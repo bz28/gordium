@@ -37,13 +37,17 @@ LAW = [
     ("R-3aa.use", {"use": "nursing_home"}, "pass"),
     # note 11: at most 3, at least 2; §325-8A(15): 500 sf or less may be exempt (the open question)
     ("R-3aa.stories", {"stories": 1, "building_area": 500}, "needs_review"),
-    ("R-3aa.stories", {"stories": 1, "building_area": 500.5}, "fail"),
+    ("R-3aa.stories", {"stories": 1, "building_area": 500.5, "accessory_buildings": 0}, "fail"),
     ("R-3aa.stories", {"stories": 2, "building_area": 300, "accessory_buildings": 0}, "pass"),
     ("R-3aa.stories", {"stories": 4, "building_area": 300}, "fail"),
     # "Buildings hereafter erected" (§325-8A(15)): the minimum may reach a one-story garage, whose stories Gordium
     # doesn't count (review round 4): never a plain pass with accessory buildings on the lot
     ("R-3aa.stories", {"stories": 2, "building_area": 1600, "accessory_buildings": 1}, "needs_review"),
     ("R-3aa.stories", {"stories": 2, "building_area": 1600, "accessory_buildings": 0}, "pass"),
+    # a one-story 480 sf cottage and a 200 sf shed: building_area (680) counts both, so the main building may still
+    # be under §325-8A(15)'s 500 sf (review round 5); with no accessory building, 680 sf is the main building's
+    ("R-3aa.stories", {"stories": 1, "building_area": 680, "accessory_buildings": 1}, "needs_review"),
+    ("R-3aa.stories", {"stories": 1, "building_area": 680, "accessory_buildings": 0}, "fail"),
     # 35 ft, bonus 3.5 ft; rear 25% of depth (50 ft cap, 20 ft floor): a 160 ft lot needs 40 ft, + 1 at 36 ft
     ("R-3aa.height", {"building_height": 36, "front_yard": 11, "side_yard_smaller": 6, "side_yard_larger": 11,
                       "rear_yard": 41, "lot_depth": 160}, "pass"),
@@ -204,6 +208,9 @@ def test_the_new_rulebooks_research_rests_on_ithacas_own_records():
     stories = RULES["R-3aa.stories"]["research"][0]
     cited = {(s.get("page"), s.get("lines", [None])[0]) for s in stories["sources"] if s.get("file") == "zoning_charts_2026-04.pdf"}
     assert {(5, 41), (11, 34)} <= cited, cited
+    # ... and gives the other side too (round 5): the City's minimums that reach only primary buildings
+    assert {(7, 42), (13, 21)} <= cited, cited
+    assert any(s.get("file") == "chapter_325_zoning_2026-10.pdf" and s.get("page") == 48 for s in stories["sources"])
     assert "no longer has" not in stories["why_open"]
     first = RULES["R-3aa.abutting_r1"]["research"][0]["sources"]
     quotes = {(s.get("page"), s.get("quote")) for s in first}

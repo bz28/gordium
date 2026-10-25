@@ -852,11 +852,12 @@ rules:
           §325-8A(15) exempts development of a footprint of 500 sf or less from minimum height requirements, and
           §325-8B(10) points the chart's minimum height regulations to it. Whether that covers note 11's minimum
           stories is the open question on this rule; this lot's buildings cover 500 sf or less.
-      - when: accessory_buildings > 0 and stories >= 2 and stories <= 3
+      - when: accessory_buildings > 0 and stories <= 3
         reason: >-
-          The main building has 2 or 3 stories, but the lot also has accessory buildings, whose own stories Gordium
-          doesn't count. Whether the 2-story minimum reaches them ("Buildings hereafter erected", §325-8A(15)) is the
-          open question on this rule: a one-story garage or shed of more than 500 sf would fail if it does.
+          The lot has accessory buildings, whose own stories Gordium doesn't count, and its building area counts them
+          too. Whether the 2-story minimum reaches them ("Buildings hereafter erected", §325-8A(15)) is the open question
+          on this rule: a one-story garage or shed of more than 500 sf would fail if it does. And with a one-story main
+          building, the main building alone may cover 500 sf or less, so the exemption may still apply to it.
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 3
@@ -906,6 +907,9 @@ rules:
       - given: {stories: 3, building_area: 400, accessory_buildings: 0}
         expect: pass
         note: a small building of 3 stories complies whichever way the exemption question is answered
+      - given: {stories: 1, building_area: 680, accessory_buildings: 1}
+        expect: needs_review
+        note: a one-story 480 sf cottage and a 200 sf shed are each 500 sf or less; the exemption may cover both
       - given: {stories: 2, building_area: 1600, accessory_buildings: 1}
         expect: needs_review
         note: a 2-story house and a garage; if the minimum reaches accessory buildings, a one-story garage over 500 sf fails
@@ -929,6 +933,7 @@ rules:
       - 325-8B
       - 325-16
       - 325-16C
+      - 325-16G
       - 325-25
       - 325-25A
       - 325-25C
@@ -966,23 +971,46 @@ rules:
         page: 11
         lines: [34, 34]
         quote: (6) Accessory structures of less than 250 SF may be1story.
+      - file: zoning_charts_2026-04.pdf
+        page: 7
+        lines: [42, 43]
+        quote: (4) Only applies to new construction of non-industrial primary structures, or additions to an existing
+          non-industrial primary use building in excess of 50% of the building area of the existing building.
+      - file: zoning_charts_2026-04.pdf
+        page: 13
+        lines: [21, 23]
+        quote: Minimum Building Height [fn2] Primary Use Number of stories 2 2 2 2 3 4
+      - file: zoning_charts_2026-04.pdf
+        page: 8
+        lines: [58, 58]
+        quote: Minimum Building Height [fn2]
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 48
+        lines: [14, 15]
+        quote: no primary use building shall be erected that is less than two stories
       why_open: >-
         The residential chart (p.3) has no "Minimum Building Height" section: R-3AA's minimum number of stories (note
         11) is its only minimum-height figure, and no residential note repeats §325-8A(15)'s exemption. The other
-        sheets of the same chart do have such sections, with a stories row and a feet row (commercial p.5, special
-        purpose p.7, waterfront p.11, Collegetown p.13), and the commercial sheet puts the exemption on its section in
-        words (p.5 note 6, the same 500 sf words as §325-8A(15)): the City treats a minimum number of stories as a
-        "minimum building height requirement" under the exemption. That points to the exemption covering R-3AA too,
-        through §325-8B(10) (added 2012); but it also shows the City writes the exemption onto a chart where it means
-        it, and p.3 has none. On accessory buildings: note 11 and §325-8A(15) ("Buildings hereafter erected") aren't
-        limited to the primary structure (note 2's footprint cap is), §325-25 sets no accessory height of its own, and
-        the waterfront sheet's note 6 ("Accessory structures of less than 250 SF may be1story", p.11) only makes
-        sense if a minimum number of stories otherwise reaches accessory structures. No City record found
-        (2026-10-25). Until it is answered, a one-story design whose buildings cover 500 sf or less needs review; a
-        larger one-story design does not comply; a 2- or 3-story main building with accessory buildings on the lot
-        needs review (Gordium counts the main building's stories only). (A one-story addition of 500 sf or less to an
-        existing one-story building, which the exemption names, shows as does not comply when the whole building
-        covers more than 500 sf: a stricter answer, never a false pass; check §325-8A(15) by hand.)
+        sheets of the same chart do have such sections (commercial p.5, special purpose p.7, West End p.8, waterfront
+        p.11, Collegetown p.13), and the commercial sheet puts the exemption on its section in words (p.5 note 6, the
+        same 500 sf words as §325-8A(15)): the City treats a minimum number of stories as a "minimum building height
+        requirement" under the exemption. That points to the exemption covering R-3AA too, through §325-8B(10) (added
+        2012); but it also shows the City writes the exemption onto a chart where it means it, and p.3 has none. On
+        accessory buildings the City's texts point both ways. For the main building only: the special purpose sheet's
+        minimum "Only applies to new construction of non-industrial primary structures" (p.7 note 4), Collegetown's
+        minimum is set on a "Primary Use" row (p.13, where the maximum has a row for accessory use too), and §325-16G
+        says "no primary use building shall be erected that is less than two stories" (p.48): where the City says whom
+        a minimum reaches, it is the primary building. For every building: note 11 and §325-8A(15) ("Buildings
+        hereafter erected") don't say primary (note 2's footprint cap does), §325-25 sets no accessory height of its
+        own, and the waterfront sheet frees only "Accessory structures of less than 250 SF" (p.11 note 6), which
+        implies its minimum otherwise reaches accessory structures; and R-3AA's p.3 has no primary-only note. No City
+        record found (2026-10-25). Until it is answered: a one-story design whose buildings cover 500 sf or less needs
+        review, and so does a one-story main building beside accessory buildings (all of them together may cover more
+        than 500 sf while the main building covers less); a one-story design with no accessory building covering more
+        than 500 sf does not comply; a 2- or 3-story main building with accessory buildings on the lot needs review
+        (Gordium counts the main building's stories only). (A one-story addition of 500 sf or less to an existing
+        one-story building, which the exemption names, shows as does not comply when the whole building covers more
+        than 500 sf: a stricter answer, never a false pass; check §325-8A(15) by hand.)
       readings:
       - id: exemption_applies
         reading: the 500 sf exemption covers R-3AA's minimum stories (a one-story building or addition of 500 sf or
