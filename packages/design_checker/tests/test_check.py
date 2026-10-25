@@ -951,7 +951,7 @@ def test_the_panel_message_line_is_cleared_by_every_check():
     # round 11: before anything that can fail, so a check that fails early clears it too
     assert body.index('ui.say(STATE.get("panel_parts"), "")') < body.index("facts = current_facts(doc)")
     report = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
-    assert report.index("run_check(doc, report=True)") < report.index("say(logic.report_message(path, True")
+    assert report.index("run_check(doc, report=True)") < report.index("say(first + logic.report_message(path, True")
 
 
 def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_path):
