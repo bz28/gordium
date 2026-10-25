@@ -1438,9 +1438,8 @@ def test_the_notice_never_hides_the_model_when_there_is_room():
     def covers(x, y, box, w=690, h=32):
         a, b, c, e = box
         return min(x + w, c) > max(x, a) and min(y + h, e) > max(y, b)
-    # framed tight (as it was): every corner covers some of the lot; never the status box
-    x, y = notice_spot(1000, 640, 690, 32, (265, 30, 735, 610), [status])
-    assert not covers(x, y, (518, 12, 985, 68))
+    # framed tight (as it was): every corner covers some of the lot: not drawn (the panel says it; #28 at 92cf742)
+    assert notice_spot(1000, 640, 690, 32, (265, 30, 735, 610), [status]) is None
     # framed with room (FRAME_ROOM 0.75: the lot from y 102 to 538): top left is clear of the lot; with the status
     # box there too, bottom left; nothing covered either way
     roomy = (324, 102, 676, 538)
@@ -2296,7 +2295,9 @@ def _plugin_functions(names, **extra):
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     view = type("View", (), {"ActiveViewportID": "vp"})()
     doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})()})()
-    ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": staticmethod(lambda lines, size: (100, 20)),
+    size_of = staticmethod(lambda lines, size: (max(len(t) for t in lines) * size * 0.6 + 22,     # gordium_ui's
+                                                len(lines) * (size + 9) + 10))                   # text_box_size
+    ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": size_of,
                           "show": staticmethod(lambda *a, **k: None)})
     ns = {"time": time_, "logic": logic_, "ui": ui_, "STATE": {},
           "Rhino": type("Rhino", (), {"RhinoDoc": type("RhinoDoc", (), {"ActiveDoc": doc})}),
@@ -2352,3 +2353,40 @@ def test_the_notice_timer_stops_once_a_check_cleared_the_notice():
     stopped.clear()
     ns["_toast_tick"]()                                                  # still showing: left running
     assert stopped == []
+
+
+def test_the_notice_is_compact_and_never_over_the_model_being_judged():
+    """The architect's eye on #28 at 92cf742: zoomed in tight, the "no longer complies" notice was one long line, a
+    bar across the whole plan over the drawing being judged. Now it is wrapped to a compact box (at most
+    NOTICE_SHARE of the view's width, never under NOTICE_MIN_CHARS a line), put in a corner clear of the model, and
+    when no corner is clear it is not drawn at all (the panel's message line says it)."""
+    from design_checker import rhino_logic as logic_
+    long = ("✕ Side yard, Southwest no longer complies · 3'-0 5/8\" to 7'-0 5/8\" proposed, 10'-0\" required "
+            "(the lot line may be 2'-0\" either way)")
+    for view_w in (1000, 600, 300):
+        lines = logic_.notice_lines([long], view_w)
+        width = max(len(t) for t in lines) * 13 * 0.6 + 22                   # gordium_ui.text_box_size's measure
+        chars = max(logic_.NOTICE_MIN_CHARS, int((view_w * logic_.NOTICE_SHARE - 22) / 7.8))
+        assert all(len(t) <= chars for t in lines), (view_w, lines)
+        assert view_w < 400 or width <= view_w * logic_.NOTICE_SHARE, (view_w, width)
+        assert " ".join(t.strip() for t in lines) == long                     # every word kept, in order
+    assert logic_.notice_lines(["✕ Rear yard no longer complies"], 1000) == ["✕ Rear yard no longer complies"]
+    # zoomed in tight: the model fills the view, no corner is clear of it: not drawn
+    assert logic_.notice_spot(1000, 640, 380, 54, (5, 5, 995, 635)) is None
+    # the model in the middle: a corner clear of it, the first such
+    x, y = logic_.notice_spot(1000, 640, 380, 54, (420, 200, 580, 440))
+    assert (x, y) == (12, 34)
+    # the model's left half fills the view's height: a right corner
+    x, y = logic_.notice_spot(1000, 640, 380, 54, (5, 5, 500, 635))
+    assert x == 1000 - 380 - 12
+    # the plugin: no spot, no notice box (never drawn over the model)
+    ns = _plugin_functions(["_notice_box"], _model_on_screen=lambda o, viewport: (5, 5, 995, 635))
+    viewport = type("Viewport", (), {"Id": "vp", "Bounds": type("B", (), {"Width": 1000, "Height": 640})()})()
+    o = type("O", (), {"toast": ([long[2:]], ns["time"].time() + 6)})()
+    assert ns["_notice_box"](o, viewport, [], False) is None
+    ns["_model_on_screen"] = lambda o, viewport: (420, 200, 580, 440)
+    lines, x, y, w, h = ns["_notice_box"](o, viewport, [], False)
+    assert len(lines) > 1 and w <= 1000 * logic_.NOTICE_SHARE and (x, y) == (12, 34)
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert 'ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])' in check     # the panel says it

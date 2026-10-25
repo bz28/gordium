@@ -507,9 +507,12 @@ def _notice_box(o, viewport, taken, old):
     active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
     if not toast or old or time.time() >= toast[1] or active is None or viewport.Id != active.ActiveViewportID:
         return None
-    lines = ["✕ " + line for line in toast[0]]
+    lines = logic.notice_lines(["✕ " + line for line in toast[0]], viewport.Bounds.Width)     # compact, a corner's
     w, h = ui.text_box_size(lines, 13)
-    x, y = logic.notice_spot(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport), taken)
+    spot = logic.notice_spot(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport), taken)
+    if spot is None:                   # no corner clear of the model: never drawn over it (the panel says it)
+        return None
+    x, y = spot
     taken.append((x, y, w, h))
     return lines, x, y, w, h
 
@@ -1756,6 +1759,8 @@ def run_check(doc, report=True):
         if not STATE.get("headless"):
             ui.show(panel(), view)
             ui.set_labels_tick(STATE.get("panel_parts"), shown)
+            if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
+                ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
             say(logic.report_message(path, False, result["report_error"], stale=had_report))

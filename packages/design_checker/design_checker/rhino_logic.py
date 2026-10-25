@@ -469,19 +469,39 @@ def label_lines(text):
     return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
 
 
+NOTICE_SHARE = 0.4        # the notice is at most this share of the view's width (compact, a corner's, never a bar)
+NOTICE_MIN_CHARS = 24     # ...but never narrower than this many characters a line
+
+
+def notice_lines(lines, view_w, size=13):
+    """The notice's lines wrapped to a compact box: at most NOTICE_SHARE of the view's width (gordium_ui
+    text_box_size's measure: size * 0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line,
+    broken between words; a wrapped line's rest indented under its first. Zoomed in tight, one long line was a bar
+    across the whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
+    import textwrap
+    chars = max(NOTICE_MIN_CHARS, int((view_w * NOTICE_SHARE - 22) / (size * 0.6)))
+    out = []
+    for line in lines:
+        out += textwrap.wrap(line, chars, subsequent_indent="  ", break_on_hyphens=False) or [""]
+    return out
+
+
 def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
-    """Where the "no longer complies" notice (w × h) goes in a view (screen pixels): (left, top). The corners are
-    tried in turn (top left under the view's name, bottom left above the axes, top right, bottom right); the first
-    that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken`
-    (the status box) is used; if every corner covers some of the model, the one covering least (architect's
-    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions)."""
+    """Where the "no longer complies" notice (w × h) goes in a view (screen pixels): (left, top), or None. The
+    corners are tried in turn (top left under the view's name, bottom left above the axes, top right, bottom
+    right); the first that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no
+    box in `taken` (the status box) is used. If every corner covers some of the model, None: the notice is never
+    drawn over the building or lot being judged (it is said in the panel instead; architect's review, 2026-10-21:
+    bottom left, it hid the lot's lower edge and dimensions; #28 at 92cf742: zoomed in tight, a bar across the
+    plan)."""
     spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
 
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
     free = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)] or spots
-    return min(free, key=lambda s: (overlap(s[0], s[1], model) if model else 0.0, free.index(s)))
+    clear = [s for s in free if not (model and overlap(s[0], s[1], model))]
+    return clear[0] if clear else None
 
 
 def clear_spot(taken, x, y, w, h, avoid=()):

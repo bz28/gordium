@@ -5,6 +5,8 @@ is pinned in CI (packages/design_checker/tests/test_check.py, test_no_notice_out
 GordiumStart on the sample (106 Ithaca Rd), then:
 1. The house moved 5 ft to the left (the Southwest side yard 7'-0 5/8" of 10'-0") and checked: the notice says the
    side yard no longer complies, and it is drawn in the Top view.
+1b. Zoomed in tight on the house: the notice is compact (at most rhino_logic.NOTICE_SHARE of the view's width) and
+   covers none of the model on screen, or isn't drawn at all; the panel's message line says it either way.
 2. Moved back and checked: nothing newly fails, and no notice is left (the earlier one is gone, not waiting out its
    6 s). Top capture.
 3. Moved left again and checked (the notice again), then moved 1 ft more with no check: the model changed since the
@@ -98,6 +100,24 @@ try:
     claim("1 moved 5 ft left and checked: the notice says the side yard no longer complies, and is drawn",
           n1["held"] and "Side yard, Southwest" in n1["held"][0] and "no longer complies" in n1["held"][0]
           and n1["drawn"], n1)
+    view = top(doc)                                      # 1b zoomed in tight on the house: never a bar over it
+    box = rg.BoundingBox.Empty
+    for o in g._buildings(doc):
+        box.Union(o.Geometry.GetBoundingBox(True))
+    view.ActiveViewport.ZoomBoundingBox(box)
+    view.Redraw()
+    vp = view.ActiveViewport
+    tight = g._notice_box(g.overlay(), vp, [], g.stale(g.overlay()))
+    model = g._model_on_screen(g.overlay(), vp)
+    message = str(g.STATE["panel_parts"]["message"].Text) if (g.STATE.get("panel_parts") or {}).get("message") else None
+    capture(doc, "1b_zoomed_in")
+    log["1b"] = {"notice": tight, "model": model, "view": [vp.Bounds.Width, vp.Bounds.Height], "panel": message}
+    claim("1b zoomed in tight: the notice is compact and covers none of the model, or isn't drawn (the panel says it)",
+          (tight is None or (tight[3] <= vp.Bounds.Width * g.logic.NOTICE_SHARE + 1 and not (
+              model and min(tight[1] + tight[3], model[2]) > max(tight[1], model[0])
+              and min(tight[2] + tight[4], model[3]) > max(tight[2], model[1]))))
+          and bool(message) and "no longer complies" in message, log["1b"])
+    view.ActiveViewport.ZoomExtents()
     move(g, doc, 5)
     g.run_check(doc, report=False)
     n2 = log["2"] = notice(g, doc)
@@ -118,7 +138,7 @@ try:
     n4 = log["4"] = {"held": list(g.overlay().toast[0]) if getattr(g.overlay(), "toast", None) else None,
                      "held_before": n3["held"]}
     claim("4 another document in front: no notice left", n3["held"] and n4["held"] is None, n4)
-    log["ok"] = all(c["ok"] for c in log["claims"].values()) and len(log["claims"]) == 4
+    log["ok"] = all(c["ok"] for c in log["claims"].values()) and len(log["claims"]) == 5
 except Exception:
     log["trace"] = traceback.format_exc()
     log["ok"] = False
