@@ -1,0 +1,164 @@
+{
+ "claims": {
+  "1 the cantilevered house is one closed solid": {
+   "ok": true,
+   "detail": true
+  },
+  "1 the left side yard is measured to the cantilever and does not comply": {
+   "ok": false,
+   "detail": {
+    "id": "R-1b.side_yards#southwest",
+    "name": "Side yard, Southwest",
+    "status": "needs_review",
+    "proposed": "6'-0 5/8\" to 12'-0 5/8\"",
+    "required": "10'-0\"",
+    "margin": "",
+    "delta": "up to 5'-11 3/8\" short",
+    "approx": true,
+    "colour": "amber",
+    "note": null,
+    "points": [
+     [
+      0.836444,
+      27.75042
+     ],
+     [
+      6.891689,
+      27.819239
+     ]
+    ],
+    "reason": "At worst 6'-0 5/8\" against 10'-0\": does not comply under that reading. the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office; whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), aren't settled yet: confirm with the zoning office",
+    "group": "building",
+    "needs": [],
+    "hint": null,
+    "refused": null
+   }
+  },
+  "1 red and amber both drawn": {
+   "ok": false,
+   "detail": [
+    [
+     "needs_review",
+     [
+      6.872,
+      -0.02,
+      48.828,
+      20.02
+     ]
+    ]
+   ]
+  },
+  "1 every coloured piece is the cantilever's own: its bottom at 10 ft, never the ground under it": {
+   "ok": false,
+   "detail": [
+    [
+     "needs_review",
+     [
+      6.872,
+      -0.02,
+      48.828,
+      20.02
+     ]
+    ]
+   ]
+  },
+  "1 nothing coloured outside the solid": {
+   "ok": true,
+   "detail": [
+    [
+     "needs_review",
+     [
+      6.872,
+      -0.02,
+      48.828,
+      20.02
+     ]
+    ]
+   ]
+  },
+  "2 the height row needs colour (it does not comply, or needs review)": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.height",
+    "name": "Building height",
+    "status": "needs_review",
+    "proposed": "38'-0\" to 46'-0\"",
+    "required": "35'-0\"",
+    "margin": "",
+    "delta": "at least 3'-0\" short; see why",
+    "approx": false,
+    "colour": "none",
+    "note": "assuming flat ground",
+    "points": null,
+    "reason": "At worst 46'-0\" against 35'-0\": does not comply under that reading. Roof not flat; this roof's height rule isn't checked in this release",
+    "group": "building",
+    "needs": [],
+    "hint": null,
+    "refused": null
+   }
+  },
+  "2 the roof is coloured in the height row's colour": {
+   "ok": true,
+   "detail": [
+    "needs_review",
+    "needs_review"
+   ]
+  },
+  "2 every piece starts at the height limit, never at the eaves (30 ft)": {
+   "ok": false,
+   "detail": [
+    -0.02,
+    34.961
+   ]
+  },
+  "2 the coloured volume is the roof's wedge above the limit (within 5 %; the uncut block is twice it)": {
+   "ok": false,
+   "detail": {
+    "volume": 6142.774458194989,
+    "wedge": 5070.236383807994
+   }
+  }
+ },
+ "house_box_ft": [
+  12.891689252023008,
+  48.80835723876953,
+  27.819238662719727,
+  65.15257263183594,
+  0.0
+ ],
+ "cantilever": [
+  [
+   "needs_review",
+   [
+    6.872,
+    -0.02,
+    48.828,
+    20.02
+   ]
+  ]
+ ],
+ "height": {
+  "row": {
+   "id": "R-1b.height",
+   "name": "Building height",
+   "status": "needs_review",
+   "proposed": "38'-0\" to 46'-0\"",
+   "required": "35'-0\"",
+   "margin": "",
+   "delta": "at least 3'-0\" short; see why",
+   "approx": false,
+   "colour": "none",
+   "note": "assuming flat ground",
+   "points": null,
+   "reason": "At worst 46'-0\" against 35'-0\": does not comply under that reading. Roof not flat; this roof's height rule isn't checked in this release",
+   "group": "building",
+   "needs": [],
+   "hint": null,
+   "refused": null
+  },
+  "limit_ft": 35.0,
+  "volume": 6142.774458194989,
+  "wedge": 5070.236383807994
+ },
+ "ok": false
+}
