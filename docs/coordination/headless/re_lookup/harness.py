@@ -11,7 +11,7 @@ sys.path.insert(0, HERE)
 import fakerhino  # noqa: E402
 
 WT = os.environ.get("GORDIUM_WT", "/home/user/wt/re-lookup")
-VENV = "/home/user/venv/bin/python"
+VENV = os.environ.get("GORDIUM_PYTHON", "/home/user/venv/bin/python")
 fakerhino.install()
 import Rhino  # noqa: E402
 import scriptcontext as sc  # noqa: E402

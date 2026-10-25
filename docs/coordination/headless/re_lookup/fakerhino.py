@@ -1132,7 +1132,7 @@ def install():
     display = _module("Rhino.Display", AutoModule, DisplayConduit=DisplayConduit)
     commands = _module("Rhino.Commands", AutoModule)
     commands.Result = types.SimpleNamespace(Success="Success", Cancel="Cancel", Nothing="Nothing")
-    commands.Command = types.SimpleNamespace(BeginCommand=Event(), __name__="Command")
+    commands.Command = types.SimpleNamespace(BeginCommand=Event(), UndoRedo=Event(), __name__="Command")
     rhino = _module("Rhino", AutoModule, Geometry=rg, DocObjects=dobj, FileIO=fileio, RhinoDoc=RhinoDoc,
                     RhinoApp=RhinoApp, RhinoMath=RhinoMath, Display=display, Commands=commands,
                     UnitSystem=types.SimpleNamespace(Feet="Feet"))

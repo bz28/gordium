@@ -48,3 +48,5 @@ Along the way it found two real bugs, both fixed in the branch:
 - a dropped preview lost a district whose own had no rules.
 
 Set `GORDIUM_WT` to a checkout of the branch to run it against another checkout.
+
+Update at #26 8c5e664 (2026-10-25): the stand-in Rhino has `Command.UndoRedo`, and there is a track for in-Rhino step 5 (surveyed lot, Keep: the lot replaced, Undo clearing the drawing). Set `GORDIUM_PYTHON` to the venv's python off the cloud. Result: 52 of 52 checkable pass, 6 Rhino-only.

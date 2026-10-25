@@ -128,7 +128,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "In a new document, one sample floor moved 3 ft, Look up 96 and Draw: asked 1 time(s): [['Start fresh for 96 Ithaca Road, Ithaca, NY, 14850? Your changes to the starting house will be removed.', ('Start fresh', 'fresh'), ('Keep my building and check it on the new lot', 'keep')]]",
+  "evidence": "In a new document, one sample floor moved 3 ft, Look up 96 and Draw: asked 1 time(s): [['Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed.', ('Start fresh', 'fresh'), (\"Keep my building and check it on 96 Ithaca Road's lot\", 'keep')]]",
   "rhino_part": "The real Eto dialog (_ask_reset); here STATE[\"on_reset_question\"] answers it."
  },
  {
@@ -143,6 +143,17 @@
   "rhino_part": "Real RhinoCommon object and layer behaviour (Delete, ModifyAttributes onto the hidden holding layer, Transform keeping the id) is MODELLED by fakerhino.py, not proven."
  },
  {
+  "id": "relookup-3-keep-label",
+  "group": "relookup",
+  "where": "re_lookup_in_rhino step 3",
+  "title": "3 the Keep answer names 96's lot (the sample's lot was Gordium's)",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Keep answer: (\"Keep my building and check it on 96 Ithaca Road's lot\", 'keep')",
+  "rhino_part": "The real Eto dialog's button text."
+ },
+ {
   "id": "relookup-4-same-address",
   "group": "relookup",
   "where": "re_lookup_in_rhino step 4",
@@ -154,6 +165,83 @@
   "rhino_part": "None beyond the modelled object table."
  },
  {
+  "id": "relookup-ir5-question",
+  "group": "relookup",
+  "where": "re_lookup_in_rhino step 5",
+  "title": "5 asked once; the question says their surveyed lot will be replaced by 96's",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Asked 1 time(s): [[\"Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed. Your surveyed lot will be replaced by 96 Ithaca Road's lot.\", ('Start fresh', 'fresh'), (\"Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)\", 'keep')]]",
+  "rhino_part": "The real Eto dialog (_ask_reset); here STATE[\"on_reset_question\"] answers it."
+ },
+ {
+  "id": "relookup-ir5-keep-label",
+  "group": "relookup",
+  "where": "re_lookup_in_rhino step 5",
+  "title": "5 the Keep answer says their surveyed lot will be replaced",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Keep answer: (\"Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)\", 'keep')",
+  "rhino_part": "The real Eto dialog's button text."
+ },
+ {
+  "id": "relookup-ir5-kept",
+  "group": "relookup",
+  "where": "re_lookup_in_rhino step 5",
+  "title": "5 Keep my building: the floors kept, the surveyed lot replaced by 96's tax-map lot",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Floors kept: True; the surveyed lot gone; the lot now \"Lot · 96 Ithaca Road, Ithaca, NY, 14850\"; lot_surveyed False.",
+  "rhino_part": "Real RhinoCommon object and layer behaviour (Delete, ModifyAttributes onto the hidden holding layer, Transform keeping the id) is MODELLED by fakerhino.py, not proven."
+ },
+ {
+  "id": "relookup-ir5-one-undo-record",
+  "group": "relookup",
+  "where": "re_lookup_in_rhino step 5",
+  "title": "5 (calls behind one Undo) the lot replaced and the new lot drawn inside one undo record",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Begin 1, End 1; changes 6, inside 6, outside 0.",
+  "rhino_part": "Only the calls are recorded (fakerhino journal); that Rhino groups them as one Undo step is Rhino's."
+ },
+ {
+  "id": "relookup-ir5-undo-clears",
+  "group": "relookup",
+  "where": "re_lookup_in_rhino step 5",
+  "title": "5 Undo ending clears the last check's drawing and the dashed outline, changing nothing in the document",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "A handler on Rhino's undo event: True. Before: a lot outline drawn True; after: cleared True; document changes during the handler: 0.",
+  "rhino_part": "The event itself is Rhino's (Rhino.Commands.Command.UndoRedo); here it is fired by hand."
+ },
+ {
+  "id": "relookup-ir5-undo",
+  "group": "relookup",
+  "where": "re_lookup_in_rhino step 5",
+  "title": "5 one Undo puts the surveyed lot and the edited house back exactly",
+  "needs": "rhino",
+  "offline": "none",
+  "offline_ok": null,
+  "evidence": "Out of scope headless: Undo is not modelled.",
+  "rhino_part": "All of it: doc.Undo() in Rhino."
+ },
+ {
+  "id": "relookup-ir5-redo",
+  "group": "relookup",
+  "where": "re_lookup_in_rhino step 5",
+  "title": "5 Redo draws 96 again, the building kept",
+  "needs": "rhino",
+  "offline": "none",
+  "offline_ok": null,
+  "evidence": "Out of scope headless: Redo is Rhino's.",
+  "rhino_part": "All of it: doc.Redo() in Rhino."
+ },
+ {
   "id": "relookup-1-sample-b",
   "group": "relookup",
   "where": "re_lookup_in_rhino step 1 (track B: one-street answers)",
@@ -161,7 +249,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "GordiumStart on an empty feet document drew the sample lot 9d2c1701-990e-4a5c-ade7-f10b22c7b30c (\"Lot · 106 Ithaca Rd · from the State tax map (parcel 84.-2-6), each line ±2'-0\", not a survey\", on Site) and a starting house of 3 floors on Gordium::Massing; the file's drawn_address: \"106 Ithaca Rd, Ithaca, NY\".",
+  "evidence": "GordiumStart on an empty feet document drew the sample lot f8d341ac-6201-4525-9af5-6e82c041ce5a (\"Lot · 106 Ithaca Rd · from the State tax map (parcel 84.-2-6), each line ±2'-0\", not a survey\", on Site) and a starting house of 3 floors on Gordium::Massing; the file's drawn_address: \"106 Ithaca Rd, Ithaca, NY\".",
   "rhino_part": "Real RhinoCommon object and layer behaviour (Delete, ModifyAttributes onto the hidden holding layer, Transform keeping the id) is MODELLED by fakerhino.py, not proven. That the lot and floors are really drawn and framed in Rhino's views."
  },
  {
@@ -216,7 +304,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "The saved lot_id eb43635a-b06c-4841-970a-9404ccca4ebf: \"Lot · 96 Ithaca Road, Ithaca, NY, 14850\" on layer Site (LAYERS[\"lot\"] = Site).",
+  "evidence": "The saved lot_id 94b84eeb-bc8b-4d1e-9911-a5e38002051f: \"Lot · 96 Ithaca Road, Ithaca, NY, 14850\" on layer Site (LAYERS[\"lot\"] = Site).",
   "rhino_part": "Real RhinoCommon object and layer behaviour (Delete, ModifyAttributes onto the hidden holding layer, Transform keeping the id) is MODELLED by fakerhino.py, not proven."
  },
  {
@@ -249,7 +337,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "During Edit site… Draw: BeginUndoRecord called 1 time(s) ([(3, 'Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850')]), EndUndoRecord 1 time(s) ([(3, True)]); 18 model changes (4 added, 4 deleted, 10 attribute edits: the hold onto the holding layer and marks), 18 inside the open record, 0 outside it; floors on Gordium::Massing after: 3.",
+  "evidence": "During Edit site… Draw: BeginUndoRecord called 1 time(s) ([(4, 'Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850')]), EndUndoRecord 1 time(s) ([(4, True)]); 18 model changes (4 added, 4 deleted, 10 attribute edits: the hold onto the holding layer and marks), 18 inside the open record, 0 outside it; floors on Gordium::Massing after: 3.",
   "rhino_part": "Only the calls are recorded (fakerhino journal). That Rhino really groups them as one Undo step is Rhino's."
  },
  {
@@ -282,7 +370,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "One floor moved 3 ft, then Look up 109 Ithaca Rd and Draw: asked 1 time(s): [['Start fresh for 109 Ithaca Road, Ithaca, NY, 14850? Your changes to the starting house will be removed.', ('Start fresh', 'fresh'), ('Keep my building and check it on the new lot', 'keep')]]",
+  "evidence": "One floor moved 3 ft, then Look up 109 Ithaca Rd and Draw: asked 1 time(s): [['Start fresh for 109 Ithaca Road? Your changes to the starting house will be removed.', ('Start fresh', 'fresh'), (\"Keep my building and check it on 109 Ithaca Road's lot\", 'keep')]]",
   "rhino_part": "The real Eto dialog (_ask_reset's buttons and wording on screen); here STATE[\"on_reset_question\"] answers it."
  },
  {
@@ -315,7 +403,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "Asked 1 time(s): [['Start fresh for 109 Ithaca Road, Ithaca, NY, 14850? Your changes to the starting house will be removed.', ('Start fresh', 'fresh'), ('Keep my building and check it on the new lot', 'keep')]]; answered Cancel (None).",
+  "evidence": "Asked 1 time(s): [['Start fresh for 109 Ithaca Road? Your changes to the starting house will be removed.', ('Start fresh', 'fresh'), (\"Keep my building and check it on 109 Ithaca Road's lot\", 'keep')]]; answered Cancel (None).",
   "rhino_part": "The real Eto dialog's Cancel button (here the answer is scripted as None)."
  },
  {
@@ -381,18 +469,18 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "After Cancel: objects 4 before, 4 after, every layer, name, box and user strings identical: True (differing: none); live layers identical: True; _ui_state changed keys: none; current_facts changed keys: none; all document strings identical: True; undo records begun 1, ended [(6, True)].",
+  "evidence": "After Cancel: objects 4 before, 4 after, every layer, name, box and user strings identical: True (differing: none); live layers identical: True; _ui_state changed keys: none; current_facts changed keys: none; all document strings identical: True; undo records begun 1, ended [(7, True)].",
   "rhino_part": "Real RhinoCommon object and layer behaviour (Delete, ModifyAttributes onto the hidden holding layer, Transform keeping the id) is MODELLED by fakerhino.py, not proven. Also that Rhino's undo record, begun at Draw and ended on Cancel, leaves no stray Undo step."
  },
  {
   "id": "relookup-7a-asked",
   "group": "relookup",
   "where": "scenario 7a (added): surveyed own lot, Start fresh",
-  "title": "The surveyed own lot is asked about once (\"your lot\"), Start fresh chosen",
+  "title": "The surveyed own lot is asked about once (\"your surveyed lot will be replaced\"), Start fresh chosen",
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "Before: lot is the architect's own, lot_surveyed True, lot source 'your survey'. Asked 1 time(s): [['Start fresh for 96 Ithaca Road, Ithaca, NY, 14850? Your lot will be removed.', ('Start fresh', 'fresh'), None]]",
+  "evidence": "Before: lot is the architect's own, lot_surveyed True, lot source 'your survey'. Asked 1 time(s): [[\"Start fresh for 96 Ithaca Road? Your surveyed lot will be replaced by 96 Ithaca Road's lot.\", ('Start fresh', 'fresh'), None]]",
   "rhino_part": "The real Eto dialog (here answered Start fresh by STATE[\"on_reset_question\"])."
  },
  {
@@ -414,7 +502,7 @@
   "needs": "code",
   "offline": "covered",
   "offline_ok": true,
-  "evidence": "fact_sources(doc)[\"lot\"] = {'value': '6,151 sf', 'source': 'the tax map (±2 ft, approximate) · NYS Tax Parcels Public', 'confirmed_by': 'you', 'date': '2026-10-22'}; the new lot's area 6151.7 sf -> '6,151 sf'.",
+  "evidence": "fact_sources(doc)[\"lot\"] = {'value': '6,151 sf', 'source': 'the tax map (±2 ft, approximate) · NYS Tax Parcels Public', 'confirmed_by': 'you', 'date': '2026-10-25'}; the new lot's area 6151.7 sf -> '6,151 sf'.",
   "rhino_part": "Rhino's AreaMassProperties for the area (here the shoelace formula on the polyline)."
  },
  {
@@ -458,7 +546,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "A 12 x 20 x 10 ft solid on Building::Garage, then Look up 96 and Draw: asked 1 time(s): [['Start fresh for 96 Ithaca Road, Ithaca, NY, 14850? The buildings you drew will be removed.', ('Start fresh', 'fresh'), ('Keep my building and check it on the new lot', 'keep')]]",
+  "evidence": "A 12 x 20 x 10 ft solid on Building::Garage, then Look up 96 and Draw: asked 1 time(s): [['Start fresh for 96 Ithaca Road? The buildings you drew will be removed.', ('Start fresh', 'fresh'), (\"Keep my building and check it on 96 Ithaca Road's lot\", 'keep')]]",
   "rhino_part": "The real Eto dialog; and that a real Rhino solid on Building::Garage is listed by _buildings."
  },
  {
@@ -480,7 +568,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "a block placed on Building (InstanceReferenceGeometry, True); RhinoTable.buildings() listed it: True; then Look up 96 and Draw: asked 1 time(s): [['Start fresh for 96 Ithaca Road, Ithaca, NY, 14850? The buildings you drew will be removed.', ('Start fresh', 'fresh'), ('Keep my building and check it on the new lot', 'keep')]]",
+  "evidence": "a block placed on Building (InstanceReferenceGeometry, True); RhinoTable.buildings() listed it: True; then Look up 96 and Draw: asked 1 time(s): [['Start fresh for 96 Ithaca Road? The buildings you drew will be removed.', ('Start fresh', 'fresh'), (\"Keep my building and check it on 96 Ithaca Road's lot\", 'keep')]]",
   "rhino_part": "A real Rhino block (InstanceObject, InstanceDefinition.GetObjects, the definition objects' layers) is MODELLED by fakerhino.py."
  },
  {
@@ -502,7 +590,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "a block holding a Building solid, placed on Site (InstanceReferenceGeometry, True); RhinoTable.buildings() listed it: True; then Look up 96 and Draw: asked 1 time(s): [['Start fresh for 96 Ithaca Road, Ithaca, NY, 14850? The buildings you drew will be removed.', ('Start fresh', 'fresh'), ('Keep my building and check it on the new lot', 'keep')]]",
+  "evidence": "a block holding a Building solid, placed on Site (InstanceReferenceGeometry, True); RhinoTable.buildings() listed it: True; then Look up 96 and Draw: asked 1 time(s): [['Start fresh for 96 Ithaca Road? The buildings you drew will be removed.', ('Start fresh', 'fresh'), (\"Keep my building and check it on 96 Ithaca Road's lot\", 'keep')]]",
   "rhino_part": "A real Rhino block (InstanceObject, InstanceDefinition.GetObjects, the definition objects' layers) is MODELLED by fakerhino.py."
  },
  {
@@ -535,7 +623,7 @@
   "needs": "code",
   "offline": "covered",
   "offline_ok": true,
-  "evidence": "Saved use 'two_family'; fact_sources(doc)[\"use\"] = {'value': 'Two-family dwelling', 'source': 'entered by you', 'confirmed_by': 'you', 'date': '2026-10-22'}.",
+  "evidence": "Saved use 'two_family'; fact_sources(doc)[\"use\"] = {'value': 'Two-family dwelling', 'source': 'entered by you', 'confirmed_by': 'you', 'date': '2026-10-25'}.",
   "rhino_part": "None."
  },
  {
@@ -546,7 +634,7 @@
   "needs": "code",
   "offline": "covered",
   "offline_ok": true,
-  "evidence": "Saved district 'R-1b'; fact_sources(doc)[\"zone\"] = {'value': 'R-1b', 'source': 'entered by you', 'confirmed_by': 'you', 'date': '2026-10-22'}; questions asked: none.",
+  "evidence": "Saved district 'R-1b'; fact_sources(doc)[\"zone\"] = {'value': 'R-1b', 'source': 'entered by you', 'confirmed_by': 'you', 'date': '2026-10-25'}; questions asked: none.",
   "rhino_part": "None."
  }
 ]

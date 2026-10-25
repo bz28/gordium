@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import traceback
+import types
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -430,6 +431,11 @@ def track_a():
                                    "are" if sorted(kept) == sorted(house) else "are NOT", len(kept),
                                    lot.Attributes.Name if lot else None), {"kept": kept, "house": house}))
     RAWLOG["step3_undo"] = undo_summary(seen["journal"])
+    guarded("relookup-3-keep-label", W % 3, "3 the Keep answer names 96's lot (the sample's lot was Gordium's)",
+            "rhino", "partial", "The real Eto dialog's button text.",
+            lambda: (bool(asked) and bool(asked[0][2]) and
+                     asked[0][2][0].startswith("Keep my building and check it on 96 Ithaca R") and
+                     asked[0][2][0].endswith("'s lot"), "Keep answer: %r" % ((asked[0][2] if asked else None),), asked))
 
     # 4. the same address again: nothing changes
     before = objects(doc)
@@ -611,9 +617,11 @@ def scenario_a_surveyed_lot():
     setup_ok = pre["lot_id"] == own and pre["lot_surveyed"] is True and \
         (pre["lot_source"].get("source") or "").startswith("your survey")
 
-    guarded("relookup-7a-asked", WA, "The surveyed own lot is asked about once (\"your lot\"), Start fresh chosen",
+    guarded("relookup-7a-asked", WA, "The surveyed own lot is asked about once (\"your surveyed lot will be "
+            "replaced\"), Start fresh chosen",
             "rhino", "partial", "The real Eto dialog (here answered Start fresh by STATE[\"on_reset_question\"]).",
-            lambda: (setup_ok and len(seen["asked"]) == 1 and "your lot" in seen["asked"][0][0].lower(),
+            lambda: (setup_ok and len(seen["asked"]) == 1 and
+                     "your surveyed lot will be replaced by 96 ithaca r" in seen["asked"][0][0].lower(),
                      "Before: lot %s, lot_surveyed %r, lot source %r. Asked %d time(s): %s" % (
                          "is the architect's own" if pre["lot_id"] == own else "is NOT the own lot",
                          pre["lot_surveyed"], pre["lot_source"].get("source"), len(seen["asked"]), seen["asked"]),
@@ -931,9 +939,82 @@ def step_5():
             "Rhino's document strings through a real save (not done here).", c5c)
 
 
+def in_rhino_step_5():
+    """re_lookup_in_rhino.py step 5 (Ben, 2026-10-25: a new address is a new site): the sample's lot made the
+    architect's survey (as pick_survey leaves it), its house edited; Look up 96, Keep my building: the floors kept,
+    the surveyed lot replaced by 96's tax-map lot, both the question and the Keep answer saying so; one undo record."""
+    W5 = "re_lookup_in_rhino step 5"
+    g = fresh_module()
+    use_track(g, "")
+    doc = new_doc()
+    g.gordium_check()
+    facts = g.current_facts(doc)
+    survey_lot = facts.get("lot_id")
+    facts["lot_surveyed"] = True
+    g.save_facts(doc, facts)
+    g._save_ui_state(doc, g.logic.settle(g._ui_state(doc), "lot"))
+    house = g.RhinoTable(doc).massing()
+    floor = g._find(doc, house[-1])
+    moved = str(doc.Objects.Transform(floor, Rhino.Geometry.Transform.Translation(3, 0, 0), True))
+    house = house[:-1] + [moved]
+    seen = edit_site(g, doc, "96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd", lambda fresh, keep: keep[1])
+    RAWLOG["in_rhino_step5"] = {k: v for k, v in seen.items() if k not in ("objects", "journal")}
+    asked = seen["asked"]
+    guarded("relookup-ir5-question", W5, "5 asked once; the question says their surveyed lot will be replaced by 96's",
+            "rhino", "partial", "The real Eto dialog (_ask_reset); here STATE[\"on_reset_question\"] answers it.",
+            lambda: (len(asked) == 1 and asked[0][0].startswith("Start fresh for 96") and
+                     "Your changes to the starting house will be removed." in asked[0][0] and
+                     asked[0][0].endswith("'s lot.") and "Your surveyed lot will be replaced by 96 Ithaca R" in
+                     asked[0][0], "Asked %d time(s): %s" % (len(asked), asked), asked))
+    guarded("relookup-ir5-keep-label", W5, "5 the Keep answer says their surveyed lot will be replaced", "rhino",
+            "partial", "The real Eto dialog's button text.",
+            lambda: (bool(asked) and bool(asked[0][2]) and
+                     asked[0][2][0].startswith("Keep my building and check it on 96 Ithaca R") and
+                     asked[0][2][0].endswith("'s lot (your surveyed lot will be replaced)"),
+                     "Keep answer: %r" % ((asked[0][2] if asked else None),), asked))
+    facts = g.current_facts(doc)
+    lot = g._find(doc, facts.get("lot_id") or "")
+    after = objects(doc)
+    kept = g.RhinoTable(doc).massing()
+    guarded("relookup-ir5-kept", W5, "5 Keep my building: the floors kept, the surveyed lot replaced by 96's tax-map "
+            "lot", "rhino", "partial", RP_MODEL,
+            lambda: (sorted(kept) == sorted(house) and survey_lot not in after and lot is not None and
+                     "96" in (lot.Attributes.Name or "") and facts.get("lot_surveyed") is False,
+                     "Floors kept: %s; the surveyed lot %s; the lot now \"%s\"; lot_surveyed %r." % (
+                         sorted(kept) == sorted(house), "gone" if survey_lot not in after else "STILL THERE",
+                         lot.Attributes.Name if lot else None, facts.get("lot_surveyed")), {"kept": kept}))
+    u = undo_summary(seen["journal"])
+    RAWLOG["in_rhino_step5_undo"] = u
+    guarded("relookup-ir5-one-undo-record", W5, "5 (calls behind one Undo) the lot replaced and the new lot drawn "
+            "inside one undo record", "rhino", "partial",
+            "Only the calls are recorded (fakerhino journal); that Rhino groups them as one Undo step is Rhino's.",
+            lambda: (len(u["begins"]) == 1 and len(u["ends"]) == 1 and u["changes"] > 0 and not u["outside"],
+                     "Begin %d, End %d; changes %d, inside %d, outside %d." % (
+                         len(u["begins"]), len(u["ends"]), u["changes"], u["inside"], len(u["outside"])), None))
+    # Rhino's undo event, as Undo ending fires it: the plugin's _undo_redo clears what the last check drew (96's lot
+    # outline, its marks) and any dashed lookup outline, and changes nothing in the document
+    o = g.STATE.get("overlay")
+    g.STATE["lookup_guide"] = [(0, 0, 0), (1, 0, 0)]          # as if a dashed outline were still kept
+    had = o is not None and o.lot_outline is not None
+    start = len(doc.journal)
+    attached = len(Rhino.Commands.Command.UndoRedo.handlers) >= 1      # the stand-in EventHandler can't call it:
+    g._undo_redo(None, types.SimpleNamespace(IsEndUndo=True, IsEndRedo=False))   # the handler's body, called
+    cleared = o is not None and o.lot_outline is None and not o.plan_lines and g.STATE.get("lookup_guide") is None
+    guarded("relookup-ir5-undo-clears", W5, "5 Undo ending clears the last check's drawing and the dashed outline, "
+            "changing nothing in the document", "rhino", "partial",
+            "The event itself is Rhino's (Rhino.Commands.Command.UndoRedo); here it is fired by hand.",
+            lambda: (attached and had and cleared and doc.journal[start:] == [],
+                     "A handler on Rhino's undo event: %s. Before: a lot outline drawn %s; after: cleared %s; document changes during the handler: %d." % (
+                         attached, had, cleared, len(doc.journal[start:])), None))
+    record("relookup-ir5-undo", W5, "5 one Undo puts the surveyed lot and the edited house back exactly", "rhino",
+           "none", None, "Out of scope headless: Undo is not modelled.", "All of it: doc.Undo() in Rhino.")
+    record("relookup-ir5-redo", W5, "5 Redo draws 96 again, the building kept", "rhino", "none", None,
+           "Out of scope headless: Redo is Rhino's.", "All of it: doc.Redo() in Rhino.")
+
+
 def main():
     print("code under test:", WT, flush=True)
-    for part in (track_a, steps_1_to_4_track_b, step_5, guide_case, scenario_a_surveyed_lot,
+    for part in (track_a, in_rhino_step_5, steps_1_to_4_track_b, step_5, guide_case, scenario_a_surveyed_lot,
                  scenario_b_retyped, scenario_c_garage, scenario_d_block, scenario_e_use_retyped):
         try:
             part()
