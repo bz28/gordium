@@ -2637,10 +2637,50 @@ def _context_layer_indexes(doc):
             if not layer.IsDeleted and logic.on_layer(layer.FullPath, logic.CONTEXT)]
 
 
+def _parent_locked(doc, layer):
+    """Whether any layer above this one is locked. Rhino then holds the layer locked whatever its own lock says:
+    locking a parent gives each sublayer the lock and saves the sublayer's own one as its persistent lock, which
+    unlocking the parent puts back (Layer.GetPersistentLocking). Under a locked parent IsLocked reads True for every
+    sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
+    parent = layer.ParentLayerId
+    while parent != System.Guid.Empty:
+        above = doc.Layers.FindId(parent)
+        if above is None:
+            return False
+        if above.IsLocked:
+            return True
+        parent = above.ParentLayerId
+    return False
+
+
+def _own_lock(doc, layer):
+    """A layer's own lock: what it is once every layer above it is unlocked (its persistent lock under a locked
+    parent, its IsLocked otherwise)."""
+    return bool(layer.GetPersistentLocking()) if _parent_locked(doc, layer) else bool(layer.IsLocked)
+
+
+def _set_own_lock(doc, layer, locked):
+    """Give a layer its own lock: under a locked parent as its persistent lock (Rhino keeps it locked until the
+    parent is unlocked, then puts this back), otherwise as its lock. Setting only IsLocked under a locked parent left
+    every context layer's persistent lock off, so unlocking "Gordium" unlocked Parcels, Streets and Notes (the Rhino
+    job, context_in_rhino.py claim 4 at e631aae). A layer added under a locked parent (the first draw in a file whose
+    "Gordium" is locked) may never have been locked by Rhino: it is locked like every other sublayer there, then
+    given its own lock (review round 1 of the fix)."""
+    if _parent_locked(doc, layer):
+        if not layer.IsLocked:
+            layer.IsLocked = True
+        layer.SetPersistentLocking(bool(locked))
+    else:
+        layer.IsLocked = bool(locked)
+
+
 def _lock_context(doc, locked):
-    """Unlock every context layer, or lock them again: all but the editable footprints (rhino_logic.context_locked)."""
-    for i in _context_layer_indexes(doc):
-        doc.Layers[i].IsLocked = bool(locked) and logic.context_locked(doc.Layers[i].FullPath)
+    """Unlock every context layer, or lock them again: all but the editable footprints (rhino_logic.context_locked).
+    Each layer's own lock, so it holds whether or not the architect has locked "Gordium" above them; a parent before
+    its sublayers, so a parent's change can't undo a sublayer's set before it."""
+    indexes = _context_layer_indexes(doc)
+    for i in logic.outermost_first([(i, doc.Layers[i].FullPath) for i in indexes]):
+        _set_own_lock(doc, doc.Layers[i], bool(locked) and logic.context_locked(doc.Layers[i].FullPath))
 
 
 def _outline_points(geometry):
@@ -2707,7 +2747,9 @@ def _clear_context(doc, sources=None):
     # 5), the architect's own Gordium::Grade and Massing too, outermost first; each is put back exactly as it was.
     touched = logic.outermost_first([(i, layer.FullPath) for i, layer in enumerate(doc.Layers) if not layer.IsDeleted
                                      and any(logic.on_layer(layer.FullPath, r) for r in roots)])
-    was = [(i, doc.Layers[i].IsVisible, doc.Layers[i].IsLocked) for i in touched]
+    # each layer's own lock (_own_lock): IsLocked under a locked parent reads True for every sublayer, so putting it
+    # back left every sublayer's persistent lock off (unlocking "Gordium" unlocked them all: the Rhino job at e631aae)
+    was = [(i, doc.Layers[i].IsVisible, doc.Layers[i].IsLocked, _own_lock(doc, doc.Layers[i])) for i in touched]
     for i in touched:                      # a parent before its sublayers: its IsVisible can't lock them again
         doc.Layers[i].IsVisible = True
         doc.Layers[i].IsLocked = False
@@ -2725,10 +2767,12 @@ def _clear_context(doc, sources=None):
                 left += not doc.Objects.ModifyAttributes(o, attrs, True)
             else:
                 left += not doc.Objects.Delete(o, True)
-    for i, visible, _ in was:              # every visibility first (each passes its lock down), then every lock
+    for i, visible, _, _ in was:           # every visibility first (each passes its lock down), then every lock,
         doc.Layers[i].IsVisible = visible
-    for i, _, locked in was:
+    for i, _, locked, _ in was:            # a parent before its sublayers (locking it saves theirs as it finds them),
         doc.Layers[i].IsLocked = locked
+    for i, _, _, own in was:               # then each layer's own lock, once every lock above it is back
+        _set_own_lock(doc, doc.Layers[i], own)
     _lock_context(doc, True)               # the context layers as Gordium keeps them: all but the footprints
     if sources is None:
         if logic.guides_of(STATE.get("context_guides"), doc.RuntimeSerialNumber):
