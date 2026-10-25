@@ -1,0 +1,138 @@
+{
+ "claims": {
+  "1 the sample: its lot and a starting house": {
+   "ok": true,
+   "detail": {
+    "lot": "1dd2f78d-a9e0-4923-91ef-7817359b41e0",
+    "house": [
+     "9a241554-af2a-4363-b74c-2e3cfca6136d",
+     "5131c6fc-60e7-4205-b11e-f61d3cc2744c",
+     "5918bb93-f094-4ff9-a6e1-27a8d1847140"
+    ]
+   }
+  },
+  "2 Look up changed nothing in the model while the box was open": {
+   "ok": true,
+   "detail": {
+    "before": 4,
+    "during": 4
+   }
+  },
+  "2 the looked-up lot was shown dashed while the box was open": {
+   "ok": true,
+   "detail": {
+    "asked": [],
+    "objects": {
+     "9a241554-af2a-4363-b74c-2e3cfca6136d": "Gordium::Massing",
+     "5131c6fc-60e7-4205-b11e-f61d3cc2744c": "Gordium::Massing",
+     "5918bb93-f094-4ff9-a6e1-27a8d1847140": "Gordium::Massing",
+     "1dd2f78d-a9e0-4923-91ef-7817359b41e0": "Site"
+    },
+    "guide_shown": true
+   }
+  },
+  "2 Draw asked nothing (all of it was Gordium's)": {
+   "ok": true,
+   "detail": []
+  },
+  "2 the sample's lot and house are gone": {
+   "ok": true,
+   "detail": []
+  },
+  "2 96's lot is drawn on Site": {
+   "ok": true,
+   "detail": "Lot \u00b7 96 Ithaca Road, Ithaca, NY, 14850"
+  },
+  "2 no starting house on 96, a corner lot (the architects' open question)": {
+   "ok": true,
+   "detail": [
+    "a corner lot: which yards are front, side and rear is an open question; no envelope drawn",
+    "no buildable area to start from"
+   ]
+  },
+  "2 the file says what is drawn: 96, and no house of Gordium's": {
+   "ok": true,
+   "detail": {
+    "drawn_address": "96 Ithaca Road, Ithaca, NY, 14850",
+    "house_fingerprint": null
+   }
+  },
+  "2 one Undo puts the sample back exactly": {
+   "ok": true,
+   "detail": {
+    "missing": [],
+    "extra": []
+   }
+  },
+  "2 Redo draws 96 again": {
+   "ok": false,
+   "detail": {
+    "api_redo_returned": false,
+    "objects_after_draw": {
+     "ed776901-0842-426e-8843-9252682037bd": "Site"
+    },
+    "objects_after_redo": {
+     "9a241554-af2a-4363-b74c-2e3cfca6136d": "Gordium::Massing",
+     "5131c6fc-60e7-4205-b11e-f61d3cc2744c": "Gordium::Massing",
+     "5918bb93-f094-4ff9-a6e1-27a8d1847140": "Gordium::Massing",
+     "1dd2f78d-a9e0-4923-91ef-7817359b41e0": "Site"
+    }
+   }
+  },
+  "3 asked once, naming the edited house": {
+   "ok": true,
+   "detail": [
+    [
+     "Start fresh for 96 Ithaca Road, Ithaca, NY, 14850? Your changes to the starting house will be removed.",
+     [
+      "Start fresh",
+      "fresh"
+     ],
+     [
+      "Keep my building and check it on the new lot",
+      "keep"
+     ]
+    ]
+   ]
+  },
+  "3 Keep my building: the floors kept, the lot is 96's": {
+   "ok": true,
+   "detail": {
+    "kept": [
+     "257df292-db3f-4357-b65a-3f5b0d289f57",
+     "0ecc9bfe-d41c-4323-b8e3-094ebc665275",
+     "126da019-53da-4227-9442-e8f149ded2d0"
+    ]
+   }
+  },
+  "4 the same address: no question and nothing in the model changes": {
+   "ok": true,
+   "detail": []
+  }
+ },
+ "step2": {
+  "asked": [],
+  "guide_shown": true
+ },
+ "step3": {
+  "asked": [
+   [
+    "Start fresh for 96 Ithaca Road, Ithaca, NY, 14850? Your changes to the starting house will be removed.",
+    [
+     "Start fresh",
+     "fresh"
+    ],
+    [
+     "Keep my building and check it on the new lot",
+     "keep"
+    ]
+   ]
+  ],
+  "guide_shown": true
+ },
+ "step4": {
+  "asked": [],
+  "guide_shown": true
+ },
+ "ok": false
+}
