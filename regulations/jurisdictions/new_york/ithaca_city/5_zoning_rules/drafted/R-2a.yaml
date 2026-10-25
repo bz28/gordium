@@ -126,16 +126,17 @@ rules:
     uses marked - fail.'
   drafted_by: rule_drafting/chart_code
   status: draft
-- id: R-2a.min_lot_area_one_family_detached
+- id: R-2a.min_lot_size_detached
   kind: rule
   topic: dimensions
-  title: Minimum lot size, one-family dwelling, detached (chart p.3)
+  title: Minimum lot size, one-family detached (chart p.3)
   applies_when: use == "one_family_detached"
   check: lot_area >= 5000
   review_when:
-  - when: additional_primary_building
-    reason: Under §325-8B(1) the area requirement applies separately to each additional primary use in a separate
-      building, so the lot area needed for more than one primary building is not settled by this check.
+  - when: multiple_primary_buildings
+    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
+      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
+      is not decided here.
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -154,59 +155,56 @@ rules:
     lines:
     - 11
     - 16
-    quote: For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use districts,
-      each square-footage requirement applies separately to the initial permitted primary use and to each additional
-      permitted primary use located in a separate building on the property in question (e.g., in R-2b Districts,
-      an area of 3,000 square feet is required for a one family house or a two-family house, and an additional area
-      of 3,000 square feet is required for each additional one-family house or two-family house on the property).
+    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
+      districts, each square-footage requirement applies separately to the initial permitted primary use and to
+      each additional permitted primary use located in a separate building on the property in question (e.g., in
+      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
+      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
+      on the property).
   examples:
   - given:
       use: one_family_detached
       lot_area: 5000
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: pass
   - given:
       use: one_family_detached
       lot_area: 4999
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: fail
   - given:
       use: one_family_detached
       lot_area: 5000
-      additional_primary_building: true
+      multiple_primary_buildings: true
     expect: needs_review
   - given:
-      use: church
+      use: two_family
       lot_area: 1
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: not_applicable
   open_questions:
-  - Chart cells with footnotes 4 to 9 add area per occupant, unit or room let. Those cells are not drafted here
-    and go to a person.
-  - Does the section 325-8B(1) rule for additional primary buildings need its own template?
+  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
+    lot holds several primary buildings of different uses?'
   research:
-  - question: Chart cells with footnotes 4 to 9 add area per occupant, unit or room let. Those cells are not drafted
-      here and go to a person.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Does the section 325-8B(1) rule for additional primary buildings need its own template?
+  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
+      when a lot holds several primary buildings of different uses?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-2a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-2a.min_lot_area_one_family_semi_detached
+- id: R-2a.min_lot_size_semi_detached
   kind: rule
   topic: dimensions
-  title: Minimum lot size, one-family dwelling, semi-detached (chart p.3)
+  title: Minimum lot size, one-family semi-detached (chart p.3)
   applies_when: use == "one_family_semi_detached"
   check: lot_area >= 5000
   review_when:
-  - when: additional_primary_building
-    reason: Under §325-8B(1) the area requirement applies separately to each additional primary use in a separate
-      building, so the lot area needed for more than one primary building is not settled by this check.
+  - when: multiple_primary_buildings
+    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
+      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
+      is not decided here.
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -225,54 +223,56 @@ rules:
     lines:
     - 11
     - 16
-    quote: For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use districts,
-      each square-footage requirement applies separately to the initial permitted primary use and to each additional
-      permitted primary use located in a separate building on the property in question (e.g., in R-2b Districts,
-      an area of 3,000 square feet is required for a one family house or a two-family house, and an additional area
-      of 3,000 square feet is required for each additional one-family house or two-family house on the property).
+    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
+      districts, each square-footage requirement applies separately to the initial permitted primary use and to
+      each additional permitted primary use located in a separate building on the property in question (e.g., in
+      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
+      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
+      on the property).
   examples:
   - given:
       use: one_family_semi_detached
       lot_area: 5000
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: pass
   - given:
       use: one_family_semi_detached
       lot_area: 4999
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: fail
   - given:
       use: one_family_semi_detached
       lot_area: 5000
-      additional_primary_building: true
+      multiple_primary_buildings: true
     expect: needs_review
   - given:
-      use: church
+      use: two_family
       lot_area: 1
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: not_applicable
   open_questions:
-  - R-2C cell carries footnote 5 (area per occupant in each dwelling unit); it is not drafted here and goes to a
-    person.
+  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
+    lot holds several primary buildings of different uses?'
   research:
-  - question: R-2C cell carries footnote 5 (area per occupant in each dwelling unit); it is not drafted here and
-      goes to a person.
+  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
+      when a lot holds several primary buildings of different uses?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-2a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-2a.min_lot_area_two_family
+- id: R-2a.min_lot_size_two_family
   kind: rule
   topic: dimensions
   title: Minimum lot size, two-family dwelling (chart p.3)
   applies_when: use == "two_family"
   check: lot_area >= 5000
   review_when:
-  - when: additional_primary_building
-    reason: Under §325-8B(1) the area requirement applies separately to each additional primary use in a separate
-      building, so the lot area needed for more than one primary building is not settled by this check.
+  - when: multiple_primary_buildings
+    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
+      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
+      is not decided here.
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -291,45 +291,46 @@ rules:
     lines:
     - 11
     - 16
-    quote: For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use districts,
-      each square-footage requirement applies separately to the initial permitted primary use and to each additional
-      permitted primary use located in a separate building on the property in question (e.g., in R-2b Districts,
-      an area of 3,000 square feet is required for a one family house or a two-family house, and an additional area
-      of 3,000 square feet is required for each additional one-family house or two-family house on the property).
+    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
+      districts, each square-footage requirement applies separately to the initial permitted primary use and to
+      each additional permitted primary use located in a separate building on the property in question (e.g., in
+      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
+      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
+      on the property).
   examples:
   - given:
       use: two_family
       lot_area: 5000
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: pass
   - given:
       use: two_family
       lot_area: 4999
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: fail
   - given:
       use: two_family
       lot_area: 5000
-      additional_primary_building: true
+      multiple_primary_buildings: true
     expect: needs_review
   - given:
-      use: church
+      use: one_family_detached
       lot_area: 1
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: not_applicable
   open_questions:
-  - R-2C cell carries footnote 5 (area per occupant in each dwelling unit); it is not drafted here and goes to a
-    person.
+  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
+    lot holds several primary buildings of different uses?'
   research:
-  - question: R-2C cell carries footnote 5 (area per occupant in each dwelling unit); it is not drafted here and
-      goes to a person.
+  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
+      when a lot holds several primary buildings of different uses?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-2a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-2a.min_lot_area_other_use
+- id: R-2a.min_lot_size_other_use
   kind: rule
   topic: dimensions
   title: Minimum lot size, other use (chart p.3)
@@ -337,9 +338,10 @@ rules:
     "one_family_attached", "two_family", "multiple_family", "fraternity_sorority_group_house"]
   check: lot_area >= 6000
   review_when:
-  - when: additional_primary_building
-    reason: Under §325-8B(1) the area requirement applies separately to each additional primary use in a separate
-      building, so the lot area needed for more than one primary building is not settled by this check.
+  - when: multiple_primary_buildings
+    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
+      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
+      is not decided here.
   - when: use == "adult_day_care_home"
     reason: '§325-3 defines this use as ''A dwelling unit in which adult day care is provided to not more than six
       adults at one tim'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
@@ -374,11 +376,12 @@ rules:
     lines:
     - 11
     - 16
-    quote: For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use districts,
-      each square-footage requirement applies separately to the initial permitted primary use and to each additional
-      permitted primary use located in a separate building on the property in question (e.g., in R-2b Districts,
-      an area of 3,000 square feet is required for a one family house or a two-family house, and an additional area
-      of 3,000 square feet is required for each additional one-family house or two-family house on the property).
+    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
+      districts, each square-footage requirement applies separately to the initial permitted primary use and to
+      each additional permitted primary use located in a separate building on the property in question (e.g., in
+      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
+      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
+      on the property).
   - file: zoning_charts_2026-04.pdf
     page: 2
     lines:
@@ -405,31 +408,36 @@ rules:
     quote: Nursing, convalescent or rest home
   examples:
   - given:
-      use: church
+      use: school
       lot_area: 6000
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: pass
   - given:
-      use: church
+      use: school
       lot_area: 5999
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: fail
   - given:
-      use: church
+      use: school
       lot_area: 6000
-      additional_primary_building: true
+      multiple_primary_buildings: true
     expect: needs_review
   - given:
-      use: one_family_detached
+      use: two_family
       lot_area: 1
-      additional_primary_building: false
+      multiple_primary_buildings: false
     expect: not_applicable
   open_questions:
-  - Is 'Other use' meant for every use not named in a row above it, including uses such as one-family attached by
-    a different name?
+  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
+    lot holds several primary buildings of different uses?'
+  - Does 'Other use' cover every use without its own row, including dormitory and nonresidential uses?
   research:
-  - question: Is 'Other use' meant for every use not named in a row above it, including uses such as one-family
-      attached by a different name?
+  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
+      when a lot holds several primary buildings of different uses?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'Other use' cover every use without its own row, including dormitory and nonresidential uses?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1160,6 +1168,73 @@ rules:
   research:
   - question: When the primary buildings on the property are of different uses, is each building's own use row's
       minimum area added together? This formula covers only the same-use case.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2a cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2a.325_16c_height_exception_stories_not_exceeded
+  kind: rule
+  topic: dimensions
+  title: 'Extra height: stories may not be exceeded (§325-16C(2))'
+  applies_when: building_height > 35
+  check: stories <= 3
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: R-2A
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Number of stories
+      column: R-2A
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines:
+    - 10
+    - 10
+    quote: In all districts, the number of stories permitted may not be exceeded.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines:
+    - 6
+    - 7
+    quote: 'In any district, any main building may be erected to a height in excess of that specified for the district,
+      provided that:'
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: See §325-16.
+  examples:
+  - given:
+      building_height: 37
+      stories: 3
+    expect: pass
+  - given:
+      building_height: 37
+      stories: 4
+    expect: fail
+  - given:
+      building_height: 35
+      stories: 4
+    expect: not_applicable
+  open_questions:
+  - §325-16C(2) applies only to a main building and not in the U-1 Zone (§325-16C(4)); confirm main-building scope.
+  - Stories are counted as §325-3B STORY defines them (basement, attic, mezzanine rules).
+  research:
+  - question: §325-16C(2) applies only to a main building and not in the U-1 Zone (§325-16C(4)); confirm main-building
+      scope.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Stories are counted as §325-3B STORY defines them (basement, attic, mezzanine rules).
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'

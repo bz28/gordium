@@ -108,10 +108,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.min_lot_area_one_family_detached"
+     "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -123,10 +123,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.min_lot_area_one_family_detached"
+     "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -138,10 +138,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.min_lot_area_one_family_detached"
+     "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -153,10 +153,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.min_lot_area_one_family_detached"
+     "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -168,10 +168,10 @@
     "expect": "not_applicable",
     "got": "not_applicable",
     "drafted": [
-     "R-1a.min_lot_area_one_family_detached"
+     "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -183,10 +183,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.min_lot_area_other_use"
+     "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -198,10 +198,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.min_lot_area_other_use"
+     "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -213,10 +213,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.min_lot_area_other_use"
+     "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -228,10 +228,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.min_lot_area_other_use"
+     "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -243,10 +243,10 @@
     "expect": "not_applicable",
     "got": "not_applicable",
     "drafted": [
-     "R-1a.min_lot_area_other_use"
+     "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -343,38 +343,17 @@
    {
     "hand": "R-1a.stories",
     "given": {
-     "stories": 2
-    },
-    "expect": "pass",
-    "got": "pass",
-    "drafted": [
-     "R-1a.max_stories"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1a.stories",
-    "given": {
-     "stories": 3
-    },
-    "expect": "pass",
-    "got": "pass",
-    "drafted": [
-     "R-1a.max_stories"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1a.stories",
-    "given": {
      "stories": 4
     },
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_stories"
+     "R-1a.max_stories",
+     "R-1a.325_16c_height_exception_stories_not_exceeded"
     ],
-    "notes": []
+    "notes": [
+     "R-1a.325_16c_height_exception_stories_not_exceeded needs ['building_height'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-1a.height",
@@ -913,6 +892,36 @@
   ],
   "disagree": [
    {
+    "hand": "R-1a.stories",
+    "given": {
+     "stories": 2
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-1a.max_stories",
+     "R-1a.325_16c_height_exception_stories_not_exceeded"
+    ],
+    "notes": [
+     "R-1a.325_16c_height_exception_stories_not_exceeded needs ['building_height'], which the hand example doesn't give"
+    ]
+   },
+   {
+    "hand": "R-1a.stories",
+    "given": {
+     "stories": 3
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-1a.max_stories",
+     "R-1a.325_16c_height_exception_stories_not_exceeded"
+    ],
+    "notes": [
+     "R-1a.325_16c_height_exception_stories_not_exceeded needs ['building_height'], which the hand example doesn't give"
+    ]
+   },
+   {
     "hand": "R-1a.height",
     "given": {
      "building_height": 38.5,
@@ -1088,12 +1097,12 @@
   "false_pass": [],
   "summary": {
    "examples": 74,
-   "agree": 64,
-   "disagree": 10,
+   "agree": 62,
+   "disagree": 12,
    "undrafted": 0,
    "false_pass": 0,
-   "agree_of_all": "64/74",
-   "agree_of_drafted": "64/74"
+   "agree_of_all": "62/74",
+   "agree_of_drafted": "62/74"
   }
  },
  "R-1b.yaml": {
@@ -1145,10 +1154,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.min_lot_area_one_family_detached"
+     "R-1b.min_lot_size_detached"
     ],
     "notes": [
-     "R-1b.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-1b.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1160,10 +1169,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.min_lot_area_one_family_detached"
+     "R-1b.min_lot_size_detached"
     ],
     "notes": [
-     "R-1b.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-1b.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1175,10 +1184,10 @@
     "expect": "not_applicable",
     "got": "not_applicable",
     "drafted": [
-     "R-1b.min_lot_area_one_family_detached"
+     "R-1b.min_lot_size_detached"
     ],
     "notes": [
-     "R-1b.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-1b.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1190,10 +1199,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.min_lot_area_other_use"
+     "R-1b.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-1b.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1205,10 +1214,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.min_lot_area_other_use"
+     "R-1b.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-1b.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1266,26 +1275,17 @@
    {
     "hand": "R-1b.stories",
     "given": {
-     "stories": 3
-    },
-    "expect": "pass",
-    "got": "pass",
-    "drafted": [
-     "R-1b.max_stories"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1b.stories",
-    "given": {
      "stories": 4
     },
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_stories"
+     "R-1b.max_stories",
+     "R-1b.325_16c_height_exception_stories_not_exceeded"
     ],
-    "notes": []
+    "notes": [
+     "R-1b.325_16c_height_exception_stories_not_exceeded needs ['building_height'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-1b.height",
@@ -1658,6 +1658,21 @@
   ],
   "disagree": [
    {
+    "hand": "R-1b.stories",
+    "given": {
+     "stories": 3
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-1b.max_stories",
+     "R-1b.325_16c_height_exception_stories_not_exceeded"
+    ],
+    "notes": [
+     "R-1b.325_16c_height_exception_stories_not_exceeded needs ['building_height'], which the hand example doesn't give"
+    ]
+   },
+   {
     "hand": "R-1b.height",
     "given": {
      "building_height": 37,
@@ -1834,12 +1849,12 @@
   "false_pass": [],
   "summary": {
    "examples": 48,
-   "agree": 38,
-   "disagree": 10,
+   "agree": 37,
+   "disagree": 11,
    "undrafted": 0,
    "false_pass": 0,
-   "agree_of_all": "38/48",
-   "agree_of_drafted": "38/48"
+   "agree_of_all": "37/48",
+   "agree_of_drafted": "37/48"
   }
  },
  "R-3a.yaml": {
@@ -1927,10 +1942,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.min_lot_area_one_family_detached"
+     "R-3a.min_lot_size_detached"
     ],
     "notes": [
-     "R-3a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1942,10 +1957,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.min_lot_area_one_family_detached"
+     "R-3a.min_lot_size_detached"
     ],
     "notes": [
-     "R-3a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1957,10 +1972,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.min_lot_area_one_family_detached"
+     "R-3a.min_lot_size_detached"
     ],
     "notes": [
-     "R-3a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1972,10 +1987,10 @@
     "expect": "not_applicable",
     "got": "not_applicable",
     "drafted": [
-     "R-3a.min_lot_area_one_family_detached"
+     "R-3a.min_lot_size_detached"
     ],
     "notes": [
-     "R-3a.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -1987,10 +2002,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.min_lot_area_one_family_semi_detached"
+     "R-3a.min_lot_size_semi_detached"
     ],
     "notes": [
-     "R-3a.min_lot_area_one_family_semi_detached given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_semi_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2002,10 +2017,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.min_lot_area_one_family_semi_detached"
+     "R-3a.min_lot_size_semi_detached"
     ],
     "notes": [
-     "R-3a.min_lot_area_one_family_semi_detached given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_semi_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2017,10 +2032,10 @@
     "expect": "not_applicable",
     "got": "not_applicable",
     "drafted": [
-     "R-3a.min_lot_area_one_family_semi_detached"
+     "R-3a.min_lot_size_semi_detached"
     ],
     "notes": [
-     "R-3a.min_lot_area_one_family_semi_detached given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_semi_detached given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2032,10 +2047,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.min_lot_area_two_family"
+     "R-3a.min_lot_size_two_family"
     ],
     "notes": [
-     "R-3a.min_lot_area_two_family given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_two_family given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2047,10 +2062,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.min_lot_area_two_family"
+     "R-3a.min_lot_size_two_family"
     ],
     "notes": [
-     "R-3a.min_lot_area_two_family given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_two_family given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2062,10 +2077,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.min_lot_area_two_family"
+     "R-3a.min_lot_size_two_family"
     ],
     "notes": [
-     "R-3a.min_lot_area_two_family given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_two_family given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2077,10 +2092,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.min_lot_area_group_house"
+     "R-3a.min_lot_size_group_house"
     ],
     "notes": [
-     "R-3a.min_lot_area_group_house given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_group_house given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2092,10 +2107,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.min_lot_area_group_house"
+     "R-3a.min_lot_size_group_house"
     ],
     "notes": [
-     "R-3a.min_lot_area_group_house given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_group_house given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2107,10 +2122,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.min_lot_area_group_house"
+     "R-3a.min_lot_size_group_house"
     ],
     "notes": [
-     "R-3a.min_lot_area_group_house given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_group_house given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2122,10 +2137,10 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.min_lot_area_other_use"
+     "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2137,10 +2152,10 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.min_lot_area_other_use"
+     "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2152,10 +2167,10 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-3a.min_lot_area_other_use"
+     "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2167,10 +2182,10 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-3a.min_lot_area_other_use"
+     "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2182,10 +2197,10 @@
     "expect": "not_applicable",
     "got": "not_applicable",
     "drafted": [
-     "R-3a.min_lot_area_other_use"
+     "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -2399,26 +2414,17 @@
    {
     "hand": "R-3a.stories",
     "given": {
-     "stories": 4
-    },
-    "expect": "pass",
-    "got": "pass",
-    "drafted": [
-     "R-3a.max_stories"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-3a.stories",
-    "given": {
      "stories": 5
     },
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_stories"
+     "R-3a.max_stories",
+     "R-3a.325_16c_height_exception_stories_not_exceeded"
     ],
-    "notes": []
+    "notes": [
+     "R-3a.325_16c_height_exception_stories_not_exceeded needs ['building_height'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-3a.height",
@@ -3146,10 +3152,10 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "R-3a.min_lot_area_other_use"
+     "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
     ]
    },
    {
@@ -3164,6 +3170,21 @@
      "R-3a.min_lot_width_other_use"
     ],
     "notes": []
+   },
+   {
+    "hand": "R-3a.stories",
+    "given": {
+     "stories": 4
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.max_stories",
+     "R-3a.325_16c_height_exception_stories_not_exceeded"
+    ],
+    "notes": [
+     "R-3a.325_16c_height_exception_stories_not_exceeded needs ['building_height'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-3a.height",
@@ -3821,12 +3842,12 @@
   "false_pass": [],
   "summary": {
    "examples": 145,
-   "agree": 88,
-   "disagree": 19,
+   "agree": 87,
+   "disagree": 20,
    "undrafted": 38,
    "false_pass": 0,
-   "agree_of_all": "88/145",
-   "agree_of_drafted": "88/107"
+   "agree_of_all": "87/145",
+   "agree_of_drafted": "87/107"
   }
  }
 }

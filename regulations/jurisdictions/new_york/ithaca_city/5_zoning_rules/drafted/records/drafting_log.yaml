@@ -102,41 +102,41 @@ units:
       the primary use). An engineer adds it, then this unit is drafted.'
   chart-p3-minimum_lot_size:
     rules:
-    - R-1a.min_lot_area_one_family_detached
-    - R-1a.min_lot_area_other_use
-    - R-1b.min_lot_area_one_family_detached
-    - R-1b.min_lot_area_other_use
-    - R-2a.min_lot_area_one_family_detached
-    - R-2a.min_lot_area_one_family_semi_detached
-    - R-2a.min_lot_area_two_family
-    - R-2a.min_lot_area_other_use
-    - R-2b.min_lot_area_one_family_detached
-    - R-2b.min_lot_area_one_family_semi_detached
-    - R-2b.min_lot_area_two_family
-    - R-2b.min_lot_area_other_use
-    - R-3a.min_lot_area_one_family_detached
-    - R-3a.min_lot_area_one_family_semi_detached
-    - R-3a.min_lot_area_two_family
-    - R-3a.min_lot_area_group_house
-    - R-3a.min_lot_area_other_use
-    - R-3aa.min_lot_area_one_family_detached
-    - R-3aa.min_lot_area_one_family_semi_detached
-    - R-3aa.min_lot_area_two_family
-    - R-3aa.min_lot_area_group_house
-    - R-3aa.min_lot_area_other_use
-    - R-3b.min_lot_area_one_family_detached
-    - R-3b.min_lot_area_one_family_semi_detached
-    - R-3b.min_lot_area_two_family
-    - R-3b.min_lot_area_group_house
-    - R-3b.min_lot_area_other_use
-    - RU.min_lot_area_one_family_detached
-    - RU.min_lot_area_one_family_semi_detached
-    - RU.min_lot_area_two_family
-    - RU.min_lot_area_group_house
-    - RU.min_lot_area_other_use
-    - R-2c.min_lot_area_other_use
+    - R-1a.min_lot_size_detached
+    - R-1a.min_lot_size_other_use
+    - R-1b.min_lot_size_detached
+    - R-1b.min_lot_size_other_use
+    - R-2a.min_lot_size_detached
+    - R-2a.min_lot_size_semi_detached
+    - R-2a.min_lot_size_two_family
+    - R-2a.min_lot_size_other_use
+    - R-2b.min_lot_size_detached
+    - R-2b.min_lot_size_semi_detached
+    - R-2b.min_lot_size_two_family
+    - R-2b.min_lot_size_other_use
+    - R-3a.min_lot_size_detached
+    - R-3a.min_lot_size_semi_detached
+    - R-3a.min_lot_size_two_family
+    - R-3a.min_lot_size_group_house
+    - R-3a.min_lot_size_other_use
+    - R-3aa.min_lot_size_detached
+    - R-3aa.min_lot_size_semi_detached
+    - R-3aa.min_lot_size_two_family
+    - R-3aa.min_lot_size_group_house
+    - R-3aa.min_lot_size_other_use
+    - R-3b.min_lot_size_detached
+    - R-3b.min_lot_size_semi_detached
+    - R-3b.min_lot_size_two_family
+    - R-3b.min_lot_size_group_house
+    - R-3b.min_lot_size_other_use
+    - RU.min_lot_size_detached
+    - RU.min_lot_size_semi_detached
+    - RU.min_lot_size_two_family
+    - RU.min_lot_size_group_house
+    - RU.min_lot_size_other_use
+    - R-2c.min_lot_size_other_use
     unresolved:
-    - rule: R-2c.min_lot_area_one_family_detached
+    - rule: R-2c.min_lot_size_detached
       why: '''One-family dwelling, detached'': the cell ''2,500 sf [fn4]'' has footnotes [''4''], the rule expects
         none'
       cells:
@@ -144,21 +144,21 @@ units:
         - Minimum Lot Size [fn3]
         - One-family dwelling, detached
         - R-2C
-    - rule: R-1a.min_lot_area_one_family_semi_detached
+    - rule: R-1a.min_lot_size_semi_detached
       why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - One-family dwelling, semi-detached
         - R-1A
-    - rule: R-1b.min_lot_area_one_family_semi_detached
+    - rule: R-1b.min_lot_size_semi_detached
       why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - One-family dwelling, semi-detached
         - R-1B
-    - rule: R-2c.min_lot_area_one_family_semi_detached
+    - rule: R-2c.min_lot_size_semi_detached
       why: '''One-family dwelling, semi-detached'': the cell ''2,000 sf [fn5]'' has footnotes [''5''], the rule
         expects none'
       cells:
@@ -166,56 +166,56 @@ units:
         - Minimum Lot Size [fn3]
         - One-family dwelling, semi-detached
         - R-2C
-    - rule: R-1a.min_lot_area_two_family
+    - rule: R-1a.min_lot_size_two_family
       why: '''Two-family dwelling'': the chart shows ''-'' here'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - Two-family dwelling
         - R-1A
-    - rule: R-1b.min_lot_area_two_family
+    - rule: R-1b.min_lot_size_two_family
       why: '''Two-family dwelling'': the chart shows ''-'' here'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - Two-family dwelling
         - R-1B
-    - rule: R-2c.min_lot_area_two_family
+    - rule: R-2c.min_lot_size_two_family
       why: '''Two-family dwelling'': the cell ''2,000 sf [fn5]'' has footnotes [''5''], the rule expects none'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - Two-family dwelling
         - R-2C
-    - rule: R-1a.min_lot_area_group_house
+    - rule: R-1a.min_lot_size_group_house
       why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - Fraternity, sorority, or group house
         - R-1A
-    - rule: R-1b.min_lot_area_group_house
+    - rule: R-1b.min_lot_size_group_house
       why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - Fraternity, sorority, or group house
         - R-1B
-    - rule: R-2a.min_lot_area_group_house
+    - rule: R-2a.min_lot_size_group_house
       why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - Fraternity, sorority, or group house
         - R-2A
-    - rule: R-2b.min_lot_area_group_house
+    - rule: R-2b.min_lot_size_group_house
       why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
       cells:
       - - 3
         - Minimum Lot Size [fn3]
         - Fraternity, sorority, or group house
         - R-2B
-    - rule: R-2c.min_lot_area_group_house
+    - rule: R-2c.min_lot_size_group_house
       why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
       cells:
       - - 3
@@ -824,21 +824,125 @@ units:
     unresolved: []
     problems: []
   325-16C:
-    rules: []
-    unresolved: []
+    rules:
+    - R-1a.325_16c_height_exception_stories_not_exceeded
+    - R-1b.325_16c_height_exception_stories_not_exceeded
+    - R-2a.325_16c_height_exception_stories_not_exceeded
+    - R-2b.325_16c_height_exception_stories_not_exceeded
+    - R-2c.325_16c_height_exception_stories_not_exceeded
+    - R-3a.325_16c_height_exception_stories_not_exceeded
+    - R-3b.325_16c_height_exception_stories_not_exceeded
+    - RU.325_16c_height_exception_stories_not_exceeded
+    - R-3aa.325_16c_height_exception_stories_not_exceeded_fn11
+    unresolved:
+    - rule: R-3aa.325_16c_height_exception_stories_not_exceeded
+      why: '''Number of stories'': the cell ''3/2 [fn11]'' has 2 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-3AA
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3AA
+    - rule: R-1a.325_16c_height_exception_stories_not_exceeded_fn11
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-1A
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-1A
+    - rule: R-1b.325_16c_height_exception_stories_not_exceeded_fn11
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-1B
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-1B
+    - rule: R-2a.325_16c_height_exception_stories_not_exceeded_fn11
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-2A
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2A
+    - rule: R-2b.325_16c_height_exception_stories_not_exceeded_fn11
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-2B
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2B
+    - rule: R-2c.325_16c_height_exception_stories_not_exceeded_fn11
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-2C
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2C
+    - rule: R-3a.325_16c_height_exception_stories_not_exceeded_fn11
+      why: '''Number of stories'': the cell ''4'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-3A
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3A
+    - rule: R-3b.325_16c_height_exception_stories_not_exceeded_fn11
+      why: '''Number of stories'': the cell ''4'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-3B
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3B
+    - rule: RU.325_16c_height_exception_stories_not_exceeded_fn11
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - RU
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - RU
+    - rule: 325-16C.325_16c_height_exception_yards_increased
+      why: '325-16C.325_16c_height_exception_yards_increased: number 20 in ''building_height > {height} and front_yard
+        >= {front} + (building_height - {height}) and side_yard_smaller >= min({side_one}, {side_other}) + (building_height
+        - {height}) and side_yard_larger >= max({side_one}, {side_other}) + (building_height - {height}) and rear_yard
+        >= max(min({rear_pct} * lot_depth, {rear_ft}), 20) + (building_height - {height})'' isn''t backed where
+        it stands: bind it to a sentence of the text being drafted, or to the own-cell footnote or the row label
+        of a slot it stands with (the same arithmetic, or the condition that picks the slot''s value) where that
+        slot decides something; a chart number must be a slot'
     problems: []
-    failed: '325-16C.325_16c_extra_height_limit: it applies above the chart''s {height_ft} and limits building_height
-      there: an exception that allows more than a chart rule is one rule that relaxes it (relaxes: "height_ft"),
-      with every condition of the exception in applies_when and the most it allows in check; 325-16C.325_16c_extra_height_front_yard:
-      it applies above the chart''s {height_ft} and limits building_height there: an exception that allows more
-      than a chart rule is one rule that relaxes it (relaxes: "height_ft"), with every condition of the exception
-      in applies_when and the most it allows in check; 325-16C.325_16c_extra_height_side_yards: it applies above
-      the chart''s {height_ft} and limits building_height there: an exception that allows more than a chart rule
-      is one rule that relaxes it (relaxes: "height_ft"), with every condition of the exception in applies_when
-      and the most it allows in check; 325-16C.325_16c_extra_height_rear_yard: it applies above the chart''s {height_ft}
-      and limits building_height there: an exception that allows more than a chart rule is one rule that relaxes
-      it (relaxes: "height_ft"), with every condition of the exception in applies_when and the most it allows in
-      check'
   325-18A:
     rules:
     - general.325_18a_porches_structures_counted_in_yards_coverage
