@@ -26,6 +26,7 @@ claim fails. Writes <temp>/gordium_re_lookup/out.json ("done": true at the end) 
 document."""
 import json
 import os
+import time
 import sys
 import tempfile
 import traceback
@@ -96,9 +97,21 @@ def watch_draws(g):
 def rhino(command, at):
     """Rhino's own command, as the architect types it (Undo, Redo): whether it ran."""
     log["at"] = at
+    log["command_at"] = time.time()
     ran = bool(Rhino.RhinoApp.RunScript("_" + command, False))
     log.setdefault("commands", []).append([at, command, ran])
     return ran
+
+
+def recheck_owed(g, doc):
+    """After Rhino's Undo or Redo, the model is checked again: a re-check is still owed at the next idle
+    (rhino_logic.should_recheck, as live mode's _idle asks it), or one has finished since the command began. Never
+    left cleared with no check to come (review round 2, P1: an Undo right after a check)."""
+    last = g.logic.last_check_at(g.STATE.get("checked_at"), doc.RuntimeSerialNumber)
+    owed = g.logic.should_recheck(g.STATE.get("dirty"), time.time() + 1, False, False, g.IDLE_SECONDS, last)
+    done = last is not None and last >= log["command_at"]
+    return (owed or done) and bool(g.STATE.get("live")), {"dirty": g.STATE.get("dirty"), "last_check": last,
+                                                         "live": g.STATE.get("live"), "owed": owed, "done": done}
 
 
 def nothing_stale(g):
@@ -143,12 +156,14 @@ def edit_site(g, doc, address, fixture, answer=None):
 
 
 def main():
-    docs = TestDocs("relookup").__enter__()
+    if os.path.exists(S + "out.json"):          # never an earlier run's result read as this one's
+        os.remove(S + "out.json")
     doc = None
     log.update(undo_events=[], undo_records=[])
     handler = System.EventHandler[Rhino.Commands.UndoRedoEventArgs](logic.guard(undo_event, "record an undo event"))
     Rhino.Commands.Command.UndoRedo += handler
     try:
+        docs = TestDocs("relookup").__enter__()
         g = fresh_module()
         watch_draws(g)
         doc = docs.open("Large Objects - Feet")
@@ -193,6 +208,8 @@ def main():
               {"ran": ran, "missing": sorted(set(before) - set(undone)), "extra": sorted(set(undone) - set(before))})
         clean, shown = nothing_stale(g)
         claim("2 after Undo nothing of 96 is left on screen", clean, shown)
+        owed, why = recheck_owed(g, doc)
+        claim("2 after Undo the sample is checked again (live mode)", owed, why)
         ran = rhino("Redo", "2 redo")
         redone = objects(doc)
         claim("2 Redo draws 96's lot again (and no house: a corner lot), the sample gone", ran and redone == after,
@@ -200,12 +217,16 @@ def main():
         capture(doc, "2_after_redo")
         clean, shown = nothing_stale(g)
         claim("2 after Redo nothing of the sample is left on screen", clean, shown)
+        owed, why = recheck_owed(g, doc)
+        claim("2 after Redo 96 is checked again (live mode)", owed, why)
         ran = rhino("Undo", "2 undo again")
         again = objects(doc)
         claim("2 a second Undo puts the sample back again", ran and again == before,
               {"ran": ran, "missing": sorted(set(before) - set(again)), "extra": sorted(set(again) - set(before))})
         ran = rhino("Redo", "2 redo again")              # 96 drawn, as step 2 left it, before the file is closed
-        claim("2 a second Redo draws 96's lot again", ran and objects(doc) == after, len(objects(doc)))
+        again = objects(doc)
+        claim("2 a second Redo draws 96's lot again", ran and again == after,
+              {"ran": ran, "missing": sorted(set(after) - set(again)), "extra": sorted(set(again) - set(after))})
 
         # 3. a new file: the sample's starting house edited, then 96 looked up: asked once; keep it
         close(doc)

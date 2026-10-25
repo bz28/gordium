@@ -91,9 +91,10 @@ CASES = [("baseline", None), ("document strings", strings), ("attribute user str
 
 
 def all_of_them(doc, keep):
-    for f in (strings, user_strings, layer_added_then_deleted, visibility, command_inside):
+    for f in (strings, user_strings, layer_added_then_deleted, visibility):
         f(doc)
-    held_then_deleted(doc, keep)
+    held_then_deleted(doc, keep)        # the Draw's commit deletes what it held, then frame_site runs its _-Zoom
+    command_inside(doc)
 
 
 def one(docs, name, extra):
@@ -111,13 +112,19 @@ def one(docs, name, extra):
         elif extra is not None:
             extra(doc)
         ended = doc.EndUndoRecord(serial)
+        held = name in ("held then deleted", "all of them")    # the object made before the record is deleted
+        kept_id = before.Id
         undo = bool(Rhino.RhinoApp.RunScript("_Undo", False))
         gone = doc.Objects.FindId(added) is None
+        held_back = doc.Objects.FindId(kept_id) is not None        # Undo brings the held object back
         redo = bool(Rhino.RhinoApp.RunScript("_Redo", False))
         back = doc.Objects.FindId(added) is not None
-        log["cases"][name] = {"ok": gone and back, "serial": int(serial), "ended": bool(ended),
-                              "in_command": in_command, "undo_ran": undo,
-                              "undone": gone, "redo_ran": redo, "redone": back}
+        held_gone = doc.Objects.FindId(kept_id) is None            # and Redo deletes it again
+        ok = gone and back and (not held or (held_back and held_gone))
+        log["cases"][name] = {"ok": ok, "serial": int(serial), "ended": bool(ended),
+                              "in_command": in_command, "undo_ran": undo, "undone": gone, "redo_ran": redo,
+                              "redone": back, "held_back_on_undo": held_back if held else None,
+                              "held_gone_on_redo": held_gone if held else None}
     except Exception:
         log["cases"][name] = {"ok": False, "trace": traceback.format_exc()}
     finally:
@@ -125,13 +132,19 @@ def one(docs, name, extra):
 
 
 def main():
+    if os.path.exists(S + "out.json"):          # never an earlier run's result read as this one's
+        os.remove(S + "out.json")
     handler = System.EventHandler[Rhino.Commands.UndoRedoEventArgs](logic.guard(event, "record an undo event"))
     Rhino.Commands.Command.UndoRedo += handler
-    docs = TestDocs("undo_probe").__enter__()
     try:
+        docs = TestDocs("undo_probe").__enter__()
         for name, extra in CASES:
             one(docs, name, extra)
-        log["ok"] = all(c.get("ok") for c in log["cases"].values())
+        log["ok"] = all(c.get("ok") for c in log["cases"].values()) and len(log["cases"]) == len(CASES)
+    except Exception:
+        log["ok"] = False                  # a case that could not even open or close its document
+        log["trace"] = traceback.format_exc()
+        raise
     finally:
         Rhino.Commands.Command.UndoRedo -= handler
         log["done"] = True
