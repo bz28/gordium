@@ -150,7 +150,7 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
                         "why": " · ".join(lines)})
     if no_rule:
         # named for what it is (review round 23): some of these set requirements Gordium can't measure yet
-        out.append({"id": "drafting.no_rule", "section": "Sections with no drafted rule",
+        out.append({"id": "drafting.no_rule", "section": "City of Ithaca Code, ch. 325",   # a citation
                     "name": f"{len(no_rule)} section{'s' if len(no_rule) != 1 else ''} with no drafted rule, some setting "
                             "requirements Gordium can't measure yet: check each by hand (the reason is given for each)",
                     "why": " · ".join(no_rule)})
