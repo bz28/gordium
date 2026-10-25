@@ -1860,7 +1860,8 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
         return facts, saved_ui, True, state
     choice = logic.START_FRESH
     if plan == "ask":
-        question, fresh, keep = logic.reset_question(saved_ui["_pending"].get("address"), mine)
+        question, fresh, keep = logic.reset_question(saved_ui["_pending"].get("address"), mine,
+                                                     saved_ui["_pending"].get("answer"))
         choice = _ask_reset(question, fresh, keep)
         if choice is None:
             return facts, saved_ui, False, state

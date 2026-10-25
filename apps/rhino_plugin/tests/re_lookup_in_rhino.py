@@ -7,9 +7,14 @@ in CI; the logic is tested in CI (packages/design_checker/tests/test_re_lookup.p
    asked (all of it was Gordium's). 96 is a corner lot, so no starting house is drawn on it (by design: which yards
    are front is the architects' open question). One Undo puts the sample back exactly; Redo again.
 3. A new file: the sample's starting house edited (one floor moved), Edit site…, Look up 96: asked once, "Start
-   fresh for 96 …? Your changes to the starting house will be removed."; Keep my building: the floors kept, the
-   lot is 96's.
+   fresh for 96 …? Your changes to the starting house will be removed.", the Keep answer "Keep my building and
+   check it on 96 …'s lot"; Keep my building: the floors kept, the lot is 96's.
 4. Edit site…, Look up 96 again: no question, nothing in the model changes.
+5. A new file: the sample's lot made the architect's survey (as Use my survey… leaves it) and its starting house
+   edited; Look up 96: a new address is a new site (Ben, 2026-10-25), so even Keep my building replaces their lot,
+   and both the question ("Your surveyed lot will be replaced by 96 …'s lot.") and the Keep answer ("… (your
+   surveyed lot will be replaced)") say so. Keep: the floors kept, the surveyed lot gone, 96's tax-map lot drawn
+   (not marked as a survey). One Undo puts the surveyed lot and the edited house back exactly; Redo again.
 Writes <temp>/gordium_re_lookup/out.json and Top captures; closes its document."""
 import json
 import os
@@ -149,6 +154,9 @@ try:
     claim("3 asked once, naming the edited house", len(asked) == 1 and asked[0][0].startswith("Start fresh for 96")
           and asked[0][0].endswith("Your changes to the starting house will be removed.") and asked[0][2],
           asked)
+    claim("3 the Keep answer names 96's lot (the sample's lot was Gordium's: nothing of theirs replaced)",
+          asked[0][2][0].startswith("Keep my building and check it on 96 Ithaca R") and asked[0][2][0].endswith(
+              "'s lot"), asked[0][2])
     facts = g.current_facts(doc)
     lot = g._find(doc, facts.get("lot_id") or "")
     kept = g.RhinoTable(doc).massing()
@@ -162,6 +170,48 @@ try:
     log["step4"] = {k: v for k, v in seen.items() if k != "objects"}
     claim("4 the same address: no question and nothing in the model changes",
           seen["asked"] == [] and objects(doc) == before, seen["asked"])
+
+    # 5. a new file: the architect's surveyed lot and an edited house, then 96 looked up: Keep replaces the lot too
+    close(doc)
+    g = fresh_module()
+    doc = docs.open("Large Objects - Feet")
+    g.gordium_check()
+    facts = g.current_facts(doc)
+    survey_lot = facts.get("lot_id")
+    facts["lot_surveyed"] = True                   # as Use my survey… leaves it (pick_survey): theirs, a survey
+    g.save_facts(doc, facts)
+    g._save_ui_state(doc, g.logic.settle(g._ui_state(doc), "lot"))
+    house = g.RhinoTable(doc).massing()
+    floor = g._find(doc, house[-1])
+    moved = str(doc.Objects.Transform(floor, Rhino.Geometry.Transform.Translation(3, 0, 0), True))
+    house = house[:-1] + [moved]
+    before = objects(doc)
+    seen = edit_site(g, doc, "96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd", lambda fresh, keep: keep[1])
+    log["step5"] = {k: v for k, v in seen.items() if k != "objects"}
+    asked = seen["asked"]
+    claim("5 asked once; the question says their surveyed lot will be replaced by 96's",
+          len(asked) == 1 and asked[0][0].startswith("Start fresh for 96") and
+          "Your changes to the starting house will be removed." in asked[0][0] and
+          asked[0][0].endswith("'s lot.") and "Your surveyed lot will be replaced by 96 Ithaca R" in asked[0][0],
+          asked)
+    claim("5 the Keep answer says their surveyed lot will be replaced",
+          asked and asked[0][2] and asked[0][2][0].startswith("Keep my building and check it on 96 Ithaca R") and
+          asked[0][2][0].endswith("'s lot (your surveyed lot will be replaced)"), asked and asked[0][2])
+    facts = g.current_facts(doc)
+    lot = g._find(doc, facts.get("lot_id") or "")
+    after = objects(doc)
+    claim("5 Keep my building: the floors kept, the surveyed lot replaced by 96's tax-map lot",
+          sorted(g.RhinoTable(doc).massing()) == sorted(house) and survey_lot not in after and lot is not None and
+          "96" in (lot.Attributes.Name or "") and facts.get("lot_surveyed") is False,
+          {"kept": g.RhinoTable(doc).massing(), "lot": lot.Attributes.Name if lot else None,
+           "surveyed": facts.get("lot_surveyed")})
+    capture(doc, "5_kept_on_96_survey_replaced")
+    doc.Undo()
+    undone = objects(doc)
+    claim("5 one Undo puts the surveyed lot and the edited house back exactly", undone == before,
+          {"missing": sorted(set(before) - set(undone)), "extra": sorted(set(undone) - set(before))})
+    doc.Redo()
+    claim("5 Redo draws 96 again, the building kept", objects(doc) == after, len(objects(doc)))
     log["ok"] = all(c["ok"] for c in log["claims"].values())
 except Exception:
     log["trace"] = traceback.format_exc()
