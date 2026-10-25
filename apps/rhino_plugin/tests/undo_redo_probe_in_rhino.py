@@ -71,9 +71,9 @@ def held_then_deleted(doc, keep):
     doc.Layers[index].IsVisible = False
     attrs = keep.Attributes.Duplicate()
     attrs.LayerIndex = index
-    doc.Objects.ModifyAttributes(keep, attrs, True)
-    doc.Objects.Delete(keep, True)
-    doc.Layers.Delete(index, True)
+    log["held"] = {"moved": bool(doc.Objects.ModifyAttributes(keep, attrs, True))}
+    log["held"]["deleted"] = bool(doc.Objects.Delete(doc.Objects.FindId(keep.Id), True))   # re-found, as the plugin
+    log["held"]["layer_deleted"] = bool(doc.Layers.Delete(index, True))
 
 
 def visibility(doc):
@@ -113,18 +113,25 @@ def one(docs, name, extra):
             extra(doc)
         ended = doc.EndUndoRecord(serial)
         held = name in ("held then deleted", "all of them")    # the object made before the record is deleted
+        wrote = name in ("document strings", "all of them")       # the document string written in the record
         kept_id = before.Id
         undo = bool(Rhino.RhinoApp.RunScript("_Undo", False))
         gone = doc.Objects.FindId(added) is None
         held_back = doc.Objects.FindId(kept_id) is not None        # Undo brings the held object back
+        string_undone = doc.Strings.GetValue("gordium_probe", "facts") is None
         redo = bool(Rhino.RhinoApp.RunScript("_Redo", False))
         back = doc.Objects.FindId(added) is not None
         held_gone = doc.Objects.FindId(kept_id) is None            # and Redo deletes it again
-        ok = gone and back and (not held or (held_back and held_gone))
+        string_redone = doc.Strings.GetValue("gordium_probe", "facts") is not None
+        ok = gone and back and (not held or (held_back and held_gone)) and (
+            not wrote or (string_undone and string_redone))
         log["cases"][name] = {"ok": ok, "serial": int(serial), "ended": bool(ended),
                               "in_command": in_command, "undo_ran": undo, "undone": gone, "redo_ran": redo,
                               "redone": back, "held_back_on_undo": held_back if held else None,
-                              "held_gone_on_redo": held_gone if held else None}
+                              "held_gone_on_redo": held_gone if held else None,
+                              "held_steps": log.pop("held", None) if held else None,
+                              "string_undone": string_undone if wrote else None,
+                              "string_redone": string_redone if wrote else None}
     except Exception:
         log["cases"][name] = {"ok": False, "trace": traceback.format_exc()}
     finally:
@@ -132,8 +139,6 @@ def one(docs, name, extra):
 
 
 def main():
-    if os.path.exists(S + "out.json"):          # never an earlier run's result read as this one's
-        os.remove(S + "out.json")
     handler = System.EventHandler[Rhino.Commands.UndoRedoEventArgs](logic.guard(event, "record an undo event"))
     Rhino.Commands.Command.UndoRedo += handler
     try:
@@ -150,12 +155,14 @@ def main():
         log["done"] = True
         json.dump(log, open(S + "out.json", "w", encoding="utf-8"), default=str, indent=1)
         Rhino.RhinoApp.WriteLine("undo_redo_probe: " + ", ".join(
-            "%s %s" % (n, "ok" if c.get("ok") else "REDO FAILS") for n, c in log["cases"].items()))
+            "%s %s" % (n, "ok" if c.get("ok") else "FAILS (see out.json)") for n, c in log["cases"].items()))
 
 
 def run_outside_a_command():
     """As the panel runs: now if no command is running, else at the next idle once this one has ended. Nothing
     may raise into Rhino from the idle (on the Mac that aborts it)."""
+    if os.path.exists(S + "out.json"):          # never an earlier run's result read as this one's
+        os.remove(S + "out.json")
     if not Rhino.Commands.Command.InCommand():
         main()
         return

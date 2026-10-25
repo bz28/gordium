@@ -103,6 +103,12 @@ def rhino(command, at):
     return ran
 
 
+def saved(g, doc):
+    """What the file says (the facts, the box's choices, the sources), as saved in its strings: an Undo must put it
+    back with the model, or the re-check would measure the sample against 96's facts."""
+    return {k: doc.Strings.GetValue(g.SECTION, k) for k in (g.ENTRY, g.UI_ENTRY, g.SOURCES_ENTRY)}
+
+
 def recheck_owed(g, doc):
     """After Rhino's Undo or Redo, the model is checked again: a re-check is still owed at the next idle
     (rhino_logic.should_recheck, as live mode's _idle asks it), or one has finished since the command began. Never
@@ -156,8 +162,6 @@ def edit_site(g, doc, address, fixture, answer=None):
 
 
 def main():
-    if os.path.exists(S + "out.json"):          # never an earlier run's result read as this one's
-        os.remove(S + "out.json")
     doc = None
     log.update(undo_events=[], undo_records=[])
     handler = System.EventHandler[Rhino.Commands.UndoRedoEventArgs](logic.guard(undo_event, "record an undo event"))
@@ -172,6 +176,7 @@ def main():
         facts = g.current_facts(doc)
         sample_lot, house = facts.get("lot_id"), g.RhinoTable(doc).massing()
         before = objects(doc)
+        said_before = saved(g, doc)
         claim("1 the sample: its lot and a starting house", g._find(doc, sample_lot) is not None and len(house) >= 2,
               {"lot": sample_lot, "house": house})
         capture(doc, "1_sample")
@@ -183,6 +188,7 @@ def main():
               {"before": len(before), "during": len(seen.get("objects") or {})})
         claim("2 the looked-up lot was shown dashed while the box was open", seen.get("guide_shown"), seen)
         after = objects(doc)
+        said_after = saved(g, doc)
         facts = g.current_facts(doc)
         new_house = g.RhinoTable(doc).massing()
         ui_state = g._ui_state(doc)
@@ -206,6 +212,8 @@ def main():
         undone = objects(doc)
         claim("2 one Undo puts the sample back exactly", ran and undone == before,
               {"ran": ran, "missing": sorted(set(before) - set(undone)), "extra": sorted(set(undone) - set(before))})
+        claim("2 after Undo the file says the sample again (facts, choices, sources)", saved(g, doc) == said_before,
+              {k: v != said_before.get(k) for k, v in saved(g, doc).items()})
         clean, shown = nothing_stale(g)
         claim("2 after Undo nothing of 96 is left on screen", clean, shown)
         owed, why = recheck_owed(g, doc)
@@ -215,6 +223,8 @@ def main():
         claim("2 Redo draws 96's lot again (and no house: a corner lot), the sample gone", ran and redone == after,
               {"ran": ran, "missing": sorted(set(after) - set(redone)), "extra": sorted(set(redone) - set(after))})
         capture(doc, "2_after_redo")
+        claim("2 after Redo the file says 96 again (facts, choices, sources)", saved(g, doc) == said_after,
+              {k: v != said_after.get(k) for k, v in saved(g, doc).items()})
         clean, shown = nothing_stale(g)
         claim("2 after Redo nothing of the sample is left on screen", clean, shown)
         owed, why = recheck_owed(g, doc)
@@ -327,6 +337,8 @@ def run_as_the_architect():
     """main() outside any command, as the panel's Edit site… runs: now if no command is running, else at the next
     idle once this one (RunPythonScript, the Script Editor's run) has ended. From the idle nothing may raise into
     Rhino (on the Mac that aborts it): a failure is in out.json ("ok": false, "trace") and on the command line."""
+    if os.path.exists(S + "out.json"):          # never an earlier run's result read as this one's
+        os.remove(S + "out.json")
     def guarded():
         try:
             main()
