@@ -2403,3 +2403,56 @@ def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     report = src[src.index("def open_report("):].split("\ndef ", 1)[0]
     assert report.count("say(first + logic.report_message(") == 2                    # kept in the report's line too
     assert 'first = "✕ " + notice + " · " if notice else ""' in report
+
+
+def test_a_label_with_no_room_beside_its_line_goes_outside_the_drawing_with_a_leader():
+    """The Rhino job at 27c8e5d (highlight claim 2): in a narrow Top view (656 px) the 7 ft southwest side yard had no
+    clear spot beside its line, and its label crossed 13 of the lot's and the house's lines (over the drawing being
+    judged). Now, with nothing clear beside its line, the label goes outside the drawing (left, right, below or above
+    it, on screen, off every line and label) and gordium_ui draws a leader from the line's middle to it."""
+    from design_checker import rhino_logic as logic_
+    from design_checker.rhino_logic import crosses, place_label, place_outside
+
+    def box(x0, y0, x1, y1):
+        return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
+    lot, house = box(158, 110, 497, 557), box(185, 250, 420, 415)
+    hatch = [((185 + k * 10, 250), (185 + k * 10, 415)) for k in range(1, 23)]      # the coloured part's edges
+    own = ((158, 409), (185, 409))                                               # the side yard's dimension
+    obstacles = lot + house + hatch
+    view = (656, 668)
+    w, h = 170, 34                                                               # its two lines
+    assert place_label(own, w, h, obstacles, view=view)[2] is False             # nothing clear beside its line
+    left, top = place_outside(own, w, h, obstacles, view=view)
+    assert not any(crosses(s, left, top, w, h) for s in obstacles + [own])
+    assert 0 <= left and left + w <= 656 and 0 <= top and top + h <= 668
+    assert top >= 557                                                            # below the lot, under its line
+    assert place_outside(own, w, h, obstacles, taken=[(0, 557, 656, 111), (0, 0, 656, 110)], view=view) is None
+    # gordium_ui.label_box: outside, two lines, its leader's end its line's middle
+    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ns = {"logic": logic_, "LINE_H": 14}
+    exec(src[src.index("def label_box("):].split("\ndef ", 1)[0], ns)             # noqa: S102
+    viewport = type("VP", (), {"Size": type("S", (), {"Width": 656, "Height": 668})(),
+                               "WorldToClient": staticmethod(lambda q: type("P", (), {"X": q[0], "Y": q[1]})())})()
+    taken = []
+    left, top, width, want, rows = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", "
+                                                   "needs 10'-0\" (approx.)", 11, taken, along=own, obstacles=obstacles)
+    height = 4 + 14 * len(rows)
+    assert len(rows) == 2 and want == 409 and top >= 557 and taken == [(left, top, width, height)]
+    assert not any(crosses(s, left, top, width, height) for s in obstacles + [own])
+    ui_src = src[src.index("def label_at("):].split("\ndef ", 1)[0]
+    assert "logic.leader_end((p.X, p.Y), (left, top, width, h))" in ui_src and "return left, top, width, h" in ui_src
+
+
+def test_the_in_rhino_checks_read_the_drawings_own_placement():
+    """The Rhino job at 27c8e5d: highlight claim 1b worked out the notice's place with its own taken boxes and said
+    "no corner clear" while the screen drew it bottom right. draw_screen now keeps what each view drew (the notice's
+    box, every label's box and the lines it must stay off) in STATE["drawn"], and the in-Rhino claims read that."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert 'STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn' in draw
+    assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
+    assert draw.count('drawn["labels"].append(') == 2
+    for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
+        assert "label_box(" not in script, name

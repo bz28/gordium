@@ -11,9 +11,12 @@ GordiumStart on the sample (106 Ithaca Rd), then:
    corner is clear), and the panel's message line says it.
 2. Moved back and checked: nothing newly fails, and no notice is left (the earlier one is gone, not waiting out its
    6 s). Top capture.
-3. Moved left again and checked (the notice again), then moved 1 ft more with no check: the model changed since the
-   check, so the notice isn't drawn (as the rows show no marks). Top capture.
-4. Another document in front: no notice is left.
+3. Back in step 1's framing, moved left again and checked (the notice drawn again), then moved 1 ft more with no
+   check: the model changed since the check, so the notice isn't drawn (as the rows show no marks). Top capture.
+4. A fresh notice (moved back and checked, moved left and checked), then another document in front: no notice is
+   left.
+Where the notice was drawn is read from the drawing itself (gordium_rhino STATE["drawn"], kept by draw_screen per
+view), never worked out again by the script.
 Run from the Script Editor or RunPythonScript; it never waits for Rhino's idle (no step needs it: the checks are run
 by the script, and "changed since the check" is the plugin's own clock). Writes <temp>/gordium_notice/out.json
 ("done": true, "ok") and Top captures; closes its documents."""
@@ -82,14 +85,15 @@ def move(g, doc, feet):
 
 
 def notice(g, doc):
-    """The notice the plugin holds, and whether it would be drawn in the Top view now."""
+    """The notice the plugin holds, and where the Top view really drew it now (gordium_rhino.draw_screen keeps each
+    view's placement in STATE["drawn"]: the drawing's own, never a copy of it)."""
     o = g.overlay()
     held = list(o.toast[0]) if getattr(o, "toast", None) else None
-    vp = top(doc).ActiveViewport
-    drawn = g._notice_box(o, vp, [], g.stale(o))
-    return {"held": held, "drawn": drawn[0] if drawn else None, "stale": g.stale(o),
-            "box": list(drawn[1:]) if drawn else None, "model": g._model_on_screen(o, vp),
-            "view": [vp.Bounds.Width, vp.Bounds.Height]}
+    view = top(doc)
+    view.Redraw()
+    rec = g.STATE.get("drawn", {}).get(str(view.ActiveViewport.Id)) or {}
+    return {"held": held, "drawn": rec.get("notice") is not None, "stale": g.stale(o), "box": rec.get("notice"),
+            "model": rec.get("model"), "view": rec.get("size")}
 
 
 def clear_of(box, model):
@@ -114,23 +118,22 @@ try:
           and n1["drawn"] and n1["box"][2] <= n1["view"][0] * g.logic.NOTICE_SHARES[0] + 1
           and clear_of(n1["box"], n1["model"]), n1)
     view = top(doc)                                      # 1b zoomed in tight on the house: never a bar over it
+    view.ActiveViewport.PushViewProjection()             # step 1's framing, put back after
     box = rg.BoundingBox.Empty
     for o in g._buildings(doc):
         box.Union(o.Geometry.GetBoundingBox(True))
     view.ActiveViewport.ZoomBoundingBox(box)
-    view.Redraw()
+    n1b = notice(g, doc)
     vp = view.ActiveViewport
-    tight = g._notice_box(g.overlay(), vp, [], g.stale(g.overlay()))
-    model = g._model_on_screen(g.overlay(), vp)
+    tight, model = n1b["box"], n1b["model"]
     message = str(g.STATE["panel_parts"]["message"].Text) if (g.STATE.get("panel_parts") or {}).get("message") else None
     capture(doc, "1b_zoomed_in")
     log["1b"] = {"notice": tight, "model": model, "view": [vp.Bounds.Width, vp.Bounds.Height], "panel": message}
     claim("1b zoomed in tight: the notice is compact and covers none of the model, or isn't drawn (the panel says it)",
-          (tight is None or (tight[3] <= vp.Bounds.Width * g.logic.NOTICE_SHARES[0] + 1 and not (
-              model and min(tight[1] + tight[3], model[2]) > max(tight[1], model[0])
-              and min(tight[2] + tight[4], model[3]) > max(tight[2], model[1]))))
+          (tight is None or (tight[2] <= vp.Bounds.Width * g.logic.NOTICE_SHARES[0] + 1 and clear_of(tight, model)))
           and bool(message) and "no longer complies" in message, log["1b"])
-    view.ActiveViewport.ZoomExtents()
+    view.ActiveViewport.PopViewProjection()              # back to step 1's framing (the Rhino job at 27c8e5d: after
+    #                                                      ZoomExtents the lot filled the view: no corner for step 3)
     move(g, doc, 5)
     g.run_check(doc, report=False)
     n2 = log["2"] = notice(g, doc)
@@ -146,11 +149,16 @@ try:
     capture(doc, "3_changed_no_notice")
     claim("3 the model changed since the check: the notice isn't drawn over it",
           again["drawn"] and n3["stale"] and n3["drawn"] is None, n3)
+    move(g, doc, 6)                                      # 4: a fresh notice of its own (step 3's edit ended its
+    g.run_check(doc, report=False)                       # notice: a changed model's notice is never shown)
+    move(g, doc, -5)
+    g.run_check(doc, report=False)
+    fresh = list(g.overlay().toast[0]) if getattr(g.overlay(), "toast", None) else None
     other = docs.open("Small Objects - Millimeters")     # another document in front (the first stays open)
     opened.append(other)
     n4 = log["4"] = {"held": list(g.overlay().toast[0]) if getattr(g.overlay(), "toast", None) else None,
-                     "held_before": n3["held"]}
-    claim("4 another document in front: no notice left", n3["held"] and n4["held"] is None, n4)
+                     "held_before": fresh}
+    claim("4 another document in front: no notice left", bool(fresh) and n4["held"] is None, n4)
     log["ok"] = all(c["ok"] for c in log["claims"].values()) and len(log["claims"]) == 5
 except Exception:
     log["trace"] = traceback.format_exc()
