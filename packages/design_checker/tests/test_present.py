@@ -471,7 +471,8 @@ def test_a_vault_read_as_walls_beside_a_flat_roof_over_the_limit_is_coloured_too
     for f in vault["faces"]:                     # the same vault, its walls' tops 1e-4 ft out of plumb
         for p in f["points"]:
             if p[2] == 38:
-                p[0] += 1e-4
+                p[0] += 1e-4                     # (both ways: every wall leans)
+                p[1] += 1e-4
     house = {"id": "house", "faces": flat["faces"] + vault["faces"], "problems": []}
     tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": present.FAILS}]},
                             {})["encroach"] if e["why"] == "height"]
