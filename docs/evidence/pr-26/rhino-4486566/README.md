@@ -21,3 +21,14 @@ check passed 39 of 39 at cb4b6e0 this morning, before the restart. Re-run once R
 | **4 (new) the lot's own address (the box opened again on it): Draw goes through and checks it as it is** | **pass** |
 | 5 asked once, the question and the Keep answer say the surveyed lot will be replaced; Keep keeps the floors | pass (3) |
 | 5 Undo and Redo and the checks after each | blocked by Undo |
+
+## Re-run after the window was fixed (2026-10-25, 16:15)
+
+The Undo block came from the desktop, not from Gordium. Another Claude session was driving Chrome, full screen on
+its own desktop, so Rhino's windows had no front window. That session also typed the stray "do" into Rhino's
+command line. Once it stopped, Rhino was quit and relaunched, one empty document was opened and brought to the
+front (seen on screen), and Rhino's update reminder was deferred (nothing installed). Then:
+- the undo probe with no Gordium code: **8 of 8** (`undo_probe_after_window_fix.json`);
+- `re_lookup_in_rhino.py` at this head: **all claims pass** (`re_lookup_results_after_window_fix.json`,
+  `re_lookup_results_full.json`).
+- #26 at 4486566, the script as written: **41 of 41, PASS**, including the new step 4 and every Undo and Redo claim.
