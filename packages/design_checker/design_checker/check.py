@@ -657,6 +657,59 @@ def above(building: dict, z: float):
     return unary_union(parts) if parts else Polygon()
 
 
+REQUIRED_HALF_FT = 6.0     # the faint required line: this far either side of its yard's dimension
+HEIGHT_DIM_OFFSET_FT = 4.0  # the height dimension stands this far out from the building's corner
+
+
+def _dim_label(i: dict) -> str:
+    """A dimension's words, as the plan shows them: its mark, its name, the measured distance (feet-inches) and,
+    when it fails, what is needed."""
+    return (f"{i['mark']} {i['name']} {i['proposed']}" +
+            (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
+            (" (approx.)" if i.get("approx") else ""))
+
+
+def required_line(points: list, limit, edges: list) -> list | None:
+    """Where the yard's required line crosses its dimension (plan, feet): a short line square to the dimension,
+    `limit` from the lot line along it, REQUIRED_HALF_FT either side, drawn faint. The dimension's lot-line end is
+    whichever end lies nearer the lot's outline (a measurement's points are a lot-line point and a building point).
+    None without a limit in feet or a dimension of some length."""
+    from shapely.geometry import LineString, Point
+    if not isinstance(limit, (int, float)) or limit <= 0 or not points or len(points) < 2:
+        return None
+    a, b = [list(p[:2]) for p in points[:2]]
+    length = math.dist(a, b)
+    if length < 1e-6:
+        return None
+    if edges:
+        ring = LineString([tuple(p[:2]) for e in edges for p in e["points"]])
+        if ring.distance(Point(b)) < ring.distance(Point(a)):
+            a, b = b, a
+    ux, uy = (b[0] - a[0]) / length, (b[1] - a[1]) / length
+    cx, cy = a[0] + ux * limit, a[1] + uy * limit
+    return [[cx - uy * REQUIRED_HALF_FT, cy + ux * REQUIRED_HALF_FT], [cx + uy * REQUIRED_HALF_FT, cy - ux * REQUIRED_HALF_FT]]
+
+
+def height_dim(site: dict, env: dict, v: dict, measured: dict) -> dict | None:
+    """The height's vertical dimension for the elevations (feet): from the grade plane up the measured height,
+    beside the buildings' corner (HEIGHT_DIM_OFFSET_FT out from it), labelled and coloured as the height row, the
+    limit as a faint line across it. None without a grade, a measured height (the larger reading when they
+    differ: never drawn lower than it may be) or a building."""
+    item = next((i for i in v["items"] if i.get("measure") == "building_height"), None)
+    record = (measured or {}).get("building_height") or {}
+    value = record.get("value")
+    if value is None and record.get("readings"):
+        value = max(r["value"] for r in record["readings"] if isinstance(r.get("value"), (int, float)))
+    pts = [p for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
+    if item is None or not isinstance(value, (int, float)) or not env or env.get("base") is None or not pts:
+        return None
+    x = max(p[0] for p in pts) + HEIGHT_DIM_OFFSET_FT
+    y = min(p[1] for p in pts) - HEIGHT_DIM_OFFSET_FT
+    limit = item.get("limit_ft")
+    return {"at": [x, y], "base": env["base"], "top": env["base"] + value, "status": item["status"],
+            "label": _dim_label(item), "limit": env["base"] + limit if isinstance(limit, (int, float)) else None}
+
+
 def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None) -> dict:
     """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
     its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
@@ -670,9 +723,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
     edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
              for r, length in edge_runs(lot.get("edges") or [])
              if length >= SHORTEST_LABELLED_EDGE]   # a tax-map sliver (0'-1 5/8"): no label, it only clutters
-    yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
-              (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
-              (" (approx.)" if i.get("approx") else "")}
+    yards = [{"points": i["points"], "status": i["status"], "label": _dim_label(i),
+              "required_line": required_line(i["points"], i.get("limit_ft"), lot.get("edges") or [])}
              for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
     encroach = []
     solids = [(b, _projection(b)) for b in site.get("buildings") or [] if b.get("faces")]
@@ -726,7 +778,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                     if g.area > 1e-3:
                         encroach.append({"outline": _ring(g), "base": env["top"], "top": top, "why": "height",
                                          "status": height, "building": b.get("id")})
-    return {"edges": edges, "yards": yards, "encroach": encroach,
+    return {"edges": edges, "yards": yards, "encroach": encroach, "height": height_dim(site, env, v, measured),
             "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
 
 

@@ -550,6 +550,14 @@ def _in_active_view(e):
     return active is not None and e.Viewport.Id == active.ActiveViewportID
 
 
+def _dimension(d, viewport, line, color):
+    """A drawing-style dimension on screen: its line and an architectural tick at 45° across each end."""
+    a, b = viewport.WorldToClient(line.From), viewport.WorldToClient(line.To)
+    d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
+    for (x0, y0), (x1, y1) in logic.dim_ticks((a.X, a.Y), (b.X, b.Y)):
+        d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), color, 2)
+
+
 def draw_screen(o, e):
     if not _here(o, e):
         return
@@ -583,17 +591,34 @@ def draw_screen(o, e):
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
     # the notice first (placed off the model and the status box), so no label is drawn under it either
     notice = _notice_box(o, e.Viewport, taken)
-    for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
-        color = ui.status_color("complies" if old else status, dark)
+    elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+    shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
+    for line, status in (getattr(o, "yard_required", None) or []) if shown else []:   # the required line, faint
+        color = ui.faint(ui.status_color("complies" if old else status, dark))
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
-        d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
-        for p in (a, b):                     # tick ends
-            d.Draw2dLine(System.Drawing.PointF(p.X - 5, p.Y + 5), System.Drawing.PointF(p.X + 5, p.Y - 5), color, 2)
+        d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 1)
+    for line, text, status in (getattr(o, "yard_dims", None) or []) if shown else []:   # each yard as measured (F4)
+        color = ui.status_color("complies" if old else status, dark)
+        _dimension(d, e.Viewport, line, color)
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
             ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
                         along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
+    height = getattr(o, "height_dim", None)
+    if height is not None and elevation and zoomed_in:       # the height, dimensioned up from the grade plane
+        line, text, status, limit = height
+        color = ui.status_color("complies" if old else status, dark)
+        _dimension(d, e.Viewport, line, color)
+        if limit is not None:                                # the limit: faint, across the dimension
+            q = e.Viewport.WorldToClient(limit)
+            d.Draw2dLine(System.Drawing.PointF(q.X - 14, q.Y), System.Drawing.PointF(q.X + 14, q.Y),
+                         ui.faint(ui.status_color("complies" if old else status, dark)), 1)
+        if old:
+            text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
+        if logic.yard_label_shown(labels, status):
+            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
+                        along=(line.From, line.To))
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
                     along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
@@ -2049,6 +2074,7 @@ def _clear(o):
     """Nothing from an earlier check is left on screen."""
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
+    o.yard_required, o.height_dim = [], None
     o.plan_lines = []
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
@@ -2097,8 +2123,15 @@ def _draw_plan(doc, o, result, facts):
     o.edge_labels = [(_model_point(doc, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), e["length"],
                       rg.Line(_model_point(doc, a), _model_point(doc, b)))         # the edge: labelled beside it
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
-    o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
+    o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
+    # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
+    o.yard_required = [(rg.Line(_model_point(doc, y["required_line"][0], 0.1), _model_point(doc, y["required_line"][1], 0.1)),
+                        y["status"]) for y in plan.get("yards") or [] if y.get("points") and y.get("required_line")]
+    h = plan.get("height")
+    o.height_dim = (rg.Line(_model_point(doc, h["at"], h["base"]), _model_point(doc, h["at"], h["top"])), h["label"],
+                    h["status"], _model_point(doc, h["at"], h["limit"]) if h.get("limit") is not None else None) \
+        if h else None
     o.encroach = [(_proud(doc, piece), status)                           # coloured from the rule's result only
                   for e, status in ((e, e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
                   if logic.highlight(status) for piece in _offending(doc, e)]

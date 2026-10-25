@@ -42,6 +42,11 @@ HIGHLIGHT_EDGE = {"red": 3, "amber": 1}
 HIGHLIGHT_PROUD_FT = 0.02    # each block stands this far proud of the house, so their shared faces never fight
 
 
+def faint(color):
+    """A colour at the required line's faint opacity (logic.FAINT_ALPHA)."""
+    return System.Drawing.Color.FromArgb(logic.FAINT_ALPHA, color.R, color.G, color.B)
+
+
 def viewport_dark():
     return _dark(Rhino.ApplicationSettings.AppearanceSettings.ViewportBackgroundColor)
 

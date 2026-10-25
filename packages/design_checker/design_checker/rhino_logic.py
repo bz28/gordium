@@ -152,8 +152,10 @@ def legend_text(code=None):
     """The legend ("?"): the marks, what the plan shows, the precision, and which version of the law was checked
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
-            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
-            "measured distance. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard "
+            "dimensioned from the building's nearest point to its lot line in its row's colour, with the required "
+            "line faint across it, and in the elevations the height, dimensioned up from the grade plane, with the "
+            "limit faint. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
@@ -453,6 +455,32 @@ LABEL_MIN_LOT_PX = 120      # a lot smaller than this on screen (zoomed out to t
 def label_width(text, size):
     """A one-line label's width on screen, pixels (its text and its backing box's margins)."""
     return len(text) * size * 0.58 + 14
+
+
+DIM_TICK_PX = 10        # a dimension's architectural tick: this long on screen, at 45° to its line
+FAINT_ALPHA = 110       # the required line, faint: the status colour at this opacity (of 255)
+
+
+def dim_ticks(a, b, size=DIM_TICK_PX):
+    """A drawing-style dimension's two end ticks on screen: at each end of the line a to b, a short slash at 45°
+    to the line (as an architect draws one, whichever way the line runs), `size` pixels long. [] for a line of no
+    length on screen (seen end on)."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = (dx * dx + dy * dy) ** 0.5
+    if n < 1e-9:
+        return []
+    ux, uy = dx / n, dy / n
+    sx, sy = (ux - uy) * 0.5 ** 0.5 * size / 2, (uy + ux) * 0.5 ** 0.5 * size / 2   # the line turned 45°
+    return [((p[0] - sx, p[1] - sy), (p[0] + sx, p[1] + sy)) for p in (a, b)]
+
+
+def dims_shown(zoomed_in, elevation=False):
+    """Whether a yard's dimension (its line, ticks, faint required line) is drawn at all: only at working zoom
+    (zoomed out to the neighbourhood every dimension gives way with the labels, labels_shown), and never in an
+    elevation (Front, Right…), where every yard's line would lie flat on the ground line. Its words also follow
+    Show on-screen labels (yard_label_shown) and show in plan only. The height's dimension is the other way round:
+    elevations only."""
+    return bool(zoomed_in) and not elevation
 
 
 def labels_shown(lot_px):

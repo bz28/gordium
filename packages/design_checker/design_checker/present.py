@@ -1096,6 +1096,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
             "objects": (measured.get(node.left.id) or {}).get("objects", []) if node is not None else [],
             "points": (measured.get(node.left.id) or {}).get("points") if node is not None else None,
+            # the limit as drawn, in feet, for the plan's faint required line (a yard, the height); None otherwise
+            "limit_ft": (numbers[1] if node is not None and numbers[3] == "ft" and isinstance(numbers[1], (int, float))
+                         else None),
             "detail": {
                 "line": line,
                 "quotes": quotes,
