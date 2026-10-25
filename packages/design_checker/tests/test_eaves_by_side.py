@@ -179,9 +179,8 @@ def test_both_sides_able_to_carry_10_ft_the_eave_fitting_one_way_only_needs_revi
 def test_equal_walls_read_each_side_as_the_narrower():
     """Walls 12 ft from both lines (which is narrower is no fact at all), eaves 1 ft west and 5 ft east (11 and 7
     from the lines): both pairings are readings. Either side may be the 10 ft one, and the east eave fits only if
-    it is the 5 ft side: review. With the east eave 9'-6" past (2'-6" from the line) it fits neither way: the law
-    says fails; the two pairings are separate readings of two measurements, which the checker may also combine
-    across (each the west eave), so it may say needs review: never complies."""
+    it is the 5 ft side: review. With the east eave 9'-6" past (2'-6" from the line) it fits neither way: fails.
+    The two pairings are kept apart (never both eaves to the west line, which would pass: sceptic A, #18 round 1)."""
     got, facts = measured(12.0, 12.0, 1.0, 5.0)
     for name in ("side_yard_smaller_eaves", "side_yard_larger_eaves"):
         assert got[name]["value"] is None
@@ -190,7 +189,16 @@ def test_equal_walls_read_each_side_as_the_narrower():
     assert verdict(rules(5, 10)["yard_projections"], got, facts) == present.REVIEW
     got, facts = measured(12.0, 12.0, 1.0, 9.5)
     assert law(12.0, 12.0, 11.0, 2.5, 5, 10) == "fails"
-    assert verdict(rules(5, 10)["yard_projections"], got, facts) in (present.FAILS, present.REVIEW)
+    assert verdict(rules(5, 10)["yard_projections"], got, facts) == present.FAILS
+
+
+@pytest.mark.parametrize("west, over", [(10.0, 2.5), (12.0, 4.5)])
+def test_equal_walls_and_one_eave_too_deep_fail_r1b_style_equal_minimums(west, over):
+    """Equal minimums (R-1b: 10 and 10), walls equally far from both lines, one eave more than 2 ft into its yard:
+    fails, as it did before the fix (sceptic A, #18 round 1: the two pairings combined across gave needs review)."""
+    got, facts = measured(west, west, over, 0.0)
+    assert law(west, west, west - over, west, 10, 10) == "fails"
+    assert verdict(rules(10, 10)["yard_projections"], got, facts) == present.FAILS
 
 
 # ---- every two-side case, against the law by hand ------------------------------------------------------------
@@ -218,12 +226,13 @@ def _designs(seed: int, n: int):
 def test_surveyed_lot_every_two_side_case_matches_the_law_worked_by_hand(west, east, ow, oe, small, large):
     """A surveyed lot, the eaves confirmed (one reading of the walls): the eaves row is exactly the law's answer.
     One allowance, always the cautious way: walls exactly as far from both lines with unequal eaves are read both
-    ways (either side the narrower), so the row may ask for review where the law gives an answer."""
+    ways (either side the narrower, two readings no answer names), so where both ways comply the row may still ask
+    for review."""
     got, facts = measured(west, east, ow, oe)
     want = law(west, east, round(west - ow, 6), round(east - oe, 6), small, large)
     said = verdict(rules(small, large)["yard_projections"], got, facts)
-    if west == east and ow != oe:
-        assert said in (SAYS[want], present.REVIEW), (west, east, ow, oe)
+    if west == east and ow != oe and want == "complies":
+        assert said in (present.COMPLIES, present.REVIEW), (west, east, ow, oe)
     else:
         assert said == SAYS[want], (west, east, ow, oe)
 

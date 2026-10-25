@@ -79,7 +79,8 @@ def _decide(name: str, readings: list[tuple[str, float, dict]], how: str, object
     values = [v for _, v, _ in readings]
     shown = [{"reading": r, "value": _r(v), **({"points": x["points"]} if x.get("points") else {}),
               **({"named": dict(x["named"])} if x.get("named") else {}),
-              **({"line": x["line"]} if x.get("line") is not None else {})} for r, v, x in readings]
+              **({"line": x["line"]} if x.get("line") is not None else {}),
+              **({"pairing": x["pairing"]} if x.get("pairing") is not None else {})} for r, v, x in readings]
     if values and max(values) - min(values) <= SAME:
         how = how if len(readings) > 1 or not readings[0][0] else f"{how} ({readings[0][0]})"
         return _record(name, UNITS.get(name) or STATED[name], _r(values[0]), how, objects, readings[0][2].get("points"),
@@ -2273,22 +2274,27 @@ def _eaves_by_wall_side(lot: "Lot", r: dict, words: str, w: str, shape, walls: l
     the same way: one pair, worded as before. When they don't (an overhang read as an eave or not moves a wall
     yard): one pair per wall reading, named and worded as it is, so a rule is checked under each. Two wall side
     yards within TOL of each other are equal (which one is narrower is float noise, _two_sides): then either side
-    may be the narrower one, and both pairings are readings (a rule holds only if it holds both ways)."""
+    may be the narrower one, and both pairings are readings (a rule holds only if it holds both ways), each marked
+    with its `pairing` (0 as _two_sides orders the lines, 1 swapped), so the checker never sets one pairing's
+    narrower side against the other's wider (both eaves to the same lot line: reading_set.combos)."""
     pairs = []
     for ww, ws, wn in walls:
         found = [(*_distance(lot.line(g), ws), list(g)) for g in r["sides"]]
         (_, _, la), (_, _, lb) = _two_sides(found)
         ea = (*_distance(lot.line(la), shape), la)
         eb = (*_distance(lot.line(lb), shape), lb)
-        pairs.append((ww, wn, ea, eb))
         if len(found) == 2 and abs(found[0][0] - found[1][0]) <= TOL:
-            pairs.append((_both(ww, "the walls as far from both side lot lines: either side the narrower"), wn, eb, ea))
-    if len({(_r(a[0]), _r(b[0])) for _, _, a, b in pairs}) == 1:      # every way gives the same two numbers
-        _, _, ea, eb = pairs[0]
+            pairs += [(ww, wn, ea, eb, 0), (_both(ww, "the walls equally far from both sides: either side the narrower"),
+                                            wn, eb, ea, 1)]
+        else:
+            pairs.append((ww, wn, ea, eb, None))
+    if len({(_r(a[0]), _r(b[0])) for _, _, a, b, _ in pairs}) == 1:      # every way gives the same two numbers
+        _, _, ea, eb, _ = pairs[0]
         return [((_both(words, w), ea[0], {"points": ea[1], "named": {}, "line": ea[2]}),
                  (_both(words, w), eb[0], {"points": eb[1], "named": {}, "line": eb[2]}))]
-    return [((_both(words, ww), ea[0], {"points": ea[1], "named": wn, "line": ea[2]}),
-             (_both(words, ww), eb[0], {"points": eb[1], "named": wn, "line": eb[2]})) for ww, wn, ea, eb in pairs]
+    return [((_both(words, ww), ea[0], {"points": ea[1], "named": wn, "line": ea[2], "pairing": k}),
+             (_both(words, ww), eb[0], {"points": eb[1], "named": wn, "line": eb[2], "pairing": k}))
+            for ww, wn, ea, eb, k in pairs]
 
 
 def _turn(a, b) -> float:
