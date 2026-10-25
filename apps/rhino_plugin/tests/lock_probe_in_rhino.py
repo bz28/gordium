@@ -11,7 +11,8 @@ Sub's (and Mid's) IsLocked and own lock (GetPersistentLocking) after every step.
 3. persistent_alone: Sub given SetPersistentLocking(True) only, the top unlocked: does it record an own lock at all?
    Read the "sub set" row's "own". (Its rows after the top's lock and unlock answer it only if case 4 shows a
    recorded own lock survives the top being locked again.)
-4. relock: the top locked, Sub given its own lock (SetPersistentLocking(True)), the top unlocked (Sub locked?), then
+4. relock: the top locked, Sub given its own lock (locked if it isn't, then SetPersistentLocking(True), as Gordium's
+   _set_own_lock does), the top unlocked (Sub locked?), then
    locked and unlocked again: does locking a parent clear a recorded own lock? (The fake's two readings, "keeps" and
    "resets".)
 5. nested_is_locked, nested_relock: cases 1 and 4 with Mid between the top and Sub.
@@ -91,6 +92,8 @@ def probe(case):
     rows.append(["sub set", state(sub, mid)])
     if case.endswith("relock"):
         doc.Layers[top].IsLocked = True
+        if not doc.Layers[sub].IsLocked:        # as Gordium's _set_own_lock gives a layer its own lock
+            doc.Layers[sub].IsLocked = True
         doc.Layers[sub].SetPersistentLocking(True)
         rows.append(["top locked, sub's own lock set", state(sub, mid)])
         doc.Layers[top].IsLocked = False
@@ -102,8 +105,8 @@ def probe(case):
     return rows
 
 
-docs = TestDocs("lock_probe").__enter__()
 try:
+    docs = TestDocs("lock_probe").__enter__()
     doc = docs.open("Large Objects - Feet")
     for case in CASES:
         out["case"] = case
@@ -123,4 +126,7 @@ finally:
     except Exception:
         pass
     out["done"] = True
-    save()
+    try:
+        save()
+    except Exception:
+        pass
