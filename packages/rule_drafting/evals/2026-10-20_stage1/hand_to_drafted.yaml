@@ -57,8 +57,8 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-1b.side_yards:
         judge:
-        - - R-1b.side_one_side_min
-          - R-1b.side_other_side_min
+        - - R-1b.side_yard_one_side_min
+          - R-1b.side_yard_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-1b.rear_yard:
         judge:
@@ -144,8 +144,8 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-1a.side_yards:
         judge:
-        - - R-1a.side_one_side_min
-          - R-1a.side_other_side_min
+        - - R-1a.side_yard_one_side_min
+          - R-1a.side_yard_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-1a.rear_yard:
         judge:
@@ -249,8 +249,8 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-2a.side_yards:
         judge:
-        - - R-2a.side_one_side_min
-          - R-2a.side_other_side_min
+        - - R-2a.side_yard_one_side_min
+          - R-2a.side_yard_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-2a.rear_yard:
         judge:
@@ -367,8 +367,8 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-2b.side_yards:
         judge:
-        - - R-2b.side_one_side_min
-          - R-2b.side_other_side_min
+        - - R-2b.side_yard_one_side_min
+          - R-2b.side_yard_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-2b.rear_yard:
         judge:
@@ -657,8 +657,8 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-3a.side_yards:
         judge:
-        - - R-3a.side_one_side_min
-          - R-3a.side_other_side_min
+        - - R-3a.side_yard_one_side_min
+          - R-3a.side_yard_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-3a.rear_yard:
         judge:
@@ -770,39 +770,9 @@ general_unmatched:
   general.325_20e_front_yard_parking_driveway_narrow_lot: '§325-20E front-yard parking: not in the keys'
   general.325_20e_front_yard_parking_orientation_15ft: '§325-20E front-yard parking: not in the keys'
   general.325_20e_parking_on_lot_without_building: '§325-20E front-yard parking: not in the keys'
-  general.325_22b_parking_one_space_per_sleeping_unit: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
-    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
-    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_22c_paving_hard_surface: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
-    PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless facilities,
-    nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_22e_curb_cuts_major_arterial: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
-    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
-    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_22f_landscaping_rear_yard_planting: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
-    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
-    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_22f_landscaping_side_yard_larger_planting: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
-    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
-    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_22f_landscaping_side_yard_smaller_planting: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
-    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
-    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_22g_driveway_illumination_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
-    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
-    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_22g_lighting_no_glare_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
-    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
-    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
   general.325_23a_performance_standards_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
     canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
     facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_24f_air_emissions_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
-    PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless facilities,
-    nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
-  general.325_24g_fire_and_safety_building_code_national_fire_code: 'stage 2 (2026-10-25): a law piece no question these keys
-    ask (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,
-    dumpsters, wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
   general.325_25b_below_grade_accessory_light_air: '§325-25B accessory structures below grade: not in the keys'
   general.325_26_stream_inlet_setback_exempt_districts_review: 'stage 2 (2026-10-25): a law piece no question these keys ask
     (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,

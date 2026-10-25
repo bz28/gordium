@@ -1122,25 +1122,18 @@ rules:
       front_yard: 24
     expect: fail
   open_questions:
-  - §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's front_yard
-    measure cover both street-facing yards?
-  - §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted separately
-    from the *_eaves measures?
+  - §325-19C deems a corner lot in a residential district to have two adjoining front yards; the front_yard measure
+    is a single depth, so should it be the smaller of the two?
   research:
-  - question: §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's
-      front_yard measure cover both street-facing yards?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted
-      separately from the *_eaves measures?
+  - question: §325-19C deems a corner lot in a residential district to have two adjoining front yards; the front_yard
+      measure is a single depth, so should it be the smaller of the two?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: RU.side_one_side_min
+- id: RU.side_yard_one_side_min
   kind: rule
   topic: dimensions
   title: Minimum side yard, one side (chart p.3)
@@ -1160,29 +1153,18 @@ rules:
       side_yard_larger: 9
     expect: fail
   open_questions:
-  - The chart does not say which side is the 'one side' and which the 'other side'. This rule reads the 'one side'
-    minimum as applying to the wider side yard (side_yard_larger) and the 'other side' minimum to the narrower one.
-    Please confirm.
-  - 'The R-2C cell (''10 ft /15 ft [fn14]'', by use, with footnote 14) is not drafted here and goes to a person:
-    the first number applies to most uses and the second to one-family detached zero lot line dwellings, and the
-    first applies to unattached sides only of semi-detached and attached dwellings.'
+  - The chart does not say which side yard is the 'one side' and which is the 'other side'. Is the 'one side' minimum
+    applied to the wider side yard and the 'other side' minimum to the narrower one?
   research:
-  - question: The chart does not say which side is the 'one side' and which the 'other side'. This rule reads the
-      'one side' minimum as applying to the wider side yard (side_yard_larger) and the 'other side' minimum to the
-      narrower one. Please confirm.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: 'The R-2C cell (''10 ft /15 ft [fn14]'', by use, with footnote 14) is not drafted here and goes to
-      a person: the first number applies to most uses and the second to one-family detached zero lot line dwellings,
-      and the first applies to unattached sides only of semi-detached and attached dwellings.'
+  - question: The chart does not say which side yard is the 'one side' and which is the 'other side'. Is the 'one
+      side' minimum applied to the wider side yard and the 'other side' minimum to the narrower one?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: RU.side_other_side_min
+- id: RU.side_yard_other_side_min
   kind: rule
   topic: dimensions
   title: Minimum side yard, other side (chart p.3)
@@ -1202,18 +1184,64 @@ rules:
       side_yard_smaller: 9
     expect: fail
   open_questions:
-  - The chart does not say which side is the 'other side'. This rule reads it as the narrower side yard (side_yard_smaller).
-    Please confirm.
-  - The R-2C cell ('0 ft /5 ft / 10 ft [fn15]', three numbers chosen by use and by which side abuts what) is not
-    drafted here and goes to a person.
+  - The chart does not say which side yard is the 'other side'. Is the 'other side' minimum applied to the narrower
+    side yard?
   research:
-  - question: The chart does not say which side is the 'other side'. This rule reads it as the narrower side yard
-      (side_yard_smaller). Please confirm.
+  - question: The chart does not say which side yard is the 'other side'. Is the 'other side' minimum applied to
+      the narrower side yard?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The R-2C cell ('0 ft /5 ft / 10 ft [fn15]', three numbers chosen by use and by which side abuts what)
-      is not drafted here and goes to a person.
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.rear_yard_min_fn17
+  kind: rule
+  topic: dimensions
+  title: Minimum rear yard, % of depth or ft, fn17 (chart p.3)
+  check: rear_yard >= max(30, min(0.25 * lot_depth, 50))
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Rear (minimum, % of depth or feet, whichever is less)
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 67
+    - 67
+    quote: But not less than 30 ft.
+  examples:
+  - given:
+      lot_depth: 160
+      rear_yard: 40
+    expect: pass
+  - given:
+      lot_depth: 160
+      rear_yard: 39
+    expect: fail
+  - given:
+      lot_depth: 40
+      rear_yard: 30
+    expect: pass
+  - given:
+      lot_depth: 40
+      rear_yard: 29
+    expect: fail
+  - given:
+      lot_depth: 400
+      rear_yard: 50
+    expect: pass
+  - given:
+      lot_depth: 400
+      rear_yard: 49
+    expect: fail
+  open_questions:
+  - 'Rear yard depth for an irregular lot: how is lot depth measured?'
+  research:
+  - question: 'Rear yard depth for an irregular lot: how is lot depth measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'

@@ -106,7 +106,9 @@ def test_a_missing_rule_shows_as_a_not_checked_item_on_the_panel(drafts_on):
     items = {i["id"]: i for i in got["view"]["items"]}
     loading = [i for k, i in items.items() if k.startswith("gap.chart.p14.minimum_loading_requirement")]
     assert loading and all(i["status"] == "not_checked" and i["group"] == "not_covered" for i in loading)
-    assert "gap.drafting.325-19A" in items              # a law piece the drafting run gave no rule: listed
+    # a law piece the drafting run gave no rule: listed, with the others like it, in one item (stage 2: ~100 of them)
+    assert "§325-19A: " in items["gap.drafting.no_rule"]["reason"]
+    assert items["gap.drafting.no_rule"]["name"].endswith("set no rule a design can be checked against: check by hand")
     # round 4: the section and what is counted are set apart, never run together ("§325-20D 97 sections...")
     assert items["gap.drafting.325-20D"]["name"] == ("§325-20D: 97 linked sections the AI drafter didn't read (too long): "
                                                     "check by hand")
@@ -210,10 +212,11 @@ def test_a_chart_cell_no_chart_rule_checks_is_never_silent():
     assert any(n.startswith("Yard Dimensions: Side (other side minimum)") for n in names)
     from design_checker.gaps import law_rule_ids
     r2a = zone_rules(J, "R-2a")
-    rear = next(x for r in r2a if r["id"] == "R-2a.rear_yard_min" for x in r["sources"] if isinstance(x.get("cell"), dict))
+    chart_rear = next(r["id"] for r in r2a if r["id"].startswith("R-2a.rear_yard_min"))     # its id per answer
+    rear = next(x for r in r2a if r["id"] == chart_rear for x in r["sources"] if isinstance(x.get("cell"), dict))
     law = sorted(law_rule_ids(J, "R-2a") & {r["id"] for r in r2a})[0]      # a law piece's own rule, made to cite it
-    without = [r | {"sources": r["sources"] + [rear]} if r["id"] == law else r for r in r2a if r["id"] != "R-2a.rear_yard_min"]
-    assert not any(rear in r["sources"] for r in without if r["id"] != law)    # nothing else cites the rear cell
+    without = [r | {"sources": r["sources"] + [rear]} if r["id"] == law else r for r in r2a if r["id"] != chart_rear]
+    assert not any(rear in r["sources"] for r in without if r["id"] not in law_rule_ids(J, "R-2a"))  # only law rules cite it
     assert any(n.startswith("Yard Dimensions: Rear") for n in (g["name"] for g in chart_gaps(J, "R-2a", without)))
 
 
@@ -224,7 +227,10 @@ def test_a_demoted_draft_shows_needs_review_in_the_checker_never_a_pass(drafts_o
     from rule_format.rulebook import load
     causes = load(J / "5_zoning_rules/drafted/records/demoted.yaml")
     rules = {r["id"]: r for p in (J / "5_zoning_rules/drafted").glob("*.yaml") for r in load(p)["rules"]}
-    assert causes and all(rules[i]["kind"] == "flag" and "Demoted until re-drafted" in rules[i]["notes"] for i in causes)
+    gone = {i for i, e in causes.items() if isinstance(e, dict) and e.get("withdraw")}     # withdrawn: not in a rulebook
+    assert gone and not gone & set(rules)
+    assert causes and all(rules[i]["kind"] == "flag" and "Demoted until re-drafted" in rules[i]["notes"]
+                          for i in causes if i not in gone)
     got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-3a", "use": "dormitory", "accessory_buildings": []})
     row = next(r for r in got["rows"] if r["Rule id"] == "R-3a.parking_dormitory")
     assert row["Error"] == "NEEDS REVIEW"
@@ -240,9 +246,10 @@ def test_a_demotion_whose_cause_is_the_law_holds_in_every_district_the_law_piece
     units = load(drafted / "records/drafting_log.yaml")["units"]
     rules = {r["id"]: r for p in drafted.glob("*.yaml") for r in load(p)["rules"]}
     checked = 0
-    for rid, cause in causes.items():
-        if "§" not in cause:
-            continue
+    for rid, entry in causes.items():
+        cause = entry if isinstance(entry, str) else entry["cause"]
+        if "§" not in cause or isinstance(entry, dict) and (entry.get("scope") == "district" or entry.get("withdraw")):
+            continue                                        # a district's own drafting gap, or withdrawn everywhere
         suffix = rid.split(".", 1)[1]
         unit = next(u for u in units.values() if rid in u.get("rules", []))
         for other in unit["rules"]:

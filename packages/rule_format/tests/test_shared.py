@@ -103,6 +103,8 @@ def test_every_jurisdiction_listing_uses_the_one_helper():
 REGULATION_YAML = [p for p in (REPO / "regulations").rglob("*.yaml") if "runs" not in p.relative_to(REPO).parts]
 assert REGULATION_YAML
 APPROVAL = re.compile(r"\barchitect\w*\b[^.\n]{0,80}?\bapprov|\bapprov\w*\b[^.\n]{0,80}?\barchitect", re.IGNORECASE)
+# A city body's approval named in the law (stage 2's §325-12E: "site plan approval status under Chapter 276").
+CITY_APPROVAL = re.compile(r"site plan|board|council|planning|permit", re.IGNORECASE)
 # Claims that are false while approval is deferred, however a document is worded around them.
 FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only approved rules|approved rulebook"
                           r"|\|\s*architects approve\s*\||\(architects approve\)|architects? confirm each rule|compares the new draft with the approved"
@@ -254,8 +256,12 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
     approving rules must say approval is deferred, and none may claim the checker waits for approved rules."""
     if any(re.search(r"^\s*status:\s*approved\b", p.read_text(encoding="utf-8"), re.MULTILINE) for p in REGULATION_YAML):
         return                                   # approval is switched on once anything is approved
+    def about_rules(p):              # in an AI-drafted rulebook, a city's approval (site plan, a board) is the law's text
+        text = p.read_text(encoding="utf-8")
+        hits = [text[max(0, m.start() - 40):m.end()] for m in APPROVAL.finditer(text)]   # with the words just before
+        return [h for h in hits if not (_ai_drafted(p) and CITY_APPROVAL.search(h))]
     silent = [str(p.relative_to(REPO)) for p in DOCS + REGULATION_YAML
-              if APPROVAL.search(p.read_text(encoding="utf-8")) and not re.search(r"deferred", p.read_text(encoding="utf-8"), re.IGNORECASE)]
+              if about_rules(p) and not re.search(r"deferred", p.read_text(encoding="utf-8"), re.IGNORECASE)]
     false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text(encoding="utf-8"))]
     # Architects approving, confirming, checking or reviewing drafts is the deferred layer: each sentence that
     # says so must say it's deferred (or describe what happens once it is switched on).

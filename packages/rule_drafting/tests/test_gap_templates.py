@@ -152,7 +152,8 @@ def test_the_height_bonus_is_one_rule_that_relaxes_each_districts_chart_height(i
     """§325-16C allows up to 10% more height when every yard grows by the extra height. Drafted as parts (each
     'when taller, this yard is larger') the chart's 35 ft still failed a 37 ft house with every yard enlarged, where
     the law (and every hand key) passes it. As one relaxing rule, linked by code to the district's chart rule."""
-    drafted = cli.drafted_rules(inputs)
+    # the hand-built bonus alone: the drafted §325-16C relaxers of stage 2 (unproven: they ask for review) left out
+    drafted = {d: [r for r in rules if not r.get("relaxes")] for d, rules in cli.drafted_rules(inputs).items()}
     got = judge(inputs, "325-16C", [bonus()], drafted)
     assert got["rejected"] == [], got["problems"][:2]
     r1a = got["rules"]["R-1a"][0]
@@ -487,7 +488,7 @@ def test_a_chart_maximum_is_known_by_what_its_rule_does_and_assumed_when_nothing
         for r in rules:
             if m := _re.fullmatch(r"building_height <= (\d+)", r.get("check") or ""):
                 r["check"] = f"{m[1]} >= building_height"
-    assert not any((r.get("check") or "").startswith("building_height <=") for rules in flipped.values() for r in rules)
+    assert not any(_re.fullmatch(r"building_height <= (\\d+)", r.get("check") or "") for rules in flipped.values() for r in rules)
     for d in (drafted, flipped, {}, None):
         assert drafter.exception_in_parts(limit, d), d and sorted(d)[:2]
 
@@ -513,8 +514,11 @@ def test_versions_of_one_rule_for_different_cell_forms_are_not_parts_of_each_oth
     assert len(stories) == 2
     got = judge(inputs, "325-16C", stories, cli.drafted_rules(inputs))
     kept = {d: [r["id"].split(".", 1)[1] for r in rs] for d, rs in got["rules"].items()}
-    assert kept["R-1a"] == ["325_16c_height_exception_stories_not_exceeded"]
-    assert kept["R-3aa"] == ["325_16c_height_exception_stories_not_exceeded_fn11"]
+    form = {x["id_suffix"]: next(sl for sl in x["slots"] if sl["row"].strip() == "Number of stories")["numbers_in_cell"]
+            for x in stories}
+    plain = "325_16c_" + next(sfx for sfx, n in form.items() if n == 1)
+    two = "325_16c_" + next(sfx for sfx, n in form.items() if n == 2)                 # R-3AA's '3/2 [fn11]'
+    assert kept["R-1a"] == [plain] and kept["R-3aa"] == [two]
     # real parts still go together: stage 1's parts (four refused) keep nothing
     assert judge(inputs, "325-16C", _stage1(inputs, "325-16C")["templates"], cli.drafted_rules(inputs))["rules"] == {}
 

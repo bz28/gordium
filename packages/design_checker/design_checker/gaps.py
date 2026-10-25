@@ -103,15 +103,16 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
         c = {"file": "zoning_charts_2026-04.pdf", "page": cell[0], "section": cell[1], "row": cell[2], "column": cell[3],
              "row_lines": []}
         return any(_cites(s, c) for rid, s in sources if by is None or rid in by)
-    out = []
+    out, no_rule = [], []
     for unit, e in units.items():
         if e.get("scope") and zone not in e["scope"]:
             continue                                    # the law piece doesn't reach this district
         chart = unit.startswith("chart-")
         lines, left_out, seen = [], [], set()
+        bare = not chart and not e.get("failed") and not e.get("rules") and e.get("reason")
         if not chart and e.get("failed"):
             lines.append(f"The AI draft failed ({e['failed']}): check by hand.")
-        elif not chart and not e.get("rules") and e.get("reason"):
+        elif bare:
             lines.append("No rule drafted: " + " ".join(str(e["reason"]).split()) + " Check by hand.")
         for x in e.get("unresolved") or []:
             rule, why = str(x.get("rule", "")), " ".join(str(x.get("why", "")).split())
@@ -138,10 +139,20 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
         if n:
             lines.append(f"It links to {n} section{'s' if n != 1 else ''} the AI drafter didn't read because they were "
                          f"too long; check them by hand: {', '.join(sorted(set(left_out)))}.")
+        if bare:
+            # stage 2: ~100 sections the drafter found set nothing a design can be checked against (other districts,
+            # procedures); one item names them all, each with its reason, so the list stays readable, none silent
+            no_rule.append(f"§{unit}: " + " ; ".join(lines))
+            continue
         if lines:
             out.append({"id": f"drafting.{unit}", "section": chart_section(unit) if chart else f"§{unit}",
                         "name": " and ".join(parts) + (": check by hand" if n else " to check by hand"),
                         "why": " · ".join(lines)})
+    if no_rule:
+        out.append({"id": "drafting.no_rule", "section": "Zoning law",
+                    "name": f"{len(no_rule)} section{'s' if len(no_rule) != 1 else ''} the AI drafter found set no rule a "
+                            "design can be checked against: check by hand",
+                    "why": " · ".join(no_rule)})
     return out
 
 

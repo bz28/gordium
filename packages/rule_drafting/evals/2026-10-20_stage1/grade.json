@@ -560,8 +560,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.side_one_side_min",
-     "R-1a.side_other_side_min"
+     "R-1a.side_yard_one_side_min",
+     "R-1a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -574,8 +574,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.side_one_side_min",
-     "R-1a.side_other_side_min"
+     "R-1a.side_yard_one_side_min",
+     "R-1a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -588,8 +588,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.side_one_side_min",
-     "R-1a.side_other_side_min"
+     "R-1a.side_yard_one_side_min",
+     "R-1a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -1487,8 +1487,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.side_one_side_min",
-     "R-1b.side_other_side_min"
+     "R-1b.side_yard_one_side_min",
+     "R-1b.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -1501,8 +1501,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.side_one_side_min",
-     "R-1b.side_other_side_min"
+     "R-1b.side_yard_one_side_min",
+     "R-1b.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -2848,8 +2848,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.side_one_side_min",
-     "R-3a.side_other_side_min"
+     "R-3a.side_yard_one_side_min",
+     "R-3a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -2862,8 +2862,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_side_min",
-     "R-3a.side_other_side_min"
+     "R-3a.side_yard_one_side_min",
+     "R-3a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -2876,8 +2876,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_side_min",
-     "R-3a.side_other_side_min"
+     "R-3a.side_yard_one_side_min",
+     "R-3a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -2890,8 +2890,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_side_min",
-     "R-3a.side_other_side_min"
+     "R-3a.side_yard_one_side_min",
+     "R-3a.side_yard_other_side_min"
     ],
     "notes": []
    },

@@ -106,6 +106,15 @@ class Inputs:
                                      drafter.chart_table(self.chart_sections, self.rows_of), self.notes,
                                      frozenset(u for u in self.ctx.uses if drafter.several_units(u, self.law, self.ctx)))
 
+    def part_of(self, pid: str) -> str:
+        """The section a subsection belongs to, with its heading ("It is part of §325-22: Motels."): review round 22,
+        §325-22B-G were drafted for every lot because the unit never saw that §325-22 is about motels."""
+        m = re.match(r"^(\d+-\d+(?:\.\d+)?)", pid)
+        parent = m[1] if m else None
+        if not parent or parent == pid or parent not in self.law["pieces"]:
+            return ""
+        return f"It is part of §{parent}: {' '.join(str(self.law['pieces'][parent]['title']).split())}. "
+
     def units(self) -> list[dict]:
         out = [{"id": unit_id, "code": True} for unit_id in CODE_SECTIONS.values()]
         for page, section in self.chart_sections:
@@ -128,6 +137,7 @@ class Inputs:
                 piece = self.law["pieces"][pid]
                 out.append({"id": pid, "piece": pid, "prefix": f"{slug(pid)}_",
                             "intro": (f"Piece {pid} of the zoning law (document \"law\", piece id {pid}): {piece['title']}. "
+                                      + self.part_of(pid) +
                                       f"It was labeled {label['label']}: {label['reason']} Draft the rules it sets for "
                                       "the residential districts."),
                             "text": piece_text(self.law["rows"], piece),
@@ -170,7 +180,10 @@ def _dump(data, **kw) -> str:
 def demoted(i: Inputs) -> dict[str, str | dict]:
     """{rule id: cause} of the drafted rules demoted until re-drafted (records/demoted.yaml). An entry may instead be
     {cause, applies_when}: a condition written by a person that replaces the drafted one, where the drafted condition
-    is itself the mistake (the loading chart's "25 + units" drafted as floor space >= 10,000 sf, 2026-10-25)."""
+    is itself the mistake (the loading chart's "25 + units" drafted as floor space >= 10,000 sf, 2026-10-25); or
+    {cause, withdraw: true}: a rule for a subject no residential design has (§325-22 Motels, drafted for every lot),
+    left out of the rulebook and listed in the drafting log as withdrawn, with the cause; or {cause, scope: district}:
+    a demotion about one district's drafting, not the law."""
     path = i.records / "demoted.yaml"
     return (load(path) or {}) if path.exists() else {}
 
@@ -206,17 +219,21 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
             new_ids.append(rule["id"])
     i.drafted.mkdir(parents=True, exist_ok=True)
     causes = demoted(i)
+    withdrawn = {rid for rid, e in causes.items() if isinstance(e, dict) and e.get("withdraw")}
     for book in books.values():                 # every save applies the demotions, to every rulebook
         book["rules"] = [demote(r, causes[r["id"]]) if r["id"] in causes and (r.get("kind") != "flag" or (
                              isinstance(causes[r["id"]], dict) and causes[r["id"]].get("applies_when"))) else r
-                         for r in book["rules"]]
+                         for r in book["rules"] if r["id"] not in withdrawn]
     for district, book in books.items():
         path = rulebook_path(i, district)
         if book["rules"]:
             path.write_text(_dump(book), encoding="utf-8")
         elif path.exists():
             path.unlink()
-    entry = {"rules": new_ids, "unresolved": result.get("unresolved", []), "problems": result.get("problems", [])}
+    entry = {"rules": [r for r in new_ids if r not in withdrawn],
+             "unresolved": result.get("unresolved", []), "problems": result.get("problems", [])}
+    if gone := [{"rule": r, "why": " ".join(str(causes[r]["cause"]).split())} for r in new_ids if r in withdrawn]:
+        entry["withdrawn"] = gone              # recorded, never silent: a person decided it doesn't apply
     if result.get("reason"):
         entry["reason"] = result["reason"]
     if result.get("failed"):

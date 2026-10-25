@@ -955,7 +955,8 @@ def test_the_saved_r3a_other_use_lot_size_never_passes_a_dormitory(inputs):
     rules = cli.load(inputs.drafted / "R-3a.yaml")["rules"]
     rule = next(r for r in rules if r["id"].startswith("R-3a.min_lot_") and r["id"].endswith("_other_use"))
     asked = set().union(*(formula.names(w["when"]) for w in rule.get("review_when") or [])) - {"use", "district", "lot_area"}
-    facts = {n: False for n in asked}
+    kinds = inputs.ctx.kinds()
+    facts = {n: False if kinds.get(n) == "boolean" else 0 for n in asked}
     assert outcome(rule, facts | {"use": "church", "lot_area": 20000}, inputs.ctx.allowed()) == "pass"
     for area in (6000, 20000):
         assert outcome(rule, facts | {"use": "dormitory", "lot_area": area}, inputs.ctx.allowed()) == "needs_review"
@@ -1397,3 +1398,36 @@ def test_a_demotion_can_replace_a_drafted_condition_that_is_itself_the_mistake()
     saved = cli.load(cli.Inputs().drafted / "R-3a.yaml")["rules"]
     held = next(r for r in saved if r["id"] == "R-3a.loading_multiple_dwelling_25_units")
     assert held["applies_when"] == 'use == "multiple_family"'
+
+
+def test_a_rule_for_a_subject_no_residential_design_has_is_withdrawn_with_its_cause(inputs):
+    """Review round 22: §325-22 (Motels) and §325-24 (Industrial District) were drafted for every lot, so every house
+    got them as NEEDS REVIEW. A person's demotion entry may withdraw such a rule: it leaves the rulebook, and the
+    drafting log lists it as withdrawn, with the cause (never silent)."""
+    rules = {r["id"] for r in cli.load(inputs.drafted / "general.yaml")["rules"]}
+    assert not {r for r in rules if r.startswith(("general.325_22b", "general.325_22f", "general.325_24f"))}
+    log = cli.read_log(inputs)
+    gone = {g["rule"]: g["why"] for u in log["units"].values() for g in u.get("withdrawn") or []}
+    assert "Motels" in gone["general.325_22f_landscaping_rear_yard_planting"]
+    assert "Industrial District" in gone["general.325_24f_air_emissions_flag"]
+
+
+def test_a_subsection_unit_names_the_section_it_belongs_to(inputs):
+    """Review round 22: §325-22B to G were drafted for every lot; their unit never said §325-22 is 'Motels'."""
+    u = next(x for x in inputs.units() if x["id"] == "325-22F")
+    assert "It is part of §325-22: " in u["intro"] and "Motel" in u["intro"]
+    assert next(x for x in inputs.units() if x["id"] == "325-16C")["intro"].count("It is part of §325-16") == 1
+
+
+def test_side_eaves_never_pass_where_the_two_side_minimums_differ(inputs):
+    """Review round 22 (P0): the eave side yards are measured narrower-first apart from the wall side yards, so in a
+    10 ft / 5 ft district an eave 3.5 ft into the required 10 ft side yard was read against the 5 ft side and passed.
+    Until each eave side is measured to its wall's lot line, those districts' side-eave rules need review."""
+    from rule_format.rulebook import outcome
+    design = {"side_yard_smaller": 9.5, "side_yard_larger": 10, "side_yard_smaller_eaves": 6.5,
+              "side_yard_larger_eaves": 9, "building_height": 30, "use": "one_family_detached"}
+    for district in ("R-2b", "R-3aa"):
+        rules = {r["id"]: r for r in cli.load(inputs.drafted / f"{district}.yaml")["rules"]}
+        for side in ("side_yard_smaller", "side_yard_larger"):
+            rule = rules[f"{district}.325_18b_projection_{side}"]
+            assert rule["kind"] == "flag" and outcome(rule, design, inputs.ctx.allowed()) != "pass", (district, side)

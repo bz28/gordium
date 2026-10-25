@@ -659,7 +659,7 @@ def test_every_drafted_unit_produced_rules_a_reason_or_a_person_entry():
         pytest.skip("nothing drafted yet")
     log = load(LOG)
     empty = [u for u, e in log["units"].items()
-             if not (e["rules"] or e.get("reason") or e.get("unresolved") or e.get("failed"))]
+             if not (e["rules"] or e.get("reason") or e.get("unresolved") or e.get("failed") or e.get("withdrawn"))]
     assert empty == []
 
 

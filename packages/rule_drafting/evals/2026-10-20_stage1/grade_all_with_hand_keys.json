@@ -560,8 +560,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.side_one_side_min",
-     "R-1a.side_other_side_min"
+     "R-1a.side_yard_one_side_min",
+     "R-1a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -574,8 +574,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.side_one_side_min",
-     "R-1a.side_other_side_min"
+     "R-1a.side_yard_one_side_min",
+     "R-1a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -588,8 +588,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.side_one_side_min",
-     "R-1a.side_other_side_min"
+     "R-1a.side_yard_one_side_min",
+     "R-1a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -1487,8 +1487,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.side_one_side_min",
-     "R-1b.side_other_side_min"
+     "R-1b.side_yard_one_side_min",
+     "R-1b.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -1501,8 +1501,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.side_one_side_min",
-     "R-1b.side_other_side_min"
+     "R-1b.side_yard_one_side_min",
+     "R-1b.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -2681,8 +2681,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-2a.side_one_side_min",
-     "R-2a.side_other_side_min"
+     "R-2a.side_yard_one_side_min",
+     "R-2a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -2695,8 +2695,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2a.side_one_side_min",
-     "R-2a.side_other_side_min"
+     "R-2a.side_yard_one_side_min",
+     "R-2a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -2709,8 +2709,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2a.side_one_side_min",
-     "R-2a.side_other_side_min"
+     "R-2a.side_yard_one_side_min",
+     "R-2a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -2723,8 +2723,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2a.side_one_side_min",
-     "R-2a.side_other_side_min"
+     "R-2a.side_yard_one_side_min",
+     "R-2a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -4145,8 +4145,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-2b.side_one_side_min",
-     "R-2b.side_other_side_min"
+     "R-2b.side_yard_one_side_min",
+     "R-2b.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -4159,8 +4159,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2b.side_one_side_min",
-     "R-2b.side_other_side_min"
+     "R-2b.side_yard_one_side_min",
+     "R-2b.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -4173,8 +4173,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2b.side_one_side_min",
-     "R-2b.side_other_side_min"
+     "R-2b.side_yard_one_side_min",
+     "R-2b.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -4187,8 +4187,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2b.side_one_side_min",
-     "R-2b.side_other_side_min"
+     "R-2b.side_yard_one_side_min",
+     "R-2b.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -4280,126 +4280,6 @@
     "got": "fail",
     "drafted": [
      "R-2b.rear_yard_min_fn16"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-2b.yard_projections",
-    "given": {
-     "front_yard_eaves": 12,
-     "side_yard_smaller_eaves": 6,
-     "side_yard_larger_eaves": 11,
-     "rear_yard_eaves": 48,
-     "lot_depth": 120,
-     "building_height": 30
-    },
-    "expect": "pass",
-    "got": "pass",
-    "drafted": [
-     "R-2b.325_18b_projection_front_yard",
-     "R-2b.325_18b_projection_side_yard_larger",
-     "R-2b.325_18b_projection_side_yard_smaller",
-     "R-2b.325_18b_projection_rear_yard_fn16"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-2b.yard_projections",
-    "given": {
-     "front_yard_eaves": 8,
-     "side_yard_smaller_eaves": 3,
-     "side_yard_larger_eaves": 8,
-     "rear_yard_eaves": 28,
-     "lot_depth": 120,
-     "building_height": 30
-    },
-    "expect": "pass",
-    "got": "pass",
-    "drafted": [
-     "R-2b.325_18b_projection_front_yard",
-     "R-2b.325_18b_projection_side_yard_larger",
-     "R-2b.325_18b_projection_side_yard_smaller",
-     "R-2b.325_18b_projection_rear_yard_fn16"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-2b.yard_projections",
-    "given": {
-     "front_yard_eaves": 7.99,
-     "side_yard_smaller_eaves": 3,
-     "side_yard_larger_eaves": 8,
-     "rear_yard_eaves": 28,
-     "lot_depth": 120,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "fail",
-    "drafted": [
-     "R-2b.325_18b_projection_front_yard",
-     "R-2b.325_18b_projection_side_yard_larger",
-     "R-2b.325_18b_projection_side_yard_smaller",
-     "R-2b.325_18b_projection_rear_yard_fn16"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-2b.yard_projections",
-    "given": {
-     "front_yard_eaves": 8,
-     "side_yard_smaller_eaves": 2.99,
-     "side_yard_larger_eaves": 8,
-     "rear_yard_eaves": 28,
-     "lot_depth": 120,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "fail",
-    "drafted": [
-     "R-2b.325_18b_projection_front_yard",
-     "R-2b.325_18b_projection_side_yard_larger",
-     "R-2b.325_18b_projection_side_yard_smaller",
-     "R-2b.325_18b_projection_rear_yard_fn16"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-2b.yard_projections",
-    "given": {
-     "front_yard_eaves": 8,
-     "side_yard_smaller_eaves": 3,
-     "side_yard_larger_eaves": 7.99,
-     "rear_yard_eaves": 28,
-     "lot_depth": 120,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "fail",
-    "drafted": [
-     "R-2b.325_18b_projection_front_yard",
-     "R-2b.325_18b_projection_side_yard_larger",
-     "R-2b.325_18b_projection_side_yard_smaller",
-     "R-2b.325_18b_projection_rear_yard_fn16"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-2b.yard_projections",
-    "given": {
-     "front_yard_eaves": 8,
-     "side_yard_smaller_eaves": 3,
-     "side_yard_larger_eaves": 8,
-     "rear_yard_eaves": 27.99,
-     "lot_depth": 120,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "fail",
-    "drafted": [
-     "R-2b.325_18b_projection_front_yard",
-     "R-2b.325_18b_projection_side_yard_larger",
-     "R-2b.325_18b_projection_side_yard_smaller",
-     "R-2b.325_18b_projection_rear_yard_fn16"
     ],
     "notes": []
    },
@@ -4775,6 +4655,126 @@
    {
     "hand": "R-2b.yard_projections",
     "given": {
+     "front_yard_eaves": 12,
+     "side_yard_smaller_eaves": 6,
+     "side_yard_larger_eaves": 11,
+     "rear_yard_eaves": 48,
+     "lot_depth": 120,
+     "building_height": 30
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-2b.325_18b_projection_front_yard",
+     "R-2b.325_18b_projection_side_yard_larger",
+     "R-2b.325_18b_projection_side_yard_smaller",
+     "R-2b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-2b.yard_projections",
+    "given": {
+     "front_yard_eaves": 8,
+     "side_yard_smaller_eaves": 3,
+     "side_yard_larger_eaves": 8,
+     "rear_yard_eaves": 28,
+     "lot_depth": 120,
+     "building_height": 30
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-2b.325_18b_projection_front_yard",
+     "R-2b.325_18b_projection_side_yard_larger",
+     "R-2b.325_18b_projection_side_yard_smaller",
+     "R-2b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-2b.yard_projections",
+    "given": {
+     "front_yard_eaves": 7.99,
+     "side_yard_smaller_eaves": 3,
+     "side_yard_larger_eaves": 8,
+     "rear_yard_eaves": 28,
+     "lot_depth": 120,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-2b.325_18b_projection_front_yard",
+     "R-2b.325_18b_projection_side_yard_larger",
+     "R-2b.325_18b_projection_side_yard_smaller",
+     "R-2b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-2b.yard_projections",
+    "given": {
+     "front_yard_eaves": 8,
+     "side_yard_smaller_eaves": 2.99,
+     "side_yard_larger_eaves": 8,
+     "rear_yard_eaves": 28,
+     "lot_depth": 120,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-2b.325_18b_projection_front_yard",
+     "R-2b.325_18b_projection_side_yard_larger",
+     "R-2b.325_18b_projection_side_yard_smaller",
+     "R-2b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-2b.yard_projections",
+    "given": {
+     "front_yard_eaves": 8,
+     "side_yard_smaller_eaves": 3,
+     "side_yard_larger_eaves": 7.99,
+     "rear_yard_eaves": 28,
+     "lot_depth": 120,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-2b.325_18b_projection_front_yard",
+     "R-2b.325_18b_projection_side_yard_larger",
+     "R-2b.325_18b_projection_side_yard_smaller",
+     "R-2b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-2b.yard_projections",
+    "given": {
+     "front_yard_eaves": 8,
+     "side_yard_smaller_eaves": 3,
+     "side_yard_larger_eaves": 8,
+     "rear_yard_eaves": 27.99,
+     "lot_depth": 120,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-2b.325_18b_projection_front_yard",
+     "R-2b.325_18b_projection_side_yard_larger",
+     "R-2b.325_18b_projection_side_yard_smaller",
+     "R-2b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-2b.yard_projections",
+    "given": {
      "front_yard_eaves": 11,
      "side_yard_smaller_eaves": 6,
      "side_yard_larger_eaves": 11,
@@ -4850,12 +4850,12 @@
   "false_pass": [],
   "summary": {
    "examples": 99,
-   "agree": 90,
-   "disagree": 9,
+   "agree": 84,
+   "disagree": 15,
    "undrafted": 0,
    "false_pass": 0,
-   "agree_of_all": "90/99",
-   "agree_of_drafted": "90/99"
+   "agree_of_all": "84/99",
+   "agree_of_drafted": "84/99"
   }
  },
  "R-2c.yaml": {
@@ -9329,8 +9329,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.side_one_side_min",
-     "R-3a.side_other_side_min"
+     "R-3a.side_yard_one_side_min",
+     "R-3a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -9343,8 +9343,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_side_min",
-     "R-3a.side_other_side_min"
+     "R-3a.side_yard_one_side_min",
+     "R-3a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -9357,8 +9357,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_side_min",
-     "R-3a.side_other_side_min"
+     "R-3a.side_yard_one_side_min",
+     "R-3a.side_yard_other_side_min"
     ],
     "notes": []
    },
@@ -9371,8 +9371,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_side_min",
-     "R-3a.side_other_side_min"
+     "R-3a.side_yard_one_side_min",
+     "R-3a.side_yard_other_side_min"
     ],
     "notes": []
    },

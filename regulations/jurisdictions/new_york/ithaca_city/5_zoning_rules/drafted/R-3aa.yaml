@@ -1157,25 +1157,18 @@ rules:
       front_yard: 9
     expect: fail
   open_questions:
-  - §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's front_yard
-    measure cover both street-facing yards?
-  - §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted separately
-    from the *_eaves measures?
+  - §325-19C deems a corner lot in a residential district to have two adjoining front yards; the front_yard measure
+    is a single depth, so should it be the smaller of the two?
   research:
-  - question: §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's
-      front_yard measure cover both street-facing yards?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted
-      separately from the *_eaves measures?
+  - question: §325-19C deems a corner lot in a residential district to have two adjoining front yards; the front_yard
+      measure is a single depth, so should it be the smaller of the two?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-3aa cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-3aa.side_one_side_min
+- id: R-3aa.side_yard_one_side_min
   kind: rule
   topic: dimensions
   title: Minimum side yard, one side (chart p.3)
@@ -1195,29 +1188,18 @@ rules:
       side_yard_larger: 9
     expect: fail
   open_questions:
-  - The chart does not say which side is the 'one side' and which the 'other side'. This rule reads the 'one side'
-    minimum as applying to the wider side yard (side_yard_larger) and the 'other side' minimum to the narrower one.
-    Please confirm.
-  - 'The R-2C cell (''10 ft /15 ft [fn14]'', by use, with footnote 14) is not drafted here and goes to a person:
-    the first number applies to most uses and the second to one-family detached zero lot line dwellings, and the
-    first applies to unattached sides only of semi-detached and attached dwellings.'
+  - The chart does not say which side yard is the 'one side' and which is the 'other side'. Is the 'one side' minimum
+    applied to the wider side yard and the 'other side' minimum to the narrower one?
   research:
-  - question: The chart does not say which side is the 'one side' and which the 'other side'. This rule reads the
-      'one side' minimum as applying to the wider side yard (side_yard_larger) and the 'other side' minimum to the
-      narrower one. Please confirm.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: 'The R-2C cell (''10 ft /15 ft [fn14]'', by use, with footnote 14) is not drafted here and goes to
-      a person: the first number applies to most uses and the second to one-family detached zero lot line dwellings,
-      and the first applies to unattached sides only of semi-detached and attached dwellings.'
+  - question: The chart does not say which side yard is the 'one side' and which is the 'other side'. Is the 'one
+      side' minimum applied to the wider side yard and the 'other side' minimum to the narrower one?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-3aa cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-3aa.side_other_side_min
+- id: R-3aa.side_yard_other_side_min
   kind: rule
   topic: dimensions
   title: Minimum side yard, other side (chart p.3)
@@ -1237,18 +1219,11 @@ rules:
       side_yard_smaller: 4
     expect: fail
   open_questions:
-  - The chart does not say which side is the 'other side'. This rule reads it as the narrower side yard (side_yard_smaller).
-    Please confirm.
-  - The R-2C cell ('0 ft /5 ft / 10 ft [fn15]', three numbers chosen by use and by which side abuts what) is not
-    drafted here and goes to a person.
+  - The chart does not say which side yard is the 'other side'. Is the 'other side' minimum applied to the narrower
+    side yard?
   research:
-  - question: The chart does not say which side is the 'other side'. This rule reads it as the narrower side yard
-      (side_yard_smaller). Please confirm.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The R-2C cell ('0 ft /5 ft / 10 ft [fn15]', three numbers chosen by use and by which side abuts what)
-      is not drafted here and goes to a person.
+  - question: The chart does not say which side yard is the 'other side'. Is the 'other side' minimum applied to
+      the narrower side yard?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1258,8 +1233,8 @@ rules:
 - id: R-3aa.rear_yard_min_fn16
   kind: rule
   topic: dimensions
-  title: Minimum rear yard, % of depth or ft, not under 20 ft (chart p.3)
-  check: rear_yard >= min(max(20, 0.25 * lot_depth), max(20, 50))
+  title: Minimum rear yard, % of depth or ft, fn16 (chart p.3)
+  check: rear_yard >= max(20, min(0.25 * lot_depth, 50))
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1274,14 +1249,6 @@ rules:
     - 66
     quote: But not less than 20 ft.
   examples:
-  - given:
-      lot_depth: 200
-      rear_yard: 50
-    expect: pass
-  - given:
-      lot_depth: 200
-      rear_yard: 49
-    expect: fail
   - given:
       lot_depth: 100
       rear_yard: 25
@@ -1298,19 +1265,18 @@ rules:
       lot_depth: 40
       rear_yard: 19
     expect: fail
+  - given:
+      lot_depth: 400
+      rear_yard: 50
+    expect: pass
+  - given:
+      lot_depth: 400
+      rear_yard: 49
+    expect: fail
   open_questions:
-  - The row reads 'whichever is less' of the percent of depth and the feet; the rule takes the lesser, then applies
-    the footnote's 20 ft floor (written as min(max(20, a), max(20, b)), which equals max(20, min(a, b))). Please
-    confirm the floor applies after taking the lesser.
-  - The RU cell ('25% / 50 ft [fn17]', not less than 30 ft) is not drafted here and goes to a person.
+  - 'Rear yard depth for an irregular lot: how is lot depth measured?'
   research:
-  - question: The row reads 'whichever is less' of the percent of depth and the feet; the rule takes the lesser,
-      then applies the footnote's 20 ft floor (written as min(max(20, a), max(20, b)), which equals max(20, min(a,
-      b))). Please confirm the floor applies after taking the lesser.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The RU cell ('25% / 50 ft [fn17]', not less than 30 ft) is not drafted here and goes to a person.
+  - question: 'Rear yard depth for an irregular lot: how is lot depth measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1803,14 +1769,9 @@ rules:
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
 - id: R-3aa.325_18b_projection_front_yard
-  kind: rule
+  kind: flag
   topic: dimensions
   title: Projection into required front yard, 2 ft max (law 325-18B)
-  check: front_yard_eaves >= 10 - 2
-  review_when:
-  - when: building_height > 35
-    reason: Chart height note 10 sends to 325-16, where yards may be enlarged for a building over the chart height,
-      so the required front yard may be larger.
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1838,19 +1799,6 @@ rules:
     - 56
     - 56
     quote: See §325-16.
-  examples:
-  - given:
-      front_yard_eaves: 8
-      building_height: 30
-    expect: pass
-  - given:
-      front_yard_eaves: 7
-      building_height: 30
-    expect: fail
-  - given:
-      front_yard_eaves: 10
-      building_height: 40
-    expect: needs_review
   open_questions:
   - Is a feature such as a porch, deck or balcony projecting more than two feet part of the building under 325-18A,
     so that it is judged against the yard itself rather than this two-foot allowance?
@@ -1865,18 +1813,15 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3aa cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  notes: 'Demoted until re-drafted: §325-18B''s eaves are one requirement for every required yard; this district''s
+    side-yard eave rules need review (an eave side isn''t measured to its wall''s lot line), so the yards left would
+    pass eaves the answer keys fail (review round 22, 2026-10-25): a person checks the eaves.'
 - id: R-3aa.325_18b_projection_side_yard_smaller
-  kind: rule
+  kind: flag
   topic: dimensions
   title: Projection into narrower required side yard, 2 ft max (law 325-18B)
-  check: side_yard_smaller_eaves >= 5 - 2
-  review_when:
-  - when: building_height > 35
-    reason: Chart height note 10 sends to 325-16, where yards may be enlarged for a building over the chart height,
-      so the required side yard may be larger.
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1904,19 +1849,6 @@ rules:
     - 56
     - 56
     quote: See §325-16.
-  examples:
-  - given:
-      side_yard_smaller_eaves: 3
-      building_height: 30
-    expect: pass
-  - given:
-      side_yard_smaller_eaves: 2
-      building_height: 30
-    expect: fail
-  - given:
-      side_yard_smaller_eaves: 5
-      building_height: 40
-    expect: needs_review
   open_questions:
   - The narrower side yard is compared with the chart's 'Side (other side minimum)' and the wider with 'Side (one
     side minimum)'. Is this the right pairing?
@@ -1926,18 +1858,15 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3aa cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  notes: 'Demoted until re-drafted: The eave yards are measured narrower-first on their own, apart from the wall
+    yards, so an eave 3.5 ft into the required 10 ft side yard is read against the 5 ft side and passes (review
+    round 22, 2026-10-25). A person checks the side eaves until each eave side is measured to its wall''s lot line.'
 - id: R-3aa.325_18b_projection_side_yard_larger
-  kind: rule
+  kind: flag
   topic: dimensions
   title: Projection into wider required side yard, 2 ft max (law 325-18B)
-  check: side_yard_larger_eaves >= 10 - 2
-  review_when:
-  - when: building_height > 35
-    reason: Chart height note 10 sends to 325-16, where yards may be enlarged for a building over the chart height,
-      so the required side yard may be larger.
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1965,19 +1894,6 @@ rules:
     - 56
     - 56
     quote: See §325-16.
-  examples:
-  - given:
-      side_yard_larger_eaves: 8
-      building_height: 30
-    expect: pass
-  - given:
-      side_yard_larger_eaves: 7
-      building_height: 30
-    expect: fail
-  - given:
-      side_yard_larger_eaves: 10
-      building_height: 40
-    expect: needs_review
   open_questions:
   - Is the pairing of the wider side yard with the chart's 'Side (one side minimum)' correct?
   research:
@@ -1985,18 +1901,15 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3aa cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  notes: 'Demoted until re-drafted: The eave yards are measured narrower-first on their own, apart from the wall
+    yards, so an eave 3.5 ft into the required 10 ft side yard is read against the 5 ft side and passes (review
+    round 22, 2026-10-25). A person checks the side eaves until each eave side is measured to its wall''s lot line.'
 - id: R-3aa.325_18b_projection_rear_yard_fn16
-  kind: rule
+  kind: flag
   topic: dimensions
   title: Projection into required rear yard, 2 ft max (law 325-18B)
-  check: rear_yard_eaves >= max(20, min(0.25 * lot_depth, 50)) - 2
-  review_when:
-  - when: building_height > 35
-    reason: Chart height note 10 sends to 325-16, where yards may be enlarged for a building over the chart height,
-      so the required rear yard may be larger.
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -2030,42 +1943,6 @@ rules:
     - 56
     - 56
     quote: See §325-16.
-  examples:
-  - given:
-      rear_yard_eaves: 23
-      lot_depth: 100
-      building_height: 30
-    expect: pass
-  - given:
-      rear_yard_eaves: 22
-      lot_depth: 100
-      building_height: 30
-    expect: fail
-  - given:
-      rear_yard_eaves: 18
-      lot_depth: 40
-      building_height: 30
-    expect: pass
-  - given:
-      rear_yard_eaves: 17
-      lot_depth: 40
-      building_height: 30
-    expect: fail
-  - given:
-      rear_yard_eaves: 48
-      lot_depth: 1000
-      building_height: 30
-    expect: pass
-  - given:
-      rear_yard_eaves: 47
-      lot_depth: 1000
-      building_height: 30
-    expect: fail
-  - given:
-      rear_yard_eaves: 30
-      lot_depth: 100
-      building_height: 40
-    expect: needs_review
   open_questions:
   - Is the rear yard's 25% of 'depth' the lot depth?
   research:
@@ -2073,9 +1950,11 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3aa cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  notes: 'Demoted until re-drafted: §325-18B''s eaves are one requirement for every required yard; this district''s
+    side-yard eave rules need review (an eave side isn''t measured to its wall''s lot line), so the yards left would
+    pass eaves the answer keys fail (review round 22, 2026-10-25): a person checks the eaves.'
 - id: R-3aa.325_19c_corner_lot_street_yards
   kind: rule
   topic: dimensions

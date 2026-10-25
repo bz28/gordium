@@ -210,17 +210,6 @@ corner_lot_with_multiple_front_yards:
   needed_by:
   - general.325_20e_corner_lot_front_yard_parking
   unit: yes_no
-curb_cuts_major_arterial:
-  meaning: Number of curb cuts the site has on a major arterial street or highway
-  needed_by:
-  - general.325_22e_curb_cuts_major_arterial
-  unit: count
-curb_cuts_major_arterial_unclear:
-  meaning: It is unclear whether the street or highway the site fronts is a major arterial street or highway, or
-    how its curb cuts are counted
-  needed_by:
-  - general.325_22e_curb_cuts_major_arterial
-  unit: yes_no
 distance_to_inlet_wall_or_stream_bank:
   meaning: Least distance from the new structure to an inlet wall or to the bank of an inlet channel or stream
   needed_by:
@@ -427,11 +416,6 @@ ornamental_parapet_or_cornice:
   needed_by:
   - general.325_16b_ornamental_parapet_cornice_extension
   unit: yes_no
-outdoor_marked_vehicles:
-  meaning: Marked or signed vehicles used by or advertising the home occupation that are not stored in a building
-  needed_by:
-  - general.325_3b_home_occupation_home_occupation_marked_vehicles
-  unit: count
 parking_area_spaces:
   meaning: Number of parking spaces in the parking area
   needed_by:
@@ -451,14 +435,6 @@ pergola_in_required_yard:
   meaning: Any part of a pergola is located in a required front, side or rear yard
   needed_by:
   - general.325_3b_building_area_pergola_terrace_patio_not_in_required_yard
-  unit: yes_no
-planting_meets_description:
-  meaning: The planting in the rear and side yards is dense shrubbery or a combination of a decorative fence and
-    shrubbery, as §325-22F describes
-  needed_by:
-  - general.325_22f_landscaping_rear_yard_planting
-  - general.325_22f_landscaping_side_yard_larger_planting
-  - general.325_22f_landscaping_side_yard_smaller_planting
   unit: yes_no
 primary_building_count:
   meaning: Number of permitted primary uses, each in a separate building, on the property, counting the initial
@@ -525,12 +501,6 @@ pwsf_side_mounted:
   needed_by:
   - general.325_29_8b_pwsf_side_mount_projection
   unit: yes_no
-rear_yard_planted_width:
-  meaning: Least width of the planted strip (dense shrubbery, or a decorative fence with shrubbery) along the rear
-    yard
-  needed_by:
-  - general.325_22f_landscaping_rear_yard_planting
-  unit: ft
 roof_plane_area:
   meaning: Area of the roof plane on which the feature is located
   needed_by:
@@ -563,18 +533,6 @@ row_house_modules:
   - general.325_3b_row_house_row_house_module_facade_length
   - general.325_3b_row_house_row_house_module_street_entry
   unit: count
-side_yard_larger_planted_width:
-  meaning: Least width of the planted strip (dense shrubbery, or a decorative fence with shrubbery) along the wider
-    side yard
-  needed_by:
-  - general.325_22f_landscaping_side_yard_larger_planting
-  unit: ft
-side_yard_smaller_planted_width:
-  meaning: Least width of the planted strip (dense shrubbery, or a decorative fence with shrubbery) along the narrower
-    side yard
-  needed_by:
-  - general.325_22f_landscaping_side_yard_smaller_planting
-  unit: ft
 silo_has_filtration:
   meaning: Every silo has filtration to keep grain or dust from escaping when filled or emptied
   needed_by:

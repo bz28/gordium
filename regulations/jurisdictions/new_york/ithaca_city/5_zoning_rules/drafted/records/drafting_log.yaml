@@ -1014,47 +1014,48 @@ units:
   chart-p3-yard_dimensions:
     rules:
     - R-1a.front_yard_min
-    - R-1a.side_one_side_min
-    - R-1a.side_other_side_min
+    - R-1a.side_yard_one_side_min
+    - R-1a.side_yard_other_side_min
     - R-1a.rear_yard_min_fn16
     - R-1b.front_yard_min
-    - R-1b.side_one_side_min
-    - R-1b.side_other_side_min
+    - R-1b.side_yard_one_side_min
+    - R-1b.side_yard_other_side_min
     - R-1b.rear_yard_min_fn16
     - R-2a.front_yard_min
-    - R-2a.side_one_side_min
-    - R-2a.side_other_side_min
+    - R-2a.side_yard_one_side_min
+    - R-2a.side_yard_other_side_min
     - R-2a.rear_yard_min_fn16
     - R-2b.front_yard_min
-    - R-2b.side_one_side_min
-    - R-2b.side_other_side_min
+    - R-2b.side_yard_one_side_min
+    - R-2b.side_yard_other_side_min
     - R-2b.rear_yard_min_fn16
     - R-2c.front_yard_min
     - R-2c.rear_yard_min_fn16
     - R-3a.front_yard_min
-    - R-3a.side_one_side_min
-    - R-3a.side_other_side_min
+    - R-3a.side_yard_one_side_min
+    - R-3a.side_yard_other_side_min
     - R-3a.rear_yard_min_fn16
     - R-3aa.front_yard_min
-    - R-3aa.side_one_side_min
-    - R-3aa.side_other_side_min
+    - R-3aa.side_yard_one_side_min
+    - R-3aa.side_yard_other_side_min
     - R-3aa.rear_yard_min_fn16
     - R-3b.front_yard_min
-    - R-3b.side_one_side_min
-    - R-3b.side_other_side_min
+    - R-3b.side_yard_one_side_min
+    - R-3b.side_yard_other_side_min
     - R-3b.rear_yard_min_fn16
     - RU.front_yard_min
-    - RU.side_one_side_min
-    - RU.side_other_side_min
+    - RU.side_yard_one_side_min
+    - RU.side_yard_other_side_min
+    - RU.rear_yard_min_fn17
     unresolved:
-    - rule: R-2c.side_one_side_min
+    - rule: R-2c.side_yard_one_side_min
       why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
       cells:
       - - 3
         - Yard Dimensions
         - Side (one side minimum)
         - R-2C
-    - rule: R-2c.side_other_side_min
+    - rule: R-2c.side_yard_other_side_min
       why: '''Side (other side minimum)'': the cell ''0 ft /5 ft / 10 ft [fn15]'' has 3 numbers, the rule expects
         1'
       cells:
@@ -1062,18 +1063,16 @@ units:
         - Yard Dimensions
         - Side (other side minimum)
         - R-2C
-    - rule: RU.rear_yard_min_fn16
-      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25% / 50 ft [fn17]'' has footnotes
-        [''17''], the rule expects [''16'']'
-      cells:
-      - - 3
-        - Yard Dimensions
-        - Rear (minimum, % of depth or feet, whichever is less)
-        - RU
-      - - 3
-        - Yard Dimensions
-        - Rear (minimum, % of depth or feet, whichever is less)
-        - RU
+    - rule: chart-p3-yard_dimensions.side_yard_one_side_min_fn14
+      why: 'R-1a.side_yard_one_side_min_fn14: ''Side (one side minimum)'': the cell ''10 ft'' has 1 numbers, the
+        rule expects 2; R-1b.side_yard_one_side_min_fn14: ''Side (one side minimum)'': the cell ''10 ft'' has 1
+        numbers, the rule expects 2; R-2a.side_yard_one_side_min_fn14: ''Side (one side minimum)'': the cell ''10
+        ft'' has 1 numbers, the rule expects 2'
+    - rule: chart-p3-yard_dimensions.side_yard_other_side_min_fn15
+      why: 'R-1a.side_yard_other_side_min_fn15: ''Side (other side minimum)'': the cell ''10 ft'' has 1 numbers,
+        the rule expects 3; R-1b.side_yard_other_side_min_fn15: ''Side (other side minimum)'': the cell ''10 ft''
+        has 1 numbers, the rule expects 3; R-2a.side_yard_other_side_min_fn15: ''Side (other side minimum)'': the
+        cell ''10 ft'' has 1 numbers, the rule expects 3'
     problems: []
   chart-p14-residential:
     rules:
@@ -2466,10 +2465,13 @@ units:
       are unsettled. The provision is also not a chart slot we can fill. No safe rule can be written from the existing
       measures, so it is left for a person.
   325-22C:
-    rules:
-    - general.325_22c_paving_hard_surface
+    rules: []
     unresolved: []
     problems: []
+    withdrawn:
+    - rule: general.325_22c_paving_hard_surface
+      why: '§325-22 is "Motels": its subsections set requirements for a motel, a use no residential district allows;
+        drafted for every lot, it would review every house (review round 22, 2026-10-25).'
   325-27D:
     rules: []
     unresolved:
@@ -3347,10 +3349,13 @@ units:
       in this text applies to a residential-district use, so no template can be drafted without inventing a use
       or measure.
   325-22B:
-    rules:
-    - general.325_22b_parking_one_space_per_sleeping_unit
+    rules: []
     unresolved: []
     problems: []
+    withdrawn:
+    - rule: general.325_22b_parking_one_space_per_sleeping_unit
+      why: '§325-22 is "Motels": its subsections set requirements for a motel, a use no residential district allows;
+        drafted for every lot, it would review every house (review round 22, 2026-10-25).'
   325-22D:
     rules: []
     unresolved:
@@ -3370,23 +3375,38 @@ units:
       ft width apply to each driveway, and is the 12 ft width per driveway? (3) how does this interact with 325-20E(2)''s
       12 ft maximum driveway width through a front yard on lots 50 ft wide or less?'
   325-22E:
-    rules:
-    - general.325_22e_curb_cuts_major_arterial
+    rules: []
     unresolved: []
     problems: []
+    withdrawn:
+    - rule: general.325_22e_curb_cuts_major_arterial
+      why: '§325-22 is "Motels": its subsections set requirements for a motel, a use no residential district allows;
+        drafted for every lot, it would review every house (review round 22, 2026-10-25).'
   325-22F:
-    rules:
-    - general.325_22f_landscaping_rear_yard_planting
-    - general.325_22f_landscaping_side_yard_smaller_planting
-    - general.325_22f_landscaping_side_yard_larger_planting
+    rules: []
     unresolved: []
     problems: []
+    withdrawn:
+    - rule: general.325_22f_landscaping_rear_yard_planting
+      why: '§325-22 is "Motels": its subsections set requirements for a motel, a use no residential district allows;
+        drafted for every lot, it would review every house (review round 22, 2026-10-25).'
+    - rule: general.325_22f_landscaping_side_yard_smaller_planting
+      why: '§325-22 is "Motels": its subsections set requirements for a motel, a use no residential district allows;
+        drafted for every lot, it would review every house (review round 22, 2026-10-25).'
+    - rule: general.325_22f_landscaping_side_yard_larger_planting
+      why: '§325-22 is "Motels": its subsections set requirements for a motel, a use no residential district allows;
+        drafted for every lot, it would review every house (review round 22, 2026-10-25).'
   325-22G:
-    rules:
-    - general.325_22g_driveway_illumination_flag
-    - general.325_22g_lighting_no_glare_flag
+    rules: []
     unresolved: []
     problems: []
+    withdrawn:
+    - rule: general.325_22g_driveway_illumination_flag
+      why: '§325-22 is "Motels": its subsections set requirements for a motel, a use no residential district allows;
+        drafted for every lot, it would review every house (review round 22, 2026-10-25).'
+    - rule: general.325_22g_lighting_no_glare_flag
+      why: '§325-22 is "Motels": its subsections set requirements for a motel, a use no residential district allows;
+        drafted for every lot, it would review every house (review round 22, 2026-10-25).'
   325-22H:
     rules: []
     unresolved:
@@ -3463,15 +3483,21 @@ units:
       and enforcement duty and sets no limit on a building design. Turning either sentence into a check would mean
       inventing a standard the text does not state.
   325-24F:
-    rules:
-    - general.325_24f_air_emissions_flag
+    rules: []
     unresolved: []
     problems: []
+    withdrawn:
+    - rule: general.325_24f_air_emissions_flag
+      why: '§325-24 is "Special performance standards in Industrial District" (B: "all uses in districts where reference
+        is made to this section"); no residential district refers to it (review round 22, 2026-10-25).'
   325-24G:
-    rules:
-    - general.325_24g_fire_and_safety_building_code_national_fire_code
+    rules: []
     unresolved: []
     problems: []
+    withdrawn:
+    - rule: general.325_24g_fire_and_safety_building_code_national_fire_code
+      why: '§325-24 is "Special performance standards in Industrial District" (B: "all uses in districts where reference
+        is made to this section"); no residential district refers to it (review round 22, 2026-10-25).'
   325-24H:
     rules: []
     unresolved:

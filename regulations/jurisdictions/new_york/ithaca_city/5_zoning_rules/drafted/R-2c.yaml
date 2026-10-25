@@ -1013,18 +1013,11 @@ rules:
       front_yard: 9
     expect: fail
   open_questions:
-  - §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's front_yard
-    measure cover both street-facing yards?
-  - §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted separately
-    from the *_eaves measures?
+  - §325-19C deems a corner lot in a residential district to have two adjoining front yards; the front_yard measure
+    is a single depth, so should it be the smaller of the two?
   research:
-  - question: §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's
-      front_yard measure cover both street-facing yards?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted
-      separately from the *_eaves measures?
+  - question: §325-19C deems a corner lot in a residential district to have two adjoining front yards; the front_yard
+      measure is a single depth, so should it be the smaller of the two?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1034,8 +1027,8 @@ rules:
 - id: R-2c.rear_yard_min_fn16
   kind: rule
   topic: dimensions
-  title: Minimum rear yard, % of depth or ft, not under 20 ft (chart p.3)
-  check: rear_yard >= min(max(20, 0.25 * lot_depth), max(20, 50))
+  title: Minimum rear yard, % of depth or ft, fn16 (chart p.3)
+  check: rear_yard >= max(20, min(0.25 * lot_depth, 50))
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1050,14 +1043,6 @@ rules:
     - 66
     quote: But not less than 20 ft.
   examples:
-  - given:
-      lot_depth: 200
-      rear_yard: 50
-    expect: pass
-  - given:
-      lot_depth: 200
-      rear_yard: 49
-    expect: fail
   - given:
       lot_depth: 100
       rear_yard: 25
@@ -1074,19 +1059,18 @@ rules:
       lot_depth: 40
       rear_yard: 19
     expect: fail
+  - given:
+      lot_depth: 400
+      rear_yard: 50
+    expect: pass
+  - given:
+      lot_depth: 400
+      rear_yard: 49
+    expect: fail
   open_questions:
-  - The row reads 'whichever is less' of the percent of depth and the feet; the rule takes the lesser, then applies
-    the footnote's 20 ft floor (written as min(max(20, a), max(20, b)), which equals max(20, min(a, b))). Please
-    confirm the floor applies after taking the lesser.
-  - The RU cell ('25% / 50 ft [fn17]', not less than 30 ft) is not drafted here and goes to a person.
+  - 'Rear yard depth for an irregular lot: how is lot depth measured?'
   research:
-  - question: The row reads 'whichever is less' of the percent of depth and the feet; the rule takes the lesser,
-      then applies the footnote's 20 ft floor (written as min(max(20, a), max(20, b)), which equals max(20, min(a,
-      b))). Please confirm the floor applies after taking the lesser.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The RU cell ('25% / 50 ft [fn17]', not less than 30 ft) is not drafted here and goes to a person.
+  - question: 'Rear yard depth for an irregular lot: how is lot depth measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'

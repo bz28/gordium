@@ -54,34 +54,54 @@ R-3b.325_19e_r3_abut_r1_side_yard_smaller: >-
   §325-19E's stricter limit for a lot abutting R-1 land (the same law piece as R-3a's): the R-3a answer key
   (answer-keys 67cc73a) sends an abutting lot to review, since what 'directly abuts' reaches is an open question; it
   is the same question in R-3b: a person checks it.
-general.325_18b_architectural_feature_projection_limit: >-
-  §325-18B's 2 ft limit drafted on a measure the AI proposed (how far a feature projects) instead of each yard
-  measured to the eaves; alone it passes eaves the answer keys fail (an eave 2.5 ft into the side yard): a person
-  checks the eaves until §325-18B is re-drafted (2026-10-25).
-R-2c.325_18b_projection_front_yard: >-
-  §325-18B's eaves are drafted yard by yard, and this district's side yard larger and side yard smaller rule couldn't be drafted (its chart cell
-  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
-R-2c.325_18b_projection_rear_yard_fn16: >-
-  §325-18B's eaves are drafted yard by yard, and this district's side yard larger and side yard smaller rule couldn't be drafted (its chart cell
-  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
-R-3a.325_18b_projection_front_yard: >-
-  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
-  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
-R-3a.325_18b_projection_side_yard_larger: >-
-  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
-  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
-R-3a.325_18b_projection_side_yard_smaller: >-
-  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
-  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
-R-3b.325_18b_projection_front_yard: >-
-  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
-  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
-R-3b.325_18b_projection_side_yard_larger: >-
-  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
-  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
-R-3b.325_18b_projection_side_yard_smaller: >-
-  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
-  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-2c.325_18b_projection_front_yard:
+  scope: district     # this district's yard rule couldn't be drafted: not a finding about the law
+  cause: >-
+    §325-18B's eaves are drafted yard by yard, and this district's side yard larger and side yard 
+    smaller rule couldn't be drafted (its chart cell took another form): the yards it has pass eaves the 
+    answer keys fail or review (2026-10-25): a person checks the eaves.
+R-2c.325_18b_projection_rear_yard_fn16:
+  scope: district     # this district's yard rule couldn't be drafted: not a finding about the law
+  cause: >-
+    §325-18B's eaves are drafted yard by yard, and this district's side yard larger and side yard 
+    smaller rule couldn't be drafted (its chart cell took another form): the yards it has pass eaves the 
+    answer keys fail or review (2026-10-25): a person checks the eaves.
+R-3a.325_18b_projection_front_yard:
+  scope: district     # this district's yard rule couldn't be drafted: not a finding about the law
+  cause: >-
+    §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted 
+    (its chart cell took another form): the yards it has pass eaves the answer keys fail or review 
+    (2026-10-25): a person checks the eaves.
+R-3a.325_18b_projection_side_yard_larger:
+  scope: district     # this district's yard rule couldn't be drafted: not a finding about the law
+  cause: >-
+    §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted 
+    (its chart cell took another form): the yards it has pass eaves the answer keys fail or review 
+    (2026-10-25): a person checks the eaves.
+R-3a.325_18b_projection_side_yard_smaller:
+  scope: district     # this district's yard rule couldn't be drafted: not a finding about the law
+  cause: >-
+    §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted 
+    (its chart cell took another form): the yards it has pass eaves the answer keys fail or review 
+    (2026-10-25): a person checks the eaves.
+R-3b.325_18b_projection_front_yard:
+  scope: district     # this district's yard rule couldn't be drafted: not a finding about the law
+  cause: >-
+    §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted 
+    (its chart cell took another form): the yards it has pass eaves the answer keys fail or review 
+    (2026-10-25): a person checks the eaves.
+R-3b.325_18b_projection_side_yard_larger:
+  scope: district     # this district's yard rule couldn't be drafted: not a finding about the law
+  cause: >-
+    §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted 
+    (its chart cell took another form): the yards it has pass eaves the answer keys fail or review 
+    (2026-10-25): a person checks the eaves.
+R-3b.325_18b_projection_side_yard_smaller:
+  scope: district     # this district's yard rule couldn't be drafted: not a finding about the law
+  cause: >-
+    §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted 
+    (its chart cell took another form): the yards it has pass eaves the answer keys fail or review 
+    (2026-10-25): a person checks the eaves.
 R-3a.loading_multiple_dwelling_25_units:
   cause: >-
     The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
@@ -115,3 +135,107 @@ R-3aa.loading_nursing_home_hospital: >-
 R-3b.loading_nursing_home_hospital: >-
   The chart's 1 loading space for a nursing home, hospital or sanitarium; the R-3a answer key sends
   loading to review (§325-21 also applies): a person checks it (2026-10-25).
+general.325_3b_home_occupation_home_occupation_marked_vehicles: >-
+  §325-3B(g) "no more than two such vehicles in R-2 Zones and in R-3 and in all other zones no more than three"
+  reads two ways: R-3 with R-2 (2 vehicles) or with all other zones (3); the draft took 3 without saying so. A
+  person checks the marked vehicles until the architects answer which (review round 22, 2026-10-25).
+general.325_22b_parking_one_space_per_sleeping_unit:
+  withdraw: true
+  cause: >-
+    §325-22 is "Motels": its subsections set requirements for a motel, a use no residential district
+    allows; drafted for every lot, it would review every house (review round 22, 2026-10-25).
+general.325_22c_paving_hard_surface:
+  withdraw: true
+  cause: >-
+    §325-22 is "Motels": its subsections set requirements for a motel, a use no residential district
+    allows; drafted for every lot, it would review every house (review round 22, 2026-10-25).
+general.325_22e_curb_cuts_major_arterial:
+  withdraw: true
+  cause: >-
+    §325-22 is "Motels": its subsections set requirements for a motel, a use no residential district
+    allows; drafted for every lot, it would review every house (review round 22, 2026-10-25).
+general.325_22f_landscaping_rear_yard_planting:
+  withdraw: true
+  cause: >-
+    §325-22 is "Motels": its subsections set requirements for a motel, a use no residential district
+    allows; drafted for every lot, it would review every house (review round 22, 2026-10-25).
+general.325_22f_landscaping_side_yard_smaller_planting:
+  withdraw: true
+  cause: >-
+    §325-22 is "Motels": its subsections set requirements for a motel, a use no residential district
+    allows; drafted for every lot, it would review every house (review round 22, 2026-10-25).
+general.325_22f_landscaping_side_yard_larger_planting:
+  withdraw: true
+  cause: >-
+    §325-22 is "Motels": its subsections set requirements for a motel, a use no residential district
+    allows; drafted for every lot, it would review every house (review round 22, 2026-10-25).
+general.325_22g_driveway_illumination_flag:
+  withdraw: true
+  cause: >-
+    §325-22 is "Motels": its subsections set requirements for a motel, a use no residential district
+    allows; drafted for every lot, it would review every house (review round 22, 2026-10-25).
+general.325_22g_lighting_no_glare_flag:
+  withdraw: true
+  cause: >-
+    §325-22 is "Motels": its subsections set requirements for a motel, a use no residential district
+    allows; drafted for every lot, it would review every house (review round 22, 2026-10-25).
+general.325_24f_air_emissions_flag:
+  withdraw: true
+  cause: >-
+    §325-24 is "Special performance standards in Industrial District" (B: "all uses in
+    districts where reference is made to this section"); no residential district refers to it (review round 22,
+    2026-10-25).
+general.325_24g_fire_and_safety_building_code_national_fire_code:
+  withdraw: true
+  cause: >-
+    §325-24 is "Special performance standards in Industrial District" (B: "all uses in
+    districts where reference is made to this section"); no residential district refers to it (review round 22,
+    2026-10-25).
+R-2b.325_18b_projection_side_yard_smaller:
+  scope: district     # this district's two side minimums differ (10 ft and 5 ft)
+  cause: >-
+    The eave yards are measured narrower-first on their own, apart from the wall yards, so an eave
+    3.5 ft into the required 10 ft side yard is read against the 5 ft side and passes (review round 22,
+    2026-10-25). A person checks the side eaves until each eave side is measured to its wall's lot line.
+R-2b.325_18b_projection_side_yard_larger:
+  scope: district     # this district's two side minimums differ (10 ft and 5 ft)
+  cause: >-
+    The eave yards are measured narrower-first on their own, apart from the wall yards, so an eave
+    3.5 ft into the required 10 ft side yard is read against the 5 ft side and passes (review round 22,
+    2026-10-25). A person checks the side eaves until each eave side is measured to its wall's lot line.
+R-3aa.325_18b_projection_side_yard_smaller:
+  scope: district     # this district's two side minimums differ (10 ft and 5 ft)
+  cause: >-
+    The eave yards are measured narrower-first on their own, apart from the wall yards, so an eave
+    3.5 ft into the required 10 ft side yard is read against the 5 ft side and passes (review round 22,
+    2026-10-25). A person checks the side eaves until each eave side is measured to its wall's lot line.
+R-3aa.325_18b_projection_side_yard_larger:
+  scope: district     # this district's two side minimums differ (10 ft and 5 ft)
+  cause: >-
+    The eave yards are measured narrower-first on their own, apart from the wall yards, so an eave
+    3.5 ft into the required 10 ft side yard is read against the 5 ft side and passes (review round 22,
+    2026-10-25). A person checks the side eaves until each eave side is measured to its wall's lot line.
+R-2b.325_18b_projection_front_yard:
+  scope: district     # its side-yard eave rules are demoted (the two side minimums differ)
+  cause: >-
+    §325-18B's eaves are one requirement for every required yard; this district's side-yard eave
+    rules need review (an eave side isn't measured to its wall's lot line), so the yards left would pass
+    eaves the answer keys fail (review round 22, 2026-10-25): a person checks the eaves.
+R-2b.325_18b_projection_rear_yard_fn16:
+  scope: district     # its side-yard eave rules are demoted (the two side minimums differ)
+  cause: >-
+    §325-18B's eaves are one requirement for every required yard; this district's side-yard eave
+    rules need review (an eave side isn't measured to its wall's lot line), so the yards left would pass
+    eaves the answer keys fail (review round 22, 2026-10-25): a person checks the eaves.
+R-3aa.325_18b_projection_front_yard:
+  scope: district     # its side-yard eave rules are demoted (the two side minimums differ)
+  cause: >-
+    §325-18B's eaves are one requirement for every required yard; this district's side-yard eave
+    rules need review (an eave side isn't measured to its wall's lot line), so the yards left would pass
+    eaves the answer keys fail (review round 22, 2026-10-25): a person checks the eaves.
+R-3aa.325_18b_projection_rear_yard_fn16:
+  scope: district     # its side-yard eave rules are demoted (the two side minimums differ)
+  cause: >-
+    §325-18B's eaves are one requirement for every required yard; this district's side-yard eave
+    rules need review (an eave side isn't measured to its wall's lot line), so the yards left would pass
+    eaves the answer keys fail (review round 22, 2026-10-25): a person checks the eaves.
