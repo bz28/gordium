@@ -1368,8 +1368,8 @@ def _ask_street_more(question):
                 return True
             if go.OptionIndex() == no:
                 return False
-        elif got == Rhino.Input.GetResult.Cancel:
-            raise Cancelled()
+        elif got != Rhino.Input.GetResult.Nothing:      # Esc, or Rhino ending the prompt (another command,
+            raise Cancelled()                            # closing): never asked again forever (round 16)
         prompt = logic.STREET_ANSWER_NEEDED + question
 
 

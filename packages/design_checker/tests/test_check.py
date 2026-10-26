@@ -3034,6 +3034,9 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
     answers = iter([("cancel", None)])
     with pytest.raises(ns["Cancelled"]):
         ns["_ask_street_more"]("q")
+    answers = iter([("exit rhino", None)])                           # any other end of the prompt: no loop
+    with pytest.raises(ns["Cancelled"]):
+        ns["_ask_street_more"]("q")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     pick = rhino[rhino.index("def _box_pick(doc, what, facts, saved_ui):"):rhino.index("def confirm(")]
     # ... run: the plugin's own _box_pick with stand-ins for Rhino, Esc at the bend question on the corner path
