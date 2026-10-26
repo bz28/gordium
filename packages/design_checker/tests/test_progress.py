@@ -257,7 +257,7 @@ def test_live_mode_rechecks_in_the_background_and_drops_a_stale_answer():
 
 def test_draw_works_out_the_starting_house_before_anything_is_saved_or_committed():
     drawn = part(RHINO, "def _drawn(", "def hide_massing(")
-    assert drawn.index('STATE["start_plan"] = _plan_house(') < drawn.index("_save_ui_state(doc, ui_state)") < \
+    assert drawn.index('STATE["start_plan"] = planned or _plan_house(') < drawn.index("_save_ui_state(doc, ui_state)") < \
         drawn.index("doc.Strings.SetString") < drawn.index("logic.draw_then_commit(session, save)")
     plan = part(RHINO, "def _plan_house(", "def _draw_starting_house(")
     assert "ask(request, cancel=True)" in plan
@@ -436,12 +436,13 @@ def test_an_answer_for_a_model_no_longer_in_front_is_never_shown_as_current():
     changed = part(RHINO, "def _changed_during(", "def _ask_job(")
     assert "front.RuntimeSerialNumber != doc_serial" in changed and "logic.checked_while_still(read_at" in changed
     run = part(RHINO, "def run_check(", "def _check_begin(")
-    assert run.index('if _changed_during(begun["doc"], begun["at"]):') < run.index("_check_outdated(doc, o, report)") \
+    assert run.index('if _changed_during(begun["doc"], begun["at"]):') < \
+        run.index("_check_outdated(doc, o, report, begun, result)") \
         < run.index("return _check_apply(")
     outdated = part(RHINO, "def _check_outdated(", "def _check_cancelled(")
     assert outdated.index("front.RuntimeSerialNumber != doc.RuntimeSerialNumber") < outdated.index("ui.show(")
     assert "_check_apply" not in outdated and 'STATE["recheck_owed"] = True' in outdated
-    assert "logic.REPORT_OUTDATED" in outdated
+    assert "logic.outdated_report_message(" in outdated
     plan = part(RHINO, "def _plan_house(", "def _draw_starting_house(")
     assert plan.index("ask(request, cancel=True)") < plan.index("_changed_during(") < plan.index("logic.ModelChanged()")
     report = part(RHINO, "def open_report(", "def _drop_report_part(")
@@ -491,14 +492,13 @@ def test_commands_ask_the_checker_before_they_read_the_model():
         start.index("doc = Rhino.RhinoDoc.ActiveDoc") < start.index("if _buildings(doc):")
     assert start.count("ask(") == 2 and 'facts["lot_id"] = sample_lot' in start
     own = start[start.index("    else:                               # the architect's own lot"):start.index("drawn = False")]
-    assert own.index("current_facts(doc)") < own.index("_still_front(doc)") < own.index("if _buildings(doc):")
+    assert own.index("current_facts(doc)") < own.index("except logic.NotInFront:") < own.index("if _buildings(doc):")
     for fn, end in (("def gordium_check(", "def _layer("), ("def edit_facts(", "def report_path(")):
         body = part(RHINO, fn, end)
         assert body.index('ask({"cmd": "options"') < body.index("doc = Rhino.RhinoDoc.ActiveDoc"), fn
-        assert body.index("current_facts(doc)") < body.index("_still_front(doc)") < body.index("confirm("), fn
+        assert body.index("current_facts(doc)") < body.index("except logic.NotInFront:") < body.index("confirm("), fn
     front = part(RHINO, "def _still_front(", "def _edited(")
     assert "front.RuntimeSerialNumber == doc.RuntimeSerialNumber" in front
-    assert RHINO.count("not _still_front(doc):") == RHINO.count("say(logic.NOT_IN_FRONT)") == 3   # each caller says it
 
 
 def test_the_saved_facts_are_matched_to_the_model_as_it_is_after_their_wait():
@@ -508,3 +508,57 @@ def test_the_saved_facts_are_matched_to_the_model_as_it_is_after_their_wait():
     assert facts.index("load_facts(doc)") < facts.index("_sorted_objects(doc)") < facts.index("logic.drop_stale(")
     start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
     assert start.index("System.Guid.Empty") < start.index('facts["lot_id"] = sample_lot')
+
+
+
+# ---- independent review of #32 (aea73b8..6ba061b): five confirmed, pinned --------------------------------------------
+
+def test_ir1_an_outdated_check_never_says_a_report_was_written_when_it_wasnt():
+    said = logic.outdated_report_message("/x/r.xlsx", "Permission denied", True)
+    assert said == logic.report_message("/x/r.xlsx", False, "Permission denied", stale=True)
+    assert "is of the model as it was" not in said
+    assert logic.outdated_report_message("/x/r.xlsx", None, False) == logic.REPORT_OUTDATED.format(path="/x/r.xlsx")
+    outdated = part(RHINO, "def _check_outdated(", "def _check_cancelled(")
+    assert 'logic.outdated_report_message(report_path(doc), (result or {}).get("report_error")' in outdated
+
+
+def test_ir2_every_reader_of_the_facts_stops_when_its_file_is_no_longer_in_front():
+    facts = part(RHINO, "def current_facts(", "def save_facts(")
+    assert facts.index("load_facts(doc)") < facts.index("if not _still_front(doc):") < \
+        facts.index("raise logic.NotInFront(logic.NOT_IN_FRONT)") < facts.index("_sorted_objects(doc)")
+    said, ran = [], []
+    acts = logic.front_actions({"enter": lambda: (_ for _ in ()).throw(logic.NotInFront(logic.NOT_IN_FRONT)),
+                                "zoom": lambda: ran.append(1)}, said.append)
+    assert acts["enter"]() is logic.REFUSED and said == [logic.NOT_IN_FRONT]
+    acts["zoom"]()
+    assert ran == [1]
+    assert "logic.front_actions(logic.busy_actions(" in part(RHINO, "def _actions(", "def PANEL_ACTIONS(")
+    for fn in ("def edit_facts(", "def gordium_check(", "def gordium_start("):
+        body = part(RHINO, fn, "\ndef ")
+        handler = body.index("except logic.NotInFront:")
+        assert body.index("say(logic.NOT_IN_FRONT)", handler) < body.index("return None", handler), fn
+
+
+def test_ir3_no_undo_step_of_gordiums_is_held_open_while_it_waits():
+    """Rhino runs during a wait: an undo step held open across it would take the architect's own edits into
+    Gordium's. A new address's house is worked out before the step opens; ask() ends any step this script holds."""
+    prepare = part(RHINO, "def _draw_prepare(", "def _begin_undo(")
+    assert prepare.index('STATE["start_plan"] = _plan_reset_house(') < prepare.index("_begin_undo(doc,")
+    ask = part(RHINO, "def ask(", "def _ask_job(")
+    assert ask.index('held = STATE.get("undo")') < ask.index("_end_undo(") < ask.index("_settle_live()")
+    plan = part(RHINO, "def _plan_reset_house(", "def _export_lot(")
+    assert "logic.apply_reset(dry, _DrySession()" in plan and "ask(request, cancel=True)" in plan
+    assert plan.index("ask(request") < plan.index("logic.ModelChanged()")
+    dry = part(RHINO, "class _DryTable", "class _DrySession")
+    assert "def add_lot(self, ring, name):" in dry and "self.ring = ring" in dry and "return DRY_LOT" in dry
+    key = part(RHINO, "def _start_key(", "DRY_LOT = ")
+    assert 'k != "lot_id"' in key
+
+
+def test_ir5_a_refused_checkbox_puts_its_tick_back():
+    acts = logic.busy_actions({"labels": lambda on: "done"}, lambda: True, lambda text: None)
+    assert acts["labels"](True) is logic.REFUSED
+    tick = part(UI, "def _tick(", "def _massing_box(")
+    assert "if action(bool(box.Checked)) is logic.REFUSED:" in tick and "box.Checked = not box.Checked" in tick
+    for name in ("massing", "labels", "envelope"):
+        assert '_tick(box, actions["%s"]' % name in UI, name

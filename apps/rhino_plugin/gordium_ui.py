@@ -331,13 +331,32 @@ def say(parts, text):
         parts["message"].Text = text or ""
 
 
+def _tick(box, action, where, skip=lambda: False):
+    """A checkbox that calls `action(ticked)`; if the action was refused (logic.REFUSED: Gordium is working, or its
+    file is no longer in front), the tick goes back, so the panel always shows the setting as it is (independent
+    review of #32). `skip()`: a change made by Gordium itself (set_labels_tick), not the architect's."""
+    putting_back = {"on": False}
+
+    def changed(s, e):
+        if putting_back["on"] or skip():
+            return
+        if action(bool(box.Checked)) is logic.REFUSED:
+            putting_back["on"] = True
+            try:
+                box.Checked = not box.Checked
+            finally:
+                putting_back["on"] = False
+
+    box.CheckedChanged += logic.guard(changed, where)
+
+
 def _massing_box(actions):
     """Hide starting house: the Gordium::Massing layer off. Hidden, it is still checked (a hidden building still
     counts, as everywhere in Gordium): only drawing it is turned off."""
     box = ef.CheckBox()
     box.Text = "Hide starting house"
     box.Checked = False
-    box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
+    _tick(box, actions["massing"], "hide the starting house")
     return box
 
 
@@ -348,11 +367,8 @@ def _labels_box(actions, parts):
     box.Text = "Show on-screen labels"
     box.Checked = False
 
-    def changed(s, e):
-        if not parts.get("_setting_labels"):        # set from the document (set_labels_tick): not a change
-            actions["labels"](bool(box.Checked))
-
-    box.CheckedChanged += logic.guard(changed, "show or hide the on-screen labels")
+    # (set from the document by set_labels_tick: not the architect's change)
+    _tick(box, actions["labels"], "show or hide the on-screen labels", skip=lambda: parts.get("_setting_labels"))
     parts["labels_box"] = box
     return box
 
@@ -372,7 +388,7 @@ def _envelope_box(actions):
     box = ef.CheckBox()
     box.Text = "Show buildable envelope"
     box.Checked = True
-    box.CheckedChanged += logic.guard(lambda s, e: actions["envelope"](bool(box.Checked)), "show or hide the envelope")
+    _tick(box, actions["envelope"], "show or hide the envelope")
     return box
 
 
