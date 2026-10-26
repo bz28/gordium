@@ -3268,11 +3268,35 @@ def test_the_notice_is_never_wider_than_its_limit_nor_off_the_view():
             lines = logic_.notice_lines([side], view_w, share)
             assert "7'-0 5/8\"" in " ".join(lines) and "0'-11 1/4\"" in " ".join(lines)    # measurements whole
     assert logic_.notice_spot(300, 600, 342, 54, None) is None                  # wider than the view: nowhere
-    lines = logic_.notice_lines([side], 400, 0.4)
-    assert max(len(t) for t in lines) <= logic_.NOTICE_MIN_CHARS + 2 or \
-        max(len(t) for t in lines) * 7.8 + 22 <= 400 * 0.4 + 1                  # the long part broken between words
+    lines = logic_.notice_lines([side], 400, 0.4)                               # the long part broken between
+    assert max(len(t) for t in lines) * 7.8 + 22 <= 400 * logic_.NOTICE_MAX_SHARE + 1, lines   # its words
+    lines, (x, y), w, h = logic_.notice_place(300, 600, [side], None)          # placed: width and screen checked
+    assert w <= 300 * logic_.NOTICE_MAX_SHARE and 0 <= x and x + w <= 300 and 0 <= y and y + h <= 600
     # a part that can't break narrower than the limit (one long word): never drawn wider than it
     assert logic_.notice_place(600, 600, ["✕ " + "W" * 60], None) is None
     # a break that would fall inside a measurement moves before it
     lines = logic_.notice_lines(["✕ Rear yard now is 7'-0 5/8\" here"], 200, 0.4)
     assert any("7'-0 5/8\"" in t for t in lines) and not any(t.strip().startswith("5/8") for t in lines), lines
+
+
+def test_the_notice_keeps_its_heading_numbers_and_mark_whole():
+    """Review of 87e105d: narrow boxes, tried first, cut the heading mid-phrase where a wider box allowed it whole;
+    a second notice line came out indented; the ✕ could stand alone; an area's unit or a number's "short" could go
+    to the next line. Now a part breaks between words only when too long even for NOTICE_MAX_SHARE, each notice line
+    starts flush, and the mark, measurements, units and the word saying what a number is stay with their neighbour."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · at least 0'-11 1/4\" short"
+    for share in logic_.NOTICE_SHARES:
+        assert any("Side yard, Southwest no longer complies" in t for t in logic_.notice_lines([side], 657, share))
+    two = logic_.notice_lines(["✕ Rear yard no longer complies", "✕ Height no longer complies"], 1000, 0.8)
+    assert two == ["✕ Rear yard no longer complies", "✕ Height no longer complies"]
+    lone = logic_.notice_lines(["✕ " + "W" * 30 + " · a"], 250, 0.8)
+    assert lone[0] != "✕" and lone[0].startswith("✕ W"), lone
+    for view_w in (300, 400, 657):
+        for share in logic_.NOTICE_SHARES:
+            area = logic_.notice_lines(["✕ Lot coverage no longer complies · 7,033 sf proposed · 35 % short"],
+                                       view_w, share)
+            joined = "\n".join(area)
+            assert "7,033 sf" in joined and "35 % short" in joined, (view_w, share, area)
+            got = logic_.notice_lines([side], view_w, share)
+            assert "0'-11 1/4\" short" in "\n".join(got) and "7'-0 5/8\" proposed" in "\n".join(got), got

@@ -516,32 +516,44 @@ NOTICE_MAX_SHARE = NOTICE_SHARES[-1]         # never wider (a two-line band abov
 NOTICE_MIN_CHARS = 24                        # ...never narrower than this many characters a line
 
 
+NOTICE_KEEP = (                    # spaces never broken in the notice (each becomes a non-breaking one)
+    r"(\d+'-\d+) (\d+/\d+\")",            # a measurement: 7'-0 5/8"
+    r"(\d[\d,.]*) (sf|%|ft)\b",             # an area, a share, a length: 7,033 sf, 35 %
+    r"([\d\"'%]) (short|over|proposed|required)\b",   # the word that says what the number is
+    r"^(✕) (\S)",                           # the mark with its first word
+)
+
+
 def notice_lines(lines, view_w, share=NOTICE_MAX_SHARE, size=13):
     """The notice's lines wrapped to at most `share` of the view's width (gordium_ui text_box_size's measure: size *
     0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line. Broken between its " · " parts first;
-    a part too long for a line is broken between its words, never inside a measurement (7'-0 5/8" stays whole:
-    review round 1); a wrapped line's rest indented under its first. Zoomed in tight, one long line was a bar across
-    the whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
+    a part is broken between its words only when it is too long even for NOTICE_MAX_SHARE (a heading kept whole where
+    a wider box allows it: review of 87e105d), and never at a space in NOTICE_KEEP (7'-0 5/8" stays whole: review
+    round 1); each notice line's rest indented under its first. Zoomed in tight, one long line was a bar across the
+    whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
     import re
     import textwrap
     chars = max(NOTICE_MIN_CHARS, int((view_w * share - 22) / (size * 0.6)))
-    keep = re.compile(r"(\d+'-\d+) (\d+/\d+\")")                     # a measurement's own space: never a break
+    widest = max(NOTICE_MIN_CHARS, int((view_w * NOTICE_MAX_SHARE - 22) / (size * 0.6)))
     out = []
     for line in lines:
-        row = ""
+        start, row = len(out), ""
         for part in line.split(" · "):
-            part = keep.sub("\\1\u00a0\\2", part)
+            for keep in NOTICE_KEEP:
+                part = re.sub(keep, lambda m: "\u00a0".join(m.groups()), part)
             if row and len(row) + 3 + len(part) <= chars:
                 row += " · " + part
                 continue
             if row:
                 out.append(row)
-            pieces = textwrap.wrap(part, chars - (2 if out or row else 0), break_long_words=False,
-                                   break_on_hyphens=False) or [part]
-            first = "  " if out else ""
+            indent = "  " if len(out) > start else ""
+            if len(indent) + len(part) <= widest:          # whole, even past this share: the limit allows it
+                pieces = [part]
+            else:
+                pieces = textwrap.wrap(part, chars - 2, break_long_words=False, break_on_hyphens=False) or [part]
             for k, piece in enumerate(pieces[:-1]):
-                out.append((first if k == 0 else "  ") + piece)
-            row = (first if len(pieces) == 1 else "  ") + pieces[-1]
+                out.append((indent if k == 0 else "  ") + piece)
+            row = (indent if len(pieces) == 1 else "  ") + pieces[-1]
         out.append(row)
     return [t.replace("\u00a0", " ") for t in out]
 
