@@ -825,7 +825,7 @@ def start_box(state, options, mode):
 
     draw = button(state.get("_draw_label") or ("Draw" if mode == "start" else "Check"),   # as what it does
                   lambda: (keep(), done("draw")))
-    reason = label(logic.draw_reason(state), size=11)
+    reason = label(logic.draw_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)   # wraps at the box's width
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
 
@@ -835,7 +835,7 @@ def start_box(state, options, mode):
     suggester = state.get("_suggest") if not looking else None
     hints = {"items": [], "chosen": None}
     hint_list = ef.ListBox()
-    hint_list.Width, hint_list.Height = 300, 110
+    hint_list.Width, hint_list.Height = 300, logic.list_height(1)
     hint_list.Visible = False
     hint_note = label("", size=10)
     wait_keys = ef.UITimer()
@@ -882,6 +882,7 @@ def start_box(state, options, mode):
         hints["items"] = items
         for item in items:
             hint_list.Items.Add(item)
+        hint_list.Height = logic.list_height(len(items))     # as tall as its rows, never empty rows
         hint_list.Visible = bool(items)
 
     wait_keys.Elapsed += logic.guard(ask_hints, "ask for address suggestions")
@@ -1006,7 +1007,7 @@ def start_box(state, options, mode):
                                label("kept back from every limit by the starting house", size=11))
         layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
-    amber = label("", eto_status_color("needs_review"), size=12)    # one line, following the answers given
+    amber = label("", eto_status_color("needs_review"), size=12, width=logic.BOX_TEXT_WIDTH)   # wraps at the box
 
     def refresh_amber(*_):
         state["corner_lot"] = [None, False, True][max(corner.SelectedIndex, 0)]

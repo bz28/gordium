@@ -154,7 +154,9 @@ def main():
                 seen[key] = {"items": [str(i.Text) for i in p["list"].Items] if p["list"] is not None else None,
                              "visible": bool(p["list"] is not None and p["list"].Visible),
                              "address": p["address"].Text, "asked": len(asked), "labels": p["labels"],
-                             "look_up_on": bool(p["buttons"].get("Look up") and p["buttons"]["Look up"].Enabled)}
+                             "look_up_on": bool(p["buttons"].get("Look up") and p["buttons"]["Look up"].Enabled),
+                             "list_height": int(p["list"].Height) if p["list"] is not None else None,
+                             "box_width": int(d.Width)}
             return record
 
         def pick_first(d):
@@ -204,6 +206,8 @@ def main():
         log["seen"], log["asked"] = seen, asked
         one, two, three = seen.get("1", {}), seen.get("2", {}), seen.get("3", {})
         claim("1 fewer than 4 characters: no list, nothing asked", not one.get("visible") and one.get("asked") == 0, one)
+        claim("2 the list is as tall as its one row (no empty rows)",
+              two.get("list_height") == logic.list_height(1), two)
         claim("2 typed a character at a time: one request after the pause, the list shows 106's address",
               two.get("asked") == 1 and two.get("visible") and two.get("items") == ["106 Ithaca Rd, Ithaca, NY"],
               {"seen": two, "asked": asked})
@@ -234,11 +238,15 @@ def main():
               any("No City of Ithaca address found for 12345 Nowhere Blvd" in (t or "") and
                   "The lot shown is still 106 Ithaca Rd's: nothing in the model changed." in (t or "")
                   for t in seven.get("labels", [])) and objects(doc) == model, seven)
-        log["done"] = True
+        claim("7 its long amber line wraps: the box stays box-sized (under 1,200 px wide)",
+              0 < (seven.get("box_width") or 0) < 1200, {"box_width": seven.get("box_width")})
+        log["ok"] = True
     except Exception:
+        log["ok"] = False
         log["error"] = traceback.format_exc()
         raise
     finally:
+        log["done"] = True                   # always: the run ended, passed or not ("ok" says which)
         json.dump(log, open(S + "out.json", "w", encoding="utf-8"), indent=1, default=str)
         try:
             g = sys.modules.get("gordium_rhino")

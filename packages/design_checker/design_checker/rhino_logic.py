@@ -1149,6 +1149,17 @@ SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and pr
 CITY_SUFFIX = ", Ithaca, NY"
 
 
+BOX_TEXT_WIDTH = 560           # px: the start box's long lines wrap here (one unbroken amber line stretched the box
+                               # across the screen: Rhino run of #33 a3eb1d7)
+LIST_ROW_PX, LIST_PAD_PX = 20, 6
+
+
+def list_height(rows):
+    """The suggestion list's height in px: as tall as its rows (1 to 8), never rows of empty space (Rhino run of
+    a3eb1d7: one suggestion sat above five empty rows)."""
+    return max(1, min(int(rows or 0), 8)) * LIST_ROW_PX + LIST_PAD_PX
+
+
 def wants_suggestions(text, chosen=None):
     """Whether to ask for suggestions for what is typed: at least SUGGEST_MIN_CHARS characters, and not the
     suggestion just picked (picking one never opens the list again)."""

@@ -146,3 +146,15 @@ def test_look_up_asks_for_the_citys_address_when_no_town_is_typed():
     assert pick.index('facts["address"] = logic.with_city(facts["address"])') < pick.index("_lookup_start(facts")
     poll = part(RHINO, "def _suggest_poll(", "def _suggest_stop(")
     assert "logic.SUGGEST_LIMIT_S" in poll and '"timeout"' in poll
+
+
+def test_the_list_is_as_tall_as_its_rows_and_long_lines_wrap():
+    """Rhino run of a3eb1d7: one suggestion sat above five empty rows; in the no-lot state the amber line was one
+    ~3,200 px line that stretched the box across the screen."""
+    assert logic.list_height(1) == 26 and logic.list_height(3) == 66 and logic.list_height(20) == logic.list_height(8)
+    assert logic.list_height(0) == logic.list_height(1)
+    box = part(UI, "def start_box(", "\ndef ")
+    got = part(box, "def got_hints(", "wait_keys.Elapsed")
+    assert got.index("hint_list.Height = logic.list_height(len(items))") < got.index("hint_list.Visible = bool(items)")
+    assert 'amber = label("", eto_status_color("needs_review"), size=12, width=logic.BOX_TEXT_WIDTH)' in box
+    assert "reason = label(logic.draw_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)" in box
