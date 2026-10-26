@@ -148,6 +148,14 @@ def test_look_up_asks_for_the_citys_address_when_no_town_is_typed():
     assert "logic.SUGGEST_LIMIT_S" in poll and '"timeout"' in poll
 
 
+def test_the_row_pitch_is_read_from_the_table_itself():
+    """Cold check of a919414 (Rhino 8's Eto.macOS.dll: ListBoxHandler is MacControl<NSTableView, ...>, so a
+    ListBox's ControlObject IS the table; .DocumentView raised and the measured pitch was never used)."""
+    fn = part(UI, "def list_row_px(", "def start_box(")
+    assert "table = listbox.ControlObject " in fn and "DocumentView" not in fn
+    assert "table.RowHeight" in fn and "table.IntercellSpacing.Height" in fn
+
+
 def test_the_list_is_as_tall_as_its_rows_and_long_lines_wrap():
     """Rhino run of a3eb1d7: one suggestion sat above five empty rows; in the no-lot state the amber line was one
     ~3,200 px line that stretched the box across the screen."""

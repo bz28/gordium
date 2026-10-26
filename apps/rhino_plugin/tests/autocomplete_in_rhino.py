@@ -110,18 +110,21 @@ def laid_out(listbox):
     """The list as Rhino (Mac) lays it out: the table's height, the scroll view's visible height, the row pitch;
     None where it can't be read (not the Mac's table)."""
     try:
-        scroll = listbox.ControlObject
-        table = scroll.DocumentView
-        return {"table_h": float(table.Frame.Height), "visible_h": float(scroll.ContentSize.Height),
-                "pitch": float(table.RowHeight) + float(table.IntercellSpacing.Height), "rows": int(table.RowCount)}
+        table = listbox.ControlObject      # Eto.macOS: the NSTableView itself
+        scroll = table.EnclosingScrollView
+        return {"visible_h": float(scroll.ContentSize.Height), "rows": int(table.RowCount),
+                "pitch": float(table.RowHeight) + float(table.IntercellSpacing.Height)}
     except Exception:
         return None
 
 
 def fits(layout):
-    """No scroll bar (every row visible) and no empty row below them."""
-    return bool(layout) and layout["rows"] > 0 and layout["table_h"] <= layout["visible_h"] + 0.5 and \
-        layout["visible_h"] - layout["table_h"] < layout["pitch"]
+    """Every row visible (no scroll bar) and no empty row below them: the rows' own height against the visible
+    height (the table itself is kept at least as tall as what shows it, so its frame can't tell)."""
+    if not layout or layout["rows"] <= 0:
+        return False
+    rows_h = layout["rows"] * layout["pitch"]
+    return rows_h <= layout["visible_h"] + 0.5 and layout["visible_h"] - rows_h < layout["pitch"]
 
 
 def parts(dialog):
