@@ -121,13 +121,25 @@ try:
     vp = top.ActiveViewport
     status = g.logic.rect_quad(g.logic.status_box(vp.Bounds.Width, g._status_rows(o, False)))
     house = [[(q.X, q.Y) for q in (vp.WorldToClient(p) for p in ring)] for ring in o.footprint]
-    labels = [(k, placed[1]) for k, placed in sorted(o.placed.items()) if placed[1] is not None]
-    hits = [(k, j) for k, q in labels for j, r in labels if k < j and g.logic.shapes_hit(q, r)]
-    log["placed"] = {k: (pl[0], [tuple(round(v) for v in p) for p in (pl[1] or [])], pl[2]) for k, pl in o.placed.items()}
+    labels = [(j, placed[1]) for j, placed in o.placed.items() if j != "height" and placed[1] is not None]
+    hits = [(j, i) for j, q in labels for i, r in labels if str(j) < str(i) and g.logic.shapes_hit(q, r)]
+    log["placed"] = {j: (pl[0], [tuple(round(v) for v in p) for p in (pl[1] or [])], pl[2], pl[5])
+                     for j, pl in o.placed.items()}
     claim("1 every label shown sits on screen clear of the status box, the house and the other labels",
           len(labels) == len(o.yard_dims) and not hits and
           not any(g.logic.shapes_hit(q, status) or (house and g.logic.shapes_hit(q, house[0])) for _, q in labels),
           {"placed": log["placed"], "overlaps": hits})
+    view = (vp.Bounds.Width, vp.Bounds.Height)
+    claim("1 every label shown lies wholly inside the view (Rhino check of #29 at f6642a9: three ran off)",
+          all(g.logic.inside_view(q, view) for _, q in labels), {"view": view, "placed": log["placed"]})
+    for name in ("Top",):                                # Zoom Extents too: the lot and neighbourhood all in view
+        vp.ZoomExtents()
+        drawn(g, doc, name, "1b_top_zoom_extents")
+        zl = [placed[1] for j, placed in o.placed.items() if j != "height" and placed[1] is not None]
+        claim("1 at Zoom Extents too, every label shown inside the view",
+              all(g.logic.inside_view(q, (vp.Bounds.Width, vp.Bounds.Height)) for q in zl), len(zl))
+    vp.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
+    drawn(g, doc, "Top")
     ring = g.ask({"cmd": "sample_site"})["lot"]
     edges = [(ring[i], ring[(i + 1) % len(ring)]) for i in range(len(ring))]
 
@@ -144,8 +156,8 @@ try:
     claim("1 the side yard's required line is 10'-0\" from its lot line", abs(to_edge(mid, left) - 10) <= 0.05,
           log["required_from_line_ft"])
     turns = []
-    for k, (_, text, _) in enumerate(o.yard_dims):
-        line = o.placed[k][3]
+    for j, (_, text, _) in enumerate(o.yard_dims):     # (j: k is the feet-to-model scale)
+        line = o.placed[j][3]
         a, b = ft(line.From), ft(line.To)              # its lot end, then its building end
         e = min(edges, key=lambda e: to_edge(a, e))     # the lot-line piece its lot end lies on
         u = (b[0] - a[0], b[1] - a[1])
@@ -175,6 +187,14 @@ try:
     claim("2 it stands beside the house, not in it", a.X > box.Max.X and a.Y < box.Min.Y, str(a))
     claim("2 coloured as the height row", front[0][2] == g.ui.dim_color(height["status"], g.ui.viewport_dark()).ToArgb(),
           height["status"])
+    fvp = doc.Views.Find("Front", False).ActiveViewport
+    hq = (o.placed.get("height") or (None, None))[1]
+    corners = [fvp.WorldToClient(p) for p in o.house_box]
+    hx = (min(q.X for q in corners), max(q.X for q in corners), min(q.Y for q in corners), max(q.Y for q in corners))
+    claim("2 its words along it, outside the house, inside the view (Rhino check at f6642a9: they sat inside the house)",
+          hq is not None and g.logic.inside_view(hq, (fvp.Bounds.Width, fvp.Bounds.Height)) and not g.logic.shapes_hit(
+              hq, [(hx[0], hx[2]), (hx[1], hx[2]), (hx[1], hx[3]), (hx[0], hx[3])]),
+          {"label": hq, "house": hx})
 
     g.set_labels(False)
     drawn(g, doc, "Top", "4_top_labels_off")

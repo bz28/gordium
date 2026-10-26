@@ -693,6 +693,13 @@ REQUIRED_HALF_FT = 6.0     # the faint required line: this far either side of it
 HEIGHT_DIM_OFFSET_FT = 4.0  # the height dimension stands this far out from the building's corner
 
 
+def _dim_short(i: dict) -> str:
+    """A dimension's words cut short, for a spot too small for the full ones (never off screen instead: Rhino check
+    of #29 at f6642a9): its mark and the yard as measured, and "< the minimum" when it fails."""
+    return (f"{i['mark']} {i['proposed']}" +
+            (f" < {i['required']}" if i["status"] == present.FAILS and i.get("required") else ""))
+
+
 def _dim_label(i: dict) -> str:
     """A dimension's words, as the plan shows them: its mark, its name, the measured distance (feet-inches) and,
     when it fails, what is needed."""
@@ -934,7 +941,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
         yards.append({"points": candidates[0]["points"], "measured_points": i["points"], "status": i["status"],
                       "label": _dim_label(i) + (f" · no required line: {why}" if why else ""),
                       "required_lines": candidates[0]["required_lines"], "required_why": why,
-                      "required_tags": required_tags(i), "candidates": candidates})
+                      "required_tags": required_tags(i), "candidates": candidates, "short_label": _dim_short(i)})
     encroach = []
     tops = [p[2] for b, _ in solids for f in b["faces"] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}

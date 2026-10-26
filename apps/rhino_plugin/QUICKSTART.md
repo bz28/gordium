@@ -287,7 +287,9 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    - in Top view each yard is dimensioned as a drawing would be: square to its lot line from the wall facing it,
      wherever along that wall it and its label sit clear of the status box, the notice and the other labels; red
      where it fails, amber where it needs review, complying ones neutral grey; its label on the line (the yard as
-     measured, its closest point; never inside the house); the required line dashed grey across it, tagged
+     measured, its closest point; never inside the house, always wholly in view: shortened to "✕ 7'-0 5/8" < 10'-0""
+     when the full words don't fit, and only then moved off the line with a leader; what is wrong placed first);
+     the required line dashed grey across it, tagged
      "min 25'-0"" (two where the limit depends on an open measurement); in the Front
      and Right views the height is dimensioned up from the grade plane, the limit faint. Zoomed out to the
      neighbourhood the dimensions give way.

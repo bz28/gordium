@@ -352,15 +352,15 @@ def test_a_label_sits_on_its_line_aligned_centred_and_outside_the_building():
 def test_a_dimension_slides_along_its_wall_to_a_clear_spot_else_its_label_goes_past_its_end_with_a_leader():
     cands = [((100, 300), (100, 200)), ((140, 300), (140, 200)), ((180, 300), (180, 200))]
     status = logic.rect_quad((60, 220, 70, 60))                  # covers the first position's label
-    i, q, kind = logic.place_dimension(cands, 80, [status])
+    i, q, kind, _ = logic.place_dimension(cands, 80, [status])
     assert (i, kind) == (1, "on") and not logic.shapes_hit(q, status)
     short = [((100, 230), (100, 200))]                           # 30 px long: shorter than its words
-    i, q, kind = logic.place_dimension(short, 80, [], away=(300, 215))
+    i, q, kind, _ = logic.place_dimension(short, 80, [], away=(300, 215))
     assert kind == "on" and min(p[1] for p in q) >= 200 + logic.DIM_LABEL_GAP_PX - 1e-9 and max(p[1] for p in q) > 230
-    blocked = logic.rect_quad((40, 190, 58, 130))                # beside it is taken: past its outer end, a leader
-    i, q, kind = logic.place_dimension(short, 80, [blocked], away=(300, 215))
-    assert kind == "end" and min(p[1] for p in q) >= 230 + logic.DIM_LABEL_GAP_PX - 1e-9
-    i, q, kind = logic.place_dimension(cands, None, [status])    # no words: only the line is placed (clear)
+    blocked = logic.rect_quad((40, 190, 58, 130))                # beside it is taken: elsewhere, with a leader
+    i, q, kind, _ = logic.place_dimension(short, 80, [blocked], away=(300, 215))
+    assert kind in ("end", "leader") and not logic.shapes_hit(q, blocked)
+    i, q, kind, _ = logic.place_dimension(cands, None, [status])    # no words: only the line is placed (clear)
     assert (i, q, kind) == (0, None, "none") or not logic.shapes_hit(
         [(c[0] - 1, c[1]) for c in cands[i]] + [(c[0] + 1, c[1]) for c in cands[i][::-1]], status)
 
@@ -383,8 +383,10 @@ def test_the_four_yard_labels_of_a_plan_keep_clear_of_each_other_the_boxes_the_e
     placed = []
     for y in yards:
         cands = [tuple(_screen(c["points"], scale)) for c in y["candidates"]]
-        i, q, kind = logic.place_dimension(cands, logic.label_width(y["label"], 11), obstacles, house, away)
-        assert q is not None
+        i, q, kind, _ = logic.place_dimension(cands, [logic.label_width(y["label"], 11),
+                                                      logic.label_width(y["short_label"], 11)],
+                                              obstacles, house, away, view=(1000, 640))
+        assert q is not None and logic.inside_view(q, (1000, 640)), (y["label"], kind, q)
         assert not any(logic.shapes_hit(q, o) for o in obstacles), (y["label"], kind)
         assert not logic.shapes_hit(q, house), y["label"]
         obstacles.append(q)
@@ -430,7 +432,7 @@ def test_with_two_buildings_a_label_never_sits_inside_either_and_turns_away_from
     owner, middle = logic.nearest_outline((200, 270), [garage, house])
     assert owner == house and middle == (300, 275)
     cands = [((120, 270), (200, 270))]                          # a west yard: from the house out to the lot line
-    i, q, kind = logic.place_dimension(cands, 60, [], [house, garage], middle)
+    i, q, kind, _ = logic.place_dimension(cands, 60, [], [house, garage], middle)
     assert q is not None and not logic.shapes_hit(q, garage) and not logic.shapes_hit(q, house)
 
 
@@ -451,11 +453,12 @@ TAG = 'min 10\'-0"'
 def test_a_min_tag_moves_to_the_lines_other_end_when_a_label_sits_at_its_far_end_and_labels_keep_off_their_own_tags():
     far, near = (200, 100), (100, 100)
     label = (200, 85, 120, 30)                                    # a label already drawn at the far end
-    assert logic.tag_spot([far, near], TAG, [label])[0] == near[0] + 4      # beside the near end instead
+    moved = logic.tag_spot([far, near], TAG, [label])           # off the label (another side, or the near end)
+    assert not logic.shapes_hit(logic.rect_quad(moved), logic.rect_quad(label))
     assert logic.tag_spot([far, near], TAG, []) == logic.tag_box(far, TAG)
     cands = [((100, 300), (100, 200)), ((140, 300), (140, 200))]
     own_tags = [[logic.rect_quad((70, 230, 25, 40))], []]          # the first position's own tag beside its line
-    i, q, kind = logic.place_dimension(cands, 60, [], extras=own_tags, away=(400, 250))
+    i, q, kind, _ = logic.place_dimension(cands, 60, [], extras=own_tags, away=(400, 250))
     assert i == 1 and kind == "on"
 
 
@@ -489,4 +492,77 @@ def test_two_min_tags_of_one_dimension_keep_off_each_other():
     a, b = logic.tag_spots(ends, [TAG, 'min 12\'-0"'], [])
     assert not logic.shapes_hit(logic.rect_quad(a), logic.rect_quad(b))
     (near,) = logic.tag_spots([((200, 100), (100, 100))], [TAG], [(200, 85, 120, 30)])
-    assert near[0] == 104                                            # the far end taken: the near end
+    assert not logic.shapes_hit(logic.rect_quad(near), logic.rect_quad((200, 85, 120, 30)))   # off what is taken
+
+
+
+# ---- the Rhino check of #29 at f6642a9: every label inside the view; what is wrong placed first; short words ----
+
+def _sample_scene(view, scale, centre=(25, 46)):
+    """check.plan's own yards for a failing house on a 50 × 100 lot, on screen: the view (w, h), `scale` px per ft,
+    the plan's `centre` in the middle of the view."""
+    from design_checker.check import check_site
+    r = check_site(_plot(box(6, 27, 38, 65)), {**FACTS, "jurisdiction": CITY})
+    origin = (view[0] / 2, view[1] / 2)
+    to = lambda pts: _screen(pts, scale, origin, centre)            # noqa: E731
+    yards = r["plan"]["yards"]
+    house = to(r["plan"]["footprint"][0])
+    lot = to([(0, 0), (50, 0), (50, 100), (0, 100)])
+    return yards, house, lot, to
+
+
+@pytest.mark.parametrize("view,scale,centre", [((1000, 640), 5, (25, 46)), ((1000, 640), 12, (25, 46)),
+                                               ((600, 400), 9, (20, 46)), ((1400, 900), 20, (10, 30)),
+                                               ((800, 500), 14, (25, 46))])
+def test_every_label_lies_wholly_inside_the_view_at_any_zoom(view, scale, centre):
+    """The Rhino check of #29 at f6642a9: the failing SW label ran off the left edge, the front and rear ones past
+    their lines' ends far outside the view. The view is a hard rule: every label wholly inside it, at the lot's
+    extents and zoomed in (the lot running off screen), on several view sizes."""
+    yards, house, lot, to = _sample_scene(view, scale, centre)
+    status = logic.rect_quad(logic.status_box(view[0], ["Gordium · ✕ 1 does not comply · 2 need review",
+                                                        "Draft rulebook · Lot lines: tax map"]))
+    obstacles = [status]
+    order = logic.placement_order([y["status"] for y in yards])
+    for k in order:
+        y = yards[k]
+        cands = [tuple(to(c["points"])) for c in y["candidates"]]
+        widths = [logic.label_width(y["label"], 11), logic.label_width(y["short_label"], 11)]
+        i, q, kind, which = logic.place_dimension(cands, widths, obstacles, house, (500, 300), view=view, lot=lot)
+        assert q is not None and logic.inside_view(q, view), (y["label"], kind, q)
+        obstacles.append(q)
+
+
+def test_what_is_wrong_is_placed_first_then_what_needs_review():
+    assert logic.placement_order(["complies", "needs_review", "does_not_comply", "complies", "does_not_comply"]) == \
+        [2, 4, 1, 0, 3]
+
+
+def test_a_label_too_long_for_its_spot_is_shortened_before_it_leaves_its_line():
+    """A 180 px dimension at the view's left edge: the full words (about 260 px) can't sit on it nor past its end
+    inside the view; the short ones ("✕ 7'-0 5/8" < 10'-0"") sit on the line."""
+    from design_checker.check import _dim_short
+    item = {"mark": "✕", "proposed": "7'-0 5/8\"", "required": "10'-0\"", "status": present.FAILS}
+    assert _dim_short(item) == "✕ 7'-0 5/8\" < 10'-0\""
+    full = logic.label_width("✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)", 11)
+    short = logic.label_width(_dim_short(item), 11)
+    cands = [((5, 300), (185, 300))]                             # its lot end at the view's left edge
+    i, q, kind, which = logic.place_dimension(cands, [full, short], [], None, (300, 300), view=(1000, 640))
+    assert (kind, which) == ("on", 1) and logic.inside_view(q, (1000, 640))
+
+
+def test_labels_keep_inside_the_lot_where_they_can():
+    """The NE label ran past the right lot line over the street: inside the lot preferred."""
+    lot = logic.rect_quad((100, 100, 400, 300))
+    cands = [((500, 250), (300, 250))]                            # a dimension ending on the lot's right line
+    i, q, kind, _ = logic.place_dimension(cands, 120, [], None, (250, 260), view=(1000, 640), lot=lot)
+    assert kind == "on" and all(logic._inside(p, lot) for p in q)
+
+
+def test_min_tags_stay_inside_the_view_and_off_the_edge_labels():
+    """The top "min 25'-0"" sat partly under the "69'-6 1/8"" edge label, and tags were too small to read."""
+    edge = (180, 60, 70, 20)
+    (box_,) = logic.tag_spots([((200, 80), (200, 300))], [TAG], [edge], view=(1000, 640))
+    assert not logic.shapes_hit(logic.rect_quad(box_), logic.rect_quad(edge))
+    assert logic.inside_view(logic.rect_quad(box_), (1000, 640)) and logic.TAG_SIZE >= 11
+    (edge_box,) = logic.tag_spots([((995, 5), (900, 5))], [TAG], [], view=(1000, 640))     # at the view's corner
+    assert logic.inside_view(logic.rect_quad(edge_box), (1000, 640))
