@@ -7,14 +7,13 @@ A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, a tax-map lot)
 1. After the check: a layer Gordium::Envelope, locked; on it the cautious buildable outline (closed, solid), the
    outline as drawn (closed, dashed linetype), and one required line per measured yard (dashed); each tagged
    Gordium's (gordium_envelope user text); the cautious outline lies 2'-0" inside the one as drawn.
-2. Snapping: an object snap to the nearest point of the cautious outline (Rhino's own Osnap, End/Near on a locked
-   object) finds a point on it (ObjectSnap via Rhino.Input.Custom.GetPoint is interactive, so the check is that the
-   curve is a real, selectable-for-snapping, locked object: IsLocked, Visible, not a reference).
+2. Real curves Osnap can snap to: in the document, visible, on a locked layer, not reference geometry (snapping
+   itself is interactive; Osnap snaps to locked objects).
 3. A second check: the same number of curves (replaced, never doubled).
-4. Undo after the check: the architect's last action (moving the house 1 ft, then Check) is what Undo takes back;
-   the curves are not an undo step of their own (the house moves back, the curves stay until the next check).
-5. "Show buildable envelope" off: the layer hidden; on again: shown.
-6. The check never measures them: the check's measured building count is unchanged with them in the file.
+4. Undo recording is off while they are worked out and drawn (so Undo never stops on them).
+5. "Show buildable envelope" off hides the layer, on shows it; a check with the layer hidden, and one with
+   "Gordium" locked, still replace them (the same number, never piled up).
+6. Never measured: none is a lot candidate or a building.
 Writes <temp>/gordium_osnap/out.json and a Top capture; closes its document."""
 import json
 import os
@@ -64,8 +63,7 @@ def curves(g, doc):
     index = doc.Layers.FindByFullPath(g.logic.ENVELOPE, -1)
     if index < 0:
         return index, []
-    return index, [o for o in doc.Objects.FindByLayer(doc.Layers[index]) or []
-                   if o.Attributes.GetUserString(g.logic.ENVELOPE_KEY)]
+    return index, g._envelope_objects(doc, index)       # (hidden or locked too: FindByLayer may skip them)
 
 
 doc = None
@@ -80,7 +78,7 @@ try:
     layer = doc.Layers[index] if index >= 0 else None
     claim("1 a Gordium::Envelope layer, locked", layer is not None and layer.IsLocked, index)
     cautious = [o for o in found if o.Attributes.GetUserString(g.logic.ENVELOPE_KEY) == "buildable outline (cautious)"]
-    drawn = [o for o in found if o.Attributes.GetUserString(g.logic.ENVELOPE_KEY) == "buildable outline (as drawn)"]
+    drawn = [o for o in found if o.Attributes.GetUserString(g.logic.ENVELOPE_KEY) == "buildable outline (as drawn, tax map)"]
     yards = [o for o in found if o.Attributes.GetUserString(g.logic.ENVELOPE_KEY).startswith("required line")]
     dashed = doc.Linetypes.Find("Dashed")
     claim("1 the cautious outline (closed, solid) and the outline as drawn (closed, dashed)",
@@ -102,32 +100,45 @@ try:
             gaps.append(round(p.DistanceTo(d.PointAt(u)) / k, 3))
         log["gaps_ft"] = gaps
         claim("1 the cautious outline 2'-0\" inside the one as drawn", all(abs(x - 2.0) <= 0.05 for x in gaps), gaps)
-    claim("2 snappable: real, visible, locked objects (Osnap snaps to locked objects)",
-          found and all(o.IsLocked or (layer is not None and layer.IsLocked) for o in found)
-          and all(not o.IsReference for o in found) and all(o.Visible for o in found), len(found))
+    claim("2 real curves Osnap can snap to: in the document, visible, locked (not reference geometry)",
+          found and all(not o.IsReference for o in found) and all(o.Visible for o in found)
+          and layer is not None and layer.IsLocked, len(found))
     g.run_check(doc, report=False)
     _, again = curves(g, doc)
     claim("3 a second check replaces them, never doubles them", len(again) == len(found), [len(found), len(again)])
-    houses = list(g._buildings(doc))
-    before = houses[0].Geometry.GetBoundingBox(True).Min.X
-    doc.Objects.Transform(houses[0].Id, rg.Transform.Translation(k, 0, 0), True)
-    doc.EndUndoRecord(doc.BeginUndoRecord("move the house 1 ft"))      # (the move, as its own step)
-    g.run_check(doc, report=False)
-    doc.Undo()
-    after = list(g._buildings(doc))[0].Geometry.GetBoundingBox(True).Min.X
-    _, kept = curves(g, doc)
-    log["undo"] = {"before": before, "after": after, "curves": len(kept)}
-    claim("4 Undo takes back the architect's move, not the curves (no undo step of their own)",
-          abs(after - before) < 1e-6 and len(kept) == len(found), log["undo"])
+    # 4. none of it recorded for Undo: Undo recording is off while the curves are worked out and drawn
+    real_curves, seen_undo = g.logic.envelope_curves, []
+
+    def spy(plan):
+        seen_undo.append(doc.UndoRecordingEnabled)
+        return real_curves(plan)
+    g.logic.envelope_curves = spy
+    try:
+        g.run_check(doc, report=False)
+    finally:
+        g.logic.envelope_curves = real_curves
+    claim("4 Undo recording is off while they are replaced (the architect's Undo never stops on them)",
+          seen_undo and not any(seen_undo), seen_undo)
+    # 5. hidden, and under a locked "Gordium": still replaced, never piled up (review of feature 4, F1)
     g.set_envelope(False)
     hidden = not doc.Layers[index].IsVisible
+    g.run_check(doc, report=False)
+    _, while_hidden = curves(g, doc)
     g.set_envelope(True)
-    claim("5 'Show buildable envelope' off hides the layer, on shows it", hidden and doc.Layers[index].IsVisible,
-          hidden)
-    measured = (g.STATE.get("last") or {}).get("header") or {}
-    claim("6 never measured: the envelope's curves are not lot candidates nor buildings",
-          all(g.logic.classify(doc.Layers[o.Attributes.LayerIndex].FullPath, type(o.Geometry).__name__) is None
-              for o in found), measured.get("lot"))
+    claim("5 'Show buildable envelope' off hides the layer; on shows it", hidden and doc.Layers[index].IsVisible, hidden)
+    root = doc.Layers[doc.Layers.FindByFullPath("Gordium", -1)]
+    root.IsLocked = True
+    try:
+        g.run_check(doc, report=False)
+        _, while_locked = curves(g, doc)
+    finally:
+        root.IsLocked = False
+    claim("5 replaced, never piled up, with the layer hidden and with 'Gordium' locked",
+          len(while_hidden) == len(found) and len(while_locked) == len(found),
+          [len(found), len(while_hidden), len(while_locked)])
+    ids = {o.Id for o in found}
+    claim("6 never measured: none is a lot candidate or a building",
+          not ids & {o.Id for o in g._lot_candidates(doc)} and not ids & {o.Id for o in g._buildings(doc)}, len(ids))
     top = doc.Views.Find("Top", False)
     doc.Views.ActiveView = top
     top.Redraw()

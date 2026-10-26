@@ -903,47 +903,62 @@ def height_dim(site: dict, env: dict, v: dict, measured: dict) -> dict | None:
             "limit": env["base"] + limit if isinstance(limit, (int, float)) else None}
 
 
+def from_tax_map(facts) -> bool:
+    """Whether the lot's lines are the tax map's (each right only to within ±TAX_MAP_TOLERANCE): anything but a lot
+    marked surveyed, an unknown one too (as the rows read it: present.py's "(approx.)"; review of feature 4, F2)."""
+    return not (facts or {}).get("lot_surveyed")
+
+
 def cautious_outline(outline, facts) -> list | None:
-    """On a tax-map lot (lot lines right to within ±TAX_MAP_TOLERANCE), the buildable outline drawn in by that
-    much on every side: where the building stands clear however the tax map's lines really lie. None on a survey
-    or without an outline (Ben, 2026-10-25: the cautious outline to snap to; the as-drawn one dashed)."""
+    """On a tax-map lot, the buildable outline drawn in by TAX_MAP_TOLERANCE on every side: where the building
+    stands clear however the tax map's lines really lie, as a list of rings (a narrow outline can come apart in
+    pieces, each kept; none at all where nothing is left 2'-0" in: an empty list, never the outline as drawn: review
+    of feature 4, F3). None on a survey or without an outline (Ben, 2026-10-25: the cautious outline to snap to; the
+    as-drawn one dashed)."""
     from shapely.geometry import Polygon
     from model_measurement.measure import TAX_MAP_TOLERANCE
-    if not outline or (facts or {}).get("lot_surveyed", True) is not False:
+    if not outline or not from_tax_map(facts):
         return None
     inner = Polygon(outline).buffer(-TAX_MAP_TOLERANCE, join_style=2)
-    if inner.is_empty or inner.geom_type != "Polygon":
-        return None
-    return _ring(inner)
+    return [_ring(g) for g in getattr(inner, "geoms", [inner]) if g.geom_type == "Polygon" and not g.is_empty]
 
 
 def full_yard_lines(shape, lot: dict, items: list) -> list:
     """Each measured yard's required line in full across the lot (plan, feet): its lot line(s) moved in by the
-    row's limit as drawn, clipped to the lot. [{"measure", "name", "status", "points": [[x, y], ...]}], one entry
-    per piece; nothing for a yard without a limit in feet or without a lot shape."""
-    from shapely.geometry import LineString, Point, Polygon
-    edges = lot.get("edges") or []
-    if shape is None or not edges:
+    row's limit, clipped to the lot; a limit that waits on an open measurement (the lot depth on the tax map:
+    `limit_span_ft`) gives a line at each end of its range, as required_lines does (review of feature 4, F4).
+    [{"measure", "name", "status", "limit_ft", "points": [[x, y], ...]}], one entry per piece; nothing for a yard
+    without a limit in feet or without a lot shape. The lot is the measurement's own polygon, curved lines and
+    all (F5)."""
+    from shapely.geometry import LineString, Point
+    if shape is None or not (lot or {}).get("edges"):
         return []
-    ring = [tuple(e["points"][0][:2]) for e in edges]
-    area = Polygon(ring).buffer(0)
+    area = shape.polygon.buffer(0)
     out = []
     for i in items:
-        limit = i.get("limit_ft")
-        if i.get("measure") not in YARD_MEASURES or not isinstance(limit, (int, float)) or limit <= 0 \
-                or not i.get("points"):
+        lo_hi = i.get("limit_span_ft")
+        limits = [i["limit_ft"]] if isinstance(i.get("limit_ft"), (int, float)) else (
+            sorted(set(lo_hi)) if lo_hi else [])
+        if i.get("measure") not in YARD_MEASURES or not i.get("points"):
             continue
         a, b = [tuple(p[:2]) for p in i["points"][:2]]
         lot_end = a if area.exterior.distance(Point(a)) <= area.exterior.distance(Point(b)) else b
         lines = _yard_lines(shape, i["measure"], lot_end)
         if lines is None:
             continue
-        inner = area.intersection(lines.buffer(limit, join_style=2)).boundary.difference(
-            area.exterior.buffer(1e-6))
-        for g in getattr(inner, "geoms", [inner]):
-            if isinstance(g, LineString) and g.length > 1e-3:
-                out.append({"measure": i["measure"], "name": i.get("name"), "status": i.get("status"),
-                            "points": [list(p) for p in g.coords]})
+        for limit in limits:
+            if limit <= 0:
+                continue
+            band = area.intersection(lines.buffer(limit, join_style=2))
+            # (only its polygon parts: a touch at a point or along a line makes a collection, whose boundary is
+            # None in shapely 2.1: review of feature 4, F8)
+            parts = [g for g in getattr(band, "geoms", [band]) if g.geom_type == "Polygon" and not g.is_empty]
+            for part in parts:
+                inner = part.boundary.difference(area.exterior.buffer(1e-6))
+                for g in getattr(inner, "geoms", [inner]):
+                    if isinstance(g, LineString) and g.length > 1e-3:
+                        out.append({"measure": i["measure"], "name": i.get("name"), "status": i.get("status"),
+                                    "limit_ft": limit, "points": [list(p) for p in g.coords]})
     return out
 
 
@@ -1059,6 +1074,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
             # what the architect snaps to (Osnap curves on Gordium::Envelope): the cautious outline on a tax-map lot
             # (every lot line 2'-0" nearer), and each yard's required line in full
             "buildable_cautious": cautious_outline(env.get("outline") if env else None, facts),
+            "lot_from_tax_map": from_tax_map(facts),
             "yard_lines": full_yard_lines(shape, lot, v["items"])}
 
 

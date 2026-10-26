@@ -519,23 +519,74 @@ def test_the_curves_to_snap_to_are_the_outline_and_every_yard_line_cautious_on_a
 def test_the_envelope_layer_is_never_measured():
     assert logic.classify("Gordium::Envelope", "PolylineCurve") is None
     assert logic.classify("Gordium::Envelope", "Brep") is None
+    # a block holding building parts there is still a problem (review of feature 4, F7: it was silently skipped)
+    assert logic.classify("Gordium::Envelope", "InstanceReference", holds_building=True)
     assert logic.envelope_curves(None) == []
 
 
-def test_the_plugin_redraws_them_each_check_locked_tagged_and_out_of_undo():
+def test_the_plugin_replaces_them_each_check_whatever_the_layers_state_and_out_of_undo():
+    """Review of feature 4: F1 (a hidden layer or a locked "Gordium": the deletes failed, a new set piled up each
+    check), F6 (recorded for Undo inside GordiumCheck), F9 (a drawing failure failed the check), F11 (Show buildable
+    envelope did nothing while a start box was open, and only in the active document)."""
     import ast
     from rule_format.rulebook import REPO
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     fns = {n.name: ast.get_source_segment(src, n) for n in ast.parse(src).body if isinstance(n, ast.FunctionDef)}
     body = fns["_envelope_curves"]
-    assert body.index("doc.UndoRecordingEnabled = bool(was and doc.UndoRecordingIsActive)") < body.index("doc.Objects.AddPolyline(") \
+    assert "doc.UndoRecordingEnabled = False\n" in body and "UndoRecordingIsActive" not in body          # F6
+    assert body.index("doc.UndoRecordingEnabled = False") < body.index("doc.Objects.AddPolyline(") \
         < body.index("doc.UndoRecordingEnabled = was")
-    assert "_set_own_lock(doc, layer, True)" in body.split("finally:")[1]              # locked again, whatever
+    assert "doc.Objects.Delete(old, True, True)" in body                     # ignoring hidden and locked (F1)
+    assert body.index("left = len(_envelope_objects(doc, index))") < body.index("if left:") \
+        < body.index("doc.Objects.AddPolyline(")                             # none added over a set not deleted
+    objects = fns["_envelope_objects"]
+    assert "settings.HiddenObjects = True" in objects and "settings.LockedObjects = True" in objects
     assert "attrs.SetUserString(logic.ENVELOPE_KEY, c[\"what\"])" in body
-    assert "if old.Attributes.GetUserString(logic.ENVELOPE_KEY):" in body              # only Gordium's replaced
-    assert "layer.IsVisible = bool(STATE.get(\"envelope_on\", True))" in body          # Show buildable envelope
+    show = fns["_show_envelope_layer"]
+    assert "layer.IsVisible = bool(STATE.get(\"envelope_on\", True))" in show and "_set_own_lock(doc, layer, True)" in show
+    for name in ("set_envelope", "toggle_envelope"):                         # F11: every document, box open or not
+        assert fns[name].index("_envelope_everywhere()") < fns[name].index("run_check(")
+    assert "for d in Rhino.RhinoDoc.OpenDocuments() or []:" in fns["_envelope_everywhere"]
     run = fns["run_check"]
-    assert "_envelope_curves(doc, result.get(\"plan\"), sent)" in run and "_envelope_curves(doc, None, facts)" in run
+    assert "logic.guard(lambda: _envelope_curves(doc, result.get(\"plan\"), sent)," in run          # F9
+    assert "_envelope_curves(doc, None, facts)" in run
+
+
+def test_an_unknown_survey_is_the_tax_maps_and_a_tight_lot_is_never_drawn_as_surveyed():
+    """Review of feature 4, F2 and F3: lot_surveyed missing read as a survey (no cautious outline, the as-drawn one
+    solid); a narrow envelope with nothing left 2'-0" in drew solid lines too."""
+    from design_checker.check import cautious_outline, from_tax_map
+    square = [[0, 0], [10, 0], [10, 10], [0, 10]]
+    assert from_tax_map({}) and from_tax_map({"lot_surveyed": None}) and not from_tax_map({"lot_surveyed": True})
+    assert cautious_outline(square, {}) and cautious_outline(square, {"lot_surveyed": True}) is None
+    assert cautious_outline([[0, 0], [3, 0], [3, 30], [0, 30]], {}) == []       # 3 ft wide: nothing 2'-0" in
+    dumbbell = [[0, 0], [10, 0], [10, 10], [6, 10], [6, 13], [10, 13], [10, 23], [0, 23], [0, 13], [4, 13], [4, 10],
+                [0, 10]]
+    assert len(cautious_outline(dumbbell, {})) == 2                            # two pieces, each kept
+    tight = logic.envelope_curves({"lot_from_tax_map": True, "buildable_cautious": [], "buildable": square,
+                                   "yard_lines": [{"points": [[0, 1], [10, 1]], "name": "Front yard"}]})
+    assert [c["dashed"] for c in tight] == [True, True] and "tax map" in tight[0]["what"]
+
+
+def test_every_yard_gets_its_snap_line_a_lot_depth_limit_both_ends_and_curved_lines_in_full():
+    """Review of feature 4: F4 (a limit waiting on the lot depth gave no line), F5 (the lot taken from each edge's
+    first point: a curved line's middle missing), F8 (a band touching at a point: a collection whose boundary is
+    None)."""
+    from shapely.geometry import LineString
+    from design_checker.check import full_yard_lines
+    from model_measurement.measure import Lot
+    bow = [[x, -10 * (1 - ((x - 25) / 25) ** 2)] for x in range(0, 51, 5)]        # the street side bulges 10 ft
+    lot = {"id": "lot", "edges": [{"points": bow}, {"points": [[50, 0], [50, 100]]}, {"points": [[50, 100], [0, 100]]},
+                     {"points": [[0, 100], [0, 0]]}]}
+    site = {"units": "ft", "lot": lot, "buildings": [], "problems": []}
+    shape = Lot(site, {"street_line": [[[0, 0], [50, 0]]]})
+    item = {"measure": "front_yard", "name": "Front yard", "status": "complies", "limit_ft": 5,
+            "points": [[25, -10], [25, 20]]}
+    (front,) = full_yard_lines(shape, lot, [item])
+    line = LineString(front["points"])
+    assert line.length > 50 and min(p[1] for p in front["points"]) < -4         # follows the bulge, in full
+    span = dict(item, limit_ft=None, limit_span_ft=[5, 8])
+    assert sorted(y["limit_ft"] for y in full_yard_lines(shape, lot, [span])) == [5, 8]
 
 
 def test_a_number_never_goes_anywhere_but_its_own_line():

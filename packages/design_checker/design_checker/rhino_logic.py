@@ -57,15 +57,18 @@ def envelope_curves(plan):
     every lot line 2'-0" nearer, solid; the outline as drawn dashed) and each yard's required line in full (dashed
     on a tax-map lot: it is as drawn). Never measured (classify); redrawn at every check."""
     plan = plan or {}
-    cautious, drawn = plan.get("buildable_cautious"), plan.get("buildable")
+    tax = bool(plan.get("lot_from_tax_map"))        # dashed whenever the lot is the tax map's, whatever is left 2'-0"
+    cautious, drawn = plan.get("buildable_cautious") or [], plan.get("buildable")   # in (review of feature 4, F3)
+    if cautious and isinstance(cautious[0][0], (int, float)):       # (one ring)
+        cautious = [cautious]
     out = []
-    if cautious:
-        out.append({"points": cautious, "closed": True, "dashed": False, "what": "buildable outline (cautious)"})
+    for ring in cautious if tax else []:
+        out.append({"points": ring, "closed": True, "dashed": False, "what": "buildable outline (cautious)"})
     if drawn:
-        out.append({"points": drawn, "closed": True, "dashed": bool(cautious),
-                    "what": "buildable outline" + (" (as drawn)" if cautious else "")})
+        out.append({"points": drawn, "closed": True, "dashed": tax,
+                    "what": "buildable outline" + (" (as drawn, tax map)" if tax else "")})
     for y in plan.get("yard_lines") or []:
-        out.append({"points": y["points"], "closed": False, "dashed": bool(cautious),
+        out.append({"points": y["points"], "closed": False, "dashed": tax,
                     "what": "required line: " + (y.get("name") or y.get("measure") or "yard")})
     return out
 
@@ -80,8 +83,8 @@ def classify(full_path, kind, holds_building=False):
         return None
     if on_layer(full_path, CONTEXT):                 # the neighbourhood drawn for context: never measured or sent
         return None
-    if on_layer(full_path, ENVELOPE):                # the curves to snap to: Gordium's, never measured or sent
-        return None
+    if on_layer(full_path, ENVELOPE) and kind.endswith("Curve"):   # the curves to snap to: Gordium's, never
+        return None                                  # measured (anything else there is judged as anywhere: F7)
     if on_layer(full_path, MASSING):
         full_path = LAYERS["building"]
     if kind.startswith("InstanceReference") and (on_layer(full_path, LAYERS["building"]) or holds_building):
