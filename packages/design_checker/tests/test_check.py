@@ -1776,7 +1776,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     # the name only with its street line (round 3, F6), and the whole street kept when one of its lines is picked
     assert '"street_name": saved_ui.get("street_name") if facts.get("street_line") else None,' in rhino
     assert ('lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,\n'
-            '                                                   outline=_outline(doc, lot), ask=_ask_street_more)') in pick
+            '                                                   outline=_outline(doc, lot), ask=_ask_street_more, said=told)') in pick
     assert "logic.set_street_lines(facts, lines, ids)" in pick
     assert logic.street_lines_after_pick(lines, lines[3]) == [list(map(list, x)) for x in lines]   # round 3, F4
     assert logic.street_lines_after_pick(lines, list(reversed(lines[3]))) == [list(map(list, x)) for x in lines]
@@ -1875,7 +1875,7 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
     corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
                    rhino.index('        elif what == "street":')]
     assert "            while lot is not None:" in corner and "_get_point(logic.street_pick_prompt(True, len(picks)))" in corner
-    assert 'logic.set_street_lines(facts, *logic.street_lines_of(outline, runs, names, picks))' in corner
+    assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in corner
     assert 'runs, said = logic.add_street_pick(runs, outline, picks[-1], names, _ask_street_more)' in corner
 
 
@@ -2422,9 +2422,9 @@ def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert rhino.count("logic.add_street_pick(runs, outline, ") == 2
     assert "outline=_outline(doc, lot), ask=_ask_street_more" in rhino and "logic.street_lines_after_picks(" not in rhino
-    assert 'logic.set_street_lines(facts, *logic.street_lines_of(outline, runs, names, picks))' in rhino
-    assert 'logic.set_street_lines(facts, logic.street_lines_of(outline, runs, None, picked)[0])' in rhino
-    assert 'say(logic.street_words(name or "This street", lines, ids))' in rhino
+    assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in rhino
+    assert 'lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []' in rhino
+    assert 'say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))' in rhino
     # what the one-street pick says when the street it kept isn't surely one street
     a, b = [[0, 0], [40, 0]], [[40, 0], [40, 100]]
     assert logic.street_words("A St", [a, b], None).endswith("Gordium asks one street or two before measuring along them")
@@ -2869,6 +2869,54 @@ def test_an_arc_drawn_in_short_chords_is_a_street_and_an_unreadable_outline_neve
     logic.street_pick(outline, outline[0], names, ask=lambda x: q.append(x) or False, label="A St")
     assert q == ["Past there is a short piece of lot line (1 more lot-line piece, 0'-2 3/8\"), with no direction of "
                  "its own. Is that on A St too? (Enter keeps it, to be safe)"], q
+
+
+def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_side_unasked():
+    """Street-run review round 8: (F1, a Front yard false pass) a refused click (a short piece standing alone) was
+    still saved as the street through street_lines_of's fallback to the clicks; now nothing changes, and the
+    command line asks again. (F2) the one-street pick says street_pick's own words, and a refusal keeps the old
+    street and its name. (F3) a click on a rounded corner's chord never joins the side line unasked (a long piece
+    joins only from a long one, or with one in the run). (F4) a short piece already near a kept line is still
+    added (pieces matched exactly, never within 0.5 ft)."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    o = _ring([(0, 0), (50, 0), (50.2, 0.2), (50.2, 100), (0, 100)])
+    runs, said = logic.add_street_pick([], o, o[1])
+    assert runs == [] and said.startswith("that piece is under 6 in long")
+    assert logic.street_lines_of(o, runs, None, [o[1]]) == ([], None)                    # (F1) nothing to save
+    assert logic.street_lines_of(o, [], None, [[[7, 7], [8, 8]]]) == ([[[7, 7], [8, 8]]], None)   # off the outline
+    told = []
+    old = [o[4]]
+    assert logic.pick_street(old, ["West St"], o[1], "Cayuga St", outline=o, said=told) == (old, ["West St"])
+    assert told == [{"words": said, "refused": True}]                                     # (F2) refused, said
+    told = []
+    shuffled = [o[2], o[0], o[3], o[1], o[4]]
+    logic.pick_street(None, None, o[0], "Elm St", outline=shuffled, said=told)
+    assert told[0]["words"].startswith("Elm St: only the lot line clicked") and not told[0]["refused"]
+    told = []
+    bend = _ring([(0, 0), (20, 0), (38, 8), (60, 12), (60, 100), (0, 100)])
+    logic.pick_street(None, None, bend[0], None, outline=bend, ask=lambda q: None, said=told)
+    assert told[0]["words"].endswith("a bend not answered is kept as street (answer No to leave it out)"), told
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '            if not facts.get("corner_lot") and runs:      # (a refused click: asked again)' in rhino
+    assert "if not (told and told[-1][\"refused\"]):" in rhino
+    # (F3) the rounded corner: 47 ft front, a 3 ft radius in 12 chords, a 97 ft side
+    pts = [(0.0, 0.0), (50.0, 0.0)]
+    for i in range(1, 13):
+        a = math.radians(90 * i / 12)
+        pts.append((50 + 3 * math.sin(a), 3 - 3 * math.cos(a)))
+    pts += [(53.0, 100.0), (0.0, 100.0)]
+    rc = _ring(pts)
+    side = 13                                                            # the piece (53, 3) -> (53, 100)
+    assert rc[side][1] == [53.0, 100.0] and abs(rc[side][0][0] - 53) < 1e-6 and abs(rc[side][0][1] - 3) < 1e-6
+    for k in (12, 11, 8):
+        got = logic.street_run(rc, rc[k])
+        assert side not in got["pieces"], (k, got)                       # never the side unasked
+    # (F4)
+    o = _ring([(0, 0), (10, 0), (10.24, 0), (10.44, 0), (30, 0), (30, 100), (0, 100)])
+    lines, _ = logic.pick_street([o[0], o[1]], None, o[0], None, outline=o)
+    assert sorted(map(str, lines)) == sorted(map(str, o[:4])), lines
 
 
 def _plugin_functions(names, **extra):

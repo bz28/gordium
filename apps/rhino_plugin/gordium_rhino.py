@@ -1376,8 +1376,9 @@ def _box_pick(doc, what, facts, saved_ui):
                 # the whole street that piece is on, never round a corner; said, and an unclear end asked
                 runs, said = logic.add_street_pick(runs, outline, picks[-1], names, _ask_street_more)
                 say(said)
-            if picks:                    # (the clicks themselves if none is a piece of the outline: never none)
-                logic.set_street_lines(facts, *logic.street_lines_of(outline, runs, names, picks))
+            lines, ids = logic.street_lines_of(outline, runs, names, picks)
+            if lines:                    # (every click refused: the street lines stay as they were)
+                logic.set_street_lines(facts, lines, ids)
                 saved_ui.pop("street_name", None)                    # (no one name for them)
                 saved_ui["street_source"] = logic.ENTERED
         elif what == "street":
@@ -1396,12 +1397,14 @@ def _box_pick(doc, what, facts, saved_ui):
                         got = ask.GetLiteralString()
                         name = (ask.StringResult() or "").strip() or None \
                             if got == Rhino.Input.GetResult.String else None
+                    told = []
                     lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,
-                                                   outline=_outline(doc, lot), ask=_ask_street_more)
-                    logic.set_street_lines(facts, lines, ids)   # the name on the clicked line only
-                    say(logic.street_words(name or "This street", lines, ids))
-                    saved_ui["street_name"] = name
-                    saved_ui["street_source"] = logic.ENTERED
+                                                   outline=_outline(doc, lot), ask=_ask_street_more, said=told)
+                    say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))
+                    if not (told and told[-1]["refused"]):     # (a point clicked: everything stays as it was)
+                        logic.set_street_lines(facts, lines, ids)   # the name on the clicked line only
+                        saved_ui["street_name"] = name
+                        saved_ui["street_source"] = logic.ENTERED
         elif what == "lot":                          # Use my survey: the surveyed outline
             lots = _lot_candidates(doc)
             picked = _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
@@ -1620,10 +1623,11 @@ def _change_facts(doc, facts, options):
                 # the whole street that piece is on, never round a corner (unnamed: from the drawing alone)
                 runs, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)
                 say(said)
-            if not facts.get("corner_lot"):
+            if not facts.get("corner_lot") and runs:      # (a refused click: asked again)
                 break
-        if picked:                                         # unnamed: the lines picked here, never the old names
-            logic.set_street_lines(facts, logic.street_lines_of(outline, runs, None, picked)[0])
+        lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []
+        if lines:                                          # unnamed: the lines picked here, never the old names
+            logic.set_street_lines(facts, lines)
         _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
