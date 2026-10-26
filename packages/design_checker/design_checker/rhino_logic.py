@@ -888,7 +888,19 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
             while (seed[-1] + 1) % n in saved and (seed[-1] + 1) % n not in seed and with_me((seed[-1] + 1) % n):
                 seed.append((seed[-1] + 1) % n)
         got = street_pick(outline, picked, names, (), ask, label, tolerance, seed=seed)
-        if got is None:                                    # an outline that doesn't run end to end: that line
+        if got is None:                 # an outline that doesn't run end to end: the saved street, else that line
+            hits = [k for k, line in enumerate(lines)
+                    if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
+            if hits:                    # never fewer on a guess (round 11): the saved street as it was
+                ids = list(own_ids or [None] * len(lines))
+                if name:
+                    ids[hits[0]] = name
+                kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
+                out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
+                said.append({"words": f"{label}: the street lines kept as they were (the lot outline doesn't run end "
+                                      f"to end in order here, so Gordium can't follow the street along it)",
+                             "refused": False})
+                return kept, (out if any(out) else None)
             said.append({"words": f"{label}: only the lot line clicked (the lot outline doesn't run end to end in "
                                   f"order here, so Gordium can't follow the street along it)", "refused": False})
             return [list(map(list, picked))], ([name] if name else None)

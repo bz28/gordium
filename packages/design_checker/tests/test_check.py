@@ -2952,6 +2952,14 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     assert ("            grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)\n"
             "            say(said)\n            if grown != runs:\n                picked.append(line)\n"
             "            runs = grown") in rhino
+    # round 11: an outline out of order, a saved street line clicked: the saved street as it was, never fewer
+    gappy = [[[0, 0], [20, 0]], [[20, 0], [40, 0]], [[40, 0], [60, 0]], [[60, 0], [60, 100]], [[60, 100.05], [0, 100]],
+             [[0, 100], [0, 0]]]
+    told = []
+    lines, ids = logic.pick_street(gappy[:3], ["A St"] * 3, gappy[1], "A St", outline=gappy, said=told)
+    assert lines == gappy[:3] and ids == ["A St"] * 3 and "kept as they were" in told[-1]["words"], (lines, told)
+    # what is said reads lines end to end whatever order they come in (round 2)
+    assert logic.street_words("X", [gappy[2], gappy[0], gappy[1]], None) == "X: 3 lot-line pieces, 60'-0\" of frontage"
     # (F4)
     o = _ring([(0, 0), (10, 0), (10.24, 0), (10.44, 0), (30, 0), (30, 100), (0, 100)])
     lines, _ = logic.pick_street([o[0], o[1]], None, o[0], None, outline=o)
