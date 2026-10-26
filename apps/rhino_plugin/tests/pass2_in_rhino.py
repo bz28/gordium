@@ -296,7 +296,7 @@ try:
         asked, real_ask = [], g._ask_street_more
         said = len(g.STATE.get("said") or [])
         g._get_point = click
-        g._ask_street_more = lambda q: asked.append(q) or False    # (both streets end at sure corners: never asked)
+        g._ask_street_more = lambda q: asked.append(q) or False    # the architect's No (see claim 10, third part)
         try:
             g._box_pick(doc, "street", facts, saved)
         finally:
@@ -318,8 +318,11 @@ try:
         claim("10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"",
               len(ithaca) == 8 and all(any(same(p, q) or same(p, q[::-1]) for q in kept) for p in ithaca)
               and "Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage" in told, log["corner"])
+        # the side street's far corner has a 0.24 ft piece in it, so it is never a sure corner (review round 7):
+        # asked once, and No keeps the street to its own 2 pieces; Ithaca Rd's two corners are sure (not asked)
         claim("10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner",
-              len(kept) == 10 and "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage" in told and not asked
+              len(kept) == 10 and "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage" in told and len(asked) == 1
+              and asked[0].startswith("Past there the lot line turns 89° over short pieces, a corner or a bend")
               and facts.get("street_ids") == ["Ithaca Rd"] * 8 + [None] * 2, log["corner"])
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
         state = dict(g._box_state(doc, facts, options, saved, "check"), corner_lot=False)   # the box: No

@@ -1776,7 +1776,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     # the name only with its street line (round 3, F6), and the whole street kept when one of its lines is picked
     assert '"street_name": saved_ui.get("street_name") if facts.get("street_line") else None,' in rhino
     assert ('lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,\n'
-            '                                                   outline=_outline(doc, lot), ask=_ask_street_more)') in pick
+            '                                                   outline=_outline(doc, lot), ask=_ask_street_more, said=told)') in pick
     assert "logic.set_street_lines(facts, lines, ids)" in pick
     assert logic.street_lines_after_pick(lines, lines[3]) == [list(map(list, x)) for x in lines]   # round 3, F4
     assert logic.street_lines_after_pick(lines, list(reversed(lines[3]))) == [list(map(list, x)) for x in lines]
@@ -1875,8 +1875,8 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
     corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
                    rhino.index('        elif what == "street":')]
     assert "            while lot is not None:" in corner and "_get_point(logic.street_pick_prompt(True, len(picks)))" in corner
-    assert 'logic.set_street_lines(facts, *logic.street_lines_of(outline, runs, names, picks))' in corner
-    assert 'runs, said = logic.add_street_pick(runs, outline, picks[-1], names, _ask_street_more)' in corner
+    assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in corner
+    assert 'grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)' in corner
 
 
 def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the_district():
@@ -2318,14 +2318,19 @@ def test_one_click_on_a_street_drawn_in_pieces_keeps_the_whole_street_and_stops_
             assert sorted(map(str, lines)) == sorted(map(str, street)), (k, lines)
             assert said == ("Ithaca Rd" if known else "Street 1") + ": 8 lot-line pieces, 75'-10\" of frontage", said
             assert ids == (["Ithaca Rd"] * 8 if known else None)
-        # the other street, clicked next: its own pieces only, never Ithaca Rd's again (the 0.24 ft piece at its
-        # far corner has no direction of its own: not taken onto the street, rhino_logic.SHORT_PIECE_FT)
+        assert not asked                               # Ithaca Rd ends at two sure corners: nothing asked
+        # the other street, clicked next: its own pieces, never Ithaca Rd's again. Its far corner has the 0.24 ft
+        # piece in it, so that corner is never sure (review round 7): the architect is asked once, and No keeps
+        # the street to its own 2 pieces
         runs, _ = logic.add_street_pick([], outline, outline[3], known, asked.append)
-        runs, said = logic.add_street_pick(runs, outline, list(reversed(outline[14])), known, asked.append)
+        no = []
+        runs, said = logic.add_street_pick(runs, outline, list(reversed(outline[14])), known,
+                                           lambda q: no.append(q) or False)
         assert runs[1] == [13, 14] and said == "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage", (runs, said)
+        assert len(no) == 1 and no[0].startswith("Past there the lot line turns 89° over short pieces, a corner "
+                                                 "or a bend (2 more lot-line pieces"), no
         again, said = logic.add_street_pick(runs, outline, outline[5], known, asked.append)   # already kept
         assert again == runs and said == "that lot line is on a street already kept"
-    assert not asked                                   # every end of both streets is a sure corner: nothing asked
     # the corners themselves: the joints where Ithaca Rd meets the lot's sides turn ~90°, far past the limit
     turns = [logic._street_lines().heading_change([outline[a], outline[b]]) for a, b in ((7, 8), (14, 0))]
     assert all(t > logic._street_lines().TURN_LIMIT_DEG for t in turns), turns
@@ -2417,9 +2422,9 @@ def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert rhino.count("logic.add_street_pick(runs, outline, ") == 2
     assert "outline=_outline(doc, lot), ask=_ask_street_more" in rhino and "logic.street_lines_after_picks(" not in rhino
-    assert 'logic.set_street_lines(facts, *logic.street_lines_of(outline, runs, names, picks))' in rhino
-    assert 'logic.set_street_lines(facts, logic.street_lines_of(outline, runs, None, picked)[0])' in rhino
-    assert 'say(logic.street_words(name or "This street", lines, ids))' in rhino
+    assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in rhino
+    assert 'lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []' in rhino
+    assert 'say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))' in rhino
     # what the one-street pick says when the street it kept isn't surely one street
     a, b = [[0, 0], [40, 0]], [[40, 0], [40, 100]]
     assert logic.street_words("A St", [a, b], None).endswith("Gordium asks one street or two before measuring along them")
@@ -2565,9 +2570,14 @@ def test_a_corner_point_drawn_twice_is_never_a_street_of_its_own():
     outline = _ring(corners)
     segs = [tuple(map(tuple, x)) for x in outline]
     got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
-    assert got["street_line"] == [list(map(list, x)) for x in outline[1:5]], got["street_line"]   # the real street
+    # never the point alone; and the corner it sits in is never sure (round 7): not suggested, the click asks
+    assert "street_line" not in got, got["street_line"]
+    asked = []
+    run, _ = logic.street_pick(outline, outline[2], ask=lambda q: asked.append(q) or False)
+    assert run == [1, 2, 3, 4] and len(asked) == 1, (run, asked)        # No: the street is its 4 real pieces
     base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
-    r = check_site(_plot(box(62, 5, 76, 45, 0, 25), lot_=lot_of(corners)), dict(base, street_line=got["street_line"]))
+    r = check_site(_plot(box(62, 5, 76, 45, 0, 25), lot_=lot_of(corners)),
+                   dict(base, street_line=[outline[k] for k in run]))
     front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
     assert front["status"] != "complies", front
     assert logic.street_run(outline, outline[0]) is None
@@ -2582,9 +2592,10 @@ def test_a_corner_point_drawn_twice_is_never_a_street_of_its_own():
     short_a, short_b = [[0, 0], [0.3, 0]], [[0.3, 0], [0.31, 0]]          # both within 0.5 ft of each other's ends
     assert logic._piece_at([short_b, short_a], short_a, 0.5) == 1 and logic._piece_at([short_b], short_a, 0.5) == 0
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "if not logic.is_tiny([_feet_point(doc, s[0])[:2], _feet_point(doc, s[1])[:2]])]" in rhino
+    click = rhino[rhino.index("def _clicked_piece(doc, lot, point):"):rhino.index("def _outline(doc, lot):")]
+    assert "return min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))" in click
     assert rhino.count("a, b = _clicked_piece(doc, lot, point)") == 3 and "min(_segments(lot.Geometry)" not in \
-        rhino.replace("return min(real or _segments(lot.Geometry)", "")
+        rhino.replace("return min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))", "")
 
 
 def test_a_piece_too_short_to_have_a_direction_is_never_a_street_a_corner_or_a_turn():
@@ -2605,9 +2616,12 @@ def test_a_piece_too_short_to_have_a_direction_is_never_a_street_a_corner_or_a_t
     outline = _ring(corners)
     segs = [tuple(map(tuple, x)) for x in outline]
     got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
-    assert got["street_line"] == [list(map(list, x)) for x in outline[1:5]], got["street_line"]
+    assert "street_line" not in got, got["street_line"]                  # the slip's corner isn't sure: asked
     assert logic.street_run(outline, outline[0]) is None and logic.street_pick(outline, outline[0])[0] == []
-    r = check_site(_plot(box(62, 5, 76, 45, 0, 25), lot_=lot_of(corners)), dict(base, street_line=got["street_line"]))
+    run, _ = logic.street_pick(outline, outline[3], ask=lambda q: False)
+    assert run == [1, 2, 3, 4], run
+    r = check_site(_plot(box(62, 5, 76, 45, 0, 25), lot_=lot_of(corners)),
+                   dict(base, street_line=[outline[k] for k in run]))
     front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
     assert front["status"] != "complies", front
     corners = [(0, 0), (20, 0), (20.003, 0.004), (40, 0), (80, 0), (80, 100), (0, 100)]           # (F2)
@@ -2662,11 +2676,303 @@ def test_a_curve_drawn_in_short_pieces_is_asked_and_the_suggestion_is_decided_in
         got = logic.to_feet(logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0,
                                                                     "segments": segs, "segments_ft": feet}], []),
                             1 / per_foot)
-        assert [[[round(c, 6) for c in p] for p in line] for line in got["street_line"]] == \
-            [list(map(list, x)) for x in _ring(corners)[1:5]], (per_foot, got["street_line"])
+        assert "street_line" not in got, (per_foot, got["street_line"])   # read in feet: the slip is short, its
+        # corner asked; read in model units a 6 mm slip was a 6-unit line, suggested alone as the street
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert '"segments_ft": [(_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]) for a, b in _segments(o.Geometry)]}' \
         in rhino
+
+
+def _messy_street_lot(rnd):
+    """A lot whose straight street (y = 0, x 0..W) is drawn in random pieces with random short ones among them
+    (a corner point drawn twice, a slip, a spike of two short pieces, several short pieces in a row), sometimes
+    at the street's own corners too; then its two sides and rear. (outline, the street's piece numbers)."""
+    W, D = rnd.uniform(40, 120), rnd.uniform(60, 150)
+    xs = sorted(rnd.uniform(1, W - 15) for _ in range(rnd.randint(1, 6)))
+    pts = [(0.0, 0.0)]
+
+    def mess(x):
+        kind = rnd.choice(["none", "none", "double", "slip", "spike", "row", "chords"])
+        if kind == "chords":                                 # a stretch drawn in short chords (an arc, flattened)
+            out, cx = [(x, 0.0)], x
+            for _ in range(rnd.randint(5, 30)):
+                cx += rnd.uniform(0.3, 0.45)
+                out.append((cx, 0.0))
+            return out
+        if kind == "double":
+            return [(x, 0.0), (x, 0.0)]
+        if kind == "slip":
+            return [(x, 0.0), (x + rnd.uniform(0.01, 0.4), rnd.uniform(-0.3, 0.3))]
+        if kind == "spike":
+            h = rnd.uniform(0.05, 0.35)
+            return [(x, 0.0), (x + h, h), (x + 2 * h, 0.0)]
+        if kind == "row":
+            out, cx = [(x, 0.0)], x
+            for _ in range(rnd.randint(2, 4)):
+                cx += rnd.uniform(0.0, 0.3)
+                out.append((cx, rnd.uniform(-0.2, 0.2)))
+            return out
+        return [(x, 0.0)]
+
+    for x in xs:
+        if x > pts[-1][0] + 0.5:                             # (never doubling back: a lot that crosses itself)
+            pts += mess(x)
+    if rnd.random() < 0.3:                                   # a short piece at the street's far corner too
+        pts.append((W - rnd.uniform(0.01, 0.3), rnd.uniform(-0.1, 0.1)))
+    pts.append((W, 0.0))
+    street_ends = len(pts)                                   # pieces 0 .. street_ends - 2 are the street
+    pts += [(W, D), (0.0, D)]
+    outline = _ring(pts)
+    if rnd.random() < 0.3:                                   # a corner point drawn twice at the near corner
+        outline = [[[0.0, 0.0], [0.0, 0.0]]] + outline
+        street = set(range(0, street_ends))
+    else:
+        street = set(range(0, street_ends - 1))
+    return outline, street
+
+
+def test_a_click_on_a_messy_straight_street_covers_it_or_asks_never_a_sure_stop_short():
+    """Street-run review round 7 (two Front yard false passes: a point drawn twice beside a short piece, and a
+    spike, ended the street for sure, unasked). The property, over 400 random lots whose one straight street is
+    drawn in random pieces with random short ones among them: from a click on any long piece of the street, at
+    each end the run either reaches the end of the street or stops with the rest put to the architect (asked),
+    never a sure stop short; the run never takes a side or the rear unasked; not answered, the whole street is
+    kept; and the suggestion, when there is one, is the whole street and nothing else."""
+    import random
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    # the two rings of round 7, as found: a point drawn twice between two 0.3 ft pieces; a V spike
+    for corners in ([(0, 0), (50, 0), (50.3, 0), (50.3, 0), (50.6, 0), (100, 0), (100, 100), (0, 100)],
+                    [(0, 0), (50, 0), (50.212, 0.212), (50.424, 0), (100, 0), (100, 100), (0, 100)]):
+        outline = _ring(corners)
+        got = logic.street_run(outline, outline[0])
+        street = set(range(len(corners) - 3))
+        assert set(got["pieces"]) | set(got["maybe"][1]) >= street, (corners, got)   # covered, or the rest asked
+        run, _ = logic.street_pick(outline, outline[0], ask=lambda q: None)
+        assert set(run) >= street, run
+        r = check_site(_plot(box(80, 6, 84, 10, 0, 25), lot_=lot_of(corners)),
+                       dict(base, street_line=[outline[q] for q in run]))
+        front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+        assert front["status"] != "complies", (corners, front)
+    rnd = random.Random(20261025)
+    for trial in range(400):
+        outline, street = _messy_street_lot(rnd)
+        n = len(outline)
+        longs = [k for k in street if not logic.is_tiny(outline[k])]
+        long_street = set(longs)
+        k = rnd.choice(longs + [q for q in street if logic.street_run(outline, outline[q]) is not None])
+        got = logic.street_run(outline, outline[k])
+        assert got is not None, (trial, outline)
+        run = got["pieces"]
+        assert set(run) <= street, (trial, run, sorted(street))           # nothing off the street unasked
+        for side, d in ((0, -1), (1, 1)):
+            q, left = (run[0] if side == 0 else run[-1]), []
+            while (q + d) % n in street and (q + d) % n not in run:
+                q = (q + d) % n
+                left.append(q)
+            if any(q in long_street for q in left):                       # street left on this side: asked
+                assert got["maybe"][side], (trial, side, run, got, sorted(street))
+        kept, _ = logic.street_pick(outline, outline[k], ask=lambda q: None)        # not answered: kept
+        assert long_street <= set(kept), (trial, kept, sorted(street))
+        yes, _ = logic.street_pick(outline, outline[k], ask=lambda q: True)
+        assert long_street <= set(yes), (trial, yes, sorted(street))
+        segs = [tuple(map(tuple, x)) for x in outline]
+        sug = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+        if sug.get("street_line"):
+            picked = {logic._piece_at(outline, line, 0.0) for line in sug["street_line"]}
+            assert long_street <= picked <= street, (trial, sorted(picked), sorted(street))
+
+
+def test_short_pieces_next_to_another_street_or_inside_a_bend_are_asked():
+    """Round 7, the rest of the rule: a short run is never decided on a guess. Before a piece named another street,
+    or before another click's street, the short run itself is asked (not left off unasked); an unclear stretch
+    ends before a short run and before a joint past PIECE_TURN_DEG, so each question is one clear stretch."""
+    from design_checker import rhino_logic as logic
+
+    def walk(start, headings, length=10.0):
+        pts, (x, y) = [start], start
+        for h in headings:
+            x, y = x + length * math.cos(math.radians(h)), y + length * math.sin(math.radians(h))
+            pts.append((round(x, 9), round(y, 9)))
+        return pts
+
+    # A St (0..40), a point drawn twice at 40, then B Ave (40..80) in line
+    outline = _ring([(0, 0), (20, 0), (40, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)])
+    names = ["A St", "A St", None, "B Ave", "B Ave", None, None, None]
+    got = logic.street_run(outline, outline[0], names)
+    assert got["pieces"] == [0, 1] and got["maybe"][1] == [2], got       # the point between them: asked
+    got = logic.street_run(outline, outline[4], None, taken={0, 1})          # A St kept by an earlier click
+    assert got["pieces"] == [3, 4] and got["maybe"][0] == [2], got
+    # a spike whose two short pieces add up to 6 in or more, though its ends are closer: asked, never passed over
+    outline = _ring([(0, 0), (50, 0), (50.15, 0.3), (50.3, 0), (100, 0), (100, 100), (0, 100)])
+    got = logic.street_run(outline, outline[0])
+    assert got["pieces"] == [0] and got["maybe"][1][:2] == [1, 2], got
+    # a gentle bend past 30° in all, then a 20° joint: the asked stretch stops before the 20° joint
+    pts = walk((0, 0), [0, 0, 9, 18, 27, 36, 56, 56])
+    lot = _ring(pts + [(-40, pts[-1][1]), (-40, -30), (-10, -30)])
+    got = logic.street_run(lot, lot[0])
+    assert got["pieces"] == [0, 1, 2, 3, 4] and got["maybe"][1] == [5], got
+    # ... and before a short run inside it
+    pts = walk((0, 0), [0, 0, 9, 18, 27, 36])
+    pts += [pts[-1]] + walk(pts[-1], [36, 36])[1:]                       # a point drawn twice, then on in line
+    lot = _ring(pts + [(-40, pts[-1][1]), (-40, -30), (-10, -30)])
+    got = logic.street_run(lot, lot[0])
+    assert got["pieces"] == [0, 1, 2, 3, 4] and got["maybe"][1] == [5], got
+
+
+def test_an_arc_drawn_in_short_chords_is_a_street_and_an_unreadable_outline_never_crashes():
+    """Street-run review round 7b: (R7-1, a Front yard false pass after a No) a click on an arc frontage drawn as
+    0.4 ft chords jumped to the nearest long piece, the side line, kept unasked; now the click is the piece under
+    it, and short chords group into strokes with their own direction, so the whole arc is the street and only its
+    two corners are asked. (R7-2) an outline of 2 pieces or out of order crashed pick_street; now the line clicked
+    alone, said. (R7-3) the questions say what they are: a corner with short pieces in it, or a short piece."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    R, half = 200.0, math.asin(30 / 200)
+    steps = int(2 * half * R / 0.4)
+    arc = [(R * math.sin(-half + 2 * half * i / steps), R - R * math.cos(-half + 2 * half * i / steps))
+           for i in range(steps + 1)]                                     # 0.4 ft chords, x -30..30
+    corners = arc + [(30, 100), (-30, 100)]
+    outline = _ring(corners)
+    mid = steps // 2
+    asked = []
+    run, said = logic.street_pick(outline, outline[mid], ask=lambda q: asked.append(q) or False)
+    assert run == list(range(steps)) and len(asked) == 2, (len(run), steps, asked)   # the arc; its 2 corners asked
+    assert all(q.startswith("Past there the lot line turns 8") and "over short pieces, a corner or a bend" in q
+               for q in asked), asked
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    r = check_site(_plot(box(-10, 4, 10, 30, 0, 25), lot_=lot_of(corners)),
+                   dict(base, street_line=[outline[k] for k in run]))
+    front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+    assert front["status"] != "complies", front
+    # (R7-2) a lot of 2 pieces (a line and an arc), a ring out of order: the line clicked alone, never a crash
+    two = [[[0, 0], [50, 0]], [[50, 0], [0, 0]]]
+    assert logic.pick_street(None, None, two[0], None, outline=two) == ([[[0, 0], [50, 0]]], None)
+    square = _ring([(0, 0), (40, 0), (40, 40), (0, 40)])
+    shuffled = [square[2], square[0], square[3], square[1]]
+    assert logic.pick_street(None, None, square[0], None, outline=shuffled) == ([[[0, 0], [40, 0]]], None)
+    runs, said = logic.add_street_pick([], shuffled, square[0])
+    assert runs == [[1]] and said.startswith("Street 1: only the lot line clicked (the lot outline doesn't run"), said
+    # (R7-3) a short piece alone, between two named streets
+    outline = _ring([(0, 0), (20, 0), (40, 0), (40.2, 0), (60, 0), (80, 0), (80, 100), (0, 100)])
+    names = ["A St", "A St", None, "B Ave", "B Ave", None, None, None]
+    q = []
+    logic.street_pick(outline, outline[0], names, ask=lambda x: q.append(x) or False, label="A St")
+    assert q == ["Past there is a short piece of lot line (1 more lot-line piece, 0'-2 3/8\"), with no direction of "
+                 "its own. Is that on A St too? (Enter keeps it, to be safe)"], q
+
+
+def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_side_unasked():
+    """Street-run review round 8: (F1, a Front yard false pass) a refused click (a short piece standing alone) was
+    still saved as the street through street_lines_of's fallback to the clicks; now nothing changes, and the
+    command line asks again. (F2) the one-street pick says street_pick's own words, and a refusal keeps the old
+    street and its name. (F3) a click on a rounded corner's chord never joins the side line unasked (a long piece
+    joins only from a long one, or with one in the run). (F4) a short piece already near a kept line is still
+    added (pieces matched exactly, never within 0.5 ft)."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    o = _ring([(0, 0), (50, 0), (50.2, 0.2), (50.2, 100), (0, 100)])
+    runs, said = logic.add_street_pick([], o, o[1])
+    assert runs == [] and said.startswith("that piece is under 6 in long")
+    assert logic.street_lines_of(o, runs, None, [o[1]]) == ([], None)                    # (F1) nothing to save
+    assert logic.street_lines_of(o, [], None, [[[7, 7], [8, 8]]]) == ([[[7, 7], [8, 8]]], None)   # off the outline
+    told = []
+    old = [o[4]]
+    assert logic.pick_street(old, ["West St"], o[1], "Cayuga St", outline=o, said=told) == (old, ["West St"])
+    assert told == [{"words": said, "refused": True}]                                     # (F2) refused, said
+    told = []
+    shuffled = [o[2], o[0], o[3], o[1], o[4]]
+    logic.pick_street(None, None, o[0], "Elm St", outline=shuffled, said=told)
+    assert told[0]["words"].startswith("Elm St: only the lot line clicked") and not told[0]["refused"]
+    told = []
+    bend = _ring([(0, 0), (20, 0), (38, 8), (60, 12), (60, 100), (0, 100)])
+    logic.pick_street(None, None, bend[0], None, outline=bend, ask=lambda q: None, said=told)
+    assert told[0]["words"].endswith("a bend not answered is kept as street (answer No to leave it out)"), told
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '            if not facts.get("corner_lot") and runs:      # (a refused click: asked again)' in rhino
+    assert "if not (told and told[-1][\"refused\"]):" in rhino
+    # (F3) the rounded corner: 47 ft front, a 3 ft radius in 12 chords, a 97 ft side
+    pts = [(0.0, 0.0), (50.0, 0.0)]
+    for i in range(1, 13):
+        a = math.radians(90 * i / 12)
+        pts.append((50 + 3 * math.sin(a), 3 - 3 * math.cos(a)))
+    pts += [(53.0, 100.0), (0.0, 100.0)]
+    rc = _ring(pts)
+    side = 13                                                            # the piece (53, 3) -> (53, 100)
+    assert rc[side][1] == [53.0, 100.0] and abs(rc[side][0][0] - 53) < 1e-6 and abs(rc[side][0][1] - 3) < 1e-6
+    for k in (12, 11, 8):
+        got = logic.street_run(rc, rc[k])
+        assert side not in got["pieces"], (k, got)                       # never the side unasked
+    # round 9: (D1) what the one-street pick says is what it keeps (old lines and the run); (D2) Edit site's prompt
+    # and its "no street line yet" guard follow what was kept, not what was clicked; (D3) a refused click is told
+    # before its street's name is asked
+    o2 = _ring([(0, 0), (60, 0), (60, 100), (0, 100)])
+    told = []
+    lines, ids = logic.pick_street([o2[0], o2[1]], None, o2[0], "A St", outline=o2, said=told)
+    assert len(lines) == 2 and told[-1]["words"] == logic.street_words("A St", lines, ids), told
+    assert "not surely one street" in told[-1]["words"]
+    assert '            keeps = not runs and logic.street_enter_keeps(facts)' in rhino and \
+        '                if runs or keeps:\n                    break' in rhino
+    one = rhino[rhino.index('        elif what == "street":'):rhino.index('        elif what == "lot":')]
+    assert one.index("refused = logic.refused_click(_outline(doc, lot), picked)") < \
+        one.index("name = logic.street_name_after_pick(")
+    slip = _ring([(0, 0), (50, 0), (50.2, 0.2), (50.2, 100), (0, 100)])
+    assert logic.refused_click(slip, slip[1]).startswith("that piece is under 6 in long")
+    assert logic.refused_click(slip, slip[0]) is None
+    assert ('                    if refused:\n                        say(refused)\n                        return facts, saved_ui\n'
+            in one)
+    # round 10: (F1) a click on a saved street line grows on from the saved pieces: nothing kept is asked again
+    # (and a No to what is asked really leaves it out); (F2) saved lines are snapped to the outline's pieces (a lot
+    # nudged under 0.5 ft: the piece, never the stale line beside it as well); (F3) Edit site answers every click
+    x = 40 + 40 * math.cos(math.radians(20))
+    bent = _ring([(0, 0), (40, 0), (x, 40 * math.sin(math.radians(20))), (x, 100), (0, 100)])
+    first, ids = logic.pick_street(None, None, bent[0], "A St", outline=bent, ask=lambda q: True)
+    assert len(first) == 2
+    asked = []
+    again, _ = logic.pick_street(first, ids, bent[0], "A St", outline=bent, ask=lambda q: asked.append(q) or False)
+    assert again == first and not asked, (again, asked)                  # kept as it was, nothing asked again
+    asked = []
+    fresh, _ = logic.pick_street(None, None, bent[0], "A St", outline=bent, ask=lambda q: asked.append(q) or False)
+    assert len(fresh) == 1 and len(asked) == 1                           # asked afresh, the No leaves it out
+    nudged = _ring([(0.2, 0), (40.2, 0), (40.2, 100), (0.2, 100)])
+    told = []
+    lines, _ = logic.pick_street([[[0, 0], [40, 0]]], None, nudged[0], "A St", outline=nudged, said=told)
+    assert lines == [nudged[0]] and told[-1]["words"] == "A St: 1 lot-line piece, 40'-0\" of frontage", (lines, told)
+    assert logic.pick_street(lines, ["A St"], nudged[0], "A St", outline=nudged)[0] == [nudged[0]]
+    assert ("            grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)\n"
+            "            say(said)\n            if grown != runs:\n                picked.append(line)\n"
+            "            runs = grown") in rhino
+    # round 11: an outline out of order, a saved street line clicked: the saved street as it was, never fewer
+    gappy = [[[0, 0], [20, 0]], [[20, 0], [40, 0]], [[40, 0], [60, 0]], [[60, 0], [60, 100]], [[60, 100.05], [0, 100]],
+             [[0, 100], [0, 0]]]
+    told = []
+    lines, ids = logic.pick_street(gappy[:3], ["A St"] * 3, gappy[1], "A St", outline=gappy, said=told)
+    assert lines == gappy[:3] and ids == ["A St"] * 3 and "kept as they were" in told[-1]["words"], (lines, told)
+    # (round 12) two known streets saved: the clicked one's kept, and said so, never "as they were"
+    told = []
+    two = gappy[:4]
+    lines, ids = logic.pick_street(two, ["A St"] * 3 + ["B Ave"], gappy[1], "A St", outline=gappy, said=told)
+    assert lines == gappy[:3] and "kept as they were" not in told[-1]["words"], (lines, told)
+    assert told[-1]["words"].startswith("A St: 3 lot-line pieces, 60'-0\" of frontage (the lot outline")
+    corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
+                   rhino.index('        elif what == "street":')]
+    assert "                if grown != runs:\n                    picks.append(line)\n                runs = grown" in corner
+    # what is said reads lines end to end whatever order they come in (round 2)
+    assert logic.street_words("X", [gappy[2], gappy[0], gappy[1]], None) == "X: 3 lot-line pieces, 60'-0\" of frontage"
+    # (F4)
+    o = _ring([(0, 0), (10, 0), (10.24, 0), (10.44, 0), (30, 0), (30, 100), (0, 100)])
+    lines, _ = logic.pick_street([o[0], o[1]], None, o[0], None, outline=o)
+    assert sorted(map(str, lines)) == sorted(map(str, o[:4])), lines
 
 
 def _plugin_functions(names, **extra):
