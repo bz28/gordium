@@ -31,7 +31,7 @@ from model_measurement.measure import measure
 from rule_format.rulebook import REPO, Context
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from test_every_reading import FACTS, LOT, floors  # noqa: E402
+from test_every_reading import FACTS, LOT, floors, prism  # noqa: E402
 
 ALLOWED = {"use": Context.for_jurisdiction(REPO / FACTS["jurisdiction"]).uses}
 WEST, EAST = "west", "east"
@@ -332,3 +332,28 @@ def test_equal_walls_fitting_one_way_only_asks_which_side_is_the_narrower():
     got, facts = measured(12.0, 12.0, 1.0, 5.0)
     assert verdict(rules(5, 10)["yard_projections"], got, facts) == present.REVIEW
     assert "which side is the narrower side yard" in got["side_yard_smaller_eaves"]["reason"]
+
+
+def test_the_which_side_question_names_the_line_each_reading_holds_narrower():
+    """#18 round c: a 120 x 60 lot with its street on the west, so its side lines run east-west (y = 0 and y = 60),
+    and a diamond house equally far from both. Each reading's question names the very lot line it reads as the
+    narrower side yard's, never a compass word from the order the lines sort in."""
+    from design_checker.check import named_result
+    lot = [(0, 0), (0, 60), (120, 60), (120, 0)]            # street along x = 0 (the first edge)
+    base = dict(FACTS, street_line=[[[0, 0], [0, 60]]])
+    built = [prism([(40, 12), (60, 30), (25, 48), (10, 30)], 0, 10, "floor 1", floor=10.0),
+             prism([(40, 12), (60, 30), (25, 48), (10, 30)], 10, 20, "floor 2", floor=10.0),
+             prism([(40, 11), (61, 30), (25, 53), (9, 30)], 20, 21, "roof")]
+    first = measure(site(built, lot), base)
+    facts = dict(base, eaves_confirmed=[{"overhang": c, "value": True, "source": "entered by you",
+                                         "confirmed_by": "the architect", "date": "2026-10-26"}
+                                        for c in first["side_yard_smaller"].get("eave_candidates") or []])
+    got = measure(site(built, lot), facts)
+    readings = [r for r in got["side_yard_smaller_eaves"].get("readings") or [] if r.get("pairing") is not None]
+    assert readings, got["side_yard_smaller_eaves"]
+    for r in readings:
+        y = r["points"][0][1]                                # the end of the reading on its lot line
+        line = "2" if abs(y - 60) < 1e-6 else "4" if abs(y) < 1e-6 else None     # the lot's edges 2 and 4
+        assert line and r["named"]["model#narrower"] == f"the side along lot line {line} the narrower side yard", r
+    found = named_result(rules(5, 10)["yard_projections"], got, ALLOWED)
+    assert found is None or "lot line" in found["text"] or found["result"] != "mixed"
