@@ -24,6 +24,9 @@ PANEL_WIDTH = 400          # as wide as Rhino's own panels (architect's review, 
 # the first column, which hid a column of its own.
 COLUMNS = [("Item", 120), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 86)]   # Item takes the rest
 ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" short" wraps instead of being cut off
+DETAIL_MIN_HEIGHT = 130   # the selected item's detail never shorter: its name, its reason (two lines) and its button
+#                           in full without scrolling (the Rhino job at 7a16aa6: with the list a fixed 380 px and a
+#                           taller header, the detail was 51 px and "Enter bedrooms and parking spaces…" 1 px under it)
 CELL_FONT_SIZE = 12
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
 
@@ -301,6 +304,7 @@ def make_panel(actions, host=None):
     detail_scroll.Content = parts["detail"]
     split.Panel2 = detail_scroll
     split.Position = 380
+    split.Panel2MinimumSize = DETAIL_MIN_HEIGHT     # the list gives way first: it scrolls, the detail's button can't
     footer = row(button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control

@@ -2856,3 +2856,16 @@ def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
         assert '.pop(str(' in script and 'get("complete")' in script and "logic.notice_place(" in script, name
+
+
+def test_the_detail_under_the_list_keeps_room_for_its_button():
+    """The Rhino job at 7a16aa6 (pass 2 claim 2): the list above the selected item's detail is a fixed 380 px, so a
+    taller header left the detail 51 px and its "Enter bedrooms and parking spaces…" button 1 px below it (scrolled).
+    The detail now never goes under DETAIL_MIN_HEIGHT: room for its name, a two-line reason and the button (each
+    line 17 px, the button 28, the layout's spacing 6 between them, its padding 10); the list gives way and scrolls."""
+    import re
+    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    least = int(re.search(r"^DETAIL_MIN_HEIGHT = (\d+)", src, re.M).group(1))
+    assert least >= 17 + 2 * 17 + 28 + 3 * 6 + 2 * 10
+    panel = src[src.index("    split = ef.Splitter()"):src.index("    footer = row(")]
+    assert "split.Panel2MinimumSize = DETAIL_MIN_HEIGHT" in panel and "split.Panel2 = detail_scroll" in panel
