@@ -1913,9 +1913,13 @@ class Job:
         self._thread.join(timeout)
         return self.finished()
 
+    def cancellable(self):
+        return self._stop is not None and not self.finished()
+
     def cancel(self):
-        """Stop the work (once; never after it is done): True when it was stopped."""
-        if self.done or self.cancelled:
+        """Stop the work (once; never after it is done; never work with no way to stop it, whose thread would go on
+        reading the checker's answers: review round 2): True when it was stopped."""
+        if not self.cancellable():
             return False
         self.cancelled = True
         self.step = CANCELLING

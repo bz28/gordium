@@ -97,6 +97,7 @@ class Watch:
     def __init__(self, g, cancel_at=None, key="asking"):
         import Eto.Forms as ef
         self.g, self.cancel_at, self.key, self.ticks, self.steps, self.panel = g, cancel_at, key, 0, [], []
+        self.cancelled = []                  # the step each cancelled job was on
         self.began = time.time()
         self.timer = ef.UITimer()
         self.timer.Interval = 0.1
@@ -117,7 +118,9 @@ class Watch:
                 lab = (self.g.STATE.get("panel_parts") or {}).get("progress_label")
                 if lab is not None and lab.Text not in self.panel:
                     self.panel.append(lab.Text)
-                if self.cancel_at is not None and time.time() - self.began >= self.cancel_at and not job.finished():
+                # only work the architect could cancel (a check, the house, the report: never the checker starting)
+                if self.cancel_at is not None and time.time() - self.began >= self.cancel_at and job.cancellable():
+                    self.cancelled.append(job.step)
                     job.cancel()
         except Exception:
             log.setdefault("watch_errors", []).append(traceback.format_exc())
@@ -198,9 +201,11 @@ def main():
         g.run_check(doc, report=True)
         old = open(path, "rb").read() if os.path.exists(path) else None
         slow(g, True)
+        g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})     # (the slow checker started first)
         w = Watch(g, cancel_at=1.0)
         g.open_report()
         w.stop()
+        claim("3 the report's own check was the work cancelled", w.cancelled == ["Slow test: waiting…"], w.cancelled)
         part = os.path.join(os.path.dirname(path), "." + os.path.basename(path) + ".part")
         claim("3 Cancel: the report file is as it was, no half-written copy",
               old is not None and open(path, "rb").read() == old and not os.path.exists(part),
@@ -210,12 +215,14 @@ def main():
 
         # 4. Draw cancelled while the starting house is worked out
         doc2 = docs.open("Large Objects - Feet")
+        g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})     # (the slow checker started again first)
         seen = {}
         g.STATE["on_confirm"] = lambda d, facts, text, state: seen.update(objects=objects(d), strings=strings(g, d))
         w = Watch(g, cancel_at=1.0)
         got = g.gordium_start()
         w.stop()
         g.STATE.pop("on_confirm", None)
+        claim("4 the work cancelled was the starting house's", w.cancelled == ["Slow test: waiting…"], w.cancelled)
         now = objects(doc2)
         claim("4 Cancel during Draw: nothing drawn, the model as when the box was shown",
               got is None and now == seen.get("objects") and not [p for p in now.values() if "Massing" in p] and
@@ -226,13 +233,10 @@ def main():
         claim("4 Gordium said Draw was cancelled", g.logic.DRAW_CANCELLED in (g.STATE.get("said") or []),
               (g.STATE.get("said") or [])[-3:])
         slow(g, False)
-        before_draw = objects(doc2)
-        g.gordium_start()
+        g.gordium_start()                      # (one undo step for a Draw is re_lookup_in_rhino.py's claim 2)
         drawn = objects(doc2)
-        Rhino.RhinoApp.RunScript("_Undo", False)
-        claim("4 Draw again works, and one Undo removes the whole Draw",
-              [p for p in drawn.values() if "Massing" in p] and set(objects(doc2)) <= set(before_draw),
-              {"drawn": len(drawn), "after_undo": len(objects(doc2)), "before": len(before_draw)})
+        claim("4 Draw again (nothing cancelled) draws the starting house", [p for p in drawn.values() if "Massing" in p],
+              {"drawn": len(drawn)})
 
         # 5. live mode: a background re-check, cancelled from the panel
         g.gordium_check()                                  # the sample again, checked; live on
@@ -280,7 +284,10 @@ def main():
             import Eto.Forms as ef
             texts = [c.Text for c in dialog.Children if isinstance(c, ef.Label)]
             buttons = {c.Text: c for c in dialog.Children if isinstance(c, ef.Button)}
-            boxes.append({"texts": texts, "buttons": sorted(buttons)})
+            draw = next((c for t, c in buttons.items() if t in ("Draw", "Check")), None)
+            run = g.STATE.get("lookup")
+            boxes.append({"texts": texts, "buttons": sorted(buttons), "draw_on": bool(draw and draw.Enabled),
+                          "lookup_running": run is not None and run["proc"].poll() is None})
             n = len(boxes)
             if n == 1:                                   # the box: the address typed, Look up
                 box = next(c for c in dialog.Children if isinstance(c, ef.TextBox))
@@ -316,11 +323,15 @@ def main():
               "Look up" in after.get("buttons", []) and
               not any((t or "").startswith("Looking up") for t in after.get("texts", [])) and
               any("cancelled: nothing changed" in (t or "") for t in after.get("texts", [])), after)
-        claim("7 the lookup process was stopped and the model unchanged",
-              g.STATE.get("lookup") is None and objects(doc2) == model)
+        claim("7 Cancel lookup stopped the lookup while the box was still open, the model unchanged",
+              not after.get("lookup_running", True) and objects(doc2) == model, after)
+        claim("7 after Cancel lookup, Draw is as it was before Look up", after.get("draw_on") == boxes[0]["draw_on"],
+              [b.get("draw_on") for b in boxes])
         log["done"] = True
+        log["ok"] = True
     except Exception:
         log["error"] = traceback.format_exc()
+        raise                                # a failed claim fails the run loudly
     finally:
         json.dump(log, open(S + "out.json", "w"), indent=1, default=str)
         try:
@@ -337,4 +348,31 @@ def main():
             close(d)
 
 
-main()
+def run_as_the_architect():
+    """main() outside any command, as the panel's buttons run (re_lookup_in_rhino.py does the same): now if no
+    command is running, else at the next idle once this one has ended. From the idle nothing may raise into Rhino: a
+    failure is in out.json ("error") and on the command line."""
+    if os.path.exists(S + "out.json"):          # never an earlier run's result read as this one's
+        os.remove(S + "out.json")
+
+    def guarded():
+        try:
+            main()
+        except Exception:
+            Rhino.RhinoApp.WriteLine("progress_cancel_in_rhino FAILED: see " + S + "out.json")
+        else:
+            Rhino.RhinoApp.WriteLine("progress_cancel_in_rhino: all claims pass")
+    if not Rhino.Commands.Command.InCommand():
+        guarded()
+        return
+
+    def once(sender, e):
+        Rhino.RhinoApp.Idle -= idle
+        guarded()
+    idle = System.EventHandler(logic.guard(once, "run outside a command"))
+    Rhino.RhinoApp.Idle += idle
+    Rhino.RhinoApp.WriteLine("progress_cancel_in_rhino: runs when this command ends; wait for " + S +
+                             "out.json to say \"done\": true")
+
+
+run_as_the_architect()

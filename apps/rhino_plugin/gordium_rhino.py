@@ -192,6 +192,10 @@ def _stop_worker():
     LEFTOVERS.pop("worker", None)
     if p is not None and p.poll() is None:
         p.kill()
+        try:                                         # gone before anything it was writing is looked at (a Cancel:
+            p.wait(timeout=2)                        # on Windows a dying process still holds its files)
+        except Exception:
+            pass
     SERVERS.stop_all()                               # and any an earlier load left running
 
 
@@ -503,7 +507,7 @@ def stale(o):
     """The model changed since the result on screen was checked, by more than a moment (F7, H1): until the
     re-check, nothing is shown as complying or not."""
     return logic.result_stale(STATE.get("dirty"), (STATE.get("last") or {}).get("at", 0), time.time(),
-                              ui.STALE_SECONDS, STATE.get("live_check") is not None)
+                              ui.STALE_SECONDS, STATE.get("live_check") is not None or bool(STATE.get("recheck_owed")))
 
 
 def draw_scene(o, e):
@@ -2181,6 +2185,7 @@ def edit_facts():
         saved = {}
     cancelled = False
     STATE["house_after_box"] = True     # this box's Draw of a new address draws its house (logic.plans_house)
+    STATE.pop("redraw_house", None)     # only this box's own Draw sets it (GordiumCheck's box left it set: round 2)
     try:                                # one undo step from Draw's reset to the starting house, closed on any way out
         try:
             facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options,
@@ -2304,6 +2309,8 @@ def run_check(doc, report=True):
         return _check_apply(doc, o, begun, result)
     except logic.WorkCancelled:
         _check_cancelled(doc, o)
+        if report:                           # any caller that asked for a report (Zoning report…, GordiumCheck):
+            _drop_report_part(report_path(doc))   # never a half-written copy left beside it (review round 2)
         return None
     except Exception as e:
         _check_failed(doc, o, e)
@@ -2339,6 +2346,7 @@ def _check_apply(doc, o, begun, result):
     """A check's answer drawn and listed (Rhino's thread)."""
     facts, sent, extras, report = begun["facts"], begun["sent"], begun["extras"], begun["report"]
     _clear(o)
+    STATE.pop("recheck_owed", None)          # a check's answer of the model now: shown as current again
     o.doc = doc.RuntimeSerialNumber
     view = result["view"]
     head = view["header"]
@@ -2458,11 +2466,12 @@ def _live_finish():
     """The live re-check's answer, on Rhino's thread: drawn if it still shows the model in front, the document it
     read; cancelled, said so; an edit made while it ran (or another document in front, a box opened): dropped, and
     the model is checked again at the next idle."""
-    running = STATE.pop("live_check", None)
+    running = STATE.get("live_check")
+    if running is None or not running["job"].finished():     # only ever a finished one (never "done" with no
+        return                                                # answer: review round 2)
+    STATE.pop("live_check", None)
     if STATE.get("live_timer") is not None:
         STATE["live_timer"].Stop()
-    if running is None:
-        return
     STATE["running"] = False
     job, begun = running["job"], running["begun"]
     doc = Rhino.RhinoDoc.ActiveDoc
@@ -2481,7 +2490,8 @@ def _live_finish():
         return
     if doc is None or doc.RuntimeSerialNumber != begun["doc"] or _box_open() or \
             not logic.checked_while_still(begun["at"], STATE.get("dirty")):
-        STATE["dirty"] = STATE.get("dirty") or time.time()      # checked again once the model is still
+        STATE["dirty"] = STATE.get("dirty") or time.time()      # checked again once the model is still;
+        STATE["recheck_owed"] = True             # until then nothing on screen is shown as checked (round 2)
         return
     try:
         _check_apply(doc, o, begun, result)
@@ -2494,11 +2504,15 @@ def _live_finish():
 def _settle_live():
     """A live re-check still running is finished before anything else asks the checker (its pipe answers one
     request at a time): waited for, with its window if slow (Cancel stops it), then drawn or dropped (_live_finish)."""
-    running = STATE.get("live_check")
-    if running is None:
-        return
-    ui.wait(running["job"], True, STATE.get("headless"))
-    _live_finish()
+    while STATE.get("live_check") is not None:
+        job = STATE["live_check"]["job"]
+        STATE["asking"] = job                # live mode starts no other re-check while this one is waited for
+        try:
+            ui.wait(job, True, STATE.get("headless"))
+        finally:
+            STATE.pop("asking", None)
+        if STATE.get("live_check") is not None and STATE["live_check"]["job"] is job:
+            _live_finish()                   # (its timer may have finished it already, while the window was open)
 
 
 # ---- "now fails": a short note, only when a rule starts failing --------------------------------------------
@@ -2681,8 +2695,7 @@ def open_report():
     last = STATE.get("last")
     result = run_check(doc, report=True)          # the check's result stays, even if the file can't be written
     if STATE.get("last") is not last and (STATE.get("last") or {}).get("cancelled"):   # this check, cancelled:
-        _drop_report_part(path)                   # (a half-written copy beside it: the report is moved in whole)
-        after = os.path.getmtime(path) if os.path.exists(path) else None
+        after = os.path.getmtime(path) if os.path.exists(path) else None   # (run_check dropped any half-written copy)
         say(logic.report_cancelled(path, after != before))   # moved in just before Cancel: said, never hidden
         return
     written = result is not None and not result.get("report_error") and os.path.exists(path) and \

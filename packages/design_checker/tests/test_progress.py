@@ -67,6 +67,16 @@ def test_cancel_stops_the_work_and_its_answer_is_never_used():
     assert not job.cancel() and stopped == [1]                        # once only
 
 
+def test_work_with_no_way_to_stop_it_is_never_cancelled():
+    """Review round 2: cancelling work nothing can stop left its thread reading the checker's answers (it could take
+    the next request's), and raised WorkCancelled where no caller expects it."""
+    go = threading.Event()
+    job = logic.Job(lambda step: (go.wait(5), "the answer")[1], "Starting Gordium's checker…")
+    assert not job.cancellable() and not job.cancel() and not job.cancelled
+    go.set()
+    assert job.wait(5) and job.outcome() == ("done", "the answer")
+
+
 def test_a_job_done_before_cancel_keeps_its_answer():
     stopped = []
     job = logic.Job(lambda step: "the answer", "Checking…", stop=lambda: stopped.append(1))
@@ -263,8 +273,14 @@ def test_a_cancelled_check_leaves_nothing_shown_as_checked():
     cancelled = part(RHINO, "def _check_cancelled(", "# ---- live mode's re-check")
     assert "_clear(o)" in cancelled and "cancelled=True" in cancelled and '"checked_at"' not in cancelled
     report = part(RHINO, "def open_report(", "def _drop_report_part(")
-    assert report.index("_drop_report_part(path)") < report.index("logic.report_cancelled(")
     assert report.index("logic.report_cancelled(") < report.index("ui.open_target(path)")
+    # review round 2: whoever asked for the report (GordiumCheck too), no half-written copy is left, and only once
+    # the stopped checker is gone
+    run = part(RHINO, "def run_check(", "def _check_begin(")
+    cancelled = run[run.index("except logic.WorkCancelled:"):run.index("except Exception as e:")]
+    assert "if report:" in cancelled and "_drop_report_part(report_path(doc))" in cancelled
+    stop = part(RHINO, "def _stop_worker(", "def ask(")
+    assert stop.index("p.kill()") < stop.index("p.wait(timeout=2)")
 
 
 def test_the_wait_window_closes_when_the_job_is_done_or_cancelled():
@@ -301,6 +317,8 @@ def test_r1_p2_only_a_box_whose_caller_draws_the_house_asks_for_one():
     assert 'logic.plans_house(mode, STATE.get("redraw_house"), STATE.get("house_after_box"))' in drawn
     edit = part(RHINO, "def edit_facts(", "def report_path(")
     assert edit.index('STATE["house_after_box"] = True') < edit.index("facts = confirm(")
+    # review round 2: a flag an earlier box (GordiumCheck's) left set never draws a house over the architect's model
+    assert edit.index('STATE.pop("redraw_house", None)') < edit.index("facts = confirm(")
     assert 'STATE.pop("house_after_box", None)' in edit
     assert "house_after_box" not in part(RHINO, "def gordium_check(", "def _layer(")
 
@@ -311,6 +329,22 @@ def test_r1_p2_a_check_the_architect_starts_shows_its_line_in_the_panel():
     follow = part(UI, "def follow(", "def wait(")
     assert "show(parts, None, checking=True, job=job)" in follow and "show_progress(parts, job)" in follow
     assert 'parts["progress_label"], parts["progress_job"] = None, job' in UI
+
+
+def test_r2_p2_waiting_for_a_background_recheck_never_starts_or_drops_another():
+    settle = part(RHINO, "def _settle_live(", "# ---- \"now fails\"")
+    assert "while STATE.get(\"live_check\") is not None:" in settle and 'STATE["asking"] = job' in settle
+    assert settle.index('STATE["asking"] = job') < settle.index("ui.wait(job") < settle.index('STATE.pop("asking"')
+    assert 'STATE["live_check"]["job"] is job' in settle
+    finish = part(RHINO, "def _live_finish(", "def _settle_live(")
+    assert finish.index('not running["job"].finished()') < finish.index('STATE.pop("live_check", None)')
+
+
+def test_r2_p3_a_dropped_answer_keeps_the_screen_out_of_date_until_the_next_check():
+    finish = part(RHINO, "def _live_finish(", "def _settle_live(")
+    assert 'STATE["recheck_owed"] = True' in finish
+    assert 'bool(STATE.get("recheck_owed"))' in part(RHINO, "def stale(", "def draw_scene(")
+    assert 'STATE.pop("recheck_owed", None)' in part(RHINO, "def _check_apply(", "def _check_failed(")
 
 
 def test_r1_p3_a_cancelled_background_recheck_clears_the_screen_at_once():
