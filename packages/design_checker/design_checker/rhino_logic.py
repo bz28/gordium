@@ -600,6 +600,18 @@ def tag_spot(ends, tag, taken):
     return boxes[0]
 
 
+def tag_spots(lines_ends, tags, taken):
+    """Each of a dimension's "min" tags placed in turn (tag_spot), each keeping off the ones before it too (two
+    limits a few feet apart: round 9, F1). `lines_ends`: per required line, its (far end, near end) on screen.
+    Their boxes, in order."""
+    seen, out = list(taken), []
+    for ends, tag in zip(lines_ends, tags):
+        box = tag_spot(list(ends), tag, seen)
+        seen.append(box)
+        out.append(box)
+    return out
+
+
 def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX,
                     extras=None):
     """Which of a yard's dimension positions to draw, and its label (screen): (index, label corners or None, "on"

@@ -477,6 +477,20 @@ def test_a_label_keeps_off_its_own_tag_wherever_the_tag_will_be_drawn():
     from rule_format.rulebook import REPO
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     screen = src[src.index("def draw_screen("):src.index("def _status_rows(")]
-    assert "spots = [[logic.tag_spot(" in screen and "extras=[[logic.rect_quad(b) for b in sp] for sp in spots]" in screen
+    assert "spots = [logic.tag_spots(" in screen and "extras=[[logic.rect_quad(b) for b in sp] for sp in spots]" in screen
     assert "_required(d, r, tag, dark, box)" in screen and "logic.tag_spot(" not in src[src.index("def _required("):
                                                                               src.index("def _dim_label(")]
+
+
+def test_two_min_tags_of_one_dimension_keep_off_each_other_and_its_label_keeps_off_both():
+    """Review round 9: two limits a few feet apart (a range) put their tags on top of each other; and a label kept
+    off its tag wherever the tag lands (the near end when the far end is taken), shown by behaviour."""
+    ends = [((200, 100), (100, 100)), ((205, 104), (105, 104))]      # two required lines 4 px apart on screen
+    a, b = logic.tag_spots(ends, [TAG, 'min 12\'-0"'], [])
+    assert not logic.shapes_hit(logic.rect_quad(a), logic.rect_quad(b))
+    far_taken = [(200, 85, 120, 30)]
+    (near,) = logic.tag_spots([((200, 100), (100, 100))], [TAG], far_taken)
+    assert near[0] == 104                                            # moved to the near end
+    cands = [((100, 300), (100, 104)), ((300, 300), (300, 104))]
+    i, q, kind = logic.place_dimension(cands, 60, [], extras=[[logic.rect_quad(near)], []], away=(500, 200))
+    assert not (i == 0 and logic.shapes_hit(q, logic.rect_quad(near)))

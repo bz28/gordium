@@ -671,9 +671,9 @@ def draw_screen(o, e):
         # each position's own "min" tags, where they will be drawn (logic.tag_spot: the far end, or the near one if
         # a label already sits there): its label never covers them (rounds 7 and 8, F3/F1)
         tags = (getattr(o, "yard_tags", None) or {}).get(k) or []
-        spots = [[logic.tag_spot([(f.X, f.Y), (n.X, n.Y)], t, taken) for (f, n), t in
-                  (((e.Viewport.WorldToClient(r.To), e.Viewport.WorldToClient(r.From)), t) for r, t in zip(req, tags))]
-                 for _, req in options]
+        spots = [logic.tag_spots([((f.X, f.Y), (n.X, n.Y)) for f, n in
+                                  ((e.Viewport.WorldToClient(r.To), e.Viewport.WorldToClient(r.From)) for r in req)],
+                                 tags, taken) for _, req in options]
         index, quad, kind = logic.place_dimension(on_screen, width, blocks, footprint, away,
                                                   extras=[[logic.rect_quad(b) for b in sp] for sp in spots])
         chosen, required = options[index]
