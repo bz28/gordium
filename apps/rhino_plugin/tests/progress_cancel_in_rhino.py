@@ -43,6 +43,7 @@ from test_docs_in_rhino import TestDocs, close  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
+sys.modules.pop("rhino_logic", None)   # this checkout's copy, never one a Rhino that loaded another head has cached
 import rhino_logic as logic  # noqa: E402  (its guard: no callback may raise into Rhino)
 
 S = os.path.join(tempfile.gettempdir(), "gordium_progress_cancel") + "/"

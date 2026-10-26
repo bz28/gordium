@@ -593,8 +593,9 @@ def test_whatever_gordium_draws_after_a_wait_is_in_an_undo_step_of_its_own():
 
 def test_a_check_whose_file_left_the_front_is_out_of_date_never_could_not_run():
     run = part(RHINO, "def run_check(", "def _check_begin(")
-    assert run.index("except logic.NotInFront:") < run.index("_check_outdated(doc, o, report)\n") < \
-        run.index("except Exception as e:")
+    handler = run.index("except logic.NotInFront as e:")
+    assert handler < run.index("_check_outdated(doc, o, report,", handler) < run.index("except Exception as e:")
+    assert "{\"report_error\": str(e)}" in run    # the check never began: no report written, said so
 
 
 def test_a_box_open_refusal_also_puts_the_tick_back():

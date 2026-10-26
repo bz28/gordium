@@ -2406,8 +2406,9 @@ def run_check(doc, report=True):
             _check_outdated(doc, o, report, begun, result)
             return None
         return _check_apply(doc, o, begun, result)
-    except logic.NotInFront:                 # another file came to the front while its facts were read
-        _check_outdated(doc, o, report)
+    except logic.NotInFront as e:            # another file came to the front while its facts were read: the check
+        _check_outdated(doc, o, report,      # never began, so no report was written (said so, never "of the model")
+                        {"had_report": bool(report) and os.path.exists(report_path(doc))}, {"report_error": str(e)})
         return None
     except logic.WorkCancelled:
         _check_cancelled(doc, o)
