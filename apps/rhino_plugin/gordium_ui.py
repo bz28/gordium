@@ -392,7 +392,8 @@ def _wrap_width(parts):
 def show(parts, view, stale=False, error=None, checking=False):
     """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet) or a
     check that couldn't run: rows keep their names but show no mark and "—", Zoom to is off (H1, H2, H5). The
-    selection, which groups are open and the scroll position are kept by item id across refreshes (D8)."""
+    selection and which groups are open are kept by item id across refreshes (D8); the list shows its first group's
+    heading whole at the top, scrolled only as far as the selected row needs (the Rhino job at 6361a3f)."""
     global WRAP_AT
     WRAP_AT = _wrap_width(parts) if DOCKED else None
     tree = parts["tree"]
@@ -434,6 +435,8 @@ def show(parts, view, stale=False, error=None, checking=False):
         store.Add(gi)
         parts["groups"].append(gi)
     tree.DataStore = store
+    _scroll_to(tree, 0)                     # the first group's heading whole at the top, never half under the column
+    #                                         titles (the Rhino job at 6361a3f: the shorter list opened scrolled a bit)
     if selected_item is not None:           # SelectedItem is read-only here: select by row in the visible list
         k = 0
         for gi in parts["groups"]:
@@ -441,10 +444,19 @@ def show(parts, view, stale=False, error=None, checking=False):
                 for c in range(gi.Children.Count):
                     if gi.Children[c] is selected_item or gi.Children[c].Tag == selected_item.Tag:
                         tree.SelectedRow = k + 1 + c
+                        _scroll_to(tree, k + 1 + c)     # ...unless the selected row is further down: just into view
                 k += gi.Children.Count
             k += 1
     parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]
     show_detail(parts)
+
+
+def _scroll_to(tree, row):
+    """The list scrolled just enough to show `row` whole (Eto's Grid.ScrollToRow: from the top, row 0 puts the first
+    group's heading under the column titles; a later row only moves the list as far as it must)."""
+    scroll = getattr(tree, "ScrollToRow", None)
+    if scroll is not None:
+        scroll(row)
 
 
 def _header(parts, view, error, out_of_date):

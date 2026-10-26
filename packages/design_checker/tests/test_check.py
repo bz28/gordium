@@ -2902,3 +2902,15 @@ def test_the_label_claim_counts_its_own_line_too():
     script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
     assert "hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]" in script
     assert "s_ != own" not in script
+
+
+def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():
+    """The Rhino job at 6361a3f (architect's eye): with the shorter list, the panel opened with the list scrolled a
+    little, "Does not comply · 1" half under the column titles. Every refresh now scrolls the list to its first row,
+    then, if a row is selected further down, only as far as that row."""
+    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    show = src[src.index("def show(parts"):src.index("def _scroll_to(")]
+    assert show.index("tree.DataStore = store") < show.index("_scroll_to(tree, 0)") < show.index("tree.SelectedRow = ")
+    assert show.index("tree.SelectedRow = k + 1 + c") < show.index("_scroll_to(tree, k + 1 + c)")
+    helper = src[src.index("def _scroll_to("):].split("\ndef ", 1)[0]
+    assert 'getattr(tree, "ScrollToRow", None)' in helper and "scroll(row)" in helper
