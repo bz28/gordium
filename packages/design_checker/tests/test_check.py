@@ -2929,6 +2929,29 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     slip = _ring([(0, 0), (50, 0), (50.2, 0.2), (50.2, 100), (0, 100)])
     assert logic.refused_click(slip, slip[1]).startswith("that piece is under 6 in long")
     assert logic.refused_click(slip, slip[0]) is None
+    assert ('                    if refused:\n                        say(refused)\n                        return facts, saved_ui\n'
+            in one)
+    # round 10: (F1) a click on a saved street line grows on from the saved pieces: nothing kept is asked again
+    # (and a No to what is asked really leaves it out); (F2) saved lines are snapped to the outline's pieces (a lot
+    # nudged under 0.5 ft: the piece, never the stale line beside it as well); (F3) Edit site answers every click
+    x = 40 + 40 * math.cos(math.radians(20))
+    bent = _ring([(0, 0), (40, 0), (x, 40 * math.sin(math.radians(20))), (x, 100), (0, 100)])
+    first, ids = logic.pick_street(None, None, bent[0], "A St", outline=bent, ask=lambda q: True)
+    assert len(first) == 2
+    asked = []
+    again, _ = logic.pick_street(first, ids, bent[0], "A St", outline=bent, ask=lambda q: asked.append(q) or False)
+    assert again == first and not asked, (again, asked)                  # kept as it was, nothing asked again
+    asked = []
+    fresh, _ = logic.pick_street(None, None, bent[0], "A St", outline=bent, ask=lambda q: asked.append(q) or False)
+    assert len(fresh) == 1 and len(asked) == 1                           # asked afresh, the No leaves it out
+    nudged = _ring([(0.2, 0), (40.2, 0), (40.2, 100), (0.2, 100)])
+    told = []
+    lines, _ = logic.pick_street([[[0, 0], [40, 0]]], None, nudged[0], "A St", outline=nudged, said=told)
+    assert lines == [nudged[0]] and told[-1]["words"] == "A St: 1 lot-line piece, 40'-0\" of frontage", (lines, told)
+    assert logic.pick_street(lines, ["A St"], nudged[0], "A St", outline=nudged)[0] == [nudged[0]]
+    assert ("            grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)\n"
+            "            say(said)\n            if grown != runs:\n                picked.append(line)\n"
+            "            runs = grown") in rhino
     # (F4)
     o = _ring([(0, 0), (10, 0), (10.24, 0), (10.44, 0), (30, 0), (30, 100), (0, 100)])
     lines, _ = logic.pick_street([o[0], o[1]], None, o[0], None, outline=o)

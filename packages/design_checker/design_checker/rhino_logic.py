@@ -848,48 +848,62 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
     whether the click was refused (a point clicked: the street lines and their name stay as they were)."""
     if said is None:
         said = []
+
     def near(p, q):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
     a, b = picked
     lines = [list(map(list, line)) for line in old_lines or []]
+    at = _piece_at(outline, picked, tolerance) if outline else None
+    if at is not None:
+        # on the lot outline: every street line is one of its pieces. The saved lines are snapped to the pieces
+        # they are (a lot nudged under 0.5 ft: the piece, never the stale line beside it; round 10), each with
+        # the street it was known to be on; the clicked piece takes the name given, and no other. The saved
+        # pieces around the click, of its own street or none, are kept as they are (never asked again, never
+        # shrunk on a guess: round 10), and the street grows on from them.
+        n = len(outline)
+        own_ids = _street_lines().matching_ids(lines, old_ids)
+        names, saved = [None] * n, set()
+        for k, line in enumerate(lines):
+            q = _piece_at(outline, line, tolerance)
+            if q is not None:
+                saved.add(q)
+                names[q] = names[q] or (own_ids[k] if own_ids is not None else None)
+        mine = name or names[at]
+        if name:
+            names[at] = name                               # the name on the clicked line only
+        label = mine or "This street"
+        refused = refused_click(outline, picked, tolerance)
+        if refused:                                        # a point clicked, not a line: nothing changes
+            said.append({"words": refused, "refused": True})
+            return lines, (list(old_ids) if own_ids is not None else None)
+
+        def with_me(q):
+            return names[q] is None or (mine is not None and _street_lines().same_street(names[q], mine))
+
+        seed = [at]
+        if at in saved:
+            while (seed[0] - 1) % n in saved and (seed[0] - 1) % n not in seed and with_me((seed[0] - 1) % n):
+                seed.insert(0, (seed[0] - 1) % n)
+            while (seed[-1] + 1) % n in saved and (seed[-1] + 1) % n not in seed and with_me((seed[-1] + 1) % n):
+                seed.append((seed[-1] + 1) % n)
+        got = street_pick(outline, picked, names, (), ask, label, tolerance, seed=seed)
+        if got is None:                                    # an outline that doesn't run end to end: that line
+            said.append({"words": f"{label}: only the lot line clicked (the lot outline doesn't run end to end in "
+                                  f"order here, so Gordium can't follow the street along it)", "refused": False})
+            return [list(map(list, picked))], ([name] if name else None)
+        said.append({"words": got[1], "refused": False})
+        return street_lines_of(outline, [got[0]], names)
+    # no outline (or a line not on it): the street lines themselves
     hits = [k for k, line in enumerate(lines)
             if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
-    if not hits:                                           # a line not among them: the street it is on
-        names = outline_names(outline, lines, old_ids, tolerance)
-        at = _piece_at(outline, picked, tolerance)
-        if at is not None:
-            names[at] = name or None                       # the name on the clicked line only
-            got = street_pick(outline, picked, names, (), ask, name or "This street", tolerance)
-            if got is None:                                # an outline that doesn't run end to end: that line
-                said.append({"words": f"{name or 'This street'}: only the lot line clicked (the lot outline doesn't "
-                                      f"run end to end in order here, so Gordium can't follow the street along it)",
-                             "refused": False})
-                return [list(map(list, picked))], ([name] if name else None)
-            if not got[0]:                                 # a point clicked, not a line: nothing changes
-                said.append({"words": got[1], "refused": True})
-                return lines, (list(old_ids) if _street_lines().matching_ids(lines, old_ids) else None)
-            said.append({"words": got[1], "refused": False})
-            return street_lines_of(outline, [got[0]], names)
+    if not hits:                                           # a line not among them: that line alone
         return [list(map(list, picked))], ([name] if name else None)
     ids = list(_street_lines().matching_ids(lines, old_ids) or [None] * len(lines))
     if name:
         ids[hits[0]] = name
     kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
     out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
-    at = _piece_at(outline, picked, tolerance)
-    if at is not None:     # and the rest of the street it is on (a suggested one-piece street, clicked: round 1, F1)
-        names = outline_names(outline, lines, ids, tolerance)
-        got = street_pick(outline, picked, names, (), ask, name or ids[hits[0]] or "This street", tolerance)
-        have = {_piece_at(outline, q, JOINT) for q in kept}        # by the piece itself (round 8: never a near one)
-        for k in (got[0] if got else []):
-            if k not in have:
-                kept.append([list(outline[k][0][:2]), list(outline[k][-1][:2])])
-                out.append(names[k])
-        if got and got[0]:     # what it says is what is kept: the old lines and the run (round 9)
-            bend = "; a bend not answered is kept as street (answer No to leave it out)"
-            said.append({"words": street_words(name or ids[hits[0]] or "This street", kept, out)
-                         + (bend if got[1].endswith(bend) else ""), "refused": False})
     return kept, (out if any(out) else None)
 
 
@@ -1260,7 +1274,7 @@ def refused_click(outline, picked, tolerance=0.5):
     return None
 
 
-def street_pick(outline, picked, names=None, taken=(), ask=None, label="This street", tolerance=0.5):
+def street_pick(outline, picked, names=None, taken=(), ask=None, label="This street", tolerance=0.5, seed=None):
     """One click on the street side, the whole street it is on: (piece numbers in order along it, what to say);
     street_run's run, with each unclear stretch past an end asked (`ask`: question -> True Yes, False No, None not
     answered) and left out only on the architect's No: a question skipped (Enter, Esc, or no one to ask) keeps it,
@@ -1268,7 +1282,7 @@ def street_pick(outline, picked, names=None, taken=(), ask=None, label="This str
     review round 3, F3; kept, a street that bends past TURN_LIMIT_DEG is asked one street or two by the measuring).
     ([], words) when the click is on a street already kept (`taken`) or on a short piece standing alone (a point,
     not a line); None when it isn't a piece of the outline, or the outline doesn't run end to end in order."""
-    found = street_run(outline, picked, names, taken, tolerance)
+    found = street_run(outline, picked, names, taken, tolerance, seed=seed)
     if found is None:
         hit = _piece_at(outline, picked, tolerance)
         if hit is not None and hit in set(taken):

@@ -1622,11 +1622,13 @@ def _change_facts(doc, facts, options):
                 continue
             a, b = _clicked_piece(doc, lot, point)
             line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
-            if line not in picked:
+            # the whole street that piece is on, never round a corner (unnamed: from the drawing alone); every
+            # click is answered, a refused one too, every time (round 10)
+            grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)
+            say(said)
+            if grown != runs:
                 picked.append(line)
-                # the whole street that piece is on, never round a corner (unnamed: from the drawing alone)
-                runs, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)
-                say(said)
+            runs = grown
             if not facts.get("corner_lot") and runs:      # (a refused click: asked again)
                 break
         lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []
