@@ -153,7 +153,7 @@ def test_the_row_pitch_is_read_from_the_table_itself():
     ListBox's ControlObject IS the table; .DocumentView raised and the measured pitch was never used)."""
     fn = part(UI, "def list_row_px(", "def start_box(")
     assert "table = listbox.ControlObject " in fn and "DocumentView" not in fn
-    assert "native_number(table.RowHeight) + native_number(table.IntercellSpacing.Height)" in fn
+    assert "native_number(table.RectOfRow(1).Y) - native_number(table.RectOfRow(0).Y)" in fn   # (laid-out rows)
     assert "int(math.ceil(pitch - 1e-6))" in fn       # rounded up: a fractional pitch never leaves a row short
     native = part(UI, "def native_number(", "def list_row_px(")
     assert native.index("return float(value)") < native.index("return float(str(value))")   # through its text too
@@ -209,3 +209,24 @@ def test_a_recorded_lookup_answers_the_start_of_its_own_address():
     from site_lookup.lookup import lookup
     assert lookup("96 Ithaca Rd, Ithaca, NY", http, now)["status"] == "found"      # as Look up asks it
     assert lookup("96 Ithaca Rd, Ithaca, NY 14850", http, now)["status"] == "found"
+
+
+# ---- Rhino run of df08fc0 ------------------------------------------------------------------------------------------
+
+def test_the_list_is_sized_from_where_its_rows_are_laid_out():
+    """Rows were painted ~16 pt apart while RowHeight + spacing said 24: eight rows left an empty band. The pitch is
+    read from the table's own row rectangles."""
+    fn = part(UI, "def list_row_px(", "def start_box(")
+    assert "table.RectOfRow(1).Y" in fn and "table.RectOfRow(0).Y" in fn
+    assert fn.index("RectOfRow(1)") < fn.index("else:") < fn.index("RectOfRow(0).Height")
+
+
+def test_the_found_address_reads_cleanly():
+    assert logic.clean_address("96 Ithaca Road, Ithaca, NY, 14850") == "96 Ithaca Road, Ithaca, NY 14850"
+    assert logic.clean_address("96 Ithaca Road, Ithaca, NY, 14850-1234") == "96 Ithaca Road, Ithaca, NY 14850-1234"
+    assert logic.clean_address("96 Ithaca Rd, Ithaca, NY") == "96 Ithaca Rd, Ithaca, NY"
+    found = {"status": "found", "query": "96 Ithaca Rd", "details": {},
+             "facts": {"address": {"value": "96 Ithaca Road, Ithaca, NY, 14850"}}}
+    facts, _ = logic.lookup_choices(found, {}, {})
+    assert facts["address"] == "96 Ithaca Road, Ithaca, NY 14850"
+    assert logic.same_address(facts["address"], "96 Ithaca Rd, Ithaca, NY")

@@ -829,7 +829,12 @@ def list_row_px(listbox):
     is read from it; elsewhere (or if it can't be read) logic.LIST_ROW_PX."""
     try:
         table = listbox.ControlObject      # Eto.macOS: the NSTableView itself (its NSScrollView is the handler's own)
-        pitch = native_number(table.RowHeight) + native_number(table.IntercellSpacing.Height)
+        # where the table lays its rows out, not the row height it reports (Rhino run of df08fc0: rows painted about
+        # 16 pt apart while RowHeight + spacing said 24, leaving an empty band under eight rows)
+        if int(native_number(table.RowCount)) >= 2:
+            pitch = native_number(table.RectOfRow(1).Y) - native_number(table.RectOfRow(0).Y)
+        else:
+            pitch = native_number(table.RectOfRow(0).Height) + native_number(table.IntercellSpacing.Height)
         return int(math.ceil(pitch - 1e-6)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX   # up: never a row short
     except Exception:
         return logic.LIST_ROW_PX

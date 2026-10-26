@@ -1207,6 +1207,13 @@ def with_city(address):
     return text
 
 
+def clean_address(text):
+    """An address as the architect reads it: the geocoder's "96 Ithaca Road, Ithaca, NY, 14850" as "96 Ithaca Road,
+    Ithaca, NY 14850" (no comma before the ZIP; Rhino run of #33 df08fc0). Anything else as it is."""
+    import re
+    return re.sub(r",\s*(\d{5}(?:-\d{4})?)\s*$", r" \1", str(text or "").strip())
+
+
 def lookup_says(payload):
     """The line for a lookup that didn't find the site (None when it did)."""
     status = (payload or {}).get("status")
@@ -1256,7 +1263,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     if found_overlays:                       # what was found, by name, not only that something was
         live["overlays"] = _merged("Found on this lot: " + "; ".join(found_overlays) + ".", live.get("overlays") or "")
     if value("address"):
-        facts["address"] = value("address")
+        facts["address"] = clean_address(value("address"))
         saved_ui["address_source"] = SUGGESTED + " · " + label("address", "address")
     zone = value("zone")
     names = {z.lower(): z for z in zones} if zones else {}

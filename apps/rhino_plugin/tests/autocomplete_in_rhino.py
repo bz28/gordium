@@ -115,8 +115,12 @@ def laid_out(listbox):
         table = listbox.ControlObject      # Eto.macOS: the NSTableView itself
         scroll = table.EnclosingScrollView
         num = sys.modules["gordium_ui"].native_number          # (Mac native numbers: as the plugin reads them)
-        return {"visible_h": num(scroll.ContentSize.Height), "rows": int(num(table.RowCount)),
-                "pitch": num(table.RowHeight) + num(table.IntercellSpacing.Height)}
+        rows = int(num(table.RowCount))
+        last = table.RectOfRow(rows - 1) if rows else None      # where the last row is laid out (painted)
+        return {"visible_h": num(scroll.ContentSize.Height), "rows": rows,
+                "rows_bottom": (num(last.Y) + num(last.Height)) if last is not None else 0.0,
+                "pitch": (num(table.RectOfRow(1).Y) - num(table.RectOfRow(0).Y)) if rows >= 2 else
+                         (num(table.RectOfRow(0).Height) if rows else 0.0)}
     except Exception:
         return None
 
@@ -126,7 +130,7 @@ def fits(layout):
     height (the table itself is kept at least as tall as what shows it, so its frame can't tell)."""
     if not layout or layout["rows"] <= 0:
         return False
-    rows_h = layout["rows"] * layout["pitch"]
+    rows_h = layout["rows_bottom"]      # the last row's bottom as laid out: what is painted, not RowHeight
     return rows_h <= layout["visible_h"] + 0.5 and layout["visible_h"] - rows_h < layout["pitch"]
 
 
@@ -272,7 +276,9 @@ def main():
               five.get("look_up_on"), five)
         claim("6 no town typed: the lookup asked for 96 Ithaca Rd, Ithaca, NY, and found it (its lot shown dashed)",
               (seen.get("6") or {}).get("query") == "96 Ithaca Rd, Ithaca, NY" and
-              any("Shown dashed: 96 Ithaca Rd" in (t or "") for t in (seen.get("6") or {}).get("labels", [])),
+              any("Shown dashed: " in (t or "") and g.logic.same_address(
+                  t.split("Shown dashed: ", 1)[1].split("'s lot", 1)[0], "96 Ithaca Rd, Ithaca, NY")
+                  for t in (seen.get("6") or {}).get("labels", [])),
               seen.get("6"))
         seven = seen.get("7", {})
         claim("7 a lookup that found no lot: the box says so and that the lot shown is still 106's, the model "
