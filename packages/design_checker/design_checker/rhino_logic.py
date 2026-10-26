@@ -947,155 +947,117 @@ def outline_names(outline, lines, ids, tolerance=0.5):
 
 def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
     """Where the street of the lot line the architect clicked (`picked`, [[x, y], [x, y]] in feet) runs along the lot
-    outline (`outline`: its pieces, each [[x, y], [x, y]], in any order): the clicked piece and its neighbours, end to
-    end both ways, for as long as they are surely on the same street. A neighbour joins when it is named the same
-    street as the clicked piece (`names`, one per piece, None where unknown: the street's identity first, however
-    it bends), or, when either is unnamed, when the joint turns no more than PIECE_TURN_DEG and the run then swings
-    no more than TURN_LIMIT_DEG in all. The run stops for sure at a piece named another street, at a joint turning
-    more than TURN_LIMIT_DEG (a corner: it never wraps round onto the other street), at a piece already `taken` (an
-    earlier click's street) and where the outline doesn't run end to end. Anywhere else it is unclear where this
-    street ends (a 20° joint, a rounded corner, a street that bends): the next stretch of pieces (up to a sure stop,
-    and never bending more than TURN_LIMIT_DEG itself, so one question never takes in a bend and the street past it:
-    review round 1, F2) is returned apart, never added on a guess, so the architect is asked. `seed`: a run already
-    kept (its pieces in order along it, the clicked one among them), grown on from its ends.
+    outline (`outline`: its pieces in order round the lot, each [[x, y], [x, y]], as Rhino gives a closed curve's
+    segments and as the measuring requires): the clicked piece and its neighbours, both ways round, for as long as
+    they are surely on the same street.
 
-    {"pieces": the run's piece numbers in order along it, "maybe": [before, after] (the unclear pieces past each
-    end, nearest first; [] where the end is sure), "turn": [the swing of each unclear stretch from the run's end, in
-    degrees, or None]}; None when `picked` isn't a piece of the outline (or is already taken)."""
+    The outline is read as long pieces (SHORT_PIECE_FT or longer: they have a direction) and the runs of short
+    pieces between them (a corner point drawn twice, a slip, a spike: no direction of their own). Going on from the
+    last long piece kept to the next long one, over the short run between them (if any):
+    - the next one is another click's street (`taken`): a sure stop;
+    - both are named (`names`, one per piece, None where unknown): the same street joins, however it bends;
+      another street is a sure stop for it, and the short run before it, if any, is asked;
+    - else, with no short run between them: a joint turning more than TURN_LIMIT_DEG is a sure stop (a corner:
+      never round onto the other street); one of PIECE_TURN_DEG or less, the run then swinging no more than
+      TURN_LIMIT_DEG in all, joins; anything else is unclear;
+    - with a short run between them, it joins in the same way only when the whole short run is under
+      SHORT_PIECE_FT (a point drawn twice, noise); otherwise it is unclear. A short piece is never a sure stop
+      (street-run review round 7: two short pieces, or a spike, ended the street unasked).
+    Unclear: the short run and the next long piece (and on over long pieces in line, while that stretch swings
+    no more than TURN_LIMIT_DEG and meets no short run) are returned apart, never added on a guess, so the
+    architect is asked. `seed`: a run already kept (its pieces in order round the lot), grown on from its ends.
+
+    {"pieces": the run's piece numbers in order round the lot, "maybe": [before, after] (the unclear pieces past
+    each end, nearest first; [] where the end is sure), "turn": [the swing of each unclear stretch from the run's
+    end, in degrees, or None]}; None when `picked` isn't a long piece of the outline (or is already taken), or the
+    outline doesn't run end to end in order (the measuring refuses such a lot: nothing is extended)."""
+    import math
     sl = _street_lines()
     pieces = [[list(line[0][:2]), list(line[-1][:2])] for line in outline or [] if len(line) >= 2]
     n = len(pieces)
     hit = _piece_at(pieces, picked, tolerance)
     taken = set(taken)
-    if hit is None or hit in taken:
+    if hit is None or hit in taken or n < 3:
+        return None
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+    # each piece turned to run round the lot (its end the next one's start): the order Rhino and the measuring use
+    vec = [None] * n
+    a, b = pieces[0]
+    if not (near(b, pieces[1][0]) or near(b, pieces[1][1])):
+        a, b = b, a
+    end = b
+    vec[0] = (b[0] - a[0], b[1] - a[1])
+    for i in range(1, n):
+        a, b = pieces[i]
+        if near(b, end) and not near(a, end):
+            a, b = b, a
+        elif not near(a, end):
+            return None                                    # not end to end in order: nothing extended
+        vec[i], end = (b[0] - a[0], b[1] - a[1]), b
+    tiny = [math.hypot(*v) < SHORT_PIECE_FT for v in vec]
+    if tiny[hit]:                                          # a point clicked, not a line: no street of it (r4)
         return None
     names = list(names) if isinstance(names, list) and len(names) == n else [None] * n
     own = names[hit]
-    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
 
-    import math
-    tiny = [is_tiny(line) for line in pieces]   # a repeated corner point (or float noise): no piece
-    if tiny[hit]:                              # a point clicked, not a line: no street of it (round 4, F1)
-        return None
+    def turn(u, v):                                        # signed, degrees, from direction u to direction v
+        return math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]))
 
-    passed = set()                             # the short pieces passed through: no direction of their own
-
-    def step(k, at, seen):
-        """(the next piece along from k's end `at`, other than those in `seen`; its far end; the short pieces passed
-        on the way, in order); None when there is none, or more than one (an outline that doesn't run end to end:
-        a lot the measuring refuses). Short pieces (is_tiny) are passed through, no direction of their own (a
-        corner point drawn twice or a slip of the pen, review rounds 3 to 5), but only up to SHORT_PIECE_FT of them
-        in all: past that they are the lot line's own shape (a curve drawn in short pieces), read piece by piece,
-        never folded into one sharp joint (round 6, F1)."""
-        via, points, length = [], [at], 0.0
-        while True:
-            touching = [j for j in range(n) if j != k and j not in via and j not in seen
-                        and any(near(pieces[j][0], p) or near(pieces[j][1], p) for p in points)]
-            short = [j for j in touching if tiny[j]]
-            budget = [j for j in short if length + math.dist(*pieces[j]) < SHORT_PIECE_FT]
-            if not short:
-                break
-            if len(budget) != len(short):              # past the allowance: the short piece is a lot line itself
-                found = [j for j in touching if j not in budget] if not budget else []
-                if len(found) != 1:
-                    return None
-                j = found[0]
-                start = any(near(pieces[j][0], p) for p in points)
-                return j, (pieces[j][1] if start else pieces[j][0]), via
-            for j in short:
-                via.append(j)
-                length += math.dist(*pieces[j])
-                points += pieces[j]
-        found = [j for j in range(n) if j != k and not tiny[j] and j not in via
-                 and any(near(pieces[j][0], p) or near(pieces[j][1], p) for p in points)]
-        if len(found) != 1 or found[0] in seen:
-            return None
-        j = found[0]
-        start = any(near(pieces[j][0], p) for p in points)
-        return j, (pieces[j][1] if start else pieces[j][0]), via
-
-    def directions(order, skip=()):
-        """Each piece's direction along `order` (pieces that meet end to end), the short ones left out (they have
-        no direction of their own: round 5); None if they don't run end to end."""
-        vecs, end = [], None
-        for i, q in enumerate(order):
-            a, b = pieces[q]
-            if i == 0:
-                if len(order) > 1 and (near(a, pieces[order[1]][0]) or near(a, pieces[order[1]][1])):
-                    a, b = b, a
-            elif near(b, end):
-                a, b = b, a
-            elif not near(a, end):
-                return None
-            end = b
-            if q not in passed and q not in skip:
-                vecs.append((b[0] - a[0], b[1] - a[1]))
-        return vecs
-
-    def swing_of(order, skip=()):        # how far the direction swings along `order`, in degrees (None: apart)
-        vecs = directions(order, skip)
-        if vecs is None:
-            return None
+    def swing(order):                                      # the spread of the running heading over the long ones
+        longs = [vec[q] for q in order if not tiny[q]]
         run_, low, high = 0.0, 0.0, 0.0
-        for u, v in zip(vecs, vecs[1:]):
-            run_ += math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]))
+        for u, v in zip(longs, longs[1:]):
+            run_ += turn(u, v)
             low, high = min(low, run_), max(high, run_)
         return high - low
 
-    def turn(a, b, via=()):              # the joint from a to b, over the short pieces between them
-        got = swing_of([a, *via, b], via)
-        return float("inf") if got is None else got
-
-    def free_end(k, inner):
-        """The end of piece k that doesn't meet piece `inner` (k's own start when there is no inner piece)."""
-        if inner is None:
-            return pieces[k][0]
-        meets = near(pieces[k][0], pieces[inner][0]) or near(pieces[k][0], pieces[inner][1])
-        return pieces[k][1] if meets else pieces[k][0]
+    def ahead(k, d, seen):
+        """From long piece k going d (+1 round the lot, -1 back): (the short run passed, in order; the next long
+        piece, or None if the lot comes round to `seen` first)."""
+        shorts, j = [], (k + d) % n
+        while tiny[j] and j not in seen:
+            shorts.append(j)
+            j = (j + d) % n
+        return shorts, (None if j in seen else j)
 
     run = list(seed) if seed and hit in seed and not set(seed) & taken else [hit]
-    ends = [free_end(run[0], run[1] if len(run) > 1 else None),
-            free_end(run[-1], run[-2]) if len(run) > 1 else pieces[hit][1]]
     maybe, swings = [[], []], [None, None]
-    for side, at in ((0, ends[0]), (1, ends[1])):
-        last = run[0] if side == 0 else run[-1]
+    for side, d in ((0, -1), (1, 1)):
         while True:
-            nxt = step(last, at, set(run) | set(maybe[0]))
-            if nxt is None or nxt[0] in taken or set(nxt[2]) & taken:
+            last = run[0] if side == 0 else run[-1]
+            shorts, j = ahead(last, d, set(run) | set(maybe[0]))
+            if j is None or j in taken or set(shorts) & taken:
+                # the lot comes round, or another click's street: sure for a long piece; short ones are asked
+                maybe[side] = [q for q in shorts if q not in taken] if shorts and not set(shorts) & taken else []
                 break
-            j, far, via = nxt
-            passed.update(via)
+            order = (lambda extra: extra[::-1] + run if side == 0 else run + extra)(shorts + [j])
             if own and names[j]:                               # both named: the street's identity decides
-                if not sl.same_street(own, names[j]):
+                if sl.same_street(own, names[j]):
+                    run[:] = order
+                    continue
+                maybe[side] = shorts                           # another street: sure for it, the short run asked
+                break
+            t = abs(turn(vec[last], vec[j]))
+            if not shorts and t > sl.TURN_LIMIT_DEG:           # a corner, long piece to long piece
+                break
+            short_len = sum(math.hypot(*vec[q]) for q in shorts)
+            if t <= PIECE_TURN_DEG and swing(order) <= sl.TURN_LIMIT_DEG and short_len < SHORT_PIECE_FT:
+                run[:] = order
+                continue
+            # unclear: the short run and the next long piece, and on over long pieces in line
+            more, k = shorts + [j], j
+            while True:
+                s2, nxt = ahead(k, d, set(run) | set(more) | set(maybe[0]))
+                if (s2 or nxt is None or nxt in taken or t > PIECE_TURN_DEG
+                        or abs(turn(vec[k], vec[nxt])) > PIECE_TURN_DEG
+                        or (names[nxt] and not (own and sl.same_street(own, names[nxt])))
+                        or swing([last] + more + [nxt]) > sl.TURN_LIMIT_DEG):
                     break
-            else:
-                t = turn(last, j, via)
-                if t > sl.TURN_LIMIT_DEG:                         # a corner
-                    break
-                swing = swing_of([j] + via[::-1] + run if side == 0 else run + via + [j])
-                if t > PIECE_TURN_DEG or swing is None or swing > sl.TURN_LIMIT_DEG:
-                    # unclear: the next stretch, asked about. A joint past PIECE_TURN_DEG is a bend of its own: that
-                    # piece alone (a rounded corner is asked piece by piece, so the straight street past it is a
-                    # question of its own); else on over small joints while it swings no more than TURN_LIMIT_DEG
-                    more, end, k = list(via), far, j
-                    while True:
-                        more.append(k)
-                        nx = step(k, end, set(run) | set(more) | set(maybe[0]))
-                        if (nx is None or nx[0] in taken or set(nx[2]) & taken or t > PIECE_TURN_DEG or turn(k, nx[0], nx[2]) > PIECE_TURN_DEG
-                                or (names[nx[0]] and not (own and sl.same_street(own, names[nx[0]])))
-                                or (swing_of([last] + more + nx[2] + [nx[0]], nx[2]) or 0.0) > sl.TURN_LIMIT_DEG):
-                            break
-                        more += nx[2]
-                        passed.update(nx[2])
-                        k, end = nx[0], nx[1]
-                    maybe[side] = more
-                    swings[side] = swing_of([last] + more)
-                    break
-            if side == 0:
-                run[:0] = [j] + via[::-1]
-            else:
-                run += via + [j]
-            last, at = j, far
+                more.append(nxt)
+                k = nxt
+            maybe[side] = more
+            swings[side] = swing([last] + more) if any(not tiny[q] for q in more) else None
+            break
     return {"pieces": run, "maybe": maybe, "turn": swings}
 
 
