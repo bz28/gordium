@@ -159,7 +159,8 @@ def painted(view):
         return {"error": repr(e)}
 
 
-PAINTED_GAP_PT = 10.0     # most empty space allowed under the lowest drawn text
+PAINTED_GAP_PT = 8.0      # most empty space allowed under the lowest drawn text (a fit leaves about 2-5 pt; half a
+#                           16 pt row left empty under one row about 9.5-10.5 pt)
 
 
 def fits(layout):

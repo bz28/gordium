@@ -239,6 +239,9 @@ def test_the_in_rhino_list_claim_needs_the_pixels():
     one = {"rows": 1, "rows_bottom": 24.0, "visible_h": 26.0, "pitch": 24.0}       # table says 24, drawn at 16
     assert not fits(dict(one, painted={"view_h": 28.0, "ink_bottom": 13.0}))        # half a row empty: not a fit
     assert fits(dict(one, painted={"view_h": 28.0, "ink_bottom": 21.0}))
+    # as sized (24 + 2 pt), text drawn in a 16 pt row, descender at 15.3 pt: 9.7 pt empty under it (round 3)
+    assert not fits(dict(one, painted={"view_h": 26.0, "ink_bottom": 16.3}))
+    assert fits(dict(one, painted={"view_h": 26.0, "ink_bottom": 21.6}))                       # a fit: 4.4 pt
 
 
 def test_the_found_address_reads_cleanly():
