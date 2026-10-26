@@ -1069,7 +1069,8 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
     assert "if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw and "    if not boxed:\n        return" in draw
     assert "if plan and labels and zoomed_in else []" in draw                                   # lot-edge labels: only when on
-    assert "\n        _dimension(d, e.Viewport, chosen, color)\n" in draw         # lines regardless (not under the
+    assert "\n            _dimension(d, e.Viewport, chosen, color)\n" in draw     # lines regardless (not under the
+    assert "\n        if flat:" in draw                              # (in plan on screen; off plan draw_scene)
     # labels' condition: placed with no words when they are off, logic.place_dimension)
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
     assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
