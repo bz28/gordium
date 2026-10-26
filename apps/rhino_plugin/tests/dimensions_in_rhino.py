@@ -127,13 +127,30 @@ try:
     hits = [(j, i) for j, q in labels for i, r in labels if str(j) < str(i) and g.logic.shapes_hit(q, r)]
     log["placed"] = {j: (pl[0], [tuple(round(v) for v in p) for p in (pl[1] or [])], pl[2], pl[5])
                      for j, pl in o.placed.items()}
-    claim("1 every label shown sits on screen clear of the status box, the house and the other labels",
+    claim("1 every number shown sits clear of the status box, the house and the other numbers",
           len(labels) == len(o.yard_dims) and not hits and
           not any(g.logic.shapes_hit(q, status) or (house and g.logic.shapes_hit(q, house[0])) for _, q in labels),
           {"placed": log["placed"], "overlaps": hits})
     view = (vp.Bounds.Width, vp.Bounds.Height)
-    claim("1 every label shown lies wholly inside the view (Rhino check of #29 at f6642a9: three ran off)",
+    claim("1 every number shown lies wholly inside the view (Rhino check of #29 at f6642a9: three ran off)",
           all(g.logic.inside_view(q, view) for _, q in labels), {"view": view, "placed": log["placed"]})
+    shown_words = [pl[5] for j, pl in o.placed.items() if j != "height" and pl[5]]
+    claim("1 each dimension shows its number only (no name, no 'needs', no '(approx.)': the panel says those)",
+          shown_words and all("yard" not in t.lower() and "needs" not in t and "approx" not in t for t in shown_words),
+          shown_words)
+    own = []
+    for j, pl in o.placed.items():                       # on or just past its own line, nowhere else
+        if j == "height" or pl[1] is None:
+            continue
+        a, b = vp.WorldToClient(pl[3].From), vp.WorldToClient(pl[3].To)
+        w = g.logic.label_width(pl[5], 11)
+        own.append(pl[2] == "crowded" or pl[1] == g.logic.number_spot(
+            (a.X, a.Y), (b.X, b.Y), w, g.logic.nearest_outline((b.X, b.Y), house)[1], view)[0])
+    claim("1 each number sits on its own line or just past its outer end", own and all(own), log["placed"])
+    tags = {j: len([r for r in pl[4]]) for j, pl in o.placed.items() if j != "height"}
+    wrong = {j for j, (_, _, st) in enumerate(o.yard_dims) if st in ("does_not_comply", "needs_review")}
+    claim("1 'min' tags only on failing or in-review yards", all(
+        (o.yard_tags.get(j) or []) == [] for j in tags if j not in wrong), {j: o.yard_tags.get(j) for j in tags})
     for name in ("Top",):                                # Zoom Extents too: the lot and neighbourhood all in view
         vp.ZoomExtents()
         drawn(g, doc, name, "1b_top_zoom_extents")
