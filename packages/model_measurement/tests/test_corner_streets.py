@@ -1,4 +1,4 @@
-"""A corner lot's streets are split only where the street lines may turn a corner (measure._street_splits), never
+"""A corner lot's streets are split only where the street lines may turn a corner (measure._street_runs), never
 mid-street: one street drawn in many pieces is one street, and a corner lot's lot width is one street's frontage
 (§325-8A col. 7), never two streets added together nor a piece of one.
 
@@ -131,7 +131,8 @@ def test_a_gently_curving_street_in_pieces_keeps_its_side_and_rear_readings():
     """#18 round c: a corner lot whose front street is 5 pieces of 12 ft turning 8 degrees at each joint (32 in all:
     where it ends is open), then a 90 degree corner. The street is the stretch before or after a possible split,
     never a middle piece alone: the address readings stay under the cap, so the side yards are still measured, and
-    no lot width reading is one 12 ft piece."""
+    no lot width reading is a middle piece alone (the first and last pieces are the streets either side of the
+    curve: 8 degrees a joint, 32 in all, is a rounded corner)."""
     pts = [(0.0, 0.0)]
     for k in range(5):
         a = math.radians(8 * k)
