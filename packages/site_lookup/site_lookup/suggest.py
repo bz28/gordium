@@ -15,14 +15,17 @@ UPPER_WORDS = set(_DIR.values())      # N, S, E, W stay capitals ("120 N Cayuga 
 
 
 MAX_SPELLINGS = 8             # spellings asked for at most (each word that may be shortened doubles them)
-CITY_WORDS = {"ITHACA", "CITY", "OF", "NY", "NEW", "YORK", "USA", "US", "14850", "14851", "14852", "14853"}
+CITY_WORDS = {"ITHACA", "CITY", "OF", "NY", "NEW", "YORK", "USA", "US", "UNITED", "STATES", "AMERICA",
+              "14850", "14851", "14852", "14853"}
 
 
 def other_town(after_comma: str) -> bool:
     """Whether what follows the first comma names a place other than the City of Ithaca ("Dryden", "Cayuga
     Heights", a ZIP not the City's): then no suggestion is offered, so another town stays another town (review round
     2). Ithaca, "City of Ithaca", NY and the City's ZIP codes are the City's."""
-    text = re.sub(r"[^A-Za-z0-9 ]", " ", after_comma or "").upper()
+    text = (after_comma or "").replace(".", "")                     # "N.Y." is "NY" (review round 3)
+    text = re.sub(r"\b(\d{5})-\d{0,4}\b", r"\1", text)              # a ZIP+4 is its ZIP ("14850-1234")
+    text = re.sub(r"[^A-Za-z0-9 ]", " ", text).upper()
     words = text.split()
 
     def city(w, typing):                 # the last word may still be being typed ("Itha", "148")

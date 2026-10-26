@@ -91,6 +91,11 @@ def test_suggestions_are_city_addresses_as_the_lookup_is_asked_for_them():
     assert suggest("106 Ithaca Rd, 14882", http) == []
     assert suggest("106 Ithaca Rd, Itha", http) == ["106 Ithaca Rd" + CITY_TAIL]        # the City's name, half typed
     assert suggest("106 Ithaca Rd, City of Ithaca, NY 14850", http) == ["106 Ithaca Rd" + CITY_TAIL]
+    # review round 3: the City written the usual ways is never taken for another town
+    for typed in ("120 N Cayuga St, Ithaca, N.Y.", "120 N Cayuga St, Ithaca, N.Y", "120 N Cayuga St, Ithaca, NY 14850-1234",
+                  "120 N Cayuga St, Ithaca, United States", "120 N Cayuga St, Ithaca, NY 14850-"):
+        assert suggest(typed, http) == ["120 N Cayuga St" + CITY_TAIL], typed
+    assert suggest("120 N Cayuga St, Ithaca, NY 14882-1234", http) == []       # another ZIP stays another
     asked = len(http.asked)
     assert suggest("106", http) == [] and len(http.asked) == asked             # too little typed: never asked
 
