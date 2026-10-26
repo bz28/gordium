@@ -97,7 +97,9 @@ def test_a_corner_rounded_into_short_pieces_beside_a_sharp_corner_may_split_insi
     facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b",
              "use": "one_family_detached", "corner_lot": True, "street_line": edges[:len(ring) - 1],
              "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0}
-    assert 40.0 in _widths(site, facts)
+    widths = _widths(site, facts)
+    assert 40.0 in widths
+    assert min(widths) >= 40.0, widths      # never one piece of the curve alone (#18 round c)
 
 
 def test_a_lot_on_three_streets_reads_each_streets_own_frontage():
@@ -110,3 +112,49 @@ def test_a_lot_on_three_streets_reads_each_streets_own_frontage():
              "ground_is_flat": True, "grade_elevation": 0}
     widths = _widths(site, facts)
     assert set(widths) == {45.0, 60.0} and max(widths) <= 60.0, widths
+
+
+def _box(x0, y0, x1, y1):
+    """A two-story box house (the floor blocks), as the architect draws one."""
+    out = []
+    for k in range(2):
+        z0, z1 = 10 * k, 10 * (k + 1)
+        pts = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+        walls = [{"points": [[*pts[i], z0], [*pts[(i + 1) % 4], z0], [*pts[(i + 1) % 4], z1], [*pts[i], z1]]}
+                 for i in range(4)]
+        out.append({"id": f"floor {k + 1}", "floor": 10.0, "problems": [],
+                    "faces": [{"points": [[x, y, z0] for x, y in pts]}, {"points": [[x, y, z1] for x, y in pts]}, *walls]})
+    return out
+
+
+def test_a_gently_curving_street_in_pieces_keeps_its_side_and_rear_readings():
+    """#18 round c: a corner lot whose front street is 5 pieces of 12 ft turning 8 degrees at each joint (32 in all:
+    where it ends is open), then a 90 degree corner. The street is the stretch before or after a possible split,
+    never a middle piece alone: the address readings stay under the cap, so the side yards are still measured, and
+    no lot width reading is one 12 ft piece."""
+    pts = [(0.0, 0.0)]
+    for k in range(5):
+        a = math.radians(8 * k)
+        pts.append((pts[-1][0] + 12 * math.cos(a), pts[-1][1] + 12 * math.sin(a)))
+    ring = [*pts, (pts[-1][0], 100.0), (0.0, 100.0)]
+    edges, site = _site(ring)
+    site["buildings"] = _box(15, 25, 40, 70)
+    facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b",
+             "use": "one_family_detached", "corner_lot": True, "street_line": edges[:6], "lot_surveyed": True,
+             "ground_is_flat": True, "grade_elevation": 0}
+    m = measure(site, facts)
+    assert m["side_yard_smaller"].get("readings") or m["side_yard_smaller"]["value"] is not None
+    assert "too many readings" not in (m["side_yard_smaller"].get("reason") or "")
+    words = [r["reading"] for r in m["lot_width"].get("readings") or []]
+    assert words and not any(w.endswith(f"(lot line {k})") for w in words for k in (2, 3, 4)), words
+
+
+def test_a_chamfer_is_never_a_street_alone():
+    """#18 round c: a corner cut off (55 ft street, a 5 x 5 chamfer, 95 ft street): the chamfer is part of either
+    street, never a street of its own (7'-1" frontage): 55, 62.07, 95 or 102.07 ft."""
+    ring = [(0, 0), (55, 0), (60, 5), (60, 100), (0, 100)]
+    edges, site = _site(ring)
+    facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b",
+             "use": "one_family_detached", "corner_lot": True, "street_line": edges[:3], "lot_surveyed": True,
+             "ground_is_flat": True, "grade_elevation": 0}
+    assert set(_widths(site, facts)) == {55.0, 62.07, 95.0, 102.07}
