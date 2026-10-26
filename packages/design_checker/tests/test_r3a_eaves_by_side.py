@@ -56,7 +56,8 @@ def test_either_side_may_be_the_10_ft_one_the_eave_fitting_one_way_needs_review(
     # the panel: that side's eave, and the rule's own question, never "Eaves into front yard" and the roof's height
     # (every height reading under 40 ft: it changes nothing; #20 review round 1, two sceptics)
     (row,) = [i for i in res["view"]["items"] if i.get("rule") == "R-3a.yard_projections"]
-    assert row["name"] == "Eaves into side yard", row["name"]
+    assert (row["name"], row["proposed"], row["required"]) == ("Eaves into side yard", "7'-0\"", "8'-0\""), row
+    # (the west eave against the 10 ft side's 8'-0" it may need, never the 5 ft side's 3'-0" it already meets)
     assert row["reason"].startswith("Which side yard is the 10 ft one"), row["reason"]
     assert "pitched roof" not in row["reason"], row["reason"]
     # the rule itself, the roof's height readings aside (each well under 40 ft: no bonus), is the review_when's
