@@ -2317,7 +2317,7 @@ def test_one_click_on_a_street_drawn_in_pieces_keeps_the_whole_street_and_stops_
             lines, ids = logic.street_lines_of(outline, runs, known)
             assert sorted(map(str, lines)) == sorted(map(str, street)), (k, lines)
             assert said == ("Ithaca Rd" if known else "Street 1") + ": 8 lot-line pieces, 75'-10\" of frontage", said
-            assert ids == (["Ithaca Rd"] * 8 if known else None)
+            assert ids == (["Ithaca Rd"] * 8 if known else ["Street 1"] * 8)   # every line an id
         assert not asked                               # Ithaca Rd ends at two sure corners: nothing asked
         # the other street, clicked next: its own pieces, never Ithaca Rd's again. Its far corner has the 0.24 ft
         # piece in it, so that corner is never sure (review round 7): the architect is asked once, and No keeps
@@ -2409,13 +2409,13 @@ def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
     side = [[40, 0], [40, 160]]
     for k in range(4):
         lines, ids = logic.pick_street([side], None, outline[k], None, outline=outline)
-        assert len(lines) == 4 and side not in lines and ids is None, (k, lines)
+        assert len(lines) == 4 and side not in lines and ids == ["Street 1"] * 4, (k, lines, ids)
         got = width(lines)
         assert got["status"] == "does_not_comply" and got["proposed"] == "40'-0\"", got
         runs, _ = logic.add_street_pick([], outline, outline[k])
         assert logic.street_lines_of(outline, runs)[0] == logic.street_lines_of(outline, [[0, 1, 2, 3]])[0]
     named = logic.pick_street(None, None, outline[2], "A St", outline=outline)
-    assert named == (logic.street_lines_of(outline, [[0, 1, 2, 3]])[0], [None, None, "A St", None])  # its own only
+    assert named == (logic.street_lines_of(outline, [[0, 1, 2, 3]])[0], ["A St"] * 4)  # the run's name
     assert width(named[0])["status"] == "does_not_comply"
     assert logic.pick_street(None, None, [[1, 1], [2, 2]], None, outline=outline) == ([[[1, 1], [2, 2]]], None)
     # the plugin: every street click goes through these (the corner box, the one-street box, the command line)
@@ -2423,7 +2423,7 @@ def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
     assert rhino.count("logic.add_street_pick(runs, outline, ") == 2
     assert "outline=_outline(doc, lot), ask=_ask_street_more" in rhino and "logic.street_lines_after_picks(" not in rhino
     assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in rhino
-    assert 'lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []' in rhino
+    assert 'lines, ids = logic.street_lines_of(outline, runs, None, picked) if picked else ([], None)' in rhino
     assert 'say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))' in rhino
     # what the one-street pick says when the street it kept isn't surely one street
     a, b = [[0, 0], [40, 0]], [[40, 0], [40, 100]]
@@ -2458,10 +2458,10 @@ def test_the_suggested_street_and_a_click_on_it_keep_the_whole_street_so_the_fro
     assert front([outline[0]])["status"] == "complies"                   # the one piece alone: the false pass
     for old in ([outline[0]], whole):
         lines, ids = logic.pick_street(old, None, outline[0], None, outline=outline)
-        assert sorted(map(str, lines)) == sorted(map(str, whole)) and ids is None, (old, lines)
+        assert sorted(map(str, lines)) == sorted(map(str, whole)) and ids == ["Street 1"] * 5, (old, lines, ids)
         assert front(lines)["status"] == "does_not_comply" and front(lines)["proposed"] == "10'-0\"", front(lines)
     lines, ids = logic.pick_street([outline[0]], ["A St"], outline[0], "A St", outline=outline)
-    assert len(lines) == 5 and ids == ["A St", None, None, None, None]       # the name on the clicked line only
+    assert len(lines) == 5 and ids == ["A St"] * 5       # the run's name, its lines one street
     # round 2: a click on a middle piece already saved appends the rest after it; what is said still reads the
     # street end to end, as the measuring does (it said "not surely one street" for a straight street)
     for k in range(5):
@@ -2856,10 +2856,10 @@ def test_an_arc_drawn_in_short_chords_is_a_street_and_an_unreadable_outline_neve
     assert front["status"] != "complies", front
     # (R7-2) a lot of 2 pieces (a line and an arc), a ring out of order: the line clicked alone, never a crash
     two = [[[0, 0], [50, 0]], [[50, 0], [0, 0]]]
-    assert logic.pick_street(None, None, two[0], None, outline=two) == ([[[0, 0], [50, 0]]], None)
+    assert logic.pick_street(None, None, two[0], None, outline=two) == ([[[0, 0], [50, 0]]], ["Street 1"])
     square = _ring([(0, 0), (40, 0), (40, 40), (0, 40)])
     shuffled = [square[2], square[0], square[3], square[1]]
-    assert logic.pick_street(None, None, square[0], None, outline=shuffled) == ([[[0, 0], [40, 0]]], None)
+    assert logic.pick_street(None, None, square[0], None, outline=shuffled) == ([[[0, 0], [40, 0]]], ["Street 1"])
     runs, said = logic.add_street_pick([], shuffled, square[0])
     assert runs == [[1]] and said.startswith("Street 1: only the lot line clicked (the lot outline doesn't run"), said
     # (R7-3) a short piece alone, between two named streets
@@ -2885,7 +2885,7 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     runs, said = logic.add_street_pick([], o, o[1])
     assert runs == [] and said.startswith("that piece is under 6 in long")
     assert logic.street_lines_of(o, runs, None, [o[1]]) == ([], None)                    # (F1) nothing to save
-    assert logic.street_lines_of(o, [], None, [[[7, 7], [8, 8]]]) == ([[[7, 7], [8, 8]]], None)   # off the outline
+    assert logic.street_lines_of(o, [], None, [[[7, 7], [8, 8]]]) == ([[[7, 7], [8, 8]]], ["Street 1"])   # off the outline
     told = []
     old = [o[4]]
     assert logic.pick_street(old, ["West St"], o[1], "Cayuga St", outline=o, said=told) == (old, ["West St"])
@@ -3081,6 +3081,58 @@ def test_a_corner_click_is_said_as_so_far_and_esc_says_the_pick_was_not_kept():
     assert "say(logic.so_far(said) if grown != runs else said)" in corner
     assert 'say(logic.ESC_STREET if what == "street" else "Esc: nothing changed")' in rhino
     assert 'say(logic.so_far(said) if grown != runs and facts.get("corner_lot") else said)' in rhino
+
+
+def test_every_street_line_is_saved_with_its_street_id():
+    """#18 reads a corner lot's streets only from facts["street_ids"] (guessing from the drawing gave false passes),
+    so every street pick saves an id on every line, matching the lines one for one: the looked-up name where it is
+    known, else "Street 1", "Street 2"... one per kept run, as the command line calls it. A run is never one id
+    across a sure corner (a street kept from an older save): past it, a street of its own, so one frontage is never
+    read along two streets."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    import re
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site, sample_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    site = sample_site()
+    outline = _ring(site["lot"])
+    names = logic.outline_names(outline, site["facts"]["street_line"], site["facts"]["street_ids"])
+    for known, first in ((names, "Ithaca Rd"), (None, "Street 1")):
+        runs, said1 = logic.add_street_pick([], outline, outline[3], known)
+        runs, said2 = logic.add_street_pick(runs, outline, outline[14], known, lambda q: False)
+        lines, ids = logic.street_lines_of(outline, runs, known)
+        assert ids == [first] * 8 + ["Street 2"] * 2, ids               # one per run, as said
+        assert said1.startswith(first + ":") and said2.startswith("Street 2:")
+        facts = logic.set_street_lines({}, lines, ids)
+        assert facts["street_ids"] == ids and len(facts["street_line"]) == 10
+    # the one-street pick: one id for the whole street, named or not, and said by it
+    told = []
+    lines, ids = logic.pick_street(None, None, outline[3], None, outline=outline, said=told)
+    assert ids == ["Street 1"] * 8 and told[-1]["words"].startswith("Street 1: 8 lot-line pieces")
+    lines, ids = logic.pick_street(None, None, outline[3], "Ithaca Rd", outline=outline)
+    assert ids == ["Ithaca Rd"] * 8
+    # the suggestion too
+    segs = [tuple(map(tuple, x)) for x in _ring([(0, 0), (20, 0), (40, 0), (40, 100), (0, 100)])]
+    got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+    assert got["street_ids"] == ["Street 1", "Street 1"]
+    # never one id across a sure corner: saved unnamed lines across a corner, re-clicked (kept as they were)
+    corners = [(0, 0), (40, 0), (40, 160), (0, 160)]
+    sq = _ring(corners)
+    lines, ids = logic.pick_street([sq[0], sq[1]], None, sq[0], None, outline=sq)
+    assert len(lines) == 2 and ids == ["Street 1", "Street 1 (past a corner)"], ids
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    r = check_site(_plot(box(12, 30, 28, 70, 0, 30), lot_=lot_of(corners)), dict(base, street_line=lines, street_ids=ids))
+    width = next(i for i in r["view"]["items"] if i["name"] == "Lot width")
+    assert width["status"] != "complies", width                      # never 200 ft along both streets
+    # the source: no street lines saved without their ids
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    calls = re.findall(r"set_street_lines\(([^)]*)\)", rhino)
+    assert calls and all(c.strip().endswith(", ids") or ", None" in c for c in calls), calls
+    logic_src = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    saves = re.findall(r"set_street_lines\((?!facts, lines, ids=None\))([^\n]*)", logic_src)
+    assert all("None)" in c or "* len(" in c for c in saves), saves
 
 
 def _plugin_functions(names, **extra):

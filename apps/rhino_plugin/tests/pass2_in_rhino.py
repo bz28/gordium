@@ -323,7 +323,7 @@ try:
         claim("10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner",
               len(kept) == 10 and "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far — Enter when done" in told and len(asked) == 1
               and asked[0].startswith("Past there the lot line turns 89° over short pieces, a corner or a bend")
-              and facts.get("street_ids") == ["Ithaca Rd"] * 8 + [None] * 2, log["corner"])
+              and facts.get("street_ids") == ["Ithaca Rd"] * 8 + ["Street 2"] * 2, log["corner"])
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
         state = dict(g._box_state(doc, facts, options, saved, "check"), corner_lot=False)   # the box: No
         after, after_ui = g._apply_box(doc, facts, state, saved)

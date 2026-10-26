@@ -1751,9 +1751,9 @@ def _change_facts(doc, facts, options):
             runs = grown
             if not facts.get("corner_lot") and runs:      # (a refused click: asked again)
                 break
-        lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []
-        if lines:                                          # unnamed: the lines picked here, never the old names
-            logic.set_street_lines(facts, lines)
+        lines, ids = logic.street_lines_of(outline, runs, None, picked) if picked else ([], None)
+        if lines:                         # never the old names; every line an id ("Street 1"…, as said): #18
+            logic.set_street_lines(facts, lines, ids)
         _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
