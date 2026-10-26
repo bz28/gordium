@@ -1,0 +1,332 @@
+{
+ "claims": {
+  "1 the house is one closed solid": {
+   "ok": true,
+   "detail": true
+  },
+  "1 the left side yard needs review (to the wall it complies, to the cantilever not)": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.side_yards#southwest",
+    "name": "Side yard, Southwest",
+    "status": "needs_review",
+    "proposed": "6'-0 5/8\" to 12'-0 5/8\"",
+    "required": "10'-0\"",
+    "margin": "",
+    "delta": "up to 5'-11 3/8\" short",
+    "approx": true,
+    "colour": "amber",
+    "note": null,
+    "points": [
+     [
+      0.836444,
+      27.75042
+     ],
+     [
+      6.891689,
+      27.819239
+     ]
+    ],
+    "reason": "At worst 6'-0 5/8\" against 10'-0\": does not comply under that reading. the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office; whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), aren't settled yet: confirm with the zoning office",
+    "group": "building",
+    "needs": [],
+    "hint": null,
+    "refused": null
+   }
+  },
+  "1 its pieces are amber only": {
+   "ok": true,
+   "detail": [
+    "needs_review"
+   ]
+  },
+  "1 the cantilever is coloured (1 ft out from the wall, 15 ft up)": {
+   "ok": true,
+   "detail": [
+    "needs_review"
+   ]
+  },
+  "1 the air under it is not (1 ft out from the wall, 5 ft up)": {
+   "ok": true,
+   "detail": []
+  },
+  "2 the house is one closed solid": {
+   "ok": true,
+   "detail": true
+  },
+  "2 the left side yard does not comply": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.side_yards#southwest",
+    "name": "Side yard, Southwest",
+    "status": "does_not_comply",
+    "proposed": "3'-0 5/8\" to 7'-0 5/8\"",
+    "required": "10'-0\"",
+    "margin": "",
+    "delta": "at least 0'-11 1/4\" short",
+    "approx": true,
+    "colour": "red",
+    "note": null,
+    "points": [
+     [
+      0.836057,
+      27.784511
+     ],
+     [
+      3.891689,
+      27.819239
+     ]
+    ],
+    "reason": "At worst 3'-0 5/8\" against 10'-0\": does not comply under that reading. Fails under every reading considered (fails under every reading)",
+    "group": "building",
+    "needs": [],
+    "hint": null,
+    "refused": null
+   }
+  },
+  "2 red and amber both drawn for it": {
+   "ok": true,
+   "detail": [
+    "does_not_comply",
+    "needs_review"
+   ]
+  },
+  "2 in the cantilever (2 ft out from the wall, 15 ft up): red": {
+   "ok": true,
+   "detail": {
+    "point": "5.8883572387695935,46.48590564727783,15",
+    "from_line_ft": 5.265,
+    "got": [
+     "does_not_comply"
+    ]
+   }
+  },
+  "2 under the cantilever (2 ft out, 5 ft up): nothing": {
+   "ok": true,
+   "detail": {
+    "point": "5.8883572387695935,46.48590564727783,5",
+    "from_line_ft": 5.265,
+    "got": []
+   }
+  },
+  "2 the house's own strip within 8 ft of the line (5 ft up): red": {
+   "ok": true,
+   "detail": {
+    "point": "8.248357238769543,46.48590564727783,5",
+    "from_line_ft": 7.624,
+    "got": [
+     "does_not_comply"
+    ]
+   }
+  },
+  "2 past 8 ft (10 ft from the line, 5 ft up): amber": {
+   "ok": true,
+   "detail": {
+    "point": "10.618357238769493,46.48590564727783,5",
+    "from_line_ft": 9.994,
+    "got": [
+     "needs_review"
+    ]
+   }
+  },
+  "3 the house is one closed solid": {
+   "ok": true,
+   "detail": true
+  },
+  "3 the height row needs colour": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.height",
+    "name": "Building height",
+    "status": "needs_review",
+    "proposed": "38'-0\" to 46'-0\"",
+    "required": "35'-0\"",
+    "margin": "",
+    "delta": "at least 3'-0\" short; see why",
+    "approx": false,
+    "colour": "none",
+    "note": "assuming flat ground",
+    "points": null,
+    "reason": "At worst 46'-0\" against 35'-0\": does not comply under that reading. Roof not flat; this roof's height rule isn't checked in this release",
+    "group": "building",
+    "needs": [],
+    "hint": null,
+    "refused": null
+   }
+  },
+  "3 its pieces in its colour": {
+   "ok": true,
+   "detail": [
+    "needs_review"
+   ]
+  },
+  "3 near the ridge (42 ft up) coloured": {
+   "ok": true,
+   "detail": [
+    "needs_review"
+   ]
+  },
+  "3 the sky over the slope (44 ft up where the roof is 38 ft) not": {
+   "ok": true,
+   "detail": []
+  },
+  "3 the height pieces' volume is the wedge above the limit (within 5 %)": {
+   "ok": true,
+   "detail": {
+    "volume": 5120.008241334634,
+    "wedge": 5070.236383807994,
+    "limit": 35.0
+   }
+  },
+  "4 the vault house is one closed solid, its roof curved": {
+   "ok": true,
+   "detail": true
+  },
+  "4 the height row needs review (the curved vault is not measured), never complies": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.height",
+    "name": "Building height",
+    "status": "needs_review",
+    "proposed": "\u2014",
+    "required": "35'-0\"",
+    "margin": "",
+    "delta": "",
+    "approx": false,
+    "colour": "none",
+    "note": "assuming flat ground",
+    "points": null,
+    "reason": "a building has a curved edge (not measured yet); a building has a curved surface (not measured yet); the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office",
+    "group": "building",
+    "needs": [],
+    "hint": null,
+    "refused": null
+   }
+  },
+  "4 coloured just inside each wall above the limit (+0.5 ft) and under the crown (41 ft)": {
+   "ok": true,
+   "detail": [
+    [
+     "needs_review"
+    ]
+   ]
+  },
+  "4 nothing coloured below the limit (1 ft under it, mid-plan)": {
+   "ok": true,
+   "detail": []
+  },
+  "4 the coloured volume is the vault's own part above the limit (within 5 %)": {
+   "ok": true,
+   "detail": {
+    "volume": 6903.250862933784,
+    "above_limit": 6822.346777966624
+   }
+  }
+ },
+ "house_box_ft": [
+  12.891689252023008,
+  48.80835723876953,
+  27.819238662719727,
+  65.15257263183594,
+  0.0
+ ],
+ "1": {
+  "pieces": [
+   [
+    "needs_review",
+    {
+     "why": "yard",
+     "measure": "front_yard",
+     "row": "Front yard",
+     "building": "738cb35d-d42c-4f0f-8cd3-6d6f617322be"
+    }
+   ],
+   [
+    "needs_review",
+    {
+     "why": "yard",
+     "measure": "side_yard_smaller",
+     "row": "Side yard, Southwest",
+     "building": "738cb35d-d42c-4f0f-8cd3-6d6f617322be"
+    }
+   ],
+   [
+    "needs_review",
+    {
+     "why": "yard",
+     "measure": "rear_yard",
+     "row": "Rear yard",
+     "building": "738cb35d-d42c-4f0f-8cd3-6d6f617322be"
+    }
+   ]
+  ],
+  "wall_ft": 12.26738574844348,
+  "inside": "11.88835723877046,46.48590564727783,15",
+  "under": "11.88835723877046,46.48590564727783,5"
+ },
+ "2": {
+  "pieces": [
+   [
+    "needs_review",
+    {
+     "why": "yard",
+     "measure": "front_yard",
+     "row": "Front yard",
+     "building": "545577b0-348c-49ec-bb7e-ec094fa2abf9"
+    }
+   ],
+   [
+    "does_not_comply",
+    {
+     "why": "yard",
+     "measure": "side_yard_smaller",
+     "row": "Side yard, Southwest",
+     "building": "545577b0-348c-49ec-bb7e-ec094fa2abf9"
+    }
+   ],
+   [
+    "needs_review",
+    {
+     "why": "yard",
+     "measure": "side_yard_smaller",
+     "row": "Side yard, Southwest",
+     "building": "545577b0-348c-49ec-bb7e-ec094fa2abf9"
+    }
+   ],
+   [
+    "needs_review",
+    {
+     "why": "yard",
+     "measure": "rear_yard",
+     "row": "Rear yard",
+     "building": "545577b0-348c-49ec-bb7e-ec094fa2abf9"
+    }
+   ]
+  ],
+  "wall_ft": 7.267708637143622
+ },
+ "3": {
+  "pieces": [
+   [
+    "needs_review",
+    {
+     "why": "yard",
+     "measure": "rear_yard",
+     "row": "Rear yard",
+     "building": "4e4894ac-733b-4bc8-a5eb-461836470812"
+    }
+   ],
+   [
+    "needs_review",
+    {
+     "why": "height",
+     "measure": "building_height",
+     "row": "Building height",
+     "building": "4e4894ac-733b-4bc8-a5eb-461836470812"
+    }
+   ]
+  ]
+ },
+ "passed": 23,
+ "ok": true
+}
