@@ -594,3 +594,12 @@ def test_the_last_resort_and_the_notice_never_cover_the_status_box():
     numbers = [(0, 0, 656, 668)]                                  # every corner covered by numbers
     x, y = logic.notice_place(656, 668, 300, 30, None, [(400, 0, 250, 60)], numbers)
     assert not logic.shapes_hit(logic.rect_quad((x, y, 300, 30)), status)
+
+
+
+def test_in_a_short_view_the_last_resort_goes_beside_the_status_box_not_off_the_bottom():
+    status = logic.rect_quad((300, 14, 290, 170))                 # a tall status box in a 200 px view
+    everywhere = logic.rect_quad((0, 0, 600, 200))
+    i, q, kind, sc = logic.place_dimension([((500, -40), (500, 30))], 80, [everywhere, status], view=(600, 200),
+                                           must=True, fixed=[status])
+    assert kind == "crowded" and logic.inside_view(q, (600, 200)) and not logic.shapes_hit(q, status)

@@ -726,16 +726,21 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=No
         dy = max(0, VIEW_MARGIN_PX - min(ys)) - max(0, max(ys) - (view[1] - VIEW_MARGIN_PX))
         q = [(x + dx, y + dy) for x, y in q]
         for f in fixed:
-            if shapes_hit(q, f):                   # below the status box (it sits at the view's top)
-                drop = _bbox(f)[3] + VIEW_MARGIN_PX - min(p[1] for p in q)
-                q = [(x, y + drop) for x, y in q]
+            if shapes_hit(q, f):                   # below the status box (it sits at the view's top) ...
+                fx0, _, _, fy1 = _bbox(f)
+                below = [(x, y + fy1 + VIEW_MARGIN_PX - min(p[1] for p in q)) for x, y in q]
+                if inside_view(below, view):
+                    q = below
+                else:                              # ... or, a short view, to its left (review F1)
+                    q = [(x + fx0 - VIEW_MARGIN_PX - max(p[0] for p in q), y) for x, y in q]
     return i, q, "crowded", 1.0
 
 
 def notice_place(view_w, view_h, w, h, model, fixed, taken):
     """Where the "no longer complies" notice goes, placed after the dimensions' numbers: off the model and off
     everything drawn (notice_spot); when every corner is taken, off the status box (`fixed`) at least, whatever
-    number it then covers (review F2: its fallback could land on the status box)."""
+    number it then covers (review F2: its fallback could land on the status box). (A view so small that the
+    status box covers every corner: the notice goes where notice_spot puts it.)"""
     x, y = notice_spot(view_w, view_h, w, h, model, list(fixed) + list(taken))
     box = rect_quad((x, y, w, h))
     if any(shapes_hit(box, rect_quad(f)) for f in fixed):
