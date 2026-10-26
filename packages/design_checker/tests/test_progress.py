@@ -264,9 +264,10 @@ def test_draw_works_out_the_starting_house_before_anything_is_saved_or_committed
     house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
     assert 'plan["key"] == _start_key(request)' in house and "start = ask(request)  " in house   # committed: no Cancel
     start_cmd = part(RHINO, "def gordium_start(", "def _draw_starting_house(")
-    assert "except logic.WorkCancelled:" in start_cmd and "say(logic.DRAW_CANCELLED)" in start_cmd
+    assert "except logic.WorkCancelled as stopped:" in start_cmd and \
+        "say(getattr(stopped, \"said\", logic.DRAW_CANCELLED))" in start_cmd
     edit = part(RHINO, "def edit_facts(", "def report_path(")
-    assert "except logic.WorkCancelled:" in edit
+    assert "except logic.WorkCancelled as stopped:" in edit
 
 
 def test_a_cancelled_check_leaves_nothing_shown_as_checked():
@@ -285,13 +286,72 @@ def test_a_cancelled_check_leaves_nothing_shown_as_checked():
 
 def test_the_wait_window_closes_when_the_job_is_done_or_cancelled():
     wait = part(UI, "def wait(", "def set_box_open(")
-    assert "if job.wait(logic.WAIT_WINDOW_S" in wait and "if job.finished():" in wait
-    assert "dialog.AbortButton = stop" in wait and "e.Cancel = not job.finished()" in wait
+    assert "if job.wait(logic.WAIT_WINDOW_S" in wait and "while not job.finished():" in wait
+    assert "ef.Keys.Escape and cancellable" in wait and "e.Cancel = not job.finished()" in wait
+    assert wait.index("finally:") < wait.index("form.Close")             # closed on every way out of the loop
     box = part(UI, "def start_box(", "\ndef ")
     assert 'status["label"].Text = progress()' in box
     assert "lookup_cancel" in part(RHINO, "def _one_pick(", "def _pick_outcome(")
     loop = part(RHINO, "def _box_loop(", "# ---- the address lookup")
     assert 'before_lookup, ticked = ticked, {}' in loop and 'ticked = before_lookup' in loop
+
+
+# ---- Rhino run of aea73b8 (#32) and a3eb1d7 (#33): a frozen wait window, and Draw again after a Cancel ------------
+
+def test_the_wait_window_never_depends_on_a_modal_session_or_a_timer():
+    """In Rhino (Mac) a wait window froze at its first frame ("○●○ 0 s") with a closed dialog still painted behind
+    it, right after a modal dialog was ended from a timer: its timer never ran. The wait is now a plain window that
+    the waiting loop itself keeps current while Rhino runs (RhinoApp.Wait between passes): no ShowModal, no UITimer,
+    nothing to deadlock on, whatever modal state Rhino is in."""
+    wait = part(UI, "def wait(", "def set_box_open(")
+    assert "ShowModal" not in wait and "UITimer" not in wait and "ef.Dialog" not in wait
+    loop = wait[wait.index("while not job.finished():"):wait.index("finally:")]
+    assert loop.index("Rhino.RhinoApp.Wait()") < loop.index("step.Text = job.step") < \
+        loop.index("line.Text = logic.progress_line(job.elapsed(), limit)")   # set by the loop, every pass
+    assert "form.Show()" in wait and "form.Topmost = True" in wait
+
+
+def test_nothing_starts_a_second_piece_of_work_while_gordium_waits():
+    said = []
+    ran = []
+    acts = logic.busy_actions({"report": lambda: ran.append("report"), "legend": lambda: ran.append("legend")},
+                              lambda: True, said.append)
+    acts["report"]()
+    acts["legend"]()                                   # only shows something: allowed
+    assert ran == ["legend"] and said == [logic.WORKING]
+    calm = logic.busy_actions({"report": lambda: ran.append("report")}, lambda: False, said.append)
+    calm["report"]()
+    assert ran == ["legend", "report"]
+    actions = part(RHINO, "def _actions(", "def PANEL_ACTIONS(")
+    assert 'logic.busy_actions(logic.gate_actions(PANEL_ACTIONS(), _box_open, say)' in actions
+    assert 'STATE.get("asking") is not None' in actions
+    ask = part(RHINO, "def ask(", "def _ask_job(")
+    assert ask.index('if STATE.get("asking") is not None:') < ask.index("raise RuntimeError(logic.WORKING)") < \
+        ask.index("_settle_live()") < ask.index("_ask_job(")
+
+
+def test_no_check_starts_while_a_start_box_is_open():
+    """A check asked for while the box is open waits until it closes (Edit site's own check runs after its box)."""
+    assert not logic.allowed("check", True) and logic.allowed("check", False)
+    assert not logic.should_recheck(10.0, 20.0, False, True, 0.5)            # live mode: the box open
+    for fn in ("def run_check(", "def _check_live("):
+        body = part(RHINO, fn, "\ndef ")
+        assert body.index('logic.allowed("check", _box_open())') < body.index("_check_begin(")
+    edit = part(RHINO, "def edit_facts(", "def report_path(")
+    assert edit.index("_end_undo(doc)") < edit.index("run_check(doc, report=False)")   # after the box, never in it
+
+
+def test_a_cancelled_gordiumstart_takes_back_the_sample_it_put_down():
+    """Rhino run of aea73b8: after a cancelled Draw, GordiumStart again drew no house: the sample lot put down before
+    the box (outside the box's session) stayed, with no facts, and was taken for the architect's own lot."""
+    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
+    assert start.index("put_down = (doc.Strings.GetValue(SECTION, UI_ENTRY)") < start.index("_add_lot(doc, sample)")
+    assert start.index("drawn = True") < start.index("save_facts(doc, facts)")
+    fin = start[start.index("    finally:"):]
+    assert "if put_down is not None and not drawn:" in fin and "_take_back_sample" in fin
+    back = part(RHINO, "def _take_back_sample(", "def _start_request(")
+    assert "table.delete(lot_id)" in back and "doc.Strings.Delete(SECTION, UI_ENTRY)" in back
+    assert "_save_ui_state(doc, json.loads(ui_before))" in back and "remove_layer_if_empty" in back
 
 
 # ---- review round 1: each confirmed finding, pinned ----------------------------------------------------------------
@@ -359,3 +419,87 @@ def test_r1_p3_a_background_recheck_never_waits_on_rhinos_thread_for_the_facts()
     job = part(RHINO, "def _ask_job(", "def _answer(")
     assert '{"cmd": "facts", "facts": facts_first' in job and '"error": UNREADABLE}' in job
     assert job.index('logic.exchange(sends, lines, first') < job.index("logic.exchange(sends, lines, request")
+
+
+# ---- review of 9a4eee2 (the wait no longer modal): edits, another document, Esc and commands during a wait ----------
+
+def test_an_answer_for_a_model_no_longer_in_front_is_never_shown_as_current():
+    """Rhino runs during the wait, so the architect can edit or bring another file to the front: the answer, about
+    the model as it was read, is then dropped (its own document says why, with Retry, and is checked again); a report
+    written meanwhile is said to be of the model as it was; a house worked out meanwhile is never drawn."""
+    ask = part(RHINO, "def ask(", "def _edited(")  # (ask, then _edited)
+    assert ask.index("_watch_edits(True)") < ask.index("ui.wait(") < ask.index("_watch_edits(False)")
+    watch = part(RHINO, "def _watch_edits(", "def _changed_during(")
+    for event in ("AddRhinoObject", "DeleteRhinoObject", "UndeleteRhinoObject", "ReplaceRhinoObject",
+                  "ModifyObjectAttributes"):
+        assert event in watch
+    changed = part(RHINO, "def _changed_during(", "def _ask_job(")
+    assert "front.RuntimeSerialNumber != doc_serial" in changed and "logic.checked_while_still(read_at" in changed
+    run = part(RHINO, "def run_check(", "def _check_begin(")
+    assert run.index('if _changed_during(begun["doc"], begun["at"]):') < run.index("_check_outdated(doc, o, report)") \
+        < run.index("return _check_apply(")
+    outdated = part(RHINO, "def _check_outdated(", "def _check_cancelled(")
+    assert outdated.index("front.RuntimeSerialNumber != doc.RuntimeSerialNumber") < outdated.index("ui.show(")
+    assert "_check_apply" not in outdated and 'STATE["recheck_owed"] = True' in outdated
+    assert "logic.REPORT_OUTDATED" in outdated
+    plan = part(RHINO, "def _plan_house(", "def _draw_starting_house(")
+    assert plan.index("ask(request, cancel=True)") < plan.index("_changed_during(") < plan.index("logic.ModelChanged()")
+    report = part(RHINO, "def open_report(", "def _drop_report_part(")
+    assert report.index('get("outdated")') < report.index("ui.open_target(path)")
+    assert issubclass(logic.ModelChanged, logic.WorkCancelled) and logic.ModelChanged.said == logic.DRAW_OUTDATED
+
+
+def test_esc_cancels_from_anywhere_and_commands_wait_their_turn():
+    wait = part(UI, "def wait(", "def set_box_open(")
+    assert "Rhino.RhinoApp.EscapeKeyPressed += esc" in wait and "Rhino.RhinoApp.EscapeKeyPressed -= esc" in wait
+    assert wait.index("finally:") < wait.index("Rhino.RhinoApp.EscapeKeyPressed -= esc")
+    for fn in ("def gordium_check(", "def gordium_start(", "def edit_facts(", "def off("):
+        body = part(RHINO, fn, "\ndef ")
+        gate = body.index('if STATE.get("asking") is not None:')
+        assert gate < 700 and body.index("say(logic.WORKING)", gate) < body.index("return", gate), fn   # first thing
+
+
+# ---- review of 5567b94 ---------------------------------------------------------------------------------------------
+
+def test_every_kind_of_edit_is_noted_and_the_wait_never_leaves_work_behind():
+    watch = part(RHINO, "def _watch_edits(", "def _changed_during(")
+    for event in ("LayerTableEvent", "InstanceDefinitionTableEvent", "DocumentPropertiesChanged"):
+        assert '("%s",' % event in watch, event                     # layers, blocks, units sort lot and building
+    ask = part(RHINO, "def ask(", "def _edited(")
+    assert ask.index("try:") < ask.index("_watch_edits(True)")       # inside the try: asking always cleared
+    fin = ask[ask.index("finally:"):]
+    assert fin.index('STATE.pop("asking", None)') < fin.index("if not job.finished():") < fin.index("_stop_worker()")
+    house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
+    fallback = house[house.index("start = ask(request)"):]
+    assert fallback.index("_changed_during(doc.RuntimeSerialNumber, read_at)") < fallback.index("logic.HOUSE_OUTDATED")
+    # its message promises the house drawn by hand is checked: live mode and the document hooks on (review of e101ec5)
+    early = fallback[fallback.index("logic.HOUSE_OUTDATED"):fallback.index("return None")]
+    assert "live(True)" in early and "documents(True)" in early
+    assert "Zoning report… was pressed" not in logic.REPORT_OUTDATED     # GordiumCheck says it too
+
+
+def test_commands_ask_the_checker_before_they_read_the_model():
+    """Review of 0702d50: Rhino runs during a wait, so whatever a command read of the model before one may be out of
+    date after it (a building drawn meanwhile got a starting house beside it; another file came to the front)."""
+    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
+    assert start.index('ask({"cmd": "options"') < start.index('ask({"cmd": "sample_site"})') < \
+        start.index("doc = Rhino.RhinoDoc.ActiveDoc") < start.index("if _buildings(doc):")
+    assert start.count("ask(") == 2 and 'facts["lot_id"] = sample_lot' in start
+    own = start[start.index("    else:                               # the architect's own lot"):start.index("drawn = False")]
+    assert own.index("current_facts(doc)") < own.index("_still_front(doc)") < own.index("if _buildings(doc):")
+    for fn, end in (("def gordium_check(", "def _layer("), ("def edit_facts(", "def report_path(")):
+        body = part(RHINO, fn, end)
+        assert body.index('ask({"cmd": "options"') < body.index("doc = Rhino.RhinoDoc.ActiveDoc"), fn
+        assert body.index("current_facts(doc)") < body.index("_still_front(doc)") < body.index("confirm("), fn
+    front = part(RHINO, "def _still_front(", "def _edited(")
+    assert "front.RuntimeSerialNumber == doc.RuntimeSerialNumber" in front
+    assert RHINO.count("not _still_front(doc):") == RHINO.count("say(logic.NOT_IN_FRONT)") == 3   # each caller says it
+
+
+def test_the_saved_facts_are_matched_to_the_model_as_it_is_after_their_wait():
+    """Cold check of 15d0894: current_facts listed the lots and buildings, then waited on the checker (load_facts),
+    then dropped stale ids against the list from before the wait."""
+    facts = part(RHINO, "def current_facts(", "def save_facts(")
+    assert facts.index("load_facts(doc)") < facts.index("_sorted_objects(doc)") < facts.index("logic.drop_stale(")
+    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
+    assert start.index("System.Guid.Empty") < start.index('facts["lot_id"] = sample_lot')

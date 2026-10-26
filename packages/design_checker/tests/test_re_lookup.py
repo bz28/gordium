@@ -11,6 +11,7 @@ The last test runs every start (whose lot, whose house, buildings or not) agains
 and holds the promises for all of them."""
 import itertools
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -659,7 +660,7 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     outer = edit.index("    try:                                # one undo step")
     assert outer < edit.index("facts = confirm(") < edit.index("    finally:\n        STATE.pop(\"redraw_house\"")
     assert edit.rstrip().endswith("run_check(doc, report=False)        # the model as it is (as it was, after a "
-                                  "Cancel)\n    if cancelled:\n        say(logic.DRAW_CANCELLED)") and "_end_undo(doc)" in edit
+                                  "Cancel)\n    if cancelled:\n        say(cancelled)") and "_end_undo(doc)" in edit
     table = rhino[rhino.index("class RhinoTable"):]
     assert "return logic.own_buildings(" in table[table.index("def buildings("):]
     # one walk of the model for the checker's sorting and a reset's questions (round 3)
@@ -854,3 +855,29 @@ def test_the_plugin_clears_its_drawing_on_undo_and_redo_and_never_changes_the_do
            "_undo_redo," in rhino
     end = rhino[rhino.index("def _end_undo("):].split("\n\n\n", 1)[0]
     assert "if logic.undo_record_to_end(held, " in end and end.index("undo_record_to_end") < end.index("EndUndoRecord")
+
+
+def test_draw_the_house_again_belongs_to_the_box_that_set_it():
+    """P1 (found 2026-10-26 by the progress-cancel job): GordiumCheck's start box, on a Draw of a new address, set
+    "draw the house again" and nothing read it; a later Edit site… whose Draw drew nothing new found it set and drew
+    a starting house over the architect's model. The flag is now this box's only: every box opens with it cleared,
+    only a Draw of a new address sets it, only Edit site… (the box's caller that draws the house) reads it, and
+    GordiumCheck drops it with its box."""
+    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    sets = [line.strip() for line in rhino.splitlines() if 'STATE["redraw_house"] =' in line]
+    assert sets == ['STATE["redraw_house"] = redraw and mode == "check"     # (GordiumStart draws its house itself)']
+    assert 'STATE["redraw_house"] =' in rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
+    confirm = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
+    assert confirm.index("gate.enter()") < confirm.index('STATE.pop("redraw_house", None)') < \
+        confirm.index("return _confirm(doc, facts, options, mode)")       # cleared as the box opens, before its Draw
+    check = rhino[rhino.index("def gordium_check("):rhino.index("# ---- GordiumStart")]
+    assert check.index("facts = confirm(") < check.index('STATE.pop("redraw_house", None)') < \
+        check.index("if facts is None:")                                    # GordiumCheck: dropped with its box
+    readers = [m.start() for m in re.finditer(r'STATE\.(?:pop|get)\("redraw_house"', rhino)]
+    edit = (rhino.index("def edit_facts("), rhino.index("def report_path("))
+    outside = [rhino.count("\n", 0, i) + 1 for i in readers if not edit[0] < i < edit[1]
+               and not rhino.index("def confirm(") < i < rhino.index("def _confirm(")
+               and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")
+               # (#32: Draw reads it, in its own box, to work out the house it will draw: logic.plans_house)
+               and not rhino.index("def _drawn(") < i < rhino.index("def hide_massing(")]
+    assert outside == [], outside                                           # read nowhere else

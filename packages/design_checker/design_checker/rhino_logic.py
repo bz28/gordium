@@ -1800,6 +1800,23 @@ def gate_actions(actions, box_open, say, open_ok=("legend",)):
     return {name: gated(name, fn) for name, fn in actions.items()}
 
 
+WORKING = "Gordium is working (its window says on what): wait for it, or press Cancel there."
+
+
+def busy_actions(actions, busy, say, open_ok=("legend",)):
+    """The panel's actions, each saying WORKING instead while Gordium waits for an answer (busy()): the wait window is
+    a plain one while Rhino keeps answering, so a button pressed meanwhile must never start a second piece of work
+    on top of it (another check, a start box). `open_ok`: the ones that only show something."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if busy() and name not in open_ok:
+                say(WORKING)
+                return None
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
+
+
 def recovery_message(removed, back):
     """What recovery did, in words (None when it did nothing)."""
     def n(k):
@@ -1932,6 +1949,22 @@ def report_cancelled(path, changed):
     after the checker moved the new report in) that it was saved anyway."""
     return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
 SETTLING = "Finishing the check that is running…"
+CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
+                   "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
+                   "panel) for a report of the model now.")
+NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
+                "command again in the file you want.")
+HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
+                  "Gordium will check it.")
+DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
+                 "is as it was: Draw again.")
+
+
+class ModelChanged(WorkCancelled):
+    """The model was edited (or another document came to the front) while Gordium worked out something to draw for
+    it: nothing is drawn; `said` is what the architect is told."""
+    said = DRAW_OUTDATED
 
 
 def progress_line(elapsed, limit=None):

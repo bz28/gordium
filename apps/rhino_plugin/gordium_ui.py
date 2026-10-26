@@ -508,66 +508,81 @@ def follow(parts, job):
     show_progress(parts, job)
 
 
+WAIT_SHOWN = None          # the in-Rhino test's hook: called with the wait window's labels each time they are set
+
+
 def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
     """Wait for a job (logic.Job) without ever blocking Rhino: work done within logic.WAIT_WINDOW_S shows nothing;
     longer, a small window says what Gordium is doing (the job's own step, a moving mark, the seconds so far) with
-    Cancel when `cancellable` (Esc too). It is modal, so nothing else can start while it waits, and its own timer
-    keeps Rhino drawing and answering. It closes itself when the job is done or cancelled; the window's own close
-    button never leaves the work running unseen (it cancels it, or, not cancellable, waits). `on_tick(job)` also
-    runs at each tick (the panel's live line). Headless (the scripted tests): just waits."""
+    Cancel when `cancellable` (Esc too). The window is a plain one, not modal, and this loop itself keeps it current
+    while it lets Rhino run (Rhino.RhinoApp.Wait: Rhino draws and answers between passes). Nothing here depends on a
+    modal session or a timer: on the Mac a wait window's timer never ran and a closed dialog stayed painted when a
+    modal was ended from a timer and another opened (Rhino runs of #32 aea73b8 and #33 a3eb1d7: frozen "0 s"). The
+    window closes as soon as the job is done or cancelled; its own close button cancels the work, or (not
+    cancellable) is refused until it is done. `on_tick(job)` runs at each pass too (the panel's live line). While it
+    waits, the panel's buttons say Gordium is busy (gordium_rhino._actions); live mode starts no check (asking).
+    Headless (the scripted tests): just waits."""
     if job.wait(logic.WAIT_WINDOW_S if not headless else 0):
         return
     if headless:
         while not job.wait(0.2):
             pass
         return
-    dialog = ef.Dialog[bool]()
-    dialog.Title = "Gordium"
-    dialog.Padding = ed.Padding(16)
-    dialog.Resizable = False
+    form = ef.Form()
+    form.Title = "Gordium"
+    form.Padding = ed.Padding(16)
+    form.Resizable = form.Minimizable = form.Maximizable = False
+    form.Topmost = True
     step = label(job.step, bold=True, size=13, width=380)
     line = label(logic.progress_line(job.elapsed(), limit), size=11, width=380)
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 8)
     layout.AddRow(step)
     layout.AddRow(line)
-    stop = None
-    if cancellable:
-        def cancel():
-            job.cancel()
-            stop.Enabled = False
+    state = {"done": False}
+
+    def cancel():
+        if job.cancel():
             step.Text = logic.CANCELLING
-        stop = button("Cancel", cancel)
+        if stop is not None:
+            stop.Enabled = False
+
+    stop = button("Cancel", cancel) if cancellable else None
+    if stop is not None:
         layout.AddRow(row(stop))
-        dialog.AbortButton = stop
-    dialog.Content = layout
-    timer = ef.UITimer()
-    timer.Interval = 0.15
 
-    def tick(s, e):
-        if job.finished():
-            timer.Stop()
-            dialog.Close(True)
-            return
-        step.Text = job.step or ""
-        line.Text = logic.progress_line(job.elapsed(), limit)
-        if on_tick is not None:
-            on_tick(job)
+    def key(s, e):                        # Esc: Cancel
+        if e.Key == ef.Keys.Escape and cancellable:
+            e.Handled = True
+            cancel()
 
-    def closing(s, e):                  # the window's own close button: Cancel, or keep waiting
-        if not job.finished():
+    def closing(s, e):                    # the window's own close button: Cancel, or keep waiting
+        if not state["done"]:
             if cancellable:
-                job.cancel()
+                cancel()
             e.Cancel = not job.finished()
 
-    timer.Elapsed += logic.guard(tick, "show what Gordium is doing")
-    dialog.Closing += logic.guard(closing, "close the progress window")
-    dialog.Shown += logic.guard(lambda s, e: timer.Start(), "start the progress window")
-    dialog.Closed += logic.guard(lambda s, e: timer.Stop(), "stop the progress window")
-    dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
-    timer.Stop()
-    while not job.finished():          # (only if the window closed some other way: never return with work running)
-        job.wait(0.2)
+    form.Content = layout
+    form.KeyDown += logic.guard(key, "cancel with Esc")
+    form.Closing += logic.guard(closing, "close the progress window")
+    # Esc wherever the keyboard is (a click in a viewport takes it from this window: review of 9a4eee2)
+    esc = System.EventHandler(logic.guard(lambda s, e: cancel() if cancellable else None, "cancel with Esc"))
+    Rhino.RhinoApp.EscapeKeyPressed += esc
+    form.Show()
+    try:
+        while not job.finished():
+            Rhino.RhinoApp.Wait()          # Rhino draws and answers (the panel, the viewports) between passes
+            step.Text = job.step or ""
+            line.Text = logic.progress_line(job.elapsed(), limit)
+            if WAIT_SHOWN is not None:
+                WAIT_SHOWN(step.Text, line.Text)
+            if on_tick is not None:
+                logic.guard(on_tick, "show what Gordium is doing")(job)
+            job.wait(0.05)
+    finally:
+        state["done"] = True
+        Rhino.RhinoApp.EscapeKeyPressed -= esc
+        logic.guard(form.Close, "close the progress window")()
 
 
 def set_box_open(parts, is_open):
