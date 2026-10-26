@@ -3260,7 +3260,7 @@ def test_a_plan_label_keeps_every_hard_rule_the_southwest_cases():
     assert sorted(logic_.hull(turned + [(300, 300)])) == sorted(turned)
     # no room beside the line at its size: a point smaller, still right beside it, no leader
     line = ((100, 100), (140, 100))
-    tight = [(0, 0, 656, 72), (0, 110, 656, 400), (0, 0, 92, 668), (153, 0, 503, 668)]
+    tight = [(0, 0, 656, 70), (0, 110, 656, 400), (0, 0, 92, 668), (153, 0, 503, 668)]
     small = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), tight, [line], [], [])
     assert small["size"] == 10 and not small["led"] and not small["forced"], small   # the largest that fits
     # no room within one label height at any size: at its own size, led, within three label heights
@@ -3357,7 +3357,7 @@ def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
                 if lead is not None and lead[0] <= 3 * lead[1] - 12 and got["size"] == 11:
                     assert got["gap"] <= 3 * got["h"], (case, own, got, lead)
     assert checked >= 200                                                       # most labels placed by the rules
-    assert slowest < 1.0, slowest                 # placing one label, at rest (never in the drawing loop): bounded
+    assert slowest < 0.03, slowest                # placing one label, at rest (never in the drawing loop): bounded
 
 
 def test_a_moved_label_is_led_and_the_draw_record_keeps_the_rules():
@@ -3415,15 +3415,12 @@ def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_re
               "status": ["does_not_comply", "complies", "needs_review", "complies"][k]} for k, d_ in enumerate(dims)]
     items += [{"key": 10 + k, "text": "75'-10\"", "line": e_, "size": 11, "status": None}
               for k, e_ in enumerate(_boxes(*lot))]
-    start = time_.perf_counter()
     spots = logic_.place_labels(items, view, [(12, 34, 506, 54), (543, 119, 61, 55)], dims, [house], _boxes(*lot))
-    sample_s = time_.perf_counter() - start
-    assert len(spots) == len(items) and sample_s < 1.0, sample_s
+    assert len(spots) == len(items)
     busy = items + [{"key": 20 + k, "text": "12'-0\"", "line": ((200 + 9 * k, 480), (230 + 9 * k, 480)), "size": 11,
                      "status": "complies"} for k in range(8)]
-    start = time_.perf_counter()
     spots = logic_.place_labels(busy, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
-    assert len(spots) == len(busy) and time_.perf_counter() - start < 6.0
+    assert len(spots) == len(busy)
     # at rest, placed a few at a time (the review of 3446e94: the whole search at once froze Rhino each pause): a
     # step stops once its budget is spent, one label at least, and the steps end with every label placed
     run = logic_.LabelRun(busy, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
@@ -3435,6 +3432,91 @@ def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_re
     assert {k: (g["left"], g["top"]) for k, g in run.spots.items()} == {
         k: (g["left"], g["top"]) for k, g in spots.items()}                # the same placements as all at once
     assert sorted(g["order"] for g in run.spots.values()) == list(range(len(busy)))
+
+
+def test_placing_the_labels_is_fast_one_tick_for_the_sample_and_a_resting_label_stays_put():
+    """The Rhino job at 822fb6f: a settle tick took up to 309 ms (one label: every spot tried against every
+    obstacle), 0.2-1.3 s a stop, and the labels jumped when the view came to rest. Now each row of spots is worked
+    out as runs that keep the HARD rules (_LabelField) and the search stops at the first spot beside the line with
+    nothing SOFT against it. Budgets (the best of 5 runs, so a busy machine can't fail it): every label of the
+    sample and of a busy lot under 5 ms, the sample all in under 30 ms and in ONE tick (LABEL_STEP_S), a tick on
+    the busy lot never past 16 ms by more than its slowest label (scaled to Rhino's speed below). And a label carried with the view that still
+    keeps every rule stays where it is when the view rests (no jump); one that no longer does is placed again."""
+    import time as time_
+    from design_checker import rhino_logic as logic_
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    step_s = float(rhino.split("LABEL_STEP_S = ", 1)[1].split()[0])
+    assert step_s <= 0.016
+    view = (656, 668)
+    lot = (158, 106, 501, 562)
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    band = [(185, 250), (420, 250), (420, 262), (185, 262)]
+    dims = [((158, 330), (185, 330)), ((420, 330), (501, 330)), ((300, 106), (300, 250)), ((300, 415), (300, 562))]
+    names = ["✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)", "Side yard, Northeast 81'-0\"",
+             "? Rear yard 27'-6\" (approx.)", "Front yard 26'-11\""]
+    items = [{"key": k, "text": names[k], "line": d_, "size": 11,
+              "status": ["does_not_comply", "complies", "needs_review", "complies"][k]} for k, d_ in enumerate(dims)]
+    items += [{"key": 10 + k, "text": "75'-10\"", "line": e_, "size": 11, "status": None}
+              for k, e_ in enumerate(_boxes(*lot))]
+    keep = [(12, 34, 506, 54), (543, 119, 61, 55)]
+    busy = items + [{"key": 20 + k, "text": "12'-0\"", "line": ((200 + 9 * k, 480), (230 + 9 * k, 480)), "size": 11,
+                     "status": "complies"} for k in range(8)]
+    busy += [{"key": 40 + k, "text": "Side yard, East 6'-2\"", "line": ((420, 270 + 20 * k), (501, 270 + 20 * k)),
+              "size": 11, "status": "complies"} for k in range(6)]
+
+    def timed(its):
+        best = None
+        for _ in range(5):
+            run = logic_.LabelRun(its, view, keep, dims, [house, band], _boxes(*lot))
+            each = []
+            start = time_.perf_counter()
+            while run.todo:
+                t = time_.perf_counter()
+                run.step(0.0)
+                each.append(time_.perf_counter() - t)
+            total = time_.perf_counter() - start
+            best = (total, max(each)) if best is None or total < best[0] else best
+        return best
+    total, worst = timed(items)
+    # Rhino's Python ran the search about 4x slower than here (309 ms against 72 ms for the same label at 822fb6f):
+    # its 5 ms a label and 30 ms for the sample are 1.25 and 7.5 here; with room for a busy machine, 2.5 and 10
+    assert worst < 0.0025 and total < 0.010, (total, worst)                    # each label, the whole sample
+    total, worst = timed(busy)
+    assert worst < 0.0025, (total, worst)
+    one_tick = False
+    for _ in range(5):
+        run = logic_.LabelRun(items, view, keep, dims, [house, band], _boxes(*lot))
+        one_tick = one_tick or run.step(step_s)
+    assert one_tick                                                             # the sample: one tick, no jumps
+    for _ in range(5):
+        run = logic_.LabelRun(busy, view, keep, dims, [house, band], _boxes(*lot))
+        start = time_.perf_counter()
+        run.step(0.016)
+        took = time_.perf_counter() - start
+        if took <= 0.016 + run.slowest:
+            break
+    assert took <= 0.016 + run.slowest, (took, run.slowest)                    # a busy lot: never past a frame
+    # at rest after a move: a carried label that still keeps every rule stays put; one now on the house moves
+    placed = logic_.place_labels(items, view, keep, dims, [house, band], _boxes(*lot))
+    nudged = {k: dict(logic_.follow(g, tuple((x + 2, y) for x, y in g["line"])), left=g["left"] + 1)
+              for k, g in placed.items()}                    # carried 1 px off where a fresh search would put it
+    moved_items = [dict(i, line=tuple((x + 2, y) for x, y in i["line"])) for i in items]
+    run = logic_.LabelRun(moved_items, view, keep, [tuple((x + 2, y) for x, y in d_) for d_ in dims],
+                          [[(x + 2, y) for x, y in house], [(x + 2, y) for x, y in band]],
+                          [tuple((x + 2, y) for x, y in e_) for e_ in _boxes(*lot)], nudged)
+    run.step()
+    stayed = [k for k in placed if not nudged[k]["led"] and (run.spots[k]["left"], run.spots[k]["top"]) == (
+        nudged[k]["left"], nudged[k]["top"])]
+    assert len(stayed) >= 4, stayed                                             # no jump for those beside their line
+    k0 = stayed[0]
+    onto = {**nudged, k0: dict(nudged[k0], left=250, top=300)}            # now on the house: placed again
+    run = logic_.LabelRun(moved_items, view, keep, [tuple((x + 2, y) for x, y in d_) for d_ in dims],
+                          [[(x + 2, y) for x, y in house], [(x + 2, y) for x, y in band]],
+                          [tuple((x + 2, y) for x, y in e_) for e_ in _boxes(*lot)], onto)
+    run.step()
+    assert (run.spots[k0]["left"], run.spots[k0]["top"]) != (250, 300)
+    box = (run.spots[k0]["left"], run.spots[k0]["top"], run.spots[k0]["w"], run.spots[k0]["h"])
+    assert not logic_.box_over_shape(box, [(x + 2, y) for x, y in house])
 
 
 def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
@@ -3480,6 +3562,20 @@ def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
     assert logic_.label_breaks_hard(dims[0], (302, 470, 30, 20), view, [], dims) == "on another yard's dimension"
     assert logic_.label_breaks_hard(dims[0], (10, 10, 50, 20), view, [], [], [], [(40, 15, 50, 20)]) == \
         "over another label"
+    # 3 px off its own line too (the Rhino job at 822fb6f: the front yard's line ran along its own label's edge)
+    assert logic_.label_breaks_hard(dims[1], (302, 470, 60, 20), view) == "on its own line"
+    assert logic_.label_breaks_hard(dims[1], (304, 470, 60, 20), view) is None
+    for key, g in spots.items():
+        own = next(i["line"] for i in items if i["key"] == key)
+        assert not logic_.crosses(own, g["left"] - 3, g["top"] - 3, g["w"] + 6, g["h"] + 6), (key, g)
+    # the in-Rhino distance search reads each label's place in the order where the record keeps it (8th field)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert ('[list(q) for q in item["line"]],\n            got["led"], got["size"], got["forced"], got.get("order")])'
+            in rhino)                                    # text, box, rows, line, led, size, forced, order
+    fields = ["text", "box", "rows", "line", "led", "size", "forced", "order"]
+    script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
+    assert "(text, (left, top, w, h, want), nrows, own, led, size, was_forced, order)" in script
+    assert "b_[%d] < order" % fields.index("order") in script
     # nowhere keeps every rule (a tiny view): forced, but still never over a label placed before it
     tiny, cover = (300, 120), [(0, 0, 300, 120)]                       # the whole view taken by a notice
     first = logic_.place_dim_label(((10, 60), (290, 60)), "✕ Front yard 7'-0\"", 11, tiny, hard_boxes=cover)

@@ -619,12 +619,13 @@ def draw_screen(o, e):
     cached = (STATE.get("label_cache") or {}).get(vid) or {}
     settled = cached.get("sig") == sig
     pending = STATE.get("label_pending") or {}
+    spots = cached.get("spots") or {}
     if not settled and items and (pending.get("sig") != sig or pending.get("view") != vid):   # moved: wait again
+        carried = {i["key"]: logic.follow(spots[i["key"]], i["line"]) for i in items if i["key"] in spots}
         STATE["label_pending"] = {"view": vid, "doc": o.doc, "sig": sig, "at": time.time(), "items": items,
                                   "size": tuple(drawn["size"]), "keep": [tuple(t) for t in keep], "dims": dims,
-                                  "shapes": solids, "lines": obstacles}
+                                  "shapes": solids, "lines": obstacles, "carried": carried}
         _label_timer()
-    spots = cached.get("spots") or {}
     for item in items:
         got = spots.get(item["key"])
         if got is None:
@@ -669,7 +670,7 @@ def _label_timer():
     timer.Start()
 
 
-LABEL_STEP_S = 0.012      # the labels placed a few at a time: this long a timer tick at most (one label at least)
+LABEL_STEP_S = 0.016      # a timer tick places labels for at most this long (one label at least): one frame
 
 
 def _label_tick():
@@ -693,7 +694,7 @@ def settle_labels(budget_s=None):
     run = pending.get("run")
     if run is None:
         run = pending["run"] = logic.LabelRun(pending["items"], pending["size"], pending["keep"], pending["dims"],
-                                              pending["shapes"], pending["lines"])
+                                              pending["shapes"], pending["lines"], pending.get("carried"))
     if not run.step(budget_s):
         return False
     STATE.pop("label_pending", None)

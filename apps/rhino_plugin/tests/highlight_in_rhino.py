@@ -211,7 +211,7 @@ try:
                 rw = max(g.logic.label_width(r_, 11) for r_ in rows)
                 rh = g.logic.label_height(len(rows), 11)
                 (xa, ya), (xb, yb) = own
-                others_ = [tuple(b_[1][:4]) for b_ in rec["labels"] if b_[8] < order]   # placed before it only
+                others_ = [tuple(b_[1][:4]) for b_ in rec["labels"] if b_[7] < order]   # placed before it only
                 near = any(g.logic.box_gap(own, (x_, y_, rw, rh)) <= rh - 6 and
                            all(not g.logic.label_breaks_hard(own, (x_ + dx, y_ + dy, rw, rh), view, hard, dims, shapes,
                                                              others_) for dx in (-3, 0, 3) for dy in (-3, 0, 3))
