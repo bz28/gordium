@@ -1,0 +1,84 @@
+{
+ "mode": "Shaded",
+ "render_meshes": [
+  6,
+  6,
+  6
+ ],
+ "house_face_pixel": "Color [A=255, R=209, G=216, B=220]",
+ "background_pixel": "Color [A=255, R=157, G=163, B=170]",
+ "plugin_new_filtered": {
+  "samples": 81,
+  "changed_over_24": 0,
+  "median": 0
+ },
+ "plugin_old_whole_piece": {
+  "samples": 81,
+  "changed_over_24": 0,
+  "median": 0
+ },
+ "own_conduit": [
+  {
+   "samples": 81,
+   "changed_over_24": 0,
+   "median": 0,
+   "stage": "PreDrawObjects",
+   "depth_test": true
+  },
+  {
+   "samples": 81,
+   "changed_over_24": 0,
+   "median": 0,
+   "stage": "PreDrawObjects",
+   "depth_test": false
+  },
+  {
+   "samples": 81,
+   "changed_over_24": 0,
+   "median": 0,
+   "stage": "PostDrawObjects",
+   "depth_test": true
+  },
+  {
+   "samples": 81,
+   "changed_over_24": 81,
+   "median": 165,
+   "stage": "PostDrawObjects",
+   "depth_test": false
+  },
+  {
+   "samples": 81,
+   "changed_over_24": 0,
+   "median": 0,
+   "stage": "DrawForeground",
+   "depth_test": true
+  },
+  {
+   "samples": 81,
+   "changed_over_24": 81,
+   "median": 176,
+   "stage": "DrawForeground",
+   "depth_test": false
+  },
+  {
+   "samples": 81,
+   "changed_over_24": 81,
+   "median": 176,
+   "stage": "DrawOverlay",
+   "depth_test": true
+  },
+  {
+   "samples": 81,
+   "changed_over_24": 81,
+   "median": 176,
+   "stage": "DrawOverlay",
+   "depth_test": false
+  }
+ ],
+ "red_box_same_script": {
+  "samples": 81,
+  "changed_over_24": 0,
+  "median": 0
+ },
+ "done": true
+}

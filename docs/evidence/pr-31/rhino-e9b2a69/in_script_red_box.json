@@ -1,0 +1,106 @@
+{
+ "houses": [
+  {
+   "type": "Brep",
+   "object_type": "Brep",
+   "layer": "Gordium::Massing",
+   "material_source": "MaterialFromLayer",
+   "material_transparency": 0.0,
+   "layer_material_index": -1,
+   "solid": "True",
+   "faces": "6"
+  },
+  {
+   "type": "Brep",
+   "object_type": "Brep",
+   "layer": "Gordium::Massing",
+   "material_source": "MaterialFromLayer",
+   "material_transparency": 0.0,
+   "layer_material_index": -1,
+   "solid": "True",
+   "faces": "6"
+  },
+  {
+   "type": "Brep",
+   "object_type": "Brep",
+   "layer": "Gordium::Massing",
+   "material_source": "MaterialFromLayer",
+   "material_transparency": 0.0,
+   "layer_material_index": -1,
+   "solid": "True",
+   "faces": "6"
+  }
+ ],
+ "shaded_mode": {
+  "ShadingEnabled": "True",
+  "ObjectTransparency": "n/a",
+  "ShowSurfaceEdges": "True",
+  "XRayAllObjects": "n/a",
+  "UseSingleColorForCurves": "n/a"
+ },
+ "found_shaded": [
+  "Shaded",
+  "8bc8debe-c83b-4c47-b13c-9db074510cac"
+ ],
+ "modes": [
+  [
+   "Wireframe",
+   "1311adcb-d89e-4051-a3f0-f64441fb8ec6"
+  ],
+  [
+   "Shaded",
+   "8bc8debe-c83b-4c47-b13c-9db074510cac"
+  ],
+  [
+   "Rendered",
+   "cae60bae-2d51-4299-abf7-a339fca86f3b"
+  ],
+  [
+   "Ghosted",
+   "ff608b97-81d3-4186-831c-41f7dc140881"
+  ],
+  [
+   "X-Ray",
+   "b5c19d5d-0aec-4ff7-a10e-e052e660263a"
+  ],
+  [
+   "Technical",
+   "63612c72-778f-4afd-b81b-17426fdfe8a6"
+  ],
+  [
+   "Artistic",
+   "b46ab226-05a0-4568-b454-4b1ab721c675"
+  ],
+  [
+   "Pen",
+   "f4616fa5-a831-4620-a97e-9b807d5ec376"
+  ],
+  [
+   "Monochrome",
+   "e1b5c8a2-ed43-4872-9a01-814e612d5363"
+  ],
+  [
+   "Arctic",
+   "c32b72c3-41bd-4adc-82a8-b7aef4456a37"
+  ],
+  [
+   "Raytraced",
+   "69e0c7a5-1c6a-46c8-b98b-8779686cd181"
+  ]
+ ],
+ "front_mode_after_set": [
+  "Shaded",
+  "8bc8debe-c83b-4c47-b13c-9db074510cac"
+ ],
+ "perspective_mode": "Shaded",
+ "red_box_behind": {
+  "samples": 49,
+  "changed_over_24": 0,
+  "median": 0
+ },
+ "outside_house_pixel_with_box": "Color [A=255, R=157, G=163, B=170]",
+ "house_face_pixel_plain": "Color [A=255, R=157, G=163, B=170]",
+ "house_face_pixel_with_box": "Color [A=255, R=157, G=163, B=170]",
+ "house_centre_pixel": "Color [A=255, R=0, G=0, B=0]",
+ "done": true
+}
