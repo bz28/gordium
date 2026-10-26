@@ -2290,7 +2290,16 @@ def _street_runs(lot: "Lot", chain: list) -> list[list[int]]:
     turns = [_turn(lot.edges[a], lot.edges[b]) for a, b in zip(chain, chain[1:])]
     sure = {k + 1 for k, t in enumerate(turns) if t > PARALLEL}
     bounds = [0, *splits, len(chain)]
-    return [chain[a:b] for i, a in enumerate(bounds) for b in bounds[i + 1:] if not any(a < k < b for k in sure)]
+    runs = [chain[a:b] for i, a in enumerate(bounds) for b in bounds[i + 1:] if not any(a < k < b for k in sure)]
+    # a corner cut off (a chamfer: a short run between two sure corners each turning under 90 - PARALLEL degrees, the
+    # two making one corner) may be part of either street: each street with it is a reading too (#18 round 10)
+    edges = sorted(sure)
+    for a, b in zip([0, *edges], [*edges, len(chain)]):
+        if 0 < a and b < len(chain) and turns[a - 1] < 90 - PARALLEL and turns[b - 1] < 90 - PARALLEL:
+            before = max([k for k in edges if k < a], default=0)
+            after = min([k for k in edges if k > b], default=len(chain))
+            runs += [chain[before:b], chain[a:after]]
+    return [r for k, r in enumerate(runs) if r not in runs[:k]]
 
 
 def _two_sides(found: list) -> list:
