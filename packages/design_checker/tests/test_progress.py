@@ -472,4 +472,7 @@ def test_every_kind_of_edit_is_noted_and_the_wait_never_leaves_work_behind():
     house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
     fallback = house[house.index("start = ask(request)"):]
     assert fallback.index("_changed_during(doc.RuntimeSerialNumber, read_at)") < fallback.index("logic.HOUSE_OUTDATED")
+    # its message promises the house drawn by hand is checked: live mode and the document hooks on (review of e101ec5)
+    early = fallback[fallback.index("logic.HOUSE_OUTDATED"):fallback.index("return None")]
+    assert "live(True)" in early and "documents(True)" in early
     assert "Zoning report… was pressed" not in logic.REPORT_OUTDATED     # GordiumCheck says it too

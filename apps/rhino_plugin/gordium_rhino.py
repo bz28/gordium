@@ -3031,6 +3031,8 @@ def _draw_starting_house(doc, facts):
         start = ask(request)            # committed by now, so no Cancel here (never a lot without its house)
         if _changed_during(doc.RuntimeSerialNumber, read_at):     # edited meanwhile: never a house for the lot
             say(logic.HOUSE_OUTDATED)                              # as it was (review of 5567b94)
+            live(True)                  # the architect draws one; it is checked as they go (as when none can be drawn)
+            documents(True)
             return None
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
     for note in start.get("notes") or []:
