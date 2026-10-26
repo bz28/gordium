@@ -2285,16 +2285,32 @@ def _street_splits(lot: "Lot", chain: list) -> list[int]:
 
 
 def _street_runs(lot: "Lot", chain: list) -> list[list[int]]:
-    """Each street a corner lot's street lines may be: every run of them between two places they may split
-    (_street_splits, or an end) with no sure corner inside it, so a joint that only may be a corner gives both
-    readings (the run split there, and joined across it). One street per run, never two added together, and every
-    street a run of its own (the middle one of three too: #18 review, a 60 x 45 lot on three streets read 105 ft,
-    two streets, and never the middle street's 45 ft)."""
-    splits = _street_splits(lot, chain)
+    """Each street a corner lot's street lines may be. Between two sure corners (or a corner and an end of the
+    lines) is one stretch: the stretch whole is a street, and where it may split (a joint that may be a corner, or
+    anywhere in a run turning more than PARALLEL in all: _street_splits) the part before the split and the part
+    after it each may be one; a middle piece is a street of its own only between two joints that really may be
+    corners (more than JOINT, no more than PARALLEL). A chamfer (a short stretch between two sure corners each
+    turning under 90 - PARALLEL degrees, the two making one corner) is never a street alone: it is read with the
+    street on either side of it. Never two streets added together, never a piece of one (§325-8A col. 7; #18
+    reviews: three streets read 105 ft; a curving street drawn in pieces read each piece, past the cap)."""
     turns = [_turn(lot.edges[a], lot.edges[b]) for a, b in zip(chain, chain[1:])]
-    sure = {k + 1 for k, t in enumerate(turns) if t > PARALLEL}
-    bounds = [0, *splits, len(chain)]
-    return [chain[a:b] for i, a in enumerate(bounds) for b in bounds[i + 1:] if not any(a < k < b for k in sure)]
+    sure = sorted(k + 1 for k, t in enumerate(turns) if t > PARALLEL)
+    splits = set(_street_splits(lot, chain)) - set(sure)
+    bends = {k + 1 for k, t in enumerate(turns) if JOINT < t <= PARALLEL}
+    stretches = list(zip([0, *sure], [*sure, len(chain)]))
+    chamfer = [0 < a and b < len(chain) and turns[a - 1] < 90 - PARALLEL and turns[b - 1] < 90 - PARALLEL
+               for a, b in stretches]
+    runs = []
+    for (a, b), cut in zip(stretches, chamfer):
+        inner = sorted(k for k in splits if a < k < b)
+        if not cut:
+            runs += [chain[a:b]] + [chain[a:k] for k in inner] + [chain[k:b] for k in inner]
+            gen = sorted(k for k in inner if k in bends)
+            runs += [chain[x:y] for i, x in enumerate(gen) for y in gen[i + 1:]]
+    for i, ((a, b), cut) in enumerate(zip(stretches, chamfer)):
+        if cut:                                   # the chamfer with the street on either side of it
+            runs += [chain[stretches[i - 1][0]:b], chain[a:stretches[i + 1][1]]]
+    return [r for k, r in enumerate(runs) if r and r not in runs[:k]]
 
 
 def _two_sides(found: list) -> list:
@@ -2347,10 +2363,14 @@ def _eaves_by_wall_side(lot: "Lot", r: dict, words: str, w: str, shape, walls: l
     # a pairing is a reading of its own (named: the checker settles it as it settles any named reading, and asks
     # which side is the narrower only when the answer turns on it; #18 review: unnamed, it held every symmetric house
     # with unequal eaves at needs review, R-1b's equal minimums included)
-    def named(wn, k):
-        return wn if k is None else {**wn, PAIR: ("first", "other")[k]}
-    return [((_both(words, ww), ea[0], {"points": ea[1], "named": named(wn, k), "line": ea[2], "pairing": k}),
-             (_both(words, ww), eb[0], {"points": eb[1], "named": named(wn, k), "line": eb[2], "pairing": k}))
+    def named(wn, k, ea):
+        # the reading names the very line it holds narrower (#18 round c: a compass word from the sort order named
+        # the wrong side on lots whose side lines run north and south)
+        return wn if k is None else {**wn, PAIR: narrower(ea)}
+    def narrower(ea):
+        return f"the side along lot line {', '.join(lot.label(i) for i in ea[2])} the narrower side yard"
+    return [((_both(words, ww), ea[0], {"points": ea[1], "named": named(wn, k, ea), "line": ea[2], "pairing": k}),
+             (_both(words, ww), eb[0], {"points": eb[1], "named": named(wn, k, ea), "line": eb[2], "pairing": k}))
             for ww, wn, ea, eb, k in pairs]
 
 
