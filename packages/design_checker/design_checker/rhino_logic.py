@@ -1806,7 +1806,7 @@ def gate_actions(actions, box_open, say, open_ok=("legend",)):
         def run(*args, **kwargs):
             if box_open() and name not in open_ok:
                 say(BOX_BUSY)
-                return None
+                return REFUSED              # (a checkbox puts its tick back: gordium_ui._tick)
             return fn(*args, **kwargs)
         return run
     return {name: gated(name, fn) for name, fn in actions.items()}
@@ -1815,18 +1815,41 @@ def gate_actions(actions, box_open, say, open_ok=("legend",)):
 WORKING = "Gordium is working (its window says on what): wait for it, or press Cancel there."
 
 
+REFUSED = object()        # what a gated panel action returns when it did nothing (its checkbox puts its tick back)
+
+
 def busy_actions(actions, busy, say, open_ok=("legend",)):
     """The panel's actions, each saying WORKING instead while Gordium waits for an answer (busy()): the wait window is
     a plain one while Rhino keeps answering, so a button pressed meanwhile must never start a second piece of work
-    on top of it (another check, a start box). `open_ok`: the ones that only show something."""
+    on top of it (another check, a start box). `open_ok`: the ones that only show something. A refused action
+    returns REFUSED, so a checkbox that called it shows its setting as it still is (independent review of #32)."""
     def gated(name, fn):
         def run(*args, **kwargs):
             if busy() and name not in open_ok:
                 say(WORKING)
-                return None
+                return REFUSED
             return fn(*args, **kwargs)
         return run
     return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+class NotInFront(Exception):
+    """Another file came to the front while Gordium read this one's facts (Rhino runs during the checker's wait):
+    whatever was about to prompt or save stops (gordium_rhino.current_facts)."""
+
+
+def front_actions(actions, say):
+    """The panel's actions, each saying why (NotInFront's words) and doing nothing more when the file it was
+    reading is no longer the one in front."""
+    def guarded(fn):
+        def run(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except NotInFront as e:
+                say(str(e))
+                return REFUSED
+        return run
+    return {name: guarded(fn) for name, fn in actions.items()}
 
 
 def recovery_message(removed, back):
@@ -1943,6 +1966,7 @@ WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (n
 SPINNER = ("●○○", "○●○", "○○●")
 SPIN_S = 0.3               # s per frame of the moving mark
 CANCELLING = "Cancelling…"
+STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint: Esc stops the work only with that window in front
 FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
               "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
               "sample_site": "Loading the sample lot…"}
@@ -1967,6 +1991,15 @@ REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when t
                    "panel) for a report of the model now.")
 NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
                 "command again in the file you want.")
+def outdated_report_message(path, report_error, had_report):
+    """What a check whose model changed while it ran says of its report: written, but of the model as it was; or,
+    when the checker couldn't write it, that it wasn't written and why (never that it was: independent review of
+    #32)."""
+    if report_error:
+        return report_message(path, False, report_error, stale=bool(had_report))
+    return REPORT_OUTDATED.format(path=path)
+
+
 HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
                   "Gordium will check it.")
 DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "

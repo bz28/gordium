@@ -43,6 +43,7 @@ from test_docs_in_rhino import TestDocs, close  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
+sys.modules.pop("rhino_logic", None)   # this checkout's copy, never one a Rhino that loaded another head has cached
 import rhino_logic as logic  # noqa: E402  (its guard: no callback may raise into Rhino)
 
 S = os.path.join(tempfile.gettempdir(), "gordium_progress_cancel") + "/"
@@ -132,10 +133,14 @@ class Watch:
 
 
 def pump_until(cond, limit):
-    """Let Rhino run (idle, timers) until cond() or `limit` s."""
+    """Let Rhino run (timers) until cond() or `limit` s. Rhino raises no Idle while a script runs, so with live mode on
+    the plugin's own idle handler stands in for it (live re-checks start only from Idle: Rhino run of 6ba061b)."""
     end = time.time() + limit
     while not cond() and time.time() < end:
         Rhino.RhinoApp.Wait()
+        g = sys.modules.get("gordium_rhino")
+        if g is not None and g.STATE.get("live"):
+            g._idle(None, None)
         time.sleep(0.05)
     return cond()
 
@@ -155,6 +160,7 @@ def add_box(doc, layer, at=0.0):
 
 def main():
     doc = None
+    docs = None
     try:
         docs = TestDocs("progress_cancel").__enter__()
         g = fresh_module()
@@ -394,7 +400,7 @@ def main():
                 g._stop_worker()
         except Exception:
             pass
-        for d in list(Rhino.RhinoDoc.OpenDocuments())[:-1]:
+        for d in list(docs.opened if docs is not None else []):    # exactly the documents this run opened
             close(d)
 
 

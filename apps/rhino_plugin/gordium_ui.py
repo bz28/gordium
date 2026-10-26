@@ -331,13 +331,32 @@ def say(parts, text):
         parts["message"].Text = text or ""
 
 
+def _tick(box, action, where, skip=lambda: False):
+    """A checkbox that calls `action(ticked)`; if the action was refused (logic.REFUSED: Gordium is working, or its
+    file is no longer in front), the tick goes back, so the panel always shows the setting as it is (independent
+    review of #32). `skip()`: a change made by Gordium itself (set_labels_tick), not the architect's."""
+    putting_back = {"on": False}
+
+    def changed(s, e):
+        if putting_back["on"] or skip():
+            return
+        if action(bool(box.Checked)) is logic.REFUSED:
+            putting_back["on"] = True
+            try:
+                box.Checked = not box.Checked
+            finally:
+                putting_back["on"] = False
+
+    box.CheckedChanged += logic.guard(changed, where)
+
+
 def _massing_box(actions):
     """Hide starting house: the Gordium::Massing layer off. Hidden, it is still checked (a hidden building still
     counts, as everywhere in Gordium): only drawing it is turned off."""
     box = ef.CheckBox()
     box.Text = "Hide starting house"
     box.Checked = False
-    box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
+    _tick(box, actions["massing"], "hide the starting house")
     return box
 
 
@@ -348,11 +367,8 @@ def _labels_box(actions, parts):
     box.Text = "Show on-screen labels"
     box.Checked = False
 
-    def changed(s, e):
-        if not parts.get("_setting_labels"):        # set from the document (set_labels_tick): not a change
-            actions["labels"](bool(box.Checked))
-
-    box.CheckedChanged += logic.guard(changed, "show or hide the on-screen labels")
+    # (set from the document by set_labels_tick: not the architect's change)
+    _tick(box, actions["labels"], "show or hide the on-screen labels", skip=lambda: parts.get("_setting_labels"))
     parts["labels_box"] = box
     return box
 
@@ -372,7 +388,7 @@ def _envelope_box(actions):
     box = ef.CheckBox()
     box.Text = "Show buildable envelope"
     box.Checked = True
-    box.CheckedChanged += logic.guard(lambda s, e: actions["envelope"](bool(box.Checked)), "show or hide the envelope")
+    _tick(box, actions["envelope"], "show or hide the envelope")
     return box
 
 
@@ -514,7 +530,7 @@ WAIT_SHOWN = None          # the in-Rhino test's hook: called with the wait wind
 def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
     """Wait for a job (logic.Job) without ever blocking Rhino: work done within logic.WAIT_WINDOW_S shows nothing;
     longer, a small window says what Gordium is doing (the job's own step, a moving mark, the seconds so far) with
-    Cancel when `cancellable` (Esc too). The window is a plain one, not modal, and this loop itself keeps it current
+    Cancel when `cancellable` (Esc too, with this window in front: logic.STOP_HINT says so). The window is a plain one, not modal, and this loop itself keeps it current
     while it lets Rhino run (Rhino.RhinoApp.Wait: Rhino draws and answers between passes). Nothing here depends on a
     modal session or a timer: on the Mac a wait window's timer never ran and a closed dialog stayed painted when a
     modal was ended from a timer and another opened (Rhino runs of #32 aea73b8 and #33 a3eb1d7: frozen "0 s"). The
@@ -548,10 +564,10 @@ def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
             stop.Enabled = False
 
     stop = button("Cancel", cancel) if cancellable else None
-    if stop is not None:
-        layout.AddRow(row(stop))
+    if stop is not None:                  # (Esc stops it only here: elsewhere in Rhino Esc keeps its own meaning)
+        layout.AddRow(row(stop, label(logic.STOP_HINT, size=11)))
 
-    def key(s, e):                        # Esc: Cancel
+    def key(s, e):                        # Esc, with this window in front: Cancel
         if e.Key == ef.Keys.Escape and cancellable:
             e.Handled = True
             cancel()
@@ -565,9 +581,8 @@ def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
     form.Content = layout
     form.KeyDown += logic.guard(key, "cancel with Esc")
     form.Closing += logic.guard(closing, "close the progress window")
-    # Esc wherever the keyboard is (a click in a viewport takes it from this window: review of 9a4eee2)
-    esc = System.EventHandler(logic.guard(lambda s, e: cancel() if cancellable else None, "cancel with Esc"))
-    Rhino.RhinoApp.EscapeKeyPressed += esc
+    # Esc cancels only with this window in front (or Cancel clicked): an Esc elsewhere in Rhino keeps Rhino's own
+    # meaning (end a command, clear a selection) and never silently cancels a check or a Draw (coordinator, 2026-10-26)
     form.Show()
     try:
         while not job.finished():
@@ -581,7 +596,6 @@ def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
             job.wait(0.05)
     finally:
         state["done"] = True
-        Rhino.RhinoApp.EscapeKeyPressed -= esc
         logic.guard(form.Close, "close the progress window")()
 
 

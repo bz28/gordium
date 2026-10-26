@@ -199,7 +199,7 @@ def _stop_worker():
     SERVERS.stop_all()                               # and any an earlier load left running
 
 
-def ask(request, cancel=False, on_tick=None):
+def ask(request, cancel=False, on_tick=None, draws_after=False):
     """Send one request to the checker and wait for its answer, never on Rhino's thread: the exchange runs as a
     logic.Job and ui.wait waits for it (a slow one shows what the checker is doing, live; Rhino keeps drawing).
     `cancel`: the wait has Cancel, which stops the checker (the next request starts a fresh one) and raises
@@ -207,6 +207,20 @@ def ask(request, cancel=False, on_tick=None):
     at a time on the checker's pipe: _settle_live)."""
     if STATE.get("asking") is not None:      # Rhino answers while a wait runs (ui.wait): nothing may put a second
         raise RuntimeError(logic.WORKING)    # request on the checker's pipe meanwhile (a command typed, a button)
+    held = STATE.get("undo")                 # never wait inside an undo step this script holds open: the architect's
+    resume = None                            # edits meanwhile would be taken into Gordium's. It ends here; when the
+    if held and held[1]:                     # caller draws after the wait (`draws_after`), a step is begun again so
+        doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(held[0])   # what it draws is still in one of Gordium's own
+        resume = (doc, STATE.get("undo_words")) if draws_after else None
+        _end_undo(doc)
+    try:
+        return _ask_waiting(request, cancel, on_tick)
+    finally:
+        if resume is not None and resume[0] is not None:
+            _begin_undo(resume[0], (resume[1] or "Gordium") + " (continued)")
+
+
+def _ask_waiting(request, cancel, on_tick):
     _settle_live()
     job = _ask_job(request, cancel)
     STATE["asking"] = job                    # live mode waits while any answer is awaited (_idle)
@@ -431,8 +445,13 @@ def load_facts(doc):
 
 
 def current_facts(doc):
-    """The saved facts, without a lot or main building that is no longer in the model."""
+    """The saved facts, without a lot or main building that is no longer in the model. logic.NotInFront when another
+    file came to the front while they were read (Rhino runs during the checker's wait): every caller that goes on to
+    prompt or save stops there, never answers typed while looking at another file saved into this one (independent
+    review of #32: the one place, so no caller can miss it)."""
     facts = load_facts(doc)            # (it waits on the checker, Rhino running: the model is listed after it)
+    if not _still_front(doc):
+        raise logic.NotInFront(logic.NOT_IN_FRONT)
     lots, buildings, _ = _sorted_objects(doc)
     return logic.drop_stale(facts, {str(o.Id) for o in lots}, {str(o.Id) for o in buildings})
 
@@ -864,8 +883,8 @@ def _prism(doc, outline, base, top):
 def _actions():
     """What the panel's buttons do (gordium_ui.make_panel): each one gated, so while a start box is open none of them
     touches the model (rhino_logic.gate_actions)."""
-    return logic.busy_actions(logic.gate_actions(PANEL_ACTIONS(), _box_open, say),
-                              lambda: STATE.get("asking") is not None, say)   # (a wait running: ui.wait)
+    return logic.front_actions(logic.busy_actions(logic.gate_actions(PANEL_ACTIONS(), _box_open, say),
+                                                  lambda: STATE.get("asking") is not None, say), say)
 
 
 def PANEL_ACTIONS():
@@ -2079,13 +2098,18 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
         choice = _ask_reset(question, fresh, keep)
         if choice is None:
             return facts, saved_ui, False, state
+    # the new address's starting house, worked out BEFORE the undo step opens: Rhino runs while Gordium waits, so an
+    # undo step held open across the wait would take the architect's own edits into Gordium's (independent review
+    # of #32, P2); logic.WorkCancelled here: nothing has changed yet
+    STATE["start_plan"] = _plan_reset_house(doc, facts, state, saved_ui, choice, mode, options)
     _begin_undo(doc, "Gordium: start fresh for " + (saved_ui["_pending"].get("address") or "a new address"))
     facts, saved_ui, redraw, guide = logic.apply_reset(table, session, facts, saved_ui, choice,
                                                        STATE.get("zones") or [])
     STATE["redraw_house"] = redraw and mode == "check"     # (GordiumStart draws its house itself)
     STATE.pop("lookup_guide", None)
-    fresh_state = logic.after_reset_state(state, _box_state(doc, facts, options, saved_ui, mode))
+    fresh_state = _reset_state(doc, facts, options, saved_ui, mode, state)
     if guide and not facts.get("lot_id"):                 # the City's outline only: their lot drawn over it first
+        STATE.pop("start_plan", None)                     # (no house planned on a lot not drawn yet)
         pts = [_model_point(doc, p) for p in guide]
         STATE["lookup_guide"] = pts + [pts[0]]
         return facts, saved_ui, False, fresh_state
@@ -2096,6 +2120,7 @@ def _begin_undo(doc, words):
     """One undo step for everything a Draw does (the reset, the new lot, the starting house drawn again)."""
     _end_undo(doc)
     STATE["undo"] = (doc.RuntimeSerialNumber, doc.BeginUndoRecord(words))
+    STATE["undo_words"] = words
 
 
 def _end_undo(doc):
@@ -2127,9 +2152,11 @@ def _drawn(doc, facts, state, saved_ui, session=None, mode=None):
     whole box back (run_box), so nothing is drawn and the model is as it was."""
     def save():
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
-        STATE.pop("start_plan", None)
+        planned = STATE.pop("start_plan", None)         # a new address's: worked out before its undo step opened
         if session is not None and logic.plans_house(mode, STATE.get("redraw_house"), STATE.get("house_after_box")):
-            STATE["start_plan"] = _plan_house(doc, out, ui_state)    # logic.WorkCancelled: nothing saved
+            # logic.WorkCancelled: nothing saved. (No undo step of this script's is open here: a reset's plan was
+            # worked out before it opened, _plan_reset_house; any other Draw opens none)
+            STATE["start_plan"] = planned or _plan_house(doc, out, ui_state)
         _save_ui_state(doc, ui_state)
         sources = fact_sources(doc)        # what the box doesn't set (the ground marking) is kept
         sources.update(logic.fact_sources(state, logic.city_day(), confirmed=True))
@@ -2309,11 +2336,11 @@ def edit_facts():
     doc = Rhino.RhinoDoc.ActiveDoc
     try:
         saved = current_facts(doc)
-    except ValueError:                  # unreadable: start again from the suggestions
-        saved = {}
-    if not _still_front(doc):           # another file came to the front while the facts were read
+    except logic.NotInFront:            # another file came to the front while the facts were read
         say(logic.NOT_IN_FRONT)
         return None
+    except ValueError:                  # unreadable: start again from the suggestions
+        saved = {}
     cancelled = False
     STATE["house_after_box"] = True     # this box's Draw of a new address draws its house (logic.plans_house)
     STATE.pop("redraw_house", None)     # only this box's own Draw sets it (GordiumCheck's box left it set: round 2)
@@ -2439,9 +2466,13 @@ def run_check(doc, report=True):
             tick = lambda job: ui.follow(p, job)     # the first tick of a slow one: its window's own line too)
         result = ask(begun["request"], cancel=True, on_tick=tick)
         if _changed_during(begun["doc"], begun["at"]):   # edited, or another document in front, while it ran
-            _check_outdated(doc, o, report)
+            _check_outdated(doc, o, report, begun, result)
             return None
         return _check_apply(doc, o, begun, result)
+    except logic.NotInFront as e:            # another file came to the front while its facts were read: the check
+        _check_outdated(doc, o, report,      # never began, so no report was written (said so, never "of the model")
+                        {"had_report": bool(report) and os.path.exists(report_path(doc))}, {"report_error": str(e)})
+        return None
     except logic.WorkCancelled:
         _check_cancelled(doc, o)
         if report:                           # any caller that asked for a report (Zoning report…, GordiumCheck):
@@ -2539,7 +2570,7 @@ def _check_failed(doc, o, e):
         ui.show(panel(), None, error=str(e)[:300])
 
 
-def _check_outdated(doc, o, report):
+def _check_outdated(doc, o, report, begun=None, result=None):
     """A check whose answer is of a model no longer in front (edited while it ran, or another document came to the
     front): never drawn or listed as current. In its own document, if still in front: nothing shown as checked, the
     panel says why with Retry, and the model is checked again (live mode); the report written, if any, is said to be
@@ -2548,8 +2579,9 @@ def _check_outdated(doc, o, report):
     STATE["recheck_owed"] = True
     front = Rhino.RhinoDoc.ActiveDoc
     STATE["last"] = {"error": logic.CHECK_OUTDATED, "outdated": True, "at": time.time()}
-    if report:
-        say(logic.REPORT_OUTDATED.format(path=report_path(doc)))
+    if report:                               # written for the model as it was, or not written at all (it says why)
+        say(logic.outdated_report_message(report_path(doc), (result or {}).get("report_error"),
+                                          (begun or {}).get("had_report")))
     if front is None or front.RuntimeSerialNumber != doc.RuntimeSerialNumber:
         return                               # another document's panel: never this model's results there
     _clear(o)
@@ -2919,11 +2951,11 @@ def gordium_check():
         return gordium_start()
     try:
         facts = current_facts(doc)
-    except ValueError:                  # unreadable: confirm again from the suggestions
-        facts = {}
-    if logic.missing(facts) and not _still_front(doc):     # another file came to the front meanwhile
+    except logic.NotInFront:            # another file came to the front while the facts were read
         say(logic.NOT_IN_FRONT)
         return None
+    except ValueError:                  # unreadable: confirm again from the suggestions
+        facts = {}
     if logic.missing(facts):
         try:
             facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
@@ -3034,12 +3066,12 @@ def gordium_start():
     else:                               # the architect's own lot: their saved facts, else the suggestions
         try:
             saved = current_facts(doc)
+        except logic.NotInFront:        # another file came to the front while the facts were read
+            say(logic.NOT_IN_FRONT)
+            return None
         except ValueError:
             saved = {}
         facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
-        if not _still_front(doc):       # another file came to the front while the facts were read
-            say(logic.NOT_IN_FRONT)
-            return None
         if _buildings(doc):             # a building drawn while the facts were read: GordiumCheck's, not a start
             say(logic.START_HAS_BUILDING)
             return None
@@ -3090,8 +3122,89 @@ def _start_request(doc, facts, saved_ui):
 
 
 def _start_key(request):
-    """What a starting house was worked out for (all but the copy's file name, which is the same each time)."""
-    return json.dumps({k: v for k, v in request.items() if k != "model"}, sort_keys=True, default=str)
+    """What a starting house was worked out for: all but the copy's file name and the lot's id (a new address's
+    house is worked out on a copy of its lot before the lot itself is drawn: _plan_reset_house)."""
+    facts = {k: v for k, v in (request.get("facts") or {}).items() if k != "lot_id"}
+    return json.dumps(dict({k: v for k, v in request.items() if k not in ("model", "facts")}, facts=facts),
+                      sort_keys=True, default=str)
+
+
+DRY_LOT = "gordium-planned-lot"      # the id of a new address's lot in the copy its house is worked out on
+
+
+class _DryTable:
+    """RhinoTable's reads, with a reset's own writes kept aside: what a Draw of a new address would draw (its lot),
+    worked out with nothing in the model changed."""
+
+    def __init__(self, doc):
+        self.real, self.ring = RhinoTable(doc), None
+
+    def __getattr__(self, name):
+        return getattr(self.real, name)
+
+    def add_lot(self, ring, name):
+        self.ring = ring
+        return DRY_LOT
+
+    def add_spot(self, p):
+        return None
+
+
+class _DrySession:
+    def add(self, ids):
+        pass
+
+    def hold(self, object_id):
+        pass
+
+
+def _reset_state(doc, facts, options, saved_ui, mode, shown):
+    """The box's state to save after a reset (logic.after_reset_state): the architect's choices as the box showed
+    them, the lot, street side, corner and ground as the reset left them. The one way both the real Draw and its dry
+    plan (_plan_reset_house) get it, so the house worked out before the reset is the one Draw draws (cold review of
+    f51ed45, P1: the plan used the box's old state and never matched)."""
+    return logic.after_reset_state(shown, _box_state(doc, facts, options, saved_ui, mode))
+
+
+def _plan_reset_house(doc, facts, state, saved_ui, choice, mode, options):
+    """A new address's starting house, worked out before Draw opens its undo step and changes the model: the reset
+    run dry (logic.apply_reset on _DryTable) gives the new lot and the facts, the checker gets a copy with that lot
+    alone. None when this Draw draws no house (Keep my building, the City's outline only, GordiumCheck's box).
+    logic.WorkCancelled (Cancel) or logic.ModelChanged (edited meanwhile): nothing has changed."""
+    dry = _DryTable(doc)
+    f, s, redraw, guide = logic.apply_reset(dry, _DrySession(), dict(facts), dict(saved_ui), choice,
+                                            STATE.get("zones") or [])
+    # the same test as _drawn's (logic.plans_house with this reset's redraw), and only with a lot to plan it on
+    if not (dry.ring and logic.plans_house(mode, redraw and mode == "check", STATE.get("house_after_box"))):
+        return None
+    out, ui_state = _apply_box(doc, f, _reset_state(doc, f, options, s, mode, state), s)
+    read_at = time.time()
+    path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
+    _export_lot(doc, dry.ring, path)
+    request = {"cmd": "start", "model": path, "facts": check_facts(doc, dict(out, lot_id=DRY_LOT)),
+               "floor_to_floor": logic.parse_feet(ui_state.get("floor_to_floor")) or logic.FLOOR_TO_FLOOR,
+               "design_buffer": logic.parse_feet(ui_state.get("design_buffer")) or 0.0}
+    start = ask(request, cancel=True)
+    if _changed_during(doc.RuntimeSerialNumber, read_at):
+        raise logic.ModelChanged()
+    return {"key": _start_key(request), "start": start}
+
+
+def _export_lot(doc, ring, path):
+    """A small .3dm with one lot outline (in feet, on Site, its id DRY_LOT): the copy a new address's starting house
+    is worked out on (the house never depends on the buildings: check.start leaves them out)."""
+    f = Rhino.FileIO.File3dm()
+    f.Settings.ModelUnitSystem = doc.ModelUnitSystem
+    for kind in ("lot", "building"):
+        layer = Rhino.DocObjects.Layer()
+        layer.Name = LAYERS[kind]
+        f.AllLayers.Add(layer)
+    points = [_model_point(doc, p) for p in ring]
+    attrs = Rhino.DocObjects.ObjectAttributes()
+    attrs.LayerIndex = 0
+    attrs.SetUserString(ID_KEY, DRY_LOT)
+    f.Objects.Add(rg.PolylineCurve(points + [points[0]]), attrs)
+    f.Write(path, 8)
 
 
 def _plan_house(doc, facts, saved_ui):
@@ -3115,8 +3228,11 @@ def _draw_starting_house(doc, facts):
     _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     if plan is not None and plan["key"] == _start_key(request):
         start = plan["start"]
+        STATE["start_from"] = "plan"     # (the in-Rhino tests read which way it came)
     else:                               # (no plan, or one for other facts: never another lot's house); the box has
-        start = ask(request)            # committed by now, so no Cancel here (never a lot without its house)
+        STATE["start_from"] = "asked"
+        start = ask(request, draws_after=True)   # committed by now: no Cancel (never a lot without its house); the
+                                                 # floors go in a step of Gordium's after the wait
         if _changed_during(doc.RuntimeSerialNumber, read_at):     # edited meanwhile: never a house for the lot
             say(logic.HOUSE_OUTDATED)                              # as it was (review of 5567b94)
             live(True)                  # the architect draws one; it is checked as they go (as when none can be drawn)
