@@ -27,7 +27,7 @@ ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" shor
 DETAIL_MIN_HEIGHT = 160   # the selected item's detail never shorter: its name and reason on up to four lines (17 px
 #                           each) and two rows of buttons (20 px, measured on the Mac) in full without scrolling (the
 #                           Rhino job at 7a16aa6: with the list a fixed 380 px and a taller header, the detail was 51 px
-#                           and "Enter bedrooms and parking spaces…" 1 px under it)
+#                           and the parking row's button 1 px under it)
 LIST_MIN_HEIGHT = 3 * ROW_HEIGHT + 24   # ...nor the list: three rows and its column titles (review round 1)
 CELL_FONT_SIZE = 12
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
