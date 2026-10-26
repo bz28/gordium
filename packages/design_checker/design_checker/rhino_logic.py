@@ -897,9 +897,9 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
                     ids[hits[0]] = name
                 kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
                 out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
-                said.append({"words": f"{label}: the street lines kept as they were (the lot outline doesn't run end "
-                                      f"to end in order here, so Gordium can't follow the street along it)",
-                             "refused": False})
+                why = "the lot outline doesn't run end to end in order here, so Gordium can't follow the street along it"
+                said.append({"words": (f"{label}: the street lines kept as they were ({why})" if kept == lines else
+                                       f"{street_words(label, kept, out)} ({why})"), "refused": False})   # (round 12)
                 return kept, (out if any(out) else None)
             said.append({"words": f"{label}: only the lot line clicked (the lot outline doesn't run end to end in "
                                   f"order here, so Gordium can't follow the street along it)", "refused": False})

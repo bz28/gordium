@@ -1876,7 +1876,7 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
                    rhino.index('        elif what == "street":')]
     assert "            while lot is not None:" in corner and "_get_point(logic.street_pick_prompt(True, len(picks)))" in corner
     assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in corner
-    assert 'runs, said = logic.add_street_pick(runs, outline, picks[-1], names, _ask_street_more)' in corner
+    assert 'grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)' in corner
 
 
 def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the_district():
@@ -2958,6 +2958,15 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     told = []
     lines, ids = logic.pick_street(gappy[:3], ["A St"] * 3, gappy[1], "A St", outline=gappy, said=told)
     assert lines == gappy[:3] and ids == ["A St"] * 3 and "kept as they were" in told[-1]["words"], (lines, told)
+    # (round 12) two known streets saved: the clicked one's kept, and said so, never "as they were"
+    told = []
+    two = gappy[:4]
+    lines, ids = logic.pick_street(two, ["A St"] * 3 + ["B Ave"], gappy[1], "A St", outline=gappy, said=told)
+    assert lines == gappy[:3] and "kept as they were" not in told[-1]["words"], (lines, told)
+    assert told[-1]["words"].startswith("A St: 3 lot-line pieces, 60'-0\" of frontage (the lot outline")
+    corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
+                   rhino.index('        elif what == "street":')]
+    assert "                if grown != runs:\n                    picks.append(line)\n                runs = grown" in corner
     # what is said reads lines end to end whatever order they come in (round 2)
     assert logic.street_words("X", [gappy[2], gappy[0], gappy[1]], None) == "X: 3 lot-line pieces, 60'-0\" of frontage"
     # (F4)

@@ -1372,10 +1372,14 @@ def _box_pick(doc, what, facts, saved_ui):
                 if rc != Rhino.Commands.Result.Success:              # Enter: done (Esc: done too)
                     break
                 a, b = _clicked_piece(doc, lot, point)
-                picks.append([_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]])
-                # the whole street that piece is on, never round a corner; said, and an unclear end asked
-                runs, said = logic.add_street_pick(runs, outline, picks[-1], names, _ask_street_more)
+                line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+                # the whole street that piece is on, never round a corner; said, and an unclear end asked; only a
+                # click that kept a street counts as picked (round 12)
+                grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)
                 say(said)
+                if grown != runs:
+                    picks.append(line)
+                runs = grown
             lines, ids = logic.street_lines_of(outline, runs, names, picks)
             if lines:                    # (every click refused: the street lines stay as they were)
                 logic.set_street_lines(facts, lines, ids)
