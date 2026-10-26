@@ -1864,6 +1864,7 @@ WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (n
 SPINNER = ("●○○", "○●○", "○○●")
 SPIN_S = 0.3               # s per frame of the moving mark
 CANCELLING = "Cancelling…"
+STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint: Esc stops the work only with that window in front
 FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
               "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
               "sample_site": "Loading the sample lot…"}

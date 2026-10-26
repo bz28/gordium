@@ -449,10 +449,15 @@ def test_an_answer_for_a_model_no_longer_in_front_is_never_shown_as_current():
     assert issubclass(logic.ModelChanged, logic.WorkCancelled) and logic.ModelChanged.said == logic.DRAW_OUTDATED
 
 
-def test_esc_cancels_from_anywhere_and_commands_wait_their_turn():
+def test_esc_stops_the_work_only_from_the_wait_window_and_commands_wait_their_turn():
+    """Coordinator's decision (2026-10-26, Ben may override): Esc cancels Gordium's work only with the wait window in
+    front (or Cancel clicked); an Esc elsewhere keeps Rhino's own meaning (end a command, clear a selection) and never
+    silently cancels a check or a Draw. The window says so."""
     wait = part(UI, "def wait(", "def set_box_open(")
-    assert "Rhino.RhinoApp.EscapeKeyPressed += esc" in wait and "Rhino.RhinoApp.EscapeKeyPressed -= esc" in wait
-    assert wait.index("finally:") < wait.index("Rhino.RhinoApp.EscapeKeyPressed -= esc")
+    assert "EscapeKeyPressed" not in wait                                   # never Rhino-wide
+    assert "form.KeyDown += logic.guard(key" in wait and "e.Key == ef.Keys.Escape and cancellable" in wait
+    assert "layout.AddRow(row(stop, label(logic.STOP_HINT" in wait and logic.STOP_HINT == "Esc or Cancel to stop"
+    assert "EscapeKeyPressed" not in RHINO
     for fn in ("def gordium_check(", "def gordium_start(", "def edit_facts(", "def off("):
         body = part(RHINO, fn, "\ndef ")
         gate = body.index('if STATE.get("asking") is not None:')

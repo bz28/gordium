@@ -237,7 +237,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      `GordiumStart`.
    Whenever Gordium takes more than a moment, a small window says what it is doing, with the seconds so far: Rhino
    keeps drawing meanwhile. A check, the starting house and the zoning report have **Cancel** (starting the
-   checker and reading the lot facts have none: they are quick once it runs). Cancel stops the
+   checker and reading the lot facts have none: they are quick once it runs); **Esc** stops it too while that
+   window is in front (anywhere else in Rhino, Esc keeps its usual meaning). Cancel stops the
    work and changes nothing: a **Draw** cancelled while Gordium works out the starting house draws nothing (the
    model is as it was before the box); once it is drawn, Cancel stops only the check that follows. A cancelled
    check leaves the panel saying "Check cancelled" (press **Check again**); a cancelled report leaves the file as it
