@@ -1882,6 +1882,18 @@ def report_cancelled(path, changed):
     after the checker moved the new report in) that it was saved anyway."""
     return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
 SETTLING = "Finishing the check that is running…"
+CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when Zoning report… was pressed (it was "
+                   "edited meanwhile, or another file came to the front): press Zoning report… again for the model "
+                   "now.")
+DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
+                 "is as it was: Draw again.")
+
+
+class ModelChanged(WorkCancelled):
+    """The model was edited (or another document came to the front) while Gordium worked out something to draw for
+    it: nothing is drawn; `said` is what the architect is told."""
+    said = DRAW_OUTDATED
 
 
 def progress_line(elapsed, limit=None):

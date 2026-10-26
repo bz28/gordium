@@ -660,7 +660,7 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     outer = edit.index("    try:                                # one undo step")
     assert outer < edit.index("facts = confirm(") < edit.index("    finally:\n        STATE.pop(\"redraw_house\"")
     assert edit.rstrip().endswith("run_check(doc, report=False)        # the model as it is (as it was, after a "
-                                  "Cancel)\n    if cancelled:\n        say(logic.DRAW_CANCELLED)") and "_end_undo(doc)" in edit
+                                  "Cancel)\n    if cancelled:\n        say(cancelled)") and "_end_undo(doc)" in edit
     table = rhino[rhino.index("class RhinoTable"):]
     assert "return logic.own_buildings(" in table[table.index("def buildings("):]
     # one walk of the model for the checker's sorting and a reset's questions (round 3)

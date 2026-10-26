@@ -264,9 +264,10 @@ def test_draw_works_out_the_starting_house_before_anything_is_saved_or_committed
     house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
     assert 'plan["key"] == _start_key(request)' in house and "start = ask(request)  " in house   # committed: no Cancel
     start_cmd = part(RHINO, "def gordium_start(", "def _draw_starting_house(")
-    assert "except logic.WorkCancelled:" in start_cmd and "say(logic.DRAW_CANCELLED)" in start_cmd
+    assert "except logic.WorkCancelled as stopped:" in start_cmd and \
+        "say(getattr(stopped, \"said\", logic.DRAW_CANCELLED))" in start_cmd
     edit = part(RHINO, "def edit_facts(", "def report_path(")
-    assert "except logic.WorkCancelled:" in edit
+    assert "except logic.WorkCancelled as stopped:" in edit
 
 
 def test_a_cancelled_check_leaves_nothing_shown_as_checked():
@@ -418,3 +419,41 @@ def test_r1_p3_a_background_recheck_never_waits_on_rhinos_thread_for_the_facts()
     job = part(RHINO, "def _ask_job(", "def _answer(")
     assert '{"cmd": "facts", "facts": facts_first' in job and '"error": UNREADABLE}' in job
     assert job.index('logic.exchange(sends, lines, first') < job.index("logic.exchange(sends, lines, request")
+
+
+# ---- review of 9a4eee2 (the wait no longer modal): edits, another document, Esc and commands during a wait ----------
+
+def test_an_answer_for_a_model_no_longer_in_front_is_never_shown_as_current():
+    """Rhino runs during the wait, so the architect can edit or bring another file to the front: the answer, about
+    the model as it was read, is then dropped (its own document says why, with Retry, and is checked again); a report
+    written meanwhile is said to be of the model as it was; a house worked out meanwhile is never drawn."""
+    ask = part(RHINO, "def ask(", "def _edited(")  # (ask, then _edited)
+    assert ask.index("_watch_edits(True)") < ask.index("ui.wait(") < ask.index("_watch_edits(False)")
+    watch = part(RHINO, "def _watch_edits(", "def _changed_during(")
+    for event in ("AddRhinoObject", "DeleteRhinoObject", "UndeleteRhinoObject", "ReplaceRhinoObject",
+                  "ModifyObjectAttributes"):
+        assert event in watch
+    changed = part(RHINO, "def _changed_during(", "def _ask_job(")
+    assert "front.RuntimeSerialNumber != doc_serial" in changed and "logic.checked_while_still(read_at" in changed
+    run = part(RHINO, "def run_check(", "def _check_begin(")
+    assert run.index('if _changed_during(begun["doc"], begun["at"]):') < run.index("_check_outdated(doc, o, report)") \
+        < run.index("return _check_apply(")
+    outdated = part(RHINO, "def _check_outdated(", "def _check_cancelled(")
+    assert outdated.index("front.RuntimeSerialNumber != doc.RuntimeSerialNumber") < outdated.index("ui.show(")
+    assert "_check_apply" not in outdated and 'STATE["recheck_owed"] = True' in outdated
+    assert "logic.REPORT_OUTDATED" in outdated
+    plan = part(RHINO, "def _plan_house(", "def _draw_starting_house(")
+    assert plan.index("ask(request, cancel=True)") < plan.index("_changed_during(") < plan.index("logic.ModelChanged()")
+    report = part(RHINO, "def open_report(", "def _drop_report_part(")
+    assert report.index('get("outdated")') < report.index("ui.open_target(path)")
+    assert issubclass(logic.ModelChanged, logic.WorkCancelled) and logic.ModelChanged.said == logic.DRAW_OUTDATED
+
+
+def test_esc_cancels_from_anywhere_and_commands_wait_their_turn():
+    wait = part(UI, "def wait(", "def set_box_open(")
+    assert "Rhino.RhinoApp.EscapeKeyPressed += esc" in wait and "Rhino.RhinoApp.EscapeKeyPressed -= esc" in wait
+    assert wait.index("finally:") < wait.index("Rhino.RhinoApp.EscapeKeyPressed -= esc")
+    for fn in ("def gordium_check(", "def gordium_start(", "def edit_facts(", "def off("):
+        body = part(RHINO, fn, "\ndef ")
+        gate = body.index('if STATE.get("asking") is not None:')
+        assert gate < 700 and body.index("say(logic.WORKING)", gate) < body.index("return", gate), fn   # first thing

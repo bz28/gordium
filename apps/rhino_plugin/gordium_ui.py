@@ -565,6 +565,9 @@ def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
     form.Content = layout
     form.KeyDown += logic.guard(key, "cancel with Esc")
     form.Closing += logic.guard(closing, "close the progress window")
+    # Esc wherever the keyboard is (a click in a viewport takes it from this window: review of 9a4eee2)
+    esc = System.EventHandler(logic.guard(lambda s, e: cancel() if cancellable else None, "cancel with Esc"))
+    Rhino.RhinoApp.EscapeKeyPressed += esc
     form.Show()
     try:
         while not job.finished():
@@ -578,6 +581,7 @@ def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
             job.wait(0.05)
     finally:
         state["done"] = True
+        Rhino.RhinoApp.EscapeKeyPressed -= esc
         logic.guard(form.Close, "close the progress window")()
 
 

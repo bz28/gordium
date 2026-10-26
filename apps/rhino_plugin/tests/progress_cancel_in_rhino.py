@@ -203,6 +203,27 @@ def main():
               {"took": round(took, 2), "last": g.STATE.get("last")})
         claim("2 Cancel: the model and the file are as they were", objects(doc) == before and
               strings(g, doc) == said_before)
+        # 2b. an edit while a check waits (Rhino runs meanwhile): its answer is about the model before the edit, so it
+        # is dropped, never drawn or listed as current
+        import Eto.Forms as ef
+        added = []
+        later = ef.UITimer()
+        later.Interval = 1.0
+
+        def edit_once(s, e):
+            later.Stop()
+            if not added:
+                added.append(add_box(doc, "Building", at=80))
+        later.Elapsed += logic.guard(edit_once, "edit during the wait")
+        later.Start()
+        result = g.run_check(doc, report=False)
+        later.Stop()
+        o = g.STATE.get("overlay")
+        claim("2b an edit during the wait: the answer is dropped, nothing shown as checked",
+              added and result is None and (g.STATE.get("last") or {}).get("outdated") and
+              not (o.red or o.encroach or o.yard_dims), {"added": added, "last": g.STATE.get("last")})
+        for i in added:
+            doc.Objects.Delete(i, True)
         slow(g, False)
         claim("2 the next check (a fresh checker) works", g.run_check(doc, report=False) is not None,
               g.STATE.get("last"))
