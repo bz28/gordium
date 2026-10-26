@@ -828,56 +828,44 @@ def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=
     return width, height
 
 
-LINE_H = 16                              # one line of a plan label (11-12 px text), in screen pixels
 
 
-def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=(), keep=None, dims=()):
-    """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted, its lines). Takes its spot
-    in `taken`. With `along` (its dimension line) it goes beside that line, off every line in `obstacles` (the
-    other dimensions, the lot's and the house's edges) and every label already placed, on screen; when no spot
-    beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines); with none
-    clear, near its line all the same (logic.place_near: within one label height, off the notice, the status box and
-    the other labels), led back to it. Its height is 4 + LINE_H per line. Returns (left, top, width, the top it
-    wanted, its lines, whether it needs a leader). The in-Rhino checks read this very placement (STATE["drawn"])."""
+def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=(), keep=None, dims=(), solids=(),
+              cache=None):
+    """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted, its lines, whether it is led
+    to its line, its text size, whether a HARD rule had to give). With `along` (its dimension line): by
+    logic.place_dim_label's one set of rules. HARD: on screen, over no building or coloured part (`solids`: their
+    outlines on screen) and none of `keep` (the notice, the status box, the north arrow), on neither its own line nor
+    another yard's (`dims`). SOFT: the labels already placed (`taken` beyond `keep`), then the lot's lines
+    (`obstacles` beyond `dims`). Takes its spot in `taken`. `cache` (draw_screen's, while nothing on screen moved):
+    the same placement again, never worked out every frame. The in-Rhino checks read this placement (STATE["drawn"])."""
     p = viewport.WorldToClient(point)
-    width = logic.label_width(text, size)
     if along is not None:
         a, b = (viewport.WorldToClient(q) for q in along)
         own = ((a.X, a.Y), (b.X, b.Y))
         view = (viewport.Size.Width, viewport.Size.Height)
-        left, top, clear = logic.place_label(own, width, 20, obstacles, taken or [], view=view)
-        rows = [text]
-        two = logic.label_lines(text)
-        if not clear and len(two) == 2:          # too long to sit clear beside its line: name, then numbers
-            w2 = max(logic.label_width(t, size) for t in two)
-            l2, t2, c2 = logic.place_label(own, w2, 4 + 2 * LINE_H, obstacles, taken or [], view=view)
-            if c2:
-                left, top, width, clear, rows = l2, t2, w2, True, two
-        h = 4 + LINE_H * len(rows)
-        if not clear:                        # nowhere clear beside its line: near it, a leader to it (never loose)
-            w2 = max(logic.label_width(t, size) for t in two)
-            near = logic.place_near(own, w2, 4 + LINE_H * len(two), obstacles, taken or [], view=view, dims=dims)
-            if near is None:                 # crowded by other labels: may cover one, never `keep` (the notice, the
-                near = logic.place_near(own, w2, 4 + LINE_H * len(two), obstacles, keep or [], view=view,
-                                        avoid=taken or [], dims=dims)        # status box, the north arrow) nor its line
-            if near is not None:
-                left, top, width, rows = near[0], near[1], w2, two
-                h = 4 + LINE_H * len(rows)
-            else:                            # nothing near is free of the notice and the labels: off them, still led
-                top = logic.clear_spot(taken if taken is not None else [], left, top, width, h, (own,))
-            if taken is not None and near is not None:
-                taken.append((left, top, width, h))
-            return left, top, width, top, rows, True
+        key = (text, size, tuple(round(v, 1) for q in own for v in q))
+        got = cache.get(key) if cache is not None else None
+        if got is None:
+            fixed = list(keep or [])
+            dim_lines = [tuple(map(tuple, d)) for d in dims or []]
+            got = logic.place_dim_label(own, text, size, view, hard_boxes=fixed, hard_lines=dim_lines,
+                                        soft_boxes=[t for t in (taken or []) if t not in fixed],
+                                        soft_lines=[o for o in obstacles if tuple(map(tuple, o)) not in dim_lines],
+                                        hard_shapes=list(solids or []))
+            if cache is not None:
+                cache[key] = got
         if taken is not None:
-            taken.append((left, top, width, h))
-        return left, top, width, top, rows, False
+            taken.append((got["left"], got["top"], got["w"], got["h"]))
+        return got["left"], got["top"], got["w"], got["top"], got["rows"], got["led"], got["size"], got["forced"]
+    width = logic.label_width(text, size)
     left, want = p.X - width / 2, p.Y - 10
     top = want if taken is None else logic.clear_spot(taken, left, want, width, 20)
-    return left, top, width, want, [text], abs(top - want) > 1
+    return left, top, width, want, [text], abs(top - want) > 1, size, False
 
 
 def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=(), leader=False,
-             keep=None, dims=()):
+             keep=None, dims=(), solids=(), cache=None):
     """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
     already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
     `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must;
@@ -886,8 +874,9 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=N
     logic.needs_leader). Returns where it went: (left, top, width, height, the top it wanted, its lines, whether a
     leader was drawn to it)."""
     p = viewport.WorldToClient(point)
-    left, top, width, want, rows, led = label_box(viewport, point, text, size, taken, along, obstacles, keep, dims)
-    h = 4 + LINE_H * len(rows)
+    left, top, width, want, rows, led, size, forced = label_box(viewport, point, text, size, taken, along, obstacles,
+                                                              keep, dims, solids, cache)
+    h = logic.label_height(len(rows), size)
     if led:                                  # moved off its spot: a leader from it to the label's nearest edge
         end = logic.leader_end((p.X, p.Y), (left, top, width, h))
         d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(end[0], end[1]), color, 1)
@@ -899,8 +888,23 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=N
             d.Draw2dLine(System.Drawing.PointF(mid[0], mid[1]), System.Drawing.PointF(end[0], end[1]), color, 1)
     d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), int(h)), color, 1, backing(dark))
     for k, row in enumerate(rows):
-        d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + LINE_H * k), False, size)
-    return left, top, width, h, want, rows, led
+        d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + (size + 5) * k), False, size)
+    return left, top, width, h, want, rows, led, size, forced
+
+
+def paint_label(d, at, got, color, dark, edge_leader=False, line=None):
+    """A placed plan label drawn (no search here: logic.place_labels placed it, outside the drawing loop): its
+    leader from `at` (its line's middle on screen) when it is led, or, for a lot edge shorter than its label
+    (`edge_leader`, logic.needs_leader), a short one; its box and its lines at its size."""
+    left, top, width, rows, size = got["left"], got["top"], got["w"], got["rows"], got["size"]
+    h = logic.label_height(len(rows), size)
+    (xa, ya), (xb, yb) = line or got["line"]          # the line as it is on screen now (it may have moved)
+    if got["led"] or (edge_leader and logic.needs_leader(((xb - xa) ** 2 + (yb - ya) ** 2) ** 0.5, width)):
+        end = logic.leader_end(at, (left, top, width, h))
+        d.Draw2dLine(System.Drawing.PointF(at[0], at[1]), System.Drawing.PointF(end[0], end[1]), color, 1)
+    d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), int(h)), color, 1, backing(dark))
+    for k, row in enumerate(rows):
+        d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + (size + 5) * k), False, size)
 
 
 def _signed(bits):

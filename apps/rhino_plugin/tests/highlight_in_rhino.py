@@ -162,8 +162,12 @@ try:
             g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # never an earlier frame's record
             top_view.Redraw()
             draw_now(top_view)
+            g.settle_labels()                         # the labels placed as when the view comes to rest (no idle
+            g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # in a script: the timer can't run)
+            top_view.Redraw()
+            draw_now(top_view)
             rec = g.STATE.get("drawn", {}).get(str(top_vp.Id))
-            return rec if rec and rec.get("complete") else None         # the whole frame drawn
+            return rec if rec and rec.get("complete") and rec.get("settled") else None   # the whole, settled frame
 
         def over(box, other):                          # two (x, y, w, h) boxes overlap
             return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
@@ -187,37 +191,56 @@ try:
         rec = what_drew(True)                          # every label on, as the architect turns them on
         lines = [tuple(map(tuple, s_)) for s_ in rec["lines"]]
         m = rec["model"]
-        boxes = list(rec.get("taken") or []) + ([rec["notice"]] if rec.get("notice") else [])
-        on_own, on_dim = [], []                      # a label over its own, or another yard's, dimension line
-        for k, (text, (left, top, w, h, want), _, own, led) in enumerate(rec["labels"]):   # led: a leader drawn
+        hard = [tuple(b_) for b_ in rec.get("hard_boxes") or []]   # the notice, status box, north arrow
+        shapes = [[tuple(q) for q in shp] for shp in rec.get("hard_shapes") or []]   # buildings, coloured parts
+        dims = [tuple(map(tuple, d_)) for d_ in rec.get("dims") or []]
+        view = tuple(rec["size"])
+        broken, forced, covered, too_far = [], [], [], []
+        for k, (text, (left, top, w, h, want), nrows, own, led, size, was_forced, order) in enumerate(rec["labels"]):
             own = tuple(map(tuple, own))
-            if g.logic.crosses(own, left, top, w, h):
-                on_own.append(text)
-            for d_ in rec.get("dims") or []:         # another yard's dimension line: never under a label
-                if tuple(map(tuple, d_)) != own and g.logic.crosses(tuple(map(tuple, d_)), left, top, w, h):
-                    on_dim.append((text, d_))
-            hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]   # its own line too (independent
-            #                                   review of 6361a3f: a label on its own dimension must never pass)
-            others = [b_ for j, b_ in enumerate(rec["labels"]) if j != k and over((left, top, w, h), b_[1][:4])] + \
-                [b_ for b_ in boxes if over((left, top, w, h), b_)]      # nor the notice, status box, north arrow
-            inside = 0 <= left and left + w <= rec["size"][0] and 0 <= top and top + h <= rec["size"][1]
-            (ax, ay), (bx, by) = own                   # next to its own line: the gap between them
-            near = min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
-                       for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
-            log.setdefault("labels", []).append((text, round(left), round(top), len(hits), len(others), inside,
-                                                 round(near, 1), bool(led), h))
+            box = (left, top, w, h)
+            why = g.logic.label_breaks_hard(own, box, view, hard, dims, shapes)   # every HARD rule
+            if why:
+                broken.append((text, why))
+            if was_forced:
+                forced.append(text)
+            gap = g.logic.box_gap(own, box)
+            # independently of the placement: is there a spot at full size within one label height of its line that
+            # keeps every HARD rule (a 4 px search)? Then the label must be that near, at full size
+            for rows in ([text], g.logic.label_lines(text)):
+                rw = max(g.logic.label_width(r_, 11) for r_ in rows)
+                rh = g.logic.label_height(len(rows), 11)
+                (xa, ya), (xb, yb) = own
+                others_ = [tuple(b_[1][:4]) for b_ in rec["labels"] if b_[7] < order]   # placed before it only
+                near = any(g.logic.box_gap(own, (x_, y_, rw, rh)) <= rh - 6 and
+                           all(not g.logic.label_breaks_hard(own, (x_ + dx, y_ + dy, rw, rh), view, hard, dims, shapes,
+                                                             others_) for dx in (-3, 0, 3) for dy in (-3, 0, 3))
+                           for y_ in range(int(min(ya, yb) - 2 * rh), int(max(ya, yb) + rh) + 1, 4)
+                           for x_ in range(int(min(xa, xb) - rw - rh), int(max(xa, xb) + rh) + 1, 4))
+                if near and (gap > rh or size < 11):
+                    too_far.append((text, round(gap, 1), size, rows))
+                    break
+            others = [j for j, b_ in enumerate(rec["labels"]) if j != k and over(box, b_[1][:4])]
+            if others:
+                covered.append((text, others))
+            log.setdefault("labels", []).append((text, round(left), round(top), round(gap, 1), bool(led), size,
+                                                 why, bool(was_forced)))
         g.set_labels(False)
-        # beside its line, a label crosses no line; moved (no room beside it), it may cross a line but never another
-        # label, the notice, the status box or the north arrow, and is led to its line (the Rhino job at 0a94fc4)
-        claim("2 no label covers another label, the notice or the status box; one beside its line crosses no line",
-              len(log["labels"]) >= 8 and all(o_ == 0 and (n == 0 or led) for _, _, _, n, o_, _, _, led, _ in
-                                              log["labels"]) and len(lines) >= 4 + 4 + 4 and not on_own and not on_dim,
-              {"labels": log["labels"], "lines": len(lines), "view": rec["size"], "on_own_line": on_own, "on_other_dimension": on_dim})
-        claim("2 every label within one label height of its own line, and a leader to it whenever it is not right "
-              "beside it (more than 12 px away)", all(near <= h_ + 6 and (near <= 12 or led)
-                                                      for *_, near, led, h_ in log["labels"]), log["labels"])
-        claim("2 every label on screen", all(i for _, _, _, _, _, i, _, _, _ in log["labels"]),
-              {"labels": log["labels"], "view": rec["size"]})
+        # one set of rules (rhino_logic.place_dim_label; the Rhino job at 319dc5d): HARD never broken: on screen, over
+        # no building or coloured part, nor the notice, the status box or the north arrow, on neither its own line nor
+        # another yard's dimension; never forced here (the sample has room)
+        claim("2 every label keeps every HARD rule: on screen, off every building and coloured part, the notice, the "
+              "status box and the north arrow, off its own line and every other yard's dimension",
+              len(log["labels"]) >= 8 and rec.get("buildings", 0) >= 1 and len(shapes) >= rec.get("buildings", 0)
+              and not broken and not forced,
+              {"broken": broken, "forced": forced, "buildings": rec.get("buildings"), "labels": log["labels"],
+               "view": view})
+        claim("2 a label is within one label height of its line at full size whenever a spot there keeps every HARD "
+              "rule (an independent 4 px search), and led to its line whenever it is further than 8 px",
+              not too_far and all(lab[4] == (lab[3] > 8) for lab in log["labels"]),
+              {"too_far": too_far, "labels": log["labels"]})
+        claim("2 no label covers another (a placed label is HARD for the later ones)", not covered,
+              {"covered": covered})
         sources = ((g.STATE.get("last") or {}).get("header") or {}).get("sources") or []
         lot = [t for t in sources if t.startswith("Lot: ")]
         area = items["Lot area"]["proposed"]                    # the row's own figure: the fact must say the same
