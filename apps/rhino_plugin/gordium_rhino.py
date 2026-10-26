@@ -705,7 +705,7 @@ def draw_screen(o, e):
             _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From,
                        size=11 * text_size)
             xs, ys = [p[0] for p in quad], [p[1] for p in quad]
-            taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+            taken.append(logic.number_box(xs, ys))     # with a margin: nothing drawn touches it
     height = getattr(o, "height_dim", None)
     corners = [e.Viewport.WorldToClient(p) for p in (getattr(o, "house_box", None) or [])]
     house = (min(q.X for q in corners), min(q.Y for q in corners), max(q.X for q in corners),
@@ -734,12 +734,14 @@ def draw_screen(o, e):
                 _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From,
                            size=11 * text_size)
                 xs, ys = [p[0] for p in quad], [p[1] for p in quad]
-                taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+                taken.append(logic.number_box(xs, ys))     # with a margin: nothing drawn touches it
+    before = len(taken)
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
                     along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     notice = _notice_box(o, e.Viewport, taken, fixed)  # off the model, the status box and the numbers
+    o.screen_boxes = {"edges": taken[before:], "notice": notice[1:] if notice else None}   # (the in-Rhino checks)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         ends = [e.Viewport.WorldToClient(p) for p in limit[0]]

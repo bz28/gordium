@@ -736,6 +736,15 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=No
     return i, q, "crowded", 1.0
 
 
+NUMBER_PAD_PX = 4      # around a drawn number: the edge lengths and the notice keep this far off it (Rhino check
+#                        of #29 at 5891efc: the rear number touched an edge length)
+
+
+def number_box(xs, ys, pad=NUMBER_PAD_PX):
+    """A drawn number's corners' xs and ys → its box (x, y, w, h) with a margin, as the later labels must avoid."""
+    return (min(xs) - pad, min(ys) - pad, max(xs) - min(xs) + 2 * pad, max(ys) - min(ys) + 2 * pad)
+
+
 def notice_place(view_w, view_h, w, h, model, fixed, taken):
     """Where the "no longer complies" notice goes, placed after the dimensions' numbers: off the model and off
     everything drawn (notice_spot); when every corner is taken, off the status box (`fixed`) at least, whatever
@@ -877,13 +886,23 @@ def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
     tried in turn (top left under the view's name, bottom left above the axes, top right, bottom right); the first
     that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken`
     (the status box) is used; if every corner covers some of the model, the one covering least (architect's
-    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions)."""
+    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions). When every corner covers a box
+    in `taken`, the first spot off all of them along the top and bottom, then anywhere in the view."""
     spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
 
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
-    free = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)] or spots
+    def free_of(cands):
+        return [(x, y) for x, y in cands if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)]
+    # every corner covering something drawn (a dimension's number: Rhino check of #29 at 5891efc, docked Top
+    # 656 × 668): slid along the top and bottom bands, then anywhere in the view, 8 px at a time, off all of it
+    step = 8
+    xs = [gap + step * k for k in range(int(max(0, view_w - w - 2 * gap) // step) + 1)]
+    ys = [34 + step * k for k in range(int(max(0, view_h - h - 74) // step) + 1)]
+    slides = [(x, y) for y in (34, view_h - h - 64, view_h - h - 40) for x in xs] + \
+        [(x, y) for y in ys for x in xs]
+    free = free_of(spots) or free_of(slides) or spots
     return min(free, key=lambda s: (overlap(s[0], s[1], model) if model else 0.0, free.index(s)))
 
 
