@@ -482,15 +482,11 @@ def test_a_label_keeps_off_its_own_tag_wherever_the_tag_will_be_drawn():
                                                                               src.index("def _dim_label(")]
 
 
-def test_two_min_tags_of_one_dimension_keep_off_each_other_and_its_label_keeps_off_both():
-    """Review round 9: two limits a few feet apart (a range) put their tags on top of each other; and a label kept
-    off its tag wherever the tag lands (the near end when the far end is taken), shown by behaviour."""
+def test_two_min_tags_of_one_dimension_keep_off_each_other():
+    """Review round 9: two limits a few feet apart (a range) put their tags on top of each other. (A label keeping
+    off its own tags: test_a_min_tag_moves_to_the_lines_other_end_…)"""
     ends = [((200, 100), (100, 100)), ((205, 104), (105, 104))]      # two required lines 4 px apart on screen
     a, b = logic.tag_spots(ends, [TAG, 'min 12\'-0"'], [])
     assert not logic.shapes_hit(logic.rect_quad(a), logic.rect_quad(b))
-    far_taken = [(200, 85, 120, 30)]
-    (near,) = logic.tag_spots([((200, 100), (100, 100))], [TAG], far_taken)
-    assert near[0] == 104                                            # moved to the near end
-    cands = [((100, 300), (100, 104)), ((300, 300), (300, 104))]
-    i, q, kind = logic.place_dimension(cands, 60, [], extras=[[logic.rect_quad(near)], []], away=(500, 200))
-    assert not (i == 0 and logic.shapes_hit(q, logic.rect_quad(near)))
+    (near,) = logic.tag_spots([((200, 100), (100, 100))], [TAG], [(200, 85, 120, 30)])
+    assert near[0] == 104                                            # the far end taken: the near end
