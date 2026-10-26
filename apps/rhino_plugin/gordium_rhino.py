@@ -534,6 +534,12 @@ def _in_active_view(e):
     return active is not None and e.Viewport.Id == active.ActiveViewportID
 
 
+def _screen_line(viewport, line):
+    """A model line's two ends on screen: ((x1, y1), (x2, y2))."""
+    a, b = viewport.WorldToClient(line.From), viewport.WorldToClient(line.To)
+    return [[a.X, a.Y], [b.X, b.Y]]
+
+
 def draw_screen(o, e):
     if not _here(o, e):
         return
@@ -565,8 +571,14 @@ def draw_screen(o, e):
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
+    # what this frame draws where, kept per view (STATE["drawn"]): the in-Rhino checks read the drawing's own
+    # placement, never a copy of it (the Rhino job at 27c8e5d: a claim's own sum disagreed with the screen)
+    drawn = {"size": [e.Viewport.Bounds.Width, e.Viewport.Bounds.Height], "model": _model_on_screen(o, e.Viewport),
+             "taken": [list(t) for t in taken], "lines": on_screen, "labels": [], "notice": None}
+    STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn
     # the notice first (placed off the model and the status box), so no label is drawn under it either
     notice = _notice_box(o, e.Viewport, taken, old)
+    drawn["notice"] = list(notice[1:]) if notice is not None else None
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -576,11 +588,13 @@ def draw_screen(o, e):
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
-            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                        along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
+            at = ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
+                             along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
+            drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line)])
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
-                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
+        at = ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each
+                         along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # edge's length, beside it, off
+        drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge)])    # every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
@@ -590,6 +604,7 @@ def draw_screen(o, e):
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
+    drawn["complete"] = True                 # every label and the notice really drawn this frame (review round 2)
     if not boxed:
         return
     state = "stale" if old else o.message[0]
@@ -1813,7 +1828,8 @@ def run_check(doc, report=True):
                 ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
-            say(logic.report_message(path, False, result["report_error"], stale=had_report))
+            first = "✕ " + result["notice"] + " · " if result.get("notice") else ""   # the notice kept in the line
+            say(first + logic.report_message(path, False, result["report_error"], stale=had_report))
         return result
     except Exception as e:
         _clear(o)

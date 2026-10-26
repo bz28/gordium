@@ -471,6 +471,33 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     return left, top, False
 
 
+def place_outside(line, w, h, obstacles=(), taken=(), gap=6, view=None):
+    """Where a w × h label goes when no spot beside its dimension `line` is clear: (left, top), or None. Outside the
+    drawing's box on screen (every line in `obstacles` and its own), nearest its line: left of it, right of it, below,
+    above, level with (or under) the line's middle and kept on screen, the first covering no line and no box in
+    `taken`; the caller draws a leader back to the line. A narrow view (the Rhino job at 27c8e5d, 656 px wide): the
+    7 ft southwest side yard had no room beside its line, and its label crossed 13 of the lot's and house's lines."""
+    segs = list(obstacles) + [line]
+    xs = [p[0] for s in segs for p in s]
+    ys = [p[1] for s in segs for p in s]
+    bx0, bx1, by0, by1 = min(xs), max(xs), min(ys), max(ys)
+    (xa, ya), (xb, yb) = line
+    mx, my = (xa + xb) / 2, (ya + yb) / 2
+    vw, vh = view if view is not None else (float("inf"), float("inf"))
+
+    def onto(x, lo, hi):
+        return min(max(x, lo), hi)
+    spots = [(bx0 - gap - w, onto(my - h / 2, 0, vh - h)), (bx1 + gap, onto(my - h / 2, 0, vh - h)),
+             (onto(mx - w / 2, 0, vw - w), by1 + gap), (onto(mx - w / 2, 0, vw - w), by0 - gap - h)]
+    for left, top in spots:
+        if left < 0 or top < 0 or left + w > vw or top + h > vh:
+            continue
+        if not any(crosses(s, left, top, w, h) for s in segs) and \
+                not any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken):
+            return left, top
+    return None
+
+
 def label_lines(text):
     """A plan label as two lines, for when it won't fit beside its line on one: its name, then its numbers
     ("✕ Side yard, Southwest" / "7'-0 5/8", needs 10'-0" (approx.)"). One line when it has no name before a number

@@ -965,7 +965,7 @@ def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_p
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
     body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'if report and result.get("report_error"):' in body and "say(logic.report_message(path, False" in body
+    assert 'if report and result.get("report_error"):' in body and "say(first + logic.report_message(path, False" in body
     # round 12: "out of date" only for a report that was there before this check, not one its own write left
     assert body.index("had_report = bool(report) and os.path.exists(report_path(doc))") < body.index("result = ask(")
     assert 'result["report_error"], stale=had_report))' in body
@@ -3090,3 +3090,89 @@ def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     report = src[src.index("def open_report("):].split("\ndef ", 1)[0]
     assert report.count("say(first + logic.report_message(") == 2                    # kept in the report's line too
     assert 'first = "✕ " + notice + " · " if notice else ""' in report
+
+
+def test_a_label_with_no_room_beside_its_line_goes_outside_the_drawing_with_a_leader():
+    """The Rhino job at 27c8e5d (highlight claim 2): in a narrow Top view (656 px) the 7 ft southwest side yard had no
+    clear spot beside its line, and its label crossed 13 of the lot's and the house's lines (over the drawing being
+    judged). Now, with nothing clear beside its line, the label goes outside the drawing (left, right, below or above
+    it, on screen, off every line and label) and gordium_ui draws a leader from the line's middle to it."""
+    from design_checker import rhino_logic as logic_
+    from design_checker.rhino_logic import crosses, place_label, place_outside
+
+    def box(x0, y0, x1, y1):
+        return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
+    lot, house = box(158, 110, 497, 557), box(185, 250, 420, 415)
+    hatch = [((185 + k * 10, 250), (185 + k * 10, 415)) for k in range(1, 23)]      # the coloured part's edges
+    own = ((158, 409), (185, 409))                                               # the side yard's dimension
+    obstacles = lot + house + hatch
+    view = (656, 668)
+    w, h = 170, 34                                                               # its two lines
+    assert place_label(own, w, h, obstacles, view=view)[2] is False             # nothing clear beside its line
+    left, top = place_outside(own, w, h, obstacles, view=view)
+    assert not any(crosses(s, left, top, w, h) for s in obstacles + [own])
+    assert 0 <= left and left + w <= 656 and 0 <= top and top + h <= 668
+    assert top >= 557                                                            # below the lot, under its line
+    assert place_outside(own, w, h, obstacles, taken=[(0, 557, 656, 111), (0, 0, 656, 110)], view=view) is None
+    # gordium_ui.label_box: outside, two lines, its leader's end its line's middle
+    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ns = {"logic": logic_, "LINE_H": 14}
+    exec(src[src.index("def label_box("):].split("\ndef ", 1)[0], ns)             # noqa: S102
+    viewport = type("VP", (), {"Size": type("S", (), {"Width": 656, "Height": 668})(),
+                               "WorldToClient": staticmethod(lambda q: type("P", (), {"X": q[0], "Y": q[1]})())})()
+    taken = []
+    left, top, width, want, rows = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", "
+                                                   "needs 10'-0\" (approx.)", 11, taken, along=own, obstacles=obstacles)
+    height = 4 + 14 * len(rows)
+    assert len(rows) == 2 and want == 409 and top >= 557 and taken == [(left, top, width, height)]
+    assert not any(crosses(s, left, top, width, height) for s in obstacles + [own])
+    ui_src = src[src.index("def label_at("):].split("\ndef ", 1)[0]
+    assert "logic.leader_end((p.X, p.Y), (left, top, width, h))" in ui_src and "return left, top, width, h" in ui_src
+
+
+def test_the_in_rhino_checks_read_the_drawings_own_placement():
+    """The Rhino job at 27c8e5d: highlight claim 1b worked out the notice's place with its own taken boxes and said
+    "no corner clear" while the screen drew it bottom right. draw_screen now keeps what each view drew (the notice's
+    box, every label's box and the lines it must stay off) in STATE["drawn"], and the in-Rhino claims read that."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert 'STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn' in draw
+    assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
+    assert draw.count('drawn["labels"].append(') == 2
+    for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
+        assert "label_box(" not in script, name
+
+
+def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
+    """Review round 2 of the placement: the record was kept before the frame finished (a label raising midway left
+    a notice in it that was never drawn), and the scripts could read an earlier frame's; and a report that couldn't
+    be written overwrote the panel line holding the notice. Now the record is marked complete only once every label
+    and the notice are drawn, each script drops the view's record before redrawing and requires it complete, and the
+    report error keeps the notice first in the line."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert draw.index("ui.draw_text_box(d, lines, ui.status_color(\"does_not_comply\"") < \
+        draw.index('drawn["complete"] = True') < draw.index("if not boxed:")
+    assert draw.count('drawn["complete"]') == 1
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert 'say(first + logic.report_message(path, False, result["report_error"], stale=had_report))' in check
+    assert 'first = "✕ " + result["notice"] + " · " if result.get("notice") else ""' in check
+    for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert '.pop(str(' in script and 'get("complete")' in script and "logic.notice_place(" in script, name
+
+
+def test_the_detail_under_the_list_keeps_room_for_its_button():
+    """The Rhino job at 7a16aa6 (pass 2 claim 2): the list above the selected item's detail is a fixed 380 px, so a
+    taller header left the detail 51 px and its "Enter bedrooms and parking spaces…" button 1 px below it (scrolled).
+    The detail now never goes under DETAIL_MIN_HEIGHT: room for its name, a two-line reason and the button (each
+    line 17 px, the button 28, the layout's spacing 6 between them, its padding 10); the list gives way and scrolls."""
+    import re
+    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    least = int(re.search(r"^DETAIL_MIN_HEIGHT = (\d+)", src, re.M).group(1))
+    assert least >= 4 * 17 + 2 * 20 + 3 * 6 + 2 * 6      # four lines of name and reason, two rows of buttons (round 1)
+    panel = src[src.index("    split = ef.Splitter()"):src.index("    footer = row(")]
+    assert "split.Panel2MinimumSize = DETAIL_MIN_HEIGHT" in panel and "split.Panel2 = detail_scroll" in panel
+    assert "split.Panel1MinimumSize = LIST_MIN_HEIGHT" in panel and "LIST_MIN_HEIGHT = 3 * ROW_HEIGHT + 24" in src

@@ -142,46 +142,64 @@ try:
                  for k in range(grp.Children.Count)]
         west_row = next(c for c in cells if "Side yard, Southwest" in c[0])
         claim("1 the panel's Delta says the same", west_row[3] == "at least 0'-11 1/4\" short", west_row)
-        top_vp = doc.Views.Find("Top", False).ActiveViewport
-        doc.Views.ActiveView = doc.Views.Find("Top", False)
-        model = g._model_on_screen(g.overlay(), top_vp)
+        # what the Top view really drew (gordium_rhino.draw_screen keeps it in STATE["drawn"]): the claims read the
+        # drawing's own placement, never a sum of their own (the Rhino job at 27c8e5d: a claim's own taken boxes
+        # said "no corner clear" while the screen placed the notice correctly)
+        top_view = doc.Views.Find("Top", False)
+        doc.Views.ActiveView = top_view
+        top_vp = top_view.ActiveViewport
+
+        def what_drew(labels_on):
+            g.set_labels(labels_on)
+            g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # never an earlier frame's record
+            top_view.Redraw()
+            rec = g.STATE.get("drawn", {}).get(str(top_vp.Id))
+            return rec if rec and rec.get("complete") else None         # the whole frame drawn
+
+        def over(box, other):                          # two (x, y, w, h) boxes overlap
+            return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
+                min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
+        message = lambda: str(g.STATE["panel_parts"]["message"].Text) if g.STATE.get("panel_parts") else ""  # noqa
+        held = ["✕ " + t for t in (getattr(g.overlay(), "toast", None) or [[]])[0]]
         for labels_on in (False, True):
-            taken = [g.logic.status_box(top_vp.Bounds.Width, g._status_rows(g.overlay(), False))] if labels_on else []
-            status = list(taken)
-            box = g._notice_box(g.overlay(), top_vp, taken, g.stale(g.overlay()))
-            claim("1b the notice covers neither the model nor the status box (labels %s)" % ("on" if labels_on else "off"),
-                  box is not None and not any(min(box[1] + box[3], a + c) > max(box[1], a) and
-                                              min(box[2] + box[4], b + e) > max(box[2], b)
-                                              for a, b, c, e in [(model[0], model[1], model[2] - model[0],
-                                                                  model[3] - model[1])] + status),
-                  {"notice": box[1:] if box else None, "model": model, "status": status})
-        vp = doc.Views.Find("Top", False).ActiveViewport
-        screen = lambda line: tuple((p.X, p.Y) for p in (vp.WorldToClient(line.From), vp.WorldToClient(line.To)))  # noqa
-        obstacles = [screen(line) for line in g.overlay().plan_lines]
-        taken, placed = [], []
-        every = [(line, text) for line, text, _ in g.overlay().yard_dims] + \
-            [(edge, text) for _, text, edge in g.overlay().edge_labels]
-        for line, text in every:      # every label, in the order the screen draws them (yards, then edge lengths)
-            left, top, w, _, rows = g.ui.label_box(vp, (line.From + line.To) / 2, text, 11, taken,
-                                                   along=(line.From, line.To), obstacles=obstacles)
-            h = 4 + g.ui.LINE_H * len(rows)                   # one line or two (name, then numbers)
-            hits = [o for o in obstacles if g.logic.crosses(o, left, top, w, h)]
-            others = [b for b in placed if left < b[0] + b[2] and b[0] < left + w and top < b[1] + b[3] and b[1] < top + h]
-            placed.append((left, top, w, h))
-            inside = 0 <= left and left + w <= vp.Bounds.Width and 0 <= top and top + h <= vp.Bounds.Height
-            (ax, ay), (bx, by) = screen(line)                 # next to its own line: the gap between them
+            rec = what_drew(labels_on) or {}
+            box, m = rec.get("notice"), rec.get("model")
+            model_box = (m[0], m[1], m[2] - m[0], m[3] - m[1]) if m else None
+            # not drawn only when the placement itself finds no corner for this frame (never just "said in the panel")
+            room = bool(rec and held) and g.logic.notice_place(rec["size"][0], rec["size"][1], held, m,
+                                                                rec.get("taken") or []) is not None
+            claim("1b the notice covers neither the model nor the status box (labels %s): drawn clear of both when a "
+                  "corner has room, else not drawn and said in the panel" % ("on" if labels_on else "off"),
+                  bool(rec) and bool(held) and ((box is not None and not (model_box and over(box, model_box))
+                                                 and not any(over(box, t) for t in rec.get("taken") or []))
+                                                or (box is None and not room and "no longer complies" in message())),
+                  {"notice": box, "room": room, "model": m, "taken": rec.get("taken"), "view": rec.get("size"),
+                   "panel": message()})
+        rec = what_drew(True)                          # every label on, as the architect turns them on
+        lines = [tuple(map(tuple, s_)) for s_ in rec["lines"]]
+        m = rec["model"]
+        boxes = list(rec.get("taken") or []) + ([rec["notice"]] if rec.get("notice") else [])
+        for k, (text, (left, top, w, h, want), _, own) in enumerate(rec["labels"]):
+            own = tuple(map(tuple, own))
+            hits = [s_ for s_ in lines if s_ != own and g.logic.crosses(s_, left, top, w, h)]
+            others = [b_ for j, b_ in enumerate(rec["labels"]) if j != k and over((left, top, w, h), b_[1][:4])] + \
+                [b_ for b_ in boxes if over((left, top, w, h), b_)]      # nor the notice, status box, north arrow
+            inside = 0 <= left and left + w <= rec["size"][0] and 0 <= top and top + h <= rec["size"][1]
+            (ax, ay), (bx, by) = own                   # next to its own line: the gap between them
             near = min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
                        for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
+            led = abs(top - want) > 1 and not over((left, top, w, h), (m[0], m[1], m[2] - m[0], m[3] - m[1]))
             log.setdefault("labels", []).append((text, round(left), round(top), len(hits), len(others), inside,
-                                                 round(near, 1)))
-            log.setdefault("label_rows", []).append(len(rows))
+                                                 round(near, 1), led))
+        g.set_labels(False)
         claim("2 no label crosses a dimension, a lot edge or the house, nor covers another label",
-              len(log["labels"]) >= 8 and all(n == 0 and m == 0 for *_, n, m, _, _ in log["labels"]) and
-              len(obstacles) >= 4 + 4 + 4, {"labels": log["labels"], "lines": len(obstacles)})
-        claim("2 every label next to its own line (within 12 px: beside it, or just past its end when it is short)",
-              all(near <= 12 for *_, near in log["labels"]), log["labels"])
-        claim("2 every label on screen", all(i for *_, i, _ in log["labels"]),
-              {"labels": log["labels"], "view": (vp.Bounds.Width, vp.Bounds.Height)})
+              len(log["labels"]) >= 8 and all(n == 0 and o_ == 0 for _, _, _, n, o_, _, _, _ in log["labels"]) and
+              len(lines) >= 4 + 4 + 4, {"labels": log["labels"], "lines": len(lines), "view": rec["size"]})
+        claim("2 every label next to its own line (within 12 px: beside it, or just past its end when it is short), or "
+              "outside the drawing with a leader to it", all(near <= 12 or led for *_, near, led in log["labels"]),
+              log["labels"])
+        claim("2 every label on screen", all(i for _, _, _, _, _, i, _, _ in log["labels"]),
+              {"labels": log["labels"], "view": rec["size"]})
         sources = ((g.STATE.get("last") or {}).get("header") or {}).get("sources") or []
         lot = [t for t in sources if t.startswith("Lot: ")]
         area = items["Lot area"]["proposed"]                    # the row's own figure: the fact must say the same
