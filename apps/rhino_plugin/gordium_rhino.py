@@ -1348,11 +1348,10 @@ def _ask_street_more(question):
 
 
 def _clicked_piece(doc, lot, point):
-    """The lot line a click is on: the nearest piece of the outline that is a line at all (a point drawn twice,
-    a piece of no length, is never clicked: it would be a street of 0'-0"; street-run review round 4, F1)."""
-    real = [s for s in _segments(lot.Geometry)
-            if not logic.is_tiny([_feet_point(doc, s[0])[:2], _feet_point(doc, s[1])[:2]])]
-    return min(real or _segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+    """The piece of the lot outline a click is on: the nearest one, whatever its length, never moved to another
+    line (street-run review round 7: a click on an arc drawn in short chords jumped to the side line). A short
+    piece standing alone (a point drawn twice) is refused by the logic with words to click beside it."""
+    return min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
 
 
 def _outline(doc, lot):
