@@ -2093,8 +2093,9 @@ def _drawn(doc, facts, state, saved_ui, session=None, mode=None):
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
         planned = STATE.pop("start_plan", None)         # a new address's: worked out before its undo step opened
         if session is not None and logic.plans_house(mode, STATE.get("redraw_house"), STATE.get("house_after_box")):
-            # logic.WorkCancelled: nothing saved. (No undo step of this script's is open here: a reset's plan was
-            # worked out before it opened, _plan_reset_house; any other Draw opens none)
+            # logic.WorkCancelled: nothing saved. (A reset's plan was worked out before its undo step opened,
+            # _plan_reset_house; the City-outline Draw's step is still open here: ask ends it for the wait and begins
+            # it again after, so the commit and the house are in a step of Gordium's)
             STATE["start_plan"] = planned or _plan_house(doc, out, ui_state)
         _save_ui_state(doc, ui_state)
         sources = fact_sources(doc)        # what the box doesn't set (the ground marking) is kept
@@ -2897,13 +2898,16 @@ def gordium_check():
         facts = {}
     if logic.missing(facts):
         try:
-            facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
-        finally:                        # GordiumCheck never draws a starting house: its box's flag goes with it
-            STATE.pop("redraw_house", None)
-        if facts is None:               # closed or Esc: nothing saved, nothing checked
-            Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
-            return None
-        save_facts(doc, facts)
+            try:
+                facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+            finally:                    # GordiumCheck never draws a starting house: its box's flag goes with it
+                STATE.pop("redraw_house", None)
+            if facts is None:           # closed or Esc: nothing saved, nothing checked
+                Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
+                return None
+            save_facts(doc, facts)
+        finally:                        # its Draw's undo step (a reset) ends here, on any way out, before the check:
+            _end_undo(doc)              # never left open for the architect's own edits (cold review of d7a5675)
     result = run_check(doc, report=True)
     live(True)                                      # live mode is on by default
     if result is not None:

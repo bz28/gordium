@@ -620,6 +620,17 @@ def test_r2_unreadable_facts_never_skip_the_front_check():
         facts.index("raise logic.NotInFront(logic.NOT_IN_FRONT)")
 
 
+def test_r2_every_command_that_opens_a_box_ends_its_undo_step_before_the_check():
+    """Cold review of d7a5675: GordiumCheck's box could reset (an undo step begun) and nothing ended the step; ask now
+    begins it again after every wait, so it would stay open for the architect's own edits."""
+    for fn, end in (("def gordium_check(", "def _layer("), ("def edit_facts(", "def report_path(")):
+        body = part(RHINO, fn, end)
+        assert body.index("confirm(") < body.index("_end_undo(doc)") < body.index("run_check(doc"), fn
+        assert body.rindex("finally:", 0, body.index("_end_undo(doc)")) > body.index("confirm("), fn
+    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
+    assert "_end_undo(doc)" in start[start.index("    finally:"):]
+
+
 def test_r2_a_report_not_written_after_a_file_switch_is_said_with_one_full_stop():
     said = logic.outdated_report_message("/x/r.xlsx", logic.NOT_IN_FRONT, True)
     assert ".." not in said and said.startswith("Zoning report not saved")
