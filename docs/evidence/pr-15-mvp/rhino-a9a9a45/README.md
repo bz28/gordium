@@ -1,7 +1,6 @@
 # #15 rhino-ui at a9a9a45: highlight, notice and pass 2, in Rhino 8 (Mac), 2026-10-26
 
-**Purpose:** the three checks at this head, and two things by eye: the list's first heading whole at the top when
-the panel opens, and the list keeping its scroll on live re-checks.\
+**Purpose:** the three checks at this head, and by eye the list's first heading and its scroll on re-checks.\
 **For:** the coordinator, the #15 job, reviewers.\
 **Kept current by:** never changed (a dated record).
 
