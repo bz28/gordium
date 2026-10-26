@@ -153,7 +153,9 @@ def test_the_row_pitch_is_read_from_the_table_itself():
     ListBox's ControlObject IS the table; .DocumentView raised and the measured pitch was never used)."""
     fn = part(UI, "def list_row_px(", "def start_box(")
     assert "table = listbox.ControlObject " in fn and "DocumentView" not in fn
-    assert "table.RowHeight" in fn and "table.IntercellSpacing.Height" in fn
+    assert "native_number(table.RowHeight) + native_number(table.IntercellSpacing.Height)" in fn
+    native = part(UI, "def native_number(", "def list_row_px(")
+    assert native.index("return float(value)") < native.index("return float(str(value))")   # through its text too
 
 
 def test_the_list_is_as_tall_as_its_rows_and_long_lines_wrap():

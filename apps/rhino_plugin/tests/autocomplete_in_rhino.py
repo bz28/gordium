@@ -112,8 +112,9 @@ def laid_out(listbox):
     try:
         table = listbox.ControlObject      # Eto.macOS: the NSTableView itself
         scroll = table.EnclosingScrollView
-        return {"visible_h": float(scroll.ContentSize.Height), "rows": int(table.RowCount),
-                "pitch": float(table.RowHeight) + float(table.IntercellSpacing.Height)}
+        num = sys.modules["gordium_ui"].native_number          # (Mac native numbers: as the plugin reads them)
+        return {"visible_h": num(scroll.ContentSize.Height), "rows": int(num(table.RowCount)),
+                "pitch": num(table.RowHeight) + num(table.IntercellSpacing.Height)}
     except Exception:
         return None
 

@@ -759,12 +759,21 @@ def legend(code=None):
 
 # ---- the start box (A1–A13) ----------------------------------------------------------------------------------
 
+def native_number(value):
+    """A Mac native number (NFloat, nint) as a Python float: directly, or through its text where the bridge won't
+    convert it (as review_fixes_in_rhino.py reads a window number: int(str(...)))."""
+    try:
+        return float(value)
+    except Exception:
+        return float(str(value))
+
+
 def list_row_px(listbox):
     """A list's row pitch in px as Rhino lays it out: on the Mac the ListBox is a table whose row height plus spacing
     is read from it; elsewhere (or if it can't be read) logic.LIST_ROW_PX."""
     try:
         table = listbox.ControlObject      # Eto.macOS: the NSTableView itself (its NSScrollView is the handler's own)
-        pitch = float(table.RowHeight) + float(table.IntercellSpacing.Height)
+        pitch = native_number(table.RowHeight) + native_number(table.IntercellSpacing.Height)
         return int(round(pitch)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX
     except Exception:
         return logic.LIST_ROW_PX
