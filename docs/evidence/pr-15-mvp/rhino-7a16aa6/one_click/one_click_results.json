@@ -1,0 +1,101 @@
+{
+ "head": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_7a16aa6",
+ "kept": [
+  [
+   [
+    76.916,
+    0.2317
+   ],
+   [
+    67.113,
+    0.1516
+   ]
+  ],
+  [
+   [
+    67.113,
+    0.1516
+   ],
+   [
+    59.09,
+    0.3022
+   ]
+  ],
+  [
+   [
+    59.09,
+    0.3022
+   ],
+   [
+    49.525,
+    0.0
+   ]
+  ],
+  [
+   [
+    49.525,
+    0.0
+   ],
+   [
+    38.7471,
+    0.5182
+   ]
+  ],
+  [
+   [
+    38.7471,
+    0.5182
+   ],
+   [
+    30.5456,
+    0.1523
+   ]
+  ],
+  [
+   [
+    30.5456,
+    0.1523
+   ],
+   [
+    20.3655,
+    0.1794
+   ]
+  ],
+  [
+   [
+    20.3655,
+    0.1794
+   ],
+   [
+    10.7167,
+    0.8339
+   ]
+  ],
+  [
+   [
+    10.7167,
+    0.8339
+   ],
+   [
+    1.1492,
+    0.2317
+   ]
+  ]
+ ],
+ "ids": [
+  "Ithaca Rd",
+  "Ithaca Rd",
+  "Ithaca Rd",
+  "Ithaca Rd",
+  "Ithaca Rd",
+  "Ithaca Rd",
+  "Ithaca Rd",
+  "Ithaca Rd"
+ ],
+ "said": [
+  "Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage"
+ ],
+ "whole_ithaca": true,
+ "ok": true,
+ "done": true
+}

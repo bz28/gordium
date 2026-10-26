@@ -1,0 +1,23 @@
+{
+ "open": {
+  "0 the sample's lot is from the tax map": true,
+  "8 the address is there too": true,
+  "8 the sample's Street side reads Ithaca Rd, from the lookup": true
+ },
+ "side_yard": {
+  "1 on the tax map: every part at least the requirement plus the 2'-0\" margin, as drawn; now 3'-0\" short": true,
+  "1 the panel shows it": true
+ },
+ "apply_move": {
+  "1 doing exactly what it said: the row complies": true,
+  "1 and no other row worse": true
+ },
+ "zoom": {
+  "3 Zoom to selects the row's objects": true
+ },
+ "button": {
+  "2 the button comes right after the reason": true,
+  "2 its words aren't repeated as text": true,
+  "2 the button is on screen without scrolling": false
+ }
+}
