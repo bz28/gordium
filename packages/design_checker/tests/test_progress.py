@@ -285,13 +285,72 @@ def test_a_cancelled_check_leaves_nothing_shown_as_checked():
 
 def test_the_wait_window_closes_when_the_job_is_done_or_cancelled():
     wait = part(UI, "def wait(", "def set_box_open(")
-    assert "if job.wait(logic.WAIT_WINDOW_S" in wait and "if job.finished():" in wait
-    assert "dialog.AbortButton = stop" in wait and "e.Cancel = not job.finished()" in wait
+    assert "if job.wait(logic.WAIT_WINDOW_S" in wait and "while not job.finished():" in wait
+    assert "ef.Keys.Escape and cancellable" in wait and "e.Cancel = not job.finished()" in wait
+    assert wait.index("finally:") < wait.index("form.Close")             # closed on every way out of the loop
     box = part(UI, "def start_box(", "\ndef ")
     assert 'status["label"].Text = progress()' in box
     assert "lookup_cancel" in part(RHINO, "def _one_pick(", "def _pick_outcome(")
     loop = part(RHINO, "def _box_loop(", "# ---- the address lookup")
     assert 'before_lookup, ticked = ticked, {}' in loop and 'ticked = before_lookup' in loop
+
+
+# ---- Rhino run of aea73b8 (#32) and a3eb1d7 (#33): a frozen wait window, and Draw again after a Cancel ------------
+
+def test_the_wait_window_never_depends_on_a_modal_session_or_a_timer():
+    """In Rhino (Mac) a wait window froze at its first frame ("○●○ 0 s") with a closed dialog still painted behind
+    it, right after a modal dialog was ended from a timer: its timer never ran. The wait is now a plain window that
+    the waiting loop itself keeps current while Rhino runs (RhinoApp.Wait between passes): no ShowModal, no UITimer,
+    nothing to deadlock on, whatever modal state Rhino is in."""
+    wait = part(UI, "def wait(", "def set_box_open(")
+    assert "ShowModal" not in wait and "UITimer" not in wait and "ef.Dialog" not in wait
+    loop = wait[wait.index("while not job.finished():"):wait.index("finally:")]
+    assert loop.index("Rhino.RhinoApp.Wait()") < loop.index("step.Text = job.step") < \
+        loop.index("line.Text = logic.progress_line(job.elapsed(), limit)")   # set by the loop, every pass
+    assert "form.Show()" in wait and "form.Topmost = True" in wait
+
+
+def test_nothing_starts_a_second_piece_of_work_while_gordium_waits():
+    said = []
+    ran = []
+    acts = logic.busy_actions({"report": lambda: ran.append("report"), "legend": lambda: ran.append("legend")},
+                              lambda: True, said.append)
+    acts["report"]()
+    acts["legend"]()                                   # only shows something: allowed
+    assert ran == ["legend"] and said == [logic.WORKING]
+    calm = logic.busy_actions({"report": lambda: ran.append("report")}, lambda: False, said.append)
+    calm["report"]()
+    assert ran == ["legend", "report"]
+    actions = part(RHINO, "def _actions(", "def PANEL_ACTIONS(")
+    assert 'logic.busy_actions(logic.gate_actions(PANEL_ACTIONS(), _box_open, say)' in actions
+    assert 'STATE.get("asking") is not None' in actions
+    ask = part(RHINO, "def ask(", "def _ask_job(")
+    assert ask.index('if STATE.get("asking") is not None:') < ask.index("raise RuntimeError(logic.WORKING)") < \
+        ask.index("_settle_live()") < ask.index("_ask_job(")
+
+
+def test_no_check_starts_while_a_start_box_is_open():
+    """A check asked for while the box is open waits until it closes (Edit site's own check runs after its box)."""
+    assert not logic.allowed("check", True) and logic.allowed("check", False)
+    assert not logic.should_recheck(10.0, 20.0, False, True, 0.5)            # live mode: the box open
+    for fn in ("def run_check(", "def _check_live("):
+        body = part(RHINO, fn, "\ndef ")
+        assert body.index('logic.allowed("check", _box_open())') < body.index("_check_begin(")
+    edit = part(RHINO, "def edit_facts(", "def report_path(")
+    assert edit.index("_end_undo(doc)") < edit.index("run_check(doc, report=False)")   # after the box, never in it
+
+
+def test_a_cancelled_gordiumstart_takes_back_the_sample_it_put_down():
+    """Rhino run of aea73b8: after a cancelled Draw, GordiumStart again drew no house: the sample lot put down before
+    the box (outside the box's session) stayed, with no facts, and was taken for the architect's own lot."""
+    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
+    assert start.index("put_down = (doc.Strings.GetValue(SECTION, UI_ENTRY)") < start.index("_add_lot(doc, sample)")
+    assert start.index("drawn = True") < start.index("save_facts(doc, facts)")
+    fin = start[start.index("    finally:"):]
+    assert "if put_down is not None and not drawn:" in fin and "_take_back_sample" in fin
+    back = part(RHINO, "def _take_back_sample(", "def _start_request(")
+    assert "table.delete(lot_id)" in back and "doc.Strings.Delete(SECTION, UI_ENTRY)" in back
+    assert "_save_ui_state(doc, json.loads(ui_before))" in back and "remove_layer_if_empty" in back
 
 
 # ---- review round 1: each confirmed finding, pinned ----------------------------------------------------------------

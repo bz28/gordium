@@ -1733,6 +1733,23 @@ def gate_actions(actions, box_open, say, open_ok=("legend",)):
     return {name: gated(name, fn) for name, fn in actions.items()}
 
 
+WORKING = "Gordium is working (its window says on what): wait for it, or press Cancel there."
+
+
+def busy_actions(actions, busy, say, open_ok=("legend",)):
+    """The panel's actions, each saying WORKING instead while Gordium waits for an answer (busy()): the wait window is
+    a plain one while Rhino keeps answering, so a button pressed meanwhile must never start a second piece of work
+    on top of it (another check, a start box). `open_ok`: the ones that only show something."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if busy() and name not in open_ok:
+                say(WORKING)
+                return None
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
+
+
 def recovery_message(removed, back):
     """What recovery did, in words (None when it did nothing)."""
     def n(k):

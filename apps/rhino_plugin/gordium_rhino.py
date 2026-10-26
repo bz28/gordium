@@ -205,6 +205,8 @@ def ask(request, cancel=False, on_tick=None):
     `cancel`: the wait has Cancel, which stops the checker (the next request starts a fresh one) and raises
     logic.WorkCancelled: its answer is never used. A live re-check still running is finished first (one request
     at a time on the checker's pipe: _settle_live)."""
+    if STATE.get("asking") is not None:      # Rhino answers while a wait runs (ui.wait): nothing may put a second
+        raise RuntimeError(logic.WORKING)    # request on the checker's pipe meanwhile (a command typed, a button)
     _settle_live()
     job = _ask_job(request, cancel)
     STATE["asking"] = job                    # live mode waits while any answer is awaited (_idle)
@@ -807,7 +809,8 @@ def _prism(doc, outline, base, top):
 def _actions():
     """What the panel's buttons do (gordium_ui.make_panel): each one gated, so while a start box is open none of them
     touches the model (rhino_logic.gate_actions)."""
-    return logic.gate_actions(PANEL_ACTIONS(), _box_open, say)
+    return logic.busy_actions(logic.gate_actions(PANEL_ACTIONS(), _box_open, say),
+                              lambda: STATE.get("asking") is not None, say)   # (a wait running: ui.wait)
 
 
 def PANEL_ACTIONS():
@@ -2847,9 +2850,12 @@ def gordium_start():
                                ef.MessageBoxButtons.OK, ef.MessageBoxType.Information)
         return None
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
+    put_down = None                     # the sample this run puts down before its box: taken back unless drawn on
     if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
         sample = ask({"cmd": "sample_site"})
+        put_down = (doc.Strings.GetValue(SECTION, UI_ENTRY), set(RhinoTable(doc).layer_names()))
         sample_lot = str(_add_lot(doc, sample))
+        put_down = (sample_lot,) + put_down
         # its facts are the sample project's; a lookup may replace its lot (never one the architect drew or picked)
         _save_ui_state(doc, dict(_ui_state(doc), from_sample=True, replaceable_lot=sample_lot,
                                  street_name=sample.get("street_name"),     # its street, as the lookup named it
@@ -2864,11 +2870,13 @@ def gordium_start():
         except ValueError:
             saved = {}
         facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
+    drawn = False
     try:
         facts = confirm(doc, facts, options, "start")
         if facts is None:
             Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
             return None
+        drawn = True
         save_facts(doc, facts)
         return _draw_starting_house(doc, facts)
     except logic.WorkCancelled:         # Cancel while the starting house was worked out: the box rolled back
@@ -2876,7 +2884,25 @@ def gordium_start():
         return None
     finally:
         STATE.pop("start_plan", None)
+        if put_down is not None and not drawn:     # Cancel (the box's, or Draw's): the file as before GordiumStart
+            logic.guard(_take_back_sample, "take back the sample lot")(doc, *put_down)
         _end_undo(doc)
+
+
+def _take_back_sample(doc, lot_id, ui_before, layers_before):
+    """The sample lot GordiumStart put down before its box, taken back when the box ended without a Draw (its Cancel,
+    or Cancel while Draw worked out the house): the lot, the box's choices it wrote, the layer it made. Left behind,
+    the next GordiumStart took it for the architect's own lot with no facts and drew no house (Rhino run of #32
+    aea73b8: "Draw again" after a cancelled Draw drew nothing)."""
+    table = RhinoTable(doc)
+    if table.exists(lot_id):
+        table.delete(lot_id)
+    if ui_before is None:
+        doc.Strings.Delete(SECTION, UI_ENTRY)
+    else:                                # (through the one write boundary: it was written through it too)
+        _save_ui_state(doc, json.loads(ui_before))
+    for path in sorted(set(table.layer_names()) - set(layers_before), key=lambda p: -p.count("::")):
+        table.remove_layer_if_empty(path)
 
 
 def _start_request(doc, facts, saved_ui):

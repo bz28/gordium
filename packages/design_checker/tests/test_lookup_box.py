@@ -899,7 +899,7 @@ def test_while_a_start_box_is_open_no_panel_action_does_anything_but_say_so():
     names = re.findall(r'"(\w+)": ', body)
     assert {"enter", "add", "ground", "not_ground", "retry", "edit_site", "survey", "grade", "report", "envelope",
             "massing", "zoom"} <= set(names)
-    assert "return logic.gate_actions(PANEL_ACTIONS(), _box_open, say)" in rhino
+    assert "logic.busy_actions(logic.gate_actions(PANEL_ACTIONS(), _box_open, say)," in rhino   # (and busy: #32)
     calls, said, box = [], [], {"open": True}
     gated = logic.gate_actions({n: (lambda *a, n=n: calls.append(n)) for n in names}, lambda: box["open"], said.append)
     for n in names:

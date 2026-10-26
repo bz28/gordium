@@ -13,8 +13,8 @@ document, then:
 3. Zoning report… cancelled after 1 s: the report file already there is byte for byte as it was, and no half-written
    copy is left beside it; Gordium said the report was cancelled and the file unchanged.
 4. GordiumStart on an empty file, the slow checker on "start", Cancel after 1 s while it finds the largest
-   building: nothing is drawn (no starting house, no object on Gordium's holding layer), the model and the file's
-   strings are as they were when the box was shown, and Gordium said "Draw cancelled". Then GordiumStart again with
+   building: nothing is drawn, the model and the file's strings are as they were before GordiumStart (the sample
+   lot it put down before its box is taken back), and Gordium said "Draw cancelled". Then GordiumStart again with
    the real checker draws the house. (GordiumStart's one undo step for a Draw with its house is not claimed here:
    this script runs outside a command, as the panel's buttons do; re_lookup_in_rhino.py claims one undo step for
    Edit site's Draw of a new address.)
@@ -168,9 +168,18 @@ def main():
         slow(g, True)
         g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})     # (the slow checker started first)
         w = Watch(g)
+        frames = []                          # the wait window's own lines, as it sets them (ui.WAIT_SHOWN)
+        g.ui.WAIT_SHOWN = lambda step, line: frames.append([round(time.time(), 2), step, line])
         began = time.time()
         result = g.run_check(doc, report=False)
         w.stop()
+        g.ui.WAIT_SHOWN = None
+        log["window_frames"] = frames
+        marks = {f[2].split()[0] for f in frames}
+        seconds = [int(f[2].split()[1]) for f in frames]
+        claim("1 the wait window's own mark moves and its seconds count up (never frozen)",
+              len(marks) == 3 and seconds and seconds[-1] >= 2 and seconds == sorted(seconds),
+              {"marks": sorted(marks), "seconds": sorted(set(seconds)), "frames": len(frames)})
         claim("1 Rhino kept running while the check waited", w.ticks >= 8, {"ticks": w.ticks,
                                                                             "s": round(time.time() - began, 1)})
         claim("1 the wait said the checker's own steps", "Slow test: waiting…" in w.steps and
@@ -219,6 +228,7 @@ def main():
         doc2 = docs.open("Large Objects - Feet")
         g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})     # (the slow checker started again first)
         seen = {}
+        empty, empty_strings = objects(doc2), strings(g, doc2)    # before GordiumStart: an empty file
         g.STATE["on_confirm"] = lambda d, facts, text, state: seen.update(objects=objects(d), strings=strings(g, d))
         w = Watch(g, cancel_at=1.0)
         got = g.gordium_start()
@@ -226,12 +236,13 @@ def main():
         g.STATE.pop("on_confirm", None)
         claim("4 the work cancelled was the starting house's", w.cancelled == ["Slow test: waiting…"], w.cancelled)
         now = objects(doc2)
-        claim("4 Cancel during Draw: nothing drawn, the model as when the box was shown",
-              got is None and now == seen.get("objects") and not [p for p in now.values() if "Massing" in p] and
-              not [p for p in now.values() if g.logic.HOLDING_LAYER in p],
-              {"now": now, "at_box": seen.get("objects")})
-        claim("4 Cancel during Draw: the file's strings as when the box was shown", strings(g, doc2) == seen.get("strings"),
-              {"now": strings(g, doc2), "at_box": seen.get("strings")})
+        # the sample lot GordiumStart put down before its box is taken back too (Rhino run of aea73b8: left behind,
+        # the next GordiumStart took it for the architect's lot and drew no house)
+        claim("4 Cancel during Draw: nothing drawn, the model as before GordiumStart (the sample taken back)",
+              got is None and now == empty and seen.get("objects") and now != seen.get("objects"),
+              {"now": now, "before": empty, "at_box": seen.get("objects")})
+        claim("4 Cancel during Draw: the file's strings as before GordiumStart", strings(g, doc2) == empty_strings,
+              {"now": strings(g, doc2), "before": empty_strings})
         claim("4 Gordium said Draw was cancelled", g.logic.DRAW_CANCELLED in (g.STATE.get("said") or []),
               (g.STATE.get("said") or [])[-3:])
         slow(g, False)
@@ -335,12 +346,21 @@ def main():
         claim("7 after Cancel lookup, Draw is as it was with the address typed before Look up (off, saying why)",
               after.get("draw_on") == boxes[0].get("draw_typed") is False and reason and
               reason == boxes[0].get("reason_typed"), {"boxes": boxes})
-        log["done"] = True
         log["ok"] = True
     except Exception:
+        log["ok"] = False
         log["error"] = traceback.format_exc()
         raise                                # a failed claim fails the run loudly
     finally:
+        log["done"] = True                   # always: the run ended, passed or not ("ok" says which)
+        try:
+            g = sys.modules.get("gordium_rhino")
+            if g is not None:                # the slow checker never outlives the run
+                g.STATE.pop("worker_command", None)
+                g._stop_worker()
+                g.ui.WAIT_SHOWN = None
+        except Exception:
+            pass
         json.dump(log, open(S + "out.json", "w", encoding="utf-8"), indent=1, default=str)
         try:
             g = sys.modules.get("gordium_rhino")

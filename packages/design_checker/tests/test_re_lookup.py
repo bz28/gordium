@@ -877,5 +877,7 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
     edit = (rhino.index("def edit_facts("), rhino.index("def report_path("))
     outside = [rhino.count("\n", 0, i) + 1 for i in readers if not edit[0] < i < edit[1]
                and not rhino.index("def confirm(") < i < rhino.index("def _confirm(")
-               and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")]
+               and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")
+               # (#32: Draw reads it, in its own box, to work out the house it will draw: logic.plans_house)
+               and not rhino.index("def _drawn(") < i < rhino.index("def hide_massing(")]
     assert outside == [], outside                                           # read nowhere else
