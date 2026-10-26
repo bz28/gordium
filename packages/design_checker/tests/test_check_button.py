@@ -76,7 +76,9 @@ def test_the_plugin_checks_by_itself_only_when_asked_and_says_press_check_otherw
     run = body(RHINO, "def run_check(", "\ndef _toast(")
     assert 'ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))' in run
     confirm = body(RHINO, "def confirm(", "\ndef _confirm(")
-    assert 'logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None)' in confirm
+    assert 'logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None,' in confirm
+    assert "failed=failed)" in confirm and confirm.index("failed = True") < confirm.index("result = _confirm(")
+    assert confirm.index("result = _confirm(") < confirm.index("failed = False") < confirm.index("finally:")
     assert confirm.index('changed_before = STATE.get("dirty")') < confirm.index("_confirm(doc, facts, options, mode)")
     saved = body(RHINO, "def set_auto_check(", "\ndef ")
     assert "auto_check=bool(on)" in saved and "_save_ui_state(doc" in saved
@@ -216,3 +218,14 @@ def test_the_rhino_check_runs_its_idle_steps_across_real_idle():
     enough = body(script, "def idle_enough(", "\ndef ")
     assert 'run["idle_at"]' in enough and "IDLE_WAIT_S" in enough
     assert (REPO / "docs/evidence/pr-27/rhino-ea88c18/phased_run_claims.json").exists()
+
+
+def test_a_start_box_that_ends_in_an_error_leaves_the_results_greyed():
+    """The headless check-15 (it failed on 2974913 too): a start box that ended in an error (its rollback stopped
+    partway) was treated as a Cancel, so the model counted as unchanged and the results stayed shown as current over
+    a model that may differ. An error keeps every edit seen during the box: the results grey out."""
+    assert logic.changed_after_box(None, 20.0, False, failed=True) == 20.0        # an edit, then the error
+    assert logic.changed_after_box(10.0, 20.0, False, failed=True) == 20.0        # the latest edit's time
+    assert logic.changed_after_box(10.0, None, False, failed=True) == 10.0        # changed before the box: still
+    assert logic.changed_after_box(None, None, False, failed=True) is None        # nothing touched: nothing to grey
+    assert logic.changed_after_box(None, 20.0, False) is None                     # a Cancel, as before

@@ -1682,10 +1682,14 @@ AUTO_CHECK_LABEL = "Check after every edit"
 AUTO_CHECK_TIP = "Off: the results grey out after an edit until you press Check. On: Gordium checks again by itself."
 
 
-def changed_after_box(before, now, drawn):
+def changed_after_box(before, now, drawn, failed=False):
     """When the model counts as changed after a start box closes (STATE["dirty"]): Cancel rolled the box's own edits
     back, so the model is as it was when the box opened (`before`: changed then, or not); Draw's edits are checked
-    by Draw's own check, and any change left counts (`now`)."""
+    by Draw's own check, and any change left counts (`now`). A box that ended in an error is no Cancel: its rollback
+    may have stopped partway, so any edit seen during it counts (`now`, else `before`): the results grey out, never
+    shown as current for a model that may differ (the headless check-15, demo review of #26 with #27)."""
+    if failed:
+        return now or before
     return now if drawn else before
 
 
