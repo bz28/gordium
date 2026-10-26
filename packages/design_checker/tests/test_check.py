@@ -3036,8 +3036,29 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
         ns["_ask_street_more"]("q")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     pick = rhino[rhino.index("def _box_pick(doc, what, facts, saved_ui):"):rhino.index("def confirm(")]
-    assert ('    except Cancelled:                    # Esc at the bend question: the street side as it was (round 15)\n'
-            '        say("Esc: the street side is as it was (nothing changed)")\n    finally:') in pick
+    # ... run: the plugin's own _box_pick with stand-ins for Rhino, Esc at the bend question on the corner path
+    # (one street already answered) and on the one-street path (a name already given): nothing changed (round 16)
+    import copy
+    said, clicks = [], []
+    lot_obj = type("Lot", (), {"Geometry": None})()
+    result = type("Result", (), {"Success": "ok", "Nothing": "none"})
+    rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result})})
+
+    def esc(question):
+        raise cancelled()
+
+    for corner, facts in ((True, {"lot_id": "l", "corner_lot": True, "street_line": [o[0]]}),
+                          (False, {"lot_id": "l", "corner_lot": False, "street_line": [o[0]], "street_ids": ["A St"]})):
+        clicks[:] = [("ok", o[0]), ("none", None)] if corner else [("ok", o[0])]
+        saved = {"street_name": "A St", "street_source": "the tax map"}
+        before = (copy.deepcopy(facts), copy.deepcopy(saved))
+        nsb = _plugin_functions(["_box_pick"], Rhino=rhino2, Cancelled=cancelled, _find=lambda doc, i: lot_obj,
+                                _outline=lambda doc, lot: o, _get_point=lambda p: clicks.pop(0),
+                                _clicked_piece=lambda doc, lot, point: point, _feet_point=lambda doc, p: p,
+                                _ask_street_more=esc, say=said.append, _highlight=lambda doc, f: None)
+        got = nsb["_box_pick"](None, "street", facts, saved)
+        assert (got[0], got[1]) == before and (facts, saved) == before, (corner, got)
+        assert said[-1] == "Esc: nothing changed (the street side is as it was)", said
 
 
 def _plugin_functions(names, **extra):
