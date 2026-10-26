@@ -79,6 +79,8 @@ try:
           stories_row is not None and str(stories) in str(stories_row.get("proposed")), stories_row)
     main = (g.STATE.get("last") or {}).get("header") or {}
     log["header"] = main
+    claim("2 the house is named 'the starting house' (its floors on sublayers, one building)",
+          "the starting house" in str(main.get("main") or ""), main.get("main"))
     note = (g.fact_sources(doc).get("starting_house") or {}).get("value") or ""
     log["note"] = note
     claim("3 the note: the largest house that complies even if the tax-map lines are 2'-0\" off, what limited it, "
