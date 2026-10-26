@@ -37,11 +37,37 @@ cd $HOME\Documents\gordium
 git pull
 ```
 
-No install step this time (2026-10-25): no new Python packages since the last update.
+No install step this time (2026-10-26): no new Python packages and no new parts of Gordium since the last update,
+and the five commands are the same, so `install.py` is not needed either.
 
 Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
 
-## What's new in this preview (2026-10-25)
+## What's new (2026-10-26)
+
+Everything in the 2026-10-25 preview below, plus:
+
+- **R-3a side-yard eaves are checked against the right side.** On an R-3a lot the two side yards can differ (one
+  must be 10 ft). Gordium now checks each side's eaves against that side's own minimum, so an eave that reaches too
+  far into the 10 ft side yard no longer complies. The earlier false pass (it could say such an eave complied) is
+  fixed: you no longer need to check these eaves by hand. If the house sits exactly in the middle, so either side
+  could be the 10 ft one, Gordium checks it both ways and says so.
+- **One click on a street edge takes the whole street.** When you pick the street side with **Change…**, click any
+  piece of the street edge: Gordium keeps the whole street (on the sample, Ithaca Rd's 8 short tax-map pieces,
+  75'-10" of frontage) and says what it kept. It never runs round a corner. Where it can't tell whether the lot line
+  bends along the same street or turns a corner, it asks: answer **Yes** or **No**. **Enter** asks the question again
+  (it needs a real answer: guessing either way could pass a lot that doesn't comply); **Esc** changes nothing (the
+  street side stays as it was). On a corner lot, click each street once, then press Enter when done.
+- **Draw stays off until a typed address is looked up.** If you type a new address, Draw waits: "Press Look up to
+  find … first." Look up, or put the lot's own address back (or clear it), and Draw is on again.
+- **The Check button.** Nothing re-checks by itself any more unless you tick **Check after every edit** in the
+  panel. After an edit the results grey out ("Model changed since the last check — press Check"), so you never
+  read old results as current; press **Check** to bring them up to date.
+- **A compact "no longer complies" notice.** When an edit breaks a rule, a small notice names it (for example
+  "Rear yard no longer complies"). It sits in a part of the view that is clear of your model, never on top of
+  it (if no part is clear, only the panel shows it), and it goes away as soon as it no longer applies. The panel
+  says it too.
+
+## What was new on 2026-10-25
 
 Everything in the 2026-10-22 evening preview below, plus three fixes found by testing it in Rhino:
 
@@ -97,14 +123,9 @@ Everything in the 2026-10-21 evening preview, plus:
 
 ## Known limits
 
-- **R-3a lots: check side-yard eaves by hand for now.** When the two side yards differ (one under 10 ft), Gordium
-  can say an eave complies when it projects too far into the side yard that must be 10 ft. A fix is coming in the
-  next update.
+- **Keyboard check wanted:** at the street question press Enter (asks again) and Esc (nothing changes) and tell Ben.
 - **Corner lots get no starting house** (which yard is the front is still an open question for the architects):
   after a lookup of a corner lot, draw your building yourself.
-- **Corner lots:** when you pick the street side with **Change…**, click every piece of the street edge — the
-  sample's street edge is 8 short tax-map pieces, and a single click keeps only that piece (fix coming in the next
-  update).
 - **Not yet re-checked inside Rhino after today's changes.** Ben's test Rhino will run the scripted checks before
   he tells you to update; if something looks wrong, take a screenshot and send it to Ben.
 - **Windows:** please confirm that no black console window appears and that Task Manager shows only one
