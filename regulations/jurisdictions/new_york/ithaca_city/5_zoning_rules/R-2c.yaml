@@ -1707,33 +1707,57 @@ rules:
           and (side_yard_smaller >= 10 + max(building_height - 35, 0) or side_yard_larger < 10 + max(building_height - 35, 0))
           and side_yard_smaller_eaves >= 10 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves >= 5 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves < 10 + max(building_height - 35, 0) - 2
         reason: >-
-          For a detached dwelling, a two-family dwelling or another use, which side must be the 10 ft side yard is open: the walls are at least 10 ft from both
-          side lot lines (or from neither), so either side may be. The eaves fit only with the wider side yard (to
-          the walls) the 5 ft one; Gordium can't tell which side the architect means it to be.
+          For a detached dwelling, a two-family dwelling or another use, which side yard is the 10 ft one (more on a building over 35 ft
+          tall) is open: the walls are at least that far from both side lot lines, or from neither, so either side
+          may be. The eaves fit only if the side whose walls are farther from its line is the 5 ft one. Say
+          which side is meant to be the 10 ft one.
       - when: >-
           use not in ["one_family_detached_zero_lot_line", "one_family_semi_detached", "one_family_attached"]
           and (side_yard_smaller >= 10 + max(building_height - 35, 0) or side_yard_larger < 10 + max(building_height - 35, 0))
           and side_yard_larger_eaves >= 10 + max(building_height - 35, 0) - 2 and side_yard_smaller_eaves >= 5 + max(building_height - 35, 0) - 2 and side_yard_smaller_eaves < 10 + max(building_height - 35, 0) - 2
         reason: >-
-          For a detached dwelling, a two-family dwelling or another use, which side must be the 10 ft side yard is open: the walls are at least 10 ft from both
-          side lot lines (or from neither), so either side may be. The eaves fit only with the narrower side yard (to
-          the walls) the 5 ft one; Gordium can't tell which side the architect means it to be.
+          For a detached dwelling, a two-family dwelling or another use, which side yard is the 10 ft one (more on a building over 35 ft
+          tall) is open: the walls are at least that far from both side lot lines, or from neither, so either side
+          may be. The eaves fit only if the side whose walls are nearer to its line is the 5 ft one. Say
+          which side is meant to be the 10 ft one.
       - when: >-
           use == "one_family_detached_zero_lot_line"
           and (side_yard_smaller >= 15 + max(building_height - 35, 0) or side_yard_larger < 15 + max(building_height - 35, 0))
           and side_yard_smaller_eaves >= 15 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves >= 10 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves < 15 + max(building_height - 35, 0) - 2
         reason: >-
-          For a zero-lot-line house, which side must be the 15 ft side yard is open: the walls are at least 15 ft from both
-          side lot lines (or from neither), so either side may be. The eaves fit only with the wider side yard (to
-          the walls) the 10 ft one; Gordium can't tell which side the architect means it to be.
+          For a zero-lot-line house, which side yard is the 15 ft one (more on a building over 35 ft
+          tall) is open: the walls are at least that far from both side lot lines, or from neither, so either side
+          may be. The eaves fit only if the side whose walls are farther from its line is the 10 ft one. Say
+          which side is meant to be the 15 ft one.
       - when: >-
           use == "one_family_detached_zero_lot_line"
           and (side_yard_smaller >= 15 + max(building_height - 35, 0) or side_yard_larger < 15 + max(building_height - 35, 0))
           and side_yard_larger_eaves >= 15 + max(building_height - 35, 0) - 2 and side_yard_smaller_eaves >= 10 + max(building_height - 35, 0) - 2 and side_yard_smaller_eaves < 15 + max(building_height - 35, 0) - 2
         reason: >-
-          For a zero-lot-line house, which side must be the 15 ft side yard is open: the walls are at least 15 ft from both
-          side lot lines (or from neither), so either side may be. The eaves fit only with the narrower side yard (to
-          the walls) the 10 ft one; Gordium can't tell which side the architect means it to be.
+          For a zero-lot-line house, which side yard is the 15 ft one (more on a building over 35 ft
+          tall) is open: the walls are at least that far from both side lot lines, or from neither, so either side
+          may be. The eaves fit only if the side whose walls are nearer to its line is the 10 ft one. Say
+          which side is meant to be the 15 ft one.
+      - when: >-
+          use == "one_family_detached_zero_lot_line"
+          and (side_yard_smaller >= 15 + max(building_height - 35, 0) or side_yard_larger < 15 + max(building_height - 35, 0))
+          and side_yard_smaller_eaves >= 15 + max(building_height - 35, 0) - 2
+          and side_yard_larger_eaves >= max(building_height - 35 - 2, 0) and side_yard_larger_eaves < 10 + max(building_height - 35, 0) - 2
+        reason: >-
+          The wider side (to the walls) of a zero-lot-line house may be its 0 ft side (note 15) when the walls leave
+          open which side is which (both sides' walls at least 15 ft from their lines, or neither): its eave may
+          reach the lot line but not cross it there, or must stay 10 ft less 2 ft from it. Gordium can't tell which
+          side that is.
+      - when: >-
+          use in ["one_family_semi_detached", "one_family_attached"]
+          and (side_yard_smaller >= 10 + max(building_height - 35, 0) or side_yard_larger < 10 + max(building_height - 35, 0))
+          and side_yard_smaller_eaves >= 10 + max(building_height - 35, 0) - 2
+          and side_yard_larger_eaves >= max(building_height - 35 - 2, 0) and side_yard_larger_eaves < 10 + max(building_height - 35, 0) - 2
+        reason: >-
+          The wider side (to the walls) of a semi-detached or attached building may be its 0 ft side (note 15) when the walls leave
+          open which side is which (both sides' walls at least 10 ft from their lines, or neither): its eave may
+          reach the lot line but not cross it there, or must stay 10 ft less 2 ft from it. Gordium can't tell which
+          side that is.
     sources:
       - file: zoning_charts_2026-04.pdf             # a use this rule's figures depend on
         page: 2
@@ -1844,6 +1868,23 @@ rules:
       - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 16, side_yard_larger: 18, front_yard_eaves: 12, side_yard_smaller_eaves: 16, side_yard_larger_eaves: 12, rear_yard_eaves: 48, lot_depth: 100, building_height: 30}
         expect: needs_review
         note: walls 16 and 18 ft; either side may be the 15 ft one, and the wider side's eave (12 ft) fits only if it is the 10 ft one
+      # the height bonus moves which side can carry the larger minimum (40 ft: 5 ft more, 15 and 10; zero lot line 20)
+      - given: {use: one_family_detached, side_yard_smaller: 9, side_yard_larger: 12, front_yard_eaves: 20, side_yard_smaller_eaves: 9, side_yard_larger_eaves: 13, rear_yard_eaves: 48, lot_depth: 100, building_height: 40}
+        expect: needs_review
+        note: at 40 ft neither side's walls are 15 ft from the line, so either side may be the larger one; the eaves fit one way only
+      - given: {use: one_family_detached, side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 100, building_height: 40}
+        expect: fail
+        note: at 40 ft only the 16 ft side can be the 15 ft one, and its eave (9 ft) is over 2 ft into it
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 18, side_yard_larger: 24, front_yard_eaves: 20, side_yard_smaller_eaves: 18, side_yard_larger_eaves: 15, rear_yard_eaves: 48, lot_depth: 100, building_height: 40}
+        expect: fail
+        note: at 40 ft only the 24 ft side can be the 20 ft one, and its eave (15 ft) is over 2 ft into it
+      # the 0 ft side may be the wider one when the walls leave it open (note 15)
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 15, front_yard_eaves: 12, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 0, rear_yard_eaves: 48, lot_depth: 100, building_height: 30}
+        expect: needs_review
+        note: either side may be the 0 ft one; with the eave at 0 on that side, the other side's 13 ft fits its 15 ft yard
+      - given: {use: one_family_semi_detached, side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 12, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 0, rear_yard_eaves: 48, lot_depth: 100, building_height: 30}
+        expect: needs_review
+        note: the wider side may be the attached (0 ft) side
     notes: >-
       The yards themselves (R-2c.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
       its eaves left out; this rule measures the same yards to the outermost part, eaves included, and lets that be up
@@ -1852,7 +1893,9 @@ rules:
       Each side's eaves are measured to that side's own lot line (side_yard_smaller_eaves to the line of the narrower
       side yard to the walls), so each eave is held to the minimum its side carries. Where the two minimums differ
       (10 and 5; a zero-lot-line house 15 and 10), only a side whose walls are at least the larger one from its line
-      can carry it; where both can, or neither, either side may, and the eaves must fit both ways (review_when). Those
+      can carry it; where both can, or neither, either side may, and the eaves must fit both ways, else
+      needs review (review_when: Gordium's cautious reading, to confirm with the architects; the chart says
+      only that one side yard is at least the one number and the other at least the other). Those
       review_when entries leave the front and rear eaves out (a formula is at most 500 characters), so with the side
       left open a front or rear eave that fails gives needs review here, not does not comply: cautious, never a pass.
     drafted_by: claude
