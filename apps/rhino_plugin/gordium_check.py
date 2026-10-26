@@ -1,5 +1,5 @@
 #! python3
-"""GordiumCheck: check the open model, show the envelope, turn on live mode."""
+"""GordiumCheck: check the open model and show the envelope (after an edit the results grey out until Check)."""
 import os
 import sys
 
