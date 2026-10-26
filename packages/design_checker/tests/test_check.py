@@ -1737,7 +1737,7 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
     assert ('    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:'
             in draw)
-    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True)" in draw
+    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep)" in draw
     assert draw.index("zoomed_in = ") < draw.index("    if not boxed:")         # the status box isn't gated by it
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     at = ui[ui.index("def label_at("):ui.index("def _signed(")]
