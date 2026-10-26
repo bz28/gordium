@@ -2025,12 +2025,18 @@ def starting_house_fact(note, today):
     return {"value": "as first drawn, " + said, "source": SUGGESTED, "confirmed_by": None, "date": today}
 
 
+# what the box's Change… on the street row does on a corner lot (_box_pick): one click per street keeps that whole
+# street, and Enter ends it (never "pick each lot line": a click already takes the street's every piece)
+CORNER_HINT = ("This lot faces two streets: click Change… on " + STREET_LABEL + ", then click once on each street "
+               "(one click keeps the whole street) and press Enter")
+
+
 def uncertain(state):
     """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
     if state.get("corner_lot") is None:          # never guessed: unanswered, the yards wait for it (§325-19C)
         return "Does this lot face two streets? Answer Corner lot? under " + STREET_LABEL
     if state.get("corner_lot"):
-        return "This lot faces two streets: click Change… and pick each lot line on a street"
+        return CORNER_HINT
     if len(state.get("zones_found") or []) > 1:
         return "This lot is in two zones: pick the zone that applies"
     return None

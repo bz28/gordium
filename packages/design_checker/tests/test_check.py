@@ -640,7 +640,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
 def test_the_amber_line_names_what_to_do():
     from design_checker import rhino_logic as logic
     assert logic.uncertain(_box(corner_lot=False)) is None               # answered: no amber line
-    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain(_box(corner_lot=True)) == logic.CORNER_HINT
     assert logic.uncertain(_box(corner_lot=False, zones_found=["R-1b", "R-2a"])) == \
         "This lot is in two zones: pick the zone that applies"
 
@@ -699,7 +699,7 @@ def test_a_corner_lot_is_never_guessed_the_box_asks_and_the_yards_wait(facts):
     street = {r["key"]: r for r in logic.box_rows(unanswered)}["street"]
     assert street["choice"] == ("Corner lot?", ["Not answered", "No: one street", "Yes: two streets"], 0)
     assert logic.uncertain(unanswered) == "Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)"
-    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain(_box(corner_lot=True)) == logic.CORNER_HINT
     assert logic.uncertain(_box(corner_lot=False)) is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     suggested = rhino.split("def suggested_facts(", 1)[1].split("\ndef ", 1)[0]
@@ -1972,7 +1972,7 @@ def test_a_corner_lot_answered_no_never_keeps_both_streets_and_never_reads_its_w
     # the box and the command line call the one helper
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert rhino.count("logic.corner_answered(") == 2 and "logic.after_corner_answer(" not in rhino
-    assert logic.uncertain({"corner_lot": True}) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain({"corner_lot": True}) == logic.CORNER_HINT
 
 
 def test_the_envelope_refuses_a_buried_solid_as_the_measuring_does():
@@ -3189,6 +3189,32 @@ def test_every_street_line_is_saved_with_its_street_id():
     logic_src = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
     saves = re.findall(r"set_street_lines\((?!facts, lines, ids=None\))([^\n]*)", logic_src)
     assert all("None)" in c or "* len(" in c for c in saves), saves
+
+
+def test_the_corner_pick_saves_one_id_per_street_and_the_hint_says_what_the_box_does():
+    """#18 reads a corner lot's streets only from street_ids. The plugin's own _box_pick, run with stand-ins for
+    Rhino on the sample (corner lot answered Yes, so no saved names), two clicks then Enter: one id per street, as
+    the command line said ("Street 1", "Street 2"), saved with the lines. And the amber hint says what the box
+    really does: Change…, one click per street, Enter."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import sample_site
+    site = sample_site()
+    o = _ring(site["lot"])
+    said = []
+    clicks = [("ok", o[3]), ("ok", o[14]), ("none", None)]
+    result = type("Result", (), {"Success": "ok", "Nothing": "none"})
+    rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result})})
+    ns = _plugin_functions(["_box_pick"], Rhino=rhino2, Cancelled=type("Cancelled", (Exception,), {}),
+                           _find=lambda doc, i: type("Lot", (), {"Geometry": None})(), _outline=lambda doc, lot: o,
+                           _get_point=lambda p: clicks.pop(0), _clicked_piece=lambda doc, lot, point: point,
+                           _feet_point=lambda doc, p: p, _ask_street_more=lambda q: False, say=said.append,
+                           _highlight=lambda doc, f: None)
+    facts, saved = ns["_box_pick"](None, "street", {"lot_id": "l", "corner_lot": True}, {})
+    assert facts["street_ids"] == ["Street 1"] * 8 + ["Street 2"] * 2, facts.get("street_ids")
+    assert len(facts["street_line"]) == 10
+    assert said[0].startswith("Street 1: 8 lot-line pieces") and said[1].startswith("Street 2: 2 lot-line pieces")
+    assert logic.CORNER_HINT == ("This lot faces two streets: click Change… on Front lot line (on the street), then "
+                                 "click once on each street (one click keeps the whole street) and press Enter")
 
 
 def _plugin_functions(names, **extra):
