@@ -885,7 +885,8 @@ def test_a_corner_lot_address_with_too_many_lines_stops_the_whole_reading():
     # the south street, 20 ft from the east one (x = 60): front yard 20 ft. Each address's frontage is measured:
     # south 50, chamfer + east 14.14 + 90 = 104.14, south + chamfer 64.14, east 90
     assert m["front_yard"]["value"] == 20.0 and m["front_yard_eaves"]["value"] == 20.0
-    assert sorted(r["value"] for r in m["lot_width"]["readings"]) == [50.0, 64.142136, 90.0, 104.142136]
+    # (the chamfer alone too: as like a short street at a skew as a cut corner, read both ways; #18 round e)
+    assert sorted(r["value"] for r in m["lot_width"]["readings"]) == [14.142136, 50.0, 64.142136, 90.0, 104.142136]
     for name in ("rear_yard", "side_yard_smaller", "side_yard_larger"):
         assert m[name]["value"] is None and "too many readings to list" in m[name]["reason"], name
 

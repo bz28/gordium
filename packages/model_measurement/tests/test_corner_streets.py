@@ -130,9 +130,8 @@ def _box(x0, y0, x1, y1):
 def test_a_gently_curving_street_in_pieces_keeps_its_side_and_rear_readings():
     """#18 round c: a corner lot whose front street is 5 pieces of 12 ft turning 8 degrees at each joint (32 in all:
     where it ends is open), then a 90 degree corner. The street is the stretch before or after a possible split,
-    never a middle piece alone: the address readings stay under the cap, so the side yards are still measured, and
-    no lot width reading is a middle piece alone (the first and last pieces are the streets either side of the
-    curve: 8 degrees a joint, 32 in all, is a rounded corner)."""
+    no reading lost: the address readings stay under the cap, so the side yards are still measured, and the whole
+    street (60 ft) is a lot width reading (8 degrees a joint, 32 in all, is a rounded corner)."""
     pts = [(0.0, 0.0)]
     for k in range(5):
         a = math.radians(8 * k)
@@ -146,16 +145,19 @@ def test_a_gently_curving_street_in_pieces_keeps_its_side_and_rear_readings():
     m = measure(site, facts)
     assert m["side_yard_smaller"].get("readings") or m["side_yard_smaller"]["value"] is not None
     assert "too many readings" not in (m["side_yard_smaller"].get("reason") or "")
-    words = [r["reading"] for r in m["lot_width"].get("readings") or []]
-    assert words and not any(w.endswith(f"(lot line {k})") for w in words for k in (2, 3, 4)), words
+    # (a middle 12 ft piece between 16 degrees of turn on each side may be a short street of its own: it is read
+    # too, beside the readings with the curve joined to either street; #18 round e, never fewer readings)
+    assert any(abs(r["value"] - 60.0) < 0.01 for r in m["lot_width"].get("readings") or [])
 
 
-def test_a_chamfer_is_never_a_street_alone():
-    """#18 round c: a corner cut off (55 ft street, a 5 x 5 chamfer, 95 ft street): the chamfer is part of either
-    street, never a street of its own (7'-1" frontage): 55, 62.07, 95 or 102.07 ft."""
+def test_a_cut_corner_is_read_with_either_street_and_as_a_short_street_too():
+    """A corner cut off (55 ft street, a 5 x 5 cut between two 45 degree turns, 95 ft street): from the street lines
+    alone it is as like a short street crossing at a skew as a cut corner, so it is read both ways (#18 round e:
+    never fewer readings; round c had dropped it alone): with either street (62.07, 102.07), the streets alone (55,
+    95), and its own 7.07 ft, the cautious lowest."""
     ring = [(0, 0), (55, 0), (60, 5), (60, 100), (0, 100)]
     edges, site = _site(ring)
     facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b",
              "use": "one_family_detached", "corner_lot": True, "street_line": edges[:3], "lot_surveyed": True,
              "ground_is_flat": True, "grade_elevation": 0}
-    assert set(_widths(site, facts)) == {55.0, 62.07, 95.0, 102.07}
+    assert set(_widths(site, facts)) == {7.07, 55.0, 62.07, 95.0, 102.07}

@@ -2254,6 +2254,7 @@ def _lot_lines(lot: Lot, facts: dict):
 JOINT = 15                # degrees: a joint turning more than this but no more than PARALLEL may be where a street ends
 STRAIGHT = 4.5            # degrees: a joint turning no more than this is within a straight street (a tax map's pieces)
 ONE_CORNER = 90 + PARALLEL  # degrees: turning joints together turning more than this are more than one corner
+MIN_STREET = 5.0          # ft: no street's frontage is shorter (a corner's pieces of less are never one alone)
 
 
 def _heading(edge) -> float:
@@ -2301,8 +2302,10 @@ def _street_runs(lot: "Lot", chain: list) -> list[list[int]]:
 
     A street ends at an end of the lines, at a corner (_corners: a sharp corner's joint, a cut or rounded corner's
     first and last joints) or at a bend (a joint turning more than JOINT, no more than PARALLEL, outside a corner).
-    A street is any run of the lines between two such ends with no corner inside it. A corner's pieces are never a
-    street, nor part of one alone: the whole corner may be read with the street on either side of it, or both. So
+    A street is any run of the lines between two such ends with no corner inside it. A corner's pieces are a street
+    of their own only where they may be one (straight, MIN_STREET or more, the corner turning more than JOINT on each
+    side: a short street at a skew is read both ways, never fewer readings); otherwise never alone: the whole corner
+    is read with the street on either side of it, or both. So
     every street's own frontage is a reading, never a piece of a corner or two streets added (§325-8A col. 7: the
     frontage on a street; #18 reviews: three streets read 105 ft; a curving street read each piece; a street between
     two rounded corners was never read alone)."""
@@ -2314,6 +2317,18 @@ def _street_runs(lot: "Lot", chain: list) -> list[list[int]]:
                   {k for k in range(1, n) if JOINT < turns[k - 1] <= PARALLEL and k not in inside})
     streets = [(x, y) for i, x in enumerate(ends) for y in ends[i + 1:]
                if not any(x < k < y for k in inside) and not any(x <= i < y for i in pieces)]
+    # a run inside a corner that may instead be a short street of its own (a street crossing at a skew, a hexagon's
+    # middle side, between two shallow corners): straight (its own joints no more than STRAIGHT), MIN_STREET or more
+    # long, with the corner turning more than JOINT on each side of it. Read both ways, its own frontage too: never
+    # fewer readings (#18 round e: the short street's frontage was lost, a false-pass shape)
+    for c0, c1 in corners:
+        for x in range(c0, c1):
+            for y in range(x + 1, c1 + 1):
+                if any(turns[k - 1] > STRAIGHT for k in range(x + 1, y)):
+                    break
+                if lot.length(chain[x:y]) >= MIN_STREET and sum(turns[c0 - 1:x]) > JOINT and \
+                        sum(turns[y - 1:c1]) > JOINT:
+                    streets.append((x, y))
     runs = [chain[x:y] for x, y in streets]
     for x, y in streets:                          # each street with the whole corner on either side, or both
         before = [c for c in corners if c[1] == x and c[1] > c[0]]
