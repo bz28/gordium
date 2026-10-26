@@ -1,0 +1,118 @@
+{
+ "claims": {
+  "V the vault house is one closed solid, its roof curved": {
+   "ok": true,
+   "detail": true
+  },
+  "V the height row needs colour": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.height",
+    "name": "Building height",
+    "status": "needs_review",
+    "proposed": "\u2014",
+    "required": "35'-0\"",
+    "margin": "",
+    "delta": "",
+    "approx": false,
+    "colour": "none",
+    "note": "assuming flat ground",
+    "points": null,
+    "reason": "a building has a curved edge (not measured yet); a building has a curved surface (not measured yet); the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office",
+    "group": "building",
+    "needs": [],
+    "hint": null,
+    "refused": null
+   }
+  },
+  "V its pieces in its colour": {
+   "ok": true,
+   "detail": [
+    "needs_review"
+   ]
+  },
+  "V the whole plan is coloured (the coloured part spans the house's width and depth)": {
+   "ok": true,
+   "detail": [
+    12.871689252023007,
+    48.82835723876953,
+    27.799238662719723,
+    65.17257263183595,
+    34.959999999999994,
+    36.04000000000001
+   ]
+  },
+  "V coloured just inside each wall above the limit (35.5 ft) and under the crown (41 ft)": {
+   "ok": false,
+   "detail": null
+  },
+  "V nothing coloured below the limit (34 ft, mid-plan)": {
+   "ok": true,
+   "detail": []
+  },
+  "V the coloured volume is the vault's own part above the limit (within 5 %)": {
+   "ok": false,
+   "detail": {
+    "volume": 1451.3055278304885,
+    "above_limit": 6822.346777966624
+   }
+  }
+ },
+ "house_box_ft": [
+  12.891689252023008,
+  48.80835723876953,
+  27.819238662719727,
+  65.15257263183594,
+  0.0
+ ],
+ "V": {
+  "height": {
+   "id": "R-1b.height",
+   "name": "Building height",
+   "status": "needs_review",
+   "proposed": "\u2014",
+   "required": "35'-0\"",
+   "margin": "",
+   "delta": "",
+   "approx": false,
+   "colour": "none",
+   "note": "assuming flat ground",
+   "points": null,
+   "reason": "a building has a curved edge (not measured yet); a building has a curved surface (not measured yet); the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office",
+   "group": "building",
+   "needs": [],
+   "hint": null,
+   "refused": null
+  },
+  "limit": 35.0,
+  "pieces": [
+   [
+    "needs_review",
+    {
+     "why": "height",
+     "measure": "building_height",
+     "row": "Building height",
+     "building": "9a0eefcc-4e84-4df3-922e-40260c1d9f05"
+    }
+   ]
+  ],
+  "plan_ft": [
+   12.871689252023007,
+   48.82835723876953,
+   27.799238662719723,
+   65.17257263183595,
+   34.959999999999994,
+   36.04000000000001
+  ],
+  "house_ft": [
+   12.891689252023008,
+   48.80835723876953,
+   27.819238662719727,
+   65.15257263183594
+  ],
+  "volume": 1451.3055278304885,
+  "above_limit": 6822.346777966624
+ },
+ "passed": 5,
+ "ok": false
+}
