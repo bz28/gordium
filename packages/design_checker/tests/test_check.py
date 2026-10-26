@@ -497,7 +497,7 @@ def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(fac
     assert lot_area["status"] == present.REVIEW and "at worst 5,934 sf against 6,000 sf" in lot_area["reason"]
     surveyed = start(MODEL, {**facts, "lot_surveyed": True})
     assert surveyed["kept_back"] == 0.0 and note not in surveyed["notes"]
-    assert surveyed["margin_note"] == "Largest house that complies; limited by lot coverage 25% (the lot is from a survey)."
+    assert surveyed["margin_note"] == "Largest house the rules allow; limited by lot coverage 25% (the lot is from a survey)."
     xs = [p[0] for p in surveyed["floors"][0]["outline"]]
     assert max(xs) - min(xs) == pytest.approx(53.0)                 # 73 − 2 × 10: exactly at the side yards
     buffered = start(MODEL, {**facts, "lot_surveyed": True}, design_buffer=1.0)
@@ -831,7 +831,7 @@ def test_the_margin_note_says_what_was_kept_and_which_part_is_the_buffer(facts):
     assert "kept 2'-3\" back; limited by the yards" in margin_note(2.25, 0.0, True, True)    # stepped back further
     assert margin_note(2.0, 0.0, True, False) == NOT_PROVEN          # never claimed without the proof
     assert margin_note(0.0, 0.0, False, True, "the yards") == \
-        "Largest house that complies; limited by the yards (the lot is from a survey)."
+        "Largest house the rules allow; limited by the yards (the lot is from a survey)."
 
 
 def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
@@ -3721,6 +3721,13 @@ def test_the_starting_house_floors_go_on_their_own_sublayers_and_count_as_the_bu
     assert "a.LayerIndex = _layer(doc, logic.massing_floor(i + 1))" in floors
     assert "_layer(doc, logic.MASSING_ROOF)" in floors
     assert "a.LayerIndex = _layer(doc, logic.MASSING)\n" not in floors
+    hide = rhino[rhino.index("def hide_massing("):rhino.index("Cancelled = logic.Cancelled")]
+    assert "logic.on_layer(layer.FullPath, logic.MASSING)" in hide and "doc.Layers[layer].IsVisible = not hidden" in hide
+    extras = rhino[rhino.index("def _extras("):rhino.index("def _extras(") + 800]
+    assert "logic.MASSING if logic.on_layer(path, logic.MASSING) else path" in extras      # said once (F3)
+    from envelope_builder import start as gen
+    src = (REPO / "packages/envelope_builder/envelope_builder/start.py").read_text(encoding="utf-8")
+    assert src.index("a corner between slices") < src.index('out["limited_by"] =') and "narrowed" in src   # F4
 
 
 def test_the_starting_house_note_says_what_limited_it_with_its_number():

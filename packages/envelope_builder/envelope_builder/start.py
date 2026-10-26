@@ -185,12 +185,15 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
         notes.append(CANT)
         return out
     lo, hi, y0, depth = found
-    # what stopped it growing: the coverage limit (its area reached it), else the yards (the buildable area's edges)
-    out["limited_by"] = "coverage" if allowed is not None and (hi - lo) * depth >= allowed - 1e-6 else "yards"
-    out["yards"] = dict(env["yards"])
     best = box(lo, y0, hi, y0 + depth)
     while not best.within(buildable.buffer(1e-9)) and best.bounds[2] - best.bounds[0] > 2 * SAFETY:
         best = box(best.bounds[0] + SAFETY, y0, best.bounds[2] - SAFETY, y0 + depth)   # a corner between slices
+    # what stopped it growing: the coverage limit (its area reached it and no corner narrowed it after), else the
+    # yards, the buildable area's edges (review of feature 5, F4)
+    narrowed = best.bounds[2] - best.bounds[0] < (hi - lo) - 1e-9
+    out["limited_by"] = "coverage" if allowed is not None and not narrowed and (hi - lo) * depth >= allowed - 1e-6 \
+        else "yards"
+    out["yards"] = dict(env["yards"])
     if not best.within(buildable.buffer(1e-9)):
         notes.append(CANT)
         return out

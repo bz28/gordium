@@ -11,7 +11,8 @@ A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, a tax-map lot)
    2'-0" off, what limited it with its number, and Use my survey… for the full size.
 4. The envelope drawn is the cautious one: its outline at the base 2'-0" inside the buildable outline as drawn
    (the dashed curve on Gordium::Envelope).
-5. Hide starting house hides every floor's sublayer with it (the parent off); showing it shows them.
+5. Hide starting house hides every floor's sublayer (each set, not left to the parent); showing it shows
+   them; none is left locked.
 Writes <temp>/gordium_massing/out.json and a Perspective capture; closes its document."""
 import json
 import os
@@ -100,14 +101,14 @@ try:
               gaps and all(abs(x - 2.0) <= 0.05 for x in gaps), gaps)
     else:
         claim("4 the envelope drawn is the cautious one", False, {"lines": bool(base), "outline": bool(env.get("outline"))})
+    floor_layers = [doc.Layers[doc.Layers.FindByFullPath(g.logic.massing_floor(n), -1)] for n in range(1, stories + 1)]
     g.hide_massing(True)
-    hidden = all(not doc.Layers[doc.Layers.FindByFullPath(g.logic.massing_floor(n), -1)].IsVisible or
-                 not doc.Layers[doc.Layers.FindByFullPath(g.logic.MASSING, -1)].IsVisible for n in range(1, stories + 1))
-    off = [o.Visible for o in g._buildings(doc)]
+    off = [layer.IsVisible for layer in floor_layers]
     g.hide_massing(False)
-    on = [o.Visible for o in g._buildings(doc)]
-    claim("5 Hide starting house hides every floor, showing it shows them", hidden and not any(off) and all(on),
-          {"off": off, "on": on})
+    on = [layer.IsVisible for layer in floor_layers]
+    unlocked = [not layer.IsLocked for layer in floor_layers]       # still the architect's to edit
+    claim("5 Hide starting house hides every floor's sublayer, showing it shows them, none left locked",
+          floor_layers and not any(off) and all(on) and all(unlocked), {"off": off, "on": on, "unlocked": unlocked})
     view = doc.Views.Find("Perspective", False)
     view.ActiveViewport.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
     view.Redraw()

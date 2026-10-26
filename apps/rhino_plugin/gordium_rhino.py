@@ -1564,7 +1564,8 @@ def _extras(doc, facts):
     lot left out, the use's name."""
     buildings = _buildings(doc)
     groups = {i for o in buildings for i in (o.Attributes.GetGroupList() or [])}
-    layers = sorted({doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings})
+    layers = sorted({logic.MASSING if logic.on_layer(path, logic.MASSING) else path   # its floors' sublayers said
+                     for path in (doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings)})   # once (F3)
     left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
@@ -2218,7 +2219,14 @@ def hide_massing(hidden):
     if index < 0:
         say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
         return
-    doc.Layers[index].IsVisible = not hidden
+    touched = logic.outermost_first([(i, layer.FullPath) for i, layer in enumerate(doc.Layers)
+                                     if not layer.IsDeleted and logic.on_layer(layer.FullPath, logic.MASSING)])
+    locks = [(i, _own_lock(doc, doc.Layers[i])) for i in touched]   # (a parent's IsVisible passes its lock down)
+    for layer in touched:
+        doc.Layers[layer].IsVisible = not hidden     # the parent and each floor's sublayer, each set (review of
+        #                                              feature 5, F2: never left to what the parent passes down)
+    for i, own in locks:                             # each layer's own lock as it was (the architect edits them)
+        _set_own_lock(doc, doc.Layers[i], own)
     doc.Views.Redraw()
 
 

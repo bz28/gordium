@@ -1140,7 +1140,8 @@ def margin_note(keep, buffer, tax, proven, limit="the yards"):
                 f"{limit}.")
     if buffer:
         return f"Starting house keeps {ft(keep)} back from each limit (your design buffer); limited by {limit}."
-    return f"Largest house that complies; limited by {limit} (the lot is from a survey)."
+    return f"Largest house the rules allow; limited by {limit} (the lot is from a survey)."   # (only the tax-map
+    #                                         wording is Ben's; "complies" is the panel's to say: review of feature 5, F6)
 
 
 LOT_ONLY = {"lot_area", "lot_width", "lot_depth"}   # items about the lot itself, whatever the house
