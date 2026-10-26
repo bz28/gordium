@@ -2738,7 +2738,7 @@ def test_the_notice_timer_stops_once_a_check_cleared_the_notice():
 
 def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     """The architect's eye on #28 at 92cf742: zoomed in tight, the "no longer complies" notice was one long line, a
-    bar across the whole plan over the drawing being judged. Now it is at most NOTICE_SHARES[0] of the view's width,
+    bar across the whole plan over the drawing being judged. Now it is at most NOTICE_MAX_SHARE of the view's width,
     wrapped between its " · " parts only (never inside a measurement), in the first corner clear of the model and of
     the status box (a narrower box tried when the wider fits no corner); when none fits, it is not drawn (the panel's
     message line says it). The side yard's notice is still drawn in the default framed view (review round 1)."""
@@ -2757,7 +2757,7 @@ def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     # the default framed Top view (1000 x 640, the lot from 324,102 to 676,538): drawn, top left, compact
     lot = (324, 102, 676, 538)
     lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot)
-    assert (x, y) == (12, 34) and w <= 1000 * logic_.NOTICE_SHARES[0] and not over(x, y, w, h, lot)
+    assert (x, y) == (12, 34) and w <= 1000 * logic_.NOTICE_MAX_SHARE and not over(x, y, w, h, lot)
     # ...with the status box top right: still clear of both
     status = (518, 12, 467, 56)
     lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot, [status])
@@ -2926,3 +2926,21 @@ def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown(
     broken = type("Tree", (), {"ScrollToRow": lambda self, row: 1 / 0})()
     ns["_scroll_to"](broken, 0, 3)                                            # never an error out of it
     ns["_scroll_to"](object(), 0, 3)                                          # no ScrollToRow: nothing
+
+
+def test_the_notice_is_drawn_in_the_real_docked_top_view():
+    """The Rhino job at a9a9a45: in the real docked Top view (657 x 668 px, the model on screen from 156,106 to
+    501,562, the north arrow at 543,119, 61 x 55) the side yard's notice wasn't drawn: its widest box (60 %) was
+    three lines, 4 px too tall for the band above the model, and narrower ones were taller still. The notice now
+    tries its most compact box first, then wider ones up to NOTICE_MAX_SHARE: here two lines across the top, clear
+    of the model and the arrow. The scripts' screenshots are taken at the view's own size, never 1000 x 640."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · at least 0'-11 1/4\" short"
+    model, arrow = (155.67, 106.27, 501.33, 561.73), (543.26, 118.92, 61.03, 55.28)
+    lines, (x, y), w, h = logic_.notice_place(657, 668, [side], model, [arrow])
+    assert len(lines) == 2 and w <= 657 * logic_.NOTICE_MAX_SHARE and y + h <= model[1] and (x, y) == (12, 34)
+    assert not (min(x + w, arrow[0] + arrow[2]) > max(x, arrow[0]) and min(y + h, arrow[1] + arrow[3]) > max(y, arrow[1]))
+    assert logic_.NOTICE_SHARES == tuple(sorted(logic_.NOTICE_SHARES))     # the most compact box first
+    for name in ("notice_in_rhino.py", "highlight_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert "Size(1000, 640)" not in script, name

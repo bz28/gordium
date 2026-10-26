@@ -510,11 +510,12 @@ def label_lines(text):
     return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
 
 
-NOTICE_SHARES = (0.6, 0.5, 0.4)   # the notice's widest box, then narrower ones: a share of the view's width each
-NOTICE_MIN_CHARS = 24             # ...never narrower than this many characters a line
+NOTICE_SHARES = (0.4, 0.5, 0.6, 0.7, 0.8)   # the notice's boxes, narrowest first: a share of the view's width each
+NOTICE_MAX_SHARE = NOTICE_SHARES[-1]         # never wider (a two-line band above the model, never a bar over it)
+NOTICE_MIN_CHARS = 24                        # ...never narrower than this many characters a line
 
 
-def notice_lines(lines, view_w, share=NOTICE_SHARES[0], size=13):
+def notice_lines(lines, view_w, share=NOTICE_MAX_SHARE, size=13):
     """The notice's lines wrapped to at most `share` of the view's width (gordium_ui text_box_size's measure: size *
     0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line. Broken only between its " · " parts,
     never inside one (a measurement like 7'-0 5/8" stays on one line: review round 1); a part longer than the line
@@ -540,11 +541,13 @@ def notice_box(lines, size=13):
 
 
 def notice_place(view_w, view_h, lines, model, taken=(), size=13):
-    """The notice as drawn in a view: (lines, (left, top), width, height), or None. Its widest box first (at most
-    NOTICE_SHARES[0] of the view's width), then narrower ones, each in the first corner clear of the model and of
-    every box in `taken` (notice_spot); None when no box fits a clear corner: then it is not drawn over the model,
-    and the panel's message line says it (review round 1: one narrow box alone hid the side yard's notice in the
-    default framed view)."""
+    """The notice as drawn in a view: (lines, (left, top), width, height), or None. Its most compact box first (40 %
+    of the view's width), then wider ones up to NOTICE_MAX_SHARE (fewer, longer lines: a band that fits above or
+    below the model where a tall box can't), each in the first corner clear of the model and of every box in `taken`
+    (notice_spot); None when no box fits a clear corner: then it is not drawn over the model, and the panel's
+    message line says it (review round 1: one narrow box alone hid the side yard's notice in the default framed
+    view; the Rhino job at a9a9a45: in the real docked Top view, 657 x 668 px, three lines at most 60 % wide were
+    4 px too tall for the band above the model, so it wasn't drawn: two lines at 80 % fit)."""
     for share in NOTICE_SHARES:
         wrapped = notice_lines(lines, view_w, share, size)
         w, h = notice_box(wrapped, size)

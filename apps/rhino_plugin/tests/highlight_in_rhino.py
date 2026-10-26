@@ -68,7 +68,8 @@ def capture(doc, view_name, name):
         view.ActiveViewport.ZoomExtents()
     view.Redraw()
     draw_now(view)
-    view.CaptureToBitmap(System.Drawing.Size(1000, 640)).Save(S + "frames/" + name + ".png")
+    size = System.Drawing.Size(view.ActiveViewport.Bounds.Width, view.ActiveViewport.Bounds.Height)   # as seen
+    view.CaptureToBitmap(size).Save(S + "frames/" + name + ".png")
 
 
 try:
