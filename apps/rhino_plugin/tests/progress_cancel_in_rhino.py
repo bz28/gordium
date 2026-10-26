@@ -15,15 +15,17 @@ document, then:
 4. GordiumStart on an empty file, the slow checker on "start", Cancel after 1 s while it finds the largest
    building: nothing is drawn (no starting house, no object on Gordium's holding layer), the model and the file's
    strings are as they were when the box was shown, and Gordium said "Draw cancelled". Then GordiumStart again with
-   the real checker draws the house, and one Undo removes the whole Draw (one undo step intact).
+   the real checker draws the house. (GordiumStart's one undo step for a Draw with its house is not claimed here:
+   this script runs outside a command, as the panel's buttons do; re_lookup_in_rhino.py claims one undo step for
+   Edit site's Draw of a new address.)
 5. Live mode: an edit starts a background re-check (Rhino not waiting: the script's own timer keeps ticking), the
    panel shows "Checking…" with its line and Cancel; Cancel: "Check cancelled", nothing drawn, not running.
 6. Live mode: a second edit while a background re-check runs: its answer is dropped (the model changed after it
    read it), and the model is then checked again and shown.
 7. The real start box: Look up of 96 Ithaca Rd (recorded, 1 s per step): the box's line changes as the lookup goes
    (its step and seconds), the button reads "Cancel lookup"; pressed: the lookup process is stopped, the box opens
-   again without the running line, saying "Look up of … cancelled: nothing changed.", Draw as before, the model
-   unchanged; then the box is closed.
+   again without the running line, saying "Look up of … cancelled: nothing changed.", Draw as it was with the
+   address typed before Look up (off: "Press Look up to find … first."), the model unchanged; then the box is closed.
 Writes <temp>/gordium_progress_cancel/out.json ("done": true at the end); closes its documents."""
 import json
 import os
@@ -233,7 +235,7 @@ def main():
         claim("4 Gordium said Draw was cancelled", g.logic.DRAW_CANCELLED in (g.STATE.get("said") or []),
               (g.STATE.get("said") or [])[-3:])
         slow(g, False)
-        g.gordium_start()                      # (one undo step for a Draw is re_lookup_in_rhino.py's claim 2)
+        g.gordium_start()
         drawn = objects(doc2)
         claim("4 Draw again (nothing cancelled) draws the starting house", [p for p in drawn.values() if "Massing" in p],
               {"drawn": len(drawn)})
@@ -291,7 +293,11 @@ def main():
             n = len(boxes)
             if n == 1:                                   # the box: the address typed, Look up
                 box = next(c for c in dialog.Children if isinstance(c, ef.TextBox))
-                box.Text = "96 Ithaca Rd, Ithaca, NY 14850"
+                box.Text = "96 Ithaca Rd, Ithaca, NY 14850"         # (TextChanged sets Draw and its reason)
+                draw = next((c for t, c in buttons.items() if t in ("Draw", "Check")), None)
+                boxes[-1]["draw_typed"] = bool(draw and draw.Enabled)
+                boxes[-1]["reason_typed"] = [c.Text for c in dialog.Children if isinstance(c, ef.Label)
+                                             and (c.Text or "").startswith("Press Look up")]
                 buttons["Look up"].PerformClick()
             elif n == 2:                                 # looking: read the line twice, then Cancel lookup
                 lines = []
@@ -325,8 +331,10 @@ def main():
               any("cancelled: nothing changed" in (t or "") for t in after.get("texts", [])), after)
         claim("7 Cancel lookup stopped the lookup while the box was still open, the model unchanged",
               not after.get("lookup_running", True) and objects(doc2) == model, after)
-        claim("7 after Cancel lookup, Draw is as it was before Look up", after.get("draw_on") == boxes[0]["draw_on"],
-              [b.get("draw_on") for b in boxes])
+        reason = [t for t in after.get("texts", []) if (t or "").startswith("Press Look up to find 96 Ithaca Rd")]
+        claim("7 after Cancel lookup, Draw is as it was with the address typed before Look up (off, saying why)",
+              after.get("draw_on") == boxes[0].get("draw_typed") is False and reason and
+              reason == boxes[0].get("reason_typed"), {"boxes": boxes})
         log["done"] = True
         log["ok"] = True
     except Exception:
