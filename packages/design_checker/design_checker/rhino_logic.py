@@ -558,8 +558,8 @@ def label_on_line(a, b, w, h=DIM_LABEL_H_PX, away=None, gap=DIM_LABEL_GAP_PX):
 
 def label_at_end(a, b, w, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
     """A dimension's label past the line's outer end (beyond the lot line), aligned with it and centred on it,
-    `gap` px past the end (a leader joins them): for a dimension too short for its label, or with no clear spot
-    beside it. Its four corners."""
+    `gap` px past the end (a short leader joins them): for a dimension too short for its number, or whose spot on
+    the line is out of view. Its four corners."""
     (ux, uy), _ = _along(b, a)                     # outward: from the building past the lot line
     nx, ny = -uy, ux
     near = (a[0] + ux * gap, a[1] + uy * gap)
@@ -649,18 +649,17 @@ def placement_order(statuses):
 def number_spot(a, b, w, away=None, view=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
     """Where a dimension's number goes (screen), the drawing's way: centred on the visible part of its own line,
     aligned with it, `gap` px off it on the side away from the building; just past its outer end (the lot-line end)
-    when the visible line is too short for it (and, that end out of view, centred on what is seen of the line). Its
-    corners and "on" or "end"; (None, None) when none of the line is in view."""
+    when the visible line is too short for it or that spot is out of view. Its corners and "on" or "end"; (None,
+    None) when neither is wholly in view (the number is then left to the panel)."""
     seen = clip_to_view(a, b, view)
     if seen is None or _along(*seen)[1] <= 1e-6:
         return None, None
-    if _along(*seen)[1] >= w + 2 * gap:
-        return label_on_line(seen[0], seen[1], w, h, away, gap), "on"
-    past = label_at_end(a, b, w, h, gap)
-    if view is None or inside_view(past, view):
-        return past, "end"
-    # its outer end out of view: centred on what is seen of its line, longer than it (still at its own line)
-    return label_on_line(seen[0], seen[1], w, h, away, gap), "on"
+    tries = ([(label_on_line(seen[0], seen[1], w, h, away, gap), "on")] if _along(*seen)[1] >= w + 2 * gap
+             else []) + [(label_at_end(a, b, w, h, gap), "end")]
+    for q, kind in tries:                            # on its line; if that is out of view or too short, past its end
+        if inside_view(q, view):
+            return q, kind
+    return None, None                                # neither in view: no number (the panel says it; review F1, F2)
 
 
 def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=None, extras=None,
@@ -712,17 +711,20 @@ def tag_spot(line_ends, outward, tag, taken, view=None):
     return None
 
 
-def limit_label_spot(line, house, w, h=18, view=None, gap=8):
+def limit_label_spot(line, house, w, h=18, view=None, gap=8, taken=()):
     """Where an elevation's "Height limit 35'-0"" label goes (screen): past an end of the limit line, outside the
     building's extent (`house`: its box on screen, x0, y0, x1, y1), centred on the line's height, in view; the
-    left end first. It never covers the coloured parts (Rhino check of #28 at fc0b023). (x, y) of its top left, or
-    None."""
+    left end first, and the end whose spot covers nothing drawn (`taken`, boxes: the height's number, the status
+    box, the notice) before one that does. It never covers the coloured parts (Rhino check of #28 at fc0b023).
+    (x, y) of its top left, or None when neither end has room in view."""
     (ax, ay), (bx, by) = sorted(line)
-    for x, y in ((min(ax, house[0] if house else ax) - gap - w, ay - h / 2), (max(bx, house[2] if house else bx) + gap,
-                                                                             by - h / 2)):
-        if inside_view(rect_quad((x, y, w, h)), view):
+    spots = [(min(ax, house[0] if house else ax) - gap - w, ay - h / 2),
+             (max(bx, house[2] if house else bx) + gap, by - h / 2)]
+    shown = [(x, y) for x, y in spots if inside_view(rect_quad((x, y, w, h)), view)]
+    for x, y in shown:
+        if not any(shapes_hit(rect_quad((x, y, w, h)), rect_quad(t)) for t in taken):
             return x, y
-    return None
+    return shown[0] if shown else None
 
 
 def _bbox(shape):

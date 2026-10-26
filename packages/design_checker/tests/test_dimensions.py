@@ -518,3 +518,20 @@ def test_the_elevations_height_limit_label_sits_past_its_lines_end_off_the_build
     assert spot is not None and spot[0] + 140 <= 250 and spot[0] + 140 <= house[0]   # left of the line and house
     edge = logic.limit_label_spot(((20, 220), (560, 220)), house, 140, 30, view=(1000, 640))
     assert edge is not None and edge[0] >= 560                    # no room on the left: past the right end
+
+
+
+def test_a_numbers_spot_off_screen_goes_just_past_its_lines_end_else_it_is_left_to_the_panel():
+    """Review of 030cc3a: a long line whose outside side runs off the view's bottom edge put its number off screen
+    and dropped it, though the spot past its end fitted; and centring a too-short line's number on its visible part
+    could never fit. Off screen on the line: past its end; neither in view: no number."""
+    q, kind = logic.number_spot((100, 585), (300, 585), 80, away=(200, 400), view=(800, 600))   # the house above it
+    assert kind == "end" and logic.inside_view(q, (800, 600))
+    assert logic.number_spot((-30, 300), (20, 300), 78, away=(200, 300), view=(800, 600)) == (None, None)
+
+
+def test_the_limit_label_keeps_off_what_is_already_drawn():
+    house = (300, 200, 500, 420)
+    taken = [(100, 205, 160, 30)]                                 # the height's number on the left
+    spot = logic.limit_label_spot(((250, 220), (560, 220)), house, 140, 30, view=(1000, 640), taken=taken)
+    assert spot is not None and spot[0] >= 560                    # past the right end instead

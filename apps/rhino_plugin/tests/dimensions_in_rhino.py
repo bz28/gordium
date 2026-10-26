@@ -8,12 +8,13 @@ view redraws.
 1. Top: one dimension per measured yard, each drawn with its dashed required line (two where the limit is read two
    ways), no two starting at the same point; the left side yard's red; its required line 10'-0" from the lot line;
    each yard's dimension square to the lot-line piece it ends on (within 0.1°).
-   A complying yard's dimension neutral grey; every label shown clear of the status box, the house and the other
-   labels (placed by logic.place_dimension: on its line, sliding along the wall to a clear spot).
+   A complying yard's dimension neutral grey; each shows its number only, on its own line or just past its end
+   (measured on screen), in view, clear of the status box, the house and the other numbers; "min" tags drawn only
+   on failing or in-review yards.
 2. Front: only the height's dimension (no yard dimension lies flat on the ground line), vertical, from the grade
    plane up the measured height, beside the house, coloured as the height row.
 3. Zoomed out to the neighbourhood (the lot under 120 px): no dimension at all in Top.
-4. Labels off: the dimensions stay, a complying yard's words go, the failing yard's words stay (logic rule).
+4. Labels off: the dimensions stay, a complying yard's number goes, the failing yard's stays (logic rule).
 Captures Top (labels on and off), Front, and Top zoomed out. Writes <temp>/gordium_dimensions/out.json and
 frames/*.png; closes its document."""
 import json
@@ -138,19 +139,30 @@ try:
     claim("1 each dimension shows its number only (no name, no 'needs', no '(approx.)': the panel says those)",
           shown_words and all("yard" not in t.lower() and "needs" not in t and "approx" not in t for t in shown_words),
           shown_words)
-    own = []
-    for j, pl in o.placed.items():                       # on or just past its own line, nowhere else
+    near = {}
+    for j, pl in o.placed.items():                       # on or just past its own line, measured on screen
         if j == "height" or pl[1] is None:
             continue
         a, b = vp.WorldToClient(pl[3].From), vp.WorldToClient(pl[3].To)
-        w = g.logic.label_width(pl[5], 11)
-        own.append(pl[2] == "crowded" or pl[1] == g.logic.number_spot(
-            (a.X, a.Y), (b.X, b.Y), w, g.logic.nearest_outline((b.X, b.Y), house)[1], view)[0])
-    claim("1 each number sits on its own line or just past its outer end", own and all(own), log["placed"])
-    tags = {j: len([r for r in pl[4]]) for j, pl in o.placed.items() if j != "height"}
+        seg = rg.Line(rg.Point3d(a.X, a.Y, 0), rg.Point3d(b.X, b.Y, 0))
+        near[j] = round(min(seg.DistanceTo(rg.Point3d(x, y, 0), True) for x, y in pl[1]), 1)
+    claim("1 each number sits on its own line or just past its outer end (a corner within 8 px of it)",
+          near and all(v <= 8 for v in near.values()), near)
     wrong = {j for j, (_, _, st) in enumerate(o.yard_dims) if st in ("does_not_comply", "needs_review")}
-    claim("1 'min' tags only on failing or in-review yards", all(
-        (o.yard_tags.get(j) or []) == [] for j in tags if j not in wrong), {j: o.yard_tags.get(j) for j in tags})
+    drawn_tags = []
+    real_required = g._required
+
+    def spy_required(d_, line_, tag_, dark_, box_=None):
+        drawn_tags.append((tag_, box_ is not None))
+        return real_required(d_, line_, tag_, dark_, box_)
+    g._required = spy_required
+    try:
+        top.Redraw()
+    finally:
+        g._required = real_required
+    claim("1 'min' tags drawn only for failing or in-review yards",
+          sum(1 for t, shown_ in drawn_tags if t and shown_) <= sum(len(o.yard_tags.get(j) or []) for j in wrong)
+          and all((o.yard_tags.get(j) or []) == [] for j in range(len(o.yard_dims)) if j not in wrong), drawn_tags)
     for name in ("Top",):                                # Zoom Extents too: the lot and neighbourhood all in view
         vp.ZoomExtents()
         drawn(g, doc, name, "1b_top_zoom_extents")

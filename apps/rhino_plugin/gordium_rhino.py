@@ -575,8 +575,9 @@ def _required(d, line, tag, dark, box=None):
 
 
 def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None):
-    """A dimension's label in its place (logic.place_dimension): its backing and outline, and its words written
-    along the dimension (readable: logic.text_angle), in the plan's own plane; past the line's end, a leader."""
+    """A dimension's number in its place (logic.place_dimension): its backing and outline, and its number written
+    along the dimension (readable: logic.text_angle), in a plane facing the camera; just past the line's end, a
+    short leader to it."""
     # the words lie in a plane through the dimension facing the camera: the plan's own plane in plan, the
     # elevation's in Front or Right (the height's words: Rhino check of #29 at f6642a9)
     if anchor is None:
@@ -736,9 +737,10 @@ def draw_screen(o, e):
         line_ = ((min(ends, key=lambda p: p.X).X, min(ends, key=lambda p: p.X).Y),
                  (max(ends, key=lambda p: p.X).X, max(ends, key=lambda p: p.X).Y))
         w, h = ui.text_box_size([limit[1]], 13)
-        spot = logic.limit_label_spot(line_, house, w, h, view)    # past the line's end, off the building and
-        if spot is not None:                                       # its colours (Rhino check of #28 at fc0b023)
+        spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken)   # past the line's end, off the
+        if spot is not None:                                       # building and its colours (#28 at fc0b023)
             o.placed["limit"] = spot + (w, h)
+            taken.append(spot + (w, h))
             ui.draw_text_box(d, [limit[1]], BLUE, int(spot[0]), int(spot[1]), dark, 13)
     if notice is not None:
         lines, x, y, _, _ = notice
