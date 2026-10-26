@@ -9,6 +9,22 @@ def test_a_block_draws_the_buildings_own_part_inside_it():
     assert logic.offending_pieces(["a", None, "b"], "the block") == ["a", "b"]
 
 
+def test_a_block_reaches_the_real_solids_top_a_vault_the_checker_cannot_read_is_coloured_whole():
+    """The Rhino check of #28 at fc0b023: walls to 36 ft, a curved vault to 42 ft, the limit 35 ft. The checker
+    reads only the walls (the curved roof is left out: height needs review), so its height block ran to 36 ft and
+    only the 35-36 ft band was coloured. The block now reaches the real solid's top; a height block still starts
+    at the limit; a yard strip reaches the solid's own bottom too."""
+    height = {"why": "height", "base": 35.0, "top": 36.0}
+    assert logic.block_span(height, 0.0, 42.0) == (35.0, 42.0)
+    assert logic.block_span(height) == (35.0, 36.0)            # no solid Rhino can draw: the checker's
+    yard = {"why": "yard", "base": 1.0, "top": 36.0}
+    assert logic.block_span(yard, 0.5, 42.0) == (0.5, 42.0)
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = src[src.index("def _offending("):src.index("def _actions(")]
+    assert "logic.block_span(e," in body and "_prism(doc, e[\"outline\"], base, top)" in body
+
+
 def test_a_failed_intersection_still_colours_the_block_never_nothing():
     # Rhino's boolean gives None when it fails, an empty list when it finds nothing (a mesh or a solid it can't cut
     # is never intersected): the failing part stays coloured either way

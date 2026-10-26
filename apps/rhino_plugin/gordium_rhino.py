@@ -884,10 +884,13 @@ def _offending(doc, e, solids=None):
     The block is cut a hair larger (_proud) so none of its faces lies on the building's own. The block itself when
     Rhino can't intersect (a mesh, a boolean that fails): never nothing (logic.offending_pieces). `solids`: the
     buildings made once for the check (_solids_for); without it, this block's own."""
-    block = _prism(doc, e["outline"], e["base"], e["top"])
+    solid = (solids if solids is not None else _solids_for(doc, [e])).get(e.get("building") or "")
+    box = solid.GetBoundingBox(True) if solid is not None else None
+    base, top = logic.block_span(e, _feet_length(doc, box.Min.Z) if box is not None and box.IsValid else None,
+                                 _feet_length(doc, box.Max.Z) if box is not None and box.IsValid else None)
+    block = _prism(doc, e["outline"], base, top)       # reaching the real solid's own top (a vault: block_span)
     if block is None:
         return []
-    solid = (solids if solids is not None else _solids_for(doc, [e])).get(e.get("building") or "")
     pieces = None
     if isinstance(solid, rg.Brep) and solid.IsSolid:       # a boolean that raises colours the block, never stops the check
         pieces = logic.guard(lambda: rg.Brep.CreateBooleanIntersection(
@@ -2744,9 +2747,10 @@ def _context_layer_indexes(doc):
 
 def _parent_locked(doc, layer):
     """Whether any layer above this one is locked. Rhino then holds the layer locked whatever its own lock says:
-    locking a parent gives each sublayer the lock and saves the sublayer's own one as its persistent lock, which
-    unlocking the parent puts back (Layer.GetPersistentLocking). Under a locked parent IsLocked reads True for every
-    sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
+    locking a parent locks each sublayer, and unlocking it gives each sublayer its persistent lock
+    (Layer.GetPersistentLocking), which only SetPersistentLocking under a locked parent records: a sublayer locked
+    before its parent comes out unlocked, in plain Rhino too (grade_lock_probe.json at e997f0e). Under a locked parent
+    IsLocked reads True for every sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
     parent = layer.ParentLayerId
     while parent != System.Guid.Empty:
         above = doc.Layers.FindId(parent)
@@ -2781,8 +2785,12 @@ def _set_own_lock(doc, layer, locked):
 
 def _lock_context(doc, locked):
     """Unlock every context layer, or lock them again: all but the editable footprints (rhino_logic.context_locked).
-    Each layer's own lock, so it holds whether or not the architect has locked "Gordium" above them; a parent before
-    its sublayers, so a parent's change can't undo a sublayer's set before it."""
+    Each layer's own lock, so a redraw or a first draw under a locked "Gordium" keeps them (the Rhino job at
+    e997f0e); a parent before its sublayers, so a parent's change can't undo a sublayer's set before it. Not yet
+    covered: drawn while "Gordium" is unlocked, a layer locked by IsLocked records no own lock (grade_lock_probe.json),
+    so if the architect then locks and unlocks "Gordium" with no redraw, Rhino may unlock Parcels, Streets and Notes.
+    lock_probe_in_rhino.py asks whether SetPersistentLocking would record one there, whether Rhino's own -_Layer
+    command does the same, and whether a recorded own lock survives the parent being locked again."""
     indexes = _context_layer_indexes(doc)
     for i in logic.outermost_first([(i, doc.Layers[i].FullPath) for i in indexes]):
         _set_own_lock(doc, doc.Layers[i], bool(locked) and logic.context_locked(doc.Layers[i].FullPath))
@@ -2874,7 +2882,7 @@ def _clear_context(doc, sources=None):
                 left += not doc.Objects.Delete(o, True)
     for i, visible, _, _ in was:           # every visibility first (each passes its lock down), then every lock,
         doc.Layers[i].IsVisible = visible
-    for i, _, locked, _ in was:            # a parent before its sublayers (locking it saves theirs as it finds them),
+    for i, _, locked, _ in was:            # a parent before its sublayers (locking it locks them all),
         doc.Layers[i].IsLocked = locked
     for i, _, _, own in was:               # then each layer's own lock, once every lock above it is back
         _set_own_lock(doc, doc.Layers[i], own)
