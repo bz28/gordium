@@ -528,12 +528,16 @@ def box_over_shape(box, poly):
 
 
 LABEL_INSET = 4                    # a plan label stays this far inside the view (#29 at e4e5018: one on its edge)
-AXIS_ICON_PX = 72                  # Rhino's world-axis icon, bottom left of every view: a square this wide kept clear
+AXIS_ICON_PX = 80                  # Rhino's world-axis icon, bottom left of every view: a square this wide kept clear
+# (the Rhino job at 8bfabdd: it spans x 34-76, y 593-634 in a 657 x 668 view), 3 px more around it
+AXIS_ICON_SCALE = 1.0              # the display's scaling where screen pixels are physical (set by the plugin)
 
 
 def axis_icon_box(view):
-    """Where Rhino draws the world-axis icon in a view (w, h): its bottom-left corner (#29 at e4e5018: a label on it)."""
-    return 0, view[1] - AXIS_ICON_PX, AXIS_ICON_PX, AXIS_ICON_PX
+    """Where Rhino draws the world-axis icon in a view (w, h): its bottom-left corner, AXIS_ICON_PX (scaled by
+    AXIS_ICON_SCALE) and 3 px around it (#29 at e4e5018: a label on it)."""
+    side = int(round(AXIS_ICON_PX * AXIS_ICON_SCALE)) + 3
+    return 0, view[1] - side, side, side
 
 
 def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes=(), placed=()):
@@ -832,7 +836,7 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
         left = min(max(left, i_), max(view[0] - w - i_, i_))
         top = min(max(top, i_), max(view[1] - h - i_, i_))
         if _over((left, top, w, h), axis_icon_box(view)):          # off the axis icon: above it (review of 7e6d824)
-            top = max(i_, view[1] - AXIS_ICON_PX - h)
+            top = max(i_, axis_icon_box(view)[1] - h)
     return result(rows, LABEL_MIN_SIZE, left, top, w, h, forced=True)
 
 

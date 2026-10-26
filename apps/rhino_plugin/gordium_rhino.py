@@ -657,6 +657,21 @@ def draw_screen(o, e):
     ui.draw_text_box(d, rows, color, int(x), y, dark, 13)
 
 
+def _icon_zoom():
+    """The display's scaling where Rhino's screen pixels are physical ones (Windows at 150 %: 1.5), for the size of
+    the world-axis icon kept clear; 1 on the Mac (its views count in points: the Rhino job at 8bfabdd) or when
+    Rhino doesn't say."""
+    try:
+        if Rhino.Runtime.HostUtils.RunningOnOSX:
+            return 1.0
+        return min(max(float(Rhino.UI.Dpi.DpiScale()), 1.0), 4.0)
+    except Exception:
+        return 1.0
+
+
+logic.AXIS_ICON_SCALE = _icon_zoom()
+
+
 def _label_timer():
     """The timer that places the labels once the view has been still for LABEL_SETTLE_S (started on demand)."""
     timer = STATE.get("label_timer")

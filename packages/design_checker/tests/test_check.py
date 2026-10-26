@@ -3594,9 +3594,17 @@ def test_a_plan_label_never_wraps_inside_a_number_stays_inside_the_view_and_off_
     assert logic_.label_breaks_hard(edge, (150, 646, 60, 20), view) == "off screen or on its edge"
     assert logic_.label_breaks_hard(edge, (150, 600, 60, 20), view) is None
     assert logic_.label_breaks_hard(((10, 500), (10, 650)), (20, 610, 60, 20), view) == "over the world-axis icon"
-    assert logic_.box_over_shape is not None and logic_.axis_icon_box(view) == (0, 668 - logic_.AXIS_ICON_PX,
-                                                                                logic_.AXIS_ICON_PX,
-                                                                                logic_.AXIS_ICON_PX)
+    icon = logic_.axis_icon_box((657, 668))          # the Rhino job at 8bfabdd: the icon spans x 34-76, y 593-634
+    assert icon[0] <= 34 - 3 and icon[0] + icon[2] >= 76 + 3 and icon[1] <= 593 - 3 and icon[1] + icon[3] >= 668
+    assert icon[2] <= 90                                                        # ...and not much more than it
+    was = logic_.AXIS_ICON_SCALE
+    try:
+        logic_.AXIS_ICON_SCALE = 1.5                                            # Windows at 150 %: physical pixels
+        assert logic_.axis_icon_box((657, 668))[2] == int(round(logic_.AXIS_ICON_PX * 1.5)) + 3
+    finally:
+        logic_.AXIS_ICON_SCALE = was
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.AXIS_ICON_SCALE = _icon_zoom()" in rhino and "RunningOnOSX" in rhino   # the Mac counts points
     got = logic_.place_dim_label(edge, "101'-1 1/2\"", 11, view)
     assert got["top"] + got["h"] <= 668 - logic_.LABEL_INSET and not got["forced"], got
     near_icon = logic_.place_dim_label(((20, 560), (20, 660)), "min 10'-0\"", 11, view)
