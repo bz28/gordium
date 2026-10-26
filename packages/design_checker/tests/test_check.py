@@ -3113,6 +3113,26 @@ def test_a_label_with_no_room_beside_its_line_stays_near_it_with_a_leader():
     assert place_label(own, w, h, obstacles, [notice, status], view=view)[2] is False   # nothing clear beside it
     left, top = place_near(own, w, h, obstacles, [notice, status], view=view)
     assert box_gap(own, (left, top, w, h)) <= h                                  # near its own line
+    assert not logic_.crosses(own, left, top, w, h)                              # never on its own line
+    assert sum(logic_.crosses(s_, left, top, w, h) for s_ in obstacles) <= 1     # the fewest: the lot's edge alone
+    # a notice right beside the line: never over it
+    close = (100, 420, 200, 60)
+    l3, t3 = place_near(own, w, h, obstacles, [close], view=view)
+    assert not (min(l3 + w, 300) > max(l3, 100) and min(t3 + h, 480) > max(t3, 420))
+    # crowded by other labels: the second pass may cover one, never `keep`
+    others = [(0, 300, 656, 368)]
+    assert place_near(own, w, h, obstacles, others, view=view) is None
+    l4, t4 = place_near(own, w, h, obstacles, [notice], view=view, avoid=others)
+    assert box_gap(own, (l4, t4, w, h)) <= h and not logic_.crosses(own, l4, t4, w, h)
+    # a short line with room all round: the label above or below it, never past its end along the line itself (a
+    # leader there runs on the line and is hidden by it)
+    short = ((300, 300), (327, 300))
+    l5, t5 = place_near(short, w, h, [], [], view=view)
+    assert t5 + h <= 300 - 6 or t5 >= 300 + 6, (l5, t5)
+    # a line at the screen's edge: the spot pushed onto the screen would sit on the line itself: never used
+    edge = ((0, 300), (20, 300))
+    l6, t6 = place_near(edge, w, h, [], [], view=view)
+    assert not logic_.crosses(edge, l6, t6, w, h), (l6, t6)
     assert not any(min(left + w, a + c) > max(left, a) and min(top + h, b + e) > max(top, b)
                    for a, b, c, e in (notice, status))                           # never over the notice nor status
     assert 0 <= left and left + w <= 656 and 0 <= top and top + h <= 668
@@ -3138,7 +3158,14 @@ def test_a_label_with_no_room_beside_its_line_stays_near_it_with_a_leader():
     height = 4 + 16 * len(rows)
     assert led and len(rows) == 2 and box_gap(own, (left, top, width, height)) <= height
     assert taken[-1] == (left, top, width, height)
+    # crowded by other labels all round its line: near it all the same (it may cover one), never far (clear_spot)
+    crowd = [notice, status, (0, 300, 656, 368)]
+    left, top, width, want, rows, led = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", "
+                                                        "needs 10'-0\" (approx.)", 11, crowd, along=own,
+                                                        obstacles=obstacles, keep=[notice, status])
+    assert led and box_gap(own, (left, top, width, 4 + 16 * len(rows))) <= 4 + 16 * len(rows)
     ui_src = src[src.index("def label_at("):].split("\ndef ", 1)[0]
+    assert "if leader and along is not None and not led:" in ui_src               # one leader, never two
     assert "if led:" in ui_src and "logic.leader_end((p.X, p.Y), (left, top, width, h))" in ui_src
     assert "return left, top, width, h, want, rows, led" in ui_src
 
@@ -3153,6 +3180,7 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
     assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
     assert draw.count('drawn["labels"].append(') == 2
     assert draw.count(", at[6]])") == 2                                          # whether a leader was drawn
+    assert draw.count("keep=keep)") == 2 and draw.index("keep = list(taken)") < draw.index("keep=keep)")
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
         assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
@@ -3199,6 +3227,7 @@ def test_the_label_claim_counts_its_own_line_too():
     script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
     assert "hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]" in script
     assert "s_ != own" not in script
+    assert "g.logic.crosses(own, left, top, w, h)" in script and "and not on_own" in script   # moved ones too
 
 
 def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():

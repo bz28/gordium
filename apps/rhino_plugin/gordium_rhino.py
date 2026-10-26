@@ -579,6 +579,7 @@ def draw_screen(o, e):
     # the notice first (placed off the model and the status box), so no label is drawn under it either
     notice = _notice_box(o, e.Viewport, taken, old)
     drawn["notice"] = list(notice[1:]) if notice is not None else None
+    keep = list(taken)                       # the status box, the north arrow, the notice: no label ever covers them
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -589,11 +590,11 @@ def draw_screen(o, e):
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
             at = ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                             along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
+                             along=(line.From, line.To), obstacles=obstacles, keep=keep)   # beside its line, off every other
             drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line), at[6]])
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
         at = ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each
-                         along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # edge's length, beside it, off
+                         along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep)   # edge's length, beside it, off
         drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge), at[6]])    # every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     limit = getattr(o, "height_limit", None)

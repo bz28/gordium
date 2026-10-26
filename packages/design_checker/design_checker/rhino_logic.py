@@ -479,11 +479,14 @@ def box_gap(line, box):
                for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
 
 
-def place_near(line, w, h, obstacles=(), taken=(), gap=6, view=None):
+def place_near(line, w, h, obstacles=(), taken=(), gap=12, view=None, avoid=()):
     """Where a w × h label goes when no spot beside its dimension `line` is clear: (left, top), or None. Never far
     from its line: within one label height of it (beside it, or just past either end), on screen, over no box in
     `taken` (the notice, the status box, the north arrow, other labels); of those, the one crossing the fewest lines
-    in `obstacles`, then the nearest. The caller draws a leader to it. The Rhino job at 0a94fc4: placed "outside the
+    in `obstacles` and covering the fewest boxes in `avoid` (other labels, when it must), then the nearest; never on
+    its own line. Beside its line is tried before past its ends (a leader along the line itself would be hidden by
+    it), `gap` (12 px) away so the leader the caller draws to it shows (review of b85effe: a 6 px leader hid under the
+    dimension's tick). The Rhino job at 0a94fc4: placed "outside the
     drawing" with the shortest leader, the failing southwest yard's label came loose from its line (330 px away, under
     the status box, no leader seen); at 27c8e5d, with no room beside its line, it had crossed 13 lines."""
     (xa, ya), (xb, yb) = line
@@ -491,20 +494,22 @@ def place_near(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     mx, my = (xa + xb) / 2, (ya + yb) / 2
     vw, vh = view if view is not None else (float("inf"), float("inf"))
     steps = (0, -h / 2, h / 2, -h, h)
-    if x1 - x0 >= y1 - y0:               # mostly horizontal: past either end, level with it; above or below it
-        spots = [(x, my - h / 2 + d) for x in (x0 - gap - w, x1 + gap) for d in steps] + \
-            [(x, top) for top in (y0 - gap - h, y1 + gap) for x in (mx - w / 2, x0 - w, x1, x0 - w - gap, x1 + gap)]
-    else:                                # mostly vertical: past either end, centred on it; right or left of it
-        spots = [(mx - w / 2 + d, y) for y in (y0 - gap - h, y1 + gap) for d in (0, -w / 2, w / 2)] + \
-            [(left, y) for left in (x1 + gap, x0 - gap - w) for y in (my - h / 2, y0 - h, y1, y0 - h - gap, y1 + gap)]
+    if x1 - x0 >= y1 - y0:               # mostly horizontal: above or below it, then past either end
+        spots = [(x, top) for top in (y0 - gap - h, y1 + gap) for x in (mx - w / 2, x0 - w, x1, x0 - w - gap, x1 + gap)] + \
+            [(x, my - h / 2 + d) for x in (x0 - gap - w, x1 + gap) for d in steps[1:] + steps[:1]]
+    else:                                # mostly vertical: right or left of it, then past either end
+        spots = [(left, y) for left in (x1 + gap, x0 - gap - w) for y in (my - h / 2, y0 - h, y1, y0 - h - gap, y1 + gap)] + \
+            [(mx - w / 2 + d, y) for y in (y0 - gap - h, y1 + gap) for d in (-w / 2, w / 2, 0)]
     best = None
     for k, (left, top) in enumerate(spots):
         left, top = min(max(left, 0), max(vw - w, 0)), min(max(top, 0), max(vh - h, 0))   # kept on screen
         if left + w > vw or top + h > vh or box_gap(line, (left, top, w, h)) > h:
             continue
-        if any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken):
+        if any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken) or \
+                crosses(line, left, top, w, h):                  # never over the notice, status box, nor its own line
             continue
-        score = (sum(crosses(s, left, top, w, h) for s in obstacles), box_gap(line, (left, top, w, h)), k)
+        score = (sum(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in avoid),
+                 sum(crosses(s, left, top, w, h) for s in obstacles if s != line), box_gap(line, (left, top, w, h)), k)
         if best is None or score < best[0]:
             best = (score, left, top)
     return None if best is None else (best[1], best[2])
