@@ -1,7 +1,6 @@
 # The notice and the highlight (#15 rhino-ui) at 27c8e5d: checked in Rhino 8 (Mac), 2026-10-25
 
-**Purpose:** `notice_in_rhino.py` (claims 1, 1b, 2, 3, 4) and `highlight_in_rhino.py` claim 1b, and the notice to an
-architect's eye.\
+**Purpose:** `notice_in_rhino.py` (claims 1, 1b, 2, 3, 4), `highlight_in_rhino.py` claim 1b, the notice by eye.\
 **For:** the coordinator, the #15 job, reviewers.\
 **Kept current by:** never changed (a dated record).
 
