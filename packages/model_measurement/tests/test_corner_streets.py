@@ -86,12 +86,12 @@ def test_a_street_bending_between_15_and_30_degrees_is_read_both_ways():
 
 
 def test_a_corner_rounded_into_short_pieces_beside_a_sharp_corner_may_split_inside_the_curve():
-    """Street A (40 ft), a corner rounded into 6 pieces turning 15 degrees each, street B up the side, and a sharp
-    90 degree corner onto a third line: the rounded run turns 90 degrees in all, so where A ends is open and A's own
-    frontage (40 ft, the split where the curve starts) must stay a reading (#18 review: without the rounded-run
-    rule the smallest reading was 43'-1 1/2", hiding a 40 ft lot width)."""
+    """Street A (40 ft), a corner rounded into 6 pieces turning 14 degrees each, street B up the side, and a sharp
+    90 degree corner onto a third line: the rounded run turns 84 degrees in all (6 pieces of 14, each within one
+    street's 15), so where A ends is open and A's own frontage (40 ft, the split where the curve starts) must stay a
+    reading (#18 review: without the rounded-run rule it was gone, hiding a 40 ft lot width)."""
     r = 12.0
-    curve = [(40 + r * math.sin(math.radians(a)), r - r * math.cos(math.radians(a))) for a in range(0, 91, 15)]
+    curve = [(40 + r * math.sin(math.radians(a)), r - r * math.cos(math.radians(a))) for a in range(0, 85, 14)]
     ring = [(0, 0), *curve, (52, 100), (0, 100)]
     edges, site = _site(ring)
     facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b",

@@ -144,7 +144,7 @@ def _review_reasons(rule: dict, measured: dict, allowed: dict, facts: dict | Non
                     held.append(" ".join(str(r.get("reason") or "").split()))
             except Exception:                   # a condition that can't be read under this reading
                 pass
-        out = [h for h in held if h] if out is None else [h for h in out if h in held]
+        out = list(dict.fromkeys(h for h in held if h)) if out is None else [h for h in out if h in held]
         if not out:                             # none holds under every reading: the readings' own questions
             return []
     return out or []
