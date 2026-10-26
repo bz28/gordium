@@ -749,15 +749,27 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
             top = base_y + j * step
             for i0, i1, _ in field.pieces(top, w, h, base_x, step, nx):
                 i = _nearest_index(line, top, w, h, base_x, step, i0, i1)
-                box = (base_x + i * step, top, w, h)
-                gap = box_gap(line, box)
-                if gap > reach or label_breaks_hard(line, box, view, hard_boxes, hard_lines, hard_shapes, placed):
+                order_ = [i] + [k for d in range(1, i1 - i0 + 1) for k in (i - d, i + d) if i0 <= k <= i1]
+                for k in order_:                         # the nearest; a neighbour only if label_breaks_hard
+                    box = (base_x + k * step, top, w, h)  # refuses it (never expected: the runs are exact)
+                    gap = box_gap(line, box)
+                    if gap <= reach and not label_breaks_hard(line, box, view, hard_boxes, hard_lines, hard_shapes,
+                                                              placed):
+                        break
+                else:
                     continue
                 if enough is not None:
                     found.append((gap, box))
                     found.sort(key=lambda q: (q[0], q[1][0], q[1][1]))
                     continue
                 s_ = score(box, gap)
+                if s_[1]:                                # a led label's leader across something: the rest of
+                    for k in range(i0, i1 + 1):          # the run weighed too (the review of 9d021d8)
+                        box_ = (base_x + k * step, top, w, h)
+                        gap_ = box_gap(line, box_)
+                        if gap_ <= reach and not label_breaks_hard(line, box_, view, hard_boxes, hard_lines,
+                                                                   hard_shapes, placed):
+                            s_ = min(s_, score(box_, gap_))
                 if best_ is None or s_ < best_:
                     best_ = s_
             if best_ is not None and best_[:3] == (0, 0, 0) and best_[3] <= 8:

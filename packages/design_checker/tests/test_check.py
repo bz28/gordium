@@ -3289,6 +3289,11 @@ def test_a_plan_label_keeps_every_hard_rule_the_southwest_cases():
     walls = [(0, 0, 656, 260), (0, 300, 656, 368), (0, 0, 238, 668), (300, 0, 356, 668)]
     window = logic_.place_dim_label(long_, "12'-0\"", 11, (656, 668), walls, [long_], [], [])
     assert window["size"] == 11 and not window["led"] and not window["forced"], window
+    # ...nor when that spot is in the same run of clear spots, as near (the review of 9d021d8)
+    line3, keep3, sq = ((300, 100), (360, 100)), [(0, 0, 656, 140)], [(310, 116), (320, 116), (320, 126), (310, 126)]
+    got3 = logic_.place_dim_label(line3, "12'-0\"", 11, (656, 668), keep3, [line3], [], [], [sq])
+    end3 = logic_.leader_end((330, 100), (got3["left"], got3["top"], got3["w"], got3["h"]))
+    assert got3["led"] and not logic_._seg_hits_shape(((330, 100), end3), sq), got3
     # a leader never runs across a building when a spot whose leader doesn't is in reach
     short = ((200, 300), (260, 300))
     under = [_rect(150, 306, 310, 336)]                                         # a coloured band just below it
@@ -3465,37 +3470,56 @@ def test_placing_the_labels_is_fast_one_tick_for_the_sample_and_a_resting_label_
               "size": 11, "status": "complies"} for k in range(6)]
 
     def timed(its):
-        best = None
+        """The best of 5 runs: the whole, and each label's own best (one pause in a run can't fail it)."""
+        totals, each = [], None
         for _ in range(5):
             run = logic_.LabelRun(its, view, keep, dims, [house, band], _boxes(*lot))
-            each = []
+            times = []
             start = time_.perf_counter()
             while run.todo:
                 t = time_.perf_counter()
                 run.step(0.0)
-                each.append(time_.perf_counter() - t)
-            total = time_.perf_counter() - start
-            best = (total, max(each)) if best is None or total < best[0] else best
-        return best
+                times.append(time_.perf_counter() - t)
+            totals.append(time_.perf_counter() - start)
+            each = times if each is None else [min(a, b) for a, b in zip(each, times)]
+        return min(totals), max(each)
+    # measured against this machine's own speed (the review of 9d021d8: a CI runner is slower than a Mac): the time
+    # of one exact HARD check (label_breaks_hard on the sample), the old search's unit of work - its slowest label
+    # made 22,664 of them for the busy lot; now a label costs at most 400 and the sample 1,500
+    probe = [(10 + 7 * k % 600, 20 + 11 * k % 600, 120, 20) for k in range(400)]
+    unit = None
+    for _ in range(5):
+        t = time_.perf_counter()
+        for box in probe:
+            logic_.label_breaks_hard(dims[0], box, view, keep, dims, [house, band], [])
+        took_ = (time_.perf_counter() - t) / len(probe)
+        unit = took_ if unit is None else min(unit, took_)
     total, worst = timed(items)
-    # Rhino's Python ran the search about 4x slower than here (309 ms against 72 ms for the same label at 822fb6f):
-    # its 5 ms a label and 30 ms for the sample are 1.25 and 7.5 here; with room for a busy machine, 2.5 and 10
-    assert worst < 0.0025 and total < 0.010, (total, worst)                    # each label, the whole sample
+    assert worst < 400 * unit and total < 1500 * unit, (total / unit, worst / unit)   # each label, the sample
+    assert worst < 0.025 and total < 0.1                                        # and plainly bounded anywhere
     total, worst = timed(busy)
-    assert worst < 0.0025, (total, worst)
+    assert worst < 400 * unit, (total / unit, worst / unit)
     one_tick = False
     for _ in range(5):
         run = logic_.LabelRun(items, view, keep, dims, [house, band], _boxes(*lot))
         one_tick = one_tick or run.step(step_s)
     assert one_tick                                                             # the sample: one tick, no jumps
-    for _ in range(5):
+    # a tick stops BEFORE a label that would take it past its budget (by the slowest so far): with labels taking
+    # 10 ms on a clock of its own, a 16 ms tick places one, never two (26 ms, past a frame)
+    clock = [0.0]
+    real_place, real_clock = logic_.place_dim_label, time_.perf_counter
+
+    def slow_place(*a, **k):
+        clock[0] += 0.010
+        return real_place(*a, **k)
+    logic_.place_dim_label, time_.perf_counter = slow_place, lambda: clock[0]
+    try:
         run = logic_.LabelRun(busy, view, keep, dims, [house, band], _boxes(*lot))
-        start = time_.perf_counter()
-        run.step(0.016)
-        took = time_.perf_counter() - start
-        if took <= 0.016 + run.slowest:
-            break
-    assert took <= 0.016 + run.slowest, (took, run.slowest)                    # a busy lot: never past a frame
+        assert run.step(0.016) is False and len(run.spots) == 1 and clock[0] == 0.010
+        run.step(0.025)
+        assert len(run.spots) == 3                                              # 10 + 10 <= 25; a third would pass
+    finally:
+        logic_.place_dim_label, time_.perf_counter = real_place, real_clock
     # at rest after a move: a carried label that still keeps every rule stays put; one now on the house moves
     placed = logic_.place_labels(items, view, keep, dims, [house, band], _boxes(*lot))
     nudged = {k: dict(logic_.follow(g, tuple((x + 2, y) for x, y in g["line"])), left=g["left"] + 1)
