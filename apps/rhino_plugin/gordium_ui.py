@@ -8,6 +8,7 @@ whole session (gordium_rhino.Overlay explains), so the panel and the dialog are 
 functions, and an update to this file takes effect at once."""
 
 import System
+import math
 import os
 
 import Eto.Drawing as ed
@@ -799,7 +800,7 @@ def list_row_px(listbox):
     try:
         table = listbox.ControlObject      # Eto.macOS: the NSTableView itself (its NSScrollView is the handler's own)
         pitch = native_number(table.RowHeight) + native_number(table.IntercellSpacing.Height)
-        return int(round(pitch)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX
+        return int(math.ceil(pitch - 1e-6)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX   # up: never a row short
     except Exception:
         return logic.LIST_ROW_PX
 

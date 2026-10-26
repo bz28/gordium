@@ -154,6 +154,7 @@ def test_the_row_pitch_is_read_from_the_table_itself():
     fn = part(UI, "def list_row_px(", "def start_box(")
     assert "table = listbox.ControlObject " in fn and "DocumentView" not in fn
     assert "native_number(table.RowHeight) + native_number(table.IntercellSpacing.Height)" in fn
+    assert "int(math.ceil(pitch - 1e-6))" in fn       # rounded up: a fractional pitch never leaves a row short
     native = part(UI, "def native_number(", "def list_row_px(")
     assert native.index("return float(value)") < native.index("return float(str(value))")   # through its text too
 
