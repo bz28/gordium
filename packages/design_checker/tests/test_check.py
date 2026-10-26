@@ -2906,11 +2906,23 @@ def test_the_label_claim_counts_its_own_line_too():
 
 def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():
     """The Rhino job at 6361a3f (architect's eye): with the shorter list, the panel opened with the list scrolled a
-    little, "Does not comply · 1" half under the column titles. Every refresh now scrolls the list to its first row,
-    then, if a row is selected further down, only as far as that row."""
+    little, "Does not comply · 1" half under the column titles. A new list (first fill, other rows or groups) now
+    scrolls to its first row; the same rows again (every live refresh) stay where the architect left them (review
+    of f063789: a scroll to the top on every edit lost their place); a selected row is scrolled just into view."""
     src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     show = src[src.index("def show(parts"):src.index("def _scroll_to(")]
-    assert show.index("tree.DataStore = store") < show.index("_scroll_to(tree, 0)") < show.index("tree.SelectedRow = ")
-    assert show.index("tree.SelectedRow = k + 1 + c") < show.index("_scroll_to(tree, k + 1 + c)")
+    assert show.index("tree.DataStore = store") < show.index("if shape != parts.get(\"shape\"):") < \
+        show.index("_scroll_to(tree, 0, len(shape))") < show.index('parts["shape"] = shape') < \
+        show.index("tree.SelectedRow = ")
+    assert show.index("tree.SelectedRow = k + 1 + c") < show.index("_scroll_to(tree, k + 1 + c, k + 2 + c)")
     helper = src[src.index("def _scroll_to("):].split("\ndef ", 1)[0]
-    assert 'getattr(tree, "ScrollToRow", None)' in helper and "scroll(row)" in helper
+    ns = {}
+    exec(helper, ns)                                                          # noqa: S102
+    calls = []
+    tree = type("Tree", (), {"ScrollToRow": lambda self, row: calls.append(row)})()
+    ns["_scroll_to"](tree, 0, 0)                                              # an empty list: never scrolled
+    ns["_scroll_to"](tree, 0, 3)
+    assert calls == [0]
+    broken = type("Tree", (), {"ScrollToRow": lambda self, row: 1 / 0})()
+    ns["_scroll_to"](broken, 0, 3)                                            # never an error out of it
+    ns["_scroll_to"](object(), 0, 3)                                          # no ScrollToRow: nothing

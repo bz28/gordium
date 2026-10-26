@@ -435,8 +435,10 @@ def show(parts, view, stale=False, error=None, checking=False):
         store.Add(gi)
         parts["groups"].append(gi)
     tree.DataStore = store
-    _scroll_to(tree, 0)                     # the first group's heading whole at the top, never half under the column
-    #                                         titles (the Rhino job at 6361a3f: the shorter list opened scrolled a bit)
+    shape = tuple((gi.Tag, gi.Expanded, gi.Children.Count) for gi in parts["groups"])
+    if shape != parts.get("shape"):         # a new list (first fill, rows or groups changed): its first group's heading
+        _scroll_to(tree, 0, len(shape))     # whole at the top, never half under the column titles (the Rhino job at
+    parts["shape"] = shape                  # 6361a3f); the same rows again (every live refresh): where it was (review)
     if selected_item is not None:           # SelectedItem is read-only here: select by row in the visible list
         k = 0
         for gi in parts["groups"]:
@@ -444,19 +446,23 @@ def show(parts, view, stale=False, error=None, checking=False):
                 for c in range(gi.Children.Count):
                     if gi.Children[c] is selected_item or gi.Children[c].Tag == selected_item.Tag:
                         tree.SelectedRow = k + 1 + c
-                        _scroll_to(tree, k + 1 + c)     # ...unless the selected row is further down: just into view
+                        _scroll_to(tree, k + 1 + c, k + 2 + c)    # the selected row just into view
                 k += gi.Children.Count
             k += 1
     parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]
     show_detail(parts)
 
 
-def _scroll_to(tree, row):
-    """The list scrolled just enough to show `row` whole (Eto's Grid.ScrollToRow: from the top, row 0 puts the first
-    group's heading under the column titles; a later row only moves the list as far as it must)."""
+def _scroll_to(tree, row, rows):
+    """The list scrolled just enough to show `row` whole (Eto's Grid.ScrollToRow: row 0 puts the first group's
+    heading under the column titles; a later row only moves the list as far as it must). Never on an empty list
+    (`rows`: how many it has; Windows' Eto indexes the row), and never an error out of it: scrolling is a nicety."""
     scroll = getattr(tree, "ScrollToRow", None)
-    if scroll is not None:
-        scroll(row)
+    if scroll is not None and 0 <= row < rows:
+        try:
+            scroll(row)
+        except Exception:
+            pass
 
 
 def _header(parts, view, error, out_of_date):
