@@ -1551,7 +1551,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         items.append({"id": "gap." + g["id"], "rule": None, "name": f"{g['section']}: {g['name']}",
                       "group": "not_covered", "status": NOT_CHECKED, "mark": "", "proposed": "", "required": "",
                       "margin": "", "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
-                      "hint": None, "reason": NOT_YET_WHY.format(g["section"]) + " · " + g["why"],
+                      "hint": None, "reason": NOT_YET_WHY.format(g.get("what") or g["section"]) + " · " + g["why"],
                       "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
     return {"items": items, "summary": summary(items), "state": state(items),
