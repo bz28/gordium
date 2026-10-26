@@ -949,13 +949,20 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         # a several-limit rule held back by its own review_when (its reason is the row's): name the limit that
         # review is about, the measure it holds below a limit (the which-side eaves review: that side's eave),
         # never simply the first limit (#18: "Eaves into front yard" for a side eave's question)
+        why_text = " ".join(str(row.get("Why") or "").split())
         said = {" ".join(w.split()) for w in str(row.get("Why") or "").split("; ")}
+        at_least = {c.left.id for c in compares if isinstance(c.ops[0], (ast.GtE, ast.Gt))}
         about = []                      # (measure, the limit the review holds it below), in the rule's order
         for r in rule["review_when"]:
-            if r.get("reason") and " ".join(str(r["reason"]).split()) in said:
+            reason = " ".join(str(r.get("reason") or "").split())
+            # the row's reason is this one: a whole entry of it, or (a reason with "; " of its own) all of it in it
+            if reason and (reason in said or len(reason) > 40 and reason in why_text):
+                # each measure the review holds below a limit, where that holds as drawn (or can't be told), on a
+                # measure the rule asks to be at least something: that limit is what the review is about
                 about += [n for n in ast.walk(formula.parse(r["when"]).body)
                           if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.left, ast.Name)
-                          and isinstance(n.ops[0], (ast.Lt, ast.LtE)) and any(c.left.id == n.left.id for c in compares)]
+                          and isinstance(n.ops[0], (ast.Lt, ast.LtE)) and n.left.id in at_least
+                          and _evaluate(ast.unparse(n), values) is not False]
         failing = next((c for c in compares if _fails_every_reading(ast.unparse(c), values, measured, facts)), None)
         if failing is not None:         # a limit failing under every reading is named first (#18 round 4)
             primary = failing
