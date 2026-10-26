@@ -1,0 +1,71 @@
+{
+ "head": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_001b757",
+ "pieces": [
+  {
+   "status": "needs_review",
+   "info": {
+    "why": "yard",
+    "measure": "rear_yard",
+    "row": "Rear yard",
+    "building": "9892971e-5b20-4f34-be0d-9c2af89a9de7"
+   },
+   "box_ft": [
+    12.87,
+    60.29,
+    23.31,
+    48.83,
+    65.17,
+    35.02
+   ]
+  },
+  {
+   "status": "needs_review",
+   "info": {
+    "why": "yard",
+    "measure": "rear_yard",
+    "row": "Rear yard",
+    "building": "06515644-4c31-4ac3-8d88-6b12da3f5114"
+   },
+   "box_ft": [
+    12.87,
+    60.29,
+    11.65,
+    48.83,
+    65.17,
+    23.35
+   ]
+  },
+  {
+   "status": "needs_review",
+   "info": {
+    "why": "yard",
+    "measure": "rear_yard",
+    "row": "Rear yard",
+    "building": "a273e66c-9070-4cc1-801c-754790557db1"
+   },
+   "box_ft": [
+    12.87,
+    60.29,
+    -0.02,
+    48.83,
+    65.17,
+    11.69
+   ]
+  }
+ ],
+ "house_box_ft": [
+  12.89,
+  27.82,
+  0.0,
+  48.81,
+  65.15,
+  11.67
+ ],
+ "rows_needing_colour": [
+  [
+   "Rear yard",
+   "needs_review"
+  ]
+ ],
+ "done": true
+}
