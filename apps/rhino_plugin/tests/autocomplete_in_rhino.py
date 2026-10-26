@@ -4,7 +4,8 @@ Rhino, not in CI; the logic is tested in CI (packages/design_checker/tests/test_
 packages/site_lookup/tests/test_suggest.py). Stand-in addresses (site_lookup's tests: hand-written, never the
 City's data) and recorded lookups: no live call. A fresh feet document, GordiumStart (the sample, 106 Ithaca Rd),
 then Edit site… with a script driving the box (typing is setting the address field's text, as a key does):
-1. "106" typed: no list after 1 s (fewer than 4 characters).
+1. "106" typed: no list after 1 s (fewer than 4 characters). When the list shows, the box grows by its height
+   (Cancel and Check stay in it) and stays on screen.
 2. "106 Itha", typed a character at a time 0.05 s apart: ONE request after the pause (not one per key), and within
    3 s the list under the address shows "106 Ithaca Rd, Ithaca, NY"; the list is the box's own (a ListBox).
 3. Picking it (the list's own pick: what Enter or a click does): the address field says "106 Ithaca Rd, Ithaca,
@@ -40,6 +41,7 @@ from test_docs_in_rhino import TestDocs, close  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
+sys.modules.pop("rhino_logic", None)   # this checkout's copy, never one a Rhino that loaded another head has cached
 import rhino_logic as logic  # noqa: E402  (its guard: no callback may raise into Rhino)
 
 S = os.path.join(tempfile.gettempdir(), "gordium_autocomplete") + "/"
@@ -128,6 +130,13 @@ def fits(layout):
     return rows_h <= layout["visible_h"] + 0.5 and layout["visible_h"] - rows_h < layout["pitch"]
 
 
+def screen_bottom(window):
+    try:
+        return int(window.Screen.WorkingArea.Bottom)
+    except Exception:
+        return None
+
+
 def parts(dialog):
     import Eto.Forms as ef
     kids = list(dialog.Children)
@@ -139,6 +148,7 @@ def parts(dialog):
 
 def main():
     doc = None
+    docs = None
     try:
         docs = TestDocs("autocomplete").__enter__()
         g = fresh_module()
@@ -179,7 +189,9 @@ def main():
                              "address": p["address"].Text, "asked": len(asked), "labels": p["labels"],
                              "look_up_on": bool(p["buttons"].get("Look up") and p["buttons"]["Look up"].Enabled),
                              "list_height": int(p["list"].Height) if p["list"] is not None else None,
-                             "box_width": int(d.Width), "layout": laid_out(p["list"])}
+                             "box_width": int(d.Width), "layout": laid_out(p["list"]),
+                             "box_height": int(d.Height), "box_bottom": int(d.Location.Y + d.Height),
+                             "screen_bottom": screen_bottom(d)}
             return record
 
         def pick_first(d):
@@ -217,6 +229,7 @@ def main():
             elif n == 2:                                   # looking up 96: the query asked
                 seen["6"] = {"query": (g.STATE.get("lookup") or {}).get("query")}
             elif n == 3:                                   # 96's answer in: now a lookup that finds nothing
+                seen["6"]["labels"] = parts(dialog)["labels"]       # (what the box says of 96's answer)
                 Script([(0.0, lambda d: g.STATE.update(lookup_fixture="not_found")),
                         (0.2, lambda d: setattr(parts(d)["address"], "Text", "12345 Nowhere Blvd, Ithaca, NY 14850")),
                         (0.3, lambda d: parts(d)["buttons"]["Look up"].PerformClick())]).run(dialog)
@@ -257,8 +270,10 @@ def main():
         claim("5 offline: no list, the quiet note, Look up still on",
               not five.get("visible") and logic.SUGGESTIONS_UNAVAILABLE in five.get("labels", []) and
               five.get("look_up_on"), five)
-        claim("6 no town typed: the lookup asked for 96 Ithaca Rd, Ithaca, NY",
-              (seen.get("6") or {}).get("query") == "96 Ithaca Rd, Ithaca, NY", seen.get("6"))
+        claim("6 no town typed: the lookup asked for 96 Ithaca Rd, Ithaca, NY, and found it (its lot shown dashed)",
+              (seen.get("6") or {}).get("query") == "96 Ithaca Rd, Ithaca, NY" and
+              any("Shown dashed: 96 Ithaca Rd" in (t or "") for t in (seen.get("6") or {}).get("labels", [])),
+              seen.get("6"))
         seven = seen.get("7", {})
         claim("7 a lookup that found no lot: the box says so and that the lot shown is still 106's, the model "
               "unchanged",
@@ -267,6 +282,15 @@ def main():
                   for t in seven.get("labels", [])) and objects(doc) == model, seven)
         claim("7 its long amber line wraps: the box stays box-sized (under 1,200 px wide)",
               0 < (seven.get("box_width") or 0) < 1200, {"box_width": seven.get("box_width")})
+        labels = " | ".join(t or "" for t in seven.get("labels", []))
+        claim("7 said once: what happened and what to do in one line, no second 'No lot found for …' line",
+              labels.count("No City of Ithaca address found") == 1 and "No lot found for" not in labels, labels)
+        claim("2 the box grows with the list so Cancel and Check stay in it, and it stays on screen",
+              two.get("box_height", 0) >= one.get("box_height", 0) + two["layout"]["rows"] * two["layout"]["pitch"]
+              if two.get("layout") else False, {"without": one.get("box_height"), "with": two.get("box_height")})
+        claim("2 the grown box's bottom is on screen",
+              two.get("screen_bottom") is not None and two.get("box_bottom", 10 ** 6) <= two["screen_bottom"],
+              {"bottom": two.get("box_bottom"), "screen": two.get("screen_bottom")})
         log["ok"] = True
     except Exception:
         log["ok"] = False
@@ -285,7 +309,7 @@ def main():
                 g._stop_worker()
         except Exception:
             pass
-        for d in list(Rhino.RhinoDoc.OpenDocuments())[:-1]:
+        for d in list(docs.opened if docs is not None else []):    # exactly the documents this run opened
             close(d)
 
 

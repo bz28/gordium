@@ -151,7 +151,21 @@ def _fixture_http(name: str):
     sys.path.insert(0, str(tests))
     spec.loader.exec_module(mod)
     fx = mod.load(name)
-    return mod.Fake(fx), mod.NOW
+    return _RecordedAddress(mod.Fake(fx), fx.get("address") or ""), mod.NOW
+
+
+class _RecordedAddress:
+    """A recorded lookup asked for the start of its own address ("96 Ithaca Rd, Ithaca, NY", as Look up adds the
+    City's name, for one recorded as "… NY 14850") answers as it was recorded: test runs only (--fixture)."""
+
+    def __init__(self, fake, address):
+        self.fake, self.address = fake, address
+
+    def post(self, url, params):
+        line = (params or {}).get("SingleLine")
+        if line and line != self.address and self.address.startswith(line.rstrip(" ,")):
+            params = dict(params, SingleLine=self.address)
+        return self.fake.post(url, params)
 
 
 SUGGEST_TIMEOUT_S = 3.0           # a type-ahead answer slower than this is no help: "Suggestions unavailable"

@@ -1151,7 +1151,7 @@ CITY_SUFFIX = ", Ithaca, NY"
 
 BOX_TEXT_WIDTH = 560           # px: the start box's long lines wrap here (one unbroken amber line stretched the box
                                # across the screen: Rhino run of #33 a3eb1d7)
-LIST_ROW_PX, LIST_PAD_PX = 20, 6
+LIST_ROW_PX, LIST_PAD_PX = 20, 2   # (2: the frame's border, so a row's text sits centred, not high: Rhino run of ee8f2ce)
 
 
 def list_height(rows, row_px=LIST_ROW_PX):
@@ -1508,6 +1508,18 @@ def draw_reason(state):
     if state.get("lot_missing"):
         return "Draw or pick the lot to continue."
     return ""
+
+
+def box_reason(state):
+    """The box's own reason line under Draw: draw_reason's, except when it would only repeat the amber line a lookup
+    that found no lot already shows (what happened, what to do, the lot still shown): said once (Rhino run of #33
+    ee8f2ce: the no-lot state said it twice)."""
+    reason = draw_reason(state)
+    look = state.get("lookup") or {}
+    if reason and look.get("says") and look.get("status") in LOOKUP_SAYS and reason == address_reason(state) \
+            and same_site_address(state.get("address"), look.get("query")):    # (that lookup's address, not another)
+        return ""
+    return reason
 
 
 def can_draw(state):

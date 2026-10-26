@@ -782,6 +782,17 @@ def native_number(value):
         return float(str(value))
 
 
+def keep_on_screen(window):
+    """A window grown downwards moved up as far as needed to stay within its screen's working area. Never raises."""
+    try:
+        area = window.Screen.WorkingArea
+        bottom = window.Location.Y + window.Height
+        if bottom > area.Bottom:
+            window.Location = ed.Point(int(window.Location.X), int(max(area.Top, area.Bottom - window.Height)))
+    except Exception:
+        pass
+
+
 def list_row_px(listbox):
     """A list's row pitch in px as Rhino lays it out: on the Mac the ListBox is a table whose row height plus spacing
     is read from it; elsewhere (or if it can't be read) logic.LIST_ROW_PX."""
@@ -859,7 +870,7 @@ def start_box(state, options, mode):
 
     draw = button(state.get("_draw_label") or ("Draw" if mode == "start" else "Check"),   # as what it does
                   lambda: (keep(), done("draw")))
-    reason = label(logic.draw_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)   # wraps at the box's width
+    reason = label(logic.box_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)   # wraps at the box's width
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
 
@@ -877,10 +888,24 @@ def start_box(state, options, mode):
     wait_answer = ef.UITimer()
     wait_answer.Interval = 0.1
 
+    grown = {"px": 0}                 # how much taller the box is for the list now showing
+
+    def fit_box():
+        """The box grows by the list's height while it shows (and back when it goes), kept on screen, so Cancel and
+        Draw never go off its bottom (Rhino run of ee8f2ce: the box kept its height and pushed them off)."""
+        want = (hint_list.Height + 6) if hint_list.Visible else 0
+        delta = want - grown["px"]
+        if delta:
+            size = dialog.ClientSize
+            dialog.ClientSize = ed.Size(size.Width, size.Height + delta)
+            grown["px"] = want
+            keep_on_screen(dialog)
+
     def hide_hints():
         hints["items"] = []
         hint_list.Items.Clear()
         hint_list.Visible = False
+        fit_box()
 
     def pick_hint(index):
         if 0 <= index < len(hints["items"]):
@@ -918,6 +943,7 @@ def start_box(state, options, mode):
             hint_list.Items.Add(item)
         hint_list.Height = logic.list_height(len(items), list_row_px(hint_list))   # as tall as its rows, no empty rows
         hint_list.Visible = bool(items)
+        fit_box()
 
     wait_keys.Elapsed += logic.guard(ask_hints, "ask for address suggestions")
     wait_answer.Elapsed += logic.guard(got_hints, "show address suggestions")
@@ -948,7 +974,7 @@ def start_box(state, options, mode):
     def address_typed(s, e):           # Draw off for an address not looked up, on again when the known one is back
         state["address"] = address.Text
         draw.Enabled = logic.can_draw(state) and not looking
-        reason.Text = logic.draw_reason(state)
+        reason.Text = logic.box_reason(state)
         if suggester is not None:      # the list waits for a pause in the typing
             if address.Text != hints["chosen"]:     # typed on: the list was for older typing, so it goes (round 2)
                 hint_list.SelectedIndex = -1   # and Enter looks up what is typed, never an older pick (round 1)
@@ -965,7 +991,7 @@ def start_box(state, options, mode):
         if buffer is not None:
             state["design_buffer"] = buffer.Text
         draw.Enabled = logic.can_draw(state) and not looking
-        reason.Text = logic.draw_reason(state)
+        reason.Text = logic.box_reason(state)
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
 
@@ -974,7 +1000,7 @@ def start_box(state, options, mode):
     def zone_changed(s, e):           # a district picked: set at once, so Draw, its reason and the row's source follow
         logic.zone_picked(state, zone.SelectedValue.Text if zone.SelectedValue else None, first_zone)
         draw.Enabled = logic.can_draw(state) and not looking
-        reason.Text = logic.draw_reason(state)
+        reason.Text = logic.box_reason(state)
         if "source" in zone_row:
             zone_row["source"].Text = logic.zone_row_text(state).split(" · ", 1)[-1]
 

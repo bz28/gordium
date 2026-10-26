@@ -161,12 +161,50 @@ def test_the_row_pitch_is_read_from_the_table_itself():
 def test_the_list_is_as_tall_as_its_rows_and_long_lines_wrap():
     """Rhino run of a3eb1d7: one suggestion sat above five empty rows; in the no-lot state the amber line was one
     ~3,200 px line that stretched the box across the screen."""
-    assert logic.list_height(1) == 26 and logic.list_height(3) == 66 and logic.list_height(20) == logic.list_height(8)
+    assert logic.list_height(1) == 22 and logic.list_height(3) == 62 and logic.list_height(20) == logic.list_height(8)
     assert logic.list_height(0) == logic.list_height(1)
     box = part(UI, "def start_box(", "\ndef ")
     got = part(box, "def got_hints(", "wait_keys.Elapsed")
     assert got.index("hint_list.Height = logic.list_height(len(items), list_row_px(hint_list))") < \
         got.index("hint_list.Visible = bool(items)")
-    assert logic.list_height(2, 24) == 54                                    # at the pitch Rhino lays rows out at
+    assert logic.list_height(2, 24) == 50                                    # at the pitch Rhino lays rows out at
     assert 'amber = label("", eto_status_color("needs_review"), size=12, width=logic.BOX_TEXT_WIDTH)' in box
-    assert "reason = label(logic.draw_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)" in box
+    assert "reason = label(logic.box_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)" in box
+
+
+# ---- Rhino run of ee8f2ce ------------------------------------------------------------------------------------------
+
+def test_the_box_grows_with_the_list_so_its_buttons_stay_on_screen():
+    box = part(UI, "def start_box(", "\ndef ")
+    fit = part(box, "def fit_box(", "def hide_hints(")
+    assert "want = (hint_list.Height + 6) if hint_list.Visible else 0" in fit
+    assert "dialog.ClientSize = ed.Size(size.Width, size.Height + delta)" in fit and "keep_on_screen(dialog)" in fit
+    hide = part(box, "def hide_hints(", "def pick_hint(")
+    assert hide.index("hint_list.Visible = False") < hide.index("fit_box()")
+    got = part(box, "def got_hints(", "wait_keys.Elapsed")
+    assert got.index("hint_list.Visible = bool(items)") < got.rindex("fit_box()")
+    keep = part(UI, "def keep_on_screen(", "def list_row_px(")
+    assert "window.Screen.WorkingArea" in keep and "area.Bottom - window.Height" in keep
+
+
+def test_a_lookup_that_found_no_lot_is_said_once():
+    """The amber line says what happened, what to do and the lot still shown; the reason line under Draw never
+    repeats it ("No lot found for … (the line above says why)…")."""
+    _, saved = logic.lookup_choices({"status": "not_found", "query": "12345 Nowhere Blvd"}, {},
+                                    {"_box_address": "106 Ithaca Rd, Ithaca, NY"})
+    state = {"address": "12345 Nowhere Blvd", "lookup": saved["_lookup"], "zone": "R-1b", "district_confirmed": True,
+             "known_addresses": ["106 Ithaca Rd, Ithaca, NY"]}
+    assert logic.draw_reason(state).startswith("No lot found for 12345 Nowhere Blvd")     # (the line it repeated)
+    assert logic.box_reason(state) == "" and not logic.can_draw(state)                     # said once; Draw still off
+    assert "check the spelling and Look up again" in logic.uncertain(state)
+    typed = dict(state, address="13 Other St")                    # another address typed since: its own reason
+    assert logic.box_reason(typed) == logic.LOOK_UP_FIRST.format(address="13 Other St")
+    assert logic.box_reason({"zone": None}) == "Pick the district to continue."
+
+
+def test_a_recorded_lookup_answers_the_start_of_its_own_address():
+    from design_checker.lookup_box import _fixture_http
+    http, now = _fixture_http("96_ithaca_rd")
+    from site_lookup.lookup import lookup
+    assert lookup("96 Ithaca Rd, Ithaca, NY", http, now)["status"] == "found"      # as Look up asks it
+    assert lookup("96 Ithaca Rd, Ithaca, NY 14850", http, now)["status"] == "found"
