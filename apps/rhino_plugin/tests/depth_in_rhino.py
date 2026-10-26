@@ -119,6 +119,15 @@ try:
     away.Unitize()
     eye = box.Center + away * (box.Diagonal.Length * 1.6) + rg.Vector3d(0, 0, box.Max.Z - box.Center.Z)
     vp.SetCameraLocations(box.Center, eye)               # at the street, looking at the house
+    whole = rg.BoundingBox(box.Min, box.Max)             # the whole house and lot in frame, so the capture itself
+    whole.Union(frame)                                   # shows the hiding (Rhino check of #31 at c174a2d)
+    vp.ZoomBoundingBox(whole)                            # (keeps the direction, moves the camera back)
+    eye = vp.CameraLocation                              # the rays below start where the camera now is
+    corners = [vp.WorldToClient(c) for c in whole.GetCorners()]
+    size = vp.Size
+    claim("2 Perspective: the whole house and lot in frame",
+          all(0 <= c.X <= size.Width and 0 <= c.Y <= size.Height for c in corners),
+          [(round(c.X), round(c.Y)) for c in corners])
     seen, bitmap = redraw_spied(g, doc, "Perspective", "2_perspective_shaded")
     log["perspective"] = seen
     claim("2 Perspective: no line goes on top", True not in seen["on_top"], seen)
@@ -163,6 +172,49 @@ try:
     log["height_pixels"] = hits
     claim("4 the see-through envelope never hides it: most of its length shows in its colour (Shaded Front)",
           hits and sum(hits) >= 0.8 * len(hits), hits)
+    # the coloured pieces (Rhino check of #31 at 001b757: the rear yard's strip, behind the house's front face,
+    # coloured the whole front face amber in Front): the front face looks the same with and without them
+    log["encroach"] = [(info.get("row"), st) for _, st, info in o.encroach]
+    claim("5 the sample has a coloured piece to hide (the rear yard's strip)", bool(o.encroach), log["encroach"])
+    kept = o.encroach
+    o.encroach = []
+    _, plain = redraw_spied(g, doc, "Front", "5_front_no_colour")
+    o.encroach = kept
+    _, coloured = redraw_spied(g, doc, "Front", "5_front_coloured")
+    front_y = min(c.Y for c in box.GetCorners())           # the house's front face (the street side, Front's near
+    diffs = []                                             # side), sampled inside its outline
+    for i in range(1, 10):
+        for k in range(1, 10):
+            p = rg.Point3d(box.Min.X + (box.Max.X - box.Min.X) * i / 10.0, front_y,
+                           box.Min.Z + (box.Max.Z - box.Min.Z) * k / 10.0)
+            q = front_vp.WorldToClient(p)
+            if 0 <= q.X < plain.Width and 0 <= q.Y < plain.Height:
+                a, b = plain.GetPixel(int(q.X), int(q.Y)), coloured.GetPixel(int(q.X), int(q.Y))
+                diffs.append(max(abs(a.R - b.R), abs(a.G - b.G), abs(a.B - b.B)))
+    log["front_face_diffs"] = diffs
+    claim("5 Front: the front face is not amber (the strip behind it is hidden): it looks as it does uncoloured",
+          diffs and sum(dv <= 24 for dv in diffs) >= 0.9 * len(diffs), diffs)
+    # and the strip still shows where it is seen (a hiding that hid everything would pass the claim above:
+    # review of 8379b66, F3): from behind the house, its rear face is coloured
+    persp = doc.Views.Find("Perspective", False).ActiveViewport
+    rear_y = max(c.Y for c in box.GetCorners())
+    persp.SetCameraLocations(box.Center, box.Center + rg.Vector3d(0, box.Diagonal.Length * 2.5, 0))
+    o.encroach = []
+    _, plain = redraw_spied(g, doc, "Perspective", "6_back_no_colour")
+    o.encroach = kept
+    _, coloured = redraw_spied(g, doc, "Perspective", "6_back_coloured")
+    back = []
+    for i in range(2, 9):
+        for k in range(2, 9):
+            p = rg.Point3d(box.Min.X + (box.Max.X - box.Min.X) * i / 10.0, rear_y,
+                           box.Min.Z + (box.Max.Z - box.Min.Z) * k / 10.0)
+            q = persp.WorldToClient(p)
+            if 0 <= q.X < plain.Width and 0 <= q.Y < plain.Height:
+                a, b = plain.GetPixel(int(q.X), int(q.Y)), coloured.GetPixel(int(q.X), int(q.Y))
+                back.append(max(abs(a.R - b.R), abs(a.G - b.G), abs(a.B - b.B)))
+    log["rear_face_diffs"] = back
+    claim("6 from behind, the rear yard's strip shows its colour on the rear face (it is not hidden everywhere)",
+          back and sum(dv > 24 for dv in back) >= 0.8 * len(back), back)
 except Exception:
     log["trace"] = traceback.format_exc()
 finally:

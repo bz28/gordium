@@ -686,16 +686,33 @@ def number_spot(a, b, w, away=None, view=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_G
     return None, None                                # neither in view: no number (the panel says it; review F1, F2)
 
 
+NUMBER_SCALES = (1.0, 0.9, 0.8, 0.7)    # a failing or in-review number's text, made smaller step by step to fit
+#                                        (0.7 × 11 px ≈ 8 px: the smallest that still reads)
+
+
+def label_at_inner(a, b, w, h=DIM_LABEL_H_PX, away=None, gap=DIM_LABEL_GAP_PX):
+    """A number beside its line at the line's inner end (the building's end), running from just outside the house
+    along the line towards the lot line: for a line whose middle and outer end are both taken. Its corners."""
+    (ux, uy), _ = _along(b, a)                     # from the building towards the lot line
+    return label_on_line((b[0] + ux * (w + 2 * gap), b[1] + uy * (w + 2 * gap)), b, w, h, away, gap)
+
+
 def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=None, extras=None,
-                    h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
-    """Which of a yard's dimension positions to draw, and its number (screen): (index, corners or None, kind).
-    `candidates`: the positions check.plan offers along the wall facing the yard's lot line, best first, each (lot
-    end, building end); `w`: the number's width (None: no number shown); `obstacles`: what it may not cover (the
-    status box, the notice, the lot edges' lengths, the numbers and tags placed before); `footprint`: the
-    buildings' outlines (one or a list); `extras`: per position, its own "min" tags; `view`: (w, h).
-    The first position whose number sits on or just past its own line (number_spot), wholly in view, covering
-    nothing; else the best position whose number is in view, as it falls ("crowded"); nothing else, never a leader
-    to somewhere else (Rhino checks of #29: the drafting convention)."""
+                    h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX, must=False, fixed=()):
+    """Which of a yard's dimension positions to draw, and its number (screen): (index, corners or None, kind,
+    scale). `candidates`: the positions check.plan offers along the wall facing the yard's lot line, best first,
+    each (lot end, building end); `w`: the number's width at full size (None: no number shown); `obstacles`: what
+    it may not cover (the status box, the numbers and tags placed before; the notice and the lots' edge lengths are
+    placed after the numbers and keep off them); `footprint`: the buildings' outlines (one or a list); `extras`:
+    per position, its own "min" tags; `view`: (w, h); `must`: the yard fails or needs review; `fixed`: what even
+    the last resort never covers (the status box).
+    At its own line only, the drawing's way: centred on the line (its visible part) at any of the positions, else
+    just past a position's outer end, else beside it at its inner end (just outside the house), the first wholly in
+    view covering nothing. A failing or in-review number is always drawn (Rhino check of #29 at 6d2e01a: the failing one
+    was missing): its text made smaller step by step (NUMBER_SCALES), and last, at full size just past its outer
+    end, moved into the view, whatever it covers ("crowded"). A complying one is left to the panel when there is no
+    room ("none")."""
+    import math
     houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
     boxed = [(o, _bbox(o)) for o in obstacles if o]
 
@@ -705,20 +722,67 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=No
         return not any(_boxes_meet(box, ob) and shapes_hit(shape, o) for o, ob in against)
     usable = [(i, a, b) for i, (a, b) in enumerate(candidates) if _along(a, b)[1] > 1e-6]
     if not usable:
-        return 0, None, "none"
+        return 0, None, "none", 1.0
     if w is None:
-        return usable[0][0], None, "none"
-    first = None
-    for i, a, b in usable:
-        q, kind = number_spot(a, b, w, away, view, h, gap)
-        if q is None or not inside_view(q, view):
-            continue
-        if clear(q, (extras[i] if extras and i < len(extras) else None) or ()):
-            return i, q, kind
-        first = first or (i, q)
-    if first is not None:
-        return first[0], first[1], "crowded"
-    return usable[0][0], None, "none"
+        return usable[0][0], None, "none", 1.0
+    for scale in (NUMBER_SCALES if must else NUMBER_SCALES[:1]):
+        ws, hs = w * scale, h * scale
+        for kind in ("on", "end", "inner"):        # on its line at any position first, then past its ends
+            for i, a, b in usable:
+                more = (extras[i] if extras and i < len(extras) else None) or ()
+                seen = clip_to_view(a, b, view)
+                if seen is None or math.dist(*seen) <= 1e-6:            # (a line that only touches the view's
+                    continue                                            # edge: nothing of it seen; review F1)
+                if kind == "on" and math.dist(*seen) < ws + 2 * gap:
+                    continue
+                q = (label_on_line(seen[0], seen[1], ws, hs, away, gap) if kind == "on" else
+                     label_at_end(a, b, ws, hs, gap) if kind == "end" else
+                     label_at_inner(seen[0], seen[1], ws, hs, away, gap))
+                if inside_view(q, view) and clear(q, more):
+                    return i, q, kind, scale
+    if not must:
+        return usable[0][0], None, "none", 1.0
+    i, a, b = usable[0]
+    q = label_at_end(a, b, w, h, gap)
+    if view:                                       # moved into the view: drawn, whatever it covers but the
+        xs, ys = [p[0] for p in q], [p[1] for p in q]          # status box (review F4)
+        dx = max(0, VIEW_MARGIN_PX - min(xs)) - max(0, max(xs) - (view[0] - VIEW_MARGIN_PX))
+        dy = max(0, VIEW_MARGIN_PX - min(ys)) - max(0, max(ys) - (view[1] - VIEW_MARGIN_PX))
+        q = [(x + dx, y + dy) for x, y in q]
+        for f in fixed:
+            if shapes_hit(q, f):                   # below the status box (it sits at the view's top) ...
+                fx0, _, _, fy1 = _bbox(f)
+                below = [(x, y + fy1 + VIEW_MARGIN_PX - min(p[1] for p in q)) for x, y in q]
+                if inside_view(below, view):
+                    q = below
+                else:                              # ... or, a short view, to its left (review F1), or right
+                    fx1 = _bbox(f)[2]
+                    left = [(x + fx0 - VIEW_MARGIN_PX - max(p[0] for p in q), y) for x, y in q]
+                    right = [(x + fx1 + VIEW_MARGIN_PX - min(p[0] for p in q), y) for x, y in q]
+                    q = left if inside_view(left, view) else right if inside_view(right, view) else q
+                    # (neither fits: it stays in view, over the box: drawn, review of dd74264 F2)
+    return i, q, "crowded", 1.0
+
+
+NUMBER_PAD_PX = 4      # around a drawn number: the edge lengths and the notice keep this far off it (Rhino check
+#                        of #29 at 5891efc: the rear number touched an edge length)
+
+
+def number_box(xs, ys, pad=NUMBER_PAD_PX):
+    """A drawn number's corners' xs and ys → its box (x, y, w, h) with a margin, as the later labels must avoid."""
+    return (min(xs) - pad, min(ys) - pad, max(xs) - min(xs) + 2 * pad, max(ys) - min(ys) + 2 * pad)
+
+
+def notice_place(view_w, view_h, w, h, model, fixed, taken):
+    """Where the "no longer complies" notice goes, placed after the dimensions' numbers: off the model and off
+    everything drawn (notice_spot); when every corner is taken, off the status box (`fixed`) at least, whatever
+    number it then covers (review F2: its fallback could land on the status box). (A view so small that the
+    status box covers every corner: the notice goes where notice_spot puts it.)"""
+    x, y = notice_spot(view_w, view_h, w, h, model, list(fixed) + list(taken))
+    box = rect_quad((x, y, w, h))
+    if any(shapes_hit(box, rect_quad(f)) for f in fixed):
+        x, y = notice_spot(view_w, view_h, w, h, model, list(fixed))
+    return x, y
 
 
 def tag_spot(line_ends, outward, tag, taken, view=None):
@@ -850,14 +914,44 @@ def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
     tried in turn (top left under the view's name, bottom left above the axes, top right, bottom right); the first
     that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken`
     (the status box) is used; if every corner covers some of the model, the one covering least (architect's
-    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions)."""
+    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions). When every corner covers a box
+    in `taken`, the first spot off all of them along the top and bottom, then anywhere in the view."""
     spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
 
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
-    free = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)] or spots
-    return min(free, key=lambda s: (overlap(s[0], s[1], model) if model else 0.0, free.index(s)))
+    def free_of(x, y):
+        return not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
+
+    def model_on(spot):
+        return overlap(spot[0], spot[1], model) if model else 0.0
+    free = [sp for sp in spots if free_of(*sp)]
+    if free:
+        return min(enumerate(free), key=lambda k_s: (model_on(k_s[1]), k_s[0]))[1]
+    # every corner covering something drawn (a dimension's number: Rhino check of #29 at 5891efc, docked Top
+    # 656 × 668): slid along the top and bottom bands, then anywhere in the view, off all of it; the first also off
+    # the model, else the one covering least of it. A step of about 1/80 of the view's size keeps a 4K view to a
+    # couple of thousand spots (review of dd74264, F1: 8 px everywhere took seconds a frame)
+    step = max(8.0, (view_w + view_h) / 80.0)
+    xs = [gap + step * k for k in range(int(max(0, view_w - w - 2 * gap) // step) + 1)]
+    ys = [34 + step * k for k in range(int(max(0, view_h - h - 74) // step) + 1)]
+    # and just beside each box drawn, so a gap narrower than the grid's step is found too (review of db58364, L1)
+    # (exactly at a box's edge: touching is clear, so a gap just the notice's size is found: review of cae5326)
+    xs += [v for a, b, c, e in taken for v in (a + c, a - w) if gap <= v <= view_w - w - gap]
+    ys += [v for a, b, c, e in taken for v in (b + e, b - h) if 34 <= v <= view_h - h - 40]
+    best = None
+    for y in [34, view_h - h - 64, view_h - h - 40] + ys:
+        for x in xs:
+            if free_of(x, y):
+                cover = model_on((x, y))
+                if cover <= 0:
+                    return x, y
+                if best is None or cover < best[0]:
+                    best = (cover, (x, y))
+    if best is not None:
+        return best[1]
+    return min(enumerate(spots), key=lambda k_s: (model_on(k_s[1]), k_s[0]))[1]
 
 
 def clear_spot(taken, x, y, w, h, avoid=()):
@@ -1887,6 +1981,14 @@ def dim_level(lot_level_ft):
     return (lot_level_ft or 0.0) + DIM_LIFT_FT
 
 
+def face_shown(facing, hidden):
+    """Whether one face of a coloured piece is drawn in a view that is not plan (Rhino check of #31 at 001b757: the
+    rear yard's strip, behind the house's front face, coloured the whole front amber in Front). `facing`: its
+    normal · the direction to the camera (> 0: it faces the camera); `hidden`: for each point sampled on it, whether
+    a building lies between it and the camera. Shown when it faces the camera and some of it is seen."""
+    return facing > 1e-9 and bool(hidden) and not all(hidden)
+
+
 def lines_on_top(parallel, direction_z):
     """Whether Gordium's lines (the lot line, the envelope's outline, the dimensions, the neighbourhood) are drawn
     over everything in this view: in plan yes, so a line under the roof (the buildable outline, a dimension to the
@@ -2018,10 +2120,14 @@ AUTO_CHECK_LABEL = "Check after every edit"
 AUTO_CHECK_TIP = "Off: the results grey out after an edit until you press Check. On: Gordium checks again by itself."
 
 
-def changed_after_box(before, now, drawn):
+def changed_after_box(before, now, drawn, failed=False):
     """When the model counts as changed after a start box closes (STATE["dirty"]): Cancel rolled the box's own edits
     back, so the model is as it was when the box opened (`before`: changed then, or not); Draw's edits are checked
-    by Draw's own check, and any change left counts (`now`)."""
+    by Draw's own check, and any change left counts (`now`). A box that ended in an error is no Cancel: its rollback
+    may have stopped partway, so any edit seen during it counts (`now`, else `before`): the results grey out, never
+    shown as current for a model that may differ (the headless check-15, demo review of #26 with #27)."""
+    if failed:
+        return now or before
     return now if drawn else before
 
 

@@ -502,10 +502,15 @@ def draw_scene(o, e):
             for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
                 name = logic.highlight(status)
                 colour = ui.HIGHLIGHT[name]
-                _see_through(d, True)
-                d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+                # in plan as it was; in any other view only its faces the camera sees, depth-tested (Rhino check
+                # of #31 at 001b757: a strip behind the house coloured its whole front face in Front)
+                shown = g if on_top else _seen_faces(o, e.Viewport, g)
+                if shown is None:
+                    continue
+                _see_through(d, True)                # (depth-tested: testing is back on above)
+                d.DrawBrepShaded(shown, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
                 _see_through(d, False)
-                d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
+                d.DrawBrepWires(shown, colour, ui.HIGHLIGHT_EDGE[name])
         for pt in getattr(o, "grade_points", None) or []:           # spot grades
             d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
         _on_top(d, on_top)
@@ -536,6 +541,133 @@ def draw_scene(o, e):
     finally:
         _on_top(e.Display, False)
         _see_through(e.Display, False)
+
+
+def _face_samples(face, margin=0.0):
+    """Points on a face's trimmed part, each with its outward normal (a face Rhino marks reversed has its normal
+    turned: review of 8379b66, F1): the middle of its area, then a 5 × 5 grid over its shrunk domain, only where on
+    the face (a boolean's face keeps its whole surface, trimmed: F2); none within `margin` of its edges, where a
+    cut face's ray, started off it along its normal, could clear a roof sloping over its edge (review of cbb6e8c, F1),
+    unless that leaves none."""
+    out = []
+    dup = face.DuplicateFace(False)
+    if dup is None:
+        return out
+    dup.Faces.ShrinkFaces()
+    shrunk = dup.Faces[0] if dup.Faces.Count else face
+    area = Rhino.Geometry.AreaMassProperties.Compute(dup)
+    uv = []
+    if area is not None:
+        ok, u, v = shrunk.ClosestPoint(area.Centroid)
+        if ok:
+            uv.append((u, v))
+    du, dv = shrunk.Domain(0), shrunk.Domain(1)
+    uv += [(du.ParameterAt(i / 6.0), dv.ParameterAt(k / 6.0)) for i in range(1, 6) for k in range(1, 6)]
+    for u, v in uv:
+        if shrunk.IsPointOnFace(u, v) == Rhino.Geometry.PointFaceRelation.Exterior:
+            continue
+        n = shrunk.NormalAt(u, v)
+        if shrunk.OrientationIsReversed:
+            n.Reverse()
+        out.append((shrunk.PointAt(u, v), n))
+    if margin > 0 and out:
+        edges = list(dup.DuplicateEdgeCurves() or [])
+
+        def inside(p):
+            for c in edges:
+                ok, t = c.ClosestPoint(p)
+                if ok and c.PointAt(t).DistanceTo(p) < margin:
+                    return False
+            return True
+        out = [s_ for s_ in out if inside(s_[0])] or out
+    return out
+
+
+def _seen_faces(o, viewport, piece):
+    """The faces of a coloured piece this view's camera sees (logic.face_shown), as one Brep, or None: a face is
+    shown when, at one of its points, it faces the camera and nothing of a building lies between (a ray to the
+    camera against every building's mesh, o.occluders, made once per check). A face with no point found is shown
+    (depth-tested; never a colour lost). Kept per piece and camera, so a still view costs nothing; samples are made
+    once per piece, rays cast only from points facing the camera, stopping at the first seen (review of 8379b66,
+    F4)."""
+    loc, direction = viewport.CameraLocation, viewport.CameraDirection
+    parallel = viewport.IsParallelProjection
+    key = (id(piece), viewport.Id, parallel, round(loc.X, 3), round(loc.Y, 3), round(loc.Z, 3),
+           round(direction.X, 5), round(direction.Y, 5), round(direction.Z, 5))
+    cache = o.__dict__.setdefault("seen_faces", {})
+    if key in cache:
+        return cache[key]
+    if len(cache) > 256:
+        cache.clear()
+    doc = Rhino.RhinoDoc.ActiveDoc
+    lift = (doc.ModelAbsoluteTolerance if doc is not None else 0.001) * 10
+    # each ray starts off the face along its own normal by more than the piece stands proud, so a face lying on the
+    # house starts outside it (_proud scales the piece: a face turned towards its middle moves in, not out; review
+    # of 3159a78, F1); a cut face inside the house still starts inside it
+    # (2.5 × proud: _proud's scaling moves a diagonal face in by up to √3 × it, the mesh stands out half of it)
+    off = _model_length(doc, 2.5 * ui.HIGHLIGHT_PROUD_FT) + lift if doc is not None else 0.05
+    samples = o.__dict__.setdefault("face_samples", {})
+    if id(piece) not in samples:
+        samples[id(piece)] = [_face_samples(f, 2 * off) for f in piece.Faces]
+    meshes = getattr(o, "occluders", None) or []
+    shown = []
+    for face, points in zip(piece.Faces, samples[id(piece)]):
+        if not points:
+            shown.append(face.DuplicateFace(False))
+            continue
+        facing, hidden = 0.0, []
+        for p, n in points:
+            way = -direction if parallel else loc - p
+            reach = None if parallel else way.Length
+            way.Unitize()
+            f = n * way
+            if f <= 1e-9:                                  # this point faces away: no ray
+                continue
+            facing = max(facing, f)
+            out = rg.Vector3d(n)
+            out.Unitize()
+            start = p + out * off
+            blocked = False
+            for m in meshes:
+                t = rg.Intersect.Intersection.MeshRay(m, rg.Ray3d(start, way))
+                if t >= 0 and (reach is None or t < reach):
+                    blocked = True
+                    break
+            hidden.append(blocked)
+            if not blocked:                                # one point seen: enough
+                break
+        if logic.face_shown(facing, hidden):
+            shown.append(face.DuplicateFace(False))
+    joined = None
+    if shown:
+        joined = rg.Brep()
+        for f in shown:
+            if f is not None:
+                joined.Append(f)
+    cache[key] = joined
+    return joined
+
+
+def _occluders(doc):
+    """Every building as one mesh, for the coloured faces' rays (_seen_faces): made once per check (review of
+    8379b66, F6: every building hides, a mesh building too)."""
+    out = []
+    for x in _buildings(doc):
+        g = _drawable(x.Geometry)
+        if isinstance(g, rg.Brep):
+            # true to the surface within half the pieces' proud distance, seams joined: a coarse mesh of a concave
+            # curved wall stands out into the air and hid a face in front of it (review of 3159a78, F2)
+            mp = rg.MeshingParameters()
+            mp.Tolerance = _model_length(doc, ui.HIGHLIGHT_PROUD_FT / 2)
+            mp.JaggedSeams = False
+            parts = rg.Mesh.CreateFromBrep(g, mp) or []
+            mesh = rg.Mesh()
+            for part in parts:
+                mesh.Append(part)
+            g = mesh if mesh.Faces.Count else None
+        if isinstance(g, rg.Mesh) and g.Faces.Count:
+            out.append(g)
+    return out
 
 
 def _see_through(d, on):
@@ -602,7 +734,7 @@ def _model_on_screen(o, viewport):
     return (min(p.X for p in pts), min(p.Y for p in pts), max(p.X for p in pts), max(p.Y for p in pts)) if pts else None
 
 
-def _notice_box(o, viewport, taken):
+def _notice_box(o, viewport, taken, fixed=()):
     """The "no longer complies" notice, if showing in this view (the active one only, G1): (lines, x, y, w, h),
     placed off the model and off the boxes in `taken` (logic.notice_spot), and then taken itself."""
     toast = getattr(o, "toast", None)
@@ -611,7 +743,8 @@ def _notice_box(o, viewport, taken):
         return None
     lines = ["✕ " + line for line in toast[0]]
     w, h = ui.text_box_size(lines, 13)
-    x, y = logic.notice_spot(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport), taken)
+    x, y = logic.notice_place(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport),
+                              fixed, [t for t in taken if t not in fixed])     # never on the status box
     taken.append((x, y, w, h))
     return lines, x, y, w, h
 
@@ -656,7 +789,7 @@ def _required(d, line, tag, dark, box=None):
         d.Draw2dText(tag, grey, rg.Point2d(box[0], box[1] + 2), False, logic.TAG_SIZE)
 
 
-def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None):
+def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None, size=11):
     """A dimension's number in its place (logic.place_dimension): its backing and outline, and its number written
     along the dimension (readable: logic.text_angle), in a plane facing the camera; just past the line's end, a
     short leader to it."""
@@ -679,7 +812,7 @@ def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None)
     angle = math.radians(logic.text_angle(a, b))
     cx, cy = sum(p[0] for p in quad) / 4, sum(p[1] for p in quad) / 4
     centre, ahead = model((cx, cy)), model((cx + math.cos(angle) * 10, cy + math.sin(angle) * 10))
-    up, below = model((cx, cy - 10)), model((cx, cy + 11))
+    up, below = model((cx, cy - 10)), model((cx, cy + size))      # (size: the text's height, px)
     if any(p is None for p in (centre, ahead, up, below)):  # a view the plan's plane can't be found in: no words
         # (`is`, never `in`: `in` compares a Point3d to None with .NET's operator, which raises: round 7, F1)
         return
@@ -693,7 +826,7 @@ def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None)
     words.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle
     d.Draw3dText(words, color)
     words.Dispose()
-    if kind == "end":                                       # just past the line's end: a short leader to it
+    if kind in ("end", "crowded"):                          # past the line's end, or moved: a leader to it
         near = min(quad, key=lambda p: (p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2)
         d.Draw2dLine(System.Drawing.PointF(a[0], a[1]), System.Drawing.PointF(near[0], near[1]), color, 1)
 
@@ -715,6 +848,7 @@ def draw_screen(o, e):
     boxed = bool(o.message and labels and _in_active_view(e))   # the status box once, in the view being worked in
     if boxed:
         taken.append(logic.status_box(e.Viewport.Bounds.Width, _status_rows(o, stale(o))))
+    fixed = taken[:1] if boxed else []                 # the status box: nothing is ever drawn over it
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
     plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
@@ -728,16 +862,12 @@ def draw_screen(o, e):
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
-    # the notice first (placed off the model and the status box), so no label is drawn under it either
-    notice = _notice_box(o, e.Viewport, taken)
+    # (the notice and the lot edges' lengths are placed after the dimensions' numbers and keep off them: Rhino
+    # check of #29 at 6d2e01a, the front number printed through the notice)
     elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
     # the lines on screen (over everything) in plan only; elsewhere draw_scene draws them depth-tested
     flat = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
-                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
-        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     # each yard: its dimension placed where it and its label sit clear (logic.place_dimension: the status box, the
     # notice, the edges' length labels, the labels before it, never inside the house), its required line dashed
     # grey with its "min" tag, its label on the line (Rhino checks of #29)
@@ -774,9 +904,11 @@ def draw_screen(o, e):
                 if box is not None:
                     seen.append(box)
             spots.append(mine)
-        index, quad, kind = logic.place_dimension(
+        index, quad, kind, text_size = logic.place_dimension(
             on_screen, width, [logic.rect_quad(box) for box in taken], footprint, away, view,
-            extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots])
+            extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots],
+            must=status in ("does_not_comply", "needs_review") and not old,
+            fixed=[logic.rect_quad(f) for f in fixed])
         if not flat:                                  # off plan draw_scene draws the first position (o.yard_dims)
             index = 0
         chosen, required = options[index]
@@ -788,9 +920,10 @@ def draw_screen(o, e):
                     taken.append(box)
             _dimension(d, e.Viewport, chosen, color)
         if quad is not None:
-            _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From)
+            _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From,
+                       size=11 * text_size)
             xs, ys = [p[0] for p in quad], [p[1] for p in quad]
-            taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+            taken.append(logic.number_box(xs, ys))     # with a margin: nothing drawn touches it
     height = getattr(o, "height_dim", None)
     corners = [e.Viewport.WorldToClient(p) for p in (getattr(o, "house_box", None) or [])]
     house = (min(q.X for q in corners), min(q.Y for q in corners), max(q.X for q in corners),
@@ -805,13 +938,24 @@ def draw_screen(o, e):
             a, b = (e.Viewport.WorldToClient(p) for p in (line.From, line.To))
             rect = logic.rect_quad((house[0], house[1], house[2] - house[0], house[3] - house[1])) if house else None
             away = ((house[0] + house[2]) / 2, (house[1] + house[3]) / 2) if house else None
-            _, quad, kind = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
-                                                  [logic.rect_quad(box) for box in taken], rect, away, view)
+            _, quad, kind, text_size = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
+                                                         [logic.rect_quad(box) for box in taken], rect, away, view,
+                                                         must=status in ("does_not_comply", "needs_review") and not old,
+                                                         fixed=[logic.rect_quad(f) for f in fixed])
             o.placed["height"] = (0, quad, kind, line, [], number)
             if quad is not None:
-                _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From)
+                _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From,
+                           size=11 * text_size)
                 xs, ys = [p[0] for p in quad], [p[1] for p in quad]
-                taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+                taken.append(logic.number_box(xs, ys))     # with a margin: nothing drawn touches it
+    before = len(taken)
+    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
+        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
+                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
+        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+    edges = taken[before:]
+    notice = _notice_box(o, e.Viewport, taken, fixed)  # off the model, the status box and the numbers
+    o.screen_boxes = {"edges": edges, "notice": notice[1:] if notice else None}   # (the in-Rhino checks)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         ends = [e.Viewport.WorldToClient(p) for p in limit[0]]
@@ -1909,17 +2053,22 @@ def confirm(doc, facts, options, mode="check"):
         return None
     result = None
     changed_before = STATE.get("dirty")
-    try:
+    failed = True                       # until _confirm returns: an error inside the box (its rollback may have
+    try:                                # stopped partway) leaves the model counted as changed
         ui.set_box_open(STATE.get("panel_parts"), True)
         result = _confirm(doc, facts, options, mode)
+        failed = False
     finally:
         gate.leave()
         ui.set_box_open(STATE.get("panel_parts"), False)
         # Cancel put the model back: it is as changed (or not) as it was when the box opened, so current results
         # never grey out for the box's own rolled-back edits (the Check button: nothing re-checks them)
         # (the edit's own time kept: never moved earlier, which could let a check from before it count as covering
-        # it; with Check after every edit on, the next idle past IDLE_SECONDS checks: review round 1, P1)
-        STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None)
+        # it; with Check after every edit on, the next idle past IDLE_SECONDS checks: review round 1, P1). An error
+        # is no Cancel: the model may not be as it was, so the results grey out, never shown as current (the
+        # headless check-15, demo review of #26 with #27)
+        STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None,
+                                                 failed=failed)
     if result is not None:              # Draw (GordiumStart or Edit site…): the neighbourhood follows the lot
         logic.guard(sync_context, "draw the neighbourhood")(doc, result)
     return result
@@ -2288,6 +2437,7 @@ def _clear(o):
     o.yard_required, o.height_dim, o.yard_options, o.yard_tags, o.footprint, o.placed = [], None, {}, {}, [], {}
     o.yard_numbers, o.house_box, o.height_number = {}, [], None
     o.plan_lines = []
+    o.occluders, o.seen_faces, o.face_samples = [], {}, {}
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
     o.doc = None
@@ -2367,6 +2517,9 @@ def _draw_plan(doc, o, result, facts):
     # read (logic.coloured_info)
     blocks = plan.get("encroach") or []
     made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
+    o.occluders = (logic.guard(lambda: _occluders(doc), "the buildings that hide a coloured face")() or []) \
+        if blocks else []                            # (meshed only when something is coloured)
+    o.seen_faces, o.face_samples = {}, {}
     o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
                   for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
                   if logic.highlight(status) for piece in _offending(doc, e, made)]
