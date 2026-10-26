@@ -1,0 +1,1243 @@
+{
+ "open": {
+  "step": "open",
+  "claims": {
+   "0 the sample's lot is from the tax map": {
+    "ok": true,
+    "detail": false
+   },
+   "8 the address is there too": {
+    "ok": true,
+    "detail": "106 Ithaca Rd, Ithaca, NY"
+   },
+   "8 the sample's Street side reads Ithaca Rd, from the lookup": {
+    "ok": true,
+    "detail": {
+     "text": "Ithaca Rd",
+     "source": "the State tax map (the sample's lookup)"
+    }
+   }
+  },
+  "surveyed": false,
+  "street": {
+   "text": "Ithaca Rd",
+   "source": "the State tax map (the sample's lookup)"
+  },
+  "ok": true
+ },
+ "side_yard": {
+  "step": "side_yard",
+  "claims": {
+   "1 on the tax map: every part at least the requirement plus the 2'-0\" margin, as drawn; now 3'-0\" short": {
+    "ok": true,
+    "detail": {
+     "name": "Side yard, Northeast",
+     "status": "does_not_comply",
+     "hint": "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the northeast side lot line as drawn (10'-0\" required, the lot lines \u00b12'-0\") \u2014 now 7'-0\" at its closest.",
+     "reason": null
+    }
+   },
+   "1 the panel shows it": {
+    "ok": true,
+    "detail": [
+     "\u2715 Side yard, Northeast \u00b7 Does not comply",
+     "7'-0\" proposed, 10'-0\" required as drawn \u00b7 with the tax map's \u00b12'-0\": at least 1'-0\" short",
+     "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the northeast side lot line as drawn (10'-0\" required, the lot lines \u00b12'-0\") \u2014 now 7'-0\" at its closest.",
+     "In the model: red is the part over the yard line whichever way the tax map's lot lines (\u00b12'-0\") really lie (certain); amber is the part that depends on where a survey puts them.",
+     "Measured: 1 group, 3 solids on Gordium::Massing \u00b7 footprint 1,341 sf",
+     "\u201cYard Dimensions \u00b7 Side (one side minimum) \u00b7 R-1B: 10 ft\u201d",
+     "City of Ithaca Zoning Charts (April 2026), p.3, line 38",
+     "\u201cYard Dimensions \u00b7 Side (other side minimum) \u00b7 R-1B: 10 ft\u201d",
+     "City of Ithaca Zoning Charts (April 2026), p.3, line 40",
+     "\u00a7325-8, District Regulations Chart, R-1b, Side yard, one side column; \u00a7325-8, District Regulations Chart, R-1b, Side yard, other side column",
+     "Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with one more decimal."
+    ]
+   }
+  },
+  "row": {
+   "name": "Side yard, Northeast",
+   "status": "does_not_comply",
+   "hint": "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the northeast side lot line as drawn (10'-0\" required, the lot lines \u00b12'-0\") \u2014 now 7'-0\" at its closest.",
+   "reason": null
+  },
+  "ok": true
+ },
+ "apply_move": {
+  "step": "apply_move",
+  "claims": {
+   "1 doing exactly what it said: the row complies": {
+    "ok": true,
+    "detail": {
+     "name": "Side yard, Northeast",
+     "status": "complies",
+     "reason": null,
+     "delta": "at the limit at worst"
+    }
+   },
+   "1 and no other row worse": {
+    "ok": true,
+    "detail": []
+   }
+  },
+  "row": {
+   "name": "Side yard, Northeast",
+   "status": "complies",
+   "reason": null,
+   "delta": "at the limit at worst"
+  },
+  "ok": true
+ },
+ "zoom": {
+  "step": "zoom",
+  "claims": {
+   "3 Zoom to selects the row's objects": {
+    "ok": true,
+    "detail": {
+     "objects": [
+      "6580b302-b251-43ca-bf40-742fbd7bd99f",
+      "be546e3b-078b-4879-8a9d-33276c737eee",
+      "b920eca9-51b0-42e9-a4bf-72b181c377ce",
+      "b38b23eb-3847-4fdf-8e8d-46e67e5eb0e7"
+     ],
+     "selected": [
+      "b38b23eb-3847-4fdf-8e8d-46e67e5eb0e7",
+      "b920eca9-51b0-42e9-a4bf-72b181c377ce",
+      "be546e3b-078b-4879-8a9d-33276c737eee",
+      "6580b302-b251-43ca-bf40-742fbd7bd99f"
+     ]
+    }
+   }
+  },
+  "zoom": {
+   "objects": [
+    "6580b302-b251-43ca-bf40-742fbd7bd99f",
+    "be546e3b-078b-4879-8a9d-33276c737eee",
+    "b920eca9-51b0-42e9-a4bf-72b181c377ce",
+    "b38b23eb-3847-4fdf-8e8d-46e67e5eb0e7"
+   ],
+   "selected": [
+    "b38b23eb-3847-4fdf-8e8d-46e67e5eb0e7",
+    "b920eca9-51b0-42e9-a4bf-72b181c377ce",
+    "be546e3b-078b-4879-8a9d-33276c737eee",
+    "6580b302-b251-43ca-bf40-742fbd7bd99f"
+   ]
+  },
+  "ok": true
+ },
+ "button": {
+  "step": "button",
+  "claims": {
+   "2 the button comes right after the reason": {
+    "ok": true,
+    "detail": {
+     "reason": 1,
+     "button": 3,
+     "between": []
+    }
+   },
+   "2 its words aren't repeated as text": {
+    "ok": true,
+    "detail": [
+     [
+      "Label",
+      "\u2013 Parking \u00b7 needs input \u00b7 Not checked"
+     ],
+     [
+      "Label",
+      "Needs bedrooms and parking spaces, which the model doesn't show"
+     ],
+     [
+      "StackLayout",
+      null
+     ],
+     [
+      "Button",
+      "Enter bedrooms and parking spaces\u2026"
+     ],
+     [
+      "Label",
+      "\u201cFirst three bed or sleeping rooms per dwelling 1 space per dwelling unit\u201d"
+     ],
+     [
+      "Label",
+      "City of Ithaca Zoning Charts (April 2026), p.14, lines 9\u201310"
+     ],
+     [
+      "Label",
+      "\u201c4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit\u201d"
+     ],
+     [
+      "Label",
+      "City of Ithaca Zoning Charts (April 2026), p.14, line 12"
+     ],
+     [
+      "Label",
+      "\u201cEach additional bed or sleeping room + 1 space per room\u201d"
+     ],
+     [
+      "Label",
+      "City of Ithaca Zoning Charts (April 2026), p.14, line 13"
+     ]
+    ]
+   },
+   "2 the button is on screen without scrolling": {
+    "ok": true,
+    "detail": {
+     "scroll_top": 474.0,
+     "scroll_height": 160,
+     "button_top": 506.0,
+     "button_height": 20
+    }
+   }
+  },
+  "detail": [
+   [
+    "Label",
+    "\u2013 Parking \u00b7 needs input \u00b7 Not checked"
+   ],
+   [
+    "Label",
+    "Needs bedrooms and parking spaces, which the model doesn't show"
+   ],
+   [
+    "StackLayout",
+    null
+   ],
+   [
+    "Button",
+    "Enter bedrooms and parking spaces\u2026"
+   ],
+   [
+    "Label",
+    "\u201cFirst three bed or sleeping rooms per dwelling 1 space per dwelling unit\u201d"
+   ],
+   [
+    "Label",
+    "City of Ithaca Zoning Charts (April 2026), p.14, lines 9\u201310"
+   ],
+   [
+    "Label",
+    "\u201c4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit\u201d"
+   ],
+   [
+    "Label",
+    "City of Ithaca Zoning Charts (April 2026), p.14, line 12"
+   ],
+   [
+    "Label",
+    "\u201cEach additional bed or sleeping room + 1 space per room\u201d"
+   ],
+   [
+    "Label",
+    "City of Ithaca Zoning Charts (April 2026), p.14, line 13"
+   ]
+  ],
+  "row": {
+   "name": "Parking \u00b7 needs input",
+   "hint": "Enter bedrooms and parking spaces",
+   "button": "Enter bedrooms and parking spaces\u2026"
+  },
+  "screen": {
+   "scroll_top": 474.0,
+   "scroll_height": 160,
+   "button_top": 506.0,
+   "button_height": 20
+  },
+  "ok": true
+ },
+ "grey": {
+  "step": "grey",
+  "claims": {
+   "9 the rules not in Gordium yet are grouped as Not checked yet": {
+    "ok": true,
+    "detail": [
+     "Does not comply",
+     "Needs review",
+     "Complies",
+     "Not checked",
+     "Not checked yet"
+    ]
+   },
+   "9 the row says it's not in Gordium yet and which section to check by hand": {
+    "ok": true,
+    "detail": {
+     "groups": [
+      "Does not comply",
+      "Needs review",
+      "Complies",
+      "Not checked",
+      "Not checked yet"
+     ],
+     "row": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+     "detail": [
+      "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets) \u00b7 Not checked yet",
+      "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+      "\u00a7325-16A, \u00a7325-16B"
+     ]
+    }
+   },
+   "9 its detail is headed Not checked yet": {
+    "ok": true,
+    "detail": [
+     "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets) \u00b7 Not checked yet"
+    ]
+   }
+  },
+  "grey": {
+   "groups": [
+    "Does not comply",
+    "Needs review",
+    "Complies",
+    "Not checked",
+    "Not checked yet"
+   ],
+   "row": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+   "detail": [
+    "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets) \u00b7 Not checked yet",
+    "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+    "\u00a7325-16A, \u00a7325-16B"
+   ]
+  },
+  "ok": true
+ },
+ "corner": {
+  "step": "corner",
+  "claims": {
+   "10 a corner lot's street side takes every street clicked, Enter when done": {
+    "ok": true,
+    "detail": {
+     "prompts": [
+      "Click each lot line on a street (0 picked); Enter when done",
+      "Click each lot line on a street (1 picked); Enter when done",
+      "Click each lot line on a street (2 picked); Enter when done"
+     ],
+     "lines": [
+      [
+       [
+        76.916,
+        0.2317
+       ],
+       [
+        67.113,
+        0.1516
+       ]
+      ],
+      [
+       [
+        67.113,
+        0.1516
+       ],
+       [
+        59.09,
+        0.3022
+       ]
+      ],
+      [
+       [
+        59.09,
+        0.3022
+       ],
+       [
+        49.525,
+        0.0
+       ]
+      ],
+      [
+       [
+        49.525,
+        0.0
+       ],
+       [
+        38.7471,
+        0.5182
+       ]
+      ],
+      [
+       [
+        38.7471,
+        0.5182
+       ],
+       [
+        30.5456,
+        0.1523
+       ]
+      ],
+      [
+       [
+        30.5456,
+        0.1523
+       ],
+       [
+        20.3655,
+        0.1794
+       ]
+      ],
+      [
+       [
+        20.3655,
+        0.1794
+       ],
+       [
+        10.7167,
+        0.8339
+       ]
+      ],
+      [
+       [
+        10.7167,
+        0.8339
+       ],
+       [
+        1.1492,
+        0.2317
+       ]
+      ],
+      [
+       [
+        75.8597,
+        92.1001
+       ],
+       [
+        76.1328,
+        68.1429
+       ]
+      ],
+      [
+       [
+        76.1328,
+        68.1429
+       ],
+       [
+        76.916,
+        0.2317
+       ]
+      ]
+     ],
+     "ids": [
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      null,
+      null
+     ],
+     "name": null,
+     "said": [
+      "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far \u2014 Enter when done",
+      "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far \u2014 Enter when done"
+     ],
+     "asked": [
+      "Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)"
+     ]
+    }
+   },
+   "10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"": {
+    "ok": true,
+    "detail": {
+     "prompts": [
+      "Click each lot line on a street (0 picked); Enter when done",
+      "Click each lot line on a street (1 picked); Enter when done",
+      "Click each lot line on a street (2 picked); Enter when done"
+     ],
+     "lines": [
+      [
+       [
+        76.916,
+        0.2317
+       ],
+       [
+        67.113,
+        0.1516
+       ]
+      ],
+      [
+       [
+        67.113,
+        0.1516
+       ],
+       [
+        59.09,
+        0.3022
+       ]
+      ],
+      [
+       [
+        59.09,
+        0.3022
+       ],
+       [
+        49.525,
+        0.0
+       ]
+      ],
+      [
+       [
+        49.525,
+        0.0
+       ],
+       [
+        38.7471,
+        0.5182
+       ]
+      ],
+      [
+       [
+        38.7471,
+        0.5182
+       ],
+       [
+        30.5456,
+        0.1523
+       ]
+      ],
+      [
+       [
+        30.5456,
+        0.1523
+       ],
+       [
+        20.3655,
+        0.1794
+       ]
+      ],
+      [
+       [
+        20.3655,
+        0.1794
+       ],
+       [
+        10.7167,
+        0.8339
+       ]
+      ],
+      [
+       [
+        10.7167,
+        0.8339
+       ],
+       [
+        1.1492,
+        0.2317
+       ]
+      ],
+      [
+       [
+        75.8597,
+        92.1001
+       ],
+       [
+        76.1328,
+        68.1429
+       ]
+      ],
+      [
+       [
+        76.1328,
+        68.1429
+       ],
+       [
+        76.916,
+        0.2317
+       ]
+      ]
+     ],
+     "ids": [
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      null,
+      null
+     ],
+     "name": null,
+     "said": [
+      "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far \u2014 Enter when done",
+      "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far \u2014 Enter when done"
+     ],
+     "asked": [
+      "Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)"
+     ]
+    }
+   },
+   "10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner": {
+    "ok": true,
+    "detail": {
+     "prompts": [
+      "Click each lot line on a street (0 picked); Enter when done",
+      "Click each lot line on a street (1 picked); Enter when done",
+      "Click each lot line on a street (2 picked); Enter when done"
+     ],
+     "lines": [
+      [
+       [
+        76.916,
+        0.2317
+       ],
+       [
+        67.113,
+        0.1516
+       ]
+      ],
+      [
+       [
+        67.113,
+        0.1516
+       ],
+       [
+        59.09,
+        0.3022
+       ]
+      ],
+      [
+       [
+        59.09,
+        0.3022
+       ],
+       [
+        49.525,
+        0.0
+       ]
+      ],
+      [
+       [
+        49.525,
+        0.0
+       ],
+       [
+        38.7471,
+        0.5182
+       ]
+      ],
+      [
+       [
+        38.7471,
+        0.5182
+       ],
+       [
+        30.5456,
+        0.1523
+       ]
+      ],
+      [
+       [
+        30.5456,
+        0.1523
+       ],
+       [
+        20.3655,
+        0.1794
+       ]
+      ],
+      [
+       [
+        20.3655,
+        0.1794
+       ],
+       [
+        10.7167,
+        0.8339
+       ]
+      ],
+      [
+       [
+        10.7167,
+        0.8339
+       ],
+       [
+        1.1492,
+        0.2317
+       ]
+      ],
+      [
+       [
+        75.8597,
+        92.1001
+       ],
+       [
+        76.1328,
+        68.1429
+       ]
+      ],
+      [
+       [
+        76.1328,
+        68.1429
+       ],
+       [
+        76.916,
+        0.2317
+       ]
+      ]
+     ],
+     "ids": [
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      "Ithaca Rd",
+      null,
+      null
+     ],
+     "name": null,
+     "said": [
+      "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far \u2014 Enter when done",
+      "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far \u2014 Enter when done"
+     ],
+     "asked": [
+      "Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)"
+     ]
+    }
+   },
+   "12 answering No in the box drops both streets' lines (picked again: review round 5, P0)": {
+    "ok": true,
+    "detail": {
+     "street_line": null,
+     "corner_lot": false
+    }
+   }
+  },
+  "corner": {
+   "prompts": [
+    "Click each lot line on a street (0 picked); Enter when done",
+    "Click each lot line on a street (1 picked); Enter when done",
+    "Click each lot line on a street (2 picked); Enter when done"
+   ],
+   "lines": [
+    [
+     [
+      76.916,
+      0.2317
+     ],
+     [
+      67.113,
+      0.1516
+     ]
+    ],
+    [
+     [
+      67.113,
+      0.1516
+     ],
+     [
+      59.09,
+      0.3022
+     ]
+    ],
+    [
+     [
+      59.09,
+      0.3022
+     ],
+     [
+      49.525,
+      0.0
+     ]
+    ],
+    [
+     [
+      49.525,
+      0.0
+     ],
+     [
+      38.7471,
+      0.5182
+     ]
+    ],
+    [
+     [
+      38.7471,
+      0.5182
+     ],
+     [
+      30.5456,
+      0.1523
+     ]
+    ],
+    [
+     [
+      30.5456,
+      0.1523
+     ],
+     [
+      20.3655,
+      0.1794
+     ]
+    ],
+    [
+     [
+      20.3655,
+      0.1794
+     ],
+     [
+      10.7167,
+      0.8339
+     ]
+    ],
+    [
+     [
+      10.7167,
+      0.8339
+     ],
+     [
+      1.1492,
+      0.2317
+     ]
+    ],
+    [
+     [
+      75.8597,
+      92.1001
+     ],
+     [
+      76.1328,
+      68.1429
+     ]
+    ],
+    [
+     [
+      76.1328,
+      68.1429
+     ],
+     [
+      76.916,
+      0.2317
+     ]
+    ]
+   ],
+   "ids": [
+    "Ithaca Rd",
+    "Ithaca Rd",
+    "Ithaca Rd",
+    "Ithaca Rd",
+    "Ithaca Rd",
+    "Ithaca Rd",
+    "Ithaca Rd",
+    "Ithaca Rd",
+    null,
+    null
+   ],
+   "name": null,
+   "said": [
+    "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far \u2014 Enter when done",
+    "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far \u2014 Enter when done"
+   ],
+   "asked": [
+    "Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)"
+   ]
+  },
+  "corner_no": {
+   "street_line": null,
+   "corner_lot": false
+  },
+  "ok": true
+ },
+ "labels": {
+  "step": "labels",
+  "claims": {
+   "4 the Height limit label is 13 pt": {
+    "ok": true,
+    "detail": [
+     {
+      "view": "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+      "rows": [
+       "Height limit 35'-0\""
+      ],
+      "size": 13
+     },
+     {
+      "view": "16926896-dffc-4a86-acf1-64661a232111",
+      "rows": [
+       "Height limit 35'-0\""
+      ],
+      "size": 13
+     }
+    ]
+   },
+   "5 every view was drawn": {
+    "ok": true,
+    "detail": [
+     "16926896-dffc-4a86-acf1-64661a232111",
+     "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+     "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+     "d1f7eee1-dedb-403c-8460-d77604e8e086"
+    ]
+   },
+   "5 the status box once, in the active view": {
+    "ok": true,
+    "detail": {
+     "views": [
+      "16926896-dffc-4a86-acf1-64661a232111",
+      "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+      "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+      "d1f7eee1-dedb-403c-8460-d77604e8e086"
+     ],
+     "active": "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+     "height": [
+      {
+       "view": "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+       "rows": [
+        "Height limit 35'-0\""
+       ],
+       "size": 13
+      },
+      {
+       "view": "16926896-dffc-4a86-acf1-64661a232111",
+       "rows": [
+        "Height limit 35'-0\""
+       ],
+       "size": 13
+      }
+     ],
+     "status_views": [
+      "c44270f9-f702-4de2-887d-8c2fad8bf5be"
+     ],
+     "status_rows": [
+      "Gordium \u00b7 \u2715 1 does not comply \u00b7 1 needs review \u00b7 8 comply \u00b7 2 not checked",
+      "Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12'-0\")"
+     ]
+    }
+   }
+  },
+  "draws": {
+   "views": [
+    "16926896-dffc-4a86-acf1-64661a232111",
+    "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+    "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+    "d1f7eee1-dedb-403c-8460-d77604e8e086"
+   ],
+   "active": "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+   "height": [
+    {
+     "view": "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+     "rows": [
+      "Height limit 35'-0\""
+     ],
+     "size": 13
+    },
+    {
+     "view": "16926896-dffc-4a86-acf1-64661a232111",
+     "rows": [
+      "Height limit 35'-0\""
+     ],
+     "size": 13
+    }
+   ],
+   "status_views": [
+    "c44270f9-f702-4de2-887d-8c2fad8bf5be"
+   ],
+   "status_rows": [
+    "Gordium \u00b7 \u2715 1 does not comply \u00b7 1 needs review \u00b7 8 comply \u00b7 2 not checked",
+    "Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12'-0\")"
+   ]
+  },
+  "ok": true
+ },
+ "scale": {
+  "step": "scale",
+  "claims": {
+   "7 zoomed out to the 1,500 ft square: no plan labels drawn": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "\u2713 Front yard 27'-6 3/8\" (approx.)",
+       "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "\u2713 Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)"
+      ]
+     }
+    }
+   },
+   "7 the status box stays": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "\u2713 Front yard 27'-6 3/8\" (approx.)",
+       "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "\u2713 Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)"
+      ]
+     },
+     "frames": {
+      "scale_neighbourhood": 3,
+      "scale_lot": 7
+     }
+    }
+   },
+   "7 zoomed to the lot: every edge's length is back, the yards' too": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "\u2713 Front yard 27'-6 3/8\" (approx.)",
+       "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "\u2713 Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)"
+      ]
+     }
+    }
+   },
+   "7 106's short 10'-4 1/8\" edge keeps its length, led to it": {
+    "ok": false,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "\u2713 Front yard 27'-6 3/8\" (approx.)",
+       "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "\u2713 Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)"
+      ]
+     }
+    }
+   }
+  },
+  "frames": {
+   "scale_neighbourhood": 3,
+   "scale_lot": 7
+  },
+  "scale": {
+   "neighbourhood": {
+    "labels": [],
+    "status_box": 1
+   },
+   "lot": {
+    "labels": [
+     "\u2713 Front yard 27'-6 3/8\" (approx.)",
+     "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+     "\u2713 Side yard, Southwest 32'-4 7/8\" (approx.)",
+     "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+     "75'-10\"",
+     "101'-1 1/2\"",
+     "10'-4 1/8\"",
+     "69'-6 1/8\"",
+     "92'-1 3/8\""
+    ],
+    "status_box": 1,
+    "edges": [
+     "10'-4 1/8\"",
+     "101'-1 1/2\"",
+     "69'-6 1/8\"",
+     "75'-10\"",
+     "92'-1 3/8\""
+    ],
+    "led": [
+     "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+     "\u2715 Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)"
+    ]
+   }
+  },
+  "trace": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_5ebb288/apps/rhino_plugin/tests/pass2_settle_in_rhino.py\", line 462, in <module>\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_5ebb288/apps/rhino_plugin/tests/pass2_settle_in_rhino.py\", line 57, in claim\nAssertionError: 7 106's short 10'-4 1/8\" edge keeps its length, led to it: {'neighbourhood': {'labels': [], 'status_box': 1}, 'lot': {'labels': ['\u2713 Front yard 27\\'-6 3/8\" (approx.)', '\u2715 Side yard, Northeast 7\\'-0\", needs 10\\'-0\" (approx.)', '\u2713 Side yard, Southwest 32\\'-4 7/8\" (approx.)', '? Rear yard 7\\'-5 7/8\" to 27\\'-0 3/8\" (approx.)', '75\\'-10\"', '101\\'-1 1/2\"', '10\\'-4 1/8\"', '69\\'-6 1/8\"', '92\\'-1 3/8\"'], 'status_box': 1, 'edges': ['10\\'-4 1/8\"', '101\\'-1 1/2\"', '69\\'-6 1/8\"', '75\\'-10\"', '92\\'-1 3/8\"'], 'led': ['? Rear yard 7\\'-5 7/8\" to 27\\'-0 3/8\" (approx.)', '\u2715 Side yard, Northeast 7\\'-0\", needs 10\\'-0\" (approx.)']}}\n"
+ },
+ "close": {
+  "step": "close",
+  "claims": {
+   "13 after every step, exactly one checker process is Rhino's": {
+    "ok": true,
+    "detail": {
+     "after the runs": [
+      "87934"
+     ],
+     "after stopping": []
+    }
+   },
+   "13 stopped when the script ends: none left": {
+    "ok": true,
+    "detail": {
+     "after the runs": [
+      "87934"
+     ],
+     "after stopping": []
+    }
+   }
+  },
+  "closed": [
+   "None"
+  ],
+  "servers": {
+   "after the runs": [
+    "87934"
+   ],
+   "after stopping": []
+  },
+  "ok": true
+ },
+ "box": {
+  "step": "box",
+  "claims": {
+   "6 the box was shown with no lot": {
+    "ok": true,
+    "detail": [
+     "Address",
+     "Zoning district",
+     "not set",
+     "Use",
+     "Lot",
+     "no lot yet: draw it, or pick a closed outline on the Site layer",
+     "Front lot line (on the street)",
+     "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+     "Pick the district to continue."
+    ]
+   },
+   "6 no Use my survey\u2026 or Change\u2026 until a lot exists": {
+    "ok": true,
+    "detail": [
+     "Look up",
+     "Draw my lot\u2026",
+     "Cancel",
+     "Draw"
+    ]
+   },
+   "11 the box says Front lot line (on the street), what it is, and This is the lot's district": {
+    "ok": true,
+    "detail": {
+     "labels": [
+      "Address",
+      "Zoning district",
+      "not set",
+      "Use",
+      "Lot",
+      "no lot yet: draw it, or pick a closed outline on the Site layer",
+      "Front lot line (on the street)",
+      "set from the lot, once there is one",
+      "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+      "Corner lot?",
+      "Not checked yet: overlays (historic, gorge, flood)",
+      "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+      "Pick the district to continue."
+     ],
+     "ticks": [
+      "This is the lot's district"
+     ]
+    }
+   }
+  },
+  "box": {
+   "buttons": [
+    "Look up",
+    "Draw my lot\u2026",
+    "Cancel",
+    "Draw"
+   ],
+   "labels": [
+    "Address",
+    "Zoning district",
+    "not set",
+    "Use",
+    "Lot",
+    "no lot yet: draw it, or pick a closed outline on the Site layer",
+    "Front lot line (on the street)",
+    "set from the lot, once there is one",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+    "Pick the district to continue."
+   ],
+   "ticks": [
+    "This is the lot's district"
+   ]
+  },
+  "ok": true,
+  "box_closed": true
+ }
+}
