@@ -1216,18 +1216,20 @@ rules:
           and side_yard_larger_eaves >= 5 + max(building_height - 40, 0) - 2 and side_yard_larger_eaves < 10 + max(building_height - 40, 0) - 2
           and front_yard_eaves >= 10 + max(building_height - 40, 0) - 2 and rear_yard_eaves >= max(min(0.2 * lot_depth, 50), 20) + max(building_height - 40, 0) - 2
         reason: >-
-          Which side must be the 10 ft side yard is open: the walls are at least 10 ft from both side lot
-          lines (or from neither), so either side may be. The eaves fit only with the wider side yard (to the walls)
-          the 5 ft one; Gordium can't tell which side the architect means it to be.
+          Which side yard is the 10 ft one (both minimums more on a building over 40 ft tall) is open: the walls are at
+          least that far from both side lot lines, or from neither, so either side may be. The eaves fit only if the
+          side whose walls are farther from its line is the 5 ft one. Say which side is meant to be the 10 ft
+          one.
       - when: >-
           (side_yard_smaller >= 10 + max(building_height - 40, 0) or side_yard_larger < 10 + max(building_height - 40, 0))
           and side_yard_larger_eaves >= 10 + max(building_height - 40, 0) - 2
           and side_yard_smaller_eaves >= 5 + max(building_height - 40, 0) - 2 and side_yard_smaller_eaves < 10 + max(building_height - 40, 0) - 2
           and front_yard_eaves >= 10 + max(building_height - 40, 0) - 2 and rear_yard_eaves >= max(min(0.2 * lot_depth, 50), 20) + max(building_height - 40, 0) - 2
         reason: >-
-          Which side must be the 10 ft side yard is open: the walls are at least 10 ft from both side lot
-          lines (or from neither), so either side may be. The eaves fit only with the narrower side yard (to the
-          walls) the 5 ft one; Gordium can't tell which side the architect means it to be.
+          Which side yard is the 10 ft one (both minimums more on a building over 40 ft tall) is open: the walls are at
+          least that far from both side lot lines, or from neither, so either side may be. The eaves fit only if the
+          side whose walls are nearer to its line is the 5 ft one. Say which side is meant to be the 10 ft
+          one.
     sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 49
@@ -1305,14 +1307,22 @@ rules:
       - given: {side_yard_smaller: 7, side_yard_larger: 9, front_yard_eaves: 12, side_yard_smaller_eaves: 7, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 38}
         expect: needs_review
         note: neither side's walls are 10 ft from its line (R-3a.side_yards fails); which side's eave the 10 ft limit is for is open
+      # the height bonus moves which side can carry the 10 ft minimum (45 ft tall: 5 ft more, 15 and 10)
+      - given: {side_yard_smaller: 9, side_yard_larger: 12, front_yard_eaves: 20, side_yard_smaller_eaves: 9, side_yard_larger_eaves: 13, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
+        expect: needs_review
+        note: at 45 ft neither side's walls are 15 ft from the line, so either side may be the larger one; the eaves fit one way only
+      - given: {side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
+        expect: fail
+        note: at 45 ft only the 16 ft side can be the 15 ft one, and its eave (9 ft) is over 2 ft into it
     notes: >-
       The yards themselves (R-3a.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
       its eaves left out; this rule measures the same yards to the outermost part, eaves included, and lets that be up
       to 2 ft less. Each side's eaves are measured to that side's own lot line: side_yard_smaller_eaves to the line of
       the narrower side yard to the walls, side_yard_larger_eaves to the other's, so each eave is held to the minimum its
       side carries. Which side carries the 10 ft minimum is the walls' to say: only the side whose walls are at least
-      10 ft from its line can. Where both can, or neither, either side may be, and the eaves must fit both ways
-      (review_when). On a corner lot every yard facing a street is a front yard (§325-19C).
+      10 ft from its line can. Where both can, or neither, either side may be, and the eaves must fit both ways,
+      else needs review (review_when: Gordium's cautious reading, to confirm with the architects; the
+      chart says only that one side yard is at least 10 ft and the other at least 5 ft). On a corner lot every yard facing a street is a front yard (§325-19C).
     drafted_by: claude
     status: draft
 

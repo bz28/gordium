@@ -262,3 +262,50 @@ def test_unconfirmed_eaves_never_comply_where_the_law_does_not(west, east, ow, o
     got, facts = measured(west, east, ow, oe, confirmed=False)
     assert law(west, east, west - ow, east - oe, 5, 10) != "complies"
     assert verdict(rules(5, 10)["yard_projections"], got, facts) != present.COMPLIES
+
+
+# ---- what the panel says (#20 review round 1, confirmed by two sceptics) -----------------------------------------
+
+def test_a_failing_side_eave_row_names_that_side_and_not_the_front_yard():
+    """R-1b, walls 12 and 18 ft, the west eave 4'-6" past its wall (7'-6" from the line, 8'-0" allowed), a pitched
+    roof (its height several readings, each under 35 ft). The row fails (right) and must name the side yard's
+    eave, 7'-6" against 8'-0", never the front yard (which passes), and never blame the roof's height, which
+    changes nothing here. Before: "Eaves into front yard 30'-0" vs 23'-0"", "the building height depends on…"."""
+    from design_checker.check import check_site
+    from test_every_reading import rows
+    got, facts = measured(12.0, 18.0, 4.5, 0.0)
+    assert got["building_height"]["value"] is None and all(r["value"] < 35 for r in got["building_height"]["readings"])
+    res = check_site(site(house(12.0, 18.0, 4.5, 0.0)), facts)
+    (row,) = rows(res, "R-1b.yard_projections")
+    assert row["status"] == present.FAILS
+    assert (row["name"], row["proposed"], row["required"]) == ("Eaves into side yard", "7'-6\"", "8'-0\"")
+    assert "depends on" not in (row["reason"] or "")
+
+
+def test_a_rules_own_review_question_is_its_reason_not_a_question_that_changes_nothing():
+    """The which-side review_when holds under every reading (walls 12 and 15 ft, the west eave 7 ft from its line):
+    the row's reason is the rule's own, and the roof-height question (every reading under 40 ft, no bonus) is left
+    out. Before: only the height question."""
+    from design_checker.check import _why
+    rule = dict(rules(5, 10)["yard_projections"], check="side_yard_smaller_eaves >= 5 + max(building_height - 40, 0)"
+                " - 2 and side_yard_larger_eaves >= 10 + max(building_height - 40, 0) - 2")
+    got, facts = measured(12.0, 15.0, 5.0, 0.0)
+    assert got["building_height"]["value"] is None
+    row = {"Error": "NEEDS REVIEW", "Rule id": rule["id"], "Why it needs review": "as drawn"}
+    why = _why(row, {rule["id"]: rule}, got, ALLOWED, facts)["Why"]
+    assert why == "the narrower side may be the one that carries the larger minimum", why
+
+
+def test_a_review_reason_is_shown_only_if_it_holds_under_every_reading():
+    """Two review_when entries, one holding under one reading of a measurement and the other under the other: neither
+    holds under every reading, so the row's reason is the readings' own question, never both entries' words."""
+    from design_checker.check import _why
+    got, facts = measured(12.0, 15.0, 5.0, 0.0)
+    h = sorted({r["value"] for r in got["building_height"]["readings"]})
+    assert len(h) >= 2
+    rule = {"id": "T.split", "kind": "rule", "check": "building_height < 100",
+            "review_when": [{"when": f"building_height <= {h[0]}", "reason": "low"},
+                            {"when": f"building_height > {h[0]}", "reason": "high"}]}
+    row = {"Error": "NEEDS REVIEW", "Rule id": rule["id"], "Why it needs review": "as drawn"}
+    why = _why(row, {rule["id"]: rule}, got, ALLOWED, facts)["Why"]
+    assert "low" not in why.split("; ") and "high" not in why.split("; "), why
