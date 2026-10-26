@@ -916,10 +916,12 @@ def cautious_outline(outline, facts) -> list | None:
     of feature 4, F3). None on a survey or without an outline (Ben, 2026-10-25: the cautious outline to snap to; the
     as-drawn one dashed)."""
     from shapely.geometry import Polygon
+    from envelope_builder.envelope import QUAD_SEGS
     from model_measurement.measure import TAX_MAP_TOLERANCE
     if not outline or not from_tax_map(facts):
         return None
-    inner = Polygon(outline).buffer(-TAX_MAP_TOLERANCE, join_style=2)
+    inner = Polygon(outline).buffer(-TAX_MAP_TOLERANCE, quad_segs=QUAD_SEGS)   # every lot line 2'-0" nearer: at
+    # an inside corner too, exactly 2'-0" (a square join made it 2'-10": review of feature 4, round 4, F2)
     return [_ring(g) for g in getattr(inner, "geoms", [inner]) if g.geom_type == "Polygon" and not g.is_empty]
 
 

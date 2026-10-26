@@ -2593,7 +2593,9 @@ def run_check(doc, report=True):
         return result
     except Exception as e:
         _clear(o)
-        logic.guard(lambda: _envelope_curves(doc, None, facts), "clear the curves to snap to")()   # none stale
+        dirty = STATE.get("dirty")     # deleting Gordium's own curves is no edit of the model: the failed check's
+        logic.guard(lambda: _envelope_curves(doc, None, facts), "clear the curves to snap to")()   # message stays
+        STATE["dirty"] = dirty         # (review of feature 4, round 4, F1: live mode read it as an edit)
         o.doc = doc.RuntimeSerialNumber
         o.message = ("needs_review", "⚠ Check could not run", [str(e)[:120]])
         STATE["last"] = {"error": str(e), "at": time.time()}

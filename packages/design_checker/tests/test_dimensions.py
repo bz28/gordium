@@ -545,6 +545,8 @@ def test_the_plugin_replaces_them_each_check_whatever_the_layers_state_and_out_o
     run = fns["run_check"]
     assert "logic.guard(lambda: _envelope_curves(doc, result.get(\"plan\"), sent)," in run          # F9
     assert "_envelope_curves(doc, None, facts)" in run
+    fail = run[run.index("_envelope_curves(doc, None, facts)") - 200:run.index("_envelope_curves(doc, None, facts)") + 200]
+    assert 'dirty = STATE.get("dirty")' in fail and 'STATE["dirty"] = dirty' in fail      # round 4, F1
     # the layer made with Undo off, and none made by a failed check (review of dd44f1b, F1); left ones hidden and said
     assert body.index("doc.UndoRecordingEnabled = False") < body.index("index = _layer(doc, logic.ENVELOPE)")
     assert body.index("if plan is None and doc.Layers.FindByFullPath(logic.ENVELOPE, -1) < 0:") < body.index("_layer(")
@@ -565,6 +567,13 @@ def test_an_unknown_survey_is_the_tax_maps_and_a_tight_lot_is_never_drawn_as_sur
     dumbbell = [[0, 0], [10, 0], [10, 10], [6, 10], [6, 13], [10, 13], [10, 23], [0, 23], [0, 13], [4, 13], [4, 10],
                 [0, 10]]
     assert len(cautious_outline(dumbbell, {})) == 2                            # two pieces, each kept
+    from shapely.geometry import Polygon
+    ell = [[0, 0], [20, 0], [20, 10], [10, 10], [10, 20], [0, 20]]               # an inside corner at (10, 10)
+    (inner,) = cautious_outline(ell, {})
+    assert Polygon(inner).exterior.distance(Polygon(ell).exterior) == pytest.approx(2.0, abs=1e-3)
+    from shapely.geometry import Point
+    far = max(Polygon(ell).exterior.distance(Point(p)) for p in inner)       # every point of it 2'-0" in: at the
+    assert far == pytest.approx(2.0, abs=1e-2)                               # inside corner too (round, not 2'-10")
     tight = logic.envelope_curves({"lot_from_tax_map": True, "buildable_cautious": [], "buildable": square,
                                    "yard_lines": [{"points": [[0, 1], [10, 1]], "name": "Front yard"}]})
     assert [c["dashed"] for c in tight] == [True, True] and "tax map" in tight[0]["what"]
