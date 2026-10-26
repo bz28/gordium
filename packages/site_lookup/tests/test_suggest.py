@@ -80,6 +80,17 @@ def test_suggestions_are_city_addresses_as_the_lookup_is_asked_for_them():
     assert suggest("102 E Court St", http) == ["102 E Court St" + CITY_TAIL]
     assert suggest("106 South Hill", http) == ["106 South Hill Ter" + CITY_TAIL]
     assert suggest("120 South Cayuga Street", http) == ["120 S Cayuga St" + CITY_TAIL]
+    # review round 2: a dot after a letter; a direction finished as the last word; another town after a comma
+    assert suggest("120 N. Cayuga", http) == ["120 N Cayuga St" + CITY_TAIL]
+    assert suggest("106 Ithaca Rd.", http) == ["106 Ithaca Rd" + CITY_TAIL]
+    assert suggest("106.5 Linn", http) == ["106.5 Linn St" + CITY_TAIL]
+    assert suggest("120 North ", http) == ["120 N Cayuga St" + CITY_TAIL]
+    asked = len(http.asked)
+    assert suggest("106 Ithaca Rd, Dryden", http) == [] and len(http.asked) == asked
+    assert suggest("106 Ithaca Rd, Cayuga Heights", http) == []
+    assert suggest("106 Ithaca Rd, 14882", http) == []
+    assert suggest("106 Ithaca Rd, Itha", http) == ["106 Ithaca Rd" + CITY_TAIL]        # the City's name, half typed
+    assert suggest("106 Ithaca Rd, City of Ithaca, NY 14850", http) == ["106 Ithaca Rd" + CITY_TAIL]
     asked = len(http.asked)
     assert suggest("106", http) == [] and len(http.asked) == asked             # too little typed: never asked
 

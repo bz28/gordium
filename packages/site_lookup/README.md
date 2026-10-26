@@ -109,8 +109,11 @@ The start box's list of addresses as the architect types (`suggest.suggest`, run
 It covers about 99% of the County's City addresses (6,500 in both; 88 only in the City's, mostly half numbers; 55
 only in the County's). A suggestion is only typing help: the address picked is looked up as any typed address is
 (the State geocoder, then the tax parcel's SWIS code decides City or Town), so nothing about the lot ever rests on
-a suggestion. Asked: `UPPER(FULL_ADDRE) LIKE '<typed, capitals, "North" -> "N", "Road" -> "RD">%'`, distinct, at
-most 8, in order; a finished last word matches that whole word only. Nothing is stored (tests use hand-written
+a suggestion. Asked: `UPPER(FULL_ADDRE) LIKE '<typed, in capitals>%'`, distinct, at most 8, in order. A direction
+after the number ("North") and a street-type word ("Road", "Court") may be the City's short form ("N", "RD") or part
+of the street's own name ("101 SOUTH ST", "102 E COURT ST"), so both spellings are asked for, as typed first, OR-ed
+(at most 8 spellings); a dot after a letter is dropped ("N." is "N"; "106.5" keeps its dot); a finished last word
+matches that whole word only; another town after a comma ("…, Dryden") gets no suggestions. Nothing is stored (tests use hand-written
 stand-in addresses, `tests/test_suggest.py`). Found on the way: endpoints.yaml's `geocoder.terms` link is the
 State's "Legacy Address Geocoder" page (retired after October 2026); the current page is
 https://gis.ny.gov/nys-geocoding-service (the service URL itself is already the current one).

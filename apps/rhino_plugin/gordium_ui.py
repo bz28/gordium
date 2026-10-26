@@ -900,8 +900,9 @@ def start_box(state, options, mode):
         draw.Enabled = logic.can_draw(state) and not looking
         reason.Text = logic.draw_reason(state)
         if suggester is not None:      # the list waits for a pause in the typing
-            if address.Text != hints["chosen"]:
-                hint_list.SelectedIndex = -1   # typed on: Enter looks up what is typed, never an older pick (round 1)
+            if address.Text != hints["chosen"]:     # typed on: the list was for older typing, so it goes (round 2)
+                hint_list.SelectedIndex = -1   # and Enter looks up what is typed, never an older pick (round 1)
+                hide_hints()
             wait_keys.Stop()
             wait_keys.Start()
 

@@ -15,6 +15,19 @@ UPPER_WORDS = set(_DIR.values())      # N, S, E, W stay capitals ("120 N Cayuga 
 
 
 MAX_SPELLINGS = 8             # spellings asked for at most (each word that may be shortened doubles them)
+CITY_WORDS = {"ITHACA", "CITY", "OF", "NY", "NEW", "YORK", "USA", "US", "14850", "14851", "14852", "14853"}
+
+
+def other_town(after_comma: str) -> bool:
+    """Whether what follows the first comma names a place other than the City of Ithaca ("Dryden", "Cayuga
+    Heights", a ZIP not the City's): then no suggestion is offered, so another town stays another town (review round
+    2). Ithaca, "City of Ithaca", NY and the City's ZIP codes are the City's."""
+    text = re.sub(r"[^A-Za-z0-9 ]", " ", after_comma or "").upper()
+    words = text.split()
+
+    def city(w, typing):                 # the last word may still be being typed ("Itha", "148")
+        return any(c == w or (typing and c.startswith(w)) for c in CITY_WORDS)
+    return any(not city(w, k == len(words) - 1 and not text.endswith(" ")) for k, w in enumerate(words))
 
 
 def typed_prefixes(typed: str) -> list[str]:
@@ -24,7 +37,10 @@ def typed_prefixes(typed: str) -> list[str]:
     ST", "102 E COURT ST", "106 SOUTH HILL TER": review round 1), so both spellings are asked for, as typed first.
     Only letters, digits, spaces, dots, hyphens and apostrophes are kept (never a % or _ that would widen the
     match). [] when fewer than MIN_CHARS are typed. A finished last word ends in a space."""
-    text = str(typed or "").split(",", 1)[0]
+    head, _, town = str(typed or "").partition(",")
+    if other_town(town):                            # another town typed: never the City's address in its place
+        return []
+    text = re.sub(r"(?<=[A-Za-z])\.", " ", head)    # "N." is "N" ("106.5" keeps its dot: the City's half numbers)
     text = re.sub(r"[^A-Za-z0-9 .'\-]", " ", text).upper()
     ends_word = text.endswith(" ") or "," in str(typed or "")
     words = text.split()
@@ -33,7 +49,8 @@ def typed_prefixes(typed: str) -> list[str]:
     spellings = [[]]
     for i, w in enumerate(words):
         short = None
-        if i == 1 and w in _DIR and words[0][:1].isdigit() and len(words) > 2:
+        # (a direction finished as the last word: "120 NORTH " asks for "120 N " too)
+        if i == 1 and w in _DIR and words[0][:1].isdigit() and (len(words) > 2 or ends_word):
             short = _DIR[w]                          # "120 NORTH CAYUGA" -> "120 N CAYUGA" (or SOUTH HILL)
         elif i > 1 and w in _SUFFIX:                 # "106 ITHACA ROAD" -> "106 ITHACA RD" (or E COURT ST)
             short = _SUFFIX[w]

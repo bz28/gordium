@@ -115,6 +115,9 @@ def test_the_box_asks_after_a_pause_and_stops_a_stale_request():
     assert "wait_keys.Stop()\n            wait_keys.Start()" in typed               # restarted at every key
     # typed on: no older suggestion stays selected for Enter to pick over what is typed (review round 1)
     assert typed.index("hint_list.SelectedIndex = -1") < typed.index("wait_keys.Start()")
+    # ... and the list itself goes: it was for older typing, so Down/Enter can never pick from it (review round 2)
+    assert typed.index('if address.Text != hints["chosen"]:') < typed.index("hide_hints()") < \
+        typed.index("wait_keys.Start()")
     keys = part(box, "def enter_looks_up(", "address.KeyDown +=")
     assert "hint_list.Visible and hint_list.SelectedIndex >= 0" in keys
     ask = part(box, "def ask_hints(", "def got_hints(")

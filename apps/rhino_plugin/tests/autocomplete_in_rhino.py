@@ -174,7 +174,6 @@ def main():
                     [(0.1, pick_first), (1.0, note("3"))] +
                     [(0.0, lambda d: g.STATE.update(suggest_slow=1.5))] +
                     typing("96 Itha", 0.0)[-1:] + [(0.5, lambda d: setattr(parts(d)["address"], "Text", "1060 Ith"))] +
-                    [(0.1, lambda d: seen.update(first_gone=procs[-2].poll() is not None if len(procs) > 1 else None))] +
                     [(3.5, note("4"))] +
                     [(0.0, lambda d: setattr(parts(d)["address"], "Text", "96 Itha")),
                      (0.6, lambda d: hold.update(on=True)),
@@ -212,9 +211,10 @@ def main():
               three.get("address") == "106 Ithaca Rd, Ithaca, NY" and not three.get("visible") and
               three.get("asked") == two.get("asked"), three)
         four = seen.get("4", {})
-        claim("4 the earlier request was stopped when the newer typing was asked for",
-              seen.get("first_gone") is True and any(a[1] == "1060 Ith" for a in asked),
-              {"first_gone": seen.get("first_gone"), "asked": asked})
+        # when 1060 Ith was asked: one request (96 Itha's, still waiting on its 1.5 s) was running before, none after
+        stopped = [r for r in log.get("running_before", []) if r[0] == "1060 Ith"]
+        claim("4 the earlier request was stopped when the newer typing was asked for", stopped == [["1060 Ith", 1, 0]],
+              {"running_before": log.get("running_before"), "asked": asked})
         claim("4 the newer typing's list: 1060's address", four.get("visible") and
               four.get("items") == ["1060 Ithaca Rd, Ithaca, NY"], four)
         claim("4 an answer for something no longer typed is dropped (no list for 96 Itha under 96 Ithac)",
