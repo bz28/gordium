@@ -731,8 +731,12 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=No
                 below = [(x, y + fy1 + VIEW_MARGIN_PX - min(p[1] for p in q)) for x, y in q]
                 if inside_view(below, view):
                     q = below
-                else:                              # ... or, a short view, to its left (review F1)
-                    q = [(x + fx0 - VIEW_MARGIN_PX - max(p[0] for p in q), y) for x, y in q]
+                else:                              # ... or, a short view, to its left (review F1), or right
+                    fx1 = _bbox(f)[2]
+                    left = [(x + fx0 - VIEW_MARGIN_PX - max(p[0] for p in q), y) for x, y in q]
+                    right = [(x + fx1 + VIEW_MARGIN_PX - min(p[0] for p in q), y) for x, y in q]
+                    q = left if inside_view(left, view) else right if inside_view(right, view) else q
+                    # (neither fits: it stays in view, over the box: drawn, review of dd74264 F2)
     return i, q, "crowded", 1.0
 
 
@@ -893,17 +897,33 @@ def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
-    def free_of(cands):
-        return [(x, y) for x, y in cands if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)]
+    def free_of(x, y):
+        return not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
+
+    def model_on(spot):
+        return overlap(spot[0], spot[1], model) if model else 0.0
+    free = [sp for sp in spots if free_of(*sp)]
+    if free:
+        return min(enumerate(free), key=lambda k_s: (model_on(k_s[1]), k_s[0]))[1]
     # every corner covering something drawn (a dimension's number: Rhino check of #29 at 5891efc, docked Top
-    # 656 × 668): slid along the top and bottom bands, then anywhere in the view, 8 px at a time, off all of it
-    step = 8
+    # 656 × 668): slid along the top and bottom bands, then anywhere in the view, off all of it; the first also off
+    # the model, else the one covering least of it. A step of about 1/80 of the view's size keeps a 4K view to a
+    # couple of thousand spots (review of dd74264, F1: 8 px everywhere took seconds a frame)
+    step = max(8.0, (view_w + view_h) / 80.0)
     xs = [gap + step * k for k in range(int(max(0, view_w - w - 2 * gap) // step) + 1)]
     ys = [34 + step * k for k in range(int(max(0, view_h - h - 74) // step) + 1)]
-    slides = [(x, y) for y in (34, view_h - h - 64, view_h - h - 40) for x in xs] + \
-        [(x, y) for y in ys for x in xs]
-    free = free_of(spots) or free_of(slides) or spots
-    return min(free, key=lambda s: (overlap(s[0], s[1], model) if model else 0.0, free.index(s)))
+    best = None
+    for y in [34, view_h - h - 64, view_h - h - 40] + ys:
+        for x in xs:
+            if free_of(x, y):
+                cover = model_on((x, y))
+                if cover <= 0:
+                    return x, y
+                if best is None or cover < best[0]:
+                    best = (cover, (x, y))
+    if best is not None:
+        return best[1]
+    return min(enumerate(spots), key=lambda k_s: (model_on(k_s[1]), k_s[0]))[1]
 
 
 def clear_spot(taken, x, y, w, h, avoid=()):

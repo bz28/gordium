@@ -740,8 +740,9 @@ def draw_screen(o, e):
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
                     along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+    edges = taken[before:]
     notice = _notice_box(o, e.Viewport, taken, fixed)  # off the model, the status box and the numbers
-    o.screen_boxes = {"edges": taken[before:], "notice": notice[1:] if notice else None}   # (the in-Rhino checks)
+    o.screen_boxes = {"edges": edges, "notice": notice[1:] if notice else None}   # (the in-Rhino checks)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         ends = [e.Viewport.WorldToClient(p) for p in limit[0]]

@@ -638,3 +638,26 @@ def test_a_drawn_numbers_box_has_a_margin_the_edge_lengths_keep_off():
     assert logic.number_box([10, 50], [20, 34]) == (10 - logic.NUMBER_PAD_PX, 20 - logic.NUMBER_PAD_PX,
                                                     40 + 2 * logic.NUMBER_PAD_PX, 14 + 2 * logic.NUMBER_PAD_PX)
     assert logic.NUMBER_PAD_PX >= 3
+
+
+
+def test_the_notice_search_stays_quick_in_a_4k_view_with_every_corner_taken():
+    """Review of dd74264, F1: an 8 px search over the whole view took 89 s a frame at 3800 × 2100."""
+    import time
+    view_w, view_h = 3800, 2100
+    taken = [(0, 0, 900, 400), (0, 1500, 900, 600), (2800, 0, 1000, 400), (2800, 1500, 1000, 600)]
+    for k in range(20):
+        taken.append((100 + 150 * k, 900, 90, 18))
+    t0 = time.perf_counter()
+    x, y = logic.notice_spot(view_w, view_h, 600, 46, (800, 300, 3000, 1800), taken)
+    assert time.perf_counter() - t0 < 0.25
+    assert not any(x < a + c and a < x + 600 and y < b + d and b < y + 46 for a, b, c, d in taken)
+
+
+def test_in_a_narrow_short_view_the_last_resort_stays_in_view():
+    """Review of dd74264, F2: moved left of the status box it ran off the view's left edge."""
+    status = logic.rect_quad((51, 14, 295, 186))
+    everywhere = logic.rect_quad((0, 0, 360, 200))
+    i, q, kind, sc = logic.place_dimension([((200, 100), (150, 100))], 80, [everywhere, status], view=(360, 200),
+                                           must=True, fixed=[status])
+    assert kind == "crowded" and logic.inside_view(q, (360, 200))
