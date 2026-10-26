@@ -814,7 +814,81 @@ def start_box(state, options, mode):
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
 
+    # type-ahead: the City's addresses starting like the one typed (logic.wants_suggestions, ~0.3 s after the last
+    # key), in a list under it; Down/Up move in it, Enter or a click picks, Esc closes it; a stale answer is dropped
+    # (logic.suggestions_shown) and an earlier request stopped; offline or slow: a quiet note, typing still works
+    suggester = state.get("_suggest") if not looking else None
+    hints = {"items": [], "chosen": None}
+    hint_list = ef.ListBox()
+    hint_list.Width, hint_list.Height = 300, 110
+    hint_list.Visible = False
+    hint_note = label("", size=10)
+    wait_keys = ef.UITimer()
+    wait_keys.Interval = logic.SUGGEST_DELAY_S
+    wait_answer = ef.UITimer()
+    wait_answer.Interval = 0.1
+
+    def hide_hints():
+        hints["items"] = []
+        hint_list.Items.Clear()
+        hint_list.Visible = False
+
+    def pick_hint(index):
+        if 0 <= index < len(hints["items"]):
+            hints["chosen"] = hints["items"][index]
+            hide_hints()
+            address.Text = hints["chosen"]            # (TextChanged: Draw and its reason follow; no new list)
+            address.Focus()
+
+    def ask_hints(s, e):
+        wait_keys.Stop()
+        if suggester is None:
+            return
+        if not logic.wants_suggestions(address.Text, hints["chosen"]):
+            suggester["stop"]()
+            wait_answer.Stop()
+            hide_hints()
+            hint_note.Text = ""
+            return
+        suggester["start"](address.Text)            # (stops one still running: its answer would be stale)
+        wait_answer.Start()
+
+    def got_hints(s, e):
+        answer = suggester["poll"]() if suggester is not None else None
+        if answer is None:
+            return
+        wait_answer.Stop()
+        shown = logic.suggestions_shown(answer, address.Text)
+        if shown is None:                            # for something no longer typed
+            return
+        items, note = shown
+        hint_note.Text = note
+        hide_hints()
+        hints["items"] = items
+        for item in items:
+            hint_list.Items.Add(item)
+        hint_list.Visible = bool(items)
+
+    wait_keys.Elapsed += logic.guard(ask_hints, "ask for address suggestions")
+    wait_answer.Elapsed += logic.guard(got_hints, "show address suggestions")
+    hint_list.Tag = pick_hint                       # (the in-Rhino test picks through the list's own pick)
+    hint_list.MouseUp += logic.guard(lambda s, e: pick_hint(hint_list.SelectedIndex), "pick a suggested address")
+    hint_list.Activated += logic.guard(lambda s, e: pick_hint(hint_list.SelectedIndex), "pick a suggested address")
+
     def enter_looks_up(s, e):          # Enter in the address: Look up (not Draw, the box's default button)
+        if hint_list.Visible and e.Key in (ef.Keys.Down, ef.Keys.Up):         # move in the list, keys stay here
+            e.Handled = True
+            hint_list.SelectedIndex = logic.list_step(hint_list.SelectedIndex, len(hints["items"]),
+                                                      "down" if e.Key == ef.Keys.Down else "up")
+            return
+        if hint_list.Visible and e.Key == ef.Keys.Escape:                       # close the list, not the box
+            e.Handled = True
+            hide_hints()
+            return
+        if e.Key == ef.Keys.Enter and hint_list.Visible and hint_list.SelectedIndex >= 0:
+            e.Handled = True                                                    # Enter picks; Enter again: Look up
+            pick_hint(hint_list.SelectedIndex)
+            return
         if e.Key == ef.Keys.Enter and not looking:
             e.Handled = True
             pick("lookup")
@@ -825,6 +899,9 @@ def start_box(state, options, mode):
         state["address"] = address.Text
         draw.Enabled = logic.can_draw(state) and not looking
         reason.Text = logic.draw_reason(state)
+        if suggester is not None:      # the list waits for a pause in the typing
+            wait_keys.Stop()
+            wait_keys.Start()
 
     address.TextChanged += logic.guard(address_typed, "follow the address typed")
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
@@ -857,6 +934,9 @@ def start_box(state, options, mode):
         key, title = r["key"], label(r["label"], bold=True)
         if key == "address":
             layout.AddRow(title, row(address, *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+            if suggester is not None:      # the type-ahead list (hidden until there is one) and its quiet note
+                layout.AddRow(None, row(hint_list))
+                layout.AddRow(None, row(hint_note))
             if r.get("matches"):           # several places match: pick one, then Look up again
                 matches = ef.DropDown()
                 matches.Items.Add("Which address?")
@@ -943,6 +1023,14 @@ def start_box(state, options, mode):
         timer.Elapsed += logic.guard(tick, "wait for the address lookup")
         dialog.Shown += logic.guard(lambda s, e: timer.Start(), "start waiting for the lookup")
         dialog.Closed += logic.guard(lambda s, e: timer.Stop(), "stop waiting for the lookup")
+
+    def closed(s, e):                  # the type-ahead stops with the box
+        wait_keys.Stop()
+        wait_answer.Stop()
+        if suggester is not None:
+            suggester["stop"]()
+
+    dialog.Closed += logic.guard(closed, "stop the address suggestions")
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen.get("what")
 

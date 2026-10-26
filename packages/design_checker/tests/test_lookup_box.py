@@ -194,7 +194,8 @@ def test_several_matches_are_offered_under_the_address():
     facts, saved, state = box(p)
     rows = {r["key"]: r for r in logic.box_rows(state)}
     assert rows["address"]["matches"] == ["10 N Aurora St", "10 S Aurora St"]
-    assert logic.uncertain(state).endswith("Pick one under Address, then Look up again.")
+    # what to do, then that the model is as it was (the box says so after every lookup that found no lot)
+    assert logic.uncertain(state).endswith("Pick one under Address, then Look up again. " + logic.NOTHING_CHANGED)
 
 
 def test_looking_up_shows_its_state_and_keeps_draw_off():

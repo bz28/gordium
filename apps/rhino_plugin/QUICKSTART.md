@@ -244,7 +244,12 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    was. Live re-checks after an edit run in the background: the panel says "Checking…" with what it is doing and
    its own **Cancel**.
 3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
-   - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
+   - **Address**: type it and press **Look up** (or Enter). After 4 characters and a short pause, a list under the
+     box offers the City of Ithaca addresses that start that way (the City's own address list, asked live, never
+     kept; Town of Ithaca addresses never appear): **Down**/**Up** and **Enter**, or a click, picks one; **Esc**
+     closes the list. Offline, it quietly says "Suggestions unavailable" and typing works as before. No town
+     typed? Look up asks for the address in the City ("106 Ithaca Rd" becomes "106 Ithaca Rd, Ithaca, NY"). If a
+     lookup finds no lot, the box says so and that the lot shown is still the one you had. Gordium asks the public map services (it takes up to
      45 seconds; the box says what it is doing as it goes, "Looking up … · Reading the City zoning map…", with a
      moving mark and the seconds so far, and **Cancel lookup** stops it and leaves the box as it was). Look up only shows what it found: the address and a suggested zoning
      district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which

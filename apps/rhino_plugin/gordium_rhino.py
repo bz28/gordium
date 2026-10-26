@@ -1381,7 +1381,8 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "doubts": saved_ui.get("doubts") or {}, "live": saved_ui.get("_live") or {},
             "checked": list(saved_ui.get("checked") or []), "lot_missing": lot is None,
             "_poll": _lookup_poll if (saved_ui.get("_lookup") or {}).get("looking") else None,
-            "_progress": _lookup_progress if (saved_ui.get("_lookup") or {}).get("looking") else None}
+            "_progress": _lookup_progress if (saved_ui.get("_lookup") or {}).get("looking") else None,
+            "_suggest": SUGGESTER}
 
 
 def _ft_text(feet):
@@ -1596,7 +1597,9 @@ def _box_pick(doc, what, facts, saved_ui, session):
 
 
 def _one_pick(doc, what, facts, saved_ui, session):
-    if what == "lookup":
+    if what == "lookup":                       # no town typed: the City's ("106 Ithaca Rd, Ithaca, NY")
+        if facts.get("address"):
+            facts["address"] = logic.with_city(facts["address"])
         saved_ui = _lookup_start(facts, saved_ui)
     elif what == "lookup_cancel":
         saved_ui = _lookup_cancel(saved_ui)
@@ -1698,6 +1701,7 @@ def _confirm(doc, facts, options, mode):
         return logic.run_box(session, lambda: _box_loop(doc, facts, options, mode, saved_ui, session))
     finally:
         _lookup_stop()
+        _suggest_stop()                   # (a type-ahead still running: never left behind)
         o.confirm = None
         o.labels = []
         STATE.pop("lookup_guide", None)
@@ -1792,6 +1796,65 @@ def _lookup_start(facts, saved_ui):
                        "out": out, "sink": sink, "err": err, "started": time.time(), "query": address,
                        "before": saved_ui.get("_lookup")}     # the box's lookup line before: Cancel lookup puts it back
     return dict(saved_ui, _lookup={"looking": address})
+
+
+def _lookup_env():
+    packages = os.path.join(REPO, "packages")
+    env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONPATH"] = os.pathsep.join(STATE.get("extra_paths", []) + [
+        os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
+    return env
+
+
+def _suggest_start(text):
+    """Type-ahead for the address typed: the City's addresses starting like it, asked in lookup_box's own short
+    process (never Rhino's Python). An earlier one still running is stopped first: its answer would be stale."""
+    _suggest_stop()
+    out = os.path.join(tempfile.gettempdir(), "gordium_suggest_%d.json" % int(time.time() * 1000))
+    args = [_python(), "-m", "design_checker.lookup_box", "--suggest", text]
+    if STATE.get("lookup_fixture"):                      # the in-Rhino test: stand-in addresses, no live call
+        args += ["--fixture"]
+        if STATE.get("suggest_offline"):              # ...or the layer unreachable
+            args += ["--offline"]
+        if STATE.get("suggest_slow"):
+            args += ["--slow", str(STATE["suggest_slow"])]
+    sink = open(out, "w", encoding="utf-8")
+    err = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8")
+    STATE["suggest"] = {"proc": ui.spawn(args, cwd=REPO, env=_lookup_env(), stdout=sink, stderr=err),
+                        "out": out, "sink": sink, "err": err, "started": time.time(), "query": text}
+
+
+def _suggest_poll():
+    """None while the type-ahead runs; then its answer ({"status", "query", "suggestions"}). Stopped, and said
+    unavailable, after logic.SUGGEST_LIMIT_S."""
+    run = STATE.get("suggest")
+    if run is None:
+        return None
+    p = run["proc"]
+    if p.poll() is None:
+        if time.time() - run["started"] < logic.SUGGEST_LIMIT_S:
+            return None
+        answer = {"status": "timeout", "query": run["query"]}
+    else:
+        run["sink"].close()
+        try:
+            with open(run["out"], encoding="utf-8") as f:
+                answer = json.loads(f.read().strip().splitlines()[-1])
+        except Exception:
+            answer = {"status": "error", "query": run["query"]}
+    _suggest_stop()
+    return answer
+
+
+def _suggest_stop():
+    run = STATE.pop("suggest", None)
+    if run is not None:
+        _lookup_kill(run)
+        _lookup_files_done(run)
+
+
+SUGGESTER = {"start": _suggest_start, "poll": _suggest_poll, "stop": _suggest_stop}
 
 
 def _lookup_progress():

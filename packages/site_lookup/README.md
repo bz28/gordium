@@ -95,6 +95,26 @@ the fixtures. A test checks every fixture and snapshot against `endpoints.yaml`.
   fixtures contain no owner or mailing fields and only storable sources.
 - A live check: `GORDIUM_LIVE=1 pytest packages/site_lookup`.
 
+## Address type-ahead (suggest.py): which service, and why
+
+The start box's list of addresses as the architect types (`suggest.suggest`, run by
+`python -m design_checker.lookup_box --suggest "106 Itha"`). Researched 2026-10-26; every source read that day:
+
+| Service | City-only? | Terms | Verdict |
+|---|---|---|---|
+| NYS ITS geocoder `suggest` (`.../NYS_Geocoder/GeocodeServer`, capabilities "Geocode,ReverseGeocode,Suggest") | No: every result says City "Ithaca", Town and Cayuga Heights alike; `searchExtent` is only a box | A disclaimer only ("The User accepts the Data provided 'as is'"; https://gis.ny.gov/nys-geocoding-service); NYS says suggest is meant for type-ahead | Not used: each suggestion would need its own City check |
+| Tompkins County address points (TCAddress) | Yes, by `MUNICIPALI = 'CITY OF ITHACA'` | "Please do not redistribute data to a third party without permission from Tompkins County GIS" (its ArcGIS item's licenseInfo) | Not used: showing it to architects may count as redistribution; would need the County's permission |
+| **City of Ithaca addresses** (`Address_Labels/FeatureServer/0`, "AddressSearchandLabels", 6,588 addresses) | **Yes: City addresses only** | Credit only: "Data contained in this product was originally produced by the GIS Program, City of Ithaca, NY. The originator does not warrant the accuracy or completeness of the information portrayed by the data." (item de917e8fea3c4377808aff5522d4170b, licenseInfo) | **Used** (`city_addresses` in endpoints.yaml, `store: none`, the credit kept with it) |
+
+It covers about 99% of the County's City addresses (6,500 in both; 88 only in the City's, mostly half numbers; 55
+only in the County's). A suggestion is only typing help: the address picked is looked up as any typed address is
+(the State geocoder, then the tax parcel's SWIS code decides City or Town), so nothing about the lot ever rests on
+a suggestion. Asked: `UPPER(FULL_ADDRE) LIKE '<typed, capitals, "North" -> "N", "Road" -> "RD">%'`, distinct, at
+most 8, in order; a finished last word matches that whole word only. Nothing is stored (tests use hand-written
+stand-in addresses, `tests/test_suggest.py`). Found on the way: endpoints.yaml's `geocoder.terms` link is the
+State's "Legacy Address Geocoder" page (retired after October 2026); the current page is
+https://gis.ny.gov/nys-geocoding-service (the service URL itself is already the current one).
+
 ## Not yet
 
 Wiring into the Rhino start box (after the start box PR lands); confirming the zone suggestion against the

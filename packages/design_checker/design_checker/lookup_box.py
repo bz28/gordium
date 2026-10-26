@@ -3,6 +3,7 @@ the checker worker, which answers one request at a time: a lookup given up on wo
 
     python -m design_checker.lookup_box "106 Ithaca Rd, Ithaca, NY 14850"            # the live services
     python -m design_checker.lookup_box "106 Ithaca Rd, Ithaca, NY 14850" --fixture 106_ithaca_rd   # recorded
+    python -m design_checker.lookup_box --suggest "106 Itha"          # type-ahead: City of Ithaca addresses, live
 
 prints a {"step": "Finding the address…"} line as each stage starts (the box shows the latest, live), then, last,
 one JSON line: site_lookup's result, where the lot lands in the model (`frame`), and exactly what the
@@ -153,6 +154,38 @@ def _fixture_http(name: str):
     return mod.Fake(fx), mod.NOW
 
 
+SUGGEST_TIMEOUT_S = 3.0           # a type-ahead answer slower than this is no help: "Suggestions unavailable"
+
+
+def _suggest_fixture_http(offline=False):
+    """Stand-in answers for the City's address layer (site_lookup's tests: STAND_IN_ADDRESSES, hand-written, never
+    the City's data), for the in-Rhino run and the CI tests: no live call. `offline`: the layer unreachable."""
+    import importlib.util
+    tests = Path(__file__).resolve().parents[2] / "site_lookup" / "tests"
+    spec = importlib.util.spec_from_file_location("site_lookup_suggest_fixtures", tests / "test_suggest.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, str(tests))
+    spec.loader.exec_module(mod)
+    return mod.StandIn(offline=offline)
+
+
+def suggest_main(text: str, fixture: bool = False, pause: float = 0.0, offline: bool = False) -> dict:
+    """One type-ahead answer, as one JSON line for the box: {"status": "ok", "query", "suggestions"} or
+    {"status": "offline" | "error", "query"} (the box then says, quietly, that suggestions are unavailable)."""
+    from site_lookup.http import Offline, ServiceError
+    from site_lookup.suggest import suggest
+    if pause:
+        import time
+        time.sleep(pause)
+    try:
+        http = _suggest_fixture_http(offline) if fixture else Http(timeout=SUGGEST_TIMEOUT_S, retries=0)
+        return {"status": "ok", "query": text, "suggestions": suggest(text, http)}
+    except Offline:
+        return {"status": "offline", "query": text}
+    except (ServiceError, KeyError, TypeError, ValueError) as e:
+        return {"status": "error", "query": text, "detail": f"{type(e).__name__}: {e}"}
+
+
 def step_line(text: str) -> str:
     """One progress line ({"step": ...}): printed as each stage starts, before the answer, which is always the last
     line (rhino_logic.lookup_step and lookup_answer read them)."""
@@ -160,6 +193,11 @@ def step_line(text: str) -> str:
 
 
 def main(argv: list[str]) -> int:
+    if argv[:1] == ["--suggest"]:                    # --suggest TEXT [--fixture] [--slow S]: type-ahead only
+        text = argv[1] if len(argv) > 1 else ""
+        slow = float(argv[argv.index("--slow") + 1]) if "--slow" in argv[2:] else 0.0
+        print(json.dumps(suggest_main(text, "--fixture" in argv[2:], slow, "--offline" in argv[2:])), flush=True)
+        return 0
     flags = {"--fixture": None, "--slow": None}     # --slow S: the in-Rhino test's pause at each stage (fixture only)
     args = []
     k = 0

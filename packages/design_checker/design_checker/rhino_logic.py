@@ -1129,6 +1129,69 @@ def storable_ui(saved_ui):
     return {k: v for k, v in (saved_ui or {}).items() if not str(k).startswith("_")}
 
 
+STILL_SHOWN = "The lot shown is still {address}'s: nothing in the model changed."
+NOTHING_CHANGED = "Nothing in the model changed."
+
+
+def still_shown(saved_ui):
+    """After a lookup that found no lot: which lot the model still shows (the one drawn, else the lot's own address
+    when the box opened), so the architect never wonders whether the old lot is the new address's."""
+    saved_ui = saved_ui or {}
+    address = saved_ui.get("drawn_address") or saved_ui.get("_box_address")
+    return STILL_SHOWN.format(address=address.split(",")[0].strip()) if address else NOTHING_CHANGED
+
+
+# ---- address type-ahead (site_lookup.suggest, in lookup_box's own short process; the box shows the list) ----------
+SUGGEST_DELAY_S = 0.3          # s after the last key before the City's address layer is asked
+SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestions unavailable"
+SUGGEST_MIN_CHARS = 4
+SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and press Look up."
+CITY_SUFFIX = ", Ithaca, NY"
+
+
+def wants_suggestions(text, chosen=None):
+    """Whether to ask for suggestions for what is typed: at least SUGGEST_MIN_CHARS characters, and not the
+    suggestion just picked (picking one never opens the list again)."""
+    text = str(text or "")
+    return len(text.lstrip()) >= SUGGEST_MIN_CHARS and text != chosen
+
+
+def suggestions_shown(answer, typed):
+    """(the list, a quiet note) for a type-ahead answer, or None when it is for something no longer typed (a stale
+    answer is dropped). Offline, an error or too slow: no list and the note that suggestions are unavailable (the
+    box still works by typing)."""
+    answer = answer or {}
+    if answer.get("query") != typed:
+        return None
+    if answer.get("status") == "ok":
+        return [str(s) for s in answer.get("suggestions") or []], ""
+    return [], SUGGESTIONS_UNAVAILABLE
+
+
+def list_step(index, count, key):
+    """The list's selection after Down or Up in the address box (none selected: -1). Stays within the list."""
+    if count <= 0:
+        return -1
+    if key == "down":
+        return min(index + 1, count - 1)
+    if key == "up":
+        return max(index - 1, 0)
+    return index
+
+
+def with_city(address):
+    """The address as the lookup is asked for it: ", Ithaca, NY" added when no town or ZIP is typed (Ben, 2026-10-21:
+    "106 Ithaca Rd" is the City's). Anything after a comma, or a last word that is a town, state or ZIP, is kept as
+    typed (another town stays another town: the parcel's SWIS code then says it isn't the City)."""
+    text = " ".join(str(address or "").split())
+    if not text or "," in text:
+        return text
+    last = text.split()[-1].lower().rstrip(".")
+    if last in CITY_TAIL or last in ITHACA_PLACE or (last[:5].isdigit() and len(last) >= 5):
+        return text
+    return text + CITY_SUFFIX
+
+
 def lookup_says(payload):
     """The line for a lookup that didn't find the site (None when it did)."""
     status = (payload or {}).get("status")
@@ -1156,7 +1219,8 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
             "asks": list(payload.get("asks") or []), "matches": list(payload.get("matches") or []),
             "query": payload.get("query")}
     saved_ui["_lookup"] = look
-    if look["status"] != "found":
+    if look["status"] != "found":                # what is on screen is still the lot it was (Ben, 2026-10-21)
+        look["says"] = " ".join(t for t in (look["says"], still_shown(saved_ui)) if t)
         return facts, saved_ui
     got, details = payload.get("facts") or {}, payload.get("details") or {}
     labels, kept = payload.get("labels") or {}, payload.get("kept_reasons") or {}

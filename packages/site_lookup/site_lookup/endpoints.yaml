@@ -21,6 +21,21 @@ address_points:
   terms: "Access: Open. Please do not redistribute data to a third party without permission from Tompkins County GIS."
   store: none
 
+city_addresses:
+  name: City of Ithaca addresses (AddressSearchandLabels)
+  owner: City of Ithaca GIS Program
+  # type-ahead in the start box only: the addresses that start like what is typed, shown live as the architect
+  # types and never kept (a pick is looked up again through the State geocoder, the parcel decides City or Town).
+  # Chosen over the State geocoder's suggest (no way to tell the City from the Town or Cayuga Heights) and the
+  # County's address points ("do not redistribute to a third party"): research 2026-10-26, see site_lookup/README.
+  url: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Address_Labels/FeatureServer/0/query
+  layer: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Address_Labels/FeatureServer/0
+  item: https://www.arcgis.com/home/item.html?id=de917e8fea3c4377808aff5522d4170b
+  attribution: >-
+    Data contained in this product was originally produced by the GIS Program, City of Ithaca, NY. The originator
+    does not warrant the accuracy or completeness of the information portrayed by the data.
+  store: none
+
 city_parcels:
   name: City of Ithaca tax parcels
   owner: City of Ithaca GIS Program (from Tompkins County Assessment)
