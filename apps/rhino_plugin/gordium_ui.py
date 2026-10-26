@@ -759,6 +759,17 @@ def legend(code=None):
 
 # ---- the start box (A1–A13) ----------------------------------------------------------------------------------
 
+def list_row_px(listbox):
+    """A list's row pitch in px as Rhino lays it out: on the Mac the ListBox is a table whose row height plus spacing
+    is read from it; elsewhere (or if it can't be read) logic.LIST_ROW_PX."""
+    try:
+        table = listbox.ControlObject.DocumentView               # Eto.Mac: NSScrollView around an NSTableView
+        pitch = float(table.RowHeight) + float(table.IntercellSpacing.Height)
+        return int(round(pitch)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX
+    except Exception:
+        return logic.LIST_ROW_PX
+
+
 def start_box(state, options, mode):
     """The start box (spec A, as approved 2026-10-20). What it shows is rhino_logic.box_rows (tested in CI); this
     only draws it: Address, Zoning district (with its source and "I confirm", unticked on a new project), Use,
@@ -882,7 +893,7 @@ def start_box(state, options, mode):
         hints["items"] = items
         for item in items:
             hint_list.Items.Add(item)
-        hint_list.Height = logic.list_height(len(items))     # as tall as its rows, never empty rows
+        hint_list.Height = logic.list_height(len(items), list_row_px(hint_list))   # as tall as its rows, no empty rows
         hint_list.Visible = bool(items)
 
     wait_keys.Elapsed += logic.guard(ask_hints, "ask for address suggestions")

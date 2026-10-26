@@ -155,6 +155,8 @@ def test_the_list_is_as_tall_as_its_rows_and_long_lines_wrap():
     assert logic.list_height(0) == logic.list_height(1)
     box = part(UI, "def start_box(", "\ndef ")
     got = part(box, "def got_hints(", "wait_keys.Elapsed")
-    assert got.index("hint_list.Height = logic.list_height(len(items))") < got.index("hint_list.Visible = bool(items)")
+    assert got.index("hint_list.Height = logic.list_height(len(items), list_row_px(hint_list))") < \
+        got.index("hint_list.Visible = bool(items)")
+    assert logic.list_height(2, 24) == 54                                    # at the pitch Rhino lays rows out at
     assert 'amber = label("", eto_status_color("needs_review"), size=12, width=logic.BOX_TEXT_WIDTH)' in box
     assert "reason = label(logic.draw_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)" in box

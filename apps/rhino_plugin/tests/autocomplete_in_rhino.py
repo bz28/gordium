@@ -8,7 +8,8 @@ then Edit site… with a script driving the box (typing is setting the address f
 2. "106 Itha", typed a character at a time 0.05 s apart: ONE request after the pause (not one per key), and within
    3 s the list under the address shows "106 Ithaca Rd, Ithaca, NY"; the list is the box's own (a ListBox).
 3. Picking it (the list's own pick: what Enter or a click does): the address field says "106 Ithaca Rd, Ithaca,
-   NY", the list closes, and no new request is made for the picked text.
+   NY", the list closes, and no new request is made for the picked text. The list, as Rhino lays it out (measured
+   from its table), shows its one row, and eight for "200 ", with no scroll bar and no empty row.
 4. A stale answer: the stand-in slowed to 1.5 s; "96 Itha" typed, then 0.5 s later "1060 Ith": the first request is
    stopped (its process gone) and the list shows 1060's address. Then an answer that lands for something no longer
    typed: "96 Itha" asked, new requests held back, "96 Ithac" typed: when 96 Itha's answer comes it is dropped (no
@@ -105,6 +106,24 @@ class Script:
         timer.Start()
 
 
+def laid_out(listbox):
+    """The list as Rhino (Mac) lays it out: the table's height, the scroll view's visible height, the row pitch;
+    None where it can't be read (not the Mac's table)."""
+    try:
+        scroll = listbox.ControlObject
+        table = scroll.DocumentView
+        return {"table_h": float(table.Frame.Height), "visible_h": float(scroll.ContentSize.Height),
+                "pitch": float(table.RowHeight) + float(table.IntercellSpacing.Height), "rows": int(table.RowCount)}
+    except Exception:
+        return None
+
+
+def fits(layout):
+    """No scroll bar (every row visible) and no empty row below them."""
+    return bool(layout) and layout["rows"] > 0 and layout["table_h"] <= layout["visible_h"] + 0.5 and \
+        layout["visible_h"] - layout["table_h"] < layout["pitch"]
+
+
 def parts(dialog):
     import Eto.Forms as ef
     kids = list(dialog.Children)
@@ -156,7 +175,7 @@ def main():
                              "address": p["address"].Text, "asked": len(asked), "labels": p["labels"],
                              "look_up_on": bool(p["buttons"].get("Look up") and p["buttons"]["Look up"].Enabled),
                              "list_height": int(p["list"].Height) if p["list"] is not None else None,
-                             "box_width": int(d.Width)}
+                             "box_width": int(d.Width), "layout": laid_out(p["list"])}
             return record
 
         def pick_first(d):
@@ -174,6 +193,7 @@ def main():
                     [(0.2, lambda d: setattr(parts(d)["address"], "Text", "106")), (1.0, note("1"))] +
                     typing("106 Itha", 0.05)[3:] + [(3.0, note("2"))] +
                     [(0.1, pick_first), (1.0, note("3"))] +
+                    [(0.0, lambda d: setattr(parts(d)["address"], "Text", "200 ")), (2.5, note("2m"))] +
                     [(0.0, lambda d: g.STATE.update(suggest_slow=1.5))] +
                     typing("96 Itha", 0.0)[-1:] + [(0.5, lambda d: setattr(parts(d)["address"], "Text", "1060 Ith"))] +
                     [(3.5, note("4"))] +
@@ -206,8 +226,11 @@ def main():
         log["seen"], log["asked"] = seen, asked
         one, two, three = seen.get("1", {}), seen.get("2", {}), seen.get("3", {})
         claim("1 fewer than 4 characters: no list, nothing asked", not one.get("visible") and one.get("asked") == 0, one)
-        claim("2 the list is as tall as its one row (no empty rows)",
-              two.get("list_height") == logic.list_height(1), two)
+        # as Rhino lays it out (measured, not the height Gordium set): one row, and eight ("200 " on ten streets)
+        many = seen.get("2m", {})
+        claim("2 the list is as tall as its rows, as laid out: one row and eight, no scroll bar, no empty row",
+              fits(two.get("layout")) and two["layout"]["rows"] == 1 and fits(many.get("layout")) and
+              many["layout"]["rows"] == 8, {"one": two.get("layout"), "eight": many.get("layout")})
         claim("2 typed a character at a time: one request after the pause, the list shows 106's address",
               two.get("asked") == 1 and two.get("visible") and two.get("items") == ["106 Ithaca Rd, Ithaca, NY"],
               {"seen": two, "asked": asked})

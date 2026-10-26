@@ -1154,10 +1154,11 @@ BOX_TEXT_WIDTH = 560           # px: the start box's long lines wrap here (one u
 LIST_ROW_PX, LIST_PAD_PX = 20, 6
 
 
-def list_height(rows):
-    """The suggestion list's height in px: as tall as its rows (1 to 8), never rows of empty space (Rhino run of
-    a3eb1d7: one suggestion sat above five empty rows)."""
-    return max(1, min(int(rows or 0), 8)) * LIST_ROW_PX + LIST_PAD_PX
+def list_height(rows, row_px=LIST_ROW_PX):
+    """The suggestion list's height in px: as tall as its rows (1 to 8) at `row_px` each (the pitch Rhino lays its
+    rows out at, read from the list where it can be), never rows of empty space (Rhino run of a3eb1d7: one suggestion
+    sat above five empty rows)."""
+    return max(1, min(int(rows or 0), 8)) * int(row_px) + LIST_PAD_PX
 
 
 def wants_suggestions(text, chosen=None):
