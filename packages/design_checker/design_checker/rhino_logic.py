@@ -914,8 +914,9 @@ def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
     xs = [gap + step * k for k in range(int(max(0, view_w - w - 2 * gap) // step) + 1)]
     ys = [34 + step * k for k in range(int(max(0, view_h - h - 74) // step) + 1)]
     # and just beside each box drawn, so a gap narrower than the grid's step is found too (review of db58364, L1)
-    xs += [v for a, b, c, e in taken for v in (a + c + 1, a - w - 1) if gap <= v <= view_w - w - gap]
-    ys += [v for a, b, c, e in taken for v in (b + e + 1, b - h - 1) if 34 <= v <= view_h - h - 40]
+    # (exactly at a box's edge: touching is clear, so a gap just the notice's size is found: review of cae5326)
+    xs += [v for a, b, c, e in taken for v in (a + c, a - w) if gap <= v <= view_w - w - gap]
+    ys += [v for a, b, c, e in taken for v in (b + e, b - h) if 34 <= v <= view_h - h - 40]
     best = None
     for y in [34, view_h - h - 64, view_h - h - 40] + ys:
         for x in xs:
