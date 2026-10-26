@@ -892,13 +892,13 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=N
     return left, top, width, h, want, rows, led, size, forced
 
 
-def paint_label(d, at, got, color, dark, edge_leader=False):
+def paint_label(d, at, got, color, dark, edge_leader=False, line=None):
     """A placed plan label drawn (no search here: logic.place_labels placed it, outside the drawing loop): its
     leader from `at` (its line's middle on screen) when it is led, or, for a lot edge shorter than its label
     (`edge_leader`, logic.needs_leader), a short one; its box and its lines at its size."""
     left, top, width, rows, size = got["left"], got["top"], got["w"], got["rows"], got["size"]
     h = logic.label_height(len(rows), size)
-    (xa, ya), (xb, yb) = got["line"]
+    (xa, ya), (xb, yb) = line or got["line"]          # the line as it is on screen now (it may have moved)
     if got["led"] or (edge_leader and logic.needs_leader(((xb - xa) ** 2 + (yb - ya) ** 2) ** 0.5, width)):
         end = logic.leader_end(at, (left, top, width, h))
         d.Draw2dLine(System.Drawing.PointF(at[0], at[1]), System.Drawing.PointF(end[0], end[1]), color, 1)

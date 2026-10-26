@@ -3391,9 +3391,10 @@ def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_re
         assert search not in draw, search                                    # never in the drawing loop
     assert "_label_timer()" in draw and "logic.follow(got, item[\"line\"])" in draw
     tick = rhino[rhino.index("def _label_tick("):].split("\ndef ", 1)[0]
-    assert "logic.LABEL_SETTLE_S" in tick and "settle_labels()" in tick
+    assert "logic.LABEL_SETTLE_S" in tick and "settle_labels(LABEL_STEP_S)" in tick
     settle = rhino[rhino.index("def settle_labels("):].split("\ndef ", 1)[0]
-    assert "logic.place_labels(" in settle and "doc.Views.Redraw()" in settle
+    assert "logic.LabelRun(" in settle and "if not run.step(budget_s):" in settle and "doc.Views.Redraw()" in settle
+    assert 'FromRuntimeSerialNumber(pending["doc"])' in settle                  # the document placed for
     assert "label_timer" in logic_.HANDLES and 'key == "label_timer"' in rhino
     # a moving frame's label work for a busy lot: 40 placements carried along, well under 16 ms
     view = (656, 668)
@@ -3417,12 +3418,23 @@ def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_re
     start = time_.perf_counter()
     spots = logic_.place_labels(items, view, [(12, 34, 506, 54), (543, 119, 61, 55)], dims, [house], _boxes(*lot))
     sample_s = time_.perf_counter() - start
-    assert len(spots) == len(items) and sample_s < 2.0, sample_s
+    assert len(spots) == len(items) and sample_s < 1.0, sample_s
     busy = items + [{"key": 20 + k, "text": "12'-0\"", "line": ((200 + 9 * k, 480), (230 + 9 * k, 480)), "size": 11,
                      "status": "complies"} for k in range(8)]
     start = time_.perf_counter()
     spots = logic_.place_labels(busy, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
     assert len(spots) == len(busy) and time_.perf_counter() - start < 6.0
+    # at rest, placed a few at a time (the review of 3446e94: the whole search at once froze Rhino each pause): a
+    # step stops once its budget is spent, one label at least, and the steps end with every label placed
+    run = logic_.LabelRun(busy, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
+    steps = 0
+    while not run.step(0.0):
+        steps += 1
+        assert len(run.spots) == steps                                     # one label a step at a zero budget
+    assert len(run.spots) == len(busy) and steps == len(busy) - 1
+    assert {k: (g["left"], g["top"]) for k, g in run.spots.items()} == {
+        k: (g["left"], g["top"]) for k, g in spots.items()}                # the same placements as all at once
+    assert sorted(g["order"] for g in run.spots.values()) == list(range(len(busy)))
 
 
 def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
@@ -3468,6 +3480,13 @@ def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
     assert logic_.label_breaks_hard(dims[0], (302, 470, 30, 20), view, [], dims) == "on another yard's dimension"
     assert logic_.label_breaks_hard(dims[0], (10, 10, 50, 20), view, [], [], [], [(40, 15, 50, 20)]) == \
         "over another label"
+    # nowhere keeps every rule (a tiny view): forced, but still never over a label placed before it
+    tiny, cover = (300, 120), [(0, 0, 300, 120)]                       # the whole view taken by a notice
+    first = logic_.place_dim_label(((10, 60), (290, 60)), "✕ Front yard 7'-0\"", 11, tiny, hard_boxes=cover)
+    took = (first["left"], first["top"], first["w"], first["h"])
+    later = logic_.place_dim_label(((10, 60), (290, 60)), "75'-10\"", 11, tiny, hard_boxes=cover, placed=[took])
+    assert first["forced"] and later["forced"]
+    assert not logic_._over((later["left"], later["top"], later["w"], later["h"]), took)
 
 
 def test_the_in_rhino_checks_read_the_drawings_own_placement():
@@ -3478,7 +3497,7 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
     draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
     assert 'STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn' in draw
     assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
-    assert draw.count('drawn["labels"].append(') == 1 and 'got["led"], got["size"], got["forced"]])' in draw
+    assert draw.count('drawn["labels"].append(') == 1 and 'got["led"], got["size"], got["forced"], got.get("order")])' in draw
     assert 'drawn["dims"] = dims' in draw and draw.index("keep = list(taken)") < draw.index('"keep": [tuple(t)')
     assert 'drawn["settled"] = settled or not items' in draw
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):

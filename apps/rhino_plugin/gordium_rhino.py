@@ -620,7 +620,7 @@ def draw_screen(o, e):
     settled = cached.get("sig") == sig
     pending = STATE.get("label_pending") or {}
     if not settled and items and (pending.get("sig") != sig or pending.get("view") != vid):   # moved: wait again
-        STATE["label_pending"] = {"view": vid, "sig": sig, "at": time.time(), "items": items,
+        STATE["label_pending"] = {"view": vid, "doc": o.doc, "sig": sig, "at": time.time(), "items": items,
                                   "size": tuple(drawn["size"]), "keep": [tuple(t) for t in keep], "dims": dims,
                                   "shapes": solids, "lines": obstacles}
         _label_timer()
@@ -633,10 +633,10 @@ def draw_screen(o, e):
             got = logic.follow(got, item["line"])
         color, edge = colors[item["key"]]
         (xa, ya), (xb, yb) = item["line"]
-        ui.paint_label(d, ((xa + xb) / 2, (ya + yb) / 2), got, color, dark, edge_leader=edge)
+        ui.paint_label(d, ((xa + xb) / 2, (ya + yb) / 2), got, color, dark, edge_leader=edge, line=item["line"])
         drawn["labels"].append([item["text"], [got["left"], got["top"], got["w"], logic.label_height(
             len(got["rows"]), got["size"]), got["top"]], len(got["rows"]), [list(q) for q in item["line"]],
-            got["led"], got["size"], got["forced"]])
+            got["led"], got["size"], got["forced"], got.get("order")])
     drawn["settled"] = settled or not items
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
@@ -669,6 +669,9 @@ def _label_timer():
     timer.Start()
 
 
+LABEL_STEP_S = 0.012      # the labels placed a few at a time: this long a timer tick at most (one label at least)
+
+
 def _label_tick():
     pending = STATE.get("label_pending")
     if pending is None:
@@ -676,19 +679,27 @@ def _label_tick():
             STATE["label_timer"].Stop()
         return
     if time.time() - pending["at"] >= logic.LABEL_SETTLE_S:
-        settle_labels()
+        settle_labels(LABEL_STEP_S)
 
 
-def settle_labels():
-    """Place the labels the last frame asked for (logic.place_labels), keep them for that view, and redraw: the
-    next frame draws them where they were placed. Outside the drawing loop: from the timer, or a script."""
-    pending = STATE.pop("label_pending", None)
+def settle_labels(budget_s=None):
+    """Place the labels the last frame asked for (logic.LabelRun), a few each call (`budget_s`: one label at least;
+    None: all, for the in-Rhino scripts), never in the drawing loop: Rhino stays responsive between the timer's
+    ticks, and a newer request (the view moved again) starts a new run. Once all are placed: kept for that view
+    and its document redrawn, which then draws them where they were placed. Whether a run finished."""
+    pending = STATE.get("label_pending")
     if pending is None:
         return False
-    spots = logic.place_labels(pending["items"], pending["size"], pending["keep"], pending["dims"],
-                               pending["shapes"], pending["lines"])
-    STATE.setdefault("label_cache", {})[pending["view"]] = {"sig": pending["sig"], "spots": spots}
-    doc = Rhino.RhinoDoc.ActiveDoc
+    run = pending.get("run")
+    if run is None:
+        run = pending["run"] = logic.LabelRun(pending["items"], pending["size"], pending["keep"], pending["dims"],
+                                              pending["shapes"], pending["lines"])
+    if not run.step(budget_s):
+        return False
+    STATE.pop("label_pending", None)
+    STATE.setdefault("label_cache", {})[pending["view"]] = {"sig": pending["sig"], "spots": run.spots}
+    doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(pending["doc"]) if pending.get("doc") is not None else None
+    doc = doc or Rhino.RhinoDoc.ActiveDoc      # the document it was placed for (review of 3446e94)
     if doc is not None:
         doc.Views.Redraw()
     return True

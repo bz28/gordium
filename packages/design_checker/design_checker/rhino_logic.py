@@ -644,8 +644,14 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
                 got = best(rows, pt, clear)
                 if got is not None:
                     return got
-    rows = variants[-1]                                          # nowhere: beside it, said (never dropped)
-    w, h = shape(rows, LABEL_MIN_SIZE)
+    rows = variants[-1]                                          # nowhere keeps them all: never over another
+    w, h = shape(rows, LABEL_MIN_SIZE)                           # label still (the review of 3446e94), else
+    if view is not None:                                         # beside its line; said either way, never dropped
+        free = sorted((box_gap(line, (left, top, w, h)), left, top) for top in range(0, int(view[1] - h) + 1, 12)
+                      for left in range(0, int(view[0] - w) + 1, 12)
+                      if not any(_over((left, top, w, h), other) for other in placed))
+        if free:
+            return result(rows, LABEL_MIN_SIZE, free[0][1], free[0][2], w, h, forced=True)
     left, top = min(xa, xb), max(ya, yb) + 6
     if view is not None:
         left, top = min(max(left, 0), max(view[0] - w, 0)), min(max(top, 0), max(view[1] - h, 0))
@@ -677,23 +683,46 @@ LABEL_ORDER = {"does_not_comply": 0, "needs_review": 1, "complies": 2}   # faili
 LABEL_SETTLE_S = 0.15        # the view still this long: the labels are placed (never while it moves)
 
 
+class LabelRun:
+    """Placing a frame's plan labels a few at a time (place_dim_label), outside the drawing loop: failing yards
+    first, then those needing review, those that comply, the edges' lengths last; each one placed is HARD for the
+    ones after (never hidden under another, the Rhino job at 4bb6d4d). `step` places labels until its time budget
+    is spent (one at least), so Rhino stays responsive between steps (the review of 3446e94: the whole search at
+    once froze it each time the view came to rest). `items`: dicts with "key", "text", "line" (screen), "size" and
+    "status" (None for an edge). `spots`: {key: placement}, each with the line it was placed for ("line") and its
+    place in the order ("order")."""
+
+    def __init__(self, items, view, keep=(), dims=(), shapes=(), lines=()):
+        self.view, self.keep, self.shapes = view, list(keep), list(shapes)
+        self.dims = [tuple(map(tuple, d)) for d in dims]
+        self.lines = [tuple(map(tuple, s_)) for s_ in lines if tuple(map(tuple, s_)) not in self.dims]
+        self.todo = [item for _, item in sorted(enumerate(items), key=lambda ki: (
+            LABEL_ORDER.get(ki[1].get("status"), 3), ki[0]))]
+        self.placed, self.spots = [], {}
+
+    def step(self, budget_s=None):
+        """Place labels until `budget_s` seconds are spent (one at least; None: all). Whether every one is placed."""
+        import time as time_
+        start = time_.perf_counter()
+        while self.todo:
+            item = self.todo.pop(0)
+            own = tuple(map(tuple, item["line"]))
+            got = place_dim_label(own, item["text"], item["size"], self.view, hard_boxes=self.keep,
+                                  hard_lines=self.dims, soft_lines=self.lines, hard_shapes=self.shapes,
+                                  placed=list(self.placed))
+            got = dict(got, line=own, order=len(self.spots))
+            self.placed.append((got["left"], got["top"], got["w"], got["h"]))
+            self.spots[item["key"]] = got
+            if budget_s is not None and time_.perf_counter() - start >= budget_s:
+                break
+        return not self.todo
+
+
 def place_labels(items, view, keep=(), dims=(), shapes=(), lines=()):
-    """Every plan label of a frame placed (place_dim_label), outside the drawing loop (the Rhino job at 4bb6d4d:
-    the search in every frame made zooming 2 fps): failing yards first, then those needing review, those that
-    comply, the edges' lengths last; each one placed is HARD for the ones after (never hidden under another).
-    `items`: dicts with "key", "text", "line" (screen), "size", and "status" (None for an edge). Returns
-    {key: placement}, each with the line it was placed for ("line"), so a moving view can carry it along (follow)."""
-    out, placed = {}, []
-    dim_lines = [tuple(map(tuple, d)) for d in dims]
-    soft = [tuple(map(tuple, s_)) for s_ in lines if tuple(map(tuple, s_)) not in dim_lines]
-    for _, item in sorted(enumerate(items), key=lambda ki: (LABEL_ORDER.get(ki[1].get("status"), 3), ki[0])):
-        own = tuple(map(tuple, item["line"]))
-        got = place_dim_label(own, item["text"], item["size"], view, hard_boxes=list(keep), hard_lines=dim_lines,
-                              soft_lines=soft, hard_shapes=list(shapes), placed=list(placed))
-        got = dict(got, line=own)
-        placed.append((got["left"], got["top"], got["w"], got["h"]))
-        out[item["key"]] = got
-    return out
+    """Every plan label of a frame placed at once (LabelRun to the end): {key: placement}."""
+    run = LabelRun(items, view, keep, dims, shapes, lines)
+    run.step()
+    return run.spots
 
 
 def follow(got, line):
