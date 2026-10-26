@@ -172,8 +172,8 @@ def fits(layout):
     ink = layout.get("painted") or {}
     if ink.get("ink_bottom") is None:   # couldn't see the pixels, or nothing drawn: not shown to fit
         return False
-    # and as painted: under the lowest text only its own row's margin and the border (about 6 pt at Rhino's 16 pt
-    # rows); a fixed bound, not the table's pitch, since the pixels are what check the table's numbers
+    # and as painted: under the lowest text only its own row's margin and the border (about 2-5 pt at Rhino's 16 pt
+    # rows; the run logs it as "painted"); a fixed bound, not the table's pitch, since the pixels are what check the table's numbers
     return (rows_h <= layout["visible_h"] + 0.5 and layout["visible_h"] - rows_h < layout["pitch"] and
             ink["view_h"] - ink["ink_bottom"] < min(layout["pitch"], PAINTED_GAP_PT))
 

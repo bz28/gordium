@@ -237,6 +237,62 @@ def test_the_in_rhino_list_claim_needs_the_pixels():
     assert not fits(dict(row, painted={"view_h": 196.0, "ink_bottom": 125.0}))      # rows drawn closer: empty band
     assert not fits(dict(row, visible_h=192.0, painted={"view_h": 194.0, "ink_bottom": 125.0}))
     one = {"rows": 1, "rows_bottom": 24.0, "visible_h": 26.0, "pitch": 24.0}       # table says 24, drawn at 16
+    _one_row_cases(fits)
+
+
+def test_the_in_rhino_pixel_scan_finds_the_lowest_text():
+    """painted() of autocomplete_in_rhino.py on a stand-in bitmap (2x, top-left origin like NSBitmapImageRep): it
+    reports the ink's bottom in points from the top, ignores the border, and fails rather than passes when it can't
+    read the pixels (review round 4)."""
+    import sys
+    import types
+    src = (REPO / "apps/rhino_plugin/tests/autocomplete_in_rhino.py").read_text(encoding="utf-8")
+    space = {"sys": sys}
+    exec(part(src, "def painted(", "PAINTED_GAP_PT ="), space)
+    painted = space["painted"]
+
+    class Color:
+        def __init__(self, v):
+            self.RedComponent = self.GreenComponent = self.BlueComponent = v
+
+    class Rep:
+        def __init__(self, high, ink_rows):
+            self.PixelsWide, self.PixelsHigh, self.ink = 600, high, ink_rows
+
+        def ColorAt(self, x, y):
+            border = x == 0 or y == 0 or x == self.PixelsWide - 1 or y == self.PixelsHigh - 1
+            return Color(0.0 if border or (y in self.ink and 40 <= x <= 200) else 1.0)
+
+    class View:
+        def __init__(self, h_pt, ink_rows):
+            self.Bounds = types.SimpleNamespace(Height=h_pt)
+            self.rep = Rep(int(h_pt * 2), ink_rows)
+
+        def BitmapImageRepForCachingDisplayInRect(self, bounds):
+            return self.rep
+
+        def CacheDisplay(self, bounds, rep):
+            pass
+
+    saved = sys.modules.get("gordium_ui")
+    sys.modules["gordium_ui"] = types.SimpleNamespace(native_number=float)
+    try:
+        # one 16 pt row in a 26 pt list: text pixels 10..42 (5 to 21.5 pt from the top)
+        got = painted(View(26.0, set(range(10, 43))))
+        assert got == {"view_h": 26.0, "ink_bottom": 21.5}
+        assert painted(View(26.0, set())) == {"view_h": 26.0, "ink_bottom": None}     # the border is not text
+        broken = View(26.0, set())
+        broken.CacheDisplay = None                                                     # can't render: an error
+        assert "error" in painted(broken)
+    finally:
+        if saved is None:
+            sys.modules.pop("gordium_ui", None)
+        else:
+            sys.modules["gordium_ui"] = saved
+
+
+def _one_row_cases(fits):
+    one = {"rows": 1, "rows_bottom": 24.0, "visible_h": 26.0, "pitch": 24.0}       # table says 24, drawn at 16
     assert not fits(dict(one, painted={"view_h": 28.0, "ink_bottom": 13.0}))        # half a row empty: not a fit
     assert fits(dict(one, painted={"view_h": 28.0, "ink_bottom": 21.0}))
     # as sized (24 + 2 pt), text drawn in a 16 pt row, descender at 15.3 pt: 9.7 pt empty under it (round 3)
