@@ -1,0 +1,424 @@
+{
+ "claims": {
+  "the left side yard does not comply": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.side_yards#southwest",
+    "name": "Side yard, Southwest",
+    "status": "does_not_comply",
+    "proposed": "7'-0 5/8\"",
+    "required": "10'-0\"",
+    "margin": "\u22122'-11 3/8\"",
+    "delta": "at least 0'-11 1/4\" short",
+    "approx": true,
+    "colour": "red",
+    "note": null,
+    "points": [
+     [
+      0.836573,
+      27.739056
+     ],
+     [
+      7.891689,
+      27.819239
+     ]
+    ],
+    "reason": null,
+    "group": "building",
+    "needs": [],
+    "hint": "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the southwest side lot line as drawn (10'-0\" required, the lot lines \u00b12'-0\") \u2014 now 7'-0 5/8\" at its closest.",
+    "refused": null
+   }
+  },
+  "1 Top: one dimension per measured yard": {
+   "ok": true,
+   "detail": {
+    "drawn": 4,
+    "dims": 4,
+    "yards": 4
+   }
+  },
+  "1 every yard dimension drawn has its dashed required line (two where the limit is read two ways)": {
+   "ok": true,
+   "detail": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2
+   }
+  },
+  "1 no two yard dimensions start at the same point": {
+   "ok": true,
+   "detail": [
+    [
+     8.7896,
+     27.8192
+    ],
+    [
+     43.8084,
+     48.9126
+    ],
+    [
+     7.8917,
+     29.4992
+    ],
+    [
+     42.1921,
+     65.1526
+    ]
+   ]
+  },
+  "1 the failing side yard's dimension is red": {
+   "ok": true,
+   "detail": [
+    [
+     "10.489025917732748,0.8195696804451175,0.1",
+     "8.789605918689674,27.819238961156874,0.1",
+     -7710720
+    ],
+    [
+     "76.35024956242127,49.2878684327085,0.1",
+     "43.80835591868967,48.912572294490204,0.1",
+     -10723228
+    ],
+    [
+     "0.8174820428477692,29.418839112619313,0.1",
+     "7.891689252023008,29.499238961156873,0.1",
+     -4704481
+    ],
+    [
+     "42.525000815644184,92.74628389972408,0.1",
+     "42.19210591868967,65.1525722944902,0.1",
+     -7710720
+    ]
+   ]
+  },
+  "1 a complying yard's dimension is neutral grey (colour only what's wrong)": {
+   "ok": true,
+   "detail": [
+    [
+     "10.489025917732748,0.8195696804451175,0.1",
+     "8.789605918689674,27.819238961156874,0.1",
+     -7710720
+    ],
+    [
+     "76.35024956242127,49.2878684327085,0.1",
+     "43.80835591868967,48.912572294490204,0.1",
+     -10723228
+    ],
+    [
+     "0.8174820428477692,29.418839112619313,0.1",
+     "7.891689252023008,29.499238961156873,0.1",
+     -4704481
+    ],
+    [
+     "42.525000815644184,92.74628389972408,0.1",
+     "42.19210591868967,65.1525722944902,0.1",
+     -7710720
+    ]
+   ]
+  },
+  "1 every label shown sits on screen clear of the status box, the house and the other labels": {
+   "ok": false,
+   "detail": {
+    "placed": {
+     "0": [
+      0,
+      [
+       [
+        219,
+        794
+       ],
+       [
+        234,
+        1025
+       ],
+       [
+        216,
+        1026
+       ],
+       [
+        201,
+        796
+       ]
+      ],
+      "end"
+     ],
+     "1": [
+      1,
+      [
+       [
+        867,
+        286
+       ],
+       [
+        579,
+        289
+       ],
+       [
+        579,
+        271
+       ],
+       [
+        867,
+        268
+       ]
+      ],
+      "on"
+     ],
+     "2": [
+      0,
+      [
+       [
+        -192,
+        503
+       ],
+       [
+        179,
+        498
+       ],
+       [
+        180,
+        516
+       ],
+       [
+        -192,
+        521
+       ]
+      ],
+      "on"
+     ],
+     "3": [
+      0,
+      [
+       [
+        533,
+        -164
+       ],
+       [
+        535,
+        -382
+       ],
+       [
+        553,
+        -382
+       ],
+       [
+        551,
+        -164
+       ]
+      ],
+      "end"
+     ]
+    },
+    "overlaps": []
+   }
+  },
+  "1 the side yard's required line is 10'-0\" from its lot line": {
+   "ok": true,
+   "detail": 10.0
+  },
+  "1 each yard's dimension is square to the lot-line piece it ends on (within 0.1\u00b0)": {
+   "ok": true,
+   "detail": [
+    [
+     "? Front yard 26'-11 3/4\" (approx.)",
+     0.0
+    ],
+    [
+     "\u2713 Side yard, Northeast 32'-4 1/4\" (approx.)",
+     0.0
+    ],
+    [
+     "\u2715 Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)",
+     0.0
+    ],
+    [
+     "? Rear yard 27'-6 7/8\" (approx.)",
+     0.0
+    ]
+   ]
+  },
+  "2 Front: only the height's dimension": {
+   "ok": true,
+   "detail": [
+    [
+     "47.80835591868967,23.819238961156874,0",
+     "47.80835591868967,23.819238961156874,35",
+     -10723228
+    ]
+   ]
+  },
+  "2 it is vertical, from the grade plane up": {
+   "ok": true,
+   "detail": {
+    "from": "47.80835591868967,23.819238961156874,0",
+    "to": "47.80835591868967,23.819238961156874,35",
+    "base": 0.0
+   }
+  },
+  "2 it measures the height row's figure": {
+   "ok": true,
+   "detail": {
+    "dim_ft": 35.0,
+    "row": "35'-0\""
+   }
+  },
+  "2 it stands beside the house, not in it": {
+   "ok": true,
+   "detail": "47.80835591868967,23.819238961156874,0"
+  },
+  "2 coloured as the height row": {
+   "ok": true,
+   "detail": "complies"
+  },
+  "4 labels off: the failing yard's words stay, a complying yard's go": {
+   "ok": true,
+   "detail": null
+  },
+  "3 zoomed out to the neighbourhood: no dimension": {
+   "ok": true,
+   "detail": 0
+  }
+ },
+ "top": [
+  [
+   "10.489025917732748,0.8195696804451175,0.1",
+   "8.789605918689674,27.819238961156874,0.1",
+   -7710720
+  ],
+  [
+   "76.35024956242127,49.2878684327085,0.1",
+   "43.80835591868967,48.912572294490204,0.1",
+   -10723228
+  ],
+  [
+   "0.8174820428477692,29.418839112619313,0.1",
+   "7.891689252023008,29.499238961156873,0.1",
+   -4704481
+  ],
+  [
+   "42.525000815644184,92.74628389972408,0.1",
+   "42.19210591868967,65.1525722944902,0.1",
+   -7710720
+  ]
+ ],
+ "placed": {
+  "0": [
+   0,
+   [
+    [
+     219,
+     794
+    ],
+    [
+     234,
+     1025
+    ],
+    [
+     216,
+     1026
+    ],
+    [
+     201,
+     796
+    ]
+   ],
+   "end"
+  ],
+  "1": [
+   1,
+   [
+    [
+     867,
+     286
+    ],
+    [
+     579,
+     289
+    ],
+    [
+     579,
+     271
+    ],
+    [
+     867,
+     268
+    ]
+   ],
+   "on"
+  ],
+  "2": [
+   0,
+   [
+    [
+     -192,
+     503
+    ],
+    [
+     179,
+     498
+    ],
+    [
+     180,
+     516
+    ],
+    [
+     -192,
+     521
+    ]
+   ],
+   "on"
+  ],
+  "3": [
+   0,
+   [
+    [
+     533,
+     -164
+    ],
+    [
+     535,
+     -382
+    ],
+    [
+     553,
+     -382
+    ],
+    [
+     551,
+     -164
+    ]
+   ],
+   "end"
+  ]
+ },
+ "required_from_line_ft": 10.0,
+ "square": [
+  [
+   "? Front yard 26'-11 3/4\" (approx.)",
+   0.0
+  ],
+  [
+   "\u2713 Side yard, Northeast 32'-4 1/4\" (approx.)",
+   0.0
+  ],
+  [
+   "\u2715 Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)",
+   0.0
+  ],
+  [
+   "? Rear yard 27'-6 7/8\" (approx.)",
+   0.0
+  ]
+ ],
+ "front": [
+  [
+   "47.80835591868967,23.819238961156874,0",
+   "47.80835591868967,23.819238961156874,35",
+   -10723228
+  ]
+ ],
+ "passed": 15,
+ "ok": false
+}
