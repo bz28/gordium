@@ -533,7 +533,7 @@ def test_the_plugin_replaces_them_each_check_whatever_the_layers_state_and_out_o
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     fns = {n.name: ast.get_source_segment(src, n) for n in ast.parse(src).body if isinstance(n, ast.FunctionDef)}
     body = fns["_envelope_curves"]
-    assert "doc.UndoRecordingEnabled = False\n" in body and "UndoRecordingIsActive" not in body          # F6
+    assert "doc.UndoRecordingEnabled = False " in body and "UndoRecordingIsActive" not in body          # F6
     assert body.index("doc.UndoRecordingEnabled = False") < body.index("doc.Objects.AddPolyline(") \
         < body.index("doc.UndoRecordingEnabled = was")
     assert "doc.Objects.Delete(old, True, True)" in body                     # ignoring hidden and locked (F1)
@@ -550,6 +550,13 @@ def test_the_plugin_replaces_them_each_check_whatever_the_layers_state_and_out_o
     run = fns["run_check"]
     assert "logic.guard(lambda: _envelope_curves(doc, result.get(\"plan\"), sent)," in run          # F9
     assert "_envelope_curves(doc, None, facts)" in run
+    # the layer made with Undo off, and none made by a failed check (review of dd44f1b, F1); left ones hidden and said
+    assert body.index("doc.UndoRecordingEnabled = False") < body.index("index = _layer(doc, logic.ENVELOPE)")
+    assert body.index("if plan is None and doc.Layers.FindByFullPath(logic.ENVELOPE, -1) < 0:") < body.index("_layer(")
+    assert body.index("if left:") < body.index("layer.IsVisible = False") < body.index("return left")
+    src_check = (REPO / "packages/design_checker/design_checker/check.py").read_text(encoding="utf-8")
+    yl = src_check[src_check.index("def full_yard_lines("):src_check.index("def plan(")]
+    assert "lines.buffer(limit))" in yl and "join_style" not in yl          # round, as the envelope (F3)
 
 
 def test_an_unknown_survey_is_the_tax_maps_and_a_tight_lot_is_never_drawn_as_surveyed():

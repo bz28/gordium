@@ -949,7 +949,8 @@ def full_yard_lines(shape, lot: dict, items: list) -> list:
         for limit in limits:
             if limit <= 0:
                 continue
-            band = area.intersection(lines.buffer(limit, join_style=2))
+            band = area.intersection(lines.buffer(limit))      # (round corners, as the envelope and the yards'
+            #                                                    strips: review of dd44f1b, F3)
             # (only its polygon parts: a touch at a point or along a line makes a collection, whose boundary is
             # None in shapely 2.1: review of feature 4, F8)
             parts = [g for g in getattr(band, "geoms", [band]) if g.geom_type == "Polygon" and not g.is_empty]

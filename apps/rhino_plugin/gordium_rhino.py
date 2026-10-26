@@ -3035,18 +3035,25 @@ def _envelope_curves(doc, plan, facts):
     locked, or under a locked "Gordium": deleted ignoring those modes; review of feature 4, F1), and the new ones
     drawn only once none is left, so they never pile up. None of it is recorded for Undo, inside a command too
     (GordiumCheck's Undo step never stops on them: F6). The layer shown only with "Show buildable envelope".
-    `plan` None: only the old ones go. How many old ones could not be deleted (0: all replaced)."""
-    index = _layer(doc, logic.ENVELOPE)
-    layer = doc.Layers[index]
+    `plan` None: only the old ones go (no layer made for that: a failed check in a file Gordium never drew in
+    leaves no Gordium layers). How many old ones could not be deleted (0: all replaced; else the layer hidden and
+    the architect told, so stale curves never pass for current ones)."""
+    if plan is None and doc.Layers.FindByFullPath(logic.ENVELOPE, -1) < 0:
+        return 0
     was = doc.UndoRecordingEnabled
-    doc.UndoRecordingEnabled = False
-    try:
+    doc.UndoRecordingEnabled = False             # the layer too: an Undo never removes it from under the curves
+    try:                                         # (review of dd44f1b, F1)
+        index = _layer(doc, logic.ENVELOPE)
+        layer = doc.Layers[index]
         if layer.Color.ToArgb() == System.Drawing.Color.Black.ToArgb():          # a new layer: Gordium's blue
             layer.Color = System.Drawing.Color.FromArgb(*ENVELOPE_BLUE)
         for old in _envelope_objects(doc, index):
             doc.Objects.Delete(old, True, True)        # quiet, ignoring hidden and locked
         left = len(_envelope_objects(doc, index))
-        if left:                                   # never a second set over the first
+        if left:                                   # never a second set over the first, nor stale ones shown as
+            layer.IsVisible = False                # current (review of dd44f1b, F2)
+            say("Gordium: the curves to snap to couldn't be replaced (" + str(left) + " left); hidden until the "
+                "next check")
             return left
         z = _lot_level(doc, facts or {})
         dashed = doc.Linetypes.Find("Dashed")
