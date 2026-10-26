@@ -592,6 +592,10 @@ def _seen_faces(o, viewport, piece):
         samples[id(piece)] = [_face_samples(f) for f in piece.Faces]
     doc = Rhino.RhinoDoc.ActiveDoc
     lift = (doc.ModelAbsoluteTolerance if doc is not None else 0.001) * 10
+    # each ray starts off the face along its own normal by more than the piece stands proud, so a face lying on the
+    # house starts outside it (_proud scales the piece: a face turned towards its middle moves in, not out; review
+    # of 3159a78, F1); a cut face inside the house still starts inside it
+    off = _model_length(doc, 2 * ui.HIGHLIGHT_PROUD_FT) + lift if doc is not None else 0.05
     meshes = getattr(o, "occluders", None) or []
     shown = []
     for face, points in zip(piece.Faces, samples[id(piece)]):
@@ -607,7 +611,9 @@ def _seen_faces(o, viewport, piece):
             if f <= 1e-9:                                  # this point faces away: no ray
                 continue
             facing = max(facing, f)
-            start = p + way * lift
+            out = rg.Vector3d(n)
+            out.Unitize()
+            start = p + out * off
             blocked = False
             for m in meshes:
                 t = rg.Intersect.Intersection.MeshRay(m, rg.Ray3d(start, way))
@@ -636,7 +642,12 @@ def _occluders(doc):
     for x in _buildings(doc):
         g = _drawable(x.Geometry)
         if isinstance(g, rg.Brep):
-            parts = rg.Mesh.CreateFromBrep(g, rg.MeshingParameters.FastRenderMesh) or []
+            # true to the surface within half the pieces' proud distance, seams joined: a coarse mesh of a concave
+            # curved wall stands out into the air and hid a face in front of it (review of 3159a78, F2)
+            mp = rg.MeshingParameters()
+            mp.Tolerance = _model_length(doc, ui.HIGHLIGHT_PROUD_FT / 2)
+            mp.JaggedSeams = False
+            parts = rg.Mesh.CreateFromBrep(g, mp) or []
             mesh = rg.Mesh()
             for part in parts:
                 mesh.Append(part)

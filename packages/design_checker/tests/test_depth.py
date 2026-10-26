@@ -162,4 +162,7 @@ def test_off_plan_the_plugin_draws_only_the_seen_faces_and_plan_as_before():
     assert "if shrunk.OrientationIsReversed:\n            n.Reverse()" in samples                # review F1
     assert "dup.Faces.ShrinkFaces()" in samples                                                 # review F2
     assert "for x in _buildings(doc):" in fns["_occluders"]                                     # review F6
+    assert "start = p + out * off" in seen and "_model_length(doc, 2 * ui.HIGHLIGHT_PROUD_FT)" in seen   # 3159a78 F1
+    assert "mp.Tolerance = _model_length(doc, ui.HIGHLIGHT_PROUD_FT / 2)" in fns["_occluders"]          # F2
+    assert "FastRenderMesh" not in fns["_occluders"]
     assert "_occluders(doc)" in fns["_draw_plan"]
