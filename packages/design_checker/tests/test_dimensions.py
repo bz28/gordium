@@ -467,3 +467,16 @@ def test_a_failing_yard_on_a_parallel_wall_is_dimensioned_at_the_walls_middle_no
     west = next(y for y in r["plan"]["yards"] if "Side yard, West" in y["label"])
     assert west["status"] == present.FAILS
     assert west["points"][1] == [pytest.approx(6), pytest.approx(46)]                  # the middle of the west wall
+
+
+
+def test_a_label_keeps_off_its_own_tag_wherever_the_tag_will_be_drawn():
+    """Review round 8, F1: the label was kept off its tag at the line's far end only; with the far end taken the
+    tag moves to the near end. The plugin works the tag's spot out first (logic.tag_spot) and gives the label
+    exactly that box to keep off, and draws the tag there."""
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    screen = src[src.index("def draw_screen("):src.index("def _status_rows(")]
+    assert "spots = [[logic.tag_spot(" in screen and "extras=[[logic.rect_quad(b) for b in sp] for sp in spots]" in screen
+    assert "_required(d, r, tag, dark, box)" in screen and "logic.tag_spot(" not in src[src.index("def _required("):
+                                                                              src.index("def _dim_label(")]

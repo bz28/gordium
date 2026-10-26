@@ -563,19 +563,15 @@ def _dimension(d, viewport, line, color):
             d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), ink, width)
 
 
-def _required(d, viewport, line, tag, dark, taken=()):
-    """A yard's required line: a clear dashed mid-grey across its dimension, with a small "min 25'-0\"" tag at its
-    end (Rhino check of #29: the faint line barely registered). Returns the tag's box on screen (None: no tag)."""
+def _required(d, line, tag, dark, box=None):
+    """A yard's required line: a clear dashed mid-grey across its dimension, with a small "min 25'-0\"" tag in
+    `box` (screen; where logic.tag_spot put it, beside one of the line's ends: Rhino check of #29, the faint line
+    barely registered)."""
     r, g, b = logic.REQUIRED_RGB[1 if dark else 0]
     grey = System.Drawing.Color.FromArgb(r, g, b)
     d.DrawPatternedLine(line.From, line.To, grey, ui.DASHED, 1)
-    if not tag:
-        return None
-    # at the line's far end, or its near end if a label already sits there (round 7, F3)
-    ends = [viewport.WorldToClient(p) for p in (line.To, line.From)]
-    box = logic.tag_spot([(q.X, q.Y) for q in ends], tag, taken)
-    d.Draw2dText(tag, grey, rg.Point2d(box[0], box[1] + 2), False, 10)
-    return box
+    if tag and box is not None:
+        d.Draw2dText(tag, grey, rg.Point2d(box[0], box[1] + 2), False, 10)
 
 
 def _dim_label(d, viewport, o, quad, text, color, dark, line, kind):
@@ -672,15 +668,18 @@ def draw_screen(o, e):
             width = logic.label_width(text, 11)
         blocks = [logic.rect_quad(box) for box in taken]
         _, away = logic.nearest_outline(on_screen[0][1], footprint)     # away from the building it measures from
-        # each position's own "min" tags: its label never covers them (round 7, F3)
+        # each position's own "min" tags, where they will be drawn (logic.tag_spot: the far end, or the near one if
+        # a label already sits there): its label never covers them (rounds 7 and 8, F3/F1)
         tags = (getattr(o, "yard_tags", None) or {}).get(k) or []
-        own = [[logic.rect_quad(logic.tag_box((q.X, q.Y), t)) for q, t in
-                ((e.Viewport.WorldToClient(r.To), t) for r, t in zip(req, tags))] for _, req in options]
-        index, quad, kind = logic.place_dimension(on_screen, width, blocks, footprint, away, extras=own)
+        spots = [[logic.tag_spot([(f.X, f.Y), (n.X, n.Y)], t, taken) for (f, n), t in
+                  (((e.Viewport.WorldToClient(r.To), e.Viewport.WorldToClient(r.From)), t) for r, t in zip(req, tags))]
+                 for _, req in options]
+        index, quad, kind = logic.place_dimension(on_screen, width, blocks, footprint, away,
+                                                  extras=[[logic.rect_quad(b) for b in sp] for sp in spots])
         chosen, required = options[index]
         o.placed[k] = (index, quad, kind, chosen, required)   # what is drawn (the in-Rhino checks read it)
-        for r, tag in zip(required, tags + [None] * len(required)):
-            box = _required(d, e.Viewport, r, tag, dark, taken)
+        for r, tag, box in zip(required, tags + [None] * len(required), spots[index] + [None] * len(required)):
+            _required(d, r, tag, dark, box)
             if box is not None:                       # a "min" tag: no later label covers it (round 6, F7)
                 taken.append(box)
         _dimension(d, e.Viewport, chosen, color)
