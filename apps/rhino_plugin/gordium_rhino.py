@@ -626,12 +626,11 @@ def draw_screen(o, e):
                                   "size": tuple(drawn["size"]), "keep": [tuple(t) for t in keep], "dims": dims,
                                   "shapes": solids, "lines": obstacles, "carried": carried}
         _label_timer()
-    for item in items:
-        got = spots.get(item["key"])
-        if got is None:
-            continue                         # never placed yet: shown once the view settles
-        if not settled:
-            got = logic.follow(got, item["line"])
+    shown = [(item, spots[item["key"]]) for item in items if item["key"] in spots]   # never placed: at rest
+    if not settled:                          # moving: only those carried along that keep every HARD rule here and
+        shown = logic.shown_while_moving(    # now, the first placed first; the rest hidden until the view rests
+            [(item, logic.follow(got, item["line"])) for item, got in shown], tuple(drawn["size"]), keep, dims, solids)
+    for item, got in shown:
         color, edge = colors[item["key"]]
         (xa, ya), (xb, yb) = item["line"]
         ui.paint_label(d, ((xa + xb) / 2, (ya + yb) / 2), got, color, dark, edge_leader=edge, line=item["line"])
@@ -670,9 +669,6 @@ def _label_timer():
     timer.Start()
 
 
-LABEL_STEP_S = 0.016      # a timer tick places labels for at most this long (one label at least): one frame
-
-
 def _label_tick():
     pending = STATE.get("label_pending")
     if pending is None:
@@ -680,7 +676,8 @@ def _label_tick():
             STATE["label_timer"].Stop()
         return
     if time.time() - pending["at"] >= logic.LABEL_SETTLE_S:
-        settle_labels(LABEL_STEP_S)
+        settle_labels()                      # all at once, in one pass (the Rhino job at 5b46c99: about 70 ms at most,
+        # once, at rest; in budgeted ticks the old places showed meanwhile and then jumped)
 
 
 def settle_labels(budget_s=None):

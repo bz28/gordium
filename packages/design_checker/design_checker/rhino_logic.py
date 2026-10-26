@@ -837,7 +837,7 @@ def hull(points):
 
 
 LABEL_ORDER = {"does_not_comply": 0, "needs_review": 1, "complies": 2}   # failing first, the edges' lengths last
-LABEL_SETTLE_S = 0.15        # the view still this long: the labels are placed (never while it moves)
+LABEL_SETTLE_S = 0.08        # the view still this long: the labels are placed (never while it moves)
 
 
 class LabelRun:
@@ -898,6 +898,23 @@ def place_labels(items, view, keep=(), dims=(), shapes=(), lines=()):
     run = LabelRun(items, view, keep, dims, shapes, lines)
     run.step()
     return run.spots
+
+
+def shown_while_moving(carried, view, keep=(), dims=(), shapes=()):
+    """Which labels carried along with a moving view (logic.follow) may be drawn this frame: only those that keep
+    every HARD rule where they are now (label_breaks_hard: on screen, off the buildings, the boxes, the dimensions
+    and the labels shown before them), in the order they were placed; the rest are hidden until the view rests and
+    they are placed again (the Rhino job at 5b46c99: old places on screen, then a jump). `carried`: [(item, got)]
+    with item["line"] the line on screen now. Returns the same pairs, those shown."""
+    out, taken = [], []
+    dims = [tuple(map(tuple, d)) for d in dims]
+    for item, got in sorted(carried, key=lambda ig: ig[1].get("order", 0)):
+        box = (got["left"], got["top"], got["w"], got["h"])
+        if label_breaks_hard(tuple(map(tuple, item["line"])), box, view, list(keep), dims, list(shapes), taken):
+            continue
+        out.append((item, got))
+        taken.append(box)
+    return out
 
 
 def follow(got, line):

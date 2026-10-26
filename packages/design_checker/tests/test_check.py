@@ -3396,7 +3396,8 @@ def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_re
         assert search not in draw, search                                    # never in the drawing loop
     assert "_label_timer()" in draw and "logic.follow(got, item[\"line\"])" in draw
     tick = rhino[rhino.index("def _label_tick("):].split("\ndef ", 1)[0]
-    assert "logic.LABEL_SETTLE_S" in tick and "settle_labels(LABEL_STEP_S)" in tick
+    assert "logic.LABEL_SETTLE_S" in tick and "settle_labels()" in tick      # all at once, one pass (5b46c99)
+    assert logic_.LABEL_SETTLE_S <= 0.08
     settle = rhino[rhino.index("def settle_labels("):].split("\ndef ", 1)[0]
     assert "logic.LabelRun(" in settle and "if not run.step(budget_s):" in settle and "doc.Views.Redraw()" in settle
     assert 'FromRuntimeSerialNumber(pending["doc"])' in settle                  # the document placed for
@@ -3444,14 +3445,11 @@ def test_placing_the_labels_is_fast_one_tick_for_the_sample_and_a_resting_label_
     obstacle), 0.2-1.3 s a stop, and the labels jumped when the view came to rest. Now each row of spots is worked
     out as runs that keep the HARD rules (_LabelField) and the search stops at the first spot beside the line with
     nothing SOFT against it. Budgets (the best of 5 runs, so a busy machine can't fail it): every label of the
-    sample and of a busy lot under 5 ms, the sample all in under 30 ms and in ONE tick (LABEL_STEP_S), a tick on
-    the busy lot never past 16 ms by more than its slowest label (scaled to Rhino's speed below). And a label carried with the view that still
+    sample and of a busy lot under 5 ms, the sample all in under 30 ms (placed in one pass at rest: the Rhino job
+    at 5b46c99), a budgeted step stopping before it would pass its budget (scaled to Rhino's speed below). And a label carried with the view that still
     keeps every rule stays where it is when the view rests (no jump); one that no longer does is placed again."""
     import time as time_
     from design_checker import rhino_logic as logic_
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    step_s = float(rhino.split("LABEL_STEP_S = ", 1)[1].split()[0])
-    assert step_s <= 0.016
     view = (656, 668)
     lot = (158, 106, 501, 562)
     house = [(185, 250), (420, 250), (420, 415), (185, 415)]
@@ -3499,11 +3497,6 @@ def test_placing_the_labels_is_fast_one_tick_for_the_sample_and_a_resting_label_
     assert worst < 0.025 and total < 0.1                                        # and plainly bounded anywhere
     total, worst = timed(busy)
     assert worst < 400 * unit, (total / unit, worst / unit)
-    one_tick = False
-    for _ in range(5):
-        run = logic_.LabelRun(items, view, keep, dims, [house, band], _boxes(*lot))
-        one_tick = one_tick or run.step(step_s)
-    assert one_tick                                                             # the sample: one tick, no jumps
     # a tick stops BEFORE a label that would take it past its budget (by the slowest so far): with labels taking
     # 10 ms on a clock of its own, a 16 ms tick places one, never two (26 ms, past a frame)
     clock = [0.0]
@@ -3541,6 +3534,38 @@ def test_placing_the_labels_is_fast_one_tick_for_the_sample_and_a_resting_label_
     assert (run.spots[k0]["left"], run.spots[k0]["top"]) != (250, 300)
     box = (run.spots[k0]["left"], run.spots[k0]["top"], run.spots[k0]["w"], run.spots[k0]["h"])
     assert not logic_.box_over_shape(box, [(x + 2, y) for x, y in house])
+
+
+def test_while_the_view_moves_only_labels_that_still_keep_every_hard_rule_are_drawn():
+    """The Rhino job at 5b46c99: while the view moved, the labels carried along were drawn wherever they landed (the
+    northeast one 40 px off, the rear one under the status box), then jumped when the view rested. Now a moving
+    frame draws a carried label only if it keeps every HARD rule where it is now (on screen, off the buildings, the
+    status box, the dimensions and the labels shown before it, in the order they were placed); the rest are hidden
+    until the view rests and all are placed in one pass."""
+    from design_checker import rhino_logic as logic_
+    view = (656, 668)
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    keep = [(12, 34, 506, 54)]
+    dims = [((158, 330), (185, 330)), ((300, 106), (300, 250)), ((300, 415), (300, 562)), ((420, 330), (501, 330))]
+
+    def lab(k, line, left, top, w=80, order=0):
+        return ({"key": k, "line": line}, {"left": left, "top": top, "w": w, "h": 20, "rows": ["x"], "size": 11,
+                                            "led": False, "forced": False, "order": order, "line": line})
+    fine = lab("fine", dims[2], 306, 480, order=1)                   # beside the front yard's line, clear
+    on_house = lab("house", dims[0], 200, 300, order=0)              # carried onto the house
+    under_box = lab("box", dims[1], 306, 40, order=2)                # under the status box
+    off = lab("off", dims[3], 620, 330, order=3)                     # past the screen's edge
+    over = lab("over", dims[2], 320, 485, order=4)                   # over "fine", placed before it
+    on_dim = lab("dim", dims[3], 290, 420, w=40, order=5)            # across the front yard's dimension
+    shown = logic_.shown_while_moving([over, under_box, fine, on_house, off, on_dim], view, keep, dims, [house])
+    assert [i["key"] for i, _ in shown] == ["fine"]
+    first = lab("first", dims[2], 320, 485, order=0)                 # placed first: it wins the overlap
+    assert [i["key"] for i, _ in logic_.shown_while_moving([fine, first], view, keep, dims, [house])] == ["first"]
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
+    moving = draw.split("    if not settled:", 1)[1].split("    for item, got in shown:", 1)[0]
+    assert "logic.shown_while_moving(" in moving and "logic.follow(got, item[\"line\"])" in moving
+    assert "keep, dims, solids)" in moving                          # the same HARD things the placement keeps off
 
 
 def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
@@ -3620,7 +3645,7 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
     assert draw.count('drawn["labels"].append(') == 1 and 'got["led"], got["size"], got["forced"], got.get("order")])' in draw
     assert 'drawn["dims"] = dims' in draw and draw.index("keep = list(taken)") < draw.index('"keep": [tuple(t)')
     assert 'drawn["settled"] = settled or not items' in draw
-    for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
+    for name in ("highlight_in_rhino.py", "notice_in_rhino.py", "redraw_timing_in_rhino.py"):
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
         assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
         assert "label_box(" not in script, name
