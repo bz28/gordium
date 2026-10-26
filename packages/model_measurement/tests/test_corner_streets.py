@@ -138,3 +138,38 @@ def test_a_gently_curving_street_in_pieces_keeps_its_side_and_rear_readings():
     assert m["side_yard_smaller"].get("readings") or m["side_yard_smaller"]["value"] is not None
     assert "too many readings" not in (m["side_yard_smaller"].get("reason") or "")
     assert 60.0 in _widths(site, facts)
+
+
+def test_without_the_streets_recorded_no_yard_is_measured_from_the_street_lines():
+    """#18 round f, P0: a corner lot with one street line picked (the other street at x = 50 not) and no street_ids:
+    the lines given may all be one street's, so no yard is measured from them, the front yard too (before: 30 ft to
+    the one line given complied, the house 3 ft from the street not picked). Every yard and the lot depth ask for the
+    street pick."""
+    ring = [(0, 0), (50, 0), (50, 100), (0, 100)]
+    edges, site = _site(ring)
+    site["buildings"] = _box(10, 30, 47, 70)
+    m = measure(site, _facts(edges, [0]))
+    for name in ("front_yard", "front_yard_eaves", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_depth",
+                 "lot_width"):
+        assert m[name]["value"] is None and not m[name].get("readings"), name
+        assert "pick the street side" in m[name]["reason"], (name, m[name]["reason"])
+
+
+def test_names_saved_for_other_lines_are_said_to_be_stale():
+    """street_ids that don't match the street lines one for one (saved before the lines were picked again): set
+    aside, and said so, never read."""
+    ring = [(0, 0), (60, 0), (60, 45), (0, 45)]
+    edges, site = _site(ring)
+    w = measure(site, _facts(edges, range(3), ["A St"]))["lot_width"]
+    assert w["value"] is None and "no longer match" in w["reason"], w
+
+
+def test_on_the_tax_map_a_short_piece_recorded_on_its_street_stays_on_it():
+    """#18 round f, P2: a 0.3 ft cut corner recorded on Oak St, on a tax-map lot: the outline cleaning (0.25 ft) would
+    merge it into Elm's line; a change of recorded street is kept as a corner, so the readings are Oak's (with the
+    cut) and Elm's, never "not recorded"."""
+    ring = [(0, 0), (59.8, 0), (60, 0.2), (60, 100), (0, 100)]
+    edges, site = _site(ring)
+    facts = _facts(edges, range(3), ["Elm St", "Oak Ave", "Oak Ave"], lot_surveyed=False)   # the cut on Oak
+    got = _widths(site, facts)
+    assert got == sorted([59.8, round(99.8 + math.hypot(0.2, 0.2), 2)]), got

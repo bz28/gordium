@@ -113,28 +113,64 @@ def design(rng):
             return out
 
 
-def _measure(ring, nstreet, ids):
+def _box(ring):
+    """A small two-story house inside the lot (its floor blocks), or none if it doesn't fit."""
+    poly = Polygon(ring)
+    c = poly.representative_point()
+    pts = [(c.x - 2, c.y - 2), (c.x + 2, c.y - 2), (c.x + 2, c.y + 2), (c.x - 2, c.y + 2)]
+    if not poly.contains(Polygon(pts)):
+        return []
+    out = []
+    for k in range(2):
+        z0, z1 = 10 * k, 10 * (k + 1)
+        walls = [{"points": [[*pts[i], z0], [*pts[(i + 1) % 4], z0], [*pts[(i + 1) % 4], z1], [*pts[i], z1]]}
+                 for i in range(4)]
+        out.append({"id": f"floor {k + 1}", "floor": 10.0, "problems": [],
+                    "faces": [{"points": [[x, y, z0] for x, y in pts]}, {"points": [[x, y, z1] for x, y in pts]}, *walls]})
+    return out
+
+
+def _measure(ring, nstreet, ids, surveyed=True, house=False):
     n = len(ring)
     edges = [[list(ring[i]), list(ring[(i + 1) % n])] for i in range(n)]
-    site = {"units": "ft", "problems": [], "buildings": [],
+    site = {"units": "ft", "problems": [], "buildings": _box(ring) if house else [],
             "lot": {"id": "lot", "edges": [{"points": e, "curved": False} for e in edges]}}
     facts = {"jurisdiction": JURISDICTION, "zone": "R-1b", "use": "one_family_detached", "corner_lot": True,
-             "street_line": edges[:nstreet], "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0}
+             "street_line": edges[:nstreet], "lot_surveyed": surveyed, "ground_is_flat": True, "grade_elevation": 0}
     if ids is not None:
         facts["street_ids"] = ids
-    return measure(site, facts)["lot_width"]
+    return measure(site, facts)
 
 
 @pytest.mark.parametrize("seed", range(100))
 def test_with_the_streets_recorded_every_true_frontage_is_a_reading_and_nothing_else(seed):
+    """Surveyed: the readings are exactly the true frontages."""
     ring, nstreet, names, true = design(random.Random(seed))
-    w = _measure(ring, nstreet, names)
+    w = _measure(ring, nstreet, names)["lot_width"]
     got = sorted(r["value"] for r in w.get("readings") or ([w] if w.get("value") is not None else []))
     assert len(got) == len(true) and all(abs(a - b) <= 0.02 for a, b in zip(got, true)), (seed, got, true)
 
 
-@pytest.mark.parametrize("seed", range(100))
-def test_without_the_streets_recorded_the_lot_width_never_passes(seed):
+@pytest.mark.parametrize("seed", range(50))
+def test_on_the_tax_map_every_true_frontage_is_still_a_reading(seed):
+    """From the tax map (the outline cleaned within 0.25 ft, pieces merged): each true frontage is a reading or the
+    lot width needs review, never a reading above the shortest true frontage alone."""
     ring, nstreet, names, true = design(random.Random(seed))
-    w = _measure(ring, nstreet, None)
-    assert w["value"] is None and not w.get("readings") and "pick the street side" in w["reason"], (seed, w)
+    w = _measure(ring, nstreet, names, surveyed=False)["lot_width"]
+    got = sorted(r["value"] for r in w.get("readings") or ([w] if w.get("value") is not None else []))
+    if got:
+        assert all(any(abs(a - b) <= 0.3 for a in got) for b in true), (seed, got, true)
+        assert min(got) <= min(true) + 0.3, (seed, got, true)
+    else:
+        assert w["value"] is None and w.get("reason"), (seed, w)
+
+
+@pytest.mark.parametrize("seed", range(100))
+def test_without_the_streets_recorded_nothing_from_the_street_lines_ever_passes(seed):
+    """No street_ids: the lot width and every yard measured from the street lines wait for the street pick (the
+    lines given may be one street's), with a house on the lot."""
+    ring, nstreet, names, true = design(random.Random(seed))
+    m = _measure(ring, nstreet, None, house=True)
+    for name in ("lot_width", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_depth"):
+        assert m[name]["value"] is None and not m[name].get("readings"), (seed, name, m[name])
+        assert "pick the street side" in m[name]["reason"], (seed, name, m[name]["reason"])

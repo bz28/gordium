@@ -29,7 +29,7 @@ from rule_format.rulebook import MEASURES_FILE, load
 
 from . import interpretations as law
 from .stops import stop
-from .street_lines import matching_ids, street_verdict
+from .street_lines import _norm, matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
 
@@ -144,6 +144,12 @@ class Lot:
                   if any(_same_point(e[0], a) and _same_point(e[-1], b) or _same_point(e[0], b) and _same_point(e[-1], a)
                          for a, b in facts.get("street_line") or [])]
         self.street = street
+        # the street each drawn street line is recorded on (street_ids), where they match: where it changes is a
+        # corner the outline cleaning keeps (#18 round f)
+        given, ids = facts.get("street_line") or [], matching_ids(facts.get("street_line"), facts.get("street_ids"))
+        self.street_of = [next((_norm(ids[k]) if ids and ids[k] else None for k, (a, b) in enumerate(given)
+                                if _same_point(e[0], a) and _same_point(e[-1], b) or
+                                _same_point(e[0], b) and _same_point(e[-1], a)), None) for e in self.edges]
         self.street_problem = None
         if not facts.get("street_line"):
             self.street_problem = stop("no_street")
@@ -186,7 +192,8 @@ class Lot:
         n = len(self.edges)
         street = set(self.street)
         pts = [self.edges[i][0] for i in range(n)]
-        keep = [i for i in range(n) if self.curved[i] or self.curved[i - 1] or ((i in street) != ((i - 1) % n in street))]
+        keep = [i for i in range(n) if self.curved[i] or self.curved[i - 1] or ((i in street) != ((i - 1) % n in street))
+                or (i in street and (i - 1) % n in street and self.street_of[i] != self.street_of[(i - 1) % n])]
         alive = list(range(n))
 
         def cost(k):                    # removing alive[k]: how far the outline moves (every vertex it spans)
@@ -2200,7 +2207,14 @@ def _lot_lines(lot: Lot, facts: dict):
         basis = {"front": [law.basis(two)], "side": [law.basis(one)], "rear": [], "depth": []}
         chain = lot.ordered_street()
         streets_of = _street_groups(lot, facts, chain)
-        if streets_of is not None and len(streets_of) < 2:
+        if streets_of is None:
+            # which lines are which street isn't recorded (or the names saved are stale): the lines given may all be
+            # one street's, so no yard is measured from them (#18 round f, P0: a yard to one street line passed);
+            # never told from where the lines turn
+            ids = facts.get("street_ids")
+            return stop("street_names_stale" if ids is not None and matching_ids(facts.get("street_line"), ids) is None
+                        else "street_ids_needed")
+        if len(streets_of) < 2:
             return stop("corner_one_street")    # stated a corner lot, but every street line is on one street
         given = facts.get("address_street_line")
         if given:
@@ -2215,9 +2229,6 @@ def _lot_lines(lot: Lot, facts: dict):
             # the address street is one of the streets, each the lines recorded on it (street_ids: the street pick,
             # or the lookup), never guessed from where the lines turn (#18 rounds b-e: no rule of angles could be
             # made safe); not recorded: which yard is the rear can't be told
-            if streets_of is None:            # the front yards (every street line) are still measured
-                return {"readings": [], "question": "; ".join(question), "basis": basis,
-                        "problem": stop("street_ids_needed"), "candidates": []}
             candidates = streets_of
             question.append("which street the lot's address is on decides which yard is the rear yard (§325-8A(14)(d)): "
                             "pick the address street (address_street_line)")
@@ -2262,16 +2273,11 @@ def _street_groups(lot: "Lot", facts: dict, chain: list) -> list[list[int]] | No
     frontage (§325-8A col. 7: the frontage on one street). None when that isn't recorded for every street lot line,
     a lot line's pieces are on two streets, or one street's lines aren't one run: then which lines are which street
     is the architect's to say, never guessed from where the lines turn."""
-    given, ids = facts.get("street_line") or [], facts.get("street_ids")
-    if matching_ids(given, ids) is None:
+    if matching_ids(facts.get("street_line"), facts.get("street_ids")) is None:
         return None
 
     def id_of(piece):
-        e = lot.drawn[piece]
-        for k, (a, b) in enumerate(given):
-            if (_same_point(e[0], a) and _same_point(e[-1], b)) or (_same_point(e[0], b) and _same_point(e[-1], a)):
-                return " ".join(str(ids[k]).lower().replace(".", " ").split()) if ids[k] else None
-        return None
+        return lot.street_of[piece]
     names = []
     for i in chain:
         found = {id_of(q) for q in (lot.pieces[i] if lot.pieces else [i])}

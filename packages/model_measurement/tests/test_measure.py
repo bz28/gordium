@@ -1648,6 +1648,7 @@ def test_a_corner_lot_whose_address_street_is_drawn_in_pieces_is_still_read(surv
     street = [[[0, 0], [30, 0]], [[30, 0], [60, 0]], [[60, 0], [60, 120]]]
     m = measure(site(lot(pts), box(10, 25, 40, 65)),
                 {**FACTS, "corner_lot": True, "street_line": street, "lot_surveyed": surveyed,
+                 "street_ids": ["South St", "South St", "East St"],
                  "address_street_line": [[[0, 0], [30, 0]], [[30, 0], [60, 0]]]})
     assert m["front_yard"]["value"] == 20.0 and m["side_yard_smaller"]["value"] == 10.0, (
         m["front_yard"], m["side_yard_smaller"])
