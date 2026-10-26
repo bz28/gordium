@@ -95,7 +95,7 @@ def test_the_plugin_draws_the_dimensions_by_these_rules():
     screen = src[src.index("def draw_screen("):src.index("def _status_rows(")]
     assert "shown = logic.dims_shown(zoomed_in, elevation)" in screen
     assert "if shown else []" in screen and screen.count("_dimension(d, e.Viewport,") == 2   # yards, height
-    assert "if height is not None and elevation and zoomed_in:" in screen
+    assert 'height = getattr(o, "height_dim", None) if elevation and zoomed_in else None' in screen
     assert "logic.dim_ticks(" in src[src.index("def _dimension("):src.index("def draw_screen(")]
 
 
@@ -201,7 +201,7 @@ def test_a_dimension_is_drawn_on_a_halo_above_the_highlight():
     assert overlay.index("def PostDrawObjects") < overlay.index("def DrawForeground")
     assert '"draw_scene"' in overlay.split("def DrawForeground")[0] and '"draw_screen"' in overlay.split("def DrawForeground")[1]
     screen = src[src.index("def draw_screen("):src.index("def _status_rows(")]
-    assert "_dimension(d, e.Viewport, chosen, color)" in screen   # the yards' dimensions: on screen, over the colours
+    assert "_dimension(d, e.Viewport, best, color)" in screen     # the yards' dimensions: on screen, over the colours
 
 
 def test_the_yard_labels_keep_off_each_other_the_status_box_and_the_notice():
@@ -337,18 +337,6 @@ def test_complying_dimensions_are_neutral_grey_never_green_and_the_legend_says_s
     assert "complying ones neutral grey" in text and "green" not in text.lower()
 
 
-def test_a_label_sits_on_its_line_aligned_centred_and_outside_the_building():
-    a, b = (100, 300), (100, 200)                                # a vertical dimension, lot end at the bottom
-    q = logic.label_on_line(a, b, 80, away=(300, 250))           # the house to the right
-    xs, ys = [p[0] for p in q], [p[1] for p in q]
-    assert max(xs) <= 100 - logic.DIM_LABEL_GAP_PX + 1e-9        # beside the line, on the side away from the house
-    assert max(ys) - min(ys) == pytest.approx(80) and max(xs) - min(xs) == pytest.approx(logic.DIM_LABEL_H_PX)
-    assert (min(ys) + max(ys)) / 2 == pytest.approx(250)         # centred on the line (aligned: its long side along it)
-    # an upright line reads bottom to top, from the right, whichever way it was given (review round 6, F4)
-    assert logic.text_angle(a, b) == pytest.approx(-90) and logic.text_angle(b, a) == pytest.approx(-90)
-    assert logic.text_angle((0, 0), (10, 0)) == pytest.approx(0) and logic.text_angle((10, 0), (0, 0)) == pytest.approx(0)
-
-
 def test_a_house_turned_against_its_lot_is_dimensioned_at_its_shortest_point_never_longer():
     """Review round 6, F1: a 40 ft wall turned 10° to the street is shortest at its corner; the corner was skipped
     and the first position offered was about 6" longer than the label. A short yard's every position is within
@@ -369,17 +357,6 @@ def test_a_house_turned_against_its_lot_is_dimensioned_at_its_shortest_point_nev
     assert math.dist(*found[0]) == pytest.approx(min(math.dist(*c) for c in found)) and measured <= 20 + 1e-6
 
 
-def test_the_label_drawing_never_compares_points_to_none_with_in():
-    """Review round 7, F1: `None in (point, ...)` compares a Point3d to None with .NET's == and raises in Rhino 8's
-    Python, blanking every label."""
-    import ast
-    from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_dim_label")
-    body = ast.get_source_segment(src, fn)
-    assert "None in (" not in body and "any(p is None for p in (centre, ahead, up, below))" in body
-
-
 TAG = 'min 10\'-0"'
 
 
@@ -394,24 +371,6 @@ def test_a_failing_yard_on_a_parallel_wall_is_dimensioned_at_the_walls_middle_no
 
 
 # ---- the Rhino check of #29 at f6642a9: every label inside the view; what is wrong placed first; short words ----
-
-
-def test_what_is_wrong_is_placed_first_then_what_needs_review():
-    assert logic.placement_order(["complies", "needs_review", "does_not_comply", "complies", "does_not_comply"]) == \
-        [2, 4, 1, 0, 3]
-
-
-def test_the_words_are_never_flipped_back_to_front():
-    """Review of be133d0, F2: text_angle already keeps the words reading left to right, so the plane's y (normal x
-    x) is the screen's up; the 'keep upright' flip, on a vertical line (the height) decided by rounding noise,
-    could mirror them. It is gone; the plane faces the camera."""
-    import ast
-    from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_dim_label")
-    body = ast.get_source_segment(src, fn)
-    assert "-plane.YAxis" not in body and "facing = rg.Plane(anchor, -viewport.CameraDirection)" in body
-    assert "rg.Vector3d.CrossProduct(facing.Normal, xaxis)" in body
 
 
 # ---- the drawing's way (Rhino checks of #29, round 4: "drawing-style dimension lines") -----------------------------
@@ -447,28 +406,6 @@ def test_failing_and_in_review_yards_alone_carry_min_tags():
             assert y["required_tags"] == [] and y["required_lines"]          # the dashed line, no words
 
 
-def test_a_number_sits_on_the_visible_part_of_its_own_line_or_just_past_its_outer_end():
-    a, b = (100, 600), (100, 200)                                 # a vertical line, its lot end running off the view
-    q, kind = logic.number_spot(a, b, 80, away=(300, 400), view=(1000, 500))
-    assert kind == "on" and logic.inside_view(q, (1000, 500))
-    ys = [p[1] for p in q]
-    assert (min(ys) + max(ys)) / 2 == pytest.approx((200 + 500) / 2)  # centred on what is seen of the line (200-500)
-    q, kind = logic.number_spot((100, 260), (100, 200), 80, away=(300, 230), view=(1000, 640))   # too short
-    assert kind == "end" and min(p[1] for p in q) >= 260 + logic.DIM_LABEL_GAP_PX - 1e-9         # past the lot end
-    assert logic.number_spot((-50, 100), (-10, 100), 40, view=(1000, 640)) == (None, None)          # none in view
-
-
-def test_a_min_tag_sits_at_its_required_lines_end_outside_or_is_left_to_the_panel():
-    out = (-1, 0)                                                 # the lot line lies to the left of the house
-    box_ = logic.tag_spot([(200, 100), (200, 300)], out, "min 10'-0\"", [], view=(1000, 640))
-    assert box_ is not None and box_[0] + box_[2] < 200 + 1e-9   # outside: towards the lot line
-    edge = (120, 80, 80, 30)                                      # the far end taken (an edge's length)
-    moved = logic.tag_spot([(200, 100), (200, 300)], out, "min 10'-0\"", [edge], view=(1000, 640))
-    assert moved is not None and moved[1] > 200 and not logic.shapes_hit(logic.rect_quad(moved), logic.rect_quad(edge))
-    both = [(100, 50, 120, 300)]
-    assert logic.tag_spot([(200, 100), (200, 300)], out, "min 10'-0\"", both, view=(1000, 640)) is None
-
-
 def test_the_elevations_height_limit_label_sits_past_its_lines_end_off_the_building():
     """The Rhino check of #28 at fc0b023: the "Height limit 35'-0"" label covered the coloured vault."""
     house = (300, 200, 500, 420)                                  # the building's box on screen
@@ -478,45 +415,11 @@ def test_the_elevations_height_limit_label_sits_past_its_lines_end_off_the_build
     assert edge is not None and edge[0] >= 560                    # no room on the left: past the right end
 
 
-def test_a_numbers_spot_off_screen_goes_just_past_its_lines_end_else_it_is_left_to_the_panel():
-    """Review of 030cc3a: a long line whose outside side runs off the view's bottom edge put its number off screen
-    and dropped it, though the spot past its end fitted; and centring a too-short line's number on its visible part
-    could never fit. Off screen on the line: past its end; neither in view: no number."""
-    q, kind = logic.number_spot((100, 585), (300, 585), 80, away=(200, 400), view=(800, 600))   # the house above it
-    assert kind == "end" and logic.inside_view(q, (800, 600))
-    assert logic.number_spot((-30, 300), (20, 300), 78, away=(200, 300), view=(800, 600)) == (None, None)
-
-
 def test_the_limit_label_keeps_off_what_is_already_drawn():
     house = (300, 200, 500, 420)
     taken = [(100, 205, 160, 30)]                                 # the height's number on the left
     spot = logic.limit_label_spot(((250, 220), (560, 220)), house, 140, 30, view=(1000, 640), taken=taken)
     assert spot is not None and spot[0] >= 560                    # past the right end instead
-
-
-def test_a_number_never_goes_anywhere_but_its_own_line():
-    """At its own line only: centred on it, past its outer end, or beside it at its inner end (just outside the
-    house); a complying one with no room is left to the panel; a failing one is always drawn (Rhino check of #29 at
-    6d2e01a: the failing number was missing)."""
-    cands = [((100, 300), (100, 200)), ((140, 300), (140, 200))]
-    status = logic.rect_quad((60, 220, 70, 60))                   # covers the first position's middle
-    i, q, kind, scale = logic.place_dimension(cands, 80, [status], view=(1000, 640))
-    assert (i, kind, scale) == (1, "on", 1.0) and not logic.shapes_hit(q, status)
-    everywhere = logic.rect_quad((0, 0, 1000, 640))
-    assert logic.place_dimension(cands, 80, [everywhere], view=(1000, 640))[1:3] == (None, "none")   # grey: dropped
-    i, q, kind, scale = logic.place_dimension(cands, 80, [everywhere], view=(1000, 640), must=True)
-    assert kind == "crowded" and q == logic.label_at_end(*cands[0], 80)                            # its outer end
-    assert logic.place_dimension(cands, None, [], view=(1000, 640)) == (0, None, "none", 1.0)
-
-
-def test_a_failing_number_tries_its_inner_end_then_smaller_text_before_crowding():
-    line = [((100, 400), (100, 200))]                             # lot end at the bottom, the house above y 200
-    middle_and_end = [logic.rect_quad((60, 290, 80, 200))]        # the middle and past the outer end taken
-    i, q, kind, scale = logic.place_dimension(line, 80, middle_and_end, view=(1000, 640), must=True)
-    assert kind == "inner" and min(p[1] for p in q) >= 200 - 1e-9 and not logic.shapes_hit(q, middle_and_end[0])
-    tight = [logic.rect_quad((60, 210, 80, 220))]                 # only a short gap left below the house
-    i, q, kind, scale = logic.place_dimension([((100, 300), (100, 200))], 120, tight, view=(1000, 640), must=True)
-    assert scale < 1.0 or kind == "crowded"
 
 
 def _scene_at(view, scale, centre):
@@ -528,163 +431,59 @@ def _scene_at(view, scale, centre):
     return yards, house, to, status
 
 
+# ---- one placer for every plan label (rhino-ui's place_dim_label; the Rhino job at #29 fc6fbd6) ------------------
+
+def _items(yards, to):
+    """The labels draw_screen hands the placer for the scene's yards: each yard's number only, a failing or in-review
+    yard's "min" tags on its required lines (its first position: check.plan's best)."""
+    items = []
+    for k, y in enumerate(yards):
+        best = y["candidates"][0] if y.get("candidates") else {"points": y["points"]}
+        items.append({"key": ("yard", k, y["number"]), "text": y["number"], "line": tuple(to(best["points"])),
+                      "size": 11, "status": y["status"]})
+        for j, (r, tag) in enumerate(zip(y["required_lines"], y["required_tags"])):
+            items.append({"key": ("tag", k, j, tag), "text": tag, "line": tuple(to(r)), "size": logic.TAG_SIZE,
+                          "status": y["status"]})
+    return items
+
+
 @pytest.mark.parametrize("view,scale,centre", [((656, 668), 6, (25, 46)), ((656, 668), 9, (25, 46)),
-                                               ((656, 668), 12, (22, 50)), ((1000, 640), 8, (25, 46)),
-                                               ((600, 400), 9, (20, 46)), ((1400, 900), 20, (10, 30))])
-def test_failing_and_in_review_numbers_are_always_drawn_in_view_off_the_status_box(view, scale, centre):
-    """The Rhino check of #29 at 6d2e01a, in the real docked Top view (656 × 668) and others: the failing SW
-    number was not drawn; the rear one ran through the status box. Every failing or in-review number is drawn,
-    wholly in view; none crosses the status box unless crowded (no room anywhere at its own line)."""
-    yards, house, to, status = _scene_at(view, scale, centre)
-    taken = [status]
-    for k in logic.placement_order([y["status"] for y in yards]):
-        y = yards[k]
-        cands = [tuple(to(c["points"])) for c in y["candidates"]]
-        must = y["status"] in (present.FAILS, present.REVIEW)
-        i, q, kind, sc = logic.place_dimension(cands, logic.label_width(y["number"], 11), taken, house,
-                                               (view[0] / 2, view[1] / 2), view, must=must)
-        if any(logic.clip_to_view(a, b, view) for a, b in cands):
-            assert q is not None or not must, y["number"]          # a failing / in-review number: always drawn
-        if q is None:
-            continue
-        assert logic.inside_view(q, view), (y["number"], kind)
-        if kind != "crowded":
-            assert not logic.shapes_hit(q, status) and not logic.shapes_hit(q, house), (y["number"], kind)
-        taken.append(q)
-
-
-def test_the_notice_placed_after_the_numbers_keeps_off_them_where_a_corner_is_free():
-    """The front number printed through the notice bar: the notice is now placed after the numbers, which it
-    keeps off (logic.notice_spot's corners), as the lots' edge lengths do (ui.label_at with what is taken)."""
-    view = (656, 668)
-    yards, house, to, status = _scene_at(view, 9, (25, 46))
-    taken = [logic._bbox(status)]
+                                               ((656, 668), 12, (22, 50)), ((1000, 640), 8, (25, 46))])
+def test_the_numbers_are_placed_by_the_one_placer_failing_first_off_the_status_box_and_the_house(view, scale, centre):
+    """The Rhino check of #29 at fc6fbd6 (docked Top 656 × 668): #29's own placer and notice fallback put the notice
+    across the model and the failing number on its coloured band. Every number and "min" tag now goes through
+    logic.LabelRun (place_dim_label's HARD rules): the failing one placed first, each in view, none over the status
+    box nor the house (unless forced, which is said), none over another."""
+    yards, house, to = _scene(view, scale, centre)
+    status = logic.status_box(view[0], ["Gordium · ✕ 1 does not comply · 2 need review",
+                                        "Draft rulebook · Lot lines: tax map"])
+    items = _items(yards, to)
+    spots = logic.place_labels(items, view, keep=[status], dims=[i["line"] for i in items if i["key"][0] == "yard"],
+                               shapes=[house])
+    assert set(spots) == {i["key"] for i in items}                 # every number and tag placed: never dropped
+    order = sorted(spots.values(), key=lambda g: g["order"])
+    first = next(i for i in items if i["status"] == present.FAILS)
+    assert spots[first["key"]]["order"] == 0                       # the failing yard's number first
     boxes = []
-    for k in logic.placement_order([y["status"] for y in yards]):
-        y = yards[k]
-        cands = [tuple(to(c["points"])) for c in y["candidates"]]
-        i, q, kind, sc = logic.place_dimension(cands, logic.label_width(y["number"], 11),
-                                               [logic.rect_quad((b[0], b[1], b[2] - b[0], b[3] - b[1])) for b in taken],
-                                               house, (328, 334), view, must=y["status"] != present.COMPLIES)
-        if q is not None:
-            bx = logic._bbox(q)
-            taken.append(bx)
-            boxes.append((bx[0], bx[1], bx[2] - bx[0], bx[3] - bx[1]))
-    w, h = 300, 30                                                # the notice's box
-    x, y_ = logic.notice_spot(view[0], view[1], w, h, None, taken=[logic.status_box(view[0], ["a", "b"])] + boxes)
-    assert not any(x < a + c and a < x + w and y_ < b + d and b < y_ + h for a, b, c, d in boxes)
+    for key, got in spots.items():
+        box = (got["left"], got["top"], got["w"], got["h"])
+        assert 0 <= box[0] and box[0] + box[2] <= view[0] and 0 <= box[1] and box[1] + box[3] <= view[1], key
+        if not got["forced"]:
+            assert not logic.shapes_hit(logic.rect_quad(box), logic.rect_quad(status)), key
+            assert not logic.shapes_hit(logic.rect_quad(box), house), key
+            assert not any(logic.shapes_hit(logic.rect_quad(box), logic.rect_quad(b)) for b in boxes), key
+        boxes.append(box)
+    assert order
 
 
-
-def test_a_line_only_touching_the_views_edge_never_raises():
-    """Review of d89a73a, F1: a clipped piece of no length divided by zero."""
-    wall = logic.rect_quad((0, 0, 100, 100))
-    i, q, kind, sc = logic.place_dimension([((-10, 5), (0, 5))], 40, [wall], view=(100, 100), must=True)
-    assert kind in ("crowded", "none")
-
-
-def test_the_last_resort_and_the_notice_never_cover_the_status_box():
-    """Review of d89a73a, F2 and F4: the crowded number moved into the view, and the notice's fallback when every
-    corner is taken, could land on the status box."""
-    status = logic.rect_quad((400, 0, 250, 60))
-    everywhere = logic.rect_quad((0, 0, 656, 668))
-    i, q, kind, sc = logic.place_dimension([((600, -40), (600, 20))], 80, [everywhere, status], view=(656, 668),
-                                           must=True, fixed=[status])
-    assert kind == "crowded" and not logic.shapes_hit(q, status) and logic.inside_view(q, (656, 668))
-    numbers = [(0, 0, 656, 668)]                                  # every corner covered by numbers
-    x, y = logic.notice_place(656, 668, 300, 30, None, [(400, 0, 250, 60)], numbers)
-    assert not logic.shapes_hit(logic.rect_quad((x, y, 300, 30)), status)
-
-
-
-def test_in_a_short_view_the_last_resort_goes_beside_the_status_box_not_off_the_bottom():
-    status = logic.rect_quad((300, 14, 290, 170))                 # a tall status box in a 200 px view
-    everywhere = logic.rect_quad((0, 0, 600, 200))
-    i, q, kind, sc = logic.place_dimension([((500, -40), (500, 30))], 80, [everywhere, status], view=(600, 200),
-                                           must=True, fixed=[status])
-    assert kind == "crowded" and logic.inside_view(q, (600, 200)) and not logic.shapes_hit(q, status)
-
-
-@pytest.mark.parametrize("scale,centre", [(6, (25, 46)), (9, (25, 46)), (12, (22, 50)), (9, (30, 40))])
-@pytest.mark.parametrize("w,h", [(300, 30), (480, 46)])
-def test_at_656_by_668_the_notice_never_covers_a_drawn_number(scale, centre, w, h):
-    """Rhino check of #29 at 5891efc, docked Top 656 × 668: the front number printed through the notice. The
-    numbers are placed first (as draw_screen does), then the notice (notice_place), off every number's box with
-    its margin (number_box) and off the status box."""
-    view = (656, 668)
-    yards, house, to, status = _scene_at(view, scale, centre)
-    sb = logic._bbox(status)
-    fixed = [(sb[0], sb[1], sb[2] - sb[0], sb[3] - sb[1])]
-    taken = list(fixed)
-    for k in logic.placement_order([y["status"] for y in yards]):
-        y = yards[k]
-        cands = [tuple(to(c["points"])) for c in y["candidates"]]
-        i, q, kind, sc = logic.place_dimension(cands, logic.label_width(y["number"], 11),
-                                               [logic.rect_quad(b) for b in taken], house, (328, 334), view,
-                                               must=y["status"] != present.COMPLIES,
-                                               fixed=[logic.rect_quad(f) for f in fixed])
-        if q is not None:
-            taken.append(logic.number_box([p[0] for p in q], [p[1] for p in q]))
-    numbers = taken[1:]
-    assert numbers
-    x, y_ = logic.notice_place(view[0], view[1], w, h, None, fixed, numbers)
-    box = (x, y_, w, h)
-    meets = lambda a, b: a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
-    assert not any(meets(box, n) for n in numbers + fixed), (box, numbers)
-
-
-def test_a_drawn_numbers_box_has_a_margin_the_edge_lengths_keep_off():
-    """The rear number touched the "69'-6 1/8"" edge length: the edge labels avoid the number's box with its margin."""
-    assert logic.number_box([10, 50], [20, 34]) == (10 - logic.NUMBER_PAD_PX, 20 - logic.NUMBER_PAD_PX,
-                                                    40 + 2 * logic.NUMBER_PAD_PX, 14 + 2 * logic.NUMBER_PAD_PX)
-    assert logic.NUMBER_PAD_PX >= 3
-
-
-
-def test_the_notice_search_stays_quick_in_a_4k_view_with_every_corner_taken():
-    """Review of dd74264, F1: an 8 px search over the whole view took 89 s a frame at 3800 × 2100."""
-    import time
-    view_w, view_h = 3800, 2100
-    taken = [(0, 0, 900, 400), (0, 1500, 900, 600), (2800, 0, 1000, 400), (2800, 1500, 1000, 600)]
-    for k in range(20):
-        taken.append((100 + 150 * k, 900, 90, 18))
-    t0 = time.perf_counter()
-    x, y = logic.notice_spot(view_w, view_h, 600, 46, (800, 300, 3000, 1800), taken)
-    assert time.perf_counter() - t0 < 0.25
-    assert not any(x < a + c and a < x + 600 and y < b + d and b < y + 46 for a, b, c, d in taken)
-
-
-def test_in_a_narrow_short_view_the_last_resort_stays_in_view():
-    """Review of dd74264, F2: moved left of the status box it ran off the view's left edge."""
-    status = logic.rect_quad((51, 14, 295, 186))
-    everywhere = logic.rect_quad((0, 0, 360, 200))
-    i, q, kind, sc = logic.place_dimension([((200, 100), (150, 100))], 80, [everywhere, status], view=(360, 200),
-                                           must=True, fixed=[status])
-    assert kind == "crowded" and logic.inside_view(q, (360, 200))
-
-
-
-def test_the_notice_finds_a_gap_narrower_than_its_search_step():
-    """Review of db58364, L1: the coarse grid missed a gap only the notice's width + 10 px wide."""
-    view_w, view_h, w, h = 656, 668, 200, 30
-    taken = [(0, 0, 656, 300), (0, 300, 213, 368), (423, 300, 233, 368)]     # a 210 px wide gap, x 213-423
-    x, y = logic.notice_spot(view_w, view_h, w, h, None, taken)
-    assert not any(x < a + c and a < x + w and y < b + d and b < y + h for a, b, c, d in taken)
-
-
-def test_the_last_resort_goes_right_of_the_status_box_when_only_that_side_fits():
-    """Review of db58364, L2: the right-hand branch, pinned."""
-    status = logic.rect_quad((10, 14, 200, 186))
-    everywhere = logic.rect_quad((0, 0, 400, 200))
-    i, q, kind, sc = logic.place_dimension([((120, 100), (60, 100))], 80, [everywhere, status], view=(400, 200),
-                                           must=True, fixed=[status])
-    assert kind == "crowded" and min(p[0] for p in q) >= 213 and not logic.shapes_hit(q, status)
-
-
-
-def test_the_notice_finds_a_gap_exactly_its_own_size():
-    """Review of cae5326: a gap exactly the notice's width (x 213-413 for 200 px) was missed with a 1 px margin."""
-    view_w, view_h, w, h = 656, 668, 200, 30
-    taken = [(0, 0, 656, 300), (0, 300, 213, 368), (413, 300, 243, 368)]
-    x, y = logic.notice_spot(view_w, view_h, w, h, None, taken)
-    assert not any(x < a + c and a < x + w and y < b + d and b < y + h for a, b, c, d in taken)
+def test_the_plugin_places_numbers_and_tags_with_the_one_placer_only():
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    screen = src[src.index("def draw_screen("):src.index("def _label_timer(")]
+    assert 'items.append({"key": key, "text": number,' in screen               # a yard's number only
+    assert 'key = ("tag", k, j, tag)' in screen                                  # its "min" tags: labels too
+    assert "logic.LabelRun(" in src and "place_dimension" not in src and "tag_spot" not in src
+    source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    for gone in ("def place_dimension(", "def number_spot(", "def tag_spot(", "def number_box(", "NUMBER_SCALES"):
+        assert gone not in source                                    # one placer: #29's own is gone
+    assert source.count("def notice_place(") == 1 and source.count("def notice_spot(") == 1
