@@ -204,7 +204,9 @@ def limits(cells) -> dict:
     out = dict(LIMITS)
     if one != other:
         wide, narrow = ((SIDE_ONE, SIDE_OTHER) if one > other else (SIDE_OTHER, SIDE_ONE))
-        out[wide] = [("side_yard_larger", "min", {"side_yard_smaller": 100}, lambda n: n[0]),
+        # the other wall at the narrower figure, so only this side can carry the larger one (each side's eaves are
+        # held to the minimum their side carries, #18's P0: a wall far out on both sides leaves either side open)
+        out[wide] = [("side_yard_larger", "min", {"side_yard_smaller": min(one, other)}, lambda n: n[0]),
                      ("side_yard_larger_eaves", "min", {"side_yard_smaller_eaves": 100}, lambda n: n[0] - 2)]
         out[narrow] = [("side_yard_smaller", "min", {"side_yard_larger": 100}, lambda n: n[0]),
                        ("side_yard_smaller_eaves", "min", {"side_yard_larger_eaves": 100}, lambda n: n[0] - 2)]

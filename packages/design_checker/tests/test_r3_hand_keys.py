@@ -54,6 +54,18 @@ LAW = [
     ("R-3aa.height", {"building_height": 36, "front_yard": 11, "side_yard_smaller": 6, "side_yard_larger": 11,
                       "rear_yard": 40.9, "lot_depth": 160}, "fail"),
     ("R-3aa.rear_yard", {"rear_yard": 39.9, "lot_depth": 160}, "fail"),
+    # each side's eave held to the minimum its side carries (#18's P0, as R-3a): walls 9'-6" and 10'-0" leave only the
+    # wider side able to be the 10 ft one, and its eave 6'-6" from its line is 3'-6" into it; walls 12 and 15 ft leave
+    # either side, and an eave that fits only one way needs review
+    ("R-3aa.yard_projections", {"side_yard_smaller": 9.5, "side_yard_larger": 10, "front_yard_eaves": 12,
+                                "side_yard_smaller_eaves": 9, "side_yard_larger_eaves": 6.5, "rear_yard_eaves": 48,
+                                "lot_depth": 120, "building_height": 30}, "fail"),
+    ("R-3b.yard_projections", {"side_yard_smaller": 12, "side_yard_larger": 15, "front_yard_eaves": 12,
+                               "side_yard_smaller_eaves": 7, "side_yard_larger_eaves": 15, "rear_yard_eaves": 48,
+                               "lot_depth": 125, "building_height": 38}, "needs_review"),
+    ("R-3aa.yard_projections", {"side_yard_smaller": 12, "side_yard_larger": 15, "front_yard_eaves": 12,
+                                "side_yard_smaller_eaves": 9, "side_yard_larger_eaves": 7, "rear_yard_eaves": 48,
+                                "lot_depth": 120, "building_height": 30}, "needs_review"),
     # R-3b: note 8 (3,500 sf new / 4,000 sf by conversion, +500 per unit past 3, +300 per room let)
     ("R-3b.lot_area_multiple_family", {"use": "multiple_family", "lot_area": 6600, "dwelling_units": 7,
                                        "rooms_let_for_profit": 2, "conversion": True}, "pass"),  # 4,000+2,000+600
