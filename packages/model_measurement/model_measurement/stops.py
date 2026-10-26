@@ -40,6 +40,8 @@ STOPS = {
     "street_ids_needed": "which street lot lines are on which street isn't recorded: pick the street side so Gordium "
                          "knows which lines are which street (a corner lot's lot width is the frontage on one street, "
                          "§325-8A col. 7)",
+    "street_ids_not_one_run": "the street lot lines named for one street aren't one run along the lot (another "
+                              "street's lines between them): pick the street side again",
     "address_not_a_street": "the address street given isn't one run of the street lot lines: pick the lot line(s) "
                             "on the street the address is on again",
     "rear_on_street": "the lot line opposite the address street is on a street too (a through lot, §325-8A(14)(d)): "

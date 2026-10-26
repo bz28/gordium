@@ -106,7 +106,7 @@ def test_one_streets_lines_in_two_runs_are_not_read():
     ring = [(0, 0), (60, 0), (60, 45), (0, 45)]
     edges, site = _site(ring)
     w = measure(site, _facts(edges, range(3), ["A St", "B St", "A St"]))["lot_width"]
-    assert w["value"] is None and "pick the street side" in w["reason"], w
+    assert w["value"] is None and "aren't one run" in w["reason"] and "isn't recorded" not in w["reason"], w
 
 
 def _box(x0, y0, x1, y1):
@@ -173,3 +173,16 @@ def test_on_the_tax_map_a_short_piece_recorded_on_its_street_stays_on_it():
     facts = _facts(edges, range(3), ["Elm St", "Oak Ave", "Oak Ave"], lot_surveyed=False)   # the cut on Oak
     got = _widths(site, facts)
     assert got == sorted([59.8, round(99.8 + math.hypot(0.2, 0.2), 2)]), got
+
+
+def test_a_corner_lot_with_one_street_lines_street_not_recorded_measures_nothing():
+    """#18 round g, P2: street_ids recorded for one street line and not the other (["A St", None]): which lines are
+    which street isn't known, so nothing is measured from the street lines (the lot width, the lot depth, every
+    yard), each asking for the street pick."""
+    ring = [(0, 0), (50, 0), (50, 100), (0, 100)]
+    edges, site = _site(ring)
+    site["buildings"] = _box(10, 30, 47, 70)
+    m = measure(site, _facts(edges, [0, 1], ["A St", None]))
+    for name in ("lot_width", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_depth"):
+        assert m[name]["value"] is None and not m[name].get("readings"), name
+        assert "pick the street side" in m[name]["reason"], (name, m[name]["reason"])

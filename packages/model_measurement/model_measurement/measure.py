@@ -35,7 +35,6 @@ MEASURES = list(load(MEASURES_FILE))
 
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
-PARALLEL = 30             # degrees: street lines turning more than this between them turn a corner
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
@@ -2207,13 +2206,11 @@ def _lot_lines(lot: Lot, facts: dict):
         basis = {"front": [law.basis(two)], "side": [law.basis(one)], "rear": [], "depth": []}
         chain = lot.ordered_street()
         streets_of = _street_groups(lot, facts, chain)
-        if streets_of is None:
-            # which lines are which street isn't recorded (or the names saved are stale): the lines given may all be
-            # one street's, so no yard is measured from them (#18 round f, P0: a yard to one street line passed);
-            # never told from where the lines turn
-            ids = facts.get("street_ids")
-            return stop("street_names_stale" if ids is not None and matching_ids(facts.get("street_line"), ids) is None
-                        else "street_ids_needed")
+        if isinstance(streets_of, str):
+            # which lines are which street isn't recorded (or the names saved are stale, or contradict themselves):
+            # the lines given may all be one street's, so no yard is measured from them (#18 round f, P0: a yard to
+            # one street line passed); never told from where the lines turn
+            return stop(streets_of)
         if len(streets_of) < 2:
             return stop("corner_one_street")    # stated a corner lot, but every street line is on one street
         given = facts.get("address_street_line")
@@ -2267,14 +2264,16 @@ def _lot_lines(lot: Lot, facts: dict):
             "candidates": candidates}
 
 
-def _street_groups(lot: "Lot", facts: dict, chain: list) -> list[list[int]] | None:
+def _street_groups(lot: "Lot", facts: dict, chain: list) -> list[list[int]] | str:
     """The street lot lines grouped by the street each is on (`street_ids`, one per `street_line`, recorded by the
     street pick or the lookup), each group its lines in order along the lot: a corner lot's streets, each its own
-    frontage (§325-8A col. 7: the frontage on one street). None when that isn't recorded for every street lot line,
-    a lot line's pieces are on two streets, or one street's lines aren't one run: then which lines are which street
-    is the architect's to say, never guessed from where the lines turn."""
-    if matching_ids(facts.get("street_line"), facts.get("street_ids")) is None:
-        return None
+    frontage (§325-8A col. 7: the frontage on one street). Else the stop saying why (street_ids_needed: not recorded
+    for every street lot line; street_names_stale: saved for other lines; street_ids_not_one_run: one street's
+    lines in two runs): which lines are which street is the architect's to say, never guessed from where the lines
+    turn."""
+    ids = facts.get("street_ids")
+    if matching_ids(facts.get("street_line"), ids) is None:
+        return "street_names_stale" if ids is not None else "street_ids_needed"
 
     def id_of(piece):
         return lot.street_of[piece]
@@ -2282,14 +2281,14 @@ def _street_groups(lot: "Lot", facts: dict, chain: list) -> list[list[int]] | No
     for i in chain:
         found = {id_of(q) for q in (lot.pieces[i] if lot.pieces else [i])}
         if None in found or len(found) != 1:
-            return None
+            return "street_ids_needed"                   # a street line's street not recorded
         names.append(found.pop())
     groups = []
     for i, name in zip(chain, names):
         if groups and groups[-1][0] == name:
             groups[-1][1].append(i)
         elif any(g[0] == name for g in groups):
-            return None                                  # one street's lines in two runs: not read
+            return "street_ids_not_one_run"              # one street's lines in two runs: not read
         else:
             groups.append((name, [i]))
     return [g for _, g in groups]
@@ -2356,13 +2355,6 @@ def _eaves_by_wall_side(lot: "Lot", r: dict, words: str, w: str, shape, walls: l
             for ww, wn, ea, eb, k in pairs]
 
 
-def _turn(a, b) -> float:
-    """How far the lot outline turns, in degrees (0-180), from one lot line to the next (end to end)."""
-    (ax, ay), (bx, by) = _chord(a), _chord(b)
-    d = abs(math.degrees(math.atan2(ay, ax) - math.atan2(by, bx))) % 360
-    return min(d, 360 - d)
-
-
 def _width(lot: Lot, facts: dict, lines) -> dict:
     """Lot width: the frontage, the length of the lot line(s) on the street. On a curved street also straight
     across (lot_width's open question). On a corner lot, each street's frontage (which street's frontage is the
@@ -2373,8 +2365,8 @@ def _width(lot: Lot, facts: dict, lines) -> dict:
         # each street's own frontage, the lines recorded on it (street_ids): never two streets added, never a
         # guess from where the lines turn; not recorded, the lot width waits for the street pick
         groups = _street_groups(lot, facts, chain)
-        if groups is None:
-            return _missing("lot_width", stop("street_ids_needed"))
+        if isinstance(groups, str):
+            return _missing("lot_width", stop(groups))
     width = []
     for g in groups:
         on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(lot.label(i) for i in g)})" if len(groups) > 1 else ""

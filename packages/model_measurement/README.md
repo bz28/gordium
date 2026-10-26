@@ -24,6 +24,7 @@ format report from it.
   | `zone`, `jurisdiction`, `use` | pick the rules |
   | `street_line` | **every** lot line on a street, each by its two ends (on a corner lot: both streets and any curve between them); front, side and rear all follow from it |
   | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review". On a corner lot every yard facing a street is a front yard (§325-19C, the law), the rear yard is opposite the street the address is on (§325-8A(14)(d)), and the one side yard left is checked against Column 13 (Gordium's reading, City practice) |
+  | `street_ids` | the street each `street_line` is on, one name per line, recorded by the street pick or the address lookup. Required on a corner lot: each street's lines are its own frontage, and which street the address may be on; not recorded (or saved for other lines, or one street's lines in two runs), the lot width, the lot depth and every yard need review, never guessed from where the lines turn |
   | `address_street_line` | on a corner lot: the lot line(s) on the street the lot's address is on (it decides which yard is the rear yard). Not given, each street is read as it, and the yards it changes need review |
   | `accessory_buildings` | the ids of the solids that are accessory buildings (a garage, a shed). A solid standing apart from the main building that isn't listed could be a freestanding deck (part of the building, §325-18A), so both are read. Listing them also picks the main building (the one left) |
   | `accessory_frame` | yes or no: the accessory buildings are frame. Frame ones keep §325-25C's distances by law; for others it is an open question (325-25C#1), read every way |
@@ -39,7 +40,7 @@ format report from it.
 **Which drawn lines form each lot line (decided 2026-10-21, review round 20).** A drawn outline's pieces are grouped
 into lot lines by cleaning it within its own accuracy: a corner goes when leaving it out moves the outline by no
 more than 0.01 ft on a survey, 0.25 ft on the tax map (pieces in line, slivers). A corner where the street meets
-the other lines, or at a curved line, always stays. The cleaned outline only decides which drawn pieces form each
+the other lines, where the recorded street changes (`street_ids`), or at a curved line, always stays. The cleaned outline only decides which drawn pieces form each
 line (street, side, rear; the readings of which are which), so it can only drop readings the drawing's noise made.
 Every distance is still measured to the pieces drawn, never to a chord across them, and the lot area is the
 outline drawn. Lines are named by the architect's own numbering ("line 10 to 11" for two drawn pieces read as
@@ -146,7 +147,8 @@ Every reason the code gives today comes from the table:
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
   lot yes or no"; "a corner lot, but the street lot lines given are all on one street: pick the lot lines on both
   streets"; "which street lot lines are on which street isn't recorded: pick the street side so Gordium knows which
-  lines are which street (a corner lot's lot width is the frontage on one street, §325-8A col. 7)"; "the address street given isn't one run of the street lot lines: pick
+  lines are which street (a corner lot's lot width is the frontage on one street, §325-8A col. 7)"; "the street lot lines named for one street aren't one run along the lot (another street's lines between
+  them): pick the street side again"; "the address street given isn't one run of the street lot lines: pick
   the lot line(s) on the street the address is on again"; "the lot line opposite the address street is on a street
   too (a through lot, §325-8A(14)(d)): which yards are rear and front is an open question for the architects";
   "every side lot line is on a street (a lot on three streets): which yard is a side yard is an open question for

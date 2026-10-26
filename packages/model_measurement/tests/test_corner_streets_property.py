@@ -153,16 +153,12 @@ def test_with_the_streets_recorded_every_true_frontage_is_a_reading_and_nothing_
 
 @pytest.mark.parametrize("seed", range(50))
 def test_on_the_tax_map_every_true_frontage_is_still_a_reading(seed):
-    """From the tax map (the outline cleaned within 0.25 ft, pieces merged): each true frontage is a reading or the
-    lot width needs review, never a reading above the shortest true frontage alone."""
+    """From the tax map (the outline cleaned within 0.25 ft, pieces merged, but never across a change of recorded
+    street): the readings are the true frontages, each within the cleaning's 0.3 ft."""
     ring, nstreet, names, true = design(random.Random(seed))
     w = _measure(ring, nstreet, names, surveyed=False)["lot_width"]
     got = sorted(r["value"] for r in w.get("readings") or ([w] if w.get("value") is not None else []))
-    if got:
-        assert all(any(abs(a - b) <= 0.3 for a in got) for b in true), (seed, got, true)
-        assert min(got) <= min(true) + 0.3, (seed, got, true)
-    else:
-        assert w["value"] is None and w.get("reason"), (seed, w)
+    assert len(got) == len(true) and all(abs(a - b) <= 0.3 for a, b in zip(got, true)), (seed, got, true, w)
 
 
 @pytest.mark.parametrize("seed", range(100))
