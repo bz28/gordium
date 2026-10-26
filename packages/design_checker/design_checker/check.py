@@ -98,18 +98,56 @@ def _n(x) -> str:
     return f"{x:,.2f}".rstrip("0").rstrip(".") if isinstance(x, float) else f"{x:,}"
 
 
-def _why(row: dict, rules: dict, measured: dict) -> dict:
+def _why(row: dict, rules: dict, measured: dict, allowed: dict | None = None, facts: dict | None = None) -> dict:
     """The row, plus "Why": for a NEEDS REVIEW row whose measurements are missing, why each is missing (the
     measuring's own reason: "a building isn't on the lot (is it part of this design?)", "enter bedrooms / parking spaces"), else the
-    report's reason."""
+    report's reason. A rule's own review_when that holds under every reading of THE reading set (with `allowed`)
+    comes first, and the readings of a measurement then change nothing, so their question is left out: the rule's
+    own question, never one that changes nothing (#20 review round 1: an eaves row asking which side is the 10 ft one
+    said instead to ask the City how a pitched roof's height is taken, though every height reading gave the same
+    answer)."""
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
         rule = rules[row["Rule id"]]
+        own = _review_reasons(rule, measured, allowed, facts) if allowed is not None else []
         for name in sorted(set().union(*(formula.names(rule[k]) for k in ("applies_when", "check") if rule.get(k)))):
+            if own and (measured.get(name) or {}).get("readings"):
+                continue                # needs review under every one of its readings: it changes nothing
             reason = (measured.get(name) or {}).get("reason")
             if (measured.get(name) or {}).get("value") is None and reason and reason not in reasons:
                 reasons.append(reason)
+        reasons = own + reasons
     return {**row, "Why": "; ".join(reasons) or row["Why it needs review"]}
+
+
+def _review_reasons(rule: dict, measured: dict, allowed: dict, facts: dict | None) -> list[str]:
+    """The reasons of a rule's review_when entries that hold under every reading of THE reading set (a needs-review
+    the rule itself asks for, whatever the open measurements turn out to be), in the rule's order."""
+    from rule_format.rulebook import _condition
+    entries = rule.get("review_when") or []
+    if not entries:
+        return []
+    names = reading_set.rule_names(rule)
+    values = {k: m["value"] for k, m in measured.items()}
+    every = reading_set.combos(names, values, measured, facts)
+    if not every:
+        return []
+    kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
+    out = []
+    for trial, _ in every:
+        if outcome(rule, trial, allowed) != "needs_review":
+            return []
+        held = []
+        for r in entries:
+            try:
+                if _condition(r["when"], trial, kinds):
+                    held.append(" ".join(str(r.get("reason") or "").split()))
+            except Exception:                   # a condition that can't be read under this reading
+                pass
+        if not held:
+            return []
+        out += [h for h in held if h and h not in out]
+    return out
 
 
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn
@@ -702,8 +740,8 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
-    every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
     allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
+    every = [_why(dict(zip(COLUMNS, r)), by_id, measured, allowed, facts) for r in t["output"]]
     waiting = [r for r in every if waits_on_interior(r, by_id[r["Rule id"]], measured, allowed)]
     for r in waiting:                   # exactly which stated facts each one waits for (its "Enter …" asks those)
         r["needs"] = logic.needs_of(reading_set.rule_names(by_id[r["Rule id"]]), {k: m.get("value") for k, m in measured.items()})
