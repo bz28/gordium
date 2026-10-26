@@ -822,7 +822,8 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
         i_ = LABEL_INSET
         free = sorted((box_gap(line, (left, top, w, h)), left, top) for top in range(i_, int(view[1] - h - i_) + 1, 12)
                       for left in range(i_, int(view[0] - w - i_) + 1, 12)
-                      if not any(_over((left, top, w, h), other) for other in placed))
+                      if not any(_over((left, top, w, h), other)
+                                 for other in list(placed) + [axis_icon_box(view)]))   # nor on the axis icon
         if free:
             return result(rows, LABEL_MIN_SIZE, free[0][1], free[0][2], w, h, forced=True)
     left, top = min(xa, xb), max(ya, yb) + 6
@@ -830,6 +831,8 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
         i_ = LABEL_INSET
         left = min(max(left, i_), max(view[0] - w - i_, i_))
         top = min(max(top, i_), max(view[1] - h - i_, i_))
+        if _over((left, top, w, h), axis_icon_box(view)):          # off the axis icon: above it (review of 7e6d824)
+            top = max(i_, view[1] - AXIS_ICON_PX - h)
     return result(rows, LABEL_MIN_SIZE, left, top, w, h, forced=True)
 
 

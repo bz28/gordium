@@ -3602,6 +3602,16 @@ def test_a_plan_label_never_wraps_inside_a_number_stays_inside_the_view_and_off_
     near_icon = logic_.place_dim_label(((20, 560), (20, 660)), "min 10'-0\"", 11, view)
     box = (near_icon["left"], near_icon["top"], near_icon["w"], near_icon["h"])
     assert not logic_._over(box, logic_.axis_icon_box(view)) and not near_icon["forced"], near_icon
+    # nowhere keeps every rule (a building over the whole view): forced, but still off the icon (review of 7e6d824)
+    small = (400, 300)
+    cover = [(-10, -10), (410, -10), (410, 310), (-10, 310)]
+    forced = logic_.place_dim_label(((10, 280), (60, 280)), "min 10'-0\"", 11, small, hard_shapes=[cover])
+    assert forced["forced"] and not logic_._over((forced["left"], forced["top"], forced["w"], forced["h"]),
+                                                 logic_.axis_icon_box(small)), forced
+    stuck = logic_.place_dim_label(((10, 280), (60, 280)), "min 10'-0\"", 11, small, hard_shapes=[cover],
+                                   placed=[(0, 0, 400, 300)])                  # not even a spot clear of labels
+    assert stuck["forced"] and not logic_._over((stuck["left"], stuck["top"], stuck["w"], stuck["h"]),
+                                                logic_.axis_icon_box(small)), stuck
     # random labels near every edge and the corner: never on an edge, never on the icon, never wrapped in a number
     rng = random.Random(29)
     for _ in range(150):
