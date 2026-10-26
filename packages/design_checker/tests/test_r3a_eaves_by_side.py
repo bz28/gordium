@@ -37,6 +37,8 @@ def test_p0_sceptic_a_design_does_not_comply_with_r3a_yard_projections():
     assert E.side(got["side_yard_larger_eaves"]) == E.EAST and got["side_yard_larger_eaves"]["value"] == 6.5
     assert status(res, "R-3a.side_yards") == present.COMPLIES
     assert status(res, "R-3a.yard_projections") == present.FAILS
+    (row,) = [i for i in res["view"]["items"] if i.get("rule") == "R-3a.yard_projections"]
+    assert (row["name"], row["proposed"], row["required"]) == ("Eaves into side yard", "6'-6\"", "8'-0\"")
 
 
 def test_p0_sceptic_b_design_does_not_comply_with_r3a_yard_projections():
@@ -51,6 +53,12 @@ def test_either_side_may_be_the_10_ft_one_the_eave_fitting_one_way_needs_review(
     west is the 5 ft side. Needs review (the review_when), never complies; it says why."""
     res, got, facts = checked(12.0, 15.0, 5.0, 0.0)
     assert status(res, "R-3a.yard_projections") == present.REVIEW
+    # the panel: that side's eave, and the rule's own question, never "Eaves into front yard" and the roof's height
+    # (every height reading under 40 ft: it changes nothing; #20 review round 1, two sceptics)
+    (row,) = [i for i in res["view"]["items"] if i.get("rule") == "R-3a.yard_projections"]
+    assert row["name"] == "Eaves into side yard", row["name"]
+    assert row["reason"].startswith("Which side yard is the 10 ft one"), row["reason"]
+    assert "pitched roof" not in row["reason"], row["reason"]
     # the rule itself, the roof's height readings aside (each well under 40 ft: no bonus), is the review_when's
     flat = {**{k: dict(v) for k, v in got.items()}, "building_height": {**got["building_height"], "value": 26.0}}
     assert row_verdict(PROJECTIONS, flat, E.ALLOWED, facts) == present.REVIEW
