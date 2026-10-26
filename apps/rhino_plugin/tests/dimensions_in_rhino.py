@@ -135,6 +135,10 @@ try:
     view = (vp.Bounds.Width, vp.Bounds.Height)
     claim("1 every number shown lies wholly inside the view (Rhino check of #29 at f6642a9: three ran off)",
           all(g.logic.inside_view(q, view) for _, q in labels), {"view": view, "placed": log["placed"]})
+    wrong_k = [j for j, (_, _, st) in enumerate(o.yard_dims) if st in ("does_not_comply", "needs_review")]
+    claim("1 every failing or in-review yard's number is drawn (Rhino check at 6d2e01a: the failing one was missing)",
+          wrong_k and all(o.placed.get(j) and o.placed[j][1] is not None for j in wrong_k),
+          {j: (o.placed.get(j) or (None, None, None))[2] for j in wrong_k})
     shown_words = [pl[5] for j, pl in o.placed.items() if j != "height" and pl[5]]
     claim("1 each dimension shows its number only (no name, no 'needs', no '(approx.)': the panel says those)",
           shown_words and all("yard" not in t.lower() and "needs" not in t and "approx" not in t for t in shown_words),

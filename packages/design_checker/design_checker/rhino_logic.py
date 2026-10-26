@@ -663,16 +663,33 @@ def number_spot(a, b, w, away=None, view=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_G
     return None, None                                # neither in view: no number (the panel says it; review F1, F2)
 
 
+NUMBER_SCALES = (1.0, 0.9, 0.8, 0.7)    # a failing or in-review number's text, made smaller step by step to fit
+#                                        (0.7 × 11 px ≈ 8 px: the smallest that still reads)
+
+
+def label_at_inner(a, b, w, h=DIM_LABEL_H_PX, away=None, gap=DIM_LABEL_GAP_PX):
+    """A number beside its line at the line's inner end (the building's end), running from just outside the house
+    along the line towards the lot line: for a line whose middle and outer end are both taken. Its corners."""
+    (ux, uy), _ = _along(b, a)                     # from the building towards the lot line
+    return label_on_line((b[0] + ux * (w + 2 * gap), b[1] + uy * (w + 2 * gap)), b, w, h, away, gap)
+
+
 def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=None, extras=None,
-                    h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
-    """Which of a yard's dimension positions to draw, and its number (screen): (index, corners or None, kind).
-    `candidates`: the positions check.plan offers along the wall facing the yard's lot line, best first, each (lot
-    end, building end); `w`: the number's width (None: no number shown); `obstacles`: what it may not cover (the
-    status box, the notice, the lot edges' lengths, the numbers and tags placed before); `footprint`: the
-    buildings' outlines (one or a list); `extras`: per position, its own "min" tags; `view`: (w, h).
-    The first position whose number sits on or just past its own line (number_spot), wholly in view, covering
-    nothing; else the best position whose number is in view, as it falls ("crowded"); nothing else, never a leader
-    to somewhere else (Rhino checks of #29: the drafting convention)."""
+                    h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX, must=False, fixed=()):
+    """Which of a yard's dimension positions to draw, and its number (screen): (index, corners or None, kind,
+    scale). `candidates`: the positions check.plan offers along the wall facing the yard's lot line, best first,
+    each (lot end, building end); `w`: the number's width at full size (None: no number shown); `obstacles`: what
+    it may not cover (the status box, the numbers and tags placed before; the notice and the lots' edge lengths are
+    placed after the numbers and keep off them); `footprint`: the buildings' outlines (one or a list); `extras`:
+    per position, its own "min" tags; `view`: (w, h); `must`: the yard fails or needs review; `fixed`: what even
+    the last resort never covers (the status box).
+    At its own line only, the drawing's way: centred on the line (its visible part) at any of the positions, else
+    just past a position's outer end, else beside it at its inner end (just outside the house), the first wholly in
+    view covering nothing. A failing or in-review number is always drawn (Rhino check of #29 at 6d2e01a: the failing one
+    was missing): its text made smaller step by step (NUMBER_SCALES), and last, at full size just past its outer
+    end, moved into the view, whatever it covers ("crowded"). A complying one is left to the panel when there is no
+    room ("none")."""
+    import math
     houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
     boxed = [(o, _bbox(o)) for o in obstacles if o]
 
@@ -682,20 +699,54 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=No
         return not any(_boxes_meet(box, ob) and shapes_hit(shape, o) for o, ob in against)
     usable = [(i, a, b) for i, (a, b) in enumerate(candidates) if _along(a, b)[1] > 1e-6]
     if not usable:
-        return 0, None, "none"
+        return 0, None, "none", 1.0
     if w is None:
-        return usable[0][0], None, "none"
-    first = None
-    for i, a, b in usable:
-        q, kind = number_spot(a, b, w, away, view, h, gap)
-        if q is None or not inside_view(q, view):
-            continue
-        if clear(q, (extras[i] if extras and i < len(extras) else None) or ()):
-            return i, q, kind
-        first = first or (i, q)
-    if first is not None:
-        return first[0], first[1], "crowded"
-    return usable[0][0], None, "none"
+        return usable[0][0], None, "none", 1.0
+    for scale in (NUMBER_SCALES if must else NUMBER_SCALES[:1]):
+        ws, hs = w * scale, h * scale
+        for kind in ("on", "end", "inner"):        # on its line at any position first, then past its ends
+            for i, a, b in usable:
+                more = (extras[i] if extras and i < len(extras) else None) or ()
+                seen = clip_to_view(a, b, view)
+                if seen is None or math.dist(*seen) <= 1e-6:            # (a line that only touches the view's
+                    continue                                            # edge: nothing of it seen; review F1)
+                if kind == "on" and math.dist(*seen) < ws + 2 * gap:
+                    continue
+                q = (label_on_line(seen[0], seen[1], ws, hs, away, gap) if kind == "on" else
+                     label_at_end(a, b, ws, hs, gap) if kind == "end" else
+                     label_at_inner(seen[0], seen[1], ws, hs, away, gap))
+                if inside_view(q, view) and clear(q, more):
+                    return i, q, kind, scale
+    if not must:
+        return usable[0][0], None, "none", 1.0
+    i, a, b = usable[0]
+    q = label_at_end(a, b, w, h, gap)
+    if view:                                       # moved into the view: drawn, whatever it covers but the
+        xs, ys = [p[0] for p in q], [p[1] for p in q]          # status box (review F4)
+        dx = max(0, VIEW_MARGIN_PX - min(xs)) - max(0, max(xs) - (view[0] - VIEW_MARGIN_PX))
+        dy = max(0, VIEW_MARGIN_PX - min(ys)) - max(0, max(ys) - (view[1] - VIEW_MARGIN_PX))
+        q = [(x + dx, y + dy) for x, y in q]
+        for f in fixed:
+            if shapes_hit(q, f):                   # below the status box (it sits at the view's top) ...
+                fx0, _, _, fy1 = _bbox(f)
+                below = [(x, y + fy1 + VIEW_MARGIN_PX - min(p[1] for p in q)) for x, y in q]
+                if inside_view(below, view):
+                    q = below
+                else:                              # ... or, a short view, to its left (review F1)
+                    q = [(x + fx0 - VIEW_MARGIN_PX - max(p[0] for p in q), y) for x, y in q]
+    return i, q, "crowded", 1.0
+
+
+def notice_place(view_w, view_h, w, h, model, fixed, taken):
+    """Where the "no longer complies" notice goes, placed after the dimensions' numbers: off the model and off
+    everything drawn (notice_spot); when every corner is taken, off the status box (`fixed`) at least, whatever
+    number it then covers (review F2: its fallback could land on the status box). (A view so small that the
+    status box covers every corner: the notice goes where notice_spot puts it.)"""
+    x, y = notice_spot(view_w, view_h, w, h, model, list(fixed) + list(taken))
+    box = rect_quad((x, y, w, h))
+    if any(shapes_hit(box, rect_quad(f)) for f in fixed):
+        x, y = notice_spot(view_w, view_h, w, h, model, list(fixed))
+    return x, y
 
 
 def tag_spot(line_ends, outward, tag, taken, view=None):
