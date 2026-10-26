@@ -1721,11 +1721,12 @@ rules:
       - when: >-
           use == "one_family_detached_zero_lot_line"
           and (side_yard_smaller >= 15 + max(building_height - 35, 0) or side_yard_larger < 15 + max(building_height - 35, 0))
-          and side_yard_smaller_eaves >= 15 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves >= 10 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves < 15 + max(building_height - 35, 0) - 2
+          and side_yard_smaller_eaves >= 15 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves >= max(building_height - 35 - 2, 0) and side_yard_larger_eaves < 15 + max(building_height - 35, 0) - 2
         reason: >-
           For a zero-lot-line house, which side yard is the 15 ft one (both minimums more on a building over 35 ft tall) is open: the walls are at least that far from both side lot lines, or from neither, so either side
-          may be. The eaves fit only if the side whose walls are farther from its line is the 10 ft one. Say
-          which side is meant to be the 15 ft one.
+          may be. The eaves fit only if the side whose walls are farther from its line is the other one (its 0 ft
+          side, where an eave may reach the line but not cross it, or 10 ft: note 15). Say which side is meant to be
+          the 15 ft one.
       - when: >-
           use == "one_family_detached_zero_lot_line"
           and (side_yard_smaller >= 15 + max(building_height - 35, 0) or side_yard_larger < 15 + max(building_height - 35, 0))
@@ -1734,17 +1735,6 @@ rules:
           For a zero-lot-line house, which side yard is the 15 ft one (both minimums more on a building over 35 ft tall) is open: the walls are at least that far from both side lot lines, or from neither, so either side
           may be. The eaves fit only if the side whose walls are nearer to its line is the 10 ft one. Say
           which side is meant to be the 15 ft one.
-      - when: >-
-          use == "one_family_detached_zero_lot_line"
-          and (side_yard_smaller >= 15 + max(building_height - 35, 0) or side_yard_larger < 15 + max(building_height - 35, 0))
-          and side_yard_smaller_eaves >= 15 + max(building_height - 35, 0) - 2
-          and side_yard_larger_eaves >= max(building_height - 35 - 2, 0) and side_yard_larger_eaves < 10 + max(building_height - 35, 0) - 2
-        reason: >-
-          The wider side (to the walls) of a zero-lot-line house may be its 0 ft side (note 15) when the walls leave
-          open which side is which (both sides' walls at least 15 ft from their lines, or neither): its eave may
-          reach the lot line but not cross it there (on a building over 35 ft tall, stay as far from it as the
-          building is over 35 ft, less 2 ft), or must stay 10 ft or 15 ft less 2 ft from it, whichever that side
-          carries (more over 35 ft). Say which side is the 0 ft one.
       - when: >-
           use in ["one_family_semi_detached", "one_family_attached"]
           and (side_yard_smaller >= 10 + max(building_height - 35, 0) or side_yard_larger < 10 + max(building_height - 35, 0))
@@ -1796,7 +1786,7 @@ rules:
         cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-2C}
     examples:
       # lot depth 100 ft -> rear yard 25 ft, its eaves 23 ft; building 30 ft tall unless said
-      - given: {use: one_family_detached, side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 12, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 100, building_height: 30}
+      - given: {use: one_family_detached, side_yard_smaller: 9, side_yard_larger: 16, front_yard_eaves: 12, side_yard_smaller_eaves: 8.5, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 100, building_height: 30}
         expect: pass
         note: eaves clear of every required yard
       - given: {use: one_family_detached, side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 100, building_height: 30}
@@ -1883,6 +1873,90 @@ rules:
       - given: {use: one_family_semi_detached, side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 12, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 0, rear_yard_eaves: 48, lot_depth: 100, building_height: 30}
         expect: needs_review
         note: the wider side may be the attached (0 ft) side
+      # each figure in the which-side reviews decides an answer (worked by hand: the rear yard's 25%, its 50 ft cap,
+      # the bonus over 35 ft, the 0 ft side)
+      - given: {use: one_family_detached, side_yard_smaller: 3, side_yard_larger: 3, front_yard_eaves: 8, side_yard_smaller_eaves: 2.5, side_yard_larger_eaves: 2.5, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: fail
+      - given: {use: one_family_detached, side_yard_smaller: 10, side_yard_larger: 10, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 3, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: needs_review
+      - given: {use: one_family_detached, side_yard_smaller: 9.5, side_yard_larger: 10, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 3, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: fail
+      - given: {use: one_family_detached, side_yard_smaller: 9.5, side_yard_larger: 9.5, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 8, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: pass
+      - given: {use: one_family_detached, side_yard_smaller: 14.5, side_yard_larger: 15, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached, side_yard_smaller: 14.5, side_yard_larger: 14.5, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {use: one_family_detached, side_yard_smaller: 10, side_yard_larger: 10, front_yard_eaves: 13, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached, side_yard_smaller: 14.5, side_yard_larger: 14.5, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 7.5, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached, side_yard_smaller: 10, side_yard_larger: 10, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: needs_review
+      - given: {use: one_family_detached, side_yard_smaller: 3, side_yard_larger: 10, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: pass
+      - given: {use: one_family_detached, side_yard_smaller: 10, side_yard_larger: 15, front_yard_eaves: 13, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: pass
+      - given: {use: one_family_detached, side_yard_smaller: 10, side_yard_larger: 14.5, front_yard_eaves: 13, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {use: one_family_detached, side_yard_smaller: 3, side_yard_larger: 14.5, front_yard_eaves: 13, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 15, front_yard_eaves: 8, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 14.5, side_yard_larger: 15, front_yard_eaves: 8, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 14.5, side_yard_larger: 14.5, front_yard_eaves: 8, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 13, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: pass
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 19.5, side_yard_larger: 20, front_yard_eaves: 13, side_yard_smaller_eaves: 18, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 19.5, side_yard_larger: 19.5, front_yard_eaves: 13, side_yard_smaller_eaves: 18, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 15, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 15, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 10, side_yard_larger: 15, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: pass
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 20, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 18, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: pass
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 19.5, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 18, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 19.5, front_yard_eaves: 13, side_yard_smaller_eaves: 12.5, side_yard_larger_eaves: 18, rear_yard_eaves: 22.5, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 15, front_yard_eaves: 8, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 0, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 14.5, side_yard_larger: 15, front_yard_eaves: 8, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 0, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 19.5, side_yard_larger: 20, front_yard_eaves: 13, side_yard_smaller_eaves: 18, side_yard_larger_eaves: 3, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 19.5, side_yard_larger: 19.5, front_yard_eaves: 13, side_yard_smaller_eaves: 18, side_yard_larger_eaves: 3, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 15, side_yard_larger: 15, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 3, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 19.5, side_yard_larger: 19.5, front_yard_eaves: 13, side_yard_smaller_eaves: 18, side_yard_larger_eaves: 2.5, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 19.5, side_yard_larger: 19.5, front_yard_eaves: 13, side_yard_smaller_eaves: 18, side_yard_larger_eaves: 12.5, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {use: one_family_semi_detached, side_yard_smaller: 10, side_yard_larger: 10, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 0, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: needs_review
+      - given: {use: one_family_semi_detached, side_yard_smaller: 9.5, side_yard_larger: 10, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 0, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: fail
+      - given: {use: one_family_semi_detached, side_yard_smaller: 9.5, side_yard_larger: 9.5, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 8, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: pass
+      - given: {use: one_family_semi_detached, side_yard_smaller: 14.5, side_yard_larger: 15, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 3, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_semi_detached, side_yard_smaller: 14.5, side_yard_larger: 14.5, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 3, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {use: one_family_semi_detached, side_yard_smaller: 14.5, side_yard_larger: 14.5, front_yard_eaves: 13, side_yard_smaller_eaves: 12.5, side_yard_larger_eaves: 3, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_semi_detached, side_yard_smaller: 14.5, side_yard_larger: 14.5, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 2.5, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {use: one_family_semi_detached, side_yard_smaller: 14.5, side_yard_larger: 14.5, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 12.5, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {use: one_family_semi_detached, side_yard_smaller: 10, side_yard_larger: 10, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 8.5, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: pass
+      - given: {use: one_family_detached_zero_lot_line, side_yard_smaller: 19.5, side_yard_larger: 19.5, front_yard_eaves: 12, side_yard_smaller_eaves: 12, side_yard_larger_eaves: 18, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
     notes: >-
       The yards themselves (R-2c.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
       its eaves left out; this rule measures the same yards to the outermost part, eaves included, and lets that be up

@@ -164,7 +164,10 @@ R2C = {
         ("side_yard_larger_eaves", "min", {"side_yard_smaller_eaves": 100, "use": "one_family_detached"},
          lambda n: n[0] - 2),
         ("side_yard_larger", "min", {**_CLEAR, "use": _Z}, lambda n: n[1]),
-        ("side_yard_larger_eaves", "min", {**_CLEAR, "use": _Z}, lambda n: n[1] - 2),
+        # (the narrower side's walls 14 ft: only the wider side can be the 15 ft one, so its eave alone decides;
+        # with both sides' walls 15 ft or more either side may be, and #18's which-side review answers instead)
+        ("side_yard_larger_eaves", "min", {**_CLEAR, "use": _Z, "side_yard_smaller": 14, "side_yard_smaller_eaves": 14},
+         lambda n: n[1] - 2),
         ("side_yard_smaller", "min", {**_CLEAR, "use": _S}, lambda n: n[0], ("pass", "needs_review")),
         ("side_yard_smaller_eaves", "min", {**_CLEAR, "use": _S}, lambda n: n[0] - 2,
          ("pass", "needs_review"))],
@@ -178,8 +181,8 @@ R2C = {
         ("side_yard_smaller_eaves", "min", {**_CLEAR, "use": _S, "building_height": 38}, lambda n: n[0] + 3 - 2,
          ("needs_review", "fail")),
         ("side_yard_smaller", "min", {**_CLEAR, "use": _Z}, lambda n: n[2], ("pass", "needs_review")),
-        ("side_yard_smaller_eaves", "min", {**_CLEAR, "use": _Z}, lambda n: n[2] - 2,
-         ("pass", "needs_review"))],
+        ("side_yard_smaller_eaves", "min", {**_CLEAR, "use": _Z, "side_yard_smaller": 14}, lambda n: n[2] - 2,
+         ("pass", "needs_review"))],   # (narrower walls 14 ft: that side can't be the 15 ft one, as above)
 }
 PER_DISTRICT = {"R-2C": R2C}
 
