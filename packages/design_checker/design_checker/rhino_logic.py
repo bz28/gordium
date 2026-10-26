@@ -1293,8 +1293,8 @@ def street_words(label, lines, ids=False):
     return pieces + f", {feet_words(_length(lines))} of frontage"
 
 
-STREET_ANSWER_NEEDED = ("Gordium needs a Yes or a No here: kept as street, a line that isn't can pass lot width; "
-                        "left out, a line that is can pass the front yard. ")
+STREET_ANSWER_NEEDED = ("Gordium needs a Yes or a No here (Esc leaves the street side as it was): kept as street, a "
+                        "line that isn't can pass lot width; left out, a line that is can pass the front yard. ")
 
 
 def street_more_question(label, outline, more, swing):

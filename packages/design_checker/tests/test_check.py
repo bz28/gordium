@@ -2368,7 +2368,7 @@ def test_a_street_run_never_wraps_a_corner_and_asks_where_it_is_unclear():
     got = logic.street_run(lot, lot[0])
     assert got["pieces"] == [0, 1, 2, 3, 4] and got["maybe"] == [[], [5, 6]], got   # 36° in all at piece 5; a
     assert round(got["turn"][1]) == 18                                   # corner (90°) after piece 6
-    # not answered (no one to ask, Enter, Esc): kept, the cautious way, and said (review round 3, F3)
+    # no one to ask (tests, headless): kept, and said; the plugin's question takes only Yes or No (round 14)
     run, said = logic.street_pick(lot, lot[0])
     assert run == got["pieces"] + [5, 6] and said.endswith("a bend not answered is kept as street (answer No to "
                                                            "leave it out)"), (run, said)
@@ -2506,8 +2506,8 @@ def test_a_street_is_never_cut_short_unasked_by_a_curve_or_a_repeated_corner_poi
     as its first 30° only, the rest silently dropped, so a house 14 ft from the street's far pieces complied 27 ft
     from the near ones; now nothing is suggested unless both ends of the street are sure (the box asks for the
     click, and the click asks the question). (F2) a corner point drawn twice (a piece of 0.005 ft) ended the street
-    there unasked; a piece no longer than JOINT is passed through. (F3) a question not answered keeps the bend
-    as street (the cautious way); only the architect's No leaves it out."""
+    there unasked; a piece no longer than JOINT is passed through. (F3) with no one to ask, the bend is kept and
+    said; the plugin's question takes only Yes or No (round 14)."""
     import sys
     sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
     from design_checker import rhino_logic as logic
@@ -2999,8 +2999,8 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
     kept, _ = logic.street_pick(o, o[0], ask=lambda q: None)          # not answered: kept
     assert kept == [0, 1] and width([o[k] for k in kept])["status"] == "complies"   # why no default is safe
     assert width([o[0]])["status"] == "does_not_comply"
-    # the plugin's own question, run with stand-ins for Rhino: Enter, then Esc, then No
-    answers = iter([("nothing", None), ("cancel", None), ("option", 1)])
+    # the plugin's own question, run with stand-ins for Rhino: Enter twice (asked again, with the reason), then No
+    answers = iter([("nothing", None), ("nothing", None), ("option", 1)])
     prompts = []
 
     class GetOption:
@@ -3023,12 +3023,21 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
     rhino_ = type("Rhino", (), {"Input": type("Input", (), {
         "Custom": type("Custom", (), {"GetOption": GetOption}),
         "GetResult": type("GetResult", (), {"Option": "option", "Nothing": "nothing", "Cancel": "cancel"})})})
-    ns = _plugin_functions(["_ask_street_more"], Rhino=rhino_)
+    cancelled = type("Cancelled", (Exception,), {})
+    ns = _plugin_functions(["_ask_street_more"], Rhino=rhino_, Cancelled=cancelled)
     assert ns["_ask_street_more"]("Is that on A St too? (Yes or No)") is False
     assert len(prompts) == 3 and prompts[1].startswith(logic.STREET_ANSWER_NEEDED) and \
         prompts[2] == prompts[1], prompts
     answers = iter([("option", 0)])
     assert ns["_ask_street_more"]("q") is True
+    # Esc never decides: it cancels (round 15), and the start box's pick then changes nothing
+    answers = iter([("cancel", None)])
+    with pytest.raises(ns["Cancelled"]):
+        ns["_ask_street_more"]("q")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    pick = rhino[rhino.index("def _box_pick(doc, what, facts, saved_ui):"):rhino.index("def confirm(")]
+    assert ('    except Cancelled:                    # Esc at the bend question: the street side as it was (round 15)\n'
+            '        say("Esc: the street side is as it was (nothing changed)")\n    finally:') in pick
 
 
 def _plugin_functions(names, **extra):

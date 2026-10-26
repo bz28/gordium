@@ -1349,10 +1349,11 @@ def _get_point(prompt):
 
 
 def _ask_street_more(question):
-    """True (Yes) or False (No), never anything else: Enter or Esc asks again, with the reason. Neither default is
-    safe: kept as street, a stretch that isn't can make the frontage long enough to pass lot width (a 40 ft street
-    with a 15 ft side line bent 20° from it read 55'-0", complies; the truth 40'-0" does not); left out, a stretch
-    that is street lets the front yard pass from part of it (street-run review round 14)."""
+    """True (Yes) or False (No), never a default: Enter asks again, with the reason; Esc cancels (Cancelled: the
+    start box's pick changes nothing, Edit site's whole edit is cancelled, as Esc does at every prompt). Neither
+    default is safe: kept as street, a stretch that isn't can make the frontage long enough to pass lot width (a
+    40 ft street with a 15 ft side line bent 20° from it read 55'-0", complies; the truth 40'-0" does not); left
+    out, a stretch that is street lets the front yard pass from part of it (street-run review rounds 14 and 15)."""
     prompt = question
     while True:
         go = Rhino.Input.Custom.GetOption()
@@ -1360,11 +1361,14 @@ def _ask_street_more(question):
         yes = go.AddOption("Yes")
         no = go.AddOption("No")
         go.AcceptNothing(True)
-        if go.Get() == Rhino.Input.GetResult.Option:
+        got = go.Get()
+        if got == Rhino.Input.GetResult.Option:
             if go.OptionIndex() == yes:
                 return True
             if go.OptionIndex() == no:
                 return False
+        elif got == Rhino.Input.GetResult.Cancel:
+            raise Cancelled()
         prompt = logic.STREET_ANSWER_NEEDED + question
 
 
@@ -1454,6 +1458,8 @@ def _box_pick(doc, what, facts, saved_ui):
                          "Click the finished ground you'll grade to, at each wall (Enter when done)",
                          GRADE_LAYER if what == "spot" else FINISHED_LAYER)
             saved_ui["ground_kind"] = what
+    except Cancelled:                    # Esc at the bend question: the street side as it was (round 15)
+        say("Esc: the street side is as it was (nothing changed)")
     finally:
         _highlight(doc, facts)
     return facts, saved_ui
