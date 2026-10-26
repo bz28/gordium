@@ -1355,7 +1355,7 @@ rules:
       # the height bonus moves which side can carry the 10 ft minimum (45 ft tall: 5 ft more, 15 and 10)
       - given: {side_yard_smaller: 13, side_yard_larger: 14, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
         expect: needs_review
-        note: at 45 ft neither side's walls are 15 ft from the line, so either side may be the larger one; the eaves fit one way only (the wider side's 9 ft eave only as the 10 ft one)
+        note: at 45 ft neither side's walls are 15 ft from the line, so either side may be the larger one; the eaves fit one way only (the wider side's 9 ft eave fits only as the smaller side, 10 ft at 45 ft, not the 15 ft one)
       - given: {side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 12, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
         expect: fail
         note: at 45 ft only the 16 ft side can be the 15 ft one, and its eave (9 ft) is over 2 ft into it
