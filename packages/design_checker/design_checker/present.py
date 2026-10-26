@@ -273,6 +273,18 @@ def _fails_whatever_part(expr: str, values: dict, unknown: dict) -> bool:
         _evaluate(expr, dict(values, **s)) is False for s in unknown["settings"])
 
 
+def _fails_every_reading(expr: str, values: dict, measured: dict, facts: dict) -> bool:
+    """One limit of a rule that fails under every reading of THE reading set (reading_set.combos): a measurement it
+    reads that has readings and no value (a pitched roof's height) leaves it unknown as drawn, yet it fails whichever
+    reading is taken (#20 review round 1: the eaves rows named the front yard, which passed, for a side eave that
+    failed, because every limit holds the height bonus)."""
+    names = formula.names(expr)
+    if not any(values.get(n) is None and (measured.get(n) or {}).get("readings") for n in names):
+        return False
+    every = reading_set.combos(names, values, measured, facts)
+    return bool(every) and all(_evaluate(expr, trial) is False for trial, _ in every)
+
+
 FACT_WORDS = {"sleeping_rooms": "bedrooms", "parking_spaces": "parking spaces"}   # interior facts, as asked
 
 
@@ -930,7 +942,35 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
         unknown = row.get("Unknown")        # not measured: a limit that fails at every value they could take
         primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False
-                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)), primary)
+                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)
+                        or _fails_every_reading(ast.unparse(c), values, measured, facts)), primary)
+    elif (_status(row) == REVIEW and rule.get("review_when") and isinstance(body, ast.BoolOp)
+          and isinstance(body.op, ast.And) and all(isinstance(v, ast.Compare) for v in body.values)):
+        # a several-limit rule held back by its own review_when (its reason is the row's): name the limit that
+        # review is about, the measure it holds below a limit (the which-side eaves review: that side's eave),
+        # never simply the first limit (#18: "Eaves into front yard" for a side eave's question)
+        why_text = " ".join(str(row.get("Why") or "").split())
+        said = {" ".join(w.split()) for w in str(row.get("Why") or "").split("; ")}
+        at_least = {c.left.id for c in compares if isinstance(c.ops[0], (ast.GtE, ast.Gt))}
+        about = []                      # (measure, the limit the review holds it below), in the rule's order
+        for r in rule["review_when"]:
+            reason = " ".join(str(r.get("reason") or "").split())
+            # the row's reason is this one: a whole entry of it, or (a reason with "; " of its own) all of it in it
+            if reason and (reason in said or len(reason) > 40 and reason in why_text):
+                # each measure the review holds below a limit, where that holds as drawn (or can't be told), on a
+                # measure the rule asks to be at least something: that limit is what the review is about
+                about += [n for n in ast.walk(formula.parse(r["when"]).body)
+                          if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.left, ast.Name)
+                          and isinstance(n.ops[0], (ast.Lt, ast.LtE)) and n.left.id in at_least
+                          and _evaluate(ast.unparse(n), values) is not False]
+        failing = next((c for c in compares if _fails_every_reading(ast.unparse(c), values, measured, facts)), None)
+        if failing is not None:         # a limit failing under every reading is named first (#18 round 4)
+            primary = failing
+        elif about:
+            # the limit the question is about, as a requirement: "at least" the review's own limit (the side that
+            # may be the 10 ft one: 7'-0" against 8'-0", never against the 5 ft side's 3'-0" it already meets)
+            n = about[0]
+            primary = ast.Compare(left=n.left, ops=[ast.GtE()], comparators=n.comparators)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
@@ -1109,7 +1149,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 lo, hi = min(got), max(got)
                 required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
                             f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
-                limit_q = list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
+                # the same limit under every reading: it depends on none of them (#20 review round 1)
+                limit_q = [] if hi - lo < 1e-9 else list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
                 rest = list(dict.fromkeys(q for n in sorted(every - set(open_)) if values.get(n) is None
                                           and (measured.get(n) or {}).get("readings")
                                           for q in _questions_of(measured[n]) if q not in limit_q))

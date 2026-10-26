@@ -63,10 +63,10 @@ measurements:
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building, eaves included; between (10, 0) and (10, 30)'
   side_yard_smaller_eaves:
     value: 10.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the nearer side lot line to the building, eaves included; between (0, 30) and (10, 30)'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the side lot line of the narrower side yard (to the walls) to the building, eaves included; between (0, 30) and (10, 30)'
   side_yard_larger_eaves:
     value: 10.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the farther side lot line to the building, eaves included; between (73, 65) and (63, 65)'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the side lot line of the wider side yard (to the walls) to the building, eaves included; between (73, 65) and (63, 65)'
   rear_yard_eaves:
     value: 25.0
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the rear lot line to the main building, eaves included; between (10, 90) and (10, 65)'

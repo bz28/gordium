@@ -83,7 +83,8 @@ def _decide(name: str, readings: list[tuple[str, float, dict]], how: str, object
     values = [v for _, v, _ in readings]
     shown = [{"reading": r, "value": _r(v), **({"points": x["points"]} if x.get("points") else {}),
               **({"named": dict(x["named"])} if x.get("named") else {}),
-              **({"line": x["line"]} if x.get("line") is not None else {})} for r, v, x in readings]
+              **({"line": x["line"]} if x.get("line") is not None else {}),
+              **({"pairing": x["pairing"]} if x.get("pairing") is not None else {})} for r, v, x in readings]
     if values and max(values) - min(values) <= SAME:
         how = how if len(readings) > 1 or not readings[0][0] else f"{how} ({readings[0][0]})"
         return _record(name, UNITS.get(name) or STATED[name], _r(values[0]), how, objects, readings[0][2].get("points"),
@@ -802,6 +803,7 @@ def _roof_part(building: dict, sloped: list) -> tuple | None:
 
 EAVE = "model#eave"        # whether what a pitched roof reaches past its walls is an eave: eave / not_eave
 PROJ = "model#projection"  # whether what sticks out past the walls at the ground is a projection: projection / part
+PAIR = "model#narrower"    # walls equally far from both side lines: which side is the narrower side yard: first / other
 
 
 def _eave_candidate(building: dict, sloped: list | None = None) -> dict | None:
@@ -2102,6 +2104,8 @@ NOT_FRAME_WORDS = {"frame_distances_apply": "the frame distances apply to every 
 EAVE_COVERAGE = ("eaves_not_counted", "eaves_over_2ft_counted", "eaves_counted")   # building_area's open question
 EAVE_QUESTION = ("whether what the pitched roof reaches past the walls is an eave (§325-18B) or part of the building "
                  "can't be told from the model: the architect confirms it (eaves_confirmed)")
+PAIR_QUESTION = ("the walls are equally far from both side lot lines: which side is the narrower side yard (each "
+                 "side's eaves are held to the minimum that side carries)")
 PROJ_QUESTION = ("whether a part below the roof that sticks out past the walls at the ground is an upper floor "
                  "(part of the building) or a bay window (a projection, §325-18B) can't be told from the model "
                  "(yard_projections)")
@@ -2210,7 +2214,9 @@ def _lot_lines(lot: Lot, facts: dict):
                 return stop("address_not_a_street")
             candidates = [idx]
         else:
-            candidates = [c for k in range(1, len(chain)) for c in (chain[:k], chain[k:])]
+            # the address street is one of the streets: the street lines split only where they may turn a corner
+            # (_street_splits), never mid-street (one street drawn in pieces is still one street, §325-8A col. 7)
+            candidates = _street_runs(lot, chain)
             question.append("which street the lot's address is on decides which yard is the rear yard (§325-8A(14)(d)): "
                             "pick the address street (address_street_line)")
     else:
@@ -2248,6 +2254,58 @@ def _lot_lines(lot: Lot, facts: dict):
             "candidates": candidates}
 
 
+JOINT = 15                # degrees: a joint between two street lines turning no more than this is within one street
+
+
+def _heading(edge) -> float:
+    (x, y) = _chord(edge)
+    return math.degrees(math.atan2(y, x))
+
+
+def _street_splits(lot: "Lot", chain: list) -> list[int]:
+    """Where a corner lot's street lines (`chain`, in order along the lot) may split into two streets: the indexes k
+    with chain[:k] one street and chain[k:] the other. A joint turning more than PARALLEL (30 degrees) is a corner
+    for sure; one turning more than JOINT (15) but no more than PARALLEL may be. Between the sure corners, a run of
+    pieces each joining within JOINT is one street only while it turns no more than PARALLEL in all (its pieces'
+    headings within PARALLEL of each other); a run that turns more (a corner rounded into many short pieces) may
+    split at any of its joints. The same limits as the Rhino panel's corner street pick (#15 7a16aa6: joints of 15
+    degrees or less, 30 or less in all, one street; over 30 a corner). Every split that may be is a reading; one
+    street drawn in pieces is never split mid-street (the frontage of one street, §325-8A col. 7, never two streets
+    added)."""
+    turns = [_turn(lot.edges[a], lot.edges[b]) for a, b in zip(chain, chain[1:])]
+    sure = {k + 1 for k, t in enumerate(turns) if t > PARALLEL}
+    maybe = {k + 1 for k, t in enumerate(turns) if JOINT < t <= PARALLEL}
+    bounds = [0, *sorted(sure), len(chain)]
+    for a, b in zip(bounds, bounds[1:]):
+        heads = [_heading(lot.edges[i]) for i in chain[a:b]]
+        spread = max((min(abs(x - y) % 360, 360 - abs(x - y) % 360) for x in heads for y in heads), default=0.0)
+        if spread > PARALLEL:
+            maybe |= set(range(a + 1, b))
+    return sorted(sure | maybe)
+
+
+def _street_runs(lot: "Lot", chain: list) -> list[list[int]]:
+    """Each street a corner lot's street lines may be: every run of them between two places they may split
+    (_street_splits, or an end) with no sure corner inside it, so a joint that only may be a corner gives both
+    readings (the run split there, and joined across it). One street per run, never two added together, and every
+    street a run of its own (the middle one of three too: #18 review, a 60 x 45 lot on three streets read 105 ft,
+    two streets, and never the middle street's 45 ft)."""
+    splits = _street_splits(lot, chain)
+    turns = [_turn(lot.edges[a], lot.edges[b]) for a, b in zip(chain, chain[1:])]
+    sure = {k + 1 for k, t in enumerate(turns) if t > PARALLEL}
+    bounds = [0, *splits, len(chain)]
+    runs = [chain[a:b] for i, a in enumerate(bounds) for b in bounds[i + 1:] if not any(a < k < b for k in sure)]
+    # a corner cut off (a chamfer: a short run between two sure corners each turning under 90 - PARALLEL degrees, the
+    # two making one corner) may be part of either street: each street with it is a reading too (#18 round 10)
+    edges = sorted(sure)
+    for a, b in zip([0, *edges], [*edges, len(chain)]):
+        if 0 < a and b < len(chain) and turns[a - 1] < 90 - PARALLEL and turns[b - 1] < 90 - PARALLEL:
+            before = max([k for k in edges if k < a], default=0)
+            after = min([k for k in edges if k > b], default=len(chain))
+            runs += [chain[before:b], chain[a:after]]
+    return [r for k, r in enumerate(runs) if r not in runs[:k]]
+
+
 def _two_sides(found: list) -> list:
     """The two side yards (distance, points, ...), the narrower first. Two within TOL of each other (0.01 ft: the
     same as everywhere else here) are equal, and go in a fixed order by where their lot line is (west, then south,
@@ -2264,6 +2322,47 @@ def _two_sides(found: list) -> list:
     return [(low, *first[1:]), (high, *second[1:])]
 
 
+def _eaves_by_wall_side(lot: "Lot", r: dict, words: str, w: str, shape, walls: list) -> list:
+    """The two side yards to the eaves (`shape`: the building seen from above) under one reading of the lot's lines
+    (`r`), each to the lot line of ITS side yard to the walls: [(the narrower's reading, the wider's reading)], one
+    pair per way the walls order the sides. The narrower side yard to the eaves is to the side lot line whose side
+    yard to the walls is the narrower one (side_yard_smaller's line), the wider to the other, so a side's eaves are
+    held to the minimum that side carries (P0, #21 review round 22: walls 9'-6" west and 10'-0" east, eaves 9'-0"
+    west and 6'-6" east; sorted on their own, the east eave, 3'-6" into the 10 ft yard R-3a requires there, was
+    read against the 5 ft side's limit and passed).
+
+    `walls`: the wall readings (words, shape, named) that go with this eave shape. When they all order the sides
+    the same way: one pair, worded as before. When they don't (an overhang read as an eave or not moves a wall
+    yard): one pair per wall reading, named and worded as it is, so a rule is checked under each. Two wall side
+    yards within TOL of each other are equal (which one is narrower is float noise, _two_sides): then either side
+    may be the narrower one, and both pairings are readings (a rule holds only if it holds both ways), each marked
+    with its `pairing` (0 as _two_sides orders the lines, 1 swapped), so the checker never sets one pairing's
+    narrower side against the other's wider (both eaves to the same lot line: reading_set.combos)."""
+    pairs = []
+    for ww, ws, wn in walls:
+        found = [(*_distance(lot.line(g), ws), list(g)) for g in r["sides"]]
+        (_, _, la), (_, _, lb) = _two_sides(found)
+        ea = (*_distance(lot.line(la), shape), la)
+        eb = (*_distance(lot.line(lb), shape), lb)
+        if len(found) == 2 and abs(found[0][0] - found[1][0]) <= TOL:
+            pairs += [(ww, wn, ea, eb, 0), (_both(ww, "the walls equally far from both sides: either side the narrower"),
+                                            wn, eb, ea, 1)]
+        else:
+            pairs.append((ww, wn, ea, eb, None))
+    if len({(_r(a[0]), _r(b[0])) for _, _, a, b, _ in pairs}) == 1:      # every way gives the same two numbers
+        _, _, ea, eb, _ = pairs[0]
+        return [((_both(words, w), ea[0], {"points": ea[1], "named": {}, "line": ea[2]}),
+                 (_both(words, w), eb[0], {"points": eb[1], "named": {}, "line": eb[2]}))]
+    # a pairing is a reading of its own (named: the checker settles it as it settles any named reading, and asks
+    # which side is the narrower only when the answer turns on it; #18 review: unnamed, it held every symmetric house
+    # with unequal eaves at needs review, R-1b's equal minimums included)
+    def named(wn, k):
+        return wn if k is None else {**wn, PAIR: ("first", "other")[k]}
+    return [((_both(words, ww), ea[0], {"points": ea[1], "named": named(wn, k), "line": ea[2], "pairing": k}),
+             (_both(words, ww), eb[0], {"points": eb[1], "named": named(wn, k), "line": eb[2], "pairing": k}))
+            for ww, wn, ea, eb, k in pairs]
+
+
 def _turn(a, b) -> float:
     """How far the lot outline turns, in degrees (0-180), from one lot line to the next (end to end)."""
     (ax, ay), (bx, by) = _chord(a), _chord(b)
@@ -2278,8 +2377,9 @@ def _width(lot: Lot, facts: dict, lines) -> dict:
     chain = lot.ordered_street()
     groups = [chain]
     if facts.get("corner_lot"):
-        groups = [c for c in lines["candidates"]] + [[i for i in chain if i not in c] for c in lines["candidates"]]
-        groups = [g for k, g in enumerate(groups) if g and g not in groups[:k]]
+        # each street's own frontage (_street_runs): never two streets added, every street (the middle one too)
+        runs = _street_runs(lot, chain)
+        groups = [g for k, g in enumerate(runs) if g and g not in runs[:k]]
     width = []
     for g in groups:
         on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(lot.label(i) for i in g)})" if len(groups) > 1 else ""
@@ -2351,10 +2451,12 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
                        ground, {PROJ: "projection"}))
         questions.append(PROJ_QUESTION)
     eave_shapes = [("", above, {})]
+    walls_of = [list(shapes)]       # for each eave shape, the wall readings that say which side is the narrower
     if decks is not None:
         shapes += [(_both(w, "the solids standing apart read as freestanding decks"), s.union(decks), n)
                    for w, s, n in shapes]
         eave_shapes += [("the solids standing apart read as freestanding decks", above.union(decks), {})]
+        walls_of.append(shapes[len(walls_of[0]):])
         questions.append("whether a solid standing apart from the main building is an accessory building (§325-25) or "
                          "a freestanding deck (part of the building, §325-18A): list the accessory buildings "
                          "(accessory_buildings)")
@@ -2374,22 +2476,32 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
             continue
         small, large, rear = [], [], []
         for words, r in lines["readings"]:
-            for w, s, n in group:
-                # each side yard keeps the lot line it was measured to, so one reading (an eave) can be set
-                # against another (not an eave) to the same line, never to the other side's (review round 15)
-                found = [(*_distance(lot.line(g), s), list(g)) for g in r["sides"]]
-                (a, pa, la), (b, pb, lb) = _two_sides(found)
-                small.append((_both(words, w), a, {"points": pa, "named": n, "line": la}))
-                large.append((_both(words, w), b, {"points": pb, "named": n, "line": lb}))
+            for k, (w, s, n) in enumerate(group):
+                if suffix:
+                    # the eaves side yards are to the wall side yards' own lot lines (P0, #21 review round 22):
+                    # never sorted narrower-first on their own
+                    for narrower, wider in _eaves_by_wall_side(lot, r, words, w, s, walls_of[k]):
+                        small.append(narrower)
+                        large.append(wider)
+                else:
+                    # each side yard keeps the lot line it was measured to, so one reading (an eave) can be set
+                    # against another (not an eave) to the same line, never to the other side's (review round 15)
+                    found = [(*_distance(lot.line(g), s), list(g)) for g in r["sides"]]
+                    (a, pa, la), (b, pb, lb) = _two_sides(found)
+                    small.append((_both(words, w), a, {"points": pa, "named": n, "line": la}))
+                    large.append((_both(words, w), b, {"points": pb, "named": n, "line": lb}))
                 d, p = _distance(lot.line(r["rear"]), s)
                 rear.append((_both(words, w), d, {"points": p, "named": n}))
         eaves = ", eaves included" if suffix else ""
-        out["side_yard_smaller" + suffix] = _decide("side_yard_smaller" + suffix, small,
-                                                    "the least distance from the nearer side lot line to the building"
-                                                    + eaves, objects, q, basis["side"])
-        out["side_yard_larger" + suffix] = _decide("side_yard_larger" + suffix, large,
-                                                   "the least distance from the farther side lot line to the building"
-                                                   + eaves, objects, q, basis["side"])
+        qs = _both(q, PAIR_QUESTION) if any(x.get("pairing") is not None for _, _, x in small) else q
+        out["side_yard_smaller" + suffix] = _decide(
+            "side_yard_smaller" + suffix, small, "the least distance from the side lot line of the narrower side "
+            "yard (to the walls) to the building, eaves included" if suffix else
+            "the least distance from the nearer side lot line to the building", objects, qs, basis["side"])
+        out["side_yard_larger" + suffix] = _decide(
+            "side_yard_larger" + suffix, large, "the least distance from the side lot line of the wider side yard "
+            "(to the walls) to the building, eaves included" if suffix else
+            "the least distance from the farther side lot line to the building", objects, qs, basis["side"])
         out["rear_yard" + suffix] = _decide("rear_yard" + suffix, rear,
                                             "the least distance from the rear lot line to the main building" + eaves,
                                             objects, q, basis["rear"])
