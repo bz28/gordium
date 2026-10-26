@@ -27,7 +27,7 @@ Copied from `packages/site_lookup/site_lookup/endpoints.yaml` on the `site-looku
 
 | Source | Question it answers | Owner | May we store it? | Terms |
 |---|---|---|---|---|
-| NYS Geocoder (address points) | Where is this address? | NYS ITS Geospatial Services | raw | [gis.ny.gov/address-geocoder](https://gis.ny.gov/address-geocoder) |
+| NYS Geocoder (address points) | Where is this address? | NYS ITS Geospatial Services | raw | [gis.ny.gov/nys-geocoding-service](https://gis.ny.gov/nys-geocoding-service) (checked 2026-10-26; the earlier gis.ny.gov/address-geocoder is now the "Legacy" page, retired after October 2026) |
 | Tompkins County address points (TCAddress) | Cross-check of the address point (more than 50 ft apart → needs review) | Tompkins County GIS Division | none | Stated on the service: "Access: Open. Please do not redistribute data to a third party without permission from Tompkins County GIS." |
 | NYS Tax Parcels Public | Which tax lot, and its outline ("from tax map", ±2 ft) | NYS ITS Geospatial Services (from Tompkins County Real Property) | raw | [gis.ny.gov/parcels](https://gis.ny.gov/parcels) |
 | City of Ithaca tax parcels | Fallback lot outline; City-only parcel flags | City of Ithaca GIS Program (from Tompkins County Assessment) | derived (numbers only) | The service's attribution: amended by the City GIS Program from a County Assessment file; accuracy not warranted. No reuse terms published |
