@@ -1905,7 +1905,7 @@ rules:
   kind: flag
   topic: parking_and_loading
   title: 'Loading: multiple dwelling with 25+ units (chart p.14)'
-  applies_when: use == "multiple_family"
+  applies_when: use in ["multiple_family", "dormitory", "fraternity_sorority_group_house"]
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 14
@@ -1945,4 +1945,7 @@ rules:
   status: draft
   notes: 'Demoted until re-drafted: The chart''s row is "Multiple dwelling with 25 + units"; the draft turned the
     rate (1 space / 10,000 sf) into a floor-space threshold, so a 30-unit building under 10,000 sf had no loading
-    check (2026-10-25): a person checks the loading of every multiple dwelling.'
+    check (2026-10-25): a person checks the loading of every multiple dwelling. A dormitory and a fraternity, sorority
+    or group house are ones too (§325-3B: "DORMITORY — A multiple dwelling which provides sleeping accommodations
+    ..."; "FRATERNITY HOUSE, SORORITY HOUSE OR GROUP HOUSE — A multiple dwelling used ..."), which the draft and
+    the first demotion left out; the R-3aa, R-3b and RU answer keys send them to review (PR #30, 2026-10-26).'

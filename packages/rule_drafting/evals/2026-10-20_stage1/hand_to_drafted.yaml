@@ -758,6 +758,510 @@ keys:
         PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
         facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
     known_false_passes: {}
+  R-3aa.yaml:
+    district: R-3aa
+    rules:
+      R-3aa.use:
+        judge:
+        - - R-3aa.use
+        reason: 'the chart''s permitted-use marks (p.2): the same question'
+      R-3aa.lot_area_one_family_detached:
+        judge:
+        - - R-3aa.min_lot_size_detached
+        reason: lot area row for this use
+      R-3aa.lot_area_one_family_semi_detached:
+        judge:
+        - - R-3aa.min_lot_size_semi_detached
+        reason: lot area row for this use
+      R-3aa.lot_area_two_family:
+        judge:
+        - - R-3aa.min_lot_size_two_family
+        reason: lot area row for this use
+      R-3aa.lot_area_one_family_attached:
+        judge:
+        - - R-3aa.min_lot_size_attached_conv_fn7
+          - R-3aa.min_lot_size_attached_new_fn7
+        reason: the lot area row for this use, in each form its cells take (as R-3a)
+      R-3aa.lot_area_multiple_family:
+        judge:
+        - - R-3aa.min_lot_size_multiple_conv_fn7
+          - R-3aa.min_lot_size_multiple_new_fn7
+        reason: the lot area row for this use, in each form its cells take (as R-3a)
+      R-3aa.lot_area_fraternity:
+        judge:
+        - - R-3aa.min_lot_size_group_house
+        reason: lot area row for this use
+      R-3aa.lot_area_other_use:
+        judge:
+        - - R-3aa.min_lot_size_other_use
+        reason: lot area row for other uses
+      R-3aa.lot_size_zero_lot_line:
+        judge: []
+        reason: not drafted
+        not_same:
+          R-3aa.use: the special-permit flag asks whether the use is allowed, not how big its lot is
+      R-3aa.lot_width_one_family_detached:
+        judge:
+        - - R-3aa.min_lot_width_one_family_detached
+        reason: lot width row
+      R-3aa.lot_width_one_family_semi_detached:
+        judge:
+        - - R-3aa.min_lot_width_one_family_semi_detached
+        reason: lot width row
+      R-3aa.lot_width_one_family_attached:
+        judge:
+        - - R-3aa.min_lot_width_one_family_attached
+        reason: lot width row
+      R-3aa.lot_width_two_family:
+        judge:
+        - - R-3aa.min_lot_width_two_family
+        reason: lot width row
+      R-3aa.lot_width_multiple_family:
+        judge:
+        - - R-3aa.min_lot_width_multiple_family
+        reason: lot width row
+      R-3aa.lot_width_fraternity:
+        judge:
+        - - R-3aa.min_lot_width_fraternity_sorority_group_house
+        reason: lot width row
+      R-3aa.lot_width_other_use:
+        judge:
+        - - R-3aa.min_lot_width_other_use
+        reason: lot width row
+      R-3aa.stories:
+        judge:
+        - - R-3aa.max_stories_with_minimum
+          - R-3aa.min_stories
+        reason: 'the chart''s stories row, its maximum and its minimum (note 11): the same question; §325-16C(2)''s stories
+          rule sets the row''s own maximum, so it is listed unmatched'
+      R-3aa.height:
+        judge:
+        - - R-3aa.max_height_ft
+        - - R-3aa.325_16c_height_exception_extra_height
+        parts: []
+        reason: the height row and §325-16C's extra height, each judged on its own (as R-3a)
+      R-3aa.lot_coverage:
+        judge:
+        - - R-3aa.max_lot_coverage
+        reason: coverage row
+      R-3aa.footprint_block_front:
+        judge: []
+        reason: 'not drafted: note 2''s footprint cap'
+      R-3aa.front_yard:
+        judge:
+        - - R-3aa.front_yard_min
+        reason: front yard row
+      R-3aa.side_yards:
+        judge:
+        - - R-3aa.side_yard_one_side_min
+          - R-3aa.side_yard_other_side_min
+        reason: the two side rows, judged together
+      R-3aa.rear_yard:
+        judge:
+        - - R-3aa.rear_yard_min_fn16
+        reason: rear yard row
+      R-3aa.yard_projections:
+        judge:
+        - - R-3aa.325_18b_projection_front_yard
+          - R-3aa.325_18b_projection_side_yard_larger
+          - R-3aa.325_18b_projection_side_yard_smaller
+          - R-3aa.325_18b_projection_rear_yard_fn16
+        reason: '§325-18B drafted yard by yard on the eave measures: judged together (as R-3a)'
+      R-3aa.accessory_buildings:
+        judge:
+        - - R-3aa.325_25a_accessory_not_in_required_front_yard
+          - general.325_25c_frame_accessory_side_setback_other
+          - general.325_25c_frame_accessory_rear_setback
+        reason: §325-25A and §325-25C, judged together
+      R-3aa.abutting_r1:
+        judge: []
+        reason: 'not drafted: no §325-19E rule for R-3aa'
+      R-3aa.parking_one_family:
+        judge: []
+        held_judge:
+        - - R-3aa.parking_per_dwelling_unit
+          - R-3aa.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (R-3aa.parking_per_dwelling_unit,
+          R-3aa.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold is lifted and the unit replayed
+          (held_judge keeps the pairing)'
+      R-3aa.parking_dwelling_units:
+        judge: []
+        held_judge:
+        - - R-3aa.parking_per_dwelling_unit
+          - R-3aa.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (R-3aa.parking_per_dwelling_unit,
+          R-3aa.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold is lifted and the unit replayed
+          (held_judge keeps the pairing)'
+      R-3aa.parking_other_uses:
+        judge: []
+        held_judge:
+        - - R-3aa.parking_per_dwelling_unit
+          - R-3aa.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (R-3aa.parking_per_dwelling_unit,
+          R-3aa.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold is lifted and the unit replayed
+          (held_judge keeps the pairing)'
+      R-3aa.loading:
+        judge:
+        - - R-3aa.loading_nursing_home_hospital
+          - R-3aa.loading_multiple_dwelling_25_units
+          - general.loading_neighborhood_commercial
+          - general.loading_nonresidential_variance
+        reason: the chart's loading rows (p.14), drafted as flags (as R-3a)
+    unmatched:
+      R-3aa.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
+        no key rule asks it'
+      R-3aa.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no
+        key rule asks it'
+      R-3aa.325_16c_height_exception_stories_not_exceeded_max_min: '§325-16C(2)''s ''stories may not be exceeded'' above 35
+        ft: the chart row''s own maximum (stories <= 3), which the row''s rule checks at every height, so it decides nothing
+        the row doesn''t (PR #30''s key)'
+      R-3aa.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
+      R-3aa.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-3aa.325_11b_cluster_front_yard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+        PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+        facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+    known_false_passes: {}
+  R-3b.yaml:
+    district: R-3b
+    rules:
+      R-3b.use:
+        judge:
+        - - R-3b.use
+        reason: the chart's permitted-use marks (p.2)
+      R-3b.lot_area_one_family_detached:
+        judge:
+        - - R-3b.min_lot_size_detached
+        reason: lot area row
+      R-3b.lot_area_one_family_semi_detached:
+        judge:
+        - - R-3b.min_lot_size_semi_detached
+        reason: lot area row
+      R-3b.lot_area_two_family:
+        judge:
+        - - R-3b.min_lot_size_two_family
+        reason: lot area row
+      R-3b.lot_area_one_family_attached:
+        judge:
+        - - R-3b.min_lot_size_attached_conv_fn8
+          - R-3b.min_lot_size_attached_new_fn8
+        reason: the lot area row for this use, in each form its cells take (as R-3a)
+      R-3b.lot_area_multiple_family:
+        judge:
+        - - R-3b.min_lot_size_multiple_conv_fn8
+          - R-3b.min_lot_size_multiple_new_fn8
+        reason: the lot area row for this use, in each form its cells take (as R-3a)
+      R-3b.lot_area_fraternity:
+        judge:
+        - - R-3b.min_lot_size_group_house
+        reason: lot area row
+      R-3b.lot_area_other_use:
+        judge:
+        - - R-3b.min_lot_size_other_use
+        reason: lot area row for other uses
+      R-3b.lot_size_zero_lot_line:
+        judge: []
+        reason: not drafted
+        not_same:
+          R-3b.use: the special-permit flag asks whether the use is allowed, not how big its lot is
+      R-3b.lot_width_one_family_detached:
+        judge:
+        - - R-3b.min_lot_width_one_family_detached
+        reason: lot width row
+      R-3b.lot_width_one_family_semi_detached:
+        judge:
+        - - R-3b.min_lot_width_one_family_semi_detached
+        reason: lot width row
+      R-3b.lot_width_one_family_attached:
+        judge:
+        - - R-3b.min_lot_width_one_family_attached
+        reason: lot width row
+      R-3b.lot_width_two_family:
+        judge:
+        - - R-3b.min_lot_width_two_family
+        reason: lot width row
+      R-3b.lot_width_multiple_family:
+        judge:
+        - - R-3b.min_lot_width_multiple_family
+        reason: lot width row
+      R-3b.lot_width_fraternity:
+        judge:
+        - - R-3b.min_lot_width_fraternity_sorority_group_house
+        reason: lot width row
+      R-3b.lot_width_other_use:
+        judge:
+        - - R-3b.min_lot_width_other_use
+        reason: lot width row
+      R-3b.stories:
+        judge:
+        - - R-3b.max_stories
+        - - R-3b.325_16c_height_exception_stories_not_exceeded
+        reason: the chart's stories row, and §325-16C(2)'s 'stories may not be exceeded' (the same limit), each judged on
+          its own (as R-3a)
+      R-3b.height:
+        judge:
+        - - R-3b.max_height_ft
+        - - R-3b.325_16c_height_exception_extra_height
+        parts: []
+        reason: the height row and §325-16C's extra height, each judged on its own (as R-3a)
+      R-3b.lot_coverage:
+        judge:
+        - - R-3b.max_lot_coverage
+        reason: coverage row
+      R-3b.front_yard:
+        judge:
+        - - R-3b.front_yard_min
+        reason: front yard row
+      R-3b.side_yards:
+        judge:
+        - - R-3b.side_yard_one_side_min
+          - R-3b.side_yard_other_side_min
+        reason: the two side rows, judged together
+      R-3b.rear_yard:
+        judge:
+        - - R-3b.rear_yard_min_fn16
+        reason: rear yard row
+      R-3b.yard_projections:
+        judge:
+        - - R-3b.325_18b_projection_front_yard
+          - R-3b.325_18b_projection_side_yard_larger
+          - R-3b.325_18b_projection_side_yard_smaller
+        reason: '§325-18B drafted yard by yard on the eave measures: judged together (as R-3a)'
+      R-3b.accessory_buildings:
+        judge:
+        - - R-3b.325_25a_accessory_not_in_required_front_yard
+          - general.325_25c_frame_accessory_side_setback_other
+          - general.325_25c_frame_accessory_rear_setback
+        reason: §325-25A and §325-25C, judged together
+      R-3b.abutting_r1:
+        judge:
+        - - R-3b.325_19e_r3_abut_r1_min_lot_area_other_use
+          - R-3b.325_19e_r3_abut_r1_max_height
+          - R-3b.325_19e_r3_abut_r1_max_coverage
+          - R-3b.325_19e_r3_abut_r1_side_yard_larger
+          - R-3b.325_19e_r3_abut_r1_side_yard_smaller
+          - R-3b.325_19e_r3_abut_r1_rear_yard
+        reason: §325-19E's conditions, judged together
+      R-3b.parking_one_family:
+        judge: []
+        held_judge:
+        - - R-3b.parking_dormitory
+          - R-3b.parking_per_dwelling_unit
+          - R-3b.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (R-3b.parking_dormitory,
+          R-3b.parking_per_dwelling_unit, R-3b.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold
+          is lifted and the unit replayed (held_judge keeps the pairing)'
+      R-3b.parking_dwelling_units:
+        judge: []
+        held_judge:
+        - - R-3b.parking_dormitory
+          - R-3b.parking_per_dwelling_unit
+          - R-3b.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (R-3b.parking_dormitory,
+          R-3b.parking_per_dwelling_unit, R-3b.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold
+          is lifted and the unit replayed (held_judge keeps the pairing)'
+      R-3b.parking_dormitory:
+        judge: []
+        held_judge:
+        - - R-3b.parking_dormitory
+          - R-3b.parking_per_dwelling_unit
+          - R-3b.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (R-3b.parking_dormitory,
+          R-3b.parking_per_dwelling_unit, R-3b.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold
+          is lifted and the unit replayed (held_judge keeps the pairing)'
+      R-3b.parking_other_uses:
+        judge: []
+        held_judge:
+        - - R-3b.parking_dormitory
+          - R-3b.parking_per_dwelling_unit
+          - R-3b.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (R-3b.parking_dormitory,
+          R-3b.parking_per_dwelling_unit, R-3b.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold
+          is lifted and the unit replayed (held_judge keeps the pairing)'
+      R-3b.loading:
+        judge:
+        - - R-3b.loading_nursing_home_hospital
+          - R-3b.loading_multiple_dwelling_25_units
+          - general.loading_neighborhood_commercial
+          - general.loading_nonresidential_variance
+        reason: the chart's loading rows (p.14), drafted as flags (as R-3a)
+    unmatched:
+      R-3b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
+        no key rule asks it'
+      R-3b.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no
+        key rule asks it'
+      R-3b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
+      R-3b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-3b.325_11b_cluster_front_yard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+        PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+        facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+    known_false_passes: {}
+  RU.yaml:
+    district: RU
+    rules:
+      RU.use:
+        judge:
+        - - RU.use
+        reason: the chart's permitted-use marks (p.2)
+      RU.lot_area_one_family_detached:
+        judge:
+        - - RU.min_lot_size_detached
+        reason: lot area row
+      RU.lot_area_one_family_semi_detached:
+        judge:
+        - - RU.min_lot_size_semi_detached
+        reason: lot area row
+      RU.lot_area_two_family:
+        judge:
+        - - RU.min_lot_size_two_family
+        reason: lot area row
+      RU.lot_area_one_family_attached:
+        judge:
+        - - RU.min_lot_size_attached_conv_fn9
+          - RU.min_lot_size_attached_new_fn9
+        reason: the lot area row for this use, in each form its cells take (as R-3a)
+      RU.lot_area_multiple_family:
+        judge:
+        - - RU.min_lot_size_multiple_conv_fn9
+          - RU.min_lot_size_multiple_new_fn9
+        reason: the lot area row for this use, in each form its cells take (as R-3a)
+      RU.lot_area_fraternity:
+        judge:
+        - - RU.min_lot_size_group_house
+        reason: lot area row
+      RU.lot_area_other_use:
+        judge:
+        - - RU.min_lot_size_other_use
+        reason: lot area row for other uses
+      RU.lot_width_one_family_detached:
+        judge:
+        - - RU.min_lot_width_one_family_detached
+        reason: lot width row
+      RU.lot_width_one_family_semi_detached:
+        judge:
+        - - RU.min_lot_width_one_family_semi_detached
+        reason: lot width row
+      RU.lot_width_one_family_attached:
+        judge:
+        - - RU.min_lot_width_one_family_attached
+        reason: lot width row
+      RU.lot_width_two_family:
+        judge:
+        - - RU.min_lot_width_two_family
+        reason: lot width row
+      RU.lot_width_multiple_family:
+        judge:
+        - - RU.min_lot_width_multiple_family
+        reason: lot width row
+      RU.lot_width_fraternity:
+        judge:
+        - - RU.min_lot_width_fraternity_sorority_group_house
+        reason: lot width row
+      RU.lot_width_other_use:
+        judge:
+        - - RU.min_lot_width_other_use
+        reason: lot width row
+      RU.stories:
+        judge:
+        - - RU.max_stories
+        - - RU.325_16c_height_exception_stories_not_exceeded
+        reason: the chart's stories row, and §325-16C(2)'s 'stories may not be exceeded' (the same limit), each judged on
+          its own (as R-3a)
+      RU.height:
+        judge:
+        - - RU.max_height_ft
+        parts: []
+        reason: the height row; §325-16C's bonus not drafted
+      RU.lot_coverage:
+        judge:
+        - - RU.max_lot_coverage_ru
+        reason: coverage row
+      RU.green_space:
+        judge:
+        - - general.green_space_ru
+        reason: note 13's green space
+      RU.front_yard:
+        judge:
+        - - RU.front_yard_min
+        reason: front yard row
+      RU.side_yards:
+        judge:
+        - - RU.side_yard_one_side_min
+          - RU.side_yard_other_side_min
+        reason: the two side rows, judged together
+      RU.rear_yard:
+        judge:
+        - - RU.rear_yard_min_fn17
+        reason: rear yard row
+      RU.yard_projections:
+        judge:
+        - - RU.325_18b_projection_front_yard
+          - RU.325_18b_projection_side_yard_larger
+          - RU.325_18b_projection_side_yard_smaller
+          - RU.325_18b_projection_rear_yard_fn17
+        reason: '§325-18B drafted yard by yard on the eave measures: judged together (as R-3a)'
+      RU.accessory_buildings:
+        judge:
+        - - RU.325_25a_accessory_not_in_required_front_yard
+          - general.325_25c_frame_accessory_side_setback_other
+          - general.325_25c_frame_accessory_rear_setback
+        reason: §325-25A and §325-25C, judged together
+      RU.primary_structures:
+        judge: []
+        reason: 'not drafted: p.2 note 3'
+      RU.spacing_500_ft:
+        judge:
+        - - RU.use
+        reason: 'note 5: the draft''s use rule sends the three noted uses to review'
+      RU.parking_one_family:
+        judge: []
+        held_judge:
+        - - RU.parking_dormitory
+          - RU.parking_per_dwelling_unit
+          - RU.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (RU.parking_dormitory,
+          RU.parking_per_dwelling_unit, RU.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold is
+          lifted and the unit replayed (held_judge keeps the pairing)'
+      RU.parking_dwelling_units:
+        judge: []
+        held_judge:
+        - - RU.parking_dormitory
+          - RU.parking_per_dwelling_unit
+          - RU.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (RU.parking_dormitory,
+          RU.parking_per_dwelling_unit, RU.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold is
+          lifted and the unit replayed (held_judge keeps the pairing)'
+      RU.parking_dormitory:
+        judge: []
+        held_judge:
+        - - RU.parking_dormitory
+          - RU.parking_per_dwelling_unit
+          - RU.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (RU.parking_dormitory,
+          RU.parking_per_dwelling_unit, RU.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold is
+          lifted and the unit replayed (held_judge keeps the pairing)'
+      RU.parking_other_uses:
+        judge: []
+        held_judge:
+        - - RU.parking_dormitory
+          - RU.parking_per_dwelling_unit
+          - RU.parking_per_dwelling_unit_undecided_uses
+        reason: 'not checked yet: parking is on hold (Ben, 2026-10-25); chart p.14''s drafted rules (RU.parking_dormitory,
+          RU.parking_per_dwelling_unit, RU.parking_per_dwelling_unit_undecided_uses) out of the rulebook until the hold is
+          lifted and the unit replayed (held_judge keeps the pairing)'
+      RU.loading:
+        judge:
+        - - RU.loading_multiple_dwelling_25_units
+          - general.loading_nonresidential_variance
+        reason: 'the chart''s loading rows (p.14), drafted as flags (as R-3a); general.loading_neighborhood_commercial left
+          out: its use isn''t one this key''s loading rule reaches'
+    unmatched:
+      RU.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
+        no key rule asks it'
+      RU.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no key
+        rule asks it'
+      RU.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
+      RU.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+    known_false_passes: {}
 general_unmatched:
   general.325_12c_pud_rezoning_review_standard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
     canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
@@ -948,4 +1452,3 @@ general_unmatched:
   general.325_7b_yard_not_shared_between_buildings: '§325-7B a yard counted once: not in the keys'
   general.325_8e_south_hill_no_added_primary_on_built_parcel: '§325-8E South Hill Overlay: not in the keys'
   general.325_8e_south_hill_one_primary_on_empty_parcel: '§325-8E South Hill Overlay: not in the keys'
-  general.green_space_ru: 'RU green space: not in the keys'

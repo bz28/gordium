@@ -241,8 +241,12 @@ def test_a_demoted_draft_shows_needs_review_in_the_checker_never_a_pass(drafts_o
     held = {g["rule"] for g in log["chart-p14-residential"]["unresolved"] if g["why"].startswith("not checked yet: parking")}
     gone = {i for i, e in causes.items() if isinstance(e, dict) and e.get("withdraw")}     # withdrawn: not in a rulebook
     assert gone and not gone & set(rules) and held and not held & set(rules)
+    kept = {i for i, e in causes.items() if isinstance(e, dict) and e.get("review_when")}   # a rule, with a review
     assert causes and all(rules[i]["kind"] == "flag" and "Demoted until re-drafted" in rules[i]["notes"]
-                          for i in causes if i not in gone | held)
+                          for i in causes if i not in gone | held | kept)
+    assert kept and all(rules[i]["kind"] == "rule" and "Review condition added by a person" in rules[i]["notes"]
+                        and all(w in rules[i]["review_when"] for w in causes[i]["review_when"])
+                        for i in kept)
     got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-3b", "use": "multiple_family", "accessory_buildings": []})
     row = next(r for r in got["rows"] if r["Rule id"] == "R-3b.loading_multiple_dwelling_25_units")   # R-3b: drafted only
     assert row["Error"] == "NEEDS REVIEW"
@@ -270,7 +274,11 @@ def test_a_demotion_whose_cause_is_the_law_holds_in_every_district_the_law_piece
         unit = next(u for u in units.values() if rid in u.get("rules", []))
         for other in unit["rules"]:
             if other.split(".", 1)[1] == suffix:
-                assert rules[other]["kind"] == "flag", (rid, other)
+                if isinstance(entry, dict) and entry.get("review_when"):    # kept a rule, with the person's review
+                    assert rules[other]["kind"] == "rule" and all(
+                        w in rules[other].get("review_when", []) for w in entry["review_when"]), (rid, other)
+                else:
+                    assert rules[other]["kind"] == "flag", (rid, other)
                 checked += 1
     assert checked >= 10                                    # R-3a's and R-3b's five §325-19E limits
     r3b = {r["id"]: r for r in zone_rules(J, "R-3b")}

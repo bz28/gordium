@@ -827,9 +827,12 @@ def test_every_hand_and_drafted_rule_is_in_the_reviewed_mapping(ctx):
             assert set(x["drafted"]) <= mapped, (path.name, x["hand"], sorted(set(x["drafted"]) - mapped))
 
 
-def _loosened(rule: dict) -> dict:
-    """The rule with its check made always true, its applies_when and review_when kept (a flag becomes such a rule)."""
-    return rule | {"kind": "rule", "check": "0 <= 0"}
+def _loosened(rule: dict, review: bool = True) -> dict:
+    """The rule with its check made always true, its applies_when and review_when kept (a flag becomes such a rule);
+    with review=False its review_when dropped too: a rule whose job for this hand rule is its review conditions
+    (RU.use sends the three uses note 5 spaces 500 ft apart to review, PR #30's key) is probed by losing them."""
+    loose = rule | {"kind": "rule", "check": "0 <= 0"}
+    return loose if review else {k: v for k, v in loose.items() if k != "review_when"}
 
 
 def test_the_grader_catches_every_mapped_rule_loosened(ctx):
@@ -851,7 +854,10 @@ def test_the_grader_catches_every_mapped_rule_loosened(ctx):
                 flipped = [_loosened(r) if r["id"] == rid else r for r in drafted]
                 g = grade_mapped(book | {"rules": [h]}, entries, flipped, ctx)
                 if len(g["false_pass"]) <= len(base[h["id"]]) and not any(rid in x["drafted"] for x in g["false_pass"]):
-                    missed.append((path.name, h["id"], rid))
+                    bare = [_loosened(r, review=False) if r["id"] == rid else r for r in drafted]
+                    g = grade_mapped(book | {"rules": [h]}, entries, bare, ctx)     # its job may be its review
+                    if len(g["false_pass"]) <= len(base[h["id"]]) and not any(rid in x["drafted"] for x in g["false_pass"]):
+                        missed.append((path.name, h["id"], rid))
     assert tried and missed == []
 
 
@@ -968,3 +974,17 @@ def test_a_held_parking_question_says_it_is_on_hold_and_keeps_its_reviewed_pairs
     for _, hid, e in held:
         assert e["judge"] == [] and e["reason"].startswith("not checked yet: parking is on hold"), hid
         assert "refused by the checks" not in e["reason"], hid
+
+
+def test_a_rule_whose_job_is_its_review_is_probed_by_losing_it(ctx):
+    """PR #30's RU key: RU.spacing_500_ft (note 5) is answered by RU.use's review of the three uses, so loosening
+    RU.use's check alone changes nothing; dropping its review too must show as a false pass."""
+    hand = {"id": "RU.spacing", "kind": "flag", "applies_when": 'use == "dormitory"',
+            "examples": [{"given": {"use": "dormitory"}, "expect": "needs_review"}]}
+    use = {"id": "RU.u", "kind": "rule", "check": 'use in ["two_family"]', "sources": [],
+           "review_when": [{"when": 'use == "dormitory"', "reason": "note 5"}]}
+    entries = {"RU.spacing": {"judge": [["RU.u"]], "reason": "x"}}
+    book = {"district": "RU", "rules": [hand]}
+    assert grade_mapped(book, entries, [use], ctx)["false_pass"] == []
+    assert grade_mapped(book, entries, [_loosened(use)], ctx)["false_pass"] == []            # the check alone: idle
+    assert grade_mapped(book, entries, [_loosened(use, review=False)], ctx)["false_pass"]    # its review: caught

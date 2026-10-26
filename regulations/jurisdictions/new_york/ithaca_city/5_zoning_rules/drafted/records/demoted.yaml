@@ -106,26 +106,38 @@ R-3a.loading_multiple_dwelling_25_units:
   cause: >-
     The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
     floor-space threshold, so a 30-unit building under 10,000 sf had no loading check (2026-10-25): a person
-    checks the loading of every multiple dwelling.
-  applies_when: use == "multiple_family"
+    checks the loading of every multiple dwelling. A dormitory and a fraternity, sorority or group house are ones
+    too (§325-3B: "DORMITORY — A multiple dwelling which provides sleeping accommodations ..."; "FRATERNITY HOUSE,
+    SORORITY HOUSE OR GROUP HOUSE — A multiple dwelling used ..."), which the draft and the first demotion left out;
+    the R-3aa, R-3b and RU answer keys send them to review (PR #30, 2026-10-26).
+  applies_when: use in ["multiple_family", "dormitory", "fraternity_sorority_group_house"]
 R-3aa.loading_multiple_dwelling_25_units:
   cause: >-
     The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
     floor-space threshold, so a 30-unit building under 10,000 sf had no loading check (2026-10-25): a person
-    checks the loading of every multiple dwelling.
-  applies_when: use == "multiple_family"
+    checks the loading of every multiple dwelling. A dormitory and a fraternity, sorority or group house are ones
+    too (§325-3B: "DORMITORY — A multiple dwelling which provides sleeping accommodations ..."; "FRATERNITY HOUSE,
+    SORORITY HOUSE OR GROUP HOUSE — A multiple dwelling used ..."), which the draft and the first demotion left out;
+    the R-3aa, R-3b and RU answer keys send them to review (PR #30, 2026-10-26).
+  applies_when: use in ["multiple_family", "dormitory", "fraternity_sorority_group_house"]
 R-3b.loading_multiple_dwelling_25_units:
   cause: >-
     The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
     floor-space threshold, so a 30-unit building under 10,000 sf had no loading check (2026-10-25): a person
-    checks the loading of every multiple dwelling.
-  applies_when: use == "multiple_family"
+    checks the loading of every multiple dwelling. A dormitory and a fraternity, sorority or group house are ones
+    too (§325-3B: "DORMITORY — A multiple dwelling which provides sleeping accommodations ..."; "FRATERNITY HOUSE,
+    SORORITY HOUSE OR GROUP HOUSE — A multiple dwelling used ..."), which the draft and the first demotion left out;
+    the R-3aa, R-3b and RU answer keys send them to review (PR #30, 2026-10-26).
+  applies_when: use in ["multiple_family", "dormitory", "fraternity_sorority_group_house"]
 RU.loading_multiple_dwelling_25_units:
   cause: >-
     The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
     floor-space threshold, so a 30-unit building under 10,000 sf had no loading check (2026-10-25): a person
-    checks the loading of every multiple dwelling.
-  applies_when: use == "multiple_family"
+    checks the loading of every multiple dwelling. A dormitory and a fraternity, sorority or group house are ones
+    too (§325-3B: "DORMITORY — A multiple dwelling which provides sleeping accommodations ..."; "FRATERNITY HOUSE,
+    SORORITY HOUSE OR GROUP HOUSE — A multiple dwelling used ..."), which the draft and the first demotion left out;
+    the R-3aa, R-3b and RU answer keys send them to review (PR #30, 2026-10-26).
+  applies_when: use in ["multiple_family", "dormitory", "fraternity_sorority_group_house"]
 R-3a.loading_nursing_home_hospital: >-
   The chart's 1 loading space for a nursing home, hospital or sanitarium; the R-3a answer key sends
   loading to review (§325-21 also applies): a person checks it (2026-10-25).
@@ -239,3 +251,21 @@ R-3aa.325_18b_projection_rear_yard_fn16:
     §325-18B's eaves are one requirement for every required yard; this district's side-yard eave
     rules need review (an eave side isn't measured to its wall's lot line), so the yards left would pass
     eaves the answer keys fail (review round 22, 2026-10-25): a person checks the eaves.
+R-3aa.min_stories:
+  cause: >-
+    The chart's 2-story minimum (note 11) may reach an accessory building ("Buildings hereafter erected",
+    §325-8A(15)), whose own stories Gordium doesn't count: a one-story garage of more than 500 sf would fail if it
+    does. The drafted rule's own open question; the R-3aa answer key sends a lot with an accessory building to review
+    (PR #30, 2026-10-26).
+  review_when:
+  - when: accessory_buildings > 0
+    reason: >-
+      The lot has accessory buildings, whose stories Gordium doesn't count. Whether the 2-story minimum (note 11)
+      reaches them ("Buildings hereafter erected", §325-8A(15)) is an open question: a person checks.
+  examples:          # a person's: the drafted ones give no accessory buildings, so would need review now
+  - given: {stories: 2, accessory_buildings: 0}
+    expect: pass
+  - given: {stories: 1, accessory_buildings: 0}
+    expect: fail
+  - given: {stories: 2, accessory_buildings: 1}
+    expect: needs_review

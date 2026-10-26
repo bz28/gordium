@@ -3,7 +3,10 @@
 # false-pass re-draft (Ben approved): the residential parking rules the checks now refuse (they passed churches and
 # two-family houses) went to a person, so their examples count as undrafted and agreement fell from the round-8 count
 # (R-1b 38, R-1a 63, R-2a/R-2b 82, R-2c 88, R-3a 88); that fall is the cost of no false pass. Keys: measurement-2
-# a98149b's R-1b, #20's R-1a and R-3a (answer-keys c342d10, on this branch), r2-hand's R-2a, R-2b, R-2c (46b8de2, final). Every difference is in
+# a98149b's R-1b, #20's R-1a and R-3a (answer-keys c342d10, on this branch), r2-hand's R-2a, R-2b, R-2c (46b8de2, final). r3-hand's R-3aa, R-3b, RU (PR #30, f64d49f),
+# graded after the false passes they found were fixed (2026-10-26): R-3aa's 2-story minimum with an accessory
+# building (now reviewed); the loading flag reaching dormitories and group houses directly (§325-3B), which graded
+# by citation passed a dormitory (under the reviewed pairing the general non-residential loading flag reviewed it). Every difference is in
 # grade_all_with_hand_keys.json.
 R-1b.yaml: 39       # of 48 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
 R-1a.yaml: 60       # of 74 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
@@ -11,3 +14,6 @@ R-2a.yaml: 79       # of 98 (parking on hold (Ben, 2026-10-25): chart p.14's par
 R-2b.yaml: 73       # of 99 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
 R-2c.yaml: 118       # of 229 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
 R-3a.yaml: 92       # of 145 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-3aa.yaml: 106       # of 179 (PR #30's key; parking on hold, so its parking examples count as undrafted)
+R-3b.yaml: 109       # of 179 (PR #30's key; parking on hold, so its parking examples count as undrafted)
+RU.yaml: 100       # of 147 (PR #30's key; parking on hold, so its parking examples count as undrafted)

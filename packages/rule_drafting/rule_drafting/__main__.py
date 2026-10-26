@@ -183,7 +183,9 @@ def demoted(i: Inputs) -> dict[str, str | dict]:
     is itself the mistake (the loading chart's "25 + units" drafted as floor space >= 10,000 sf, 2026-10-25); or
     {cause, withdraw: true}: a rule for a subject no residential design has (§325-22 Motels, drafted for every lot),
     left out of the rulebook and listed in the drafting log as withdrawn, with the cause; or {cause, scope: district}:
-    a demotion about one district's drafting, not the law."""
+    a demotion about one district's drafting, not the law; or {cause, review_when: [{when, reason}], examples}: the rule
+    kept, with a person's review condition (and worked examples giving its measure) added where the law is open (R-3aa's 2-story minimum on a lot with an accessory
+    building, 2026-10-26: it still fails a one-story house, and needs review where the open question decides)."""
     path = i.records / "demoted.yaml"
     return (load(path) or {}) if path.exists() else {}
 
@@ -191,8 +193,17 @@ def demoted(i: Inputs) -> dict[str, str | dict]:
 def demote(rule: dict, cause: str | dict) -> dict:
     """The rule as a flag: the checker shows NEEDS REVIEW, with the cause, wherever it applies; never a pass. Its
     conditions are kept (or replaced by the entry's applies_when, a person's), its check and worked examples dropped
-    (a flag has none), and so is any `relaxes` (a flag widens nothing)."""
+    (a flag has none), and so is any `relaxes` (a flag widens nothing). An entry with review_when instead keeps the
+    rule a rule, adding the person's review condition (once) and examples."""
     entry = cause if isinstance(cause, dict) else {"cause": cause}
+    if entry.get("review_when"):
+        # kept as a rule: a person's review condition is added (once: every save applies the demotions again)
+        have = list(rule.get("review_when") or [])
+        why = f"Review condition added by a person: {' '.join(str(entry['cause']).split())}"
+        return rule | {"review_when": have + [w for w in entry["review_when"] if w["when"] not in {h["when"] for h in have}],
+                       "examples": entry.get("examples") or rule.get("examples") or [],   # a person's, with the new measure
+                       "notes": rule.get("notes", "") if why in str(rule.get("notes", "")) else
+                       " ".join(filter(None, [str(rule.get("notes") or ""), why]))}
     keep = {k: v for k, v in rule.items() if k not in ("check", "review_when", "examples", "notes", "relaxes")}
     if entry.get("applies_when"):
         keep["applies_when"] = entry["applies_when"]

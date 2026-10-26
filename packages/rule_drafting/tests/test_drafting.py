@@ -1397,7 +1397,7 @@ def test_a_demotion_can_replace_a_drafted_condition_that_is_itself_the_mistake()
     assert cli.demote(rule, "a plain cause")["applies_when"] == rule["applies_when"]      # a plain cause keeps it
     saved = cli.load(cli.Inputs().drafted / "R-3a.yaml")["rules"]
     held = next(r for r in saved if r["id"] == "R-3a.loading_multiple_dwelling_25_units")
-    assert held["applies_when"] == 'use == "multiple_family"'
+    assert held["applies_when"] == 'use in ["multiple_family", "dormitory", "fraternity_sorority_group_house"]'
 
 
 def test_a_rule_for_a_subject_no_residential_design_has_is_withdrawn_with_its_cause(inputs):
@@ -1465,3 +1465,47 @@ def test_replaying_a_held_unit_says_what_was_saved(tmp_path, capsys):
     held = [g for g in cli.read_log(cli.Inputs(dst))["units"]["chart-p14-residential"]["unresolved"]
             if g["why"].startswith("not checked yet: ")]
     assert held and all("replay --only chart-p14-residential" in g["why"] and g["cells"] for g in held)
+
+
+def test_pr30_a_dormitory_is_a_multiple_dwelling_so_the_loading_flag_reaches_it():
+    """PR #30's R-3b and RU keys: the loading rule for 25+ units skipped dormitories, so graded by citation (no
+    reviewed pairing yet) a dormitory passed what the key sends to review; §325-3B: "DORMITORY — A multiple dwelling
+    which provides sleeping accommodations ...". A fraternity, sorority or group house is one too (cold review)."""
+    from rule_format.rulebook import Context, outcome
+    allowed = Context.for_jurisdiction(cli.PLACE).allowed()
+    for district in ("R-3a", "R-3aa", "R-3b", "RU"):
+        rule = next(r for r in cli.load(cli.Inputs().drafted / f"{district}.yaml")["rules"]
+                    if r["id"] == f"{district}.loading_multiple_dwelling_25_units")
+        assert outcome(rule, {"use": "dormitory"}, allowed) == "needs_review", district
+        assert outcome(rule, {"use": "fraternity_sorority_group_house"}, allowed) == "needs_review", district
+        assert outcome(rule, {"use": "multiple_family"}, allowed) == "needs_review", district
+        assert outcome(rule, {"use": "two_family"}, allowed) == "not_applicable", district
+
+
+def test_pr30_r3aa_minimum_stories_needs_review_with_an_accessory_building():
+    """PR #30's R-3aa key: a 2-story house with an accessory building passed the 2-story minimum; whether the minimum
+    reaches a one-story garage is open (§325-8A(15)), so a person's review condition is added, the rule kept: a
+    one-story house still fails."""
+    from rule_format.rulebook import Context, outcome
+    allowed = Context.for_jurisdiction(cli.PLACE).allowed()
+    rule = next(r for r in cli.load(cli.Inputs().drafted / "R-3aa.yaml")["rules"] if r["id"] == "R-3aa.min_stories")
+    assert rule["kind"] == "rule"
+    assert outcome(rule, {"stories": 2, "accessory_buildings": 1}, allowed) == "needs_review"
+    assert outcome(rule, {"stories": 2, "accessory_buildings": 0}, allowed) == "pass"
+    assert outcome(rule, {"stories": 1, "accessory_buildings": 0}, allowed) == "fail"
+    for ex in rule["examples"]:                                   # its worked examples hold
+        assert outcome(rule, ex["given"], allowed) == ex["expect"], ex
+
+
+def test_a_review_when_demotion_keeps_the_rule_and_adds_its_condition_once():
+    """The {cause, review_when, examples} form: the rule stays a rule (its check, so a fail still fails), the person's
+    condition is added once however often the demotions are applied, and the person's examples replace the draft's."""
+    rule = {"id": "X.min", "kind": "rule", "check": "stories >= 2", "notes": "drafted",
+            "examples": [{"given": {"stories": 2}, "expect": "pass"}]}
+    entry = {"cause": "open question", "review_when": [{"when": "accessory_buildings > 0", "reason": "r"}],
+             "examples": [{"given": {"stories": 2, "accessory_buildings": 0}, "expect": "pass"}]}
+    once = cli.demote(rule, entry)
+    twice = cli.demote(once, entry)
+    assert once == twice and once["kind"] == "rule" and once["check"] == "stories >= 2"
+    assert once["review_when"] == entry["review_when"] and once["examples"] == entry["examples"]
+    assert once["notes"].count("open question") == 1

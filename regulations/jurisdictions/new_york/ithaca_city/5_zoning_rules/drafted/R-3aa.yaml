@@ -1042,10 +1042,16 @@ rules:
   examples:
   - given:
       stories: 2
+      accessory_buildings: 0
     expect: pass
   - given:
       stories: 1
+      accessory_buildings: 0
     expect: fail
+  - given:
+      stories: 2
+      accessory_buildings: 1
+    expect: needs_review
   open_questions:
   - Does the minimum stories requirement apply to every building on the lot, including accessory buildings and additions,
     or only to primary buildings?
@@ -1055,9 +1061,17 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3aa cells.
+  notes: 'Drafted by the rule-drafting script; numbers filled by code from the R-3aa cells. Review condition added
+    by a person: The chart''s 2-story minimum (note 11) may reach an accessory building ("Buildings hereafter erected",
+    §325-8A(15)), whose own stories Gordium doesn''t count: a one-story garage of more than 500 sf would fail if
+    it does. The drafted rule''s own open question; the R-3aa answer key sends a lot with an accessory building
+    to review (PR #30, 2026-10-26).'
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: accessory_buildings > 0
+    reason: 'The lot has accessory buildings, whose stories Gordium doesn''t count. Whether the 2-story minimum
+      (note 11) reaches them ("Buildings hereafter erected", §325-8A(15)) is an open question: a person checks.'
 - id: R-3aa.max_height_ft
   kind: rule
   topic: dimensions
@@ -2056,7 +2070,7 @@ rules:
   kind: flag
   topic: parking_and_loading
   title: 'Loading: multiple dwelling with 25+ units (chart p.14)'
-  applies_when: use == "multiple_family"
+  applies_when: use in ["multiple_family", "dormitory", "fraternity_sorority_group_house"]
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 14
@@ -2096,7 +2110,10 @@ rules:
   status: draft
   notes: 'Demoted until re-drafted: The chart''s row is "Multiple dwelling with 25 + units"; the draft turned the
     rate (1 space / 10,000 sf) into a floor-space threshold, so a 30-unit building under 10,000 sf had no loading
-    check (2026-10-25): a person checks the loading of every multiple dwelling.'
+    check (2026-10-25): a person checks the loading of every multiple dwelling. A dormitory and a fraternity, sorority
+    or group house are ones too (§325-3B: "DORMITORY — A multiple dwelling which provides sleeping accommodations
+    ..."; "FRATERNITY HOUSE, SORORITY HOUSE OR GROUP HOUSE — A multiple dwelling used ..."), which the draft and
+    the first demotion left out; the R-3aa, R-3b and RU answer keys send them to review (PR #30, 2026-10-26).'
 - id: R-3aa.325_11b_cluster_front_yard
   kind: rule
   topic: dimensions
