@@ -146,8 +146,9 @@ try:
         a, b = vp.WorldToClient(pl[3].From), vp.WorldToClient(pl[3].To)
         seg = rg.Line(rg.Point3d(a.X, a.Y, 0), rg.Point3d(b.X, b.Y, 0))
         near[j] = round(min(seg.DistanceTo(rg.Point3d(x, y, 0), True) for x, y in pl[1]), 1)
-    claim("1 each number sits on its own line or just past its outer end (a corner within 8 px of it)",
-          near and all(v <= 8 for v in near.values()), near)
+    reach = math.hypot(g.logic.DIM_LABEL_GAP_PX, g.logic.DIM_LABEL_H_PX / 2) + 1   # on: 4 px; past its end: ~10 px
+    claim("1 each number sits on its own line or just past its outer end (its nearest corner within ~11 px)",
+          near and all(v <= reach for v in near.values()), {"near": near, "reach": reach})
     wrong = {j for j, (_, _, st) in enumerate(o.yard_dims) if st in ("does_not_comply", "needs_review")}
     drawn_tags = []
     real_required = g._required
@@ -160,8 +161,9 @@ try:
         top.Redraw()
     finally:
         g._required = real_required
-    claim("1 'min' tags drawn only for failing or in-review yards",
-          sum(1 for t, shown_ in drawn_tags if t and shown_) <= sum(len(o.yard_tags.get(j) or []) for j in wrong)
+    wrong_tags = [t for j in wrong for t in o.yard_tags.get(j) or []]
+    claim("1 'min' tags drawn only for failing or in-review yards (every tag drawn is one of theirs)",
+          all(t in wrong_tags for t, shown_ in drawn_tags if t and shown_)
           and all((o.yard_tags.get(j) or []) == [] for j in range(len(o.yard_dims)) if j not in wrong), drawn_tags)
     for name in ("Top",):                                # Zoom Extents too: the lot and neighbourhood all in view
         vp.ZoomExtents()

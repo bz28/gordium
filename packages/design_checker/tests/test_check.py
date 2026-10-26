@@ -1711,7 +1711,9 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
         < zoom.index("        o.Select(True)")
     # 4 and 5
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
-    assert "ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 30, dark, 13)" in rhino
+    # the height limit's label: past its line's end, off the building (Rhino check of #28 at fc0b023; #29)
+    assert "ui.draw_text_box(d, [limit[1]], BLUE, int(spot[0]), int(spot[1]), dark, 13)" in rhino
+    assert "spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken)" in rhino
     assert "    boxed = bool(o.message and labels and _in_active_view(e))" in draw
     assert draw.index("    boxed = ") < draw.index("    if boxed:\n        taken.append(logic.status_box(") \
         < draw.index("    if not boxed:\n        return")         # nor its room kept clear in the other views
