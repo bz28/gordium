@@ -613,7 +613,7 @@ def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None)
     if kind in ("leader", "forced"):                        # a leader from the middle of the line's visible part
         seen = logic.clip_to_view(a, b, (viewport.Bounds.Width, viewport.Bounds.Height)) or (a, b)
         a = ((seen[0][0] + seen[1][0]) / 2, (seen[0][1] + seen[1][1]) / 2)
-    if kind in ("end", "leader"):                           # a leader from the line to the label
+    if kind in ("end", "leader", "forced"):                 # a leader from the line to the label
         near = min(quad, key=lambda p: (p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2)
         d.Draw2dLine(System.Drawing.PointF(a[0], a[1]), System.Drawing.PointF(near[0], near[1]), color, 1)
 

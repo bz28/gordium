@@ -693,14 +693,14 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_L
     ("forced")."""
     houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
     widths = None if w is None else (list(w) if isinstance(w, (list, tuple)) else [w])
-    boxed = [(o, _bbox(o)) for o in obstacles]              # each shape's box, once: most tests stop there
-    homes = [(f, _bbox(f)) for f in houses]
+    boxed = [(o, _bbox(o)) for o in obstacles if o]         # each shape's box, once: most tests stop there
+    homes = [(f, _bbox(f)) for f in houses if f]
 
     def clear(shape, solid=True, more=(), within=True):
         if within and not inside_view(shape, view):
             return False
         box = _bbox(shape)
-        against = boxed + [(m, _bbox(m)) for m in more] + (homes if solid else [])
+        against = boxed + [(m, _bbox(m)) for m in more if m] + (homes if solid else [])
         return not any(_boxes_meet(box, ob) and shapes_hit(shape, o) for o, ob in against)
 
     def own(i):
@@ -755,7 +755,6 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_L
 
 
 LEADER_REACH_PX = 320   # how far from its line a label may go to find a clear spot (with a leader back)
-LEADER_TRIES = 2000     # the most spots tried for one label (cheap box tests first: a frame stays quick)
 
 
 def _ring_offsets(step=16, reach=LEADER_REACH_PX):
@@ -770,6 +769,7 @@ def _ring_offsets(step=16, reach=LEADER_REACH_PX):
 
 
 RING_OFFSETS = _ring_offsets()
+LEADER_TRIES = 2 * len(RING_OFFSETS)   # the two positions' every ring to LEADER_REACH_PX (box tests first)
 
 
 def _bbox(shape):
