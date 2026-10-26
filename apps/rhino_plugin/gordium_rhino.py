@@ -689,7 +689,7 @@ def draw_screen(o, e):
                 if box is not None:
                     seen.append(box)
             spots.append(mine)
-        index, quad, kind, scale = logic.place_dimension(
+        index, quad, kind, text_size = logic.place_dimension(
             on_screen, width, [logic.rect_quad(box) for box in taken], footprint, away, view,
             extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots],
             must=status in ("does_not_comply", "needs_review") and not old,
@@ -703,7 +703,7 @@ def draw_screen(o, e):
         _dimension(d, e.Viewport, chosen, color)
         if quad is not None:
             _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From,
-                       size=11 * scale)
+                       size=11 * text_size)
             xs, ys = [p[0] for p in quad], [p[1] for p in quad]
             taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
     height = getattr(o, "height_dim", None)
@@ -725,14 +725,14 @@ def draw_screen(o, e):
             a, b = (e.Viewport.WorldToClient(p) for p in (line.From, line.To))
             rect = logic.rect_quad((house[0], house[1], house[2] - house[0], house[3] - house[1])) if house else None
             away = ((house[0] + house[2]) / 2, (house[1] + house[3]) / 2) if house else None
-            _, quad, kind, scale = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
+            _, quad, kind, text_size = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
                                                          [logic.rect_quad(box) for box in taken], rect, away, view,
                                                          must=status in ("does_not_comply", "needs_review") and not old,
                                                          fixed=[logic.rect_quad(f) for f in fixed])
             o.placed["height"] = (0, quad, kind, line, [], number)
             if quad is not None:
                 _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From,
-                           size=11 * scale)
+                           size=11 * text_size)
                 xs, ys = [p[0] for p in quad], [p[1] for p in quad]
                 taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
