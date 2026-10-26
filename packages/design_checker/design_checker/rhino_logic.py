@@ -412,15 +412,26 @@ def suggested_facts(jurisdiction, zones, lots, buildings):
     The largest outline is the lot, its lowest line on screen the street side; the ground is flat at the
     buildings' lowest point (or the lot's level); the lot is not from a survey; the first zone with rules; a
     detached one-family house; the largest solid the main building. The corner-lot question is never answered
-    here: always None, so the box asks it and the yards wait for the answer."""
+    here: always None, so the box asks it and the yards wait for the answer. A lot's "segments_ft" (the same
+    segments in feet, when given) decide the street's lengths and turns, in feet as everywhere (review round 6,
+    F2: a 6 mm slip in a millimetre model read as a 6 ft line)."""
     facts = {"jurisdiction": jurisdiction, "zone": zones[0] if zones else None, "use": "one_family_detached",
              "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}
     lot = max(lots, key=lambda l: l["area"]) if lots else None
     if lot is not None:
         facts["lot_id"] = lot["id"]
         if lot["segments"]:
-            a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
-            set_street_lines(facts, [[[a[0], a[1]], [b[0], b[1]]]])
+            outline = [[[p[0], p[1]], [q[0], q[1]]] for p, q in lot["segments"]]
+            feet = [[list(p[:2]) for p in line] for line in lot.get("segments_ft") or outline]
+            # the lowest piece a street can start from (never a point drawn twice: round 4; an arc drawn in short
+            # chords is a line: round 7)
+            run = next((r for k in sorted(range(len(feet)), key=lambda k: (outline[k][0][1] + outline[k][1][1]) / 2)
+                        for r in [street_run(feet, feet[k], tolerance=0.0)] if r is not None), None)
+            # the whole street it is on (review round 1, F1: a tax-map street suggested as one piece), only when
+            # both its ends are sure; else no suggestion, so the box asks for the click and the click asks the
+            # question (round 3, F1: a curving street suggested as its first 30°, the front yard from part of it)
+            if run and run["maybe"] == [[], []]:
+                set_street_lines(facts, [outline[k] for k in run["pieces"]])
     ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
     if ground is not None:
         facts["grade_elevation"] = ground
@@ -518,7 +529,7 @@ def _segments_cross(p, q, r, s_):
     return (d1 > 0) != (d2 > 0) and (d3 > 0) != (d4 > 0)
 
 
-def _inside(pt, poly):
+def _point_in(pt, poly):
     x, y = pt
     hit = False
     for k in range(len(poly)):
@@ -535,60 +546,12 @@ def shapes_hit(a, b):
         for j in range(len(b)):
             if _segments_cross(a[k - 1], a[k], b[j - 1], b[j]):
                 return True
-    return bool(a and b) and (_inside(a[0], b) or _inside(b[0], a))
+    return bool(a and b) and (_point_in(a[0], b) or _point_in(b[0], a))
 
 
 def _along(a, b):
     n = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
     return ((b[0] - a[0]) / n, (b[1] - a[1]) / n), n
-
-
-def label_on_line(a, b, w, h=DIM_LABEL_H_PX, away=None, gap=DIM_LABEL_GAP_PX):
-    """A dimension's label ON its line (screen): aligned with the line a (lot end) to b (building end), centred on
-    its middle, its near edge `gap` px off the line, on the side away from `away` (the building's middle on
-    screen: the label sits outside the building). Its four corners."""
-    (ux, uy), _ = _along(a, b)
-    nx, ny = -uy, ux
-    mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
-    if away is not None and (away[0] - mx) * nx + (away[1] - my) * ny > 0:
-        nx, ny = -nx, -ny
-    cx, cy = mx + nx * (gap + h / 2), my + ny * (gap + h / 2)
-    return [(cx + sx * ux * w / 2 + sy * nx * h / 2, cy + sx * uy * w / 2 + sy * ny * h / 2)
-            for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
-
-
-def label_at_end(a, b, w, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
-    """A dimension's label past the line's outer end (beyond the lot line), aligned with it and centred on it,
-    `gap` px past the end (a short leader joins them): for a dimension too short for its number, or whose spot on
-    the line is out of view. Its four corners."""
-    (ux, uy), _ = _along(b, a)                     # outward: from the building past the lot line
-    nx, ny = -uy, ux
-    near = (a[0] + ux * gap, a[1] + uy * gap)
-    return [(near[0] + ux * dx + nx * dy, near[1] + uy * dx + ny * dy)
-            for dx, dy in ((0, -h / 2), (w, -h / 2), (w, h / 2), (0, h / 2))]
-
-
-def text_angle(a, b):
-    """The angle (degrees, screen: y runs down) a label along a to b is written at, kept readable: within
-    [-90, 90)."""
-    import math
-    t = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
-    while t >= 90:                                  # within [-90, 90): an upright line reads bottom to top, from
-        t -= 180                                    # the right (drafting's convention; review round 6, F4)
-    while t < -90:
-        t += 180
-    return t
-
-
-def nearest_outline(point, outlines):
-    """Of the buildings' outlines on screen, the one nearest `point` (a dimension's building end) and its middle:
-    the label goes on the side away from THAT building (review round 6, F2: two buildings)."""
-    def gap(poly):
-        return min(_point_segment(point, poly[k - 1], poly[k]) for k in range(len(poly)))
-    if not outlines:
-        return None, None
-    best = min(outlines, key=gap)
-    return best, (sum(p[0] for p in best) / len(best), sum(p[1] for p in best) / len(best))
 
 
 def _point_segment(p, a, b):
@@ -616,164 +579,13 @@ def inside_view(shape, view, margin=VIEW_MARGIN_PX):
     return all(margin <= x <= view[0] - margin and margin <= y <= view[1] - margin for x, y in shape)
 
 
-def clip_to_view(a, b, view):
-    """The part of the screen segment a to b inside the view (w, h) (Liang-Barsky), or None when none of it is;
-    the segment itself without a view. A number is centred on what the architect can see of its line."""
-    if not view:
-        return a, b
-    t0, t1 = 0.0, 1.0
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    for p, q in ((-dx, a[0]), (dx, view[0] - a[0]), (-dy, a[1]), (dy, view[1] - a[1])):
-        if abs(p) < 1e-12:
-            if q < 0:
-                return None
-            continue
-        r = q / p
-        if p < 0:
-            t0 = max(t0, r)
-        else:
-            t1 = min(t1, r)
-        if t0 > t1:
-            return None
-    return (a[0] + t0 * dx, a[1] + t0 * dy), (a[0] + t1 * dx, a[1] + t1 * dy)
-
-
 PRIORITY = {"does_not_comply": 0, "needs_review": 1}      # what is wrong placed first: it gets the clear spots
 
 
-def placement_order(statuses):
-    """The order the yards' numbers are placed in (their indexes): failing first, then needs review, then the
-    rest, each in its own order."""
-    return sorted(range(len(statuses)), key=lambda k: (PRIORITY.get(statuses[k], 2), k))
-
-
-def number_spot(a, b, w, away=None, view=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
-    """Where a dimension's number goes (screen), the drawing's way: centred on the visible part of its own line,
-    aligned with it, `gap` px off it on the side away from the building; just past its outer end (the lot-line end)
-    when the visible line is too short for it or that spot is out of view. Its corners and "on" or "end"; (None,
-    None) when neither is wholly in view (the number is then left to the panel)."""
-    seen = clip_to_view(a, b, view)
-    if seen is None or _along(*seen)[1] <= 1e-6:
-        return None, None
-    tries = ([(label_on_line(seen[0], seen[1], w, h, away, gap), "on")] if _along(*seen)[1] >= w + 2 * gap
-             else []) + [(label_at_end(a, b, w, h, gap), "end")]
-    for q, kind in tries:                            # on its line; if that is out of view or too short, past its end
-        if inside_view(q, view):
-            return q, kind
-    return None, None                                # neither in view: no number (the panel says it; review F1, F2)
-
-
-NUMBER_SCALES = (1.0, 0.9, 0.8, 0.7)    # a failing or in-review number's text, made smaller step by step to fit
 #                                        (0.7 × 11 px ≈ 8 px: the smallest that still reads)
 
 
-def label_at_inner(a, b, w, h=DIM_LABEL_H_PX, away=None, gap=DIM_LABEL_GAP_PX):
-    """A number beside its line at the line's inner end (the building's end), running from just outside the house
-    along the line towards the lot line: for a line whose middle and outer end are both taken. Its corners."""
-    (ux, uy), _ = _along(b, a)                     # from the building towards the lot line
-    return label_on_line((b[0] + ux * (w + 2 * gap), b[1] + uy * (w + 2 * gap)), b, w, h, away, gap)
-
-
-def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=None, extras=None,
-                    h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX, must=False, fixed=()):
-    """Which of a yard's dimension positions to draw, and its number (screen): (index, corners or None, kind,
-    scale). `candidates`: the positions check.plan offers along the wall facing the yard's lot line, best first,
-    each (lot end, building end); `w`: the number's width at full size (None: no number shown); `obstacles`: what
-    it may not cover (the status box, the numbers and tags placed before; the notice and the lots' edge lengths are
-    placed after the numbers and keep off them); `footprint`: the buildings' outlines (one or a list); `extras`:
-    per position, its own "min" tags; `view`: (w, h); `must`: the yard fails or needs review; `fixed`: what even
-    the last resort never covers (the status box).
-    At its own line only, the drawing's way: centred on the line (its visible part) at any of the positions, else
-    just past a position's outer end, else beside it at its inner end (just outside the house), the first wholly in
-    view covering nothing. A failing or in-review number is always drawn (Rhino check of #29 at 6d2e01a: the failing one
-    was missing): its text made smaller step by step (NUMBER_SCALES), and last, at full size just past its outer
-    end, moved into the view, whatever it covers ("crowded"). A complying one is left to the panel when there is no
-    room ("none")."""
-    import math
-    houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
-    boxed = [(o, _bbox(o)) for o in obstacles if o]
-
-    def clear(shape, more=()):
-        box = _bbox(shape)
-        against = boxed + [(m, _bbox(m)) for m in more if m] + [(f, _bbox(f)) for f in houses if f]
-        return not any(_boxes_meet(box, ob) and shapes_hit(shape, o) for o, ob in against)
-    usable = [(i, a, b) for i, (a, b) in enumerate(candidates) if _along(a, b)[1] > 1e-6]
-    if not usable:
-        return 0, None, "none", 1.0
-    if w is None:
-        return usable[0][0], None, "none", 1.0
-    for scale in (NUMBER_SCALES if must else NUMBER_SCALES[:1]):
-        ws, hs = w * scale, h * scale
-        for kind in ("on", "end", "inner"):        # on its line at any position first, then past its ends
-            for i, a, b in usable:
-                more = (extras[i] if extras and i < len(extras) else None) or ()
-                seen = clip_to_view(a, b, view)
-                if seen is None or math.dist(*seen) <= 1e-6:            # (a line that only touches the view's
-                    continue                                            # edge: nothing of it seen; review F1)
-                if kind == "on" and math.dist(*seen) < ws + 2 * gap:
-                    continue
-                q = (label_on_line(seen[0], seen[1], ws, hs, away, gap) if kind == "on" else
-                     label_at_end(a, b, ws, hs, gap) if kind == "end" else
-                     label_at_inner(seen[0], seen[1], ws, hs, away, gap))
-                if inside_view(q, view) and clear(q, more):
-                    return i, q, kind, scale
-    if not must:
-        return usable[0][0], None, "none", 1.0
-    i, a, b = usable[0]
-    q = label_at_end(a, b, w, h, gap)
-    if view:                                       # moved into the view: drawn, whatever it covers but the
-        xs, ys = [p[0] for p in q], [p[1] for p in q]          # status box (review F4)
-        dx = max(0, VIEW_MARGIN_PX - min(xs)) - max(0, max(xs) - (view[0] - VIEW_MARGIN_PX))
-        dy = max(0, VIEW_MARGIN_PX - min(ys)) - max(0, max(ys) - (view[1] - VIEW_MARGIN_PX))
-        q = [(x + dx, y + dy) for x, y in q]
-        for f in fixed:
-            if shapes_hit(q, f):                   # below the status box (it sits at the view's top) ...
-                fx0, _, _, fy1 = _bbox(f)
-                below = [(x, y + fy1 + VIEW_MARGIN_PX - min(p[1] for p in q)) for x, y in q]
-                if inside_view(below, view):
-                    q = below
-                else:                              # ... or, a short view, to its left (review F1), or right
-                    fx1 = _bbox(f)[2]
-                    left = [(x + fx0 - VIEW_MARGIN_PX - max(p[0] for p in q), y) for x, y in q]
-                    right = [(x + fx1 + VIEW_MARGIN_PX - min(p[0] for p in q), y) for x, y in q]
-                    q = left if inside_view(left, view) else right if inside_view(right, view) else q
-                    # (neither fits: it stays in view, over the box: drawn, review of dd74264 F2)
-    return i, q, "crowded", 1.0
-
-
-NUMBER_PAD_PX = 4      # around a drawn number: the edge lengths and the notice keep this far off it (Rhino check
 #                        of #29 at 5891efc: the rear number touched an edge length)
-
-
-def number_box(xs, ys, pad=NUMBER_PAD_PX):
-    """A drawn number's corners' xs and ys → its box (x, y, w, h) with a margin, as the later labels must avoid."""
-    return (min(xs) - pad, min(ys) - pad, max(xs) - min(xs) + 2 * pad, max(ys) - min(ys) + 2 * pad)
-
-
-def notice_place(view_w, view_h, w, h, model, fixed, taken):
-    """Where the "no longer complies" notice goes, placed after the dimensions' numbers: off the model and off
-    everything drawn (notice_spot); when every corner is taken, off the status box (`fixed`) at least, whatever
-    number it then covers (review F2: its fallback could land on the status box). (A view so small that the
-    status box covers every corner: the notice goes where notice_spot puts it.)"""
-    x, y = notice_spot(view_w, view_h, w, h, model, list(fixed) + list(taken))
-    box = rect_quad((x, y, w, h))
-    if any(shapes_hit(box, rect_quad(f)) for f in fixed):
-        x, y = notice_spot(view_w, view_h, w, h, model, list(fixed))
-    return x, y
-
-
-def tag_spot(line_ends, outward, tag, taken, view=None):
-    """Where a failing or in-review yard's "min" tag goes (screen): at an end of its required line (far, then
-    near), on the outside (`outward`: the unit direction from the building towards the lot line), wholly in view,
-    covering nothing drawn (`taken`, boxes); None when neither end has room (the panel says it anyway). Its box
-    (x, y, w, h)."""
-    w, h = label_width(tag, TAG_SIZE), 16
-    for end in line_ends:
-        cx, cy = end[0] + outward[0] * (w / 2 + 4), end[1] + outward[1] * (h / 2 + 4)
-        box = (cx - w / 2, cy - h / 2, w, h)
-        if inside_view(rect_quad(box), view) and not any(shapes_hit(rect_quad(box), rect_quad(t)) for t in taken):
-            return box
-    return None
 
 
 def limit_label_spot(line, house, w, h=18, view=None, gap=8, taken=()):
@@ -795,10 +607,6 @@ def limit_label_spot(line, house, w, h=18, view=None, gap=8, taken=()):
 def _bbox(shape):
     xs, ys = [p[0] for p in shape], [p[1] for p in shape]
     return min(xs), min(ys), max(xs), max(ys)
-
-
-def _boxes_meet(a, b):
-    return a[0] <= b[2] and b[0] <= a[2] and a[1] <= b[3] and b[1] <= a[3]
 
 
 def dim_ticks(a, b, size=DIM_TICK_PX):
@@ -877,6 +685,289 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     return left, top, False
 
 
+def _point_seg(px, py, line):
+    """A point's distance from a segment (screen pixels)."""
+    (ax, ay), (bx, by) = line
+    dx, dy = bx - ax, by - ay
+    t = 0.0 if dx == dy == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+    return ((px - ax - t * dx) ** 2 + (py - ay - t * dy) ** 2) ** 0.5
+
+
+def box_gap(line, box):
+    """How far a box (left, top, w, h) is from a screen line ((x1, y1), (x2, y2)), exactly: 0 when they touch."""
+    left, top, w, h = box
+    if crosses(line, left, top, w, h):
+        return 0.0
+    corners = ((left, top), (left + w, top), (left, top + h), (left + w, top + h))
+    ends = [((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5) for x, y in line]
+    return min(ends + [_point_seg(x, y, line) for x, y in corners])
+
+
+LABEL_MIN_SIZE = 9                 # a plan label's text is never smaller (readable on screen)
+LABEL_LEAD_REACH = 3               # how far a led label may sit from its line: this many label heights
+LABEL_STEP = 6                     # the lattice the spots near a line are tried on, screen pixels
+
+
+def label_height(rows, size):
+    """A plan label's height on screen: its lines (size + 5 px each: 16 px at 11 pt) and 4 of margin."""
+    return 4 + (size + 5) * rows
+
+
+def _over(box, other):
+    """Whether two (left, top, w, h) boxes overlap (touching edges don't)."""
+    return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
+        min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
+
+
+def _inside(x, y, poly):
+    """Whether a point is inside a polygon (screen points; even-odd)."""
+    inside = False
+    for (ax, ay), (bx, by) in zip(poly, poly[1:] + poly[:1]):
+        if (ay > y) != (by > y) and x < ax + (y - ay) * (bx - ax) / (by - ay):
+            inside = not inside
+    return inside
+
+
+def box_over_shape(box, poly):
+    """Whether a box (left, top, w, h) covers any of a polygon (its screen points), 3 px around it included."""
+    left, top, w, h = box[0] - 3, box[1] - 3, box[2] + 6, box[3] + 6
+    if len(poly) < 3:
+        return False
+    if any(crosses(edge, left, top, w, h) for edge in zip(poly, poly[1:] + poly[:1])):
+        return True
+    if any(left <= x <= left + w and top <= y <= top + h for x, y in poly):
+        return True
+    return _inside(left + w / 2, top + h / 2, poly)
+
+
+def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes=(), placed=()):
+    """Which HARD rule a plan label's box (left, top, w, h) breaks, or None. HARD: on screen; over no building
+    footprint nor coloured part (`hard_shapes`: their outlines on screen, 3 px around them), nor the notice, the
+    status box or the north arrow (`hard_boxes`, 3 px around them), nor a label already placed (`placed`: a label is
+    never hidden under another, the Rhino job at 4bb6d4d); crossing neither its own dimension `line` nor any line in
+    `hard_lines` (every other yard's dimension, 3 px around it: the southwest label sat 1 px beside the front's)."""
+    left, top, w, h = box
+    if view is not None and (left < 0 or top < 0 or left + w > view[0] or top + h > view[1]):
+        return "off screen"
+    if any(box_over_shape(box, shape) for shape in hard_shapes):
+        return "over a building or its coloured part"
+    if any(_over(box, (a - 3, b - 3, c + 6, e + 6)) for a, b, c, e in hard_boxes):
+        return "over the notice, the status box or the north arrow"
+    if any(_over(box, other) for other in placed):
+        return "over another label"
+    if crosses(line, left, top, w, h):
+        return "on its own line"
+    if any(crosses(other, left - 3, top - 3, w + 6, h + 6) for other in hard_lines if other != line):
+        return "on another yard's dimension"
+    return None
+
+
+def label_spots(line, w, h, reach, step=LABEL_STEP):
+    """Every spot for a w × h label within `reach` of its dimension `line` (screen pixels), on a `step` lattice from
+    the line's own corner, nearest first."""
+    (xa, ya), (xb, yb) = line
+    x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
+    spots = []
+    nx, ny = int((x1 - x0 + w + 2 * reach) / step) + 1, int((y1 - y0 + h + 2 * reach) / step) + 1
+    for j in range(ny):
+        top = y0 - h - reach + j * step
+        for i in range(nx):
+            left = x0 - w - reach + i * step
+            gap = box_gap(line, (left, top, w, h))
+            if gap <= reach:
+                spots.append((gap, left, top))
+    spots.sort()
+    return spots
+
+
+def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_boxes=(), soft_lines=(),
+                    hard_shapes=(), placed=()):
+    """Where a plan label for the dimension `line` goes (screen pixels), by one complete set of rules (the Rhino job
+    at 319dc5d: each round's fix moved the southwest yard's label onto the next obstacle nobody had listed):
+    - HARD, never broken (label_breaks_hard): on screen; over no building footprint or coloured part
+      (`hard_shapes`), nor the notice, the status box or the north arrow (`hard_boxes`); on neither its own line nor
+      any other yard's dimension (`hard_lines`).
+    - SOFT, least first: other labels covered (`soft_boxes`), then, for a led label, the HARD things its leader
+      crosses, then lines crossed (`soft_lines`: the lot's edges), then its distance from its own line.
+    - Within one label height of its line, on one line, then on two (name, then numbers: label_lines), every spot
+      on a LABEL_STEP lattice tried; then smaller, a point at a time down to LABEL_MIN_SIZE; then, at its own size,
+      up to LABEL_LEAD_REACH label heights away; then the nearest spots anywhere on screen that break no HARD rule,
+      at its own size, then the smallest. A label more than 8 px from its line is led to it (`led`). Only when no
+      spot on the whole screen keeps every HARD rule is one broken (`forced`, never silent), so a failing yard's
+      label is never dropped.
+    Returns {"left", "top", "w", "h", "rows", "size", "led", "forced", "gap"}."""
+    (xa, ya), (xb, yb) = line
+    mx, my = (xa + xb) / 2, (ya + yb) / 2
+    two = label_lines(text)
+    variants = [[text]] + ([two] if len(two) == 2 else [])
+
+    def shape(rows, pt):
+        return max(label_width(r, pt) for r in rows), label_height(len(rows), pt)
+
+    def result(rows, pt, left, top, w, h, forced=False):
+        gap = box_gap(line, (left, top, w, h))
+        return {"left": left, "top": top, "w": w, "h": h, "rows": rows, "size": pt, "led": gap > 8,
+                "forced": forced, "gap": gap}
+
+    def soft(box, gap):
+        left, top, w, h = box
+        covered = sum(_over(box, other) for other in soft_boxes)
+        led_hits = 0
+        if gap > 8:                      # its leader: from its line's middle to the label's nearest edge
+            ex, ey = leader_end((mx, my), box)
+            lead = ((mx, my), (ex, ey))
+            led_hits = sum(_seg_hits_shape(lead, shape_) for shape_ in hard_shapes) + \
+                sum(_seg_hits_box(lead, b_) for b_ in list(hard_boxes) + list(soft_boxes))
+        crossed = sum(crosses(s_, left, top, w, h) for s_ in soft_lines if s_ != line)
+        return covered, led_hits, crossed, gap
+
+    def best(rows, pt, spots):
+        w, h = shape(rows, pt)
+        found = None
+        for gap, left, top in spots:
+            box = (left, top, w, h)
+            if label_breaks_hard(line, box, view, hard_boxes, hard_lines, hard_shapes, placed):
+                continue
+            score = soft(box, gap)
+            if found is None or score < found[0]:
+                found = (score, left, top, w, h)
+                if score[:3] == (0, 0, 0):           # nearest first: nothing better follows
+                    break
+        return None if found is None else result(rows, pt, *found[1:])
+
+    for pt in range(int(size), LABEL_MIN_SIZE - 1, -1):          # within one label height: its size, then smaller
+        for rows in variants:
+            w, h = shape(rows, pt)
+            got = best(rows, pt, label_spots(line, w, h, h))
+            if got is not None:
+                return got
+    for rows in variants:                                        # led, up to LABEL_LEAD_REACH heights away
+        w, h = shape(rows, size)
+        got = best(rows, size, label_spots(line, w, h, LABEL_LEAD_REACH * h))
+        if got is not None:
+            return got
+    if view is not None:                                         # the nearest spots on screen that keep the rules
+        for pt in (int(size), LABEL_MIN_SIZE):
+            for rows in variants:
+                w, h = shape(rows, pt)
+                grid = [(box_gap(line, (left, top, w, h)), left, top) for top in range(0, int(view[1] - h) + 1, 12)
+                        for left in range(0, int(view[0] - w) + 1, 12)]
+                grid.sort()
+                clear = [q for q in grid if not label_breaks_hard(line, (q[1], q[2], w, h), view, hard_boxes,
+                                                                  hard_lines, hard_shapes, placed)][:40]
+                got = best(rows, pt, clear)
+                if got is not None:
+                    return got
+    rows = variants[-1]                                          # nowhere keeps them all: never over another
+    w, h = shape(rows, LABEL_MIN_SIZE)                           # label still (the review of 3446e94), else
+    if view is not None:                                         # beside its line; said either way, never dropped
+        free = sorted((box_gap(line, (left, top, w, h)), left, top) for top in range(0, int(view[1] - h) + 1, 12)
+                      for left in range(0, int(view[0] - w) + 1, 12)
+                      if not any(_over((left, top, w, h), other) for other in placed))
+        if free:
+            return result(rows, LABEL_MIN_SIZE, free[0][1], free[0][2], w, h, forced=True)
+    left, top = min(xa, xb), max(ya, yb) + 6
+    if view is not None:
+        left, top = min(max(left, 0), max(view[0] - w, 0)), min(max(top, 0), max(view[1] - h, 0))
+    return result(rows, LABEL_MIN_SIZE, left, top, w, h, forced=True)
+
+
+def hull(points):
+    """The convex hull of screen points, counter-clockwise (a building's footprint on screen when its outline isn't
+    given in order: never smaller than the footprint, and turned with it, never its whole bounding box)."""
+    pts = sorted(set((round(x, 3), round(y, 3)) for x, y in points))
+    if len(pts) < 3:
+        return pts
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+LABEL_ORDER = {"does_not_comply": 0, "needs_review": 1, "complies": 2}   # failing first, the edges' lengths last
+LABEL_SETTLE_S = 0.15        # the view still this long: the labels are placed (never while it moves)
+
+
+class LabelRun:
+    """Placing a frame's plan labels a few at a time (place_dim_label), outside the drawing loop: failing yards
+    first, then those needing review, those that comply, the edges' lengths last; each one placed is HARD for the
+    ones after (never hidden under another, the Rhino job at 4bb6d4d). `step` places labels until its time budget
+    is spent (one at least), so Rhino stays responsive between steps (the review of 3446e94: the whole search at
+    once froze it each time the view came to rest). `items`: dicts with "key", "text", "line" (screen), "size" and
+    "status" (None for an edge). `spots`: {key: placement}, each with the line it was placed for ("line") and its
+    place in the order ("order")."""
+
+    def __init__(self, items, view, keep=(), dims=(), shapes=(), lines=()):
+        self.view, self.keep, self.shapes = view, list(keep), list(shapes)
+        self.dims = [tuple(map(tuple, d)) for d in dims]
+        self.lines = [tuple(map(tuple, s_)) for s_ in lines if tuple(map(tuple, s_)) not in self.dims]
+        self.todo = [item for _, item in sorted(enumerate(items), key=lambda ki: (
+            LABEL_ORDER.get(ki[1].get("status"), 3), ki[0]))]
+        self.placed, self.spots = [], {}
+
+    def step(self, budget_s=None):
+        """Place labels until `budget_s` seconds are spent (one at least; None: all). Whether every one is placed."""
+        import time as time_
+        start = time_.perf_counter()
+        while self.todo:
+            item = self.todo.pop(0)
+            own = tuple(map(tuple, item["line"]))
+            got = place_dim_label(own, item["text"], item["size"], self.view, hard_boxes=self.keep,
+                                  hard_lines=self.dims, soft_lines=self.lines, hard_shapes=self.shapes,
+                                  placed=list(self.placed))
+            got = dict(got, line=own, order=len(self.spots))
+            self.placed.append((got["left"], got["top"], got["w"], got["h"]))
+            self.spots[item["key"]] = got
+            if budget_s is not None and time_.perf_counter() - start >= budget_s:
+                break
+        return not self.todo
+
+
+def place_labels(items, view, keep=(), dims=(), shapes=(), lines=()):
+    """Every plan label of a frame placed at once (LabelRun to the end): {key: placement}."""
+    run = LabelRun(items, view, keep, dims, shapes, lines)
+    run.step()
+    return run.spots
+
+
+def follow(got, line):
+    """A placement carried along while the view moves (never searched in the drawing loop): the same offset from
+    its line's middle as when it was placed, at the line's middle on screen now."""
+    (xa, ya), (xb, yb) = got["line"]
+    (xc, yc), (xd, yd) = line
+    dx, dy = (xc + xd) / 2 - (xa + xb) / 2, (yc + yd) / 2 - (ya + yb) / 2
+    return dict(got, left=got["left"] + dx, top=got["top"] + dy, line=tuple(map(tuple, line)))
+
+
+def _seg_hits_box(seg, box):
+    return crosses(seg, box[0], box[1], box[2], box[3])
+
+
+def _seg_hits_shape(seg, poly):
+    """Whether a segment touches a polygon (crosses an edge, or lies inside it)."""
+    (ax, ay), (bx, by) = seg
+    if len(poly) < 3:
+        return False
+    for (cx, cy), (dx, dy) in zip(poly, poly[1:] + poly[:1]):
+        d = (bx - ax) * (dy - cy) - (by - ay) * (dx - cx)
+        if abs(d) < 1e-12:
+            continue
+        t = ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / d
+        u = ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / d
+        if 0 <= t <= 1 and 0 <= u <= 1:
+            return True
+    return _inside((ax + bx) / 2, (ay + by) / 2, poly)
+
+
 def label_lines(text):
     """A plan label as two lines, for when it won't fit beside its line on one: its name, then its numbers
     ("✕ Side yard, Southwest" / "7'-0 5/8", needs 10'-0" (approx.)"). One line when it has no name before a number
@@ -886,49 +977,93 @@ def label_lines(text):
     return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
 
 
+NOTICE_SHARES = (0.4, 0.5, 0.6, 0.7, 0.8)   # the notice's boxes, narrowest first: a share of the view's width each
+NOTICE_MAX_SHARE = NOTICE_SHARES[-1]         # never wider (a two-line band above the model, never a bar over it)
+NOTICE_MIN_CHARS = 24                        # ...never narrower than this many characters a line
+
+
+NOTICE_KEEP = (                    # spaces never broken in the notice (each becomes a non-breaking one)
+    r"(\d+'-\d+) (\d+/\d+\")",            # a measurement: 7'-0 5/8"
+    r"(\d[\d,.]*) (sf|%|ft)\b",             # an area, a share, a length: 7,033 sf, 35 %
+    r"([\d\"'%]) (short|over|proposed|required)\b",   # the word that says what the number is
+    r"^(✕) (\S)",                           # the mark with its first word
+)
+
+
+def notice_lines(lines, view_w, share=NOTICE_MAX_SHARE, size=13):
+    """The notice's lines wrapped to at most `share` of the view's width (gordium_ui text_box_size's measure: size *
+    0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line. Broken between its " · " parts first;
+    a part is broken between its words only when it is too long even for NOTICE_MAX_SHARE (a heading kept whole where
+    a wider box allows it: review of 87e105d), and never at a space in NOTICE_KEEP (7'-0 5/8" stays whole: review
+    round 1); each notice line's rest indented under its first. Zoomed in tight, one long line was a bar across the
+    whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
+    import re
+    import textwrap
+    chars = max(NOTICE_MIN_CHARS, int((view_w * share - 22) / (size * 0.6)))
+    widest = max(NOTICE_MIN_CHARS, int((view_w * NOTICE_MAX_SHARE - 22) / (size * 0.6)))
+    out = []
+    for line in lines:
+        start, row = len(out), ""
+        for part in line.split(" · "):
+            for keep in NOTICE_KEEP:
+                part = re.sub(keep, lambda m: "\u00a0".join(m.groups()), part)
+            if row and len(row) + 3 + len(part) <= chars:
+                row += " · " + part
+                continue
+            if row:
+                out.append(row)
+            indent = "  " if len(out) > start else ""
+            if len(indent) + len(part) <= widest:          # whole, even past this share: the limit allows it
+                pieces = [part]
+            else:
+                pieces = textwrap.wrap(part, chars - 2, break_long_words=False, break_on_hyphens=False) or [part]
+            for k, piece in enumerate(pieces[:-1]):
+                out.append((indent if k == 0 else "  ") + piece)
+            row = (indent if len(pieces) == 1 else "  ") + pieces[-1]
+        out.append(row)
+    return [t.replace("\u00a0", " ") for t in out]
+
+
+def notice_box(lines, size=13):
+    """The (width, height) the notice's box takes on screen: gordium_ui.text_box_size's measure."""
+    return max(len(t) for t in lines) * (size * 0.6) + 22, len(lines) * (size + 9) + 10
+
+
+def notice_place(view_w, view_h, lines, model, taken=(), size=13):
+    """The notice as drawn in a view: (lines, (left, top), width, height), or None. Its most compact box first (lines
+    of at most 40 % of the view's width), then wider ones up to NOTICE_MAX_SHARE, never a box wider than that (fewer, longer lines: a band that fits above or
+    below the model where a tall box can't), each in the first corner clear of the model and of every box in `taken`
+    (notice_spot); None when no box fits a clear corner: then it is not drawn over the model, and the panel's
+    message line says it (review round 1: one narrow box alone hid the side yard's notice in the default framed
+    view; the Rhino job at a9a9a45: in the real docked Top view, 657 x 668 px, three lines at most 60 % wide were
+    4 px too tall for the band above the model, so it wasn't drawn: two lines at 80 % fit)."""
+    for share in NOTICE_SHARES:
+        wrapped = notice_lines(lines, view_w, share, size)
+        w, h = notice_box(wrapped, size)
+        if w > view_w * NOTICE_MAX_SHARE:    # a part that won't break narrower: never wider than the limit (review)
+            continue
+        spot = notice_spot(view_w, view_h, w, h, model, taken)
+        if spot is not None:
+            return wrapped, spot, w, h
+    return None
+
+
 def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
-    """Where the "no longer complies" notice (w × h) goes in a view (screen pixels): (left, top). The corners are
-    tried in turn (top left under the view's name, bottom left above the axes, top right, bottom right); the first
-    that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken`
-    (the status box) is used; if every corner covers some of the model, the one covering least (architect's
-    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions). When every corner covers a box
-    in `taken`, the first spot off all of them along the top and bottom, then anywhere in the view."""
+    """Where a w × h notice goes in a view (screen pixels): (left, top), or None. The corners are tried in turn (top
+    left under the view's name, bottom left above the axes, top right, bottom right); the first that covers none of
+    the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken` (the status box) is used;
+    None when there is none: the notice is never drawn over the building or lot being judged, nor over the status box
+    (architect's review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions; #28 at 92cf742: zoomed
+    in tight, a bar across the plan)."""
     spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
 
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
-    def free_of(x, y):
-        return not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
-
-    def model_on(spot):
-        return overlap(spot[0], spot[1], model) if model else 0.0
-    free = [sp for sp in spots if free_of(*sp)]
-    if free:
-        return min(enumerate(free), key=lambda k_s: (model_on(k_s[1]), k_s[0]))[1]
-    # every corner covering something drawn (a dimension's number: Rhino check of #29 at 5891efc, docked Top
-    # 656 × 668): slid along the top and bottom bands, then anywhere in the view, off all of it; the first also off
-    # the model, else the one covering least of it. A step of about 1/80 of the view's size keeps a 4K view to a
-    # couple of thousand spots (review of dd74264, F1: 8 px everywhere took seconds a frame)
-    step = max(8.0, (view_w + view_h) / 80.0)
-    xs = [gap + step * k for k in range(int(max(0, view_w - w - 2 * gap) // step) + 1)]
-    ys = [34 + step * k for k in range(int(max(0, view_h - h - 74) // step) + 1)]
-    # and just beside each box drawn, so a gap narrower than the grid's step is found too (review of db58364, L1)
-    # (exactly at a box's edge: touching is clear, so a gap just the notice's size is found: review of cae5326)
-    xs += [v for a, b, c, e in taken for v in (a + c, a - w) if gap <= v <= view_w - w - gap]
-    ys += [v for a, b, c, e in taken for v in (b + e, b - h) if 34 <= v <= view_h - h - 40]
-    best = None
-    for y in [34, view_h - h - 64, view_h - h - 40] + ys:
-        for x in xs:
-            if free_of(x, y):
-                cover = model_on((x, y))
-                if cover <= 0:
-                    return x, y
-                if best is None or cover < best[0]:
-                    best = (cover, (x, y))
-    if best is not None:
-        return best[1]
-    return min(enumerate(spots), key=lambda k_s: (model_on(k_s[1]), k_s[0]))[1]
+    clear = [(x, y) for x, y in spots if 0 <= x and x + w <= view_w and 0 <= y and y + h <= view_h   # on screen
+             and not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
+             and not (model and overlap(x, y, model))]
+    return clear[0] if clear else None
 
 
 def clear_spot(taken, x, y, w, h, avoid=()):
@@ -1249,19 +1384,78 @@ def street_lines_after_picks(lines, picks, corner):
     return out
 
 
-def pick_street(old_lines, old_ids, picked, name, tolerance=0.5):
+def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, ask=None, said=None):
     """(street lines, their street names) after the architect clicks a lot line as the street side (`picked`) and
     names its street (`name`, found or typed; None: unnamed). THE one order of steps (arch-fixes-2 review rounds
     9-11, where a name given for one line kept landing on other lines and two streets, or "one street or two?",
     became one): the name goes on the clicked line ONLY; every other line keeps the street it was known to be on,
     or none; then the street lines follow from those names (street_lines_after_pick: the clicked line's own street
     when the lines are known to be two streets, else every line). A line nobody named stays unnamed, so the
-    measuring still reads it from the drawing (a corner: one street or two?, needs review)."""
+    measuring still reads it from the drawing (a corner: one street or two?, needs review). A line not among them:
+    the whole street it is on along the lot `outline` (street_pick: never round a corner; an unclear end asked with
+    `ask`), else that line alone. `said` (a list): gets {"words", "refused"}, what the command line says and
+    whether the click was refused (a point clicked: the street lines and their name stay as they were)."""
+    if said is None:
+        said = []
+
     def near(p, q):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
     a, b = picked
     lines = [list(map(list, line)) for line in old_lines or []]
+    at = _piece_at(outline, picked, tolerance) if outline else None
+    if at is not None:
+        # on the lot outline: every street line is one of its pieces. The saved lines are snapped to the pieces
+        # they are (a lot nudged under 0.5 ft: the piece, never the stale line beside it; round 10), each with
+        # the street it was known to be on; the clicked piece takes the name given, and no other. The saved
+        # pieces around the click, of its own street or none, are kept as they are (never asked again, never
+        # shrunk on a guess: round 10), and the street grows on from them.
+        n = len(outline)
+        own_ids = _street_lines().matching_ids(lines, old_ids)
+        names, saved = [None] * n, set()
+        for k, line in enumerate(lines):
+            q = _piece_at(outline, line, tolerance)
+            if q is not None:
+                saved.add(q)
+                names[q] = names[q] or (own_ids[k] if own_ids is not None else None)
+        mine = name or names[at]
+        if name:
+            names[at] = name                               # the name on the clicked line only
+        label = mine or "This street"
+        refused = refused_click(outline, picked, tolerance)
+        if refused:                                        # a point clicked, not a line: nothing changes
+            said.append({"words": refused, "refused": True})
+            return lines, (list(old_ids) if own_ids is not None else None)
+
+        def with_me(q):
+            return names[q] is None or (mine is not None and _street_lines().same_street(names[q], mine))
+
+        seed = [at]
+        if at in saved:
+            while (seed[0] - 1) % n in saved and (seed[0] - 1) % n not in seed and with_me((seed[0] - 1) % n):
+                seed.insert(0, (seed[0] - 1) % n)
+            while (seed[-1] + 1) % n in saved and (seed[-1] + 1) % n not in seed and with_me((seed[-1] + 1) % n):
+                seed.append((seed[-1] + 1) % n)
+        got = street_pick(outline, picked, names, (), ask, label, tolerance, seed=seed)
+        if got is None:                 # an outline that doesn't run end to end: the saved street, else that line
+            hits = [k for k, line in enumerate(lines)
+                    if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
+            if hits:                    # never fewer on a guess (round 11): the saved street as it was
+                ids = list(own_ids or [None] * len(lines))
+                if name:
+                    ids[hits[0]] = name
+                kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
+                out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
+                why = "the lot outline doesn't run end to end in order here, so Gordium can't follow the street along it"
+                said.append({"words": (f"{label}: the street lines kept as they were ({why})" if kept == lines else
+                                       f"{street_words(label, kept, out)} ({why})"), "refused": False})   # (round 12)
+                return kept, (out if any(out) else None)
+            said.append({"words": f"{label}: only the lot line clicked (the lot outline doesn't run end to end in "
+                                  f"order here, so Gordium can't follow the street along it)", "refused": False})
+            return [list(map(list, picked))], ([name] if name else None)
+        said.append({"words": got[1], "refused": False})
+        return street_lines_of(outline, [got[0]], names)
+    # no outline (or a line not on it): the street lines themselves
     hits = [k for k, line in enumerate(lines)
             if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
     if not hits:                                           # a line not among them: that line alone
@@ -1294,6 +1488,442 @@ def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
     return [list(map(list, line)) for line in lines]
 
 
+# A joint between two lot-line pieces that turns no more than this is the same street's wobble: a tax-map outline
+# draws a straight street in short pieces (106 Ithaca Rd: 8 pieces of about 10 ft, joints turning up to 7.5°). A
+# joint turning more than street_lines.TURN_LIMIT_DEG is a corner (the measuring's own limit for one street or
+# two); in between, or a run of small joints that swings past that limit in all, is unclear, and the architect is
+# asked (demo 00c04f1: one click on one of the 8 pieces kept that 9.8 ft piece as the whole street).
+PIECE_TURN_DEG = 15.0
+SHORT_PIECE_FT = 0.5   # a piece shorter than this (6 in) has no direction of its own (is_tiny)
+JOINT = 0.01      # ft: two pieces of one outline meet where they share an end (a click is matched within `tolerance`:
+                  # 106's 0.24 ft piece has both ends within 0.5 ft of its neighbours' ends)
+
+
+def is_tiny(line):
+    """A lot-line piece shorter than SHORT_PIECE_FT (6 in): a corner point drawn twice, a slip of the
+    pen or float noise, with no direction of its own: never a street of its own (it would be 0'-0" of frontage,
+    the front yard read from a point), never a corner or a bend (street-run review rounds 3 to 5); passed through
+    inside a street."""
+    import math
+    return math.dist(line[0][:2], line[-1][:2]) < SHORT_PIECE_FT
+
+
+def _same_piece(line, picked, tolerance):
+    (a, b), (c, d) = (line[0], line[-1]), (picked[0], picked[-1])
+    near = lambda p, q: abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance   # noqa: E731
+    return (near(a, c) and near(b, d)) or (near(a, d) and near(b, c))
+
+
+def _in_ring_order(outline):
+    """Whether the outline's pieces run end to end in order round the lot (as the measuring needs)."""
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+    lines = [[list(x[0][:2]), list(x[-1][:2])] for x in outline or []]
+    if len(lines) < 3:
+        return False
+    a, b = lines[0]
+    if not (near(b, lines[1][0]) or near(b, lines[1][1])):
+        a, b = b, a
+    first, end = a, b
+    for x, y in lines[1:]:
+        if near(y, end) and not near(x, end):
+            x, y = y, x
+        elif not near(x, end):
+            return False
+        end = y
+    return near(end, first)
+
+
+def _piece_at(outline, picked, tolerance):
+    """The outline piece a click names: the one it is exactly (within JOINT), else the first within `tolerance`
+    (a short piece beside another short one is never mistaken for it)."""
+    for tol in (JOINT, tolerance):
+        k = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tol)), None)
+        if k is not None:
+            return k
+    return None
+
+
+def outline_names(outline, lines, ids, tolerance=0.5):
+    """The street each piece of the lot outline is known to be on (one per piece, None where unknown): a piece that
+    is one of the street lines `lines` takes that line's own name (`ids`, only when they match the lines one for one:
+    street_lines.matching_ids); every other piece None."""
+    own = _street_lines().matching_ids(lines or [], ids)
+    out = []
+    for piece in outline or []:
+        k = next((k for k, line in enumerate(lines or []) if _same_piece(line, piece, tolerance)), None)
+        out.append(own[k] if own is not None and k is not None else None)
+    return out
+
+
+def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
+    """Where the street of the lot line the architect clicked (`picked`, [[x, y], [x, y]] in feet) runs along the lot
+    outline (`outline`: its pieces in order round the lot, each [[x, y], [x, y]], as Rhino gives a closed curve's
+    segments and as the measuring requires): the clicked piece and its neighbours, both ways round, for as long as
+    they are surely on the same street.
+
+    The outline is read as strokes: each long piece (SHORT_PIECE_FT or longer) is one; consecutive short pieces
+    are grouped into strokes whose ends are at least SHORT_PIECE_FT apart (an arc drawn as short chords keeps its
+    shape); short pieces left over between two strokes (a corner point drawn twice, a slip, a spike) have no
+    direction and stand in the gap between them. Going on from the last stroke kept to the next one:
+    - the next one is another click's street (`taken`): a sure stop (the gap before it is asked);
+    - both are named (`names`, one per piece, None where unknown): the same street joins, however it bends;
+      another street is a sure stop for it (the gap before it is asked);
+    - else a joint between two long pieces with nothing between them turning more than TURN_LIMIT_DEG is a sure
+      stop (a corner: never round onto the other street). Nothing else is ever a sure stop: no short piece
+      decides one (street-run review round 7);
+    - it joins when the joint turns PIECE_TURN_DEG or less, the run then swings no more than TURN_LIMIT_DEG in all
+      and the gap is under SHORT_PIECE_FT;
+    - anything else is unclear: the gap and the next stroke (and on over strokes in line with no gap, while that
+      stretch swings no more than TURN_LIMIT_DEG) are returned apart, never added on a guess, so the architect
+      is asked.
+    `seed`: a run already kept (its pieces in order round the lot), grown on from its ends.
+
+    {"pieces": the run's piece numbers in order round the lot, "maybe": [before, after] (the unclear pieces past
+    each end, nearest first; [] where the end is sure), "turn": [the swing of each unclear stretch from the run's
+    end, in degrees, or None when it is short pieces only]}; None when `picked` isn't a piece of the outline, is
+    already taken, is a short piece standing alone (a point, not a line), or the outline doesn't run end to end
+    in order (the measuring refuses such a lot)."""
+    import math
+    sl = _street_lines()
+    pieces = [[list(line[0][:2]), list(line[-1][:2])] for line in outline or [] if len(line) >= 2]
+    n = len(pieces)
+    hit = _piece_at(pieces, picked, tolerance)
+    taken = set(taken)
+    if hit is None or hit in taken or n < 3:
+        return None
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+    # each piece turned to run round the lot (its end the next one's start): the order Rhino and the measuring use
+    start, vec = [None] * n, [None] * n
+    a, b = pieces[0]
+    if not (near(b, pieces[1][0]) or near(b, pieces[1][1])):
+        a, b = b, a
+    end = b
+    start[0], vec[0] = a, (b[0] - a[0], b[1] - a[1])
+    for i in range(1, n):
+        a, b = pieces[i]
+        if near(b, end) and not near(a, end):
+            a, b = b, a
+        elif not near(a, end):
+            return None                                    # not end to end in order: nothing extended
+        start[i], vec[i], end = a, (b[0] - a[0], b[1] - a[1]), b
+    if not near(end, start[0]):
+        return None
+    length = [math.hypot(*v) for v in vec]
+    tiny = [x < SHORT_PIECE_FT for x in length]
+    names = list(names) if isinstance(names, list) and len(names) == n else [None] * n
+
+    # the strokes, in order round the lot from a long piece; each {"pieces", "dir", "long"}; gap[m]: the short
+    # pieces between stroke m and stroke m + 1
+    first = next((i for i in range(n) if not tiny[i]), 0)
+    strokes, gap, group = [], [], []
+
+    def close_group(final):
+        nonlocal group
+        while group:
+            g0 = start[group[0]]
+            cut = None
+            for c in range(len(group)):
+                e = group[c]
+                tip = (start[e][0] + vec[e][0], start[e][1] + vec[e][1])
+                if math.hypot(tip[0] - g0[0], tip[1] - g0[1]) >= SHORT_PIECE_FT:
+                    cut = c
+                    break
+            if cut is None:
+                if final:
+                    gap[-1] += group if strokes else []
+                    if not strokes:
+                        strokes.append({"pieces": list(group), "dir": None, "long": False})
+                        gap.append([])
+                group = []
+                return
+            part, group = group[:cut + 1], group[cut + 1:]
+            e = part[-1]
+            tip = (start[e][0] + vec[e][0], start[e][1] + vec[e][1])
+            strokes.append({"pieces": part, "dir": (tip[0] - g0[0], tip[1] - g0[1]), "long": False})
+            gap.append([])
+
+    for step_ in range(n):
+        i = (first + step_) % n
+        if tiny[i]:
+            group.append(i)
+            continue
+        close_group(True)
+        strokes.append({"pieces": [i], "dir": vec[i], "long": True})
+        gap.append([])
+    close_group(True)
+    m_of = {}
+    for m, s_ in enumerate(strokes):
+        for q in s_["pieces"]:
+            m_of[q] = m
+    if hit not in m_of:                                    # a short piece standing alone: a point, not a line
+        return None
+    S = len(strokes)
+
+    def name_of(m):
+        got = {names[q] for q in strokes[m]["pieces"]}
+        return got.pop() if len(got) == 1 else None
+
+    def turn(u, v):                                        # signed, degrees, from direction u to direction v
+        return math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]))
+
+    def swing(ms):                                         # the spread of the running heading over strokes
+        dirs = [strokes[m]["dir"] for m in ms if strokes[m]["dir"] is not None]
+        run_, low, high = 0.0, 0.0, 0.0
+        for u, v in zip(dirs, dirs[1:]):
+            run_ += turn(u, v)
+            low, high = min(low, run_), max(high, run_)
+        return high - low
+
+    def between(m, d):                                     # the gap from stroke m to its neighbour going d
+        return list(gap[m]) if d > 0 else list(reversed(gap[(m - 1) % S]))
+
+    def pieces_of(ms):
+        return [q for m in ms for q in strokes[m]["pieces"]]
+
+    hm = m_of[hit]
+    own = name_of(hm) or names[hit]
+    run = [hm]
+    if seed and hit in seed and not set(seed) & taken:     # the strokes the seed holds, grown out from the hit's
+        held = {m_of[q] for q in seed if q in m_of}
+        while (run[0] - 1) % S in held and (run[0] - 1) % S not in run:
+            run.insert(0, (run[0] - 1) % S)
+        while (run[-1] + 1) % S in held and (run[-1] + 1) % S not in run:
+            run.append((run[-1] + 1) % S)
+    held_gaps = set(seed or ()) - set(pieces_of(run))       # gap pieces a Yes already kept past the ends
+    maybe, swings = [[], []], [None, None]
+    for side, d in ((0, -1), (1, 1)):
+        while True:
+            last = run[0] if side == 0 else run[-1]
+            g = [q for q in between(last, d) if q not in held_gaps]
+            j = (last + d) % S
+            if j in run:                                   # the lot comes round
+                maybe[side] = g
+                break
+            jp = strokes[j]["pieces"]
+            if set(jp) & taken or set(g) & taken:          # another click's street: sure; the gap is asked
+                maybe[side] = [q for q in g if q not in taken] if not set(g) & taken else []
+                break
+            nj = name_of(j)
+            order = [j] + run if side == 0 else run + [j]
+            if own and nj:                                 # both named: the street's identity decides
+                if sl.same_street(own, nj) and not g:
+                    run[:] = order
+                    continue
+                if not sl.same_street(own, nj):
+                    maybe[side] = g                        # another street: sure for it, the gap asked
+                    break
+            u, v = strokes[last]["dir"], strokes[j]["dir"]
+            t = abs(turn(u, v)) if u is not None and v is not None else 180.0
+            if not g and strokes[last]["long"] and strokes[j]["long"] and t > sl.TURN_LIMIT_DEG:
+                break                                      # a corner, long piece to long piece
+            g_len = sum(length[q] for q in g)
+            # (onto a long piece only from a long one, or with one in the run already: a click on a rounded
+            # corner's chord never takes the side line unasked, round 8)
+            sure_dir = strokes[j]["long"] is False or strokes[last]["long"] or any(strokes[m]["long"] for m in run)
+            if t <= PIECE_TURN_DEG and swing(order) <= sl.TURN_LIMIT_DEG and g_len < SHORT_PIECE_FT and sure_dir:
+                run[:] = order
+                if g:                                       # (the gap joins with it)
+                    held_gaps.update(g)
+                continue
+            more_m, k = [j], j
+            while True:                                    # on over strokes in line with no gap
+                g2 = between(k, d)
+                nxt = (k + d) % S
+                if (g2 or nxt in run or nxt in more_m or set(strokes[nxt]["pieces"]) & taken
+                        or t > PIECE_TURN_DEG or strokes[k]["dir"] is None or strokes[nxt]["dir"] is None
+                        or abs(turn(strokes[k]["dir"], strokes[nxt]["dir"])) > PIECE_TURN_DEG
+                        or (name_of(nxt) and not (own and sl.same_street(own, name_of(nxt))))
+                        or swing([last] + more_m + [nxt]) > sl.TURN_LIMIT_DEG):
+                    break
+                more_m.append(nxt)
+                k = nxt
+            stretch = g + [q for m in more_m for q in (strokes[m]["pieces"] if d > 0 else
+                                                       list(reversed(strokes[m]["pieces"])))]
+            maybe[side] = stretch
+            swings[side] = swing([last] + more_m)
+            break
+    flat = []
+    for idx, m in enumerate(run):
+        flat += strokes[m]["pieces"]
+        if idx < len(run) - 1:
+            flat += gap[m]
+    before = [q for q in reversed(gap[(run[0] - 1) % S]) if q in held_gaps][::-1] if S > 1 else []
+    after = [q for q in gap[run[-1]] if q in held_gaps] if S > 1 else []
+    pieces_out = before + flat + after
+    seen = set()
+    pieces_out = [q for q in pieces_out if not (q in seen or seen.add(q))]
+    return {"pieces": pieces_out, "maybe": maybe, "turn": swings}
+
+
+def feet_words(feet):
+    """A length for the command line, rounded DOWN to the nearest 1/8 in (never in the architect's favour):
+    75.83 -> 75'-9 7/8"."""
+    import math
+    eighths = int(math.floor(feet * 96 + 1e-6))
+    ft, rest = divmod(eighths, 96)
+    inch, frac = divmod(rest, 8)
+    if frac:
+        g = math.gcd(frac, 8)
+        return f"{ft}'-{inch} {frac // g}/{8 // g}\""
+    return f"{ft}'-{inch}\""
+
+
+def _length(lines):
+    import math
+    return sum(math.dist(line[0][:2], line[-1][:2]) for line in lines)
+
+
+def _end_to_end(lines, ids=None):
+    """(lines, ids) in order end to end along the street, as the measuring reads them (measure.Lot puts the street
+    lines in outline order before its street_verdict): a click on a street line appends the rest of its street
+    after the old lines (street-run review round 2). Lines that don't run end to end: as they were."""
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+    n = len(lines)
+    ids = list(ids) if isinstance(ids, list) and len(ids) == n else None
+    ends = [(line[0], line[-1]) for line in lines]
+
+    def touches(k, p):
+        return [j for j in range(n) if j != k and (near(ends[j][0], p) or near(ends[j][1], p))]
+
+    starts = [k for k in range(n) if not touches(k, ends[k][0]) or not touches(k, ends[k][1])]
+    if not starts:
+        return lines, ids
+    order, k = [starts[0]], starts[0]
+    at = ends[k][1] if not touches(k, ends[k][0]) else ends[k][0]
+    while len(order) < n:
+        nxt = [j for j in touches(k, at) if j not in order]
+        if len(nxt) != 1:
+            return lines, ids
+        k = nxt[0]
+        at = ends[k][1] if near(ends[k][0], at) else ends[k][0]
+        order.append(k)
+    return [lines[k] for k in order], ([ids[k] for k in order] if ids is not None else None)
+
+
+def street_words(label, lines, ids=False):
+    """What the command line says a click kept: "Ithaca Rd: 8 lot-line pieces, 75'-10" of frontage". With `ids`
+    given (the lines' street names, or None: unnamed), lines that aren't surely one street (street_verdict) say so
+    instead of one frontage: the measuring asks one street or two."""
+    n = len(lines)
+    pieces = f"{label}: {n} lot-line piece{'s' if n != 1 else ''}"
+    if ids is not False and n > 1 and street_verdict(*_end_to_end(lines, ids))[0] != "one":
+        return pieces + ", not surely one street: Gordium asks one street or two before measuring along them"
+    return pieces + f", {feet_words(_length(lines))} of frontage"
+
+
+STREET_ANSWER_NEEDED = ("Gordium needs a Yes or a No here (Esc: nothing changes): kept as street, a "
+                        "line that isn't can pass lot width; left out, a line that is can pass the front yard. ")
+
+
+ESC_STREET = "Esc: nothing changed — the street side is as it was; this pick wasn't kept"
+
+
+def so_far(words):
+    """A corner lot's street click, said while the picking goes on: kept only when Enter ends it, so "so far"
+    ("Ithaca Rd: 8 lot-line pieces, 75'-10" so far — Enter when done"), never read as kept before an Esc."""
+    if words.endswith(" of frontage"):
+        return words[:-len(" of frontage")] + " so far — Enter when done"
+    return words + " (so far — Enter when done)"
+
+
+def street_more_question(label, outline, more, swing):
+    """The question when it isn't clear where a street ends (street_run's "maybe" pieces past one end)."""
+    lines = [outline[k] for k in more]
+    n = len(lines)
+    count = f"{n} more lot-line piece{'s' if n != 1 else ''}, {feet_words(_length(lines))}"
+    tail = f" Is that on {label} too? (Yes or No)"
+    if swing is None:                                  # short pieces only (no direction to give)
+        return f"Past there is a short piece of lot line ({count}), with no direction of its own.{tail}"
+    if swing > _street_lines().TURN_LIMIT_DEG:         # a corner, but with short pieces in it, or a bend
+        return f"Past there the lot line turns {round(swing)}° over short pieces, a corner or a bend ({count}).{tail}"
+    return f"Past there the lot line bends {round(swing)}° with no clear corner ({count}).{tail}"
+
+
+def refused_click(outline, picked, tolerance=0.5):
+    """What the command line says when a click can't start a street (a short piece standing alone: a point, not a
+    line), or None: asked before anything else (the street's name), so nothing is asked of a refused click
+    (street-run review round 9)."""
+    hit = _piece_at(outline, picked, tolerance)
+    if hit is not None and is_tiny(outline[hit]) and _in_ring_order(outline) \
+            and street_run(outline, outline[hit], None, (), 0.0) is None:
+        return "that piece is under 6 in long (a corner point drawn twice?), not a street line: click the lot line beside it"
+    return None
+
+
+def street_pick(outline, picked, names=None, taken=(), ask=None, label="This street", tolerance=0.5, seed=None):
+    """One click on the street side, the whole street it is on: (piece numbers in order along it, what to say);
+    street_run's run, with each unclear stretch past an end asked (`ask`: question -> True Yes, False No, None not
+    answered) and left out only on a No. The plugin's question takes only Yes or No (round 14: neither default is
+    safe, see gordium_rhino._ask_street_more); None (no one to ask: tests, headless runs) keeps it and says so.
+    ([], words) when the click is on a street already kept (`taken`) or on a short piece standing alone (a point,
+    not a line); None when it isn't a piece of the outline, or the outline doesn't run end to end in order."""
+    found = street_run(outline, picked, names, taken, tolerance, seed=seed)
+    if found is None:
+        hit = _piece_at(outline, picked, tolerance)
+        if hit is not None and hit in set(taken):
+            return [], "that lot line is on a street already kept"
+        if hit is not None and refused_click(outline, outline[hit], 0.0):
+            return [], refused_click(outline, outline[hit], 0.0)
+        return None
+    run, closed, skipped = list(found["pieces"]), set(), False
+    while True:            # each unclear stretch asked in turn; a Yes grows the street on from there, a No ends it
+        grew = False
+        for side in (0, 1):
+            more = found["maybe"][side]
+            if not more or side in closed:
+                continue
+            said = ask(street_more_question(label, outline, more, found["turn"][side])) if ask is not None else None
+            if said is False:                              # the architect's No: the street ends there
+                closed.add(side)
+            else:
+                run, grew = (list(reversed(more)) + run if side == 0 else run + more), True
+                skipped = skipped or said is not True
+        if not grew:
+            break
+        found = street_run(outline, picked, names, taken, tolerance, seed=run)
+        run = list(found["pieces"])
+    # what it says checks the street as the measuring will (a Yes past a bend: not surely one street)
+    known = list(names) if isinstance(names, list) and len(names) == len(outline) else [None] * len(outline)
+    words = street_words(label, [outline[k] for k in run], [known[k] for k in run])
+    return run, words + ("; a bend not answered is kept as street (answer No to leave it out)" if skipped else "")
+
+
+def add_street_pick(runs, outline, picked, names=None, ask=None, tolerance=0.5):
+    """A corner lot's street side, one click at a time: (`runs` with the clicked street's run added, what to say).
+    Each click keeps the whole street it is on (street_pick), never one already kept; the street is called by its
+    known name, else "Street 1", "Street 2"... in click order."""
+    hit = _piece_at(outline, picked, tolerance)
+    own = names[hit] if hit is not None and isinstance(names, list) and len(names) == len(outline) else None
+    label = own or f"Street {len(runs) + 1}"
+    got = street_pick(outline, picked, names, {k for run in runs for k in run}, ask, label, tolerance)
+    if got is None:
+        if hit is None:
+            return runs, "that isn't one of the lot's lines"
+        return runs + [[hit]], (f"{label}: only the lot line clicked (the lot outline doesn't run end to end in "
+                                f"order here, so Gordium can't follow the street along it: click each street line)")
+    run, words = got
+    return (runs + [run] if run else runs), words
+
+
+def street_lines_of(outline, runs, names=None, clicks=None):
+    """(street lines, their street names or None) from the runs kept (piece numbers), in click order, each piece
+    once; a piece's name is the one it was known by (`names`), never another's. No run (no click was a piece of
+    the outline): the lines clicked (`clicks`), each once (street_lines_after_picks), unnamed."""
+    if not any(runs) and clicks:
+        if all(_piece_at(outline, c, JOINT) is None for c in clicks):   # none is a piece of the outline
+            return street_lines_after_picks(None, clicks, True), None
+        return [], None          # every click refused (a point, a street already kept): nothing changes (round 8)
+    names = list(names) if isinstance(names, list) and len(names) == len(outline or []) else [None] * len(outline or [])
+    seen, lines, ids = set(), [], []
+    for run in runs:
+        for k in run:
+            if k not in seen:
+                seen.add(k)
+                lines.append([list(outline[k][0][:2]), list(outline[k][-1][:2])])
+                ids.append(names[k])
+    return lines, (ids if any(ids) else None)
+
+
 _STREETS = {}
 
 
@@ -1315,7 +1945,6 @@ def _street_lines():
 def street_verdict(lines, ids=None):
     """("one" | "two" | "unsure", total swing): street_lines.street_verdict, the measuring's own."""
     return _street_lines().street_verdict(lines, ids)
-
 
 
 def box_rows(state, flat=None):
@@ -1674,16 +2303,25 @@ def allowed(action, box_open):
 
 def pick_effect(what, outcome, facts, saved_ui):
     """(facts, saved_ui) after one of the start box's picks, from what the pick gave (the Rhino side only gathers it):
-    street: {"picks": the lot lines [a, b] clicked, "name": the clicked line's street (street_name_after_pick, else
+    street: {"lines", "ids": the street lines worked out at the pick (rhino-ui's street runs), "name"} or
+    {"picks": the lot lines [a, b] clicked, "name": the clicked line's street (street_name_after_pick, else
     typed; None: unnamed)}; lot (Use my survey…): the outline picked; draw_lot: the outline drawn; terrain: the
     surface picked; spot / regrade: the points placed. Esc, Enter or nothing picked (`outcome` empty): nothing
     changes, every doubt stays (eval-integrity audit: Esc on Place spot grades wiped the ground's doubt).
     The street lines change only through set_street_lines (arch-fixes-2 round 7): on a corner lot every line
     clicked, no one name for them; otherwise pick_street, the name on the clicked line only (rounds 9-11)."""
     facts, saved_ui = dict(facts), dict(saved_ui)
-    if not outcome or (what == "street" and not outcome.get("picks")):
+    if not outcome or (what == "street" and not (outcome.get("picks") or outcome.get("lines"))):
         return facts, saved_ui
-    if what == "street":
+    if what == "street" and outcome.get("lines"):     # the street lines worked out at the pick (street runs)
+        saved_ui = settle(saved_ui, "street")
+        set_street_lines(facts, outcome["lines"], outcome.get("ids"))
+        if facts.get("corner_lot") is True:            # two streets: no one name for them
+            saved_ui.pop("street_name", None)
+        else:
+            saved_ui["street_name"] = outcome.get("name")      # the name on the clicked line only
+        saved_ui["street_source"] = ENTERED
+    elif what == "street":
         picks, name = outcome["picks"], outcome.get("name")
         saved_ui = settle(saved_ui, "street")          # the architect's line: no looked-up name stays on it
         if facts.get("corner_lot") is True:            # a corner lot: every line on a street (two streets: unnamed)
@@ -1716,7 +2354,6 @@ def after_ground_pick(saved_ui, what, placed):
     saved_ui["ground_kind"] = what
     saved_ui.pop("ground_source", None)
     return saved_ui
-
 
 
 def parse_feet(text):
@@ -1956,14 +2593,6 @@ def dim_level(lot_level_ft):
     point), so the ground and a lot drawn above z 0 never hide them where they are depth-tested; 0 + lift
     without a lot."""
     return (lot_level_ft or 0.0) + DIM_LIFT_FT
-
-
-def face_shown(facing, hidden):
-    """Whether one face of a coloured piece is drawn in a view that is not plan (Rhino check of #31 at 001b757: the
-    rear yard's strip, behind the house's front face, coloured the whole front amber in Front). `facing`: its
-    normal · the direction to the camera (> 0: it faces the camera); `hidden`: for each point sampled on it, whether
-    a building lies between it and the camera. Shown when it faces the camera and some of it is seen."""
-    return facing > 1e-9 and bool(hidden) and not all(hidden)
 
 
 def lines_on_top(parallel, direction_z):
@@ -2642,7 +3271,7 @@ def exchange(sends, lines, request, limit):
     return answer_for(lines, request["id"], limit)
 
 
-HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer",
+HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",
            "worker", "worker_sends", "worker_lines")
 
 

@@ -76,7 +76,7 @@ def test_the_see_through_fills_write_no_depth_so_lines_behind_them_still_show():
     dimension behind them is not hidden (review round 1, F2); depth writing is back on after each."""
     scene = _body("draw_scene")
     assert "d.EnableDepthWriting(not on)" in _body("_see_through")
-    for fill in ("d.DrawBrepShaded(o.yards_zone", "d.DrawBrepShaded(o.envelope", "d.DrawBrepShaded(shown, Rhino.Display"):
+    for fill in ("d.DrawBrepShaded(o.yards_zone", "d.DrawBrepShaded(o.envelope", "d.DrawBrepShaded(g, Rhino.Display"):
         at = scene.index(fill)
         before, after = scene[:at], scene[at:]
         assert before.rindex("_see_through(d, True)") > before.rfind("_see_through(d, False)"), fill
@@ -98,9 +98,9 @@ def test_off_plan_the_dimensions_are_drawn_in_the_model_and_not_over_the_solids(
     screen = _body("draw_screen")
     assert "flat = logic.lines_on_top(" in screen
     flat_block = screen[screen.index("        if flat:"):]
-    assert "_required(d, r, tag, dark, box)" in flat_block.split("_dimension(d, e.Viewport, chosen, color)")[0]
-    assert "            _dimension(d, e.Viewport, chosen, color)" in flat_block   # required lines and dims: plan only
-    height = screen[screen.index("if height is not None and elevation and zoomed_in:"):]
+    assert "_required(d, r, dark)" in flat_block.split("_dimension(d, e.Viewport, best, color)")[0]
+    assert "            _dimension(d, e.Viewport, best, color)" in flat_block     # required lines and dims: plan only
+    height = screen[screen.index("    if height is not None:                   # the height"):]
     assert "_dimension(d, " not in height.split("limit = getattr(o, \"height_limit\"")[0]   # the height's: in the model
     dims = _body("_scene_dims")
     assert dims.count("_model_dimension(d, e.RhinoDoc,") == 2 and "logic.dims_shown(zoomed_in, elevation)" in dims
@@ -121,7 +121,7 @@ def test_off_plan_a_dimension_has_the_same_halo_as_on_screen():
     assert body.index("_see_through(d, True)") < body.index("d.DrawLine(stroke, halo,") \
         < body.index("_see_through(d, False)") < body.index("d.DrawLine(stroke, color, 2)")
     scene = _body("draw_scene")
-    assert scene.index("d.DrawBrepShaded(shown, Rhino.Display") < scene.index("_scene_dims(o, e, d, dark, old)")
+    assert scene.index("d.DrawBrepShaded(g, Rhino.Display") < scene.index("_scene_dims(o, e, d, dark, old)")
 
 
 
@@ -131,40 +131,29 @@ def test_off_plan_dimensions_have_the_plans_colours_and_dashed_required_lines():
     dims = _body("_scene_dims")
     assert "ui.status_color(" not in dims.split("if limit is not None")[0]
     assert dims.count("_model_dimension(d, e.RhinoDoc, line, ui.dim_color(") == 2
-    assert "_required(d, line, None, dark)" in dims
+    assert "_required(d, line, dark)" in dims
+    # every call matches _required's own arguments (the merge with rhino-ui changed them: a call left with the old
+    # four raised in draw_scene)
+    import ast
+    from rule_format.rulebook import REPO
+    tree = ast.parse((REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8"))
+    (fn,) = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_required"]
+    calls = [c for c in ast.walk(tree) if isinstance(c, ast.Call) and getattr(c.func, "id", None) == "_required"]
+    assert calls and all(len(c.args) == len(fn.args.args) for c in calls)
 
 
-# ---- the coloured pieces off plan: only what the camera sees (Rhino check of #31 at 001b757) -----------------------
+# ---- the coloured pieces: depth-tested fills, no ray-casting (the Rhino job at #31 e9b2a69) ------------------------
 
-def test_a_coloured_face_shows_only_facing_the_camera_and_not_wholly_behind_a_building():
-    """The rear yard's strip, behind the house's front face, coloured the whole front amber in Front."""
-    assert logic.face_shown(1.0, [False, False, True])            # facing, partly seen: shown
-    assert not logic.face_shown(1.0, [True] * 5)                  # wholly behind the house: hidden
-    assert not logic.face_shown(0.0, [False])                     # edge-on (a side face in an elevation)
-    assert not logic.face_shown(-1.0, [False])                    # facing away (the strip's back, from the front)
-    assert not logic.face_shown(1.0, [])                          # nothing of it sampled
-
-
-def test_off_plan_the_plugin_draws_only_the_seen_faces_and_plan_as_before():
+def test_the_coloured_pieces_are_plain_depth_tested_fills_with_no_ray_casting():
+    """The amber front face in Front was Rhino drawing the house as wireframe while a script runs (no faces write
+    depth then); once Rhino idles, the depth-tested fill shows only where seen (0 of 81 front-face points amber).
+    The ray-cast visibility added for it cost an orbit frame 89 ms against 33: removed."""
     import ast
     from rule_format.rulebook import REPO
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     fns = {n.name: ast.get_source_segment(src, n) for n in ast.parse(src).body if isinstance(n, ast.FunctionDef)}
+    assert not {"_seen_faces", "_face_samples", "_occluders"} & set(fns)
+    assert "MeshRay" not in src and "occluders" not in src
     scene = fns["draw_scene"]
-    assert "shown = g if on_top else _seen_faces(o, e.Viewport, g)" in scene
-    assert scene.index("_seen_faces(o, e.Viewport, g)") < scene.index("d.DrawBrepShaded(shown,") \
-        < scene.index("d.DrawBrepWires(shown,")
-    seen = fns["_seen_faces"]
-    assert "logic.face_shown(facing, hidden)" in seen and "o.occluders" in seen and "cache[key] = joined" in seen
-    assert "if f <= 1e-9:" in seen and seen.index("if f <= 1e-9:") < seen.index("MeshRay")   # rays only facing
-    assert "if not points:\n            shown.append(face.DuplicateFace(False))" in seen        # never lost
-    samples = fns["_face_samples"]
-    assert "if shrunk.OrientationIsReversed:\n            n.Reverse()" in samples                # review F1
-    assert "dup.Faces.ShrinkFaces()" in samples                                                 # review F2
-    assert "for x in _buildings(doc):" in fns["_occluders"]                                     # review F6
-    assert "start = p + out * off" in seen and "_model_length(doc, 2.5 * ui.HIGHLIGHT_PROUD_FT)" in seen  # 3159a78 F1
-    assert seen.index("    off = ") < seen.index("_face_samples(f, 2 * off)")       # samples off the edges (cbb6e8c)
-    assert "if c.PointAt(t).DistanceTo(p) < margin" in fns["_face_samples"].replace("ok and ", "")
-    assert "mp.Tolerance = _model_length(doc, ui.HIGHLIGHT_PROUD_FT / 2)" in fns["_occluders"]          # F2
-    assert "FastRenderMesh" not in fns["_occluders"]
-    assert "_occluders(doc)" in fns["_draw_plan"]
+    assert "d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))" in scene
+    assert not hasattr(logic, "face_shown")
