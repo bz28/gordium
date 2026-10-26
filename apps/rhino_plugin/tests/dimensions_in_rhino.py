@@ -76,7 +76,9 @@ def drawn(g, doc, view_name, capture=None):
     try:
         view.Redraw()
         if capture:
-            view.CaptureToBitmap(System.Drawing.Size(1000, 640)).Save(S + "frames/" + capture + ".png")
+            # at the view's own size, so the frame captured is the one the claims read (review of be133d0, F6)
+            view.CaptureToBitmap(view.ActiveViewport.Size).Save(S + "frames/" + capture + ".png")
+            view.Redraw()
     finally:
         g._dimension = real
     return calls

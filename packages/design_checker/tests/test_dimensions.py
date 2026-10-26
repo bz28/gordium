@@ -566,3 +566,31 @@ def test_min_tags_stay_inside_the_view_and_off_the_edge_labels():
     assert logic.inside_view(logic.rect_quad(box_), (1000, 640)) and logic.TAG_SIZE >= 11
     (edge_box,) = logic.tag_spots([((995, 5), (900, 5))], [TAG], [], view=(1000, 640))     # at the view's corner
     assert logic.inside_view(logic.rect_quad(edge_box), (1000, 640))
+
+
+
+def test_a_label_with_nowhere_clear_costs_a_bounded_number_of_checks_per_frame(monkeypatch):
+    """Review of be133d0, F1: with every spot taken, the leader search tried ~3,500 ring offsets for each of 15
+    positions and both widths, every frame. Now the best few positions together, nearest first, at most
+    LEADER_TRIES spots, each shape tested against an obstacle only when their boxes meet."""
+    calls = []
+    real = logic.shapes_hit
+    monkeypatch.setattr(logic, "shapes_hit", lambda a, b: calls.append(1) or real(a, b))
+    wall = logic.rect_quad((0, 0, 1000, 640))                     # the whole view taken
+    cands = [((100 + 10 * n, 300), (100 + 10 * n, 200)) for n in range(15)]
+    i, q, kind, which = logic.place_dimension(cands, [200, 120], [wall], view=(1000, 640))
+    assert kind == "forced" and len(calls) <= 2 * logic.LEADER_TRIES + 200, len(calls)
+
+
+
+def test_the_words_are_never_flipped_back_to_front():
+    """Review of be133d0, F2: text_angle already keeps the words reading left to right, so the plane's y (normal x
+    x) is the screen's up; the 'keep upright' flip, on a vertical line (the height) decided by rounding noise,
+    could mirror them. It is gone; the plane faces the camera."""
+    import ast
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_dim_label")
+    body = ast.get_source_segment(src, fn)
+    assert "-plane.YAxis" not in body and "facing = rg.Plane(anchor, -viewport.CameraDirection)" in body
+    assert "rg.Vector3d.CrossProduct(facing.Normal, xaxis)" in body

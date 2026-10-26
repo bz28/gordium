@@ -693,11 +693,15 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_L
     ("forced")."""
     houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
     widths = None if w is None else (list(w) if isinstance(w, (list, tuple)) else [w])
+    boxed = [(o, _bbox(o)) for o in obstacles]              # each shape's box, once: most tests stop there
+    homes = [(f, _bbox(f)) for f in houses]
 
     def clear(shape, solid=True, more=(), within=True):
-        return (not within or inside_view(shape, view)) and \
-            not any(shapes_hit(shape, o) for o in list(obstacles) + list(more)) and \
-            not (solid and any(shapes_hit(shape, f) for f in houses))
+        if within and not inside_view(shape, view):
+            return False
+        box = _bbox(shape)
+        against = boxed + [(m, _bbox(m)) for m in more] + (homes if solid else [])
+        return not any(_boxes_meet(box, ob) and shapes_hit(shape, o) for o, ob in against)
 
     def own(i):
         return (extras[i] if extras and i < len(extras) else None) or ()
@@ -728,18 +732,21 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_L
             if clear(q, more=own(i)):
                 return i, q, "end", which
     # nowhere on or past the line: the nearest clear spot inside the view, the label still along the line, a leader
-    # back to the line's middle (searched outward in rings, up to LEADER_REACH_PX)
+    # back to the line's middle: the best few positions searched together, nearest first, at most LEADER_TRIES
+    # spots in all (the display conduit runs this every frame: review of be133d0, F1)
     for which, width in enumerate(widths):
-        for i, a, b, (va, vb) in clear_lines or shown:
-            base = label_on_line(va, vb, width, h, away, gap)
-            for dx, dy in _ring_offsets():
-                q = [(x + dx, y + dy) for x, y in base]
-                if clear(q, more=own(i)):
-                    return i, q, "leader", which
+        bases = [(i, label_on_line(va, vb, width, h, away, gap)) for i, a, b, (va, vb) in (clear_lines or shown)[:2]]
+        tries = sorted(((dx * dx + dy * dy, n, dx, dy) for n, _ in enumerate(bases) for dx, dy in RING_OFFSETS),
+                       key=lambda t: (t[0], t[1]))[:LEADER_TRIES]
+        for _, n, dx, dy in tries:
+            i, base = bases[n]
+            q = [(x + dx, y + dy) for x, y in base]
+            if clear(q, more=own(i)):
+                return i, q, "leader", which
     i, a, b, (va, vb) = (clear_lines or shown or [(usable[0][0], usable[0][1], usable[0][2],
                                                     (usable[0][1], usable[0][2]))])[0]
     q = label_on_line(va, vb, widths[-1], h, away, gap)
-    if view:                                            # moved wholly inside the view, whatever it covers
+    if view:     # moved inside the view, whatever it covers (wider than the view itself: as far in as it goes)
         xs, ys = [p[0] for p in q], [p[1] for p in q]
         dx = max(0, VIEW_MARGIN_PX - min(xs)) - max(0, max(xs) - (view[0] - VIEW_MARGIN_PX))
         dy = max(0, VIEW_MARGIN_PX - min(ys)) - max(0, max(ys) - (view[1] - VIEW_MARGIN_PX))
@@ -747,20 +754,31 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_L
     return i, q, "forced", len(widths) - 1
 
 
-LEADER_REACH_PX = 400   # how far from its line a label may go to find a clear spot (with a leader back)
+LEADER_REACH_PX = 320   # how far from its line a label may go to find a clear spot (with a leader back)
+LEADER_TRIES = 2000     # the most spots tried for one label (cheap box tests first: a frame stays quick)
 
 
-def _ring_offsets(step=12, reach=LEADER_REACH_PX):
+def _ring_offsets(step=16, reach=LEADER_REACH_PX):
     """Screen offsets in rings around (0, 0), nearest first: where a label is tried when nothing beside its line is
-    clear."""
+    clear. Made once (RING_OFFSETS)."""
+    import math
     out = []
     for r in range(step, reach + 1, step):
-        n = max(8, int(6.283 * r / step))
-        for k in range(n):
-            import math
-            t = 6.283185307 * k / n
-            out.append((r * math.cos(t), r * math.sin(t)))
+        n = max(8, int(2 * math.pi * r / step))
+        out += [(r * math.cos(2 * math.pi * k / n), r * math.sin(2 * math.pi * k / n)) for k in range(n)]
     return out
+
+
+RING_OFFSETS = _ring_offsets()
+
+
+def _bbox(shape):
+    xs, ys = [p[0] for p in shape], [p[1] for p in shape]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _boxes_meet(a, b):
+    return a[0] <= b[2] and b[0] <= a[2] and a[1] <= b[3] and b[1] <= a[3]
 
 
 def dim_ticks(a, b, size=DIM_TICK_PX):

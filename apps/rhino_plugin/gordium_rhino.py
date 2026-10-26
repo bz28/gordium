@@ -602,16 +602,17 @@ def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None)
         return
     xaxis = ahead - centre
     plane = rg.Plane(centre, xaxis, rg.Vector3d.CrossProduct(facing.Normal, xaxis))
-    if plane.YAxis * (up - centre) < 0:                     # screen y runs down: keep the words upright
-        plane = rg.Plane(centre, xaxis, -plane.YAxis)
+    # (no flip: text_angle already keeps x reading left to right, so the normal x x is the screen's up, and a flip
+    # turned the words back to front: review of be133d0, F2)
     height = centre.DistanceTo(below)
     words = Rhino.Display.Text3d(text, plane, height)
     words.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center
     words.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle
     d.Draw3dText(words, color)
     words.Dispose()
-    if kind in ("leader", "forced"):                        # a leader from the line's middle to the label
-        a = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+    if kind in ("leader", "forced"):                        # a leader from the middle of the line's visible part
+        seen = logic.clip_to_view(a, b, (viewport.Bounds.Width, viewport.Bounds.Height)) or (a, b)
+        a = ((seen[0][0] + seen[1][0]) / 2, (seen[0][1] + seen[1][1]) / 2)
     if kind in ("end", "leader"):                           # a leader from the line to the label
         near = min(quad, key=lambda p: (p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2)
         d.Draw2dLine(System.Drawing.PointF(a[0], a[1]), System.Drawing.PointF(near[0], near[1]), color, 1)
