@@ -10,12 +10,15 @@ then Edit site… with a script driving the box (typing is setting the address f
 3. Picking it (the list's own pick: what Enter or a click does): the address field says "106 Ithaca Rd, Ithaca,
    NY", the list closes, and no new request is made for the picked text.
 4. A stale answer: the stand-in slowed to 1.5 s; "96 Itha" typed, then 0.5 s later "1060 Ith": the first request is
-   stopped, and the list only ever shows 1060's address, never 96's.
+   stopped (its process gone) and the list shows 1060's address. Then an answer that lands for something no longer
+   typed: "96 Itha" asked, new requests held back, "96 Ithac" typed: when 96 Itha's answer comes it is dropped (no
+   list); let go, "96 Ithac"'s own answer shows 96's address.
 5. Offline: the stand-in unreachable; "96 Itha": no list, the quiet note "Suggestions unavailable: type the full
    address and press Look up."; the box still works (Look up still on).
 6. "96 Ithaca Rd" (no town) and Look up: the lookup is asked for "96 Ithaca Rd, Ithaca, NY".
-7. A lookup that finds no lot ("999 Nowhere St", recorded answers have none): the box says "The lot shown is still
-   106 Ithaca Rd's: nothing in the model changed."; the model unchanged. Then the box is closed (Cancel).
+7. A lookup that finds no lot (the recorded "12345 Nowhere Blvd, Ithaca, NY 14850", which the State geocoder
+   doesn't know): the box says "No City of Ithaca address found …" and "The lot shown is still 106 Ithaca Rd's:
+   nothing in the model changed."; the model unchanged. Then the box is closed (Cancel).
 By hand (keys can't be scripted in Eto): in the address, type "106 Itha", press Down (the first suggestion
 selected), Enter (picked), Enter again (Look up); type "120 N Cay", click a suggestion; with the list open, Esc
 closes the list and not the box.
@@ -122,12 +125,19 @@ def main():
         g.STATE["auto_ok"] = False
         g.STATE["lookup_fixture"] = "96_ithaca_rd"
         model = objects(doc)
-        asked = []
+        asked, procs, hold = [], [], {"on": False}
         start = g._suggest_start
 
         def counted(text):
-            asked.append([round(time.time(), 2), text])
-            return start(text)
+            asked.append([round(time.time(), 2), text, hold["on"]])
+            if hold["on"]:                  # held back: the request already running is left to answer
+                return None
+            before = [p for p in procs if p.poll() is None]
+            start(text)
+            procs.append(g.STATE["suggest"]["proc"])
+            log.setdefault("running_before", []).append([text, len(before),
+                                                         sum(1 for p in before if p.poll() is None)])
+            return None
         g._suggest_start = counted
         g.SUGGESTER["start"] = counted
         seen = {}
@@ -164,7 +174,16 @@ def main():
                     [(0.1, pick_first), (1.0, note("3"))] +
                     [(0.0, lambda d: g.STATE.update(suggest_slow=1.5))] +
                     typing("96 Itha", 0.0)[-1:] + [(0.5, lambda d: setattr(parts(d)["address"], "Text", "1060 Ith"))] +
-                    [(2.5, note("4"))] +
+                    [(0.1, lambda d: seen.update(first_gone=procs[-2].poll() is not None if len(procs) > 1 else None))] +
+                    [(3.5, note("4"))] +
+                    [(0.0, lambda d: setattr(parts(d)["address"], "Text", "96 Itha")),
+                     (0.6, lambda d: hold.update(on=True)),
+                     (0.0, lambda d: setattr(parts(d)["address"], "Text", "96 Ithac")),
+                     (3.5, note("4b")),
+                     (0.0, lambda d: hold.update(on=False)),
+                     (0.0, lambda d: setattr(parts(d)["address"], "Text", "96 Itha")),
+                     (0.0, lambda d: setattr(parts(d)["address"], "Text", "96 Ithac")),
+                     (3.5, note("4c"))] +
                     [(0.0, lambda d: g.STATE.update(suggest_slow=0, suggest_offline=True))] +
                     [(0.0, lambda d: setattr(parts(d)["address"], "Text", "96 Itha")), (2.0, note("5"))] +
                     [(0.0, lambda d: g.STATE.update(suggest_offline=False)),
@@ -173,7 +192,8 @@ def main():
             elif n == 2:                                   # looking up 96: the query asked
                 seen["6"] = {"query": (g.STATE.get("lookup") or {}).get("query")}
             elif n == 3:                                   # 96's answer in: now a lookup that finds nothing
-                Script([(0.2, lambda d: setattr(parts(d)["address"], "Text", "999 Nowhere St")),
+                Script([(0.0, lambda d: g.STATE.update(lookup_fixture="not_found")),
+                        (0.2, lambda d: setattr(parts(d)["address"], "Text", "12345 Nowhere Blvd, Ithaca, NY 14850")),
                         (0.3, lambda d: parts(d)["buttons"]["Look up"].PerformClick())]).run(dialog)
             elif n == 4:
                 pass                                       # looking up 999: wait for its answer
@@ -192,10 +212,16 @@ def main():
               three.get("address") == "106 Ithaca Rd, Ithaca, NY" and not three.get("visible") and
               three.get("asked") == two.get("asked"), three)
         four = seen.get("4", {})
-        claim("4 a stale answer is never shown: only 1060's address",
-              four.get("items") == ["1060 Ithaca Rd, Ithaca, NY"] or (not four.get("visible") and not four.get("items")),
-              four)
-        claim("4 the newer typing was asked for", any(t == "1060 Ith" for _, t in asked), asked)
+        claim("4 the earlier request was stopped when the newer typing was asked for",
+              seen.get("first_gone") is True and any(a[1] == "1060 Ith" for a in asked),
+              {"first_gone": seen.get("first_gone"), "asked": asked})
+        claim("4 the newer typing's list: 1060's address", four.get("visible") and
+              four.get("items") == ["1060 Ithaca Rd, Ithaca, NY"], four)
+        claim("4 an answer for something no longer typed is dropped (no list for 96 Itha under 96 Ithac)",
+              not seen.get("4b", {}).get("visible") and seen.get("4b", {}).get("address") == "96 Ithac",
+              seen.get("4b"))
+        claim("4 then 96 Ithac's own answer shows 96's address",
+              seen.get("4c", {}).get("items") == ["96 Ithaca Rd, Ithaca, NY"], seen.get("4c"))
         five = seen.get("5", {})
         claim("5 offline: no list, the quiet note, Look up still on",
               not five.get("visible") and logic.SUGGESTIONS_UNAVAILABLE in five.get("labels", []) and
@@ -203,8 +229,10 @@ def main():
         claim("6 no town typed: the lookup asked for 96 Ithaca Rd, Ithaca, NY",
               (seen.get("6") or {}).get("query") == "96 Ithaca Rd, Ithaca, NY", seen.get("6"))
         seven = seen.get("7", {})
-        claim("7 a lookup that found no lot: the box says the lot shown is still 106's, the model unchanged",
-              any("The lot shown is still 106 Ithaca Rd's: nothing in the model changed." in (t or "")
+        claim("7 a lookup that found no lot: the box says so and that the lot shown is still 106's, the model "
+              "unchanged",
+              any("No City of Ithaca address found for 12345 Nowhere Blvd" in (t or "") and
+                  "The lot shown is still 106 Ithaca Rd's: nothing in the model changed." in (t or "")
                   for t in seven.get("labels", [])) and objects(doc) == model, seven)
         log["done"] = True
     except Exception:

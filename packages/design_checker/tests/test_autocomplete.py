@@ -48,6 +48,12 @@ def test_the_citys_name_is_added_only_when_no_town_is_typed():
     assert logic.with_city("  106   Ithaca Rd ") == "106 Ithaca Rd, Ithaca, NY"
     assert logic.with_city("106 Ithaca Rd, Ithaca, NY") == "106 Ithaca Rd, Ithaca, NY"
     assert logic.with_city("106 Ithaca Rd, Dryden") == "106 Ithaca Rd, Dryden"      # another town stays another
+    # ... without a comma too (review round 1: "Dryden, Ithaca, NY" found the City's 106 Ithaca Rd)
+    assert logic.with_city("106 Ithaca Rd Dryden") == "106 Ithaca Rd Dryden"
+    assert logic.with_city("12 Main St Cayuga Heights") == "12 Main St Cayuga Heights"
+    assert logic.with_city("120 North Cayuga Street") == "120 North Cayuga Street, Ithaca, NY"
+    assert logic.with_city("102 E Court St.") == "102 E Court St., Ithaca, NY"
+    assert logic.with_city("Ithaca Rd") == "Ithaca Rd"                               # no number: as typed
     assert logic.with_city("106 Ithaca Rd Ithaca NY") == "106 Ithaca Rd Ithaca NY"
     assert logic.with_city("106 Ithaca Rd 14850") == "106 Ithaca Rd 14850"
     assert logic.with_city("106 Ithaca Rd Ithaca") == "106 Ithaca Rd Ithaca"
@@ -107,6 +113,10 @@ def test_the_box_asks_after_a_pause_and_stops_a_stale_request():
     box = part(UI, "def start_box(", "\ndef ")
     typed = part(box, "def address_typed(", "address.TextChanged")
     assert "wait_keys.Stop()\n            wait_keys.Start()" in typed               # restarted at every key
+    # typed on: no older suggestion stays selected for Enter to pick over what is typed (review round 1)
+    assert typed.index("hint_list.SelectedIndex = -1") < typed.index("wait_keys.Start()")
+    keys = part(box, "def enter_looks_up(", "address.KeyDown +=")
+    assert "hint_list.Visible and hint_list.SelectedIndex >= 0" in keys
     ask = part(box, "def ask_hints(", "def got_hints(")
     assert "logic.wants_suggestions(address.Text, hints[\"chosen\"])" in ask and 'suggester["start"](address.Text)' in ask
     got = part(box, "def got_hints(", "wait_keys.Elapsed")

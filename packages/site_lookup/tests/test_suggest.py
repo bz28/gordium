@@ -6,13 +6,15 @@ import pytest
 
 from site_lookup.http import Offline
 from site_lookup.sources import ENDPOINTS
-from site_lookup.suggest import CITY_TAIL, LIMIT, MIN_CHARS, pretty, suggest, typed_prefix, where
+from site_lookup.suggest import CITY_TAIL, LIMIT, MIN_CHARS, pretty, suggest, typed_prefix, typed_prefixes, where
 
 # City of Ithaca addresses, typed by hand as the City's layer writes them: the sample and its neighbour, one
 # repeated (a building with units repeats), a longer number, two downtown, a half number, and ten "200 …" on
 # different streets (more than the box shows)
 STAND_IN_ADDRESSES = (["106 ITHACA RD", "106 ITHACA RD", "96 ITHACA RD", "1060 ITHACA RD", "120 N CAYUGA ST",
-                       "120 S CAYUGA ST", "106.5 LINN ST", "O'NEIL CT"] +
+                       "120 S CAYUGA ST", "106.5 LINN ST", "O'NEIL CT",
+                       # a direction or a street-type word that is part of the street's own name (review round 1)
+                       "101 SOUTH ST", "102 E COURT ST", "106 SOUTH HILL TER"] +
                       ["200 %s ST" % s for s in ("ASH", "BIRCH", "CEDAR", "DOGWOOD", "ELM", "FIR", "GROVE", "HAZEL",
                                                  "IVY", "JUNIPER")])
 
@@ -37,11 +39,15 @@ class StandIn:
 
 
 def test_what_is_asked_is_the_typed_address_as_the_city_writes_it():
-    assert typed_prefix("106 Itha") == "106 ITHA"
-    assert typed_prefix("120 North Cayuga") == "120 N CAYUGA"          # a direction after the number
-    assert typed_prefix("106 Ithaca Road") == "106 ITHACA RD"          # a whole street-type word, the last one too
-    assert typed_prefix("120 North Cayuga Street ") == "120 N CAYUGA ST "
-    assert typed_prefix("106 Ithaca Rd, Ithaca, NY") == "106 ITHACA RD "   # up to the town: the address is whole
+    assert typed_prefixes("106 Itha") == ["106 ITHA"]
+    # a direction after the number, a whole street-type word (the last one too): the City's short form, or part of
+    # the street's own name: both asked for, as typed first
+    assert typed_prefixes("120 North Cayuga") == ["120 NORTH CAYUGA", "120 N CAYUGA"]
+    assert typed_prefixes("106 Ithaca Road") == ["106 ITHACA ROAD", "106 ITHACA RD"]
+    assert "120 N CAYUGA ST " in typed_prefixes("120 North Cayuga Street ")
+    assert typed_prefixes("106 Ithaca Rd, Ithaca, NY") == ["106 ITHACA RD "]   # up to the town: the address is whole
+    assert typed_prefix("106 Ithaca Road") == "106 ITHACA ROAD"
+    assert len(typed_prefixes("1 North Court Street Road Lane Place Drive")) == 8      # never more than 8 spellings
     assert typed_prefix("North Cayuga") == "NORTH CAYUGA"              # no number: never a direction guessed
     assert typed_prefix("10%_6 It") == "10 6 IT"                       # never a wildcard that widens the match
     assert typed_prefix("106") is None and typed_prefix("") is None and typed_prefix(None) is None
@@ -53,17 +59,27 @@ def test_the_query_quotes_safely_and_a_finished_word_is_whole():
     assert where("O'NEIL") == "UPPER(FULL_ADDRE) LIKE 'O''NEIL%'"
     assert where("106 ITHACA RD ") == ("(UPPER(FULL_ADDRE) = '106 ITHACA RD' OR UPPER(FULL_ADDRE) LIKE "
                                        "'106 ITHACA RD %')")
+    assert where(["101 SOUTH ST", "101 S ST"]) == ("(UPPER(FULL_ADDRE) LIKE '101 SOUTH ST%' OR "
+                                                   "UPPER(FULL_ADDRE) LIKE '101 S ST%')")
+    assert where(["106 ITHA"]) == "UPPER(FULL_ADDRE) LIKE '106 ITHA%'"
 
 
 def test_suggestions_are_city_addresses_as_the_lookup_is_asked_for_them():
     http = StandIn()
     assert suggest("106 Itha", http) == ["106 Ithaca Rd" + CITY_TAIL]          # the repeated one said once
-    assert suggest("106 ", http) == ["106 Ithaca Rd" + CITY_TAIL]              # a whole "106": never "1060 …"
+    assert suggest("106 ", http) == ["106 Ithaca Rd" + CITY_TAIL,              # a whole "106": never "1060 …"
+                                     "106 South Hill Ter" + CITY_TAIL]
     assert suggest("1060", http) == ["1060 Ithaca Rd" + CITY_TAIL]
     assert suggest("120 North Cayuga", http) == ["120 N Cayuga St" + CITY_TAIL]
     assert suggest("106 Ithaca Rd, Ithaca, NY", http) == ["106 Ithaca Rd" + CITY_TAIL]
     assert suggest("O'Neil", http) == ["O'neil Ct" + CITY_TAIL]
     assert suggest("999 Nowhere", http) == []
+    # a direction or street-type word in the street's own name: still found once the word is finished (round 1)
+    assert suggest("101 South St", http) == ["101 South St" + CITY_TAIL]
+    assert suggest("102 East Court", http) == ["102 E Court St" + CITY_TAIL]
+    assert suggest("102 E Court St", http) == ["102 E Court St" + CITY_TAIL]
+    assert suggest("106 South Hill", http) == ["106 South Hill Ter" + CITY_TAIL]
+    assert suggest("120 South Cayuga Street", http) == ["120 S Cayuga St" + CITY_TAIL]
     asked = len(http.asked)
     assert suggest("106", http) == [] and len(http.asked) == asked             # too little typed: never asked
 

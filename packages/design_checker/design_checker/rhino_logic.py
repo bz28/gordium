@@ -1181,15 +1181,18 @@ def list_step(index, count, key):
 
 def with_city(address):
     """The address as the lookup is asked for it: ", Ithaca, NY" added when no town or ZIP is typed (Ben, 2026-10-21:
-    "106 Ithaca Rd" is the City's). Anything after a comma, or a last word that is a town, state or ZIP, is kept as
-    typed (another town stays another town: the parcel's SWIS code then says it isn't the City)."""
+    "106 Ithaca Rd" is the City's). Only when the address plainly ends with its street ("106 Ithaca Rd", "120 North
+    Cayuga Street"): anything after the street type ("106 Ithaca Rd Dryden", "12 Main St Cayuga Heights", a ZIP)
+    may be another town and is kept as typed, so another town stays another town (review round 1), and anything
+    after a comma is kept as typed too."""
     text = " ".join(str(address or "").split())
     if not text or "," in text:
         return text
-    last = text.split()[-1].lower().rstrip(".")
-    if last in CITY_TAIL or last in ITHACA_PLACE or (last[:5].isdigit() and len(last) >= 5):
-        return text
-    return text + CITY_SUFFIX
+    words = text.lower().replace(".", " ").split()
+    street_types = {w for k, v in STREET_WORDS.items() if k not in ("north", "south", "east", "west") for w in (k, v)}
+    if len(words) >= 3 and words[0][:1].isdigit() and words[-1] in street_types:
+        return text + CITY_SUFFIX
+    return text
 
 
 def lookup_says(payload):
