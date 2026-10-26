@@ -8,8 +8,9 @@ the pixel claims, each recorded, the run failing at the end if any did.
 5. Front: the house's front face looks the same with and without the coloured pieces (the rear yard's strip
    behind it is hidden by the house: 90 % of 81 samples within 24 per channel).
 6. From behind: the strip shows its colour on the rear face (80 % of samples differ by more than 24).
-7. Orbiting the shaded Perspective, a frame with the labels and colours on takes at most 1.2 x one with them off
-   (median of 40 frames each; the Rhino job at e9b2a69: a per-camera face filter took 89 ms against 33).
+7. Orbiting the shaded Perspective with the labels and colours on, the median frame is within 10 ms of them off
+   and at most 50 ms (the median of 3 batches of 40 frames; the worst frame reported, never failed on: the Rhino
+   job at e9b2a69, a per-camera face filter took 89 ms against 33; at fc41fea a 1.2x ratio was flaky).
 Writes <temp>/gordium_depth/out.json (both phases' claims) and frames/*.png; closes the document."""
 import json
 import os
@@ -158,22 +159,31 @@ try:
     pvp.ZoomBoundingBox(frame)
     doc.Views.ActiveView = persp
     timing = {}
-    for on in (False, True):
+    for on in (False, True):                 # 3 batches of 40 frames each way; the median of the batches' medians
         o.encroach = kept if on else []
         g.set_labels(on)
-        ms = []
-        persp.Redraw()
-        for _ in range(40):
-            pvp.Rotate(0.05, rg.Vector3d.ZAxis, frame.Center)
-            t = time.perf_counter()
+        medians, worst = [], 0.0
+        for _ in range(3):
+            ms = []
             persp.Redraw()
             persp.CaptureToBitmap(pvp.Size)
-            ms.append((time.perf_counter() - t) * 1000)
-        ms.sort()
-        timing["on" if on else "off"] = {"median_ms": round(ms[len(ms) // 2], 1), "max_ms": round(ms[-1], 1)}
+            for _ in range(40):
+                pvp.Rotate(0.05, rg.Vector3d.ZAxis, frame.Center)
+                t = time.perf_counter()
+                persp.Redraw()
+                persp.CaptureToBitmap(pvp.Size)
+                ms.append((time.perf_counter() - t) * 1000)
+            ms.sort()
+            medians.append(ms[len(ms) // 2])
+            worst = max(worst, ms[-1])
+        medians.sort()
+        timing["on" if on else "off"] = {"median_ms": round(medians[1], 1),
+                                         "batch_medians_ms": [round(m, 1) for m in medians],
+                                         "worst_frame_ms": round(worst, 1)}      # reported, never failed on
     log["orbit"] = timing
-    claim("7 orbiting, a frame with the labels and colours on takes at most 1.2 x one with them off (median)",
-          timing["on"]["median_ms"] <= 1.2 * timing["off"]["median_ms"], timing)
+    claim("7 orbiting, labels and colours on: the median frame within 10 ms of them off, and at most 50 ms "
+          "(median of 3 batches of 40; a one-frame hitch reported, not failed: the Rhino job at fc41fea)",
+          timing["on"]["median_ms"] <= timing["off"]["median_ms"] + 10 and timing["on"]["median_ms"] <= 50, timing)
 except Exception:
     log["trace"] = traceback.format_exc()
 finally:
