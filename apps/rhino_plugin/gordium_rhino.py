@@ -217,7 +217,8 @@ def ask(request, cancel=False, on_tick=None):
         return _ask_waiting(request, cancel, on_tick)
     finally:
         if resume is not None and resume[0] is not None:
-            _begin_undo(resume[0], (resume[1] or "Gordium") + " (continued)")
+            words = resume[1] or "Gordium"     # (its name said once, however many waits it spans)
+            _begin_undo(resume[0], words if words.endswith(" (continued)") else words + " (continued)")
 
 
 def _ask_waiting(request, cancel, on_tick):
