@@ -471,21 +471,31 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     return left, top, False
 
 
-def box_gap(line, box):
-    """How far a box (left, top, w, h) is from a screen line ((x1, y1), (x2, y2)): 0 when they touch."""
+def _point_seg(px, py, line):
+    """A point's distance from a segment (screen pixels)."""
     (ax, ay), (bx, by) = line
+    dx, dy = bx - ax, by - ay
+    t = 0.0 if dx == dy == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+    return ((px - ax - t * dx) ** 2 + (py - ay - t * dy) ** 2) ** 0.5
+
+
+def box_gap(line, box):
+    """How far a box (left, top, w, h) is from a screen line ((x1, y1), (x2, y2)), exactly: 0 when they touch."""
     left, top, w, h = box
-    return min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
-               for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
+    if crosses(line, left, top, w, h):
+        return 0.0
+    corners = ((left, top), (left + w, top), (left, top + h), (left + w, top + h))
+    ends = [((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5) for x, y in line]
+    return min(ends + [_point_seg(x, y, line) for x, y in corners])
 
 
 LABEL_MIN_SIZE = 9                 # a plan label's text is never smaller (readable on screen)
 LABEL_LEAD_REACH = 3               # how far a led label may sit from its line: this many label heights
+LABEL_STEP = 6                     # the lattice the spots near a line are tried on, screen pixels
 
 
 def label_height(rows, size):
-    """A plan label's height on screen: its lines (size + 5 px each: 16 px at 11 pt, gordium_ui.LINE_H) and 4 of
-    margin."""
+    """A plan label's height on screen: its lines (size + 5 px each: 16 px at 11 pt) and 4 of margin."""
     return 4 + (size + 5) * rows
 
 
@@ -495,15 +505,39 @@ def _over(box, other):
         min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
 
 
-def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=()):
-    """Which HARD rule a plan label's box (left, top, w, h) breaks, or None. HARD: on screen; over no box in
-    `hard_boxes` (every building's footprint and its coloured parts, the notice, the status box, the north arrow);
-    crossing neither its own dimension `line` nor any line in `hard_lines` (every other yard's dimension)."""
+def _inside(x, y, poly):
+    """Whether a point is inside a polygon (screen points; even-odd)."""
+    inside = False
+    for (ax, ay), (bx, by) in zip(poly, poly[1:] + poly[:1]):
+        if (ay > y) != (by > y) and x < ax + (y - ay) * (bx - ax) / (by - ay):
+            inside = not inside
+    return inside
+
+
+def box_over_shape(box, poly):
+    """Whether a box (left, top, w, h) covers any of a polygon (its screen points), 3 px around it included."""
+    left, top, w, h = box[0] - 3, box[1] - 3, box[2] + 6, box[3] + 6
+    if len(poly) < 3:
+        return False
+    if any(crosses(edge, left, top, w, h) for edge in zip(poly, poly[1:] + poly[:1])):
+        return True
+    if any(left <= x <= left + w and top <= y <= top + h for x, y in poly):
+        return True
+    return _inside(left + w / 2, top + h / 2, poly)
+
+
+def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes=()):
+    """Which HARD rule a plan label's box (left, top, w, h) breaks, or None. HARD: on screen; over no building
+    footprint nor coloured part (`hard_shapes`: their outlines on screen, 3 px around them), nor the notice, the
+    status box or the north arrow (`hard_boxes`, 3 px around them); crossing neither its own dimension `line` nor
+    any line in `hard_lines` (every other yard's dimension)."""
     left, top, w, h = box
     if view is not None and (left < 0 or top < 0 or left + w > view[0] or top + h > view[1]):
         return "off screen"
-    if any(_over(box, (a - 3, b - 3, c + 6, e + 6)) for a, b, c, e in hard_boxes):     # 3 px clear of each
-        return "over a building, its coloured part, the notice, the status box or the north arrow"
+    if any(box_over_shape(box, shape) for shape in hard_shapes):
+        return "over a building or its coloured part"
+    if any(_over(box, (a - 3, b - 3, c + 6, e + 6)) for a, b, c, e in hard_boxes):
+        return "over the notice, the status box or the north arrow"
     if crosses(line, left, top, w, h):
         return "on its own line"
     if any(crosses(other, left, top, w, h) for other in hard_lines if other != line):
@@ -511,37 +545,42 @@ def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=()):
     return None
 
 
-def _label_spots(line, w, h, gaps):
-    """Spots for a w × h label around its dimension `line`, `gaps` away from it: beside it (centred, then shifted to
-    either end), then just past either end (level, then up or down a half and a whole height)."""
+def label_spots(line, w, h, reach, step=LABEL_STEP):
+    """Every spot for a w × h label within `reach` of its dimension `line` (screen pixels), on a `step` lattice from
+    the line's own corner, nearest first."""
     (xa, ya), (xb, yb) = line
     x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
-    mx, my = (xa + xb) / 2, (ya + yb) / 2
-    out = []
-    for g in gaps:
-        if x1 - x0 >= y1 - y0:           # mostly horizontal: above, below; then past the left and right ends
-            out += [(x, t) for t in (y0 - g - h, y1 + g) for x in (mx - w / 2, x0, x1 - w, x0 - w, x1)]
-            out += [(x, my - h / 2 + d) for x in (x0 - g - w, x1 + g) for d in (0, -h / 2, h / 2, -h, h)]
-        else:                            # mostly vertical: right, left; then past the top and bottom ends
-            out += [(x, t) for x in (x1 + g, x0 - g - w) for t in (my - h / 2, y0, y1 - h, y0 - h, y1)]
-            out += [(mx - w / 2 + d, y) for y in (y0 - g - h, y1 + g) for d in (0, -w / 2, w / 2, -w, w)]
-    return out
+    spots = []
+    nx, ny = int((x1 - x0 + w + 2 * reach) / step) + 1, int((y1 - y0 + h + 2 * reach) / step) + 1
+    for j in range(ny):
+        top = y0 - h - reach + j * step
+        for i in range(nx):
+            left = x0 - w - reach + i * step
+            gap = box_gap(line, (left, top, w, h))
+            if gap <= reach:
+                spots.append((gap, left, top))
+    spots.sort()
+    return spots
 
 
-def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_boxes=(), soft_lines=()):
+def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_boxes=(), soft_lines=(),
+                    hard_shapes=()):
     """Where a plan label for the dimension `line` goes (screen pixels), by one complete set of rules (the Rhino job
     at 319dc5d: each round's fix moved the southwest yard's label onto the next obstacle nobody had listed):
-    - HARD, never broken (label_breaks_hard): on screen; over no building footprint or coloured part, nor the
-      notice, the status box or the north arrow (`hard_boxes`); on neither its own line nor any other yard's
-      dimension (`hard_lines`).
-    - SOFT, least first: other labels covered (`soft_boxes`), then lines crossed (`soft_lines`: the lot's edges),
-      then its distance from its own line.
-    - Within one label height of its line, on one line, then on two (name, then numbers: label_lines); then smaller,
-      a point at a time down to LABEL_MIN_SIZE; then, at its own size, up to LABEL_LEAD_REACH label heights away;
-      then the nearest spot anywhere on screen that breaks no HARD rule. A label more than 8 px from its line is led
-      to it (`led`). Only when no spot on the whole screen keeps every HARD rule is one broken (`forced`, never
-      silent: the claim reports it), so a failing yard's label is never dropped.
+    - HARD, never broken (label_breaks_hard): on screen; over no building footprint or coloured part
+      (`hard_shapes`), nor the notice, the status box or the north arrow (`hard_boxes`); on neither its own line nor
+      any other yard's dimension (`hard_lines`).
+    - SOFT, least first: other labels covered (`soft_boxes`), then, for a led label, the HARD things its leader
+      crosses, then lines crossed (`soft_lines`: the lot's edges), then its distance from its own line.
+    - Within one label height of its line, on one line, then on two (name, then numbers: label_lines), every spot
+      on a LABEL_STEP lattice tried; then smaller, a point at a time down to LABEL_MIN_SIZE; then, at its own size,
+      up to LABEL_LEAD_REACH label heights away; then the nearest spots anywhere on screen that break no HARD rule,
+      at its own size, then the smallest. A label more than 8 px from its line is led to it (`led`). Only when no
+      spot on the whole screen keeps every HARD rule is one broken (`forced`, never silent), so a failing yard's
+      label is never dropped.
     Returns {"left", "top", "w", "h", "rows", "size", "led", "forced", "gap"}."""
+    (xa, ya), (xb, yb) = line
+    mx, my = (xa + xb) / 2, (ya + yb) / 2
     two = label_lines(text)
     variants = [[text]] + ([two] if len(two) == 2 else [])
 
@@ -553,48 +592,102 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
         return {"left": left, "top": top, "w": w, "h": h, "rows": rows, "size": pt, "led": gap > 8,
                 "forced": forced, "gap": gap}
 
-    def best(rows, pt, gaps, reach, nearest_first=False):
+    def soft(box, gap):
+        left, top, w, h = box
+        covered = sum(_over(box, other) for other in soft_boxes)
+        led_hits = 0
+        if gap > 8:                      # its leader: from its line's middle to the label's nearest edge
+            ex, ey = leader_end((mx, my), box)
+            lead = ((mx, my), (ex, ey))
+            led_hits = sum(_seg_hits_shape(lead, shape_) for shape_ in hard_shapes) + \
+                sum(_seg_hits_box(lead, b_) for b_ in list(hard_boxes) + list(soft_boxes))
+        crossed = sum(crosses(s_, left, top, w, h) for s_ in soft_lines if s_ != line)
+        return covered, led_hits, crossed, gap
+
+    def best(rows, pt, spots):
         w, h = shape(rows, pt)
         found = None
-        for k, (left, top) in enumerate(_label_spots(line, w, h, gaps)):
+        for gap, left, top in spots:
             box = (left, top, w, h)
-            gap = box_gap(line, box)
-            if gap > reach or label_breaks_hard(line, box, view, hard_boxes, hard_lines):
+            if label_breaks_hard(line, box, view, hard_boxes, hard_lines, hard_shapes):
                 continue
-            covered = sum(_over(box, other) for other in soft_boxes)
-            crossed = sum(crosses(s_, left, top, w, h) for s_ in soft_lines if s_ != line)
-            score = (covered, gap, crossed, k) if nearest_first else (covered, crossed, gap, k)
+            score = soft(box, gap)
             if found is None or score < found[0]:
                 found = (score, left, top, w, h)
+                if score[:3] == (0, 0, 0):           # nearest first: nothing better follows
+                    break
         return None if found is None else result(rows, pt, *found[1:])
 
-    for pt in range(int(size), LABEL_MIN_SIZE - 1, -1):          # beside it: its size, then a point smaller each time
+    for pt in range(int(size), LABEL_MIN_SIZE - 1, -1):          # within one label height: its size, then smaller
         for rows in variants:
-            h = shape(rows, pt)[1]
-            got = best(rows, pt, (6, h / 2, h), h)
+            w, h = shape(rows, pt)
+            got = best(rows, pt, label_spots(line, w, h, h))
             if got is not None:
                 return got
     for rows in variants:                                        # led, up to LABEL_LEAD_REACH heights away
-        h = shape(rows, size)[1]
-        reach = LABEL_LEAD_REACH * h
-        got = best(rows, size, (1.5 * h, 2 * h, 2.5 * h, reach - 1), reach, nearest_first=True)
+        w, h = shape(rows, size)
+        got = best(rows, size, label_spots(line, w, h, LABEL_LEAD_REACH * h))
         if got is not None:
             return got
-    rows = variants[-1]                                          # anywhere on screen that keeps every HARD rule
+    if view is not None:                                         # the nearest spots on screen that keep the rules
+        for pt in (int(size), LABEL_MIN_SIZE):
+            for rows in variants:
+                w, h = shape(rows, pt)
+                grid = [(box_gap(line, (left, top, w, h)), left, top) for top in range(0, int(view[1] - h) + 1, 12)
+                        for left in range(0, int(view[0] - w) + 1, 12)]
+                grid.sort()
+                clear = [q for q in grid if not label_breaks_hard(line, (q[1], q[2], w, h), view, hard_boxes,
+                                                                  hard_lines, hard_shapes)][:40]
+                got = best(rows, pt, clear)
+                if got is not None:
+                    return got
+    rows = variants[-1]                                          # nowhere: beside it, said (never dropped)
     w, h = shape(rows, LABEL_MIN_SIZE)
-    if view is not None:                                         # nearest first (a 16 px grid: drawn every frame)
-        (xa, ya), (xb, yb) = line
-        mx, my = (xa + xb) / 2, (ya + yb) / 2
-        grid = [(left, top) for top in range(0, int(view[1] - h) + 1, 16) for left in range(0, int(view[0] - w) + 1, 16)]
-        grid.sort(key=lambda q: (q[0] + w / 2 - mx) ** 2 + (q[1] + h / 2 - my) ** 2)
-        for left, top in grid:
-            if not label_breaks_hard(line, (left, top, w, h), view, hard_boxes, hard_lines):
-                return result(rows, LABEL_MIN_SIZE, left, top, w, h)
-    (xa, ya), (xb, yb) = line                                    # nowhere: beside it, said (never dropped)
     left, top = min(xa, xb), max(ya, yb) + 6
     if view is not None:
         left, top = min(max(left, 0), max(view[0] - w, 0)), min(max(top, 0), max(view[1] - h, 0))
     return result(rows, LABEL_MIN_SIZE, left, top, w, h, forced=True)
+
+
+def hull(points):
+    """The convex hull of screen points, counter-clockwise (a building's footprint on screen when its outline isn't
+    given in order: never smaller than the footprint, and turned with it, never its whole bounding box)."""
+    pts = sorted(set((round(x, 3), round(y, 3)) for x, y in points))
+    if len(pts) < 3:
+        return pts
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+def _seg_hits_box(seg, box):
+    return crosses(seg, box[0], box[1], box[2], box[3])
+
+
+def _seg_hits_shape(seg, poly):
+    """Whether a segment touches a polygon (crosses an edge, or lies inside it)."""
+    (ax, ay), (bx, by) = seg
+    if len(poly) < 3:
+        return False
+    for (cx, cy), (dx, dy) in zip(poly, poly[1:] + poly[:1]):
+        d = (bx - ax) * (dy - cy) - (by - ay) * (dx - cx)
+        if abs(d) < 1e-12:
+            continue
+        t = ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / d
+        u = ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / d
+        if 0 <= t <= 1 and 0 <= u <= 1:
+            return True
+    return _inside((ax + bx) / 2, (ay + by) / 2, poly)
 
 
 def label_lines(text):

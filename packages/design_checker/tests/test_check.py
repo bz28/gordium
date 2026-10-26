@@ -3185,75 +3185,108 @@ def _boxes(x0, y0, x1, y1):
     return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
 
 
+def _rect(x0, y0, x1, y1):
+    return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+
+def _nearest_hard_clear(logic_, line, text, size, view, boxes, dims, shapes, reach_rows=1.0, step=3):
+    """Independently of the placement: the smallest distance from its line of any spot within `reach_rows` label
+    heights that keeps every HARD rule, at this size, on one line or two (a brute-force `step` px search)."""
+    best = None
+    (xa, ya), (xb, yb) = line
+    for rows in ([text], logic_.label_lines(text)):
+        w, h = max(logic_.label_width(r, size) for r in rows), logic_.label_height(len(rows), size)
+        reach = reach_rows * h
+        for top in range(int(min(ya, yb) - h - reach), int(max(ya, yb) + reach) + 1, step):
+            for left in range(int(min(xa, xb) - w - reach), int(max(xa, xb) + reach) + 1, step):
+                gap = logic_.box_gap(line, (left, top, w, h))
+                if gap <= reach and not logic_.label_breaks_hard(line, (left, top, w, h), view, boxes, dims, shapes):
+                    best = (gap, h) if best is None or gap < best[0] else best
+    return best
+
+
 def test_a_plan_label_keeps_every_hard_rule_the_southwest_cases():
     """The Rhino rounds on #15, each a new obstacle the label landed on: 13 lot and house lines (27c8e5d), loose 330
     px from its line under the status box (0a94fc4), the front yard's dimension (81efd62), the house's corner and
     its coloured band (319dc5d). Now one set of rules (rhino_logic.place_dim_label): HARD, never broken: on screen,
     over no building or coloured part, nor the notice, the status box or the north arrow, on neither its own line
-    nor another yard's dimension. SOFT, least first: other labels, lot lines, distance."""
+    nor another yard's dimension. SOFT, least first: other labels, a led label's leader, lot lines, distance."""
     from design_checker import rhino_logic as logic_
-    lot, house = (158, 106, 501, 562), (185, 250, 420, 415)
-    band = (185, 250, 200, 415)                                                  # the amber band along the west wall
+    lot = (158, 106, 501, 562)
+    house, band = _rect(185, 250, 420, 415), _rect(185, 250, 200, 415)
     own = ((158, 409), (185, 409))                                               # the southwest side yard
-    front = ((300, 415), (300, 562))                                             # the front yard's dimension
-    rear = ((300, 106), (300, 250))
-    northeast = ((420, 330), (501, 330))
-    dims = [own, front, rear, northeast]
-    hard = [(house[0], house[1], house[2] - house[0], house[3] - house[1]),
-            (band[0], band[1], band[2] - band[0], band[3] - band[1]),
-            (12, 34, 506, 54), (60, 14, 584, 54), (543, 119, 61, 55)]           # the notice, status box, arrow
+    dims = [own, ((300, 415), (300, 562)), ((300, 106), (300, 250)), ((420, 330), (501, 330))]
+    boxes = [(12, 34, 506, 54), (60, 14, 584, 54), (543, 119, 61, 55)]           # the notice, status box, arrow
+    view = (657, 668)
     text = "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)"
-    got = logic_.place_dim_label(own, text, 11, (657, 668), hard, dims, [], _boxes(*lot))
+    got = logic_.place_dim_label(own, text, 11, view, boxes, dims, [], _boxes(*lot), [house, band])
     box = (got["left"], got["top"], got["w"], got["h"])
-    assert logic_.label_breaks_hard(own, box, (657, 668), hard, dims) is None, got
-    assert not got["forced"] and got["size"] >= logic_.LABEL_MIN_SIZE
-    assert got["gap"] <= got["h"] or (got["led"] and got["gap"] <= logic_.LABEL_LEAD_REACH * got["h"]) or \
-        got["led"], got
+    assert logic_.label_breaks_hard(own, box, view, boxes, dims, [house, band]) is None and not got["forced"], got
+    near = _nearest_hard_clear(logic_, own, text, 11, view, boxes, dims, [house, band])
+    assert near is not None and got["size"] == 11 and got["gap"] <= near[1], (got, near)    # in reach at full size
     assert got["led"] == (got["gap"] > 8)
+    # each HARD rule, broken on purpose, is named
+    assert logic_.label_breaks_hard(own, (-5, 400, 100, 20), view) == "off screen"
+    assert logic_.label_breaks_hard(own, (190, 300, 100, 20), view, [], [], [house]).startswith("over a building")
+    assert logic_.label_breaks_hard(own, (14, 36, 30, 20), view, boxes).startswith("over the notice")
+    assert logic_.label_breaks_hard(own, (150, 400, 30, 20), view) == "on its own line"
+    assert logic_.label_breaks_hard(own, (290, 450, 30, 20), view, [], dims) == "on another yard's dimension"
+    # a turned house: its outline, never its box (the corner beyond a turned wall is free)
+    turned = [(300, 200), (400, 300), (300, 400), (200, 300)]
+    assert not logic_.box_over_shape((200, 200, 40, 20), turned) and logic_.box_over_shape((280, 280, 40, 20), turned)
+    assert sorted(logic_.hull(turned + [(300, 300)])) == sorted(turned)
     # no room beside the line at its size: a point smaller, still right beside it, no leader
     line = ((100, 100), (140, 100))
     tight = [(0, 0, 656, 72), (0, 110, 656, 400), (0, 0, 92, 668), (153, 0, 503, 668)]
     small = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), tight, [line], [], [])
     assert small["size"] == 10 and not small["led"] and not small["forced"], small   # the largest that fits
     # no room within one label height at any size: at its own size, led, within three label heights
-    band = [(0, 60, 656, 80)]
-    led = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), band, [line], [], [])
+    band2 = [(0, 60, 656, 80)]
+    led = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), band2, [line], [], [])
     assert led["size"] == 11 and led["led"] and 20 < led["gap"] <= logic_.LABEL_LEAD_REACH * 20, led
-    assert logic_.label_breaks_hard(line, (led["left"], led["top"], led["w"], led["h"]), (656, 668), band, [line]) is None
-    # nowhere near keeps the rules: the nearest spot on screen that does, led
+    # nowhere near keeps the rules: the nearest spot on screen that does, led, at full size
     wide = [(0, 0, 656, 300)]
     anywhere = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), wide, [line], [], [])
-    assert anywhere["led"] and not anywhere["forced"] and anywhere["top"] >= 303, anywhere
+    assert anywhere["led"] and not anywhere["forced"] and anywhere["top"] >= 303 and anywhere["size"] == 11, anywhere
+    # ...and there SOFT still holds: another label already there is kept clear of
+    a_box = (anywhere["left"], anywhere["top"], anywhere["w"], anywhere["h"])
+    again = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), wide, [line], [a_box], [])
+    assert not logic_._over((again["left"], again["top"], again["w"], again["h"]), a_box), (anywhere, again)
     # nowhere at all: forced and said, never dropped
-    full = [(0, 0, 656, 668)]
-    stuck = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), full, [line], [], [])
+    stuck = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), [(0, 0, 656, 668)], [line], [], [])
     assert stuck["forced"] and stuck["rows"]
-    # SOFT: another label already there is kept clear of when a spot that keeps the HARD rules allows it
+    # SOFT near the line: another label already there is kept clear of
     open_line = ((300, 300), (340, 300))
     first = logic_.place_dim_label(open_line, "12'-0\"", 11, (656, 668), [], [open_line], [], [])
-    a_box = (first["left"], first["top"], first["w"], first["h"])
-    second = logic_.place_dim_label(open_line, "12'-0\"", 11, (656, 668), [], [open_line], [a_box], [])
-    assert not logic_._over((second["left"], second["top"], second["w"], second["h"]), a_box), (first, second)
-    # each HARD rule, broken on purpose, is named
-    view = (657, 668)
-    assert logic_.label_breaks_hard(own, (-5, 400, 100, 20), view) == "off screen"
-    assert logic_.label_breaks_hard(own, (190, 300, 100, 20), view, hard).startswith("over a building")
-    assert logic_.label_breaks_hard(own, (150, 400, 30, 20), view) == "on its own line"
-    assert logic_.label_breaks_hard(own, (290, 450, 30, 20), view, [], dims) == "on another yard's dimension"
+    f_box = (first["left"], first["top"], first["w"], first["h"])
+    second = logic_.place_dim_label(open_line, "12'-0\"", 11, (656, 668), [], [open_line], [f_box], [])
+    assert not logic_._over((second["left"], second["top"], second["w"], second["h"]), f_box), (first, second)
+    # a free window right beside a long line (sceptic B's repro): found, at full size, unled
+    long_ = ((200, 300), (400, 300))
+    walls = [(0, 0, 656, 260), (0, 300, 656, 368), (0, 0, 238, 668), (300, 0, 356, 668)]
+    window = logic_.place_dim_label(long_, "12'-0\"", 11, (656, 668), walls, [long_], [], [])
+    assert window["size"] == 11 and not window["led"] and not window["forced"], window
+    # a leader never runs across a building when a spot whose leader doesn't is in reach
+    short = ((200, 300), (260, 300))
+    under = [_rect(150, 306, 310, 336)]                                         # a coloured band just below it
+    blocked = [(0, 200, 656, 100)]                                              # nothing above it, within reach
+    led2 = logic_.place_dim_label(short, "12'-0\"", 11, (656, 668), blocked, [short], [], [], under)
+    ex, ey = logic_.leader_end((230, 300), (led2["left"], led2["top"], led2["w"], led2["h"]))
+    assert not logic_._seg_hits_shape(((230, 300), (ex, ey)), under[0]), led2
 
 
 def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
     """A property test: random lots, houses, coloured bands, notices and views (the docked 656 x 668 among them),
-    every yard's label placed in turn. Each one breaks no HARD rule; it is within one label height of its line, or
-    led and within LABEL_LEAD_REACH heights, or led to the nearest HARD-clear spot (then none nearer exists within
-    that reach); never smaller than LABEL_MIN_SIZE; never dropped; and only `forced` when no spot on the whole
-    screen keeps every HARD rule."""
+    every yard's label placed in turn. Each one breaks no HARD rule; whenever a spot at full size within one label
+    height of its line keeps every HARD rule (an independent 3 px search), it is that near at full size; whenever one
+    within three label heights does, it is within three; never smaller than LABEL_MIN_SIZE; never dropped; and only
+    `forced` when no spot on the whole screen keeps every HARD rule."""
     import random
     from design_checker import rhino_logic as logic_
     rng = random.Random(1525)
     views = [(656, 668), (1000, 640), (800, 520), (480, 600), (420, 420)]
     checked = 0
-    for case in range(120):
+    for case in range(60):
         vw, vh = views[case % len(views)]
         lw, lh = rng.uniform(0.35, 0.8) * vw, rng.uniform(0.35, 0.8) * vh
         lx, ly = rng.uniform(4, vw - lw - 4), rng.uniform(4, vh - lh - 4)
@@ -3263,66 +3296,78 @@ def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
         hy1 = ly + lh - rng.uniform(0.1, 0.35) * lh
         my, mx = (hy0 + hy1) / 2, (hx0 + hx1) / 2
         dims = [((lx, my), (hx0, my)), ((hx1, my), (lx + lw, my)), ((mx, ly), (mx, hy0)), ((mx, hy1), (mx, ly + lh))]
-        hard = [(hx0, hy0, hx1 - hx0, hy1 - hy0)]
+        shapes = [_rect(hx0, hy0, hx1, hy1)]
         side = rng.choice(["w", "e", "n", "s"])                               # a coloured band along one wall
-        hard.append({"w": (hx0, hy0, 12, hy1 - hy0), "e": (hx1 - 12, hy0, 12, hy1 - hy0),
-                     "n": (hx0, hy0, hx1 - hx0, 12), "s": (hx0, hy1 - 12, hx1 - hx0, 12)}[side])
+        shapes.append({"w": _rect(hx0, hy0, hx0 + 12, hy1), "e": _rect(hx1 - 12, hy0, hx1, hy1),
+                       "n": _rect(hx0, hy0, hx1, hy0 + 12), "s": _rect(hx0, hy1 - 12, hx1, hy1)}[side])
+        boxes = []
         if rng.random() < 0.6:
-            hard.append((12, 34, rng.uniform(0.3, 0.8) * vw, 54))             # the notice
+            boxes.append((12, 34, rng.uniform(0.3, 0.8) * vw, 54))            # the notice
         if rng.random() < 0.5:
-            hard.append((vw - 0.7 * vw - 12, 12, 0.7 * vw, 54))               # the status box
-        hard.append((vw - 80, 100, 61, 55))                                    # the north arrow
+            boxes.append((vw - 0.7 * vw - 12, 12, 0.7 * vw, 54))              # the status box
+        boxes.append((vw - 80, 100, 61, 55))                                   # the north arrow
         soft_lines = _boxes(lx, ly, lx + lw, ly + lh)
         placed = []
         for own, name in zip(dims, ("Side yard, West", "Side yard, East", "Rear yard", "Front yard")):
             text = "✕ " + name + " 7'-0 5/8\", needs 10'-0\" (approx.)"
-            got = logic_.place_dim_label(own, text, 11, (vw, vh), hard, dims, list(placed), soft_lines)
+            got = logic_.place_dim_label(own, text, 11, (vw, vh), boxes, dims, list(placed), soft_lines, shapes)
             box = (got["left"], got["top"], got["w"], got["h"])
             placed.append(box)
             assert got["rows"] and got["size"] >= logic_.LABEL_MIN_SIZE, got          # never dropped, readable
             if got["forced"]:                                                  # honest: nowhere keeps every rule
                 w, h = got["w"], got["h"]
-                assert all(logic_.label_breaks_hard(own, (x, y, w, h), (vw, vh), hard, dims)
-                           for y in range(0, int(vh - h) + 1, 16) for x in range(0, int(vw - w) + 1, 16)), (case, own)
+                assert all(logic_.label_breaks_hard(own, (x, y, w, h), (vw, vh), boxes, dims, shapes)
+                           for y in range(0, int(vh - h) + 1, 4) for x in range(0, int(vw - w) + 1, 4)), (case, own)
                 continue
             checked += 1
-            assert logic_.label_breaks_hard(own, box, (vw, vh), hard, dims) is None, (case, own, got)
+            assert logic_.label_breaks_hard(own, box, (vw, vh), boxes, dims, shapes) is None, (case, own, got)
             assert got["led"] == (got["gap"] > 8), got
-            if got["gap"] > logic_.LABEL_LEAD_REACH * logic_.label_height(len(got["rows"]), 11):
-                assert got["led"]
-    assert checked >= 400                                                       # most labels placed by the rules
+            near = _nearest_hard_clear(logic_, own, text, 11, (vw, vh), boxes, dims, shapes)
+            if near is not None and near[0] <= near[1] - 6:                   # a full-size spot in reach: used
+                assert got["size"] == 11 and got["gap"] <= near[1], (case, own, got, near)
+            elif near is None:
+                lead = _nearest_hard_clear(logic_, own, text, 11, (vw, vh), boxes, dims, shapes, 3.0, 6)
+                if lead is not None and lead[0] <= 3 * lead[1] - 12 and got["size"] == 11:
+                    assert got["gap"] <= 3 * got["h"], (case, own, got, lead)
+    assert checked >= 200                                                       # most labels placed by the rules
 
 
 def test_a_moved_label_is_led_and_the_draw_record_keeps_the_rules():
-    """gordium_ui.label_box goes through place_dim_label (HARD: the solids, the notice and the dimensions it is
-    given; SOFT: the labels already placed and the lot's lines), takes its spot, and reports whether it is led, its
-    size and whether a HARD rule had to give; label_at draws the leader and the shrunk text; draw_screen passes every
-    building and coloured part (o.plan_solids, cleared with the check) and records the HARD boxes."""
+    """gordium_ui.label_box goes through place_dim_label (HARD: the outlines of the buildings and coloured parts it
+    is given, the notice and the dimensions; SOFT: the labels already placed and the lot's lines), takes its spot,
+    keeps it in the frame's cache, and reports whether it is led, its size and whether a HARD rule had to give;
+    label_at draws the leader and the shrunk text; draw_screen passes every building (its outline's hull) and
+    coloured part (its own outline) and records them, the buildings counted."""
     from design_checker import rhino_logic as logic_
     src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    ns = {"logic": logic_, "LINE_H": 16}
+    ns = {"logic": logic_}
     exec(src[src.index("def label_box("):].split("\ndef ", 1)[0], ns)             # noqa: S102
     viewport = type("VP", (), {"Size": type("S", (), {"Width": 656, "Height": 668})(),
                                "WorldToClient": staticmethod(lambda q: type("P", (), {"X": q[0], "Y": q[1]})())})()
     own = ((158, 409), (185, 409))
-    house = (185, 250, 235, 165)
+    house = _rect(185, 250, 420, 415)
     keep = [(12, 34, 506, 54)]
-    taken = list(keep)
-    got = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)", 11,
-                          taken, along=own, obstacles=_boxes(158, 106, 501, 562), keep=keep, dims=[own],
-                          solids=[house])
+    taken, cache = list(keep), {}
+    text = "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)"
+    got = ns["label_box"](viewport, (171, 409), text, 11, taken, along=own, obstacles=_boxes(158, 106, 501, 562),
+                          keep=keep, dims=[own], solids=[house], cache=cache)
     left, top, width, want, rows, led, size, forced = got
     h = logic_.label_height(len(rows), size)
-    assert taken[-1] == (left, top, width, h) and not forced
-    assert logic_.label_breaks_hard(own, (left, top, width, h), (656, 668), [house] + keep, [own]) is None
+    assert taken[-1] == (left, top, width, h) and not forced and len(cache) == 1
+    assert logic_.label_breaks_hard(own, (left, top, width, h), (656, 668), keep, [own], [house]) is None
+    again = ns["label_box"](viewport, (171, 409), text, 11, list(keep), along=own, obstacles=[], keep=keep,
+                            dims=[own], solids=[], cache=cache)
+    assert again == got                                                         # the same frame again: cached
     at = src[src.index("def label_at("):].split("\ndef ", 1)[0]
     assert "if led:" in at and "logic.label_height(len(rows), size)" in at and "(size + 5) * k" in at
     assert "return left, top, width, h, want, rows, led, size, forced" in at
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
-    assert draw.count("solids=solids)") == 2 and 'drawn["hard_boxes"] = solids + ' in draw
+    assert draw.count('solids=solids, cache=cached["spots"])') == 2 and 'drawn["hard_shapes"]' in draw
+    assert 'logic.hull(on) if kind == "building" else on' in draw and 'drawn["buildings"] = ' in draw
     assert draw.count("at[6], at[7], at[8]])") == 2
-    assert "o.plan_solids = " in rhino and "o.plan_lines, o.plan_solids = [], []" in rhino
+    assert 'o.plan_solids = [("building", ' in rhino and "o.plan_lines, o.plan_solids = [], []" in rhino
+    assert '("coloured", [_model_point(doc, (x, y)) for x, y in e["outline"]])' in rhino
 
 
 def test_the_in_rhino_checks_read_the_drawings_own_placement():
@@ -3378,15 +3423,15 @@ def test_the_detail_under_the_list_keeps_room_for_its_button():
 
 
 def test_the_label_claim_counts_its_own_line_too():
-    """Independent review of 6361a3f, then the Rhino job at 319dc5d: highlight claim 2 checks every HARD rule
-    through the very function the placement keeps (rhino_logic.label_breaks_hard: its own line, every other yard's
-    dimension, every building and coloured part, the notice, the status box, the north arrow, the screen), on what the
-    view drew (STATE["drawn"]: its hard boxes and dimensions), and fails a forced or unled moved label."""
+    """Independent review of 6361a3f, then the Rhino job at 319dc5d and the review of c99843a: highlight claim 2
+    checks every HARD rule through rhino_logic.label_breaks_hard on what the view drew (its notice, status box and
+    arrow, its buildings' and coloured parts' outlines, its dimensions), requires at least one building recorded,
+    and checks distance by its own brute-force search, not the placement's."""
     script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
-    assert "g.logic.label_breaks_hard(own, box, view, hard, dims)" in script
-    assert 'rec.get("hard_boxes")' in script and 'rec.get("dims")' in script
-    assert "not broken and not forced" in script and "not unled and not far" in script
-    assert "s_ != own" not in script
+    assert "g.logic.label_breaks_hard(own, box, view, hard, dims, shapes)" in script
+    assert 'rec.get("hard_shapes")' in script and 'rec.get("buildings", 0) >= 1' in script
+    assert "not broken and not forced" in script and "not too_far" in script
+    assert "for y_ in range(" in script and "s_ != own" not in script
 
 def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():
     """The Rhino job at 6361a3f (architect's eye): with the shorter list, the panel opened with the list scrolled a

@@ -583,13 +583,20 @@ def draw_screen(o, e):
     dims = [tuple(map(tuple, _screen_line(e.Viewport, line))) for line, _, _ in getattr(o, "yard_dims", None) or []] \
         if plan else []                      # the yards' dimension lines: a moved label keeps off another's
     drawn["dims"] = dims
-    solids = []                              # each building and coloured part's box on screen: never under a label
-    for corners in getattr(o, "plan_solids", None) or []:
-        on = [e.Viewport.WorldToClient(q) for q in corners]
-        if on:
-            x0, y0 = min(q.X for q in on), min(q.Y for q in on)
-            solids.append((x0, y0, max(q.X for q in on) - x0, max(q.Y for q in on) - y0))
-    drawn["hard_boxes"] = solids + [list(t) for t in keep]
+    solids = []                              # each building's footprint and coloured part on screen: never under a
+    for kind, pts in getattr(o, "plan_solids", None) or []:          # label (their outlines, never their boxes)
+        on = [(q.X, q.Y) for q in (e.Viewport.WorldToClient(q) for q in pts)]
+        solids.append(logic.hull(on) if kind == "building" else on)
+    drawn["hard_shapes"], drawn["hard_boxes"] = solids, [list(t) for t in keep]
+    drawn["buildings"] = sum(kind == "building" for kind, _ in getattr(o, "plan_solids", None) or [])
+    # the same picture as the last frame (nothing on screen moved): the same placements, never worked out again
+    sig = (tuple(drawn["size"]), tuple(round(v, 1) for s_ in on_screen for q in s_ for v in q),
+           tuple(round(v, 1) for shp in solids for q in shp for v in q), tuple(tuple(round(v, 1) for v in t)
+                                                                               for t in keep), bool(labels))
+    cached = STATE.get("label_cache") or {}
+    if cached.get("sig") != sig or cached.get("view") != str(e.Viewport.Id):
+        cached = {"sig": sig, "view": str(e.Viewport.Id), "spots": {}}
+        STATE["label_cache"] = cached
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -601,12 +608,12 @@ def draw_screen(o, e):
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
             at = ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
                              along=(line.From, line.To), obstacles=obstacles, keep=keep, dims=dims,
-                             solids=solids)   # beside its line, off every other
+                             solids=solids, cache=cached["spots"])   # beside its line, off every other
             drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line), at[6], at[7], at[8]])
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
         at = ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each
                          along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep, dims=dims,
-                         solids=solids)   # edge's length, beside it, off
+                         solids=solids, cache=cached["spots"])   # edge's length, beside it, off
         drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge), at[6], at[7], at[8]])    # every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     limit = getattr(o, "height_limit", None)
@@ -1780,10 +1787,12 @@ def _draw_plan(doc, o, result, facts):
     pts = o.lot_outline or []
     o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
         [line for b in _buildings(doc) for line in _plan_edges(b.Geometry)]
-    # what no plan label may cover (logic.place_dim_label's HARD rules): each building's footprint and each coloured
-    # part, by their corners (model space; their box on screen is taken each frame)
-    o.plan_solids = [[q for line in _plan_edges(b.Geometry) for q in (line.From, line.To)] for b in _buildings(doc)] + \
-        [list(brep.GetBoundingBox(True).GetCorners()) for brep, _ in o.encroach]
+    # what no plan label may cover (logic.place_dim_label's HARD rules): each building's footprint (its plan edges'
+    # ends: their hull on screen each frame) and each coloured part's own outline (model space)
+    o.plan_solids = [("building", [q for line in _plan_edges(b.Geometry) for q in (line.From, line.To)])
+                     for b in _buildings(doc)] + \
+        [("coloured", [_model_point(doc, (x, y)) for x, y in e["outline"]]) for e in plan.get("encroach") or []
+         if e.get("outline") and logic.highlight(e.get("status") or "does_not_comply")]
     o.yards_zone = None
     if lot is not None and plan.get("buildable"):
         inner = rg.PolylineCurve([_model_point(doc, p) for p in plan["buildable"] + plan["buildable"][:1]])

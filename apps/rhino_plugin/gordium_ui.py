@@ -828,27 +828,33 @@ def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=
     return width, height
 
 
-LINE_H = 16                              # one line of a plan label (11-12 px text), in screen pixels
 
 
-def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=(), keep=None, dims=(), solids=()):
+def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=(), keep=None, dims=(), solids=(),
+              cache=None):
     """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted, its lines, whether it is led
     to its line, its text size, whether a HARD rule had to give). With `along` (its dimension line): by
-    logic.place_dim_label's one set of rules. HARD: on screen, over no building or coloured part (`solids`) and none
-    of `keep` (the notice, the status box, the north arrow), on neither its own line nor another yard's (`dims`).
-    SOFT: the labels already placed (`taken` beyond `keep`), then the lot's lines (`obstacles` beyond `dims`). Takes
-    its spot in `taken`. The in-Rhino checks read this very placement (STATE["drawn"])."""
+    logic.place_dim_label's one set of rules. HARD: on screen, over no building or coloured part (`solids`: their
+    outlines on screen) and none of `keep` (the notice, the status box, the north arrow), on neither its own line nor
+    another yard's (`dims`). SOFT: the labels already placed (`taken` beyond `keep`), then the lot's lines
+    (`obstacles` beyond `dims`). Takes its spot in `taken`. `cache` (draw_screen's, while nothing on screen moved):
+    the same placement again, never worked out every frame. The in-Rhino checks read this placement (STATE["drawn"])."""
     p = viewport.WorldToClient(point)
     if along is not None:
         a, b = (viewport.WorldToClient(q) for q in along)
         own = ((a.X, a.Y), (b.X, b.Y))
         view = (viewport.Size.Width, viewport.Size.Height)
-        fixed = list(keep or [])
-        dim_lines = [tuple(map(tuple, d)) for d in dims or []]
-        got = logic.place_dim_label(own, text, size, view, hard_boxes=list(solids or []) + fixed,
-                                    hard_lines=dim_lines,
-                                    soft_boxes=[t for t in (taken or []) if t not in fixed],
-                                    soft_lines=[o for o in obstacles if tuple(map(tuple, o)) not in dim_lines])
+        key = (text, size, tuple(round(v, 1) for q in own for v in q))
+        got = cache.get(key) if cache is not None else None
+        if got is None:
+            fixed = list(keep or [])
+            dim_lines = [tuple(map(tuple, d)) for d in dims or []]
+            got = logic.place_dim_label(own, text, size, view, hard_boxes=fixed, hard_lines=dim_lines,
+                                        soft_boxes=[t for t in (taken or []) if t not in fixed],
+                                        soft_lines=[o for o in obstacles if tuple(map(tuple, o)) not in dim_lines],
+                                        hard_shapes=list(solids or []))
+            if cache is not None:
+                cache[key] = got
         if taken is not None:
             taken.append((got["left"], got["top"], got["w"], got["h"]))
         return got["left"], got["top"], got["w"], got["top"], got["rows"], got["led"], got["size"], got["forced"]
@@ -859,7 +865,7 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
 
 
 def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=(), leader=False,
-             keep=None, dims=(), solids=()):
+             keep=None, dims=(), solids=(), cache=None):
     """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
     already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
     `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must;
@@ -869,7 +875,7 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=N
     leader was drawn to it)."""
     p = viewport.WorldToClient(point)
     left, top, width, want, rows, led, size, forced = label_box(viewport, point, text, size, taken, along, obstacles,
-                                                              keep, dims, solids)
+                                                              keep, dims, solids, cache)
     h = logic.label_height(len(rows), size)
     if led:                                  # moved off its spot: a leader from it to the label's nearest edge
         end = logic.leader_end((p.X, p.Y), (left, top, width, h))
