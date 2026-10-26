@@ -160,8 +160,8 @@
   "title": "A start box that ends in an error leaves the results greyed, never shown as current",
   "needs": "rhino",
   "offline": "partial",
-  "offline_ok": false,
-  "evidence": "Raised: True; changed mark: False; status box: ['Gordium \u00b7 ? 4 need review \u00b7 6 comply \u00b7 2 not checked', 'Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12\\'-0\")'].",
+  "offline_ok": true,
+  "evidence": "Raised: True; changed mark: True; status box: ['Gordium \u00b7 Model changed since the last check \u2014 press Check', 'Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12\\'-0\")'].",
   "rhino_part": "A real Rhino error inside the box."
  }
 ]
