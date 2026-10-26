@@ -479,43 +479,122 @@ def box_gap(line, box):
                for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
 
 
-def place_near(line, w, h, obstacles=(), taken=(), gap=12, view=None, avoid=(), dims=()):
-    """Where a w × h label goes when no spot beside its dimension `line` is clear: (left, top), or None. Never far
-    from its line: within one label height of it (beside it, or just past either end), on screen, over no box in
-    `taken` (the notice, the status box, the north arrow, other labels); of those, the one crossing the fewest lines
-    in `obstacles`, another yard's dimension line (`dims`) above all (the Rhino job at 81efd62: the southwest label
-    covered the front yard's dimension where a spot clear of it was in reach), and covering the fewest boxes in
-    `avoid` (other labels, when it must), then the nearest; never on
-    its own line. Beside its line is tried before past its ends (a leader along the line itself would be hidden by
-    it), `gap` (12 px) away so the leader the caller draws to it shows (review of b85effe: a 6 px leader hid under the
-    dimension's tick). The Rhino job at 0a94fc4: placed "outside the
-    drawing" with the shortest leader, the failing southwest yard's label came loose from its line (330 px away, under
-    the status box, no leader seen); at 27c8e5d, with no room beside its line, it had crossed 13 lines."""
+LABEL_MIN_SIZE = 9                 # a plan label's text is never smaller (readable on screen)
+LABEL_LEAD_REACH = 3               # how far a led label may sit from its line: this many label heights
+
+
+def label_height(rows, size):
+    """A plan label's height on screen: its lines (size + 5 px each: 16 px at 11 pt, gordium_ui.LINE_H) and 4 of
+    margin."""
+    return 4 + (size + 5) * rows
+
+
+def _over(box, other):
+    """Whether two (left, top, w, h) boxes overlap (touching edges don't)."""
+    return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
+        min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
+
+
+def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=()):
+    """Which HARD rule a plan label's box (left, top, w, h) breaks, or None. HARD: on screen; over no box in
+    `hard_boxes` (every building's footprint and its coloured parts, the notice, the status box, the north arrow);
+    crossing neither its own dimension `line` nor any line in `hard_lines` (every other yard's dimension)."""
+    left, top, w, h = box
+    if view is not None and (left < 0 or top < 0 or left + w > view[0] or top + h > view[1]):
+        return "off screen"
+    if any(_over(box, (a - 3, b - 3, c + 6, e + 6)) for a, b, c, e in hard_boxes):     # 3 px clear of each
+        return "over a building, its coloured part, the notice, the status box or the north arrow"
+    if crosses(line, left, top, w, h):
+        return "on its own line"
+    if any(crosses(other, left, top, w, h) for other in hard_lines if other != line):
+        return "on another yard's dimension"
+    return None
+
+
+def _label_spots(line, w, h, gaps):
+    """Spots for a w × h label around its dimension `line`, `gaps` away from it: beside it (centred, then shifted to
+    either end), then just past either end (level, then up or down a half and a whole height)."""
     (xa, ya), (xb, yb) = line
     x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
     mx, my = (xa + xb) / 2, (ya + yb) / 2
-    vw, vh = view if view is not None else (float("inf"), float("inf"))
-    steps = (0, -h / 2, h / 2, -h, h)
-    if x1 - x0 >= y1 - y0:               # mostly horizontal: above or below it, then past either end
-        spots = [(x, top) for top in (y0 - gap - h, y1 + gap) for x in (mx - w / 2, x0 - w, x1, x0 - w - gap, x1 + gap)] + \
-            [(x, my - h / 2 + d) for x in (x0 - gap - w, x1 + gap) for d in steps[1:] + steps[:1]]
-    else:                                # mostly vertical: right or left of it, then past either end
-        spots = [(left, y) for left in (x1 + gap, x0 - gap - w) for y in (my - h / 2, y0 - h, y1, y0 - h - gap, y1 + gap)] + \
-            [(mx - w / 2 + d, y) for y in (y0 - gap - h, y1 + gap) for d in (-w / 2, w / 2, 0)]
-    best = None
-    for k, (left, top) in enumerate(spots):
-        left, top = min(max(left, 0), max(vw - w, 0)), min(max(top, 0), max(vh - h, 0))   # kept on screen
-        if left + w > vw or top + h > vh or box_gap(line, (left, top, w, h)) > h:
-            continue
-        if any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken) or \
-                crosses(line, left, top, w, h):                  # never over the notice, status box, nor its own line
-            continue
-        score = (sum(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in avoid),
-                 sum(crosses(s, left, top, w, h) for s in dims if s != line),
-                 sum(crosses(s, left, top, w, h) for s in obstacles if s != line), box_gap(line, (left, top, w, h)), k)
-        if best is None or score < best[0]:
-            best = (score, left, top)
-    return None if best is None else (best[1], best[2])
+    out = []
+    for g in gaps:
+        if x1 - x0 >= y1 - y0:           # mostly horizontal: above, below; then past the left and right ends
+            out += [(x, t) for t in (y0 - g - h, y1 + g) for x in (mx - w / 2, x0, x1 - w, x0 - w, x1)]
+            out += [(x, my - h / 2 + d) for x in (x0 - g - w, x1 + g) for d in (0, -h / 2, h / 2, -h, h)]
+        else:                            # mostly vertical: right, left; then past the top and bottom ends
+            out += [(x, t) for x in (x1 + g, x0 - g - w) for t in (my - h / 2, y0, y1 - h, y0 - h, y1)]
+            out += [(mx - w / 2 + d, y) for y in (y0 - g - h, y1 + g) for d in (0, -w / 2, w / 2, -w, w)]
+    return out
+
+
+def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_boxes=(), soft_lines=()):
+    """Where a plan label for the dimension `line` goes (screen pixels), by one complete set of rules (the Rhino job
+    at 319dc5d: each round's fix moved the southwest yard's label onto the next obstacle nobody had listed):
+    - HARD, never broken (label_breaks_hard): on screen; over no building footprint or coloured part, nor the
+      notice, the status box or the north arrow (`hard_boxes`); on neither its own line nor any other yard's
+      dimension (`hard_lines`).
+    - SOFT, least first: other labels covered (`soft_boxes`), then lines crossed (`soft_lines`: the lot's edges),
+      then its distance from its own line.
+    - Within one label height of its line, on one line, then on two (name, then numbers: label_lines); then smaller,
+      a point at a time down to LABEL_MIN_SIZE; then, at its own size, up to LABEL_LEAD_REACH label heights away;
+      then the nearest spot anywhere on screen that breaks no HARD rule. A label more than 8 px from its line is led
+      to it (`led`). Only when no spot on the whole screen keeps every HARD rule is one broken (`forced`, never
+      silent: the claim reports it), so a failing yard's label is never dropped.
+    Returns {"left", "top", "w", "h", "rows", "size", "led", "forced", "gap"}."""
+    two = label_lines(text)
+    variants = [[text]] + ([two] if len(two) == 2 else [])
+
+    def shape(rows, pt):
+        return max(label_width(r, pt) for r in rows), label_height(len(rows), pt)
+
+    def result(rows, pt, left, top, w, h, forced=False):
+        gap = box_gap(line, (left, top, w, h))
+        return {"left": left, "top": top, "w": w, "h": h, "rows": rows, "size": pt, "led": gap > 8,
+                "forced": forced, "gap": gap}
+
+    def best(rows, pt, gaps, reach, nearest_first=False):
+        w, h = shape(rows, pt)
+        found = None
+        for k, (left, top) in enumerate(_label_spots(line, w, h, gaps)):
+            box = (left, top, w, h)
+            gap = box_gap(line, box)
+            if gap > reach or label_breaks_hard(line, box, view, hard_boxes, hard_lines):
+                continue
+            covered = sum(_over(box, other) for other in soft_boxes)
+            crossed = sum(crosses(s_, left, top, w, h) for s_ in soft_lines if s_ != line)
+            score = (covered, gap, crossed, k) if nearest_first else (covered, crossed, gap, k)
+            if found is None or score < found[0]:
+                found = (score, left, top, w, h)
+        return None if found is None else result(rows, pt, *found[1:])
+
+    for pt in range(int(size), LABEL_MIN_SIZE - 1, -1):          # beside it: its size, then a point smaller each time
+        for rows in variants:
+            h = shape(rows, pt)[1]
+            got = best(rows, pt, (6, h / 2, h), h)
+            if got is not None:
+                return got
+    for rows in variants:                                        # led, up to LABEL_LEAD_REACH heights away
+        h = shape(rows, size)[1]
+        reach = LABEL_LEAD_REACH * h
+        got = best(rows, size, (1.5 * h, 2 * h, 2.5 * h, reach - 1), reach, nearest_first=True)
+        if got is not None:
+            return got
+    rows = variants[-1]                                          # anywhere on screen that keeps every HARD rule
+    w, h = shape(rows, LABEL_MIN_SIZE)
+    if view is not None:                                         # nearest first (a 16 px grid: drawn every frame)
+        (xa, ya), (xb, yb) = line
+        mx, my = (xa + xb) / 2, (ya + yb) / 2
+        grid = [(left, top) for top in range(0, int(view[1] - h) + 1, 16) for left in range(0, int(view[0] - w) + 1, 16)]
+        grid.sort(key=lambda q: (q[0] + w / 2 - mx) ** 2 + (q[1] + h / 2 - my) ** 2)
+        for left, top in grid:
+            if not label_breaks_hard(line, (left, top, w, h), view, hard_boxes, hard_lines):
+                return result(rows, LABEL_MIN_SIZE, left, top, w, h)
+    (xa, ya), (xb, yb) = line                                    # nowhere: beside it, said (never dropped)
+    left, top = min(xa, xb), max(ya, yb) + 6
+    if view is not None:
+        left, top = min(max(left, 0), max(view[0] - w, 0)), min(max(top, 0), max(view[1] - h, 0))
+    return result(rows, LABEL_MIN_SIZE, left, top, w, h, forced=True)
 
 
 def label_lines(text):

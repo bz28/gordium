@@ -583,6 +583,13 @@ def draw_screen(o, e):
     dims = [tuple(map(tuple, _screen_line(e.Viewport, line))) for line, _, _ in getattr(o, "yard_dims", None) or []] \
         if plan else []                      # the yards' dimension lines: a moved label keeps off another's
     drawn["dims"] = dims
+    solids = []                              # each building and coloured part's box on screen: never under a label
+    for corners in getattr(o, "plan_solids", None) or []:
+        on = [e.Viewport.WorldToClient(q) for q in corners]
+        if on:
+            x0, y0 = min(q.X for q in on), min(q.Y for q in on)
+            solids.append((x0, y0, max(q.X for q in on) - x0, max(q.Y for q in on) - y0))
+    drawn["hard_boxes"] = solids + [list(t) for t in keep]
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -593,12 +600,14 @@ def draw_screen(o, e):
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
             at = ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                             along=(line.From, line.To), obstacles=obstacles, keep=keep, dims=dims)   # beside its line, off every other
-            drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line), at[6]])
+                             along=(line.From, line.To), obstacles=obstacles, keep=keep, dims=dims,
+                             solids=solids)   # beside its line, off every other
+            drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line), at[6], at[7], at[8]])
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
         at = ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each
-                         along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep, dims=dims)   # edge's length, beside it, off
-        drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge), at[6]])    # every
+                         along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep, dims=dims,
+                         solids=solids)   # edge's length, beside it, off
+        drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge), at[6], at[7], at[8]])    # every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
@@ -1714,7 +1723,7 @@ def _clear(o):
     o.toast = None
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
-    o.plan_lines = []
+    o.plan_lines, o.plan_solids = [], []
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
     o.doc = None
@@ -1771,6 +1780,10 @@ def _draw_plan(doc, o, result, facts):
     pts = o.lot_outline or []
     o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
         [line for b in _buildings(doc) for line in _plan_edges(b.Geometry)]
+    # what no plan label may cover (logic.place_dim_label's HARD rules): each building's footprint and each coloured
+    # part, by their corners (model space; their box on screen is taken each frame)
+    o.plan_solids = [[q for line in _plan_edges(b.Geometry) for q in (line.From, line.To)] for b in _buildings(doc)] + \
+        [list(brep.GetBoundingBox(True).GetCorners()) for brep, _ in o.encroach]
     o.yards_zone = None
     if lot is not None and plan.get("buildable"):
         inner = rg.PolylineCurve([_model_point(doc, p) for p in plan["buildable"] + plan["buildable"][:1]])
