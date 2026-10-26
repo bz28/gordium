@@ -881,7 +881,7 @@ rules:
           and side_yard_larger_eaves >= 5 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves < 10 + max(building_height - 35, 0) - 2
           and front_yard_eaves >= 10 + max(building_height - 35, 0) - 2 and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2
         reason: >-
-          Which side yard is the 10 ft one (more on a building over 35 ft tall) is open: the walls are at
+          Which side yard is the 10 ft one (both minimums more on a building over 35 ft tall) is open: the walls are at
           least that far from both side lot lines, or from neither, so either side may be. The eaves fit only if the
           side whose walls are farther from its line is the 5 ft one. Say which side is meant to be the 10 ft
           one.
@@ -891,7 +891,7 @@ rules:
           and side_yard_smaller_eaves >= 5 + max(building_height - 35, 0) - 2 and side_yard_smaller_eaves < 10 + max(building_height - 35, 0) - 2
           and front_yard_eaves >= 10 + max(building_height - 35, 0) - 2 and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2
         reason: >-
-          Which side yard is the 10 ft one (more on a building over 35 ft tall) is open: the walls are at
+          Which side yard is the 10 ft one (both minimums more on a building over 35 ft tall) is open: the walls are at
           least that far from both side lot lines, or from neither, so either side may be. The eaves fit only if the
           side whose walls are nearer to its line is the 5 ft one. Say which side is meant to be the 10 ft
           one.
