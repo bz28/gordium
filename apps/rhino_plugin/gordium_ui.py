@@ -834,7 +834,7 @@ def list_row_px(listbox):
         if int(native_number(table.RowCount)) >= 2:
             pitch = native_number(table.RectOfRow(1).Y) - native_number(table.RectOfRow(0).Y)
         else:
-            pitch = native_number(table.RectOfRow(0).Height) + native_number(table.IntercellSpacing.Height)
+            pitch = native_number(table.RectOfRow(0).Height)   # a row's rect already includes its spacing
         return int(math.ceil(pitch - 1e-6)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX   # up: never a row short
     except Exception:
         return logic.LIST_ROW_PX

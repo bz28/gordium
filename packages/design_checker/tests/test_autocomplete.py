@@ -219,6 +219,8 @@ def test_the_list_is_sized_from_where_its_rows_are_laid_out():
     fn = part(UI, "def list_row_px(", "def start_box(")
     assert "table.RectOfRow(1).Y" in fn and "table.RectOfRow(0).Y" in fn
     assert fn.index("RectOfRow(1)") < fn.index("else:") < fn.index("RectOfRow(0).Height")
+    one_row = fn[fn.index("else:"):fn.index("return int(")]
+    assert "IntercellSpacing" not in one_row     # a row's rectangle already includes the gap under it (cold review)
 
 
 def test_the_found_address_reads_cleanly():
