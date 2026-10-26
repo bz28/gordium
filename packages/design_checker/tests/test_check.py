@@ -951,7 +951,7 @@ def test_the_panel_message_line_is_cleared_by_every_check():
     # round 11: before anything that can fail, so a check that fails early clears it too
     assert body.index('ui.say(STATE.get("panel_parts"), "")') < body.index("facts = current_facts(doc)")
     report = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
-    assert report.index("run_check(doc, report=True)") < report.index("say(logic.report_message(path, True")
+    assert report.index("run_check(doc, report=True)") < report.index("say(first + logic.report_message(path, True")
 
 
 def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_path):
@@ -1438,9 +1438,8 @@ def test_the_notice_never_hides_the_model_when_there_is_room():
     def covers(x, y, box, w=690, h=32):
         a, b, c, e = box
         return min(x + w, c) > max(x, a) and min(y + h, e) > max(y, b)
-    # framed tight (as it was): every corner covers some of the lot; never the status box
-    x, y = notice_spot(1000, 640, 690, 32, (265, 30, 735, 610), [status])
-    assert not covers(x, y, (518, 12, 985, 68))
+    # framed tight (as it was): every corner covers some of the lot: not drawn (the panel says it; #28 at 92cf742)
+    assert notice_spot(1000, 640, 690, 32, (265, 30, 735, 610), [status]) is None
     # framed with room (FRAME_ROOM 0.75: the lot from y 102 to 538): top left is clear of the lot; with the status
     # box there too, bottom left; nothing covered either way
     roomy = (324, 102, 676, 538)
@@ -2677,7 +2676,9 @@ def _plugin_functions(names, **extra):
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     view = type("View", (), {"ActiveViewportID": "vp"})()
     doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})()})()
-    ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": staticmethod(lambda lines, size: (100, 20)),
+    size_of = staticmethod(lambda lines, size: (max(len(t) for t in lines) * size * 0.6 + 22,     # gordium_ui's
+                                                len(lines) * (size + 9) + 10))                   # text_box_size
+    ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": size_of,
                           "show": staticmethod(lambda *a, **k: None)})
     ns = {"time": time_, "logic": logic_, "ui": ui_, "STATE": {},
           "Rhino": type("Rhino", (), {"RhinoDoc": type("RhinoDoc", (), {"ActiveDoc": doc})}),
@@ -2733,3 +2734,53 @@ def test_the_notice_timer_stops_once_a_check_cleared_the_notice():
     stopped.clear()
     ns["_toast_tick"]()                                                  # still showing: left running
     assert stopped == []
+
+
+def test_the_notice_is_compact_and_never_over_the_model_being_judged():
+    """The architect's eye on #28 at 92cf742: zoomed in tight, the "no longer complies" notice was one long line, a
+    bar across the whole plan over the drawing being judged. Now it is at most NOTICE_SHARES[0] of the view's width,
+    wrapped between its " · " parts only (never inside a measurement), in the first corner clear of the model and of
+    the status box (a narrower box tried when the wider fits no corner); when none fits, it is not drawn (the panel's
+    message line says it). The side yard's notice is still drawn in the default framed view (review round 1)."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · −2'-11 3/8\" short"
+    for view_w in (1000, 700, 400):
+        for share in logic_.NOTICE_SHARES:
+            lines = logic_.notice_lines([side], view_w, share)
+            assert " · ".join(t.strip() for t in lines) == side                # every part kept, in order
+            assert all("'-" not in t.split()[-1] or t.split()[-1].endswith(('"', "'")) for t in lines), lines
+            assert not any(t.strip().startswith(('1/', '3/', '5/', '7/')) for t in lines), lines  # 7'-0 5/8" whole
+            chars = max(logic_.NOTICE_MIN_CHARS, int((view_w * share - 22) / 7.8))
+            assert all(len(t) <= chars for t in lines if " · " in t.strip()), (view_w, share, lines)
+    def over(x, y, w, h, box):                                           # (x0, y0, x1, y1)
+        return min(x + w, box[2]) > max(x, box[0]) and min(y + h, box[3]) > max(y, box[1])
+    # the default framed Top view (1000 x 640, the lot from 324,102 to 676,538): drawn, top left, compact
+    lot = (324, 102, 676, 538)
+    lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot)
+    assert (x, y) == (12, 34) and w <= 1000 * logic_.NOTICE_SHARES[0] and not over(x, y, w, h, lot)
+    # ...with the status box top right: still clear of both
+    status = (518, 12, 467, 56)
+    lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot, [status])
+    assert not over(x, y, w, h, lot) and not over(x, y, w, h, (518, 12, 985, 68))
+    # a smaller view where only the narrowest box fits a corner: the narrower box, never over the model
+    placed = logic_.notice_place(700, 450, [side], (380, 60, 560, 400))
+    assert placed is not None and len(placed[0]) > 1 and not over(*placed[1], placed[2], placed[3], (380, 60, 560, 400))
+    # zoomed in tight: the model fills the view: not drawn
+    assert logic_.notice_place(1000, 640, [side], (5, 5, 995, 635)) is None
+    # every corner taken by other boxes: not drawn (never over the status box)
+    corners = [(0, 0, 500, 320), (500, 0, 500, 320), (0, 320, 500, 320), (500, 320, 500, 320)]
+    assert logic_.notice_spot(1000, 640, 300, 50, None, corners) is None
+    # the plugin: no place, no notice box; a place, that box
+    ns = _plugin_functions(["_notice_box"], _model_on_screen=lambda o, viewport: (5, 5, 995, 635))
+    viewport = type("Viewport", (), {"Id": "vp", "Bounds": type("B", (), {"Width": 1000, "Height": 640})()})()
+    o = type("O", (), {"toast": ([side[2:]], ns["time"].time() + 6)})()
+    assert ns["_notice_box"](o, viewport, [], False) is None
+    ns["_model_on_screen"] = lambda o, viewport: lot
+    lines, x, y, w, h = ns["_notice_box"](o, viewport, [], False)
+    assert (x, y) == (12, 34) and not over(x, y, w, h, lot) and lines[0].startswith("✕ Side yard, Southwest")
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert 'ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])' in check     # the panel says it
+    report = src[src.index("def open_report("):].split("\ndef ", 1)[0]
+    assert report.count("say(first + logic.report_message(") == 2                    # kept in the report's line too
+    assert 'first = "✕ " + notice + " · " if notice else ""' in report
