@@ -1293,12 +1293,16 @@ def street_words(label, lines, ids=False):
     return pieces + f", {feet_words(_length(lines))} of frontage"
 
 
+STREET_ANSWER_NEEDED = ("Gordium needs a Yes or a No here: kept as street, a line that isn't can pass lot width; "
+                        "left out, a line that is can pass the front yard. ")
+
+
 def street_more_question(label, outline, more, swing):
     """The question when it isn't clear where a street ends (street_run's "maybe" pieces past one end)."""
     lines = [outline[k] for k in more]
     n = len(lines)
     count = f"{n} more lot-line piece{'s' if n != 1 else ''}, {feet_words(_length(lines))}"
-    tail = f" Is that on {label} too? (Enter keeps it, to be safe)"
+    tail = f" Is that on {label} too? (Yes or No)"
     if swing is None:                                  # short pieces only (no direction to give)
         return f"Past there is a short piece of lot line ({count}), with no direction of its own.{tail}"
     if swing > _street_lines().TURN_LIMIT_DEG:         # a corner, but with short pieces in it, or a bend
@@ -1320,9 +1324,8 @@ def refused_click(outline, picked, tolerance=0.5):
 def street_pick(outline, picked, names=None, taken=(), ask=None, label="This street", tolerance=0.5, seed=None):
     """One click on the street side, the whole street it is on: (piece numbers in order along it, what to say);
     street_run's run, with each unclear stretch past an end asked (`ask`: question -> True Yes, False No, None not
-    answered) and left out only on the architect's No: a question skipped (Enter, Esc, or no one to ask) keeps it,
-    the cautious way (a street line read as a side line would let the front yard pass from part of the street:
-    review round 3, F3; kept, a street that bends past TURN_LIMIT_DEG is asked one street or two by the measuring).
+    answered) and left out only on a No. The plugin's question takes only Yes or No (round 14: neither default is
+    safe, see gordium_rhino._ask_street_more); None (no one to ask: tests, headless runs) keeps it and says so.
     ([], words) when the click is on a street already kept (`taken`) or on a short piece standing alone (a point,
     not a line); None when it isn't a piece of the outline, or the outline doesn't run end to end in order."""
     found = street_run(outline, picked, names, taken, tolerance, seed=seed)

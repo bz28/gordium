@@ -2495,7 +2495,7 @@ def test_an_unclear_stretch_never_takes_in_the_street_past_a_bend():
     run, said = logic.street_pick(lot, lot[0], ask=lambda q: asked.append(q) or next(answers, False))
     assert run == [0, 1, 2, 3, 4, 5, 6] and len(asked) == 5, (run, asked)  # the 5th: the straight street, No
     assert asked[-1] == ("Past there the lot line bends 10° with no clear corner (5 more lot-line pieces, 50'-0\"). "
-                         "Is that on This street too? (Enter keeps it, to be safe)"), asked[-1]
+                         "Is that on This street too? (Yes or No)"), asked[-1]
     assert said.endswith("not surely one street: Gordium asks one street or two before measuring along them"), said
     runs, _ = logic.add_street_pick([[0, 1, 2, 3, 4, 5, 6]], lot, lot[9], None, lambda q: False)
     assert runs[1] == [7, 8, 9, 10, 11], runs
@@ -2551,7 +2551,7 @@ def test_a_street_is_never_cut_short_unasked_by_a_curve_or_a_repeated_corner_poi
     assert logic.street_pick(outline, outline[0], ask=lambda q: False)[0] == [0, 1, 2, 3, 4, 5]
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     ask = rhino[rhino.index("def _ask_street_more(question):"):rhino.index("def _outline(doc, lot):")]
-    assert "if go.Get() != Rhino.Input.GetResult.Option:\n        return None" in ask
+    assert "        prompt = logic.STREET_ANSWER_NEEDED + question" in ask and "return None" not in ask   # (round 14)
 
 
 def test_a_corner_point_drawn_twice_is_never_a_street_of_its_own():
@@ -2868,7 +2868,7 @@ def test_an_arc_drawn_in_short_chords_is_a_street_and_an_unreadable_outline_neve
     q = []
     logic.street_pick(outline, outline[0], names, ask=lambda x: q.append(x) or False, label="A St")
     assert q == ["Past there is a short piece of lot line (1 more lot-line piece, 0'-2 3/8\"), with no direction of "
-                 "its own. Is that on A St too? (Enter keeps it, to be safe)"], q
+                 "its own. Is that on A St too? (Yes or No)"], q
 
 
 def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_side_unasked():
@@ -2973,6 +2973,62 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     o = _ring([(0, 0), (10, 0), (10.24, 0), (10.44, 0), (30, 0), (30, 100), (0, 100)])
     lines, _ = logic.pick_street([o[0], o[1]], None, o[0], None, outline=o)
     assert sorted(map(str, lines)) == sorted(map(str, o[:4])), lines
+
+
+def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe():
+    """Street-run review round 14 (the coordinator's question): Enter kept an unclear stretch as street "to be
+    safe", but that is not safe either. A 40 ft street with a 15 ft lot line bent 20° from it: kept, the frontage
+    reads 55'-0" and Lot width complies (R-1b needs 50'-0"); the truth, 40'-0", does not. Left out, a stretch that
+    is street lets the front yard pass from part of it (round 3). So the plugin's question takes only Yes or No:
+    Enter and Esc ask again, with the reason."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    x2, y2 = 40 + 15 * math.cos(math.radians(20)), 15 * math.sin(math.radians(20))
+    corners = [(0, 0), (40, 0), (x2, y2), (x2, 120), (0, 120)]
+    o = _ring(corners)
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+
+    def width(street):
+        r = check_site(_plot(box(12, 30, 30, 70, 0, 25), lot_=lot_of(corners)), dict(base, street_line=street))
+        return next(i for i in r["view"]["items"] if i["name"] == "Lot width")
+
+    kept, _ = logic.street_pick(o, o[0], ask=lambda q: None)          # not answered: kept
+    assert kept == [0, 1] and width([o[k] for k in kept])["status"] == "complies"   # why no default is safe
+    assert width([o[0]])["status"] == "does_not_comply"
+    # the plugin's own question, run with stand-ins for Rhino: Enter, then Esc, then No
+    answers = iter([("nothing", None), ("cancel", None), ("option", 1)])
+    prompts = []
+
+    class GetOption:
+        def SetCommandPrompt(self, p):
+            prompts.append(p)
+
+        def AddOption(self, name):
+            return {"Yes": 0, "No": 1}[name]
+
+        def AcceptNothing(self, on):
+            pass
+
+        def Get(self):
+            self.kind, self.index = next(answers)
+            return self.kind
+
+        def OptionIndex(self):
+            return self.index
+
+    rhino_ = type("Rhino", (), {"Input": type("Input", (), {
+        "Custom": type("Custom", (), {"GetOption": GetOption}),
+        "GetResult": type("GetResult", (), {"Option": "option", "Nothing": "nothing", "Cancel": "cancel"})})})
+    ns = _plugin_functions(["_ask_street_more"], Rhino=rhino_)
+    assert ns["_ask_street_more"]("Is that on A St too? (Yes or No)") is False
+    assert len(prompts) == 3 and prompts[1].startswith(logic.STREET_ANSWER_NEEDED) and \
+        prompts[2] == prompts[1], prompts
+    answers = iter([("option", 0)])
+    assert ns["_ask_street_more"]("q") is True
 
 
 def _plugin_functions(names, **extra):
