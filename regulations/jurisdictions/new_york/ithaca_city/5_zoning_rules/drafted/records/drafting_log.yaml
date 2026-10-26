@@ -1075,28 +1075,7 @@ units:
         cell ''10 ft'' has 1 numbers, the rule expects 3'
     problems: []
   chart-p14-residential:
-    rules:
-    - R-1a.parking_per_dwelling_unit
-    - R-1a.parking_per_dwelling_unit_undecided_uses
-    - R-1b.parking_per_dwelling_unit
-    - R-1b.parking_per_dwelling_unit_undecided_uses
-    - R-2a.parking_per_dwelling_unit
-    - R-2a.parking_per_dwelling_unit_undecided_uses
-    - R-2b.parking_per_dwelling_unit
-    - R-2b.parking_per_dwelling_unit_undecided_uses
-    - R-2c.parking_per_dwelling_unit
-    - R-2c.parking_per_dwelling_unit_undecided_uses
-    - R-3a.parking_per_dwelling_unit
-    - R-3a.parking_dormitory
-    - R-3a.parking_per_dwelling_unit_undecided_uses
-    - R-3aa.parking_per_dwelling_unit
-    - R-3aa.parking_per_dwelling_unit_undecided_uses
-    - R-3b.parking_per_dwelling_unit
-    - R-3b.parking_dormitory
-    - R-3b.parking_per_dwelling_unit_undecided_uses
-    - RU.parking_per_dwelling_unit
-    - RU.parking_dormitory
-    - RU.parking_per_dwelling_unit_undecided_uses
+    rules: []
     unresolved:
     - rule: R-1a.parking_dormitory
       why: '''Dormitory'': the chart shows ''-'' here'
@@ -1164,6 +1143,69 @@ units:
         - Residential
         - Dormitory
         - R-3AA
+    - rule: R-1a.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-1a.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-1b.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-1b.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-2a.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-2a.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-2b.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-2b.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-2c.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-2c.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-3a.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-3a.parking_dormitory
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Dormitory parking per persons
+        housed (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-3a.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-3aa.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-3aa.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-3b.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-3b.parking_dormitory
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Dormitory parking per persons
+        housed (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: R-3b.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+    - rule: RU.parking_per_dwelling_unit
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
+        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: RU.parking_dormitory
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Dormitory parking per persons
+        housed (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+    - rule: RU.parking_per_dwelling_unit_undecided_uses
+      why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
+        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
     problems: []
   325-3B:accessory_dwelling_unit:
     rules:

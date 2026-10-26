@@ -23,6 +23,7 @@ max_tokens_by_unit:
 on_hold:
   325-20F: parking is on hold (Ben, 2026-10-25)
   325-20G: parking is on hold (Ben, 2026-10-25)
+  chart-p14-residential: parking is on hold (Ben, 2026-10-25)   # drafted before the hold: its rules are not checked yet
 max_attempts: 3           # the first answer plus up to 2 retries when code rejects it
 # A hard cap on total spending across all drafting runs, in US dollars, separate from labeling's. Kept in
 # ~/.config/gordium/rule_drafting_ledger.json (shared by every checkout), never taken as less than the

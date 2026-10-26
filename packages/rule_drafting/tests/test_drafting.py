@@ -1431,3 +1431,17 @@ def test_side_eaves_never_pass_where_the_two_side_minimums_differ(inputs):
         for side in ("side_yard_smaller", "side_yard_larger"):
             rule = rules[f"{district}.325_18b_projection_{side}"]
             assert rule["kind"] == "flag" and outcome(rule, design, inputs.ctx.allowed()) != "pass", (district, side)
+
+
+def test_a_drafted_unit_put_on_hold_keeps_its_rules_out_and_lists_them_not_checked_yet(inputs):
+    """Ben put parking on hold (2026-10-25); chart p.14's residential parking was drafted before. Its rules leave the
+    rulebooks and each is listed for a person, "not checked yet: parking is on hold", reversibly."""
+    assert "chart-p14-residential" in cli.on_hold()
+    log = cli.read_log(inputs)
+    entry = log["units"]["chart-p14-residential"]
+    assert entry["rules"] == []
+    held = [g for g in entry["unresolved"] if g["why"].startswith("not checked yet: parking is on hold")]
+    assert held and all(g["rule"].split(".")[0] in {"R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "RU"}
+                        for g in held)
+    saved = {r["id"] for p in inputs.drafted.glob("*.yaml") for r in cli.load(p)["rules"]}
+    assert not {g["rule"] for g in held} & saved

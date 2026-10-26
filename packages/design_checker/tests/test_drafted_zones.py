@@ -228,18 +228,23 @@ def test_a_chart_cell_no_chart_rule_checks_is_never_silent():
 
 def test_a_demoted_draft_shows_needs_review_in_the_checker_never_a_pass(drafts_on):
     """A drafted rule the answer keys show passing where they don't (records/demoted.yaml) is saved as a flag with its
-    cause until re-drafted: never a false pass in the product. Through the checker: a dormitory in R-3a gets its
-    parking row as NEEDS REVIEW, with the cause."""
+    cause until re-drafted: never a false pass in the product. Through the checker: a multiple dwelling in R-3a gets
+    its loading row as NEEDS REVIEW (the demotion's own condition, a person's). Rules of a unit on hold (chart p.14's
+    parking, Ben 2026-10-25) are out of the rulebooks: their demotions wait for the hold to lift."""
     from rule_format.rulebook import load
     causes = load(J / "5_zoning_rules/drafted/records/demoted.yaml")
     rules = {r["id"]: r for p in (J / "5_zoning_rules/drafted").glob("*.yaml") for r in load(p)["rules"]}
+    log = load(J / "5_zoning_rules/drafted/records/drafting_log.yaml")["units"]
+    held = {g["rule"] for g in log["chart-p14-residential"]["unresolved"] if g["why"].startswith("not checked yet: parking")}
     gone = {i for i, e in causes.items() if isinstance(e, dict) and e.get("withdraw")}     # withdrawn: not in a rulebook
-    assert gone and not gone & set(rules)
+    assert gone and not gone & set(rules) and held and not held & set(rules)
     assert causes and all(rules[i]["kind"] == "flag" and "Demoted until re-drafted" in rules[i]["notes"]
-                          for i in causes if i not in gone)
-    got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-3a", "use": "dormitory", "accessory_buildings": []})
-    row = next(r for r in got["rows"] if r["Rule id"] == "R-3a.parking_dormitory")
+                          for i in causes if i not in gone | held)
+    got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-3b", "use": "multiple_family", "accessory_buildings": []})
+    row = next(r for r in got["rows"] if r["Rule id"] == "R-3b.loading_multiple_dwelling_25_units")   # R-3b: drafted only
     assert row["Error"] == "NEEDS REVIEW"
+    items = {i["id"]: i for i in got["view"]["items"]}
+    assert "parking is on hold" in items["gap.drafting.chart-p14-residential"]["reason"]   # shown as not checked yet
 
 
 def test_a_demotion_whose_cause_is_the_law_holds_in_every_district_the_law_piece_covers():
@@ -254,6 +259,8 @@ def test_a_demotion_whose_cause_is_the_law_holds_in_every_district_the_law_piece
     checked = 0
     for rid, entry in causes.items():
         cause = entry if isinstance(entry, str) else entry["cause"]
+        if rid not in {r for u in units.values() for r in u.get("rules", [])}:
+            continue                                        # its unit is on hold (parking): not in any rulebook now
         if "§" not in cause or isinstance(entry, dict) and (entry.get("scope") == "district" or entry.get("withdraw")):
             continue                                        # a district's own drafting gap, or withdrawn everywhere
         suffix = rid.split(".", 1)[1]

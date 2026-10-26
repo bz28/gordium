@@ -79,15 +79,14 @@ keys:
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-1b.parking_one_family:
-        judge:
-        - - R-1b.parking_per_dwelling_unit
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-1b.parking_other_uses:
-        judge:
-        - - R-1b.parking_per_dwelling_unit
-          - R-1b.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
-          other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft''s bedroom rule is limited to one-family houses, so for other uses it doesn''t apply: compared, so a ''doesn''t
+          apply'' where the key asks for review counts), so it is listed for a person'
     unmatched:
       R-1b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
@@ -166,15 +165,14 @@ keys:
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-1a.parking_one_family:
-        judge:
-        - - R-1a.parking_per_dwelling_unit
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-1a.parking_other_uses:
-        judge:
-        - - R-1a.parking_per_dwelling_unit
-          - R-1a.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
-          other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft''s bedroom rule is limited to one-family houses, so for other uses it doesn''t apply: compared, so a ''doesn''t
+          apply'' where the key asks for review counts), so it is listed for a person'
     unmatched:
       R-1a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
@@ -271,21 +269,19 @@ keys:
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-2a.parking_one_family:
-        judge:
-        - - R-2a.parking_per_dwelling_unit
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-2a.parking_dwelling_units:
-        judge:
-        - - R-2a.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart''s residential parking: the draft checks the one-family detached houses (zero lot line included)
-          and lists the buildings of several units for a person; the key sends these uses to review, so where they overlap
-          the draft is compared'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking: the draft
+          checks the one-family detached houses (zero lot line included) and lists the buildings of several units for a person;
+          the key sends these uses to review, so where they overlap the draft is compared), so it is listed for a person'
       R-2a.parking_other_uses:
-        judge:
-        - - R-2a.parking_per_dwelling_unit
-          - R-2a.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
-          other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft''s bedroom rule is limited to one-family houses, so for other uses it doesn''t apply: compared, so a ''doesn''t
+          apply'' where the key asks for review counts), so it is listed for a person'
       R-2a.loading:
         judge:
         - - general.loading_neighborhood_commercial
@@ -389,21 +385,19 @@ keys:
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-2b.parking_one_family:
-        judge:
-        - - R-2b.parking_per_dwelling_unit
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-2b.parking_dwelling_units:
-        judge:
-        - - R-2b.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart''s residential parking: the draft checks the one-family detached houses (zero lot line included)
-          and lists the buildings of several units for a person; the key sends these uses to review, so where they overlap
-          the draft is compared'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking: the draft
+          checks the one-family detached houses (zero lot line included) and lists the buildings of several units for a person;
+          the key sends these uses to review, so where they overlap the draft is compared), so it is listed for a person'
       R-2b.parking_other_uses:
-        judge:
-        - - R-2b.parking_per_dwelling_unit
-          - R-2b.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
-          other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft''s bedroom rule is limited to one-family houses, so for other uses it doesn''t apply: compared, so a ''doesn''t
+          apply'' where the key asks for review counts), so it is listed for a person'
       R-2b.loading:
         judge:
         - - general.loading_neighborhood_commercial
@@ -531,21 +525,19 @@ keys:
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-2c.parking_one_family:
-        judge:
-        - - R-2c.parking_per_dwelling_unit
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-2c.parking_dwelling_units:
-        judge:
-        - - R-2c.parking_per_dwelling_unit
-          - R-2c.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart''s residential parking: the draft checks the one-family detached houses (zero lot line included)
-          and lists the buildings of several units for a person; the key sends these uses to review, so where they overlap
-          the draft is compared'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking: the draft
+          checks the one-family detached houses (zero lot line included) and lists the buildings of several units for a person;
+          the key sends these uses to review, so where they overlap the draft is compared), so it is listed for a person'
       R-2c.parking_other_uses:
-        judge:
-        - - R-2c.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
-          other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft''s bedroom rule is limited to one-family houses, so for other uses it doesn''t apply: compared, so a ''doesn''t
+          apply'' where the key asks for review counts), so it is listed for a person'
       R-2c.loading:
         judge:
         - - general.loading_neighborhood_commercial
@@ -687,25 +679,23 @@ keys:
           - R-3a.325_19e_r3_abut_r1_rear_yard
         reason: '§325-19E''s conditions for R-3 lots next to R-1 land: judged together'
       R-3a.parking_one_family:
-        judge:
-        - - R-3a.parking_per_dwelling_unit
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-3a.parking_dwelling_units:
-        judge:
-        - - R-3a.parking_per_dwelling_unit
-          - R-3a.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart''s residential parking: the draft checks the one-family detached houses (zero lot line included)
-          and lists the buildings of several units for a person; the key sends these uses to review, so where they overlap
-          the draft is compared'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking: the draft
+          checks the one-family detached houses (zero lot line included) and lists the buildings of several units for a person;
+          the key sends these uses to review, so where they overlap the draft is compared), so it is listed for a person'
       R-3a.parking_dormitory:
-        judge:
-        - - R-3a.parking_dormitory
-        reason: the chart's dormitory parking row
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s dormitory parking row), so
+          it is listed for a person'
       R-3a.parking_other_uses:
-        judge:
-        - - R-3a.parking_per_dwelling_unit_undecided_uses
-        reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
-          other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft''s bedroom rule is limited to one-family houses, so for other uses it doesn''t apply: compared, so a ''doesn''t
+          apply'' where the key asks for review counts), so it is listed for a person'
       R-3a.loading:
         judge:
         - - general.loading_neighborhood_commercial

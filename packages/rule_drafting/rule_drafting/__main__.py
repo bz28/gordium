@@ -200,7 +200,15 @@ def demote(rule: dict, cause: str | dict) -> dict:
 
 
 def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
-    """Replace this unit's earlier drafts with the new ones, and record what happened."""
+    """Replace this unit's earlier drafts with the new ones, and record what happened. A unit on hold (settings
+    on_hold) that was drafted before the hold keeps its drafts out of the rulebooks: each one is listed for a person,
+    "not checked yet", with the hold's cause (Ben, 2026-10-25: chart p.14's parking). Lift the hold and replay the
+    unit to bring them back."""
+    if held := on_hold().get(unit_id):
+        result = dict(result, rules={}, unresolved=list(result.get("unresolved") or []) + [
+            {"rule": r["id"], "why": f"not checked yet: {held}; the drafted rule ({r.get('title', '')}) is kept in the "
+                                     "run records and comes back when the hold is lifted"}
+            for rules in (result.get("rules") or {}).values() for r in rules])
     old = set(log["units"].get(unit_id, {}).get("rules", []))
     books = {p.stem: load(p) for p in i.drafted.glob("*.yaml")}
     for district, book in books.items():

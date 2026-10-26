@@ -5,9 +5,9 @@
 # (R-1b 38, R-1a 63, R-2a/R-2b 82, R-2c 88, R-3a 88); that fall is the cost of no false pass. Keys: measurement-2
 # a98149b's R-1b, #20's R-1a and R-3a (answer-keys c342d10, on this branch), r2-hand's R-2a, R-2b, R-2c (46b8de2, final). Every difference is in
 # grade_all_with_hand_keys.json.
-R-1b.yaml: 42       # of 48 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
-R-1a.yaml: 67       # of 74 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
-R-2a.yaml: 90       # of 98 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
-R-2b.yaml: 84       # of 99 (review round 22: its §325-18B eave rules need review, since an eave side is not yet measured to its wall's lot line)
-R-2c.yaml: 122       # of 229 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
-R-3a.yaml: 99       # of 145 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
+R-1b.yaml: 39       # of 48 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-1a.yaml: 60       # of 74 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-2a.yaml: 79       # of 98 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-2b.yaml: 73       # of 99 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-2c.yaml: 118       # of 229 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-3a.yaml: 92       # of 145 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
