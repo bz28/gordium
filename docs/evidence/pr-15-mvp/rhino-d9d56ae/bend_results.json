@@ -1,0 +1,87 @@
+{
+ "head": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_d9d56ae",
+ "claims": {
+  "A the bend question is asked, and Enter asks again, starting 'Gordium needs a Yes or a No here (Esc: nothing changes)'": {
+   "ok": true,
+   "detail": [
+    "Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)",
+    "Gordium needs a Yes or a No here (Esc: nothing changes): kept as street, a line that isn't can pass lot width; left out, a line that is can pass the front yard. Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)"
+   ]
+  },
+  "A Esc: 'Esc: nothing changed (the street side is as it was)'": {
+   "ok": false,
+   "detail": [
+    "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far \u2014 Enter when done",
+    "Esc: nothing changed \u2014 the street side is as it was; this pick wasn't kept"
+   ]
+  },
+  "A the street lines (the blue line) as they were": {
+   "ok": true,
+   "detail": {
+    "before": 8,
+    "after": 8
+   }
+  },
+  "B the same picks, No: the side street kept without the bend (Street 2: 2 lot-line pieces)": {
+   "ok": true,
+   "detail": {
+    "prompts": [
+     "Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)"
+    ],
+    "said": [
+     "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far \u2014 Enter when done",
+     "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far \u2014 Enter when done"
+    ],
+    "lines": 10,
+    "ids": [
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     null,
+     null
+    ]
+   }
+  }
+ },
+ "before_lines": 8,
+ "A": {
+  "prompts": [
+   "Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)",
+   "Gordium needs a Yes or a No here (Esc: nothing changes): kept as street, a line that isn't can pass lot width; left out, a line that is can pass the front yard. Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)"
+  ],
+  "said": [
+   "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far \u2014 Enter when done",
+   "Esc: nothing changed \u2014 the street side is as it was; this pick wasn't kept"
+  ],
+  "lines": 8
+ },
+ "B": {
+  "prompts": [
+   "Past there the lot line turns 89\u00b0 over short pieces, a corner or a bend (2 more lot-line pieces, 69'-9\"). Is that on Street 2 too? (Yes or No)"
+  ],
+  "said": [
+   "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far \u2014 Enter when done",
+   "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far \u2014 Enter when done"
+  ],
+  "lines": 10,
+  "ids": [
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   null,
+   null
+  ]
+ },
+ "ok": false,
+ "done": true
+}
