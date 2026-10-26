@@ -84,3 +84,43 @@ def test_r2_eaves_never_comply_or_fail_where_the_law_does_not(zone, use, small, 
         if said == present.FAILS:
             assert answers == {"fails"}, (west, east, ow, oe, answers)
     assert {present.FAILS, present.COMPLIES} <= seen, seen        # the cases decide both ways, not just review
+
+
+# ---- what the panel names (#18 review rounds 4-5, with this rulebook) -------------------------------------------
+
+def _one_height(monkeypatch):
+    """The checker's measuring with the roof's height settled at its highest reading (all under 35 ft: no bonus)."""
+    from design_checker import check as C
+    real = C.measure
+
+    def settled(site, facts):
+        got = real(site, facts)
+        h = got["building_height"]
+        got["building_height"] = {**h, "value": max(r["value"] for r in h.get("readings") or [h]), "readings": [],
+                                  "reason": ""}
+        return got
+    monkeypatch.setattr(C, "measure", settled)
+
+
+def test_a_semi_detached_0_ft_side_review_names_that_side_eave(monkeypatch):
+    """Semi-detached, walls 12 and 15 ft, the west eave 7 ft from its line: the narrower side may be the attached
+    (0 ft) side or need 10 ft (R-2c's note 15 review, whose reason has a "; " of its own). The row is that side's eave
+    against the 10 ft side's 8'-0", never "Eaves into front yard 30'-0" vs 8'-0"" (#18 round 5)."""
+    _one_height(monkeypatch)
+    got, facts = E.measured(12.0, 15.0, 5.0, 0.0)
+    res = check_site(E.site(E.house(12.0, 15.0, 5.0, 0.0)), {**facts, "zone": "R-2c", "use": "one_family_semi_detached"})
+    (row,) = [i for i in res["view"]["items"] if i.get("rule") == "R-2c.yard_projections"]
+    assert row["status"] == present.REVIEW
+    assert (row["name"], row["proposed"], row["required"]) == ("Eaves into side yard", "7'-0\"", "8'-0\""), row
+
+
+def test_an_attached_lot_size_review_is_never_shown_as_at_least_units():
+    """One-family attached, 1 dwelling unit here of 3 in the building: the lot size review (which reading of the
+    building the lot holds) is about the lot area, never "1 vs 3" units with "To comply: increase it by 2" (the
+    review's "units below the building's" sits in an "or"; the rule asks units to equal it, not be at least it)."""
+    got, facts = E.measured(12.0, 15.0, 0.0, 0.0)
+    res = check_site(E.site(E.house(12.0, 15.0, 0.0, 0.0)),
+                     {**facts, "zone": "R-2c", "use": "one_family_attached", "dwelling_units": 1,
+                      "attached_units_in_building": 3, "occupants": 2})
+    (row,) = [i for i in res["view"]["items"] if i.get("rule") == "R-2c.lot_area_one_family_attached"]
+    assert row["name"] == "Lot area" and not row.get("hint"), row
