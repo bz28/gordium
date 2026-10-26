@@ -180,7 +180,8 @@ def main():
         g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})     # (the slow checker started first)
         w = Watch(g)
         frames = []                          # the wait window's own lines, as it sets them (ui.WAIT_SHOWN)
-        g.ui.WAIT_SHOWN = lambda step, line: frames.append([round(time.time(), 2), step, line])
+        g.ui.WAIT_SHOWN = lambda step, line, focused=None, hint=None: frames.append(
+            [round(time.time(), 2), step, line, focused, hint])
         began = time.time()
         result = g.run_check(doc, report=False)
         w.stop()
@@ -192,6 +193,10 @@ def main():
               "up; what is painted: by eye and the captures)",
               len(marks) == 3 and seconds and seconds[-1] >= 2 and seconds == sorted(seconds),
               {"marks": sorted(marks), "seconds": sorted(set(seconds)), "frames": len(frames)})
+        focus = [f[3] for f in frames]
+        claim("1 the wait window has the keyboard once shown, and then says 'Esc or Cancel to stop'",
+              any(focus) and all(f[4] == g.logic.STOP_HINT for f in frames if f[3]), {"focus": focus[:10],
+                                                                                        "hints": sorted({f[4] for f in frames})})
         claim("1 Rhino kept running while the check waited", w.ticks >= 8, {"ticks": w.ticks,
                                                                             "s": round(time.time() - began, 1)})
         claim("1 the wait said the checker's own steps", "Slow test: waiting…" in w.steps and
@@ -293,7 +298,7 @@ def main():
         w = Watch(g, key="live_check")
         pump_until(lambda: g.STATE.get("live_check") is not None, 10)
         job = (g.STATE.get("live_check") or {}).get("job")
-        pump_until(lambda: len(w.panel) >= 2, 3)
+        pump_until(lambda: len(w.panel) >= 2 and w.ticks >= 5, 8)    # what the claim needs, capped (not a fixed wait)
         ticks = w.ticks
         claim("5 a background re-check started; Rhino not waiting on it; the panel's line moves",
               job is not None and ticks >= 5 and len(w.panel) >= 2, {"ticks": ticks, "panel": w.panel})

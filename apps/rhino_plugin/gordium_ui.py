@@ -528,6 +528,31 @@ def follow(parts, job):
 WAIT_SHOWN = None          # the in-Rhino test's hook: called with the wait window's labels each time they are set
 
 
+def take_keyboard(form):
+    """The wait window made the key window, so Esc reaches it: Eto's own Focus, and on the Mac the window's own
+    makeKeyAndOrderFront (Rhino run of 65c07d7: Eto reported no focus after BringToFront and Focus). Never raises."""
+    for step in (lambda: form.BringToFront(), lambda: form.Focus(),
+                 lambda: form.ControlObject.MakeKeyAndOrderFront(form.ControlObject)):
+        try:
+            step()
+        except Exception:
+            pass
+
+
+def has_keyboard(form):
+    """Whether the window has the keyboard (Esc reaches it): Eto's HasFocus, or on the Mac the window being the key
+    window. False when neither can be read."""
+    try:
+        if form.HasFocus:
+            return True
+    except Exception:
+        pass
+    try:
+        return bool(form.ControlObject.IsKeyWindow)
+    except Exception:
+        return False
+
+
 def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
     """Wait for a job (logic.Job) without ever blocking Rhino: work done within logic.WAIT_WINDOW_S shows nothing;
     longer, a small window says what Gordium is doing (the job's own step, a moving mark, the seconds so far) with
@@ -565,8 +590,9 @@ def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
             stop.Enabled = False
 
     stop = button("Cancel", cancel) if cancellable else None
+    hint = label(logic.STOP_HINT_CLICK, size=11)   # "Esc or Cancel" only once the window has the keyboard
     if stop is not None:                  # (Esc stops it only here: elsewhere in Rhino Esc keeps its own meaning)
-        layout.AddRow(row(stop, label(logic.STOP_HINT, size=11)))
+        layout.AddRow(row(stop, hint))
 
     def key(s, e):                        # Esc, with this window in front: Cancel
         if e.Key == ef.Keys.Escape and cancellable:
@@ -585,13 +611,17 @@ def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
     # Esc cancels only with this window in front (or Cancel clicked): an Esc elsewhere in Rhino keeps Rhino's own
     # meaning (end a command, clear a selection) and never silently cancels a check or a Draw (coordinator, 2026-10-26)
     form.Show()
+    take_keyboard(form)
     try:
         while not job.finished():
             Rhino.RhinoApp.Wait()          # Rhino draws and answers (the panel, the viewports) between passes
             step.Text = job.step or ""
             line.Text = logic.progress_line(job.elapsed(), limit)
+            focused = has_keyboard(form)   # Esc is promised only while it works (Rhino run of 65c07d7)
+            if cancellable:
+                hint.Text = logic.STOP_HINT if focused else logic.STOP_HINT_CLICK
             if WAIT_SHOWN is not None:
-                WAIT_SHOWN(step.Text, line.Text)
+                WAIT_SHOWN(step.Text, line.Text, focused, hint.Text)
             if on_tick is not None:
                 logic.guard(on_tick, "show what Gordium is doing")(job)
             job.wait(0.05)

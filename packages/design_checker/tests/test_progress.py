@@ -262,7 +262,7 @@ def test_draw_works_out_the_starting_house_before_anything_is_saved_or_committed
     plan = part(RHINO, "def _plan_house(", "def _draw_starting_house(")
     assert "ask(request, cancel=True)" in plan
     house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
-    assert 'plan["key"] == _start_key(request)' in house and "start = ask(request, draws_after=True)" in house   # no Cancel
+    assert 'plan["key"] == _start_key(request)' in house and "start = ask(request)  " in house   # no Cancel
     start_cmd = part(RHINO, "def gordium_start(", "def _draw_starting_house(")
     assert "except logic.WorkCancelled as stopped:" in start_cmd and \
         "say(getattr(stopped, \"said\", logic.DRAW_CANCELLED))" in start_cmd
@@ -457,7 +457,13 @@ def test_esc_stops_the_work_only_from_the_wait_window_and_commands_wait_their_tu
     wait = part(UI, "def wait(", "def set_box_open(")
     assert "EscapeKeyPressed" not in wait                                   # never Rhino-wide
     assert "form.KeyDown += logic.guard(key" in wait and "e.Key == ef.Keys.Escape and cancellable" in wait
-    assert "layout.AddRow(row(stop, label(logic.STOP_HINT" in wait and logic.STOP_HINT == "Esc or Cancel to stop"
+    assert "layout.AddRow(row(stop, hint))" in wait and logic.STOP_HINT == "Esc or Cancel to stop"
+    # Esc is promised only while the window has the keyboard (Rhino run of 65c07d7: the Mac gave it no focus)
+    assert "hint = label(logic.STOP_HINT_CLICK" in wait and "take_keyboard(form)" in wait
+    assert "hint.Text = logic.STOP_HINT if focused else logic.STOP_HINT_CLICK" in wait
+    keys = part(UI, "def take_keyboard(", "def has_keyboard(")
+    assert "form.Focus()" in keys and "MakeKeyAndOrderFront" in keys
+    assert "IsKeyWindow" in part(UI, "def has_keyboard(", "def wait(")
     assert "EscapeKeyPressed" not in RHINO
     for fn in ("def gordium_check(", "def gordium_start(", "def edit_facts(", "def off("):
         body = part(RHINO, fn, "\ndef ")
@@ -476,7 +482,7 @@ def test_every_kind_of_edit_is_noted_and_the_wait_never_leaves_work_behind():
     fin = ask[ask.index("finally:"):]
     assert fin.index('STATE.pop("asking", None)') < fin.index("if not job.finished():") < fin.index("_stop_worker()")
     house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
-    fallback = house[house.index("start = ask(request, draws_after=True)"):]
+    fallback = house[house.index("start = ask(request)  "):]
     assert fallback.index("_changed_during(doc.RuntimeSerialNumber, read_at)") < fallback.index("logic.HOUSE_OUTDATED")
     # its message promises the house drawn by hand is checked: live mode and the document hooks on (review of e101ec5)
     early = fallback[fallback.index("logic.HOUSE_OUTDATED"):fallback.index("return None")]
@@ -585,9 +591,9 @@ def test_the_planned_house_is_worked_out_from_the_same_state_draw_uses():
 
 def test_whatever_gordium_draws_after_a_wait_is_in_an_undo_step_of_its_own():
     ask = part(RHINO, "def ask(", "def _ask_waiting(")
-    assert 'resume = (doc, STATE.get("undo_words")) if draws_after else None' in ask
+    assert 'resume = (doc, STATE.get("undo_words"))' in ask and "draws_after" not in ask   # whoever asked (review of 2781a5d)
     assert ask.index("_end_undo(doc)") < ask.index("return _ask_waiting(") < ask.index("_begin_undo(resume[0]")
-    assert "ask(request, draws_after=True)" in part(RHINO, "def _draw_starting_house(", "def _doc_name(")
+    assert "ask(request, cancel=True)" in part(RHINO, "def _plan_house(", "def _draw_starting_house(")   # (the City-outline Draw's plan: resumed too)
     assert 'STATE["undo_words"] = words' in part(RHINO, "def _begin_undo(", "def _end_undo(")
 
 
@@ -601,3 +607,30 @@ def test_a_check_whose_file_left_the_front_is_out_of_date_never_could_not_run():
 def test_a_box_open_refusal_also_puts_the_tick_back():
     acts = logic.gate_actions({"labels": lambda on: "done"}, lambda: True, lambda text: None)
     assert acts["labels"](True) is logic.REFUSED
+
+
+# ---- independent review of 6ba061b..2781a5d ------------------------------------------------------------------------
+
+def test_r2_unreadable_facts_never_skip_the_front_check():
+    """P1: load_facts raised ValueError (unreadable) before the front check; the callers turned it into {} and
+    opened the box on a file no longer in front. The check runs on every way out."""
+    facts = part(RHINO, "def current_facts(", "def save_facts(")
+    try_at = facts.index("    try:\n        facts = load_facts(doc)")
+    assert try_at < facts.index("    finally:") < facts.index("if not _still_front(doc):") < \
+        facts.index("raise logic.NotInFront(logic.NOT_IN_FRONT)")
+
+
+def test_r2_every_command_that_opens_a_box_ends_its_undo_step_before_the_check():
+    """Cold review of d7a5675: GordiumCheck's box could reset (an undo step begun) and nothing ended the step; ask now
+    begins it again after every wait, so it would stay open for the architect's own edits."""
+    for fn, end in (("def gordium_check(", "def _layer("), ("def edit_facts(", "def report_path(")):
+        body = part(RHINO, fn, end)
+        assert body.index("confirm(") < body.index("_end_undo(doc)") < body.index("run_check(doc"), fn
+        assert body.rindex("finally:", 0, body.index("_end_undo(doc)")) > body.index("confirm("), fn
+    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
+    assert "_end_undo(doc)" in start[start.index("    finally:"):]
+
+
+def test_r2_a_report_not_written_after_a_file_switch_is_said_with_one_full_stop():
+    said = logic.outdated_report_message("/x/r.xlsx", logic.NOT_IN_FRONT, True)
+    assert ".." not in said and said.startswith("Zoning report not saved")
