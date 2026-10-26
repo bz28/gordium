@@ -781,10 +781,13 @@ def _offending(doc, e, solids=None):
     The block is cut a hair larger (_proud) so none of its faces lies on the building's own. The block itself when
     Rhino can't intersect (a mesh, a boolean that fails): never nothing (logic.offending_pieces). `solids`: the
     buildings made once for the check (_solids_for); without it, this block's own."""
-    block = _prism(doc, e["outline"], e["base"], e["top"])
+    solid = (solids if solids is not None else _solids_for(doc, [e])).get(e.get("building") or "")
+    box = solid.GetBoundingBox(True) if solid is not None else None
+    base, top = logic.block_span(e, _feet_length(doc, box.Min.Z) if box is not None and box.IsValid else None,
+                                 _feet_length(doc, box.Max.Z) if box is not None and box.IsValid else None)
+    block = _prism(doc, e["outline"], base, top)       # reaching the real solid's own top (a vault: block_span)
     if block is None:
         return []
-    solid = (solids if solids is not None else _solids_for(doc, [e])).get(e.get("building") or "")
     pieces = None
     if isinstance(solid, rg.Brep) and solid.IsSolid:       # a boolean that raises colours the block, never stops the check
         pieces = logic.guard(lambda: rg.Brep.CreateBooleanIntersection(

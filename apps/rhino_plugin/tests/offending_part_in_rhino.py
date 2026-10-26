@@ -20,6 +20,9 @@ real lot's line is slanted) and tested inside or outside the coloured pieces:
    point near the ridge (42 ft up) coloured by a height piece; the sky over the slope (44 ft up where the roof is
    38 ft, inside the uncut block) not; the height
    pieces' volume is the wedge above the limit, within 5 % (the uncut block would be twice it).
+4. A curved vault over the limit (walls to 36 ft, a true arc to 42 ft): the height row needs review, never complies;
+   coloured just inside each wall at 35.5 ft and under the crown at 41 ft; nothing below the limit; the coloured
+   volume is the vault's own part above the limit, within 5 % (Rhino cuts the real solid to its own top).
 Captures Perspective and Front for each. Writes <temp>/gordium_offending/out.json and frames/*.png; closes its
 document."""
 import json
@@ -213,6 +216,46 @@ try:
           wedge and abs(volume - wedge) <= 0.05 * wedge, {"volume": volume, "wedge": wedge, "limit": limit})
     capture(doc, "Perspective", "3_gable_perspective")
     capture(doc, "Front", "3_gable_front")
+
+    # 4. a curved vault over the limit (the coordinator's probe at fc0b023): walls to 36 ft, a true arc to 42 ft.
+    # The checker reads only the flat faces (the vault is a curved surface: height needs review); Rhino cuts the
+    # real solid from the limit to its own top
+    wall, crown = 36 * k, 42 * k
+    p3 = lambda x, z: rg.Point3d(x, y0, z)                              # noqa: E731
+    prof = rg.PolyCurve()
+    prof.Append(rg.LineCurve(p3(x0, z0), p3(x1, z0)))
+    prof.Append(rg.LineCurve(p3(x1, z0), p3(x1, z0 + wall)))
+    prof.Append(rg.ArcCurve(rg.Arc(p3(x1, z0 + wall), p3(mid, z0 + crown), p3(x0, z0 + wall))))
+    prof.Append(rg.LineCurve(p3(x0, z0 + wall), p3(x0, z0)))
+    vault = rg.Surface.CreateExtrusion(prof, rg.Vector3d(0, y1 - y0, 0)).ToBrep().CapPlanarHoles(
+        doc.ModelAbsoluteTolerance)
+    if vault.SolidOrientation == rg.BrepSolidOrientation.Inward:
+        vault.Flip()
+    claim("4 the vault house is one closed solid, its roof curved", vault.IsSolid and any(
+        not f.IsPlanar(doc.ModelAbsoluteTolerance) for f in vault.Faces), vault.IsValid)
+    replace_house(g, doc, vault)
+    g.run_check(doc, report=False)
+    items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
+    height = items.get("Building height") or {}
+    limit = ((g.STATE.get("last") or {}).get("envelope") or {}).get("top")
+    claim("4 the height row needs review (the curved vault is not measured), never complies",
+          height.get("status") == "needs_review", height)
+    tops = [(b, s) for b, s, info in g.overlay().encroach if info.get("why") == "height"]
+    claim("4 coloured just inside each wall above the limit (35.5 ft) and under the crown (41 ft)", all(
+        colour_at(g, doc, p, why="height") == [height.get("status")] for p in (
+            rg.Point3d(x0 + 0.5 * k, ym, z0 + 35.5 * k), rg.Point3d(x1 - 0.5 * k, ym, z0 + 35.5 * k),
+            rg.Point3d(mid, ym, z0 + 41 * k))), [colour_at(g, doc, rg.Point3d(mid, ym, z0 + 41 * k))])
+    claim("4 nothing coloured below the limit (34 ft, mid-plan)",
+          colour_at(g, doc, rg.Point3d(mid, ym, z0 + 34 * k)) == [], colour_at(g, doc, rg.Point3d(mid, ym, z0 + 34 * k)))
+    lo = z0 + ((limit - z0 / k) if limit is not None else 35) * k
+    above = rg.Brep.CreateFromBox(rg.BoundingBox(rg.Point3d(x0 - k, y0 - k, lo), rg.Point3d(x1 + k, y1 + k, z0 + 50 * k)))
+    cut = rg.Brep.CreateBooleanIntersection(vault, above, doc.ModelAbsoluteTolerance) or []
+    want = sum(rg.VolumeMassProperties.Compute(b).Volume for b in cut) / k ** 3
+    got = sum(rg.VolumeMassProperties.Compute(b).Volume for b, _ in tops) / k ** 3
+    claim("4 the coloured volume is the vault's own part above the limit (within 5 %)",
+          want and abs(got - want) <= 0.05 * want, {"volume": got, "above_limit": want})
+    capture(doc, "Perspective", "4_vault_perspective")
+    capture(doc, "Front", "4_vault_front")
 except Exception:
     log["trace"] = traceback.format_exc()
 finally:

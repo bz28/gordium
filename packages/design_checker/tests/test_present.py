@@ -482,6 +482,23 @@ def test_a_vault_read_as_walls_beside_a_flat_roof_over_the_limit_is_coloured_too
     assert Polygon(gable[0]["outline"]).area == pytest.approx(500, abs=0.01)           # a roof's walls: still its ridge
 
 
+def test_a_building_with_a_curved_surface_never_complies_on_height_and_is_coloured_above_the_limit():
+    """The vault probe at fc0b023: walls to 36 ft read, the curved vault left out by the reader (a problem it reports):
+    the height row needs review, never complies, and the block over the limit covers the building's plan (the
+    Rhino side cuts the real vault from there: rhino_logic.block_span)."""
+    from shapely.geometry import Polygon
+    from design_checker.check import check_site
+    from model_measurement.stops import stop
+    vault = box(10, 25, 35, 65, 0, 36)
+    vault["faces"] = [f for f in vault["faces"] if not all(p[2] == 36 for p in f["points"])]
+    vault["problems"] = [stop("curved_surface")]
+    r = check_site(_plot(vault), {**FACTS, "jurisdiction": CITY})
+    assert items(r["view"])["Building height"]["status"] == present.REVIEW
+    tops = [e for e in r["plan"]["encroach"] if e["why"] == "height"]
+    assert tops and all(t["status"] == present.REVIEW for t in tops)
+    assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000)
+
+
 def test_only_the_buildings_that_rise_above_the_limit_are_coloured_each_to_its_own_top():
     from shapely.geometry import Polygon
     from design_checker.check import plan

@@ -127,6 +127,20 @@ def coloured_info(entry):
     return {k: entry.get(k) for k in ("why", "measure", "row", "building")}
 
 
+def block_span(entry, solid_bottom=None, solid_top=None):
+    """The heights (feet) a coloured block is cut from in Rhino: the checker's (check.plan), reaching to the real
+    solid's own top (and, for a yard strip, its own bottom) when Rhino's solid goes further. The checker measures
+    only the faces it can read (a curved vault is left out: its height needs review), so its top can be the wall
+    tops, while the vault above them is just as much over the limit (the Rhino check of #28 at fc0b023: only the
+    band from 35 to 36 ft was coloured, under a vault to 42 ft). A height block always starts at the limit."""
+    base, top = entry["base"], entry["top"]
+    if solid_top is not None:
+        top = max(top, solid_top)
+    if solid_bottom is not None and entry.get("why") != "height":
+        base = min(base, solid_bottom)
+    return base, top
+
+
 def offending_pieces(pieces, block):
     """What a coloured block draws: the building's own part inside it (Rhino's boolean intersection, `pieces`), or
     the block itself when the intersection gave nothing (it failed, or the building is a mesh or a solid Rhino
