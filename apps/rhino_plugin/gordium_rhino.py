@@ -1353,17 +1353,28 @@ def _get_point(prompt):
 
 
 def _ask_street_more(question):
-    """True (Yes), False (No), or None when not answered (Enter or Esc): only the architect's No leaves the bend
-    out; not answered, it is kept as street, the cautious way (street-run review round 3, F3), and the box's pick
-    goes on."""
-    go = Rhino.Input.Custom.GetOption()
-    go.SetCommandPrompt(question)
-    yes = go.AddOption("Yes")
-    no = go.AddOption("No")
-    go.AcceptNothing(True)
-    if go.Get() != Rhino.Input.GetResult.Option:
-        return None
-    return True if go.OptionIndex() == yes else False if go.OptionIndex() == no else None
+    """True (Yes) or False (No), never a default: Enter asks again, with the reason; Esc cancels (Cancelled: in the
+    start box, Edit site… included, the pick changes nothing and the box comes back; in change_facts, the
+    command-line edit, the whole edit is cancelled, as Esc does at its every prompt). Neither
+    default is safe: kept as street, a stretch that isn't can make the frontage long enough to pass lot width (a
+    40 ft street with a 15 ft side line bent 20° from it read 55'-0", complies; the truth 40'-0" does not); left
+    out, a stretch that is street lets the front yard pass from part of it (street-run review rounds 14 and 15)."""
+    prompt = question
+    while True:
+        go = Rhino.Input.Custom.GetOption()
+        go.SetCommandPrompt(prompt)
+        yes = go.AddOption("Yes")
+        no = go.AddOption("No")
+        go.AcceptNothing(True)
+        got = go.Get()
+        if got == Rhino.Input.GetResult.Option:
+            if go.OptionIndex() == yes:
+                return True
+            if go.OptionIndex() == no:
+                return False
+        elif got != Rhino.Input.GetResult.Nothing:      # Esc, or Rhino ending the prompt (another command,
+            raise Cancelled()                            # closing): never asked again forever (round 16)
+        prompt = logic.STREET_ANSWER_NEEDED + question
 
 
 def _clicked_piece(doc, lot, point):
@@ -1452,6 +1463,8 @@ def _box_pick(doc, what, facts, saved_ui):
                          "Click the finished ground you'll grade to, at each wall (Enter when done)",
                          GRADE_LAYER if what == "spot" else FINISHED_LAYER)
             saved_ui["ground_kind"] = what
+    except Cancelled:                    # Esc (the bend question, a pick): nothing changes (rounds 15, 16)
+        say("Esc: nothing changed" + (" (the street side is as it was)" if what == "street" else ""))
     finally:
         _highlight(doc, facts)
     return facts, saved_ui
