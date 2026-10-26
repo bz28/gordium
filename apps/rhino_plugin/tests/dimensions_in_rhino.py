@@ -139,6 +139,19 @@ try:
     claim("1 every failing or in-review yard's number is drawn (Rhino check at 6d2e01a: the failing one was missing)",
           wrong_k and all(o.placed.get(j) and o.placed[j][1] is not None for j in wrong_k),
           {j: (o.placed.get(j) or (None, None, None))[2] for j in wrong_k})
+    import time as _time
+    o.toast = (["Side yard (left) no longer complies: 3'-2\" short of 10'-0\""], _time.time() + 60)
+    drawn(g, doc, "Top", "1_top_notice")          # the notice showing, as after an edit (in the view worked in)
+    numbers = [g.logic.number_box([p[0] for p in pl[1]], [p[1] for p in pl[1]], 0)
+               for pl in o.placed.values() if pl[1] is not None]
+    boxes = getattr(o, "screen_boxes", None) or {}
+    meets = lambda a, b: a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
+    log["screen_boxes"] = {"numbers": numbers, **boxes, "view": (vp.Bounds.Width, vp.Bounds.Height)}
+    claim("1 the notice covers no number (Rhino check at 5891efc: the front number printed through it)",
+          boxes.get("notice") and not any(meets(boxes["notice"], n) for n in numbers), log["screen_boxes"])
+    claim("1 no lot edge's length touches a number (Rhino check at 5891efc: the rear one touched '69'-6 1/8\"')",
+          not any(meets(e_, n) for e_ in boxes.get("edges") or [] for n in numbers), log["screen_boxes"])
+    o.toast = None
     shown_words = [pl[5] for j, pl in o.placed.items() if j != "height" and pl[5]]
     claim("1 each dimension shows its number only (no name, no 'needs', no '(approx.)': the panel says those)",
           shown_words and all("yard" not in t.lower() and "needs" not in t and "approx" not in t for t in shown_words),

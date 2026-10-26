@@ -603,3 +603,79 @@ def test_in_a_short_view_the_last_resort_goes_beside_the_status_box_not_off_the_
     i, q, kind, sc = logic.place_dimension([((500, -40), (500, 30))], 80, [everywhere, status], view=(600, 200),
                                            must=True, fixed=[status])
     assert kind == "crowded" and logic.inside_view(q, (600, 200)) and not logic.shapes_hit(q, status)
+
+
+@pytest.mark.parametrize("scale,centre", [(6, (25, 46)), (9, (25, 46)), (12, (22, 50)), (9, (30, 40))])
+@pytest.mark.parametrize("w,h", [(300, 30), (480, 46)])
+def test_at_656_by_668_the_notice_never_covers_a_drawn_number(scale, centre, w, h):
+    """Rhino check of #29 at 5891efc, docked Top 656 × 668: the front number printed through the notice. The
+    numbers are placed first (as draw_screen does), then the notice (notice_place), off every number's box with
+    its margin (number_box) and off the status box."""
+    view = (656, 668)
+    yards, house, to, status = _scene_at(view, scale, centre)
+    sb = logic._bbox(status)
+    fixed = [(sb[0], sb[1], sb[2] - sb[0], sb[3] - sb[1])]
+    taken = list(fixed)
+    for k in logic.placement_order([y["status"] for y in yards]):
+        y = yards[k]
+        cands = [tuple(to(c["points"])) for c in y["candidates"]]
+        i, q, kind, sc = logic.place_dimension(cands, logic.label_width(y["number"], 11),
+                                               [logic.rect_quad(b) for b in taken], house, (328, 334), view,
+                                               must=y["status"] != present.COMPLIES,
+                                               fixed=[logic.rect_quad(f) for f in fixed])
+        if q is not None:
+            taken.append(logic.number_box([p[0] for p in q], [p[1] for p in q]))
+    numbers = taken[1:]
+    assert numbers
+    x, y_ = logic.notice_place(view[0], view[1], w, h, None, fixed, numbers)
+    box = (x, y_, w, h)
+    meets = lambda a, b: a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
+    assert not any(meets(box, n) for n in numbers + fixed), (box, numbers)
+
+
+def test_a_drawn_numbers_box_has_a_margin_the_edge_lengths_keep_off():
+    """The rear number touched the "69'-6 1/8"" edge length: the edge labels avoid the number's box with its margin."""
+    assert logic.number_box([10, 50], [20, 34]) == (10 - logic.NUMBER_PAD_PX, 20 - logic.NUMBER_PAD_PX,
+                                                    40 + 2 * logic.NUMBER_PAD_PX, 14 + 2 * logic.NUMBER_PAD_PX)
+    assert logic.NUMBER_PAD_PX >= 3
+
+
+
+def test_the_notice_search_stays_quick_in_a_4k_view_with_every_corner_taken():
+    """Review of dd74264, F1: an 8 px search over the whole view took 89 s a frame at 3800 × 2100."""
+    import time
+    view_w, view_h = 3800, 2100
+    taken = [(0, 0, 900, 400), (0, 1500, 900, 600), (2800, 0, 1000, 400), (2800, 1500, 1000, 600)]
+    for k in range(20):
+        taken.append((100 + 150 * k, 900, 90, 18))
+    t0 = time.perf_counter()
+    x, y = logic.notice_spot(view_w, view_h, 600, 46, (800, 300, 3000, 1800), taken)
+    assert time.perf_counter() - t0 < 0.25
+    assert not any(x < a + c and a < x + 600 and y < b + d and b < y + 46 for a, b, c, d in taken)
+
+
+def test_in_a_narrow_short_view_the_last_resort_stays_in_view():
+    """Review of dd74264, F2: moved left of the status box it ran off the view's left edge."""
+    status = logic.rect_quad((51, 14, 295, 186))
+    everywhere = logic.rect_quad((0, 0, 360, 200))
+    i, q, kind, sc = logic.place_dimension([((200, 100), (150, 100))], 80, [everywhere, status], view=(360, 200),
+                                           must=True, fixed=[status])
+    assert kind == "crowded" and logic.inside_view(q, (360, 200))
+
+
+
+def test_the_notice_finds_a_gap_narrower_than_its_search_step():
+    """Review of db58364, L1: the coarse grid missed a gap only the notice's width + 10 px wide."""
+    view_w, view_h, w, h = 656, 668, 200, 30
+    taken = [(0, 0, 656, 300), (0, 300, 213, 368), (423, 300, 233, 368)]     # a 210 px wide gap, x 213-423
+    x, y = logic.notice_spot(view_w, view_h, w, h, None, taken)
+    assert not any(x < a + c and a < x + w and y < b + d and b < y + h for a, b, c, d in taken)
+
+
+def test_the_last_resort_goes_right_of_the_status_box_when_only_that_side_fits():
+    """Review of db58364, L2: the right-hand branch, pinned."""
+    status = logic.rect_quad((10, 14, 200, 186))
+    everywhere = logic.rect_quad((0, 0, 400, 200))
+    i, q, kind, sc = logic.place_dimension([((120, 100), (60, 100))], 80, [everywhere, status], view=(400, 200),
+                                           must=True, fixed=[status])
+    assert kind == "crowded" and min(p[0] for p in q) >= 213 and not logic.shapes_hit(q, status)

@@ -791,7 +791,7 @@ def draw_screen(o, e):
             _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From,
                        size=11 * text_size)
             xs, ys = [p[0] for p in quad], [p[1] for p in quad]
-            taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+            taken.append(logic.number_box(xs, ys))     # with a margin: nothing drawn touches it
     height = getattr(o, "height_dim", None)
     corners = [e.Viewport.WorldToClient(p) for p in (getattr(o, "house_box", None) or [])]
     house = (min(q.X for q in corners), min(q.Y for q in corners), max(q.X for q in corners),
@@ -815,12 +815,15 @@ def draw_screen(o, e):
                 _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From,
                            size=11 * text_size)
                 xs, ys = [p[0] for p in quad], [p[1] for p in quad]
-                taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+                taken.append(logic.number_box(xs, ys))     # with a margin: nothing drawn touches it
+    before = len(taken)
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
                     along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+    edges = taken[before:]
     notice = _notice_box(o, e.Viewport, taken, fixed)  # off the model, the status box and the numbers
+    o.screen_boxes = {"edges": edges, "notice": notice[1:] if notice else None}   # (the in-Rhino checks)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         ends = [e.Viewport.WorldToClient(p) for p in limit[0]]
@@ -1918,17 +1921,22 @@ def confirm(doc, facts, options, mode="check"):
         return None
     result = None
     changed_before = STATE.get("dirty")
-    try:
+    failed = True                       # until _confirm returns: an error inside the box (its rollback may have
+    try:                                # stopped partway) leaves the model counted as changed
         ui.set_box_open(STATE.get("panel_parts"), True)
         result = _confirm(doc, facts, options, mode)
+        failed = False
     finally:
         gate.leave()
         ui.set_box_open(STATE.get("panel_parts"), False)
         # Cancel put the model back: it is as changed (or not) as it was when the box opened, so current results
         # never grey out for the box's own rolled-back edits (the Check button: nothing re-checks them)
         # (the edit's own time kept: never moved earlier, which could let a check from before it count as covering
-        # it; with Check after every edit on, the next idle past IDLE_SECONDS checks: review round 1, P1)
-        STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None)
+        # it; with Check after every edit on, the next idle past IDLE_SECONDS checks: review round 1, P1). An error
+        # is no Cancel: the model may not be as it was, so the results grey out, never shown as current (the
+        # headless check-15, demo review of #26 with #27)
+        STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None,
+                                                 failed=failed)
     if result is not None:              # Draw (GordiumStart or Edit site…): the neighbourhood follows the lot
         logic.guard(sync_context, "draw the neighbourhood")(doc, result)
     return result

@@ -732,9 +732,22 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=No
                 below = [(x, y + fy1 + VIEW_MARGIN_PX - min(p[1] for p in q)) for x, y in q]
                 if inside_view(below, view):
                     q = below
-                else:                              # ... or, a short view, to its left (review F1)
-                    q = [(x + fx0 - VIEW_MARGIN_PX - max(p[0] for p in q), y) for x, y in q]
+                else:                              # ... or, a short view, to its left (review F1), or right
+                    fx1 = _bbox(f)[2]
+                    left = [(x + fx0 - VIEW_MARGIN_PX - max(p[0] for p in q), y) for x, y in q]
+                    right = [(x + fx1 + VIEW_MARGIN_PX - min(p[0] for p in q), y) for x, y in q]
+                    q = left if inside_view(left, view) else right if inside_view(right, view) else q
+                    # (neither fits: it stays in view, over the box: drawn, review of dd74264 F2)
     return i, q, "crowded", 1.0
+
+
+NUMBER_PAD_PX = 4      # around a drawn number: the edge lengths and the notice keep this far off it (Rhino check
+#                        of #29 at 5891efc: the rear number touched an edge length)
+
+
+def number_box(xs, ys, pad=NUMBER_PAD_PX):
+    """A drawn number's corners' xs and ys → its box (x, y, w, h) with a margin, as the later labels must avoid."""
+    return (min(xs) - pad, min(ys) - pad, max(xs) - min(xs) + 2 * pad, max(ys) - min(ys) + 2 * pad)
 
 
 def notice_place(view_w, view_h, w, h, model, fixed, taken):
@@ -878,14 +891,43 @@ def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
     tried in turn (top left under the view's name, bottom left above the axes, top right, bottom right); the first
     that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken`
     (the status box) is used; if every corner covers some of the model, the one covering least (architect's
-    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions)."""
+    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions). When every corner covers a box
+    in `taken`, the first spot off all of them along the top and bottom, then anywhere in the view."""
     spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
 
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
-    free = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)] or spots
-    return min(free, key=lambda s: (overlap(s[0], s[1], model) if model else 0.0, free.index(s)))
+    def free_of(x, y):
+        return not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
+
+    def model_on(spot):
+        return overlap(spot[0], spot[1], model) if model else 0.0
+    free = [sp for sp in spots if free_of(*sp)]
+    if free:
+        return min(enumerate(free), key=lambda k_s: (model_on(k_s[1]), k_s[0]))[1]
+    # every corner covering something drawn (a dimension's number: Rhino check of #29 at 5891efc, docked Top
+    # 656 × 668): slid along the top and bottom bands, then anywhere in the view, off all of it; the first also off
+    # the model, else the one covering least of it. A step of about 1/80 of the view's size keeps a 4K view to a
+    # couple of thousand spots (review of dd74264, F1: 8 px everywhere took seconds a frame)
+    step = max(8.0, (view_w + view_h) / 80.0)
+    xs = [gap + step * k for k in range(int(max(0, view_w - w - 2 * gap) // step) + 1)]
+    ys = [34 + step * k for k in range(int(max(0, view_h - h - 74) // step) + 1)]
+    # and just beside each box drawn, so a gap narrower than the grid's step is found too (review of db58364, L1)
+    xs += [v for a, b, c, e in taken for v in (a + c + 1, a - w - 1) if gap <= v <= view_w - w - gap]
+    ys += [v for a, b, c, e in taken for v in (b + e + 1, b - h - 1) if 34 <= v <= view_h - h - 40]
+    best = None
+    for y in [34, view_h - h - 64, view_h - h - 40] + ys:
+        for x in xs:
+            if free_of(x, y):
+                cover = model_on((x, y))
+                if cover <= 0:
+                    return x, y
+                if best is None or cover < best[0]:
+                    best = (cover, (x, y))
+    if best is not None:
+        return best[1]
+    return min(enumerate(spots), key=lambda k_s: (model_on(k_s[1]), k_s[0]))[1]
 
 
 def clear_spot(taken, x, y, w, h, avoid=()):
@@ -2046,10 +2088,14 @@ AUTO_CHECK_LABEL = "Check after every edit"
 AUTO_CHECK_TIP = "Off: the results grey out after an edit until you press Check. On: Gordium checks again by itself."
 
 
-def changed_after_box(before, now, drawn):
+def changed_after_box(before, now, drawn, failed=False):
     """When the model counts as changed after a start box closes (STATE["dirty"]): Cancel rolled the box's own edits
     back, so the model is as it was when the box opened (`before`: changed then, or not); Draw's edits are checked
-    by Draw's own check, and any change left counts (`now`)."""
+    by Draw's own check, and any change left counts (`now`). A box that ended in an error is no Cancel: its rollback
+    may have stopped partway, so any edit seen during it counts (`now`, else `before`): the results grey out, never
+    shown as current for a model that may differ (the headless check-15, demo review of #26 with #27)."""
+    if failed:
+        return now or before
     return now if drawn else before
 
 
