@@ -2211,7 +2211,9 @@ def _lot_lines(lot: Lot, facts: dict):
                 return stop("address_not_a_street")
             candidates = [idx]
         else:
-            candidates = [c for k in range(1, len(chain)) for c in (chain[:k], chain[k:])]
+            # the address street is one of the streets: the street lines split only where they may turn a corner
+            # (_street_splits), never mid-street (one street drawn in pieces is still one street, §325-8A col. 7)
+            candidates = [c for k in _street_splits(lot, chain) for c in (chain[:k], chain[k:])]
             question.append("which street the lot's address is on decides which yard is the rear yard (§325-8A(14)(d)): "
                             "pick the address street (address_street_line)")
     else:
@@ -2247,6 +2249,36 @@ def _lot_lines(lot: Lot, facts: dict):
     problem = None if found else (problems[0] if problems else stop("no_rear_line"))
     return {"readings": found, "question": "; ".join(question), "basis": basis, "problem": problem,
             "candidates": candidates}
+
+
+JOINT = 15                # degrees: a joint between two street lines turning no more than this is within one street
+
+
+def _heading(edge) -> float:
+    (x, y) = _chord(edge)
+    return math.degrees(math.atan2(y, x))
+
+
+def _street_splits(lot: "Lot", chain: list) -> list[int]:
+    """Where a corner lot's street lines (`chain`, in order along the lot) may split into two streets: the indexes k
+    with chain[:k] one street and chain[k:] the other. A joint turning more than PARALLEL (30 degrees) is a corner
+    for sure; one turning more than JOINT (15) but no more than PARALLEL may be. Between the sure corners, a run of
+    pieces each joining within JOINT is one street only while it turns no more than PARALLEL in all (its pieces'
+    headings within PARALLEL of each other); a run that turns more (a corner rounded into many short pieces) may
+    split at any of its joints. The same limits as the Rhino panel's corner street pick (#15 7a16aa6: joints of 15
+    degrees or less, 30 or less in all, one street; over 30 a corner). Every split that may be is a reading; one
+    street drawn in pieces is never split mid-street (the frontage of one street, §325-8A col. 7, never two streets
+    added)."""
+    turns = [_turn(lot.edges[a], lot.edges[b]) for a, b in zip(chain, chain[1:])]
+    sure = {k + 1 for k, t in enumerate(turns) if t > PARALLEL}
+    maybe = {k + 1 for k, t in enumerate(turns) if JOINT < t <= PARALLEL}
+    bounds = [0, *sorted(sure), len(chain)]
+    for a, b in zip(bounds, bounds[1:]):
+        heads = [_heading(lot.edges[i]) for i in chain[a:b]]
+        spread = max((min(abs(x - y) % 360, 360 - abs(x - y) % 360) for x in heads for y in heads), default=0.0)
+        if spread > PARALLEL:
+            maybe |= set(range(a + 1, b))
+    return sorted(sure | maybe)
 
 
 def _two_sides(found: list) -> list:

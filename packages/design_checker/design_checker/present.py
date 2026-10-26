@@ -273,6 +273,18 @@ def _fails_whatever_part(expr: str, values: dict, unknown: dict) -> bool:
         _evaluate(expr, dict(values, **s)) is False for s in unknown["settings"])
 
 
+def _fails_every_reading(expr: str, values: dict, measured: dict, facts: dict) -> bool:
+    """One limit of a rule that fails under every reading of THE reading set (reading_set.combos): a measurement it
+    reads that has readings and no value (a pitched roof's height) leaves it unknown as drawn, yet it fails whichever
+    reading is taken (#20 review round 1: the eaves rows named the front yard, which passed, for a side eave that
+    failed, because every limit holds the height bonus)."""
+    names = formula.names(expr)
+    if not any(values.get(n) is None and (measured.get(n) or {}).get("readings") for n in names):
+        return False
+    every = reading_set.combos(names, values, measured, facts)
+    return bool(every) and all(_evaluate(expr, trial) is False for trial, _ in every)
+
+
 FACT_WORDS = {"sleeping_rooms": "bedrooms", "parking_spaces": "parking spaces"}   # interior facts, as asked
 
 
@@ -930,7 +942,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
         unknown = row.get("Unknown")        # not measured: a limit that fails at every value they could take
         primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False
-                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)), primary)
+                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)
+                        or _fails_every_reading(ast.unparse(c), values, measured, facts)), primary)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
@@ -1109,7 +1122,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 lo, hi = min(got), max(got)
                 required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
                             f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
-                limit_q = list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
+                # the same limit under every reading: it depends on none of them (#20 review round 1)
+                limit_q = [] if hi - lo < 1e-9 else list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
                 rest = list(dict.fromkeys(q for n in sorted(every - set(open_)) if values.get(n) is None
                                           and (measured.get(n) or {}).get("readings")
                                           for q in _questions_of(measured[n]) if q not in limit_q))
