@@ -1,0 +1,569 @@
+{
+ "claims": {
+  "1 fewer than 4 characters: no list, nothing asked": {
+   "ok": true,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "106",
+    "asked": 0,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 106 first."
+    ],
+    "look_up_on": true
+   }
+  },
+  "2 typed a character at a time: one request after the pause, the list shows 106's address": {
+   "ok": true,
+   "detail": {
+    "seen": {
+     "items": [
+      "106 Ithaca Rd, Ithaca, NY"
+     ],
+     "visible": true,
+     "address": "106 Itha",
+     "asked": 1,
+     "labels": [
+      "Address",
+      "",
+      "Zoning district",
+      "entered by you",
+      "Use",
+      "Lot",
+      "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+      "Front lot line (on the street)",
+      "Ithaca Rd",
+      "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+      "Corner lot?",
+      "Not checked yet: overlays (historic, gorge, flood)",
+      "",
+      "Press Look up to find 106 Itha first."
+     ],
+     "look_up_on": true
+    },
+    "asked": [
+     [
+      1793004018.0,
+      "106 Itha",
+      false
+     ],
+     [
+      1793004022.31,
+      "96 Itha",
+      false
+     ],
+     [
+      1793004022.85,
+      "1060 Ith",
+      false
+     ],
+     [
+      1793004026.41,
+      "96 Itha",
+      false
+     ],
+     [
+      1793004027.11,
+      "96 Ithac",
+      true
+     ],
+     [
+      1793004030.76,
+      "96 Ithac",
+      false
+     ],
+     [
+      1793004034.41,
+      "96 Itha",
+      false
+     ],
+     [
+      1793004036.51,
+      "96 Ithaca Rd",
+      false
+     ]
+    ]
+   }
+  },
+  "3 picked: the address field says it, the list closed, no new request": {
+   "ok": true,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "106 Ithaca Rd, Ithaca, NY",
+    "asked": 1,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     ""
+    ],
+    "look_up_on": true
+   }
+  },
+  "4 the earlier request was stopped when the newer typing was asked for": {
+   "ok": true,
+   "detail": {
+    "running_before": [
+     [
+      "106 Itha",
+      0,
+      0
+     ],
+     [
+      "96 Itha",
+      0,
+      0
+     ],
+     [
+      "1060 Ith",
+      1,
+      0
+     ],
+     [
+      "96 Itha",
+      0,
+      0
+     ],
+     [
+      "96 Ithac",
+      0,
+      0
+     ],
+     [
+      "96 Itha",
+      0,
+      0
+     ],
+     [
+      "96 Ithaca Rd",
+      0,
+      0
+     ]
+    ],
+    "asked": [
+     [
+      1793004018.0,
+      "106 Itha",
+      false
+     ],
+     [
+      1793004022.31,
+      "96 Itha",
+      false
+     ],
+     [
+      1793004022.85,
+      "1060 Ith",
+      false
+     ],
+     [
+      1793004026.41,
+      "96 Itha",
+      false
+     ],
+     [
+      1793004027.11,
+      "96 Ithac",
+      true
+     ],
+     [
+      1793004030.76,
+      "96 Ithac",
+      false
+     ],
+     [
+      1793004034.41,
+      "96 Itha",
+      false
+     ],
+     [
+      1793004036.51,
+      "96 Ithaca Rd",
+      false
+     ]
+    ]
+   }
+  },
+  "4 the newer typing's list: 1060's address": {
+   "ok": true,
+   "detail": {
+    "items": [
+     "1060 Ithaca Rd, Ithaca, NY"
+    ],
+    "visible": true,
+    "address": "1060 Ith",
+    "asked": 3,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 1060 Ith first."
+    ],
+    "look_up_on": true
+   }
+  },
+  "4 an answer for something no longer typed is dropped (no list for 96 Itha under 96 Ithac)": {
+   "ok": true,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "96 Ithac",
+    "asked": 5,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 96 Ithac first."
+    ],
+    "look_up_on": true
+   }
+  },
+  "4 then 96 Ithac's own answer shows 96's address": {
+   "ok": true,
+   "detail": {
+    "items": [
+     "96 Ithaca Rd, Ithaca, NY"
+    ],
+    "visible": true,
+    "address": "96 Ithac",
+    "asked": 6,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 96 Ithac first."
+    ],
+    "look_up_on": true
+   }
+  }
+ },
+ "running_before": [
+  [
+   "106 Itha",
+   0,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "1060 Ith",
+   1,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "96 Ithac",
+   0,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "96 Ithaca Rd",
+   0,
+   0
+  ]
+ ],
+ "seen": {
+  "1": {
+   "items": [],
+   "visible": false,
+   "address": "106",
+   "asked": 0,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 106 first."
+   ],
+   "look_up_on": true
+  },
+  "2": {
+   "items": [
+    "106 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "106 Itha",
+   "asked": 1,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 106 Itha first."
+   ],
+   "look_up_on": true
+  },
+  "3": {
+   "items": [],
+   "visible": false,
+   "address": "106 Ithaca Rd, Ithaca, NY",
+   "asked": 1,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    ""
+   ],
+   "look_up_on": true
+  },
+  "4": {
+   "items": [
+    "1060 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "1060 Ith",
+   "asked": 3,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 1060 Ith first."
+   ],
+   "look_up_on": true
+  },
+  "4b": {
+   "items": [],
+   "visible": false,
+   "address": "96 Ithac",
+   "asked": 5,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Ithac first."
+   ],
+   "look_up_on": true
+  },
+  "4c": {
+   "items": [
+    "96 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "96 Ithac",
+   "asked": 6,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Ithac first."
+   ],
+   "look_up_on": true
+  },
+  "5": {
+   "items": [],
+   "visible": false,
+   "address": "96 Itha",
+   "asked": 7,
+   "labels": [
+    "Address",
+    "Suggestions unavailable: type the full address and press Look up.",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Itha first."
+   ],
+   "look_up_on": true
+  },
+  "6": {
+   "query": "96 Ithaca Rd, Ithaca, NY"
+  },
+  "7": {
+   "items": [],
+   "visible": false,
+   "address": "12345 Nowhere Blvd, Ithaca, NY 14850",
+   "asked": 8,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "?  No City of Ithaca address found for 12345 Nowhere Blvd, Ithaca, NY 14850: check the spelling and Look up again, or put back the lot's own address (or clear it) and draw the lot. The lot shown is still 106 Ithaca Rd's: nothing in the model changed.",
+    "No lot found for 12345 Nowhere Blvd, Ithaca, NY 14850 (the line above says why): correct the address and press Look up, or put back 106 Ithaca Rd."
+   ],
+   "look_up_on": true
+  }
+ },
+ "asked": [
+  [
+   1793004018.0,
+   "106 Itha",
+   false
+  ],
+  [
+   1793004022.31,
+   "96 Itha",
+   false
+  ],
+  [
+   1793004022.85,
+   "1060 Ith",
+   false
+  ],
+  [
+   1793004026.41,
+   "96 Itha",
+   false
+  ],
+  [
+   1793004027.11,
+   "96 Ithac",
+   true
+  ],
+  [
+   1793004030.76,
+   "96 Ithac",
+   false
+  ],
+  [
+   1793004034.41,
+   "96 Itha",
+   false
+  ],
+  [
+   1793004036.51,
+   "96 Ithaca Rd",
+   false
+  ]
+ ],
+ "error": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_a3eb1d7/apps/rhino_plugin/tests/autocomplete_all_claims.py\", line 227, in main\nAttributeError: module 'rhino_logic' has no attribute 'SUGGESTIONS_UNAVAILABLE'\n"
+}
