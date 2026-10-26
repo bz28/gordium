@@ -82,12 +82,22 @@ def street_verdict(lines, ids=None, tolerance=0.5):
     named = {_norm(i) for i in ids or [] if i}
     if len(named) > 1:
         return "two", None
-    if named and len([i for i in ids if i]) == len(lines or []):
+    # one street by a real name; Gordium's own "Street N" (a run the architect picked, nobody named) only keeps
+    # streets apart, never vouches for one: its lines are still read from the drawing (a curved edge's swing
+    # counts here; the box only saw its ends: street ids review, D1)
+    if named and len([i for i in ids if i]) == len(lines or []) and not any(generated_id(i) for i in ids if i):
         return "one", None
     turn = heading_change(lines, tolerance)
     if turn is None or turn > TURN_LIMIT_DEG:
         return "unsure", turn
     return "one", turn
+
+
+def generated_id(name):
+    """Whether a street id is Gordium's own ("Street 1", "Street 2"... given to a run nobody named), not a name, by
+    the one comparison street_verdict uses (case, dots and spaces ignored: "street 2." too)."""
+    import re
+    return isinstance(name, str) and re.fullmatch(r"street \d+", _norm(name)) is not None
 
 
 def same_street(a, b):

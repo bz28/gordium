@@ -3158,6 +3158,30 @@ def test_every_street_line_is_saved_with_its_street_id():
     runs, _ = logic.add_street_pick(runs, sq, sq[0], names)
     assert logic.street_lines_of(sq, runs, names)[1] == ["Street 1", "Street 2"]
     assert logic.generated_id("Street 12") and not logic.generated_id("Ithaca Rd")
+    # round 2: (D1) Gordium's own ids never vouch for one street in the measuring: a curved edge (the box sees only
+    # its ends) still swings in the measuring's own check, so a 50° arc then a line ask one street or two
+    from model_measurement import street_lines
+    from model_measurement.measure import measure
+    from test_measure import FACTS as MFACTS, site as msite, box as mbox
+    arc = [(60 + 20 * m_.sin(m_.radians(t)), 20 - 20 * m_.cos(m_.radians(t))) for t in range(0, 51, 5)]
+    e = arc[-1]
+    b1 = (e[0] + 40 * m_.cos(m_.radians(50)), e[1] + 40 * m_.sin(m_.radians(50)))
+    edges = [{"points": [[0, 0], [60, 0]]}, {"points": [list(p) for p in arc], "curved": True},
+             {"points": [list(e), list(b1)]}, {"points": [list(b1), [0, 120]]}, {"points": [[0, 120], [0, 0]]}]
+    ends = [[list(ed["points"][0]), list(ed["points"][-1])] for ed in edges]
+    got = measure(msite({"id": "lot", "edges": edges}, mbox(10, 30, 40, 60)),
+                  {**MFACTS, "street_line": ends[:2], "street_ids": ["Street 1", "Street 1"], "corner_lot": False})
+    assert got["front_yard"]["value"] is None and "one street that bends, or two" in got["front_yard"]["reason"], \
+        got["front_yard"]
+    assert street_lines.street_verdict(ends[:2], ["Street 1", "Street 2"])[0] == "two"   # still keeps streets apart
+    assert street_lines.street_verdict(ends[:1], ["Elm St"])[0] == "one"
+    # (D3) the same comparison as street names: "street 2." is Gordium's own id too, never a name
+    assert logic.generated_id("street 2.") and logic.generated_id("STREET  2")
+    # (D2) the unreadable fallback fills with the street's known name, never a new id beside it
+    a_, b_ = [[0, 0], [20, 0]], [[20, 0], [40, 0]]
+    gappy = [a_, b_, [[40, 0], [40, 100]], [[40, 100.05], [0, 100]], [[0, 100], [0, 0]]]
+    lines, ids = logic.pick_street([a_, b_], ["Elm St", None], b_, None, outline=gappy)
+    assert ids == ["Elm St", "Elm St"], ids
     # the source: no street lines saved without their ids
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     calls = re.findall(r"set_street_lines\(([^)]*)\)", rhino)

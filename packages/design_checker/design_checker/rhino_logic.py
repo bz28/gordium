@@ -1401,7 +1401,8 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
                 kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
                 out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
                 if street_verdict(*_end_to_end(kept, out))[0] == "one":     # (one id only for one street)
-                    out = [i or label for i in out]
+                    fill = next((i for i in out if i), None) or label           # (its known name first: D2)
+                    out = [i or fill for i in out]
                 why = "the lot outline doesn't run end to end in order here, so Gordium can't follow the street along it"
                 said.append({"words": (f"{label}: the street lines kept as they were ({why})" if kept == lines else
                                        f"{street_words(label, kept, out)} ({why})"), "refused": False})   # (round 12)
@@ -1502,8 +1503,7 @@ def _piece_at(outline, picked, tolerance):
 def generated_id(name):
     """Whether a street id is Gordium's own ("Street 1", "Street 2"... given to a run nobody named), not a name:
     never read back as a street's identity (a new pick numbers its streets afresh: round ids, F4)."""
-    import re
-    return isinstance(name, str) and re.fullmatch(r"Street \d+", name.strip()) is not None
+    return _street_lines().generated_id(name)            # (street_lines: the measuring's own comparison)
 
 
 def _real_names(ids):
