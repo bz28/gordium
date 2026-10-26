@@ -24,6 +24,11 @@ PANEL_WIDTH = 400          # as wide as Rhino's own panels (architect's review, 
 # the first column, which hid a column of its own.
 COLUMNS = [("Item", 120), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 86)]   # Item takes the rest
 ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" short" wraps instead of being cut off
+DETAIL_MIN_HEIGHT = 160   # the selected item's detail never shorter: its name and reason on up to four lines (17 px
+#                           each) and two rows of buttons (20 px, measured on the Mac) in full without scrolling (the
+#                           Rhino job at 7a16aa6: with the list a fixed 380 px and a taller header, the detail was 51 px
+#                           and the parking row's button 1 px under it)
+LIST_MIN_HEIGHT = 3 * ROW_HEIGHT + 24   # ...nor the list: three rows and its column titles (review round 1)
 CELL_FONT_SIZE = 12
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
 
@@ -301,6 +306,8 @@ def make_panel(actions, host=None, context_on=True):
     detail_scroll.Content = parts["detail"]
     split.Panel2 = detail_scroll
     split.Position = 380
+    split.Panel2MinimumSize = DETAIL_MIN_HEIGHT     # the list gives way first: it scrolls, the detail's button can't
+    split.Panel1MinimumSize = LIST_MIN_HEIGHT       # ...down to three rows, never gone
     footer = row(button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control
@@ -417,7 +424,8 @@ def _wrap_width(parts):
 def show(parts, view, stale=False, error=None, checking=False):
     """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet) or a
     check that couldn't run: rows keep their names but show no mark and "—", Zoom to is off (H1, H2, H5). The
-    selection, which groups are open and the scroll position are kept by item id across refreshes (D8)."""
+    selection and which groups are open are kept by item id across refreshes (D8); the list shows its first group's
+    heading whole at the top, scrolled only as far as the selected row needs (the Rhino job at 6361a3f)."""
     global WRAP_AT
     WRAP_AT = _wrap_width(parts) if DOCKED else None
     tree = parts["tree"]
@@ -459,6 +467,10 @@ def show(parts, view, stale=False, error=None, checking=False):
         store.Add(gi)
         parts["groups"].append(gi)
     tree.DataStore = store
+    shape = tuple((gi.Tag, gi.Expanded, gi.Children.Count) for gi in parts["groups"])
+    if shape != parts.get("shape"):         # a new list (first fill, rows or groups changed): its first group's heading
+        _scroll_to(tree, 0, len(shape))     # whole at the top, never half under the column titles (the Rhino job at
+    parts["shape"] = shape                  # 6361a3f); the same rows again (every live refresh): where it was (review)
     if selected_item is not None:           # SelectedItem is read-only here: select by row in the visible list
         k = 0
         for gi in parts["groups"]:
@@ -466,10 +478,23 @@ def show(parts, view, stale=False, error=None, checking=False):
                 for c in range(gi.Children.Count):
                     if gi.Children[c] is selected_item or gi.Children[c].Tag == selected_item.Tag:
                         tree.SelectedRow = k + 1 + c
+                        _scroll_to(tree, k + 1 + c, k + 2 + c)    # the selected row just into view
                 k += gi.Children.Count
             k += 1
     parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]
     show_detail(parts)
+
+
+def _scroll_to(tree, row, rows):
+    """The list scrolled just enough to show `row` whole (Eto's Grid.ScrollToRow: row 0 puts the first group's
+    heading under the column titles; a later row only moves the list as far as it must). Never on an empty list
+    (`rows`: how many it has; Windows' Eto indexes the row), and never an error out of it: scrolling is a nicety."""
+    scroll = getattr(tree, "ScrollToRow", None)
+    if scroll is not None and 0 <= row < rows:
+        try:
+            scroll(row)
+        except Exception:
+            pass
 
 
 def _header(parts, view, error, out_of_date):
@@ -916,12 +941,14 @@ def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=
 LINE_H = 16                              # one line of a plan label (11-12 px text), in screen pixels
 
 
-def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=()):
+def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=(), keep=None, dims=()):
     """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted, its lines). Takes its spot
     in `taken`. With `along` (its dimension line) it goes beside that line, off every line in `obstacles` (the
     other dimensions, the lot's and the house's edges) and every label already placed, on screen; when no spot
-    beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines). Its height
-    is 4 + LINE_H per line. The in-Rhino checks measure this very placement."""
+    beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines); with none
+    clear, near its line all the same (logic.place_near: within one label height, off the notice, the status box and
+    the other labels), led back to it. Its height is 4 + LINE_H per line. Returns (left, top, width, the top it
+    wanted, its lines, whether it needs a leader). The in-Rhino checks read this very placement (STATE["drawn"])."""
     p = viewport.WorldToClient(point)
     width = logic.label_width(text, size)
     if along is not None:
@@ -937,29 +964,44 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
             if c2:
                 left, top, width, clear, rows = l2, t2, w2, True, two
         h = 4 + LINE_H * len(rows)
-        if not clear:                        # nowhere clear: at least off its own line and the other labels
-            top = logic.clear_spot(taken if taken is not None else [], left, top, width, h, (own,))
-        elif taken is not None:
+        if not clear:                        # nowhere clear beside its line: near it, a leader to it (never loose)
+            w2 = max(logic.label_width(t, size) for t in two)
+            near = logic.place_near(own, w2, 4 + LINE_H * len(two), obstacles, taken or [], view=view, dims=dims)
+            if near is None:                 # crowded by other labels: may cover one, never `keep` (the notice, the
+                near = logic.place_near(own, w2, 4 + LINE_H * len(two), obstacles, keep or [], view=view,
+                                        avoid=taken or [], dims=dims)        # status box, the north arrow) nor its line
+            if near is not None:
+                left, top, width, rows = near[0], near[1], w2, two
+                h = 4 + LINE_H * len(rows)
+            else:                            # nothing near is free of the notice and the labels: off them, still led
+                top = logic.clear_spot(taken if taken is not None else [], left, top, width, h, (own,))
+            if taken is not None and near is not None:
+                taken.append((left, top, width, h))
+            return left, top, width, top, rows, True
+        if taken is not None:
             taken.append((left, top, width, h))
-        return left, top, width, top, rows
+        return left, top, width, top, rows, False
     left, want = p.X - width / 2, p.Y - 10
     top = want if taken is None else logic.clear_spot(taken, left, want, width, 20)
-    return left, top, width, want, [text]
+    return left, top, width, want, [text], abs(top - want) > 1
 
 
-def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=(), leader=False):
+def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=(), leader=False,
+             keep=None, dims=()):
     """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
     already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
-    `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must);
-    with `leader` too, a line shorter on screen than its label gets a short leader from its middle to the label (a
-    lot edge: logic.needs_leader)."""
+    `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must;
+    near its line with a leader when nothing beside it is clear: logic.place_near); with `leader` too, a
+    line shorter on screen than its label gets a short leader from its middle to the label (a lot edge:
+    logic.needs_leader). Returns where it went: (left, top, width, height, the top it wanted, its lines, whether a
+    leader was drawn to it)."""
     p = viewport.WorldToClient(point)
-    left, top, width, want, rows = label_box(viewport, point, text, size, taken, along, obstacles)
+    left, top, width, want, rows, led = label_box(viewport, point, text, size, taken, along, obstacles, keep, dims)
     h = 4 + LINE_H * len(rows)
-    if abs(top - want) > 1:
-        d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(p.X, top + (h if top < p.Y else 0)),
-                     color, 1)
-    if leader and along is not None:
+    if led:                                  # moved off its spot: a leader from it to the label's nearest edge
+        end = logic.leader_end((p.X, p.Y), (left, top, width, h))
+        d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(end[0], end[1]), color, 1)
+    if leader and along is not None and not led:     # (its leader already drawn above)
         a, b = (viewport.WorldToClient(q) for q in along)
         if logic.needs_leader(((b.X - a.X) ** 2 + (b.Y - a.Y) ** 2) ** 0.5, width):
             mid = ((a.X + b.X) / 2, (a.Y + b.Y) / 2)
@@ -968,6 +1010,7 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=N
     d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), int(h)), color, 1, backing(dark))
     for k, row in enumerate(rows):
         d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + LINE_H * k), False, size)
+    return left, top, width, h, want, rows, led
 
 
 def _signed(bits):
