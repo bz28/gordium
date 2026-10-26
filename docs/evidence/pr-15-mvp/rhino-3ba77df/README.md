@@ -15,7 +15,7 @@ corner), claim 12, and the full pass 2.\
   answer No keeps "Street 2: 2 lot-line pieces, 91'-10 3/8" of frontage". Kept: 10 lines (Ithaca Rd's 8, named;
   Street 2's 2).
 - Claim 12: answering No to Corner lot? drops both streets' lines.
-- **The rear is never highlighted** (`corner_top_street_highlight.png`, a crop of the Top view in `corner.jpg`): the
+- **The rear is never highlighted** (`corner_top_street_highlight.jpg`, a crop of the Top view in `corner.jpg`): the
   thick blue street highlight runs along the bottom (Ithaca Rd) and up the right side (Street 2) to its corner, and
   stops there. The rear and the left side show only the selected lot outline's thin yellow and green.
 
