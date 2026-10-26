@@ -573,3 +573,24 @@ def test_the_notice_placed_after_the_numbers_keeps_off_them_where_a_corner_is_fr
     w, h = 300, 30                                                # the notice's box
     x, y_ = logic.notice_spot(view[0], view[1], w, h, None, taken=[logic.status_box(view[0], ["a", "b"])] + boxes)
     assert not any(x < a + c and a < x + w and y_ < b + d and b < y_ + h for a, b, c, d in boxes)
+
+
+
+def test_a_line_only_touching_the_views_edge_never_raises():
+    """Review of d89a73a, F1: a clipped piece of no length divided by zero."""
+    wall = logic.rect_quad((0, 0, 100, 100))
+    i, q, kind, sc = logic.place_dimension([((-10, 5), (0, 5))], 40, [wall], view=(100, 100), must=True)
+    assert kind in ("crowded", "none")
+
+
+def test_the_last_resort_and_the_notice_never_cover_the_status_box():
+    """Review of d89a73a, F2 and F4: the crowded number moved into the view, and the notice's fallback when every
+    corner is taken, could land on the status box."""
+    status = logic.rect_quad((400, 0, 250, 60))
+    everywhere = logic.rect_quad((0, 0, 656, 668))
+    i, q, kind, sc = logic.place_dimension([((600, -40), (600, 20))], 80, [everywhere, status], view=(656, 668),
+                                           must=True, fixed=[status])
+    assert kind == "crowded" and not logic.shapes_hit(q, status) and logic.inside_view(q, (656, 668))
+    numbers = [(0, 0, 656, 668)]                                  # every corner covered by numbers
+    x, y = logic.notice_place(656, 668, 300, 30, None, [(400, 0, 250, 60)], numbers)
+    assert not logic.shapes_hit(logic.rect_quad((x, y, 300, 30)), status)

@@ -674,19 +674,21 @@ def label_at_inner(a, b, w, h=DIM_LABEL_H_PX, away=None, gap=DIM_LABEL_GAP_PX):
 
 
 def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=None, extras=None,
-                    h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX, must=False):
+                    h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX, must=False, fixed=()):
     """Which of a yard's dimension positions to draw, and its number (screen): (index, corners or None, kind,
     scale). `candidates`: the positions check.plan offers along the wall facing the yard's lot line, best first,
     each (lot end, building end); `w`: the number's width at full size (None: no number shown); `obstacles`: what
     it may not cover (the status box, the numbers and tags placed before; the notice and the lots' edge lengths are
     placed after the numbers and keep off them); `footprint`: the buildings' outlines (one or a list); `extras`:
-    per position, its own "min" tags; `view`: (w, h); `must`: the yard fails or needs review.
+    per position, its own "min" tags; `view`: (w, h); `must`: the yard fails or needs review; `fixed`: what even
+    the last resort never covers (the status box).
     At its own line only, the drawing's way: centred on the line (its visible part) at any of the positions, else
     just past a position's outer end, else beside it at its inner end (just outside the house), the first wholly in
     view covering nothing. A failing or in-review number is always drawn (Rhino check of #29 at 6d2e01a: the failing one
     was missing): its text made smaller step by step (NUMBER_SCALES), and last, at full size just past its outer
     end, moved into the view, whatever it covers ("crowded"). A complying one is left to the panel when there is no
     room ("none")."""
+    import math
     houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
     boxed = [(o, _bbox(o)) for o in obstacles if o]
 
@@ -705,7 +707,9 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=No
             for i, a, b in usable:
                 more = (extras[i] if extras and i < len(extras) else None) or ()
                 seen = clip_to_view(a, b, view)
-                if seen is None or (kind == "on" and _along(*seen)[1] < ws + 2 * gap):
+                if seen is None or math.dist(*seen) <= 1e-6:            # (a line that only touches the view's
+                    continue                                            # edge: nothing of it seen; review F1)
+                if kind == "on" and math.dist(*seen) < ws + 2 * gap:
                     continue
                 q = (label_on_line(seen[0], seen[1], ws, hs, away, gap) if kind == "on" else
                      label_at_end(a, b, ws, hs, gap) if kind == "end" else
@@ -716,12 +720,27 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=No
         return usable[0][0], None, "none", 1.0
     i, a, b = usable[0]
     q = label_at_end(a, b, w, h, gap)
-    if view:                                       # moved into the view: drawn, whatever it covers
-        xs, ys = [p[0] for p in q], [p[1] for p in q]
+    if view:                                       # moved into the view: drawn, whatever it covers but the
+        xs, ys = [p[0] for p in q], [p[1] for p in q]          # status box (review F4)
         dx = max(0, VIEW_MARGIN_PX - min(xs)) - max(0, max(xs) - (view[0] - VIEW_MARGIN_PX))
         dy = max(0, VIEW_MARGIN_PX - min(ys)) - max(0, max(ys) - (view[1] - VIEW_MARGIN_PX))
         q = [(x + dx, y + dy) for x, y in q]
+        for f in fixed:
+            if shapes_hit(q, f):                   # below the status box (it sits at the view's top)
+                drop = _bbox(f)[3] + VIEW_MARGIN_PX - min(p[1] for p in q)
+                q = [(x, y + drop) for x, y in q]
     return i, q, "crowded", 1.0
+
+
+def notice_place(view_w, view_h, w, h, model, fixed, taken):
+    """Where the "no longer complies" notice goes, placed after the dimensions' numbers: off the model and off
+    everything drawn (notice_spot); when every corner is taken, off the status box (`fixed`) at least, whatever
+    number it then covers (review F2: its fallback could land on the status box)."""
+    x, y = notice_spot(view_w, view_h, w, h, model, list(fixed) + list(taken))
+    box = rect_quad((x, y, w, h))
+    if any(shapes_hit(box, rect_quad(f)) for f in fixed):
+        x, y = notice_spot(view_w, view_h, w, h, model, list(fixed))
+    return x, y
 
 
 def tag_spot(line_ends, outward, tag, taken, view=None):

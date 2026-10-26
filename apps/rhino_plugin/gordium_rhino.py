@@ -520,7 +520,7 @@ def _model_on_screen(o, viewport):
     return (min(p.X for p in pts), min(p.Y for p in pts), max(p.X for p in pts), max(p.Y for p in pts)) if pts else None
 
 
-def _notice_box(o, viewport, taken):
+def _notice_box(o, viewport, taken, fixed=()):
     """The "no longer complies" notice, if showing in this view (the active one only, G1): (lines, x, y, w, h),
     placed off the model and off the boxes in `taken` (logic.notice_spot), and then taken itself."""
     toast = getattr(o, "toast", None)
@@ -529,7 +529,8 @@ def _notice_box(o, viewport, taken):
         return None
     lines = ["✕ " + line for line in toast[0]]
     w, h = ui.text_box_size(lines, 13)
-    x, y = logic.notice_spot(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport), taken)
+    x, y = logic.notice_place(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport),
+                              fixed, [t for t in taken if t not in fixed])     # never on the status box
     taken.append((x, y, w, h))
     return lines, x, y, w, h
 
@@ -611,7 +612,7 @@ def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None,
     words.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle
     d.Draw3dText(words, color)
     words.Dispose()
-    if kind == "end":                                       # just past the line's end: a short leader to it
+    if kind in ("end", "crowded"):                          # past the line's end, or moved: a leader to it
         near = min(quad, key=lambda p: (p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2)
         d.Draw2dLine(System.Drawing.PointF(a[0], a[1]), System.Drawing.PointF(near[0], near[1]), color, 1)
 
@@ -633,6 +634,7 @@ def draw_screen(o, e):
     boxed = bool(o.message and labels and _in_active_view(e))   # the status box once, in the view being worked in
     if boxed:
         taken.append(logic.status_box(e.Viewport.Bounds.Width, _status_rows(o, stale(o))))
+    fixed = taken[:1] if boxed else []                 # the status box: nothing is ever drawn over it
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
     plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
@@ -690,7 +692,8 @@ def draw_screen(o, e):
         index, quad, kind, scale = logic.place_dimension(
             on_screen, width, [logic.rect_quad(box) for box in taken], footprint, away, view,
             extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots],
-            must=status in ("does_not_comply", "needs_review") and not old)
+            must=status in ("does_not_comply", "needs_review") and not old,
+            fixed=[logic.rect_quad(f) for f in fixed])
         chosen, required = options[index]
         o.placed[k] = (index, quad, kind, chosen, required, number if quad is not None else None)
         for r, tag, box in zip(required, tags + [None] * len(required), spots[index] + [None] * len(required)):
@@ -724,7 +727,8 @@ def draw_screen(o, e):
             away = ((house[0] + house[2]) / 2, (house[1] + house[3]) / 2) if house else None
             _, quad, kind, scale = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
                                                          [logic.rect_quad(box) for box in taken], rect, away, view,
-                                                         must=status in ("does_not_comply", "needs_review"))
+                                                         must=status in ("does_not_comply", "needs_review") and not old,
+                                                         fixed=[logic.rect_quad(f) for f in fixed])
             o.placed["height"] = (0, quad, kind, line, [], number)
             if quad is not None:
                 _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From,
@@ -735,7 +739,7 @@ def draw_screen(o, e):
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
                     along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
-    notice = _notice_box(o, e.Viewport, taken)         # off the model, the status box and the numbers
+    notice = _notice_box(o, e.Viewport, taken, fixed)  # off the model, the status box and the numbers
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         ends = [e.Viewport.WorldToClient(p) for p in limit[0]]
