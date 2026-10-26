@@ -199,7 +199,7 @@ def _stop_worker():
     SERVERS.stop_all()                               # and any an earlier load left running
 
 
-def ask(request, cancel=False, on_tick=None, draws_after=False):
+def ask(request, cancel=False, on_tick=None):
     """Send one request to the checker and wait for its answer, never on Rhino's thread: the exchange runs as a
     logic.Job and ui.wait waits for it (a slow one shows what the checker is doing, live; Rhino keeps drawing).
     `cancel`: the wait has Cancel, which stops the checker (the next request starts a fresh one) and raises
@@ -208,11 +208,11 @@ def ask(request, cancel=False, on_tick=None, draws_after=False):
     if STATE.get("asking") is not None:      # Rhino answers while a wait runs (ui.wait): nothing may put a second
         raise RuntimeError(logic.WORKING)    # request on the checker's pipe meanwhile (a command typed, a button)
     held = STATE.get("undo")                 # never wait inside an undo step this script holds open: the architect's
-    resume = None                            # edits meanwhile would be taken into Gordium's. It ends here; when the
-    if held and held[1]:                     # caller draws after the wait (`draws_after`), a step is begun again so
-        doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(held[0])   # what it draws is still in one of Gordium's own
-        resume = (doc, STATE.get("undo_words")) if draws_after else None
-        _end_undo(doc)
+    resume = None                            # edits meanwhile would be taken into Gordium's. It ends here and is
+    if held and held[1]:                     # always begun again after the wait, whoever asked, so whatever Gordium
+        doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(held[0])   # changes next (a commit, the floors) is in a step
+        resume = (doc, STATE.get("undo_words"))   # of its own (independent review of 2781a5d, P1: the City-outline
+        _end_undo(doc)                            # Draw committed and drew the house in none)
     try:
         return _ask_waiting(request, cancel, on_tick)
     finally:
@@ -449,9 +449,11 @@ def current_facts(doc):
     file came to the front while they were read (Rhino runs during the checker's wait): every caller that goes on to
     prompt or save stops there, never answers typed while looking at another file saved into this one (independent
     review of #32: the one place, so no caller can miss it)."""
-    facts = load_facts(doc)            # (it waits on the checker, Rhino running: the model is listed after it)
-    if not _still_front(doc):
-        raise logic.NotInFront(logic.NOT_IN_FRONT)
+    try:
+        facts = load_facts(doc)        # (it waits on the checker, Rhino running: the model is listed after it)
+    finally:                           # on every way out, unreadable facts too (their callers then open the box:
+        if not _still_front(doc):      # independent review of 2781a5d, P1)
+            raise logic.NotInFront(logic.NOT_IN_FRONT)
     lots, buildings, _ = _sorted_objects(doc)
     return logic.drop_stale(facts, {str(o.Id) for o in lots}, {str(o.Id) for o in buildings})
 
@@ -3168,7 +3170,7 @@ def _draw_starting_house(doc, facts):
         STATE["start_from"] = "plan"     # (the in-Rhino tests read which way it came)
     else:                               # (no plan, or one for other facts: never another lot's house); the box has
         STATE["start_from"] = "asked"
-        start = ask(request, draws_after=True)   # committed by now: no Cancel (never a lot without its house); the
+        start = ask(request)            # committed by now: no Cancel (never a lot without its house); the
                                                  # floors go in a step of Gordium's after the wait
         if _changed_during(doc.RuntimeSerialNumber, read_at):     # edited meanwhile: never a house for the lot
             say(logic.HOUSE_OUTDATED)                              # as it was (review of 5567b94)

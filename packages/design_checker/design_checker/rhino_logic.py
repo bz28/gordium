@@ -1887,7 +1887,8 @@ WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (n
 SPINNER = ("●○○", "○●○", "○○●")
 SPIN_S = 0.3               # s per frame of the moving mark
 CANCELLING = "Cancelling…"
-STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint: Esc stops the work only with that window in front
+STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint, while it has the keyboard (Esc reaches it)
+STOP_HINT_CLICK = "Click Cancel to stop"   # ... and while it hasn't: never a promise Esc can't keep
 FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
               "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
               "sample_site": "Loading the sample lot…"}
@@ -1916,8 +1917,8 @@ def outdated_report_message(path, report_error, had_report):
     """What a check whose model changed while it ran says of its report: written, but of the model as it was; or,
     when the checker couldn't write it, that it wasn't written and why (never that it was: independent review of
     #32)."""
-    if report_error:
-        return report_message(path, False, report_error, stale=bool(had_report))
+    if report_error:                     # (its own full stop dropped: report_message adds one)
+        return report_message(path, False, str(report_error).rstrip(". "), stale=bool(had_report))
     return REPORT_OUTDATED.format(path=path)
 
 
