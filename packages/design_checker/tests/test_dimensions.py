@@ -679,3 +679,12 @@ def test_the_last_resort_goes_right_of_the_status_box_when_only_that_side_fits()
     i, q, kind, sc = logic.place_dimension([((120, 100), (60, 100))], 80, [everywhere, status], view=(400, 200),
                                            must=True, fixed=[status])
     assert kind == "crowded" and min(p[0] for p in q) >= 213 and not logic.shapes_hit(q, status)
+
+
+
+def test_the_notice_finds_a_gap_exactly_its_own_size():
+    """Review of cae5326: a gap exactly the notice's width (x 213-413 for 200 px) was missed with a 1 px margin."""
+    view_w, view_h, w, h = 656, 668, 200, 30
+    taken = [(0, 0, 656, 300), (0, 300, 213, 368), (413, 300, 243, 368)]
+    x, y = logic.notice_spot(view_w, view_h, w, h, None, taken)
+    assert not any(x < a + c and a < x + w and y < b + d and b < y + h for a, b, c, d in taken)
