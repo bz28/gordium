@@ -187,3 +187,32 @@ def test_no_command_text_still_promises_live_re_checking():
         text = (REPO / path).read_text(encoding="utf-8")
         assert "live re-checking" not in text and "turn on live mode" not in text and "stop live mode" not in text, path
         assert "Live checking is on" not in text, path
+
+
+def test_the_rhino_check_runs_its_idle_steps_across_real_idle():
+    """The Rhino job at ea88c18 (docs/evidence/pr-27/rhino-ea88c18/): Rhino never raises its Idle event while a script
+    runs, so check_button_in_rhino.py's wait (a loop on RhinoApp.Wait() inside the script) never let the plugin's idle
+    handler grey the panel or check by itself, and claim 2 failed on a correct plugin. Now the script only starts the
+    run: each step runs from a timer once no command is running, steps 2 and 4 only after Rhino's own Idle event has
+    been seen 3 s past the edit, and a wait that never sees it fails (never hangs)."""
+    script = (REPO / "apps/rhino_plugin/tests/check_button_in_rhino.py").read_text(encoding="utf-8")
+    assert "RhinoApp.Wait()" not in script.split('"""', 2)[2]                 # (the docstring says why)
+    assert "Rhino.RhinoApp.Idle += idle_handler" in script and "ef.UITimer()" in script
+    tick = body(script, "def tick(", "\ndef ")
+    assert "Command.InCommand()" in tick and "idle_enough()" in tick and "PHASE_LIMIT_S" in tick
+    assert tick.index("late = ") < tick.index("InCommand()")      # a command left running fails too (review round 1)
+    in_command = tick[tick.index("InCommand()"):]
+    in_command = in_command[:in_command.index("return")]
+    assert "if late:" in in_command and 'claim("no command left running' in in_command
+    start = script.index('earlier = sc.sticky.get("gordium_check_button_run")')   # an earlier waiting run stopped
+    stop = script[start:script.index('os.remove(S + "out.json")')]                 # before this run's out.json
+    assert all(s in stop for s in ('earlier["finished"] = True', 'earlier["timer"].Stop()',
+                                   'Rhino.RhinoApp.Idle -= earlier["idle"]'))
+    step_b = body(script, "def step_b(", "\ndef ")                 # counted after the tick, before the edit
+    assert (step_b.index('auto_box").Checked = True') < step_b.index('run["checks_at_tick"] = len(runs)')
+            < step_b.rindex("move_top_floor("))
+    step_c = body(script, "def step_c(", "\ndef ")
+    assert 'run["checks_at_tick"] == 1' in step_c and "len(runs) == 2" in step_c   # the edit's own check
+    enough = body(script, "def idle_enough(", "\ndef ")
+    assert 'run["idle_at"]' in enough and "IDLE_WAIT_S" in enough
+    assert (REPO / "docs/evidence/pr-27/rhino-ea88c18/phased_run_claims.json").exists()
