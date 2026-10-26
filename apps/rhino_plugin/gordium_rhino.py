@@ -2544,11 +2544,21 @@ def run_check(doc, report=True):
         second = [head["draft"].split(" · ")[0]] + [t for t in (head["lot"], head["grade"])
                                                      if "approximate" in t or "not set" in t or "existing" in t]
         o.message = (view["state"], view["summary"], [" · ".join(second)])
-        env = _envelope_brep(doc, _drawn_envelope(doc, facts, result.get("envelope"))) \
-            if STATE.get("envelope_on", True) else None
+        # on a tax-map lot the cautious envelope, every lot line 2'-0" nearer (logic.envelope_outlines)
+        outlines = logic.envelope_outlines(result.get("envelope"), result.get("plan"))
+        shown = _drawn_envelope(doc, facts, dict(result.get("envelope") or {}, outline=outlines[0])) if outlines \
+            else None
+        env = None
+        if STATE.get("envelope_on", True) and shown:
+            pieces = [_envelope_brep(doc, dict(shown, outline=ring)) for ring in outlines]
+            pieces = [b for b in pieces if b is not None]
+            if pieces:
+                env = pieces[0]
+                for b in pieces[1:]:
+                    env.Append(b)
         o.envelope = env
         o.box = env.GetBoundingBox(True) if env else rg.BoundingBox.Empty
-        drawn = _drawn_envelope(doc, facts, result.get("envelope")) if env is not None else None
+        drawn = shown if env is not None else None
         o.envelope_lines = _envelope_lines(doc, drawn) if drawn else None
         o.height_limit = (o.envelope_lines[1], logic.height_limit_text((result.get("envelope") or {}).get("top"),
                                                                        _ft_text(drawn["top"] - drawn["base"]))) \
@@ -2896,8 +2906,9 @@ def _add_lot(doc, sample):
 
 
 def add_floors(doc, start):
-    """The starting building: one solid per story, stacked, as one group on Gordium::Massing (so a Move moves the
-    house), named Floor 1, 2… None, with nothing added, if a floor isn't a box Rhino can make."""
+    """The starting building: one solid per story, stacked, as one group (so a Move moves the house), each on its own
+    sublayer Gordium::Massing::Floor 1, 2… (named Floor 1, 2…), with Gordium::Massing::Roof made for the roof. None,
+    with nothing added, if a floor isn't a box Rhino can make."""
     breps = []
     for floor in start["floors"]:
         corners = [_model_point(doc, (x, y), z) for z in (floor["base"], floor["top"]) for x, y in floor["outline"]]
@@ -2906,9 +2917,10 @@ def add_floors(doc, start):
         return None                     # nothing added: the caller says so
     group = doc.Groups.Add("Gordium starting building")
     ids = []
-    for i, (floor, brep) in enumerate(zip(start["floors"], breps)):
+    _layer(doc, logic.MASSING_ROOF)          # the roof's sublayer, ready for the architect's roof (the starting house
+    for i, (floor, brep) in enumerate(zip(start["floors"], breps)):   # is flat-topped: its top floor's top)
         a = Rhino.DocObjects.ObjectAttributes()
-        a.LayerIndex = _layer(doc, logic.MASSING)
+        a.LayerIndex = _layer(doc, logic.massing_floor(i + 1))      # each floor on its own sublayer (Ben, 2026-10-21)
         a.Name = "Floor " + str(i + 1)
         # one story, at the height drawn: what makes it count as a story (a stretched block no longer does)
         a.SetUserString(logic.FLOOR_KEY, str(i + 1) + ";" + repr(floor["top"] - floor["base"]))
@@ -2985,7 +2997,7 @@ def gordium_start():
     documents(True)
     frame_site(doc, facts)
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
-                             logic.MASSING)
+                             logic.MASSING + "::Floor 1…" + str(len(start["floors"])))
     return result
 
 

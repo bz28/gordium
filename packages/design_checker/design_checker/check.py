@@ -1105,25 +1105,42 @@ def _start_preview(out: dict, measured: dict) -> dict | None:
             "kept_back": present.feet_inches(out["kept_back"], "nearest") if out.get("kept_back") else None}
 
 
-TAX_MAP_NOTE = ("Starting house keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey "
-                "for the full area.")
+TAX_MAP_NOTE = ("Largest house that complies even if the tax-map lines are 2'-0\" off; limited by {limit}. Use my "
+                "survey… for the full size.")
 NOT_PROVEN = ("Starting house: Gordium couldn't keep it clear of the tax map's 2'-0\" tolerance on this lot; the items "
               "that say so need review until a survey.")
 
 
-def margin_note(keep, buffer, tax, proven):
-    """What the starting house keeps back, in the architect's words (Ben's wording when it is the tax map alone)."""
+def limit_words(out, lot_area):
+    """What stopped the starting house growing, in the architect's words, with its number (Ben, 2026-10-21: "limited
+    by coverage 25%"): the lot coverage limit and its percent of the lot, or the yards and their minimums."""
+    ft = lambda v: present.feet_inches(v, "up")                    # noqa: E731 (a minimum: up, as the panel)
+    if out.get("limited_by") == "coverage" and out.get("coverage_allowed") and lot_area:
+        return "lot coverage " + present._pct(out["coverage_allowed"] / lot_area * 100, "down", 2)
+    yards = out.get("yards") or {}
+    if yards:
+        return ("the yards (front " + ft(yards.get("front", 0)) + ", sides " + ft(yards.get("side", 0)) + ", rear " +
+                ft(yards.get("rear", 0)) + ")")
+    return "the yards"
+
+
+def margin_note(keep, buffer, tax, proven, limit="the yards"):
+    """What the starting house is and keeps back, in the architect's words, with what limited it (Ben's wording when
+    it is the tax map alone: "Largest house that complies even if the tax-map lines are 2'-0" off; limited by …")."""
     ft = lambda v: present.feet_inches(v, "nearest")
     if tax and not proven:
         return NOT_PROVEN
     if tax and not buffer:
-        return TAX_MAP_NOTE if abs(keep - TAX_MAP_TOLERANCE) < 1e-9 else TAX_MAP_NOTE.replace("2'-0\"", ft(keep), 1)
+        note = TAX_MAP_NOTE.format(limit=limit)
+        return note if abs(keep - TAX_MAP_TOLERANCE) < 1e-9 else note.replace(
+            "limited by", "kept " + ft(keep) + " back; limited by", 1)
     if tax:
         return (f"Starting house keeps {ft(keep)} back from each limit: {ft(keep - buffer)} because the lot is from "
-                f"the tax map (use a survey for the full area) and {ft(buffer)} your design buffer.")
+                f"the tax map (use a survey for the full area) and {ft(buffer)} your design buffer; limited by "
+                f"{limit}.")
     if buffer:
-        return f"Starting house keeps {ft(keep)} back from each limit (your design buffer)."
-    return "Starting house goes to the limits (the lot is from a survey)."
+        return f"Starting house keeps {ft(keep)} back from each limit (your design buffer); limited by {limit}."
+    return f"Largest house that complies; limited by {limit} (the lot is from a survey)."
 
 
 LOT_ONLY = {"lot_area", "lot_width", "lot_depth"}   # items about the lot itself, whatever the house
@@ -1160,9 +1177,11 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     if out.get("coverage_allowed") and scale:      # the rule's own allowance on the lot as drawn; what it was sized to
         out["coverage_target"] = out["coverage_allowed"]
         out["coverage_allowed"] = out["coverage_allowed"] / scale
-    out["margin_note"] = margin_note(keep, buffer, tax, proven) if out.get("floors") else None
-    if out["margin_note"] and (tax or buffer):
-        out["notes"].append(out["margin_note"])
+    lot_area = (measured.get("lot_area") or {}).get("value") or drawn   # what the allowance is a share of
+    out["margin_note"] = margin_note(keep, buffer, tax, proven, limit_words(out, lot_area)) \
+        if out.get("floors") else None
+    if out["margin_note"]:                        # said always: what the house is and what limits it (Ben's
+        out["notes"].append(out["margin_note"])   # "reassure in place")
     return out
 
 

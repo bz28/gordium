@@ -269,10 +269,13 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      outline 2'-0" in from every lot line is solid and everything as drawn dashed; where nothing is left 2'-0" in,
      only the dashed one. Gordium replaces them at every check (never measured; Undo never stops on them); untick
      **Show buildable envelope** to hide them;
-   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
-     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
-     lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
-     on a survey it goes to the limits;
+   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, each floor on its
+     own sublayer `Gordium::Massing::Floor 1`, `Floor 2`, `Floor 3` (a `Gordium::Massing::Roof` sublayer is made for
+     your roof). **Hide starting house** in the panel hides it (it is still checked). On a lot from the tax map it
+     keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off; on a survey it goes to the
+     limits. The panel says why it is that size, for example "Largest house that complies even if the tax-map lines
+     are 2'-0" off; limited by lot coverage 25%. Use my survey… for the full size.";
+   - on a tax-map lot the blue envelope is the cautious one: every lot line 2'-0" nearer;
    - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing, all kept in the file:
      the neighbouring tax parcels and the street centerlines in grey on locked `Gordium::Context` layers; the
      neighbouring building footprints as outlines (no heights) on the unlocked `Gordium::Context::Buildings` layer,

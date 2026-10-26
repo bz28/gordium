@@ -11,11 +11,17 @@ LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
 FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew: "<story>;<height drawn, ft>"
 MASSING = "Gordium::Massing"            # where GordiumStart draws the starting building: building objects too
+MASSING_ROOF = MASSING + "::Roof"       # its roof's sublayer (the architect's own roof goes there too): a building
 SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
                 "Leader", "LinearDimension", "AngularDimension", "RadialDimension", "OrdinateDimension")
 # the grade isn't required: without one the check runs and height and stories need review until it's set (spec C3)
 REQUIRED = ("jurisdiction", "zone", "use", "street_line", "lot_surveyed")   # corner lot unanswered: the yards wait (C)
+
+
+def massing_floor(n):
+    """The sublayer of the starting house's floor n (1 up): Gordium::Massing::Floor 1, … (Ben, 2026-10-21)."""
+    return MASSING + "::Floor " + str(int(n))
 
 
 def on_layer(full_path, layer):
@@ -49,6 +55,23 @@ class BoxGate:
 
     def leave(self):
         self.open = False
+
+
+def envelope_outlines(env, plan):
+    """The buildable outline(s) the blue envelope is drawn on (feet): on a tax-map lot the cautious one, every lot
+    line 2'-0" nearer (each piece of it; none where nothing is left: the as-drawn outline is then only the dashed
+    curve on Gordium::Envelope), so the envelope shows where a building complies however the tax map's lines lie
+    (Ben, 2026-10-21: "cautious envelope on tax-map lots"); on a survey the outline as drawn. Largest first."""
+    from shapely.geometry import Polygon
+    outline = (env or {}).get("outline")
+    if not outline:
+        return []
+    plan = plan or {}
+    cautious = plan.get("buildable_cautious")
+    if not plan.get("lot_from_tax_map") or cautious is None:
+        return [outline]
+    rings = [cautious] if cautious and isinstance(cautious[0][0], (int, float)) else list(cautious)
+    return sorted(rings, key=lambda r: -Polygon(r).area)
 
 
 def envelope_curves(plan):
@@ -2451,7 +2474,8 @@ def starting_house_fact(note, today):
     # the panel puts "Starting house: " in front, and it describes the house as Gordium drew it (the architect
     # may since have moved or replaced it), so it says so
     said = note[len("Starting house: "):] if note.startswith("Starting house: ") else \
-        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else note
+        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else \
+        "the l" + note[1:] if note.startswith("Largest house") else note
     return {"value": "as first drawn, " + said, "source": SUGGESTED, "confirmed_by": None, "date": today}
 
 
@@ -2570,7 +2594,7 @@ def shorten(text, most):
 def building_name(layer, name, grouped):
     """What the panel calls a building: the starting house Gordium drew (its floors grouped on the massing layer),
     else the object's name, else its layer ("a solid on Building")."""
-    if layer == MASSING:
+    if on_layer(layer, MASSING):                     # its floors and roof each on its own sublayer
         return "the starting house"
     if name:
         return name + (" (and its group)" if grouped else "")

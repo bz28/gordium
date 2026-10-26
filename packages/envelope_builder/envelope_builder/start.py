@@ -142,7 +142,8 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     coverage allowed (below 1: sized for the smallest lot the tax map allows). `verdict`: the checker's own result
     for one rule (design_checker.check.verdict, which also counts a rule that fails under every reading); the
     checker passes it, since this package can't import the checker."""
-    out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": []}
+    out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": [],
+           "limited_by": None, "yards": None}
     notes = out["notes"]
     sized, drawn = _as_drawn(measured)       # coverage on a lot not yet surveyed: from the lot as drawn (said below)
     # the rectangle's sides lie on straight yard lines, so the exact region is used (no rounding margin): the yards
@@ -184,6 +185,9 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
         notes.append(CANT)
         return out
     lo, hi, y0, depth = found
+    # what stopped it growing: the coverage limit (its area reached it), else the yards (the buildable area's edges)
+    out["limited_by"] = "coverage" if allowed is not None and (hi - lo) * depth >= allowed - 1e-6 else "yards"
+    out["yards"] = dict(env["yards"])
     best = box(lo, y0, hi, y0 + depth)
     while not best.within(buildable.buffer(1e-9)) and best.bounds[2] - best.bounds[0] > 2 * SAFETY:
         best = box(best.bounds[0] + SAFETY, y0, best.bounds[2] - SAFETY, y0 + depth)   # a corner between slices

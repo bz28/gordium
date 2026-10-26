@@ -483,8 +483,10 @@ def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(fac
     from envelope_builder.start import floor_solids
     from model_measurement.read_3dm import read_site
     tax = start(MODEL, {**facts, "lot_surveyed": False})
-    assert tax["kept_back"] == 2.0 and TAX_MAP_NOTE in tax["notes"] and tax["preview"]["kept_back"] == "2'-0\""
-    assert tax["margin_note"] == TAX_MAP_NOTE
+    note = ("Largest house that complies even if the tax-map lines are 2'-0\" off; limited by lot coverage 25%. "
+            "Use my survey… for the full size.")                  # Ben, 2026-10-21: what limits it, said in place
+    assert tax["kept_back"] == 2.0 and note in tax["notes"] and tax["preview"]["kept_back"] == "2'-0\""
+    assert tax["margin_note"] == note == TAX_MAP_NOTE.format(limit="lot coverage 25%") and tax["limited_by"] == "coverage"
     # coverage is sized for the worst case, so no note says it needs review (review round 7)
     assert not any("NEEDS REVIEW for coverage" in n for n in tax["notes"])
     site = {**read_site(MODEL, facts), "buildings": floor_solids(tax["floors"])}
@@ -494,7 +496,8 @@ def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(fac
     lot_area = next(i for i in view["items"] if i["name"] == "Lot area")    # the lot's own size, not the house's:
     assert lot_area["status"] == present.REVIEW and "at worst 5,934 sf against 6,000 sf" in lot_area["reason"]
     surveyed = start(MODEL, {**facts, "lot_surveyed": True})
-    assert surveyed["kept_back"] == 0.0 and TAX_MAP_NOTE not in surveyed["notes"]
+    assert surveyed["kept_back"] == 0.0 and note not in surveyed["notes"]
+    assert surveyed["margin_note"] == "Largest house that complies; limited by lot coverage 25% (the lot is from a survey)."
     xs = [p[0] for p in surveyed["floors"][0]["outline"]]
     assert max(xs) - min(xs) == pytest.approx(53.0)                 # 73 − 2 × 10: exactly at the side yards
     buffered = start(MODEL, {**facts, "lot_surveyed": True}, design_buffer=1.0)
@@ -822,11 +825,13 @@ def test_the_margin_note_says_what_was_kept_and_which_part_is_the_buffer(facts):
     got = start(MODEL, {**facts, "lot_surveyed": False}, design_buffer=1.0)
     assert got["kept_back"] == 3.0
     assert got["margin_note"] == ("Starting house keeps 3'-0\" back from each limit: 2'-0\" because the lot is from "
-                                  "the tax map (use a survey for the full area) and 1'-0\" your design buffer.")
-    assert got["margin_note"] in got["notes"] and TAX_MAP_NOTE not in got["notes"]
-    assert margin_note(2.25, 0.0, True, True).startswith("Starting house keeps 2'-3\" back")
+                                  "the tax map (use a survey for the full area) and 1'-0\" your design buffer; "
+                                  "limited by lot coverage 25%.")
+    assert got["margin_note"] in got["notes"]
+    assert "kept 2'-3\" back; limited by the yards" in margin_note(2.25, 0.0, True, True)    # stepped back further
     assert margin_note(2.0, 0.0, True, False) == NOT_PROVEN          # never claimed without the proof
-    assert margin_note(0.0, 0.0, False, True) == "Starting house goes to the limits (the lot is from a survey)."
+    assert margin_note(0.0, 0.0, False, True, "the yards") == \
+        "Largest house that complies; limited by the yards (the lot is from a survey)."
 
 
 def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
@@ -842,7 +847,8 @@ def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
     from design_checker.check import NOT_PROVEN, TAX_MAP_NOTE
     lines = [present.source_lines({"starting_house": logic.starting_house_fact(n, "2026-10-20")})[0]
              for n in (TAX_MAP_NOTE, NOT_PROVEN)]
-    assert lines[0].startswith("Starting house: as first drawn, it keeps 2'-0\" back from each limit")
+    assert lines[0].startswith("Starting house: as first drawn, the largest house that complies even if the "
+                               "tax-map lines are 2'-0\" off")
     assert lines[1].startswith("Starting house: as first drawn, Gordium couldn't keep it clear")
     assert not any(ln.count("Starting house") > 1 for ln in lines) and NOT_PROVEN.endswith(".")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
@@ -3698,3 +3704,48 @@ def test_the_notice_keeps_its_heading_numbers_and_mark_whole():
             assert "7,033 sf" in joined and "35 % short" in joined, (view_w, share, area)
             got = logic_.notice_lines([side], view_w, share)
             assert "0'-11 1/4\" short" in "\n".join(got) and "7'-0 5/8\" proposed" in "\n".join(got), got
+
+
+# ---- feature 5: the starting house on its own sublayers, its note, the cautious envelope (Ben, 2026-10-21) ----------
+
+from design_checker import rhino_logic as logic  # noqa: E402
+
+def test_the_starting_house_floors_go_on_their_own_sublayers_and_count_as_the_building():
+    assert logic.massing_floor(1) == "Gordium::Massing::Floor 1" and logic.massing_floor(3) == "Gordium::Massing::Floor 3"
+    assert logic.MASSING_ROOF == "Gordium::Massing::Roof"
+    for layer in (logic.massing_floor(2), logic.MASSING_ROOF):
+        assert logic.classify(layer, "Brep") == "building"                  # measured, as on Gordium::Massing
+        assert logic.building_name(layer, "Floor 2", True) == "the starting house"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    floors = rhino[rhino.index("def add_floors("):rhino.index("def gordium_start(")]
+    assert "a.LayerIndex = _layer(doc, logic.massing_floor(i + 1))" in floors
+    assert "_layer(doc, logic.MASSING_ROOF)" in floors
+    assert "a.LayerIndex = _layer(doc, logic.MASSING)\n" not in floors
+
+
+def test_the_starting_house_note_says_what_limited_it_with_its_number():
+    """Ben (2026-10-21, "reassure in place"): "largest that complies even if tax-map lines are 2 ft off; limited by
+    coverage 25%". The yards when they stopped it, each with its minimum."""
+    from design_checker.check import TAX_MAP_NOTE, limit_words, margin_note
+    assert limit_words({"limited_by": "coverage", "coverage_allowed": 1500.0}, 6000.0) == "lot coverage 25%"
+    assert limit_words({"limited_by": "yards", "yards": {"front": 25, "side": 10, "rear": 30}}, 6000.0) == \
+        "the yards (front 25'-0\", sides 10'-0\", rear 30'-0\")"
+    assert margin_note(2.0, 0.0, True, True, "lot coverage 25%") == TAX_MAP_NOTE.format(limit="lot coverage 25%")
+    assert TAX_MAP_NOTE.endswith("Use my survey… for the full size.")
+    fact = logic.starting_house_fact(TAX_MAP_NOTE.format(limit="lot coverage 25%"), "2026-10-26")
+    assert fact["value"].startswith("as first drawn, the largest house that complies even if the tax-map lines")
+
+
+def test_on_a_tax_map_lot_the_envelope_is_drawn_on_the_cautious_outline():
+    """Ben (2026-10-21): the cautious envelope on tax-map lots; on a survey the outline as drawn."""
+    env = {"outline": [[0, 0], [40, 0], [40, 60], [0, 60]]}
+    inner = [[2, 2], [38, 2], [38, 58], [2, 58]]
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": False, "buildable_cautious": None}) == [env["outline"]]
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [inner]}) == [inner]
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": []}) == []   # none 2'-0" in
+    small = [[0, 0], [1, 0], [1, 1], [0, 1]]
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small, inner]})[0] == inner
+    assert logic.envelope_outlines(None, {}) == []
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    run = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert 'outlines = logic.envelope_outlines(result.get("envelope"), result.get("plan"))' in run
