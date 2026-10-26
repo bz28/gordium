@@ -661,3 +661,21 @@ def test_in_a_narrow_short_view_the_last_resort_stays_in_view():
     i, q, kind, sc = logic.place_dimension([((200, 100), (150, 100))], 80, [everywhere, status], view=(360, 200),
                                            must=True, fixed=[status])
     assert kind == "crowded" and logic.inside_view(q, (360, 200))
+
+
+
+def test_the_notice_finds_a_gap_narrower_than_its_search_step():
+    """Review of db58364, L1: the coarse grid missed a gap only the notice's width + 10 px wide."""
+    view_w, view_h, w, h = 656, 668, 200, 30
+    taken = [(0, 0, 656, 300), (0, 300, 213, 368), (423, 300, 233, 368)]     # a 210 px wide gap, x 213-423
+    x, y = logic.notice_spot(view_w, view_h, w, h, None, taken)
+    assert not any(x < a + c and a < x + w and y < b + d and b < y + h for a, b, c, d in taken)
+
+
+def test_the_last_resort_goes_right_of_the_status_box_when_only_that_side_fits():
+    """Review of db58364, L2: the right-hand branch, pinned."""
+    status = logic.rect_quad((10, 14, 200, 186))
+    everywhere = logic.rect_quad((0, 0, 400, 200))
+    i, q, kind, sc = logic.place_dimension([((120, 100), (60, 100))], 80, [everywhere, status], view=(400, 200),
+                                           must=True, fixed=[status])
+    assert kind == "crowded" and min(p[0] for p in q) >= 213 and not logic.shapes_hit(q, status)
