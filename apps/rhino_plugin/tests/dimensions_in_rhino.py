@@ -64,16 +64,21 @@ def fresh_module():
 
 
 def drawn(g, doc, view_name, capture=None):
-    """The dimensions the conduit draws in one view's redraw: [(from, to, colour argb)] (model points)."""
+    """The dimensions the conduit draws in one view's redraw, on screen (plan) or in the model (any other view,
+    depth-tested: draw_scene's _model_dimension; review of 9fa61de, F1): [(from, to, colour argb)] (model points)."""
     calls = []
-    real = g._dimension
+    real, real_model = g._dimension, g._model_dimension
 
     def spy(d, viewport, line, color):
         calls.append((line.From, line.To, color.ToArgb()))
         return real(d, viewport, line, color)
+
+    def spy_model(d, doc_, line, color):
+        calls.append((line.From, line.To, color.ToArgb()))
+        return real_model(d, doc_, line, color)
     view = doc.Views.Find(view_name, False)
     doc.Views.ActiveView = view
-    g._dimension = spy
+    g._dimension, g._model_dimension = spy, spy_model
     try:
         view.Redraw()
         g.settle_labels()                                # the labels placed (as once the view rests), then drawn
@@ -84,7 +89,7 @@ def drawn(g, doc, view_name, capture=None):
             view.CaptureToBitmap(view.ActiveViewport.Size).Save(S + "frames/" + capture + ".png")
             view.Redraw()
     finally:
-        g._dimension = real
+        g._dimension, g._model_dimension = real, real_model
     return calls
 
 

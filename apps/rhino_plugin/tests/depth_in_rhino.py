@@ -93,6 +93,9 @@ def redraw_spied(g, doc, view_name, capture=None):
 
 doc = None
 handed = False
+stale = sc.sticky.pop("gordium_depth", None)        # an earlier phase 1 never followed by its phase 2: its document
+if stale is not None:                               # closed, so phase 2 never judges it (review of 9fa61de, F4)
+    close(stale["doc"])
 try:
     g = fresh_module()
     doc = TestDocs("depth").__enter__().open("Large Objects - Feet")
