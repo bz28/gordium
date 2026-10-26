@@ -1403,7 +1403,7 @@ def _box_pick(doc, what, facts, saved_ui):
                 # the whole street that piece is on, never round a corner; said, and an unclear end asked; only a
                 # click that kept a street counts as picked (round 12)
                 grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)
-                say(said)
+                say(logic.so_far(said) if grown != runs else said)    # (kept only at Enter: so far)
                 if grown != runs:
                     picks.append(line)
                 runs = grown
@@ -1461,7 +1461,7 @@ def _box_pick(doc, what, facts, saved_ui):
                          GRADE_LAYER if what == "spot" else FINISHED_LAYER)
             saved_ui["ground_kind"] = what
     except Cancelled:                    # Esc (the bend question, a pick): nothing changes (rounds 15, 16)
-        say("Esc: nothing changed" + (" (the street side is as it was)" if what == "street" else ""))
+        say(logic.ESC_STREET if what == "street" else "Esc: nothing changed")
     finally:
         _highlight(doc, facts)
     return facts, saved_ui
@@ -1658,7 +1658,7 @@ def _change_facts(doc, facts, options):
             # the whole street that piece is on, never round a corner (unnamed: from the drawing alone); every
             # click is answered, a refused one too, every time (round 10)
             grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)
-            say(said)
+            say(logic.so_far(said) if grown != runs and facts.get("corner_lot") else said)   # (corner: so far)
             if grown != runs:
                 picked.append(line)
             runs = grown

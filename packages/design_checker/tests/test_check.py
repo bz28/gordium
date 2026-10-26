@@ -2950,7 +2950,8 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     assert lines == [nudged[0]] and told[-1]["words"] == "A St: 1 lot-line piece, 40'-0\" of frontage", (lines, told)
     assert logic.pick_street(lines, ["A St"], nudged[0], "A St", outline=nudged)[0] == [nudged[0]]
     assert ("            grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)\n"
-            "            say(said)\n            if grown != runs:\n                picked.append(line)\n"
+            "            say(logic.so_far(said) if grown != runs and facts.get(\"corner_lot\") else said)   # (corner: so far)\n"
+            "            if grown != runs:\n                picked.append(line)\n"
             "            runs = grown") in rhino
     # round 11: an outline out of order, a saved street line clicked: the saved street as it was, never fewer
     gappy = [[[0, 0], [20, 0]], [[20, 0], [40, 0]], [[40, 0], [60, 0]], [[60, 0], [60, 100]], [[60, 100.05], [0, 100]],
@@ -3061,7 +3062,25 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
                                 _ask_street_more=esc, say=said.append, _highlight=lambda doc, f: None)
         got = nsb["_box_pick"](None, "street", facts, saved)
         assert (got[0], got[1]) == before and (facts, saved) == before, (corner, got)
-        assert said[-1] == "Esc: nothing changed (the street side is as it was)", said
+        assert said[-1] == "Esc: nothing changed — the street side is as it was; this pick wasn't kept", said
+
+
+def test_a_corner_click_is_said_as_so_far_and_esc_says_the_pick_was_not_kept():
+    """The Rhino run at a31661e: with Esc after a first corner click, the command line said "Ithaca Rd: 8 lot-line
+    pieces, 75'-10" of frontage" and then "Esc: nothing changed…", which read as kept, then nothing. A corner
+    click is said as provisional, and Esc says the pick wasn't kept."""
+    from design_checker import rhino_logic as logic
+    assert logic.so_far("Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage") == \
+        "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far — Enter when done"
+    assert logic.so_far("Street 2: 3 lot-line pieces, not surely one street: Gordium asks one street or two before "
+                        "measuring along them").endswith("(so far — Enter when done)")
+    assert logic.ESC_STREET == "Esc: nothing changed — the street side is as it was; this pick wasn't kept"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
+                   rhino.index('        elif what == "street":')]
+    assert "say(logic.so_far(said) if grown != runs else said)" in corner
+    assert 'say(logic.ESC_STREET if what == "street" else "Esc: nothing changed")' in rhino
+    assert 'say(logic.so_far(said) if grown != runs and facts.get("corner_lot") else said)' in rhino
 
 
 def _plugin_functions(names, **extra):

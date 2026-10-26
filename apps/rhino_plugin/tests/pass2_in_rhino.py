@@ -317,11 +317,11 @@ try:
         # 9'-9 5/8"); the whole street is kept now, said, and the side street's own 3 pieces, never round a corner
         claim("10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"",
               len(ithaca) == 8 and all(any(same(p, q) or same(p, q[::-1]) for q in kept) for p in ithaca)
-              and "Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage" in told, log["corner"])
+              and "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far — Enter when done" in told, log["corner"])
         # the side street's far corner has a 0.24 ft piece in it, so it is never a sure corner (review round 7):
         # asked once, and No keeps the street to its own 2 pieces; Ithaca Rd's two corners are sure (not asked)
         claim("10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner",
-              len(kept) == 10 and "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage" in told and len(asked) == 1
+              len(kept) == 10 and "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far — Enter when done" in told and len(asked) == 1
               and asked[0].startswith("Past there the lot line turns 89° over short pieces, a corner or a bend")
               and facts.get("street_ids") == ["Ithaca Rd"] * 8 + [None] * 2, log["corner"])
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})

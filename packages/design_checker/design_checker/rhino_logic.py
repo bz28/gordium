@@ -1338,6 +1338,17 @@ STREET_ANSWER_NEEDED = ("Gordium needs a Yes or a No here (Esc: nothing changes)
                         "line that isn't can pass lot width; left out, a line that is can pass the front yard. ")
 
 
+ESC_STREET = "Esc: nothing changed — the street side is as it was; this pick wasn't kept"
+
+
+def so_far(words):
+    """A corner lot's street click, said while the picking goes on: kept only when Enter ends it, so "so far"
+    ("Ithaca Rd: 8 lot-line pieces, 75'-10" so far — Enter when done"), never read as kept before an Esc."""
+    if words.endswith(" of frontage"):
+        return words[:-len(" of frontage")] + " so far — Enter when done"
+    return words + " (so far — Enter when done)"
+
+
 def street_more_question(label, outline, more, swing):
     """The question when it isn't clear where a street ends (street_run's "maybe" pieces past one end)."""
     lines = [outline[k] for k in more]
