@@ -944,6 +944,19 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False
                         or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)
                         or _fails_every_reading(ast.unparse(c), values, measured, facts)), primary)
+    elif (_status(row) == REVIEW and rule.get("review_when") and isinstance(body, ast.BoolOp)
+          and isinstance(body.op, ast.And) and all(isinstance(v, ast.Compare) for v in body.values)):
+        # a several-limit rule held back by its own review_when (its reason is the row's): name the limit that
+        # review is about, the measure it holds below a limit (the which-side eaves review: that side's eave),
+        # never simply the first limit (#18: "Eaves into front yard" for a side eave's question)
+        why_text = " ".join(str(row.get("Why") or "").split())
+        about = []
+        for r in rule["review_when"]:
+            if r.get("reason") and " ".join(str(r["reason"]).split()) in why_text:
+                about += [n.left.id for n in ast.walk(formula.parse(r["when"]).body)
+                          if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.left, ast.Name)
+                          and isinstance(n.ops[0], (ast.Lt, ast.LtE))]
+        primary = next((c for c in compares if c.left.id in about), primary)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
