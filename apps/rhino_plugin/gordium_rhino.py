@@ -574,7 +574,7 @@ def _required(d, line, tag, dark, box=None):
         d.Draw2dText(tag, grey, rg.Point2d(box[0], box[1] + 2), False, logic.TAG_SIZE)
 
 
-def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None):
+def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None, size=11):
     """A dimension's number in its place (logic.place_dimension): its backing and outline, and its number written
     along the dimension (readable: logic.text_angle), in a plane facing the camera; just past the line's end, a
     short leader to it."""
@@ -597,7 +597,7 @@ def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None)
     angle = math.radians(logic.text_angle(a, b))
     cx, cy = sum(p[0] for p in quad) / 4, sum(p[1] for p in quad) / 4
     centre, ahead = model((cx, cy)), model((cx + math.cos(angle) * 10, cy + math.sin(angle) * 10))
-    up, below = model((cx, cy - 10)), model((cx, cy + 11))
+    up, below = model((cx, cy - 10)), model((cx, cy + size))      # (size: the text's height, px)
     if any(p is None for p in (centre, ahead, up, below)):  # a view the plan's plane can't be found in: no words
         # (`is`, never `in`: `in` compares a Point3d to None with .NET's operator, which raises: round 7, F1)
         return
@@ -647,14 +647,10 @@ def draw_screen(o, e):
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
-    # the notice first (placed off the model and the status box), so no label is drawn under it either
-    notice = _notice_box(o, e.Viewport, taken)
+    # (the notice and the lot edges' lengths are placed after the dimensions' numbers and keep off them: Rhino
+    # check of #29 at 6d2e01a, the front number printed through the notice)
     elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
-                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
-        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     # each yard: its dimension placed where it and its label sit clear (logic.place_dimension: the status box, the
     # notice, the edges' length labels, the labels before it, never inside the house), its required line dashed
     # grey with its "min" tag, its label on the line (Rhino checks of #29)
@@ -691,9 +687,10 @@ def draw_screen(o, e):
                 if box is not None:
                     seen.append(box)
             spots.append(mine)
-        index, quad, kind = logic.place_dimension(
+        index, quad, kind, scale = logic.place_dimension(
             on_screen, width, [logic.rect_quad(box) for box in taken], footprint, away, view,
-            extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots])
+            extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots],
+            must=status in ("does_not_comply", "needs_review") and not old)
         chosen, required = options[index]
         o.placed[k] = (index, quad, kind, chosen, required, number if quad is not None else None)
         for r, tag, box in zip(required, tags + [None] * len(required), spots[index] + [None] * len(required)):
@@ -702,7 +699,8 @@ def draw_screen(o, e):
                 taken.append(box)
         _dimension(d, e.Viewport, chosen, color)
         if quad is not None:
-            _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From)
+            _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From,
+                       size=11 * scale)
             xs, ys = [p[0] for p in quad], [p[1] for p in quad]
             taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
     height = getattr(o, "height_dim", None)
@@ -724,13 +722,20 @@ def draw_screen(o, e):
             a, b = (e.Viewport.WorldToClient(p) for p in (line.From, line.To))
             rect = logic.rect_quad((house[0], house[1], house[2] - house[0], house[3] - house[1])) if house else None
             away = ((house[0] + house[2]) / 2, (house[1] + house[3]) / 2) if house else None
-            _, quad, kind = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
-                                                  [logic.rect_quad(box) for box in taken], rect, away, view)
+            _, quad, kind, scale = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
+                                                         [logic.rect_quad(box) for box in taken], rect, away, view,
+                                                         must=status in ("does_not_comply", "needs_review"))
             o.placed["height"] = (0, quad, kind, line, [], number)
             if quad is not None:
-                _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From)
+                _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From,
+                           size=11 * scale)
                 xs, ys = [p[0] for p in quad], [p[1] for p in quad]
                 taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
+        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
+                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
+        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+    notice = _notice_box(o, e.Viewport, taken)         # off the model, the status box and the numbers
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         ends = [e.Viewport.WorldToClient(p) for p in limit[0]]
