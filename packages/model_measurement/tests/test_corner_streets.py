@@ -98,3 +98,15 @@ def test_a_corner_rounded_into_short_pieces_beside_a_sharp_corner_may_split_insi
              "use": "one_family_detached", "corner_lot": True, "street_line": edges[:len(ring) - 1],
              "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0}
     assert 40.0 in _widths(site, facts)
+
+
+def test_a_lot_on_three_streets_reads_each_streets_own_frontage():
+    """#18 review (coordinator round): a 60 x 45 lot with streets on its 60, 45 and 60 ft sides (edges 0, 1, 2). The
+    lot width is one street's frontage: 60 or 45 ft (the middle street's own too), never 105 ft (two streets)."""
+    ring = [(0, 0), (60, 0), (60, 45), (0, 45)]
+    edges, site = _site(ring)
+    facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b",
+             "use": "one_family_detached", "corner_lot": True, "street_line": edges[:3], "lot_surveyed": True,
+             "ground_is_flat": True, "grade_elevation": 0}
+    widths = _widths(site, facts)
+    assert set(widths) == {45.0, 60.0} and max(widths) <= 60.0, widths
