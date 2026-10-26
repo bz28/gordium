@@ -126,7 +126,7 @@ try:
           seen["model"] == len(o.yard_dims) and seen["screen"] == 0, seen)
 
     status = next(st for line, text, st in o.yard_dims if text[2:].startswith("Rear yard"))
-    want = g.ui.status_color(status, g.ui.viewport_dark())
+    want = g.ui.dim_color(status, g.ui.viewport_dark())
     breps = [g._drawable(x.Geometry) for x in g._buildings(doc)]
     breps = [b for b in breps if isinstance(b, rg.Brep)]
     hidden, open_ = [], []
@@ -153,7 +153,7 @@ try:
     claim("4 Front: the height's dimension drawn in the model, depth-tested",
           seen["model"] == 1 and seen["screen"] == 0 and True not in seen["on_top"], seen)
     line, _, hstatus, _ = o.height_dim
-    want = g.ui.status_color(hstatus, g.ui.viewport_dark())
+    want = g.ui.dim_color(hstatus, g.ui.viewport_dark())
     hits = []
     for k in range(2, 39):
         q = front_vp.WorldToClient(line.PointAt(k / 40.0))

@@ -122,3 +122,13 @@ def test_off_plan_a_dimension_has_the_same_halo_as_on_screen():
         < body.index("_see_through(d, False)") < body.index("d.DrawLine(stroke, color, 2)")
     scene = _body("draw_scene")
     assert scene.index("d.DrawBrepShaded(g, Rhino.Display") < scene.index("_scene_dims(o, e, d, dark, old)")
+
+
+
+def test_off_plan_dimensions_have_the_plans_colours_and_dashed_required_lines():
+    """Review of the merge of drawing-dims: off plan the dimensions kept the old status colours (a complying yard
+    green in Perspective, grey in Top) and the faint solid required line the plan had replaced."""
+    dims = _body("_scene_dims")
+    assert "ui.status_color(" not in dims.split("if limit is not None")[0]
+    assert dims.count("_model_dimension(d, e.RhinoDoc, line, ui.dim_color(") == 2
+    assert "_required(d, line, None, dark)" in dims

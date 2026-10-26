@@ -575,20 +575,21 @@ def _model_dimension(d, doc, line, color):
 
 def _scene_dims(o, e, d, dark, old):
     """The dimensions in a view that isn't plan (perspective, elevations), in the model so that the solids in
-    front of them hide them: each yard's with its faint required line (not in an elevation, where they would lie
-    on the ground line), and in an elevation the height's with its faint limit. Their words stay on screen
-    (draw_screen). Nothing zoomed out to the neighbourhood."""
+    front of them hide them, in the plan's colours (logic.dim_rgb: complying grey): each yard's with its dashed
+    required line (not in an elevation, where they would lie on the ground line), and in an elevation the height's
+    with its faint limit. Their numbers stay on screen (draw_screen; off plan the height's only). Nothing zoomed
+    out to the neighbourhood."""
     zoomed_in = _zoomed_in(o, e.Viewport)
     elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     if logic.dims_shown(zoomed_in, elevation):
-        for line, status in getattr(o, "yard_required", None) or []:
-            d.DrawLine(line, ui.faint(ui.status_color("complies" if old else status, dark)), 1)
+        for line, _ in getattr(o, "yard_required", None) or []:
+            _required(d, line, None, dark)               # dashed grey, as in plan (review of the merge, F2)
         for line, _, status in getattr(o, "yard_dims", None) or []:
-            _model_dimension(d, e.RhinoDoc, line, ui.status_color("complies" if old else status, dark))
+            _model_dimension(d, e.RhinoDoc, line, ui.dim_color("complies" if old else status, dark))
     height = getattr(o, "height_dim", None)
     if height is not None and elevation and zoomed_in:
         line, _, status, limit = height
-        _model_dimension(d, e.RhinoDoc, line, ui.status_color("complies" if old else status, dark))
+        _model_dimension(d, e.RhinoDoc, line, ui.dim_color("complies" if old else status, dark))
         if limit is not None:                        # the limit, faint, across it (seen in Front and Right alike)
             k = _model_length(e.RhinoDoc, 1.5)
             d.DrawLine(rg.Line(limit + rg.Vector3d(-k, k, 0), limit + rg.Vector3d(k, -k, 0)),
@@ -776,6 +777,8 @@ def draw_screen(o, e):
         index, quad, kind = logic.place_dimension(
             on_screen, width, [logic.rect_quad(box) for box in taken], footprint, away, view,
             extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots])
+        if not flat:                                  # off plan draw_scene draws the first position (o.yard_dims)
+            index = 0
         chosen, required = options[index]
         o.placed[k] = (index, quad, kind, chosen, required, number if quad is not None else None)
         if flat:                                      # off plan, draw_scene draws them in the model (depth-tested)
