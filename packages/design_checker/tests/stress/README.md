@@ -13,6 +13,7 @@ a rule complies where the oracle says it fails under every reading, that is a fa
 | `test_oracle.py` | the oracle checked first: every worked example in R-1b.yaml, and hand-worked designs |
 | `test_stress.py` | the random sample; each known finding recognised by its cause |
 | `test_stress_findings.py` | every finding (F1-F17) shrunk to its fewest edits, as a named test; open ones strict-xfail |
+| `test_unequal_sides.py` | two side minimums that differ (10 ft one side, 5 ft the other, as R-3a and R-2b): each side's walls and eaves to its own lot line, eaves of their own depths, against `oracle.unequal_sides_verdict`. Added after #21 review round 22's P0 (eaves sorted apart from the walls), which every run above missed: R-1b's minimums are equal, the oracle kept one side number, and both eaves were always the same depth |
 | `explain.py`, `compare.py` | one case side by side (oracle vs Gordium; one drawing vs another) |
 | `conftest.py` | skips the full sizes unless asked (the option and marker are in the repository's root `conftest.py`) |
 
@@ -32,6 +33,7 @@ pytest --runslow          # from anywhere (registered in the root conftest.py); 
 | `test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outlines_are_drawn` | the 6 lots, F16's case and 12 designs | 40 designs |
 | `test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_between_fails_and_complies` | the 6 lots, F17's case and 5 designs | 15 designs |
 | `test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line` | turned 0 and 90 degrees | 0, 90, 180 and 270 |
+| `test_unequal_side_minimums_eaves_never_comply_or_fail_against_the_oracle` | 150 designs (it catches the P0 with #18's fix reverted: 4 false passes) | 1000 designs |
 
 The seeds are fixed (same seed, same designs, same answers).
 
