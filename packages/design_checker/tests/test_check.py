@@ -3133,16 +3133,16 @@ def test_the_notice_timer_stops_once_a_check_cleared_the_notice():
 
 def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     """The architect's eye on #28 at 92cf742: zoomed in tight, the "no longer complies" notice was one long line, a
-    bar across the whole plan over the drawing being judged. Now it is at most NOTICE_SHARES[0] of the view's width,
+    bar across the whole plan over the drawing being judged. Now it is at most NOTICE_MAX_SHARE of the view's width,
     wrapped between its " · " parts only (never inside a measurement), in the first corner clear of the model and of
-    the status box (a narrower box tried when the wider fits no corner); when none fits, it is not drawn (the panel's
+    the status box (the most compact box first, wider ones when it fits no corner); when none fits, not drawn (the panel's
     message line says it). The side yard's notice is still drawn in the default framed view (review round 1)."""
     from design_checker import rhino_logic as logic_
     side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · −2'-11 3/8\" short"
     for view_w in (1000, 700, 400):
         for share in logic_.NOTICE_SHARES:
             lines = logic_.notice_lines([side], view_w, share)
-            assert " · ".join(t.strip() for t in lines) == side                # every part kept, in order
+            assert [w for t in lines for w in t.split() if w != "·"] == [w for w in side.split() if w != "·"]
             assert all("'-" not in t.split()[-1] or t.split()[-1].endswith(('"', "'")) for t in lines), lines
             assert not any(t.strip().startswith(('1/', '3/', '5/', '7/')) for t in lines), lines  # 7'-0 5/8" whole
             chars = max(logic_.NOTICE_MIN_CHARS, int((view_w * share - 22) / 7.8))
@@ -3152,12 +3152,12 @@ def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     # the default framed Top view (1000 x 640, the lot from 324,102 to 676,538): drawn, top left, compact
     lot = (324, 102, 676, 538)
     lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot)
-    assert (x, y) == (12, 34) and w <= 1000 * logic_.NOTICE_SHARES[0] and not over(x, y, w, h, lot)
+    assert (x, y) == (12, 34) and w <= 1000 * logic_.NOTICE_MAX_SHARE and not over(x, y, w, h, lot)
     # ...with the status box top right: still clear of both
     status = (518, 12, 467, 56)
     lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot, [status])
     assert not over(x, y, w, h, lot) and not over(x, y, w, h, (518, 12, 985, 68))
-    # a smaller view where only the narrowest box fits a corner: the narrower box, never over the model
+    # a smaller view: the most compact box that fits a corner, never over the model
     placed = logic_.notice_place(700, 450, [side], (380, 60, 560, 400))
     assert placed is not None and len(placed[0]) > 1 and not over(*placed[1], placed[2], placed[3], (380, 60, 560, 400))
     # zoomed in tight: the model fills the view: not drawn
@@ -3321,3 +3321,71 @@ def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown(
     broken = type("Tree", (), {"ScrollToRow": lambda self, row: 1 / 0})()
     ns["_scroll_to"](broken, 0, 3)                                            # never an error out of it
     ns["_scroll_to"](object(), 0, 3)                                          # no ScrollToRow: nothing
+
+
+def test_the_notice_is_drawn_in_the_real_docked_top_view():
+    """The Rhino job at a9a9a45: in the real docked Top view (657 x 668 px, the model on screen from 156,106 to
+    501,562, the north arrow at 543,119, 61 x 55) the side yard's notice wasn't drawn: its widest box (60 %) was
+    three lines, 4 px too tall for the band above the model, and narrower ones were taller still. The notice now
+    tries its most compact box first, then wider ones up to NOTICE_MAX_SHARE: here two lines across the top, clear
+    of the model and the arrow. The scripts' screenshots are taken at the view's own size, never 1000 x 640."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · at least 0'-11 1/4\" short"
+    model, arrow = (155.67, 106.27, 501.33, 561.73), (543.26, 118.92, 61.03, 55.28)
+    lines, (x, y), w, h = logic_.notice_place(657, 668, [side], model, [arrow])
+    assert len(lines) == 2 and w <= 657 * logic_.NOTICE_MAX_SHARE and y + h <= model[1] and (x, y) == (12, 34)
+    assert not (min(x + w, arrow[0] + arrow[2]) > max(x, arrow[0]) and min(y + h, arrow[1] + arrow[3]) > max(y, arrow[1]))
+    assert logic_.NOTICE_SHARES == tuple(sorted(logic_.NOTICE_SHARES))     # the most compact box first
+    for name in ("notice_in_rhino.py", "highlight_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert "Size(1000, 640)" not in script, name
+
+
+def test_the_notice_is_never_wider_than_its_limit_nor_off_the_view():
+    """Review of 1d91bd9: a part too long for a line stayed whole, so in a narrow view (400 px, a four-view layout on
+    a laptop) the box was 342 px, past NOTICE_MAX_SHARE, and at 300 px wider than the view, its right-hand corners
+    off screen. A long part now breaks between its words (never inside a measurement), no box wider than the limit is
+    tried, and no spot off the view is used."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · at least 0'-11 1/4\" short"
+    for view_w in (400, 300):
+        placed = logic_.notice_place(view_w, 600, [side], (100, 120, 390, 590))
+        if placed is not None:
+            lines, (x, y), w, h = placed
+            assert w <= view_w * logic_.NOTICE_MAX_SHARE and 0 <= x and x + w <= view_w, (view_w, placed)
+        for share in logic_.NOTICE_SHARES:
+            lines = logic_.notice_lines([side], view_w, share)
+            assert "7'-0 5/8\"" in " ".join(lines) and "0'-11 1/4\"" in " ".join(lines)    # measurements whole
+    assert logic_.notice_spot(300, 600, 342, 54, None) is None                  # wider than the view: nowhere
+    lines = logic_.notice_lines([side], 400, 0.4)                               # the long part broken between
+    assert max(len(t) for t in lines) * 7.8 + 22 <= 400 * logic_.NOTICE_MAX_SHARE + 1, lines   # its words
+    lines, (x, y), w, h = logic_.notice_place(300, 600, [side], None)          # placed: width and screen checked
+    assert w <= 300 * logic_.NOTICE_MAX_SHARE and 0 <= x and x + w <= 300 and 0 <= y and y + h <= 600
+    # a part that can't break narrower than the limit (one long word): never drawn wider than it
+    assert logic_.notice_place(600, 600, ["✕ " + "W" * 60], None) is None
+    # a break that would fall inside a measurement moves before it
+    lines = logic_.notice_lines(["✕ Rear yard now is 7'-0 5/8\" here"], 200, 0.4)
+    assert any("7'-0 5/8\"" in t for t in lines) and not any(t.strip().startswith("5/8") for t in lines), lines
+
+
+def test_the_notice_keeps_its_heading_numbers_and_mark_whole():
+    """Review of 87e105d: narrow boxes, tried first, cut the heading mid-phrase where a wider box allowed it whole;
+    a second notice line came out indented; the ✕ could stand alone; an area's unit or a number's "short" could go
+    to the next line. Now a part breaks between words only when too long even for NOTICE_MAX_SHARE, each notice line
+    starts flush, and the mark, measurements, units and the word saying what a number is stay with their neighbour."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · at least 0'-11 1/4\" short"
+    for share in logic_.NOTICE_SHARES:
+        assert any("Side yard, Southwest no longer complies" in t for t in logic_.notice_lines([side], 657, share))
+    two = logic_.notice_lines(["✕ Rear yard no longer complies", "✕ Height no longer complies"], 1000, 0.8)
+    assert two == ["✕ Rear yard no longer complies", "✕ Height no longer complies"]
+    lone = logic_.notice_lines(["✕ " + "W" * 30 + " · a"], 250, 0.8)
+    assert lone[0] != "✕" and lone[0].startswith("✕ W"), lone
+    for view_w in (300, 400, 657):
+        for share in logic_.NOTICE_SHARES:
+            area = logic_.notice_lines(["✕ Lot coverage no longer complies · 7,033 sf proposed · 35 % short"],
+                                       view_w, share)
+            joined = "\n".join(area)
+            assert "7,033 sf" in joined and "35 % short" in joined, (view_w, share, area)
+            got = logic_.notice_lines([side], view_w, share)
+            assert "0'-11 1/4\" short" in "\n".join(got) and "7'-0 5/8\" proposed" in "\n".join(got), got

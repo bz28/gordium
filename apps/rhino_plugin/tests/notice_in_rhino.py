@@ -5,7 +5,7 @@ is pinned in CI (packages/design_checker/tests/test_check.py, test_no_notice_out
 GordiumStart on the sample (106 Ithaca Rd), then:
 1. The house moved 5 ft to the left (the Southwest side yard 7'-0 5/8" of 10'-0") and checked: the notice says the
    side yard no longer complies, and it is drawn in the Top view.
-   In the framed Top view it is compact (at most rhino_logic.NOTICE_SHARES[0] of the view's width) and covers none
+   In the framed Top view it is compact (at most rhino_logic.NOTICE_MAX_SHARE of the view's width) and covers none
    of the model on screen.
 1b. Zoomed in tight on the house (the lot and the yards fill the view): the notice isn't drawn over the model (no
    corner is clear), and the panel's message line says it.
@@ -75,7 +75,8 @@ def top(doc):
 def capture(doc, name):
     view = top(doc)
     view.Redraw()
-    view.CaptureToBitmap(System.Drawing.Size(1000, 640)).Save(S + name + ".png")
+    size = System.Drawing.Size(view.ActiveViewport.Bounds.Width, view.ActiveViewport.Bounds.Height)   # as seen
+    view.CaptureToBitmap(size).Save(S + name + ".png")
 
 
 def move(g, doc, feet):
@@ -121,7 +122,7 @@ try:
     claim("1 moved 5 ft left and checked: the notice says the side yard no longer complies, drawn compact and "
           "clear of the model in the framed Top view",
           n1["held"] and "Side yard, Southwest" in n1["held"][0] and "no longer complies" in n1["held"][0]
-          and n1["drawn"] and n1["box"][2] <= n1["view"][0] * g.logic.NOTICE_SHARES[0] + 1
+          and n1["drawn"] and n1["box"][2] <= n1["view"][0] * g.logic.NOTICE_MAX_SHARE + 1
           and clear_of(n1["box"], n1["model"]), n1)
     view = top(doc)                                      # 1b zoomed in tight on the house: never a bar over it
     framing = Rhino.DocObjects.ViewportInfo(view.ActiveViewport)    # step 1's framing, put back after
@@ -137,7 +138,7 @@ try:
     log["1b"] = {"notice": tight, "model": model, "view": [vp.Bounds.Width, vp.Bounds.Height], "panel": message}
     claim("1b zoomed in tight: the notice is compact and covers none of the model, or isn't drawn (the panel says it)",
           n1b["complete"] and ((tight is None and not n1b["room"]) or (
-              tight is not None and tight[2] <= vp.Bounds.Width * g.logic.NOTICE_SHARES[0] + 1 and clear_of(tight, model)))
+              tight is not None and tight[2] <= vp.Bounds.Width * g.logic.NOTICE_MAX_SHARE + 1 and clear_of(tight, model)))
           and bool(message) and "no longer complies" in message, log["1b"])
     view.ActiveViewport.SetViewProjection(framing, True)  # back to step 1's framing (the Rhino job at 27c8e5d:
     #                                                      after ZoomExtents the lot filled the view: no corner for step 3)

@@ -1,0 +1,534 @@
+{
+ "step": "corner",
+ "claims": {
+  "10 a corner lot's street side takes every street clicked, Enter when done": {
+   "ok": true,
+   "detail": {
+    "prompts": [
+     "Click each lot line on a street (0 picked); Enter when done",
+     "Click each lot line on a street (1 picked); Enter when done",
+     "Click each lot line on a street (2 picked); Enter when done"
+    ],
+    "lines": [
+     [
+      [
+       76.916,
+       0.2317
+      ],
+      [
+       67.113,
+       0.1516
+      ]
+     ],
+     [
+      [
+       67.113,
+       0.1516
+      ],
+      [
+       59.09,
+       0.3022
+      ]
+     ],
+     [
+      [
+       59.09,
+       0.3022
+      ],
+      [
+       49.525,
+       0.0
+      ]
+     ],
+     [
+      [
+       49.525,
+       0.0
+      ],
+      [
+       38.7471,
+       0.5182
+      ]
+     ],
+     [
+      [
+       38.7471,
+       0.5182
+      ],
+      [
+       30.5456,
+       0.1523
+      ]
+     ],
+     [
+      [
+       30.5456,
+       0.1523
+      ],
+      [
+       20.3655,
+       0.1794
+      ]
+     ],
+     [
+      [
+       20.3655,
+       0.1794
+      ],
+      [
+       10.7167,
+       0.8339
+      ]
+     ],
+     [
+      [
+       10.7167,
+       0.8339
+      ],
+      [
+       1.1492,
+       0.2317
+      ]
+     ],
+     [
+      [
+       75.8597,
+       92.1001
+      ],
+      [
+       76.1328,
+       68.1429
+      ]
+     ],
+     [
+      [
+       76.1328,
+       68.1429
+      ],
+      [
+       76.916,
+       0.2317
+      ]
+     ]
+    ],
+    "ids": [
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     null,
+     null
+    ],
+    "name": null,
+    "said": [
+     "Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage",
+     "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage"
+    ],
+    "asked": []
+   }
+  },
+  "10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"": {
+   "ok": true,
+   "detail": {
+    "prompts": [
+     "Click each lot line on a street (0 picked); Enter when done",
+     "Click each lot line on a street (1 picked); Enter when done",
+     "Click each lot line on a street (2 picked); Enter when done"
+    ],
+    "lines": [
+     [
+      [
+       76.916,
+       0.2317
+      ],
+      [
+       67.113,
+       0.1516
+      ]
+     ],
+     [
+      [
+       67.113,
+       0.1516
+      ],
+      [
+       59.09,
+       0.3022
+      ]
+     ],
+     [
+      [
+       59.09,
+       0.3022
+      ],
+      [
+       49.525,
+       0.0
+      ]
+     ],
+     [
+      [
+       49.525,
+       0.0
+      ],
+      [
+       38.7471,
+       0.5182
+      ]
+     ],
+     [
+      [
+       38.7471,
+       0.5182
+      ],
+      [
+       30.5456,
+       0.1523
+      ]
+     ],
+     [
+      [
+       30.5456,
+       0.1523
+      ],
+      [
+       20.3655,
+       0.1794
+      ]
+     ],
+     [
+      [
+       20.3655,
+       0.1794
+      ],
+      [
+       10.7167,
+       0.8339
+      ]
+     ],
+     [
+      [
+       10.7167,
+       0.8339
+      ],
+      [
+       1.1492,
+       0.2317
+      ]
+     ],
+     [
+      [
+       75.8597,
+       92.1001
+      ],
+      [
+       76.1328,
+       68.1429
+      ]
+     ],
+     [
+      [
+       76.1328,
+       68.1429
+      ],
+      [
+       76.916,
+       0.2317
+      ]
+     ]
+    ],
+    "ids": [
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     null,
+     null
+    ],
+    "name": null,
+    "said": [
+     "Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage",
+     "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage"
+    ],
+    "asked": []
+   }
+  },
+  "10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner": {
+   "ok": true,
+   "detail": {
+    "prompts": [
+     "Click each lot line on a street (0 picked); Enter when done",
+     "Click each lot line on a street (1 picked); Enter when done",
+     "Click each lot line on a street (2 picked); Enter when done"
+    ],
+    "lines": [
+     [
+      [
+       76.916,
+       0.2317
+      ],
+      [
+       67.113,
+       0.1516
+      ]
+     ],
+     [
+      [
+       67.113,
+       0.1516
+      ],
+      [
+       59.09,
+       0.3022
+      ]
+     ],
+     [
+      [
+       59.09,
+       0.3022
+      ],
+      [
+       49.525,
+       0.0
+      ]
+     ],
+     [
+      [
+       49.525,
+       0.0
+      ],
+      [
+       38.7471,
+       0.5182
+      ]
+     ],
+     [
+      [
+       38.7471,
+       0.5182
+      ],
+      [
+       30.5456,
+       0.1523
+      ]
+     ],
+     [
+      [
+       30.5456,
+       0.1523
+      ],
+      [
+       20.3655,
+       0.1794
+      ]
+     ],
+     [
+      [
+       20.3655,
+       0.1794
+      ],
+      [
+       10.7167,
+       0.8339
+      ]
+     ],
+     [
+      [
+       10.7167,
+       0.8339
+      ],
+      [
+       1.1492,
+       0.2317
+      ]
+     ],
+     [
+      [
+       75.8597,
+       92.1001
+      ],
+      [
+       76.1328,
+       68.1429
+      ]
+     ],
+     [
+      [
+       76.1328,
+       68.1429
+      ],
+      [
+       76.916,
+       0.2317
+      ]
+     ]
+    ],
+    "ids": [
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     null,
+     null
+    ],
+    "name": null,
+    "said": [
+     "Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage",
+     "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage"
+    ],
+    "asked": []
+   }
+  },
+  "12 answering No in the box drops both streets' lines (picked again: review round 5, P0)": {
+   "ok": true,
+   "detail": {
+    "street_line": null,
+    "corner_lot": false
+   }
+  }
+ },
+ "corner": {
+  "prompts": [
+   "Click each lot line on a street (0 picked); Enter when done",
+   "Click each lot line on a street (1 picked); Enter when done",
+   "Click each lot line on a street (2 picked); Enter when done"
+  ],
+  "lines": [
+   [
+    [
+     76.916,
+     0.2317
+    ],
+    [
+     67.113,
+     0.1516
+    ]
+   ],
+   [
+    [
+     67.113,
+     0.1516
+    ],
+    [
+     59.09,
+     0.3022
+    ]
+   ],
+   [
+    [
+     59.09,
+     0.3022
+    ],
+    [
+     49.525,
+     0.0
+    ]
+   ],
+   [
+    [
+     49.525,
+     0.0
+    ],
+    [
+     38.7471,
+     0.5182
+    ]
+   ],
+   [
+    [
+     38.7471,
+     0.5182
+    ],
+    [
+     30.5456,
+     0.1523
+    ]
+   ],
+   [
+    [
+     30.5456,
+     0.1523
+    ],
+    [
+     20.3655,
+     0.1794
+    ]
+   ],
+   [
+    [
+     20.3655,
+     0.1794
+    ],
+    [
+     10.7167,
+     0.8339
+    ]
+   ],
+   [
+    [
+     10.7167,
+     0.8339
+    ],
+    [
+     1.1492,
+     0.2317
+    ]
+   ],
+   [
+    [
+     75.8597,
+     92.1001
+    ],
+    [
+     76.1328,
+     68.1429
+    ]
+   ],
+   [
+    [
+     76.1328,
+     68.1429
+    ],
+    [
+     76.916,
+     0.2317
+    ]
+   ]
+  ],
+  "ids": [
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   null,
+   null
+  ],
+  "name": null,
+  "said": [
+   "Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage",
+   "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage"
+  ],
+  "asked": []
+ },
+ "corner_no": {
+  "street_line": null,
+  "corner_lot": false
+ },
+ "ok": true
+}
