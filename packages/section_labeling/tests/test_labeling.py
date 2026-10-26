@@ -313,11 +313,19 @@ CITED = sorted(coverage.cited_by(ITHACA, LAW, load_pieces(ITHACA / "2_extracted_
 
 @pytest.mark.parametrize("pid", CITED)
 def test_pieces_rules_rely_on_are_rule_or_reference(pid):
+    """A piece a rule relies on is labeled rule, flag (drafted as a flag: stage 2 drafted every flag piece, and its flag
+    cites it) or reference; or it is a heading with no text of its own (§325-21) whose subsections carry those labels."""
     path = ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml"
-    label = (load(path)["labels"] if path.exists() else {}).get(pid)
+    labels = load(path)["labels"] if path.exists() else {}
+    label = labels.get(pid)
     if label is None:
         pytest.skip("not labeled yet (needs a real labeling run)")
-    assert label["label"] in ("rule", "reference"), f"{pid} labeled {label['label']}: {label['reason']}"
+    relied = ("rule", "flag", "reference")
+    subsections = [x for p_, x in labels.items() if p_ != pid and p_.startswith(pid) and p_[len(pid):len(pid) + 1].isalpha()]
+    heading = label["label"] == "not_for_checking" and subsections and all(x["label"] in relied + ("not_for_checking",)
+                                                                          for x in subsections) \
+        and any(x["label"] in relied for x in subsections)
+    assert label["label"] in relied or heading, f"{pid} labeled {label['label']}: {label['reason']}"
 
 
 # The budget cap: no call is sent that could cross it, and measured spend persists across runs.
