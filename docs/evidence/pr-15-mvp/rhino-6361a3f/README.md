@@ -1,7 +1,6 @@
 # #15 rhino-ui at 6361a3f: pass 2, the notice and the highlight, in Rhino 8 (Mac), 2026-10-25
 
-**Purpose:** pass 2 in full (claim 2's button, the corner step), the notice and highlight checks (1b and 2 now read
-what the view drew), and an architect's look at the southwest label, the notice and the panel.\
+**Purpose:** pass 2 in full, the notice and highlight checks, and an architect's look at the label, notice and panel.\
 **For:** the coordinator, the #15 job, reviewers.\
 **Kept current by:** never changed (a dated record).
 
