@@ -132,10 +132,14 @@ class Watch:
 
 
 def pump_until(cond, limit):
-    """Let Rhino run (idle, timers) until cond() or `limit` s."""
+    """Let Rhino run (timers) until cond() or `limit` s. Rhino raises no Idle while a script runs, so with live mode on
+    the plugin's own idle handler stands in for it (live re-checks start only from Idle: Rhino run of 6ba061b)."""
     end = time.time() + limit
     while not cond() and time.time() < end:
         Rhino.RhinoApp.Wait()
+        g = sys.modules.get("gordium_rhino")
+        if g is not None and g.STATE.get("live"):
+            g._idle(None, None)
         time.sleep(0.05)
     return cond()
 
@@ -155,6 +159,7 @@ def add_box(doc, layer, at=0.0):
 
 def main():
     doc = None
+    docs = None
     try:
         docs = TestDocs("progress_cancel").__enter__()
         g = fresh_module()
@@ -394,7 +399,7 @@ def main():
                 g._stop_worker()
         except Exception:
             pass
-        for d in list(Rhino.RhinoDoc.OpenDocuments())[:-1]:
+        for d in list(docs.opened if docs is not None else []):    # exactly the documents this run opened
             close(d)
 
 
