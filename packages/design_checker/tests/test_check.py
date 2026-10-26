@@ -1737,7 +1737,7 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
     assert ('    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:'
             in draw)
-    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True)" in draw
+    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep)" in draw
     assert draw.index("zoomed_in = ") < draw.index("    if not boxed:")         # the status box isn't gated by it
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     at = ui[ui.index("def label_at("):ui.index("def _signed(")]
@@ -3181,13 +3181,15 @@ def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     assert 'first = "✕ " + notice + " · " if notice else ""' in report
 
 
-def test_a_label_with_no_room_beside_its_line_goes_outside_the_drawing_with_a_leader():
+def test_a_label_with_no_room_beside_its_line_stays_near_it_with_a_leader():
     """The Rhino job at 27c8e5d (highlight claim 2): in a narrow Top view (656 px) the 7 ft southwest side yard had no
-    clear spot beside its line, and its label crossed 13 of the lot's and the house's lines (over the drawing being
-    judged). Now, with nothing clear beside its line, the label goes outside the drawing (left, right, below or above
-    it, on screen, off every line and label) and gordium_ui draws a leader from the line's middle to it."""
+    clear spot beside its line, and its label crossed 13 of the lot's and the house's lines. Then (0a94fc4), placed
+    outside the drawing with the shortest leader, it came loose: 330 px from its line under the status box, 130 px
+    below it with labels off, no leader seen. Now such a label stays within one label height of its own line (beside
+    it or just past either end), never over the notice, the status box or another label, crossing as few lines as it
+    can, and a leader is always drawn to it."""
     from design_checker import rhino_logic as logic_
-    from design_checker.rhino_logic import crosses, place_label, place_outside
+    from design_checker.rhino_logic import box_gap, place_label, place_near
 
     def box(x0, y0, x1, y1):
         return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
@@ -3195,28 +3197,66 @@ def test_a_label_with_no_room_beside_its_line_goes_outside_the_drawing_with_a_le
     hatch = [((185 + k * 10, 250), (185 + k * 10, 415)) for k in range(1, 23)]      # the coloured part's edges
     own = ((158, 409), (185, 409))                                               # the side yard's dimension
     obstacles = lot + house + hatch
-    view = (656, 668)
-    w, h = 170, 34                                                               # its two lines
-    assert place_label(own, w, h, obstacles, view=view)[2] is False             # nothing clear beside its line
-    left, top = place_outside(own, w, h, obstacles, view=view)
-    assert not any(crosses(s, left, top, w, h) for s in obstacles + [own])
+    view, w, h = (656, 668), 170, 36
+    notice, status = (12, 34, 506, 54), (60, 14, 584, 54)
+    assert place_label(own, w, h, obstacles, [notice, status], view=view)[2] is False   # nothing clear beside it
+    left, top = place_near(own, w, h, obstacles, [notice, status], view=view)
+    assert box_gap(own, (left, top, w, h)) <= h                                  # near its own line
+    assert not logic_.crosses(own, left, top, w, h)                              # never on its own line
+    assert sum(logic_.crosses(s_, left, top, w, h) for s_ in obstacles) <= 1     # the fewest: the lot's edge alone
+    # a notice right beside the line: never over it
+    close = (100, 420, 200, 60)
+    l3, t3 = place_near(own, w, h, obstacles, [close], view=view)
+    assert not (min(l3 + w, 300) > max(l3, 100) and min(t3 + h, 480) > max(t3, 420))
+    # crowded by other labels: the second pass may cover one, never `keep`
+    others = [(0, 300, 656, 368)]
+    assert place_near(own, w, h, obstacles, others, view=view) is None
+    l4, t4 = place_near(own, w, h, obstacles, [notice], view=view, avoid=others)
+    assert box_gap(own, (l4, t4, w, h)) <= h and not logic_.crosses(own, l4, t4, w, h)
+    # a short line with room all round: the label above or below it, never past its end along the line itself (a
+    # leader there runs on the line and is hidden by it)
+    short = ((300, 300), (327, 300))
+    l5, t5 = place_near(short, w, h, [], [], view=view)
+    assert t5 + h <= 300 - 6 or t5 >= 300 + 6, (l5, t5)
+    # a line at the screen's edge: the spot pushed onto the screen would sit on the line itself: never used
+    edge = ((0, 300), (20, 300))
+    l6, t6 = place_near(edge, w, h, [], [], view=view)
+    assert not logic_.crosses(edge, l6, t6, w, h), (l6, t6)
+    assert not any(min(left + w, a + c) > max(left, a) and min(top + h, b + e) > max(top, b)
+                   for a, b, c, e in (notice, status))                           # never over the notice nor status
     assert 0 <= left and left + w <= 656 and 0 <= top and top + h <= 668
-    assert top >= 557                                                            # below the lot, under its line
-    assert place_outside(own, w, h, obstacles, taken=[(0, 557, 656, 111), (0, 0, 656, 110)], view=view) is None
-    # gordium_ui.label_box: outside, two lines, its leader's end its line's middle
+    # the east yard's label: near its own line too
+    east = ((612, 480), (640, 480))
+    obstacles2 = box(300, 110, 640, 520) + box(330, 150, 612, 500)
+    left2, top2 = place_near(east, w, h, obstacles2, [], view=(700, 668))
+    assert box_gap(east, (left2, top2, w, h)) <= h
+    # everything near taken: None (the caller keeps it off them, still led)
+    assert place_near(own, w, h, obstacles, [(0, 0, 656, 668)], view=view) is None
+    # a line off the screen: nothing within reach on it (a spot pushed onto the screen is never far from its line)
+    assert place_near(((100, 900), (130, 900)), w, h, [], [], view=view) is None
+    # gordium_ui.label_box: near, two lines, a leader
     src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    ns = {"logic": logic_, "LINE_H": 14}
+    ns = {"logic": logic_, "LINE_H": 16}
     exec(src[src.index("def label_box("):].split("\ndef ", 1)[0], ns)             # noqa: S102
     viewport = type("VP", (), {"Size": type("S", (), {"Width": 656, "Height": 668})(),
                                "WorldToClient": staticmethod(lambda q: type("P", (), {"X": q[0], "Y": q[1]})())})()
-    taken = []
-    left, top, width, want, rows = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", "
-                                                   "needs 10'-0\" (approx.)", 11, taken, along=own, obstacles=obstacles)
-    height = 4 + 14 * len(rows)
-    assert len(rows) == 2 and want == 409 and top >= 557 and taken == [(left, top, width, height)]
-    assert not any(crosses(s, left, top, width, height) for s in obstacles + [own])
+    taken = [notice, status]
+    left, top, width, want, rows, led = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", "
+                                                        "needs 10'-0\" (approx.)", 11, taken, along=own,
+                                                        obstacles=obstacles)
+    height = 4 + 16 * len(rows)
+    assert led and len(rows) == 2 and box_gap(own, (left, top, width, height)) <= height
+    assert taken[-1] == (left, top, width, height)
+    # crowded by other labels all round its line: near it all the same (it may cover one), never far (clear_spot)
+    crowd = [notice, status, (0, 300, 656, 368)]
+    left, top, width, want, rows, led = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", "
+                                                        "needs 10'-0\" (approx.)", 11, crowd, along=own,
+                                                        obstacles=obstacles, keep=[notice, status])
+    assert led and box_gap(own, (left, top, width, 4 + 16 * len(rows))) <= 4 + 16 * len(rows)
     ui_src = src[src.index("def label_at("):].split("\ndef ", 1)[0]
-    assert "logic.leader_end((p.X, p.Y), (left, top, width, h))" in ui_src and "return left, top, width, h" in ui_src
+    assert "if leader and along is not None and not led:" in ui_src               # one leader, never two
+    assert "if led:" in ui_src and "logic.leader_end((p.X, p.Y), (left, top, width, h))" in ui_src
+    assert "return left, top, width, h, want, rows, led" in ui_src
 
 
 def test_the_in_rhino_checks_read_the_drawings_own_placement():
@@ -3228,6 +3268,8 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
     assert 'STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn' in draw
     assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
     assert draw.count('drawn["labels"].append(') == 2
+    assert draw.count(", at[6]])") == 2                                          # whether a leader was drawn
+    assert draw.count("keep=keep)") == 2 and draw.index("keep = list(taken)") < draw.index("keep=keep)")
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
         assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
@@ -3268,35 +3310,13 @@ def test_the_detail_under_the_list_keeps_room_for_its_button():
     assert "split.Panel1MinimumSize = LIST_MIN_HEIGHT" in panel and "LIST_MIN_HEIGHT = 3 * ROW_HEIGHT + 24" in src
 
 
-def test_a_label_outside_the_drawing_takes_the_spot_with_the_shortest_leader():
-    """Independent review of 6361a3f: place_outside took the first clear spot in a fixed order (left, right, below,
-    above), so an east side yard's label went west of the whole lot, its leader across the house, while a spot just
-    below its line was clear. It now takes the clear spot whose leader is shortest."""
-    from design_checker.rhino_logic import crosses, leader_end, place_label, place_outside
-
-    def box(x0, y0, x1, y1):
-        return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
-    obstacles = box(300, 110, 640, 520) + box(330, 150, 612, 500) + \
-        [((330 + k * 10, 150), (330 + k * 10, 500)) for k in range(1, 28)]
-    own = ((612, 480), (640, 480))                                               # the east yard's dimension
-    view, w, h = (700, 668), 170, 34
-    assert place_label(own, w, h, obstacles, view=view)[2] is False
-    left, top = place_outside(own, w, h, obstacles, view=view)
-    assert top >= 520 and left > 300, (left, top)                                # below the lot, under its line
-    ex, ey = leader_end((626, 480), (left, top, w, h))
-    assert ((ex - 626) ** 2 + (ey - 480) ** 2) ** 0.5 < 60
-    assert not any(crosses(s, left, top, w, h) for s in obstacles + [own])
-    # the west yard's label: left of the lot, beside its line (there the nearest clear spot)
-    west = place_outside(((300, 480), (330, 480)), w, h, obstacles, view=view)
-    assert west is not None and west[0] + w <= 300 and abs(west[1] + h / 2 - 480) < 1
-
-
 def test_the_label_claim_counts_its_own_line_too():
     """Independent review of 6361a3f: highlight claim 2 skipped the label's own dimension line when counting
     crossings, so a label drawn on top of its own dimension passed (clear_spot's fallback can land there)."""
     script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
     assert "hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]" in script
     assert "s_ != own" not in script
+    assert "g.logic.crosses(own, left, top, w, h)" in script and "and not on_own" in script   # moved ones too
 
 
 def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():

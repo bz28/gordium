@@ -188,8 +188,11 @@ try:
         lines = [tuple(map(tuple, s_)) for s_ in rec["lines"]]
         m = rec["model"]
         boxes = list(rec.get("taken") or []) + ([rec["notice"]] if rec.get("notice") else [])
-        for k, (text, (left, top, w, h, want), _, own) in enumerate(rec["labels"]):
+        on_own = []                                  # a label over its own dimension line, moved or not
+        for k, (text, (left, top, w, h, want), _, own, led) in enumerate(rec["labels"]):   # led: a leader drawn
             own = tuple(map(tuple, own))
+            if g.logic.crosses(own, left, top, w, h):
+                on_own.append(text)
             hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]   # its own line too (independent
             #                                   review of 6361a3f: a label on its own dimension must never pass)
             others = [b_ for j, b_ in enumerate(rec["labels"]) if j != k and over((left, top, w, h), b_[1][:4])] + \
@@ -198,17 +201,19 @@ try:
             (ax, ay), (bx, by) = own                   # next to its own line: the gap between them
             near = min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
                        for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
-            led = abs(top - want) > 1 and not over((left, top, w, h), (m[0], m[1], m[2] - m[0], m[3] - m[1]))
             log.setdefault("labels", []).append((text, round(left), round(top), len(hits), len(others), inside,
-                                                 round(near, 1), led))
+                                                 round(near, 1), bool(led), h))
         g.set_labels(False)
-        claim("2 no label crosses a dimension, a lot edge or the house, nor covers another label",
-              len(log["labels"]) >= 8 and all(n == 0 and o_ == 0 for _, _, _, n, o_, _, _, _ in log["labels"]) and
-              len(lines) >= 4 + 4 + 4, {"labels": log["labels"], "lines": len(lines), "view": rec["size"]})
-        claim("2 every label next to its own line (within 12 px: beside it, or just past its end when it is short), or "
-              "outside the drawing with a leader to it", all(near <= 12 or led for *_, near, led in log["labels"]),
-              log["labels"])
-        claim("2 every label on screen", all(i for _, _, _, _, _, i, _, _ in log["labels"]),
+        # beside its line, a label crosses no line; moved (no room beside it), it may cross a line but never another
+        # label, the notice, the status box or the north arrow, and is led to its line (the Rhino job at 0a94fc4)
+        claim("2 no label covers another label, the notice or the status box; one beside its line crosses no line",
+              len(log["labels"]) >= 8 and all(o_ == 0 and (n == 0 or led) for _, _, _, n, o_, _, _, led, _ in
+                                              log["labels"]) and len(lines) >= 4 + 4 + 4 and not on_own,
+              {"labels": log["labels"], "lines": len(lines), "view": rec["size"], "on_own_line": on_own})
+        claim("2 every label within one label height of its own line, and a leader to it whenever it is not right "
+              "beside it (more than 12 px away)", all(near <= h_ + 6 and (near <= 12 or led)
+                                                      for *_, near, led, h_ in log["labels"]), log["labels"])
+        claim("2 every label on screen", all(i for _, _, _, _, _, i, _, _, _ in log["labels"]),
               {"labels": log["labels"], "view": rec["size"]})
         sources = ((g.STATE.get("last") or {}).get("header") or {}).get("sources") or []
         lot = [t for t in sources if t.startswith("Lot: ")]

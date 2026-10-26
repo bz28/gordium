@@ -471,35 +471,48 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     return left, top, False
 
 
-def place_outside(line, w, h, obstacles=(), taken=(), gap=6, view=None):
-    """Where a w × h label goes when no spot beside its dimension `line` is clear: (left, top), or None. Outside the
-    drawing's box on screen (every line in `obstacles` and its own): left of it, right of it, below or above it, level
-    with (or under) the line's middle and kept on screen; of those covering no line and no box in `taken`, the one
-    whose leader back to the line is shortest (the caller draws the leader). A narrow view (the Rhino job at 27c8e5d, 656 px wide): the
-    7 ft southwest side yard had no room beside its line, and its label crossed 13 of the lot's and house's lines."""
-    segs = list(obstacles) + [line]
-    xs = [p[0] for s in segs for p in s]
-    ys = [p[1] for s in segs for p in s]
-    bx0, bx1, by0, by1 = min(xs), max(xs), min(ys), max(ys)
+def box_gap(line, box):
+    """How far a box (left, top, w, h) is from a screen line ((x1, y1), (x2, y2)): 0 when they touch."""
+    (ax, ay), (bx, by) = line
+    left, top, w, h = box
+    return min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
+               for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
+
+
+def place_near(line, w, h, obstacles=(), taken=(), gap=12, view=None, avoid=()):
+    """Where a w × h label goes when no spot beside its dimension `line` is clear: (left, top), or None. Never far
+    from its line: within one label height of it (beside it, or just past either end), on screen, over no box in
+    `taken` (the notice, the status box, the north arrow, other labels); of those, the one crossing the fewest lines
+    in `obstacles` and covering the fewest boxes in `avoid` (other labels, when it must), then the nearest; never on
+    its own line. Beside its line is tried before past its ends (a leader along the line itself would be hidden by
+    it), `gap` (12 px) away so the leader the caller draws to it shows (review of b85effe: a 6 px leader hid under the
+    dimension's tick). The Rhino job at 0a94fc4: placed "outside the
+    drawing" with the shortest leader, the failing southwest yard's label came loose from its line (330 px away, under
+    the status box, no leader seen); at 27c8e5d, with no room beside its line, it had crossed 13 lines."""
     (xa, ya), (xb, yb) = line
+    x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
     mx, my = (xa + xb) / 2, (ya + yb) / 2
     vw, vh = view if view is not None else (float("inf"), float("inf"))
-
-    def onto(x, lo, hi):
-        return min(max(x, lo), hi)
-    spots = [(bx0 - gap - w, onto(my - h / 2, 0, vh - h)), (bx1 + gap, onto(my - h / 2, 0, vh - h)),
-             (onto(mx - w / 2, 0, vw - w), by1 + gap), (onto(mx - w / 2, 0, vw - w), by0 - gap - h)]
-    clear = []
+    steps = (0, -h / 2, h / 2, -h, h)
+    if x1 - x0 >= y1 - y0:               # mostly horizontal: above or below it, then past either end
+        spots = [(x, top) for top in (y0 - gap - h, y1 + gap) for x in (mx - w / 2, x0 - w, x1, x0 - w - gap, x1 + gap)] + \
+            [(x, my - h / 2 + d) for x in (x0 - gap - w, x1 + gap) for d in steps[1:] + steps[:1]]
+    else:                                # mostly vertical: right or left of it, then past either end
+        spots = [(left, y) for left in (x1 + gap, x0 - gap - w) for y in (my - h / 2, y0 - h, y1, y0 - h - gap, y1 + gap)] + \
+            [(mx - w / 2 + d, y) for y in (y0 - gap - h, y1 + gap) for d in (-w / 2, w / 2, 0)]
+    best = None
     for k, (left, top) in enumerate(spots):
-        if left < 0 or top < 0 or left + w > vw or top + h > vh:
+        left, top = min(max(left, 0), max(vw - w, 0)), min(max(top, 0), max(vh - h, 0))   # kept on screen
+        if left + w > vw or top + h > vh or box_gap(line, (left, top, w, h)) > h:
             continue
-        if not any(crosses(s, left, top, w, h) for s in segs) and \
-                not any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken):
-            ex, ey = leader_end((mx, my), (left, top, w, h))
-            clear.append((((ex - mx) ** 2 + (ey - my) ** 2) ** 0.5, k, left, top))
-    # the clear spot with the shortest leader (independent review of 6361a3f: a fixed order put an east yard's label
-    # west of the whole lot, its leader across the house); the order above only breaks ties
-    return min(clear)[2:] if clear else None
+        if any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken) or \
+                crosses(line, left, top, w, h):                  # never over the notice, status box, nor its own line
+            continue
+        score = (sum(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in avoid),
+                 sum(crosses(s, left, top, w, h) for s in obstacles if s != line), box_gap(line, (left, top, w, h)), k)
+        if best is None or score < best[0]:
+            best = (score, left, top)
+    return None if best is None else (best[1], best[2])
 
 
 def label_lines(text):
