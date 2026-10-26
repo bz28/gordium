@@ -1677,6 +1677,10 @@ def confirm(doc, facts, options, mode="check"):
         say(logic.BOX_BUSY)
         return None
     try:
+        # "draw the house again" belongs to this box only: set by its own Draw of a new address (_draw_prepare), read
+        # by its caller (edit_facts) right after; never one an earlier box left (GordiumCheck's box set it and nothing
+        # read it, so a later Edit site… drew a starting house over the architect's model: P1, found 2026-10-26)
+        STATE.pop("redraw_house", None)
         ui.set_box_open(STATE.get("panel_parts"), True)
         return _confirm(doc, facts, options, mode)
     finally:
@@ -2759,7 +2763,10 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-        facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+        try:
+            facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+        finally:                        # GordiumCheck never draws a starting house: its box's flag goes with it
+            STATE.pop("redraw_house", None)
         if facts is None:               # closed or Esc: nothing saved, nothing checked
             Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
             return None
