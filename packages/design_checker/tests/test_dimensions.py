@@ -432,3 +432,38 @@ def test_with_two_buildings_a_label_never_sits_inside_either_and_turns_away_from
     cands = [((120, 270), (200, 270))]                          # a west yard: from the house out to the lot line
     i, q, kind = logic.place_dimension(cands, 60, [], [house, garage], middle)
     assert q is not None and not logic.shapes_hit(q, garage) and not logic.shapes_hit(q, house)
+
+
+def test_the_label_drawing_never_compares_points_to_none_with_in():
+    """Review round 7, F1: `None in (point, ...)` compares a Point3d to None with .NET's == and raises in Rhino 8's
+    Python, blanking every label."""
+    import ast
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_dim_label")
+    body = ast.get_source_segment(src, fn)
+    assert "None in (" not in body and "any(p is None for p in (centre, ahead, up, below))" in body
+
+
+TAG = 'min 10\'-0"'
+
+
+def test_a_min_tag_moves_to_the_lines_other_end_when_a_label_sits_at_its_far_end_and_labels_keep_off_their_own_tags():
+    far, near = (200, 100), (100, 100)
+    label = (200, 85, 120, 30)                                    # a label already drawn at the far end
+    assert logic.tag_spot([far, near], TAG, [label])[0] == near[0] + 4      # beside the near end instead
+    assert logic.tag_spot([far, near], TAG, []) == logic.tag_box(far, TAG)
+    cands = [((100, 300), (100, 200)), ((140, 300), (140, 200))]
+    own_tags = [[logic.rect_quad((70, 230, 25, 40))], []]          # the first position's own tag beside its line
+    i, q, kind = logic.place_dimension(cands, 60, [], extras=own_tags, away=(400, 250))
+    assert i == 1 and kind == "on"
+
+
+def test_a_failing_yard_on_a_parallel_wall_is_dimensioned_at_the_walls_middle_not_its_corner():
+    """Review round 7, F2: within the 1/4" tier every position is as short as the yard; shortest-first pushed a
+    failing yard to the corner shared with the next one. There it stays nearest the middle."""
+    from design_checker.check import check_site
+    r = check_site(_plot(box(6, 27, 38, 65)), {**FACTS, "jurisdiction": CITY})        # the west yard fails (6 ft)
+    west = next(y for y in r["plan"]["yards"] if "Side yard, West" in y["label"])
+    assert west["status"] == present.FAILS
+    assert west["points"][1] == [pytest.approx(6), pytest.approx(46)]                  # the middle of the west wall

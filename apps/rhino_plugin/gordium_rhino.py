@@ -563,7 +563,7 @@ def _dimension(d, viewport, line, color):
             d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), ink, width)
 
 
-def _required(d, viewport, line, tag, dark):
+def _required(d, viewport, line, tag, dark, taken=()):
     """A yard's required line: a clear dashed mid-grey across its dimension, with a small "min 25'-0\"" tag at its
     end (Rhino check of #29: the faint line barely registered). Returns the tag's box on screen (None: no tag)."""
     r, g, b = logic.REQUIRED_RGB[1 if dark else 0]
@@ -571,9 +571,11 @@ def _required(d, viewport, line, tag, dark):
     d.DrawPatternedLine(line.From, line.To, grey, ui.DASHED, 1)
     if not tag:
         return None
-    q = viewport.WorldToClient(line.To)
-    d.Draw2dText(tag, grey, rg.Point2d(q.X + 4, q.Y - 6), False, 10)
-    return (q.X + 4, q.Y - 8, logic.label_width(tag, 10), 16)          # its box on screen
+    # at the line's far end, or its near end if a label already sits there (round 7, F3)
+    ends = [viewport.WorldToClient(p) for p in (line.To, line.From)]
+    box = logic.tag_spot([(q.X, q.Y) for q in ends], tag, taken)
+    d.Draw2dText(tag, grey, rg.Point2d(box[0], box[1] + 2), False, 10)
+    return box
 
 
 def _dim_label(d, viewport, o, quad, text, color, dark, line, kind):
@@ -595,7 +597,8 @@ def _dim_label(d, viewport, o, quad, text, color, dark, line, kind):
     cx, cy = sum(p[0] for p in quad) / 4, sum(p[1] for p in quad) / 4
     centre, ahead = model((cx, cy)), model((cx + math.cos(angle) * 10, cy + math.sin(angle) * 10))
     up, below = model((cx, cy - 10)), model((cx, cy + 11))
-    if None in (centre, ahead, up, below):                  # a view the plan's plane can't be found in: no words
+    if any(p is None for p in (centre, ahead, up, below)):  # a view the plan's plane can't be found in: no words
+        # (`is`, never `in`: `in` compares a Point3d to None with .NET's operator, which raises: round 7, F1)
         return
     xaxis = ahead - centre
     plane = rg.Plane(centre, xaxis, rg.Vector3d.CrossProduct(rg.Vector3d.ZAxis, xaxis))
@@ -669,11 +672,15 @@ def draw_screen(o, e):
             width = logic.label_width(text, 11)
         blocks = [logic.rect_quad(box) for box in taken]
         _, away = logic.nearest_outline(on_screen[0][1], footprint)     # away from the building it measures from
-        index, quad, kind = logic.place_dimension(on_screen, width, blocks, footprint, away)
+        # each position's own "min" tags: its label never covers them (round 7, F3)
+        tags = (getattr(o, "yard_tags", None) or {}).get(k) or []
+        own = [[logic.rect_quad(logic.tag_box((q.X, q.Y), t)) for q, t in
+                ((e.Viewport.WorldToClient(r.To), t) for r, t in zip(req, tags))] for _, req in options]
+        index, quad, kind = logic.place_dimension(on_screen, width, blocks, footprint, away, extras=own)
         chosen, required = options[index]
         o.placed[k] = (index, quad, kind, chosen, required)   # what is drawn (the in-Rhino checks read it)
-        for r, tag in zip(required, ((getattr(o, "yard_tags", None) or {}).get(k) or []) + [None] * len(required)):
-            box = _required(d, e.Viewport, r, tag, dark)
+        for r, tag in zip(required, tags + [None] * len(required)):
+            box = _required(d, e.Viewport, r, tag, dark, taken)
             if box is not None:                       # a "min" tag: no later label covers it (round 6, F7)
                 taken.append(box)
         _dimension(d, e.Viewport, chosen, color)

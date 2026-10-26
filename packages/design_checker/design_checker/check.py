@@ -876,8 +876,9 @@ def dim_candidates(points: list, measure: str, shape, footprint, edges: list, wo
         spread = max(1, -(-(found[-1][0] - found[0][0]) // (DIM_CANDIDATES - 1)))
         best = min(found, key=lambda kd: abs(kd[0] - middle))[0]
         found = [(k, d) for k, d in found if (k - best) % spread == 0]
-    if worst:                                       # the shortest first, then nearest the middle
+    if worst and slack > DIM_NEAR_FT:               # with slack: the shortest first (round 6, F1); within 1/4"
         return [d for k, d in sorted(found, key=lambda kd: (round(math.dist(*kd[1]), 4), abs(kd[0] - middle)))]
+    # every one as short as the yard: nearest the middle, off the shared corner (round 7, F2)
     return [d for k, d in sorted(found, key=lambda kd: abs(kd[0] - middle))]
 
 

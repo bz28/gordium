@@ -585,20 +585,39 @@ def _point_segment(p, a, b):
     return ((p[0] - a[0] - t * dx) ** 2 + (p[1] - a[1] - t * dy) ** 2) ** 0.5
 
 
-def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
+def tag_box(end, tag):
+    """A required line's "min" tag beside the line's end (screen): its box (x, y, w, h)."""
+    return (end[0] + 4, end[1] - 8, label_width(tag, 10), 16)
+
+
+def tag_spot(ends, tag, taken):
+    """Where a "min" tag goes: beside the first of the line's ends (far, then near) whose box covers nothing
+    already drawn (`taken`, boxes); the far end's when none is free. Its box."""
+    boxes = [tag_box(end, tag) for end in ends]
+    for box in boxes:
+        if not any(shapes_hit(rect_quad(box), rect_quad(t)) for t in taken):
+            return box
+    return boxes[0]
+
+
+def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX,
+                    extras=None):
     """Which of a yard's dimension positions to draw, and its label (screen): (index, label corners or None, "on"
     | "end" | "none"). `candidates` are the positions check.plan offers along the wall run, best first, each
     (lot end, building end) on screen; `w` the label's width (None: no label shown, only the line placed);
     `obstacles` the screen polygons nothing may cover (the status box, the notice, the lot edges' length labels,
     the labels placed before); `footprint` the buildings' outlines on screen (one outline, or a list of them: a
-    label never sits inside any).
+    label never sits inside any); `extras` per position, more polygons its label keeps off (its own "min" tags).
     The first position whose line and label (on the line) are clear; else the first whose line is clear with its
     label past its outer end (a leader); else the best position, its label past its end."""
     houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
 
-    def clear(shape, solid=True):
-        return not any(shapes_hit(shape, o) for o in obstacles) and \
+    def clear(shape, solid=True, more=()):
+        return not any(shapes_hit(shape, o) for o in list(obstacles) + list(more)) and \
             not (solid and any(shapes_hit(shape, f) for f in houses))
+
+    def own(i):
+        return (extras[i] if extras and i < len(extras) else None) or ()
 
     def line_box(a, b):                            # the line itself, 2 px wide (it starts at the wall: no footprint)
         (ux, uy), _ = _along(a, b)
@@ -612,13 +631,13 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_L
         if w is None:
             return i, None, "none"
         q = label_on_line(a, b, w, h, away, gap)
-        if clear(q):
+        if clear(q, more=own(i)):
             return i, q, "on"
     if w is None:
         return usable[0][0], None, "none"
     for i, a, b in usable:
         q = label_at_end(a, b, w, h, gap)
-        if clear(line_box(a, b), solid=False) and clear(q):
+        if clear(line_box(a, b), solid=False) and clear(q, more=own(i)):
             return i, q, "end"
     i, a, b = usable[0]
     return i, label_at_end(a, b, w, h, gap), "end"
