@@ -543,10 +543,12 @@ def draw_scene(o, e):
         _see_through(e.Display, False)
 
 
-def _face_samples(face):
+def _face_samples(face, margin=0.0):
     """Points on a face's trimmed part, each with its outward normal (a face Rhino marks reversed has its normal
     turned: review of 8379b66, F1): the middle of its area, then a 5 × 5 grid over its shrunk domain, only where on
-    the face (a boolean's face keeps its whole surface, trimmed: F2)."""
+    the face (a boolean's face keeps its whole surface, trimmed: F2); none within `margin` of its edges, where a
+    cut face's ray, started off it along its normal, could clear a roof sloping over its edge (review of cbb6e8c, F1),
+    unless that leaves none."""
     out = []
     dup = face.DuplicateFace(False)
     if dup is None:
@@ -568,6 +570,16 @@ def _face_samples(face):
         if shrunk.OrientationIsReversed:
             n.Reverse()
         out.append((shrunk.PointAt(u, v), n))
+    if margin > 0 and out:
+        edges = list(dup.DuplicateEdgeCurves() or [])
+
+        def inside(p):
+            for c in edges:
+                ok, t = c.ClosestPoint(p)
+                if ok and c.PointAt(t).DistanceTo(p) < margin:
+                    return False
+            return True
+        out = [s_ for s_ in out if inside(s_[0])] or out
     return out
 
 
@@ -587,15 +599,16 @@ def _seen_faces(o, viewport, piece):
         return cache[key]
     if len(cache) > 256:
         cache.clear()
-    samples = o.__dict__.setdefault("face_samples", {})
-    if id(piece) not in samples:
-        samples[id(piece)] = [_face_samples(f) for f in piece.Faces]
     doc = Rhino.RhinoDoc.ActiveDoc
     lift = (doc.ModelAbsoluteTolerance if doc is not None else 0.001) * 10
     # each ray starts off the face along its own normal by more than the piece stands proud, so a face lying on the
     # house starts outside it (_proud scales the piece: a face turned towards its middle moves in, not out; review
     # of 3159a78, F1); a cut face inside the house still starts inside it
-    off = _model_length(doc, 2 * ui.HIGHLIGHT_PROUD_FT) + lift if doc is not None else 0.05
+    # (2.5 × proud: _proud's scaling moves a diagonal face in by up to √3 × it, the mesh stands out half of it)
+    off = _model_length(doc, 2.5 * ui.HIGHLIGHT_PROUD_FT) + lift if doc is not None else 0.05
+    samples = o.__dict__.setdefault("face_samples", {})
+    if id(piece) not in samples:
+        samples[id(piece)] = [_face_samples(f, 2 * off) for f in piece.Faces]
     meshes = getattr(o, "occluders", None) or []
     shown = []
     for face, points in zip(piece.Faces, samples[id(piece)]):
@@ -2504,7 +2517,8 @@ def _draw_plan(doc, o, result, facts):
     # read (logic.coloured_info)
     blocks = plan.get("encroach") or []
     made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
-    o.occluders = logic.guard(lambda: _occluders(doc), "the buildings that hide a coloured face")() or []
+    o.occluders = (logic.guard(lambda: _occluders(doc), "the buildings that hide a coloured face")() or []) \
+        if blocks else []                            # (meshed only when something is coloured)
     o.seen_faces, o.face_samples = {}, {}
     o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
                   for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
