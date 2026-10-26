@@ -556,7 +556,7 @@ def test_the_plugin_replaces_them_each_check_whatever_the_layers_state_and_out_o
     assert body.index("if left:") < body.index("layer.IsVisible = False") < body.index("return left")
     src_check = (REPO / "packages/design_checker/design_checker/check.py").read_text(encoding="utf-8")
     yl = src_check[src_check.index("def full_yard_lines("):src_check.index("def plan(")]
-    assert "lines.buffer(limit))" in yl and "join_style" not in yl          # round, as the envelope (F3)
+    assert "lines.buffer(limit, quad_segs=QUAD_SEGS))" in yl and "join_style" not in yl   # round, as the envelope
 
 
 def test_an_unknown_survey_is_the_tax_maps_and_a_tight_lot_is_never_drawn_as_surveyed():

@@ -931,6 +931,7 @@ def full_yard_lines(shape, lot: dict, items: list) -> list:
     without a limit in feet or without a lot shape. The lot is the measurement's own polygon, curved lines and
     all (F5)."""
     from shapely.geometry import LineString, Point
+    from envelope_builder.envelope import QUAD_SEGS
     if shape is None or not (lot or {}).get("edges"):
         return []
     area = shape.polygon.buffer(0)
@@ -949,8 +950,9 @@ def full_yard_lines(shape, lot: dict, items: list) -> list:
         for limit in limits:
             if limit <= 0:
                 continue
-            band = area.intersection(lines.buffer(limit))      # (round corners, as the envelope and the yards'
-            #                                                    strips: review of dd44f1b, F3)
+            # round corners at the envelope's own fineness (its QUAD_SEGS), so the line and the envelope's arc
+            # agree (reviews of dd44f1b, F3, and d5fca99, R1)
+            band = area.intersection(lines.buffer(limit, quad_segs=QUAD_SEGS))
             # (only its polygon parts: a touch at a point or along a line makes a collection, whose boundary is
             # None in shapely 2.1: review of feature 4, F8)
             parts = [g for g in getattr(band, "geoms", [band]) if g.geom_type == "Polygon" and not g.is_empty]

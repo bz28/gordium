@@ -3052,7 +3052,7 @@ def _envelope_curves(doc, plan, facts):
         left = len(_envelope_objects(doc, index))
         if left:                                   # never a second set over the first, nor stale ones shown as
             layer.IsVisible = False                # current (review of dd44f1b, F2)
-            say("Gordium: the curves to snap to couldn't be replaced (" + str(left) + " left); hidden until the "
+            say("the curves to snap to couldn't be replaced (" + str(left) + " left); hidden until the "
                 "next check")
             return left
         z = _lot_level(doc, facts or {})
