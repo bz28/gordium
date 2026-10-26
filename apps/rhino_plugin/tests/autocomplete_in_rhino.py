@@ -120,9 +120,43 @@ def laid_out(listbox):
         return {"visible_h": num(scroll.ContentSize.Height), "rows": rows,
                 "rows_bottom": (num(last.Y) + num(last.Height)) if last is not None else 0.0,
                 "pitch": (num(table.RectOfRow(1).Y) - num(table.RectOfRow(0).Y)) if rows >= 2 else
-                         (num(table.RectOfRow(0).Height) if rows else 0.0)}
+                         (num(table.RectOfRow(0).Height) if rows else 0.0),
+                "painted": painted(scroll)}
     except Exception:
         return None
+
+
+def painted(view):
+    """What is drawn, read from pixels (not from the table's numbers, which are what Gordium sizes from): the view
+    rendered to a bitmap, scanned from the bottom up for the lowest pixel row that differs from the background
+    (text). Returns the view's height and that ink's bottom, in points; or the error, so the claim fails rather
+    than passes when it can't look."""
+    try:
+        num = sys.modules["gordium_ui"].native_number
+        bounds = view.Bounds
+        rep = view.BitmapImageRepForCachingDisplayInRect(bounds)
+        view.CacheDisplay(bounds, rep)
+        wide, high = int(num(rep.PixelsWide)), int(num(rep.PixelsHigh))
+        scale = high / max(num(bounds.Height), 1.0)
+
+        def rgb(x, y):
+            c = rep.ColorAt(x, y)
+            try:
+                return (num(c.RedComponent), num(c.GreenComponent), num(c.BlueComponent))
+            except Exception:
+                import AppKit
+                c = c.UsingColorSpace(AppKit.NSColorSpace.DeviceRGB)
+                return (num(c.RedComponent), num(c.GreenComponent), num(c.BlueComponent))
+
+        inset = int(4 * scale)                               # off the border
+        background = rgb(wide - inset, high - inset)
+        xs = range(inset, int(wide * 0.6), max(1, wide // 80))   # where the address text runs
+        for y in range(high - inset, inset, -1):             # bottom up: stop at the first row with ink
+            if any(sum(abs(a - b) for a, b in zip(rgb(x, y), background)) > 0.3 for x in xs):
+                return {"view_h": high / scale, "ink_bottom": (y + 1) / scale}
+        return {"view_h": high / scale, "ink_bottom": None}
+    except Exception as e:
+        return {"error": repr(e)}
 
 
 def fits(layout):
@@ -130,8 +164,13 @@ def fits(layout):
     height (the table itself is kept at least as tall as what shows it, so its frame can't tell)."""
     if not layout or layout["rows"] <= 0:
         return False
-    rows_h = layout["rows_bottom"]      # the last row's bottom as laid out: what is painted, not RowHeight
-    return rows_h <= layout["visible_h"] + 0.5 and layout["visible_h"] - rows_h < layout["pitch"]
+    rows_h = layout["rows_bottom"]      # the last row's bottom as laid out, not RowHeight
+    ink = layout.get("painted") or {}
+    if ink.get("ink_bottom") is None:   # couldn't see the pixels, or nothing drawn: not shown to fit
+        return False
+    # and as painted: the lowest text is in the last row's band, so no empty row shows under it
+    return (rows_h <= layout["visible_h"] + 0.5 and layout["visible_h"] - rows_h < layout["pitch"] and
+            ink["view_h"] - ink["ink_bottom"] < layout["pitch"])
 
 
 def screen_bottom(window):
@@ -249,7 +288,7 @@ def main():
         claim("1 fewer than 4 characters: no list, nothing asked", not one.get("visible") and one.get("asked") == 0, one)
         # as Rhino lays it out (measured, not the height Gordium set): one row, and eight ("200 " on ten streets)
         many = seen.get("2m", {})
-        claim("2 the list is as tall as its rows, as laid out: one row and eight, no scroll bar, no empty row",
+        claim("2 the list is as tall as its rows, laid out and painted: one row and eight, no scroll bar, no empty row",
               fits(two.get("layout")) and two["layout"]["rows"] == 1 and fits(many.get("layout")) and
               many["layout"]["rows"] == 8, {"one": two.get("layout"), "eight": many.get("layout")})
         claim("2 typed a character at a time: one request after the pause, the list shows 106's address",

@@ -223,6 +223,21 @@ def test_the_list_is_sized_from_where_its_rows_are_laid_out():
     assert "IntercellSpacing" not in one_row     # a row's rectangle already includes the gap under it (cold review)
 
 
+def test_the_in_rhino_list_claim_needs_the_pixels():
+    """Claim 2 of autocomplete_in_rhino.py: the table's numbers are what Gordium sizes from, so the claim also reads
+    the drawn pixels; not seeing them, or an empty band painted under the text, is not a fit."""
+    src = (REPO / "apps/rhino_plugin/tests/autocomplete_in_rhino.py").read_text(encoding="utf-8")
+    space = {}
+    exec(part(src, "def fits(", "def screen_bottom("), space)
+    fits = space["fits"]
+    row = {"rows": 8, "rows_bottom": 128.0, "visible_h": 130.0, "pitch": 16.0}
+    assert fits(dict(row, painted={"view_h": 132.0, "ink_bottom": 125.0}))
+    assert not fits(dict(row, painted={"error": "AttributeError"}))                 # couldn't look: not a pass
+    assert not fits(dict(row, painted={"view_h": 132.0, "ink_bottom": None}))
+    assert not fits(dict(row, painted={"view_h": 196.0, "ink_bottom": 125.0}))      # rows drawn closer: empty band
+    assert not fits(dict(row, visible_h=192.0, painted={"view_h": 194.0, "ink_bottom": 125.0}))
+
+
 def test_the_found_address_reads_cleanly():
     assert logic.clean_address("96 Ithaca Road, Ithaca, NY, 14850") == "96 Ithaca Road, Ithaca, NY 14850"
     assert logic.clean_address("96 Ithaca Road, Ithaca, NY, 14850-1234") == "96 Ithaca Road, Ithaca, NY 14850-1234"
