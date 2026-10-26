@@ -472,9 +472,9 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
 
 def place_outside(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     """Where a w × h label goes when no spot beside its dimension `line` is clear: (left, top), or None. Outside the
-    drawing's box on screen (every line in `obstacles` and its own), nearest its line: left of it, right of it, below,
-    above, level with (or under) the line's middle and kept on screen, the first covering no line and no box in
-    `taken`; the caller draws a leader back to the line. A narrow view (the Rhino job at 27c8e5d, 656 px wide): the
+    drawing's box on screen (every line in `obstacles` and its own): left of it, right of it, below or above it, level
+    with (or under) the line's middle and kept on screen; of those covering no line and no box in `taken`, the one
+    whose leader back to the line is shortest (the caller draws the leader). A narrow view (the Rhino job at 27c8e5d, 656 px wide): the
     7 ft southwest side yard had no room beside its line, and its label crossed 13 of the lot's and house's lines."""
     segs = list(obstacles) + [line]
     xs = [p[0] for s in segs for p in s]
@@ -488,13 +488,17 @@ def place_outside(line, w, h, obstacles=(), taken=(), gap=6, view=None):
         return min(max(x, lo), hi)
     spots = [(bx0 - gap - w, onto(my - h / 2, 0, vh - h)), (bx1 + gap, onto(my - h / 2, 0, vh - h)),
              (onto(mx - w / 2, 0, vw - w), by1 + gap), (onto(mx - w / 2, 0, vw - w), by0 - gap - h)]
-    for left, top in spots:
+    clear = []
+    for k, (left, top) in enumerate(spots):
         if left < 0 or top < 0 or left + w > vw or top + h > vh:
             continue
         if not any(crosses(s, left, top, w, h) for s in segs) and \
                 not any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken):
-            return left, top
-    return None
+            ex, ey = leader_end((mx, my), (left, top, w, h))
+            clear.append((((ex - mx) ** 2 + (ey - my) ** 2) ** 0.5, k, left, top))
+    # the clear spot with the shortest leader (independent review of 6361a3f: a fixed order put an east yard's label
+    # west of the whole lot, its leader across the house); the order above only breaks ties
+    return min(clear)[2:] if clear else None
 
 
 def label_lines(text):

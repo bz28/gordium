@@ -181,7 +181,8 @@ try:
         boxes = list(rec.get("taken") or []) + ([rec["notice"]] if rec.get("notice") else [])
         for k, (text, (left, top, w, h, want), _, own) in enumerate(rec["labels"]):
             own = tuple(map(tuple, own))
-            hits = [s_ for s_ in lines if s_ != own and g.logic.crosses(s_, left, top, w, h)]
+            hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]   # its own line too (independent
+            #                                   review of 6361a3f: a label on its own dimension must never pass)
             others = [b_ for j, b_ in enumerate(rec["labels"]) if j != k and over((left, top, w, h), b_[1][:4])] + \
                 [b_ for b_ in boxes if over((left, top, w, h), b_)]      # nor the notice, status box, north arrow
             inside = 0 <= left and left + w <= rec["size"][0] and 0 <= top and top + h <= rec["size"][1]

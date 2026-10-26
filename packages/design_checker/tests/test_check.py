@@ -2861,8 +2861,9 @@ def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
 def test_the_detail_under_the_list_keeps_room_for_its_button():
     """The Rhino job at 7a16aa6 (pass 2 claim 2): the list above the selected item's detail is a fixed 380 px, so a
     taller header left the detail 51 px and its "Enter bedrooms and parking spaces…" button 1 px below it (scrolled).
-    The detail now never goes under DETAIL_MIN_HEIGHT: room for its name, a two-line reason and the button (each
-    line 17 px, the button 28, the layout's spacing 6 between them, its padding 10); the list gives way and scrolls."""
+    The detail now never goes under DETAIL_MIN_HEIGHT: room for four lines of name and reason (17 px each), two rows
+    of buttons (20 px each, measured on the Mac), three gaps of 6 px between them and 6 px above and below; the list
+    gives way and scrolls, down to LIST_MIN_HEIGHT (three rows and the column titles)."""
     import re
     src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     least = int(re.search(r"^DETAIL_MIN_HEIGHT = (\d+)", src, re.M).group(1))
@@ -2870,3 +2871,34 @@ def test_the_detail_under_the_list_keeps_room_for_its_button():
     panel = src[src.index("    split = ef.Splitter()"):src.index("    footer = row(")]
     assert "split.Panel2MinimumSize = DETAIL_MIN_HEIGHT" in panel and "split.Panel2 = detail_scroll" in panel
     assert "split.Panel1MinimumSize = LIST_MIN_HEIGHT" in panel and "LIST_MIN_HEIGHT = 3 * ROW_HEIGHT + 24" in src
+
+
+def test_a_label_outside_the_drawing_takes_the_spot_with_the_shortest_leader():
+    """Independent review of 6361a3f: place_outside took the first clear spot in a fixed order (left, right, below,
+    above), so an east side yard's label went west of the whole lot, its leader across the house, while a spot just
+    below its line was clear. It now takes the clear spot whose leader is shortest."""
+    from design_checker.rhino_logic import crosses, leader_end, place_label, place_outside
+
+    def box(x0, y0, x1, y1):
+        return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
+    obstacles = box(300, 110, 640, 520) + box(330, 150, 612, 500) + \
+        [((330 + k * 10, 150), (330 + k * 10, 500)) for k in range(1, 28)]
+    own = ((612, 480), (640, 480))                                               # the east yard's dimension
+    view, w, h = (700, 668), 170, 34
+    assert place_label(own, w, h, obstacles, view=view)[2] is False
+    left, top = place_outside(own, w, h, obstacles, view=view)
+    assert top >= 520 and left > 300, (left, top)                                # below the lot, under its line
+    ex, ey = leader_end((626, 480), (left, top, w, h))
+    assert ((ex - 626) ** 2 + (ey - 480) ** 2) ** 0.5 < 60
+    assert not any(crosses(s, left, top, w, h) for s in obstacles + [own])
+    # the west yard's label: left of the lot, beside its line (there the nearest clear spot)
+    west = place_outside(((300, 480), (330, 480)), w, h, obstacles, view=view)
+    assert west is not None and west[0] + w <= 300 and abs(west[1] + h / 2 - 480) < 1
+
+
+def test_the_label_claim_counts_its_own_line_too():
+    """Independent review of 6361a3f: highlight claim 2 skipped the label's own dimension line when counting
+    crossings, so a label drawn on top of its own dimension passed (clear_spot's fallback can land there)."""
+    script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
+    assert "hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]" in script
+    assert "s_ != own" not in script
