@@ -270,16 +270,18 @@ try:
         lot = g._find(doc, g.current_facts(doc).get("lot_id") or "")
         segs = list(g._segments(lot.Geometry))
         street0 = [[list(p) for p in line] for line in g.current_facts(doc).get("street_line") or []]
-        on_street = lambda s: any(all(abs(a - b) < 0.05 for a, b in zip(list(g._feet_point(doc, s[0])[:2]) +
+        on_street = lambda s: any(all(abs(a - b) < 0.05 for a, b in zip(list(g._feet_point(doc, s[0])[:2]) +  # noqa
                                   list(g._feet_point(doc, s[1])[:2]), line[0] + line[1])) or
                                   all(abs(a - b) < 0.05 for a, b in zip(list(g._feet_point(doc, s[0])[:2]) +
                                   list(g._feet_point(doc, s[1])[:2]), line[1] + line[0])) for line in street0)
         east = max((p for line in street0 for p in line), key=lambda p: p[0])     # Ithaca Rd's east end
-        touches = lambda s: any(abs(g._feet_point(doc, q)[0] - east[0]) < 0.05 and
+        touches = lambda s: any(abs(g._feet_point(doc, q)[0] - east[0]) < 0.05 and  # noqa
                                 abs(g._feet_point(doc, q)[1] - east[1]) < 0.05 for q in s)
         first = next(s for s in segs if on_street(s))
         side = next(s for s in segs if not on_street(s) and touches(s))
-        mids = [(s[0] + s[1]) / 2 for s in (first, side)]   # one Ithaca Rd piece, then the side street (Rhino job)
+        # one Ithaca Rd piece, then the side street (the Rhino job at 7a16aa6 and 6361a3f: the outline's middle
+        # segment is another Ithaca Rd piece on 106's lot, not the side street)
+        mids = [(s[0] + s[1]) / 2 for s in (first, side)]
         clicks = [(Rhino.Commands.Result.Success, m) for m in mids] + [(Rhino.Commands.Result.Nothing, None)]
         prompts = []
         real = g._get_point

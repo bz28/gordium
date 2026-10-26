@@ -55,12 +55,19 @@ def fresh_module():
     return gordium_rhino
 
 
+def draw_now(view):
+    """The view's frame drawn now, at its own size: on the Mac Redraw() only schedules it, and a capture draws it,
+    the plugin's drawing included (the Rhino job at 6361a3f: the draw record read right after Redraw() was empty)."""
+    view.CaptureToBitmap(System.Drawing.Size(view.ActiveViewport.Bounds.Width, view.ActiveViewport.Bounds.Height))
+
+
 def capture(doc, view_name, name):
     view = doc.Views.Find(view_name, False)
     doc.Views.ActiveView = view
     if view_name == "Perspective":
         view.ActiveViewport.ZoomExtents()
     view.Redraw()
+    draw_now(view)
     view.CaptureToBitmap(System.Drawing.Size(1000, 640)).Save(S + "frames/" + name + ".png")
 
 
@@ -153,6 +160,7 @@ try:
             g.set_labels(labels_on)
             g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # never an earlier frame's record
             top_view.Redraw()
+            draw_now(top_view)
             rec = g.STATE.get("drawn", {}).get(str(top_vp.Id))
             return rec if rec and rec.get("complete") else None         # the whole frame drawn
 
@@ -181,7 +189,8 @@ try:
         boxes = list(rec.get("taken") or []) + ([rec["notice"]] if rec.get("notice") else [])
         for k, (text, (left, top, w, h, want), _, own) in enumerate(rec["labels"]):
             own = tuple(map(tuple, own))
-            hits = [s_ for s_ in lines if s_ != own and g.logic.crosses(s_, left, top, w, h)]
+            hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]   # its own line too (independent
+            #                                   review of 6361a3f: a label on its own dimension must never pass)
             others = [b_ for j, b_ in enumerate(rec["labels"]) if j != k and over((left, top, w, h), b_[1][:4])] + \
                 [b_ for b_ in boxes if over((left, top, w, h), b_)]      # nor the notice, status box, north arrow
             inside = 0 <= left and left + w <= rec["size"][0] and 0 <= top and top + h <= rec["size"][1]
