@@ -1957,6 +1957,14 @@ def dim_level(lot_level_ft):
     return (lot_level_ft or 0.0) + DIM_LIFT_FT
 
 
+def face_shown(facing, hidden):
+    """Whether one face of a coloured piece is drawn in a view that is not plan (Rhino check of #31 at 001b757: the
+    rear yard's strip, behind the house's front face, coloured the whole front amber in Front). `facing`: its
+    normal · the direction to the camera (> 0: it faces the camera); `hidden`: for each point sampled on it, whether
+    a building lies between it and the camera. Shown when it faces the camera and some of it is seen."""
+    return facing > 1e-9 and bool(hidden) and not all(hidden)
+
+
 def lines_on_top(parallel, direction_z):
     """Whether Gordium's lines (the lot line, the envelope's outline, the dimensions, the neighbourhood) are drawn
     over everything in this view: in plan yes, so a line under the roof (the buildable outline, a dimension to the

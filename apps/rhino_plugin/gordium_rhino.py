@@ -502,10 +502,15 @@ def draw_scene(o, e):
             for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
                 name = logic.highlight(status)
                 colour = ui.HIGHLIGHT[name]
-                _see_through(d, True)
-                d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+                # in plan as it was; in any other view only its faces the camera sees, depth-tested (Rhino check
+                # of #31 at 001b757: a strip behind the house coloured its whole front face in Front)
+                shown = g if on_top else _seen_faces(o, e.Viewport, g)
+                if shown is None:
+                    continue
+                _see_through(d, True)                # (depth-tested: testing is back on above)
+                d.DrawBrepShaded(shown, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
                 _see_through(d, False)
-                d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
+                d.DrawBrepWires(shown, colour, ui.HIGHLIGHT_EDGE[name])
         for pt in getattr(o, "grade_points", None) or []:           # spot grades
             d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
         _on_top(d, on_top)
@@ -536,6 +541,54 @@ def draw_scene(o, e):
     finally:
         _on_top(e.Display, False)
         _see_through(e.Display, False)
+
+
+def _seen_faces(o, viewport, piece):
+    """The faces of a coloured piece this view's camera sees (logic.face_shown), as one Brep, or None: each face
+    facing the camera with a point of it not behind a building (rays to the camera against the buildings,
+    o.occluders). Kept per piece and camera, so a still view costs nothing per frame."""
+    loc, direction = viewport.CameraLocation, viewport.CameraDirection
+    key = (id(piece), viewport.Id, viewport.IsParallelProjection, round(loc.X, 3), round(loc.Y, 3),
+           round(loc.Z, 3), round(direction.X, 5), round(direction.Y, 5), round(direction.Z, 5))
+    cache = o.__dict__.setdefault("seen_faces", {})
+    if key in cache:
+        return cache[key]
+    if len(cache) > 64:
+        cache.clear()
+    doc = Rhino.RhinoDoc.ActiveDoc
+    tol = doc.ModelAbsoluteTolerance if doc is not None else 0.001
+    far = max(piece.GetBoundingBox(True).Diagonal.Length, 1.0) * 1000
+    shown = []
+    for face in piece.Faces:
+        dom_u, dom_v = face.Domain(0), face.Domain(1)
+        samples = []
+        for su, sv in ((0.5, 0.5), (0.15, 0.15), (0.85, 0.15), (0.15, 0.85), (0.85, 0.85)):
+            u, v = dom_u.ParameterAt(su), dom_v.ParameterAt(sv)
+            if face.IsPointOnFace(u, v) != Rhino.Geometry.PointFaceRelation.Exterior:
+                samples.append((face.PointAt(u, v), face.NormalAt(u, v)))
+        if not samples:
+            continue
+        p, n = samples[0]
+        to_camera = -direction if viewport.IsParallelProjection else loc - p
+        to_camera.Unitize()
+        facing = n * to_camera
+        hidden = []
+        for p, _ in samples:
+            way = -direction if viewport.IsParallelProjection else loc - p
+            length = far if viewport.IsParallelProjection else way.Length
+            way.Unitize()
+            ray = rg.LineCurve(p + way * (tol * 10), p + way * length)
+            hidden.append(any(len(rg.Intersect.Intersection.CurveBrep(ray, b, tol)[2]) > 0
+                              for b in getattr(o, "occluders", None) or []))
+        if logic.face_shown(facing, hidden):
+            shown.append(face.DuplicateFace(False))
+    joined = None
+    if shown:
+        joined = rg.Brep()
+        for f in shown:
+            joined.Append(f)
+    cache[key] = joined
+    return joined
 
 
 def _see_through(d, on):
@@ -2384,6 +2437,8 @@ def _draw_plan(doc, o, result, facts):
     # read (logic.coloured_info)
     blocks = plan.get("encroach") or []
     made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
+    o.occluders = [b for b in made.values() if isinstance(b, rg.Brep)]   # what hides a coloured face off plan
+    o.seen_faces = {}
     o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
                   for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
                   if logic.highlight(status) for piece in _offending(doc, e, made)]

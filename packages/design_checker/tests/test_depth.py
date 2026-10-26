@@ -76,7 +76,7 @@ def test_the_see_through_fills_write_no_depth_so_lines_behind_them_still_show():
     dimension behind them is not hidden (review round 1, F2); depth writing is back on after each."""
     scene = _body("draw_scene")
     assert "d.EnableDepthWriting(not on)" in _body("_see_through")
-    for fill in ("d.DrawBrepShaded(o.yards_zone", "d.DrawBrepShaded(o.envelope", "d.DrawBrepShaded(g, Rhino.Display"):
+    for fill in ("d.DrawBrepShaded(o.yards_zone", "d.DrawBrepShaded(o.envelope", "d.DrawBrepShaded(shown, Rhino.Display"):
         at = scene.index(fill)
         before, after = scene[:at], scene[at:]
         assert before.rindex("_see_through(d, True)") > before.rfind("_see_through(d, False)"), fill
@@ -121,7 +121,7 @@ def test_off_plan_a_dimension_has_the_same_halo_as_on_screen():
     assert body.index("_see_through(d, True)") < body.index("d.DrawLine(stroke, halo,") \
         < body.index("_see_through(d, False)") < body.index("d.DrawLine(stroke, color, 2)")
     scene = _body("draw_scene")
-    assert scene.index("d.DrawBrepShaded(g, Rhino.Display") < scene.index("_scene_dims(o, e, d, dark, old)")
+    assert scene.index("d.DrawBrepShaded(shown, Rhino.Display") < scene.index("_scene_dims(o, e, d, dark, old)")
 
 
 
@@ -132,3 +132,28 @@ def test_off_plan_dimensions_have_the_plans_colours_and_dashed_required_lines():
     assert "ui.status_color(" not in dims.split("if limit is not None")[0]
     assert dims.count("_model_dimension(d, e.RhinoDoc, line, ui.dim_color(") == 2
     assert "_required(d, line, None, dark)" in dims
+
+
+# ---- the coloured pieces off plan: only what the camera sees (Rhino check of #31 at 001b757) -----------------------
+
+def test_a_coloured_face_shows_only_facing_the_camera_and_not_wholly_behind_a_building():
+    """The rear yard's strip, behind the house's front face, coloured the whole front amber in Front."""
+    assert logic.face_shown(1.0, [False, False, True])            # facing, partly seen: shown
+    assert not logic.face_shown(1.0, [True] * 5)                  # wholly behind the house: hidden
+    assert not logic.face_shown(0.0, [False])                     # edge-on (a side face in an elevation)
+    assert not logic.face_shown(-1.0, [False])                    # facing away (the strip's back, from the front)
+    assert not logic.face_shown(1.0, [])                          # nothing of it sampled
+
+
+def test_off_plan_the_plugin_draws_only_the_seen_faces_and_plan_as_before():
+    import ast
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fns = {n.name: ast.get_source_segment(src, n) for n in ast.parse(src).body if isinstance(n, ast.FunctionDef)}
+    scene = fns["draw_scene"]
+    assert "shown = g if on_top else _seen_faces(o, e.Viewport, g)" in scene
+    assert scene.index("_seen_faces(o, e.Viewport, g)") < scene.index("d.DrawBrepShaded(shown,") \
+        < scene.index("d.DrawBrepWires(shown,")
+    seen = fns["_seen_faces"]
+    assert "logic.face_shown(facing, hidden)" in seen and "o.occluders" in seen and "cache[key] = joined" in seen
+    assert "o.occluders = [b for b in made.values() if isinstance(b, rg.Brep)]" in fns["_draw_plan"]

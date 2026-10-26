@@ -172,6 +172,28 @@ try:
     log["height_pixels"] = hits
     claim("4 the see-through envelope never hides it: most of its length shows in its colour (Shaded Front)",
           hits and sum(hits) >= 0.8 * len(hits), hits)
+    # the coloured pieces (Rhino check of #31 at 001b757: the rear yard's strip, behind the house's front face,
+    # coloured the whole front face amber in Front): the front face looks the same with and without them
+    log["encroach"] = [(info.get("row"), st) for _, st, info in o.encroach]
+    claim("5 the sample has a coloured piece to hide (the rear yard's strip)", bool(o.encroach), log["encroach"])
+    kept = o.encroach
+    o.encroach = []
+    _, plain = redraw_spied(g, doc, "Front", "5_front_no_colour")
+    o.encroach = kept
+    _, coloured = redraw_spied(g, doc, "Front", "5_front_coloured")
+    front_y = min(c.Y for c in box.GetCorners())           # the house's front face (the street side, Front's near
+    diffs = []                                             # side), sampled inside its outline
+    for i in range(1, 10):
+        for k in range(1, 10):
+            p = rg.Point3d(box.Min.X + (box.Max.X - box.Min.X) * i / 10.0, front_y,
+                           box.Min.Z + (box.Max.Z - box.Min.Z) * k / 10.0)
+            q = front_vp.WorldToClient(p)
+            if 0 <= q.X < plain.Width and 0 <= q.Y < plain.Height:
+                a, b = plain.GetPixel(int(q.X), int(q.Y)), coloured.GetPixel(int(q.X), int(q.Y))
+                diffs.append(max(abs(a.R - b.R), abs(a.G - b.G), abs(a.B - b.B)))
+    log["front_face_diffs"] = diffs
+    claim("5 Front: the front face is not amber (the strip behind it is hidden): it looks as it does uncoloured",
+          diffs and sum(dv <= 24 for dv in diffs) >= 0.9 * len(diffs), diffs)
 except Exception:
     log["trace"] = traceback.format_exc()
 finally:
