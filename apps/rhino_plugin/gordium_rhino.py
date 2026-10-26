@@ -222,6 +222,13 @@ def ask(request, cancel=False, on_tick=None):
     return _answer(job)
 
 
+def _still_front(doc):
+    """Whether `doc` is still the document in front (Rhino runs while Gordium waits): if not, the command says so
+    (logic.NOT_IN_FRONT) and stops before its box opens on a model that isn't the one in front."""
+    front = Rhino.RhinoDoc.ActiveDoc
+    return front is not None and front.RuntimeSerialNumber == doc.RuntimeSerialNumber
+
+
 def _edited(sender, e):
     STATE["edited_at"] = time.time()
 
@@ -2234,12 +2241,15 @@ def edit_facts():
     if STATE.get("asking") is not None:   # Gordium is working (Rhino runs during its wait): a command
         say(logic.WORKING)                # typed meanwhile waits its turn, never a second piece of work
         return None
+    options = ask({"cmd": "options", "jurisdiction": JURISDICTION})   # (asked first: the model is read after it)
     doc = Rhino.RhinoDoc.ActiveDoc
-    options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     try:
         saved = current_facts(doc)
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
+    if not _still_front(doc):           # another file came to the front while the facts were read
+        say(logic.NOT_IN_FRONT)
+        return None
     cancelled = False
     STATE["house_after_box"] = True     # this box's Draw of a new address draws its house (logic.plans_house)
     STATE.pop("redraw_house", None)     # only this box's own Draw sets it (GordiumCheck's box left it set: round 2)
@@ -2838,15 +2848,18 @@ def gordium_check():
     if STATE.get("asking") is not None:   # Gordium is working (Rhino runs during its wait): a command
         say(logic.WORKING)                # typed meanwhile waits its turn, never a second piece of work
         return None
+    options = ask({"cmd": "options", "jurisdiction": JURISDICTION})   # (asked first: the model is read after it)
     doc = Rhino.RhinoDoc.ActiveDoc
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if not _buildings(doc) and not _lot_candidates(doc):    # an empty model: a new project starts here
         return gordium_start()
-    options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     try:
         facts = current_facts(doc)
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
+    if logic.missing(facts) and not _still_front(doc):     # another file came to the front meanwhile
+        say(logic.NOT_IN_FRONT)
+        return None
     if logic.missing(facts):
         try:
             facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
@@ -2925,6 +2938,10 @@ def gordium_start():
     if STATE.get("asking") is not None:   # Gordium is working (Rhino runs during its wait): a command
         say(logic.WORKING)                # typed meanwhile waits its turn, never a second piece of work
         return None
+    # what the checker gives first (Rhino runs while it is asked: ui.wait), then every read of the model, so nothing
+    # read can change under a wait (review of 0702d50: a building drawn during the wait got a house beside it)
+    options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
+    sample = ask({"cmd": "sample_site"})
     doc = Rhino.RhinoDoc.ActiveDoc
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if _buildings(doc):
@@ -2934,10 +2951,8 @@ def gordium_start():
             ef.MessageBox.Show(Rhino.UI.RhinoEtoApp.MainWindow, logic.START_HAS_BUILDING, "Gordium",
                                ef.MessageBoxButtons.OK, ef.MessageBoxType.Information)
         return None
-    options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     put_down = None                     # the sample this run puts down before its box: taken back unless drawn on
     if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
-        sample = ask({"cmd": "sample_site"})
         put_down = (doc.Strings.GetValue(SECTION, UI_ENTRY), set(RhinoTable(doc).layer_names()))
         sample_lot = str(_add_lot(doc, sample))
         put_down = (sample_lot,) + put_down
@@ -2948,13 +2963,19 @@ def gordium_start():
                                  drawn_address=sample["address"]))   # what is drawn: a lookup of another redraws
         facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
                                        suggested_facts(doc, options["zones"]))
-        facts["lot_id"] = str(_lot_candidates(doc)[0].Id)
+        facts["lot_id"] = sample_lot    # the sample's own lot (never whichever lot happens to come first)
     else:                               # the architect's own lot: their saved facts, else the suggestions
         try:
             saved = current_facts(doc)
         except ValueError:
             saved = {}
         facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
+        if not _still_front(doc):       # another file came to the front while the facts were read
+            say(logic.NOT_IN_FRONT)
+            return None
+        if _buildings(doc):             # a building drawn while the facts were read: GordiumCheck's, not a start
+            say(logic.START_HAS_BUILDING)
+            return None
     drawn = False
     try:
         facts = confirm(doc, facts, options, "start")

@@ -1886,6 +1886,8 @@ CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown
 REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
                    "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
                    "panel) for a report of the model now.")
+NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
+                "command again in the file you want.")
 HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
                   "Gordium will check it.")
 DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "

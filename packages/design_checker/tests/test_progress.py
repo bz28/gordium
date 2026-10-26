@@ -476,3 +476,21 @@ def test_every_kind_of_edit_is_noted_and_the_wait_never_leaves_work_behind():
     early = fallback[fallback.index("logic.HOUSE_OUTDATED"):fallback.index("return None")]
     assert "live(True)" in early and "documents(True)" in early
     assert "Zoning report… was pressed" not in logic.REPORT_OUTDATED     # GordiumCheck says it too
+
+
+def test_commands_ask_the_checker_before_they_read_the_model():
+    """Review of 0702d50: Rhino runs during a wait, so whatever a command read of the model before one may be out of
+    date after it (a building drawn meanwhile got a starting house beside it; another file came to the front)."""
+    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
+    assert start.index('ask({"cmd": "options"') < start.index('ask({"cmd": "sample_site"})') < \
+        start.index("doc = Rhino.RhinoDoc.ActiveDoc") < start.index("if _buildings(doc):")
+    assert start.count("ask(") == 2 and 'facts["lot_id"] = sample_lot' in start
+    own = start[start.index("    else:                               # the architect's own lot"):start.index("drawn = False")]
+    assert own.index("current_facts(doc)") < own.index("_still_front(doc)") < own.index("if _buildings(doc):")
+    for fn, end in (("def gordium_check(", "def _layer("), ("def edit_facts(", "def report_path(")):
+        body = part(RHINO, fn, end)
+        assert body.index('ask({"cmd": "options"') < body.index("doc = Rhino.RhinoDoc.ActiveDoc"), fn
+        assert body.index("current_facts(doc)") < body.index("_still_front(doc)") < body.index("confirm("), fn
+    front = part(RHINO, "def _still_front(", "def _edited(")
+    assert "front.RuntimeSerialNumber == doc.RuntimeSerialNumber" in front
+    assert RHINO.count("not _still_front(doc):") == RHINO.count("say(logic.NOT_IN_FRONT)") == 3   # each caller says it
