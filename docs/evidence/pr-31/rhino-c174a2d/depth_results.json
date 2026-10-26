@@ -1,0 +1,348 @@
+{
+ "claims": {
+  "the sample is drawn with its yard dimensions": {
+   "ok": true,
+   "detail": 4
+  },
+  "1 Top: the lines go on top": {
+   "ok": true,
+   "detail": {
+    "on_top": [
+     true,
+     false,
+     true,
+     false,
+     true,
+     false,
+     false
+    ],
+    "screen": 4,
+    "model": 0
+   }
+  },
+  "1 Top: the yard dimensions drawn on screen, not in the model": {
+   "ok": true,
+   "detail": {
+    "on_top": [
+     true,
+     false,
+     true,
+     false,
+     true,
+     false,
+     false
+    ],
+    "screen": 4,
+    "model": 0
+   }
+  },
+  "2 Perspective: no line goes on top": {
+   "ok": true,
+   "detail": {
+    "on_top": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "screen": 0,
+    "model": 4
+   }
+  },
+  "2 Perspective: the yard dimensions drawn in the model, none on screen": {
+   "ok": true,
+   "detail": {
+    "on_top": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "screen": 0,
+    "model": 4
+   }
+  },
+  "3 where the house hides the rear yard's dimension, none of it shows": {
+   "ok": true,
+   "detail": {
+    "hidden": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "open": []
+   }
+  },
+  "3 where nothing hides it, it shows": {
+   "ok": true,
+   "detail": {
+    "hidden": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "open": []
+   }
+  },
+  "4 Front: the height's dimension drawn in the model, depth-tested": {
+   "ok": true,
+   "detail": {
+    "on_top": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "screen": 0,
+    "model": 1
+   }
+  },
+  "4 the see-through envelope never hides it: most of its length shows in its colour (Shaded Front)": {
+   "ok": true,
+   "detail": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "top": {
+  "on_top": [
+   true,
+   false,
+   true,
+   false,
+   true,
+   false,
+   false
+  ],
+  "screen": 4,
+  "model": 0
+ },
+ "perspective": {
+  "on_top": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "screen": 0,
+  "model": 4
+ },
+ "pixels": {
+  "hidden": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "open": []
+ },
+ "front": {
+  "on_top": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "screen": 0,
+  "model": 1
+ },
+ "height_pixels": [
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true
+ ],
+ "passed": 9,
+ "ok": true
+}
