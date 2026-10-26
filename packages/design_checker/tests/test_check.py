@@ -3117,15 +3117,47 @@ def test_every_street_line_is_saved_with_its_street_id():
     segs = [tuple(map(tuple, x)) for x in _ring([(0, 0), (20, 0), (40, 0), (40, 100), (0, 100)])]
     got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
     assert got["street_ids"] == ["Street 1", "Street 1"]
-    # never one id across a sure corner: saved unnamed lines across a corner, re-clicked (kept as they were)
+    # one id only where the run is surely one street (round ids, all reproduced through check_site): never 200 ft
+    # read along two streets of a 40 ft lot
     corners = [(0, 0), (40, 0), (40, 160), (0, 160)]
     sq = _ring(corners)
-    lines, ids = logic.pick_street([sq[0], sq[1]], None, sq[0], None, outline=sq)
-    assert len(lines) == 2 and ids == ["Street 1", "Street 1 (past a corner)"], ids
     base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
-    r = check_site(_plot(box(12, 30, 28, 70, 0, 30), lot_=lot_of(corners)), dict(base, street_line=lines, street_ids=ids))
-    width = next(i for i in r["view"]["items"] if i["name"] == "Lot width")
-    assert width["status"] != "complies", width                      # never 200 ft along both streets
+
+    def width(lines_, ids_, corners_=corners):
+        r = check_site(_plot(box(12, 30, 28, 70, 0, 30), lot_=lot_of(corners_)),
+                       dict(base, street_line=lines_, street_ids=ids_))
+        return next(i for i in r["view"]["items"] if i["name"] == "Lot width")["status"]
+
+    # saved unnamed lines across a corner, re-clicked (kept as they were): unnamed, asked
+    lines, ids = logic.pick_street([sq[0], sq[1]], None, sq[0], None, outline=sq)
+    assert len(lines) == 2 and ids == [None, None] and width(lines, ids) != "complies", ids
+    # (F2) a name never crosses a corner onto an unnamed line
+    lines, ids = logic.pick_street([sq[0], sq[1]], [None, "B St"], sq[1], None, outline=sq)
+    assert ids == [None, "B St"] and width(lines, ids) != "complies", ids
+    # (F3) the unreadable outline's fallback: the saved lines across the corner stay unnamed
+    shuffled = [sq[2], sq[0], sq[3], sq[1]]
+    lines, ids = logic.pick_street([sq[0], sq[1]], None, sq[0], None, outline=shuffled)
+    assert len(lines) == 2 and ids == [None, None], ids
+    # (F1) a Yes at every bend of a rounded corner: not surely one street, so unnamed (the words say so too)
+    import math as m_
+    pts = [(0.0, 0.0), (30.0, 0.0)] + [(30 + 10 * m_.sin(m_.radians(a)), 10 - 10 * m_.cos(m_.radians(a)))
+                                       for a in (22.5, 45, 67.5, 90)] + [(40.0, 160.0), (0.0, 160.0)]
+    rc = _ring(pts)
+    told = []
+    lines, ids = logic.pick_street(None, None, rc[0], None, outline=rc, ask=lambda q: True, said=told)
+    assert len(lines) == 6 and ids == [None] * 6 and "not surely one street" in told[-1]["words"], (ids, told)
+    assert width(lines, ids, pts) != "complies"
+    runs, _ = logic.add_street_pick([], rc, rc[0], None, lambda q: True)
+    assert logic.street_lines_of(rc, runs)[1] == [None] * 6
+    # (F4) Gordium's own "Street 1" is no name: a corner pick numbers its streets afresh, never two "Street 1"
+    first, first_ids = logic.pick_street(None, None, sq[0], None, outline=sq)
+    assert first_ids == ["Street 1"]
+    names = logic.outline_names(sq, first, first_ids)
+    assert names == [None] * 4
+    runs, _ = logic.add_street_pick([], sq, sq[1], names)
+    runs, _ = logic.add_street_pick(runs, sq, sq[0], names)
+    assert logic.street_lines_of(sq, runs, names)[1] == ["Street 1", "Street 2"]
+    assert logic.generated_id("Street 12") and not logic.generated_id("Ithaca Rd")
     # the source: no street lines saved without their ids
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     calls = re.findall(r"set_street_lines\(([^)]*)\)", rhino)

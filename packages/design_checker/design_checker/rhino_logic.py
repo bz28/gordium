@@ -1365,7 +1365,7 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
         # pieces around the click, of its own street or none, are kept as they are (never asked again, never
         # shrunk on a guess: round 10), and the street grows on from them.
         n = len(outline)
-        own_ids = _street_lines().matching_ids(lines, old_ids)
+        own_ids = _real_names(_street_lines().matching_ids(lines, old_ids))   # (Gordium's own ids: no name)
         names, saved = [None] * n, set()
         for k, line in enumerate(lines):
             q = _piece_at(outline, line, tolerance)
@@ -1399,7 +1399,9 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
                 if name:
                     ids[hits[0]] = name
                 kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
-                out = [ids[next(k for k, line in enumerate(lines) if line == q)] or label for q in kept]
+                out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
+                if street_verdict(*_end_to_end(kept, out))[0] == "one":     # (one id only for one street)
+                    out = [i or label for i in out]
                 why = "the lot outline doesn't run end to end in order here, so Gordium can't follow the street along it"
                 said.append({"words": (f"{label}: the street lines kept as they were ({why})" if kept == lines else
                                        f"{street_words(label, kept, out)} ({why})"), "refused": False})   # (round 12)
@@ -1497,11 +1499,22 @@ def _piece_at(outline, picked, tolerance):
     return None
 
 
+def generated_id(name):
+    """Whether a street id is Gordium's own ("Street 1", "Street 2"... given to a run nobody named), not a name:
+    never read back as a street's identity (a new pick numbers its streets afresh: round ids, F4)."""
+    import re
+    return isinstance(name, str) and re.fullmatch(r"Street \d+", name.strip()) is not None
+
+
+def _real_names(ids):
+    return [None if generated_id(i) else i for i in ids] if isinstance(ids, list) else ids
+
+
 def outline_names(outline, lines, ids, tolerance=0.5):
     """The street each piece of the lot outline is known to be on (one per piece, None where unknown): a piece that
     is one of the street lines `lines` takes that line's own name (`ids`, only when they match the lines one for one:
     street_lines.matching_ids); every other piece None."""
-    own = _street_lines().matching_ids(lines or [], ids)
+    own = _real_names(_street_lines().matching_ids(lines or [], ids))      # (Gordium's own ids: no name)
     out = []
     for piece in outline or []:
         k = next((k for k, line in enumerate(lines or []) if _same_piece(line, piece, tolerance)), None)
@@ -1860,13 +1873,12 @@ def add_street_pick(runs, outline, picked, names=None, ask=None, tolerance=0.5):
 
 
 def street_lines_of(outline, runs, names=None, clicks=None, labels=None):
-    """(street lines, their street ids) from the runs kept (piece numbers), in click order, each piece once. Every
-    line gets an id, so the ids always match the lines (the measuring reads a corner lot's streets from them, never
-    from the drawing: #18): a piece's own name where it is known (`names`), else its run's: the run's known name,
+    """(street lines, their street ids, one per line) from the runs kept (piece numbers), in click order, each piece
+    once (the measuring reads a corner lot's streets from the ids, never from the drawing: #18): a piece's own name
+    where it is known (`names`; Gordium's own "Street N" ids are no name), else its run's: the run's known name,
     else `labels[i]`, else "Street 1", "Street 2"... by the run's place in the click order (as the command line
-    calls it). A run is never one id across a sure corner (two long pieces turning more than TURN_LIMIT_DEG, as a
-    street kept from an older save may be): past one it is "… (past a corner)", a street of its own, so the
-    measuring never reads one frontage along two streets. No run (no click was a piece of the outline): the lines
+    calls it), but only where the run is surely one street (street_verdict): else its unnamed lines stay unnamed,
+    and the measuring asks, never one frontage along two streets. No run (no click was a piece of the outline): the lines
     clicked, each its own street; every click refused: nothing ([], None)."""
     if not any(runs) and clicks:
         if all(_piece_at(outline, c, JOINT) is None for c in clicks):   # none is a piece of the outline
@@ -1874,22 +1886,20 @@ def street_lines_of(outline, runs, names=None, clicks=None, labels=None):
             return lines, [f"Street {i + 1}" for i in range(len(lines))]
         return [], None          # every click refused (a point, a street already kept): nothing changes (round 8)
     names = list(names) if isinstance(names, list) and len(names) == len(outline or []) else [None] * len(outline or [])
-    sl = _street_lines()
     seen, lines, ids = set(), [], []
     for i, run in enumerate(runs):
-        known = next((names[k] for k in run if names[k]), None)
+        mine = [k for k in run if k not in seen]
+        # a run gets one id only where it is surely one street (street_verdict over its lines and known names,
+        # the measuring's own test): else its unnamed lines stay unnamed and the measuring asks (round ids: a
+        # Yes round a rounded corner, a name across a corner, never one id for two streets)
+        sure = street_verdict(*_end_to_end([outline[k] for k in mine], [names[k] for k in mine]))[0] == "one" \
+            if mine else False
+        known = next((names[k] for k in mine if names[k]), None)
         base = known or (labels[i] if labels and i < len(labels) and labels[i] else f"Street {i + 1}")
-        current, last = base, None
-        for k in run:
-            if k in seen:
-                continue
-            if last is not None and not is_tiny(outline[last]) and not is_tiny(outline[k]) and \
-                    (sl.heading_change([outline[last], outline[k]], JOINT) or 0.0) > sl.TURN_LIMIT_DEG:
-                current = (current + " (past a corner)") if current == base else current + " (past another corner)"
+        for k in mine:
             seen.add(k)
             lines.append([list(outline[k][0][:2]), list(outline[k][-1][:2])])
-            ids.append(names[k] or current)
-            last = k
+            ids.append(names[k] or (base if sure else None))
     return lines, (ids if lines else None)
 
 
