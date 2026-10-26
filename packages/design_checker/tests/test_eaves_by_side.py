@@ -294,3 +294,18 @@ def test_a_rules_own_review_question_is_its_reason_not_a_question_that_changes_n
     row = {"Error": "NEEDS REVIEW", "Rule id": rule["id"], "Why it needs review": "as drawn"}
     why = _why(row, {rule["id"]: rule}, got, ALLOWED, facts)["Why"]
     assert why == "the narrower side may be the one that carries the larger minimum", why
+
+
+def test_a_review_reason_is_shown_only_if_it_holds_under_every_reading():
+    """Two review_when entries, one holding under one reading of a measurement and the other under the other: neither
+    holds under every reading, so the row's reason is the readings' own question, never both entries' words."""
+    from design_checker.check import _why
+    got, facts = measured(12.0, 15.0, 5.0, 0.0)
+    h = sorted({r["value"] for r in got["building_height"]["readings"]})
+    assert len(h) >= 2
+    rule = {"id": "T.split", "kind": "rule", "check": "building_height < 100",
+            "review_when": [{"when": f"building_height <= {h[0]}", "reason": "low"},
+                            {"when": f"building_height > {h[0]}", "reason": "high"}]}
+    row = {"Error": "NEEDS REVIEW", "Rule id": rule["id"], "Why it needs review": "as drawn"}
+    why = _why(row, {rule["id"]: rule}, got, ALLOWED, facts)["Why"]
+    assert "low" not in why.split("; ") and "high" not in why.split("; "), why

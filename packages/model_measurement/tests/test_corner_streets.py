@@ -83,3 +83,18 @@ def test_a_street_bending_between_15_and_30_degrees_is_read_both_ways():
              "ground_is_flat": True, "grade_elevation": 0}
     widths = _widths(site, facts)
     assert 30.0 in widths and 50.0 in widths, widths
+
+
+def test_a_corner_rounded_into_short_pieces_beside_a_sharp_corner_may_split_inside_the_curve():
+    """Street A (40 ft), a corner rounded into 6 pieces turning 15 degrees each, street B up the side, and a sharp
+    90 degree corner onto a third line: the rounded run turns 90 degrees in all, so where A ends is open and A's own
+    frontage (40 ft, the split where the curve starts) must stay a reading (#18 review: without the rounded-run
+    rule the smallest reading was 43'-1 1/2", hiding a 40 ft lot width)."""
+    r = 12.0
+    curve = [(40 + r * math.sin(math.radians(a)), r - r * math.cos(math.radians(a))) for a in range(0, 91, 15)]
+    ring = [(0, 0), *curve, (52, 100), (0, 100)]
+    edges, site = _site(ring)
+    facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b",
+             "use": "one_family_detached", "corner_lot": True, "street_line": edges[:len(ring) - 1],
+             "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0}
+    assert 40.0 in _widths(site, facts)

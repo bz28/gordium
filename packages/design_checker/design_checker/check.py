@@ -133,7 +133,7 @@ def _review_reasons(rule: dict, measured: dict, allowed: dict, facts: dict | Non
     if not every:
         return []
     kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
-    out = []
+    out = None
     for trial, _ in every:
         if outcome(rule, trial, allowed) != "needs_review":
             return []
@@ -144,10 +144,10 @@ def _review_reasons(rule: dict, measured: dict, allowed: dict, facts: dict | Non
                     held.append(" ".join(str(r.get("reason") or "").split()))
             except Exception:                   # a condition that can't be read under this reading
                 pass
-        if not held:
+        out = [h for h in held if h] if out is None else [h for h in out if h in held]
+        if not out:                             # none holds under every reading: the readings' own questions
             return []
-        out += [h for h in held if h and h not in out]
-    return out
+    return out or []
 
 
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn

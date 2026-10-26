@@ -2261,9 +2261,10 @@ def _street_splits(lot: "Lot", chain: list) -> list[int]:
     for sure; one turning more than JOINT (15) but no more than PARALLEL may be. Between the sure corners, a run of
     pieces each joining within JOINT is one street only while it turns no more than PARALLEL in all (its pieces'
     headings within PARALLEL of each other); a run that turns more (a corner rounded into many short pieces) may
-    split at any of its joints. The same rule as the Rhino panel's street pick (rhino_logic.street_run: joints of 15
-    degrees or less, 30 or less in all, one street). Every split that may be is a reading; one street drawn in
-    pieces is never split mid-street (the frontage of one street, §325-8A col. 7, never two streets added)."""
+    split at any of its joints. The same limits as the Rhino panel's corner street pick (#15 7a16aa6: joints of 15
+    degrees or less, 30 or less in all, one street; over 30 a corner). Every split that may be is a reading; one
+    street drawn in pieces is never split mid-street (the frontage of one street, §325-8A col. 7, never two streets
+    added)."""
     turns = [_turn(lot.edges[a], lot.edges[b]) for a, b in zip(chain, chain[1:])]
     sure = {k + 1 for k, t in enumerate(turns) if t > PARALLEL}
     maybe = {k + 1 for k, t in enumerate(turns) if JOINT < t <= PARALLEL}
