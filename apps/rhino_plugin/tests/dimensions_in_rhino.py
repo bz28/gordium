@@ -75,14 +75,17 @@ def drawn(g, doc, view_name, capture=None):
     doc.Views.ActiveView = view
     g._dimension = spy
     try:
+        # on the Mac Redraw() only schedules a frame: a capture draws it (and asks for the labels), the labels are
+        # placed (as once the view rests), then the settled frame is drawn by a second capture (the Rhino job at
+        # e4e5018: as written nothing was drawn, so no label was asked for)
         view.Redraw()
-        g.settle_labels()                                # the labels placed (as once the view rests), then drawn
+        view.CaptureToBitmap(view.ActiveViewport.Size)
+        g.settle_labels()
         del calls[:]
         view.Redraw()
+        bitmap = view.CaptureToBitmap(view.ActiveViewport.Size)   # at the view's own size: the frame the claims read
         if capture:
-            # at the view's own size, so the frame captured is the one the claims read (review of be133d0, F6)
-            view.CaptureToBitmap(view.ActiveViewport.Size).Save(S + "frames/" + capture + ".png")
-            view.Redraw()
+            bitmap.Save(S + "frames/" + capture + ".png")
     finally:
         g._dimension = real
     return calls
@@ -154,18 +157,23 @@ try:
           wrong_k and all(o.placed[j][5] in shown for j in wrong_k), [o.placed[j][5] for j in wrong_k])
     import time as _time
     o.toast = (["Side yard (left) no longer complies: 3'-2\" short of 10'-0\""], _time.time() + 60)
+    roomy = rg.BoundingBox(o.box.Min, o.box.Max)
+    roomy.Inflate(o.box.Diagonal.Length * 0.6)           # a corner clear of the model, so the notice is drawn
+    vp.ZoomBoundingBox(roomy)                             # (#15's rule: no clear corner, none drawn)
     drawn(g, doc, "Top", "1_top_notice")          # the notice showing, as after an edit (in the view worked in)
     every, hard, shapes, dr = frame()
     shown = {t: (box, led, forced, line) for t, box, led, forced, line in every}
     model = dr.get("model")
     note = dr.get("notice")
     log["notice"] = {"notice": note, "model": model}
+    claim("1 the notice is drawn in this failing scene (a corner clear of the model)", note is not None, log["notice"])
     claim("1 the notice is never over the model, nor under any label (#15's rule: no clear corner, not drawn; "
           "the panel says it)",
           note is None or ((not model or not meets(tuple(note), (model[0], model[1], model[2] - model[0],
                                                                   model[3] - model[1])))
                            and not any(meets(tuple(note), x[1]) for x in every)), log["notice"])
     o.toast = None
+    vp.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
     shown_words = [t for t in shown if t in numbers]
     claim("1 each dimension shows its number only (no name, no 'needs', no '(approx.)': the panel says those)",
           shown_words and all("yard" not in t.lower() and "needs" not in t and "approx" not in t for t in shown_words),
@@ -248,7 +256,18 @@ try:
           {"label": hq and hq[0], "house": hx})
 
     g.set_labels(False)
+    vp.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
     drawn(g, doc, "Top", "4_top_labels_off")
+    off, _, _, _ = frame()
+    failing_numbers = [o.placed[j][5] for j, (_, _, st) in enumerate(o.yard_dims) if st == "does_not_comply"]
+    complying_numbers = [o.placed[j][5] for j, (_, _, st) in enumerate(o.yard_dims) if st == "complies"]
+    texts = [x[0] for x in off]
+    log["labels_off"] = [(x[0], x[1], round(g.logic.box_gap(x[4], x[1]), 1)) for x in off]
+    claim("4 labels off: the failing yard's number still beside its yard (number only, within a label height or "
+          "led), the complying yards' gone",
+          failing_numbers and all(t in texts for t in failing_numbers)
+          and all(x[2] or g.logic.box_gap(x[4], x[1]) <= 20 for x in off if x[0] in failing_numbers)
+          and not any(t in texts for t in complying_numbers), log["labels_off"])
     claim("4 labels off: the failing yard's words stay, a complying yard's go",
           g.logic.yard_label_shown(False, "does_not_comply") and not g.logic.yard_label_shown(False, "complies"))
     top.ActiveViewport.ZoomBoundingBox(rg.BoundingBox(rg.Point3d(-3000 * k, -3000 * k, 0), rg.Point3d(3000 * k, 3000 * k, 0)))
