@@ -2866,6 +2866,7 @@ def test_the_detail_under_the_list_keeps_room_for_its_button():
     import re
     src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     least = int(re.search(r"^DETAIL_MIN_HEIGHT = (\d+)", src, re.M).group(1))
-    assert least >= 17 + 2 * 17 + 28 + 3 * 6 + 2 * 10
+    assert least >= 4 * 17 + 2 * 20 + 3 * 6 + 2 * 6      # four lines of name and reason, two rows of buttons (round 1)
     panel = src[src.index("    split = ef.Splitter()"):src.index("    footer = row(")]
     assert "split.Panel2MinimumSize = DETAIL_MIN_HEIGHT" in panel and "split.Panel2 = detail_scroll" in panel
+    assert "split.Panel1MinimumSize = LIST_MIN_HEIGHT" in panel and "LIST_MIN_HEIGHT = 3 * ROW_HEIGHT + 24" in src
