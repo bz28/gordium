@@ -2790,9 +2790,10 @@ def _context_layer_indexes(doc):
 
 def _parent_locked(doc, layer):
     """Whether any layer above this one is locked. Rhino then holds the layer locked whatever its own lock says:
-    locking a parent gives each sublayer the lock and saves the sublayer's own one as its persistent lock, which
-    unlocking the parent puts back (Layer.GetPersistentLocking). Under a locked parent IsLocked reads True for every
-    sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
+    locking a parent locks each sublayer, and unlocking it gives each sublayer its persistent lock
+    (Layer.GetPersistentLocking), which only SetPersistentLocking under a locked parent records: a sublayer locked
+    before its parent comes out unlocked, in plain Rhino too (grade_lock_probe.json at e997f0e). Under a locked parent
+    IsLocked reads True for every sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
     parent = layer.ParentLayerId
     while parent != System.Guid.Empty:
         above = doc.Layers.FindId(parent)
@@ -2827,11 +2828,26 @@ def _set_own_lock(doc, layer, locked):
 
 def _lock_context(doc, locked):
     """Unlock every context layer, or lock them again: all but the editable footprints (rhino_logic.context_locked).
-    Each layer's own lock, so it holds whether or not the architect has locked "Gordium" above them; a parent before
-    its sublayers, so a parent's change can't undo a sublayer's set before it."""
+    Each layer's own lock, so a redraw or a first draw under a locked "Gordium" keeps them (the Rhino job at
+    e997f0e); a parent before its sublayers, so a parent's change can't undo a sublayer's set before it. Drawn while
+    "Gordium" is unlocked, a layer locked by IsLocked records no own lock, so the architect locking and unlocking
+    "Gordium" afterwards unlocked Parcels, Streets and Notes (grade_lock_probe.json): so Gordium::Context, Gordium's
+    own layer, is locked for a moment while each sublayer is given its own lock, which only a locked layer above lets
+    it record, and Rhino keeps it through later locks and unlocks of "Gordium" (lock_probe_994012d.json: relock,
+    nested_relock)."""
     indexes = _context_layer_indexes(doc)
     for i in logic.outermost_first([(i, doc.Layers[i].FullPath) for i in indexes]):
         _set_own_lock(doc, doc.Layers[i], bool(locked) and logic.context_locked(doc.Layers[i].FullPath))
+    top = doc.Layers.FindByFullPath(logic.CONTEXT, -1)
+    if top < 0 or doc.Layers[top].IsLocked or _parent_locked(doc, doc.Layers[top]):
+        return                              # under a locked "Gordium" each own lock is already recorded
+    doc.Layers[top].IsLocked = True         # a moment: its sublayers can record their own locks
+    if not doc.Layers[top].IsLocked:        # refused (the architect's current layer is under it): nothing touched
+        return                              # more, not even an unlock of a layer never locked (review round 3)
+    for i in indexes:
+        if i != top:
+            doc.Layers[i].SetPersistentLocking(bool(locked) and logic.context_locked(doc.Layers[i].FullPath))
+    doc.Layers[top].IsLocked = False        # each sublayer back as its own lock says
 
 
 def _outline_points(geometry):
@@ -2920,7 +2936,7 @@ def _clear_context(doc, sources=None):
                 left += not doc.Objects.Delete(o, True)
     for i, visible, _, _ in was:           # every visibility first (each passes its lock down), then every lock,
         doc.Layers[i].IsVisible = visible
-    for i, _, locked, _ in was:            # a parent before its sublayers (locking it saves theirs as it finds them),
+    for i, _, locked, _ in was:            # a parent before its sublayers (locking it locks them all),
         doc.Layers[i].IsLocked = locked
     for i, _, _, own in was:               # then each layer's own lock, once every lock above it is back
         _set_own_lock(doc, doc.Layers[i], own)
