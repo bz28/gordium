@@ -892,6 +892,21 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=N
     return left, top, width, h, want, rows, led, size, forced
 
 
+def paint_label(d, at, got, color, dark, edge_leader=False):
+    """A placed plan label drawn (no search here: logic.place_labels placed it, outside the drawing loop): its
+    leader from `at` (its line's middle on screen) when it is led, or, for a lot edge shorter than its label
+    (`edge_leader`, logic.needs_leader), a short one; its box and its lines at its size."""
+    left, top, width, rows, size = got["left"], got["top"], got["w"], got["rows"], got["size"]
+    h = logic.label_height(len(rows), size)
+    (xa, ya), (xb, yb) = got["line"]
+    if got["led"] or (edge_leader and logic.needs_leader(((xb - xa) ** 2 + (yb - ya) ** 2) ** 0.5, width)):
+        end = logic.leader_end(at, (left, top, width, h))
+        d.Draw2dLine(System.Drawing.PointF(at[0], at[1]), System.Drawing.PointF(end[0], end[1]), color, 1)
+    d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), int(h)), color, 1, backing(dark))
+    for k, row in enumerate(rows):
+        d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + (size + 5) * k), False, size)
+
+
 def _signed(bits):
     """A 32-bit dash mask as Rhino takes it: a signed Int32 (a mask with its top bit set overflows otherwise:
     "value too large to convert", caught by the guard 2026-10-20, so the dashed lines never drew)."""

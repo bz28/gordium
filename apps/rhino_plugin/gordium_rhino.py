@@ -589,15 +589,9 @@ def draw_screen(o, e):
         solids.append(logic.hull(on) if kind == "building" else on)
     drawn["hard_shapes"], drawn["hard_boxes"] = solids, [list(t) for t in keep]
     drawn["buildings"] = sum(kind == "building" for kind, _ in getattr(o, "plan_solids", None) or [])
-    # the same picture as the last frame (nothing on screen moved): the same placements, never worked out again
-    sig = (tuple(drawn["size"]), tuple(round(v, 1) for s_ in on_screen for q in s_ for v in q),
-           tuple(round(v, 1) for shp in solids for q in shp for v in q), tuple(tuple(round(v, 1) for v in t)
-                                                                               for t in keep), bool(labels))
-    cached = STATE.get("label_cache") or {}
-    if cached.get("sig") != sig or cached.get("view") != str(e.Viewport.Id):
-        cached = {"sig": sig, "view": str(e.Viewport.Id), "spots": {}}
-        STATE["label_cache"] = cached
-    for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
+    # the labels to draw: each yard's (failing first when placed), then each lot edge's length
+    items, colors = [], {}
+    for k, (line, text, status) in enumerate(getattr(o, "yard_dims", None) or []):   # each yard, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
         d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
@@ -606,16 +600,44 @@ def draw_screen(o, e):
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
-            at = ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                             along=(line.From, line.To), obstacles=obstacles, keep=keep, dims=dims,
-                             solids=solids, cache=cached["spots"])   # beside its line, off every other
-            drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line), at[6], at[7], at[8]])
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
-        at = ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each
-                         along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep, dims=dims,
-                         solids=solids, cache=cached["spots"])   # edge's length, beside it, off
-        drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge), at[6], at[7], at[8]])    # every
-        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+            key = ("yard", k, text)
+            items.append({"key": key, "text": text, "line": ((a.X, a.Y), (b.X, b.Y)), "size": 11, "status": status})
+            colors[key] = (color, False)
+    edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []
+    for k, (point, text, edge) in enumerate(edges):
+        a, b = e.Viewport.WorldToClient(edge.From), e.Viewport.WorldToClient(edge.To)
+        key = ("edge", k, text)
+        items.append({"key": key, "text": text, "line": ((a.X, a.Y), (b.X, b.Y)), "size": 11, "status": None})
+        colors[key] = (ui.status_color("complies", dark), True)
+    # placed only once the view is still (logic.place_labels, from _label_tick): never searched in the drawing
+    # loop (the Rhino job at 4bb6d4d: zooming with labels on was 2 fps). The same picture as when they were
+    # placed: drawn there. Moving: carried along with their lines (logic.follow) until the view settles again.
+    vid = str(e.Viewport.Id)
+    sig = (tuple(drawn["size"]), tuple(round(v, 1) for s_ in on_screen for q in s_ for v in q),
+           tuple(round(v, 1) for shp in solids for q in shp for v in q),
+           tuple(tuple(round(v, 1) for v in t) for t in keep), tuple(i["key"] for i in items))
+    cached = (STATE.get("label_cache") or {}).get(vid) or {}
+    settled = cached.get("sig") == sig
+    pending = STATE.get("label_pending") or {}
+    if not settled and items and (pending.get("sig") != sig or pending.get("view") != vid):   # moved: wait again
+        STATE["label_pending"] = {"view": vid, "sig": sig, "at": time.time(), "items": items,
+                                  "size": tuple(drawn["size"]), "keep": [tuple(t) for t in keep], "dims": dims,
+                                  "shapes": solids, "lines": obstacles}
+        _label_timer()
+    spots = cached.get("spots") or {}
+    for item in items:
+        got = spots.get(item["key"])
+        if got is None:
+            continue                         # never placed yet: shown once the view settles
+        if not settled:
+            got = logic.follow(got, item["line"])
+        color, edge = colors[item["key"]]
+        (xa, ya), (xb, yb) = item["line"]
+        ui.paint_label(d, ((xa + xb) / 2, (ya + yb) / 2), got, color, dark, edge_leader=edge)
+        drawn["labels"].append([item["text"], [got["left"], got["top"], got["w"], logic.label_height(
+            len(got["rows"]), got["size"]), got["top"]], len(got["rows"]), [list(q) for q in item["line"]],
+            got["led"], got["size"], got["forced"]])
+    drawn["settled"] = settled or not items
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
@@ -633,6 +655,43 @@ def draw_screen(o, e):
     rows = _status_rows(o, old)
     x, y, _, _ = logic.status_box(e.Viewport.Bounds.Width, rows)
     ui.draw_text_box(d, rows, color, int(x), y, dark, 13)
+
+
+def _label_timer():
+    """The timer that places the labels once the view has been still for LABEL_SETTLE_S (started on demand)."""
+    timer = STATE.get("label_timer")
+    if timer is None:
+        timer = ef.UITimer()
+        timer.Interval = 0.05
+        timer.Elapsed += logic.guard(logic.current_only(lambda s, e: _label_tick(), _is_current), "place the labels")
+        STATE["label_timer"] = timer
+        LEFTOVERS["label_timer"] = timer.Stop
+    timer.Start()
+
+
+def _label_tick():
+    pending = STATE.get("label_pending")
+    if pending is None:
+        if STATE.get("label_timer"):
+            STATE["label_timer"].Stop()
+        return
+    if time.time() - pending["at"] >= logic.LABEL_SETTLE_S:
+        settle_labels()
+
+
+def settle_labels():
+    """Place the labels the last frame asked for (logic.place_labels), keep them for that view, and redraw: the
+    next frame draws them where they were placed. Outside the drawing loop: from the timer, or a script."""
+    pending = STATE.pop("label_pending", None)
+    if pending is None:
+        return False
+    spots = logic.place_labels(pending["items"], pending["size"], pending["keep"], pending["dims"],
+                               pending["shapes"], pending["lines"])
+    STATE.setdefault("label_cache", {})[pending["view"]] = {"sig": pending["sig"], "spots": spots}
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is not None:
+        doc.Views.Redraw()
+    return True
 
 
 def _status_rows(o, old):
@@ -2301,6 +2360,8 @@ def _release(key, value):
         if form is not None:
             form.Close()
     elif key == "toast_timer":
+        value.Stop()
+    elif key == "label_timer":
         value.Stop()
     elif key == "worker":
         _stop_worker()

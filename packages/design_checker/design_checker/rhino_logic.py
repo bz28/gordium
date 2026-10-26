@@ -526,11 +526,12 @@ def box_over_shape(box, poly):
     return _inside(left + w / 2, top + h / 2, poly)
 
 
-def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes=()):
+def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes=(), placed=()):
     """Which HARD rule a plan label's box (left, top, w, h) breaks, or None. HARD: on screen; over no building
     footprint nor coloured part (`hard_shapes`: their outlines on screen, 3 px around them), nor the notice, the
-    status box or the north arrow (`hard_boxes`, 3 px around them); crossing neither its own dimension `line` nor
-    any line in `hard_lines` (every other yard's dimension)."""
+    status box or the north arrow (`hard_boxes`, 3 px around them), nor a label already placed (`placed`: a label is
+    never hidden under another, the Rhino job at 4bb6d4d); crossing neither its own dimension `line` nor any line in
+    `hard_lines` (every other yard's dimension, 3 px around it: the southwest label sat 1 px beside the front's)."""
     left, top, w, h = box
     if view is not None and (left < 0 or top < 0 or left + w > view[0] or top + h > view[1]):
         return "off screen"
@@ -538,9 +539,11 @@ def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes
         return "over a building or its coloured part"
     if any(_over(box, (a - 3, b - 3, c + 6, e + 6)) for a, b, c, e in hard_boxes):
         return "over the notice, the status box or the north arrow"
+    if any(_over(box, other) for other in placed):
+        return "over another label"
     if crosses(line, left, top, w, h):
         return "on its own line"
-    if any(crosses(other, left, top, w, h) for other in hard_lines if other != line):
+    if any(crosses(other, left - 3, top - 3, w + 6, h + 6) for other in hard_lines if other != line):
         return "on another yard's dimension"
     return None
 
@@ -564,7 +567,7 @@ def label_spots(line, w, h, reach, step=LABEL_STEP):
 
 
 def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_boxes=(), soft_lines=(),
-                    hard_shapes=()):
+                    hard_shapes=(), placed=()):
     """Where a plan label for the dimension `line` goes (screen pixels), by one complete set of rules (the Rhino job
     at 319dc5d: each round's fix moved the southwest yard's label onto the next obstacle nobody had listed):
     - HARD, never broken (label_breaks_hard): on screen; over no building footprint or coloured part
@@ -609,7 +612,7 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
         found = None
         for gap, left, top in spots:
             box = (left, top, w, h)
-            if label_breaks_hard(line, box, view, hard_boxes, hard_lines, hard_shapes):
+            if label_breaks_hard(line, box, view, hard_boxes, hard_lines, hard_shapes, placed):
                 continue
             score = soft(box, gap)
             if found is None or score < found[0]:
@@ -637,7 +640,7 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
                         for left in range(0, int(view[0] - w) + 1, 12)]
                 grid.sort()
                 clear = [q for q in grid if not label_breaks_hard(line, (q[1], q[2], w, h), view, hard_boxes,
-                                                                  hard_lines, hard_shapes)][:40]
+                                                                  hard_lines, hard_shapes, placed)][:40]
                 got = best(rows, pt, clear)
                 if got is not None:
                     return got
@@ -668,6 +671,38 @@ def hull(points):
             upper.pop()
         upper.append(p)
     return lower[:-1] + upper[:-1]
+
+
+LABEL_ORDER = {"does_not_comply": 0, "needs_review": 1, "complies": 2}   # failing first, the edges' lengths last
+LABEL_SETTLE_S = 0.15        # the view still this long: the labels are placed (never while it moves)
+
+
+def place_labels(items, view, keep=(), dims=(), shapes=(), lines=()):
+    """Every plan label of a frame placed (place_dim_label), outside the drawing loop (the Rhino job at 4bb6d4d:
+    the search in every frame made zooming 2 fps): failing yards first, then those needing review, those that
+    comply, the edges' lengths last; each one placed is HARD for the ones after (never hidden under another).
+    `items`: dicts with "key", "text", "line" (screen), "size", and "status" (None for an edge). Returns
+    {key: placement}, each with the line it was placed for ("line"), so a moving view can carry it along (follow)."""
+    out, placed = {}, []
+    dim_lines = [tuple(map(tuple, d)) for d in dims]
+    soft = [tuple(map(tuple, s_)) for s_ in lines if tuple(map(tuple, s_)) not in dim_lines]
+    for _, item in sorted(enumerate(items), key=lambda ki: (LABEL_ORDER.get(ki[1].get("status"), 3), ki[0])):
+        own = tuple(map(tuple, item["line"]))
+        got = place_dim_label(own, item["text"], item["size"], view, hard_boxes=list(keep), hard_lines=dim_lines,
+                              soft_lines=soft, hard_shapes=list(shapes), placed=list(placed))
+        got = dict(got, line=own)
+        placed.append((got["left"], got["top"], got["w"], got["h"]))
+        out[item["key"]] = got
+    return out
+
+
+def follow(got, line):
+    """A placement carried along while the view moves (never searched in the drawing loop): the same offset from
+    its line's middle as when it was placed, at the line's middle on screen now."""
+    (xa, ya), (xb, yb) = got["line"]
+    (xc, yc), (xd, yd) = line
+    dx, dy = (xc + xd) / 2 - (xa + xb) / 2, (yc + yd) / 2 - (ya + yb) / 2
+    return dict(got, left=got["left"] + dx, top=got["top"] + dy, line=tuple(map(tuple, line)))
 
 
 def _seg_hits_box(seg, box):
@@ -1947,7 +1982,7 @@ def exchange(sends, lines, request, limit):
     return answer_for(lines, request["id"], limit)
 
 
-HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer",
+HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",
            "worker", "worker_sends", "worker_lines")
 
 

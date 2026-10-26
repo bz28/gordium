@@ -162,8 +162,12 @@ try:
             g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # never an earlier frame's record
             top_view.Redraw()
             draw_now(top_view)
+            g.settle_labels()                         # the labels placed as when the view comes to rest (no idle
+            g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # in a script: the timer can't run)
+            top_view.Redraw()
+            draw_now(top_view)
             rec = g.STATE.get("drawn", {}).get(str(top_vp.Id))
-            return rec if rec and rec.get("complete") else None         # the whole frame drawn
+            return rec if rec and rec.get("complete") and rec.get("settled") else None   # the whole, settled frame
 
         def over(box, other):                          # two (x, y, w, h) boxes overlap
             return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
@@ -207,8 +211,10 @@ try:
                 rw = max(g.logic.label_width(r_, 11) for r_ in rows)
                 rh = g.logic.label_height(len(rows), 11)
                 (xa, ya), (xb, yb) = own
-                near = any(not g.logic.label_breaks_hard(own, (x_, y_, rw, rh), view, hard, dims, shapes) and
-                           g.logic.box_gap(own, (x_, y_, rw, rh)) <= rh - 6
+                others_ = [tuple(b_[1][:4]) for j, b_ in enumerate(rec["labels"]) if j != k]
+                near = any(g.logic.box_gap(own, (x_, y_, rw, rh)) <= rh - 6 and
+                           all(not g.logic.label_breaks_hard(own, (x_ + dx, y_ + dy, rw, rh), view, hard, dims, shapes,
+                                                             others_) for dx in (-3, 0, 3) for dy in (-3, 0, 3))
                            for y_ in range(int(min(ya, yb) - 2 * rh), int(max(ya, yb) + rh) + 1, 4)
                            for x_ in range(int(min(xa, xb) - rw - rh), int(max(xa, xb) + rh) + 1, 4))
                 if near and (gap > rh or size < 11):
@@ -233,7 +239,8 @@ try:
               "rule (an independent 4 px search), and led to its line whenever it is further than 8 px",
               not too_far and all(lab[4] == (lab[3] > 8) for lab in log["labels"]),
               {"too_far": too_far, "labels": log["labels"]})
-        claim("2 no label covers another", not covered, {"covered": covered})
+        claim("2 no label covers another (a placed label is HARD for the later ones)", not covered,
+              {"covered": covered})
         sources = ((g.STATE.get("last") or {}).get("header") or {}).get("sources") or []
         lot = [t for t in sources if t.startswith("Lot: ")]
         area = items["Lot area"]["proposed"]                    # the row's own figure: the fact must say the same
