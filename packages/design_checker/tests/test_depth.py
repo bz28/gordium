@@ -156,4 +156,10 @@ def test_off_plan_the_plugin_draws_only_the_seen_faces_and_plan_as_before():
         < scene.index("d.DrawBrepWires(shown,")
     seen = fns["_seen_faces"]
     assert "logic.face_shown(facing, hidden)" in seen and "o.occluders" in seen and "cache[key] = joined" in seen
-    assert "o.occluders = [b for b in made.values() if isinstance(b, rg.Brep)]" in fns["_draw_plan"]
+    assert "if f <= 1e-9:" in seen and seen.index("if f <= 1e-9:") < seen.index("MeshRay")   # rays only facing
+    assert "if not points:\n            shown.append(face.DuplicateFace(False))" in seen        # never lost
+    samples = fns["_face_samples"]
+    assert "if shrunk.OrientationIsReversed:\n            n.Reverse()" in samples                # review F1
+    assert "dup.Faces.ShrinkFaces()" in samples                                                 # review F2
+    assert "for x in _buildings(doc):" in fns["_occluders"]                                     # review F6
+    assert "_occluders(doc)" in fns["_draw_plan"]

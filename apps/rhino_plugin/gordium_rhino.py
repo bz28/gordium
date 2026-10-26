@@ -543,52 +543,107 @@ def draw_scene(o, e):
         _see_through(e.Display, False)
 
 
+def _face_samples(face):
+    """Points on a face's trimmed part, each with its outward normal (a face Rhino marks reversed has its normal
+    turned: review of 8379b66, F1): the middle of its area, then a 5 × 5 grid over its shrunk domain, only where on
+    the face (a boolean's face keeps its whole surface, trimmed: F2)."""
+    out = []
+    dup = face.DuplicateFace(False)
+    if dup is None:
+        return out
+    dup.Faces.ShrinkFaces()
+    shrunk = dup.Faces[0] if dup.Faces.Count else face
+    area = Rhino.Geometry.AreaMassProperties.Compute(dup)
+    uv = []
+    if area is not None:
+        ok, u, v = shrunk.ClosestPoint(area.Centroid)
+        if ok:
+            uv.append((u, v))
+    du, dv = shrunk.Domain(0), shrunk.Domain(1)
+    uv += [(du.ParameterAt(i / 6.0), dv.ParameterAt(k / 6.0)) for i in range(1, 6) for k in range(1, 6)]
+    for u, v in uv:
+        if shrunk.IsPointOnFace(u, v) == Rhino.Geometry.PointFaceRelation.Exterior:
+            continue
+        n = shrunk.NormalAt(u, v)
+        if shrunk.OrientationIsReversed:
+            n.Reverse()
+        out.append((shrunk.PointAt(u, v), n))
+    return out
+
+
 def _seen_faces(o, viewport, piece):
-    """The faces of a coloured piece this view's camera sees (logic.face_shown), as one Brep, or None: each face
-    facing the camera with a point of it not behind a building (rays to the camera against the buildings,
-    o.occluders). Kept per piece and camera, so a still view costs nothing per frame."""
+    """The faces of a coloured piece this view's camera sees (logic.face_shown), as one Brep, or None: a face is
+    shown when, at one of its points, it faces the camera and nothing of a building lies between (a ray to the
+    camera against every building's mesh, o.occluders, made once per check). A face with no point found is shown
+    (depth-tested; never a colour lost). Kept per piece and camera, so a still view costs nothing; samples are made
+    once per piece, rays cast only from points facing the camera, stopping at the first seen (review of 8379b66,
+    F4)."""
     loc, direction = viewport.CameraLocation, viewport.CameraDirection
-    key = (id(piece), viewport.Id, viewport.IsParallelProjection, round(loc.X, 3), round(loc.Y, 3),
-           round(loc.Z, 3), round(direction.X, 5), round(direction.Y, 5), round(direction.Z, 5))
+    parallel = viewport.IsParallelProjection
+    key = (id(piece), viewport.Id, parallel, round(loc.X, 3), round(loc.Y, 3), round(loc.Z, 3),
+           round(direction.X, 5), round(direction.Y, 5), round(direction.Z, 5))
     cache = o.__dict__.setdefault("seen_faces", {})
     if key in cache:
         return cache[key]
-    if len(cache) > 64:
+    if len(cache) > 256:
         cache.clear()
+    samples = o.__dict__.setdefault("face_samples", {})
+    if id(piece) not in samples:
+        samples[id(piece)] = [_face_samples(f) for f in piece.Faces]
     doc = Rhino.RhinoDoc.ActiveDoc
-    tol = doc.ModelAbsoluteTolerance if doc is not None else 0.001
-    far = max(piece.GetBoundingBox(True).Diagonal.Length, 1.0) * 1000
+    lift = (doc.ModelAbsoluteTolerance if doc is not None else 0.001) * 10
+    meshes = getattr(o, "occluders", None) or []
     shown = []
-    for face in piece.Faces:
-        dom_u, dom_v = face.Domain(0), face.Domain(1)
-        samples = []
-        for su, sv in ((0.5, 0.5), (0.15, 0.15), (0.85, 0.15), (0.15, 0.85), (0.85, 0.85)):
-            u, v = dom_u.ParameterAt(su), dom_v.ParameterAt(sv)
-            if face.IsPointOnFace(u, v) != Rhino.Geometry.PointFaceRelation.Exterior:
-                samples.append((face.PointAt(u, v), face.NormalAt(u, v)))
-        if not samples:
+    for face, points in zip(piece.Faces, samples[id(piece)]):
+        if not points:
+            shown.append(face.DuplicateFace(False))
             continue
-        p, n = samples[0]
-        to_camera = -direction if viewport.IsParallelProjection else loc - p
-        to_camera.Unitize()
-        facing = n * to_camera
-        hidden = []
-        for p, _ in samples:
-            way = -direction if viewport.IsParallelProjection else loc - p
-            length = far if viewport.IsParallelProjection else way.Length
+        facing, hidden = 0.0, []
+        for p, n in points:
+            way = -direction if parallel else loc - p
+            reach = None if parallel else way.Length
             way.Unitize()
-            ray = rg.LineCurve(p + way * (tol * 10), p + way * length)
-            hidden.append(any(len(rg.Intersect.Intersection.CurveBrep(ray, b, tol)[2]) > 0
-                              for b in getattr(o, "occluders", None) or []))
+            f = n * way
+            if f <= 1e-9:                                  # this point faces away: no ray
+                continue
+            facing = max(facing, f)
+            start = p + way * lift
+            blocked = False
+            for m in meshes:
+                t = rg.Intersect.Intersection.MeshRay(m, rg.Ray3d(start, way))
+                if t >= 0 and (reach is None or t < reach):
+                    blocked = True
+                    break
+            hidden.append(blocked)
+            if not blocked:                                # one point seen: enough
+                break
         if logic.face_shown(facing, hidden):
             shown.append(face.DuplicateFace(False))
     joined = None
     if shown:
         joined = rg.Brep()
         for f in shown:
-            joined.Append(f)
+            if f is not None:
+                joined.Append(f)
     cache[key] = joined
     return joined
+
+
+def _occluders(doc):
+    """Every building as one mesh, for the coloured faces' rays (_seen_faces): made once per check (review of
+    8379b66, F6: every building hides, a mesh building too)."""
+    out = []
+    for x in _buildings(doc):
+        g = _drawable(x.Geometry)
+        if isinstance(g, rg.Brep):
+            parts = rg.Mesh.CreateFromBrep(g, rg.MeshingParameters.FastRenderMesh) or []
+            mesh = rg.Mesh()
+            for part in parts:
+                mesh.Append(part)
+            g = mesh if mesh.Faces.Count else None
+        if isinstance(g, rg.Mesh) and g.Faces.Count:
+            out.append(g)
+    return out
 
 
 def _see_through(d, on):
@@ -2358,6 +2413,7 @@ def _clear(o):
     o.yard_required, o.height_dim, o.yard_options, o.yard_tags, o.footprint, o.placed = [], None, {}, {}, [], {}
     o.yard_numbers, o.house_box, o.height_number = {}, [], None
     o.plan_lines = []
+    o.occluders, o.seen_faces, o.face_samples = [], {}, {}
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
     o.doc = None
@@ -2437,8 +2493,8 @@ def _draw_plan(doc, o, result, facts):
     # read (logic.coloured_info)
     blocks = plan.get("encroach") or []
     made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
-    o.occluders = [b for b in made.values() if isinstance(b, rg.Brep)]   # what hides a coloured face off plan
-    o.seen_faces = {}
+    o.occluders = logic.guard(lambda: _occluders(doc), "the buildings that hide a coloured face")() or []
+    o.seen_faces, o.face_samples = {}, {}
     o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
                   for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
                   if logic.highlight(status) for piece in _offending(doc, e, made)]

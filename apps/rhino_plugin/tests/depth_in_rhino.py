@@ -194,6 +194,27 @@ try:
     log["front_face_diffs"] = diffs
     claim("5 Front: the front face is not amber (the strip behind it is hidden): it looks as it does uncoloured",
           diffs and sum(dv <= 24 for dv in diffs) >= 0.9 * len(diffs), diffs)
+    # and the strip still shows where it is seen (a hiding that hid everything would pass the claim above:
+    # review of 8379b66, F3): from behind the house, its rear face is coloured
+    persp = doc.Views.Find("Perspective", False).ActiveViewport
+    rear_y = max(c.Y for c in box.GetCorners())
+    persp.SetCameraLocations(box.Center, box.Center + rg.Vector3d(0, box.Diagonal.Length * 2.5, 0))
+    o.encroach = []
+    _, plain = redraw_spied(g, doc, "Perspective", "6_back_no_colour")
+    o.encroach = kept
+    _, coloured = redraw_spied(g, doc, "Perspective", "6_back_coloured")
+    back = []
+    for i in range(2, 9):
+        for k in range(2, 9):
+            p = rg.Point3d(box.Min.X + (box.Max.X - box.Min.X) * i / 10.0, rear_y,
+                           box.Min.Z + (box.Max.Z - box.Min.Z) * k / 10.0)
+            q = persp.WorldToClient(p)
+            if 0 <= q.X < plain.Width and 0 <= q.Y < plain.Height:
+                a, b = plain.GetPixel(int(q.X), int(q.Y)), coloured.GetPixel(int(q.X), int(q.Y))
+                back.append(max(abs(a.R - b.R), abs(a.G - b.G), abs(a.B - b.B)))
+    log["rear_face_diffs"] = back
+    claim("6 from behind, the rear yard's strip shows its colour on the rear face (it is not hidden everywhere)",
+          back and sum(dv > 24 for dv in back) >= 0.8 * len(back), back)
 except Exception:
     log["trace"] = traceback.format_exc()
 finally:
