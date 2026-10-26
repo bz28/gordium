@@ -2913,6 +2913,22 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     for k in (12, 11, 8):
         got = logic.street_run(rc, rc[k])
         assert side not in got["pieces"], (k, got)                       # never the side unasked
+    # round 9: (D1) what the one-street pick says is what it keeps (old lines and the run); (D2) Edit site's prompt
+    # and its "no street line yet" guard follow what was kept, not what was clicked; (D3) a refused click is told
+    # before its street's name is asked
+    o2 = _ring([(0, 0), (60, 0), (60, 100), (0, 100)])
+    told = []
+    lines, ids = logic.pick_street([o2[0], o2[1]], None, o2[0], "A St", outline=o2, said=told)
+    assert len(lines) == 2 and told[-1]["words"] == logic.street_words("A St", lines, ids), told
+    assert "not surely one street" in told[-1]["words"]
+    assert '            keeps = not runs and logic.street_enter_keeps(facts)' in rhino and \
+        '                if runs or keeps:\n                    break' in rhino
+    one = rhino[rhino.index('        elif what == "street":'):rhino.index('        elif what == "lot":')]
+    assert one.index("refused = logic.refused_click(_outline(doc, lot), picked)") < \
+        one.index("name = logic.street_name_after_pick(")
+    slip = _ring([(0, 0), (50, 0), (50.2, 0.2), (50.2, 100), (0, 100)])
+    assert logic.refused_click(slip, slip[1]).startswith("that piece is under 6 in long")
+    assert logic.refused_click(slip, slip[0]) is None
     # (F4)
     o = _ring([(0, 0), (10, 0), (10.24, 0), (10.44, 0), (30, 0), (30, 100), (0, 100)])
     lines, _ = logic.pick_street([o[0], o[1]], None, o[0], None, outline=o)

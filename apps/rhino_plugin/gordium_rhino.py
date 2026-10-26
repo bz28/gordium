@@ -1388,6 +1388,10 @@ def _box_pick(doc, what, facts, saved_ui):
                 if rc == Rhino.Commands.Result.Success:
                     a, b = _clicked_piece(doc, lot, point)
                     picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+                    refused = logic.refused_click(_outline(doc, lot), picked)   # (before asking its name: round 9)
+                    if refused:
+                        say(refused)
+                        return facts, saved_ui
                     name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
                                                         picked, ids=facts.get("street_ids"))   # the line's own street?
                     if name is None:                                       # else asked, never guessed
@@ -1606,13 +1610,13 @@ def _change_facts(doc, facts, options):
     if lot is not None:
         picked, runs, outline = [], [], _outline(doc, lot)
         while True:                      # every lot line on a street (both streets on a corner lot)
-            keeps = not picked and logic.street_enter_keeps(facts)
-            prompt = "Click a lot line on the street" + (" (Enter when done)" if picked else
-                                                         " (Enter keeps the blue one)" if keeps else "")
+            keeps = not runs and logic.street_enter_keeps(facts)        # (what was kept, not what was clicked:
+            prompt = "Click a lot line on the street" + (" (Enter when done)" if runs else   # a refused click
+                                                         " (Enter keeps the blue one)" if keeps else "")   # keeps none)
             rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, True)      # Enter: done, keep, or asked again
             _go_on(rc)
             if rc != Rhino.Commands.Result.Success:
-                if picked or keeps:
+                if runs or keeps:
                     break
                 Rhino.RhinoApp.WriteLine("Gordium: this lot has no street line yet; click one (Esc cancels)")
                 continue

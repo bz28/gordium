@@ -886,8 +886,10 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
             if k not in have:
                 kept.append([list(outline[k][0][:2]), list(outline[k][-1][:2])])
                 out.append(names[k])
-        if got and got[0]:
-            said.append({"words": got[1], "refused": False})
+        if got and got[0]:     # what it says is what is kept: the old lines and the run (round 9)
+            bend = "; a bend not answered is kept as street (answer No to leave it out)"
+            said.append({"words": street_words(name or ids[hits[0]] or "This street", kept, out)
+                         + (bend if got[1].endswith(bend) else ""), "refused": False})
     return kept, (out if any(out) else None)
 
 
@@ -1247,6 +1249,17 @@ def street_more_question(label, outline, more, swing):
     return f"Past there the lot line bends {round(swing)}° with no clear corner ({count}).{tail}"
 
 
+def refused_click(outline, picked, tolerance=0.5):
+    """What the command line says when a click can't start a street (a short piece standing alone: a point, not a
+    line), or None: asked before anything else (the street's name), so nothing is asked of a refused click
+    (street-run review round 9)."""
+    hit = _piece_at(outline, picked, tolerance)
+    if hit is not None and is_tiny(outline[hit]) and _in_ring_order(outline) \
+            and street_run(outline, outline[hit], None, (), 0.0) is None:
+        return "that piece is under 6 in long (a corner point drawn twice?), not a street line: click the lot line beside it"
+    return None
+
+
 def street_pick(outline, picked, names=None, taken=(), ask=None, label="This street", tolerance=0.5):
     """One click on the street side, the whole street it is on: (piece numbers in order along it, what to say);
     street_run's run, with each unclear stretch past an end asked (`ask`: question -> True Yes, False No, None not
@@ -1260,9 +1273,8 @@ def street_pick(outline, picked, names=None, taken=(), ask=None, label="This str
         hit = _piece_at(outline, picked, tolerance)
         if hit is not None and hit in set(taken):
             return [], "that lot line is on a street already kept"
-        if hit is not None and is_tiny(outline[hit]) and street_run(outline, outline[hit], None, (), 0.0) is None \
-                and _in_ring_order(outline):
-            return [], "that piece is under 6 in long (a corner point drawn twice?), not a street line: click the lot line beside it"
+        if hit is not None and refused_click(outline, outline[hit], 0.0):
+            return [], refused_click(outline, outline[hit], 0.0)
         return None
     run, closed, skipped = list(found["pieces"]), set(), False
     while True:            # each unclear stretch asked in turn; a Yes grows the street on from there, a No ends it
