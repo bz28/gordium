@@ -651,14 +651,15 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     assert -1 not in at and at == sorted(at), [st for st, i in zip(steps, at) if i == -1] or at
     loop = rhino[rhino.index("def _box_loop("):rhino.index("def _lookup_start(")]
     assert loop.count("_draw_prepare(doc, facts, state, saved_ui, session, mode, options)") == 2
-    assert "return _drawn(doc, facts, drawn_state, saved_ui, session)" in loop      # the rebuilt state is saved
+    assert "return _drawn(doc, facts, drawn_state, saved_ui, session, mode)" in loop   # the rebuilt state is saved
     draw = loop[loop.index('if what == "draw":'):]
     assert loop.index("ticked = {k: state[k]") < loop.index('if what == "draw":') and "continue" in draw
     assert "logic.box_facts(facts, saved_ui, state)" in rhino[rhino.index("def _apply_box("):]
     edit = rhino[rhino.index("def edit_facts("):rhino.index("def report_path(")]
     outer = edit.index("    try:                                # one undo step")
     assert outer < edit.index("facts = confirm(") < edit.index("    finally:\n        STATE.pop(\"redraw_house\"")
-    assert edit.rstrip().endswith("run_check(doc, report=False)") and "_end_undo(doc)" in edit
+    assert edit.rstrip().endswith("run_check(doc, report=False)        # the model as it is (as it was, after a "
+                                  "Cancel)\n    if cancelled:\n        say(logic.DRAW_CANCELLED)") and "_end_undo(doc)" in edit
     table = rhino[rhino.index("class RhinoTable"):]
     assert "return logic.own_buildings(" in table[table.index("def buildings("):]
     # one walk of the model for the checker's sorting and a reset's questions (round 3)

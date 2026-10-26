@@ -235,9 +235,17 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      street along the bottom of Top view, the lot behind it.
    - To use your own lot instead, first draw it as one closed polyline on a layer named `Site`, then run
      `GordiumStart`.
+   Whenever Gordium takes more than a moment (the checker, the starting house, the zoning report), a small window
+   says what it is doing, with the seconds so far and **Cancel**: Rhino keeps drawing meanwhile. Cancel stops the
+   work and changes nothing: a **Draw** cancelled while Gordium works out the starting house draws nothing (the
+   model is as it was before the box); once it is drawn, Cancel stops only the check that follows. A cancelled
+   check leaves the panel saying "Check cancelled" (press **Check again**); a cancelled report leaves the file as it
+   was. Live re-checks after an edit run in the background: the panel says "Checking…" with what it is doing and
+   its own **Cancel**.
 3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
    - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
-     45 seconds; the box says "Looking up…"). Look up only shows what it found: the address and a suggested zoning
+     45 seconds; the box says what it is doing as it goes, "Looking up … · Reading the City zoning map…", with a
+     moving mark and the seconds so far, and **Cancel lookup** stops it and leaves the box as it was). Look up only shows what it found: the address and a suggested zoning
      district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which
      draws that lot from the tax map (its street at the bottom of Top view), the street side and whether it's a
      corner lot, each with where it came from (not the ground: for now it is assumed flat, see **Ground** below).

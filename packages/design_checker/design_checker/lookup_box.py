@@ -4,7 +4,8 @@ the checker worker, which answers one request at a time: a lookup given up on wo
     python -m design_checker.lookup_box "106 Ithaca Rd, Ithaca, NY 14850"            # the live services
     python -m design_checker.lookup_box "106 Ithaca Rd, Ithaca, NY 14850" --fixture 106_ithaca_rd   # recorded
 
-prints one JSON line: site_lookup's result, where the lot lands in the model (`frame`), and exactly what the
+prints a {"step": "Finding the address…"} line as each stage starts (the box shows the latest, live), then, last,
+one JSON line: site_lookup's result, where the lot lands in the model (`frame`), and exactly what the
 Rhino side may write into the .3dm (`writes`, by each source's store policy in site_lookup/endpoints.yaml).
 No AI; the map services' own answers, worked out by plain code."""
 import datetime as dt
@@ -152,24 +153,47 @@ def _fixture_http(name: str):
     return mod.Fake(fx), mod.NOW
 
 
+def step_line(text: str) -> str:
+    """One progress line ({"step": ...}): printed as each stage starts, before the answer, which is always the last
+    line (rhino_logic.lookup_step and lookup_answer read them)."""
+    return json.dumps({"step": text})
+
+
 def main(argv: list[str]) -> int:
-    fixture = argv[argv.index("--fixture") + 1] if "--fixture" in argv else None
-    args = [a for k, a in enumerate(argv) if a != "--fixture" and (k == 0 or argv[k - 1] != "--fixture")]
+    flags = {"--fixture": None, "--slow": None}     # --slow S: the in-Rhino test's pause at each stage (fixture only)
+    args = []
+    k = 0
+    while k < len(argv):
+        if argv[k] in flags and k + 1 < len(argv):
+            flags[argv[k]] = argv[k + 1]
+            k += 2
+            continue
+        args.append(argv[k])
+        k += 1
+    fixture = flags["--fixture"]
     if len(args) != 1:
         print(__doc__.strip(), file=sys.stderr)
         return 2
+    pause = float(flags["--slow"] or 0) if fixture else 0.0
+
+    def step(text):
+        print(step_line(text), flush=True)
+        if pause:
+            import time
+            time.sleep(pause)
+
     try:
         if fixture:
             http, now = _fixture_http(fixture)
         else:
             http, now = Http(timeout=TIMEOUT_S, retries=RETRIES), dt.datetime.now(dt.timezone.utc)
-        result = lookup(args[0], http, now)
-        print(json.dumps(box_payload(result, now), default=str))
+        result = lookup(args[0], http, now, step=step)
+        print(json.dumps(box_payload(result, now), default=str), flush=True)
     except Exception as e:                # never a traceback for the box: a plain state it can say
         print(json.dumps({"status": "error", "message": "The lookup failed: enter the site by hand.",
                           "detail": f"{type(e).__name__}: {e}", "asks": [], "matches": [], "facts": {}, "details": {},
                           "writes": {"lot_ring": None, "guide_ring": None, "street_line": None, "spots": [],
-                                     "frame": None, "snapshot": None}}))
+                                     "frame": None, "snapshot": None}}), flush=True)
     return 0
 
 

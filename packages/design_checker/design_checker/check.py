@@ -441,8 +441,18 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
             part.unlink()
 
 
+# What a check or a start is doing, in the architect's words, as each stage begins (the plugin's progress line)
+STEPS = {"read": "Reading the model…", "measure": "Measuring the building…", "rules": "Checking the rules…",
+         "report": "Writing the zoning report…", "lot": "Reading the lot…",
+         "largest": "Finding the largest building that complies…"}
+
+
+def _quiet(text: str) -> None:
+    """No progress line (the command line, the tests)."""
+
+
 def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,
-          extras: dict | None = None) -> dict:
+          extras: dict | None = None, step=None) -> dict:
     """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
     Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
     building measure need review, never silently dropped. `extras` is what the command adds for the panel: what
@@ -452,24 +462,28 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     model_path = Path(model_path)
+    (step or _quiet)(STEPS["read"])
     site = read_site(model_path, facts)
     if building_problems:
         site["buildings"].append({"id": "Building layer", "faces": [], "problems": list(building_problems)})
-    return check_site(site, facts, model_path.name, report_path, extras)
+    return check_site(site, facts, model_path.name, report_path, extras, step=step)
 
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
-               extras: dict | None = None) -> dict:
+               extras: dict | None = None, step=None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
     generator builds. Exactly the same measuring, rules and presentation as a model read from a file."""
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     model_path = Path(name)
+    say = step or _quiet
+    say(STEPS["measure"])
     measured = measure(site, facts)
     project = {"title": facts.get("title") or model_path.stem, "jurisdiction": facts.get("jurisdiction"),
                "zone": facts.get("zone"),
                "measurements": {k: {"value": m["value"], "from": working(m, model_path.name)} for k, m in measured.items()}}
+    say(STEPS["rules"])
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "project.yaml"
         path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True), encoding="utf-8")
@@ -516,6 +530,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
+            say(STEPS["report"])
             _report(t, v, report_path)
         except OSError as e:
             report_error = f"{e.strerror or e} ({report_path})"
@@ -768,7 +783,8 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     return out
 
 
-def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0) -> dict:
+def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0,
+          step=None) -> dict:
     """The largest legal starting building for the lot in a model (its buildings, if any, left out): stacked
     floor blocks, one per story, from the zone's rules (envelope_builder.start). With no grade set, it is drawn
     standing at the lot's own level (and said so): the check then says height and stories need review until the
@@ -776,6 +792,8 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    say = step or _quiet
+    say(STEPS["lot"])
     site = {**read_site(Path(model_path), facts), "buildings": []}
     if site.get("problems"):
         return {"floors": [], "notes": list(site["problems"])}
@@ -802,6 +820,7 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     existing = drawing.get("grade_is") == "existing"
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}
+    say(STEPS["largest"])
     measured = measure(site, drawing)
     out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer)
     if existing and out.get("floors"):

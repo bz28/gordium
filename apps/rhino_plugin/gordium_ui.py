@@ -384,18 +384,19 @@ def _wrap_width(parts):
     return max(240, width - 48) if width > 0 else None
 
 
-def show(parts, view, stale=False, error=None, checking=False):
-    """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet) or a
-    check that couldn't run: rows keep their names but show no mark and "—", Zoom to is off (H1, H2, H5). The
-    selection, which groups are open and the scroll position are kept by item id across refreshes (D8)."""
+def show(parts, view, stale=False, error=None, checking=False, job=None, cancelled=False):
+    """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet), a
+    check running (`job`: its live line and Cancel under "Checking…"), cancelled, or one that couldn't run: rows
+    keep their names but show no mark and "—", Zoom to is off (H1, H2, H5). The selection, which groups are open
+    and the scroll position are kept by item id across refreshes (D8)."""
     global WRAP_AT
     WRAP_AT = _wrap_width(parts) if DOCKED else None
     tree = parts["tree"]
-    parts["stale"] = stale or error is not None or checking
+    parts["stale"] = stale or error is not None or checking or cancelled or job is not None
     if view is not None:
         parts["view"] = view
     view = parts["view"]
-    _header(parts, view, error, checking or stale)
+    _header(parts, view, error, checking or stale or job is not None, job, cancelled)
     if view is None:
         tree.DataStore = ef.TreeGridItemCollection()
         parts["by_id"], parts["groups"] = {}, []
@@ -442,19 +443,27 @@ def show(parts, view, stale=False, error=None, checking=False):
     show_detail(parts)
 
 
-def _header(parts, view, error, out_of_date):
+def _header(parts, view, error, out_of_date, job=None, cancelled=False):
     h = parts["header"]
     h.Clear()
     a = parts["actions"]
     head = (view or {}).get("header") or {}
     lines = logic.panel_header(head)
+    parts["progress_label"], parts["progress_job"] = None, job
     h.AddRow(_wide(lines["above"][0], bold=True, size=13))
     if error is not None:
         h.AddRow(row(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
                      button("Retry", a["retry"])))
         h.AddRow(_wide(error, size=11))
+    elif cancelled:                        # nothing shown as checked until the next check
+        h.AddRow(row(_wide(logic.CHECK_CANCELLED, eto_status_color("needs_review"), bold=True, size=15),
+                     button("Check again", a["retry"])))
+        h.AddRow(_wide(logic.CHECK_CANCELLED_NOTE, size=11))
     elif out_of_date:
         h.AddRow(_wide("Checking…", bold=True, size=15))
+        if job is not None:                # what the check is doing now, the seconds so far, and its Cancel
+            parts["progress_label"] = label(progress_text(job), size=11, width=PANEL_WIDTH - 140)
+            h.AddRow(row(parts["progress_label"], button("Cancel", job.cancel)))
     else:
         h.AddRow(_wide((view or {}).get("summary") or "No check yet", bold=True, size=15))
     draft, lot, grade = lines["below"]
@@ -475,6 +484,90 @@ def _header(parts, view, error, out_of_date):
         b.Enabled = not parts.get("box_open")
     h.AddRow(row(*buttons))
     h.Create()
+
+
+def progress_text(job, limit=None):
+    """A running job's line: what it is doing now, then the moving mark and the seconds so far."""
+    return (job.step or "Working…") + "  " + logic.progress_line(job.elapsed(), limit)
+
+
+def show_progress(parts, job):
+    """The panel's live line under "Checking…", moved on (the timer that waits for the job calls this)."""
+    lab = (parts or {}).get("progress_label")
+    if lab is not None:
+        lab.Text = progress_text(job)
+
+
+def follow(parts, job):
+    """The panel follows a running check: "Checking…" with this job's live line and Cancel (laid out once, on the
+    first tick), then the line moved on at each tick (review round 1: a check the architect started never showed it)."""
+    if parts is None:
+        return
+    if parts.get("progress_job") is not job or parts.get("progress_label") is None:
+        show(parts, None, checking=True, job=job)
+    show_progress(parts, job)
+
+
+def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
+    """Wait for a job (logic.Job) without ever blocking Rhino: work done within logic.WAIT_WINDOW_S shows nothing;
+    longer, a small window says what Gordium is doing (the job's own step, a moving mark, the seconds so far) with
+    Cancel when `cancellable` (Esc too). It is modal, so nothing else can start while it waits, and its own timer
+    keeps Rhino drawing and answering. It closes itself when the job is done or cancelled; the window's own close
+    button never leaves the work running unseen (it cancels it, or, not cancellable, waits). `on_tick(job)` also
+    runs at each tick (the panel's live line). Headless (the scripted tests): just waits."""
+    if job.wait(logic.WAIT_WINDOW_S if not headless else 0):
+        return
+    if headless:
+        while not job.wait(0.2):
+            pass
+        return
+    dialog = ef.Dialog[bool]()
+    dialog.Title = "Gordium"
+    dialog.Padding = ed.Padding(16)
+    dialog.Resizable = False
+    step = label(job.step, bold=True, size=13, width=380)
+    line = label(logic.progress_line(job.elapsed(), limit), size=11, width=380)
+    layout = ef.DynamicLayout()
+    layout.Spacing = ed.Size(8, 8)
+    layout.AddRow(step)
+    layout.AddRow(line)
+    stop = None
+    if cancellable:
+        def cancel():
+            job.cancel()
+            stop.Enabled = False
+            step.Text = logic.CANCELLING
+        stop = button("Cancel", cancel)
+        layout.AddRow(row(stop))
+        dialog.AbortButton = stop
+    dialog.Content = layout
+    timer = ef.UITimer()
+    timer.Interval = 0.15
+
+    def tick(s, e):
+        if job.finished():
+            timer.Stop()
+            dialog.Close(True)
+            return
+        step.Text = job.step or ""
+        line.Text = logic.progress_line(job.elapsed(), limit)
+        if on_tick is not None:
+            on_tick(job)
+
+    def closing(s, e):                  # the window's own close button: Cancel, or keep waiting
+        if not job.finished():
+            if cancellable:
+                job.cancel()
+            e.Cancel = not job.finished()
+
+    timer.Elapsed += logic.guard(tick, "show what Gordium is doing")
+    dialog.Closing += logic.guard(closing, "close the progress window")
+    dialog.Shown += logic.guard(lambda s, e: timer.Start(), "start the progress window")
+    dialog.Closed += logic.guard(lambda s, e: timer.Stop(), "stop the progress window")
+    dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
+    timer.Stop()
+    while not job.finished():          # (only if the window closed some other way: never return with work running)
+        job.wait(0.2)
 
 
 def set_box_open(parts, is_open):
@@ -757,6 +850,7 @@ def start_box(state, options, mode):
 
     zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
     cancel = button("Cancel", lambda: done(None))
+    status = {}                       # the running lookup's live line, once laid out
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
     for r in logic.box_rows(state):
@@ -776,8 +870,9 @@ def start_box(state, options, mode):
 
                 matches.SelectedIndexChanged += logic.guard(matched, "pick the address")
                 layout.AddRow(None, row(matches))
-            if r.get("status"):            # Looking up 106 Ithaca Rd… (the box stays usable; Cancel works)
-                layout.AddRow(None, row(label(r["status"], size=11)))
+            if r.get("status"):            # Looking up 106 Ithaca Rd · Finding the address…  ○●○  3 s (live;
+                status["label"] = label(r["status"], size=11, width=560)   # Cancel lookup stops it)
+                layout.AddRow(None, row(status["label"]))
         elif key == "zone":
             confirm.Text = r["tick"][0]
             zone_row["source"] = label(r["text"].split(" · ", 1)[-1], size=11)
@@ -832,15 +927,18 @@ def start_box(state, options, mode):
     if shown is not None:
         dialog.Shown += logic.guard(lambda s, e: shown(dialog), "run the start box hook")
     poll = state.get("_poll")                 # a lookup running in its own process: the box closes itself when it
-    if looking and poll is not None:          # answers (or the time runs out), and opens again filled in
+    progress = state.get("_progress")         # answers (or the time runs out), and opens again filled in; until
+    if looking and poll is not None:          # then its line says what it is doing, live
         timer = ef.UITimer()
-        timer.Interval = 0.5
+        timer.Interval = 0.25
 
         def tick(s, e):
             if poll() is not None:
                 timer.Stop()
                 keep()
                 done("pick:lookup_done")
+            elif progress is not None and status.get("label") is not None:
+                status["label"].Text = progress()
 
         timer.Elapsed += logic.guard(tick, "wait for the address lookup")
         dialog.Shown += logic.guard(lambda s, e: timer.Start(), "start waiting for the lookup")
