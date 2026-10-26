@@ -11,6 +11,7 @@ The last test runs every start (whose lot, whose house, buildings or not) agains
 and holds the promises for all of them."""
 import itertools
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -94,7 +95,7 @@ class Box:
 
     def __init__(self, site):
         self.site, self.table = site, site.table
-        self.facts, self.saved = dict(site.facts), dict(site.saved)
+        self.facts, self.saved = dict(site.facts), logic.box_opened(site.saved, site.facts)
         self.session = logic.BoxSession(self.table)
         self.asked, self.preview, self.said, self.open, self.typed = [], None, [], True, {}
 
@@ -113,6 +114,7 @@ class Box:
                  "zone_source": sv.get("zone_source"), "address_source": sv.get("address_source"),
                  "use_source": sv.get("use_source"),
                  "lookup": sv.get("_lookup") or {}, "live": sv.get("_live") or {}, "doubts": sv.get("doubts") or {},
+                 "known_addresses": logic.known_addresses(sv),
                  "checked": sv.get("checked") or []}
         return dict(state, **self.typed)
 
@@ -140,23 +142,21 @@ class Box:
         return {r["key"]: r for r in logic.box_rows(state)}, state
 
     def draw(self, reply=None):
-        """Draw (gordium_rhino._draw_prepare then _drawn): "lookup" (the typed address looked up first), "unfound",
-        "box-again" (a preview dropped by an address retyped: the box shown again as it was put back), "asked-cancel" (Cancel at the
+        """Draw (gordium_rhino._draw_prepare then _drawn): "off" (an address typed and not looked up: Draw is off,
+        its reason said), "box-again" (a preview dropped by an address retyped: the box shown again as it was put back), "asked-cancel" (Cancel at the
         question: back to the box), "open" (the City's guide: the box stays open for Draw my lot…), or "drawn"
         (saved, the session committed, the starting house drawn again when it was cleared)."""
         state = self.shown()
+        reason = logic.address_reason(state)
+        if reason:                                 # Draw is off (the plugin's _draw_prepare says why on any way in)
+            self.said.append(reason)
+            return "off"
         self._apply(state)
         previewed = self.saved.get("_pending") is not None
         self.facts, self.saved = logic.settle_pending(self.facts, self.saved, state["address"])
         if previewed and self.saved.get("_pending") is None:
             return "box-again"
-        plan, mine, say = logic.draw_decision(self.table, self.facts, self.saved, state["address"])
-        if say:
-            self.said.append(say)
-        if plan == "unfound":
-            self.saved["_lookup"] = logic.lookup_after_unfound(self.saved.get("_lookup"), say)
-        if plan in ("lookup", "unfound"):
-            return plan
+        plan, mine = logic.draw_decision(self.table, self.facts, self.saved)
         redraw = False
         if plan == "none":
             self.saved.pop("_pending", None)
@@ -265,7 +265,7 @@ def test_cancel_after_the_reset_puts_everything_back():
     site = Site()
     before = site.state()
     box = site.box().look_up(answer("96_ithaca_rd"))
-    plan, mine, _ = logic.draw_decision(box.table, box.facts, box.saved, box.facts["address"])
+    plan, mine = logic.draw_decision(box.table, box.facts, box.saved)
     assert (plan, mine) == ("redraw", [])
     box.facts, box.saved, redraw, guide = logic.apply_reset(box.table, box.session, box.facts, box.saved,
                                                             logic.START_FRESH, ZONES)
@@ -355,15 +355,36 @@ def test_the_question_names_their_lot_as_it_came(source, words):
                                       "outline).")
 
 
-def test_a_typed_address_is_looked_up_first_and_on_their_own_lot_is_a_label():
-    site = Site()
+@pytest.mark.parametrize("start", [dict(), dict(lot="looked_up"), dict(lot="theirs"), dict(lot="theirs", surveyed=True),
+                                   dict(lot="theirs", drawn_lot=True), dict(lot="theirs", drawn=None, house=None),
+                                   dict(lot="theirs", labelled="12 Oak Ave")],
+                         ids=["sample", "looked_up", "picked", "surveyed", "drawn", "empty_file", "own_address"])
+def test_an_address_typed_and_not_looked_up_turns_draw_off_on_every_start(start):
+    """Ben (2026-10-25): an address in the box that is neither the lot's own nor the one last looked up turns Draw
+    off, with the box's usual reason line, "Press Look up to find 96 Ithaca Rd first."; never a label saved on the
+    old lot. Typing back the original address turns Draw on again. On every start: the sample, a lot looked up
+    before, the architect's own lot (picked, surveyed or drawn), and a file with no address yet."""
+    drawn_lot, labelled = start.pop("drawn_lot", False), start.pop("labelled", None)
+    site = Site(**start)
+    if labelled:                                              # the lot's own address, never the one drawn
+        site.facts["address"] = labelled
+    if drawn_lot:
+        site.saved["lot_source"] = "drawn by you"
+    if start.get("drawn", SAMPLE) is None:
+        site.facts.pop("address")
     before = site.state()
-    box = site.box().type_address("96 Ithaca Rd")
-    assert box.draw() == "lookup" and site.table.snapshot() == before[0]    # looked up first, the box again
-    own = Site(lot="theirs")
-    box = own.box().type_address("96 Ithaca Rd")
-    assert box.draw() == "drawn" and box.said == [logic.OWN_LOT_LABEL]
-    assert own.table.exists("lot1") and own.facts["address"] == "96 Ithaca Rd"
+    box = site.box()
+    original = box.shown()["address"]
+    assert logic.address_reason(box.shown()) == ""            # as it opened: Draw as before
+    box.type_address("96 Ithaca Rd")
+    assert logic.address_reason(box.shown()) == "Press Look up to find 96 Ithaca Rd first."
+    assert logic.draw_reason(dict(box.shown(), zone=None)) == "Press Look up to find 96 Ithaca Rd first."   # first
+    assert box.draw() == "off" and box.said == ["Press Look up to find 96 Ithaca Rd first."]
+    assert site.state() == before                             # nothing drawn, nothing saved
+    box.type_address(original)                                # typed back: Draw on again
+    assert logic.address_reason(box.shown()) == ""
+    assert box.draw() == "drawn" and site.table.snapshot()[0] == before[0][0]
+    assert site.facts.get("address") == before[1].get("address")      # never another address on the old lot
 
 
 def test_the_last_look_up_is_the_one_drawn_and_a_failed_one_drops_the_preview():
@@ -374,10 +395,9 @@ def test_the_last_look_up_is_the_one_drawn_and_a_failed_one_drops_the_preview():
     box.look_up(failed)
     assert "_pending" not in box.saved and box.button() == "Check"
     before = site.table.snapshot()
-    # Draw with the address just not found: nothing drawn, said once, never the same lookup again and again
-    assert box.draw() == "unfound" and site.table.snapshot() == before
-    plan, _, say = logic.draw_decision(box.table, box.facts, box.saved, box.facts["address"])
-    assert say == logic.UNFOUND.format(address=failed["query"], drawn=SAMPLE)
+    # the address just not found: Draw off, saying so (never Look up again and again, never a label saved)
+    assert box.draw() == "off" and site.table.snapshot() == before
+    assert box.said[-1] == logic.NOT_FOUND_YET.format(address=failed["query"], back="put back 106 Ithaca Rd")
     assert box.type_address("106 Ithaca Road").draw() == "drawn"            # the drawn address put back
     assert site.table.snapshot()[0] == before[0]
 
@@ -461,7 +481,11 @@ def test_every_start_lookup_and_answer_keeps_the_promises(start):
         where = (kind, said, outcome, box.asked)
         if outcome == "box-again":                             # never in this sweep: no address is retyped
             raise AssertionError(where)
-        if outcome in ("lookup", "unfound", "asked-cancel"):
+        if kind in ("typed", "failed"):                        # an address not looked up, or not found: Draw off
+            assert outcome == "off" and box.said[-1] in (logic.LOOK_UP_FIRST.format(address="96 Ithaca Rd"),
+                                                         logic.NOT_FOUND_YET.format(address=box.shown()["address"],
+                                                                                    back="put back 106 Ithaca Rd")), where
+        if outcome in ("off", "asked-cancel"):
             box.cancel()
             assert site.state() == before, where
             continue
@@ -479,7 +503,7 @@ def test_every_start_lookup_and_answer_keeps_the_promises(start):
                     box.asked[0][2] is None or "will be replaced)" in box.asked[0][2][0]), where
         assert site.facts.get("lot_id") in left, where         # never a Draw without a lot
         assert not [k for k in site.saved if k.startswith("_")], where
-        if (kind == "same" and lot != "sample") or kind == "failed" or (kind == "typed" and lot == "theirs"):
+        if kind == "same" and lot != "sample":
             assert site.table.snapshot()[0] == before[0][0], where   # nothing new drawn, nothing removed
         elif kind in ("new", "guide", "same"):                 # the sample's own address too: a real lot drawn
             kept_house = said == "keep" and bool(box.asked) and box.asked[0][2]
@@ -490,6 +514,118 @@ def test_every_start_lookup_and_answer_keeps_the_promises(start):
 
 # ---- the plugin does what the harness does --------------------------------------------------------------------
 
+def test_after_the_city_guide_reset_the_old_address_is_a_new_one_again():
+    """Typed-address rule, review round 1 (P1): after the City-guide reset (the box stays open), the address the box
+    opened with stayed known, so typing it back saved it on the lot drawn for 96."""
+    site = Site()
+    box = site.box().look_up(guide_only("96_ithaca_rd"))
+    assert box.draw() == "open"
+    box.draw_my_lot()
+    box.type_address(SAMPLE)
+    assert box.draw() == "off" and box.said[-1] == logic.LOOK_UP_FIRST.format(address=SAMPLE)
+    box.type_address(box.saved["drawn_address"])            # 96, as found: the lot's address now
+    assert box.draw() == "drawn" and logic.same_address(site.facts["address"], "96 Ithaca Rd")
+
+
+@pytest.mark.parametrize("status, words", [("not_found", "No lot found for"), ("offline", "didn't finish"),
+                                           ("timeout", "didn't finish"), ("error", "didn't finish"),
+                                           ("multiple", "Pick one of the matches")])
+def test_the_reason_says_what_to_do_for_each_failed_lookup(status, words):
+    """Typed-address rule, review round 1 (P2, P3): the reason fits how the lookup failed (not found: correct it;
+    no answer: Look up again; several: pick one), and the lookup's own line no longer sends the architect to a dead
+    end: it says to put back the lot's own address or clear it. With no address known, the way out is to clear it."""
+    reason = logic.address_reason({"address": "Q St", "known_addresses": [SAMPLE],
+                                   "lookup": {"status": status, "query": "Q St"}})
+    assert reason.startswith(words) or words in reason
+    if status != "multiple":
+        assert reason.endswith("put back 106 Ithaca Rd.")
+        alone = logic.address_reason({"address": "Q St", "known_addresses": [], "lookup": {"status": status,
+                                                                                           "query": "Q St"}})
+        assert alone.endswith("or clear the address.")
+        assert "or clear it" in logic.LOOKUP_SAYS[status]
+
+
+def test_another_towns_address_is_never_taken_for_the_lots_own():
+    """Round 2 (P2): the gate compared only the street words, so "106 Ithaca Rd, Dryden" was the lot's own."""
+    known = {"known_addresses": [SAMPLE]}
+    assert logic.address_reason(dict(known, address="106 Ithaca Rd, Dryden, NY 13053")) == \
+        "Press Look up to find 106 Ithaca Rd, Dryden, NY 13053 first."
+    assert logic.address_reason(dict(known, address="106 Ithaca Rd, Lansing")) != ""
+    for same in ("106 Ithaca Road", "106 ithaca rd, Ithaca NY 14850", "106 Ithaca Rd, Ithaca, NY, 14850-1234",
+                 "106 Ithaca Rd, City of Ithaca, NY", "106 Ithaca Rd, Ithaca, United States", "106 Ithaca Rd, Ithaca, N.Y.",
+                 "106 Ithaca Rd, Ithaca, New York, United States of America", "106 Ithaca Rd, Ithaca City"):
+        assert logic.address_reason(dict(known, address=same)) == "", same
+    assert logic.address_reason(dict(known, address="106 Ithaca Rd, Town of Ithaca")) != ""   # another municipality
+    failed = {"status": "not_found", "query": "500 Elm St"}            # its failure is never another town's
+    assert logic.address_reason(dict(known, address="500 Elm St, Dryden", lookup=failed)) == \
+        logic.LOOK_UP_FIRST.format(address="500 Elm St, Dryden")
+
+
+def test_while_a_lookup_runs_the_reason_never_says_to_press_look_up():
+    """Round 2 (P2): while the lookup of the address ran, the reason said "Press Look up to find it first"."""
+    site = Site()
+    box = site.box().type_address("96 Ithaca Rd")
+    box._apply()
+    box.saved["_lookup"] = {"looking": "96 Ithaca Rd"}
+    assert logic.address_reason(box.shown()) == "Looking up 96 Ithaca Rd: Draw once the answer is in."
+    box.type_address(SAMPLE)                                 # the lot's own typed back meanwhile: still waits
+    assert logic.address_reason(box.shown()) == "Looking up 96 Ithaca Rd: Draw once the answer is in."
+    box.type_address("500 Elm St")                           # another typed: the line names the lookup's address
+    assert logic.address_reason(box.shown()) == "Looking up 96 Ithaca Rd: Draw once the answer is in."
+    box.type_address("96 Ithaca Rd")
+    before = site.state()
+    assert box.draw() == "off" and site.state() == before    # the gate stays on (round 3): never a label saved
+
+
+def test_a_loose_query_typed_back_is_saved_as_found():
+    """Round 2 (P3): after a misspelt "96 Ithica Rd" was found as 96 Ithaca Road, typing the query back and drawing
+    saved the misspelling, not the address found."""
+    site = Site()
+    p = answer("96_ithaca_rd")
+    p["query"] = "96 Ithica Rd"
+    box = site.box().look_up(p)
+    box.type_address("96 Ithica Rd")
+    box.typed["address_source"] = logic.ENTERED           # as the box marks a field the architect typed in
+    assert box.draw() == "drawn" and logic.same_address(site.facts["address"], "96 Ithaca Road")
+    assert site.facts["address"] == site.saved["drawn_address"]
+    assert site.sources["address"]["source"] != logic.ENTERED      # the lookup's address with the lookup's source
+
+
+def test_after_the_guide_reset_the_found_address_keeps_the_lookups_source():
+    """Round 4 (P2): on the City-guide path the box's loop carried the old box's ticks back, address_source
+    ("entered by you") among them, over the address as found; it was saved as the architect's."""
+    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    keeps = eval(rhino.split("\nGUIDE_KEEPS = ", 1)[1].split("\n", 1)[0])       # noqa: S307 (the file's own tuple)
+    assert "address_source" not in keeps
+    assert "if k in GUIDE_KEEPS}" in rhino[rhino.index("def _box_loop("):]
+    site = Site()
+    p = guide_only("96_ithaca_rd")
+    p["query"] = "96 Ithica Rd"
+    box = site.box().look_up(p)
+    box.type_address("96 Ithica Rd")
+    box.typed["address_source"] = logic.ENTERED
+    ticked = {k: box.shown()[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source")}
+    assert box.draw() == "open"
+    box.typed.update({k: v for k, v in ticked.items() if k in keeps})   # as the plugin's loop carries them
+    box.draw_my_lot()
+    assert box.draw() == "drawn" and logic.same_address(site.facts["address"], "96 Ithaca Road")
+    assert site.sources["address"]["source"] != logic.ENTERED
+
+
+def test_the_box_turns_draw_off_and_on_as_the_address_is_typed():
+    """Ben (2026-10-25): the box's Draw follows the address field as it is typed (off, with its reason, for an
+    address not looked up; on again when the lot's own is typed back), not only after a pick; the box opens
+    knowing the lot's own address."""
+    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    typed = ui[ui.index("    def address_typed(s, e):"):ui.index('address.TextChanged += logic.guard(address_typed')]
+    assert 'state["address"] = address.Text' in typed
+    assert "draw.Enabled = logic.can_draw(state) and not looking" in typed and \
+        "reason.Text = logic.draw_reason(state)" in typed
+    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "saved_ui = logic.box_opened(_ui_state(doc), facts)" in rhino[rhino.index("def _confirm("):]
+    assert '"known_addresses": logic.known_addresses(saved_ui),' in rhino[rhino.index("def _box_state("):]
+
+
 def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     """gordium_rhino._draw_prepare does what Box.draw does, in its order: the box's answers into the facts, the
     preview settled, the district checked, rhino_logic.draw_decision, the question (Cancel: back to the box), the
@@ -498,11 +634,13 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     closes the undo step on any way out, errors included; RhinoTable.buildings is the checker's own buildings."""
     rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     prep = rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
-    steps = ("facts, saved_ui = _apply_box(doc, facts, state, saved_ui)",
+    steps = ("unlooked = logic.address_reason(dict(state, known_addresses=logic.known_addresses(saved_ui),",
+             "if unlooked:                                          # Draw is off in the box; any other way in",
+             "say(unlooked)\n        return facts, saved_ui, False, state",
+             "facts, saved_ui = _apply_box(doc, facts, state, saved_ui)",
              'logic.settle_pending(facts, saved_ui, state.get("address"))',
              'if previewed and saved_ui.get("_pending") is None:',
-             'logic.draw_decision(table, facts, saved_ui, state.get("address"))', 'if plan == "lookup":',
-             'if plan == "unfound":', 'if plan == "none":', 'if plan == "ask":',
+             'logic.draw_decision(table, facts, saved_ui)', 'if plan == "none":', 'if plan == "ask":',
              # the question is told the pending answer (the City's outline only: "you draw … over the City's outline")
              'logic.reset_question(saved_ui["_pending"].get("address"), mine,\n'
              '                                                     saved_ui["_pending"].get("answer"))',
@@ -558,7 +696,8 @@ def test_an_address_typed_after_look_up_drops_the_preview_and_its_district():
     said = logic.uncertain(box.shown()) or ""                 # its line went with it (round 3)
     assert "Shown dashed" not in said and said.startswith("The lookup of 96 Ithaca")
     assert box.button() == "Check" and not box.saved["_lookup"]["asks"]
-    assert box.type_address("96 Ithaca Rd").draw() == "lookup"   # typed again: looked up again, never "not found"
+    assert box.type_address("96 Ithaca Rd").draw() == "off"      # typed again: to be looked up again, never "not found"
+    assert box.said[-1] == "Press Look up to find 96 Ithaca Rd first."
     box = site.box().look_up(answer("96_ithaca_rd"))
     assert box.type_address(SAMPLE).draw() == "box-again"
     assert box.draw() == "drawn"
@@ -585,14 +724,13 @@ def test_buildings_on_a_sublayer_are_asked_about():
     assert box.draw() == "asked-cancel" and box.asked[0][0].endswith("The buildings you drew will be removed.")
 
 
-def test_a_lookup_that_failed_offline_says_so_at_draw_never_not_found():
-    """P3: Draw after an offline, timeout or error lookup said the address "wasn't found", over the real reason."""
+def test_a_lookup_that_failed_offline_says_so_never_not_found():
+    """P3: after an offline, timeout or error lookup the box said the address "wasn't found", over the real reason.
+    Now the lookup's own line says why, and Draw stays off pointing to it."""
     site = Site()
     box = site.box().look_up({"status": "offline", "query": "96 Ithaca Rd"})
-    assert box.draw() == "unfound"
-    assert box.said[-1].startswith(logic.LOOKUP_SAYS["offline"]) and "wasn't found" not in box.said[-1]
-    box = site.box().look_up(answer("not_found"))
-    assert box.draw() == "unfound" and "wasn't found" in box.said[-1]
+    assert box.draw() == "off" and "wasn't found" not in box.said[-1] and "the line above says why" in box.said[-1]
+    assert (logic.uncertain(box.shown()) or "").startswith(logic.LOOKUP_SAYS["offline"])
 
 
 def test_the_district_the_architect_picked_survives_the_reset():
@@ -658,17 +796,17 @@ def test_the_architects_own_answers_keep_their_source_when_draw_stops():
     assert site.sources["use"]["value"] == "two_family" and site.sources["use"]["source"] == logic.ENTERED
 
 
-def test_draw_after_an_outside_city_or_ambiguous_lookup_keeps_its_own_words():
-    """Round 2: the lookup's message (the town it is in, the matches) was rebuilt without it at Draw; a second Draw
-    says it once, never wrapped twice."""
+def test_an_outside_city_or_ambiguous_lookup_keeps_its_own_words_and_draw_stays_off():
+    """Round 2: the lookup's message (the town it is in, the matches) was lost at Draw. It stays the box's line,
+    said once, and Draw stays off for that address."""
     site = Site()
     town = "This address is in the Town of Lansing, not the City of Ithaca."
     box = site.box().look_up({"status": "outside_city", "query": "5 Main St, Lansing", "message": town})
-    assert box.draw() == "unfound" and box.said[-1].startswith(town)
-    assert box.draw() == "unfound" and box.said[-1].count(town) == 1 and box.said[-1].count("Nothing is drawn") == 1
+    assert box.draw() == "off" and box.draw() == "off"
+    assert (logic.uncertain(box.shown()) or "").count(town) == 1
     many = "2 addresses match: 106 Ithaca Rd, 106 Ithaca St."
     box = site.box().look_up({"status": "multiple", "query": "106 Ithaca", "message": many})
-    assert box.draw() == "unfound" and many in box.said[-1]
+    assert box.draw() == "off" and many in (logic.uncertain(box.shown()) or "")
 
 
 # ---- Undo and Redo of a Draw (the Rhino job at demo e631aae: Redo did nothing, 96's outline stayed on screen) ----
@@ -716,3 +854,27 @@ def test_the_plugin_clears_its_drawing_on_undo_and_redo_and_never_changes_the_do
            "_undo_redo," in rhino
     end = rhino[rhino.index("def _end_undo("):].split("\n\n\n", 1)[0]
     assert "if logic.undo_record_to_end(held, " in end and end.index("undo_record_to_end") < end.index("EndUndoRecord")
+
+
+def test_draw_the_house_again_belongs_to_the_box_that_set_it():
+    """P1 (found 2026-10-26 by the progress-cancel job): GordiumCheck's start box, on a Draw of a new address, set
+    "draw the house again" and nothing read it; a later Edit site… whose Draw drew nothing new found it set and drew
+    a starting house over the architect's model. The flag is now this box's only: every box opens with it cleared,
+    only a Draw of a new address sets it, only Edit site… (the box's caller that draws the house) reads it, and
+    GordiumCheck drops it with its box."""
+    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    sets = [line.strip() for line in rhino.splitlines() if 'STATE["redraw_house"] =' in line]
+    assert sets == ['STATE["redraw_house"] = redraw and mode == "check"     # (GordiumStart draws its house itself)']
+    assert 'STATE["redraw_house"] =' in rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
+    confirm = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
+    assert confirm.index("gate.enter()") < confirm.index('STATE.pop("redraw_house", None)') < \
+        confirm.index("return _confirm(doc, facts, options, mode)")       # cleared as the box opens, before its Draw
+    check = rhino[rhino.index("def gordium_check("):rhino.index("# ---- GordiumStart")]
+    assert check.index("facts = confirm(") < check.index('STATE.pop("redraw_house", None)') < \
+        check.index("if facts is None:")                                    # GordiumCheck: dropped with its box
+    readers = [m.start() for m in re.finditer(r'STATE\.(?:pop|get)\("redraw_house"', rhino)]
+    edit = (rhino.index("def edit_facts("), rhino.index("def report_path("))
+    outside = [rhino.count("\n", 0, i) + 1 for i in readers if not edit[0] < i < edit[1]
+               and not rhino.index("def confirm(") < i < rhino.index("def _confirm(")
+               and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")]
+    assert outside == [], outside                                           # read nowhere else

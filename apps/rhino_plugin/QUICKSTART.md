@@ -237,11 +237,15 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      `GordiumStart`.
 3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
    - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
-     45 seconds; the box says "Looking up…"). It fills in the lot from the tax map (drawn with its street at the
-     bottom of Top view), the street side, whether it's a corner lot, and a suggested zoning district, each with
-     where it came from (not the ground: for now it is assumed flat, see **Ground** below). Anything doubtful is amber with the reason: tick **I checked
-     this** once you have, or change it; until then the items that depend on it need review. If the lookup
-     can't help (offline, not found, outside the City of Ithaca), the box says why and you fill it in by hand.
+     45 seconds; the box says "Looking up…"). Look up only shows what it found: the address and a suggested zoning
+     district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which
+     draws that lot from the tax map (its street at the bottom of Top view), the street side and whether it's a
+     corner lot, each with where it came from (not the ground: for now it is assumed flat, see **Ground** below).
+     Anything doubtful is amber with the reason: tick **I checked this** once you have, or change it; until then
+     the items that depend on it need review. An address typed and not looked up keeps Draw off ("Press Look up to
+     find … first."); type the lot's own address back, or clear it, and Draw is on again. If the lookup can't
+     help (offline, not found, outside the City of Ithaca), the box says why: correct the address and Look up
+     again, or put back the lot's own address (or clear it) and fill the rest in by hand.
    - **Zoning district**: R-1b, R-1a or R-3a, "entered by you", or after Look up "suggested by Gordium · City of
      Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
      lookup, because the City's online map is informational: the district is your statement.

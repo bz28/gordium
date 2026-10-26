@@ -12,7 +12,11 @@ in CI; the logic is tested in CI (packages/design_checker/tests/test_re_lookup.p
 3. A new file: the sample's starting house edited (one floor moved), Edit site…, Look up 96: asked once, "Start
    fresh for 96 …? Your changes to the starting house will be removed.", the Keep answer "Keep my building and
    check it on 96 …'s lot"; Keep my building: the floors kept, the lot is 96's.
-4. Edit site…, Look up 96 again: no question, nothing in the model changes.
+4. Edit site…, Look up 96 again: no question, nothing in the model changes. Then Edit site… with another address
+   typed and not looked up (Ben, 2026-10-25): Draw does nothing and says "Press Look up to find 109 Ithaca Rd, …
+   first."; the model and the file are as they were (never a label saved on 96's lot). Edit site… again on 96's own
+   address: Draw goes through and checks the model as it is (typing an address and then the original back in one
+   box is proven in CI: test_re_lookup.py).
 5. A new file: the sample's lot made the architect's survey (as Use my survey… leaves it) and its starting house
    edited; Look up 96: a new address is a new site (Ben, 2026-10-25), so even Keep my building replaces their lot,
    and both the question ("Your surveyed lot will be replaced by 96 …'s lot.") and the Keep answer ("… (your
@@ -135,6 +139,27 @@ def nothing_stale(g):
              "check_lot_outline": o is not None and o.lot_outline is not None,
              "check_marks": o is not None and bool(o.red or o.encroach or o.yard_dims or o.plan_lines)}
     return not any(shown.values()), shown
+
+
+def type_only(g, doc, address):
+    """Edit site… with `address` typed and Draw pressed, no Look up (scripted): (what the plugin said, whether Draw
+    went through: the plugin's _drawn, the Draw's own save, ran)."""
+    start = len(g.STATE.get("said") or [])
+    ran = []
+    drawn = g._drawn
+
+    def recorded(*a, **k):
+        ran.append(True)
+        return drawn(*a, **k)
+    g._drawn = recorded
+    g.STATE.update(box_picks=[], box_overrides={"address": address})
+    try:
+        g.edit_facts()
+    finally:
+        g._drawn = drawn
+        for k in ("box_picks", "box_overrides"):
+            g.STATE.pop(k, None)
+    return (g.STATE.get("said") or [])[start:], bool(ran)
 
 
 def capture(doc, name):
@@ -288,6 +313,19 @@ def main():
         log["step4"] = {k: v for k, v in seen.items() if k != "objects"}
         claim("4 the same address: no question and nothing in the model changes",
               seen["asked"] == [] and objects(doc) == before, seen["asked"])
+        # an address typed and not looked up: Draw does nothing and says why (Ben, 2026-10-25)
+        before, said_before = objects(doc), saved(g, doc)
+        typed = "109 Ithaca Rd, Ithaca, NY 14850"
+        said, ran = type_only(g, doc, typed)
+        claim("4 an address typed and not looked up: Draw says to look it up first, nothing changes",
+              ("Press Look up to find " + typed + " first.") in said and not ran and objects(doc) == before and
+              saved(g, doc) == said_before, {"said": said, "ran": ran,
+                                             "strings": differs(saved(g, doc), said_before)})
+        own = g.current_facts(doc).get("address")
+        said, ran = type_only(g, doc, own)
+        claim("4 the lot's own address (the box opened again on it): Draw goes through and checks it as it is",
+              ran and not [t for t in said if "Look up" in t] and objects(doc) == before and
+              g.logic.same_address(g.current_facts(doc).get("address"), own), {"said": said, "ran": ran, "own": own})
 
         # 5. a new file: the architect's surveyed lot and an edited house, then 96 looked up: Keep replaces the lot too
         close(doc)
