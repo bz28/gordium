@@ -1,0 +1,3676 @@
+{
+ "claims": {
+  "0 the sample is drawn and checked": {
+   "ok": true,
+   "detail": {
+    "summary": {
+     "state": "review",
+     "text": "6 pass \u00b7 3 need review",
+     "lines": [
+      "Lot size: passes with the lot as drawn (confirm the survey)",
+      "Lot coverage by buildings: passes with the lot as drawn (confirm the survey)",
+      "Rear yard: the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), are open questions for the architects (yard_projections)"
+     ]
+    },
+    "view_summary": "1 needs review \u00b7 9 comply \u00b7 2 not checked",
+    "state": "needs_review",
+    "rows": [
+     {
+      "Requirement": "Permitted primary uses (chart p.2)",
+      "Table limit": "Permitted: One-family dwelling, detached; Church or related building; Public park or playground; Library or fire station",
+      "Proposed": "One-family dwelling, detached",
+      "Units": "use",
+      "Error": "PASS",
+      "Rule id": "R-1b.use",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Minimum lot size, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 6,000",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_area_one_family_detached",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Minimum lot width, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 50",
+      "Proposed": 75.835064,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.lot_width_one_family_detached",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum number of stories (chart p.3)",
+      "Table limit": "\u2264 3",
+      "Proposed": 3.0,
+      "Units": "stories",
+      "Error": "PASS",
+      "Rule id": "R-1b.stories",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum building height, with the \u00a7325-16C bonus",
+      "Table limit": "building_height \u2264 35 or building_height \u2264 38.5; front_yard \u2265 25; side_yard_smaller \u2265 10; side_yard_larger \u2265 10; rear_yard \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + (building_height - 35))",
+      "Proposed": "building_height = 35; front_yard = 27.07; side_yard_smaller = 12.06; side_yard_larger = 27.36; rear_yard = not given",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.height",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum lot coverage by buildings (chart p.3, \u00a7325-8A(10))",
+      "Table limit": "\u2264 ? (0.25 * lot_area)",
+      "Proposed": "1,340.89",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_coverage",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Front yard minimum (chart p.3)",
+      "Table limit": "\u2265 25",
+      "Proposed": 27.070666,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.front_yard",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Side yards minimum, one side and other side (chart p.3)",
+      "Table limit": "side_yard_smaller \u2265 10; side_yard_larger \u2265 10",
+      "Proposed": "side_yard_smaller = 12.06; side_yard_larger = 27.36",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.side_yards",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Rear yard minimum (chart p.3, note 16; lot depth \u00a7325-8A(14))",
+      "Table limit": "\u2265 ? (max(min(0.25 * lot_depth, 50), 20))",
+      "Proposed": "not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.rear_yard",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), are open questions for the architects (yard_projections)",
+      "Provisional": null
+     }
+    ],
+    "items": [
+     {
+      "id": "R-1b.use",
+      "name": "Use",
+      "status": "complies",
+      "proposed": "One-family dwelling, detached",
+      "required": "permitted",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_area_one_family_detached",
+      "name": "Lot area",
+      "status": "complies",
+      "proposed": "7,033 sf",
+      "required": "6,000 sf",
+      "margin": "+1,033 sf",
+      "delta": "at least 357 sf to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_width_one_family_detached",
+      "name": "Lot width",
+      "status": "complies",
+      "proposed": "75'-10\"",
+      "required": "50'-0\"",
+      "margin": "+25'-10\"",
+      "delta": "at least 21'-10\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.stories",
+      "name": "Stories",
+      "status": "complies",
+      "proposed": "3",
+      "required": "3",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.height",
+      "name": "Building height",
+      "status": "complies",
+      "proposed": "35'-0\"",
+      "required": "35'-0\"",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_coverage",
+      "name": "Lot coverage",
+      "status": "complies",
+      "proposed": "19.1%",
+      "required": "25%",
+      "margin": "+5.93%",
+      "delta": "at least 3.9% to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.front_yard",
+      "name": "Front yard",
+      "status": "complies",
+      "proposed": "27'-0 3/4\"",
+      "required": "25'-0\"",
+      "margin": "+2'-0 3/4\"",
+      "delta": "at least 0'-0 3/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.059635,
+        0.810638
+       ],
+       [
+        12.891689,
+        27.819239
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#northeast",
+      "name": "Side yard, Northeast",
+      "status": "complies",
+      "proposed": "27'-4 1/4\"",
+      "required": "10'-0\"",
+      "margin": "+17'-4 1/4\"",
+      "delta": "at least 15'-4 1/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        76.163648,
+        65.468053
+       ],
+       [
+        48.808356,
+        65.152572
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#southwest",
+      "name": "Side yard, Southwest",
+      "status": "complies",
+      "proposed": "12'-0 5/8\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 5/8\"",
+      "delta": "at least 0'-0 5/8\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        0.837219,
+        27.682237
+       ],
+       [
+        12.891689,
+        27.819239
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.rear_yard",
+      "name": "Rear yard",
+      "status": "needs_review",
+      "proposed": "27'-5 3/4\" to 27'-6 1/8\"",
+      "required": "21'-1 5/8\" to 25'-5 1/2\"",
+      "margin": "",
+      "delta": "up to 0'-11 1/4\" short",
+      "approx": true,
+      "colour": "amber",
+      "note": null,
+      "points": [
+       [
+        76.1328,
+        68.1429
+       ],
+       [
+        48.808356,
+        65.152572
+       ]
+      ],
+      "reason": "Needs 21'-1 5/8\" to 25'-5 1/2\", depending on which lot lines count as side and which as rear (it sets the lot depth): ask the zoning office; also open: whether a yard is measured to the wall or to overhangs, and what counts as part of the building",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.parking_one_family",
+      "name": "Parking \u00b7 needs input",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Needs bedrooms and parking spaces, which the model doesn't show",
+      "group": "not_checked",
+      "needs": [
+       "sleeping_rooms",
+       "parking_spaces"
+      ],
+      "hint": "Enter bedrooms and parking spaces",
+      "refused": null
+     },
+     {
+      "id": "release.overlays",
+      "name": "Overlays \u00b7 not in this release",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).",
+      "group": "not_checked",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.height_exceptions",
+      "name": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.yard_projections",
+      "name": "\u00a7325-18 Projections into yards (porches, decks, eaves)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.corner_lots",
+      "name": "\u00a7325-19C Corner lots",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-19C",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.accessory_structures",
+      "name": "\u00a7325-25 Accessory structures (garages, sheds)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-25",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.adus",
+      "name": "\u00a7325-28 Accessory dwelling units",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-28",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     }
+    ],
+    "header": {
+     "place": "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+     "code": "Ch. 325 as amended through Ord. No. 2026-02 (May 6, 2026) \u00b7 District Regulations Chart, April 2026",
+     "draft": "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+     "lot": "Lot lines: tax map, approximate (\u00b12'-0\")",
+     "grade": "Ground: assumed flat (elevation 0'-0\")",
+     "actions": [
+      "Pick survey lot lines\u2026"
+     ],
+     "main": null,
+     "sources": [
+      "Address: 106 Ithaca Rd, Ithaca, NY \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Zoning district: R-1b \u00b7 entered by you \u00b7 confirmed by you, 2026-10-26",
+      "Use: One-family dwelling, detached \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Lot: 7,033 sf \u00b7 the tax map (\u00b12 ft, approximate) \u00b7 confirmed by you, 2026-10-26",
+      "Front lot line (on the street): Ithaca Rd \u00b7 the State tax map (the sample's lookup) \u00b7 confirmed by you, 2026-10-26",
+      "Corner lot: no, one street \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Starting house: as first drawn, it keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey for the full area. \u00b7 suggested by Gordium \u00b7 not confirmed",
+      "Ground: assumed flat \u00b7 assumed (flat ground, the MVP's rule) \u00b7 not confirmed"
+     ]
+    },
+    "interior": [
+     "R-1b.parking_one_family"
+    ],
+    "encroach": 1,
+    "plan_encroach": 1,
+    "envelope": {
+     "outline": [
+      [
+       59.2207969032566,
+       25.302857854746513
+      ],
+      [
+       59.08321019495586,
+       25.30273344435009
+      ],
+      [
+       58.945623439377016,
+       25.302783121374244
+      ],
+      [
+       58.929807539655364,
+       25.302594732657706
+      ],
+      [
+       58.91399052445763,
+       25.302580430395842
+      ],
+      [
+       58.7764157028903,
+       25.300767628808778
+      ],
+      [
+       58.63883869772724,
+       25.299128900953644
+      ],
+      [
+       58.62302630073298,
+       25.29874644100347
+      ],
+      [
+       58.60721065203826,
+       25.298538040710977
+      ],
+      [
+       58.469668435466815,
+       25.295037120934545
+      ],
+      [
+       58.33212189931008,
+       25.291710234986493
+      ],
+      [
+       58.316315386332136,
+       25.291133761399745
+      ],
+      [
+       58.30050348591887,
+       25.29073129446094
+      ],
+      [
+       49.73090685166342,
+       25.019980421186293
+      ],
+      [
+       39.94775779486651,
+       25.49035292800415
+      ],
+      [
+       39.86377591797361,
+       25.493874413775156
+      ],
+      [
+       39.77981486937491,
+       25.497861747080805
+      ],
+      [
+       39.710508778317426,
+       25.50030113429428
+      ],
+      [
+       39.641220656809885,
+       25.503206488913822
+      ],
+      [
+       39.557201889550356,
+       25.505697122705833
+      ],
+      [
+       39.473198232350924,
+       25.508653824550226
+      ],
+      [
+       39.40386742488139,
+       25.510242535732477
+      ],
+      [
+       39.334548867471185,
+       25.512297399748345
+      ],
+      [
+       39.25050586276179,
+       25.513756806481076
+      ],
+      [
+       39.16647224760395,
+       25.51568243159578
+      ],
+      [
+       39.09712716468682,
+       25.51642022749276
+      ],
+      [
+       39.02778861049384,
+       25.517624291449977
+      ],
+      [
+       38.94373402490248,
+       25.518052251342127
+      ],
+      [
+       38.85968310693905,
+       25.518946509735105
+      ],
+      [
+       38.790334191688586,
+       25.518833279237462
+      ],
+      [
+       38.72098608284421,
+       25.519186361808426
+      ],
+      [
+       38.63693257468236,
+       25.51858281041081
+      ],
+      [
+       38.552877011672365,
+       25.518445567410037
+      ],
+      [
+       38.48353470778,
+       25.51748132756987
+      ],
+      [
+       38.414187487854456,
+       25.516983375581642
+      ],
+      [
+       38.33014771527134,
+       25.515348403786877
+      ],
+      [
+       38.246100165673305,
+       25.514179680060646
+      ],
+      [
+       38.17677491583496,
+       25.512364576088935
+      ],
+      [
+       38.107439028264466,
+       25.511015664531246
+      ],
+      [
+       38.023425647340595,
+       25.508349518560074
+      ],
+      [
+       37.93939876840648,
+       25.506149490113877
+      ],
+      [
+       37.87010101274996,
+       25.5034837953586
+      ],
+      [
+       37.800786899263976,
+       25.501284127372575
+      ],
+      [
+       37.716812562105346,
+       25.49758720873676
+      ],
+      [
+       37.63281900797417,
+       25.4943562068868
+      ],
+      [
+       30.021443969414175,
+       25.15478391808486
+      ],
+      [
+       21.245701421179664,
+       25.178145439391837
+      ],
+      [
+       12.408686433945691,
+       25.777580219794025
+      ],
+      [
+       12.310501736403406,
+       25.783635329068627
+      ],
+      [
+       12.21234464764856,
+       25.79012263260128
+      ],
+      [
+       12.157390697408083,
+       25.79307777881356
+      ],
+      [
+       12.102461703675065,
+       25.796465282851592
+      ],
+      [
+       12.004210093754677,
+       25.80131505891264
+      ],
+      [
+       11.905980786854384,
+       25.806597335490597
+      ],
+      [
+       11.850994710355337,
+       25.80887788968148
+      ],
+      [
+       11.796028282789099,
+       25.811591075397093
+      ],
+      [
+       11.697724556821381,
+       25.81523478788616
+      ],
+      [
+       11.59943782474822,
+       25.81931124201799
+      ],
+      [
+       11.544427902691815,
+       25.820916860744386
+      ],
+      [
+       11.489432319033826,
+       25.82295531954181
+      ],
+      [
+       11.391091281198772,
+       25.825392419729177
+      ],
+      [
+       11.29276192557262,
+       25.8282624375159
+      ],
+      [
+       11.237736442249936,
+       25.82919287897756
+      ],
+      [
+       11.182719984633641,
+       25.830556303872363
+      ],
+      [
+       11.084356444730124,
+       25.831786424739715
+      ],
+      [
+       10.985999273589949,
+       25.833449573967208
+      ],
+      [
+       10.930966515637099,
+       25.833704698043054
+      ],
+      [
+       10.875937469337924,
+       25.83439288370849
+      ],
+      [
+       10.859865867032841,
+       25.83439663424062
+      ],
+      [
+       10.384246109259323,
+       67.68314113400046
+      ],
+      [
+       50.70152701780221,
+       67.19674708648891
+      ],
+      [
+       50.71333222561405,
+       66.91636146219602
+      ],
+      [
+       50.730297779412965,
+       66.60451784629613
+      ],
+      [
+       50.75108885660855,
+       66.29290590509
+      ],
+      [
+       50.77570232614105,
+       65.98157256618971
+      ],
+      [
+       50.8041344813125,
+       65.67056471525098
+      ],
+      [
+       50.83638104034492,
+       65.35992918891218
+      ],
+      [
+       50.87243714702511,
+       65.04971276774094
+      ],
+      [
+       50.912297371436054,
+       64.73996216918925
+      ],
+      [
+       50.95595571077455,
+       64.43072404055789
+      ],
+      [
+       51.0034055902553,
+       64.12204495197159
+      ],
+      [
+       51.05463986410098,
+       63.81397138936562
+      ],
+      [
+       51.10965081661839,
+       63.50654974748539
+      ],
+      [
+       51.168430163360455,
+       63.19982632289933
+      ],
+      [
+       51.230969052373744,
+       62.89384730702698
+      ],
+      [
+       51.29725806553161,
+       62.58865877918268
+      ],
+      [
+       51.367287219952516,
+       62.28430669963612
+      ],
+      [
+       51.441045969503364,
+       61.98083690269101
+      ],
+      [
+       51.51852320638781,
+       61.67829508978248
+      ],
+      [
+       51.59970726281894,
+       61.37672682259477
+      ],
+      [
+       51.68458591277649,
+       61.076177516199614
+      ],
+      [
+       51.773146373847965,
+       60.77669243221709
+      ],
+      [
+       51.865375309153706,
+       60.47831667199922
+      ],
+      [
+       51.96125882935527,
+       60.181095169838
+      ],
+      [
+       52.06078249474723,
+       59.88507268619837
+      ],
+      [
+       52.16393131743164,
+       59.59029380097752
+      ],
+      [
+       52.270689763575206,
+       59.296802906791314
+      ],
+      [
+       52.381041755748655,
+       59.004644202288816
+      ],
+      [
+       52.494970675347844,
+       58.713861685496326
+      ],
+      [
+       52.612459365096555,
+       58.42449914719125
+      ],
+      [
+       52.73349013163027,
+       58.136600164307545
+      ],
+      [
+       52.85804474816074,
+       57.850208093373006
+      ],
+      [
+       52.986104457220854,
+       57.565366063980136
+      ],
+      [
+       53.11764997348948,
+       57.28211697229078
+      ],
+      [
+       53.252661486695715,
+       57.00050347457631
+      ],
+      [
+       53.391118664602295,
+       56.720567980793604
+      ],
+      [
+       53.533000656067514,
+       56.44235264819834
+      ],
+      [
+       53.678286094185324,
+       56.165899374996286
+      ],
+      [
+       53.82695309950316,
+       55.89124979403347
+      ],
+      [
+       53.97897928331685,
+       55.618445266526585
+      ],
+      [
+       54.13434175104233,
+       55.34752687583397
+      ],
+      [
+       54.2930171056634,
+       55.078535421268796
+      ],
+      [
+       54.454981451255335,
+       54.81151141195465
+      ],
+      [
+       54.62021039658342,
+       54.54649506072518
+      ],
+      [
+       54.78867905877627,
+       54.28352627806804
+      ],
+      [
+       54.96036206707299,
+       54.02264466611465
+      ],
+      [
+       55.13523356664409,
+       53.76388951267615
+      ],
+      [
+       55.31326722248493,
+       53.507299785326886
+      ],
+      [
+       55.4944362233818,
+       53.252914125535995
+      ],
+      [
+       55.678713285949556,
+       53.00077084284811
+      ],
+      [
+       55.8660706587404,
+       52.75090790911419
+      ],
+      [
+       56.05648012642317,
+       52.50336295277294
+      ],
+      [
+       56.24991301403236,
+       52.258173253184275
+      ],
+      [
+       56.44634019128666,
+       52.01537573501505
+      ],
+      [
+       56.64573207697564,
+       51.775006962678454
+      ],
+      [
+       56.848058643414774,
+       51.53710313482742
+      ],
+      [
+       57.053289420967346,
+       51.301700078903366
+      ],
+      [
+       57.26139350263318,
+       51.06883324574062
+      ],
+      [
+       57.47233954870302,
+       50.83853770422771
+      ],
+      [
+       57.68609579147825,
+       50.610848136026114
+      ],
+      [
+       57.90263004005499,
+       50.38579883034726
+      ],
+      [
+       58.12190968517184,
+       50.163423678788824
+      ],
+      [
+       58.34390170412087,
+       49.94375617023063
+      ],
+      [
+       58.56857266572052,
+       49.726829385791504
+      ],
+      [
+       58.795888735350424,
+       49.51267599384724
+      ],
+      [
+       59.0258156800466,
+       49.30132824511096
+      ],
+      [
+       59.25831887365694,
+       49.0928179677762
+      ],
+      [
+       59.49336330205568,
+       48.8871765627238
+      ],
+      [
+       59.73091356841648,
+       48.68443499879293
+      ],
+      [
+       59.970933898542995,
+       48.48462380811738
+      ],
+      [
+       60.213388146256364,
+       48.28777308152751
+      ],
+      [
+       60.458239798838726,
+       48.09391246401866
+      ],
+      [
+       60.7054519825318,
+       47.90307115028676
+      ],
+      [
+       60.954987468090074,
+       47.71527788033169
+      ],
+      [
+       61.206808676387254,
+       47.530560935129145
+      ],
+      [
+       61.460877684075676,
+       47.34894813237162
+      ],
+      [
+       61.71715622929729,
+       47.170466822279195
+      ],
+      [
+       61.97560571744588,
+       46.995143883480665
+      ],
+      [
+       62.236187226979176,
+       46.82300571896571
+      ],
+      [
+       62.49886151528031,
+       46.65407825210876
+      ],
+      [
+       62.76358902456769,
+       46.48838692276493
+      ],
+      [
+       63.03032988785213,
+       46.32595668343899
+      ],
+      [
+       63.29904393494081,
+       46.16681199552749
+      ],
+      [
+       63.569690698486596,
+       46.01097682563507
+      ],
+      [
+       63.84222942008247,
+       45.858474641965074
+      ],
+      [
+       64.11661905639939,
+       45.70932841078547
+      ],
+      [
+       64.39281828536744,
+       45.56356059297001
+      ],
+      [
+       64.67078551239865,
+       45.421193140615934
+      ],
+      [
+       64.9504788766511,
+       45.28224749373786
+      ],
+      [
+       65.23185625733294,
+       45.146744577039144
+      ],
+      [
+       65.51487528004557,
+       45.014704796760626
+      ],
+      [
+       65.79949332316524,
+       44.886148037607526
+      ],
+      [
+       66.08566752426155,
+       44.7610936597549
+      ],
+      [
+       66.37335478655245,
+       44.63956049593207
+      ],
+      [
+       66.40232842805112,
+       44.62773748749375
+      ],
+      [
+       66.62677343971663,
+       25.166131159328597
+      ],
+      [
+       59.55921194648549,
+       25.298796591321693
+      ],
+      [
+       59.54339618692656,
+       25.29899640095368
+      ],
+      [
+       59.52758358452304,
+       25.299370271983907
+      ],
+      [
+       59.39000570954148,
+       25.300934271513878
+      ],
+      [
+       59.252429923605774,
+       25.302672345936134
+      ],
+      [
+       59.236612902972944,
+       25.302678056823876
+      ]
+     ],
+     "holes": [],
+     "base": 0.0,
+     "top": 35.0,
+     "yards": {
+      "front": 25,
+      "side": 10,
+      "rear": 25.448042
+     },
+     "height": 35,
+     "coverage": null,
+     "notes": [
+      "R-1b.lot_coverage: the limit 0.25 * lot_area can't be worked out for this lot"
+     ]
+    },
+    "at": 1793003282.723423
+   }
+  },
+  "1 Rhino kept running while the check waited": {
+   "ok": true,
+   "detail": {
+    "ticks": 35,
+    "s": 4.0
+   }
+  },
+  "1 the wait said the checker's own steps": {
+   "ok": true,
+   "detail": [
+    "Slow test: waiting\u2026",
+    "Checking the rules\u2026"
+   ]
+  },
+  "1 the panel said Checking\u2026 with the live line (the checker's step and the seconds)": {
+   "ok": true,
+   "detail": [
+    "Slow test: waiting\u2026  \u25cb\u25cb\u25cf  0 s",
+    "Slow test: waiting\u2026  \u25cf\u25cb\u25cb  0 s",
+    "Slow test: waiting\u2026  \u25cf\u25cb\u25cb  1 s",
+    "Slow test: waiting\u2026  \u25cb\u25cf\u25cb  1 s",
+    "Slow test: waiting\u2026  \u25cb\u25cb\u25cf  1 s",
+    "Slow test: waiting\u2026  \u25cb\u25cf\u25cb  2 s",
+    "Slow test: waiting\u2026  \u25cb\u25cb\u25cf  2 s",
+    "Slow test: waiting\u2026  \u25cf\u25cb\u25cb  2 s",
+    "Measuring the building\u2026  \u25cb\u25cf\u25cb  3 s",
+    "Checking the rules\u2026  \u25cb\u25cf\u25cb  3 s",
+    "Checking the rules\u2026  \u25cb\u25cb\u25cf  3 s",
+    "Checking the rules\u2026  \u25cf\u25cb\u25cb  3 s"
+   ]
+  },
+  "1 the slow check finished normally": {
+   "ok": true,
+   "detail": {
+    "summary": {
+     "state": "review",
+     "text": "6 pass \u00b7 3 need review",
+     "lines": [
+      "Lot size: passes with the lot as drawn (confirm the survey)",
+      "Lot coverage by buildings: passes with the lot as drawn (confirm the survey)",
+      "Rear yard: the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), are open questions for the architects (yard_projections)"
+     ]
+    },
+    "view_summary": "1 needs review \u00b7 9 comply \u00b7 2 not checked",
+    "state": "needs_review",
+    "rows": [
+     {
+      "Requirement": "Permitted primary uses (chart p.2)",
+      "Table limit": "Permitted: One-family dwelling, detached; Church or related building; Public park or playground; Library or fire station",
+      "Proposed": "One-family dwelling, detached",
+      "Units": "use",
+      "Error": "PASS",
+      "Rule id": "R-1b.use",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Minimum lot size, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 6,000",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_area_one_family_detached",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Minimum lot width, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 50",
+      "Proposed": 75.835064,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.lot_width_one_family_detached",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum number of stories (chart p.3)",
+      "Table limit": "\u2264 3",
+      "Proposed": 3.0,
+      "Units": "stories",
+      "Error": "PASS",
+      "Rule id": "R-1b.stories",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum building height, with the \u00a7325-16C bonus",
+      "Table limit": "building_height \u2264 35 or building_height \u2264 38.5; front_yard \u2265 25; side_yard_smaller \u2265 10; side_yard_larger \u2265 10; rear_yard \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + (building_height - 35))",
+      "Proposed": "building_height = 35; front_yard = 27.07; side_yard_smaller = 12.06; side_yard_larger = 27.36; rear_yard = not given",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.height",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum lot coverage by buildings (chart p.3, \u00a7325-8A(10))",
+      "Table limit": "\u2264 ? (0.25 * lot_area)",
+      "Proposed": "1,340.89",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_coverage",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Front yard minimum (chart p.3)",
+      "Table limit": "\u2265 25",
+      "Proposed": 27.070666,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.front_yard",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Side yards minimum, one side and other side (chart p.3)",
+      "Table limit": "side_yard_smaller \u2265 10; side_yard_larger \u2265 10",
+      "Proposed": "side_yard_smaller = 12.06; side_yard_larger = 27.36",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.side_yards",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Rear yard minimum (chart p.3, note 16; lot depth \u00a7325-8A(14))",
+      "Table limit": "\u2265 ? (max(min(0.25 * lot_depth, 50), 20))",
+      "Proposed": "not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.rear_yard",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), are open questions for the architects (yard_projections)",
+      "Provisional": null
+     }
+    ],
+    "items": [
+     {
+      "id": "R-1b.use",
+      "name": "Use",
+      "status": "complies",
+      "proposed": "One-family dwelling, detached",
+      "required": "permitted",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_area_one_family_detached",
+      "name": "Lot area",
+      "status": "complies",
+      "proposed": "7,033 sf",
+      "required": "6,000 sf",
+      "margin": "+1,033 sf",
+      "delta": "at least 357 sf to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_width_one_family_detached",
+      "name": "Lot width",
+      "status": "complies",
+      "proposed": "75'-10\"",
+      "required": "50'-0\"",
+      "margin": "+25'-10\"",
+      "delta": "at least 21'-10\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.stories",
+      "name": "Stories",
+      "status": "complies",
+      "proposed": "3",
+      "required": "3",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.height",
+      "name": "Building height",
+      "status": "complies",
+      "proposed": "35'-0\"",
+      "required": "35'-0\"",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_coverage",
+      "name": "Lot coverage",
+      "status": "complies",
+      "proposed": "19.1%",
+      "required": "25%",
+      "margin": "+5.93%",
+      "delta": "at least 3.9% to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.front_yard",
+      "name": "Front yard",
+      "status": "complies",
+      "proposed": "27'-0 3/4\"",
+      "required": "25'-0\"",
+      "margin": "+2'-0 3/4\"",
+      "delta": "at least 0'-0 3/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.059635,
+        0.810638
+       ],
+       [
+        12.891689,
+        27.819239
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#northeast",
+      "name": "Side yard, Northeast",
+      "status": "complies",
+      "proposed": "27'-4 1/4\"",
+      "required": "10'-0\"",
+      "margin": "+17'-4 1/4\"",
+      "delta": "at least 15'-4 1/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        76.163648,
+        65.468053
+       ],
+       [
+        48.808356,
+        65.152572
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#southwest",
+      "name": "Side yard, Southwest",
+      "status": "complies",
+      "proposed": "12'-0 5/8\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 5/8\"",
+      "delta": "at least 0'-0 5/8\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        0.837219,
+        27.682237
+       ],
+       [
+        12.891689,
+        27.819239
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.rear_yard",
+      "name": "Rear yard",
+      "status": "needs_review",
+      "proposed": "27'-5 3/4\" to 27'-6 1/8\"",
+      "required": "21'-1 5/8\" to 25'-5 1/2\"",
+      "margin": "",
+      "delta": "up to 0'-11 1/4\" short",
+      "approx": true,
+      "colour": "amber",
+      "note": null,
+      "points": [
+       [
+        76.1328,
+        68.1429
+       ],
+       [
+        48.808356,
+        65.152572
+       ]
+      ],
+      "reason": "Needs 21'-1 5/8\" to 25'-5 1/2\", depending on which lot lines count as side and which as rear (it sets the lot depth): ask the zoning office; also open: whether a yard is measured to the wall or to overhangs, and what counts as part of the building",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.parking_one_family",
+      "name": "Parking \u00b7 needs input",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Needs bedrooms and parking spaces, which the model doesn't show",
+      "group": "not_checked",
+      "needs": [
+       "sleeping_rooms",
+       "parking_spaces"
+      ],
+      "hint": "Enter bedrooms and parking spaces",
+      "refused": null
+     },
+     {
+      "id": "release.overlays",
+      "name": "Overlays \u00b7 not in this release",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).",
+      "group": "not_checked",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.height_exceptions",
+      "name": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.yard_projections",
+      "name": "\u00a7325-18 Projections into yards (porches, decks, eaves)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.corner_lots",
+      "name": "\u00a7325-19C Corner lots",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-19C",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.accessory_structures",
+      "name": "\u00a7325-25 Accessory structures (garages, sheds)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-25",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.adus",
+      "name": "\u00a7325-28 Accessory dwelling units",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-28",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     }
+    ],
+    "header": {
+     "place": "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+     "code": "Ch. 325 as amended through Ord. No. 2026-02 (May 6, 2026) \u00b7 District Regulations Chart, April 2026",
+     "draft": "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+     "lot": "Lot lines: tax map, approximate (\u00b12'-0\")",
+     "grade": "Ground: assumed flat (elevation 0'-0\")",
+     "actions": [
+      "Pick survey lot lines\u2026"
+     ],
+     "main": null,
+     "sources": [
+      "Address: 106 Ithaca Rd, Ithaca, NY \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Zoning district: R-1b \u00b7 entered by you \u00b7 confirmed by you, 2026-10-26",
+      "Use: One-family dwelling, detached \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Lot: 7,033 sf \u00b7 the tax map (\u00b12 ft, approximate) \u00b7 confirmed by you, 2026-10-26",
+      "Front lot line (on the street): Ithaca Rd \u00b7 the State tax map (the sample's lookup) \u00b7 confirmed by you, 2026-10-26",
+      "Corner lot: no, one street \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Starting house: as first drawn, it keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey for the full area. \u00b7 suggested by Gordium \u00b7 not confirmed",
+      "Ground: assumed flat \u00b7 assumed (flat ground, the MVP's rule) \u00b7 not confirmed"
+     ]
+    },
+    "interior": [
+     "R-1b.parking_one_family"
+    ],
+    "encroach": 1,
+    "plan_encroach": 1,
+    "envelope": {
+     "outline": [
+      [
+       59.2207969032566,
+       25.302857854746513
+      ],
+      [
+       59.08321019495586,
+       25.30273344435009
+      ],
+      [
+       58.945623439377016,
+       25.302783121374244
+      ],
+      [
+       58.929807539655364,
+       25.302594732657706
+      ],
+      [
+       58.91399052445763,
+       25.302580430395842
+      ],
+      [
+       58.7764157028903,
+       25.300767628808778
+      ],
+      [
+       58.63883869772724,
+       25.299128900953644
+      ],
+      [
+       58.62302630073298,
+       25.29874644100347
+      ],
+      [
+       58.60721065203826,
+       25.298538040710977
+      ],
+      [
+       58.469668435466815,
+       25.295037120934545
+      ],
+      [
+       58.33212189931008,
+       25.291710234986493
+      ],
+      [
+       58.316315386332136,
+       25.291133761399745
+      ],
+      [
+       58.30050348591887,
+       25.29073129446094
+      ],
+      [
+       49.73090685166342,
+       25.019980421186293
+      ],
+      [
+       39.94775779486651,
+       25.49035292800415
+      ],
+      [
+       39.86377591797361,
+       25.493874413775156
+      ],
+      [
+       39.77981486937491,
+       25.497861747080805
+      ],
+      [
+       39.710508778317426,
+       25.50030113429428
+      ],
+      [
+       39.641220656809885,
+       25.503206488913822
+      ],
+      [
+       39.557201889550356,
+       25.505697122705833
+      ],
+      [
+       39.473198232350924,
+       25.508653824550226
+      ],
+      [
+       39.40386742488139,
+       25.510242535732477
+      ],
+      [
+       39.334548867471185,
+       25.512297399748345
+      ],
+      [
+       39.25050586276179,
+       25.513756806481076
+      ],
+      [
+       39.16647224760395,
+       25.51568243159578
+      ],
+      [
+       39.09712716468682,
+       25.51642022749276
+      ],
+      [
+       39.02778861049384,
+       25.517624291449977
+      ],
+      [
+       38.94373402490248,
+       25.518052251342127
+      ],
+      [
+       38.85968310693905,
+       25.518946509735105
+      ],
+      [
+       38.790334191688586,
+       25.518833279237462
+      ],
+      [
+       38.72098608284421,
+       25.519186361808426
+      ],
+      [
+       38.63693257468236,
+       25.51858281041081
+      ],
+      [
+       38.552877011672365,
+       25.518445567410037
+      ],
+      [
+       38.48353470778,
+       25.51748132756987
+      ],
+      [
+       38.414187487854456,
+       25.516983375581642
+      ],
+      [
+       38.33014771527134,
+       25.515348403786877
+      ],
+      [
+       38.246100165673305,
+       25.514179680060646
+      ],
+      [
+       38.17677491583496,
+       25.512364576088935
+      ],
+      [
+       38.107439028264466,
+       25.511015664531246
+      ],
+      [
+       38.023425647340595,
+       25.508349518560074
+      ],
+      [
+       37.93939876840648,
+       25.506149490113877
+      ],
+      [
+       37.87010101274996,
+       25.5034837953586
+      ],
+      [
+       37.800786899263976,
+       25.501284127372575
+      ],
+      [
+       37.716812562105346,
+       25.49758720873676
+      ],
+      [
+       37.63281900797417,
+       25.4943562068868
+      ],
+      [
+       30.021443969414175,
+       25.15478391808486
+      ],
+      [
+       21.245701421179664,
+       25.178145439391837
+      ],
+      [
+       12.408686433945691,
+       25.777580219794025
+      ],
+      [
+       12.310501736403406,
+       25.783635329068627
+      ],
+      [
+       12.21234464764856,
+       25.79012263260128
+      ],
+      [
+       12.157390697408083,
+       25.79307777881356
+      ],
+      [
+       12.102461703675065,
+       25.796465282851592
+      ],
+      [
+       12.004210093754677,
+       25.80131505891264
+      ],
+      [
+       11.905980786854384,
+       25.806597335490597
+      ],
+      [
+       11.850994710355337,
+       25.80887788968148
+      ],
+      [
+       11.796028282789099,
+       25.811591075397093
+      ],
+      [
+       11.697724556821381,
+       25.81523478788616
+      ],
+      [
+       11.59943782474822,
+       25.81931124201799
+      ],
+      [
+       11.544427902691815,
+       25.820916860744386
+      ],
+      [
+       11.489432319033826,
+       25.82295531954181
+      ],
+      [
+       11.391091281198772,
+       25.825392419729177
+      ],
+      [
+       11.29276192557262,
+       25.8282624375159
+      ],
+      [
+       11.237736442249936,
+       25.82919287897756
+      ],
+      [
+       11.182719984633641,
+       25.830556303872363
+      ],
+      [
+       11.084356444730124,
+       25.831786424739715
+      ],
+      [
+       10.985999273589949,
+       25.833449573967208
+      ],
+      [
+       10.930966515637099,
+       25.833704698043054
+      ],
+      [
+       10.875937469337924,
+       25.83439288370849
+      ],
+      [
+       10.859865867032841,
+       25.83439663424062
+      ],
+      [
+       10.384246109259323,
+       67.68314113400046
+      ],
+      [
+       50.70152701780221,
+       67.19674708648891
+      ],
+      [
+       50.71333222561405,
+       66.91636146219602
+      ],
+      [
+       50.730297779412965,
+       66.60451784629613
+      ],
+      [
+       50.75108885660855,
+       66.29290590509
+      ],
+      [
+       50.77570232614105,
+       65.98157256618971
+      ],
+      [
+       50.8041344813125,
+       65.67056471525098
+      ],
+      [
+       50.83638104034492,
+       65.35992918891218
+      ],
+      [
+       50.87243714702511,
+       65.04971276774094
+      ],
+      [
+       50.912297371436054,
+       64.73996216918925
+      ],
+      [
+       50.95595571077455,
+       64.43072404055789
+      ],
+      [
+       51.0034055902553,
+       64.12204495197159
+      ],
+      [
+       51.05463986410098,
+       63.81397138936562
+      ],
+      [
+       51.10965081661839,
+       63.50654974748539
+      ],
+      [
+       51.168430163360455,
+       63.19982632289933
+      ],
+      [
+       51.230969052373744,
+       62.89384730702698
+      ],
+      [
+       51.29725806553161,
+       62.58865877918268
+      ],
+      [
+       51.367287219952516,
+       62.28430669963612
+      ],
+      [
+       51.441045969503364,
+       61.98083690269101
+      ],
+      [
+       51.51852320638781,
+       61.67829508978248
+      ],
+      [
+       51.59970726281894,
+       61.37672682259477
+      ],
+      [
+       51.68458591277649,
+       61.076177516199614
+      ],
+      [
+       51.773146373847965,
+       60.77669243221709
+      ],
+      [
+       51.865375309153706,
+       60.47831667199922
+      ],
+      [
+       51.96125882935527,
+       60.181095169838
+      ],
+      [
+       52.06078249474723,
+       59.88507268619837
+      ],
+      [
+       52.16393131743164,
+       59.59029380097752
+      ],
+      [
+       52.270689763575206,
+       59.296802906791314
+      ],
+      [
+       52.381041755748655,
+       59.004644202288816
+      ],
+      [
+       52.494970675347844,
+       58.713861685496326
+      ],
+      [
+       52.612459365096555,
+       58.42449914719125
+      ],
+      [
+       52.73349013163027,
+       58.136600164307545
+      ],
+      [
+       52.85804474816074,
+       57.850208093373006
+      ],
+      [
+       52.986104457220854,
+       57.565366063980136
+      ],
+      [
+       53.11764997348948,
+       57.28211697229078
+      ],
+      [
+       53.252661486695715,
+       57.00050347457631
+      ],
+      [
+       53.391118664602295,
+       56.720567980793604
+      ],
+      [
+       53.533000656067514,
+       56.44235264819834
+      ],
+      [
+       53.678286094185324,
+       56.165899374996286
+      ],
+      [
+       53.82695309950316,
+       55.89124979403347
+      ],
+      [
+       53.97897928331685,
+       55.618445266526585
+      ],
+      [
+       54.13434175104233,
+       55.34752687583397
+      ],
+      [
+       54.2930171056634,
+       55.078535421268796
+      ],
+      [
+       54.454981451255335,
+       54.81151141195465
+      ],
+      [
+       54.62021039658342,
+       54.54649506072518
+      ],
+      [
+       54.78867905877627,
+       54.28352627806804
+      ],
+      [
+       54.96036206707299,
+       54.02264466611465
+      ],
+      [
+       55.13523356664409,
+       53.76388951267615
+      ],
+      [
+       55.31326722248493,
+       53.507299785326886
+      ],
+      [
+       55.4944362233818,
+       53.252914125535995
+      ],
+      [
+       55.678713285949556,
+       53.00077084284811
+      ],
+      [
+       55.8660706587404,
+       52.75090790911419
+      ],
+      [
+       56.05648012642317,
+       52.50336295277294
+      ],
+      [
+       56.24991301403236,
+       52.258173253184275
+      ],
+      [
+       56.44634019128666,
+       52.01537573501505
+      ],
+      [
+       56.64573207697564,
+       51.775006962678454
+      ],
+      [
+       56.848058643414774,
+       51.53710313482742
+      ],
+      [
+       57.053289420967346,
+       51.301700078903366
+      ],
+      [
+       57.26139350263318,
+       51.06883324574062
+      ],
+      [
+       57.47233954870302,
+       50.83853770422771
+      ],
+      [
+       57.68609579147825,
+       50.610848136026114
+      ],
+      [
+       57.90263004005499,
+       50.38579883034726
+      ],
+      [
+       58.12190968517184,
+       50.163423678788824
+      ],
+      [
+       58.34390170412087,
+       49.94375617023063
+      ],
+      [
+       58.56857266572052,
+       49.726829385791504
+      ],
+      [
+       58.795888735350424,
+       49.51267599384724
+      ],
+      [
+       59.0258156800466,
+       49.30132824511096
+      ],
+      [
+       59.25831887365694,
+       49.0928179677762
+      ],
+      [
+       59.49336330205568,
+       48.8871765627238
+      ],
+      [
+       59.73091356841648,
+       48.68443499879293
+      ],
+      [
+       59.970933898542995,
+       48.48462380811738
+      ],
+      [
+       60.213388146256364,
+       48.28777308152751
+      ],
+      [
+       60.458239798838726,
+       48.09391246401866
+      ],
+      [
+       60.7054519825318,
+       47.90307115028676
+      ],
+      [
+       60.954987468090074,
+       47.71527788033169
+      ],
+      [
+       61.206808676387254,
+       47.530560935129145
+      ],
+      [
+       61.460877684075676,
+       47.34894813237162
+      ],
+      [
+       61.71715622929729,
+       47.170466822279195
+      ],
+      [
+       61.97560571744588,
+       46.995143883480665
+      ],
+      [
+       62.236187226979176,
+       46.82300571896571
+      ],
+      [
+       62.49886151528031,
+       46.65407825210876
+      ],
+      [
+       62.76358902456769,
+       46.48838692276493
+      ],
+      [
+       63.03032988785213,
+       46.32595668343899
+      ],
+      [
+       63.29904393494081,
+       46.16681199552749
+      ],
+      [
+       63.569690698486596,
+       46.01097682563507
+      ],
+      [
+       63.84222942008247,
+       45.858474641965074
+      ],
+      [
+       64.11661905639939,
+       45.70932841078547
+      ],
+      [
+       64.39281828536744,
+       45.56356059297001
+      ],
+      [
+       64.67078551239865,
+       45.421193140615934
+      ],
+      [
+       64.9504788766511,
+       45.28224749373786
+      ],
+      [
+       65.23185625733294,
+       45.146744577039144
+      ],
+      [
+       65.51487528004557,
+       45.014704796760626
+      ],
+      [
+       65.79949332316524,
+       44.886148037607526
+      ],
+      [
+       66.08566752426155,
+       44.7610936597549
+      ],
+      [
+       66.37335478655245,
+       44.63956049593207
+      ],
+      [
+       66.40232842805112,
+       44.62773748749375
+      ],
+      [
+       66.62677343971663,
+       25.166131159328597
+      ],
+      [
+       59.55921194648549,
+       25.298796591321693
+      ],
+      [
+       59.54339618692656,
+       25.29899640095368
+      ],
+      [
+       59.52758358452304,
+       25.299370271983907
+      ],
+      [
+       59.39000570954148,
+       25.300934271513878
+      ],
+      [
+       59.252429923605774,
+       25.302672345936134
+      ],
+      [
+       59.236612902972944,
+       25.302678056823876
+      ]
+     ],
+     "holes": [],
+     "base": 0.0,
+     "top": 35.0,
+     "yards": {
+      "front": 25,
+      "side": 10,
+      "rear": 25.448042
+     },
+     "height": 35,
+     "coverage": null,
+     "notes": [
+      "R-1b.lot_coverage: the limit 0.25 * lot_area can't be worked out for this lot"
+     ]
+    },
+    "at": 1793003287.341988
+   }
+  },
+  "2 Cancel: run_check returned within 2.5 s, nothing shown as checked": {
+   "ok": true,
+   "detail": {
+    "took": 1.14,
+    "last": {
+     "error": "the check was cancelled",
+     "cancelled": true,
+     "at": 1793003288.4950771
+    }
+   }
+  },
+  "2 Cancel: the model and the file are as they were": {
+   "ok": true,
+   "detail": null
+  },
+  "2 the next check (a fresh checker) works": {
+   "ok": true,
+   "detail": {
+    "summary": {
+     "state": "review",
+     "text": "6 pass \u00b7 3 need review",
+     "lines": [
+      "Lot size: passes with the lot as drawn (confirm the survey)",
+      "Lot coverage by buildings: passes with the lot as drawn (confirm the survey)",
+      "Rear yard: the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), are open questions for the architects (yard_projections)"
+     ]
+    },
+    "view_summary": "1 needs review \u00b7 9 comply \u00b7 2 not checked",
+    "state": "needs_review",
+    "rows": [
+     {
+      "Requirement": "Permitted primary uses (chart p.2)",
+      "Table limit": "Permitted: One-family dwelling, detached; Church or related building; Public park or playground; Library or fire station",
+      "Proposed": "One-family dwelling, detached",
+      "Units": "use",
+      "Error": "PASS",
+      "Rule id": "R-1b.use",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Minimum lot size, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 6,000",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_area_one_family_detached",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Minimum lot width, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 50",
+      "Proposed": 75.835064,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.lot_width_one_family_detached",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum number of stories (chart p.3)",
+      "Table limit": "\u2264 3",
+      "Proposed": 3.0,
+      "Units": "stories",
+      "Error": "PASS",
+      "Rule id": "R-1b.stories",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum building height, with the \u00a7325-16C bonus",
+      "Table limit": "building_height \u2264 35 or building_height \u2264 38.5; front_yard \u2265 25; side_yard_smaller \u2265 10; side_yard_larger \u2265 10; rear_yard \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + (building_height - 35))",
+      "Proposed": "building_height = 35; front_yard = 27.07; side_yard_smaller = 12.06; side_yard_larger = 27.36; rear_yard = not given",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.height",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum lot coverage by buildings (chart p.3, \u00a7325-8A(10))",
+      "Table limit": "\u2264 ? (0.25 * lot_area)",
+      "Proposed": "1,340.89",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_coverage",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Front yard minimum (chart p.3)",
+      "Table limit": "\u2265 25",
+      "Proposed": 27.070666,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.front_yard",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Side yards minimum, one side and other side (chart p.3)",
+      "Table limit": "side_yard_smaller \u2265 10; side_yard_larger \u2265 10",
+      "Proposed": "side_yard_smaller = 12.06; side_yard_larger = 27.36",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.side_yards",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Rear yard minimum (chart p.3, note 16; lot depth \u00a7325-8A(14))",
+      "Table limit": "\u2265 ? (max(min(0.25 * lot_depth, 50), 20))",
+      "Proposed": "not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.rear_yard",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth); whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), are open questions for the architects (yard_projections)",
+      "Provisional": null
+     }
+    ],
+    "items": [
+     {
+      "id": "R-1b.use",
+      "name": "Use",
+      "status": "complies",
+      "proposed": "One-family dwelling, detached",
+      "required": "permitted",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_area_one_family_detached",
+      "name": "Lot area",
+      "status": "complies",
+      "proposed": "7,033 sf",
+      "required": "6,000 sf",
+      "margin": "+1,033 sf",
+      "delta": "at least 357 sf to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_width_one_family_detached",
+      "name": "Lot width",
+      "status": "complies",
+      "proposed": "75'-10\"",
+      "required": "50'-0\"",
+      "margin": "+25'-10\"",
+      "delta": "at least 21'-10\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.stories",
+      "name": "Stories",
+      "status": "complies",
+      "proposed": "3",
+      "required": "3",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.height",
+      "name": "Building height",
+      "status": "complies",
+      "proposed": "35'-0\"",
+      "required": "35'-0\"",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_coverage",
+      "name": "Lot coverage",
+      "status": "complies",
+      "proposed": "19.1%",
+      "required": "25%",
+      "margin": "+5.93%",
+      "delta": "at least 3.9% to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.front_yard",
+      "name": "Front yard",
+      "status": "complies",
+      "proposed": "27'-0 3/4\"",
+      "required": "25'-0\"",
+      "margin": "+2'-0 3/4\"",
+      "delta": "at least 0'-0 3/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.059635,
+        0.810638
+       ],
+       [
+        12.891689,
+        27.819239
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#northeast",
+      "name": "Side yard, Northeast",
+      "status": "complies",
+      "proposed": "27'-4 1/4\"",
+      "required": "10'-0\"",
+      "margin": "+17'-4 1/4\"",
+      "delta": "at least 15'-4 1/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        76.163648,
+        65.468053
+       ],
+       [
+        48.808356,
+        65.152572
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#southwest",
+      "name": "Side yard, Southwest",
+      "status": "complies",
+      "proposed": "12'-0 5/8\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 5/8\"",
+      "delta": "at least 0'-0 5/8\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        0.837219,
+        27.682237
+       ],
+       [
+        12.891689,
+        27.819239
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.rear_yard",
+      "name": "Rear yard",
+      "status": "needs_review",
+      "proposed": "27'-5 3/4\" to 27'-6 1/8\"",
+      "required": "21'-1 5/8\" to 25'-5 1/2\"",
+      "margin": "",
+      "delta": "up to 0'-11 1/4\" short",
+      "approx": true,
+      "colour": "amber",
+      "note": null,
+      "points": [
+       [
+        76.1328,
+        68.1429
+       ],
+       [
+        48.808356,
+        65.152572
+       ]
+      ],
+      "reason": "Needs 21'-1 5/8\" to 25'-5 1/2\", depending on which lot lines count as side and which as rear (it sets the lot depth): ask the zoning office; also open: whether a yard is measured to the wall or to overhangs, and what counts as part of the building",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.parking_one_family",
+      "name": "Parking \u00b7 needs input",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Needs bedrooms and parking spaces, which the model doesn't show",
+      "group": "not_checked",
+      "needs": [
+       "sleeping_rooms",
+       "parking_spaces"
+      ],
+      "hint": "Enter bedrooms and parking spaces",
+      "refused": null
+     },
+     {
+      "id": "release.overlays",
+      "name": "Overlays \u00b7 not in this release",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).",
+      "group": "not_checked",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.height_exceptions",
+      "name": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.yard_projections",
+      "name": "\u00a7325-18 Projections into yards (porches, decks, eaves)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.corner_lots",
+      "name": "\u00a7325-19C Corner lots",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-19C",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.accessory_structures",
+      "name": "\u00a7325-25 Accessory structures (garages, sheds)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-25",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.adus",
+      "name": "\u00a7325-28 Accessory dwelling units",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-28",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     }
+    ],
+    "header": {
+     "place": "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+     "code": "Ch. 325 as amended through Ord. No. 2026-02 (May 6, 2026) \u00b7 District Regulations Chart, April 2026",
+     "draft": "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+     "lot": "Lot lines: tax map, approximate (\u00b12'-0\")",
+     "grade": "Ground: assumed flat (elevation 0'-0\")",
+     "actions": [
+      "Pick survey lot lines\u2026"
+     ],
+     "main": null,
+     "sources": [
+      "Address: 106 Ithaca Rd, Ithaca, NY \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Zoning district: R-1b \u00b7 entered by you \u00b7 confirmed by you, 2026-10-26",
+      "Use: One-family dwelling, detached \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Lot: 7,033 sf \u00b7 the tax map (\u00b12 ft, approximate) \u00b7 confirmed by you, 2026-10-26",
+      "Front lot line (on the street): Ithaca Rd \u00b7 the State tax map (the sample's lookup) \u00b7 confirmed by you, 2026-10-26",
+      "Corner lot: no, one street \u00b7 the sample project \u00b7 confirmed by you, 2026-10-26",
+      "Starting house: as first drawn, it keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey for the full area. \u00b7 suggested by Gordium \u00b7 not confirmed",
+      "Ground: assumed flat \u00b7 assumed (flat ground, the MVP's rule) \u00b7 not confirmed"
+     ]
+    },
+    "interior": [
+     "R-1b.parking_one_family"
+    ],
+    "encroach": 1,
+    "plan_encroach": 1,
+    "envelope": {
+     "outline": [
+      [
+       59.2207969032566,
+       25.302857854746513
+      ],
+      [
+       59.08321019495586,
+       25.30273344435009
+      ],
+      [
+       58.945623439377016,
+       25.302783121374244
+      ],
+      [
+       58.929807539655364,
+       25.302594732657706
+      ],
+      [
+       58.91399052445763,
+       25.302580430395842
+      ],
+      [
+       58.7764157028903,
+       25.300767628808778
+      ],
+      [
+       58.63883869772724,
+       25.299128900953644
+      ],
+      [
+       58.62302630073298,
+       25.29874644100347
+      ],
+      [
+       58.60721065203826,
+       25.298538040710977
+      ],
+      [
+       58.469668435466815,
+       25.295037120934545
+      ],
+      [
+       58.33212189931008,
+       25.291710234986493
+      ],
+      [
+       58.316315386332136,
+       25.291133761399745
+      ],
+      [
+       58.30050348591887,
+       25.29073129446094
+      ],
+      [
+       49.73090685166342,
+       25.019980421186293
+      ],
+      [
+       39.94775779486651,
+       25.49035292800415
+      ],
+      [
+       39.86377591797361,
+       25.493874413775156
+      ],
+      [
+       39.77981486937491,
+       25.497861747080805
+      ],
+      [
+       39.710508778317426,
+       25.50030113429428
+      ],
+      [
+       39.641220656809885,
+       25.503206488913822
+      ],
+      [
+       39.557201889550356,
+       25.505697122705833
+      ],
+      [
+       39.473198232350924,
+       25.508653824550226
+      ],
+      [
+       39.40386742488139,
+       25.510242535732477
+      ],
+      [
+       39.334548867471185,
+       25.512297399748345
+      ],
+      [
+       39.25050586276179,
+       25.513756806481076
+      ],
+      [
+       39.16647224760395,
+       25.51568243159578
+      ],
+      [
+       39.09712716468682,
+       25.51642022749276
+      ],
+      [
+       39.02778861049384,
+       25.517624291449977
+      ],
+      [
+       38.94373402490248,
+       25.518052251342127
+      ],
+      [
+       38.85968310693905,
+       25.518946509735105
+      ],
+      [
+       38.790334191688586,
+       25.518833279237462
+      ],
+      [
+       38.72098608284421,
+       25.519186361808426
+      ],
+      [
+       38.63693257468236,
+       25.51858281041081
+      ],
+      [
+       38.552877011672365,
+       25.518445567410037
+      ],
+      [
+       38.48353470778,
+       25.51748132756987
+      ],
+      [
+       38.414187487854456,
+       25.516983375581642
+      ],
+      [
+       38.33014771527134,
+       25.515348403786877
+      ],
+      [
+       38.246100165673305,
+       25.514179680060646
+      ],
+      [
+       38.17677491583496,
+       25.512364576088935
+      ],
+      [
+       38.107439028264466,
+       25.511015664531246
+      ],
+      [
+       38.023425647340595,
+       25.508349518560074
+      ],
+      [
+       37.93939876840648,
+       25.506149490113877
+      ],
+      [
+       37.87010101274996,
+       25.5034837953586
+      ],
+      [
+       37.800786899263976,
+       25.501284127372575
+      ],
+      [
+       37.716812562105346,
+       25.49758720873676
+      ],
+      [
+       37.63281900797417,
+       25.4943562068868
+      ],
+      [
+       30.021443969414175,
+       25.15478391808486
+      ],
+      [
+       21.245701421179664,
+       25.178145439391837
+      ],
+      [
+       12.408686433945691,
+       25.777580219794025
+      ],
+      [
+       12.310501736403406,
+       25.783635329068627
+      ],
+      [
+       12.21234464764856,
+       25.79012263260128
+      ],
+      [
+       12.157390697408083,
+       25.79307777881356
+      ],
+      [
+       12.102461703675065,
+       25.796465282851592
+      ],
+      [
+       12.004210093754677,
+       25.80131505891264
+      ],
+      [
+       11.905980786854384,
+       25.806597335490597
+      ],
+      [
+       11.850994710355337,
+       25.80887788968148
+      ],
+      [
+       11.796028282789099,
+       25.811591075397093
+      ],
+      [
+       11.697724556821381,
+       25.81523478788616
+      ],
+      [
+       11.59943782474822,
+       25.81931124201799
+      ],
+      [
+       11.544427902691815,
+       25.820916860744386
+      ],
+      [
+       11.489432319033826,
+       25.82295531954181
+      ],
+      [
+       11.391091281198772,
+       25.825392419729177
+      ],
+      [
+       11.29276192557262,
+       25.8282624375159
+      ],
+      [
+       11.237736442249936,
+       25.82919287897756
+      ],
+      [
+       11.182719984633641,
+       25.830556303872363
+      ],
+      [
+       11.084356444730124,
+       25.831786424739715
+      ],
+      [
+       10.985999273589949,
+       25.833449573967208
+      ],
+      [
+       10.930966515637099,
+       25.833704698043054
+      ],
+      [
+       10.875937469337924,
+       25.83439288370849
+      ],
+      [
+       10.859865867032841,
+       25.83439663424062
+      ],
+      [
+       10.384246109259323,
+       67.68314113400046
+      ],
+      [
+       50.70152701780221,
+       67.19674708648891
+      ],
+      [
+       50.71333222561405,
+       66.91636146219602
+      ],
+      [
+       50.730297779412965,
+       66.60451784629613
+      ],
+      [
+       50.75108885660855,
+       66.29290590509
+      ],
+      [
+       50.77570232614105,
+       65.98157256618971
+      ],
+      [
+       50.8041344813125,
+       65.67056471525098
+      ],
+      [
+       50.83638104034492,
+       65.35992918891218
+      ],
+      [
+       50.87243714702511,
+       65.04971276774094
+      ],
+      [
+       50.912297371436054,
+       64.73996216918925
+      ],
+      [
+       50.95595571077455,
+       64.43072404055789
+      ],
+      [
+       51.0034055902553,
+       64.12204495197159
+      ],
+      [
+       51.05463986410098,
+       63.81397138936562
+      ],
+      [
+       51.10965081661839,
+       63.50654974748539
+      ],
+      [
+       51.168430163360455,
+       63.19982632289933
+      ],
+      [
+       51.230969052373744,
+       62.89384730702698
+      ],
+      [
+       51.29725806553161,
+       62.58865877918268
+      ],
+      [
+       51.367287219952516,
+       62.28430669963612
+      ],
+      [
+       51.441045969503364,
+       61.98083690269101
+      ],
+      [
+       51.51852320638781,
+       61.67829508978248
+      ],
+      [
+       51.59970726281894,
+       61.37672682259477
+      ],
+      [
+       51.68458591277649,
+       61.076177516199614
+      ],
+      [
+       51.773146373847965,
+       60.77669243221709
+      ],
+      [
+       51.865375309153706,
+       60.47831667199922
+      ],
+      [
+       51.96125882935527,
+       60.181095169838
+      ],
+      [
+       52.06078249474723,
+       59.88507268619837
+      ],
+      [
+       52.16393131743164,
+       59.59029380097752
+      ],
+      [
+       52.270689763575206,
+       59.296802906791314
+      ],
+      [
+       52.381041755748655,
+       59.004644202288816
+      ],
+      [
+       52.494970675347844,
+       58.713861685496326
+      ],
+      [
+       52.612459365096555,
+       58.42449914719125
+      ],
+      [
+       52.73349013163027,
+       58.136600164307545
+      ],
+      [
+       52.85804474816074,
+       57.850208093373006
+      ],
+      [
+       52.986104457220854,
+       57.565366063980136
+      ],
+      [
+       53.11764997348948,
+       57.28211697229078
+      ],
+      [
+       53.252661486695715,
+       57.00050347457631
+      ],
+      [
+       53.391118664602295,
+       56.720567980793604
+      ],
+      [
+       53.533000656067514,
+       56.44235264819834
+      ],
+      [
+       53.678286094185324,
+       56.165899374996286
+      ],
+      [
+       53.82695309950316,
+       55.89124979403347
+      ],
+      [
+       53.97897928331685,
+       55.618445266526585
+      ],
+      [
+       54.13434175104233,
+       55.34752687583397
+      ],
+      [
+       54.2930171056634,
+       55.078535421268796
+      ],
+      [
+       54.454981451255335,
+       54.81151141195465
+      ],
+      [
+       54.62021039658342,
+       54.54649506072518
+      ],
+      [
+       54.78867905877627,
+       54.28352627806804
+      ],
+      [
+       54.96036206707299,
+       54.02264466611465
+      ],
+      [
+       55.13523356664409,
+       53.76388951267615
+      ],
+      [
+       55.31326722248493,
+       53.507299785326886
+      ],
+      [
+       55.4944362233818,
+       53.252914125535995
+      ],
+      [
+       55.678713285949556,
+       53.00077084284811
+      ],
+      [
+       55.8660706587404,
+       52.75090790911419
+      ],
+      [
+       56.05648012642317,
+       52.50336295277294
+      ],
+      [
+       56.24991301403236,
+       52.258173253184275
+      ],
+      [
+       56.44634019128666,
+       52.01537573501505
+      ],
+      [
+       56.64573207697564,
+       51.775006962678454
+      ],
+      [
+       56.848058643414774,
+       51.53710313482742
+      ],
+      [
+       57.053289420967346,
+       51.301700078903366
+      ],
+      [
+       57.26139350263318,
+       51.06883324574062
+      ],
+      [
+       57.47233954870302,
+       50.83853770422771
+      ],
+      [
+       57.68609579147825,
+       50.610848136026114
+      ],
+      [
+       57.90263004005499,
+       50.38579883034726
+      ],
+      [
+       58.12190968517184,
+       50.163423678788824
+      ],
+      [
+       58.34390170412087,
+       49.94375617023063
+      ],
+      [
+       58.56857266572052,
+       49.726829385791504
+      ],
+      [
+       58.795888735350424,
+       49.51267599384724
+      ],
+      [
+       59.0258156800466,
+       49.30132824511096
+      ],
+      [
+       59.25831887365694,
+       49.0928179677762
+      ],
+      [
+       59.49336330205568,
+       48.8871765627238
+      ],
+      [
+       59.73091356841648,
+       48.68443499879293
+      ],
+      [
+       59.970933898542995,
+       48.48462380811738
+      ],
+      [
+       60.213388146256364,
+       48.28777308152751
+      ],
+      [
+       60.458239798838726,
+       48.09391246401866
+      ],
+      [
+       60.7054519825318,
+       47.90307115028676
+      ],
+      [
+       60.954987468090074,
+       47.71527788033169
+      ],
+      [
+       61.206808676387254,
+       47.530560935129145
+      ],
+      [
+       61.460877684075676,
+       47.34894813237162
+      ],
+      [
+       61.71715622929729,
+       47.170466822279195
+      ],
+      [
+       61.97560571744588,
+       46.995143883480665
+      ],
+      [
+       62.236187226979176,
+       46.82300571896571
+      ],
+      [
+       62.49886151528031,
+       46.65407825210876
+      ],
+      [
+       62.76358902456769,
+       46.48838692276493
+      ],
+      [
+       63.03032988785213,
+       46.32595668343899
+      ],
+      [
+       63.29904393494081,
+       46.16681199552749
+      ],
+      [
+       63.569690698486596,
+       46.01097682563507
+      ],
+      [
+       63.84222942008247,
+       45.858474641965074
+      ],
+      [
+       64.11661905639939,
+       45.70932841078547
+      ],
+      [
+       64.39281828536744,
+       45.56356059297001
+      ],
+      [
+       64.67078551239865,
+       45.421193140615934
+      ],
+      [
+       64.9504788766511,
+       45.28224749373786
+      ],
+      [
+       65.23185625733294,
+       45.146744577039144
+      ],
+      [
+       65.51487528004557,
+       45.014704796760626
+      ],
+      [
+       65.79949332316524,
+       44.886148037607526
+      ],
+      [
+       66.08566752426155,
+       44.7610936597549
+      ],
+      [
+       66.37335478655245,
+       44.63956049593207
+      ],
+      [
+       66.40232842805112,
+       44.62773748749375
+      ],
+      [
+       66.62677343971663,
+       25.166131159328597
+      ],
+      [
+       59.55921194648549,
+       25.298796591321693
+      ],
+      [
+       59.54339618692656,
+       25.29899640095368
+      ],
+      [
+       59.52758358452304,
+       25.299370271983907
+      ],
+      [
+       59.39000570954148,
+       25.300934271513878
+      ],
+      [
+       59.252429923605774,
+       25.302672345936134
+      ],
+      [
+       59.236612902972944,
+       25.302678056823876
+      ]
+     ],
+     "holes": [],
+     "base": 0.0,
+     "top": 35.0,
+     "yards": {
+      "front": 25,
+      "side": 10,
+      "rear": 25.448042
+     },
+     "height": 35,
+     "coverage": null,
+     "notes": [
+      "R-1b.lot_coverage: the limit 0.25 * lot_area can't be worked out for this lot"
+     ]
+    },
+    "at": 1793003289.907316
+   }
+  },
+  "3 the report's own check was the work cancelled": {
+   "ok": true,
+   "detail": [
+    "Slow test: waiting\u2026"
+   ]
+  },
+  "3 Cancel: the report file is as it was, no half-written copy": {
+   "ok": true,
+   "detail": {
+    "path": "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_test_docs/progress_cancel_Large_Objects_-_Feet_gordium_report.xlsx",
+    "part_left": false
+   }
+  },
+  "3 Gordium said the report was cancelled": {
+   "ok": true,
+   "detail": [
+    "Zoning report cancelled: the report file wasn't changed."
+   ]
+  },
+  "4 the work cancelled was the starting house's": {
+   "ok": true,
+   "detail": [
+    "Slow test: waiting\u2026"
+   ]
+  },
+  "4 Cancel during Draw: nothing drawn, the model as when the box was shown": {
+   "ok": true,
+   "detail": {
+    "now": {
+     "f54edb28-6cee-483d-8ee6-12dede3f0207": "Site"
+    },
+    "at_box": {
+     "f54edb28-6cee-483d-8ee6-12dede3f0207": "Site"
+    }
+   }
+  },
+  "4 Cancel during Draw: the file's strings as when the box was shown": {
+   "ok": true,
+   "detail": {
+    "now": {
+     "lot_facts": null,
+     "ui": "{\"from_sample\": true, \"replaceable_lot\": \"f54edb28-6cee-483d-8ee6-12dede3f0207\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"drawn_address\": \"106 Ithaca Rd, Ithaca, NY\"}",
+     "fact_sources": null
+    },
+    "at_box": {
+     "lot_facts": null,
+     "ui": "{\"from_sample\": true, \"replaceable_lot\": \"f54edb28-6cee-483d-8ee6-12dede3f0207\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"drawn_address\": \"106 Ithaca Rd, Ithaca, NY\"}",
+     "fact_sources": null
+    }
+   }
+  },
+  "4 Gordium said Draw was cancelled": {
+   "ok": true,
+   "detail": [
+    "Zoning report cancelled: the report file wasn't changed.",
+    "Draw cancelled: nothing was drawn, and the model is as it was before the box opened (Draw again when you're ready)."
+   ]
+  },
+  "4 Draw again (nothing cancelled) draws the starting house": {
+   "ok": false,
+   "detail": {
+    "drawn": 1
+   }
+  }
+ },
+ "error": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_aea73b8/apps/rhino_plugin/tests/progress_cancel_in_rhino.py\", line 240, in main\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_aea73b8/apps/rhino_plugin/tests/progress_cancel_in_rhino.py\", line 57, in claim\nAssertionError: 4 Draw again (nothing cancelled) draws the starting house: {'drawn': 1}\n"
+}
