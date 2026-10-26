@@ -119,6 +119,15 @@ try:
     away.Unitize()
     eye = box.Center + away * (box.Diagonal.Length * 1.6) + rg.Vector3d(0, 0, box.Max.Z - box.Center.Z)
     vp.SetCameraLocations(box.Center, eye)               # at the street, looking at the house
+    whole = rg.BoundingBox(box.Min, box.Max)             # the whole house and lot in frame, so the capture itself
+    whole.Union(frame)                                   # shows the hiding (Rhino check of #31 at c174a2d)
+    vp.ZoomBoundingBox(whole)                            # (keeps the direction, moves the camera back)
+    eye = vp.CameraLocation                              # the rays below start where the camera now is
+    corners = [vp.WorldToClient(c) for c in whole.GetCorners()]
+    size = vp.Size
+    claim("2 Perspective: the whole house and lot in frame",
+          all(0 <= c.X <= size.Width and 0 <= c.Y <= size.Height for c in corners),
+          [(round(c.X), round(c.Y)) for c in corners])
     seen, bitmap = redraw_spied(g, doc, "Perspective", "2_perspective_shaded")
     log["perspective"] = seen
     claim("2 Perspective: no line goes on top", True not in seen["on_top"], seen)
