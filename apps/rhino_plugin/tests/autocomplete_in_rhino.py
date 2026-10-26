@@ -159,6 +159,9 @@ def painted(view):
         return {"error": repr(e)}
 
 
+PAINTED_GAP_PT = 10.0     # most empty space allowed under the lowest drawn text
+
+
 def fits(layout):
     """Every row visible (no scroll bar) and no empty row below them: the rows' own height against the visible
     height (the table itself is kept at least as tall as what shows it, so its frame can't tell)."""
@@ -168,9 +171,10 @@ def fits(layout):
     ink = layout.get("painted") or {}
     if ink.get("ink_bottom") is None:   # couldn't see the pixels, or nothing drawn: not shown to fit
         return False
-    # and as painted: the lowest text is in the last row's band, so no empty row shows under it
+    # and as painted: under the lowest text only its own row's margin and the border (about 6 pt at Rhino's 16 pt
+    # rows); a fixed bound, not the table's pitch, since the pixels are what check the table's numbers
     return (rows_h <= layout["visible_h"] + 0.5 and layout["visible_h"] - rows_h < layout["pitch"] and
-            ink["view_h"] - ink["ink_bottom"] < layout["pitch"])
+            ink["view_h"] - ink["ink_bottom"] < min(layout["pitch"], PAINTED_GAP_PT))
 
 
 def screen_bottom(window):

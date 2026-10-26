@@ -228,7 +228,7 @@ def test_the_in_rhino_list_claim_needs_the_pixels():
     the drawn pixels; not seeing them, or an empty band painted under the text, is not a fit."""
     src = (REPO / "apps/rhino_plugin/tests/autocomplete_in_rhino.py").read_text(encoding="utf-8")
     space = {}
-    exec(part(src, "def fits(", "def screen_bottom("), space)
+    exec(part(src, "PAINTED_GAP_PT =", "def screen_bottom("), space)
     fits = space["fits"]
     row = {"rows": 8, "rows_bottom": 128.0, "visible_h": 130.0, "pitch": 16.0}
     assert fits(dict(row, painted={"view_h": 132.0, "ink_bottom": 125.0}))
@@ -236,6 +236,9 @@ def test_the_in_rhino_list_claim_needs_the_pixels():
     assert not fits(dict(row, painted={"view_h": 132.0, "ink_bottom": None}))
     assert not fits(dict(row, painted={"view_h": 196.0, "ink_bottom": 125.0}))      # rows drawn closer: empty band
     assert not fits(dict(row, visible_h=192.0, painted={"view_h": 194.0, "ink_bottom": 125.0}))
+    one = {"rows": 1, "rows_bottom": 24.0, "visible_h": 26.0, "pitch": 24.0}       # table says 24, drawn at 16
+    assert not fits(dict(one, painted={"view_h": 28.0, "ink_bottom": 13.0}))        # half a row empty: not a fit
+    assert fits(dict(one, painted={"view_h": 28.0, "ink_bottom": 21.0}))
 
 
 def test_the_found_address_reads_cleanly():
