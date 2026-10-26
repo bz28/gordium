@@ -341,7 +341,7 @@ def main():
         log["error"] = traceback.format_exc()
         raise                                # a failed claim fails the run loudly
     finally:
-        json.dump(log, open(S + "out.json", "w"), indent=1, default=str)
+        json.dump(log, open(S + "out.json", "w", encoding="utf-8"), indent=1, default=str)
         try:
             g = sys.modules.get("gordium_rhino")
             if g is not None:                    # never left on the slow checker or the test's hooks
