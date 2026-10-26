@@ -808,8 +808,8 @@ def dim_candidates(points: list, measure: str, shape, footprint, edges: list, wo
     """Where a yard's dimension may be drawn (plan, feet), best first: pairs [its lot-line end, its building end],
     as a drawing would place it (Rhino checks of #29). The building end lies on the wall run facing the yard's lot
     line, never a corner the next yard's dimension shares; the lot end is its square projection onto the lot-line
-    piece it falls on (0° by construction). Best is nearest the middle of the run; the viewport takes the first
-    whose label sits clear on screen (rhino_logic.place_dimension).
+    piece it falls on (0° by construction). Best is nearest the middle of the run; the plugin draws the first (its
+    number placed by rhino_logic.place_dim_label).
     How far along the run it may go: a yard that fails or needs review (`worst`) is dimensioned where it is
     shortest, within DIM_NEAR_FT of the yard as measured (the drawing never shows more room than the label);
     a complying yard anywhere its dimension is within BEND_SLACK_FT of it (a lot line a fraction of a degree off

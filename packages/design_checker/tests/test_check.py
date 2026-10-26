@@ -951,7 +951,7 @@ def test_the_panel_message_line_is_cleared_by_every_check():
     # round 11: before anything that can fail, so a check that fails early clears it too
     assert body.index('ui.say(STATE.get("panel_parts"), "")') < body.index("facts = current_facts(doc)")
     report = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
-    assert report.index("run_check(doc, report=True)") < report.index("say(logic.report_message(path, True")
+    assert report.index("run_check(doc, report=True)") < report.index("say(first + logic.report_message(path, True")
 
 
 def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_path):
@@ -965,7 +965,7 @@ def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_p
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
     body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'if report and result.get("report_error"):' in body and "say(logic.report_message(path, False" in body
+    assert 'if report and result.get("report_error"):' in body and "say(first + logic.report_message(path, False" in body
     # round 12: "out of date" only for a report that was there before this check, not one its own write left
     assert body.index("had_report = bool(report) and os.path.exists(report_path(doc))") < body.index("result = ask(")
     assert 'result["report_error"], stale=had_report))' in body
@@ -986,7 +986,8 @@ def test_no_viewport_label_is_drawn_under_the_status_box():
     assert top >= y + h
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     conduit = rhino[rhino.index("    taken = []"):]
-    assert conduit.index("logic.status_box(") < conduit.index("ui.label_at(")
+    assert conduit.index("logic.status_box(") < conduit.index("ui.paint_label(")
+    assert conduit.index("keep = list(taken)") < conduit.index('"keep": [tuple(t) for t in keep]')   # placed off it
 
 
 def test_a_report_write_that_fails_half_way_leaves_no_broken_report(facts, tmp_path, monkeypatch):
@@ -1069,9 +1070,9 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
     assert "if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw and "    if not boxed:\n        return" in draw
     assert "if plan and labels and zoomed_in else []" in draw                                   # lot-edge labels: only when on
-    assert "\n            _dimension(d, e.Viewport, chosen, color)\n" in draw     # lines regardless (not under the
+    assert "\n            _dimension(d, e.Viewport, best, color)\n" in draw       # lines regardless (not under the
     assert "\n        if flat:" in draw                              # (in plan on screen; off plan draw_scene)
-    # labels' condition: placed with no words when they are off, logic.place_dimension)
+    # labels' condition: drawn with no words when they are off; the words are the one placer's, place_dim_label)
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
     assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
     check_code = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
@@ -1452,9 +1453,8 @@ def test_the_notice_never_hides_the_model_when_there_is_room():
     def covers(x, y, box, w=690, h=32):
         a, b, c, e = box
         return min(x + w, c) > max(x, a) and min(y + h, e) > max(y, b)
-    # framed tight (as it was): every corner covers some of the lot; never the status box
-    x, y = notice_spot(1000, 640, 690, 32, (265, 30, 735, 610), [status])
-    assert not covers(x, y, (518, 12, 985, 68))
+    # framed tight (as it was): every corner covers some of the lot: not drawn (the panel says it; #28 at 92cf742)
+    assert notice_spot(1000, 640, 690, 32, (265, 30, 735, 610), [status]) is None
     # framed with room (FRAME_ROOM 0.75: the lot from y 102 to 538): top left is clear of the lot; with the status
     # box there too, bottom left; nothing covered either way
     roomy = (324, 102, 676, 538)
@@ -1714,7 +1714,7 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
     # the height limit's label: past its line's end, off the building (Rhino check of #28 at fc0b023; #29)
     assert "ui.draw_text_box(d, [limit[1]], BLUE, int(spot[0]), int(spot[1]), dark, 13)" in rhino
-    assert "spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken)" in rhino
+    assert "spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken + placed_boxes)" in rhino
     assert "    boxed = bool(o.message and labels and _in_active_view(e))" in draw
     assert draw.index("    boxed = ") < draw.index("    if boxed:\n        taken.append(logic.status_box(") \
         < draw.index("    if not boxed:\n        return")         # nor its room kept clear in the other views
@@ -1754,14 +1754,13 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
             in zoom)                                  # judged from the lot's edges: a lot with arcs too (round 3, F5)
     assert '    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]' in zoom
     assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
-    assert ('    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:'
-            in draw)
-    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True)" in draw
+    assert '    edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []' in draw
+    assert 'colors[key] = (ui.status_color("complies", dark), True)' in draw            # edges: a leader when short
     assert draw.index("zoomed_in = ") < draw.index("    if not boxed:")         # the status box isn't gated by it
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    at = ui[ui.index("def label_at("):ui.index("def _signed(")]
-    assert "        if logic.needs_leader(((b.X - a.X) ** 2 + (b.Y - a.Y) ** 2) ** 0.5, width):" in at
-    assert "            end = logic.leader_end(mid, (left, top, width, h))" in at
+    at = ui[ui.index("def paint_label("):ui.index("def _signed(")]
+    assert "edge_leader and logic.needs_leader(((xb - xa) ** 2 + (yb - ya) ** 2) ** 0.5, width)" in at
+    assert "        end = logic.leader_end(at, (left, top, width, h))" in at
 
 def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps_it_only_on_that_street():
     """The stack-keeper's review: the panel and report name the street only when the highlighted street line's own
@@ -1791,7 +1790,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     # sets the lines from them (PR #19: every pick's effect decided there, tested by behaviour)
     pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
     assert pick.index('name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),') \
-        < pick.index("ask.GetLiteralString()") < pick.index('return {"picks": [picked], "name": name}')
+        < pick.index("ask.GetLiteralString()") < pick.index('return {"lines": lines, "ids": ids, "name": name}')
     assert "RhinoGet.GetString(" not in pick        # a space would end it: "Cayuga St" saved as "Cayuga" (R3)
     assert 'street_name=sample.get("street_name"),' in rhino
     # the name only with its street line (round 3, F6), and the whole street kept when one of its lines is picked
@@ -1812,6 +1811,13 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     assert f["street_line"] == [side] and "street_ids" not in f and not s.get("street_name")   # unnamed, asked
     # with the box state, a name read only with a street line (no line: no name, and none saved as its source)
     assert '"street_name_saved": None if saved_ui.get("_street_name") or not facts.get("street_line")' in state_src
+    assert ('lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,\n'
+            '                                           outline=_outline(doc, lot), ask=_ask_street_more, said=told)') in pick
+    assert 'return {"lines": lines, "ids": ids, "name": name}' in pick
+    f, s = logic.pick_effect("street", {"lines": lines, "ids": ["Ithaca Rd"] * len(lines), "name": "Ithaca Rd"},
+                             {"street_line": [side]}, {"_street_name": "X"})
+    assert f["street_line"] == [list(map(list, x)) for x in lines] and s["street_name"] == "Ithaca Rd"
+    assert "_street_name" not in s and s["street_source"] == logic.ENTERED
     assert logic.street_lines_after_pick(lines, lines[3]) == [list(map(list, x)) for x in lines]   # round 3, F4
     assert logic.street_lines_after_pick(lines, list(reversed(lines[3]))) == [list(map(list, x)) for x in lines]
     assert logic.street_lines_after_pick(lines, side) == [side]
@@ -1907,10 +1913,13 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
     assert logic.street_pick_prompt(False, 0) == "Click the lot line on the street"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
-    assert '        corner = facts.get("corner_lot") is True' in pick and "        while True:" in pick
-    assert "_get_point(logic.street_pick_prompt(corner, len(picks)))" in pick
-    assert pick.index("            if not corner:\n                break") < pick.index(
-        '            return {"picks": picks, "name": None}')        # a corner lot: every click, Enter when done
+    corner = pick[pick.index('            if facts.get("corner_lot") is True:'):pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))")]
+    assert "                while True:" in corner and "_get_point(logic.street_pick_prompt(True, len(picks)))" in corner
+    assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in corner
+    assert 'grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)' in corner
+    f, s = logic.pick_effect("street", {"lines": [b, c], "ids": [None, None], "name": None},
+                             {"corner_lot": True, "street_line": [a]}, {"street_name": "A St"})
+    assert f["street_line"] == [b, c] and "street_name" not in s and s["street_source"] == logic.ENTERED
     source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
     effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
     assert 'set_street_lines(facts, street_lines_after_picks(facts.get("street_line"), picks, True))' in effect
@@ -2253,7 +2262,8 @@ def test_street_names_go_with_their_street_lines_on_every_path_and_never_stop_th
         assert re.findall(r'\["street_(?:line|ids)"\] = |\.pop\("street_(?:line|ids)"', text) == []
     assert rhino.count("logic.set_street_lines(") == 1               # the command line's (Edit site) pick
     effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
-    assert effect.count("set_street_lines(") == 2                    # the start box's picks (PR #19: decided there)
+    assert effect.count("set_street_lines(") == 3                    # the start box's picks (PR #19: decided there;
+    #                                                                   the street runs' lines, then the clicks')
     # stale names (saved before the lines changed): the check still runs, lot width needs review and says why
     stale = dict(sample["facts"], street_line=sample["facts"]["street_line"][:1], lot_surveyed=True)
     assert fact_problems(stale) == []
@@ -2332,3 +2342,1359 @@ def test_a_name_names_only_the_line_clicked_so_one_street_or_two_stays_a_questio
     assert logic.pick_street(s106, ["Ithaca Rd"] * 3, s106[1], "Ithaca Rd") == (s106, ["Ithaca Rd"] * 3)
     side = [[0, 0], [0, 50]]
     assert logic.pick_street(s106, None, side, "Mitchell St") == ([side], ["Mitchell St"])   # a line not among them
+
+
+def _ring(points):
+    """A lot outline's pieces, end to end, from its corners in order."""
+    return [[list(points[i]), list(points[(i + 1) % len(points)])] for i in range(len(points))]
+
+
+def test_one_click_on_a_street_drawn_in_pieces_keeps_the_whole_street_and_stops_at_the_corner():
+    """Found in Rhino at demo 00c04f1 (docs/evidence/demo-00c04f1, step 2): on a corner lot, one click on one of the
+    sample's 8 short Ithaca Rd tax-map pieces kept only that 9.8 ft piece as the street (its frontage read 9'-9 5/8"
+    instead of 75'-10"), because the corner pick kept each click literally (street_lines_after_picks) while the
+    one-street pick kept the old street. Now every click keeps the whole street that piece is on along the lot
+    outline (rhino_logic.street_pick), said on the command line, and never round the corner onto the other
+    street (a longer frontage passes lot width more easily: the stop at the corner is what keeps it no false pass)."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import sample_site
+    site = sample_site()
+    ring, facts = site["lot"], site["facts"]
+    outline = _ring(ring)
+    assert len(outline) == 15
+    names = logic.outline_names(outline, facts["street_line"], facts["street_ids"])
+    assert names == ["Ithaca Rd"] * 8 + [None] * 7
+    street = [list(map(list, x)) for x in facts["street_line"]]
+    asked = []
+    for known in (names, None):                        # the sample's own names, or none (Corner lot? answered Yes)
+        for k in range(8):                             # a click on ANY of the 8 pieces: all 8, nothing more
+            runs, said = logic.add_street_pick([], outline, outline[k], known, asked.append)
+            lines, ids = logic.street_lines_of(outline, runs, known)
+            assert sorted(map(str, lines)) == sorted(map(str, street)), (k, lines)
+            assert said == ("Ithaca Rd" if known else "Street 1") + ": 8 lot-line pieces, 75'-10\" of frontage", said
+            assert ids == (["Ithaca Rd"] * 8 if known else None)
+        assert not asked                               # Ithaca Rd ends at two sure corners: nothing asked
+        # the other street, clicked next: its own pieces, never Ithaca Rd's again. Its far corner has the 0.24 ft
+        # piece in it, so that corner is never sure (review round 7): the architect is asked once, and No keeps
+        # the street to its own 2 pieces
+        runs, _ = logic.add_street_pick([], outline, outline[3], known, asked.append)
+        no = []
+        runs, said = logic.add_street_pick(runs, outline, list(reversed(outline[14])), known,
+                                           lambda q: no.append(q) or False)
+        assert runs[1] == [13, 14] and said == "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage", (runs, said)
+        assert len(no) == 1 and no[0].startswith("Past there the lot line turns 89° over short pieces, a corner "
+                                                 "or a bend (2 more lot-line pieces"), no
+        again, said = logic.add_street_pick(runs, outline, outline[5], known, asked.append)   # already kept
+        assert again == runs and said == "that lot line is on a street already kept"
+    # the corners themselves: the joints where Ithaca Rd meets the lot's sides turn ~90°, far past the limit
+    turns = [logic._street_lines().heading_change([outline[a], outline[b]]) for a, b in ((7, 8), (14, 0))]
+    assert all(t > logic._street_lines().TURN_LIMIT_DEG for t in turns), turns
+    assert logic.feet_words(75.8333) == "75'-9 7/8\"" and logic.feet_words(9.8) == "9'-9 1/2\""   # rounded down
+
+
+def test_a_street_run_never_wraps_a_corner_and_asks_where_it_is_unclear():
+    """The rules of street_run, one at a time: wobble joins (a joint ≤ PIECE_TURN_DEG while the run swings ≤
+    TURN_LIMIT_DEG); a corner (a joint > TURN_LIMIT_DEG) stops it for sure; anything between is unclear and only
+    the architect's Yes adds it (never a guess); a piece named another street stops it however straight; one named
+    the same street joins however it bends."""
+    from design_checker import rhino_logic as logic
+
+    def walk(start, headings, length=10.0):
+        pts, (x, y) = [start], start
+        for h in headings:
+            x, y = x + length * math.cos(math.radians(h)), y + length * math.sin(math.radians(h))
+            pts.append((round(x, 9), round(y, 9)))
+        return pts
+
+    # a 40 ft street in 4 pieces, then a square corner: a 100 ft side, the rear, the other side
+    square = _ring([(0, 0), (10, 0), (20, 0), (30, 0), (40, 0), (40, 100), (0, 100)])
+    got = logic.street_run(square, square[1])
+    assert got == {"pieces": [0, 1, 2, 3], "maybe": [[], []], "turn": [None, None]}, got
+    # joints just inside and just past PIECE_TURN_DEG
+    for joint, joins in ((14.9, True), (15.1, False)):
+        pts = walk((0, 0), [0, 0, joint])
+        lot = _ring(pts + [(pts[-1][0], 80), (0, 80)])
+        got = logic.street_run(lot, lot[0])
+        assert (2 in got["pieces"]) is joins and (got["maybe"][1] == [2]) is (not joins), (joint, got)
+    # small joints adding up past TURN_LIMIT_DEG (a rounded corner): the fourth 9° joint (36° in all) is unclear,
+    # and the unclear stretch runs on to the next sure stop
+    pts = walk((0, 0), [0, 0, 9, 18, 27, 36, 45, 135])
+    lot = _ring(pts + [(-40, pts[-1][1]), (-40, -30), (-10, -30)])
+    got = logic.street_run(lot, lot[0])
+    assert got["pieces"] == [0, 1, 2, 3, 4] and got["maybe"] == [[], [5, 6]], got   # 36° in all at piece 5; a
+    assert round(got["turn"][1]) == 18                                   # corner (90°) after piece 6
+    # no one to ask (tests, headless): kept, and said; the plugin's question takes only Yes or No (round 14)
+    run, said = logic.street_pick(lot, lot[0])
+    assert run == got["pieces"] + [5, 6] and said.endswith("a bend not answered is kept as street (answer No to "
+                                                           "leave it out)"), (run, said)
+    asked = []
+    run, said = logic.street_pick(lot, lot[0], ask=lambda q: asked.append(q) or True)
+    assert run == got["pieces"] + [5, 6] and len(asked) == 1 and asked[0].startswith("Past there the lot line bends")
+    assert logic.street_pick(lot, lot[0], ask=lambda q: False)[0] == got["pieces"]   # only the architect's No
+    assert logic.street_pick(lot, lot[0], ask=lambda q: None)[0] == got["pieces"] + [5, 6]   # leaves it out
+    # names: another street stops it, however straight; the same street joins, however it bends
+    named = ["A St", "B Ave", None, None, None, None, None]
+    assert logic.street_run(square, square[0], named)["pieces"] == [0]
+    bend = _ring([(0, 0), (10, 0), (20, 10), (20, 60), (0, 60)])            # a 45° joint
+    assert logic.street_run(bend, bend[0]) == {"pieces": [0], "maybe": [[], []], "turn": [None, None]}  # sure
+    assert logic.street_run(square, square[3], taken={0, 1})["pieces"] == [2, 3]   # never into another click's
+    assert logic.street_run(bend, bend[0], ["A St", "a st.", None, None, None])["pieces"] == [0, 1]
+    assert logic.street_run(square, [[1, 1], [2, 2]]) is None                # not a lot line
+
+
+def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
+    """The false pass a longer frontage could give, through the real checker: a 40 ft lot whose street is drawn as
+    4 pieces (Lot width needs 50'-0" in R-1b). One click on one piece keeps the 4 pieces (40'-0": does not comply),
+    never the 160 ft side (200 ft: it would comply); not a corner lot, the box's pick (pick_street, a line not among
+    the old ones) and the command line's (add_street_pick) alike."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    corners = [(0, 0), (10, 0), (20, 0), (30, 0), (40, 0), (40, 160), (0, 160)]
+    outline = _ring(corners)
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+
+    def width(street):
+        r = check_site(_plot(box(12, 30, 28, 70, 0, 30), lot_=lot_of(corners)), dict(base, street_line=street))
+        return next(i for i in r["view"]["items"] if i["name"] == "Lot width")
+
+    side = [[40, 0], [40, 160]]
+    for k in range(4):
+        lines, ids = logic.pick_street([side], None, outline[k], None, outline=outline)
+        assert len(lines) == 4 and side not in lines and ids is None, (k, lines)
+        got = width(lines)
+        assert got["status"] == "does_not_comply" and got["proposed"] == "40'-0\"", got
+        runs, _ = logic.add_street_pick([], outline, outline[k])
+        assert logic.street_lines_of(outline, runs)[0] == logic.street_lines_of(outline, [[0, 1, 2, 3]])[0]
+    named = logic.pick_street(None, None, outline[2], "A St", outline=outline)
+    assert named == (logic.street_lines_of(outline, [[0, 1, 2, 3]])[0], [None, None, "A St", None])  # its own only
+    assert width(named[0])["status"] == "does_not_comply"
+    assert logic.pick_street(None, None, [[1, 1], [2, 2]], None, outline=outline) == ([[[1, 1], [2, 2]]], None)
+    # the plugin: every street click goes through these (the corner box, the one-street box, the command line)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert rhino.count("logic.add_street_pick(runs, outline, ") == 2
+    assert "outline=_outline(doc, lot), ask=_ask_street_more" in rhino and "logic.street_lines_after_picks(" not in rhino
+    assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in rhino
+    assert 'lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []' in rhino
+    assert 'say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))' in rhino
+    # what the one-street pick says when the street it kept isn't surely one street
+    a, b = [[0, 0], [40, 0]], [[40, 0], [40, 100]]
+    assert logic.street_words("A St", [a, b], None).endswith("Gordium asks one street or two before measuring along them")
+    assert logic.street_words("A St", [a], None) == "A St: 1 lot-line piece, 40'-0\" of frontage"
+
+
+def test_the_suggested_street_and_a_click_on_it_keep_the_whole_street_so_the_front_yard_is_never_read_from_part():
+    """Street-run review round 1, F1 (a false pass on the Front yard): a drawn lot's suggested street was its lowest
+    single piece, and clicking that highlighted piece kept it alone (pick_street extended only a line not among the
+    street lines), so a house 10 ft from the street's other pieces read its front yard from the one piece, 46 ft
+    away, and complied. Now the suggestion is the whole street that piece is surely on, and a click on a street
+    line also grows to the rest of its street."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    corners = [(0, 0), (20, 0), (40, 0), (60, 0), (80, 0), (100, 0), (100, 160), (0, 160)]
+    outline = _ring(corners)
+    whole = [list(map(list, x)) for x in outline[:5]]
+    got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 16000, "bottom": 0.0,
+                                                 "segments": [tuple(map(tuple, x)) for x in outline]}], [])
+    assert sorted(map(str, got["street_line"])) == sorted(map(str, whole)), got["street_line"]
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+
+    def front(street):
+        r = check_site(_plot(box(65, 10, 85, 50, 0, 30), lot_=lot_of(corners)), dict(base, street_line=street))
+        return next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+
+    assert front([outline[0]])["status"] == "complies"                   # the one piece alone: the false pass
+    for old in ([outline[0]], whole):
+        lines, ids = logic.pick_street(old, None, outline[0], None, outline=outline)
+        assert sorted(map(str, lines)) == sorted(map(str, whole)) and ids is None, (old, lines)
+        assert front(lines)["status"] == "does_not_comply" and front(lines)["proposed"] == "10'-0\"", front(lines)
+    lines, ids = logic.pick_street([outline[0]], ["A St"], outline[0], "A St", outline=outline)
+    assert len(lines) == 5 and ids == ["A St", None, None, None, None]       # the name on the clicked line only
+    # round 2: a click on a middle piece already saved appends the rest after it; what is said still reads the
+    # street end to end, as the measuring does (it said "not surely one street" for a straight street)
+    for k in range(5):
+        lines, ids = logic.pick_street([outline[k]], None, outline[k], None, outline=outline)
+        assert logic.street_words("This street", lines, ids) == "This street: 5 lot-line pieces, 100'-0\" of frontage"
+    two = [outline[0], outline[1]]                                          # known two streets: its own, and on
+    lines, ids = logic.pick_street(two, ["A St", "B Ave"], outline[0], "A St", outline=outline)
+    assert lines == [outline[0]] and ids == ["A St"], (lines, ids)          # never onto B Ave's piece
+
+
+def test_an_unclear_stretch_never_takes_in_the_street_past_a_bend():
+    """Street-run review round 1, F2: an unclear stretch ran on past a rounded corner along the whole other street,
+    so one Yes kept both streets as one (and the other street could no longer be its own click). Now a joint past
+    PIECE_TURN_DEG is a question of its own, a Yes grows the street on and asks again, and the straight street past
+    the bend is its own question: answered No, it stays clickable as Street 2."""
+    from design_checker import rhino_logic as logic
+
+    def walk(start, headings, length=10.0):
+        pts, (x, y) = [start], start
+        for h in headings:
+            x, y = x + length * math.cos(math.radians(h)), y + length * math.sin(math.radians(h))
+            pts.append((round(x, 9), round(y, 9)))
+        return pts
+
+    pts = walk((0, 10), [0, 0, 0, 20, 40, 60, 80, 90, 90, 90, 90, 90])     # 0..11; 12 the rear; 13, 14 the sides
+    lot = _ring(pts + [(-50, pts[-1][1]), (-50, 0), (0, 0)])
+    got = logic.street_run(lot, lot[0])
+    assert got["pieces"] == [0, 1, 2] and got["maybe"] == [[], [3]], got
+    asked = []
+    answers = iter([True, True, True, True])                                # the bend, piece by piece: Yes
+    run, said = logic.street_pick(lot, lot[0], ask=lambda q: asked.append(q) or next(answers, False))
+    assert run == [0, 1, 2, 3, 4, 5, 6] and len(asked) == 5, (run, asked)  # the 5th: the straight street, No
+    assert asked[-1] == ("Past there the lot line bends 10° with no clear corner (5 more lot-line pieces, 50'-0\"). "
+                         "Is that on This street too? (Yes or No)"), asked[-1]
+    assert said.endswith("not surely one street: Gordium asks one street or two before measuring along them"), said
+    runs, _ = logic.add_street_pick([[0, 1, 2, 3, 4, 5, 6]], lot, lot[9], None, lambda q: False)
+    assert runs[1] == [7, 8, 9, 10, 11], runs
+
+
+def test_a_street_is_never_cut_short_unasked_by_a_curve_or_a_repeated_corner_point():
+    """Street-run review round 3 (two Front yard false passes): (F1) a drawn lot on a curving street was suggested
+    as its first 30° only, the rest silently dropped, so a house 14 ft from the street's far pieces complied 27 ft
+    from the near ones; now nothing is suggested unless both ends of the street are sure (the box asks for the
+    click, and the click asks the question). (F2) a corner point drawn twice (a piece of 0.005 ft) ended the street
+    there unasked; a piece no longer than JOINT is passed through. (F3) with no one to ask, the bend is kept and
+    said; the plugin's question takes only Yes or No (round 14)."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+
+    def walk(start, headings, length=20.0):
+        pts, (x, y) = [start], start
+        for h in headings:
+            x, y = x + length * math.cos(math.radians(h)), y + length * math.sin(math.radians(h))
+            pts.append((round(x, 6), round(y, 6)))
+        return pts
+
+    def lot_facts(corners):
+        segs = [(tuple(corners[i]), tuple(corners[(i + 1) % len(corners)])) for i in range(len(corners))]
+        return logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+
+    pts = walk((0, 0), [0, 0, 0, 10, 20, 30, 40, 50])                 # a street curving 50° along the lot
+    curve = pts + [(pts[-1][0] - 100, pts[-1][1] + 100), (-10, 150)]
+    assert "street_line" not in lot_facts(curve)                       # not sure where it ends: not suggested
+    square = [(0, 0), (20, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)]
+    assert len(lot_facts(square)["street_line"]) == 4                  # sure at both ends: the whole street
+    # (F2) a corner point drawn twice, or 0.005 ft apart: still the whole street, through the tiny piece
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    for dup in ((40, 0), (40.005, 0)):
+        corners = [(0, 0), (20, 0), (40, 0), dup, (60, 0), (80, 0), (80, 100), (0, 100)]
+        outline = _ring(corners)
+        lines, _ = logic.pick_street(None, None, outline[0], None, outline=outline)
+        assert len(lines) == 5 and logic.street_run(outline, outline[4])["pieces"] == [0, 1, 2, 3, 4], (dup, lines)
+        assert len(lot_facts(corners)["street_line"]) == 5
+        if dup != (40, 0):                    # (a zero-length lot line is refused by the measuring before this)
+            r = check_site(_plot(box(62, 15, 76, 45, 0, 25), lot_=lot_of(corners)), dict(base, street_line=lines))
+            front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+            assert front["status"] == "does_not_comply" and front["proposed"] == "15'-0\"", front
+    # (F3) the curve, clicked and the question not answered: kept as street, so the front yard is never read from
+    # part of it; answered No, left out (the architect's statement)
+    outline = _ring(curve)
+    run, said = logic.street_pick(outline, outline[0], ask=lambda q: None)
+    assert run == [0, 1, 2, 3, 4, 5, 6, 7] and "not surely one street" in said, (run, said)
+    assert logic.street_pick(outline, outline[0], ask=lambda q: False)[0] == [0, 1, 2, 3, 4, 5]
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ask = rhino[rhino.index("def _ask_street_more(question):"):rhino.index("def _outline(doc, lot):")]
+    assert "        prompt = logic.STREET_ANSWER_NEEDED + question" in ask and "return None" not in ask   # (round 14)
+
+
+def test_a_corner_point_drawn_twice_is_never_a_street_of_its_own():
+    """Street-run review round 4, F1 (a Front yard false pass): a lot whose first corner is drawn twice has a
+    0.005 ft piece at the street; the suggestion (the lowest piece, a tie) or a click on it kept that piece alone as
+    the street, so the front yard was read from one corner point and complied 62 ft away. Now a piece no longer
+    than JOINT is never the suggestion, never clicked (the plugin takes the nearest real piece), and a click on one
+    changes nothing."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    corners = [(0, 0), (0.005, 0), (20, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)]
+    outline = _ring(corners)
+    segs = [tuple(map(tuple, x)) for x in outline]
+    got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+    # never the point alone; and the corner it sits in is never sure (round 7): not suggested, the click asks
+    assert "street_line" not in got, got["street_line"]
+    asked = []
+    run, _ = logic.street_pick(outline, outline[2], ask=lambda q: asked.append(q) or False)
+    assert run == [1, 2, 3, 4] and len(asked) == 1, (run, asked)        # No: the street is its 4 real pieces
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    r = check_site(_plot(box(62, 5, 76, 45, 0, 25), lot_=lot_of(corners)),
+                   dict(base, street_line=[outline[k] for k in run]))
+    front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+    assert front["status"] != "complies", front
+    assert logic.street_run(outline, outline[0]) is None
+    assert logic.street_pick(outline, outline[0]) == ([], "that piece is under 6 in long (a corner point drawn "
+                                                         "twice?), not a street line: click the lot line beside it")
+    runs, said = logic.add_street_pick([], outline, outline[0])
+    assert runs == [] and said.startswith("that piece is under 6 in long")
+    old = [list(map(list, x)) for x in outline[1:5]]
+    assert logic.pick_street(old, None, outline[0], None, outline=outline) == (old, None)      # nothing changes
+    assert logic.pick_street(None, None, outline[0], None, outline=outline) == ([], None)
+    # a click on a short real piece beside a tiny one is that piece, not the tiny one (exact match first)
+    short_a, short_b = [[0, 0], [0.3, 0]], [[0.3, 0], [0.31, 0]]          # both within 0.5 ft of each other's ends
+    assert logic._piece_at([short_b, short_a], short_a, 0.5) == 1 and logic._piece_at([short_b], short_a, 0.5) == 0
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    click = rhino[rhino.index("def _clicked_piece(doc, lot, point):"):rhino.index("def _outline(doc, lot):")]
+    assert "return min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))" in click
+    assert rhino.count("a, b = _clicked_piece(doc, lot, point)") == 3 and "min(_segments(lot.Geometry)" not in \
+        rhino.replace("return min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))", "")
+
+
+def test_a_piece_too_short_to_have_a_direction_is_never_a_street_a_corner_or_a_turn():
+    """Street-run review round 5: (F1, a Front yard false pass) a 0.02 ft slip at the corner, just longer than the
+    0.01 ft of round 4, was still suggested or kept on a click as the whole street, both its joints read as sure
+    corners; (F2) a 0.005 ft noise piece inside a straight street read as a 53° turn ("one street or two?"). A
+    piece shorter than rhino_logic.SHORT_PIECE_FT (6 in) has no direction: never a street of its own, never a
+    corner, never a turn; and the measuring reads no direction from a stretch under street_lines.NOISE_FT."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from model_measurement import street_lines
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    corners = [(0, 0), (0.012, -0.016), (20, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)]   # (F1)
+    outline = _ring(corners)
+    segs = [tuple(map(tuple, x)) for x in outline]
+    got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+    assert "street_line" not in got, got["street_line"]                  # the slip's corner isn't sure: asked
+    assert logic.street_run(outline, outline[0]) is None and logic.street_pick(outline, outline[0])[0] == []
+    run, _ = logic.street_pick(outline, outline[3], ask=lambda q: False)
+    assert run == [1, 2, 3, 4], run
+    r = check_site(_plot(box(62, 5, 76, 45, 0, 25), lot_=lot_of(corners)),
+                   dict(base, street_line=[outline[k] for k in run]))
+    front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+    assert front["status"] != "complies", front
+    corners = [(0, 0), (20, 0), (20.003, 0.004), (40, 0), (80, 0), (80, 100), (0, 100)]           # (F2)
+    outline = _ring(corners)
+    run, said = logic.street_pick(outline, outline[0])
+    assert run == [0, 1, 2, 3] and said == "This street: 4 lot-line pieces, 80'-0\" of frontage", (run, said)
+    assert street_lines.heading_change(outline[:4]) == pytest.approx(0.0, abs=0.01)
+    r = check_site(_plot(box(30, 30, 50, 60, 0, 25), lot_=lot_of(corners)),
+                   dict(base, street_line=[outline[k] for k in run]))
+    assert "turn" not in (r["measurements"]["lot_width"].get("reason") or ""), r["measurements"]["lot_width"]
+    # a real turn between longer stretches is all still there, and a curve drawn in short pieces still swings
+    assert street_lines.heading_change([[[0, 0], [10, 0]], [[10, 0], [10.2, 0.1]], [[10.2, 0.1], [10.2, 10]]]) \
+        == pytest.approx(90.0, abs=2.0)
+    import math
+    arc = [[[10 * math.cos(math.radians(a)), 10 * math.sin(math.radians(a))],
+            [10 * math.cos(math.radians(a + 2)), 10 * math.sin(math.radians(a + 2))]] for a in range(0, 90, 2)]
+    assert street_lines.heading_change(arc) == pytest.approx(88.0, abs=3.0)        # 0.35 ft pieces: 90° in all
+
+
+def test_a_curve_drawn_in_short_pieces_is_asked_and_the_suggestion_is_decided_in_feet():
+    """Street-run review round 6: (F1, a Front yard false pass) a street curving 40° in ten 0.4 ft pieces had them
+    all passed through as direction-less, so the curve read as one sharp 40° joint, a sure corner, and the street
+    was cut short unasked; short pieces are passed through only up to SHORT_PIECE_FT in all, past that read piece
+    by piece. (F2) the suggestion was decided in model units: in a millimetre model a 0.02 ft slip was 6 "units"
+    long, a real line, and the whole street; it is decided in feet."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    pts, (x, y, h) = [(0, 0), (50, 0)], (50, 0, 0)
+    for _ in range(10):
+        h += 4
+        x, y = x + 0.4 * math.cos(math.radians(h)), y + 0.4 * math.sin(math.radians(h))
+        pts.append((x, y))
+    x, y = x + 50 * math.cos(math.radians(h)), y + 50 * math.sin(math.radians(h))
+    pts += [(x, y), (x - 20, y + 100), (-20, 100)]
+    outline = _ring(pts)
+    asked = []
+    run, said = logic.street_pick(outline, outline[0], ask=lambda q: asked.append(q) or None)
+    assert asked and run == list(range(12)), (run, asked)                # asked, and not answered: kept
+    r = check_site(_plot(box(80, 31, 84, 35, 0, 25), lot_=lot_of(pts)), dict(base, street_line=[outline[k] for k in run]))
+    front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+    assert front["status"] != "complies", front
+    # (F2) the round-5 slip lot drawn in millimetres: the real street, never the 6 mm slip
+    corners = [(0, 0), (0.012, -0.016), (20, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)]
+    for per_foot in (304.8, 12.0, 1.0):                                 # millimetres, inches, feet
+        segs = [tuple(map(tuple, x)) for x in _ring([(a * per_foot, b * per_foot) for a, b in corners])]
+        feet = [tuple(tuple(c / per_foot for c in p) for p in x) for x in segs]
+        got = logic.to_feet(logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0,
+                                                                    "segments": segs, "segments_ft": feet}], []),
+                            1 / per_foot)
+        assert "street_line" not in got, (per_foot, got["street_line"])   # read in feet: the slip is short, its
+        # corner asked; read in model units a 6 mm slip was a 6-unit line, suggested alone as the street
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '"segments_ft": [(_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]) for a, b in _segments(o.Geometry)]}' \
+        in rhino
+
+
+def _messy_street_lot(rnd):
+    """A lot whose straight street (y = 0, x 0..W) is drawn in random pieces with random short ones among them
+    (a corner point drawn twice, a slip, a spike of two short pieces, several short pieces in a row), sometimes
+    at the street's own corners too; then its two sides and rear. (outline, the street's piece numbers)."""
+    W, D = rnd.uniform(40, 120), rnd.uniform(60, 150)
+    xs = sorted(rnd.uniform(1, W - 15) for _ in range(rnd.randint(1, 6)))
+    pts = [(0.0, 0.0)]
+
+    def mess(x):
+        kind = rnd.choice(["none", "none", "double", "slip", "spike", "row", "chords"])
+        if kind == "chords":                                 # a stretch drawn in short chords (an arc, flattened)
+            out, cx = [(x, 0.0)], x
+            for _ in range(rnd.randint(5, 30)):
+                cx += rnd.uniform(0.3, 0.45)
+                out.append((cx, 0.0))
+            return out
+        if kind == "double":
+            return [(x, 0.0), (x, 0.0)]
+        if kind == "slip":
+            return [(x, 0.0), (x + rnd.uniform(0.01, 0.4), rnd.uniform(-0.3, 0.3))]
+        if kind == "spike":
+            h = rnd.uniform(0.05, 0.35)
+            return [(x, 0.0), (x + h, h), (x + 2 * h, 0.0)]
+        if kind == "row":
+            out, cx = [(x, 0.0)], x
+            for _ in range(rnd.randint(2, 4)):
+                cx += rnd.uniform(0.0, 0.3)
+                out.append((cx, rnd.uniform(-0.2, 0.2)))
+            return out
+        return [(x, 0.0)]
+
+    for x in xs:
+        if x > pts[-1][0] + 0.5:                             # (never doubling back: a lot that crosses itself)
+            pts += mess(x)
+    if rnd.random() < 0.3:                                   # a short piece at the street's far corner too
+        pts.append((W - rnd.uniform(0.01, 0.3), rnd.uniform(-0.1, 0.1)))
+    pts.append((W, 0.0))
+    street_ends = len(pts)                                   # pieces 0 .. street_ends - 2 are the street
+    pts += [(W, D), (0.0, D)]
+    outline = _ring(pts)
+    if rnd.random() < 0.3:                                   # a corner point drawn twice at the near corner
+        outline = [[[0.0, 0.0], [0.0, 0.0]]] + outline
+        street = set(range(0, street_ends))
+    else:
+        street = set(range(0, street_ends - 1))
+    return outline, street
+
+
+def test_a_click_on_a_messy_straight_street_covers_it_or_asks_never_a_sure_stop_short():
+    """Street-run review round 7 (two Front yard false passes: a point drawn twice beside a short piece, and a
+    spike, ended the street for sure, unasked). The property, over 400 random lots whose one straight street is
+    drawn in random pieces with random short ones among them: from a click on any long piece of the street, at
+    each end the run either reaches the end of the street or stops with the rest put to the architect (asked),
+    never a sure stop short; the run never takes a side or the rear unasked; not answered, the whole street is
+    kept; and the suggestion, when there is one, is the whole street and nothing else."""
+    import random
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    # the two rings of round 7, as found: a point drawn twice between two 0.3 ft pieces; a V spike
+    for corners in ([(0, 0), (50, 0), (50.3, 0), (50.3, 0), (50.6, 0), (100, 0), (100, 100), (0, 100)],
+                    [(0, 0), (50, 0), (50.212, 0.212), (50.424, 0), (100, 0), (100, 100), (0, 100)]):
+        outline = _ring(corners)
+        got = logic.street_run(outline, outline[0])
+        street = set(range(len(corners) - 3))
+        assert set(got["pieces"]) | set(got["maybe"][1]) >= street, (corners, got)   # covered, or the rest asked
+        run, _ = logic.street_pick(outline, outline[0], ask=lambda q: None)
+        assert set(run) >= street, run
+        r = check_site(_plot(box(80, 6, 84, 10, 0, 25), lot_=lot_of(corners)),
+                       dict(base, street_line=[outline[q] for q in run]))
+        front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+        assert front["status"] != "complies", (corners, front)
+    rnd = random.Random(20261025)
+    for trial in range(400):
+        outline, street = _messy_street_lot(rnd)
+        n = len(outline)
+        longs = [k for k in street if not logic.is_tiny(outline[k])]
+        long_street = set(longs)
+        k = rnd.choice(longs + [q for q in street if logic.street_run(outline, outline[q]) is not None])
+        got = logic.street_run(outline, outline[k])
+        assert got is not None, (trial, outline)
+        run = got["pieces"]
+        assert set(run) <= street, (trial, run, sorted(street))           # nothing off the street unasked
+        for side, d in ((0, -1), (1, 1)):
+            q, left = (run[0] if side == 0 else run[-1]), []
+            while (q + d) % n in street and (q + d) % n not in run:
+                q = (q + d) % n
+                left.append(q)
+            if any(q in long_street for q in left):                       # street left on this side: asked
+                assert got["maybe"][side], (trial, side, run, got, sorted(street))
+        kept, _ = logic.street_pick(outline, outline[k], ask=lambda q: None)        # not answered: kept
+        assert long_street <= set(kept), (trial, kept, sorted(street))
+        yes, _ = logic.street_pick(outline, outline[k], ask=lambda q: True)
+        assert long_street <= set(yes), (trial, yes, sorted(street))
+        segs = [tuple(map(tuple, x)) for x in outline]
+        sug = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+        if sug.get("street_line"):
+            picked = {logic._piece_at(outline, line, 0.0) for line in sug["street_line"]}
+            assert long_street <= picked <= street, (trial, sorted(picked), sorted(street))
+
+
+def test_short_pieces_next_to_another_street_or_inside_a_bend_are_asked():
+    """Round 7, the rest of the rule: a short run is never decided on a guess. Before a piece named another street,
+    or before another click's street, the short run itself is asked (not left off unasked); an unclear stretch
+    ends before a short run and before a joint past PIECE_TURN_DEG, so each question is one clear stretch."""
+    from design_checker import rhino_logic as logic
+
+    def walk(start, headings, length=10.0):
+        pts, (x, y) = [start], start
+        for h in headings:
+            x, y = x + length * math.cos(math.radians(h)), y + length * math.sin(math.radians(h))
+            pts.append((round(x, 9), round(y, 9)))
+        return pts
+
+    # A St (0..40), a point drawn twice at 40, then B Ave (40..80) in line
+    outline = _ring([(0, 0), (20, 0), (40, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)])
+    names = ["A St", "A St", None, "B Ave", "B Ave", None, None, None]
+    got = logic.street_run(outline, outline[0], names)
+    assert got["pieces"] == [0, 1] and got["maybe"][1] == [2], got       # the point between them: asked
+    got = logic.street_run(outline, outline[4], None, taken={0, 1})          # A St kept by an earlier click
+    assert got["pieces"] == [3, 4] and got["maybe"][0] == [2], got
+    # a spike whose two short pieces add up to 6 in or more, though its ends are closer: asked, never passed over
+    outline = _ring([(0, 0), (50, 0), (50.15, 0.3), (50.3, 0), (100, 0), (100, 100), (0, 100)])
+    got = logic.street_run(outline, outline[0])
+    assert got["pieces"] == [0] and got["maybe"][1][:2] == [1, 2], got
+    # a gentle bend past 30° in all, then a 20° joint: the asked stretch stops before the 20° joint
+    pts = walk((0, 0), [0, 0, 9, 18, 27, 36, 56, 56])
+    lot = _ring(pts + [(-40, pts[-1][1]), (-40, -30), (-10, -30)])
+    got = logic.street_run(lot, lot[0])
+    assert got["pieces"] == [0, 1, 2, 3, 4] and got["maybe"][1] == [5], got
+    # ... and before a short run inside it
+    pts = walk((0, 0), [0, 0, 9, 18, 27, 36])
+    pts += [pts[-1]] + walk(pts[-1], [36, 36])[1:]                       # a point drawn twice, then on in line
+    lot = _ring(pts + [(-40, pts[-1][1]), (-40, -30), (-10, -30)])
+    got = logic.street_run(lot, lot[0])
+    assert got["pieces"] == [0, 1, 2, 3, 4] and got["maybe"][1] == [5], got
+
+
+def test_an_arc_drawn_in_short_chords_is_a_street_and_an_unreadable_outline_never_crashes():
+    """Street-run review round 7b: (R7-1, a Front yard false pass after a No) a click on an arc frontage drawn as
+    0.4 ft chords jumped to the nearest long piece, the side line, kept unasked; now the click is the piece under
+    it, and short chords group into strokes with their own direction, so the whole arc is the street and only its
+    two corners are asked. (R7-2) an outline of 2 pieces or out of order crashed pick_street; now the line clicked
+    alone, said. (R7-3) the questions say what they are: a corner with short pieces in it, or a short piece."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    R, half = 200.0, math.asin(30 / 200)
+    steps = int(2 * half * R / 0.4)
+    arc = [(R * math.sin(-half + 2 * half * i / steps), R - R * math.cos(-half + 2 * half * i / steps))
+           for i in range(steps + 1)]                                     # 0.4 ft chords, x -30..30
+    corners = arc + [(30, 100), (-30, 100)]
+    outline = _ring(corners)
+    mid = steps // 2
+    asked = []
+    run, said = logic.street_pick(outline, outline[mid], ask=lambda q: asked.append(q) or False)
+    assert run == list(range(steps)) and len(asked) == 2, (len(run), steps, asked)   # the arc; its 2 corners asked
+    assert all(q.startswith("Past there the lot line turns 8") and "over short pieces, a corner or a bend" in q
+               for q in asked), asked
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    r = check_site(_plot(box(-10, 4, 10, 30, 0, 25), lot_=lot_of(corners)),
+                   dict(base, street_line=[outline[k] for k in run]))
+    front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+    assert front["status"] != "complies", front
+    # (R7-2) a lot of 2 pieces (a line and an arc), a ring out of order: the line clicked alone, never a crash
+    two = [[[0, 0], [50, 0]], [[50, 0], [0, 0]]]
+    assert logic.pick_street(None, None, two[0], None, outline=two) == ([[[0, 0], [50, 0]]], None)
+    square = _ring([(0, 0), (40, 0), (40, 40), (0, 40)])
+    shuffled = [square[2], square[0], square[3], square[1]]
+    assert logic.pick_street(None, None, square[0], None, outline=shuffled) == ([[[0, 0], [40, 0]]], None)
+    runs, said = logic.add_street_pick([], shuffled, square[0])
+    assert runs == [[1]] and said.startswith("Street 1: only the lot line clicked (the lot outline doesn't run"), said
+    # (R7-3) a short piece alone, between two named streets
+    outline = _ring([(0, 0), (20, 0), (40, 0), (40.2, 0), (60, 0), (80, 0), (80, 100), (0, 100)])
+    names = ["A St", "A St", None, "B Ave", "B Ave", None, None, None]
+    q = []
+    logic.street_pick(outline, outline[0], names, ask=lambda x: q.append(x) or False, label="A St")
+    assert q == ["Past there is a short piece of lot line (1 more lot-line piece, 0'-2 3/8\"), with no direction of "
+                 "its own. Is that on A St too? (Yes or No)"], q
+
+
+def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_side_unasked():
+    """Street-run review round 8: (F1, a Front yard false pass) a refused click (a short piece standing alone) was
+    still saved as the street through street_lines_of's fallback to the clicks; now nothing changes, and the
+    command line asks again. (F2) the one-street pick says street_pick's own words, and a refusal keeps the old
+    street and its name. (F3) a click on a rounded corner's chord never joins the side line unasked (a long piece
+    joins only from a long one, or with one in the run). (F4) a short piece already near a kept line is still
+    added (pieces matched exactly, never within 0.5 ft)."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    o = _ring([(0, 0), (50, 0), (50.2, 0.2), (50.2, 100), (0, 100)])
+    runs, said = logic.add_street_pick([], o, o[1])
+    assert runs == [] and said.startswith("that piece is under 6 in long")
+    assert logic.street_lines_of(o, runs, None, [o[1]]) == ([], None)                    # (F1) nothing to save
+    assert logic.street_lines_of(o, [], None, [[[7, 7], [8, 8]]]) == ([[[7, 7], [8, 8]]], None)   # off the outline
+    told = []
+    old = [o[4]]
+    assert logic.pick_street(old, ["West St"], o[1], "Cayuga St", outline=o, said=told) == (old, ["West St"])
+    assert told == [{"words": said, "refused": True}]                                     # (F2) refused, said
+    told = []
+    shuffled = [o[2], o[0], o[3], o[1], o[4]]
+    logic.pick_street(None, None, o[0], "Elm St", outline=shuffled, said=told)
+    assert told[0]["words"].startswith("Elm St: only the lot line clicked") and not told[0]["refused"]
+    told = []
+    bend = _ring([(0, 0), (20, 0), (38, 8), (60, 12), (60, 100), (0, 100)])
+    logic.pick_street(None, None, bend[0], None, outline=bend, ask=lambda q: None, said=told)
+    assert told[0]["words"].endswith("a bend not answered is kept as street (answer No to leave it out)"), told
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '            if not facts.get("corner_lot") and runs:      # (a refused click: asked again)' in rhino
+    assert "if told and told[-1][\"refused\"]:          # (a point clicked: everything stays as it was)" in rhino
+    # (F3) the rounded corner: 47 ft front, a 3 ft radius in 12 chords, a 97 ft side
+    pts = [(0.0, 0.0), (50.0, 0.0)]
+    for i in range(1, 13):
+        a = math.radians(90 * i / 12)
+        pts.append((50 + 3 * math.sin(a), 3 - 3 * math.cos(a)))
+    pts += [(53.0, 100.0), (0.0, 100.0)]
+    rc = _ring(pts)
+    side = 13                                                            # the piece (53, 3) -> (53, 100)
+    assert rc[side][1] == [53.0, 100.0] and abs(rc[side][0][0] - 53) < 1e-6 and abs(rc[side][0][1] - 3) < 1e-6
+    for k in (12, 11, 8):
+        got = logic.street_run(rc, rc[k])
+        assert side not in got["pieces"], (k, got)                       # never the side unasked
+    # round 9: (D1) what the one-street pick says is what it keeps (old lines and the run); (D2) Edit site's prompt
+    # and its "no street line yet" guard follow what was kept, not what was clicked; (D3) a refused click is told
+    # before its street's name is asked
+    o2 = _ring([(0, 0), (60, 0), (60, 100), (0, 100)])
+    told = []
+    lines, ids = logic.pick_street([o2[0], o2[1]], None, o2[0], "A St", outline=o2, said=told)
+    assert len(lines) == 2 and told[-1]["words"] == logic.street_words("A St", lines, ids), told
+    assert "not surely one street" in told[-1]["words"]
+    assert '            keeps = not runs and logic.street_enter_keeps(facts)' in rhino and \
+        '                if runs or keeps:\n                    break' in rhino
+    pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
+    one = pick[pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))"):]
+    assert one.index("refused = logic.refused_click(_outline(doc, lot), picked)") < \
+        one.index("name = logic.street_name_after_pick(")
+    slip = _ring([(0, 0), (50, 0), (50.2, 0.2), (50.2, 100), (0, 100)])
+    assert logic.refused_click(slip, slip[1]).startswith("that piece is under 6 in long")
+    assert logic.refused_click(slip, slip[0]) is None
+    assert '            if refused:\n                say(refused)\n                return None\n' in one
+    # round 10: (F1) a click on a saved street line grows on from the saved pieces: nothing kept is asked again
+    # (and a No to what is asked really leaves it out); (F2) saved lines are snapped to the outline's pieces (a lot
+    # nudged under 0.5 ft: the piece, never the stale line beside it as well); (F3) Edit site answers every click
+    x = 40 + 40 * math.cos(math.radians(20))
+    bent = _ring([(0, 0), (40, 0), (x, 40 * math.sin(math.radians(20))), (x, 100), (0, 100)])
+    first, ids = logic.pick_street(None, None, bent[0], "A St", outline=bent, ask=lambda q: True)
+    assert len(first) == 2
+    asked = []
+    again, _ = logic.pick_street(first, ids, bent[0], "A St", outline=bent, ask=lambda q: asked.append(q) or False)
+    assert again == first and not asked, (again, asked)                  # kept as it was, nothing asked again
+    asked = []
+    fresh, _ = logic.pick_street(None, None, bent[0], "A St", outline=bent, ask=lambda q: asked.append(q) or False)
+    assert len(fresh) == 1 and len(asked) == 1                           # asked afresh, the No leaves it out
+    nudged = _ring([(0.2, 0), (40.2, 0), (40.2, 100), (0.2, 100)])
+    told = []
+    lines, _ = logic.pick_street([[[0, 0], [40, 0]]], None, nudged[0], "A St", outline=nudged, said=told)
+    assert lines == [nudged[0]] and told[-1]["words"] == "A St: 1 lot-line piece, 40'-0\" of frontage", (lines, told)
+    assert logic.pick_street(lines, ["A St"], nudged[0], "A St", outline=nudged)[0] == [nudged[0]]
+    assert ("            grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)\n"
+            "            say(logic.so_far(said) if grown != runs and facts.get(\"corner_lot\") else said)   # (corner: so far)\n"
+            "            if grown != runs:\n                picked.append(line)\n"
+            "            runs = grown") in rhino
+    # round 11: an outline out of order, a saved street line clicked: the saved street as it was, never fewer
+    gappy = [[[0, 0], [20, 0]], [[20, 0], [40, 0]], [[40, 0], [60, 0]], [[60, 0], [60, 100]], [[60, 100.05], [0, 100]],
+             [[0, 100], [0, 0]]]
+    told = []
+    lines, ids = logic.pick_street(gappy[:3], ["A St"] * 3, gappy[1], "A St", outline=gappy, said=told)
+    assert lines == gappy[:3] and ids == ["A St"] * 3 and "kept as they were" in told[-1]["words"], (lines, told)
+    # (round 12) two known streets saved: the clicked one's kept, and said so, never "as they were"
+    told = []
+    two = gappy[:4]
+    lines, ids = logic.pick_street(two, ["A St"] * 3 + ["B Ave"], gappy[1], "A St", outline=gappy, said=told)
+    assert lines == gappy[:3] and "kept as they were" not in told[-1]["words"], (lines, told)
+    assert told[-1]["words"].startswith("A St: 3 lot-line pieces, 60'-0\" of frontage (the lot outline")
+    pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
+    corner = pick[pick.index('            if facts.get("corner_lot") is True:'):
+                  pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))")]
+    assert "                    if grown != runs:\n                        picks.append(line)\n                    runs = grown" in corner
+    # what is said reads lines end to end whatever order they come in (round 2)
+    assert logic.street_words("X", [gappy[2], gappy[0], gappy[1]], None) == "X: 3 lot-line pieces, 60'-0\" of frontage"
+    # (F4)
+    o = _ring([(0, 0), (10, 0), (10.24, 0), (10.44, 0), (30, 0), (30, 100), (0, 100)])
+    lines, _ = logic.pick_street([o[0], o[1]], None, o[0], None, outline=o)
+    assert sorted(map(str, lines)) == sorted(map(str, o[:4])), lines
+
+
+def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe():
+    """Street-run review round 14 (the coordinator's question): Enter kept an unclear stretch as street "to be
+    safe", but that is not safe either. A 40 ft street with a 15 ft lot line bent 20° from it: kept, the frontage
+    reads 55'-0" and Lot width complies (R-1b needs 50'-0"); the truth, 40'-0", does not. Left out, a stretch that
+    is street lets the front yard pass from part of it (round 3). So the plugin's question takes only Yes or No:
+    Enter and Esc ask again, with the reason."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    x2, y2 = 40 + 15 * math.cos(math.radians(20)), 15 * math.sin(math.radians(20))
+    corners = [(0, 0), (40, 0), (x2, y2), (x2, 120), (0, 120)]
+    o = _ring(corners)
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+
+    def width(street):
+        r = check_site(_plot(box(12, 30, 30, 70, 0, 25), lot_=lot_of(corners)), dict(base, street_line=street))
+        return next(i for i in r["view"]["items"] if i["name"] == "Lot width")
+
+    kept, _ = logic.street_pick(o, o[0], ask=lambda q: None)          # not answered: kept
+    assert kept == [0, 1] and width([o[k] for k in kept])["status"] == "complies"   # why no default is safe
+    assert width([o[0]])["status"] == "does_not_comply"
+    # the plugin's own question, run with stand-ins for Rhino: Enter twice (asked again, with the reason), then No
+    answers = iter([("nothing", None), ("nothing", None), ("option", 1)])
+    prompts = []
+
+    class GetOption:
+        def SetCommandPrompt(self, p):
+            prompts.append(p)
+
+        def AddOption(self, name):
+            return {"Yes": 0, "No": 1}[name]
+
+        def AcceptNothing(self, on):
+            pass
+
+        def Get(self):
+            self.kind, self.index = next(answers)
+            return self.kind
+
+        def OptionIndex(self):
+            return self.index
+
+    rhino_ = type("Rhino", (), {"Input": type("Input", (), {
+        "Custom": type("Custom", (), {"GetOption": GetOption}),
+        "GetResult": type("GetResult", (), {"Option": "option", "Nothing": "nothing", "Cancel": "cancel"})})})
+    cancelled = type("Cancelled", (Exception,), {})
+    ns = _plugin_functions(["_ask_street_more"], Rhino=rhino_, Cancelled=cancelled)
+    assert ns["_ask_street_more"]("Is that on A St too? (Yes or No)") is False
+    assert len(prompts) == 3 and prompts[1].startswith(logic.STREET_ANSWER_NEEDED) and \
+        prompts[2] == prompts[1], prompts
+    answers = iter([("option", 0)])
+    assert ns["_ask_street_more"]("q") is True
+    # Esc never decides: it cancels (round 15), and the start box's pick then changes nothing
+    answers = iter([("cancel", None)])
+    with pytest.raises(ns["Cancelled"]):
+        ns["_ask_street_more"]("q")
+    answers = iter([("exit rhino", None)])                           # any other end of the prompt: no loop
+    with pytest.raises(ns["Cancelled"]):
+        ns["_ask_street_more"]("q")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    # ... run: the plugin's own _pick_outcome with stand-ins for Rhino, Esc at the bend question on the corner path
+    # (one street already answered) and on the one-street path (a name already given): nothing changed (round 16)
+    import copy
+    said, clicks = [], []
+    lot_obj = type("Lot", (), {"Geometry": None})()
+    result = type("Result", (), {"Success": "ok", "Nothing": "none", "Cancel": "esc"})
+    rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result})})
+
+    def esc(question):
+        raise cancelled()
+
+    for corner, facts in ((True, {"lot_id": "l", "corner_lot": True, "street_line": [o[0]]}),
+                          (False, {"lot_id": "l", "corner_lot": False, "street_line": [o[0]], "street_ids": ["A St"]})):
+        clicks[:] = [("ok", o[0]), ("none", None)] if corner else [("ok", o[0])]
+        saved = {"street_name": "A St", "street_source": "the tax map"}
+        before = (copy.deepcopy(facts), copy.deepcopy(saved))
+        nsb = _plugin_functions(["_pick_outcome"], Rhino=rhino2, Cancelled=cancelled, _find=lambda doc, i: lot_obj,
+                                _outline=lambda doc, lot: o, _get_point=lambda p: clicks.pop(0),
+                                _clicked_piece=lambda doc, lot, point: point, _feet_point=lambda doc, p: p,
+                                _ask_street_more=esc, say=said.append, _highlight=lambda doc, f: None)
+        outcome = nsb["_pick_outcome"](None, "street", facts, saved, None)
+        got = logic.pick_effect("street", outcome, facts, saved)
+        assert outcome is None and (got[0], got[1]) == before and (facts, saved) == before, (corner, got)
+        assert said[-1] == "Esc: nothing changed — the street side is as it was; this pick wasn't kept", said
+
+
+def test_a_corner_click_is_said_as_so_far_and_esc_says_the_pick_was_not_kept():
+    """The Rhino run at a31661e: with Esc after a first corner click, the command line said "Ithaca Rd: 8 lot-line
+    pieces, 75'-10" of frontage" and then "Esc: nothing changed…", which read as kept, then nothing. A corner
+    click is said as provisional, and Esc says the pick wasn't kept."""
+    from design_checker import rhino_logic as logic
+    assert logic.so_far("Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage") == \
+        "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far — Enter when done"
+    assert logic.so_far("Street 2: 3 lot-line pieces, not surely one street: Gordium asks one street or two before "
+                        "measuring along them").endswith("(so far — Enter when done)")
+    assert logic.ESC_STREET == "Esc: nothing changed — the street side is as it was; this pick wasn't kept"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
+    corner = pick[pick.index('            if facts.get("corner_lot") is True:'):
+                  pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))")]
+    assert "say(logic.so_far(said) if grown != runs else said)" in corner
+    assert "        except Cancelled:" in pick and "            say(logic.ESC_STREET)\n            return None" in pick
+    assert 'say(logic.so_far(said) if grown != runs and facts.get("corner_lot") else said)' in rhino
+
+
+def _plugin_functions(names, **extra):
+    """The plugin's own functions, run against stand-ins for Rhino (each from gordium_rhino.py as written)."""
+    import time as time_
+    from design_checker import rhino_logic as logic_
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    view = type("View", (), {"ActiveViewportID": "vp"})()
+    doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})()})()
+    size_of = staticmethod(lambda lines, size: (max(len(t) for t in lines) * size * 0.6 + 22,     # gordium_ui's
+                                                len(lines) * (size + 9) + 10))                   # text_box_size
+    ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": size_of,
+                          "show": staticmethod(lambda *a, **k: None)})
+    ns = {"time": time_, "logic": logic_, "ui": ui_, "STATE": {},
+          "Rhino": type("Rhino", (), {"RhinoDoc": type("RhinoDoc", (), {"ActiveDoc": doc})}),
+          "rg": type("rg", (), {"BoundingBox": type("BoundingBox", (), {"Empty": None})}),
+          "_model_on_screen": lambda o, viewport: None}
+    ns.update(extra)
+    for name in names:
+        exec(src[src.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
+    return ns
+
+
+def test_no_notice_outlives_the_model_it_was_about():
+    """The Rhino job at #28 92cf742: the red "Side yard, Southwest no longer complies …" notice of one scene stayed on
+    screen over the next house, back on its original footprint (a check that found nothing newly failing left the
+    earlier notice up for its 6 s). No verdict on screen may outlive its model: the notice goes with every new
+    check's clear, with another document, and is never drawn over a model changed since its check (as the rows
+    show no marks then)."""
+    ns = _plugin_functions(["_notice_box", "_clear", "_new_document", "stale"])
+    viewport = type("Viewport", (), {"Id": "vp", "Bounds": type("B", (), {"Width": 1000, "Height": 640})()})()
+    o = type("O", (), {})()
+    o.toast = (["Side yard, Southwest no longer complies"], ns["time"].time() + 6)
+    assert ns["_notice_box"](o, viewport, [], False)[0] == ["✕ Side yard, Southwest no longer complies"]
+    assert ns["_notice_box"](o, viewport, [], True) is None              # the model changed since: not drawn
+    ns["_clear"](o)                                                      # every check clears before it draws
+    assert o.toast is None and ns["_notice_box"](o, viewport, [], False) is None
+    o.toast = (["Rear yard no longer complies"], ns["time"].time() + 6)
+    ns["STATE"]["overlay"] = o
+    ns["_new_document"](None, None)                                      # another document in front
+    assert o.toast is None
+    now = ns["time"].time()                                              # stale: an edit after the check on screen
+    ns["STATE"].update(dirty=now - 1, last={"at": now - 2})
+    assert ns["stale"](o) is True
+    ns["STATE"].update(last={"at": now})
+    assert ns["stale"](o) is False
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert check.index("_clear(o)") < check.index('if result.get("notice"):')   # cleared, then the new notice
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert "old = stale(o)" in draw and "_notice_box(o, e.Viewport, taken, old)" in draw
+
+
+def test_the_notice_timer_stops_once_a_check_cleared_the_notice():
+    """Review round 1 of the notice fix: a check's _clear drops the notice, and the notice's timer then ticked every
+    0.5 s with nothing to time until another notice expired. Now its next tick stops it."""
+    stopped = []
+    timer = type("Timer", (), {"Stop": lambda self: stopped.append(1)})()
+    ns = _plugin_functions(["_toast_tick"], _clear_toast=lambda: stopped.append("cleared"))
+    o = type("O", (), {"toast": None})()
+    ns["STATE"].update(overlay=o, toast_timer=timer)
+    ns["_toast_tick"]()
+    assert stopped == [1]
+    o.toast = (["Rear yard no longer complies"], ns["time"].time() + 6)
+    stopped.clear()
+    ns["_toast_tick"]()                                                  # still showing: left running
+    assert stopped == []
+
+
+def test_the_notice_is_compact_and_never_over_the_model_being_judged():
+    """The architect's eye on #28 at 92cf742: zoomed in tight, the "no longer complies" notice was one long line, a
+    bar across the whole plan over the drawing being judged. Now it is at most NOTICE_MAX_SHARE of the view's width,
+    wrapped between its " · " parts only (never inside a measurement), in the first corner clear of the model and of
+    the status box (the most compact box first, wider ones when it fits no corner); when none fits, not drawn (the panel's
+    message line says it). The side yard's notice is still drawn in the default framed view (review round 1)."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · −2'-11 3/8\" short"
+    for view_w in (1000, 700, 400):
+        for share in logic_.NOTICE_SHARES:
+            lines = logic_.notice_lines([side], view_w, share)
+            assert [w for t in lines for w in t.split() if w != "·"] == [w for w in side.split() if w != "·"]
+            assert all("'-" not in t.split()[-1] or t.split()[-1].endswith(('"', "'")) for t in lines), lines
+            assert not any(t.strip().startswith(('1/', '3/', '5/', '7/')) for t in lines), lines  # 7'-0 5/8" whole
+            chars = max(logic_.NOTICE_MIN_CHARS, int((view_w * share - 22) / 7.8))
+            assert all(len(t) <= chars for t in lines if " · " in t.strip()), (view_w, share, lines)
+    def over(x, y, w, h, box):                                           # (x0, y0, x1, y1)
+        return min(x + w, box[2]) > max(x, box[0]) and min(y + h, box[3]) > max(y, box[1])
+    # the default framed Top view (1000 x 640, the lot from 324,102 to 676,538): drawn, top left, compact
+    lot = (324, 102, 676, 538)
+    lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot)
+    assert (x, y) == (12, 34) and w <= 1000 * logic_.NOTICE_MAX_SHARE and not over(x, y, w, h, lot)
+    # ...with the status box top right: still clear of both
+    status = (518, 12, 467, 56)
+    lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot, [status])
+    assert not over(x, y, w, h, lot) and not over(x, y, w, h, (518, 12, 985, 68))
+    # a smaller view: the most compact box that fits a corner, never over the model
+    placed = logic_.notice_place(700, 450, [side], (380, 60, 560, 400))
+    assert placed is not None and len(placed[0]) > 1 and not over(*placed[1], placed[2], placed[3], (380, 60, 560, 400))
+    # zoomed in tight: the model fills the view: not drawn
+    assert logic_.notice_place(1000, 640, [side], (5, 5, 995, 635)) is None
+    # every corner taken by other boxes: not drawn (never over the status box)
+    corners = [(0, 0, 500, 320), (500, 0, 500, 320), (0, 320, 500, 320), (500, 320, 500, 320)]
+    assert logic_.notice_spot(1000, 640, 300, 50, None, corners) is None
+    # the plugin: no place, no notice box; a place, that box
+    ns = _plugin_functions(["_notice_box"], _model_on_screen=lambda o, viewport: (5, 5, 995, 635))
+    viewport = type("Viewport", (), {"Id": "vp", "Bounds": type("B", (), {"Width": 1000, "Height": 640})()})()
+    o = type("O", (), {"toast": ([side[2:]], ns["time"].time() + 6)})()
+    assert ns["_notice_box"](o, viewport, [], False) is None
+    ns["_model_on_screen"] = lambda o, viewport: lot
+    lines, x, y, w, h = ns["_notice_box"](o, viewport, [], False)
+    assert (x, y) == (12, 34) and not over(x, y, w, h, lot) and lines[0].startswith("✕ Side yard, Southwest")
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert 'ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])' in check     # the panel says it
+    report = src[src.index("def open_report("):].split("\ndef ", 1)[0]
+    assert report.count("say(first + logic.report_message(") == 2                    # kept in the report's line too
+    assert 'first = "✕ " + notice + " · " if notice else ""' in report
+
+
+def _boxes(x0, y0, x1, y1):
+    return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
+
+
+def _rect(x0, y0, x1, y1):
+    return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+
+def _nearest_hard_clear(logic_, line, text, size, view, boxes, dims, shapes, reach_rows=1.0, step=3, placed=()):
+    """Independently of the placement: the smallest distance from its line of any spot within `reach_rows` label
+    heights that keeps every HARD rule with room around it (the spot 3 px either way keeps them too: a sliver of a
+    window no lattice of the placement's 6 px could be asked to find is not room), at this size, on one line or
+    two (a brute-force `step` px search)."""
+    best = None
+    (xa, ya), (xb, yb) = line
+    for rows in ([text], logic_.label_lines(text)):
+        w, h = max(logic_.label_width(r, size) for r in rows), logic_.label_height(len(rows), size)
+        reach = reach_rows * h
+        for top in range(int(min(ya, yb) - h - reach), int(max(ya, yb) + reach) + 1, step):
+            for left in range(int(min(xa, xb) - w - reach), int(max(xa, xb) + reach) + 1, step):
+                gap = logic_.box_gap(line, (left, top, w, h))
+                if gap <= reach - 3 and all(not logic_.label_breaks_hard(line, (left + dx, top + dy, w, h), view, boxes,
+                                                                         dims, shapes, placed)
+                                            for dx in (-3, 0, 3) for dy in (-3, 0, 3)):   # room, not a sliver
+                    best = (gap, h) if best is None or gap < best[0] else best
+    return best
+
+
+def test_a_plan_label_keeps_every_hard_rule_the_southwest_cases():
+    """The Rhino rounds on #15, each a new obstacle the label landed on: 13 lot and house lines (27c8e5d), loose 330
+    px from its line under the status box (0a94fc4), the front yard's dimension (81efd62), the house's corner and
+    its coloured band (319dc5d). Now one set of rules (rhino_logic.place_dim_label): HARD, never broken: on screen,
+    over no building or coloured part, nor the notice, the status box or the north arrow, on neither its own line
+    nor another yard's dimension. SOFT, least first: other labels, a led label's leader, lot lines, distance."""
+    from design_checker import rhino_logic as logic_
+    lot = (158, 106, 501, 562)
+    house, band = _rect(185, 250, 420, 415), _rect(185, 250, 200, 415)
+    own = ((158, 409), (185, 409))                                               # the southwest side yard
+    dims = [own, ((300, 415), (300, 562)), ((300, 106), (300, 250)), ((420, 330), (501, 330))]
+    boxes = [(12, 34, 506, 54), (60, 14, 584, 54), (543, 119, 61, 55)]           # the notice, status box, arrow
+    view = (657, 668)
+    text = "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)"
+    got = logic_.place_dim_label(own, text, 11, view, boxes, dims, [], _boxes(*lot), [house, band])
+    box = (got["left"], got["top"], got["w"], got["h"])
+    assert logic_.label_breaks_hard(own, box, view, boxes, dims, [house, band]) is None and not got["forced"], got
+    near = _nearest_hard_clear(logic_, own, text, 11, view, boxes, dims, [house, band])
+    assert near is not None and got["size"] == 11 and got["gap"] <= near[1], (got, near)    # in reach at full size
+    assert got["led"] == (got["gap"] > 8)
+    # each HARD rule, broken on purpose, is named
+    assert logic_.label_breaks_hard(own, (-5, 400, 100, 20), view) == "off screen"
+    assert logic_.label_breaks_hard(own, (190, 300, 100, 20), view, [], [], [house]).startswith("over a building")
+    assert logic_.label_breaks_hard(own, (14, 36, 30, 20), view, boxes).startswith("over the notice")
+    assert logic_.label_breaks_hard(own, (150, 400, 30, 20), view) == "on its own line"
+    assert logic_.label_breaks_hard(own, (290, 450, 30, 20), view, [], dims) == "on another yard's dimension"
+    # a turned house: its outline, never its box (the corner beyond a turned wall is free)
+    turned = [(300, 200), (400, 300), (300, 400), (200, 300)]
+    assert not logic_.box_over_shape((200, 200, 40, 20), turned) and logic_.box_over_shape((280, 280, 40, 20), turned)
+    assert sorted(logic_.hull(turned + [(300, 300)])) == sorted(turned)
+    # no room beside the line at its size: a point smaller, still right beside it, no leader
+    line = ((100, 100), (140, 100))
+    tight = [(0, 0, 656, 72), (0, 110, 656, 400), (0, 0, 92, 668), (153, 0, 503, 668)]
+    small = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), tight, [line], [], [])
+    assert small["size"] == 10 and not small["led"] and not small["forced"], small   # the largest that fits
+    # no room within one label height at any size: at its own size, led, within three label heights
+    band2 = [(0, 60, 656, 80)]
+    led = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), band2, [line], [], [])
+    assert led["size"] == 11 and led["led"] and 20 < led["gap"] <= logic_.LABEL_LEAD_REACH * 20, led
+    # nowhere near keeps the rules: the nearest spot on screen that does, led, at full size
+    wide = [(0, 0, 656, 300)]
+    anywhere = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), wide, [line], [], [])
+    assert anywhere["led"] and not anywhere["forced"] and anywhere["top"] >= 303 and anywhere["size"] == 11, anywhere
+    # ...and there SOFT still holds: another label already there is kept clear of
+    a_box = (anywhere["left"], anywhere["top"], anywhere["w"], anywhere["h"])
+    again = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), wide, [line], [a_box], [])
+    assert not logic_._over((again["left"], again["top"], again["w"], again["h"]), a_box), (anywhere, again)
+    # nowhere at all: forced and said, never dropped
+    stuck = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), [(0, 0, 656, 668)], [line], [], [])
+    assert stuck["forced"] and stuck["rows"]
+    # SOFT near the line: another label already there is kept clear of
+    open_line = ((300, 300), (340, 300))
+    first = logic_.place_dim_label(open_line, "12'-0\"", 11, (656, 668), [], [open_line], [], [])
+    f_box = (first["left"], first["top"], first["w"], first["h"])
+    second = logic_.place_dim_label(open_line, "12'-0\"", 11, (656, 668), [], [open_line], [f_box], [])
+    assert not logic_._over((second["left"], second["top"], second["w"], second["h"]), f_box), (first, second)
+    # a free window right beside a long line (sceptic B's repro): found, at full size, unled
+    long_ = ((200, 300), (400, 300))
+    walls = [(0, 0, 656, 260), (0, 300, 656, 368), (0, 0, 238, 668), (300, 0, 356, 668)]
+    window = logic_.place_dim_label(long_, "12'-0\"", 11, (656, 668), walls, [long_], [], [])
+    assert window["size"] == 11 and not window["led"] and not window["forced"], window
+    # a leader never runs across a building when a spot whose leader doesn't is in reach
+    short = ((200, 300), (260, 300))
+    under = [_rect(150, 306, 310, 336)]                                         # a coloured band just below it
+    blocked = [(0, 200, 656, 100)]                                              # nothing above it, within reach
+    led2 = logic_.place_dim_label(short, "12'-0\"", 11, (656, 668), blocked, [short], [], [], under)
+    ex, ey = logic_.leader_end((230, 300), (led2["left"], led2["top"], led2["w"], led2["h"]))
+    assert not logic_._seg_hits_shape(((230, 300), (ex, ey)), under[0]), led2
+
+
+def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
+    """A property test: random lots, houses, coloured bands, notices and views (the docked 656 x 668 among them),
+    every yard's label placed in turn. Each one breaks no HARD rule; whenever a spot at full size within one label
+    height of its line keeps every HARD rule (an independent 3 px search), it is that near at full size; whenever one
+    within three label heights does, it is within three; never smaller than LABEL_MIN_SIZE; never dropped; and only
+    `forced` when no spot on the whole screen keeps every HARD rule."""
+    import random
+    from design_checker import rhino_logic as logic_
+    import time as time_
+    rng = random.Random(1525)
+    views = [(656, 668), (1000, 640), (800, 520), (480, 600), (420, 420)]
+    checked, slowest = 0, 0.0
+    for case in range(60):
+        vw, vh = views[case % len(views)]
+        lw, lh = rng.uniform(0.35, 0.8) * vw, rng.uniform(0.35, 0.8) * vh
+        lx, ly = rng.uniform(4, vw - lw - 4), rng.uniform(4, vh - lh - 4)
+        hx0 = lx + rng.uniform(0.05, 0.3) * lw
+        hx1 = lx + lw - rng.uniform(0.05, 0.3) * lw
+        hy0 = ly + rng.uniform(0.1, 0.35) * lh
+        hy1 = ly + lh - rng.uniform(0.1, 0.35) * lh
+        my, mx = (hy0 + hy1) / 2, (hx0 + hx1) / 2
+        dims = [((lx, my), (hx0, my)), ((hx1, my), (lx + lw, my)), ((mx, ly), (mx, hy0)), ((mx, hy1), (mx, ly + lh))]
+        shapes = [_rect(hx0, hy0, hx1, hy1)]
+        side = rng.choice(["w", "e", "n", "s"])                               # a coloured band along one wall
+        shapes.append({"w": _rect(hx0, hy0, hx0 + 12, hy1), "e": _rect(hx1 - 12, hy0, hx1, hy1),
+                       "n": _rect(hx0, hy0, hx1, hy0 + 12), "s": _rect(hx0, hy1 - 12, hx1, hy1)}[side])
+        boxes = []
+        if rng.random() < 0.6:
+            boxes.append((12, 34, rng.uniform(0.3, 0.8) * vw, 54))            # the notice
+        if rng.random() < 0.5:
+            boxes.append((vw - 0.7 * vw - 12, 12, 0.7 * vw, 54))              # the status box
+        boxes.append((vw - 80, 100, 61, 55))                                   # the north arrow
+        soft_lines = _boxes(lx, ly, lx + lw, ly + lh)
+        placed = []
+        for own, name in zip(dims, ("Side yard, West", "Side yard, East", "Rear yard", "Front yard")):
+            text = "✕ " + name + " 7'-0 5/8\", needs 10'-0\" (approx.)"
+            before = list(placed)
+            start = time_.perf_counter()
+            got = logic_.place_dim_label(own, text, 11, (vw, vh), boxes, dims, [], soft_lines, shapes, placed=before)
+            slowest = max(slowest, time_.perf_counter() - start)
+            box = (got["left"], got["top"], got["w"], got["h"])
+            placed.append(box)
+            assert got["rows"] and got["size"] >= logic_.LABEL_MIN_SIZE, got          # never dropped, readable
+            if got["forced"]:                                                  # honest: nowhere keeps every rule
+                w, h = got["w"], got["h"]
+                assert all(logic_.label_breaks_hard(own, (x, y, w, h), (vw, vh), boxes, dims, shapes, before)
+                           for y in range(0, int(vh - h) + 1, 4) for x in range(0, int(vw - w) + 1, 4)), (case, own)
+                continue
+            checked += 1
+            assert logic_.label_breaks_hard(own, box, (vw, vh), boxes, dims, shapes, before) is None, (case, own, got)
+            assert got["led"] == (got["gap"] > 8), got
+            near = _nearest_hard_clear(logic_, own, text, 11, (vw, vh), boxes, dims, shapes, placed=before)
+            if near is not None and near[0] <= near[1] - 6:                   # a full-size spot in reach: used
+                assert got["size"] == 11 and got["gap"] <= near[1], (case, own, got, near)
+            elif near is None:
+                lead = _nearest_hard_clear(logic_, own, text, 11, (vw, vh), boxes, dims, shapes, 3.0, 6, before)
+                if lead is not None and lead[0] <= 3 * lead[1] - 12 and got["size"] == 11:
+                    assert got["gap"] <= 3 * got["h"], (case, own, got, lead)
+    assert checked >= 200                                                       # most labels placed by the rules
+    assert slowest < 1.0, slowest                 # placing one label, at rest (never in the drawing loop): bounded
+
+
+def test_a_moved_label_is_led_and_the_draw_record_keeps_the_rules():
+    """draw_screen gathers the labels (each yard's, then each lot edge's), and draws them where logic.place_labels
+    put them once the view was still (ui.paint_label: the leader when led, the shrunk text); every building (its
+    outline's hull) and coloured part (its own outline) goes in as HARD, the buildings counted in the record."""
+    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    paint = src[src.index("def paint_label("):].split("\ndef ", 1)[0]
+    assert 'if got["led"] or (edge_leader and' in paint and "(size + 5) * k" in paint
+    assert "logic.label_height(len(rows), size)" in paint
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert '"shapes": solids' in draw and 'drawn["hard_shapes"]' in draw
+    assert 'logic.hull(on) if kind == "building" else on' in draw and 'drawn["buildings"] = ' in draw
+    assert 'o.plan_solids = [("building", ' in rhino and "o.plan_lines, o.plan_solids = [], []" in rhino
+    assert '("coloured", [_model_point(doc, (x, y)) for x, y in e["outline"]])' in rhino
+
+
+def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_rests():
+    """The Rhino job at 4bb6d4d: zooming the Top view with labels on ran 502 ms a frame (worst 1,605 ms): the search
+    ran in every frame. Now draw_screen never searches: a frame on a view that hasn't moved since its labels were
+    placed draws them there; while the view moves they are carried along with their lines (logic.follow) and the
+    placing is left to a timer that runs it LABEL_SETTLE_S after the last change (settle_labels). The work a moving
+    frame does for a busy lot (40 labels) stays well under 16 ms; placing the sample and a busy lot once is timed
+    too."""
+    import time as time_
+    from design_checker import rhino_logic as logic_
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
+    for search in ("place_labels(", "place_dim_label(", "label_box(", "label_at(", "settle_labels("):
+        assert search not in draw, search                                    # never in the drawing loop
+    assert "_label_timer()" in draw and "logic.follow(got, item[\"line\"])" in draw
+    tick = rhino[rhino.index("def _label_tick("):].split("\ndef ", 1)[0]
+    assert "logic.LABEL_SETTLE_S" in tick and "settle_labels(LABEL_STEP_S)" in tick
+    settle = rhino[rhino.index("def settle_labels("):].split("\ndef ", 1)[0]
+    assert "logic.LabelRun(" in settle and "if not run.step(budget_s):" in settle and "doc.Views.Redraw()" in settle
+    assert 'FromRuntimeSerialNumber(pending["doc"])' in settle                  # the document placed for
+    assert "label_timer" in logic_.HANDLES and 'key == "label_timer"' in rhino
+    # a moving frame's label work for a busy lot: 40 placements carried along, well under 16 ms
+    view = (656, 668)
+    lines = [((40 + 15 * k, 100 + 12 * k), (60 + 15 * k, 100 + 12 * k)) for k in range(40)]
+    placed = {k: {"left": 10.0 + k, "top": 20.0 + k, "w": 80, "h": 20, "rows": ["x"], "size": 11, "led": False,
+                  "forced": False, "gap": 6, "line": lines[k]} for k in range(40)}
+    moved = [((x0 + 7, y0 - 3), (x1 + 7, y1 - 3)) for (x0, y0), (x1, y1) in lines]
+    start = time_.perf_counter()
+    for _ in range(20):
+        carried = [logic_.follow(placed[k], moved[k]) for k in range(40)]
+    per_frame = (time_.perf_counter() - start) / 20
+    assert per_frame < 0.016 and carried[0]["left"] == 17.0 and carried[0]["top"] == 17.0, per_frame
+    # placing (at rest, outside the drawing loop): the sample's 4 yards and 5 edges, then a busy lot's 16 labels
+    lot = (158, 106, 501, 562)
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    dims = [((158, 330), (185, 330)), ((420, 330), (501, 330)), ((300, 106), (300, 250)), ((300, 415), (300, 562))]
+    items = [{"key": k, "text": "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)", "line": d_, "size": 11,
+              "status": ["does_not_comply", "complies", "needs_review", "complies"][k]} for k, d_ in enumerate(dims)]
+    items += [{"key": 10 + k, "text": "75'-10\"", "line": e_, "size": 11, "status": None}
+              for k, e_ in enumerate(_boxes(*lot))]
+    start = time_.perf_counter()
+    spots = logic_.place_labels(items, view, [(12, 34, 506, 54), (543, 119, 61, 55)], dims, [house], _boxes(*lot))
+    sample_s = time_.perf_counter() - start
+    assert len(spots) == len(items) and sample_s < 1.0, sample_s
+    busy = items + [{"key": 20 + k, "text": "12'-0\"", "line": ((200 + 9 * k, 480), (230 + 9 * k, 480)), "size": 11,
+                     "status": "complies"} for k in range(8)]
+    start = time_.perf_counter()
+    spots = logic_.place_labels(busy, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
+    assert len(spots) == len(busy) and time_.perf_counter() - start < 6.0
+    # at rest, placed a few at a time (the review of 3446e94: the whole search at once froze Rhino each pause): a
+    # step stops once its budget is spent, one label at least, and the steps end with every label placed
+    run = logic_.LabelRun(busy, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
+    steps = 0
+    while not run.step(0.0):
+        steps += 1
+        assert len(run.spots) == steps                                     # one label a step at a zero budget
+    assert len(run.spots) == len(busy) and steps == len(busy) - 1
+    assert {k: (g["left"], g["top"]) for k, g in run.spots.items()} == {
+        k: (g["left"], g["top"]) for k, g in spots.items()}                # the same placements as all at once
+    assert sorted(g["order"] for g in run.spots.values()) == list(range(len(busy)))
+
+
+def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
+    """The Rhino job at 4bb6d4d: the front yard's label was wholly under the southwest one (the architect lost that
+    figure), and the southwest label sat 1 px beside the front yard's dimension. Now a label already placed is HARD
+    for every later one (never covered), failing yards are placed first, then those needing review, those that
+    comply, then the edges' lengths; and a label keeps 3 px off every other dimension line."""
+    from design_checker import rhino_logic as logic_
+    view = (657, 668)
+    lot = (158, 106, 501, 562)
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    dims = [((158, 409), (185, 409)), ((300, 415), (300, 562)), ((300, 106), (300, 250)), ((420, 330), (501, 330))]
+    statuses = ["complies", "complies", "needs_review", "does_not_comply"]
+    items = [{"key": k, "text": ["Side yard, Southwest 12'-0\"", "Front yard 26'-11\"", "? Rear yard 27'-6\"",
+                                 "✕ Side yard, Northeast 7'-0\", needs 10'-0\""][k], "line": d_, "size": 11,
+              "status": statuses[k]} for k, d_ in enumerate(dims)]
+    items += [{"key": 10 + k, "text": "75'-10\"", "line": e_, "size": 11, "status": None}
+              for k, e_ in enumerate(_boxes(*lot))]
+    order = []
+    real = logic_.place_dim_label
+
+    def spy(line, text, *a, **k):
+        order.append(text)
+        return real(line, text, *a, **k)
+    logic_.place_dim_label = spy
+    try:
+        spots = logic_.place_labels(items, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
+    finally:
+        logic_.place_dim_label = real
+    assert order[0].startswith("✕") and order[1].startswith("?") and order[-1] == "75'-10\""   # failing first
+    boxes = [(g["left"], g["top"], g["w"], g["h"]) for g in spots.values()]
+    for i, b1 in enumerate(boxes):
+        for j, b2 in enumerate(boxes):
+            assert i == j or not logic_._over(b1, b2), (i, j, b1, b2)                 # none hidden under another
+    for key, g in spots.items():
+        own = next(i["line"] for i in items if i["key"] == key)
+        box = (g["left"], g["top"], g["w"], g["h"])
+        for d_ in dims:
+            if tuple(map(tuple, d_)) != tuple(map(tuple, own)):
+                assert not logic_.crosses(d_, box[0] - 3, box[1] - 3, box[2] + 6, box[3] + 6), (key, d_)  # 3 px
+    assert logic_.label_breaks_hard(dims[0], (198, 470, 100, 20), view, [], dims) == "on another yard's dimension"
+    assert logic_.label_breaks_hard(dims[0], (190, 470, 100, 20), view, [], dims) is None          # 10 px off: fine
+    assert logic_.label_breaks_hard(dims[0], (302, 470, 30, 20), view, [], dims) == "on another yard's dimension"
+    assert logic_.label_breaks_hard(dims[0], (10, 10, 50, 20), view, [], [], [], [(40, 15, 50, 20)]) == \
+        "over another label"
+    # nowhere keeps every rule (a tiny view): forced, but still never over a label placed before it
+    tiny, cover = (300, 120), [(0, 0, 300, 120)]                       # the whole view taken by a notice
+    first = logic_.place_dim_label(((10, 60), (290, 60)), "✕ Front yard 7'-0\"", 11, tiny, hard_boxes=cover)
+    took = (first["left"], first["top"], first["w"], first["h"])
+    later = logic_.place_dim_label(((10, 60), (290, 60)), "75'-10\"", 11, tiny, hard_boxes=cover, placed=[took])
+    assert first["forced"] and later["forced"]
+    assert not logic_._over((later["left"], later["top"], later["w"], later["h"]), took)
+
+
+def test_the_in_rhino_checks_read_the_drawings_own_placement():
+    """The Rhino job at 27c8e5d: highlight claim 1b worked out the notice's place with its own taken boxes and said
+    "no corner clear" while the screen drew it bottom right. draw_screen now keeps what each view drew (the notice's
+    box, every label's box and the lines it must stay off) in STATE["drawn"], and the in-Rhino claims read that."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert 'STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn' in draw
+    assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
+    assert draw.count('drawn["labels"].append(') == 1 and 'got["led"], got["size"], got["forced"], got.get("order")])' in draw
+    assert 'drawn["dims"] = dims' in draw and draw.index("keep = list(taken)") < draw.index('"keep": [tuple(t)')
+    assert 'drawn["settled"] = settled or not items' in draw
+    for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
+        assert "label_box(" not in script, name
+
+
+def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
+    """Review round 2 of the placement: the record was kept before the frame finished (a label raising midway left
+    a notice in it that was never drawn), and the scripts could read an earlier frame's; and a report that couldn't
+    be written overwrote the panel line holding the notice. Now the record is marked complete only once every label
+    and the notice are drawn, each script drops the view's record before redrawing and requires it complete, and the
+    report error keeps the notice first in the line."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert draw.index("ui.draw_text_box(d, lines, ui.status_color(\"does_not_comply\"") < \
+        draw.index('drawn["complete"] = True') < draw.index("if not boxed:")
+    assert draw.count('drawn["complete"]') == 1
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert 'say(first + logic.report_message(path, False, result["report_error"], stale=had_report))' in check
+    assert 'first = "✕ " + result["notice"] + " · " if result.get("notice") else ""' in check
+    for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert '.pop(str(' in script and 'get("complete")' in script and "logic.notice_place(" in script, name
+
+
+def test_the_detail_under_the_list_keeps_room_for_its_button():
+    """The Rhino job at 7a16aa6 (pass 2 claim 2): the list above the selected item's detail is a fixed 380 px, so a
+    taller header left the detail 51 px and its "Enter bedrooms and parking spaces…" button 1 px below it (scrolled).
+    The detail now never goes under DETAIL_MIN_HEIGHT: room for four lines of name and reason (17 px each), two rows
+    of buttons (20 px each, measured on the Mac), three gaps of 6 px between them and 6 px above and below; the list
+    gives way and scrolls, down to LIST_MIN_HEIGHT (three rows and the column titles)."""
+    import re
+    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    least = int(re.search(r"^DETAIL_MIN_HEIGHT = (\d+)", src, re.M).group(1))
+    assert least >= 4 * 17 + 2 * 20 + 3 * 6 + 2 * 6      # four lines of name and reason, two rows of buttons (round 1)
+    panel = src[src.index("    split = ef.Splitter()"):src.index("    footer = row(")]
+    assert "split.Panel2MinimumSize = DETAIL_MIN_HEIGHT" in panel and "split.Panel2 = detail_scroll" in panel
+    assert "split.Panel1MinimumSize = LIST_MIN_HEIGHT" in panel and "LIST_MIN_HEIGHT = 3 * ROW_HEIGHT + 24" in src
+
+
+def test_the_label_claim_counts_its_own_line_too():
+    """Independent review of 6361a3f, then the Rhino job at 319dc5d and the review of c99843a: highlight claim 2
+    checks every HARD rule through rhino_logic.label_breaks_hard on what the view drew (its notice, status box and
+    arrow, its buildings' and coloured parts' outlines, its dimensions), requires at least one building recorded,
+    and checks distance by its own brute-force search, not the placement's."""
+    script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
+    assert "g.logic.label_breaks_hard(own, box, view, hard, dims, shapes)" in script
+    assert 'rec.get("hard_shapes")' in script and 'rec.get("buildings", 0) >= 1' in script
+    assert "not broken and not forced" in script and "not too_far" in script
+    assert "for y_ in range(" in script and "s_ != own" not in script
+
+def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():
+    """The Rhino job at 6361a3f (architect's eye): with the shorter list, the panel opened with the list scrolled a
+    little, "Does not comply · 1" half under the column titles. A new list (first fill, other rows or groups) now
+    scrolls to its first row; the same rows again (every live refresh) stay where the architect left them (review
+    of f063789: a scroll to the top on every edit lost their place); a selected row is scrolled just into view."""
+    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    show = src[src.index("def show(parts"):src.index("def _scroll_to(")]
+    assert show.index("tree.DataStore = store") < show.index("if shape != parts.get(\"shape\"):") < \
+        show.index("_scroll_to(tree, 0, len(shape))") < show.index('parts["shape"] = shape') < \
+        show.index("tree.SelectedRow = ")
+    assert show.index("tree.SelectedRow = k + 1 + c") < show.index("_scroll_to(tree, k + 1 + c, k + 2 + c)")
+    helper = src[src.index("def _scroll_to("):].split("\ndef ", 1)[0]
+    ns = {}
+    exec(helper, ns)                                                          # noqa: S102
+    calls = []
+    tree = type("Tree", (), {"ScrollToRow": lambda self, row: calls.append(row)})()
+    ns["_scroll_to"](tree, 0, 0)                                              # an empty list: never scrolled
+    ns["_scroll_to"](tree, 0, 3)
+    assert calls == [0]
+    broken = type("Tree", (), {"ScrollToRow": lambda self, row: 1 / 0})()
+    ns["_scroll_to"](broken, 0, 3)                                            # never an error out of it
+    ns["_scroll_to"](object(), 0, 3)                                          # no ScrollToRow: nothing
+
+
+def test_the_notice_is_drawn_in_the_real_docked_top_view():
+    """The Rhino job at a9a9a45: in the real docked Top view (657 x 668 px, the model on screen from 156,106 to
+    501,562, the north arrow at 543,119, 61 x 55) the side yard's notice wasn't drawn: its widest box (60 %) was
+    three lines, 4 px too tall for the band above the model, and narrower ones were taller still. The notice now
+    tries its most compact box first, then wider ones up to NOTICE_MAX_SHARE: here two lines across the top, clear
+    of the model and the arrow. The scripts' screenshots are taken at the view's own size, never 1000 x 640."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · at least 0'-11 1/4\" short"
+    model, arrow = (155.67, 106.27, 501.33, 561.73), (543.26, 118.92, 61.03, 55.28)
+    lines, (x, y), w, h = logic_.notice_place(657, 668, [side], model, [arrow])
+    assert len(lines) == 2 and w <= 657 * logic_.NOTICE_MAX_SHARE and y + h <= model[1] and (x, y) == (12, 34)
+    assert not (min(x + w, arrow[0] + arrow[2]) > max(x, arrow[0]) and min(y + h, arrow[1] + arrow[3]) > max(y, arrow[1]))
+    assert logic_.NOTICE_SHARES == tuple(sorted(logic_.NOTICE_SHARES))     # the most compact box first
+    for name in ("notice_in_rhino.py", "highlight_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert "Size(1000, 640)" not in script, name
+
+
+def test_the_notice_is_never_wider_than_its_limit_nor_off_the_view():
+    """Review of 1d91bd9: a part too long for a line stayed whole, so in a narrow view (400 px, a four-view layout on
+    a laptop) the box was 342 px, past NOTICE_MAX_SHARE, and at 300 px wider than the view, its right-hand corners
+    off screen. A long part now breaks between its words (never inside a measurement), no box wider than the limit is
+    tried, and no spot off the view is used."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · at least 0'-11 1/4\" short"
+    for view_w in (400, 300):
+        placed = logic_.notice_place(view_w, 600, [side], (100, 120, 390, 590))
+        if placed is not None:
+            lines, (x, y), w, h = placed
+            assert w <= view_w * logic_.NOTICE_MAX_SHARE and 0 <= x and x + w <= view_w, (view_w, placed)
+        for share in logic_.NOTICE_SHARES:
+            lines = logic_.notice_lines([side], view_w, share)
+            assert "7'-0 5/8\"" in " ".join(lines) and "0'-11 1/4\"" in " ".join(lines)    # measurements whole
+    assert logic_.notice_spot(300, 600, 342, 54, None) is None                  # wider than the view: nowhere
+    lines = logic_.notice_lines([side], 400, 0.4)                               # the long part broken between
+    assert max(len(t) for t in lines) * 7.8 + 22 <= 400 * logic_.NOTICE_MAX_SHARE + 1, lines   # its words
+    lines, (x, y), w, h = logic_.notice_place(300, 600, [side], None)          # placed: width and screen checked
+    assert w <= 300 * logic_.NOTICE_MAX_SHARE and 0 <= x and x + w <= 300 and 0 <= y and y + h <= 600
+    # a part that can't break narrower than the limit (one long word): never drawn wider than it
+    assert logic_.notice_place(600, 600, ["✕ " + "W" * 60], None) is None
+    # a break that would fall inside a measurement moves before it
+    lines = logic_.notice_lines(["✕ Rear yard now is 7'-0 5/8\" here"], 200, 0.4)
+    assert any("7'-0 5/8\"" in t for t in lines) and not any(t.strip().startswith("5/8") for t in lines), lines
+
+
+def test_the_notice_keeps_its_heading_numbers_and_mark_whole():
+    """Review of 87e105d: narrow boxes, tried first, cut the heading mid-phrase where a wider box allowed it whole;
+    a second notice line came out indented; the ✕ could stand alone; an area's unit or a number's "short" could go
+    to the next line. Now a part breaks between words only when too long even for NOTICE_MAX_SHARE, each notice line
+    starts flush, and the mark, measurements, units and the word saying what a number is stay with their neighbour."""
+    from design_checker import rhino_logic as logic_
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · at least 0'-11 1/4\" short"
+    for share in logic_.NOTICE_SHARES:
+        assert any("Side yard, Southwest no longer complies" in t for t in logic_.notice_lines([side], 657, share))
+    two = logic_.notice_lines(["✕ Rear yard no longer complies", "✕ Height no longer complies"], 1000, 0.8)
+    assert two == ["✕ Rear yard no longer complies", "✕ Height no longer complies"]
+    lone = logic_.notice_lines(["✕ " + "W" * 30 + " · a"], 250, 0.8)
+    assert lone[0] != "✕" and lone[0].startswith("✕ W"), lone
+    for view_w in (300, 400, 657):
+        for share in logic_.NOTICE_SHARES:
+            area = logic_.notice_lines(["✕ Lot coverage no longer complies · 7,033 sf proposed · 35 % short"],
+                                       view_w, share)
+            joined = "\n".join(area)
+            assert "7,033 sf" in joined and "35 % short" in joined, (view_w, share, area)
+            got = logic_.notice_lines([side], view_w, share)
+            assert "0'-11 1/4\" short" in "\n".join(got) and "7'-0 5/8\" proposed" in "\n".join(got), got

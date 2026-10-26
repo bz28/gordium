@@ -64,24 +64,35 @@ def fresh_module():
 
 
 def drawn(g, doc, view_name, capture=None):
-    """The dimensions the conduit draws in one view's redraw: [(from, to, colour argb)] (model points)."""
+    """The dimensions the conduit draws in one view's redraw, on screen (plan) or in the model (any other view,
+    depth-tested: draw_scene's _model_dimension; review of 9fa61de, F1): [(from, to, colour argb)] (model points)."""
     calls = []
-    real = g._dimension
+    real, real_model = g._dimension, g._model_dimension
 
     def spy(d, viewport, line, color):
         calls.append((line.From, line.To, color.ToArgb()))
         return real(d, viewport, line, color)
+
+    def spy_model(d, doc_, line, color):
+        calls.append((line.From, line.To, color.ToArgb()))
+        return real_model(d, doc_, line, color)
     view = doc.Views.Find(view_name, False)
     doc.Views.ActiveView = view
-    g._dimension = spy
+    g._dimension, g._model_dimension = spy, spy_model
     try:
+        # on the Mac Redraw() only schedules a frame: a capture draws it (and asks for the labels), the labels are
+        # placed (as once the view rests), then the settled frame is drawn by a second capture (the Rhino job at
+        # e4e5018: as written nothing was drawn, so no label was asked for)
         view.Redraw()
+        view.CaptureToBitmap(view.ActiveViewport.Size)
+        g.settle_labels()
+        del calls[:]
+        view.Redraw()
+        bitmap = view.CaptureToBitmap(view.ActiveViewport.Size)   # at the view's own size: the frame the claims read
         if capture:
-            # at the view's own size, so the frame captured is the one the claims read (review of be133d0, F6)
-            view.CaptureToBitmap(view.ActiveViewport.Size).Save(S + "frames/" + capture + ".png")
-            view.Redraw()
+            bitmap.Save(S + "frames/" + capture + ".png")
     finally:
-        g._dimension = real
+        g._dimension, g._model_dimension = real, real_model
     return calls
 
 
@@ -122,72 +133,72 @@ try:
     claim("1 a complying yard's dimension is neutral grey (colour only what's wrong)",
           not complying or sum(c == grey for _, _, c in calls) == len(complying), log["top"])
     vp = top.ActiveViewport
-    status = g.logic.rect_quad(g.logic.status_box(vp.Bounds.Width, g._status_rows(o, False)))
-    house = [[(q.X, q.Y) for q in (vp.WorldToClient(p) for p in ring)] for ring in o.footprint]
-    labels = [(j, placed[1]) for j, placed in o.placed.items() if j != "height" and placed[1] is not None]
-    hits = [(j, i) for j, q in labels for i, r in labels if str(j) < str(i) and g.logic.shapes_hit(q, r)]
-    log["placed"] = {j: (pl[0], [tuple(round(v) for v in p) for p in (pl[1] or [])], pl[2], pl[5])
-                     for j, pl in o.placed.items()}
-    claim("1 every number shown sits clear of the status box, the house and the other numbers",
-          len(labels) == len(o.yard_dims) and not hits and
-          not any(g.logic.shapes_hit(q, status) or (house and g.logic.shapes_hit(q, house[0])) for _, q in labels),
-          {"placed": log["placed"], "overlaps": hits})
     view = (vp.Bounds.Width, vp.Bounds.Height)
-    claim("1 every number shown lies wholly inside the view (Rhino check of #29 at f6642a9: three ran off)",
-          all(g.logic.inside_view(q, view) for _, q in labels), {"view": view, "placed": log["placed"]})
+    meets = lambda a, b: a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
+
+    def frame(name="Top"):
+        """What the view drew last (STATE["drawn"]: the one placer's own record): its labels as a list of
+        (text, box, led, forced, line) (a list: two labels with the same words are two labels, review of 86c01ea,
+        F2), the HARD boxes (status box, north arrow, notice), the buildings' shapes."""
+        v = doc.Views.Find(name, False).ActiveViewport
+        dr = g.STATE["drawn"][str(v.Id)]
+        return ([(lb[0], tuple(lb[1][:4]), lb[4], lb[6], lb[3]) for lb in dr["labels"]], dr["hard_boxes"],
+                dr["hard_shapes"], dr)
+    every, hard, shapes, dr = frame()
+    shown = {t: (box, led, forced, line) for t, box, led, forced, line in every}
+    numbers = {pl[5]: k for k, pl in o.placed.items() if k != "height"}
+    log["labels"] = [x[:4] for x in every]
+    claim("1 every number and tag is placed by the one placer, none forced, clear of the status box, the house and "
+          "each other (review of 86c01ea, F3: a forced one was let off)",
+          every and all(not x[3] and not any(meets(x[1], tuple(h)) for h in hard)
+                        and not any(g.logic.shapes_hit(g.logic.rect_quad(x[1]), sh) for sh in shapes)
+                        and not any(meets(x[1], y[1]) for j, y in enumerate(every) if j != i)
+                        for i, x in enumerate(every)), log["labels"])
+    claim("1 every label lies wholly inside the view",
+          all(0 <= x[1][0] and x[1][0] + x[1][2] <= view[0] and 0 <= x[1][1] and x[1][1] + x[1][3] <= view[1]
+              for x in every), {"view": view})
     wrong_k = [j for j, (_, _, st) in enumerate(o.yard_dims) if st in ("does_not_comply", "needs_review")]
     claim("1 every failing or in-review yard's number is drawn (Rhino check at 6d2e01a: the failing one was missing)",
-          wrong_k and all(o.placed.get(j) and o.placed[j][1] is not None for j in wrong_k),
-          {j: (o.placed.get(j) or (None, None, None))[2] for j in wrong_k})
+          wrong_k and all(o.placed[j][5] in shown for j in wrong_k), [o.placed[j][5] for j in wrong_k])
     import time as _time
     o.toast = (["Side yard (left) no longer complies: 3'-2\" short of 10'-0\""], _time.time() + 60)
+    roomy = rg.BoundingBox(o.box.Min, o.box.Max)
+    roomy.Inflate(o.box.Diagonal.Length * 0.6)           # a corner clear of the model, so the notice is drawn
+    vp.ZoomBoundingBox(roomy)                             # (#15's rule: no clear corner, none drawn)
     drawn(g, doc, "Top", "1_top_notice")          # the notice showing, as after an edit (in the view worked in)
-    numbers = [g.logic.number_box([p[0] for p in pl[1]], [p[1] for p in pl[1]], 0)
-               for pl in o.placed.values() if pl[1] is not None]
-    boxes = getattr(o, "screen_boxes", None) or {}
-    meets = lambda a, b: a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
-    log["screen_boxes"] = {"numbers": numbers, **boxes, "view": (vp.Bounds.Width, vp.Bounds.Height)}
-    claim("1 the notice covers no number (Rhino check at 5891efc: the front number printed through it)",
-          boxes.get("notice") and not any(meets(boxes["notice"], n) for n in numbers), log["screen_boxes"])
-    claim("1 no lot edge's length touches a number (Rhino check at 5891efc: the rear one touched '69'-6 1/8\"')",
-          not any(meets(e_, n) for e_ in boxes.get("edges") or [] for n in numbers), log["screen_boxes"])
+    every, hard, shapes, dr = frame()
+    shown = {t: (box, led, forced, line) for t, box, led, forced, line in every}
+    model = dr.get("model")
+    note = dr.get("notice")
+    log["notice"] = {"notice": note, "model": model}
+    claim("1 the notice is drawn in this failing scene (a corner clear of the model)", note is not None, log["notice"])
+    claim("1 the notice is never over the model, nor under any label (#15's rule: no clear corner, not drawn; "
+          "the panel says it)",
+          note is None or ((not model or not meets(tuple(note), (model[0], model[1], model[2] - model[0],
+                                                                  model[3] - model[1])))
+                           and not any(meets(tuple(note), x[1]) for x in every)), log["notice"])
     o.toast = None
-    shown_words = [pl[5] for j, pl in o.placed.items() if j != "height" and pl[5]]
+    vp.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
+    shown_words = [t for t in shown if t in numbers]
     claim("1 each dimension shows its number only (no name, no 'needs', no '(approx.)': the panel says those)",
           shown_words and all("yard" not in t.lower() and "needs" not in t and "approx" not in t for t in shown_words),
           shown_words)
-    near = {}
-    for j, pl in o.placed.items():                       # on or just past its own line, measured on screen
-        if j == "height" or pl[1] is None:
-            continue
-        a, b = vp.WorldToClient(pl[3].From), vp.WorldToClient(pl[3].To)
-        seg = rg.Line(rg.Point3d(a.X, a.Y, 0), rg.Point3d(b.X, b.Y, 0))
-        near[j] = round(min(seg.DistanceTo(rg.Point3d(x, y, 0), True) for x, y in pl[1]), 1)
-    reach = math.hypot(g.logic.DIM_LABEL_GAP_PX, g.logic.DIM_LABEL_H_PX / 2) + 1   # on: 4 px; past its end: ~10 px
-    claim("1 each number sits on its own line or just past its outer end (its nearest corner within ~11 px)",
-          near and all(v <= reach for v in near.values()), {"near": near, "reach": reach})
+    claim("1 each number sits beside its own line, or is led to it (place_dim_label)",
+          all(shown[t][1] or g.logic.box_gap(shown[t][3], shown[t][0]) <= 8 for t in shown_words),
+          {t: (shown[t][1], round(g.logic.box_gap(shown[t][3], shown[t][0]), 1)) for t in shown_words})
     wrong = {j for j, (_, _, st) in enumerate(o.yard_dims) if st in ("does_not_comply", "needs_review")}
-    drawn_tags = []
-    real_required = g._required
-
-    def spy_required(d_, line_, tag_, dark_, box_=None):
-        drawn_tags.append((tag_, box_ is not None))
-        return real_required(d_, line_, tag_, dark_, box_)
-    g._required = spy_required
-    try:
-        top.Redraw()
-    finally:
-        g._required = real_required
     wrong_tags = [t for j in wrong for t in o.yard_tags.get(j) or []]
+    tags = [t for t in shown if t.startswith("min ")]
     claim("1 'min' tags drawn only for failing or in-review yards (every tag drawn is one of theirs)",
-          all(t in wrong_tags for t, shown_ in drawn_tags if t and shown_)
-          and all((o.yard_tags.get(j) or []) == [] for j in range(len(o.yard_dims)) if j not in wrong), drawn_tags)
+          all(t in wrong_tags for t in tags)
+          and all((o.yard_tags.get(j) or []) == [] for j in range(len(o.yard_dims)) if j not in wrong), tags)
     for name in ("Top",):                                # Zoom Extents too: the lot and neighbourhood all in view
         vp.ZoomExtents()
         drawn(g, doc, name, "1b_top_zoom_extents")
-        zl = [placed[1] for j, placed in o.placed.items() if j != "height" and placed[1] is not None]
+        zl, _, _, _ = frame()
         claim("1 at Zoom Extents too, every label shown inside the view",
-              all(g.logic.inside_view(q, (vp.Bounds.Width, vp.Bounds.Height)) for q in zl), len(zl))
+              all(0 <= x[1][0] and x[1][0] + x[1][2] <= vp.Bounds.Width and 0 <= x[1][1]
+                  and x[1][1] + x[1][3] <= vp.Bounds.Height for x in zl), len(zl))
     vp.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
     drawn(g, doc, "Top")
     ring = g.ask({"cmd": "sample_site"})["lot"]
@@ -238,16 +249,30 @@ try:
     claim("2 coloured as the height row", front[0][2] == g.ui.dim_color(height["status"], g.ui.viewport_dark()).ToArgb(),
           height["status"])
     fvp = doc.Views.Find("Front", False).ActiveViewport
-    hq = (o.placed.get("height") or (None, None))[1]
+    fl, _, _, _ = frame("Front")
+    hq = next(((x[1],) for x in fl if o.placed.get("height") and x[0] == o.placed["height"][5]), None)
     corners = [fvp.WorldToClient(p) for p in o.house_box]
     hx = (min(q.X for q in corners), max(q.X for q in corners), min(q.Y for q in corners), max(q.Y for q in corners))
-    claim("2 its words along it, outside the house, inside the view (Rhino check at f6642a9: they sat inside the house)",
-          hq is not None and g.logic.inside_view(hq, (fvp.Bounds.Width, fvp.Bounds.Height)) and not g.logic.shapes_hit(
-              hq, [(hx[0], hx[2]), (hx[1], hx[2]), (hx[1], hx[3]), (hx[0], hx[3])]),
-          {"label": hq, "house": hx})
+    claim("2 its number placed by the one placer, outside the house, inside the view (Rhino check at f6642a9: "
+          "it sat inside the house)",
+          hq is not None and 0 <= hq[0][0] and hq[0][0] + hq[0][2] <= fvp.Bounds.Width and 0 <= hq[0][1]
+          and hq[0][1] + hq[0][3] <= fvp.Bounds.Height
+          and not meets(hq[0], (hx[0], hx[2], hx[1] - hx[0], hx[3] - hx[2])),
+          {"label": hq and hq[0], "house": hx})
 
     g.set_labels(False)
+    vp.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
     drawn(g, doc, "Top", "4_top_labels_off")
+    off, _, _, _ = frame()
+    failing_numbers = [o.placed[j][5] for j, (_, _, st) in enumerate(o.yard_dims) if st == "does_not_comply"]
+    complying_numbers = [o.placed[j][5] for j, (_, _, st) in enumerate(o.yard_dims) if st == "complies"]
+    texts = [x[0] for x in off]
+    log["labels_off"] = [(x[0], x[1], round(g.logic.box_gap(x[4], x[1]), 1)) for x in off]
+    claim("4 labels off: the failing yard's number still beside its yard (number only, within a label height or "
+          "led), the complying yards' gone",
+          failing_numbers and all(t in texts for t in failing_numbers)
+          and all(x[2] or g.logic.box_gap(x[4], x[1]) <= 20 for x in off if x[0] in failing_numbers)
+          and not any(t in texts for t in complying_numbers), log["labels_off"])
     claim("4 labels off: the failing yard's words stay, a complying yard's go",
           g.logic.yard_label_shown(False, "does_not_comply") and not g.logic.yard_label_shown(False, "complies"))
     top.ActiveViewport.ZoomBoundingBox(rg.BoundingBox(rg.Point3d(-3000 * k, -3000 * k, 0), rg.Point3d(3000 * k, 3000 * k, 0)))

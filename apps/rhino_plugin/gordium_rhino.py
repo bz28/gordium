@@ -294,7 +294,9 @@ def suggested_facts(doc, zones):
     reads the model."""
     lots, buildings, _ = _sorted_objects(doc)
     lot_data = [{"id": str(o.Id), "area": _area(o.Geometry), "bottom": o.Geometry.GetBoundingBox(True).Min.Z,
-                 "segments": [((a.X, a.Y), (b.X, b.Y)) for a, b in _segments(o.Geometry)]} for o in lots]
+                 "segments": [((a.X, a.Y), (b.X, b.Y)) for a, b in _segments(o.Geometry)],
+                 "segments_ft": [(_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]) for a, b in _segments(o.Geometry)]}
+                for o in lots]                                     # (the street decided in feet: review round 6)
     boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
     building_data = [{"id": str(o.Id), "bottom": b.Min.Z, "volume": b.Diagonal.X * b.Diagonal.Y * b.Diagonal.Z}
                      for o, b in zip(buildings, boxes)]
@@ -502,15 +504,10 @@ def draw_scene(o, e):
             for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
                 name = logic.highlight(status)
                 colour = ui.HIGHLIGHT[name]
-                # in plan as it was; in any other view only its faces the camera sees, depth-tested (Rhino check
-                # of #31 at 001b757: a strip behind the house coloured its whole front face in Front)
-                shown = g if on_top else _seen_faces(o, e.Viewport, g)
-                if shown is None:
-                    continue
-                _see_through(d, True)                # (depth-tested: testing is back on above)
-                d.DrawBrepShaded(shown, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+                _see_through(d, True)
+                d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
                 _see_through(d, False)
-                d.DrawBrepWires(shown, colour, ui.HIGHLIGHT_EDGE[name])
+                d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
         for pt in getattr(o, "grade_points", None) or []:           # spot grades
             d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
         _on_top(d, on_top)
@@ -541,133 +538,6 @@ def draw_scene(o, e):
     finally:
         _on_top(e.Display, False)
         _see_through(e.Display, False)
-
-
-def _face_samples(face, margin=0.0):
-    """Points on a face's trimmed part, each with its outward normal (a face Rhino marks reversed has its normal
-    turned: review of 8379b66, F1): the middle of its area, then a 5 × 5 grid over its shrunk domain, only where on
-    the face (a boolean's face keeps its whole surface, trimmed: F2); none within `margin` of its edges, where a
-    cut face's ray, started off it along its normal, could clear a roof sloping over its edge (review of cbb6e8c, F1),
-    unless that leaves none."""
-    out = []
-    dup = face.DuplicateFace(False)
-    if dup is None:
-        return out
-    dup.Faces.ShrinkFaces()
-    shrunk = dup.Faces[0] if dup.Faces.Count else face
-    area = Rhino.Geometry.AreaMassProperties.Compute(dup)
-    uv = []
-    if area is not None:
-        ok, u, v = shrunk.ClosestPoint(area.Centroid)
-        if ok:
-            uv.append((u, v))
-    du, dv = shrunk.Domain(0), shrunk.Domain(1)
-    uv += [(du.ParameterAt(i / 6.0), dv.ParameterAt(k / 6.0)) for i in range(1, 6) for k in range(1, 6)]
-    for u, v in uv:
-        if shrunk.IsPointOnFace(u, v) == Rhino.Geometry.PointFaceRelation.Exterior:
-            continue
-        n = shrunk.NormalAt(u, v)
-        if shrunk.OrientationIsReversed:
-            n.Reverse()
-        out.append((shrunk.PointAt(u, v), n))
-    if margin > 0 and out:
-        edges = list(dup.DuplicateEdgeCurves() or [])
-
-        def inside(p):
-            for c in edges:
-                ok, t = c.ClosestPoint(p)
-                if ok and c.PointAt(t).DistanceTo(p) < margin:
-                    return False
-            return True
-        out = [s_ for s_ in out if inside(s_[0])] or out
-    return out
-
-
-def _seen_faces(o, viewport, piece):
-    """The faces of a coloured piece this view's camera sees (logic.face_shown), as one Brep, or None: a face is
-    shown when, at one of its points, it faces the camera and nothing of a building lies between (a ray to the
-    camera against every building's mesh, o.occluders, made once per check). A face with no point found is shown
-    (depth-tested; never a colour lost). Kept per piece and camera, so a still view costs nothing; samples are made
-    once per piece, rays cast only from points facing the camera, stopping at the first seen (review of 8379b66,
-    F4)."""
-    loc, direction = viewport.CameraLocation, viewport.CameraDirection
-    parallel = viewport.IsParallelProjection
-    key = (id(piece), viewport.Id, parallel, round(loc.X, 3), round(loc.Y, 3), round(loc.Z, 3),
-           round(direction.X, 5), round(direction.Y, 5), round(direction.Z, 5))
-    cache = o.__dict__.setdefault("seen_faces", {})
-    if key in cache:
-        return cache[key]
-    if len(cache) > 256:
-        cache.clear()
-    doc = Rhino.RhinoDoc.ActiveDoc
-    lift = (doc.ModelAbsoluteTolerance if doc is not None else 0.001) * 10
-    # each ray starts off the face along its own normal by more than the piece stands proud, so a face lying on the
-    # house starts outside it (_proud scales the piece: a face turned towards its middle moves in, not out; review
-    # of 3159a78, F1); a cut face inside the house still starts inside it
-    # (2.5 × proud: _proud's scaling moves a diagonal face in by up to √3 × it, the mesh stands out half of it)
-    off = _model_length(doc, 2.5 * ui.HIGHLIGHT_PROUD_FT) + lift if doc is not None else 0.05
-    samples = o.__dict__.setdefault("face_samples", {})
-    if id(piece) not in samples:
-        samples[id(piece)] = [_face_samples(f, 2 * off) for f in piece.Faces]
-    meshes = getattr(o, "occluders", None) or []
-    shown = []
-    for face, points in zip(piece.Faces, samples[id(piece)]):
-        if not points:
-            shown.append(face.DuplicateFace(False))
-            continue
-        facing, hidden = 0.0, []
-        for p, n in points:
-            way = -direction if parallel else loc - p
-            reach = None if parallel else way.Length
-            way.Unitize()
-            f = n * way
-            if f <= 1e-9:                                  # this point faces away: no ray
-                continue
-            facing = max(facing, f)
-            out = rg.Vector3d(n)
-            out.Unitize()
-            start = p + out * off
-            blocked = False
-            for m in meshes:
-                t = rg.Intersect.Intersection.MeshRay(m, rg.Ray3d(start, way))
-                if t >= 0 and (reach is None or t < reach):
-                    blocked = True
-                    break
-            hidden.append(blocked)
-            if not blocked:                                # one point seen: enough
-                break
-        if logic.face_shown(facing, hidden):
-            shown.append(face.DuplicateFace(False))
-    joined = None
-    if shown:
-        joined = rg.Brep()
-        for f in shown:
-            if f is not None:
-                joined.Append(f)
-    cache[key] = joined
-    return joined
-
-
-def _occluders(doc):
-    """Every building as one mesh, for the coloured faces' rays (_seen_faces): made once per check (review of
-    8379b66, F6: every building hides, a mesh building too)."""
-    out = []
-    for x in _buildings(doc):
-        g = _drawable(x.Geometry)
-        if isinstance(g, rg.Brep):
-            # true to the surface within half the pieces' proud distance, seams joined: a coarse mesh of a concave
-            # curved wall stands out into the air and hid a face in front of it (review of 3159a78, F2)
-            mp = rg.MeshingParameters()
-            mp.Tolerance = _model_length(doc, ui.HIGHLIGHT_PROUD_FT / 2)
-            mp.JaggedSeams = False
-            parts = rg.Mesh.CreateFromBrep(g, mp) or []
-            mesh = rg.Mesh()
-            for part in parts:
-                mesh.Append(part)
-            g = mesh if mesh.Faces.Count else None
-        if isinstance(g, rg.Mesh) and g.Faces.Count:
-            out.append(g)
-    return out
 
 
 def _see_through(d, on):
@@ -715,7 +585,7 @@ def _scene_dims(o, e, d, dark, old):
     elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     if logic.dims_shown(zoomed_in, elevation):
         for line, _ in getattr(o, "yard_required", None) or []:
-            _required(d, line, None, dark)               # dashed grey, as in plan (review of the merge, F2)
+            _required(d, line, dark)                     # dashed grey, as in plan (review of the merge, F2)
         for line, _, status in getattr(o, "yard_dims", None) or []:
             _model_dimension(d, e.RhinoDoc, line, ui.dim_color("complies" if old else status, dark))
     height = getattr(o, "height_dim", None)
@@ -734,17 +604,20 @@ def _model_on_screen(o, viewport):
     return (min(p.X for p in pts), min(p.Y for p in pts), max(p.X for p in pts), max(p.Y for p in pts)) if pts else None
 
 
-def _notice_box(o, viewport, taken, fixed=()):
+def _notice_box(o, viewport, taken, old):
     """The "no longer complies" notice, if showing in this view (the active one only, G1): (lines, x, y, w, h),
-    placed off the model and off the boxes in `taken` (logic.notice_spot), and then taken itself."""
+    placed off the model and off the boxes in `taken` (logic.notice_spot), and then taken itself. Never over a
+    model changed since the check it was about (`old`, stale(o)): a verdict outlives its model no more than the
+    rows' marks do (the Rhino job at #28 92cf742: an earlier scene's notice stayed over the next house)."""
     toast = getattr(o, "toast", None)
     active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
-    if not toast or time.time() >= toast[1] or active is None or viewport.Id != active.ActiveViewportID:
+    if not toast or old or time.time() >= toast[1] or active is None or viewport.Id != active.ActiveViewportID:
         return None
-    lines = ["✕ " + line for line in toast[0]]
-    w, h = ui.text_box_size(lines, 13)
-    x, y = logic.notice_place(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport),
-                              fixed, [t for t in taken if t not in fixed])     # never on the status box
+    placed = logic.notice_place(viewport.Bounds.Width, viewport.Bounds.Height, ["✕ " + line for line in toast[0]],
+                                _model_on_screen(o, viewport), taken)    # compact, in a corner clear of the model
+    if placed is None:                 # no corner clear of the model: never drawn over it (the panel says it)
+        return None
+    lines, (x, y), w, h = placed
     taken.append((x, y, w, h))
     return lines, x, y, w, h
 
@@ -765,6 +638,12 @@ def _in_active_view(e):
     return active is not None and e.Viewport.Id == active.ActiveViewportID
 
 
+def _screen_line(viewport, line):
+    """A model line's two ends on screen: ((x1, y1), (x2, y2))."""
+    a, b = viewport.WorldToClient(line.From), viewport.WorldToClient(line.To)
+    return [[a.X, a.Y], [b.X, b.Y]]
+
+
 def _dimension(d, viewport, line, color):
     """A drawing-style dimension on screen: its line and an architectural tick at 45° across each end, each on a
     thin halo (dark on a light viewport, light on a dark one) so it reads over the red and amber it often crosses
@@ -778,57 +657,10 @@ def _dimension(d, viewport, line, color):
             d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), ink, width)
 
 
-def _required(d, line, tag, dark, box=None):
-    """A yard's required line: a clear dashed mid-grey across its dimension, with a small "min 25'-0\"" tag in
-    `box` (screen; where logic.tag_spot put it, beside one of the line's ends: Rhino check of #29, the faint line
-    barely registered)."""
-    r, g, b = logic.REQUIRED_RGB[1 if dark else 0]
-    grey = System.Drawing.Color.FromArgb(r, g, b)
-    d.DrawPatternedLine(line.From, line.To, grey, ui.DASHED, 2)
-    if tag and box is not None:
-        d.Draw2dText(tag, grey, rg.Point2d(box[0], box[1] + 2), False, logic.TAG_SIZE)
-
-
-def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None, size=11):
-    """A dimension's number in its place (logic.place_dimension): its backing and outline, and its number written
-    along the dimension (readable: logic.text_angle), in a plane facing the camera; just past the line's end, a
-    short leader to it."""
-    # the words lie in a plane through the dimension facing the camera: the plan's own plane in plan, the
-    # elevation's in Front or Right (the height's words: Rhino check of #29 at f6642a9)
-    if anchor is None:
-        anchor = rg.Point3d(0, 0, (getattr(o, "lot_outline", None) or [rg.Point3d(0, 0, 0)])[0].Z)
-    facing = rg.Plane(anchor, -viewport.CameraDirection)
-
-    def model(p):
-        ray = viewport.ClientToWorld(rg.Point2d(p[0], p[1]))
-        ok, t = rg.Intersect.Intersection.LinePlane(ray, facing)
-        return ray.PointAt(t) if ok else None
-    corners = [model(p) for p in quad]
-    if any(c is None for c in corners):
-        return
-    d.DrawPolygon(corners, ui.backing(dark), True)
-    d.DrawPolygon(corners, color, False)
-    a, b = line
-    angle = math.radians(logic.text_angle(a, b))
-    cx, cy = sum(p[0] for p in quad) / 4, sum(p[1] for p in quad) / 4
-    centre, ahead = model((cx, cy)), model((cx + math.cos(angle) * 10, cy + math.sin(angle) * 10))
-    up, below = model((cx, cy - 10)), model((cx, cy + size))      # (size: the text's height, px)
-    if any(p is None for p in (centre, ahead, up, below)):  # a view the plan's plane can't be found in: no words
-        # (`is`, never `in`: `in` compares a Point3d to None with .NET's operator, which raises: round 7, F1)
-        return
-    xaxis = ahead - centre
-    plane = rg.Plane(centre, xaxis, rg.Vector3d.CrossProduct(facing.Normal, xaxis))
-    # (no flip: text_angle already keeps x reading left to right, so the normal x x is the screen's up, and a flip
-    # turned the words back to front: review of be133d0, F2)
-    height = centre.DistanceTo(below)
-    words = Rhino.Display.Text3d(text, plane, height)
-    words.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center
-    words.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle
-    d.Draw3dText(words, color)
-    words.Dispose()
-    if kind in ("end", "crowded"):                          # past the line's end, or moved: a leader to it
-        near = min(quad, key=lambda p: (p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2)
-        d.Draw2dLine(System.Drawing.PointF(a[0], a[1]), System.Drawing.PointF(near[0], near[1]), color, 1)
+def _required(d, line, dark):
+    """A yard's required line: a clear dashed mid-grey across its dimension (Rhino check of #29: the faint line
+    barely registered). Its "min" tag is a plan label, placed with the rest (logic.place_dim_label)."""
+    d.DrawPatternedLine(line.From, line.To, ui.required_color(dark), ui.DASHED, 2)
 
 
 def draw_screen(o, e):
@@ -848,7 +680,6 @@ def draw_screen(o, e):
     boxed = bool(o.message and labels and _in_active_view(e))   # the status box once, in the view being worked in
     if boxed:
         taken.append(logic.status_box(e.Viewport.Bounds.Width, _status_rows(o, stale(o))))
-    fixed = taken[:1] if boxed else []                 # the status box: nothing is ever drawn over it
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
     plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
@@ -862,114 +693,129 @@ def draw_screen(o, e):
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
-    # (the notice and the lot edges' lengths are placed after the dimensions' numbers and keep off them: Rhino
-    # check of #29 at 6d2e01a, the front number printed through the notice)
+    # what this frame draws where, kept per view (STATE["drawn"]): the in-Rhino checks read the drawing's own
+    # placement, never a copy of it (the Rhino job at 27c8e5d: a claim's own sum disagreed with the screen)
+    drawn = {"size": [e.Viewport.Bounds.Width, e.Viewport.Bounds.Height], "model": _model_on_screen(o, e.Viewport),
+             "taken": [list(t) for t in taken], "lines": on_screen, "labels": [], "notice": None}
+    STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn
+    # the notice first (placed off the model and the status box), so no label is drawn under it either
+    notice = _notice_box(o, e.Viewport, taken, old)
+    drawn["notice"] = list(notice[1:]) if notice is not None else None
+    keep = list(taken)                       # the status box, the north arrow, the notice: no label ever covers them
     elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
     # the lines on screen (over everything) in plan only; elsewhere draw_scene draws them depth-tested
     flat = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
-    # each yard: its dimension placed where it and its label sit clear (logic.place_dimension: the status box, the
-    # notice, the edges' length labels, the labels before it, never inside the house), its required line dashed
-    # grey with its "min" tag, its label on the line (Rhino checks of #29)
-    o.placed = {}
-    footprint = [[(q.X, q.Y) for q in (e.Viewport.WorldToClient(p) for p in ring)]
-                 for ring in getattr(o, "footprint", None) or []]
-    view = (e.Viewport.Bounds.Width, e.Viewport.Bounds.Height)
-    dims = (getattr(o, "yard_dims", None) or []) if shown else []
+    yard_dims = (getattr(o, "yard_dims", None) or []) if shown else []
+    options = getattr(o, "yard_options", None) or {}
+    chosen = {k: (options.get(k) or [(line, [])])[0] for k, (line, _, _) in enumerate(yard_dims)}  # its best position
+    height = getattr(o, "height_dim", None) if elevation and zoomed_in else None
+    dims = [tuple(map(tuple, _screen_line(e.Viewport, c))) for c, _ in chosen.values()] if plan else []
+    if height is not None:
+        dims.append(tuple(map(tuple, _screen_line(e.Viewport, height[0]))))
+    drawn["dims"] = dims                     # the dimension lines: a label keeps off another's (HARD)
+    solids = []                              # each building's footprint and coloured part on screen: never under a
+    for kind, pts in getattr(o, "plan_solids", None) or []:          # label (their outlines, never their boxes)
+        on = [(q.X, q.Y) for q in (e.Viewport.WorldToClient(q) for q in pts)]
+        solids.append(logic.hull(on) if kind == "building" else on)
+    drawn["hard_shapes"], drawn["hard_boxes"] = solids, [list(t) for t in keep]
+    drawn["buildings"] = sum(kind == "building" for kind, _ in getattr(o, "plan_solids", None) or [])
+    # the labels to draw, all placed by the one placer (logic.place_dim_label, through LabelRun: failing first, then
+    # in review, then complying, the edges' lengths last; rhino-ui's rules, the Rhino job at #29 fc6fbd6): each
+    # yard's number only (the drawing's way), a failing or in-review yard's "min" tag at its required line, the
+    # height's number in an elevation, each lot edge's length
+    items, colors = [], {}
     numbers = getattr(o, "yard_numbers", None) or {}
-    # the drawing's way (Rhino checks of #29): each dimension shows its number only, on its own line or just past
-    # its end; what is wrong placed first; a failing or in-review yard's "min" tag at its required line's end
-    for k in logic.placement_order([status for _, _, status in dims]):
-        line, text, status = dims[k]
+    o.placed = {}
+    for k, (line, text, status) in enumerate(yard_dims):
         color = ui.dim_color("complies" if old else status, dark)
-        options = (getattr(o, "yard_options", None) or {}).get(k) or [(line, [])]
-        on_screen = [((a.X, a.Y), (b.X, b.Y)) for a, b in ((e.Viewport.WorldToClient(c.From),
-                                                             e.Viewport.WorldToClient(c.To)) for c, _ in options)]
+        best, required = chosen[k]
+        tags = [] if old else (getattr(o, "yard_tags", None) or {}).get(k) or []
+        if flat:                                    # off plan, draw_scene draws them in the model (depth-tested)
+            for r in required:
+                _required(d, r, dark)                   # dashed grey; its "min" tag is a label (below)
+            _dimension(d, e.Viewport, best, color)
         number = numbers.get(k) or text
         if old:
             number = number.split(" ", 1)[1] if number[:1] in ("?", "✕", "✓") else number
-        width = None                         # no number: only the line is placed
+        o.placed[k] = (0, None, None, best, required, number)
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
-            width = logic.label_width(number, 11)
-        _, away = logic.nearest_outline(on_screen[0][1], footprint)     # away from the building it measures from
-        tags = [] if old else (getattr(o, "yard_tags", None) or {}).get(k) or []
-        spots = []
-        for (a, b), (_, req) in zip(on_screen, options):      # each position's own tags (failing or in review)
-            out = logic._along(b, a)[0] if logic._along(b, a)[1] > 1e-6 else (0, 0)
-            seen, mine = list(taken), []
-            for r, t in zip(req, tags):
-                ends = [(q.X, q.Y) for q in (e.Viewport.WorldToClient(r.To), e.Viewport.WorldToClient(r.From))]
-                box = logic.tag_spot(ends, out, t, seen, view)
-                mine.append(box)
-                if box is not None:
-                    seen.append(box)
-            spots.append(mine)
-        index, quad, kind, text_size = logic.place_dimension(
-            on_screen, width, [logic.rect_quad(box) for box in taken], footprint, away, view,
-            extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots],
-            must=status in ("does_not_comply", "needs_review") and not old,
-            fixed=[logic.rect_quad(f) for f in fixed])
-        if not flat:                                  # off plan draw_scene draws the first position (o.yard_dims)
-            index = 0
-        chosen, required = options[index]
-        o.placed[k] = (index, quad, kind, chosen, required, number if quad is not None else None)
-        if flat:                                      # off plan, draw_scene draws them in the model (depth-tested)
-            for r, tag, box in zip(required, tags + [None] * len(required), spots[index] + [None] * len(required)):
-                _required(d, r, tag, dark, box)
-                if box is not None:                   # a "min" tag: no later number covers it
-                    taken.append(box)
-            _dimension(d, e.Viewport, chosen, color)
-        if quad is not None:
-            _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From,
-                       size=11 * text_size)
-            xs, ys = [p[0] for p in quad], [p[1] for p in quad]
-            taken.append(logic.number_box(xs, ys))     # with a margin: nothing drawn touches it
-    height = getattr(o, "height_dim", None)
-    corners = [e.Viewport.WorldToClient(p) for p in (getattr(o, "house_box", None) or [])]
-    house = (min(q.X for q in corners), min(q.Y for q in corners), max(q.X for q in corners),
-             max(q.Y for q in corners)) if corners else None
-    if height is not None and elevation and zoomed_in:       # the height, dimensioned up from the grade plane
-        line, text, status, limit = height       # (its line, ticks and limit: draw_scene, depth-tested)
+            key = ("yard", k, number)
+            items.append({"key": key, "text": number, "line": tuple(map(tuple, _screen_line(e.Viewport, best))),
+                          "size": 11, "status": status})
+            colors[key] = (color, False)
+            for j, (r, tag) in enumerate(zip(required, tags)):
+                key = ("tag", k, j, tag)
+                items.append({"key": key, "text": tag, "line": tuple(map(tuple, _screen_line(e.Viewport, r))),
+                              "size": logic.TAG_SIZE, "status": status})
+                colors[key] = (ui.required_color(dark), False)
+    if height is not None:                   # the height, dimensioned up from the grade plane
+        line, text, status, limit = height
         color = ui.dim_color("complies" if old else status, dark)
         number = getattr(o, "height_number", None) or text
         if old:
             number = number.split(" ", 1)[1] if number[:1] in ("?", "✕", "✓") else number
-        if logic.yard_label_shown(labels, status):           # its number on its line, outside the house, in view
-            a, b = (e.Viewport.WorldToClient(p) for p in (line.From, line.To))
-            rect = logic.rect_quad((house[0], house[1], house[2] - house[0], house[3] - house[1])) if house else None
-            away = ((house[0] + house[2]) / 2, (house[1] + house[3]) / 2) if house else None
-            _, quad, kind, text_size = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
-                                                         [logic.rect_quad(box) for box in taken], rect, away, view,
-                                                         must=status in ("does_not_comply", "needs_review") and not old,
-                                                         fixed=[logic.rect_quad(f) for f in fixed])
-            o.placed["height"] = (0, quad, kind, line, [], number)
-            if quad is not None:
-                _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From,
-                           size=11 * text_size)
-                xs, ys = [p[0] for p in quad], [p[1] for p in quad]
-                taken.append(logic.number_box(xs, ys))     # with a margin: nothing drawn touches it
-    before = len(taken)
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
-                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
-        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
-    edges = taken[before:]
-    notice = _notice_box(o, e.Viewport, taken, fixed)  # off the model, the status box and the numbers
-    o.screen_boxes = {"edges": edges, "notice": notice[1:] if notice else None}   # (the in-Rhino checks)
+        o.placed["height"] = (0, None, None, line, [], number)
+        if logic.yard_label_shown(labels, status):
+            key = ("height", number)
+            items.append({"key": key, "text": number, "line": tuple(map(tuple, _screen_line(e.Viewport, line))),
+                          "size": 11, "status": status})
+            colors[key] = (color, False)
+    edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []
+    for k, (point, text, edge) in enumerate(edges):
+        a, b = e.Viewport.WorldToClient(edge.From), e.Viewport.WorldToClient(edge.To)
+        key = ("edge", k, text)
+        items.append({"key": key, "text": text, "line": ((a.X, a.Y), (b.X, b.Y)), "size": 11, "status": None})
+        colors[key] = (ui.status_color("complies", dark), True)
+    # placed only once the view is still (logic.place_labels, from _label_tick): never searched in the drawing
+    # loop (the Rhino job at 4bb6d4d: zooming with labels on was 2 fps). The same picture as when they were
+    # placed: drawn there. Moving: carried along with their lines (logic.follow) until the view settles again.
+    vid = str(e.Viewport.Id)
+    sig = (tuple(drawn["size"]), tuple(round(v, 1) for s_ in on_screen for q in s_ for v in q),
+           tuple(round(v, 1) for shp in solids for q in shp for v in q),
+           tuple(tuple(round(v, 1) for v in t) for t in keep), tuple(i["key"] for i in items))
+    cached = (STATE.get("label_cache") or {}).get(vid) or {}
+    settled = cached.get("sig") == sig
+    pending = STATE.get("label_pending") or {}
+    if not settled and items and (pending.get("sig") != sig or pending.get("view") != vid):   # moved: wait again
+        STATE["label_pending"] = {"view": vid, "doc": o.doc, "sig": sig, "at": time.time(), "items": items,
+                                  "size": tuple(drawn["size"]), "keep": [tuple(t) for t in keep], "dims": dims,
+                                  "shapes": solids, "lines": obstacles}
+        _label_timer()
+    spots = cached.get("spots") or {}
+    for item in items:
+        got = spots.get(item["key"])
+        if got is None:
+            continue                         # never placed yet: shown once the view settles
+        if not settled:
+            got = logic.follow(got, item["line"])
+        color, edge = colors[item["key"]]
+        (xa, ya), (xb, yb) = item["line"]
+        ui.paint_label(d, ((xa + xb) / 2, (ya + yb) / 2), got, color, dark, edge_leader=edge, line=item["line"])
+        drawn["labels"].append([item["text"], [got["left"], got["top"], got["w"], logic.label_height(
+            len(got["rows"]), got["size"]), got["top"]], len(got["rows"]), [list(q) for q in item["line"]],
+            got["led"], got["size"], got["forced"], got.get("order")])
+    drawn["settled"] = settled or not items
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         ends = [e.Viewport.WorldToClient(p) for p in limit[0]]
         line_ = ((min(ends, key=lambda p: p.X).X, min(ends, key=lambda p: p.X).Y),
                  (max(ends, key=lambda p: p.X).X, max(ends, key=lambda p: p.X).Y))
+        corners = [e.Viewport.WorldToClient(p) for p in (getattr(o, "house_box", None) or [])]
+        house = (min(q.X for q in corners), min(q.Y for q in corners), max(q.X for q in corners),
+                 max(q.Y for q in corners)) if corners else None
         w, h = ui.text_box_size([limit[1]], 13)
-        spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken)   # past the line's end, off the
-        if spot is not None:                                       # building and its colours (#28 at fc0b023)
+        view = (e.Viewport.Bounds.Width, e.Viewport.Bounds.Height)
+        placed_boxes = [tuple(lb[1][:4]) for lb in drawn["labels"]]
+        spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken + placed_boxes)   # past the line's
+        if spot is not None:                           # end, off the building and its colours (#28 at fc0b023)
             o.placed["limit"] = spot + (w, h)
             taken.append(spot + (w, h))
             ui.draw_text_box(d, [limit[1]], BLUE, int(spot[0]), int(spot[1]), dark, 13)
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
+    drawn["complete"] = True                 # every label and the notice really drawn this frame (review round 2)
     if not boxed:
         return
     state = "stale" if old else o.message[0]
@@ -978,6 +824,54 @@ def draw_screen(o, e):
     rows = _status_rows(o, old)
     x, y, _, _ = logic.status_box(e.Viewport.Bounds.Width, rows)
     ui.draw_text_box(d, rows, color, int(x), y, dark, 13)
+
+
+def _label_timer():
+    """The timer that places the labels once the view has been still for LABEL_SETTLE_S (started on demand)."""
+    timer = STATE.get("label_timer")
+    if timer is None:
+        timer = ef.UITimer()
+        timer.Interval = 0.05
+        timer.Elapsed += logic.guard(logic.current_only(lambda s, e: _label_tick(), _is_current), "place the labels")
+        STATE["label_timer"] = timer
+        LEFTOVERS["label_timer"] = timer.Stop
+    timer.Start()
+
+
+LABEL_STEP_S = 0.012      # the labels placed a few at a time: this long a timer tick at most (one label at least)
+
+
+def _label_tick():
+    pending = STATE.get("label_pending")
+    if pending is None:
+        if STATE.get("label_timer"):
+            STATE["label_timer"].Stop()
+        return
+    if time.time() - pending["at"] >= logic.LABEL_SETTLE_S:
+        settle_labels(LABEL_STEP_S)
+
+
+def settle_labels(budget_s=None):
+    """Place the labels the last frame asked for (logic.LabelRun), a few each call (`budget_s`: one label at least;
+    None: all, for the in-Rhino scripts), never in the drawing loop: Rhino stays responsive between the timer's
+    ticks, and a newer request (the view moved again) starts a new run. Once all are placed: kept for that view
+    and its document redrawn, which then draws them where they were placed. Whether a run finished."""
+    pending = STATE.get("label_pending")
+    if pending is None:
+        return False
+    run = pending.get("run")
+    if run is None:
+        run = pending["run"] = logic.LabelRun(pending["items"], pending["size"], pending["keep"], pending["dims"],
+                                              pending["shapes"], pending["lines"])
+    if not run.step(budget_s):
+        return False
+    STATE.pop("label_pending", None)
+    STATE.setdefault("label_cache", {})[pending["view"]] = {"sig": pending["sig"], "spots": run.spots}
+    doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(pending["doc"]) if pending.get("doc") is not None else None
+    doc = doc or Rhino.RhinoDoc.ActiveDoc      # the document it was placed for (review of 3446e94)
+    if doc is not None:
+        doc.Views.Redraw()
+    return True
 
 
 def _status_rows(o, old):
@@ -1972,6 +1866,43 @@ def _get_point(prompt):
     return Rhino.Input.RhinoGet.GetPoint(prompt, True)
 
 
+def _ask_street_more(question):
+    """True (Yes) or False (No), never a default: Enter asks again, with the reason; Esc cancels (Cancelled: in the
+    start box, Edit site… included, the pick changes nothing and the box comes back; in change_facts, the
+    command-line edit, the whole edit is cancelled, as Esc does at its every prompt). Neither
+    default is safe: kept as street, a stretch that isn't can make the frontage long enough to pass lot width (a
+    40 ft street with a 15 ft side line bent 20° from it read 55'-0", complies; the truth 40'-0" does not); left
+    out, a stretch that is street lets the front yard pass from part of it (street-run review rounds 14 and 15)."""
+    prompt = question
+    while True:
+        go = Rhino.Input.Custom.GetOption()
+        go.SetCommandPrompt(prompt)
+        yes = go.AddOption("Yes")
+        no = go.AddOption("No")
+        go.AcceptNothing(True)
+        got = go.Get()
+        if got == Rhino.Input.GetResult.Option:
+            if go.OptionIndex() == yes:
+                return True
+            if go.OptionIndex() == no:
+                return False
+        elif got != Rhino.Input.GetResult.Nothing:      # Esc, or Rhino ending the prompt (another command,
+            raise Cancelled()                            # closing): never asked again forever (round 16)
+        prompt = logic.STREET_ANSWER_NEEDED + question
+
+
+def _clicked_piece(doc, lot, point):
+    """The piece of the lot outline a click is on: the nearest one, whatever its length, never moved to another
+    line (street-run review round 7: a click on an arc drawn in short chords jumped to the side line). A short
+    piece standing alone (a point drawn twice) is refused by the logic with words to click beside it."""
+    return min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+
+
+def _outline(doc, lot):
+    """The lot outline's pieces, in feet: [[x, y], [x, y]] each, as a click on one is read."""
+    return [[_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]] for a, b in _segments(lot.Geometry)]
+
+
 def _box_pick(doc, what, facts, saved_ui, session):
     """One pick the start box asked for, with the box hidden. Esc or Enter: nothing changes (Esc at any prompt,
     rhino_logic.pick_or_nothing). Every model edit goes through the box's session."""
@@ -1995,40 +1926,66 @@ def _one_pick(doc, what, facts, saved_ui, session):
 
 def _pick_outcome(doc, what, facts, saved_ui, session):
     """What one pick gave, or None (Esc at any prompt, Enter with nothing clicked). Drawn objects go through the
-    session. The street: {"picks": the lot lines clicked, "name": the clicked line's street}; rhino_logic.pick_effect
-    sets the street lines from them (pick_street / street_lines_after_picks, through set_street_lines)."""
+    session. The street: {"lines", "ids": the street lines worked out from the clicks (the whole street a piece is
+    on, rhino_logic.add_street_pick / pick_street, asking at an unclear end), "name": the clicked line's street};
+    rhino_logic.pick_effect sets them (through set_street_lines)."""
     if what == "street":
         lot = _find(doc, facts.get("lot_id") or "")
         if lot is None:
             return None
-        corner = facts.get("corner_lot") is True     # a corner lot: every line on a street, Enter when done
-        picks = []
-        while True:
-            rc, point = _get_point(logic.street_pick_prompt(corner, len(picks)))
+        outline = _outline(doc, lot)
+        try:
+            if facts.get("corner_lot") is True:      # a corner lot: every street clicked, Enter when done
+                picks, runs = [], []
+                names = logic.outline_names(outline, facts.get("street_line"), facts.get("street_ids"))
+                while True:
+                    rc, point = _get_point(logic.street_pick_prompt(True, len(picks)))
+                    if rc == Rhino.Commands.Result.Cancel:
+                        raise Cancelled()            # Esc: nothing changes, the lines clicked so far too
+                    if rc != Rhino.Commands.Result.Success:   # Enter: done
+                        break
+                    a, b = _clicked_piece(doc, lot, point)
+                    line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+                    # the whole street that piece is on, never round a corner; said, and an unclear end asked; only
+                    # a click that kept a street counts as picked (street-run round 12)
+                    grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)
+                    say(logic.so_far(said) if grown != runs else said)
+                    if grown != runs:
+                        picks.append(line)
+                    runs = grown
+                lines, ids = logic.street_lines_of(outline, runs, names, picks)
+                return {"lines": lines, "ids": ids, "name": None} if lines else None   # (every click refused)
+            rc, point = _get_point(logic.street_pick_prompt(False, 0))
             if rc == Rhino.Commands.Result.Cancel:
-                return None                           # Esc: nothing changes, the lines clicked so far too
-            if rc != Rhino.Commands.Result.Success:   # Enter: done
-                break
-            a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
-            picks.append([_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]])
-            if not corner:
-                break
-        if not picks:
+                raise Cancelled()
+            if rc != Rhino.Commands.Result.Success:
+                return None
+            a, b = _clicked_piece(doc, lot, point)
+            picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+            refused = logic.refused_click(_outline(doc, lot), picked)   # (before asking its name: round 9)
+            if refused:
+                say(refused)
+                return None
+            name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
+                                                picked, ids=facts.get("street_ids"))   # the line's own street?
+            if name is None:                                   # else asked, never guessed
+                ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga St")
+                ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")
+                ask.AcceptNothing(True)
+                got = ask.GetLiteralString()
+                if got == Rhino.Input.GetResult.Cancel:
+                    raise Cancelled()
+                name = (ask.StringResult() or "").strip() or None if got == Rhino.Input.GetResult.String else None
+            told = []
+            lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,
+                                           outline=_outline(doc, lot), ask=_ask_street_more, said=told)
+            say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))
+            if told and told[-1]["refused"]:          # (a point clicked: everything stays as it was)
+                return None
+            return {"lines": lines, "ids": ids, "name": name}
+        except Cancelled:                            # Esc (the bend question, a pick): nothing changes
+            say(logic.ESC_STREET)
             return None
-        if corner:
-            return {"picks": picks, "name": None}     # two streets: unnamed until named
-        picked = picks[0]
-        name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
-                                            picked, ids=facts.get("street_ids"))   # the line's own street?
-        if name is None:                                       # else asked, never guessed
-            ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga St")
-            ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")
-            ask.AcceptNothing(True)
-            got = ask.GetLiteralString()
-            if got == Rhino.Input.GetResult.Cancel:
-                return None                           # Esc: nothing changes
-            name = (ask.StringResult() or "").strip() or None if got == Rhino.Input.GetResult.String else None
-        return {"picks": [picked], "name": name}
     if what == "lot":                            # Use my survey: the surveyed outline
         return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
                      _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
@@ -2381,26 +2338,32 @@ def _change_facts(doc, facts, options):
     _highlight(doc, facts)
     lot = _find(doc, facts.get("lot_id") or "")
     if lot is not None:
-        picked = []
+        picked, runs, outline = [], [], _outline(doc, lot)
         while True:                      # every lot line on a street (both streets on a corner lot)
-            keeps = not picked and logic.street_enter_keeps(facts)
-            prompt = "Click a lot line on the street" + (" (Enter when done)" if picked else
-                                                         " (Enter keeps the blue one)" if keeps else "")
+            keeps = not runs and logic.street_enter_keeps(facts)        # (what was kept, not what was clicked:
+            prompt = "Click a lot line on the street" + (" (Enter when done)" if runs else   # a refused click
+                                                         " (Enter keeps the blue one)" if keeps else "")   # keeps none)
             rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, True)      # Enter: done, keep, or asked again
             _go_on(rc)
             if rc != Rhino.Commands.Result.Success:
-                if picked or keeps:
+                if runs or keeps:
                     break
                 Rhino.RhinoApp.WriteLine("Gordium: this lot has no street line yet; click one (Esc cancels)")
                 continue
-            a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+            a, b = _clicked_piece(doc, lot, point)
             line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
-            if line not in picked:
+            # the whole street that piece is on, never round a corner (unnamed: from the drawing alone); every
+            # click is answered, a refused one too, every time (round 10)
+            grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)
+            say(logic.so_far(said) if grown != runs and facts.get("corner_lot") else said)   # (corner: so far)
+            if grown != runs:
                 picked.append(line)
-            if not facts.get("corner_lot"):
+            runs = grown
+            if not facts.get("corner_lot") and runs:      # (a refused click: asked again)
                 break
-        if picked:
-            logic.set_street_lines(facts, picked)          # unnamed: the lines picked here, never the old names
+        lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []
+        if lines:                                          # unnamed: the lines picked here, never the old names
+            logic.set_street_lines(facts, lines)
         _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
@@ -2439,13 +2402,15 @@ def report_path(doc):
 
 
 def _clear(o):
-    """Nothing from an earlier check is left on screen."""
+    """Nothing from an earlier check is left on screen, its "no longer complies" notice included: every check
+    clears before it draws (a check that finds nothing newly failing leaves no notice of an earlier one), and so
+    does another document, a failed check and new facts."""
+    o.toast = None
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
     o.yard_required, o.height_dim, o.yard_options, o.yard_tags, o.footprint, o.placed = [], None, {}, {}, [], {}
     o.yard_numbers, o.house_box, o.height_number = {}, [], None
-    o.plan_lines = []
-    o.occluders, o.seen_faces, o.face_samples = [], {}, {}
+    o.plan_lines, o.plan_solids = [], []
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
     o.doc = None
@@ -2501,12 +2466,12 @@ def _draw_plan(doc, o, result, facts):
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
     o.yard_required = [(rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z)), y["status"])
                        for y in plan.get("yards") or [] if y.get("points") for r in y.get("required_lines") or []]
-    # every position check.plan offers for each yard's dimension, with its required lines; the "min" tags; the
-    # buildings' outline (a label never sits inside it)
+    # each yard's dimension where check.plan puts it best (its first position: the one placer moves the number, never
+    # the line; review of 86c01ea, F5), with its required lines; the "min" tags; the buildings' outline
     o.yard_options = {k: [(rg.Line(_model_point(doc, c["points"][0], z), _model_point(doc, c["points"][1], z)),
                            [rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z))
                             for r in c.get("required_lines") or []])
-                          for c in y.get("candidates") or []]
+                          for c in (y.get("candidates") or [])[:1]]
                       for k, y in enumerate(y for y in plan.get("yards") or [] if y.get("points"))}
     o.yard_tags = {k: y.get("required_tags") or [] for k, y in enumerate(y for y in plan.get("yards") or []
                                                                            if y.get("points"))}
@@ -2525,9 +2490,6 @@ def _draw_plan(doc, o, result, facts):
     # read (logic.coloured_info)
     blocks = plan.get("encroach") or []
     made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
-    o.occluders = (logic.guard(lambda: _occluders(doc), "the buildings that hide a coloured face")() or []) \
-        if blocks else []                            # (meshed only when something is coloured)
-    o.seen_faces, o.face_samples = {}, {}
     o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
                   for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
                   if logic.highlight(status) for piece in _offending(doc, e, made)]
@@ -2537,6 +2499,12 @@ def _draw_plan(doc, o, result, facts):
     o.plan_lines = [line for line, _, _ in o.yard_dims] + [line for line, _ in o.yard_required] + \
         [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
         [line for b in _buildings(doc) for line in _plan_edges(b.Geometry)]
+    # what no plan label may cover (logic.place_dim_label's HARD rules): each building's footprint (its plan edges'
+    # ends: their hull on screen each frame) and each coloured part's own outline (model space)
+    o.plan_solids = [("building", [q for line in _plan_edges(b.Geometry) for q in (line.From, line.To)])
+                     for b in _buildings(doc)] + \
+        [("coloured", [_model_point(doc, (x, y)) for x, y in e["outline"]]) for e in plan.get("encroach") or []
+         if e.get("outline") and logic.highlight(e.get("status") or "does_not_comply")]
     o.yards_zone = None
     if lot is not None and plan.get("buildable"):
         inner = rg.PolylineCurve([_model_point(doc, p) for p in plan["buildable"] + plan["buildable"][:1]])
@@ -2616,9 +2584,12 @@ def run_check(doc, report=True):
             ui.set_labels_tick(STATE.get("panel_parts"), shown)
             ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))
             ui.set_context_tick(STATE.get("panel_parts"), _context_on(doc))
+            if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
+                ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
-            say(logic.report_message(path, False, result["report_error"], stale=had_report))
+            first = "✕ " + result["notice"] + " · " if result.get("notice") else ""   # the notice kept in the line
+            say(first + logic.report_message(path, False, result["report_error"], stale=had_report))
         return result
     except Exception as e:
         _clear(o)
@@ -2661,6 +2632,8 @@ def _toast_tick():
     o = STATE.get("overlay")
     if getattr(o, "toast", None) and time.time() >= o.toast[1]:
         _clear_toast()
+    elif not getattr(o, "toast", None) and STATE.get("toast_timer"):    # cleared with a check's results (_clear):
+        STATE["toast_timer"].Stop()                                     # nothing left to time
 
 
 def _clear_toast():
@@ -2831,13 +2804,15 @@ def open_report():
     result = run_check(doc, report=True)          # the check's result stays, even if the file can't be written
     written = result is not None and not result.get("report_error") and os.path.exists(path) and \
         os.path.getmtime(path) != before
+    notice = (result or {}).get("notice")      # the check's notice kept in the one line (review round 1: a view
+    first = "✕ " + notice + " · " if notice else ""   # with no corner clear of the model shows it nowhere else)
     if not written:
         if not (result or {}).get("report_error"):    # a report error: run_check has said it
-            say(logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
-                                     ("the report file wasn't written to " + os.path.dirname(path))))
+            say(first + logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
+                                             ("the report file wasn't written to " + os.path.dirname(path))))
         return
     opened, why = ui.open_target(path)            # os.startfile on Windows, `open` on macOS
-    say(logic.report_message(path, True, opened=opened, open_error=why))
+    say(first + logic.report_message(path, True, opened=opened, open_error=why))
 
 
 def off():
@@ -3510,7 +3485,6 @@ def frame_site(doc, facts):
     doc.Views.Redraw()
 
 
-
 def _release(key, value):
     """Release one handle an earlier copy left in STATE, through this copy's tolerant undo (a copy from before
     LEFTOVERS registered nothing there): its hooks (old tuple shapes too), its drawing, panel, timer, checker."""
@@ -3529,6 +3503,8 @@ def _release(key, value):
         if form is not None:
             form.Close()
     elif key == "toast_timer":
+        value.Stop()
+    elif key == "label_timer":
         value.Stop()
     elif key == "worker":
         _stop_worker()
