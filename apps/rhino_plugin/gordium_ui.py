@@ -835,8 +835,10 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
     """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted, its lines). Takes its spot
     in `taken`. With `along` (its dimension line) it goes beside that line, off every line in `obstacles` (the
     other dimensions, the lot's and the house's edges) and every label already placed, on screen; when no spot
-    beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines). Its height
-    is 4 + LINE_H per line. The in-Rhino checks measure this very placement."""
+    beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines); with none
+    clear, near its line all the same (logic.place_near: within one label height, off the notice, the status box and
+    the other labels), led back to it. Its height is 4 + LINE_H per line. Returns (left, top, width, the top it
+    wanted, its lines, whether it needs a leader). The in-Rhino checks read this very placement (STATE["drawn"])."""
     p = viewport.WorldToClient(point)
     width = logic.label_width(text, size)
     if along is not None:
@@ -852,35 +854,37 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
             if c2:
                 left, top, width, clear, rows = l2, t2, w2, True, two
         h = 4 + LINE_H * len(rows)
-        if not clear:                        # nowhere beside its line: outside the drawing, a leader back to it
+        if not clear:                        # nowhere clear beside its line: near it, a leader to it (never loose)
             w2 = max(logic.label_width(t, size) for t in two)
-            out = logic.place_outside(own, w2, 4 + LINE_H * len(two), obstacles, taken or [], view=view)
-            if out is not None:
-                left, top, width, rows = out[0], out[1], w2, two
-                if taken is not None:
-                    taken.append((left, top, width, 4 + LINE_H * len(rows)))
-                return left, top, width, (own[0][1] + own[1][1]) / 2, rows     # its line's middle: the leader's end
-        if not clear:                        # nowhere clear: at least off its own line and the other labels
-            top = logic.clear_spot(taken if taken is not None else [], left, top, width, h, (own,))
-        elif taken is not None:
+            near = logic.place_near(own, w2, 4 + LINE_H * len(two), obstacles, taken or [], view=view)
+            if near is not None:
+                left, top, width, rows = near[0], near[1], w2, two
+                h = 4 + LINE_H * len(rows)
+            else:                            # nothing near is free of the notice and the labels: off them, still led
+                top = logic.clear_spot(taken if taken is not None else [], left, top, width, h, (own,))
+            if taken is not None and near is not None:
+                taken.append((left, top, width, h))
+            return left, top, width, top, rows, True
+        if taken is not None:
             taken.append((left, top, width, h))
-        return left, top, width, top, rows
+        return left, top, width, top, rows, False
     left, want = p.X - width / 2, p.Y - 10
     top = want if taken is None else logic.clear_spot(taken, left, want, width, 20)
-    return left, top, width, want, [text]
+    return left, top, width, want, [text], abs(top - want) > 1
 
 
 def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=(), leader=False):
     """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
     already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
     `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must;
-    outside the drawing with a leader when nothing beside it is clear: logic.place_outside); with `leader` too, a
+    outside the drawing with a leader when nothing beside it is clear: logic.place_near); with `leader` too, a
     line shorter on screen than its label gets a short leader from its middle to the label (a lot edge:
-    logic.needs_leader). Returns where it went: (left, top, width, height, the top it wanted, its lines)."""
+    logic.needs_leader). Returns where it went: (left, top, width, height, the top it wanted, its lines, whether a
+    leader was drawn to it)."""
     p = viewport.WorldToClient(point)
-    left, top, width, want, rows = label_box(viewport, point, text, size, taken, along, obstacles)
+    left, top, width, want, rows, led = label_box(viewport, point, text, size, taken, along, obstacles)
     h = 4 + LINE_H * len(rows)
-    if abs(top - want) > 1:                  # moved off its spot: a leader from it to the label's nearest edge
+    if led:                                  # moved off its spot: a leader from it to the label's nearest edge
         end = logic.leader_end((p.X, p.Y), (left, top, width, h))
         d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(end[0], end[1]), color, 1)
     if leader and along is not None:
@@ -892,7 +896,7 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=N
     d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), int(h)), color, 1, backing(dark))
     for k, row in enumerate(rows):
         d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + LINE_H * k), False, size)
-    return left, top, width, h, want, rows
+    return left, top, width, h, want, rows, led
 
 
 def _signed(bits):

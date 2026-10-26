@@ -590,11 +590,11 @@ def draw_screen(o, e):
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
             at = ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
                              along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
-            drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line)])
+            drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line), at[6]])
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
         at = ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each
                          along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # edge's length, beside it, off
-        drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge)])    # every
+        drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge), at[6]])    # every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
