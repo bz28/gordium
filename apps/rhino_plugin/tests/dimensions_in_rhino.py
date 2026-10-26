@@ -129,30 +129,34 @@ try:
     meets = lambda a, b: a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
 
     def frame(name="Top"):
-        """What the view drew last (STATE["drawn"]: the one placer's own record): its labels as
-        {text: (box, led, forced, line)}, the HARD boxes (status box, north arrow, notice), the buildings' shapes."""
+        """What the view drew last (STATE["drawn"]: the one placer's own record): its labels as a list of
+        (text, box, led, forced, line) (a list: two labels with the same words are two labels, review of 86c01ea,
+        F2), the HARD boxes (status box, north arrow, notice), the buildings' shapes."""
         v = doc.Views.Find(name, False).ActiveViewport
         dr = g.STATE["drawn"][str(v.Id)]
-        return ({lb[0]: (tuple(lb[1][:4]), lb[4], lb[6], lb[3]) for lb in dr["labels"]}, dr["hard_boxes"],
+        return ([(lb[0], tuple(lb[1][:4]), lb[4], lb[6], lb[3]) for lb in dr["labels"]], dr["hard_boxes"],
                 dr["hard_shapes"], dr)
-    shown, hard, shapes, dr = frame()
+    every, hard, shapes, dr = frame()
+    shown = {t: (box, led, forced, line) for t, box, led, forced, line in every}
     numbers = {pl[5]: k for k, pl in o.placed.items() if k != "height"}
-    log["labels"] = {t: v[:3] for t, v in shown.items()}
-    claim("1 every number and tag is placed by the one placer, clear of the status box, the house and each other",
-          shown and all(v[2] or (not any(meets(v[0], tuple(h)) for h in hard)
-                                 and not any(g.logic.shapes_hit(g.logic.rect_quad(v[0]), sh) for sh in shapes)
-                                 and not any(meets(v[0], w[0]) for t2, w in shown.items() if t2 != t))
-                        for t, v in shown.items()), log["labels"])
+    log["labels"] = [x[:4] for x in every]
+    claim("1 every number and tag is placed by the one placer, none forced, clear of the status box, the house and "
+          "each other (review of 86c01ea, F3: a forced one was let off)",
+          every and all(not x[3] and not any(meets(x[1], tuple(h)) for h in hard)
+                        and not any(g.logic.shapes_hit(g.logic.rect_quad(x[1]), sh) for sh in shapes)
+                        and not any(meets(x[1], y[1]) for j, y in enumerate(every) if j != i)
+                        for i, x in enumerate(every)), log["labels"])
     claim("1 every label lies wholly inside the view",
-          all(0 <= v[0][0] and v[0][0] + v[0][2] <= view[0] and 0 <= v[0][1] and v[0][1] + v[0][3] <= view[1]
-              for v in shown.values()), {"view": view})
+          all(0 <= x[1][0] and x[1][0] + x[1][2] <= view[0] and 0 <= x[1][1] and x[1][1] + x[1][3] <= view[1]
+              for x in every), {"view": view})
     wrong_k = [j for j, (_, _, st) in enumerate(o.yard_dims) if st in ("does_not_comply", "needs_review")]
     claim("1 every failing or in-review yard's number is drawn (Rhino check at 6d2e01a: the failing one was missing)",
           wrong_k and all(o.placed[j][5] in shown for j in wrong_k), [o.placed[j][5] for j in wrong_k])
     import time as _time
     o.toast = (["Side yard (left) no longer complies: 3'-2\" short of 10'-0\""], _time.time() + 60)
     drawn(g, doc, "Top", "1_top_notice")          # the notice showing, as after an edit (in the view worked in)
-    shown, hard, shapes, dr = frame()
+    every, hard, shapes, dr = frame()
+    shown = {t: (box, led, forced, line) for t, box, led, forced, line in every}
     model = dr.get("model")
     note = dr.get("notice")
     log["notice"] = {"notice": note, "model": model}
@@ -160,7 +164,7 @@ try:
           "the panel says it)",
           note is None or ((not model or not meets(tuple(note), (model[0], model[1], model[2] - model[0],
                                                                   model[3] - model[1])))
-                           and not any(meets(tuple(note), v[0]) for v in shown.values())), log["notice"])
+                           and not any(meets(tuple(note), x[1]) for x in every)), log["notice"])
     o.toast = None
     shown_words = [t for t in shown if t in numbers]
     claim("1 each dimension shows its number only (no name, no 'needs', no '(approx.)': the panel says those)",
@@ -180,8 +184,8 @@ try:
         drawn(g, doc, name, "1b_top_zoom_extents")
         zl, _, _, _ = frame()
         claim("1 at Zoom Extents too, every label shown inside the view",
-              all(0 <= v[0][0] and v[0][0] + v[0][2] <= vp.Bounds.Width and 0 <= v[0][1]
-                  and v[0][1] + v[0][3] <= vp.Bounds.Height for v in zl.values()), len(zl))
+              all(0 <= x[1][0] and x[1][0] + x[1][2] <= vp.Bounds.Width and 0 <= x[1][1]
+                  and x[1][1] + x[1][3] <= vp.Bounds.Height for x in zl), len(zl))
     vp.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
     drawn(g, doc, "Top")
     ring = g.ask({"cmd": "sample_site"})["lot"]
@@ -233,7 +237,7 @@ try:
           height["status"])
     fvp = doc.Views.Find("Front", False).ActiveViewport
     fl, _, _, _ = frame("Front")
-    hq = fl.get(o.placed["height"][5]) if o.placed.get("height") else None
+    hq = next(((x[1],) for x in fl if o.placed.get("height") and x[0] == o.placed["height"][5]), None)
     corners = [fvp.WorldToClient(p) for p in o.house_box]
     hx = (min(q.X for q in corners), max(q.X for q in corners), min(q.Y for q in corners), max(q.Y for q in corners))
     claim("2 its number placed by the one placer, outside the house, inside the view (Rhino check at f6642a9: "

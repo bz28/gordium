@@ -483,6 +483,7 @@ def test_the_plugin_places_numbers_and_tags_with_the_one_placer_only():
     assert 'items.append({"key": key, "text": number,' in screen               # a yard's number only
     assert 'key = ("tag", k, j, tag)' in screen                                  # its "min" tags: labels too
     assert "logic.LabelRun(" in src and "place_dimension" not in src and "tag_spot" not in src
+    assert 'for c in (y.get("candidates") or [])[:1]]' in src     # the line at its best position only (86c01ea F5)
     source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
     for gone in ("def place_dimension(", "def number_spot(", "def tag_spot(", "def number_box(", "NUMBER_SCALES"):
         assert gone not in source                                    # one placer: #29's own is gone

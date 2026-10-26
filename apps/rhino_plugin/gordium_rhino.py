@@ -2376,12 +2376,12 @@ def _draw_plan(doc, o, result, facts):
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
     o.yard_required = [(rg.Line(_model_point(doc, r[0], 0.1), _model_point(doc, r[1], 0.1)), y["status"])
                        for y in plan.get("yards") or [] if y.get("points") for r in y.get("required_lines") or []]
-    # every position check.plan offers for each yard's dimension, with its required lines; the "min" tags; the
-    # buildings' outline (a label never sits inside it)
+    # each yard's dimension where check.plan puts it best (its first position: the one placer moves the number, never
+    # the line; review of 86c01ea, F5), with its required lines; the "min" tags; the buildings' outline
     o.yard_options = {k: [(rg.Line(_model_point(doc, c["points"][0], 0.1), _model_point(doc, c["points"][1], 0.1)),
                            [rg.Line(_model_point(doc, r[0], 0.1), _model_point(doc, r[1], 0.1))
                             for r in c.get("required_lines") or []])
-                          for c in y.get("candidates") or []]
+                          for c in (y.get("candidates") or [])[:1]]
                       for k, y in enumerate(y for y in plan.get("yards") or [] if y.get("points"))}
     o.yard_tags = {k: y.get("required_tags") or [] for k, y in enumerate(y for y in plan.get("yards") or []
                                                                            if y.get("points"))}
