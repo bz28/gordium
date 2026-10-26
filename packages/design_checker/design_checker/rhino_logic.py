@@ -1883,9 +1883,11 @@ def report_cancelled(path, changed):
     return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
 SETTLING = "Finishing the check that is running…"
 CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
-REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when Zoning report… was pressed (it was "
-                   "edited meanwhile, or another file came to the front): press Zoning report… again for the model "
-                   "now.")
+REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
+                   "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
+                   "panel) for a report of the model now.")
+HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
+                  "Gordium will check it.")
 DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
                  "is as it was: Draw again.")
 

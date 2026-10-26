@@ -457,3 +457,19 @@ def test_esc_cancels_from_anywhere_and_commands_wait_their_turn():
         body = part(RHINO, fn, "\ndef ")
         gate = body.index('if STATE.get("asking") is not None:')
         assert gate < 700 and body.index("say(logic.WORKING)", gate) < body.index("return", gate), fn   # first thing
+
+
+# ---- review of 5567b94 ---------------------------------------------------------------------------------------------
+
+def test_every_kind_of_edit_is_noted_and_the_wait_never_leaves_work_behind():
+    watch = part(RHINO, "def _watch_edits(", "def _changed_during(")
+    for event in ("LayerTableEvent", "InstanceDefinitionTableEvent", "DocumentPropertiesChanged"):
+        assert '("%s",' % event in watch, event                     # layers, blocks, units sort lot and building
+    ask = part(RHINO, "def ask(", "def _edited(")
+    assert ask.index("try:") < ask.index("_watch_edits(True)")       # inside the try: asking always cleared
+    fin = ask[ask.index("finally:"):]
+    assert fin.index('STATE.pop("asking", None)') < fin.index("if not job.finished():") < fin.index("_stop_worker()")
+    house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
+    fallback = house[house.index("start = ask(request)"):]
+    assert fallback.index("_changed_during(doc.RuntimeSerialNumber, read_at)") < fallback.index("logic.HOUSE_OUTDATED")
+    assert "Zoning report… was pressed" not in logic.REPORT_OUTDATED     # GordiumCheck says it too

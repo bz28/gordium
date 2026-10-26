@@ -210,12 +210,15 @@ def ask(request, cancel=False, on_tick=None):
     _settle_live()
     job = _ask_job(request, cancel)
     STATE["asking"] = job                    # live mode waits while any answer is awaited (_idle)
-    _watch_edits(True)                       # Rhino runs during the wait: an edit made meanwhile is noted
     try:
+        _watch_edits(True)                   # Rhino runs during the wait: an edit made meanwhile is noted
         ui.wait(job, cancel, STATE.get("headless"), on_tick)
     finally:
         _watch_edits(False)
         STATE.pop("asking", None)
+        if not job.finished():               # (an error in the wait): never a request left in flight on the pipe
+            if not job.cancel():
+                _stop_worker()
     return _answer(job)
 
 
@@ -228,23 +231,27 @@ def _watch_edits(on):
     (STATE["edited_at"]), live mode on or off, so an answer about the model as it was read is never shown as the model
     now (_changed_during; review of 9a4eee2)."""
     hooks = STATE.pop("edit_watch", None)
-    if hooks:
-        objects, replaced, attributes = hooks
-        for name in ("AddRhinoObject", "DeleteRhinoObject", "UndeleteRhinoObject"):
-            _off(Rhino.RhinoDoc, name, objects)
-        _off(Rhino.RhinoDoc, "ReplaceRhinoObject", replaced)
-        _off(Rhino.RhinoDoc, "ModifyObjectAttributes", attributes)
+    for name, handler in hooks or []:
+        _off(Rhino.RhinoDoc, name, handler)
     if on:
         objects = _handler(System.EventHandler[Rhino.DocObjects.RhinoObjectEventArgs], _edited, "notice an edit")
         replaced = _handler(System.EventHandler[Rhino.DocObjects.RhinoReplaceObjectEventArgs], _edited,
                             "notice an edit")
         attributes = _handler(System.EventHandler[Rhino.DocObjects.RhinoModifyObjectAttributesEventArgs], _edited,
                               "notice an edit")
-        for name in ("AddRhinoObject", "DeleteRhinoObject", "UndeleteRhinoObject"):
-            _on(Rhino.RhinoDoc, name, objects)
-        _on(Rhino.RhinoDoc, "ReplaceRhinoObject", replaced)
-        _on(Rhino.RhinoDoc, "ModifyObjectAttributes", attributes)
-        STATE["edit_watch"] = (objects, replaced, attributes)
+        # what sorts objects into lot and building without touching them: a layer renamed or moved, a block's
+        # contents edited, the model's units (review of 5567b94)
+        layers = _handler(System.EventHandler[Rhino.DocObjects.Tables.LayerTableEventArgs], _edited,
+                          "notice an edit")
+        blocks = _handler(System.EventHandler[Rhino.DocObjects.Tables.InstanceDefinitionTableEventArgs], _edited,
+                          "notice an edit")
+        props = _handler(System.EventHandler[Rhino.DocumentEventArgs], _edited, "notice an edit")
+        hooks = [(name, objects) for name in ("AddRhinoObject", "DeleteRhinoObject", "UndeleteRhinoObject")] + \
+            [("ReplaceRhinoObject", replaced), ("ModifyObjectAttributes", attributes), ("LayerTableEvent", layers),
+             ("InstanceDefinitionTableEvent", blocks), ("DocumentPropertiesChanged", props)]
+        for name, handler in hooks:
+            _on(Rhino.RhinoDoc, name, handler)
+        STATE["edit_watch"] = hooks
 
 
 def _changed_during(doc_serial, read_at):
@@ -3015,12 +3022,16 @@ def _draw_starting_house(doc, facts):
     """The largest legal starting house for the lot, as stacked floors, checked (GordiumStart, and Edit site's Draw
     of a new address); its "as first drawn" note and its fingerprint (rhino_logic.own_work: edited or not) saved."""
     plan = STATE.pop("start_plan", None)        # worked out at Draw, before the box committed (_drawn)
+    read_at = time.time()
     request = _start_request(doc, facts, _ui_state(doc))
     _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     if plan is not None and plan["key"] == _start_key(request):
         start = plan["start"]
     else:                               # (no plan, or one for other facts: never another lot's house); the box has
         start = ask(request)            # committed by now, so no Cancel here (never a lot without its house)
+        if _changed_during(doc.RuntimeSerialNumber, read_at):     # edited meanwhile: never a house for the lot
+            say(logic.HOUSE_OUTDATED)                              # as it was (review of 5567b94)
+            return None
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)

@@ -177,7 +177,8 @@ def main():
         log["window_frames"] = frames
         marks = {f[2].split()[0] for f in frames}
         seconds = [int(f[2].split()[1]) for f in frames]
-        claim("1 the wait window's own mark moves and its seconds count up (never frozen)",
+        claim("1 the wait loop kept running and set the window's lines each pass (all three marks, seconds counting "
+              "up; what is painted: by eye and the captures)",
               len(marks) == 3 and seconds and seconds[-1] >= 2 and seconds == sorted(seconds),
               {"marks": sorted(marks), "seconds": sorted(set(seconds)), "frames": len(frames)})
         claim("1 Rhino kept running while the check waited", w.ticks >= 8, {"ticks": w.ticks,
