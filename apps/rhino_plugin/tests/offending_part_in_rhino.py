@@ -241,13 +241,13 @@ try:
     claim("4 the height row needs review (the curved vault is not measured), never complies",
           height.get("status") == "needs_review", height)
     tops = [(b, s) for b, s, info in g.overlay().encroach if info.get("why") == "height"]
-    claim("4 coloured just inside each wall above the limit (35.5 ft) and under the crown (41 ft)", all(
+    lo = z0 + ((limit - z0 / k) if limit is not None else 35) * k      # the limit, in model units
+    claim("4 coloured just inside each wall above the limit (+0.5 ft) and under the crown (41 ft)", all(
         colour_at(g, doc, p, why="height") == [height.get("status")] for p in (
-            rg.Point3d(x0 + 0.5 * k, ym, z0 + 35.5 * k), rg.Point3d(x1 - 0.5 * k, ym, z0 + 35.5 * k),
+            rg.Point3d(x0 + 0.5 * k, ym, lo + 0.5 * k), rg.Point3d(x1 - 0.5 * k, ym, lo + 0.5 * k),
             rg.Point3d(mid, ym, z0 + 41 * k))), [colour_at(g, doc, rg.Point3d(mid, ym, z0 + 41 * k))])
-    claim("4 nothing coloured below the limit (34 ft, mid-plan)",
-          colour_at(g, doc, rg.Point3d(mid, ym, z0 + 34 * k)) == [], colour_at(g, doc, rg.Point3d(mid, ym, z0 + 34 * k)))
-    lo = z0 + ((limit - z0 / k) if limit is not None else 35) * k
+    claim("4 nothing coloured below the limit (1 ft under it, mid-plan)",
+          colour_at(g, doc, rg.Point3d(mid, ym, lo - k)) == [], colour_at(g, doc, rg.Point3d(mid, ym, lo - k)))
     above = rg.Brep.CreateFromBox(rg.BoundingBox(rg.Point3d(x0 - k, y0 - k, lo), rg.Point3d(x1 + k, y1 + k, z0 + 50 * k)))
     cut = rg.Brep.CreateBooleanIntersection(vault, above, doc.ModelAbsoluteTolerance) or []
     want = sum(rg.VolumeMassProperties.Compute(b).Volume for b in cut) / k ** 3

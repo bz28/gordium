@@ -696,6 +696,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
     Each yard's red and amber are its own row's (present.settle: from the row's readings, after every status
     change), never another yard's: red where its wall is short under every reading, amber under some."""
     from model_measurement.measure import Lot, _projection
+    from model_measurement.stops import stop
     from shapely.ops import unary_union
 
     lot = site.get("lot") or {}
@@ -761,8 +762,13 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
         if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
             for b, own in solids:                       # only what rises above the limit: a roof's ridge, not its eaves
                 top = max(p[2] for f in b["faces"] for p in f["points"])
-                if top <= env["top"] + 1e-6:
+                # a curved surface the reader left out (a vault) may rise over the limit from walls below it: a
+                # block over its plan at the limit, no taller here; Rhino reaches it to the real solid's top and
+                # cuts it (rhino_logic.block_span), nothing when the solid stays under (review of 2cae58d, F1)
+                unread = bool(set(b.get("problems") or []) & {stop("curved_surface"), stop("curved_edge")})
+                if top <= env["top"] + 1e-6 and not unread:
                     continue
+                top = max(top, env["top"])
                 region = above(b, env["top"])
                 # nothing above it seen from above, or a wall rising over the limit outside what is (a vault read as
                 # walls, alone or beside a flat roof): its own plan, never less (independent review of #28, P1, L1)

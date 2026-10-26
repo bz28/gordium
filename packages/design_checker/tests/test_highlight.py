@@ -16,7 +16,7 @@ def test_a_block_reaches_the_real_solids_top_a_vault_the_checker_cannot_read_is_
     at the limit; a yard strip reaches the solid's own bottom too."""
     height = {"why": "height", "base": 35.0, "top": 36.0}
     assert logic.block_span(height, 0.0, 42.0) == (35.0, 42.0)
-    assert logic.block_span(height) == (35.0, 36.0)                         # no solid (a mesh): the checker's
+    assert logic.block_span(height) == (35.0, 36.0)            # no solid Rhino can draw: the checker's
     yard = {"why": "yard", "base": 1.0, "top": 36.0}
     assert logic.block_span(yard, 0.5, 42.0) == (0.5, 42.0)
     from rule_format.rulebook import REPO

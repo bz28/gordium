@@ -482,6 +482,29 @@ def test_a_vault_read_as_walls_beside_a_flat_roof_over_the_limit_is_coloured_too
     assert Polygon(gable[0]["outline"]).area == pytest.approx(500, abs=0.01)           # a roof's walls: still its ridge
 
 
+def test_a_vault_springing_below_the_limit_gets_a_block_at_the_limit_for_rhino_to_reach_its_real_top():
+    """Review of 2cae58d (F1): walls to 30 ft read, a curved vault to 42 ft left out: the checker's own top is
+    under the 35 ft limit, so no block was made and nothing was coloured. Now a block over its plan at the limit
+    (no height of its own here); Rhino reaches it to the real vault's top (rhino_logic.block_span)."""
+    from shapely.geometry import Polygon
+    from design_checker.check import check_site
+    from model_measurement.stops import stop
+    vault = box(10, 25, 35, 65, 0, 30)
+    vault["faces"] = [f for f in vault["faces"] if not all(p[2] == 30 for p in f["points"])]
+    vault["problems"] = [stop("curved_surface")]
+    r = check_site(_plot(vault), {**FACTS, "jurisdiction": CITY})
+    assert items(r["view"])["Building height"]["status"] == present.REVIEW
+    tops = [e for e in r["plan"]["encroach"] if e["why"] == "height"]
+    assert [(t["base"], t["top"]) for t in tops] == [(35, 35)]
+    assert Polygon(tops[0]["outline"]).area == pytest.approx(1000)
+    assert logic_span(tops[0], 0.0, 42.0) == (35, 42.0) and logic_span(tops[0], 0.0, 30.0) == (35, 35)
+
+
+def logic_span(entry, bottom, top):
+    from design_checker import rhino_logic
+    return rhino_logic.block_span(entry, bottom, top)
+
+
 def test_a_building_with_a_curved_surface_never_complies_on_height_and_is_coloured_above_the_limit():
     """The vault probe at fc0b023: walls to 36 ft read, the curved vault left out by the reader (a problem it reports):
     the height row needs review, never complies, and the block over the limit covers the building's plan (the
