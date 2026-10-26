@@ -1727,7 +1727,7 @@ def gate_actions(actions, box_open, say, open_ok=("legend",)):
         def run(*args, **kwargs):
             if box_open() and name not in open_ok:
                 say(BOX_BUSY)
-                return None
+                return REFUSED              # (a checkbox puts its tick back: gordium_ui._tick)
             return fn(*args, **kwargs)
         return run
     return {name: gated(name, fn) for name, fn in actions.items()}

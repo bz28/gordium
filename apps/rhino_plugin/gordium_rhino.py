@@ -199,7 +199,7 @@ def _stop_worker():
     SERVERS.stop_all()                               # and any an earlier load left running
 
 
-def ask(request, cancel=False, on_tick=None):
+def ask(request, cancel=False, on_tick=None, draws_after=False):
     """Send one request to the checker and wait for its answer, never on Rhino's thread: the exchange runs as a
     logic.Job and ui.wait waits for it (a slow one shows what the checker is doing, live; Rhino keeps drawing).
     `cancel`: the wait has Cancel, which stops the checker (the next request starts a fresh one) and raises
@@ -208,8 +208,19 @@ def ask(request, cancel=False, on_tick=None):
     if STATE.get("asking") is not None:      # Rhino answers while a wait runs (ui.wait): nothing may put a second
         raise RuntimeError(logic.WORKING)    # request on the checker's pipe meanwhile (a command typed, a button)
     held = STATE.get("undo")                 # never wait inside an undo step this script holds open: the architect's
-    if held and held[1]:                     # edits meanwhile would be taken into Gordium's (it ends here; a Draw's
-        _end_undo(Rhino.RhinoDoc.FromRuntimeSerialNumber(held[0]))   # own changes are all in it by then)
+    resume = None                            # edits meanwhile would be taken into Gordium's. It ends here; when the
+    if held and held[1]:                     # caller draws after the wait (`draws_after`), a step is begun again so
+        doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(held[0])   # what it draws is still in one of Gordium's own
+        resume = (doc, STATE.get("undo_words")) if draws_after else None
+        _end_undo(doc)
+    try:
+        return _ask_waiting(request, cancel, on_tick)
+    finally:
+        if resume is not None and resume[0] is not None:
+            _begin_undo(resume[0], (resume[1] or "Gordium") + " (continued)")
+
+
+def _ask_waiting(request, cancel, on_tick):
     _settle_live()
     job = _ask_job(request, cancel)
     STATE["asking"] = job                    # live mode waits while any answer is awaited (_idle)
@@ -2027,13 +2038,13 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
     # the new address's starting house, worked out BEFORE the undo step opens: Rhino runs while Gordium waits, so an
     # undo step held open across the wait would take the architect's own edits into Gordium's (independent review
     # of #32, P2); logic.WorkCancelled here: nothing has changed yet
-    STATE["start_plan"] = _plan_reset_house(doc, facts, state, saved_ui, choice, mode)
+    STATE["start_plan"] = _plan_reset_house(doc, facts, state, saved_ui, choice, mode, options)
     _begin_undo(doc, "Gordium: start fresh for " + (saved_ui["_pending"].get("address") or "a new address"))
     facts, saved_ui, redraw, guide = logic.apply_reset(table, session, facts, saved_ui, choice,
                                                        STATE.get("zones") or [])
     STATE["redraw_house"] = redraw and mode == "check"     # (GordiumStart draws its house itself)
     STATE.pop("lookup_guide", None)
-    fresh_state = logic.after_reset_state(state, _box_state(doc, facts, options, saved_ui, mode))
+    fresh_state = _reset_state(doc, facts, options, saved_ui, mode, state)
     if guide and not facts.get("lot_id"):                 # the City's outline only: their lot drawn over it first
         STATE.pop("start_plan", None)                     # (no house planned on a lot not drawn yet)
         pts = [_model_point(doc, p) for p in guide]
@@ -2046,6 +2057,7 @@ def _begin_undo(doc, words):
     """One undo step for everything a Draw does (the reset, the new lot, the starting house drawn again)."""
     _end_undo(doc)
     STATE["undo"] = (doc.RuntimeSerialNumber, doc.BeginUndoRecord(words))
+    STATE["undo_words"] = words
 
 
 def _end_undo(doc):
@@ -2394,6 +2406,9 @@ def run_check(doc, report=True):
             _check_outdated(doc, o, report, begun, result)
             return None
         return _check_apply(doc, o, begun, result)
+    except logic.NotInFront:                 # another file came to the front while its facts were read
+        _check_outdated(doc, o, report)
+        return None
     except logic.WorkCancelled:
         _check_cancelled(doc, o)
         if report:                           # any caller that asked for a report (Zoning report…, GordiumCheck):
@@ -3079,7 +3094,15 @@ class _DrySession:
         pass
 
 
-def _plan_reset_house(doc, facts, state, saved_ui, choice, mode):
+def _reset_state(doc, facts, options, saved_ui, mode, shown):
+    """The box's state to save after a reset (logic.after_reset_state): the architect's choices as the box showed
+    them, the lot, street side, corner and ground as the reset left them. The one way both the real Draw and its dry
+    plan (_plan_reset_house) get it, so the house worked out before the reset is the one Draw draws (cold review of
+    f51ed45, P1: the plan used the box's old state and never matched)."""
+    return logic.after_reset_state(shown, _box_state(doc, facts, options, saved_ui, mode))
+
+
+def _plan_reset_house(doc, facts, state, saved_ui, choice, mode, options):
     """A new address's starting house, worked out before Draw opens its undo step and changes the model: the reset
     run dry (logic.apply_reset on _DryTable) gives the new lot and the facts, the checker gets a copy with that lot
     alone. None when this Draw draws no house (Keep my building, the City's outline only, GordiumCheck's box).
@@ -3087,9 +3110,10 @@ def _plan_reset_house(doc, facts, state, saved_ui, choice, mode):
     dry = _DryTable(doc)
     f, s, redraw, guide = logic.apply_reset(dry, _DrySession(), dict(facts), dict(saved_ui), choice,
                                             STATE.get("zones") or [])
-    if not (redraw and dry.ring and logic.plans_house(mode, mode == "check", STATE.get("house_after_box"))):
+    # the same test as _drawn's (logic.plans_house with this reset's redraw), and only with a lot to plan it on
+    if not (dry.ring and logic.plans_house(mode, redraw and mode == "check", STATE.get("house_after_box"))):
         return None
-    out, ui_state = _apply_box(doc, f, state, s)
+    out, ui_state = _apply_box(doc, f, _reset_state(doc, f, options, s, mode, state), s)
     read_at = time.time()
     path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
     _export_lot(doc, dry.ring, path)
@@ -3143,7 +3167,8 @@ def _draw_starting_house(doc, facts):
         STATE["start_from"] = "plan"     # (the in-Rhino tests read which way it came)
     else:                               # (no plan, or one for other facts: never another lot's house); the box has
         STATE["start_from"] = "asked"
-        start = ask(request)            # committed by now, so no Cancel here (never a lot without its house)
+        start = ask(request, draws_after=True)   # committed by now: no Cancel (never a lot without its house); the
+                                                 # floors go in a step of Gordium's after the wait
         if _changed_during(doc.RuntimeSerialNumber, read_at):     # edited meanwhile: never a house for the lot
             say(logic.HOUSE_OUTDATED)                              # as it was (review of 5567b94)
             live(True)                  # the architect draws one; it is checked as they go (as when none can be drawn)

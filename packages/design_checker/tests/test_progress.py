@@ -251,7 +251,7 @@ def test_live_mode_rechecks_in_the_background_and_drops_a_stale_answer():
     assert 'logic.checked_while_still(begun["at"], STATE.get("dirty"))' in finish
     assert finish.index("checked_while_still") < finish.index("_check_apply(")
     assert 'doc.RuntimeSerialNumber != begun["doc"]' in finish and "_box_open()" in finish
-    for caller in ("def ask(", "def run_check(", "def open_report(", "def confirm("):
+    for caller in ("def _ask_waiting(", "def run_check(", "def open_report(", "def confirm("):
         assert "_settle_live()" in part(RHINO, caller, "\ndef "), caller
 
 
@@ -262,7 +262,7 @@ def test_draw_works_out_the_starting_house_before_anything_is_saved_or_committed
     plan = part(RHINO, "def _plan_house(", "def _draw_starting_house(")
     assert "ask(request, cancel=True)" in plan
     house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
-    assert 'plan["key"] == _start_key(request)' in house and "start = ask(request)  " in house   # committed: no Cancel
+    assert 'plan["key"] == _start_key(request)' in house and "start = ask(request, draws_after=True)" in house   # no Cancel
     start_cmd = part(RHINO, "def gordium_start(", "def _draw_starting_house(")
     assert "except logic.WorkCancelled as stopped:" in start_cmd and \
         "say(getattr(stopped, \"said\", logic.DRAW_CANCELLED))" in start_cmd
@@ -476,7 +476,7 @@ def test_every_kind_of_edit_is_noted_and_the_wait_never_leaves_work_behind():
     fin = ask[ask.index("finally:"):]
     assert fin.index('STATE.pop("asking", None)') < fin.index("if not job.finished():") < fin.index("_stop_worker()")
     house = part(RHINO, "def _draw_starting_house(", "def _doc_name(")
-    fallback = house[house.index("start = ask(request)"):]
+    fallback = house[house.index("start = ask(request, draws_after=True)"):]
     assert fallback.index("_changed_during(doc.RuntimeSerialNumber, read_at)") < fallback.index("logic.HOUSE_OUTDATED")
     # its message promises the house drawn by hand is checked: live mode and the document hooks on (review of e101ec5)
     early = fallback[fallback.index("logic.HOUSE_OUTDATED"):fallback.index("return None")]
@@ -562,3 +562,41 @@ def test_ir5_a_refused_checkbox_puts_its_tick_back():
     assert "if action(bool(box.Checked)) is logic.REFUSED:" in tick and "box.Checked = not box.Checked" in tick
     for name in ("massing", "labels", "envelope"):
         assert '_tick(box, actions["%s"]' % name in UI, name
+
+
+# ---- cold review of f51ed45 ----------------------------------------------------------------------------------------
+
+def test_the_planned_house_is_worked_out_from_the_same_state_draw_uses():
+    """P1: the dry plan used the box's old state, the real Draw the state rebuilt for the new lot (corner answer,
+    survey, ground fall, address): the keys never matched, and the fallback split Draw's undo step."""
+    prepare = part(RHINO, "def _draw_prepare(", "def _begin_undo(")
+    assert "fresh_state = _reset_state(doc, facts, options, saved_ui, mode, state)" in prepare
+    plan = part(RHINO, "def _plan_reset_house(", "def _export_lot(")
+    assert "_apply_box(doc, f, _reset_state(doc, f, options, s, mode, state), s)" in plan
+    assert 'logic.plans_house(mode, redraw and mode == "check", STATE.get("house_after_box"))' in plan
+    drawn = part(RHINO, "def _drawn(", "def hide_massing(")
+    assert 'logic.plans_house(mode, STATE.get("redraw_house"), STATE.get("house_after_box"))' in drawn
+    # the reset's own fields come from what the reset left (fresh), the architect's choices from the box (shown)
+    shown = {"zone": "R-1b", "district_confirmed": True, "corner_lot": None, "address": "1 Old St"}
+    fresh = {"corner_lot": False, "address": "96 Ithaca Rd", "lot_surveyed": False, "ground_fall": 4}
+    state = logic.after_reset_state(shown, fresh)
+    assert state["corner_lot"] is False and state["address"] == "96 Ithaca Rd" and state["zone"] == "R-1b"
+
+
+def test_whatever_gordium_draws_after_a_wait_is_in_an_undo_step_of_its_own():
+    ask = part(RHINO, "def ask(", "def _ask_waiting(")
+    assert 'resume = (doc, STATE.get("undo_words")) if draws_after else None' in ask
+    assert ask.index("_end_undo(doc)") < ask.index("return _ask_waiting(") < ask.index("_begin_undo(resume[0]")
+    assert "ask(request, draws_after=True)" in part(RHINO, "def _draw_starting_house(", "def _doc_name(")
+    assert 'STATE["undo_words"] = words' in part(RHINO, "def _begin_undo(", "def _end_undo(")
+
+
+def test_a_check_whose_file_left_the_front_is_out_of_date_never_could_not_run():
+    run = part(RHINO, "def run_check(", "def _check_begin(")
+    assert run.index("except logic.NotInFront:") < run.index("_check_outdated(doc, o, report)\n") < \
+        run.index("except Exception as e:")
+
+
+def test_a_box_open_refusal_also_puts_the_tick_back():
+    acts = logic.gate_actions({"labels": lambda on: "done"}, lambda: True, lambda text: None)
+    assert acts["labels"](True) is logic.REFUSED

@@ -646,7 +646,7 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
              '                                                     saved_ui["_pending"].get("answer"))',
              "if choice is None:\n            return facts, saved_ui, False, state", "_begin_undo(",
              "logic.apply_reset(table, session, facts, saved_ui, choice",
-             "logic.after_reset_state(state, _box_state(doc, facts, options, saved_ui, mode))",
+             "_reset_state(doc, facts, options, saved_ui, mode, state)",   # (logic.after_reset_state, as the dry plan: #32)
              'if guide and not facts.get("lot_id"):', "return facts, saved_ui, True, fresh_state")
     at = [prep.find(step) for step in steps]
     assert -1 not in at and at == sorted(at), [st for st, i in zip(steps, at) if i == -1] or at
