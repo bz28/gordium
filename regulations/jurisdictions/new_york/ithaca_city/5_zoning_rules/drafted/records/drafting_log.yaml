@@ -1145,67 +1145,337 @@ units:
         - R-3AA
     - rule: R-1a.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-1A
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-1A
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-1A
     - rule: R-1a.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-1A
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-1A
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-1A
     - rule: R-1b.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-1B
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-1B
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-1B
     - rule: R-1b.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-1B
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-1B
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-1B
     - rule: R-2a.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-2A
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-2A
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-2A
     - rule: R-2a.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-2A
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-2A
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-2A
     - rule: R-2b.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-2B
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-2B
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-2B
     - rule: R-2b.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-2B
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-2B
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-2B
     - rule: R-2c.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-2C
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-2C
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-2C
     - rule: R-2c.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-2C
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-2C
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-2C
     - rule: R-3a.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-3A
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-3A
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-3A
     - rule: R-3a.parking_dormitory
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Dormitory parking per persons
-        housed (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        housed (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - R-3A
     - rule: R-3a.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-3A
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-3A
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-3A
     - rule: R-3aa.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-3AA
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-3AA
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-3AA
     - rule: R-3aa.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-3AA
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-3AA
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-3AA
     - rule: R-3b.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-3B
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-3B
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-3B
     - rule: R-3b.parking_dormitory
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Dormitory parking per persons
-        housed (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        housed (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - R-3B
     - rule: R-3b.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - R-3B
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - R-3B
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - R-3B
     - rule: RU.parking_per_dwelling_unit
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Residential parking per dwelling
-        unit (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        unit (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml and
+        the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - RU
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - RU
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - RU
     - rule: RU.parking_dormitory
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Dormitory parking per persons
-        housed (chart p.14)) is kept in the run records and comes back when the hold is lifted'
+        housed (chart p.14)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - RU
     - rule: RU.parking_per_dwelling_unit_undecided_uses
       why: 'not checked yet: parking is on hold (Ben, 2026-10-25); the drafted rule (Parking for the uses no drafted
-        rule decides (a person checks)) is kept in the run records and comes back when the hold is lifted'
+        rule decides (a person checks)) is kept in the run records: it comes back once the hold is lifted in settings.yaml
+        and the unit replayed (python -m rule_drafting replay --only chart-p14-residential)'
+      cells:
+      - - 14
+        - Residential
+        - First three bed or sleeping rooms per dwelling unit
+        - RU
+      - - 14
+        - Residential
+        - 4-5 bed or sleeping rooms per dwelling unit
+        - RU
+      - - 14
+        - Residential
+        - Each additional bed or sleeping room
+        - RU
     problems: []
   325-3B:accessory_dwelling_unit:
     rules:

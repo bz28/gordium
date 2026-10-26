@@ -52,6 +52,19 @@ def law_rule_ids(j: Path, zone: str) -> set[str]:
     return {rid for unit, e in units.items() if not unit.startswith("chart-") for rid in e.get("rules") or []}
 
 
+def held_cells(j: Path, zone: str) -> set[tuple]:
+    """(page, section, row) of the chart cells a unit on hold's rules cite in this zone: the drafting log's entries
+    'not checked yet: <hold>' (chart p.14's parking, 2026-10-25). Only in an AI-drafted zone: a hand rulebook's
+    uncited row stays listed."""
+    log_file = j / "5_zoning_rules/drafted/records/drafting_log.yaml"
+    if not (is_ai_drafted(j, zone) and log_file.is_file()):
+        return set()
+    units = (load(log_file) or {}).get("units") or {}
+    return {(c[0], c[1], c[2]) for e in units.values() for g in e.get("unresolved") or []
+            if str(g.get("why", "")).startswith("not checked yet: ") for c in g.get("cells") or []
+            if district_name(str(c[3])) == zone}
+
+
 def chart_gaps(j: Path, zone: str, rules: list[dict]) -> list[dict]:
     """One entry per chart row of the zone's column that states something no rule checks: every cell ends as a rule
     citing it, or a visible not-checked item, never silent. In an AI-drafted zone only a rule drafted from the chart
@@ -59,12 +72,13 @@ def chart_gaps(j: Path, zone: str, rules: list[dict]) -> list[dict]:
     stay listed whatever §325-16C's height bonus cites)."""
     inputs_only = law_rule_ids(j, zone)
     sources = [s for r in rules if r.get("id") not in inputs_only for s in r.get("sources") or [] if isinstance(s, dict)]
+    held = held_cells(j, zone)          # a unit on hold (parking) lists its rows itself, with the hold's reason
     out, seen = [], set()
     for c in _cells(j):
         if district_name(c["column"]) != zone or str(c.get("value") or "").strip() in EMPTY:
             continue
         key = (c["page"], _clean(c.get("section", "")), _clean(c["row"]))
-        if key in seen or any(_cites(s, c) for s in sources):
+        if key in seen or any(_cites(s, c) for s in sources) or (c["page"], c.get("section", ""), c["row"]) in held:
             continue
         seen.add(key)
         slug = re.sub(r"[^a-z0-9]+", "_", f"{key[1]} {key[2]}".lower()).strip("_")
@@ -103,6 +117,8 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
         c = {"file": "zoning_charts_2026-04.pdf", "page": cell[0], "section": cell[1], "row": cell[2], "column": cell[3],
              "row_lines": []}
         return any(_cites(s, c) for rid, s in sources if by is None or rid in by)
+    values = {(c["page"], c.get("section", ""), c["row"]): _clean(c["value"]) for c in _cells(j)
+              if district_name(c["column"]) == zone}
     out, no_rule = [], []
     for unit, e in units.items():
         if e.get("scope") and zone not in e["scope"]:
@@ -121,13 +137,18 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
             if why.startswith("chart page"):
                 continue                                # an uncited cell: chart_gaps lists it while it is uncited
             cells = [c for c in x.get("cells") or [] if district_name(str(c[3])) == zone]
-            if cells and not any(cited(c) for c in cells):
+            if cells and not why.startswith("not checked yet: ") and not any(cited(c) for c in cells):
                 continue                                # every cell uncited: chart_gaps lists them
             if cells and chart and any(cited(c, set(e.get("rules") or [])) for c in cells):
                 continue                                # a sibling template of the same chart unit checks the cell
             if m := LEFT_OUT.match(why):
                 left_out.append(m.group(1))
                 continue
+            if cells and why.startswith("not checked yet: "):
+                # held (parking): chart_gaps leaves its rows to this note, so it names each row and value it holds
+                rows = list(dict.fromkeys(f"{_clean(c[2])} ({values[(c[0], c[1], c[2])]})" for c in cells
+                                          if (c[0], c[1], c[2]) in values))
+                why += f". Chart p.{cells[0][0]} rows not checked: " + "; ".join(rows) if rows else ""
             if (rule, why) not in seen:
                 seen.add((rule, why))
                 lines.append(f"{rule}: {why}")

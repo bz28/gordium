@@ -87,16 +87,19 @@ def test_every_chart_row_the_zone_states_is_checked_by_a_rule_or_listed_as_not_c
     """Stage 1 drafted no minimum lot width rule, and the result simply had no lot-width row. Now every cell of the
     zone's chart column that states something is cited by one of the zone's rules or listed as not checked (the
     loading row, never drafted, is listed for every zone)."""
-    from design_checker.gaps import _cells, _cites, _clean, EMPTY, chart_gaps
+    from design_checker.gaps import _cells, _cites, _clean, EMPTY, chart_gaps, drafting_gaps
     from rule_format.rulebook import district_name, zone_rules
     rules = zone_rules(J, zone)
     found = chart_gaps(J, zone, rules)
     gaps, rows = {g["id"] for g in found}, {g["row"] for g in found}
+    # a row on hold (parking) is listed by its drafting item, which names the row and value as not checked yet
+    held = " · ".join(g["why"] for g in drafting_gaps(J, zone, rules) if "not checked yet: " in g["why"])
     sources = [s for r in rules for s in r.get("sources") or []]
     stated = [c for c in _cells(J) if district_name(c["column"]) == zone and str(c["value"]).strip() not in EMPTY]
     assert stated
     for c in stated:
-        listed = (c["page"], _clean(c["section"]), _clean(c["row"])) in rows
+        listed = (c["page"], _clean(c["section"]), _clean(c["row"])) in rows or \
+            f"{_clean(c['row'])} ({_clean(c['value'])})" in held
         assert any(_cites(s, c) for s in sources) or listed, (c["page"], c["section"], c["row"])
     assert any(g.startswith("chart.p14.minimum_loading_requirement") for g in gaps)     # not drafted: listed
 
@@ -291,3 +294,20 @@ def test_a_drafted_zones_not_checked_rows_keep_what_to_check_in_the_report_and_c
     for i in got["view"]["items"]:
         if i["id"].startswith("gap.drafting.chart-"):
             assert re.match(r"Not in Gordium yet .* for now: Chart p\.\d+: ", i["reason"]), i["reason"]
+
+
+def test_a_held_parking_row_is_listed_once_with_the_hold_reason():
+    """Parking-hold review: each held chart p.14 row was listed again as a generic 'No rule checks this chart row yet'.
+    The unit on hold lists its rows itself, with the hold's reason; the chart list leaves them to it."""
+    from design_checker.gaps import chart_gaps, drafting_gaps
+    from rule_format.rulebook import zone_rules
+    rules = zone_rules(J, "R-2a")
+    rows = [g for g in chart_gaps(J, "R-2a", rules) if g["row"][0] == 14 and g["row"][1].startswith("Residential")]
+    assert rows == []
+    item = next(g for g in drafting_gaps(J, "R-2a", rules) if g["id"] == "drafting.chart-p14-residential")
+    assert "parking is on hold" in item["why"] and "replay --only chart-p14-residential" in item["why"]
+    assert "rows not checked: First three bed or sleeping rooms per dwelling unit (" in item["why"]   # names its rows
+    # a hand rulebook's zone is not the drafting log's to hold: an uncited parking row there stays listed
+    from rule_format.rulebook import is_ai_drafted
+    assert not is_ai_drafted(J, "R-1a")
+    assert any(g["row"][0] == 14 and g["row"][1].startswith("Residential") for g in chart_gaps(J, "R-1a", []))

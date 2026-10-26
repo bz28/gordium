@@ -1441,7 +1441,27 @@ def test_a_drafted_unit_put_on_hold_keeps_its_rules_out_and_lists_them_not_check
     entry = log["units"]["chart-p14-residential"]
     assert entry["rules"] == []
     held = [g for g in entry["unresolved"] if g["why"].startswith("not checked yet: parking is on hold")]
+    assert all("replay --only chart-p14-residential" in g["why"] and g.get("cells") for g in held)   # how to undo
     assert held and all(g["rule"].split(".")[0] in {"R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "RU"}
                         for g in held)
     saved = {r["id"] for p in inputs.drafted.glob("*.yaml") for r in cli.load(p)["rules"]}
     assert not {g["rule"] for g in held} & saved
+
+
+def test_replaying_a_held_unit_says_what_was_saved(tmp_path, capsys):
+    """Parking-hold review: replaying chart p.14's parking printed '21 rules' while none was saved."""
+    import shutil
+    src = cli.PLACE
+    dst = tmp_path / "ithaca_city"
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("*.pdf", "*.xlsx"))
+    for pdf in src.rglob("*.pdf"):
+        target = dst / pdf.relative_to(src)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.symlink_to(pdf)
+    cli.replay_units(cli.Inputs(dst), ["chart-p14-residential"])
+    out = capsys.readouterr().out
+    assert "chart-p14-residential: 0 rules" in out and "on hold: parking is on hold" in out
+    # the note says how to undo the hold (lifting it alone brings nothing back), and names the rows it holds
+    held = [g for g in cli.read_log(cli.Inputs(dst))["units"]["chart-p14-residential"]["unresolved"]
+            if g["why"].startswith("not checked yet: ")]
+    assert held and all("replay --only chart-p14-residential" in g["why"] and g["cells"] for g in held)

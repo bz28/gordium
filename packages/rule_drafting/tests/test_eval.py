@@ -937,8 +937,9 @@ def test_every_mapping_reason_describes_the_drafts_there_are():
         for hid, e in k["rules"].items():
             if "parts of the answer" in e["reason"] and not e.get("parts"):
                 stale.append((name, hid, "claims parts"))
+            held = {i for u in e.get("held_judge") or [] for i in u}   # out of the rulebook while on hold
             for rid in _re.findall(r"\b(?:general|R-\w+)\.[a-z0-9_]+\b", e["reason"]):
-                if rid not in have:
+                if rid not in have and rid not in held:
                     stale.append((name, hid, rid))
     assert stale == []
 
@@ -955,3 +956,15 @@ def test_a_law_rule_limiting_another_measure_doesnt_answer_the_height_question(c
     assert exception_false_passes(hand, [stories], ctx, from_law={stories["id"]}) == []
     height = stories | {"id": "R-1b.x_limit", "check": "building_height <= 35 + 0.1 * 35"}
     assert exception_false_passes(hand, [height], ctx, from_law={height["id"]}) != []
+
+
+def test_a_held_parking_question_says_it_is_on_hold_and_keeps_its_reviewed_pairs():
+    """Parking-hold review: the 17 parking entries said the re-draft 'was refused by the checks'; the rules were drafted
+    and checked, then put on hold (Ben, 2026-10-25). The reason says so, and held_judge keeps the reviewed pairs."""
+    m = mapping()
+    held = [(k, hid, e) for k in m["keys"].values() for hid, e in k["rules"].items()
+            if hid.split(".", 1)[1].startswith("parking_") and e.get("held_judge")]
+    assert held
+    for _, hid, e in held:
+        assert e["judge"] == [] and e["reason"].startswith("not checked yet: parking is on hold"), hid
+        assert "refused by the checks" not in e["reason"], hid

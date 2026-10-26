@@ -199,15 +199,18 @@ def demote(rule: dict, cause: str | dict) -> dict:
     return keep | {"kind": "flag", "notes": f"Demoted until re-drafted: {' '.join(str(entry['cause']).split())}"}
 
 
-def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
+def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> dict:
     """Replace this unit's earlier drafts with the new ones, and record what happened. A unit on hold (settings
     on_hold) that was drafted before the hold keeps its drafts out of the rulebooks: each one is listed for a person,
     "not checked yet", with the hold's cause (Ben, 2026-10-25: chart p.14's parking). Lift the hold and replay the
     unit to bring them back."""
     if held := on_hold().get(unit_id):
-        result = dict(result, rules={}, unresolved=list(result.get("unresolved") or []) + [
+        result = dict(result, rules={}, held=held, unresolved=list(result.get("unresolved") or []) + [
             {"rule": r["id"], "why": f"not checked yet: {held}; the drafted rule ({r.get('title', '')}) is kept in the "
-                                     "run records and comes back when the hold is lifted"}
+                                     f"run records: it comes back once the hold is lifted in settings.yaml and the unit "
+                                     f"replayed (python -m rule_drafting replay --only {unit_id})",
+             "cells": [[x["page"], x["cell"]["section"], x["cell"]["row"], x["cell"]["column"]]
+                       for x in r.get("sources") or [] if isinstance(x.get("cell"), dict)]}
             for rules in (result.get("rules") or {}).values() for r in rules])
     old = set(log["units"].get(unit_id, {}).get("rules", []))
     books = {p.stem: load(p) for p in i.drafted.glob("*.yaml")}
@@ -267,6 +270,7 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
     elif proposed_path.exists():
         proposed_path.unlink()
     (i.records / "drafting_log.yaml").write_text(_dump(log), encoding="utf-8")
+    return result
 
 
 def _formula_names(rule: dict) -> set[str]:
@@ -290,8 +294,9 @@ def _measured_output(i: Inputs, model: str) -> float | None:
 
 
 def on_hold() -> dict[str, str]:
-    """Units Ben has put on hold (settings.yaml on_hold: {unit: why}): never drafted, so the checker shows them as
-    not checked yet (2026-10-25: the parking sections, §325-20F and G)."""
+    """Units Ben has put on hold (settings.yaml on_hold: {unit: why}), shown as not checked yet: never drafted (the
+    parking sections §325-20F and G), or, drafted before the hold (chart p.14's parking), their rules kept out of the
+    rulebooks and listed for a person until the hold is lifted and the unit replayed (save_result)."""
     return dict(drafter.SETTINGS.get("on_hold") or {})
 
 
@@ -424,12 +429,13 @@ def cmd_draft(args) -> int:
                         and not answered(recorded_sessions(i, u["id"])[-1]):
                     print(f"  {u['id']}: no answer this time ({result['failed']}): its last answered session stands")
                     result = replay_unit(i, u, stands)
-            save_result(i, log, u["id"], result)
+            result = save_result(i, log, u["id"], result)
             saved = True
             print(f"  {u['id']}: {sum(len(r) for r in result['rules'].values())} rules, "
                   f"{len(result.get('unresolved', []))} for a person"
                   + (f", none: {result['reason']}" if result.get("reason") else "")
-                  + (f", FAILED: {result['failed']}" if result.get("failed") else ""))
+                  + (f", FAILED: {result['failed']}" if result.get("failed") else "")
+                  + (f" (on hold: {result['held']})" if result.get("held") else ""))
     except BudgetExceeded as stop:
         print(f"  stopped before a call: {stop}")
         return 1
@@ -553,11 +559,12 @@ def replay_units(i: Inputs, unit_ids: list[str], log: dict | None = None, quiet:
                 print(f"  {uid}: no recorded answer to replay (draft it first)")
                 continue
             result = replay_unit(i, u, attempts)
-        save_result(i, log, uid, result)
+        result = save_result(i, log, uid, result)
         if not quiet:
             print(f"  {uid}: {sum(len(r) for r in result['rules'].values())} rules, "
                   f"{len(result.get('unresolved', []))} for a person (replayed, no API call)"
-                  + (f", FAILED: {result['failed']}" if result.get("failed") else ""))
+                  + (f", FAILED: {result['failed']}" if result.get("failed") else "")
+                  + (f" (on hold: {result['held']})" if result.get("held") else ""))
     log["complete"] = all(u in log["units"] for u in units)
     (i.records / "drafting_log.yaml").write_text(_dump(log), encoding="utf-8")
     return log
