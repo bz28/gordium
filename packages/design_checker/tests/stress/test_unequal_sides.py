@@ -155,6 +155,33 @@ def test_the_p0_design_does_not_comply():
     assert got["said"] == present.FAILS, got
 
 
+def _case(lot, west, east, over_west, over_east, confirmed=True):
+    """The starting house on `lot` with its walls `west` and `east` ft from the side lines and its two eaves those
+    depths past them (a gable roof across, its eaves on the side walls)."""
+    lt = generate.lot(lot)
+    outline = generate.starting_design(lot)["parts"][0]["outline"]
+    xs = [x for x, _ in outline]
+    dx = west - min(xs)
+    edits = [{"op": "move_house", "dx": dx, "dy": 0.0},
+             {"op": "stretch", "face": _east_face(outline), "amount": (lt["points"][1][0] - east) - (max(xs) + dx)},
+             {"op": "add_roof", "kind": "roof", "axis": _axis_across(outline), "over": 0.0, "fascia": 0.0,
+              "inset": 0.0, "rise": 8.0}]
+    roof = next(p for p in generate.build(lot, edits)[0]["parts"] if p["kind"] == "roof")
+    east_is_p1 = roof["corners"][1][0] > roof["corners"][0][0]
+    over = {"over": over_west, "over2": over_east} if east_is_p1 else {"over": over_east, "over2": over_west}
+    return {"lot": lot, "edits": edits + [{"op": "overhangs", **over}], "confirmed": confirmed}
+
+
+def test_the_oracle_tries_the_tax_map_shift_where_a_side_becomes_able_to_carry_10_ft():
+    """#22 review round 1: on the tax map (each line up to 2 ft off), walls 9'-3" west and 12'-0" east, the west eave
+    2'-3" past its wall. At +9" the west walls are exactly 10 ft from the line, so either side may be the 10 ft one,
+    and with the west the 10 ft one its eave, 7'-9" from the line, is over 2 ft in. Sampling only -2, -1, 0, 1, 2 ft
+    missed that world and said PASS; the answer is UNDECIDED."""
+    design = generate.build("sample_tax", _case("sample_tax", 9.25, 12.0, 2.25, 0.0)["edits"])[0]
+    assert oracle.unequal_sides_verdict(design, SMALL, LARGE, tolerance=True, eaves_confirmed=True) == \
+        oracle.UNDECIDED
+
+
 def _east_face(outline):
     """The index of the outline edge facing east (its outward normal +x)."""
     for k in range(len(outline)):

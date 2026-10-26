@@ -335,13 +335,16 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
 # sorted narrower-first apart from the walls). For a district whose two minimums differ, each side keeps its own
 # numbers here: its walls and its eaves, to its own lot line.
 
-def side_worlds(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE, eaves_confirmed=False):
+def side_worlds(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE, eaves_confirmed=False, critical=()):
     """Every way the two side yards can be, each side to its own lot line(s): [({side: to the walls}, {side: to the
     eaves})]. Two readings of what reaches past the walls (an eave: the yard to the walls, the eave yard to the full
     outline; not an eave: both to the full outline), and on a tax-map lot with `tolerance` each side line up to
     tolerance_ft off either way (its walls' and its eaves' yards moving together). None when the design isn't one
     this covers (not two side lines, or a building apart from the main one). `eaves_confirmed`: the architect has
-    said what reaches past the walls is an eave (only the first reading)."""
+    said what reaches past the walls is an eave (only the first reading). `critical`: the distances where the rule
+    turns (a side able to carry the larger minimum; an eave at a limit): each side's shifts include the ones that
+    put its walls or its eaves exactly there, and a hair short of it, so a world between the sampled shifts is never
+    missed (#22 review round 1: walls 9.25 ft on the tax map reach 10 ft at +0.75, where the eave fails)."""
     lot = design["lot"]
     main, detached = main_and_detached(design)
     if len(lot["sides"]) != 2 or detached or lot.get("unsure") or lot.get("corner"):
@@ -352,13 +355,23 @@ def side_worlds(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE, eaves_c
         return None
     names = sorted(lot["sides"])
     tol = tolerance_ft if tolerance and not lot["surveyed"] else 0.0
-    shifts = sorted({-tol, -tol / 2, 0.0, tol / 2, tol})
     out = []
     for to_walls in (walls,) if eaves_confirmed else (walls, full):     # what reaches past the walls an eave, or not
         w = {n: _dist(to_walls, lot["sides"][n]) for n in names}
         e = {n: _dist(full, lot["sides"][n]) for n in names}
-        for d in [dict(zip(names, ds)) for ds in ((a, b) for a in shifts for b in shifts)]:
-            out.append(({n: w[n] + d[n] for n in names}, {n: e[n] + d[n] for n in names}))
+        shifts = {}
+        for n in names:
+            at = {-tol, -tol / 2, 0.0, tol / 2, tol}
+            if tol:
+                for c in critical:
+                    for v in (w[n], e[n]):
+                        at |= {x for x in (c - v, c - v - 1e-4) if -tol <= x <= tol}
+            shifts[n] = sorted(at)
+        a, b = names
+        for da in shifts[a]:
+            for db in shifts[b]:
+                d = {a: da, b: db}
+                out.append(({n: w[n] + d[n] for n in names}, {n: e[n] + d[n] for n in names}))
     return out
 
 
@@ -378,7 +391,8 @@ def unequal_sides_eaves(walls: dict, eaves: dict, small: float, large: float) ->
 def unequal_sides_verdict(design, small: float, large: float, tolerance=False, eaves_confirmed=False) -> str | None:
     """The eaves rule for two side minimums that differ over every world (side_worlds): PASS only if it passes in
     every one, FAIL only if it fails in every one, else UNDECIDED. None when side_worlds doesn't cover the design."""
-    worlds = side_worlds(design, tolerance, eaves_confirmed=eaves_confirmed)
+    worlds = side_worlds(design, tolerance, eaves_confirmed=eaves_confirmed,
+                         critical=(large, large - 2, small - 2))
     if worlds is None:
         return None
     got = {unequal_sides_eaves(w, e, small, large) for w, e in worlds}
