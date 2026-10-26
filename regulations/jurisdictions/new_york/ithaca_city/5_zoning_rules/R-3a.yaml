@@ -1260,9 +1260,9 @@ rules:
         page: 3
         cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-3A}
     examples:
-      - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 12, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 125, building_height: 38}
+      - given: {side_yard_smaller: 9, side_yard_larger: 14, front_yard_eaves: 12, side_yard_smaller_eaves: 8.5, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 125, building_height: 38}
         expect: pass
-        note: eaves clear of every required yard
+        note: eaves clear of every required yard, whichever side is the 10 ft one
       - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 125, building_height: 38}
         expect: pass
         note: eaves exactly 2 ft into the front (10 − 2), narrower side (5 − 2), wider side (10 − 2) and rear (20% of 125 = 25, − 2) yards
@@ -1314,6 +1314,38 @@ rules:
       - given: {side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
         expect: fail
         note: at 45 ft only the 16 ft side can be the 15 ft one, and its eave (9 ft) is over 2 ft into it
+      # each figure in the which-side review decides an answer (the rear yard's 20%, its 50 ft cap; the bonus)
+      - given: {side_yard_smaller: 9, side_yard_larger: 9, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 3, rear_yard_eaves: 18, lot_depth: 90, building_height: 30}
+        expect: needs_review
+        note: neither side's walls 10 ft from the line; the rear eave exactly 2 ft into the 20 ft rear yard (20% of 90 is 18, raised to 20)
+      - given: {side_yard_smaller: 4.5, side_yard_larger: 9, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 18, lot_depth: 90, building_height: 30}
+        expect: needs_review
+        note: neither side 10 ft; the wider side's eave fits 10 ft, the narrower's only 5 ft
+      - given: {side_yard_smaller: 9, side_yard_larger: 9, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 3, rear_yard_eaves: 48, lot_depth: 300, building_height: 30}
+        expect: needs_review
+        note: the rear eave exactly 2 ft into the 50 ft rear yard (20% of 300 is 60, capped at 50)
+      - given: {side_yard_smaller: 4.5, side_yard_larger: 9, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 48, lot_depth: 300, building_height: 30}
+        expect: needs_review
+      - given: {side_yard_smaller: 14, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 90, building_height: 45}
+        expect: needs_review
+        note: 45 ft tall (every yard 5 ft more), neither side's walls 15 ft from the line; the eaves fit one way only
+      - given: {side_yard_smaller: 14, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 7.5, rear_yard_eaves: 23, lot_depth: 90, building_height: 45}
+        expect: fail
+        note: the eave on one side is over 2 ft into even its 10 ft yard
+      - given: {side_yard_smaller: 14, side_yard_larger: 14, front_yard_eaves: 12.5, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 90, building_height: 45}
+        expect: fail
+        note: the front eave fails (13 ft at 45 ft tall), whichever side is the 15 ft one
+      - given: {side_yard_smaller: 14, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 22.5, lot_depth: 90, building_height: 45}
+        expect: fail
+        note: the rear eave fails (23 ft at 45 ft tall), whichever side is the 15 ft one
+      - given: {side_yard_smaller: 9.5, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 90, building_height: 45}
+        expect: needs_review
+      - given: {side_yard_smaller: 9.5, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 7.5, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 90, building_height: 45}
+        expect: fail
+      - given: {side_yard_smaller: 9.5, side_yard_larger: 14, front_yard_eaves: 12.5, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 90, building_height: 45}
+        expect: fail
+      - given: {side_yard_smaller: 9.5, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 22.5, lot_depth: 90, building_height: 45}
+        expect: fail
     notes: >-
       The yards themselves (R-3a.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
       its eaves left out; this rule measures the same yards to the outermost part, eaves included, and lets that be up
