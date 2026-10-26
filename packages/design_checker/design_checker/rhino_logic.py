@@ -24,6 +24,8 @@ def on_layer(full_path, layer):
 
 
 CONTEXT = "Gordium::Context"            # the context map (neighbouring parcels, streets, notes): drawing only
+ENVELOPE = "Gordium::Envelope"          # the curves the architect snaps to (the buildable outline, the yard lines)
+ENVELOPE_KEY = "gordium_envelope"       # on each of those curves: what it is (Gordium's own, redrawn each check)
 CONTEXT_KEY = "gordium_context"         # on each context object: the endpoints.yaml source it was drawn from
 HOLDING_LAYER = "Gordium::Replaced (Cancel restores)"   # objects a start box replaced, until Draw (BoxSession)
 HELD_FROM = "gordium_held_from"                          # on each held object: the layer it came from
@@ -49,6 +51,25 @@ class BoxGate:
         self.open = False
 
 
+def envelope_curves(plan):
+    """The curves drawn on Gordium::Envelope for the architect to snap to (Osnap), from check.plan, in feet: each
+    {"points" [[x, y], ...], "closed", "dashed", "what"}. The buildable outline (on a tax-map lot the cautious one,
+    every lot line 2'-0" nearer, solid; the outline as drawn dashed) and each yard's required line in full (dashed
+    on a tax-map lot: it is as drawn). Never measured (classify); redrawn at every check."""
+    plan = plan or {}
+    cautious, drawn = plan.get("buildable_cautious"), plan.get("buildable")
+    out = []
+    if cautious:
+        out.append({"points": cautious, "closed": True, "dashed": False, "what": "buildable outline (cautious)"})
+    if drawn:
+        out.append({"points": drawn, "closed": True, "dashed": bool(cautious),
+                    "what": "buildable outline" + (" (as drawn)" if cautious else "")})
+    for y in plan.get("yard_lines") or []:
+        out.append({"points": y["points"], "closed": False, "dashed": bool(cautious),
+                    "what": "required line: " + (y.get("name") or y.get("measure") or "yard")})
+    return out
+
+
 def classify(full_path, kind, holds_building=False):
     """What the Rhino command does with one object, from its layer's full path and its geometry's type name:
     "lot" (a curve on the lot layer: a possible lot outline), "building" (a solid or mesh on the building layer),
@@ -58,6 +79,8 @@ def classify(full_path, kind, holds_building=False):
     if on_layer(full_path, HOLDING_LAYER):           # held by an open start box: never measured or sent
         return None
     if on_layer(full_path, CONTEXT):                 # the neighbourhood drawn for context: never measured or sent
+        return None
+    if on_layer(full_path, ENVELOPE):                # the curves to snap to: Gordium's, never measured or sent
         return None
     if on_layer(full_path, MASSING):
         full_path = LAYERS["building"]

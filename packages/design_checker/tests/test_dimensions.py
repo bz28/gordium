@@ -535,3 +535,47 @@ def test_the_limit_label_keeps_off_what_is_already_drawn():
     taken = [(100, 205, 160, 30)]                                 # the height's number on the left
     spot = logic.limit_label_spot(((250, 220), (560, 220)), house, 140, 30, view=(1000, 640), taken=taken)
     assert spot is not None and spot[0] >= 560                    # past the right end instead
+
+
+
+# ---- feature 4: Osnap curves on a locked Gordium::Envelope layer (Ben, 2026-10-21) ---------------------------------
+
+def test_the_curves_to_snap_to_are_the_outline_and_every_yard_line_cautious_on_a_tax_map_lot():
+    from shapely.geometry import LineString, Polygon
+    from design_checker.check import check_site
+    survey = check_site(_plot(box(12, 27, 38, 65)), {**FACTS, "jurisdiction": CITY})["plan"]
+    curves = logic.envelope_curves(survey)
+    assert [c["what"] for c in curves][0] == "buildable outline" and not any(c["dashed"] for c in curves)
+    lines = [c for c in curves if c["what"].startswith("required line")]
+    assert len(lines) == 4                                        # front, two sides, rear: each in full
+    front = next(c for c in lines if "Front" in c["what"])
+    assert all(abs(p[1] - 25) < 1e-6 for p in front["points"]) and LineString(front["points"]).length == pytest.approx(50)
+    tax = check_site(_plot(box(12, 27, 38, 65)), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})["plan"]
+    curves = logic.envelope_curves(tax)
+    cautious, drawn = curves[0], curves[1]
+    assert (cautious["what"], cautious["dashed"], drawn["dashed"]) == ("buildable outline (cautious)", False, True)
+    inner, outer = Polygon(cautious["points"]), Polygon(drawn["points"])
+    assert outer.contains(inner) and outer.exterior.distance(inner.exterior) == pytest.approx(2.0)   # 2'-0" in
+    assert all(c["dashed"] for c in curves[2:])                   # the yard lines as drawn: dashed
+
+
+def test_the_envelope_layer_is_never_measured():
+    assert logic.classify("Gordium::Envelope", "PolylineCurve") is None
+    assert logic.classify("Gordium::Envelope", "Brep") is None
+    assert logic.envelope_curves(None) == []
+
+
+def test_the_plugin_redraws_them_each_check_locked_tagged_and_out_of_undo():
+    import ast
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fns = {n.name: ast.get_source_segment(src, n) for n in ast.parse(src).body if isinstance(n, ast.FunctionDef)}
+    body = fns["_envelope_curves"]
+    assert body.index("doc.UndoRecordingEnabled = bool(was and doc.UndoRecordingIsActive)") < body.index("doc.Objects.AddPolyline(") \
+        < body.index("doc.UndoRecordingEnabled = was")
+    assert "_set_own_lock(doc, layer, True)" in body.split("finally:")[1]              # locked again, whatever
+    assert "attrs.SetUserString(logic.ENVELOPE_KEY, c[\"what\"])" in body
+    assert "if old.Attributes.GetUserString(logic.ENVELOPE_KEY):" in body              # only Gordium's replaced
+    assert "layer.IsVisible = bool(STATE.get(\"envelope_on\", True))" in body          # Show buildable envelope
+    run = fns["run_check"]
+    assert "_envelope_curves(doc, result.get(\"plan\"), sent)" in run and "_envelope_curves(doc, None, facts)" in run

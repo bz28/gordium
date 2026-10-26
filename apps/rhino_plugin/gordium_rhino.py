@@ -2427,6 +2427,7 @@ def run_check(doc, report=True):
         o.north = _north(doc, facts)
         o.unmeasured = _unmeasured_outlines(doc, extras.get("not_included"))
         _draw_plan(doc, o, result, sent)
+        _envelope_curves(doc, result.get("plan"), sent)  # the curves to snap to, redrawn (never measured)
         STATE["statuses_by_doc"][doc.RuntimeSerialNumber] = result["statuses"]
         STATE["last"] = {"summary": result["summary"], "view_summary": view["summary"], "state": view["state"],
                          "rows": [{k: r.get(k) for k in ("Requirement", "Table limit", "Proposed", "Units",
@@ -2459,6 +2460,7 @@ def run_check(doc, report=True):
         return result
     except Exception as e:
         _clear(o)
+        logic.guard(lambda: _envelope_curves(doc, None, facts), "clear the curves to snap to")()   # none stale
         o.doc = doc.RuntimeSerialNumber
         o.message = ("needs_review", "⚠ Check could not run", [str(e)[:120]])
         STATE["last"] = {"error": str(e), "at": time.time()}
@@ -2857,6 +2859,52 @@ def gordium_start():
 
 CONTEXT_GREYS = {"Parcels": (150, 150, 150), "Streets": (120, 120, 120), "Buildings": (135, 135, 135),
                  "Notes": (110, 110, 110)}
+
+
+ENVELOPE_BLUE = (29, 95, 138)
+
+
+def _envelope_curves(doc, plan, facts):
+    """The buildable outline and each yard's required line as real curves on a locked Gordium::Envelope layer, for
+    the architect to snap to (Osnap; Ben, 2026-10-21): on a tax-map lot the cautious outline solid and the outline
+    as drawn dashed (logic.envelope_curves). Each is tagged Gordium's (ENVELOPE_KEY), never measured
+    (logic.classify), and replaced at every check (the old ones deleted first); none of it is recorded for Undo,
+    so the architect's Undo never stops on them. The layer is shown only with "Show buildable envelope". `plan`
+    None: only the old ones go."""
+    index = _layer(doc, logic.ENVELOPE)
+    layer = doc.Layers[index]
+    was = doc.UndoRecordingEnabled
+    # (inside a command's own undo step, GordiumStart's, they join it: an Undo of that step takes them too, and the
+    # next check draws them again; anywhere else none of it is recorded)
+    doc.UndoRecordingEnabled = bool(was and doc.UndoRecordingIsActive)
+    try:
+        _set_own_lock(doc, layer, False)
+        if layer.Color.ToArgb() == System.Drawing.Color.Black.ToArgb():          # a new layer: Gordium's blue
+            layer.Color = System.Drawing.Color.FromArgb(*ENVELOPE_BLUE)
+        for old in list(doc.Objects.FindByLayer(layer) or []):
+            if old.Attributes.GetUserString(logic.ENVELOPE_KEY):
+                doc.Objects.Unlock(old.Id, True)
+                doc.Objects.Delete(old.Id, True)
+        z = _lot_level(doc, facts or {})
+        dashed = doc.Linetypes.Find("Dashed")
+        for c in logic.envelope_curves(plan):
+            pts = [_model_point(doc, p, z) for p in c["points"]]
+            if c["closed"]:
+                pts.append(pts[0])
+            if len(pts) < 2:
+                continue
+            attrs = Rhino.DocObjects.ObjectAttributes()
+            attrs.LayerIndex = index
+            attrs.Name = "Gordium: " + c["what"]
+            attrs.SetUserString(logic.ENVELOPE_KEY, c["what"])
+            if c["dashed"] and dashed >= 0:
+                attrs.LinetypeSource = Rhino.DocObjects.ObjectLinetypeSource.LinetypeFromObject
+                attrs.LinetypeIndex = dashed
+            doc.Objects.AddPolyline(pts, attrs)
+        layer.IsVisible = bool(STATE.get("envelope_on", True))
+    finally:
+        _set_own_lock(doc, layer, True)
+        doc.UndoRecordingEnabled = was
 
 
 def _context_layer(doc, name):
