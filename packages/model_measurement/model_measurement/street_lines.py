@@ -13,6 +13,8 @@ even one rounded into several short pieces) are an open question, never measured
 import math
 
 TURN_LIMIT_DEG = 30.0       # street lines turning more than this in all, their street unknown: one street or two?
+NOISE_FT = 0.05             # a stretch of lot line shorter than this (0.6 in) has no direction of its own: a corner
+                            # point drawn twice, or float noise, never reads as a turn (street-run review round 5)
 
 
 def _near(p, q, tolerance):
@@ -46,7 +48,16 @@ def heading_change(lines, tolerance=0.5):
     points = chain(lines, tolerance)
     if points is None:
         return None
-    steps = [(b[0] - a[0], b[1] - a[1]) for a, b in zip(points, points[1:]) if math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-9]
+    # the direction is read over stretches of at least NOISE_FT (a 0.005 ft piece pointing anywhere read a
+    # straight street as turning 53°); a turn between longer stretches is still all there
+    ends, anchor = [], points[0]
+    for p in points[1:]:
+        if math.hypot(p[0] - anchor[0], p[1] - anchor[1]) >= NOISE_FT:
+            ends.append((anchor, p))
+            anchor = p
+    if anchor != points[-1]:                    # what is left at the end goes on the last stretch
+        ends = ends[:-1] + [(ends[-1][0], points[-1])] if ends else [(points[0], points[-1])]
+    steps = [(b[0] - a[0], b[1] - a[1]) for a, b in ends if math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-9]
     run, low, high = 0.0, 0.0, 0.0
     for u, v in zip(steps, steps[1:]):
         turn = math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]))

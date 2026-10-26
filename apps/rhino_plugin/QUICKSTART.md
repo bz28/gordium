@@ -244,7 +244,10 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
      survey…** to pick your surveyed outline instead.
    - **Street side**: the lot line on the street (highlighted). **Change…** to pick another. **Corner lot?**: answer
-     it (one street or two). Gordium never guesses: until you answer, the yards need review.
+     it (one street or two). Gordium never guesses: until you answer, the yards need review. One click on a street
+     keeps the whole street, however many pieces the tax map drew it in, and stops at the corner; the command line
+     says what it kept ("Ithaca Rd: 8 lot-line pieces, 75'-10" of frontage"). Where the lot line bends with no clear
+     corner, Gordium asks; only your No leaves the bend out (Enter keeps it, to be safe).
    - **Ground**: for now Gordium assumes the ground is **flat at the lot level and finished** (no regrading), so
      height and stories are checked; their rows say "assuming flat ground", and so does the report. (Spot grades,
      terrain and regrading come back in a later release.)

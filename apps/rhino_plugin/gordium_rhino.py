@@ -291,7 +291,9 @@ def suggested_facts(doc, zones):
     reads the model."""
     lots, buildings, _ = _sorted_objects(doc)
     lot_data = [{"id": str(o.Id), "area": _area(o.Geometry), "bottom": o.Geometry.GetBoundingBox(True).Min.Z,
-                 "segments": [((a.X, a.Y), (b.X, b.Y)) for a, b in _segments(o.Geometry)]} for o in lots]
+                 "segments": [((a.X, a.Y), (b.X, b.Y)) for a, b in _segments(o.Geometry)],
+                 "segments_ft": [(_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]) for a, b in _segments(o.Geometry)]}
+                for o in lots]                                     # (the street decided in feet: review round 6)
     boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
     building_data = [{"id": str(o.Id), "bottom": b.Min.Z, "volume": b.Diagonal.X * b.Diagonal.Y * b.Diagonal.Z}
                      for o, b in zip(buildings, boxes)]
@@ -1346,21 +1348,52 @@ def _get_point(prompt):
     return Rhino.Input.RhinoGet.GetPoint(prompt, True)
 
 
+def _ask_street_more(question):
+    """True (Yes), False (No), or None when not answered (Enter or Esc): only the architect's No leaves the bend
+    out; not answered, it is kept as street, the cautious way (street-run review round 3, F3), and the box's pick
+    goes on."""
+    go = Rhino.Input.Custom.GetOption()
+    go.SetCommandPrompt(question)
+    yes = go.AddOption("Yes")
+    no = go.AddOption("No")
+    go.AcceptNothing(True)
+    if go.Get() != Rhino.Input.GetResult.Option:
+        return None
+    return True if go.OptionIndex() == yes else False if go.OptionIndex() == no else None
+
+
+def _clicked_piece(doc, lot, point):
+    """The lot line a click is on: the nearest piece of the outline that is a line at all (a point drawn twice,
+    a piece of no length, is never clicked: it would be a street of 0'-0"; street-run review round 4, F1)."""
+    real = [s for s in _segments(lot.Geometry)
+            if not logic.is_tiny([_feet_point(doc, s[0])[:2], _feet_point(doc, s[1])[:2]])]
+    return min(real or _segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+
+
+def _outline(doc, lot):
+    """The lot outline's pieces, in feet: [[x, y], [x, y]] each, as a click on one is read."""
+    return [[_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]] for a, b in _segments(lot.Geometry)]
+
+
 def _box_pick(doc, what, facts, saved_ui):
     """One pick the start box asked for, with the box hidden. Esc or Enter: nothing changes."""
     try:
         if what == "street" and facts.get("corner_lot") is True:   # a corner lot: every line on a street
             lot = _find(doc, facts.get("lot_id") or "")
-            picks = []
+            picks, runs = [], []
+            outline = _outline(doc, lot) if lot is not None else []
+            names = logic.outline_names(outline, facts.get("street_line"), facts.get("street_ids"))
             while lot is not None:
                 rc, point = _get_point(logic.street_pick_prompt(True, len(picks)))
                 if rc != Rhino.Commands.Result.Success:              # Enter: done (Esc: done too)
                     break
-                a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+                a, b = _clicked_piece(doc, lot, point)
                 picks.append([_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]])
-            if picks:
-                logic.set_street_lines(facts, logic.street_lines_after_picks(facts.get("street_line"), picks, True))
-                # (two streets: unnamed until named)
+                # the whole street that piece is on, never round a corner; said, and an unclear end asked
+                runs, said = logic.add_street_pick(runs, outline, picks[-1], names, _ask_street_more)
+                say(said)
+            if picks:                    # (the clicks themselves if none is a piece of the outline: never none)
+                logic.set_street_lines(facts, *logic.street_lines_of(outline, runs, names, picks))
                 saved_ui.pop("street_name", None)                    # (no one name for them)
                 saved_ui["street_source"] = logic.ENTERED
         elif what == "street":
@@ -1368,7 +1401,7 @@ def _box_pick(doc, what, facts, saved_ui):
             if lot is not None:
                 rc, point = _get_point(logic.street_pick_prompt(False, 0))
                 if rc == Rhino.Commands.Result.Success:
-                    a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+                    a, b = _clicked_piece(doc, lot, point)
                     picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
                     name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
                                                         picked, ids=facts.get("street_ids"))   # the line's own street?
@@ -1379,8 +1412,10 @@ def _box_pick(doc, what, facts, saved_ui):
                         got = ask.GetLiteralString()
                         name = (ask.StringResult() or "").strip() or None \
                             if got == Rhino.Input.GetResult.String else None
-                    lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name)
+                    lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,
+                                                   outline=_outline(doc, lot), ask=_ask_street_more)
                     logic.set_street_lines(facts, lines, ids)   # the name on the clicked line only
+                    say(logic.street_words(name or "This street", lines, ids))
                     saved_ui["street_name"] = name
                     saved_ui["street_source"] = logic.ENTERED
         elif what == "lot":                          # Use my survey: the surveyed outline
@@ -1582,7 +1617,7 @@ def _change_facts(doc, facts, options):
     _highlight(doc, facts)
     lot = _find(doc, facts.get("lot_id") or "")
     if lot is not None:
-        picked = []
+        picked, runs, outline = [], [], _outline(doc, lot)
         while True:                      # every lot line on a street (both streets on a corner lot)
             keeps = not picked and logic.street_enter_keeps(facts)
             prompt = "Click a lot line on the street" + (" (Enter when done)" if picked else
@@ -1594,14 +1629,17 @@ def _change_facts(doc, facts, options):
                     break
                 Rhino.RhinoApp.WriteLine("Gordium: this lot has no street line yet; click one (Esc cancels)")
                 continue
-            a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+            a, b = _clicked_piece(doc, lot, point)
             line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
             if line not in picked:
                 picked.append(line)
+                # the whole street that piece is on, never round a corner (unnamed: from the drawing alone)
+                runs, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)
+                say(said)
             if not facts.get("corner_lot"):
                 break
-        if picked:
-            logic.set_street_lines(facts, picked)          # unnamed: the lines picked here, never the old names
+        if picked:                                         # unnamed: the lines picked here, never the old names
+            logic.set_street_lines(facts, logic.street_lines_of(outline, runs, None, picked)[0])
         _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
