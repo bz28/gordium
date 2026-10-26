@@ -517,22 +517,32 @@ NOTICE_MIN_CHARS = 24                        # ...never narrower than this many 
 
 def notice_lines(lines, view_w, share=NOTICE_MAX_SHARE, size=13):
     """The notice's lines wrapped to at most `share` of the view's width (gordium_ui text_box_size's measure: size *
-    0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line. Broken only between its " · " parts,
-    never inside one (a measurement like 7'-0 5/8" stays on one line: review round 1); a part longer than the line
-    stays whole; a wrapped line's rest indented under its first. Zoomed in tight, one long line was a bar across the
-    whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
+    0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line. Broken between its " · " parts first;
+    a part too long for a line is broken between its words, never inside a measurement (7'-0 5/8" stays whole:
+    review round 1); a wrapped line's rest indented under its first. Zoomed in tight, one long line was a bar across
+    the whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
+    import re
+    import textwrap
     chars = max(NOTICE_MIN_CHARS, int((view_w * share - 22) / (size * 0.6)))
+    keep = re.compile(r"(\d+'-\d+) (\d+/\d+\")")                     # a measurement's own space: never a break
     out = []
     for line in lines:
-        parts, row = line.split(" · "), ""
-        for part in parts:
-            if row and len(row) + 3 + len(part) > chars:
+        row = ""
+        for part in line.split(" · "):
+            part = keep.sub("\\1\u00a0\\2", part)
+            if row and len(row) + 3 + len(part) <= chars:
+                row += " · " + part
+                continue
+            if row:
                 out.append(row)
-                row = "  " + part
-            else:
-                row = row + " · " + part if row else part
+            pieces = textwrap.wrap(part, chars - (2 if out or row else 0), break_long_words=False,
+                                   break_on_hyphens=False) or [part]
+            first = "  " if out else ""
+            for k, piece in enumerate(pieces[:-1]):
+                out.append((first if k == 0 else "  ") + piece)
+            row = (first if len(pieces) == 1 else "  ") + pieces[-1]
         out.append(row)
-    return out
+    return [t.replace("\u00a0", " ") for t in out]
 
 
 def notice_box(lines, size=13):
@@ -541,8 +551,8 @@ def notice_box(lines, size=13):
 
 
 def notice_place(view_w, view_h, lines, model, taken=(), size=13):
-    """The notice as drawn in a view: (lines, (left, top), width, height), or None. Its most compact box first (40 %
-    of the view's width), then wider ones up to NOTICE_MAX_SHARE (fewer, longer lines: a band that fits above or
+    """The notice as drawn in a view: (lines, (left, top), width, height), or None. Its most compact box first (lines
+    of at most 40 % of the view's width), then wider ones up to NOTICE_MAX_SHARE, never a box wider than that (fewer, longer lines: a band that fits above or
     below the model where a tall box can't), each in the first corner clear of the model and of every box in `taken`
     (notice_spot); None when no box fits a clear corner: then it is not drawn over the model, and the panel's
     message line says it (review round 1: one narrow box alone hid the side yard's notice in the default framed
@@ -551,6 +561,8 @@ def notice_place(view_w, view_h, lines, model, taken=(), size=13):
     for share in NOTICE_SHARES:
         wrapped = notice_lines(lines, view_w, share, size)
         w, h = notice_box(wrapped, size)
+        if w > view_w * NOTICE_MAX_SHARE:    # a part that won't break narrower: never wider than the limit (review)
+            continue
         spot = notice_spot(view_w, view_h, w, h, model, taken)
         if spot is not None:
             return wrapped, spot, w, h
@@ -569,7 +581,8 @@ def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
-    clear = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
+    clear = [(x, y) for x, y in spots if 0 <= x and x + w <= view_w and 0 <= y and y + h <= view_h   # on screen
+             and not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
              and not (model and overlap(x, y, model))]
     return clear[0] if clear else None
 
