@@ -238,3 +238,16 @@ def test_an_ru_two_family_lot_under_15000_sf_does_not_comply():
     """100 x 140 = 14,000 sf: RU's two-family minimum is 15,000 sf (the same house complies in R-3b: 3,000 sf)."""
     assert _view("RU", "two_family", 100, 140)["RU.lot_area_two_family"]["status"] == present.FAILS
     assert _view("R-3b", "two_family", 100, 140)["R-3b.lot_area_two_family"]["status"] == present.COMPLIES
+
+
+def test_no_worked_example_puts_an_eave_farther_from_its_line_than_its_wall():
+    """An eave reaches out from its wall, so on each side the yard to the eaves is never more than the yard to the
+    walls (review round 6: some which-side examples had walls 6 ft and eaves 8 ft from the same line, and the chart
+    probes started from one of them)."""
+    bad = []
+    for rule in RULES.values():
+        for i, ex in enumerate(rule.get("examples", [])):
+            g = ex["given"]
+            bad += [(rule["id"], i, y) for y in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
+                    if y in g and f"{y}_eaves" in g and g[f"{y}_eaves"] > g[y]]
+    assert bad == []

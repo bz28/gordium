@@ -999,7 +999,8 @@ rules:
         accessory buildings the City's texts point both ways. For the main building only: the special purpose sheet's
         minimum "Only applies to new construction of non-industrial primary structures" (p.7 note 4), Collegetown's
         minimum is set on a "Primary Use" row (p.13, where the maximum has a row for accessory use too), and §325-16G
-        says "no primary use building shall be erected that is less than two stories" (p.48): where the City says whom
+        says, in the CBD-60 to CBD-140, B-1a, B-1b, B-2c and B-2d districts, "no primary use building shall be erected
+        that is less than two stories" (p.48): where the City says whom
         a minimum reaches, it is the primary building. For every building: note 11 and §325-8A(15) ("Buildings
         hereafter erected") don't say primary (note 2's footprint cap does), §325-25 sets no accessory height of its
         own, and the waterfront sheet frees only "Accessory structures of less than 250 SF" (p.11 note 6), which
@@ -1490,7 +1491,7 @@ rules:
         page: 3
         cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-3AA}
     examples:
-      - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 12, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+      - given: {side_yard_smaller: 8, side_yard_larger: 14, front_yard_eaves: 12, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
         expect: pass
         note: eaves clear of every required yard
       - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
@@ -1582,18 +1583,20 @@ rules:
       - given: {side_yard_smaller: 14, side_yard_larger: 15, front_yard_eaves: 20, side_yard_smaller_eaves: 7, side_yard_larger_eaves: 12, rear_yard_eaves: 56, lot_depth: 300, building_height: 38}
         expect: needs_review
         note: 'on a 300 ft lot (rear capped at 50 ft, +3); the narrower side''s eave fits one way only'
-      - given: {side_yard_smaller: 9, side_yard_larger: 12, front_yard_eaves: 20, side_yard_smaller_eaves: 12, side_yard_larger_eaves: 8, rear_yard_eaves: 48, lot_depth: 120, building_height: 38}
+      - given: {side_yard_smaller: 11.5, side_yard_larger: 12.5, front_yard_eaves: 20, side_yard_smaller_eaves: 11.5, side_yard_larger_eaves: 8, rear_yard_eaves: 48, lot_depth: 120, building_height: 38}
         expect: needs_review
         note: 'neither wall is 13 ft from its line at 38 ft; the eaves fit only with the wider side the 8 ft one'
     notes: >-
       The yards themselves (R-3aa.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
       its eaves left out; this rule measures the same yards to the outermost part, eaves included, and lets that be up
-      to 2 ft less. Each side's eaves are measured to that side's own lot line: side_yard_smaller_eaves to the line of
+      to 2 ft less. Each side's eaves are measured to that side's own lot line (#18's measuring, c613837, which
+      reaches this branch with the stack): side_yard_smaller_eaves to the line of
       the narrower side yard to the walls, side_yard_larger_eaves to the other's, so each eave is held to the minimum its
       side carries. Which side carries the 10 ft minimum is the walls' to say: only the side whose walls are at least
       10 ft from its line can. Where both can, or neither, either side may be, and the eaves must fit both ways,
       else needs review (review_when: Gordium's cautious reading, to confirm with the architects; the
-      chart says only that one side yard is at least 10 ft and the other at least 5 ft), as R-3a's eaves rule does. A
+      chart says only that one side yard is at least 10 ft and the other at least 5 ft), the pattern of R-3a's eaves
+      rule after #18's P0 (06fea9c, c0e6d3c; with the stack). A
       massing model shows eaves, not windowsills, belt courses or cornices: those are for the architect to check. On a
       corner lot every yard facing a street is a front yard (§325-19C).
     drafted_by: claude

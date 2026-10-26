@@ -1305,7 +1305,7 @@ rules:
         page: 3
         cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-3B}
     examples:
-      - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 12, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 125, building_height: 38}
+      - given: {side_yard_smaller: 8, side_yard_larger: 14, front_yard_eaves: 12, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 125, building_height: 38}
         expect: pass
         note: eaves clear of every required yard
       - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 125, building_height: 38}
@@ -1353,12 +1353,21 @@ rules:
         expect: needs_review
         note: neither side's walls are 10 ft from its line (R-3b.side_yards fails); which side's eave the 10 ft limit is for is open
       # the height bonus moves which side can carry the 10 ft minimum (45 ft tall: 5 ft more, 15 and 10)
-      - given: {side_yard_smaller: 9, side_yard_larger: 12, front_yard_eaves: 20, side_yard_smaller_eaves: 9, side_yard_larger_eaves: 13, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
+      - given: {side_yard_smaller: 13, side_yard_larger: 14, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
         expect: needs_review
-        note: at 45 ft neither side's walls are 15 ft from the line, so either side may be the larger one; the eaves fit one way only
-      - given: {side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
+        note: at 45 ft neither side's walls are 15 ft from the line, so either side may be the larger one; the eaves fit one way only (the wider side's 9 ft eave only as the 10 ft one)
+      - given: {side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 12, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
         expect: fail
         note: at 45 ft only the 16 ft side can be the 15 ft one, and its eave (9 ft) is over 2 ft into it
+      - given: {side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 12, side_yard_larger_eaves: 13, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
+        expect: pass
+        note: 'at 45 ft only the 16 ft side can be the 15 ft one (the 12 ft walls are short of it), and its eave (13 ft) fits it: no question which side is which'
+      - given: {side_yard_smaller: 13, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
+        expect: fail
+        note: 'at 45 ft the 13 ft walls are short of 15 ft, so the 16 ft side must be the 15 ft one; its 9 ft eave is short of 13 ft'
+      - given: {side_yard_smaller: 14, side_yard_larger: 15, front_yard_eaves: 20, side_yard_smaller_eaves: 9, side_yard_larger_eaves: 12, rear_yard_eaves: 48, lot_depth: 125, building_height: 43}
+        expect: needs_review
+        note: 'at 43 ft both walls clear 13 ft; the narrower side''s 9 ft eave fits only as the 8 ft side (6 ft eave), not the 13 ft one (11 ft)'
       # the which-side review part by part, above the height limit (worked by hand: at 43 ft every yard is 3 ft more: sides 13 and 8, front 13, rear 28 ft on a 125 ft lot)
       - given: {side_yard_smaller: 14, side_yard_larger: 15, front_yard_eaves: 20, side_yard_smaller_eaves: 12, side_yard_larger_eaves: 10, rear_yard_eaves: 48, lot_depth: 125, building_height: 43}
         expect: needs_review
@@ -1396,18 +1405,20 @@ rules:
       - given: {side_yard_smaller: 14, side_yard_larger: 15, front_yard_eaves: 20, side_yard_smaller_eaves: 7, side_yard_larger_eaves: 12, rear_yard_eaves: 56, lot_depth: 300, building_height: 43}
         expect: needs_review
         note: 'on a 300 ft lot (rear capped at 50 ft, +3); the narrower side''s eave fits one way only'
-      - given: {side_yard_smaller: 9, side_yard_larger: 12, front_yard_eaves: 20, side_yard_smaller_eaves: 12, side_yard_larger_eaves: 8, rear_yard_eaves: 48, lot_depth: 125, building_height: 43}
+      - given: {side_yard_smaller: 11.5, side_yard_larger: 12.5, front_yard_eaves: 20, side_yard_smaller_eaves: 11.5, side_yard_larger_eaves: 8, rear_yard_eaves: 48, lot_depth: 125, building_height: 43}
         expect: needs_review
         note: 'neither wall is 13 ft from its line at 43 ft; the eaves fit only with the wider side the 8 ft one'
     notes: >-
       The yards themselves (R-3b.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
       its eaves left out; this rule measures the same yards to the outermost part, eaves included, and lets that be up
-      to 2 ft less. Each side's eaves are measured to that side's own lot line: side_yard_smaller_eaves to the line of
+      to 2 ft less. Each side's eaves are measured to that side's own lot line (#18's measuring, c613837, which
+      reaches this branch with the stack): side_yard_smaller_eaves to the line of
       the narrower side yard to the walls, side_yard_larger_eaves to the other's, so each eave is held to the minimum its
       side carries. Which side carries the 10 ft minimum is the walls' to say: only the side whose walls are at least
       10 ft from its line can. Where both can, or neither, either side may be, and the eaves must fit both ways,
       else needs review (review_when: Gordium's cautious reading, to confirm with the architects; the
-      chart says only that one side yard is at least 10 ft and the other at least 5 ft). On a corner lot every yard facing a street is a front yard (§325-19C).
+      chart says only that one side yard is at least 10 ft and the other at least 5 ft), as R-3a's eaves rule after
+      #18's P0 (06fea9c, c0e6d3c; with the stack), whose yards and height R-3b shares. On a corner lot every yard facing a street is a front yard (§325-19C).
     drafted_by: claude
     status: draft
 
