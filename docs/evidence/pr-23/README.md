@@ -88,3 +88,26 @@ The panel tick, clicked (`context_tick_in_rhino.py` at 955d97f): **10 of 10 clai
 |---|---|
 | `106_context_top_955d97f.png` | Top view at 955d97f |
 | `106_context_perspective_955d97f.png` | The same in 3D |
+
+## Re-run at e997f0e (2026-10-25): the neighbourhood keeps its own locks; Grade's part of claim 4 is Rhino's
+
+The test as run: e997f0e's own `context_in_rhino.py`, in a copy that records every claim rather than stopping
+(`context_results_e997f0e.json`), with recorded answers. **15 of 16.** Every claim passes but claim 4's second
+part.
+
+**The fix holds.** With Grade, then "Gordium" locked, the redraw replaces (319 outlines before and after) and puts
+both locks back. Each neighbourhood layer's own lock is right: Parcels, Streets and Notes on; Buildings and
+Context off. Once "Gordium" is unlocked, Parcels, Streets and Notes are locked and Buildings isn't. A first draw
+in a file whose "Gordium" was locked beforehand gives the same locks (`first_draw_locked.json`, 595 objects drawn).
+
+**What fails is Grade, and that is Rhino, not Gordium.** Grade's own lock reads off already before the redraw
+(`grade_own_lock_before: false`), and Grade is unlocked once "Gordium" is. A probe with no Gordium code
+(`grade_lock_probe.json`) shows Rhino 8 does this by itself: a sublayer locked by `IsLocked`, or by
+`SetPersistentLocking` while its parent is unlocked, records no lock of its own. When its parent is locked and
+unlocked, it comes out unlocked. So "Grade still locked after unlocking Gordium" can't hold for a layer locked
+before its parent. The claim should drop that part, or lock Grade after "Gordium" is locked.
+
+| File | What it shows |
+|---|---|
+| `106_context_top_e997f0e.png` | Top view at e997f0e |
+| `106_context_perspective_e997f0e.png` | The same in 3D |

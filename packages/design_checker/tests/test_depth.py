@@ -90,16 +90,18 @@ def test_the_yard_dimensions_stand_just_above_the_lots_own_level():
     assert logic.dim_level(412.0) == pytest.approx(412.1) and logic.dim_level(None) == pytest.approx(0.1)
     plan = _body("_draw_plan")
     assert "z = logic.dim_level(_lot_level(doc, facts))" in plan          # the one lot-level helper (round 2)
-    assert plan.count(", z), _model_point(doc,") == 2 and ", 0.1)" not in plan
+    assert plan.count(", z), _model_point(doc,") == 4                 # the dims, required lines and their options
+    assert "_model_point(doc, y[\"points\"][0], 0.1)" not in plan and "_model_point(doc, r[0], 0.1)" not in plan
 
 
 def test_off_plan_the_dimensions_are_drawn_in_the_model_and_not_over_the_solids():
     screen = _body("draw_screen")
     assert "flat = logic.lines_on_top(" in screen
-    assert "if shown and flat else []" in screen                 # the faint required lines: on screen in plan only
-    assert "        if flat:\n            _dimension(d, e.Viewport, line, color)" in screen   # the yards' too
+    flat_block = screen[screen.index("        if flat:"):]
+    assert "_required(d, r, tag, dark, box)" in flat_block.split("_dimension(d, e.Viewport, chosen, color)")[0]
+    assert "            _dimension(d, e.Viewport, chosen, color)" in flat_block   # required lines and dims: plan only
     height = screen[screen.index("if height is not None and elevation and zoomed_in:"):]
-    assert "_dimension(" not in height.split("for point, text, edge in")[0]   # the height's: in the model
+    assert "_dimension(d, " not in height.split("limit = getattr(o, \"height_limit\"")[0]   # the height's: in the model
     dims = _body("_scene_dims")
     assert dims.count("_model_dimension(d, e.RhinoDoc,") == 2 and "logic.dims_shown(zoomed_in, elevation)" in dims
     assert "d.Draw2dLine" not in dims and "d.Draw2dLine" not in _body("_model_dimension")
@@ -115,6 +117,8 @@ def test_off_plan_a_dimension_has_the_same_halo_as_on_screen():
     """The Rhino check of #29 asked for a halo so a dimension reads over the red and amber; off plan they are drawn
     in the model (after the colours: _scene_dims comes after the coloured parts in draw_scene), on the same halo."""
     body = _body("_model_dimension")
-    assert "for ink, width in ((halo, 2 + 2 * logic.HALO_PX), (color, 2)):" in body
+    # the halo first, writing no depth (round 4: else it could hide its own coloured line drawn at its depth)
+    assert body.index("_see_through(d, True)") < body.index("d.DrawLine(stroke, halo,") \
+        < body.index("_see_through(d, False)") < body.index("d.DrawLine(stroke, color, 2)")
     scene = _body("draw_scene")
     assert scene.index("d.DrawBrepShaded(g, Rhino.Display") < scene.index("_scene_dims(o, e, d, dark, old)")

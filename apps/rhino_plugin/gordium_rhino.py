@@ -563,9 +563,14 @@ def _model_dimension(d, doc, line, color):
     strokes = [line] + [rg.Line(rg.Point3d(*p), rg.Point3d(*q))
                         for p, q in logic.model_ticks((a.X, a.Y, a.Z), (b.X, b.Y, b.Z), _model_length(doc, 1.0))]
     halo = ui.halo(ui.viewport_dark())
-    for ink, width in ((halo, 2 + 2 * logic.HALO_PX), (color, 2)):          # the halo under, the line over it
-        for stroke in strokes:
-            d.DrawLine(stroke, ink, width)
+    # the halo writes no depth, so the line drawn over it at the same depth is never hidden by it (round 4 of
+    # depth-lines: a halo writing depth first could hide its own coloured line); the solids still hide both
+    _see_through(d, True)
+    for stroke in strokes:
+        d.DrawLine(stroke, halo, 2 + 2 * logic.HALO_PX)
+    _see_through(d, False)
+    for stroke in strokes:
+        d.DrawLine(stroke, color, 2)
 
 
 def _scene_dims(o, e, d, dark, old):
@@ -639,6 +644,59 @@ def _dimension(d, viewport, line, color):
             d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), ink, width)
 
 
+def _required(d, line, tag, dark, box=None):
+    """A yard's required line: a clear dashed mid-grey across its dimension, with a small "min 25'-0\"" tag in
+    `box` (screen; where logic.tag_spot put it, beside one of the line's ends: Rhino check of #29, the faint line
+    barely registered)."""
+    r, g, b = logic.REQUIRED_RGB[1 if dark else 0]
+    grey = System.Drawing.Color.FromArgb(r, g, b)
+    d.DrawPatternedLine(line.From, line.To, grey, ui.DASHED, 2)
+    if tag and box is not None:
+        d.Draw2dText(tag, grey, rg.Point2d(box[0], box[1] + 2), False, logic.TAG_SIZE)
+
+
+def _dim_label(d, viewport, o, quad, text, color, dark, line, kind, anchor=None):
+    """A dimension's number in its place (logic.place_dimension): its backing and outline, and its number written
+    along the dimension (readable: logic.text_angle), in a plane facing the camera; just past the line's end, a
+    short leader to it."""
+    # the words lie in a plane through the dimension facing the camera: the plan's own plane in plan, the
+    # elevation's in Front or Right (the height's words: Rhino check of #29 at f6642a9)
+    if anchor is None:
+        anchor = rg.Point3d(0, 0, (getattr(o, "lot_outline", None) or [rg.Point3d(0, 0, 0)])[0].Z)
+    facing = rg.Plane(anchor, -viewport.CameraDirection)
+
+    def model(p):
+        ray = viewport.ClientToWorld(rg.Point2d(p[0], p[1]))
+        ok, t = rg.Intersect.Intersection.LinePlane(ray, facing)
+        return ray.PointAt(t) if ok else None
+    corners = [model(p) for p in quad]
+    if any(c is None for c in corners):
+        return
+    d.DrawPolygon(corners, ui.backing(dark), True)
+    d.DrawPolygon(corners, color, False)
+    a, b = line
+    angle = math.radians(logic.text_angle(a, b))
+    cx, cy = sum(p[0] for p in quad) / 4, sum(p[1] for p in quad) / 4
+    centre, ahead = model((cx, cy)), model((cx + math.cos(angle) * 10, cy + math.sin(angle) * 10))
+    up, below = model((cx, cy - 10)), model((cx, cy + 11))
+    if any(p is None for p in (centre, ahead, up, below)):  # a view the plan's plane can't be found in: no words
+        # (`is`, never `in`: `in` compares a Point3d to None with .NET's operator, which raises: round 7, F1)
+        return
+    xaxis = ahead - centre
+    plane = rg.Plane(centre, xaxis, rg.Vector3d.CrossProduct(facing.Normal, xaxis))
+    # (no flip: text_angle already keeps x reading left to right, so the normal x x is the screen's up, and a flip
+    # turned the words back to front: review of be133d0, F2)
+    height = centre.DistanceTo(below)
+    words = Rhino.Display.Text3d(text, plane, height)
+    words.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center
+    words.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle
+    d.Draw3dText(words, color)
+    words.Dispose()
+    if kind == "end":                                       # just past the line's end: a short leader to it
+        near = min(quad, key=lambda p: (p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2)
+        d.Draw2dLine(System.Drawing.PointF(a[0], a[1]), System.Drawing.PointF(near[0], near[1]), color, 1)
+
+
 def draw_screen(o, e):
     if not _here(o, e):
         return
@@ -675,37 +733,93 @@ def draw_screen(o, e):
     shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
     # the lines on screen (over everything) in plan only; elsewhere draw_scene draws them depth-tested
     flat = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
-    for line, status in (getattr(o, "yard_required", None) or []) if shown and flat else []:   # the required line
-        color = ui.faint(ui.status_color("complies" if old else status, dark))
-        a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
-        d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 1)
-    for line, text, status in (getattr(o, "yard_dims", None) or []) if shown else []:   # each yard as measured (F4)
-        color = ui.status_color("complies" if old else status, dark)
-        if flat:
-            _dimension(d, e.Viewport, line, color)
-        if old:
-            text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
-        if plan and logic.yard_label_shown(labels, status) and zoomed_in:
-            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                        along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
-    height = getattr(o, "height_dim", None)
-    if height is not None and elevation and zoomed_in:       # the height, dimensioned up from the grade plane
-        line, text, status, limit = height       # (its line, ticks and limit: draw_scene, depth-tested)
-        color = ui.status_color("complies" if old else status, dark)
-        if old:
-            text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
-        if logic.yard_label_shown(labels, status):
-            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                        along=(line.From, line.To))
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
                     along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
         # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+    # each yard: its dimension placed where it and its label sit clear (logic.place_dimension: the status box, the
+    # notice, the edges' length labels, the labels before it, never inside the house), its required line dashed
+    # grey with its "min" tag, its label on the line (Rhino checks of #29)
+    o.placed = {}
+    footprint = [[(q.X, q.Y) for q in (e.Viewport.WorldToClient(p) for p in ring)]
+                 for ring in getattr(o, "footprint", None) or []]
+    view = (e.Viewport.Bounds.Width, e.Viewport.Bounds.Height)
+    dims = (getattr(o, "yard_dims", None) or []) if shown else []
+    numbers = getattr(o, "yard_numbers", None) or {}
+    # the drawing's way (Rhino checks of #29): each dimension shows its number only, on its own line or just past
+    # its end; what is wrong placed first; a failing or in-review yard's "min" tag at its required line's end
+    for k in logic.placement_order([status for _, _, status in dims]):
+        line, text, status = dims[k]
+        color = ui.dim_color("complies" if old else status, dark)
+        options = (getattr(o, "yard_options", None) or {}).get(k) or [(line, [])]
+        on_screen = [((a.X, a.Y), (b.X, b.Y)) for a, b in ((e.Viewport.WorldToClient(c.From),
+                                                             e.Viewport.WorldToClient(c.To)) for c, _ in options)]
+        number = numbers.get(k) or text
+        if old:
+            number = number.split(" ", 1)[1] if number[:1] in ("?", "✕", "✓") else number
+        width = None                         # no number: only the line is placed
+        if plan and logic.yard_label_shown(labels, status) and zoomed_in:
+            width = logic.label_width(number, 11)
+        _, away = logic.nearest_outline(on_screen[0][1], footprint)     # away from the building it measures from
+        tags = [] if old else (getattr(o, "yard_tags", None) or {}).get(k) or []
+        spots = []
+        for (a, b), (_, req) in zip(on_screen, options):      # each position's own tags (failing or in review)
+            out = logic._along(b, a)[0] if logic._along(b, a)[1] > 1e-6 else (0, 0)
+            seen, mine = list(taken), []
+            for r, t in zip(req, tags):
+                ends = [(q.X, q.Y) for q in (e.Viewport.WorldToClient(r.To), e.Viewport.WorldToClient(r.From))]
+                box = logic.tag_spot(ends, out, t, seen, view)
+                mine.append(box)
+                if box is not None:
+                    seen.append(box)
+            spots.append(mine)
+        index, quad, kind = logic.place_dimension(
+            on_screen, width, [logic.rect_quad(box) for box in taken], footprint, away, view,
+            extras=[[logic.rect_quad(b) for b in sp if b is not None] for sp in spots])
+        chosen, required = options[index]
+        o.placed[k] = (index, quad, kind, chosen, required, number if quad is not None else None)
+        if flat:                                      # off plan, draw_scene draws them in the model (depth-tested)
+            for r, tag, box in zip(required, tags + [None] * len(required), spots[index] + [None] * len(required)):
+                _required(d, r, tag, dark, box)
+                if box is not None:                   # a "min" tag: no later number covers it
+                    taken.append(box)
+            _dimension(d, e.Viewport, chosen, color)
+        if quad is not None:
+            _dim_label(d, e.Viewport, o, quad, number, color, dark, on_screen[index], kind, chosen.From)
+            xs, ys = [p[0] for p in quad], [p[1] for p in quad]
+            taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
+    height = getattr(o, "height_dim", None)
+    corners = [e.Viewport.WorldToClient(p) for p in (getattr(o, "house_box", None) or [])]
+    house = (min(q.X for q in corners), min(q.Y for q in corners), max(q.X for q in corners),
+             max(q.Y for q in corners)) if corners else None
+    if height is not None and elevation and zoomed_in:       # the height, dimensioned up from the grade plane
+        line, text, status, limit = height       # (its line, ticks and limit: draw_scene, depth-tested)
+        color = ui.dim_color("complies" if old else status, dark)
+        number = getattr(o, "height_number", None) or text
+        if old:
+            number = number.split(" ", 1)[1] if number[:1] in ("?", "✕", "✓") else number
+        if logic.yard_label_shown(labels, status):           # its number on its line, outside the house, in view
+            a, b = (e.Viewport.WorldToClient(p) for p in (line.From, line.To))
+            rect = logic.rect_quad((house[0], house[1], house[2] - house[0], house[3] - house[1])) if house else None
+            away = ((house[0] + house[2]) / 2, (house[1] + house[3]) / 2) if house else None
+            _, quad, kind = logic.place_dimension([((a.X, a.Y), (b.X, b.Y))], logic.label_width(number, 11),
+                                                  [logic.rect_quad(box) for box in taken], rect, away, view)
+            o.placed["height"] = (0, quad, kind, line, [], number)
+            if quad is not None:
+                _dim_label(d, e.Viewport, o, quad, number, color, dark, ((a.X, a.Y), (b.X, b.Y)), kind, line.From)
+                xs, ys = [p[0] for p in quad], [p[1] for p in quad]
+                taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
-        corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
-        left = min(corners, key=lambda p: p.X)       # the height limit, labelled at its left end in an elevation
-        ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 30, dark, 13)
+        ends = [e.Viewport.WorldToClient(p) for p in limit[0]]
+        line_ = ((min(ends, key=lambda p: p.X).X, min(ends, key=lambda p: p.X).Y),
+                 (max(ends, key=lambda p: p.X).X, max(ends, key=lambda p: p.X).Y))
+        w, h = ui.text_box_size([limit[1]], 13)
+        spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken)   # past the line's end, off the
+        if spot is not None:                                       # building and its colours (#28 at fc0b023)
+            o.placed["limit"] = spot + (w, h)
+            taken.append(spot + (w, h))
+            ui.draw_text_box(d, [limit[1]], BLUE, int(spot[0]), int(spot[1]), dark, 13)
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
@@ -864,17 +978,33 @@ def _prism(doc, outline, base, top):
     return brep
 
 
-def _offending(doc, e):
+def _solids_for(doc, entries):
+    """Each coloured block's building as a solid Rhino can cut, made once per building per check (a Brep copy, an
+    extrusion or SubD converted; None for a mesh or anything else): the blocks of one building share it
+    (independent review of #28, P3)."""
+    out = {}
+    for e in entries:
+        key = e.get("building") or ""
+        if key not in out:
+            found = _find(doc, key)
+            out[key] = _drawable(found.Geometry) if found is not None else None
+    return out
+
+
+def _offending(doc, e, solids=None):
     """The part of its building inside one coloured block (check.plan: a yard strip from the building's bottom to
     its top, or what rises above the height limit): Rhino's intersection of the building with the block, so a
     cantilever over a yard is coloured and not the air under it, a roof's ridge and not the sky over its slopes.
     The block is cut a hair larger (_proud) so none of its faces lies on the building's own. The block itself when
-    Rhino can't intersect (a block instance, a mesh, a boolean that fails): never nothing (logic.offending_pieces)."""
-    block = _prism(doc, e["outline"], e["base"], e["top"])
+    Rhino can't intersect (a mesh, a boolean that fails): never nothing (logic.offending_pieces). `solids`: the
+    buildings made once for the check (_solids_for); without it, this block's own."""
+    solid = (solids if solids is not None else _solids_for(doc, [e])).get(e.get("building") or "")
+    box = solid.GetBoundingBox(True) if solid is not None else None
+    base, top = logic.block_span(e, _feet_length(doc, box.Min.Z) if box is not None and box.IsValid else None,
+                                 _feet_length(doc, box.Max.Z) if box is not None and box.IsValid else None)
+    block = _prism(doc, e["outline"], base, top)       # reaching the real solid's own top (a vault: block_span)
     if block is None:
         return []
-    found = _find(doc, e.get("building") or "")
-    solid = _drawable(found.Geometry) if found is not None else None
     pieces = None
     if isinstance(solid, rg.Brep) and solid.IsSolid:       # a boolean that raises colours the block, never stops the check
         pieces = logic.guard(lambda: rg.Brep.CreateBooleanIntersection(
@@ -2152,7 +2282,8 @@ def _clear(o):
     """Nothing from an earlier check is left on screen."""
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
-    o.yard_required, o.height_dim = [], None
+    o.yard_required, o.height_dim, o.yard_options, o.yard_tags, o.footprint, o.placed = [], None, {}, {}, [], {}
+    o.yard_numbers, o.house_box, o.height_number = {}, [], None
     o.plan_lines = []
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
@@ -2209,15 +2340,33 @@ def _draw_plan(doc, o, result, facts):
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
     o.yard_required = [(rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z)), y["status"])
                        for y in plan.get("yards") or [] if y.get("points") for r in y.get("required_lines") or []]
+    # every position check.plan offers for each yard's dimension, with its required lines; the "min" tags; the
+    # buildings' outline (a label never sits inside it)
+    o.yard_options = {k: [(rg.Line(_model_point(doc, c["points"][0], z), _model_point(doc, c["points"][1], z)),
+                           [rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z))
+                            for r in c.get("required_lines") or []])
+                          for c in y.get("candidates") or []]
+                      for k, y in enumerate(y for y in plan.get("yards") or [] if y.get("points"))}
+    o.yard_tags = {k: y.get("required_tags") or [] for k, y in enumerate(y for y in plan.get("yards") or []
+                                                                           if y.get("points"))}
+    o.footprint = [[_model_point(doc, p, 0.1) for p in ring] for ring in plan.get("footprint") or []]
+    o.yard_numbers = {k: y.get("number") for k, y in enumerate(y for y in plan.get("yards") or [] if y.get("points"))}
+    o.height_number = (plan.get("height") or {}).get("number")
+    box = rg.BoundingBox.Empty
+    for b in _buildings(doc):
+        box.Union(b.Geometry.GetBoundingBox(True))
+    o.house_box = list(box.GetCorners()) if box.IsValid else []
     h = plan.get("height")
     o.height_dim = (rg.Line(_model_point(doc, h["at"], h["base"]), _model_point(doc, h["at"], h["top"])), h["label"],
                     h["status"], _model_point(doc, h["at"], h["limit"]) if h.get("limit") is not None else None) \
         if h else None
     # what is drawn, each piece with its rule and building: the one list draw_scene draws and the in-Rhino checks
     # read (logic.coloured_info)
+    blocks = plan.get("encroach") or []
+    made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
     o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
-                  for e, status in ((e, e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
-                  if logic.highlight(status) for piece in _offending(doc, e)]
+                  for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
+                  if logic.highlight(status) for piece in _offending(doc, e, made)]
     # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
     pts = o.lot_outline or []
     # (the faint required lines too: a yard's words never cover one, review round 1, F3)
@@ -2722,9 +2871,10 @@ def _context_layer_indexes(doc):
 
 def _parent_locked(doc, layer):
     """Whether any layer above this one is locked. Rhino then holds the layer locked whatever its own lock says:
-    locking a parent gives each sublayer the lock and saves the sublayer's own one as its persistent lock, which
-    unlocking the parent puts back (Layer.GetPersistentLocking). Under a locked parent IsLocked reads True for every
-    sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
+    locking a parent locks each sublayer, and unlocking it gives each sublayer its persistent lock
+    (Layer.GetPersistentLocking), which only SetPersistentLocking under a locked parent records: a sublayer locked
+    before its parent comes out unlocked, in plain Rhino too (grade_lock_probe.json at e997f0e). Under a locked parent
+    IsLocked reads True for every sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
     parent = layer.ParentLayerId
     while parent != System.Guid.Empty:
         above = doc.Layers.FindId(parent)
@@ -2759,8 +2909,12 @@ def _set_own_lock(doc, layer, locked):
 
 def _lock_context(doc, locked):
     """Unlock every context layer, or lock them again: all but the editable footprints (rhino_logic.context_locked).
-    Each layer's own lock, so it holds whether or not the architect has locked "Gordium" above them; a parent before
-    its sublayers, so a parent's change can't undo a sublayer's set before it."""
+    Each layer's own lock, so a redraw or a first draw under a locked "Gordium" keeps them (the Rhino job at
+    e997f0e); a parent before its sublayers, so a parent's change can't undo a sublayer's set before it. Not yet
+    covered: drawn while "Gordium" is unlocked, a layer locked by IsLocked records no own lock (grade_lock_probe.json),
+    so if the architect then locks and unlocks "Gordium" with no redraw, Rhino may unlock Parcels, Streets and Notes.
+    lock_probe_in_rhino.py asks whether SetPersistentLocking would record one there, whether Rhino's own -_Layer
+    command does the same, and whether a recorded own lock survives the parent being locked again."""
     indexes = _context_layer_indexes(doc)
     for i in logic.outermost_first([(i, doc.Layers[i].FullPath) for i in indexes]):
         _set_own_lock(doc, doc.Layers[i], bool(locked) and logic.context_locked(doc.Layers[i].FullPath))
@@ -2852,7 +3006,7 @@ def _clear_context(doc, sources=None):
                 left += not doc.Objects.Delete(o, True)
     for i, visible, _, _ in was:           # every visibility first (each passes its lock down), then every lock,
         doc.Layers[i].IsVisible = visible
-    for i, _, locked, _ in was:            # a parent before its sublayers (locking it saves theirs as it finds them),
+    for i, _, locked, _ in was:            # a parent before its sublayers (locking it locks them all),
         doc.Layers[i].IsLocked = locked
     for i, _, _, own in was:               # then each layer's own lock, once every lock above it is back
         _set_own_lock(doc, doc.Layers[i], own)

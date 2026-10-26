@@ -284,10 +284,11 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    - only the offending part of the building is coloured: the part inside a required yard, or above the height
      limit. Red where it fails under every reading; amber where it fails only under some (for example within the
      tax map's 2'-0" of a lot line). The rest stays neutral;
-   - in Top view each yard is dimensioned as a drawing would be: from the middle of the wall that comes nearest
-     its lot line, square to that line, in the yard's colour on a thin halo, labelled with the yard as measured
-     (its closest point), the required line faint across it (two where the limit depends on an open
-     measurement, at each end of its range); in the Front
+   - in Top view each yard is dimensioned as a drawing is: square to its lot line from the wall facing it, red
+     where it fails, amber where it needs review, complying ones neutral grey; it shows its number only, on its
+     line or just past its end (✕ or ? before it when something is wrong; the yard's name and what it needs are in
+     the panel); the required line is dashed across it, tagged "min 10'-0"" where the yard fails or needs review;
+     what is wrong is placed first and every number stays in view; in the Front
      and Right views the height is dimensioned up from the grade plane, the limit faint. Zoomed out to the
      neighbourhood the dimensions give way.
    - in Top view Gordium's lines (the lot line, the envelope's outline, the dimensions) are drawn over everything,

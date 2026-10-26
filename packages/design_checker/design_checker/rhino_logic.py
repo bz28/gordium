@@ -127,10 +127,25 @@ def coloured_info(entry):
     return {k: entry.get(k) for k in ("why", "measure", "row", "building")}
 
 
+def block_span(entry, solid_bottom=None, solid_top=None):
+    """The heights (feet) a coloured block is cut from in Rhino: the checker's (check.plan), reaching to the real
+    solid's own top (and, for a yard strip, its own bottom) when Rhino's solid goes further. The checker measures
+    only the faces it can read (a curved vault is left out: its height needs review), so its top can be the wall
+    tops, while the vault above them is just as much over the limit (the Rhino check of #28 at fc0b023: only the
+    band from 35 to 36 ft was coloured, under a vault to 42 ft). A height block always starts at the limit."""
+    base, top = entry["base"], entry["top"]
+    if solid_top is not None:
+        top = max(top, solid_top)
+    if solid_bottom is not None and entry.get("why") != "height":
+        base = min(base, solid_bottom)
+    return base, top
+
+
 def offending_pieces(pieces, block):
     """What a coloured block draws: the building's own part inside it (Rhino's boolean intersection, `pieces`), or
-    the block itself when the intersection gave nothing (it failed, or the building is a block instance or a
-    mesh): a failing part is never left uncoloured because a boolean failed."""
+    the block itself when the intersection gave nothing (it failed, or the building is a mesh or a solid Rhino
+    can't cut; a block instance is never measured: it is a setup problem, "explode it"), so a failing part is never
+    left uncoloured because a boolean failed."""
     kept = [p for p in pieces or [] if p is not None]
     return kept or [block]
 
@@ -160,16 +175,18 @@ def legend_text(code=None):
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
             "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard "
-            "dimensioned square to its lot line from the middle of the wall that comes nearest it, in its row's "
-            "colour, labelled with the yard as measured (its closest point), with the required line faint across it "
-            "(two where the limit depends on an open measurement), and in the elevations the height, dimensioned up "
-            "from the grade plane, with the limit faint. In plan these lines are drawn over everything; in every "
-            "other view they hide behind the solids in front of them, as the model's own lines do. Values are "
-            "measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "dimensioned square to its lot line from the wall facing it, as a drawing is: red where it fails, amber "
+            "where it needs review, complying ones neutral grey (colour only what's wrong); its number only, on its "
+            "line (✕ or ? before it when wrong; its name and what it needs are in the panel), the required line "
+            "dashed across it, tagged \"min\" where the yard fails or needs review; in the elevations the height, "
+            "dimensioned up from the grade plane, with the limit faint. In plan these lines are drawn over "
+            "everything; in every other view they hide behind the solids in front of them, as the model's own lines "
+            "do. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
-            "ridge, not its eaves; a mesh or a block instance is coloured over its whole strip instead). RED: it "
+            "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
+            "block isn't measured until it is exploded). RED: it "
             "fails there under every reading. AMBER: it fails there under some readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
             "Nothing where it complies. The buildable envelope is only a see-through guide: colours come from the "
             "rules' results.")
@@ -470,6 +487,254 @@ def label_width(text, size):
 DIM_TICK_PX = 10        # a dimension's architectural tick: this long on screen, at 45° to its line
 HALO_PX = 1           # a dimension's halo: this many pixels each side of its line
 FAINT_ALPHA = 110       # the required line, faint: the status colour at this opacity (of 255)
+
+
+# a yard's dimension and its label, placed on screen as a drawing would (Rhino checks of #29, 2026-10-25)
+DIM_RGB = {"complies": ((92, 96, 100), (176, 180, 184)),          # (light viewport, dark viewport): neutral grey,
+           "needs_review": ((138, 88, 0), (233, 180, 76)),          # amber, red: colour only what's wrong
+           "does_not_comply": ((184, 55, 31), (240, 122, 112))}
+REQUIRED_RGB = ((96, 96, 96), (190, 190, 190))     # the required line: a clear dashed grey, with its "min" tag
+# (darker on a light viewport, lighter on a dark one than the first version: Rhino check of #29 at f6642a9)
+DIM_LABEL_H_PX = 18     # a dimension's label: its height on screen
+DIM_LABEL_GAP_PX = 4    # and its gap from the dimension line (and past the line's outer end)
+
+
+def dim_rgb(status, dark):
+    """A dimension's colour (r, g, b): red fails, amber needs review, a neutral dark grey (light on a dark viewport)
+    complies: drafting's convention, and Ben's "colour only what's wrong"."""
+    return DIM_RGB.get(status, DIM_RGB["complies"])[1 if dark else 0]
+
+
+def rect_quad(box):
+    """An (x, y, w, h) screen box as its four corners."""
+    x, y, w, h = box
+    return [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+
+
+def _segments_cross(p, q, r, s_):
+    def side(a, b, c):
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    d1, d2, d3, d4 = side(r, s_, p), side(r, s_, q), side(p, q, r), side(p, q, s_)
+    return (d1 > 0) != (d2 > 0) and (d3 > 0) != (d4 > 0)
+
+
+def _inside(pt, poly):
+    x, y = pt
+    hit = False
+    for k in range(len(poly)):
+        (x0, y0), (x1, y1) = poly[k - 1], poly[k]
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            hit = not hit
+    return hit
+
+
+def shapes_hit(a, b):
+    """Whether two screen polygons (lists of corners) overlap: an edge of one crosses the other's, or one lies
+    inside the other."""
+    for k in range(len(a)):
+        for j in range(len(b)):
+            if _segments_cross(a[k - 1], a[k], b[j - 1], b[j]):
+                return True
+    return bool(a and b) and (_inside(a[0], b) or _inside(b[0], a))
+
+
+def _along(a, b):
+    n = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+    return ((b[0] - a[0]) / n, (b[1] - a[1]) / n), n
+
+
+def label_on_line(a, b, w, h=DIM_LABEL_H_PX, away=None, gap=DIM_LABEL_GAP_PX):
+    """A dimension's label ON its line (screen): aligned with the line a (lot end) to b (building end), centred on
+    its middle, its near edge `gap` px off the line, on the side away from `away` (the building's middle on
+    screen: the label sits outside the building). Its four corners."""
+    (ux, uy), _ = _along(a, b)
+    nx, ny = -uy, ux
+    mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+    if away is not None and (away[0] - mx) * nx + (away[1] - my) * ny > 0:
+        nx, ny = -nx, -ny
+    cx, cy = mx + nx * (gap + h / 2), my + ny * (gap + h / 2)
+    return [(cx + sx * ux * w / 2 + sy * nx * h / 2, cy + sx * uy * w / 2 + sy * ny * h / 2)
+            for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+
+
+def label_at_end(a, b, w, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
+    """A dimension's label past the line's outer end (beyond the lot line), aligned with it and centred on it,
+    `gap` px past the end (a short leader joins them): for a dimension too short for its number, or whose spot on
+    the line is out of view. Its four corners."""
+    (ux, uy), _ = _along(b, a)                     # outward: from the building past the lot line
+    nx, ny = -uy, ux
+    near = (a[0] + ux * gap, a[1] + uy * gap)
+    return [(near[0] + ux * dx + nx * dy, near[1] + uy * dx + ny * dy)
+            for dx, dy in ((0, -h / 2), (w, -h / 2), (w, h / 2), (0, h / 2))]
+
+
+def text_angle(a, b):
+    """The angle (degrees, screen: y runs down) a label along a to b is written at, kept readable: within
+    [-90, 90)."""
+    import math
+    t = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+    while t >= 90:                                  # within [-90, 90): an upright line reads bottom to top, from
+        t -= 180                                    # the right (drafting's convention; review round 6, F4)
+    while t < -90:
+        t += 180
+    return t
+
+
+def nearest_outline(point, outlines):
+    """Of the buildings' outlines on screen, the one nearest `point` (a dimension's building end) and its middle:
+    the label goes on the side away from THAT building (review round 6, F2: two buildings)."""
+    def gap(poly):
+        return min(_point_segment(point, poly[k - 1], poly[k]) for k in range(len(poly)))
+    if not outlines:
+        return None, None
+    best = min(outlines, key=gap)
+    return best, (sum(p[0] for p in best) / len(best), sum(p[1] for p in best) / len(best))
+
+
+def _point_segment(p, a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = dx * dx + dy * dy
+    t = 0.0 if n <= 1e-12 else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / n))
+    return ((p[0] - a[0] - t * dx) ** 2 + (p[1] - a[1] - t * dy) ** 2) ** 0.5
+
+
+TAG_SIZE = 11            # a "min" tag's text size (readable at the default zoom: Rhino check of #29 at f6642a9)
+VIEW_MARGIN_PX = 3      # every number and tag stays this far inside the view
+
+
+def dim_number(mark, proposed, status):
+    """What a dimension shows on the drawing, as a drawing does: its number only, "✕ " or "? " before it when the
+    yard fails or needs review (colour says the rest). Its name, what it needs and "(approx.)" are the panel's and
+    the notice's (Rhino checks of #29: a long label never fit a plan)."""
+    return (mark + " " if status in ("does_not_comply", "needs_review") and mark else "") + proposed
+
+
+def inside_view(shape, view, margin=VIEW_MARGIN_PX):
+    """Whether a screen polygon lies wholly inside the view (w, h), `margin` px in. True without a view."""
+    if not view:
+        return True
+    return all(margin <= x <= view[0] - margin and margin <= y <= view[1] - margin for x, y in shape)
+
+
+def clip_to_view(a, b, view):
+    """The part of the screen segment a to b inside the view (w, h) (Liang-Barsky), or None when none of it is;
+    the segment itself without a view. A number is centred on what the architect can see of its line."""
+    if not view:
+        return a, b
+    t0, t1 = 0.0, 1.0
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    for p, q in ((-dx, a[0]), (dx, view[0] - a[0]), (-dy, a[1]), (dy, view[1] - a[1])):
+        if abs(p) < 1e-12:
+            if q < 0:
+                return None
+            continue
+        r = q / p
+        if p < 0:
+            t0 = max(t0, r)
+        else:
+            t1 = min(t1, r)
+        if t0 > t1:
+            return None
+    return (a[0] + t0 * dx, a[1] + t0 * dy), (a[0] + t1 * dx, a[1] + t1 * dy)
+
+
+PRIORITY = {"does_not_comply": 0, "needs_review": 1}      # what is wrong placed first: it gets the clear spots
+
+
+def placement_order(statuses):
+    """The order the yards' numbers are placed in (their indexes): failing first, then needs review, then the
+    rest, each in its own order."""
+    return sorted(range(len(statuses)), key=lambda k: (PRIORITY.get(statuses[k], 2), k))
+
+
+def number_spot(a, b, w, away=None, view=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
+    """Where a dimension's number goes (screen), the drawing's way: centred on the visible part of its own line,
+    aligned with it, `gap` px off it on the side away from the building; just past its outer end (the lot-line end)
+    when the visible line is too short for it or that spot is out of view. Its corners and "on" or "end"; (None,
+    None) when neither is wholly in view (the number is then left to the panel)."""
+    seen = clip_to_view(a, b, view)
+    if seen is None or _along(*seen)[1] <= 1e-6:
+        return None, None
+    tries = ([(label_on_line(seen[0], seen[1], w, h, away, gap), "on")] if _along(*seen)[1] >= w + 2 * gap
+             else []) + [(label_at_end(a, b, w, h, gap), "end")]
+    for q, kind in tries:                            # on its line; if that is out of view or too short, past its end
+        if inside_view(q, view):
+            return q, kind
+    return None, None                                # neither in view: no number (the panel says it; review F1, F2)
+
+
+def place_dimension(candidates, w, obstacles, footprint=None, away=None, view=None, extras=None,
+                    h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
+    """Which of a yard's dimension positions to draw, and its number (screen): (index, corners or None, kind).
+    `candidates`: the positions check.plan offers along the wall facing the yard's lot line, best first, each (lot
+    end, building end); `w`: the number's width (None: no number shown); `obstacles`: what it may not cover (the
+    status box, the notice, the lot edges' lengths, the numbers and tags placed before); `footprint`: the
+    buildings' outlines (one or a list); `extras`: per position, its own "min" tags; `view`: (w, h).
+    The first position whose number sits on or just past its own line (number_spot), wholly in view, covering
+    nothing; else the best position whose number is in view, as it falls ("crowded"); nothing else, never a leader
+    to somewhere else (Rhino checks of #29: the drafting convention)."""
+    houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
+    boxed = [(o, _bbox(o)) for o in obstacles if o]
+
+    def clear(shape, more=()):
+        box = _bbox(shape)
+        against = boxed + [(m, _bbox(m)) for m in more if m] + [(f, _bbox(f)) for f in houses if f]
+        return not any(_boxes_meet(box, ob) and shapes_hit(shape, o) for o, ob in against)
+    usable = [(i, a, b) for i, (a, b) in enumerate(candidates) if _along(a, b)[1] > 1e-6]
+    if not usable:
+        return 0, None, "none"
+    if w is None:
+        return usable[0][0], None, "none"
+    first = None
+    for i, a, b in usable:
+        q, kind = number_spot(a, b, w, away, view, h, gap)
+        if q is None or not inside_view(q, view):
+            continue
+        if clear(q, (extras[i] if extras and i < len(extras) else None) or ()):
+            return i, q, kind
+        first = first or (i, q)
+    if first is not None:
+        return first[0], first[1], "crowded"
+    return usable[0][0], None, "none"
+
+
+def tag_spot(line_ends, outward, tag, taken, view=None):
+    """Where a failing or in-review yard's "min" tag goes (screen): at an end of its required line (far, then
+    near), on the outside (`outward`: the unit direction from the building towards the lot line), wholly in view,
+    covering nothing drawn (`taken`, boxes); None when neither end has room (the panel says it anyway). Its box
+    (x, y, w, h)."""
+    w, h = label_width(tag, TAG_SIZE), 16
+    for end in line_ends:
+        cx, cy = end[0] + outward[0] * (w / 2 + 4), end[1] + outward[1] * (h / 2 + 4)
+        box = (cx - w / 2, cy - h / 2, w, h)
+        if inside_view(rect_quad(box), view) and not any(shapes_hit(rect_quad(box), rect_quad(t)) for t in taken):
+            return box
+    return None
+
+
+def limit_label_spot(line, house, w, h=18, view=None, gap=8, taken=()):
+    """Where an elevation's "Height limit 35'-0"" label goes (screen): past an end of the limit line, outside the
+    building's extent (`house`: its box on screen, x0, y0, x1, y1), centred on the line's height, in view; the
+    left end first, and the end whose spot covers nothing drawn (`taken`, boxes: the height's number, the status
+    box, the notice) before one that does. It never covers the coloured parts (Rhino check of #28 at fc0b023).
+    (x, y) of its top left, or None when neither end has room in view."""
+    (ax, ay), (bx, by) = sorted(line)
+    spots = [(min(ax, house[0] if house else ax) - gap - w, ay - h / 2),
+             (max(bx, house[2] if house else bx) + gap, by - h / 2)]
+    shown = [(x, y) for x, y in spots if inside_view(rect_quad((x, y, w, h)), view)]
+    for x, y in shown:
+        if not any(shapes_hit(rect_quad((x, y, w, h)), rect_quad(t)) for t in taken):
+            return x, y
+    return shown[0] if shown else None
+
+
+def _bbox(shape):
+    xs, ys = [p[0] for p in shape], [p[1] for p in shape]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _boxes_meet(a, b):
+    return a[0] <= b[2] and b[0] <= a[2] and a[1] <= b[3] and b[1] <= a[3]
 
 
 def dim_ticks(a, b, size=DIM_TICK_PX):
