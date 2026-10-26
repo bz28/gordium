@@ -494,3 +494,12 @@ def test_commands_ask_the_checker_before_they_read_the_model():
     front = part(RHINO, "def _still_front(", "def _edited(")
     assert "front.RuntimeSerialNumber == doc.RuntimeSerialNumber" in front
     assert RHINO.count("not _still_front(doc):") == RHINO.count("say(logic.NOT_IN_FRONT)") == 3   # each caller says it
+
+
+def test_the_saved_facts_are_matched_to_the_model_as_it_is_after_their_wait():
+    """Cold check of 15d0894: current_facts listed the lots and buildings, then waited on the checker (load_facts),
+    then dropped stale ids against the list from before the wait."""
+    facts = part(RHINO, "def current_facts(", "def save_facts(")
+    assert facts.index("load_facts(doc)") < facts.index("_sorted_objects(doc)") < facts.index("logic.drop_stale(")
+    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
+    assert start.index("System.Guid.Empty") < start.index('facts["lot_id"] = sample_lot')

@@ -432,8 +432,9 @@ def load_facts(doc):
 
 def current_facts(doc):
     """The saved facts, without a lot or main building that is no longer in the model."""
+    facts = load_facts(doc)            # (it waits on the checker, Rhino running: the model is listed after it)
     lots, buildings, _ = _sorted_objects(doc)
-    return logic.drop_stale(load_facts(doc), {str(o.Id) for o in lots}, {str(o.Id) for o in buildings})
+    return logic.drop_stale(facts, {str(o.Id) for o in lots}, {str(o.Id) for o in buildings})
 
 
 def save_facts(doc, facts):
@@ -2955,6 +2956,9 @@ def gordium_start():
     if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
         put_down = (doc.Strings.GetValue(SECTION, UI_ENTRY), set(RhinoTable(doc).layer_names()))
         sample_lot = str(_add_lot(doc, sample))
+        if sample_lot == str(System.Guid.Empty):   # Rhino couldn't add it: said, never a box on a lot that isn't there
+            say("The sample lot couldn't be drawn in this file: draw your lot on the Site layer, then GordiumStart.")
+            return None
         put_down = (sample_lot,) + put_down
         # its facts are the sample project's; a lookup may replace its lot (never one the architect drew or picked)
         _save_ui_state(doc, dict(_ui_state(doc), from_sample=True, replaceable_lot=sample_lot,
