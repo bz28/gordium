@@ -26,7 +26,12 @@ document, then:
    (its step and seconds), the button reads "Cancel lookup"; pressed: the lookup process is stopped, the box opens
    again without the running line, saying "Look up of … cancelled: nothing changed.", Draw as it was with the
    address typed before Look up (off: "Press Look up to find … first."), the model unchanged; then the box is closed.
-Writes <temp>/gordium_progress_cancel/out.json ("done": true at the end); closes its documents."""
+8. A new address's starting house is worked out before Draw opens its undo step (independent review of #32): a new
+   file, the sample (106 Ithaca Rd), Edit site to 96 (a corner lot: no house), then Edit site back to 106 (a new
+   address again: the reset draws a house). Draw used the house worked out before the reset (STATE["start_from"] is
+   "plan", never asked again after the commit), and the house drawn is that plan's: as many floors, each at the
+   plan's base and top.
+Writes <temp>/gordium_progress_cancel/out.json ("done": true at the end); closes the documents it opened."""
 import json
 import os
 import sys
@@ -374,6 +379,35 @@ def main():
         claim("7 after Cancel lookup, Draw is as it was with the address typed before Look up (off, saying why)",
               after.get("draw_on") == boxes[0].get("draw_typed") is False and reason and
               reason == boxes[0].get("reason_typed"), {"boxes": boxes})
+        # 8. a new address's house: planned before the undo step, and the house drawn is the plan's
+        g.STATE["auto_ok"] = True
+        g.live(False)
+        doc3 = docs.open("Large Objects - Feet")
+        g.gordium_start()                                  # the sample, 106 Ithaca Rd, with its house
+
+        def edit_site_to(address, fixture):
+            g.STATE.update(box_picks=["lookup"], box_overrides={"address": address}, lookup_fixture=fixture)
+            try:
+                g.edit_facts()
+            finally:
+                for k in ("box_picks", "box_overrides", "lookup_fixture"):
+                    g.STATE.pop(k, None)
+
+        edit_site_to("96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd")      # a corner lot: no house drawn
+        g.STATE.pop("start_from", None)
+        g.STATE.pop("start", None)
+        edit_site_to("106 Ithaca Rd, Ithaca, NY 14850", "106_ithaca_rd")    # a new address again: a house
+        floors = (g.STATE.get("start") or {}).get("floors") or []
+        drawn = [o for o in doc3.Objects if g.logic.on_layer(doc3.Layers[o.Attributes.LayerIndex].FullPath,
+                                                                 g.logic.MASSING)]
+        levels = sorted((round(g._feet_length(doc3, o.Geometry.GetBoundingBox(True).Min.Z), 2),
+                         round(g._feet_length(doc3, o.Geometry.GetBoundingBox(True).Max.Z), 2)) for o in drawn)
+        planned = sorted((round(f["base"], 2), round(f["top"], 2)) for f in floors)
+        log["step8"] = {"start_from": g.STATE.get("start_from"), "drawn": levels, "planned": planned}
+        claim("8 the new address's Draw used the house worked out before its undo step opened",
+              g.STATE.get("start_from") == "plan", log["step8"])
+        claim("8 the house drawn is the plan's: as many floors, each at the plan's base and top",
+              planned and levels == planned, log["step8"])
         log["ok"] = True
     except Exception:
         log["ok"] = False
