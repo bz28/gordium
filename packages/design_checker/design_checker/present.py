@@ -949,14 +949,21 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         # a several-limit rule held back by its own review_when (its reason is the row's): name the limit that
         # review is about, the measure it holds below a limit (the which-side eaves review: that side's eave),
         # never simply the first limit (#18: "Eaves into front yard" for a side eave's question)
-        why_text = " ".join(str(row.get("Why") or "").split())
-        about = []
+        said = {" ".join(w.split()) for w in str(row.get("Why") or "").split("; ")}
+        about = []                      # (measure, the limit the review holds it below), in the rule's order
         for r in rule["review_when"]:
-            if r.get("reason") and " ".join(str(r["reason"]).split()) in why_text:
-                about += [n.left.id for n in ast.walk(formula.parse(r["when"]).body)
+            if r.get("reason") and " ".join(str(r["reason"]).split()) in said:
+                about += [n for n in ast.walk(formula.parse(r["when"]).body)
                           if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.left, ast.Name)
-                          and isinstance(n.ops[0], (ast.Lt, ast.LtE))]
-        primary = next((c for c in compares if c.left.id in about), primary)
+                          and isinstance(n.ops[0], (ast.Lt, ast.LtE)) and any(c.left.id == n.left.id for c in compares)]
+        failing = next((c for c in compares if _fails_every_reading(ast.unparse(c), values, measured, facts)), None)
+        if failing is not None:         # a limit failing under every reading is named first (#18 round 4)
+            primary = failing
+        elif about:
+            # the limit the question is about, as a requirement: "at least" the review's own limit (the side that
+            # may be the 10 ft one: 7'-0" against 8'-0", never against the 5 ft side's 3'-0" it already meets)
+            n = about[0]
+            primary = ast.Compare(left=n.left, ops=[ast.GtE()], comparators=n.comparators)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
