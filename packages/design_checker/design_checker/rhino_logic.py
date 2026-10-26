@@ -479,11 +479,13 @@ def box_gap(line, box):
                for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
 
 
-def place_near(line, w, h, obstacles=(), taken=(), gap=12, view=None, avoid=()):
+def place_near(line, w, h, obstacles=(), taken=(), gap=12, view=None, avoid=(), dims=()):
     """Where a w × h label goes when no spot beside its dimension `line` is clear: (left, top), or None. Never far
     from its line: within one label height of it (beside it, or just past either end), on screen, over no box in
     `taken` (the notice, the status box, the north arrow, other labels); of those, the one crossing the fewest lines
-    in `obstacles` and covering the fewest boxes in `avoid` (other labels, when it must), then the nearest; never on
+    in `obstacles`, another yard's dimension line (`dims`) above all (the Rhino job at 81efd62: the southwest label
+    covered the front yard's dimension where a spot clear of it was in reach), and covering the fewest boxes in
+    `avoid` (other labels, when it must), then the nearest; never on
     its own line. Beside its line is tried before past its ends (a leader along the line itself would be hidden by
     it), `gap` (12 px) away so the leader the caller draws to it shows (review of b85effe: a 6 px leader hid under the
     dimension's tick). The Rhino job at 0a94fc4: placed "outside the
@@ -509,6 +511,7 @@ def place_near(line, w, h, obstacles=(), taken=(), gap=12, view=None, avoid=()):
                 crosses(line, left, top, w, h):                  # never over the notice, status box, nor its own line
             continue
         score = (sum(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in avoid),
+                 sum(crosses(s, left, top, w, h) for s in dims if s != line),
                  sum(crosses(s, left, top, w, h) for s in obstacles if s != line), box_gap(line, (left, top, w, h)), k)
         if best is None or score < best[0]:
             best = (score, left, top)

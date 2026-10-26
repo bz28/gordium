@@ -831,7 +831,7 @@ def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=
 LINE_H = 16                              # one line of a plan label (11-12 px text), in screen pixels
 
 
-def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=(), keep=None):
+def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=(), keep=None, dims=()):
     """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted, its lines). Takes its spot
     in `taken`. With `along` (its dimension line) it goes beside that line, off every line in `obstacles` (the
     other dimensions, the lot's and the house's edges) and every label already placed, on screen; when no spot
@@ -856,10 +856,10 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
         h = 4 + LINE_H * len(rows)
         if not clear:                        # nowhere clear beside its line: near it, a leader to it (never loose)
             w2 = max(logic.label_width(t, size) for t in two)
-            near = logic.place_near(own, w2, 4 + LINE_H * len(two), obstacles, taken or [], view=view)
+            near = logic.place_near(own, w2, 4 + LINE_H * len(two), obstacles, taken or [], view=view, dims=dims)
             if near is None:                 # crowded by other labels: may cover one, never `keep` (the notice, the
                 near = logic.place_near(own, w2, 4 + LINE_H * len(two), obstacles, keep or [], view=view,
-                                        avoid=taken or [])        # status box, the north arrow) nor its line
+                                        avoid=taken or [], dims=dims)        # status box, the north arrow) nor its line
             if near is not None:
                 left, top, width, rows = near[0], near[1], w2, two
                 h = 4 + LINE_H * len(rows)
@@ -877,7 +877,7 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
 
 
 def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=(), leader=False,
-             keep=None):
+             keep=None, dims=()):
     """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
     already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
     `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must;
@@ -886,7 +886,7 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=N
     logic.needs_leader). Returns where it went: (left, top, width, height, the top it wanted, its lines, whether a
     leader was drawn to it)."""
     p = viewport.WorldToClient(point)
-    left, top, width, want, rows, led = label_box(viewport, point, text, size, taken, along, obstacles, keep)
+    left, top, width, want, rows, led = label_box(viewport, point, text, size, taken, along, obstacles, keep, dims)
     h = 4 + LINE_H * len(rows)
     if led:                                  # moved off its spot: a leader from it to the label's nearest edge
         end = logic.leader_end((p.X, p.Y), (left, top, width, h))

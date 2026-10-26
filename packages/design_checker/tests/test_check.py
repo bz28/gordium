@@ -1737,7 +1737,7 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
     assert ('    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:'
             in draw)
-    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep)" in draw
+    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep, dims=dims)" in draw
     assert draw.index("zoomed_in = ") < draw.index("    if not boxed:")         # the status box isn't gated by it
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     at = ui[ui.index("def label_at("):ui.index("def _signed(")]
@@ -3237,6 +3237,28 @@ def test_a_label_with_no_room_beside_its_line_stays_near_it_with_a_leader():
     short = ((300, 300), (327, 300))
     l5, t5 = place_near(short, w, h, [], [], view=view)
     assert t5 + h <= 300 - 6 or t5 >= 300 + 6, (l5, t5)
+    # another yard's dimension line in reach (the Rhino job at 81efd62: the southwest label covered the front yard's
+    # dimension): a spot within reach clear of it is taken, even crossing a lot edge more
+    front = ((180, 430), (180, 470))                                             # the front yard's dimension, below
+    l7, t7 = place_near(own, w, h, obstacles + [front], [notice, status], view=view, dims=[own, front])
+    assert not logic_.crosses(front, l7, t7, w, h) and box_gap(own, (l7, t7, w, h)) <= h, (l7, t7)
+    # ...ranked above other lines: here every spot clear of the other dimension crosses two plain lines, the one under
+    # it only that dimension: the label still keeps off the dimension
+    mine, theirs = ((300, 300), (330, 300)), ((310, 312), (310, 360))
+    plain = [((0, 265), (656, 265)), ((0, 275), (656, 275))] + \
+        [((x, 0), (x, 600)) for x in (200, 210, 420, 430)]
+    l8, t8 = place_near(mine, w, h, plain + [theirs], [], view=view, dims=[mine, theirs])
+    assert not logic_.crosses(theirs, l8, t8, w, h), (l8, t8)
+    ui_src0 = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ns0 = {"logic": logic_, "LINE_H": 16}
+    exec(ui_src0[ui_src0.index("def label_box("):].split("\ndef ", 1)[0], ns0)    # noqa: S102
+    vp0 = type("VP", (), {"Size": type("S", (), {"Width": 656, "Height": 668})(),
+                          "WorldToClient": staticmethod(lambda q: type("P", (), {"X": q[0], "Y": q[1]})())})()
+    got = ns0["label_box"](vp0, (315, 300), "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)", 11, [],
+                           along=mine, obstacles=plain + [theirs], dims=[mine, theirs])
+    assert got[5] and not logic_.crosses(theirs, got[0], got[1], got[2], 4 + 16 * len(got[4])), got
+    box_src = ui_src0[ui_src0.index("def label_box("):].split("\ndef ", 1)[0]
+    assert box_src.count("view=view, dims=dims)") == 1 and box_src.count("avoid=taken or [], dims=dims)") == 1
     # a line at the screen's edge: the spot pushed onto the screen would sit on the line itself: never used
     edge = ((0, 300), (20, 300))
     l6, t6 = place_near(edge, w, h, [], [], view=view)
@@ -3288,7 +3310,8 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
     assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
     assert draw.count('drawn["labels"].append(') == 2
     assert draw.count(", at[6]])") == 2                                          # whether a leader was drawn
-    assert draw.count("keep=keep)") == 2 and draw.index("keep = list(taken)") < draw.index("keep=keep)")
+    assert draw.count("keep=keep, dims=dims)") == 2 and 'drawn["dims"] = dims' in draw
+    assert draw.count("keep=keep)") == 0 and draw.index("keep = list(taken)") < draw.index("keep=keep, dims=dims)")
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
         assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
@@ -3336,6 +3359,7 @@ def test_the_label_claim_counts_its_own_line_too():
     assert "hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]" in script
     assert "s_ != own" not in script
     assert "g.logic.crosses(own, left, top, w, h)" in script and "and not on_own" in script   # moved ones too
+    assert "and not on_dim" in script and 'rec.get("dims")' in script            # nor another yard's dimension
 
 
 def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():
