@@ -2199,8 +2199,9 @@ def _lot_lines(lot: Lot, facts: dict):
             return stop("law_missing", what="the corner-lot findings (front_yard, side_yard)")
         basis = {"front": [law.basis(two)], "side": [law.basis(one)], "rear": [], "depth": []}
         chain = lot.ordered_street()
-        if not _corners(lot, chain)[1]:
-            return stop("corner_one_street")    # stated a corner lot, but the lines given never turn a corner
+        streets_of = _street_groups(lot, facts, chain)
+        if streets_of is not None and len(streets_of) < 2:
+            return stop("corner_one_street")    # stated a corner lot, but every street line is on one street
         given = facts.get("address_street_line")
         if given:
             # the picks are drawn pieces: each matched to a drawn piece, then to the lot line it is part of
@@ -2211,9 +2212,13 @@ def _lot_lines(lot: Lot, facts: dict):
                 return stop("address_not_a_street")
             candidates = [idx]
         else:
-            # the address street is one of the streets (_street_runs): never a piece of one, never two added
-            # (one street drawn in pieces is still one street, §325-8A col. 7)
-            candidates = _street_runs(lot, chain)
+            # the address street is one of the streets, each the lines recorded on it (street_ids: the street pick,
+            # or the lookup), never guessed from where the lines turn (#18 rounds b-e: no rule of angles could be
+            # made safe); not recorded: which yard is the rear can't be told
+            if streets_of is None:            # the front yards (every street line) are still measured
+                return {"readings": [], "question": "; ".join(question), "basis": basis,
+                        "problem": stop("street_ids_needed"), "candidates": []}
+            candidates = streets_of
             question.append("which street the lot's address is on decides which yard is the rear yard (§325-8A(14)(d)): "
                             "pick the address street (address_street_line)")
     else:
@@ -2251,91 +2256,37 @@ def _lot_lines(lot: Lot, facts: dict):
             "candidates": candidates}
 
 
-JOINT = 15                # degrees: a joint turning more than this but no more than PARALLEL may be where a street ends
-STRAIGHT = 4.5            # degrees: a joint turning no more than this is within a straight street (a tax map's pieces)
-ONE_CORNER = 90 + PARALLEL  # degrees: turning joints together turning more than this are more than one corner
-MIN_STREET = 5.0          # ft: no street's frontage is shorter (a corner's pieces of less are never one alone)
+def _street_groups(lot: "Lot", facts: dict, chain: list) -> list[list[int]] | None:
+    """The street lot lines grouped by the street each is on (`street_ids`, one per `street_line`, recorded by the
+    street pick or the lookup), each group its lines in order along the lot: a corner lot's streets, each its own
+    frontage (§325-8A col. 7: the frontage on one street). None when that isn't recorded for every street lot line,
+    a lot line's pieces are on two streets, or one street's lines aren't one run: then which lines are which street
+    is the architect's to say, never guessed from where the lines turn."""
+    given, ids = facts.get("street_line") or [], facts.get("street_ids")
+    if matching_ids(given, ids) is None:
+        return None
 
-
-def _heading(edge) -> float:
-    (x, y) = _chord(edge)
-    return math.degrees(math.atan2(y, x))
-
-
-def _corners(lot: "Lot", chain: list) -> tuple[list[float], list[tuple[int, int]]]:
-    """The street lines' turns (turns[k - 1]: joint k, between chain[k - 1] and chain[k]) and their corners, each
-    (first joint, last joint). A corner is a run of consecutive joints each turning more than STRAIGHT (a tax map's
-    pieces of one street turn less) that together turn more than PARALLEL: a sharp corner (one joint), a cut corner
-    or a rounded one (its pieces between its first and last joint are the corner's pieces). A run turning more than
-    ONE_CORNER is more than one corner, with a street between: it is split at its longest piece (a street between
-    two rounded corners, or the middle street of three)."""
-    n = len(chain)
-    turns = [_turn(lot.edges[a], lot.edges[b]) for a, b in zip(chain, chain[1:])]
-    length = [lot.length([i]) for i in chain]
-    out = []
-
-    def split(k, j):                                  # joints k .. j, consecutive, each turning
-        total = sum(turns[k - 1:j])
-        if total <= PARALLEL:
-            return
-        if total > ONE_CORNER and j > k:
-            longest = max(range(k, j), key=lambda i: length[i])      # pieces k .. j-1 lie inside
-            split(k, longest)
-            split(longest + 1, j)
-            return
-        out.append((k, j))
-    k = 1
-    while k < n:
-        if turns[k - 1] > STRAIGHT:
-            j = k
-            while j + 1 < n and turns[j] > STRAIGHT:
-                j += 1
-            split(k, j)
-            k = j + 1
+    def id_of(piece):
+        e = lot.drawn[piece]
+        for k, (a, b) in enumerate(given):
+            if (_same_point(e[0], a) and _same_point(e[-1], b)) or (_same_point(e[0], b) and _same_point(e[-1], a)):
+                return " ".join(str(ids[k]).lower().replace(".", " ").split()) if ids[k] else None
+        return None
+    names = []
+    for i in chain:
+        found = {id_of(q) for q in (lot.pieces[i] if lot.pieces else [i])}
+        if None in found or len(found) != 1:
+            return None
+        names.append(found.pop())
+    groups = []
+    for i, name in zip(chain, names):
+        if groups and groups[-1][0] == name:
+            groups[-1][1].append(i)
+        elif any(g[0] == name for g in groups):
+            return None                                  # one street's lines in two runs: not read
         else:
-            k += 1
-    return turns, sorted(out)
-
-
-def _street_runs(lot: "Lot", chain: list) -> list[list[int]]:
-    """Each street a corner lot's street lines (`chain`, in order along the lot) may be, from one rule.
-
-    A street ends at an end of the lines, at a corner (_corners: a sharp corner's joint, a cut or rounded corner's
-    first and last joints) or at a bend (a joint turning more than JOINT, no more than PARALLEL, outside a corner).
-    A street is any run of the lines between two such ends with no corner inside it. A corner's pieces are a street
-    of their own only where they may be one (straight, MIN_STREET or more, the corner turning more than JOINT on each
-    side: a short street at a skew is read both ways, never fewer readings); otherwise never alone: the whole corner
-    is read with the street on either side of it, or both. So
-    every street's own frontage is a reading, never a piece of a corner or two streets added (§325-8A col. 7: the
-    frontage on a street; #18 reviews: three streets read 105 ft; a curving street read each piece; a street between
-    two rounded corners was never read alone)."""
-    n = len(chain)
-    turns, corners = _corners(lot, chain)
-    inside = {k for c0, c1 in corners for k in range(c0, c1 + 1)}            # joints of a corner
-    pieces = {i for c0, c1 in corners for i in range(c0, c1)}                 # a corner's own pieces
-    ends = sorted({0, n} | {e for c in corners for e in c} |
-                  {k for k in range(1, n) if JOINT < turns[k - 1] <= PARALLEL and k not in inside})
-    streets = [(x, y) for i, x in enumerate(ends) for y in ends[i + 1:]
-               if not any(x < k < y for k in inside) and not any(x <= i < y for i in pieces)]
-    # a run inside a corner that may instead be a short street of its own (a street crossing at a skew, a hexagon's
-    # middle side, between two shallow corners): straight (its own joints no more than STRAIGHT), MIN_STREET or more
-    # long, with the corner turning more than JOINT on each side of it. Read both ways, its own frontage too: never
-    # fewer readings (#18 round e: the short street's frontage was lost, a false-pass shape)
-    for c0, c1 in corners:
-        for x in range(c0, c1):
-            for y in range(x + 1, c1 + 1):
-                if any(turns[k - 1] > STRAIGHT for k in range(x + 1, y)):
-                    break
-                if lot.length(chain[x:y]) >= MIN_STREET and sum(turns[c0 - 1:x]) > JOINT and \
-                        sum(turns[y - 1:c1]) > JOINT:
-                    streets.append((x, y))
-    runs = [chain[x:y] for x, y in streets]
-    for x, y in streets:                          # each street with the whole corner on either side, or both
-        before = [c for c in corners if c[1] == x and c[1] > c[0]]
-        after = [c for c in corners if c[0] == y and c[1] > c[0]]
-        runs += [chain[c[0]:y] for c in before] + [chain[x:c[1]] for c in after]
-        runs += [chain[c[0]:d[1]] for c in before for d in after]
-    return [r for i, r in enumerate(runs) if r and r not in runs[:i]]
+            groups.append((name, [i]))
+    return [g for _, g in groups]
 
 
 def _two_sides(found: list) -> list:
@@ -2413,9 +2364,11 @@ def _width(lot: Lot, facts: dict, lines) -> dict:
     chain = lot.ordered_street()
     groups = [chain]
     if facts.get("corner_lot"):
-        # each street's own frontage (_street_runs): never two streets added, every street (the middle one too)
-        runs = _street_runs(lot, chain)
-        groups = [g for k, g in enumerate(runs) if g and g not in runs[:k]]
+        # each street's own frontage, the lines recorded on it (street_ids): never two streets added, never a
+        # guess from where the lines turn; not recorded, the lot width waits for the street pick
+        groups = _street_groups(lot, facts, chain)
+        if groups is None:
+            return _missing("lot_width", stop("street_ids_needed"))
     width = []
     for g in groups:
         on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(lot.label(i) for i in g)})" if len(groups) > 1 else ""

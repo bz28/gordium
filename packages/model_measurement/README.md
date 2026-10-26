@@ -144,8 +144,9 @@ Every reason the code gives today comes from the table:
   the lot facts are still read and checked);
   "every lot line is on a street: which yards are front, side and rear is an open question for the architects".
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
-  lot yes or no"; "a corner lot, but the street lot lines given run along one street (they never turn more than
-  30°): pick the lot lines on both streets"; "the address street given isn't one run of the street lot lines: pick
+  lot yes or no"; "a corner lot, but the street lot lines given are all on one street: pick the lot lines on both
+  streets"; "which street lot lines are on which street isn't recorded: pick the street side so Gordium knows which
+  lines are which street (a corner lot's lot width is the frontage on one street, §325-8A col. 7)"; "the address street given isn't one run of the street lot lines: pick
   the lot line(s) on the street the address is on again"; "the lot line opposite the address street is on a street
   too (a through lot, §325-8A(14)(d)): which yards are rear and front is an open question for the architects";
   "every side lot line is on a street (a lot on three streets): which yard is a side yard is an open question for

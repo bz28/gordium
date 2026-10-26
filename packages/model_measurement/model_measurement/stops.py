@@ -35,8 +35,11 @@ STOPS = {
                   "architects",
     # corner lots (§325-19C)
     "corner_unknown": "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no",
-    "corner_one_street": "a corner lot, but the street lot lines given run along one street (they never turn more than "
-                         "30°): pick the lot lines on both streets",
+    "corner_one_street": "a corner lot, but the street lot lines given are all on one street: pick the lot lines on "
+                         "both streets",
+    "street_ids_needed": "which street lot lines are on which street isn't recorded: pick the street side so Gordium "
+                         "knows which lines are which street (a corner lot's lot width is the frontage on one street, "
+                         "§325-8A col. 7)",
     "address_not_a_street": "the address street given isn't one run of the street lot lines: pick the lot line(s) "
                             "on the street the address is on again",
     "rear_on_street": "the lot line opposite the address street is on a street too (a through lot, §325-8A(14)(d)): "
