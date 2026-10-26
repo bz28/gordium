@@ -1654,17 +1654,22 @@ def confirm(doc, facts, options, mode="check"):
         return None
     result = None
     changed_before = STATE.get("dirty")
-    try:
+    failed = True                       # until _confirm returns: an error inside the box (its rollback may have
+    try:                                # stopped partway) leaves the model counted as changed
         ui.set_box_open(STATE.get("panel_parts"), True)
         result = _confirm(doc, facts, options, mode)
+        failed = False
     finally:
         gate.leave()
         ui.set_box_open(STATE.get("panel_parts"), False)
         # Cancel put the model back: it is as changed (or not) as it was when the box opened, so current results
         # never grey out for the box's own rolled-back edits (the Check button: nothing re-checks them)
         # (the edit's own time kept: never moved earlier, which could let a check from before it count as covering
-        # it; with Check after every edit on, the next idle past IDLE_SECONDS checks: review round 1, P1)
-        STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None)
+        # it; with Check after every edit on, the next idle past IDLE_SECONDS checks: review round 1, P1). An error
+        # is no Cancel: the model may not be as it was, so the results grey out, never shown as current (the
+        # headless check-15, demo review of #26 with #27)
+        STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None,
+                                                 failed=failed)
     if result is not None:              # Draw (GordiumStart or Edit site…): the neighbourhood follows the lot
         logic.guard(sync_context, "draw the neighbourhood")(doc, result)
     return result
