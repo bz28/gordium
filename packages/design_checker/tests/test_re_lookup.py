@@ -780,6 +780,9 @@ def test_rows_do_not_show_the_found_lot_while_another_address_is_typed_or_looked
     box.type_address("109 Ithaca Rd, Ithaca, NY")
     rows = _rows_of(box)
     assert (rows["lot"], rows["street"]) == (before["lot"], before["street"])
+    box.type_address("")                       # blank: Draw sets the preview aside, so no promise either
+    rows = _rows_of(box)
+    assert (rows["lot"], rows["street"]) == (before["lot"], before["street"])
     box.typed.clear()
     box.saved["_lookup"] = dict(box.saved["_lookup"], looking="109 Ithaca Rd")
     rows = _rows_of(box)

@@ -3203,8 +3203,8 @@ def show_pending_lot(state, facts, saved_ui):
     if (not pending or not sample_only or not lookup_may_replace(facts, saved_ui)
             or is_drawn(pending.get("address"), saved_ui)
             or (state.get("lookup") or {}).get("looking")           # another address is being looked up
-            or (state.get("address") and not (same_address(state["address"], pending.get("address"))
-                                              or same_address(state["address"], pending.get("query"))))):      # Draw draws nothing new for it: no "after Draw"
+            or not (same_address(state.get("address") or "", pending.get("address"))      # blank: Draw sets the
+                    or same_address(state.get("address") or "", pending.get("query")))):    # preview aside      # Draw draws nothing new for it: no "after Draw"
         return state
     answer = pending.get("answer") or {}
     got = answer.get("facts") or {}
@@ -3430,7 +3430,7 @@ BOX_CHOSEN_UI = ("address_source", "zone_source", "_zone_said", "_reconfirm", "_
 # what of the box's state the reset redraws (the rest is the architect's choices in the box): after_reset_state
 RESET_STATE_KEYS = ("has_lot", "lot_missing", "lot_area", "lot_surveyed", "lot_source", "street_name",
                     "street_name_saved", "street_source", "corner_lot", "corner_source", "ground", "ground_fall",
-                    "lookup", "live", "doubts", "checked", "address", "address_source")
+                    "lookup", "live", "doubts", "checked", "address", "address_source", "after_draw")
 
 
 def after_reset_state(shown, fresh):
