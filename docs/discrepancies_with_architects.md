@@ -53,6 +53,20 @@ Checked by us on 2026-10-19 against the official sources in `regulations/jurisdi
 | 4.5 | The buildable-area outline is on the "Site" layer, not "Setback". | ⚪ |
 | 4.6 | Front setback drawn at 30 ft (the minimum is 25 ft). That's allowed, just stricter than needed. Intended? | ⚪ |
 
+**Confirmed by measuring the model with code (PR 11, `packages/model_measurement/tests/test_models.py`).** As sent, the house solid is outside the lot, so Gordium measures the lot (6,674.5 sf, 73.0 ft frontage) and the height (35 ft) but gives no yards (4.1). With the solid moved onto its own outline on the Site layer (an exact copy, shifted by 48.68 ft and 58.78 ft):
+
+| Measure | Their spreadsheet | Their model, measured | Why they differ |
+|---|---|---|---|
+| Lot width | 73 | 73.0 | same |
+| Front yard | 30 | 30.0 | same |
+| Side yards | 10 / 10 | 10.0 / 10.0 | same |
+| Height | 35 | 35.0 | same |
+| Building area | 1,855 sf (53 × 35) | 2,169.2 sf | the model's house is about 53.3–53.6 × 40.4–40.8 ft, not quite rectangular (4.4) |
+| Rear yard | 25 ft | 20.0 ft | the model's deeper house; 20 ft is the spreadsheet's unused "Back offset" input (2.2) |
+| Lot depth | 90 ft | no single value: 94.82 ft (the jog as a rear lot line) or 100.06 ft (as a side lot line) | §325-8A(14)(a) averages the two side lot lines; 90 ft is neither reading (4.2) |
+
+With those numbers the R-1b results agree with the spreadsheet on 7 of its 11 rows. The other four are NEEDS REVIEW: rear yard and height (both use the lot depth) until the architects say which lines are the side lot lines, and lot size and coverage (both use the lot area) because the model's lot is drawn from the City's map, not a survey. Under either reading the model's 20 ft rear yard is short (23.7 or 25.0 ft required).
+
 ## 5. The workflow document
 
 | # | Issue | Severity |

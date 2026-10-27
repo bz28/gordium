@@ -41,6 +41,7 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 
 | Document | Purpose | For whom | Updated when |
 |---|---|---|---|
+| [decisions/2026-10-20_rhino_talks_to_python.md](decisions/2026-10-20_rhino_talks_to_python.md) | Decision: all measuring and checking runs in Gordium's own Python; Rhino only copies the model across and draws the answer | Engineers | The Rhino–Python connection changes |
 | [questions_for_architects.md](questions_for_architects.md) | The questions about the law research couldn't settle | Architects | A question is added, researched or answered |
 
 ## Evidence: how we know it's right
@@ -68,6 +69,7 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 | [rule_drafting](../packages/rule_drafting/README.md) | Step 5: AI drafts rules for every district; code checks every draft | Engineers | Drafting changes |
 | [rule_export](../packages/rule_export/README.md) | The rules spreadsheet people read, with links to the City's words | Engineers | The spreadsheet changes |
 | [project_report](../packages/project_report/README.md) | A project's compliance report in the architects' own spreadsheet format | Engineers | The report changes |
+| [model_measurement](../packages/model_measurement/README.md) | Measures a Rhino model the way the City defines each measurement (lot, yards, building area, height) | Engineers | A measurement is added or changes |
 
 **Regulation steps** (the data for each city, in numbered steps):
 
