@@ -24,7 +24,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs  # noqa: E402
 import System
 
-S = os.path.join(tempfile.gettempdir(), "gordium_scenarios") + "/"
+# which folder of hand-worked designs: the scenarios (default), or the deep-run sites (deep_run_in_rhino.py sets it)
+FOLDER_NAME = os.environ.get("GORDIUM_SCENARIO_FOLDER", "scenarios")
+S = os.path.join(tempfile.gettempdir(), "gordium_" + FOLDER_NAME) + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))   # the repo
 FRAMES = S + "frames/"
 if not os.path.isdir(FRAMES):
@@ -141,7 +143,7 @@ try:
     doc = docs.open("Large Objects - Feet")
     if doc.Path and "scratchpad" not in doc.Path and "gordium" not in doc.Path.lower():
         raise RuntimeError("refusing to clear " + doc.Path + ": open a new empty document first")
-    folder = os.path.join(WT, "test_data/test_sites/new_york/ithaca_city/scenarios")
+    folder = os.path.join(WT, "test_data/test_sites/new_york/ithaca_city", FOLDER_NAME)
     for f in sorted(os.listdir(folder)):
         if not f.endswith(".yaml"):
             continue

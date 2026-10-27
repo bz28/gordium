@@ -4,6 +4,7 @@ Gordium; a disagreement is investigated (a code fix, or a question for the archi
 
     python -m design_checker.scenarios               the table: scenario · expected · Gordium · match
     python -m design_checker.scenarios dump <yaml>   the scenario as JSON (lot, solids, facts), for the Rhino test
+    python -m design_checker.scenarios --sites       the same table for the deep-run sites (real lots, deep_run/)
 
 A scenario is built the way an architect draws it in Rhino: the lot as one closed outline, the street along its
 first edge, each story its own floor block (marked with the height it was drawn, as GordiumStart marks them),
@@ -19,14 +20,16 @@ from design_checker import present
 from rule_format.rulebook import REPO, utf8_console
 
 FOLDER = REPO / "test_data/test_sites/new_york/ithaca_city/scenarios"
+# real City of Ithaca lots, one full design per district family, every rule worked out by hand (queue item 12)
+SITES = REPO / "test_data/test_sites/new_york/ithaca_city/deep_run"
 JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
 # the most cautious status a rule's rows give is the rule's status
 CAUTION = {present.FAILS: 3, present.REVIEW: 2, present.NOT_CHECKED: 1, present.COMPLIES: 0}
 TOUCH = 0.1                     # ft: a left-out solid this close to the building may be part of it
 
 
-def paths() -> list[Path]:
-    return sorted(FOLDER.glob("*.yaml"))
+def paths(folder: Path = FOLDER) -> list[Path]:
+    return sorted(Path(folder).glob("*.yaml"))
 
 
 def load(path) -> dict:
@@ -76,6 +79,7 @@ def facts(scenario: dict) -> dict:
         out.update(ground_is_flat=True, grade_elevation=grade["elevation"])
     elif grade.get("points"):
         out.update(grade_from="spot", grade_points=[list(p) for p in grade["points"]])
+    out.update(scenario.get("stated") or {})      # what the architect states (bedrooms, who lives there, ...)
     return out
 
 
@@ -193,7 +197,10 @@ def main(argv):
         print(json.dumps({"scenario": sc, "solids": solids(sc), "moved": solids(sc, True) if sc.get("then") else None,
                           "facts": facts(sc)}))
         return 0
-    every = {p.stem: load(p) for p in paths()}
+    folder = FOLDER
+    if argv[:1] == ["--sites"]:                 # the deep-run sites instead of the scenarios
+        folder, argv = SITES, argv[1:]
+    every = {p.stem: load(p) for p in paths(folder)}
     trace = None
     if argv[:1] == ["rhino"]:               # the Rhino run's views, judged by the same comparison
         ran = json.loads(Path(argv[1]).read_text(encoding="utf-8"))
