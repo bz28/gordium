@@ -652,7 +652,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
 def test_the_amber_line_names_what_to_do():
     from design_checker import rhino_logic as logic
     assert logic.uncertain(_box(corner_lot=False)) is None               # answered: no amber line
-    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain(_box(corner_lot=True)) == logic.CORNER_HINT
     assert logic.uncertain(_box(corner_lot=False, zones_found=["R-1b", "R-2a"])) == \
         "This lot is in two zones: pick the zone that applies"
 
@@ -711,7 +711,7 @@ def test_a_corner_lot_is_never_guessed_the_box_asks_and_the_yards_wait(facts):
     street = {r["key"]: r for r in logic.box_rows(unanswered)}["street"]
     assert street["choice"] == ("Corner lot?", ["Not answered", "No: one street", "Yes: two streets"], 0)
     assert logic.uncertain(unanswered) == "Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)"
-    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain(_box(corner_lot=True)) == logic.CORNER_HINT
     assert logic.uncertain(_box(corner_lot=False)) is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     suggested = rhino.split("def suggested_facts(", 1)[1].split("\ndef ", 1)[0]
@@ -998,7 +998,8 @@ def test_no_viewport_label_is_drawn_under_the_status_box():
     assert top >= y + h
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     conduit = rhino[rhino.index("    taken = []"):]
-    assert conduit.index("logic.status_box(") < conduit.index("ui.label_at(")
+    assert conduit.index("logic.status_box(") < conduit.index("ui.paint_label(")
+    assert conduit.index("keep = list(taken)") < conduit.index('"keep": [tuple(t) for t in keep]')   # placed off it
 
 
 def test_a_report_write_that_fails_half_way_leaves_no_broken_report(facts, tmp_path, monkeypatch):
@@ -1085,7 +1086,9 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
     assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
     check_code = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert "logic.labels_on(_ui_state(doc))" in check_code and "ui.set_labels_tick(" in check_code
+    sync = rhino[rhino.index("def _sync_ticks("):].split("\ndef ", 1)[0]          # (every tick, at every check)
+    assert "logic.labels_on(_ui_state(doc))" in check_code and "_sync_ticks(doc)" in check_code
+    assert "ui.set_labels_tick(p, logic.labels_on(_ui_state(doc)))" in sync
     assert '"labels": set_labels' in rhino
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert 'box.Text = "Show on-screen labels"' in ui and "box.Checked = False" in ui.split("def _labels_box(")[1]
@@ -1319,7 +1322,7 @@ def test_the_panel_columns_fit_a_rhino_sized_panel_and_wrap():
     assert "col.Expand = i == 0" in ui and "ef.DrawableCell()" in ui and "ef.TextBoxCell(" not in ui
     assert int(re.search(r"^ROW_HEIGHT = (\d+)", ui, re.M).group(1)) >= 2 * 16           # two lines
     assert "ft.Wrap = ed.FormattedTextWrapMode.Word" in ui
-    for tick in ("_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)"):
+    for tick in ("_envelope_box(actions, parts)", "_massing_box(actions, parts)", "_labels_box(actions, parts)"):
         assert "row(%s)" % tick in ui and "row(%s, " % tick not in ui, tick     # each in a row of its own
 
 
@@ -1758,14 +1761,13 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
             in draw)                                  # judged from the lot's edges: a lot with arcs too (round 3, F5)
     assert '    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]' in draw
     assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
-    assert ('    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:'
-            in draw)
-    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep, dims=dims)" in draw
+    assert '    edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []' in draw
+    assert 'colors[key] = (ui.status_color("complies", dark), True)' in draw            # edges: a leader when short
     assert draw.index("zoomed_in = ") < draw.index("    if not boxed:")         # the status box isn't gated by it
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    at = ui[ui.index("def label_at("):ui.index("def _signed(")]
-    assert "        if logic.needs_leader(((b.X - a.X) ** 2 + (b.Y - a.Y) ** 2) ** 0.5, width):" in at
-    assert "            end = logic.leader_end(mid, (left, top, width, h))" in at
+    at = ui[ui.index("def paint_label("):ui.index("def _signed(")]
+    assert "edge_leader and logic.needs_leader(((xb - xa) ** 2 + (yb - ya) ** 2) ** 0.5, width)" in at
+    assert "        end = logic.leader_end(at, (left, top, width, h))" in at
 
 def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps_it_only_on_that_street():
     """The stack-keeper's review: the panel and report name the street only when the highlighted street line's own
@@ -1927,13 +1929,10 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
     assert f["street_line"] == [b, c] and "street_name" not in s and s["street_source"] == logic.ENTERED
     source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
     effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
-    assert 'set_street_lines(facts, street_lines_after_picks(facts.get("street_line"), picks, True))' in effect
-    # ...and by behaviour: the corner lot's clicks are its street lines, unnamed (no one name for two streets)
+    assert "street_lines_after_picks(" not in effect     # a corner lot's lines are never saved without their ids
     f, s = logic.pick_effect("street", {"picks": [b, c, b], "name": None},
-                             {"corner_lot": True, "street_line": [a], "street_ids": ["A St"]},
-                             {"street_name": "A St", "_street_name": "A St"})
-    assert f["street_line"] == [b, c] and "street_ids" not in f
-    assert "street_name" not in s and "_street_name" not in s and s["street_source"] == logic.ENTERED
+                             {"corner_lot": True, "street_line": [a], "street_ids": ["A St"]}, {"street_name": "A St"})
+    assert f["street_line"] == [a] and f["street_ids"] == ["A St"] and s == {"street_name": "A St"}   # nothing
 
 
 def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the_district():
@@ -2032,7 +2031,7 @@ def test_a_corner_lot_answered_no_never_keeps_both_streets_and_never_reads_its_w
     box_facts = inspect.getsource(logic.box_facts)
     assert "logic.box_facts(" in apply_box and "corner_answered(" in box_facts
     assert rhino.count("logic.corner_answered(") == 1 and "logic.after_corner_answer(" not in rhino
-    assert logic.uncertain({"corner_lot": True}) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain({"corner_lot": True}) == logic.CORNER_HINT
 
 
 def test_the_envelope_refuses_a_buried_solid_as_the_measuring_does():
@@ -2270,8 +2269,8 @@ def test_street_names_go_with_their_street_lines_on_every_path_and_never_stop_th
         assert re.findall(r'\["street_(?:line|ids)"\] = |\.pop\("street_(?:line|ids)"', text) == []
     assert rhino.count("logic.set_street_lines(") == 1               # the command line's (Edit site) pick
     effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
-    assert effect.count("set_street_lines(") == 3                    # the start box's picks (PR #19: decided there;
-    #                                                                   the street runs' lines, then the clicks')
+    assert effect.count("set_street_lines(") == 2                    # the start box's picks (PR #19: decided there;
+    #                                                                   the street runs' lines and ids, or one line's)
     # stale names (saved before the lines changed): the check still runs, lot width needs review and says why
     stale = dict(sample["facts"], street_line=sample["facts"]["street_line"][:1], lot_surveyed=True)
     assert fact_problems(stale) == []
@@ -2380,7 +2379,7 @@ def test_one_click_on_a_street_drawn_in_pieces_keeps_the_whole_street_and_stops_
             lines, ids = logic.street_lines_of(outline, runs, known)
             assert sorted(map(str, lines)) == sorted(map(str, street)), (k, lines)
             assert said == ("Ithaca Rd" if known else "Street 1") + ": 8 lot-line pieces, 75'-10\" of frontage", said
-            assert ids == (["Ithaca Rd"] * 8 if known else None)
+            assert ids == (["Ithaca Rd"] * 8 if known else ["Street 1"] * 8)   # every line an id
         assert not asked                               # Ithaca Rd ends at two sure corners: nothing asked
         # the other street, clicked next: its own pieces, never Ithaca Rd's again. Its far corner has the 0.24 ft
         # piece in it, so that corner is never sure (review round 7): the architect is asked once, and No keeps
@@ -2472,13 +2471,13 @@ def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
     side = [[40, 0], [40, 160]]
     for k in range(4):
         lines, ids = logic.pick_street([side], None, outline[k], None, outline=outline)
-        assert len(lines) == 4 and side not in lines and ids is None, (k, lines)
+        assert len(lines) == 4 and side not in lines and ids == ["Street 1"] * 4, (k, lines, ids)
         got = width(lines)
         assert got["status"] == "does_not_comply" and got["proposed"] == "40'-0\"", got
         runs, _ = logic.add_street_pick([], outline, outline[k])
         assert logic.street_lines_of(outline, runs)[0] == logic.street_lines_of(outline, [[0, 1, 2, 3]])[0]
     named = logic.pick_street(None, None, outline[2], "A St", outline=outline)
-    assert named == (logic.street_lines_of(outline, [[0, 1, 2, 3]])[0], [None, None, "A St", None])  # its own only
+    assert named == (logic.street_lines_of(outline, [[0, 1, 2, 3]])[0], ["A St"] * 4)  # the run's name
     assert width(named[0])["status"] == "does_not_comply"
     assert logic.pick_street(None, None, [[1, 1], [2, 2]], None, outline=outline) == ([[[1, 1], [2, 2]]], None)
     # the plugin: every street click goes through these (the corner box, the one-street box, the command line)
@@ -2486,7 +2485,7 @@ def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
     assert rhino.count("logic.add_street_pick(runs, outline, ") == 2
     assert "outline=_outline(doc, lot), ask=_ask_street_more" in rhino and "logic.street_lines_after_picks(" not in rhino
     assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in rhino
-    assert 'lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []' in rhino
+    assert 'lines, ids = logic.street_lines_of(outline, runs, None, picked) if picked else ([], None)' in rhino
     assert 'say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))' in rhino
     # what the one-street pick says when the street it kept isn't surely one street
     a, b = [[0, 0], [40, 0]], [[40, 0], [40, 100]]
@@ -2521,10 +2520,10 @@ def test_the_suggested_street_and_a_click_on_it_keep_the_whole_street_so_the_fro
     assert front([outline[0]])["status"] == "complies"                   # the one piece alone: the false pass
     for old in ([outline[0]], whole):
         lines, ids = logic.pick_street(old, None, outline[0], None, outline=outline)
-        assert sorted(map(str, lines)) == sorted(map(str, whole)) and ids is None, (old, lines)
+        assert sorted(map(str, lines)) == sorted(map(str, whole)) and ids == ["Street 1"] * 5, (old, lines, ids)
         assert front(lines)["status"] == "does_not_comply" and front(lines)["proposed"] == "10'-0\"", front(lines)
     lines, ids = logic.pick_street([outline[0]], ["A St"], outline[0], "A St", outline=outline)
-    assert len(lines) == 5 and ids == ["A St", None, None, None, None]       # the name on the clicked line only
+    assert len(lines) == 5 and ids == ["A St"] * 5       # the run's name, its lines one street
     # round 2: a click on a middle piece already saved appends the rest after it; what is said still reads the
     # street end to end, as the measuring does (it said "not surely one street" for a straight street)
     for k in range(5):
@@ -2919,10 +2918,10 @@ def test_an_arc_drawn_in_short_chords_is_a_street_and_an_unreadable_outline_neve
     assert front["status"] != "complies", front
     # (R7-2) a lot of 2 pieces (a line and an arc), a ring out of order: the line clicked alone, never a crash
     two = [[[0, 0], [50, 0]], [[50, 0], [0, 0]]]
-    assert logic.pick_street(None, None, two[0], None, outline=two) == ([[[0, 0], [50, 0]]], None)
+    assert logic.pick_street(None, None, two[0], None, outline=two) == ([[[0, 0], [50, 0]]], ["Street 1"])
     square = _ring([(0, 0), (40, 0), (40, 40), (0, 40)])
     shuffled = [square[2], square[0], square[3], square[1]]
-    assert logic.pick_street(None, None, square[0], None, outline=shuffled) == ([[[0, 0], [40, 0]]], None)
+    assert logic.pick_street(None, None, square[0], None, outline=shuffled) == ([[[0, 0], [40, 0]]], ["Street 1"])
     runs, said = logic.add_street_pick([], shuffled, square[0])
     assert runs == [[1]] and said.startswith("Street 1: only the lot line clicked (the lot outline doesn't run"), said
     # (R7-3) a short piece alone, between two named streets
@@ -2948,7 +2947,7 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     runs, said = logic.add_street_pick([], o, o[1])
     assert runs == [] and said.startswith("that piece is under 6 in long")
     assert logic.street_lines_of(o, runs, None, [o[1]]) == ([], None)                    # (F1) nothing to save
-    assert logic.street_lines_of(o, [], None, [[[7, 7], [8, 8]]]) == ([[[7, 7], [8, 8]]], None)   # off the outline
+    assert logic.street_lines_of(o, [], None, [[[7, 7], [8, 8]]]) == ([[[7, 7], [8, 8]]], ["Street 1"])   # off the outline
     told = []
     old = [o[4]]
     assert logic.pick_street(old, ["West St"], o[1], "Cayuga St", outline=o, said=told) == (old, ["West St"])
@@ -3148,6 +3147,196 @@ def test_a_corner_click_is_said_as_so_far_and_esc_says_the_pick_was_not_kept():
     assert 'say(logic.so_far(said) if grown != runs and facts.get("corner_lot") else said)' in rhino
 
 
+def test_every_street_line_is_saved_with_its_street_id():
+    """#18 reads a corner lot's streets only from facts["street_ids"] (guessing from the drawing gave false passes),
+    so every street pick saves an id on every line, matching the lines one for one: the looked-up name where it is
+    known, else "Street 1", "Street 2"... one per kept run, as the command line calls it. A run is never one id
+    across a sure corner (a street kept from an older save): past it, a street of its own, so one frontage is never
+    read along two streets."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    import re
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site, sample_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    site = sample_site()
+    outline = _ring(site["lot"])
+    names = logic.outline_names(outline, site["facts"]["street_line"], site["facts"]["street_ids"])
+    for known, first in ((names, "Ithaca Rd"), (None, "Street 1")):
+        runs, said1 = logic.add_street_pick([], outline, outline[3], known)
+        runs, said2 = logic.add_street_pick(runs, outline, outline[14], known, lambda q: False)
+        lines, ids = logic.street_lines_of(outline, runs, known)
+        assert ids == [first] * 8 + ["Street 2"] * 2, ids               # one per run, as said
+        assert said1.startswith(first + ":") and said2.startswith("Street 2:")
+        facts = logic.set_street_lines({}, lines, ids)
+        assert facts["street_ids"] == ids and len(facts["street_line"]) == 10
+    # the one-street pick: one id for the whole street, named or not, and said by it
+    told = []
+    lines, ids = logic.pick_street(None, None, outline[3], None, outline=outline, said=told)
+    assert ids == ["Street 1"] * 8 and told[-1]["words"].startswith("Street 1: 8 lot-line pieces")
+    lines, ids = logic.pick_street(None, None, outline[3], "Ithaca Rd", outline=outline)
+    assert ids == ["Ithaca Rd"] * 8
+    # the suggestion too
+    segs = [tuple(map(tuple, x)) for x in _ring([(0, 0), (20, 0), (40, 0), (40, 100), (0, 100)])]
+    got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+    assert got["street_ids"] == ["Street 1", "Street 1"]
+    # one id only where the run is surely one street (round ids, all reproduced through check_site): never 200 ft
+    # read along two streets of a 40 ft lot
+    corners = [(0, 0), (40, 0), (40, 160), (0, 160)]
+    sq = _ring(corners)
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+
+    def width(lines_, ids_, corners_=corners):
+        r = check_site(_plot(box(12, 30, 28, 70, 0, 30), lot_=lot_of(corners_)),
+                       dict(base, street_line=lines_, street_ids=ids_))
+        return next(i for i in r["view"]["items"] if i["name"] == "Lot width")["status"]
+
+    # saved unnamed lines across a corner, re-clicked (kept as they were): unnamed, asked
+    lines, ids = logic.pick_street([sq[0], sq[1]], None, sq[0], None, outline=sq)
+    assert len(lines) == 2 and ids == [None, None] and width(lines, ids) != "complies", ids
+    # (F2) a name never crosses a corner onto an unnamed line
+    lines, ids = logic.pick_street([sq[0], sq[1]], [None, "B St"], sq[1], None, outline=sq)
+    assert ids == [None, "B St"] and width(lines, ids) != "complies", ids
+    # (F3) the unreadable outline's fallback: the saved lines across the corner stay unnamed
+    shuffled = [sq[2], sq[0], sq[3], sq[1]]
+    lines, ids = logic.pick_street([sq[0], sq[1]], None, sq[0], None, outline=shuffled)
+    assert len(lines) == 2 and ids == [None, None], ids
+    # (F1) a Yes at every bend of a rounded corner: not surely one street, so unnamed (the words say so too)
+    import math as m_
+    pts = [(0.0, 0.0), (30.0, 0.0)] + [(30 + 10 * m_.sin(m_.radians(a)), 10 - 10 * m_.cos(m_.radians(a)))
+                                       for a in (22.5, 45, 67.5, 90)] + [(40.0, 160.0), (0.0, 160.0)]
+    rc = _ring(pts)
+    told = []
+    lines, ids = logic.pick_street(None, None, rc[0], None, outline=rc, ask=lambda q: True, said=told)
+    assert len(lines) == 6 and ids == [None] * 6 and "not surely one street" in told[-1]["words"], (ids, told)
+    assert width(lines, ids, pts) != "complies"
+    runs, _ = logic.add_street_pick([], rc, rc[0], None, lambda q: True)
+    assert logic.street_lines_of(rc, runs)[1] == [None] * 6
+    # (F4) Gordium's own "Street 1" is no name: a corner pick numbers its streets afresh, never two "Street 1"
+    first, first_ids = logic.pick_street(None, None, sq[0], None, outline=sq)
+    assert first_ids == ["Street 1"]
+    names = logic.outline_names(sq, first, first_ids)
+    assert names == [None] * 4
+    runs, _ = logic.add_street_pick([], sq, sq[1], names)
+    runs, _ = logic.add_street_pick(runs, sq, sq[0], names)
+    assert logic.street_lines_of(sq, runs, names)[1] == ["Street 1", "Street 2"]
+    assert logic.generated_id("Street 12") and not logic.generated_id("Ithaca Rd")
+    # round 2: (D1) Gordium's own ids never vouch for one street in the measuring: a curved edge (the box sees only
+    # its ends) still swings in the measuring's own check, so a 50° arc then a line ask one street or two
+    from model_measurement import street_lines
+    from model_measurement.measure import measure
+    from test_measure import FACTS as MFACTS, site as msite, box as mbox
+    arc = [(60 + 20 * m_.sin(m_.radians(t)), 20 - 20 * m_.cos(m_.radians(t))) for t in range(0, 51, 5)]
+    e = arc[-1]
+    b1 = (e[0] + 40 * m_.cos(m_.radians(50)), e[1] + 40 * m_.sin(m_.radians(50)))
+    edges = [{"points": [[0, 0], [60, 0]]}, {"points": [list(p) for p in arc], "curved": True},
+             {"points": [list(e), list(b1)]}, {"points": [list(b1), [0, 120]]}, {"points": [[0, 120], [0, 0]]}]
+    ends = [[list(ed["points"][0]), list(ed["points"][-1])] for ed in edges]
+    got = measure(msite({"id": "lot", "edges": edges}, mbox(10, 30, 40, 60)),
+                  {**MFACTS, "street_line": ends[:2], "street_ids": ["Street 1", "Street 1"], "corner_lot": False})
+    assert got["front_yard"]["value"] is None and "one street that bends, or two" in got["front_yard"]["reason"], \
+        got["front_yard"]
+    assert street_lines.street_verdict(ends[:2], ["Street 1", "Street 2"])[0] == "two"   # still keeps streets apart
+    assert street_lines.street_verdict(ends[:1], ["Elm St"])[0] == "one"
+    # (D3) the same comparison as street names: "street 2." is Gordium's own id too, never a name
+    assert logic.generated_id("street 2.") and logic.generated_id("STREET  2")
+    # (D2) the unreadable fallback fills with the street's known name, never a new id beside it
+    a_, b_ = [[0, 0], [20, 0]], [[20, 0], [40, 0]]
+    gappy = [a_, b_, [[40, 0], [40, 100]], [[40, 100.05], [0, 100]], [[0, 100], [0, 0]]]
+    lines, ids = logic.pick_street([a_, b_], ["Elm St", None], b_, None, outline=gappy)
+    assert ids == ["Elm St", "Elm St"], ids
+    # the source: no street lines saved without their ids
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    calls = re.findall(r"set_street_lines\(([^)]*)\)", rhino)
+    assert calls and all(c.strip().endswith(", ids") or ", None" in c for c in calls), calls
+    logic_src = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    saves = re.findall(r"set_street_lines\((?!facts, lines, ids=None\))([^\n]*)", logic_src)
+    # (with_suggestions: the lines with their own source's ids, never the other source's: round 3, F1; the start
+    # box's picks: the street runs' own ids, #19; the lookup's address street: one street, unnamed, a corner lot
+    # still asks for the street pick, #18 reading its streets only from the pick's ids)
+    allowed = ('out, out.get("street_line"), own.get("street_ids"))', 'facts, outcome["lines"], outcome.get("ids"))',
+               'facts, w["street_line"])', 'facts, lines, ids)')
+    assert all("None)" in c or "* len(" in c or c.startswith(allowed) for c in saves), saves
+
+
+def test_the_corner_pick_saves_one_id_per_street_and_the_hint_says_what_the_box_does():
+    """#18 reads a corner lot's streets only from street_ids. The plugin's own _box_pick, run with stand-ins for
+    Rhino on the sample (corner lot answered Yes, so no saved names), two clicks then Enter: one id per street, as
+    the command line said ("Street 1", "Street 2"), saved with the lines. And the amber hint says what the box
+    really does: Change…, one click per street, Enter."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import sample_site
+    site = sample_site()
+    o = _ring(site["lot"])
+    said = []
+    clicks = [("ok", o[3]), ("ok", o[14]), ("none", None)]
+    result = type("Result", (), {"Success": "ok", "Nothing": "none", "Cancel": "esc"})
+    rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result})})
+    ns = _plugin_functions(["_box_pick", "_one_pick", "_pick_outcome"], Rhino=rhino2, Cancelled=type("Cancelled", (Exception,), {}),
+                           _find=lambda doc, i: type("Lot", (), {"Geometry": None})(), _outline=lambda doc, lot: o,
+                           _get_point=lambda p: clicks.pop(0), _clicked_piece=lambda doc, lot, point: point,
+                           _feet_point=lambda doc, p: p, _ask_street_more=lambda q: False, say=said.append,
+                           _highlight=lambda doc, f: None)
+    facts, saved = ns["_box_pick"](None, "street", {"lot_id": "l", "corner_lot": True}, {}, None)
+    assert facts["street_ids"] == ["Street 1"] * 8 + ["Street 2"] * 2, facts.get("street_ids")
+    assert len(facts["street_line"]) == 10
+    assert said[0].startswith("Street 1: 8 lot-line pieces") and said[1].startswith("Street 2: 2 lot-line pieces")
+    assert logic.CORNER_HINT == ("This lot faces two streets: click Change… on Front lot line (on the street), then "
+                                 "click once on each street (one click keeps the whole street) and press Enter")
+
+
+def test_esc_at_any_street_prompt_changes_nothing():
+    """The guide's review (Lane C, 2026-10-27): on a corner lot, Esc at the street pick acted as Enter and kept the
+    clicks made so far; Esc at "Which street is this lot line on?" still saved the clicked line. Esc changes
+    nothing, at either prompt, and says so (ESC_STREET); Enter still keeps what was clicked."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import sample_site
+    site = sample_site()
+    o = _ring(site["lot"])
+    said = []
+    cancelled = type("Cancelled", (Exception,), {})
+    result = type("Result", (), {"Success": "ok", "Nothing": "none", "Cancel": "esc"})
+    answers = []
+
+    class GetString:
+        def SetCommandPrompt(self, p):
+            pass
+
+        def AcceptNothing(self, ok):
+            pass
+
+        def GetLiteralString(self):
+            return answers.pop(0)
+
+        def StringResult(self):
+            return "Elm St"
+    get = type("GetResult", (), {"String": "string", "Cancel": "esc", "Nothing": "none"})
+    rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result}),
+                                "Input": type("Input", (), {"GetResult": get,
+                                                            "Custom": type("Custom", (), {"GetString": GetString})})})
+    clicks = []
+    ns = _plugin_functions(["_box_pick", "_one_pick", "_pick_outcome"], Rhino=rhino2, Cancelled=cancelled,
+                           _find=lambda doc, i: type("Lot", (), {"Geometry": None})(), _outline=lambda doc, lot: o,
+                           _get_point=lambda p: clicks.pop(0), _clicked_piece=lambda doc, lot, point: point,
+                           _feet_point=lambda doc, p: p, _ask_street_more=lambda q: False, say=said.append,
+                           _highlight=lambda doc, f: None)
+    corner = {"lot_id": "l", "corner_lot": True, "street_line": [o[0]], "street_ids": ["Ithaca Rd"]}
+    clicks[:] = [("ok", o[3]), ("esc", None)]                       # a click, then Esc
+    facts, saved = ns["_box_pick"](None, "street", dict(corner), {}, None)
+    assert facts["street_line"] == [o[0]] and facts["street_ids"] == ["Ithaca Rd"] and said[-1] == logic.ESC_STREET
+    clicks[:] = [("ok", o[3]), ("none", None)]                      # the same click, then Enter: kept
+    facts, saved = ns["_box_pick"](None, "street", dict(corner), {}, None)
+    assert len(facts["street_line"]) == 8
+    inside = {"lot_id": "l", "corner_lot": False, "street_line": [o[0]], "street_ids": ["Ithaca Rd"]}
+    clicks[:] = [("ok", o[13])]                                      # a line of no known street: its name asked
+    answers[:] = ["esc"]                                             # Esc at "Which street is this lot line on?"
+    facts, saved = ns["_box_pick"](None, "street", dict(inside), {"street_name": "Ithaca Rd"}, None)
+    assert facts["street_line"] == [o[0]] and facts["street_ids"] == ["Ithaca Rd"] and saved == {"street_name":
+                                                                                                  "Ithaca Rd"}
+    assert said[-1] == logic.ESC_STREET
+
+
 def _plugin_functions(names, **extra):
     """The plugin's own functions, run against stand-ins for Rhino (each from gordium_rhino.py as written)."""
     import time as time_
@@ -3265,104 +3454,503 @@ def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     assert 'first = "✕ " + notice + " · " if notice else ""' in report
 
 
-def test_a_label_with_no_room_beside_its_line_stays_near_it_with_a_leader():
-    """The Rhino job at 27c8e5d (highlight claim 2): in a narrow Top view (656 px) the 7 ft southwest side yard had no
-    clear spot beside its line, and its label crossed 13 of the lot's and the house's lines. Then (0a94fc4), placed
-    outside the drawing with the shortest leader, it came loose: 330 px from its line under the status box, 130 px
-    below it with labels off, no leader seen. Now such a label stays within one label height of its own line (beside
-    it or just past either end), never over the notice, the status box or another label, crossing as few lines as it
-    can, and a leader is always drawn to it."""
-    from design_checker import rhino_logic as logic_
-    from design_checker.rhino_logic import box_gap, place_label, place_near
+def _boxes(x0, y0, x1, y1):
+    return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
 
-    def box(x0, y0, x1, y1):
-        return [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))]
-    lot, house = box(158, 110, 497, 557), box(185, 250, 420, 415)
-    hatch = [((185 + k * 10, 250), (185 + k * 10, 415)) for k in range(1, 23)]      # the coloured part's edges
-    own = ((158, 409), (185, 409))                                               # the side yard's dimension
-    obstacles = lot + house + hatch
-    view, w, h = (656, 668), 170, 36
-    notice, status = (12, 34, 506, 54), (60, 14, 584, 54)
-    assert place_label(own, w, h, obstacles, [notice, status], view=view)[2] is False   # nothing clear beside it
-    left, top = place_near(own, w, h, obstacles, [notice, status], view=view)
-    assert box_gap(own, (left, top, w, h)) <= h                                  # near its own line
-    assert not logic_.crosses(own, left, top, w, h)                              # never on its own line
-    assert sum(logic_.crosses(s_, left, top, w, h) for s_ in obstacles) <= 1     # the fewest: the lot's edge alone
-    # a notice right beside the line: never over it
-    close = (100, 420, 200, 60)
-    l3, t3 = place_near(own, w, h, obstacles, [close], view=view)
-    assert not (min(l3 + w, 300) > max(l3, 100) and min(t3 + h, 480) > max(t3, 420))
-    # crowded by other labels: the second pass may cover one, never `keep`
-    others = [(0, 300, 656, 368)]
-    assert place_near(own, w, h, obstacles, others, view=view) is None
-    l4, t4 = place_near(own, w, h, obstacles, [notice], view=view, avoid=others)
-    assert box_gap(own, (l4, t4, w, h)) <= h and not logic_.crosses(own, l4, t4, w, h)
-    # a short line with room all round: the label above or below it, never past its end along the line itself (a
-    # leader there runs on the line and is hidden by it)
-    short = ((300, 300), (327, 300))
-    l5, t5 = place_near(short, w, h, [], [], view=view)
-    assert t5 + h <= 300 - 6 or t5 >= 300 + 6, (l5, t5)
-    # another yard's dimension line in reach (the Rhino job at 81efd62: the southwest label covered the front yard's
-    # dimension): a spot within reach clear of it is taken, even crossing a lot edge more
-    front = ((180, 430), (180, 470))                                             # the front yard's dimension, below
-    l7, t7 = place_near(own, w, h, obstacles + [front], [notice, status], view=view, dims=[own, front])
-    assert not logic_.crosses(front, l7, t7, w, h) and box_gap(own, (l7, t7, w, h)) <= h, (l7, t7)
-    # ...ranked above other lines: here every spot clear of the other dimension crosses two plain lines, the one under
-    # it only that dimension: the label still keeps off the dimension
-    mine, theirs = ((300, 300), (330, 300)), ((310, 312), (310, 360))
-    plain = [((0, 265), (656, 265)), ((0, 275), (656, 275))] + \
-        [((x, 0), (x, 600)) for x in (200, 210, 420, 430)]
-    l8, t8 = place_near(mine, w, h, plain + [theirs], [], view=view, dims=[mine, theirs])
-    assert not logic_.crosses(theirs, l8, t8, w, h), (l8, t8)
-    ui_src0 = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    ns0 = {"logic": logic_, "LINE_H": 16}
-    exec(ui_src0[ui_src0.index("def label_box("):].split("\ndef ", 1)[0], ns0)    # noqa: S102
-    vp0 = type("VP", (), {"Size": type("S", (), {"Width": 656, "Height": 668})(),
-                          "WorldToClient": staticmethod(lambda q: type("P", (), {"X": q[0], "Y": q[1]})())})()
-    got = ns0["label_box"](vp0, (315, 300), "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)", 11, [],
-                           along=mine, obstacles=plain + [theirs], dims=[mine, theirs])
-    assert got[5] and not logic_.crosses(theirs, got[0], got[1], got[2], 4 + 16 * len(got[4])), got
-    box_src = ui_src0[ui_src0.index("def label_box("):].split("\ndef ", 1)[0]
-    assert box_src.count("view=view, dims=dims)") == 1 and box_src.count("avoid=taken or [], dims=dims)") == 1
-    # a line at the screen's edge: the spot pushed onto the screen would sit on the line itself: never used
-    edge = ((0, 300), (20, 300))
-    l6, t6 = place_near(edge, w, h, [], [], view=view)
-    assert not logic_.crosses(edge, l6, t6, w, h), (l6, t6)
-    assert not any(min(left + w, a + c) > max(left, a) and min(top + h, b + e) > max(top, b)
-                   for a, b, c, e in (notice, status))                           # never over the notice nor status
-    assert 0 <= left and left + w <= 656 and 0 <= top and top + h <= 668
-    # the east yard's label: near its own line too
-    east = ((612, 480), (640, 480))
-    obstacles2 = box(300, 110, 640, 520) + box(330, 150, 612, 500)
-    left2, top2 = place_near(east, w, h, obstacles2, [], view=(700, 668))
-    assert box_gap(east, (left2, top2, w, h)) <= h
-    # everything near taken: None (the caller keeps it off them, still led)
-    assert place_near(own, w, h, obstacles, [(0, 0, 656, 668)], view=view) is None
-    # a line off the screen: nothing within reach on it (a spot pushed onto the screen is never far from its line)
-    assert place_near(((100, 900), (130, 900)), w, h, [], [], view=view) is None
-    # gordium_ui.label_box: near, two lines, a leader
+
+def _rect(x0, y0, x1, y1):
+    return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+
+def _nearest_hard_clear(logic_, line, text, size, view, boxes, dims, shapes, reach_rows=1.0, step=3, placed=()):
+    """Independently of the placement: the smallest distance from its line of any spot within `reach_rows` label
+    heights that keeps every HARD rule with room around it (the spot 3 px either way keeps them too: a sliver of a
+    window no lattice of the placement's 6 px could be asked to find is not room), at this size, on one line or
+    two (a brute-force `step` px search)."""
+    best = None
+    (xa, ya), (xb, yb) = line
+    for rows in ([text], logic_.label_lines(text)):
+        w, h = max(logic_.label_width(r, size) for r in rows), logic_.label_height(len(rows), size)
+        reach = reach_rows * h
+        for top in range(int(min(ya, yb) - h - reach), int(max(ya, yb) + reach) + 1, step):
+            for left in range(int(min(xa, xb) - w - reach), int(max(xa, xb) + reach) + 1, step):
+                gap = logic_.box_gap(line, (left, top, w, h))
+                if gap <= reach - 3 and all(not logic_.label_breaks_hard(line, (left + dx, top + dy, w, h), view, boxes,
+                                                                         dims, shapes, placed)
+                                            for dx in (-3, 0, 3) for dy in (-3, 0, 3)):   # room, not a sliver
+                    best = (gap, h) if best is None or gap < best[0] else best
+    return best
+
+
+def test_a_plan_label_keeps_every_hard_rule_the_southwest_cases():
+    """The Rhino rounds on #15, each a new obstacle the label landed on: 13 lot and house lines (27c8e5d), loose 330
+    px from its line under the status box (0a94fc4), the front yard's dimension (81efd62), the house's corner and
+    its coloured band (319dc5d). Now one set of rules (rhino_logic.place_dim_label): HARD, never broken: on screen,
+    over no building or coloured part, nor the notice, the status box or the north arrow, on neither its own line
+    nor another yard's dimension. SOFT, least first: other labels, a led label's leader, lot lines, distance."""
+    from design_checker import rhino_logic as logic_
+    lot = (158, 106, 501, 562)
+    house, band = _rect(185, 250, 420, 415), _rect(185, 250, 200, 415)
+    own = ((158, 409), (185, 409))                                               # the southwest side yard
+    dims = [own, ((300, 415), (300, 562)), ((300, 106), (300, 250)), ((420, 330), (501, 330))]
+    boxes = [(12, 34, 506, 54), (60, 14, 584, 54), (543, 119, 61, 55)]           # the notice, status box, arrow
+    view = (657, 668)
+    text = "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)"
+    got = logic_.place_dim_label(own, text, 11, view, boxes, dims, [], _boxes(*lot), [house, band])
+    box = (got["left"], got["top"], got["w"], got["h"])
+    assert logic_.label_breaks_hard(own, box, view, boxes, dims, [house, band]) is None and not got["forced"], got
+    near = _nearest_hard_clear(logic_, own, text, 11, view, boxes, dims, [house, band])
+    assert near is not None and got["size"] == 11 and got["gap"] <= near[1], (got, near)    # in reach at full size
+    assert got["led"] == (got["gap"] > 8)
+    # each HARD rule, broken on purpose, is named
+    assert logic_.label_breaks_hard(own, (-5, 400, 100, 20), view) == "off screen or on its edge"
+    assert logic_.label_breaks_hard(own, (190, 300, 100, 20), view, [], [], [house]).startswith("over a building")
+    assert logic_.label_breaks_hard(own, (14, 36, 30, 20), view, boxes).startswith("over the notice")
+    assert logic_.label_breaks_hard(own, (150, 400, 30, 20), view) == "on its own line"
+    assert logic_.label_breaks_hard(own, (290, 450, 30, 20), view, [], dims) == "on another yard's dimension"
+    # a turned house: its outline, never its box (the corner beyond a turned wall is free)
+    turned = [(300, 200), (400, 300), (300, 400), (200, 300)]
+    assert not logic_.box_over_shape((200, 200, 40, 20), turned) and logic_.box_over_shape((280, 280, 40, 20), turned)
+    assert sorted(logic_.hull(turned + [(300, 300)])) == sorted(turned)
+    # no room beside the line at its size: a point smaller, still right beside it, no leader
+    line = ((100, 100), (140, 100))
+    tight = [(0, 0, 656, 70), (0, 110, 656, 400), (0, 0, 92, 668), (153, 0, 503, 668)]
+    small = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), tight, [line], [], [])
+    assert small["size"] == 10 and not small["led"] and not small["forced"], small   # the largest that fits
+    # no room within one label height at any size: at its own size, led, within three label heights
+    band2 = [(0, 60, 656, 80)]
+    led = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), band2, [line], [], [])
+    assert led["size"] == 11 and led["led"] and 20 < led["gap"] <= logic_.LABEL_LEAD_REACH * 20, led
+    # nowhere near keeps the rules: the nearest spot on screen that does, led, at full size
+    wide = [(0, 0, 656, 300)]
+    anywhere = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), wide, [line], [], [])
+    assert anywhere["led"] and not anywhere["forced"] and anywhere["top"] >= 303 and anywhere["size"] == 11, anywhere
+    # ...and there SOFT still holds: another label already there is kept clear of
+    a_box = (anywhere["left"], anywhere["top"], anywhere["w"], anywhere["h"])
+    again = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), wide, [line], [a_box], [])
+    assert not logic_._over((again["left"], again["top"], again["w"], again["h"]), a_box), (anywhere, again)
+    # nowhere at all: forced and said, never dropped
+    stuck = logic_.place_dim_label(line, "12'-0\"", 11, (656, 668), [(0, 0, 656, 668)], [line], [], [])
+    assert stuck["forced"] and stuck["rows"]
+    # SOFT near the line: another label already there is kept clear of
+    open_line = ((300, 300), (340, 300))
+    first = logic_.place_dim_label(open_line, "12'-0\"", 11, (656, 668), [], [open_line], [], [])
+    f_box = (first["left"], first["top"], first["w"], first["h"])
+    second = logic_.place_dim_label(open_line, "12'-0\"", 11, (656, 668), [], [open_line], [f_box], [])
+    assert not logic_._over((second["left"], second["top"], second["w"], second["h"]), f_box), (first, second)
+    # a free window right beside a long line (sceptic B's repro): found, at full size, unled
+    long_ = ((200, 300), (400, 300))
+    walls = [(0, 0, 656, 260), (0, 300, 656, 368), (0, 0, 238, 668), (300, 0, 356, 668)]
+    window = logic_.place_dim_label(long_, "12'-0\"", 11, (656, 668), walls, [long_], [], [])
+    assert window["size"] == 11 and not window["led"] and not window["forced"], window
+    # ...nor when that spot is in the same run of clear spots, as near (the review of 9d021d8)
+    line3, keep3, sq = ((300, 100), (360, 100)), [(0, 0, 656, 140)], [(310, 116), (320, 116), (320, 126), (310, 126)]
+    got3 = logic_.place_dim_label(line3, "12'-0\"", 11, (656, 668), keep3, [line3], [], [], [sq])
+    end3 = logic_.leader_end((330, 100), (got3["left"], got3["top"], got3["w"], got3["h"]))
+    assert got3["led"] and not logic_._seg_hits_shape(((330, 100), end3), sq), got3
+    # a leader never runs across a building when a spot whose leader doesn't is in reach
+    short = ((200, 300), (260, 300))
+    under = [_rect(150, 306, 310, 336)]                                         # a coloured band just below it
+    blocked = [(0, 200, 656, 100)]                                              # nothing above it, within reach
+    led2 = logic_.place_dim_label(short, "12'-0\"", 11, (656, 668), blocked, [short], [], [], under)
+    ex, ey = logic_.leader_end((230, 300), (led2["left"], led2["top"], led2["w"], led2["h"]))
+    assert not logic_._seg_hits_shape(((230, 300), (ex, ey)), under[0]), led2
+
+
+def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
+    """A property test: random lots, houses, coloured bands, notices and views (the docked 656 x 668 among them),
+    every yard's label placed in turn. Each one breaks no HARD rule; whenever a spot at full size within one label
+    height of its line keeps every HARD rule (an independent 3 px search), it is that near at full size; whenever one
+    within three label heights does, it is within three; never smaller than LABEL_MIN_SIZE; never dropped; and only
+    `forced` when no spot on the whole screen keeps every HARD rule."""
+    import random
+    from design_checker import rhino_logic as logic_
+    import time as time_
+    rng = random.Random(1525)
+    views = [(656, 668), (1000, 640), (800, 520), (480, 600), (420, 420)]
+    checked, slowest = 0, 0.0
+    for case in range(60):
+        vw, vh = views[case % len(views)]
+        lw, lh = rng.uniform(0.35, 0.8) * vw, rng.uniform(0.35, 0.8) * vh
+        lx, ly = rng.uniform(4, vw - lw - 4), rng.uniform(4, vh - lh - 4)
+        hx0 = lx + rng.uniform(0.05, 0.3) * lw
+        hx1 = lx + lw - rng.uniform(0.05, 0.3) * lw
+        hy0 = ly + rng.uniform(0.1, 0.35) * lh
+        hy1 = ly + lh - rng.uniform(0.1, 0.35) * lh
+        my, mx = (hy0 + hy1) / 2, (hx0 + hx1) / 2
+        dims = [((lx, my), (hx0, my)), ((hx1, my), (lx + lw, my)), ((mx, ly), (mx, hy0)), ((mx, hy1), (mx, ly + lh))]
+        shapes = [_rect(hx0, hy0, hx1, hy1)]
+        side = rng.choice(["w", "e", "n", "s"])                               # a coloured band along one wall
+        shapes.append({"w": _rect(hx0, hy0, hx0 + 12, hy1), "e": _rect(hx1 - 12, hy0, hx1, hy1),
+                       "n": _rect(hx0, hy0, hx1, hy0 + 12), "s": _rect(hx0, hy1 - 12, hx1, hy1)}[side])
+        boxes = []
+        if rng.random() < 0.6:
+            boxes.append((12, 34, rng.uniform(0.3, 0.8) * vw, 54))            # the notice
+        if rng.random() < 0.5:
+            boxes.append((vw - 0.7 * vw - 12, 12, 0.7 * vw, 54))              # the status box
+        boxes.append((vw - 80, 100, 61, 55))                                   # the north arrow
+        soft_lines = _boxes(lx, ly, lx + lw, ly + lh)
+        placed = []
+        for own, name in zip(dims, ("Side yard, West", "Side yard, East", "Rear yard", "Front yard")):
+            text = "✕ " + name + " 7'-0 5/8\", needs 10'-0\" (approx.)"
+            before = list(placed)
+            start = time_.perf_counter()
+            got = logic_.place_dim_label(own, text, 11, (vw, vh), boxes, dims, [], soft_lines, shapes, placed=before)
+            slowest = max(slowest, time_.perf_counter() - start)
+            box = (got["left"], got["top"], got["w"], got["h"])
+            placed.append(box)
+            assert got["rows"] and got["size"] >= logic_.LABEL_MIN_SIZE, got          # never dropped, readable
+            assert " ".join(got["rows"]) == text and all(r not in ("✕", "?") for r in got["rows"]), got
+            assert not any(r.endswith("7'-0") or r.startswith("5/8") for r in got["rows"]), got   # whole numbers
+            if not got["forced"]:                                               # inside the view, off the icon
+                assert logic_.LABEL_INSET <= got["left"] and got["top"] + got["h"] <= vh - logic_.LABEL_INSET
+                assert not logic_._over((got["left"], got["top"], got["w"], got["h"]), logic_.axis_icon_box((vw, vh)))
+            if got["forced"]:                                                  # honest: nowhere keeps every rule
+                w, h = got["w"], got["h"]
+                assert all(logic_.label_breaks_hard(own, (x, y, w, h), (vw, vh), boxes, dims, shapes, before)
+                           for y in range(0, int(vh - h) + 1, 4) for x in range(0, int(vw - w) + 1, 4)), (case, own)
+                continue
+            checked += 1
+            assert logic_.label_breaks_hard(own, box, (vw, vh), boxes, dims, shapes, before) is None, (case, own, got)
+            assert got["led"] == (got["gap"] > 8), got
+            near = _nearest_hard_clear(logic_, own, text, 11, (vw, vh), boxes, dims, shapes, placed=before)
+            if near is not None and near[0] <= near[1] - 6:                   # a full-size spot in reach: used
+                assert got["size"] == 11 and got["gap"] <= near[1], (case, own, got, near)
+            elif near is None:
+                lead = _nearest_hard_clear(logic_, own, text, 11, (vw, vh), boxes, dims, shapes, 3.0, 6, before)
+                if lead is not None and lead[0] <= 3 * lead[1] - 12 and got["size"] == 11:
+                    assert got["gap"] <= 3 * got["h"], (case, own, got, lead)
+    assert checked >= 200                                                       # most labels placed by the rules
+    assert slowest < 0.03, slowest                # placing one label, at rest (never in the drawing loop): bounded
+
+
+def test_a_moved_label_is_led_and_the_draw_record_keeps_the_rules():
+    """draw_screen gathers the labels (each yard's, then each lot edge's), and draws them where logic.place_labels
+    put them once the view was still (ui.paint_label: the leader when led, the shrunk text); every building (its
+    outline's hull) and coloured part (its own outline) goes in as HARD, the buildings counted in the record."""
     src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    ns = {"logic": logic_, "LINE_H": 16}
-    exec(src[src.index("def label_box("):].split("\ndef ", 1)[0], ns)             # noqa: S102
-    viewport = type("VP", (), {"Size": type("S", (), {"Width": 656, "Height": 668})(),
-                               "WorldToClient": staticmethod(lambda q: type("P", (), {"X": q[0], "Y": q[1]})())})()
-    taken = [notice, status]
-    left, top, width, want, rows, led = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", "
-                                                        "needs 10'-0\" (approx.)", 11, taken, along=own,
-                                                        obstacles=obstacles)
-    height = 4 + 16 * len(rows)
-    assert led and len(rows) == 2 and box_gap(own, (left, top, width, height)) <= height
-    assert taken[-1] == (left, top, width, height)
-    # crowded by other labels all round its line: near it all the same (it may cover one), never far (clear_spot)
-    crowd = [notice, status, (0, 300, 656, 368)]
-    left, top, width, want, rows, led = ns["label_box"](viewport, (171, 409), "✕ Side yard, Southwest 7'-0 5/8\", "
-                                                        "needs 10'-0\" (approx.)", 11, crowd, along=own,
-                                                        obstacles=obstacles, keep=[notice, status])
-    assert led and box_gap(own, (left, top, width, 4 + 16 * len(rows))) <= 4 + 16 * len(rows)
-    ui_src = src[src.index("def label_at("):].split("\ndef ", 1)[0]
-    assert "if leader and along is not None and not led:" in ui_src               # one leader, never two
-    assert "if led:" in ui_src and "logic.leader_end((p.X, p.Y), (left, top, width, h))" in ui_src
-    assert "return left, top, width, h, want, rows, led" in ui_src
+    paint = src[src.index("def paint_label("):].split("\ndef ", 1)[0]
+    assert 'if got["led"] or (edge_leader and' in paint and "(size + 5) * k" in paint
+    assert "logic.label_height(len(rows), size)" in paint
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert '"shapes": solids' in draw and 'drawn["hard_shapes"]' in draw
+    assert 'logic.hull(on) if kind == "building" else on' in draw and 'drawn["buildings"] = ' in draw
+    assert 'o.plan_solids = [("building", ' in rhino and "o.plan_lines, o.plan_solids = [], []" in rhino
+    assert '("coloured", [_model_point(doc, (x, y)) for x, y in e["outline"]])' in rhino
+
+
+def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_rests():
+    """The Rhino job at 4bb6d4d: zooming the Top view with labels on ran 502 ms a frame (worst 1,605 ms): the search
+    ran in every frame. Now draw_screen never searches: a frame on a view that hasn't moved since its labels were
+    placed draws them there; while the view moves they are carried along with their lines (logic.follow) and the
+    placing is left to a timer that runs it LABEL_SETTLE_S after the last change (settle_labels). The work a moving
+    frame does for a busy lot (40 labels) stays well under 16 ms; placing the sample and a busy lot once is timed
+    too."""
+    import time as time_
+    from design_checker import rhino_logic as logic_
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
+    for search in ("place_labels(", "place_dim_label(", "label_box(", "label_at(", "settle_labels("):
+        assert search not in draw, search                                    # never in the drawing loop
+    assert "_label_timer()" in draw and "logic.follow(got, item[\"line\"])" in draw
+    tick = rhino[rhino.index("def _label_tick("):].split("\ndef ", 1)[0]
+    assert "logic.LABEL_SETTLE_S" in tick and "settle_labels()" in tick      # all at once, one pass (5b46c99)
+    assert logic_.LABEL_SETTLE_S <= 0.08
+    settle = rhino[rhino.index("def settle_labels("):].split("\ndef ", 1)[0]
+    assert "logic.LabelRun(" in settle and "if not run.step(budget_s):" in settle and "doc.Views.Redraw()" in settle
+    assert 'FromRuntimeSerialNumber(pending["doc"])' in settle                  # the document placed for
+    assert "label_timer" in logic_.HANDLES and 'key == "label_timer"' in rhino
+    # a moving frame's label work for a busy lot: 40 placements carried along, well under 16 ms
+    view = (656, 668)
+    lines = [((40 + 15 * k, 100 + 12 * k), (60 + 15 * k, 100 + 12 * k)) for k in range(40)]
+    placed = {k: {"left": 10.0 + k, "top": 20.0 + k, "w": 80, "h": 20, "rows": ["x"], "size": 11, "led": False,
+                  "forced": False, "gap": 6, "line": lines[k]} for k in range(40)}
+    moved = [((x0 + 7, y0 - 3), (x1 + 7, y1 - 3)) for (x0, y0), (x1, y1) in lines]
+    start = time_.perf_counter()
+    for _ in range(20):
+        carried = [logic_.follow(placed[k], moved[k]) for k in range(40)]
+    per_frame = (time_.perf_counter() - start) / 20
+    assert per_frame < 0.016 and carried[0]["left"] == 17.0 and carried[0]["top"] == 17.0, per_frame
+    # placing (at rest, outside the drawing loop): the sample's 4 yards and 5 edges, then a busy lot's 16 labels
+    lot = (158, 106, 501, 562)
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    dims = [((158, 330), (185, 330)), ((420, 330), (501, 330)), ((300, 106), (300, 250)), ((300, 415), (300, 562))]
+    items = [{"key": k, "text": "✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)", "line": d_, "size": 11,
+              "status": ["does_not_comply", "complies", "needs_review", "complies"][k]} for k, d_ in enumerate(dims)]
+    items += [{"key": 10 + k, "text": "75'-10\"", "line": e_, "size": 11, "status": None}
+              for k, e_ in enumerate(_boxes(*lot))]
+    spots = logic_.place_labels(items, view, [(12, 34, 506, 54), (543, 119, 61, 55)], dims, [house], _boxes(*lot))
+    assert len(spots) == len(items)
+    busy = items + [{"key": 20 + k, "text": "12'-0\"", "line": ((200 + 9 * k, 480), (230 + 9 * k, 480)), "size": 11,
+                     "status": "complies"} for k in range(8)]
+    spots = logic_.place_labels(busy, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
+    assert len(spots) == len(busy)
+    # at rest, placed a few at a time (the review of 3446e94: the whole search at once froze Rhino each pause): a
+    # step stops once its budget is spent, one label at least, and the steps end with every label placed
+    run = logic_.LabelRun(busy, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
+    steps = 0
+    while not run.step(0.0):
+        steps += 1
+        assert len(run.spots) == steps                                     # one label a step at a zero budget
+    assert len(run.spots) == len(busy) and steps == len(busy) - 1
+    assert {k: (g["left"], g["top"]) for k, g in run.spots.items()} == {
+        k: (g["left"], g["top"]) for k, g in spots.items()}                # the same placements as all at once
+    assert sorted(g["order"] for g in run.spots.values()) == list(range(len(busy)))
+
+
+def test_placing_the_labels_is_fast_one_tick_for_the_sample_and_a_resting_label_stays_put():
+    """The Rhino job at 822fb6f: a settle tick took up to 309 ms (one label: every spot tried against every
+    obstacle), 0.2-1.3 s a stop, and the labels jumped when the view came to rest. Now each row of spots is worked
+    out as runs that keep the HARD rules (_LabelField) and the search stops at the first spot beside the line with
+    nothing SOFT against it. Budgets (the best of 5 runs, so a busy machine can't fail it): every label of the
+    sample and of a busy lot under 5 ms, the sample all in under 30 ms (placed in one pass at rest: the Rhino job
+    at 5b46c99), a budgeted step stopping before it would pass its budget (scaled to Rhino's speed below). And a label carried with the view that still
+    keeps every rule stays where it is when the view rests (no jump); one that no longer does is placed again."""
+    import time as time_
+    from design_checker import rhino_logic as logic_
+    view = (656, 668)
+    lot = (158, 106, 501, 562)
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    band = [(185, 250), (420, 250), (420, 262), (185, 262)]
+    dims = [((158, 330), (185, 330)), ((420, 330), (501, 330)), ((300, 106), (300, 250)), ((300, 415), (300, 562))]
+    names = ["✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)", "Side yard, Northeast 81'-0\"",
+             "? Rear yard 27'-6\" (approx.)", "Front yard 26'-11\""]
+    items = [{"key": k, "text": names[k], "line": d_, "size": 11,
+              "status": ["does_not_comply", "complies", "needs_review", "complies"][k]} for k, d_ in enumerate(dims)]
+    items += [{"key": 10 + k, "text": "75'-10\"", "line": e_, "size": 11, "status": None}
+              for k, e_ in enumerate(_boxes(*lot))]
+    keep = [(12, 34, 506, 54), (543, 119, 61, 55)]
+    busy = items + [{"key": 20 + k, "text": "12'-0\"", "line": ((200 + 9 * k, 480), (230 + 9 * k, 480)), "size": 11,
+                     "status": "complies"} for k in range(8)]
+    busy += [{"key": 40 + k, "text": "Side yard, East 6'-2\"", "line": ((420, 270 + 20 * k), (501, 270 + 20 * k)),
+              "size": 11, "status": "complies"} for k in range(6)]
+
+    def timed(its):
+        """The best of 5 runs: the whole, and each label's own best (one pause in a run can't fail it)."""
+        totals, each = [], None
+        for _ in range(5):
+            run = logic_.LabelRun(its, view, keep, dims, [house, band], _boxes(*lot))
+            times = []
+            start = time_.perf_counter()
+            while run.todo:
+                t = time_.perf_counter()
+                run.step(0.0)
+                times.append(time_.perf_counter() - t)
+            totals.append(time_.perf_counter() - start)
+            each = times if each is None else [min(a, b) for a, b in zip(each, times)]
+        return min(totals), max(each)
+    # measured against this machine's own speed (the review of 9d021d8: a CI runner is slower than a Mac): the time
+    # of one exact HARD check (label_breaks_hard on the sample), the old search's unit of work - its slowest label
+    # made 22,664 of them for the busy lot; now a label costs at most 400 and the sample 1,500
+    probe = [(10 + 7 * k % 600, 20 + 11 * k % 600, 120, 20) for k in range(400)]
+    unit = None
+    for _ in range(5):
+        t = time_.perf_counter()
+        for box in probe:
+            logic_.label_breaks_hard(dims[0], box, view, keep, dims, [house, band], [])
+        took_ = (time_.perf_counter() - t) / len(probe)
+        unit = took_ if unit is None else min(unit, took_)
+    total, worst = timed(items)
+    assert worst < 400 * unit and total < 1500 * unit, (total / unit, worst / unit)   # each label, the sample
+    assert worst < 0.025 and total < 0.1                                        # and plainly bounded anywhere
+    total, worst = timed(busy)
+    assert worst < 400 * unit, (total / unit, worst / unit)
+    # a tick stops BEFORE a label that would take it past its budget (by the slowest so far): with labels taking
+    # 10 ms on a clock of its own, a 16 ms tick places one, never two (26 ms, past a frame)
+    clock = [0.0]
+    real_place, real_clock = logic_.place_dim_label, time_.perf_counter
+
+    def slow_place(*a, **k):
+        clock[0] += 0.010
+        return real_place(*a, **k)
+    logic_.place_dim_label, time_.perf_counter = slow_place, lambda: clock[0]
+    try:
+        run = logic_.LabelRun(busy, view, keep, dims, [house, band], _boxes(*lot))
+        assert run.step(0.016) is False and len(run.spots) == 1 and clock[0] == 0.010
+        run.step(0.025)
+        assert len(run.spots) == 3                                              # 10 + 10 <= 25; a third would pass
+    finally:
+        logic_.place_dim_label, time_.perf_counter = real_place, real_clock
+    # at rest after a move: a carried label that still keeps every rule stays put; one now on the house moves
+    placed = logic_.place_labels(items, view, keep, dims, [house, band], _boxes(*lot))
+    nudged = {k: dict(logic_.follow(g, tuple((x + 2, y) for x, y in g["line"])), left=g["left"] + 1)
+              for k, g in placed.items()}                    # carried 1 px off where a fresh search would put it
+    moved_items = [dict(i, line=tuple((x + 2, y) for x, y in i["line"])) for i in items]
+    run = logic_.LabelRun(moved_items, view, keep, [tuple((x + 2, y) for x, y in d_) for d_ in dims],
+                          [[(x + 2, y) for x, y in house], [(x + 2, y) for x, y in band]],
+                          [tuple((x + 2, y) for x, y in e_) for e_ in _boxes(*lot)], nudged)
+    run.step()
+    stayed = [k for k in placed if not nudged[k]["led"] and (run.spots[k]["left"], run.spots[k]["top"]) == (
+        nudged[k]["left"], nudged[k]["top"])]
+    assert len(stayed) >= 4, stayed                                             # no jump for those beside their line
+    k0 = stayed[0]
+    onto = {**nudged, k0: dict(nudged[k0], left=250, top=300)}            # now on the house: placed again
+    run = logic_.LabelRun(moved_items, view, keep, [tuple((x + 2, y) for x, y in d_) for d_ in dims],
+                          [[(x + 2, y) for x, y in house], [(x + 2, y) for x, y in band]],
+                          [tuple((x + 2, y) for x, y in e_) for e_ in _boxes(*lot)], onto)
+    run.step()
+    assert (run.spots[k0]["left"], run.spots[k0]["top"]) != (250, 300)
+    box = (run.spots[k0]["left"], run.spots[k0]["top"], run.spots[k0]["w"], run.spots[k0]["h"])
+    assert not logic_.box_over_shape(box, [(x + 2, y) for x, y in house])
+
+
+def test_while_the_view_moves_only_labels_that_still_keep_every_hard_rule_are_drawn():
+    """The Rhino job at 5b46c99: while the view moved, the labels carried along were drawn wherever they landed (the
+    northeast one 40 px off, the rear one under the status box), then jumped when the view rested. Now a moving
+    frame draws a carried label only if it keeps every HARD rule where it is now (on screen, off the buildings, the
+    status box, the dimensions and the labels shown before it, in the order they were placed); the rest are hidden
+    until the view rests and all are placed in one pass."""
+    from design_checker import rhino_logic as logic_
+    view = (656, 668)
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    keep = [(12, 34, 506, 54)]
+    dims = [((158, 330), (185, 330)), ((300, 106), (300, 250)), ((300, 415), (300, 562)), ((420, 330), (501, 330))]
+
+    def lab(k, line, left, top, w=80, order=0):
+        return ({"key": k, "line": line}, {"left": left, "top": top, "w": w, "h": 20, "rows": ["x"], "size": 11,
+                                            "led": False, "forced": False, "order": order, "line": line})
+    fine = lab("fine", dims[2], 306, 480, order=1)                   # beside the front yard's line, clear
+    on_house = lab("house", dims[0], 200, 300, order=0)              # carried onto the house
+    under_box = lab("box", dims[1], 306, 40, order=2)                # under the status box
+    off = lab("off", dims[3], 620, 330, order=3)                     # past the screen's edge
+    over = lab("over", dims[2], 320, 485, order=4)                   # over "fine", placed before it
+    on_dim = lab("dim", dims[3], 290, 420, w=40, order=5)            # across the front yard's dimension
+    shown = logic_.shown_while_moving([over, under_box, fine, on_house, off, on_dim], view, keep, dims, [house])
+    assert [i["key"] for i, _ in shown] == ["fine"]
+    first = lab("first", dims[2], 320, 485, order=0)                 # placed first: it wins the overlap
+    assert [i["key"] for i, _ in logic_.shown_while_moving([fine, first], view, keep, dims, [house])] == ["first"]
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
+    moving = draw.split("    if not settled:", 1)[1].split("    for item, got in shown:", 1)[0]
+    assert "logic.shown_while_moving(" in moving and "logic.follow(got, item[\"line\"])" in moving
+    assert "keep, dims, solids)" in moving                          # the same HARD things the placement keeps off
+
+
+def test_a_plan_label_never_wraps_inside_a_number_stays_inside_the_view_and_off_the_axis_icon():
+    """The Rhino job at #29 e4e5018 (its drawing dimensions use this placer): "101'-1" over "1/2"" and "92'-1" over
+    "3/8"" (wrapped inside a measurement); "✕" alone over "7'-0 5/8""; a number on the view's bottom edge;
+    "min 10'-0"" over Rhino's world-axis icon. Now a label wraps only between a name and its numbers, never inside a
+    measurement nor after a mark or "min"/"needs" alone (LABEL_KEEP, as the notice's); it stays LABEL_INSET px
+    inside the view; and the axis icon (bottom left) is HARD."""
+    import random
+    from design_checker import rhino_logic as logic_
+    for text in ("101'-1 1/2\"", "92'-1 3/8\"", "✕ 7'-0 5/8\"", "✕ 7'-0 5/8\", needs 10'-0\"", "min 10'-0\"",
+                 "? 12'-0\" (approx.)"):
+        assert logic_.label_lines(text) == [text], text                       # nothing to wrap: one line
+    assert logic_.label_lines("✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)") == [
+        "✕ Side yard, Southwest", "7'-0 5/8\", needs 10'-0\" (approx.)"]
+    assert logic_.label_lines("Side yard min 10'-0\"") == ["Side yard", "min 10'-0\""]
+    assert logic_.label_lines("Front yard 26'-11 1/4\"") == ["Front yard", "26'-11 1/4\""]
+    assert logic_.LABEL_KEEP[0] == logic_.NOTICE_KEEP[0]                       # the same measurement rule
+    view = (656, 668)
+    edge = ((100, 660), (300, 660))                                            # a line on the bottom edge
+    assert logic_.label_breaks_hard(edge, (150, 646, 60, 20), view) == "off screen or on its edge"
+    assert logic_.label_breaks_hard(edge, (150, 600, 60, 20), view) is None
+    assert logic_.label_breaks_hard(((10, 500), (10, 650)), (20, 610, 60, 20), view) == "over the world-axis icon"
+    icon = logic_.axis_icon_box((657, 668))          # the Rhino job at 8bfabdd: the icon spans x 34-76, y 593-634
+    assert icon[0] <= 34 - 3 and icon[0] + icon[2] >= 76 + 3 and icon[1] <= 593 - 3 and icon[1] + icon[3] >= 668
+    assert icon[2] <= 90                                                        # ...and not much more than it
+    was = logic_.AXIS_ICON_SCALE
+    try:
+        logic_.AXIS_ICON_SCALE = 1.5                                            # Windows at 150 %: physical pixels
+        assert logic_.axis_icon_box((657, 668))[2] == int(round(logic_.AXIS_ICON_PX * 1.5)) + 3
+    finally:
+        logic_.AXIS_ICON_SCALE = was
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.AXIS_ICON_SCALE = _icon_zoom()" in rhino and "RunningOnOSX" in rhino   # the Mac counts points
+    got = logic_.place_dim_label(edge, "101'-1 1/2\"", 11, view)
+    assert got["top"] + got["h"] <= 668 - logic_.LABEL_INSET and not got["forced"], got
+    near_icon = logic_.place_dim_label(((20, 560), (20, 660)), "min 10'-0\"", 11, view)
+    box = (near_icon["left"], near_icon["top"], near_icon["w"], near_icon["h"])
+    assert not logic_._over(box, logic_.axis_icon_box(view)) and not near_icon["forced"], near_icon
+    # nowhere keeps every rule (a building over the whole view): forced, but still off the icon (review of 7e6d824)
+    small = (400, 300)
+    cover = [(-10, -10), (410, -10), (410, 310), (-10, 310)]
+    forced = logic_.place_dim_label(((10, 280), (60, 280)), "min 10'-0\"", 11, small, hard_shapes=[cover])
+    assert forced["forced"] and not logic_._over((forced["left"], forced["top"], forced["w"], forced["h"]),
+                                                 logic_.axis_icon_box(small)), forced
+    stuck = logic_.place_dim_label(((10, 280), (60, 280)), "min 10'-0\"", 11, small, hard_shapes=[cover],
+                                   placed=[(0, 0, 400, 300)])                  # not even a spot clear of labels
+    assert stuck["forced"] and not logic_._over((stuck["left"], stuck["top"], stuck["w"], stuck["h"]),
+                                                logic_.axis_icon_box(small)), stuck
+    # random labels near every edge and the corner: never on an edge, never on the icon, never wrapped in a number
+    rng = random.Random(29)
+    for _ in range(150):
+        vw, vh = rng.choice([(656, 668), (420, 420), (1000, 640)])
+        x, y = rng.uniform(0, vw), rng.choice([rng.uniform(vh - 90, vh), rng.uniform(0, 30), rng.uniform(0, vh)])
+        line = ((x, y), (min(vw, x + rng.uniform(5, 120)), y))
+        text = rng.choice(["101'-1 1/2\"", "✕ 7'-0 5/8\"", "min 10'-0\"", "Side yard, East 6'-2 3/4\""])
+        g = logic_.place_dim_label(line, text, 11, (vw, vh))
+        b = (g["left"], g["top"], g["w"], g["h"])
+        assert not g["forced"] and logic_.label_breaks_hard(line, b, (vw, vh)) is None, (line, text, g)
+        assert all(not r.endswith(("'-1", "'-0", "✕", "min")) for r in g["rows"]), g["rows"]
+
+
+def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
+    """The Rhino job at 4bb6d4d: the front yard's label was wholly under the southwest one (the architect lost that
+    figure), and the southwest label sat 1 px beside the front yard's dimension. Now a label already placed is HARD
+    for every later one (never covered), failing yards are placed first, then those needing review, those that
+    comply, then the edges' lengths; and a label keeps 3 px off every other dimension line."""
+    from design_checker import rhino_logic as logic_
+    view = (657, 668)
+    lot = (158, 106, 501, 562)
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    dims = [((158, 409), (185, 409)), ((300, 415), (300, 562)), ((300, 106), (300, 250)), ((420, 330), (501, 330))]
+    statuses = ["complies", "complies", "needs_review", "does_not_comply"]
+    items = [{"key": k, "text": ["Side yard, Southwest 12'-0\"", "Front yard 26'-11\"", "? Rear yard 27'-6\"",
+                                 "✕ Side yard, Northeast 7'-0\", needs 10'-0\""][k], "line": d_, "size": 11,
+              "status": statuses[k]} for k, d_ in enumerate(dims)]
+    items += [{"key": 10 + k, "text": "75'-10\"", "line": e_, "size": 11, "status": None}
+              for k, e_ in enumerate(_boxes(*lot))]
+    order = []
+    real = logic_.place_dim_label
+
+    def spy(line, text, *a, **k):
+        order.append(text)
+        return real(line, text, *a, **k)
+    logic_.place_dim_label = spy
+    try:
+        spots = logic_.place_labels(items, view, [(12, 34, 506, 54)], dims, [house], _boxes(*lot))
+    finally:
+        logic_.place_dim_label = real
+    assert order[0].startswith("✕") and order[1].startswith("?") and order[-1] == "75'-10\""   # failing first
+    boxes = [(g["left"], g["top"], g["w"], g["h"]) for g in spots.values()]
+    for i, b1 in enumerate(boxes):
+        for j, b2 in enumerate(boxes):
+            assert i == j or not logic_._over(b1, b2), (i, j, b1, b2)                 # none hidden under another
+    for key, g in spots.items():
+        own = next(i["line"] for i in items if i["key"] == key)
+        box = (g["left"], g["top"], g["w"], g["h"])
+        for d_ in dims:
+            if tuple(map(tuple, d_)) != tuple(map(tuple, own)):
+                assert not logic_.crosses(d_, box[0] - 3, box[1] - 3, box[2] + 6, box[3] + 6), (key, d_)  # 3 px
+    assert logic_.label_breaks_hard(dims[0], (198, 470, 100, 20), view, [], dims) == "on another yard's dimension"
+    assert logic_.label_breaks_hard(dims[0], (190, 470, 100, 20), view, [], dims) is None          # 10 px off: fine
+    assert logic_.label_breaks_hard(dims[0], (302, 470, 30, 20), view, [], dims) == "on another yard's dimension"
+    assert logic_.label_breaks_hard(dims[0], (10, 10, 50, 20), view, [], [], [], [(40, 15, 50, 20)]) == \
+        "over another label"
+    # 3 px off its own line too (the Rhino job at 822fb6f: the front yard's line ran along its own label's edge)
+    assert logic_.label_breaks_hard(dims[1], (302, 470, 60, 20), view) == "on its own line"
+    assert logic_.label_breaks_hard(dims[1], (304, 470, 60, 20), view) is None
+    for key, g in spots.items():
+        own = next(i["line"] for i in items if i["key"] == key)
+        assert not logic_.crosses(own, g["left"] - 3, g["top"] - 3, g["w"] + 6, g["h"] + 6), (key, g)
+    # the in-Rhino distance search reads each label's place in the order where the record keeps it (8th field)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert ('[list(q) for q in item["line"]],\n            got["led"], got["size"], got["forced"], got.get("order")])'
+            in rhino)                                    # text, box, rows, line, led, size, forced, order
+    fields = ["text", "box", "rows", "line", "led", "size", "forced", "order"]
+    script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
+    assert "(text, (left, top, w, h, want), nrows, own, led, size, was_forced, order)" in script
+    assert "b_[%d] < order" % fields.index("order") in script
+    # nowhere keeps every rule (a tiny view): forced, but still never over a label placed before it
+    tiny, cover = (300, 120), [(0, 0, 300, 120)]                       # the whole view taken by a notice
+    first = logic_.place_dim_label(((10, 60), (290, 60)), "✕ Front yard 7'-0\"", 11, tiny, hard_boxes=cover)
+    took = (first["left"], first["top"], first["w"], first["h"])
+    later = logic_.place_dim_label(((10, 60), (290, 60)), "75'-10\"", 11, tiny, hard_boxes=cover, placed=[took])
+    assert first["forced"] and later["forced"]
+    assert not logic_._over((later["left"], later["top"], later["w"], later["h"]), took)
 
 
 def test_the_in_rhino_checks_read_the_drawings_own_placement():
@@ -3373,11 +3961,10 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
     draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
     assert 'STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn' in draw
     assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
-    assert draw.count('drawn["labels"].append(') == 2
-    assert draw.count(", at[6]])") == 2                                          # whether a leader was drawn
-    assert draw.count("keep=keep, dims=dims)") == 2 and 'drawn["dims"] = dims' in draw
-    assert draw.count("keep=keep)") == 0 and draw.index("keep = list(taken)") < draw.index("keep=keep, dims=dims)")
-    for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
+    assert draw.count('drawn["labels"].append(') == 1 and 'got["led"], got["size"], got["forced"], got.get("order")])' in draw
+    assert 'drawn["dims"] = dims' in draw and draw.index("keep = list(taken)") < draw.index('"keep": [tuple(t)')
+    assert 'drawn["settled"] = settled or not items' in draw
+    for name in ("highlight_in_rhino.py", "notice_in_rhino.py", "redraw_timing_in_rhino.py"):
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
         assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
         assert "label_box(" not in script, name
@@ -3418,14 +4005,15 @@ def test_the_detail_under_the_list_keeps_room_for_its_button():
 
 
 def test_the_label_claim_counts_its_own_line_too():
-    """Independent review of 6361a3f: highlight claim 2 skipped the label's own dimension line when counting
-    crossings, so a label drawn on top of its own dimension passed (clear_spot's fallback can land there)."""
+    """Independent review of 6361a3f, then the Rhino job at 319dc5d and the review of c99843a: highlight claim 2
+    checks every HARD rule through rhino_logic.label_breaks_hard on what the view drew (its notice, status box and
+    arrow, its buildings' and coloured parts' outlines, its dimensions), requires at least one building recorded,
+    and checks distance by its own brute-force search, not the placement's."""
     script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
-    assert "hits = [s_ for s_ in lines if g.logic.crosses(s_, left, top, w, h)]" in script
-    assert "s_ != own" not in script
-    assert "g.logic.crosses(own, left, top, w, h)" in script and "and not on_own" in script   # moved ones too
-    assert "and not on_dim" in script and 'rec.get("dims")' in script            # nor another yard's dimension
-
+    assert "g.logic.label_breaks_hard(own, box, view, hard, dims, shapes)" in script
+    assert 'rec.get("hard_shapes")' in script and 'rec.get("buildings", 0) >= 1' in script
+    assert "not broken and not forced" in script and "not too_far" in script
+    assert "for y_ in range(" in script and "s_ != own" not in script
 
 def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():
     """The Rhino job at 6361a3f (architect's eye): with the shorter list, the panel opened with the list scrolled a
@@ -3517,3 +4105,79 @@ def test_the_notice_keeps_its_heading_numbers_and_mark_whole():
             assert "7,033 sf" in joined and "35 % short" in joined, (view_w, share, area)
             got = logic_.notice_lines([side], view_w, share)
             assert "0'-11 1/4\" short" in "\n".join(got) and "7'-0 5/8\" proposed" in "\n".join(got), got
+
+
+def test_saved_street_lines_never_take_the_suggestions_street_ids():
+    """Street ids review round 3, F1 (P0): a corner lot saved before street ids existed (both streets' lines, no
+    ids) merged with a suggestion that carries "Street 1" ids for other lines kept the lines and took those ids,
+    so both streets were one "Street 1" (#18: one frontage along two streets). The lines and ids are one fact."""
+    from design_checker import rhino_logic as logic
+    segs = [((0, 0), (30, 0)), ((30, 0), (60, 0)), ((60, 0), (60, 100)), ((60, 100), (0, 100)), ((0, 100), (0, 0))]
+    sug = logic.suggested_facts("ithaca", ["R-1b"], [{"id": "lot", "area": 6000, "bottom": 0, "segments": segs}], [])
+    assert sug["street_ids"] == ["Street 1", "Street 1"]                   # the suggestion: the bottom's 2 pieces
+    corner = {"lot_id": "lot", "corner_lot": True, "street_line": [[[60, 100], [0, 100]], [[60, 0], [60, 100]]]}
+    merged = logic.with_suggestions(corner, sug)
+    assert merged["street_line"] == corner["street_line"] and "street_ids" not in merged      # unnamed: asked
+    three = {"lot_id": "lot", "street_line": [[[60, 0], [60, 100]], [[60, 100], [0, 100]], [[0, 100], [0, 0]]]}
+    assert "street_ids" not in logic.with_suggestions(three, sug)                             # never stale ids
+    named = dict(corner, street_ids=["A St", "B St"])
+    assert logic.with_suggestions(named, sug)["street_ids"] == ["A St", "B St"]               # its own ids kept
+    assert logic.with_suggestions({"lot_id": "lot"}, sug)["street_ids"] == sug["street_ids"]  # suggested: its own
+
+
+def test_gordiums_own_street_id_is_never_kept_as_the_streets_name():
+    """Street ids review round 3, F2: the box's suggested street carries Gordium's own "Street 1"; clicking that
+    line again kept "Street 1" as the street's name (never asked which street). Gordium's own ids are no name."""
+    from design_checker import rhino_logic as logic
+    lines = [[[0, 0], [30, 0]], [[30, 0], [60, 0]]]
+    assert logic.street_name_after_pick(None, lines, lines[0], ids=["Street 1", "Street 1"]) is None
+    assert logic.street_name_after_pick(None, lines, lines[0], ids=["Ithaca Rd", "Ithaca Rd"]) == "Ithaca Rd"
+
+
+def test_every_panel_tick_follows_the_document():
+    """The Rhino job at 540f718: after Cmd+Z of Hide starting house the layer came back but the tick stayed ticked
+    (it had no setter: only a click set it); the review after: the envelope's tick came back ticked on a panel
+    made again with it off, a failed check's panel showed default ticks, and Hide starting house with no house
+    stayed ticked. Every tick box the panel has is set by its own setter (guarded, so setting it is never a click),
+    all of them in _sync_ticks, which runs at every check (failed ones too) and whenever the panel is made."""
+    import re
+    ui_src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    boxes = re.findall(r"\ndef _(\w+)_box\(actions[^)]*\):\n(?:(?!\ndef ).)*?ef\.CheckBox\(\)", ui_src, re.S)
+    assert {"massing", "labels", "envelope"} <= set(boxes)
+    sync = rhino[rhino.index("def _sync_ticks("):].split("\ndef ", 1)[0]
+    for name in set(boxes):
+        body = ui_src[ui_src.index("def _%s_box(" % name):].split("\ndef ", 1)[0]
+        assert 'parts["%s_box"] = box' % name in body and 'if not parts.get("_setting_%s")' % name in body, name
+        assert "def set_%s_tick(parts, " % name in ui_src, name
+        assert "ui.set_%s_tick(" % name in sync, name
+    run = rhino[rhino.index("def run_check("):].split("\ndef ", 1)[0]
+    made = rhino[rhino.index("def panel("):].split("\ndef ", 1)[0]
+    assert run.count("_sync_ticks(doc)") == 2 and made.count("ui.make_panel(") == made.count("_sync_ticks(doc)") == 2
+
+
+def test_hide_starting_house_with_no_house_is_never_left_ticked():
+    ticks, said = [], []
+    layers = type("Layers", (), {"FindByFullPath": lambda self, path, default: -1})()
+    doc = type("Doc", (), {"Layers": layers})()
+    ui_ = type("UI", (), {"set_massing_tick": staticmethod(lambda parts, hidden: ticks.append(hidden))})
+    ns = _plugin_functions(["hide_massing"], ui=ui_, say=said.append,
+                           Rhino=type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": doc})}))
+    ns["hide_massing"](True)
+    assert ticks == [False] and said and said[0].startswith("There is no starting house")
+
+
+
+
+def test_another_document_shows_its_own_ticks():
+    """Round 2 of the tick review: switching to another document cleared the panel but left the last document's
+    ticks (its labels, its hidden starting house) until a check, which a file with no lot facts never gets."""
+    synced = []
+    form = type("F", (), {"Visible": True})()
+    ui_ = type("UI", (), {"show": staticmethod(lambda *a, **k: None)})
+    front = object()
+    ns = _plugin_functions(["_new_document"], ui=ui_, _sync_ticks=synced.append, _clear=lambda o: None,
+                           Rhino=type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": front})}))
+    ns["STATE"]["panel_parts"] = {"form": form}
+    ns["_new_document"](None, None)
+    assert synced == [front]

@@ -610,7 +610,15 @@ def draw_screen(o, e):
     dims = [tuple(map(tuple, _screen_line(e.Viewport, line))) for line, _, _ in getattr(o, "yard_dims", None) or []] \
         if plan else []                      # the yards' dimension lines: a moved label keeps off another's
     drawn["dims"] = dims
-    for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
+    solids = []                              # each building's footprint and coloured part on screen: never under a
+    for kind, pts in getattr(o, "plan_solids", None) or []:          # label (their outlines, never their boxes)
+        on = [(q.X, q.Y) for q in (e.Viewport.WorldToClient(q) for q in pts)]
+        solids.append(logic.hull(on) if kind == "building" else on)
+    drawn["hard_shapes"], drawn["hard_boxes"] = solids, [list(t) for t in keep]
+    drawn["buildings"] = sum(kind == "building" for kind, _ in getattr(o, "plan_solids", None) or [])
+    # the labels to draw: each yard's (failing first when placed), then each lot edge's length
+    items, colors = [], {}
+    for k, (line, text, status) in enumerate(getattr(o, "yard_dims", None) or []):   # each yard, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
         d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
@@ -619,14 +627,44 @@ def draw_screen(o, e):
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
-            at = ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                             along=(line.From, line.To), obstacles=obstacles, keep=keep, dims=dims)   # beside its line, off every other
-            drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, line), at[6]])
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
-        at = ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each
-                         along=(edge.From, edge.To), obstacles=obstacles, leader=True, keep=keep, dims=dims)   # edge's length, beside it, off
-        drawn["labels"].append([text, list(at[:5]), len(at[5]), _screen_line(e.Viewport, edge), at[6]])    # every
-        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+            key = ("yard", k, text)
+            items.append({"key": key, "text": text, "line": ((a.X, a.Y), (b.X, b.Y)), "size": 11, "status": status})
+            colors[key] = (color, False)
+    edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []
+    for k, (point, text, edge) in enumerate(edges):
+        a, b = e.Viewport.WorldToClient(edge.From), e.Viewport.WorldToClient(edge.To)
+        key = ("edge", k, text)
+        items.append({"key": key, "text": text, "line": ((a.X, a.Y), (b.X, b.Y)), "size": 11, "status": None})
+        colors[key] = (ui.status_color("complies", dark), True)
+    # placed only once the view is still (logic.place_labels, from _label_tick): never searched in the drawing
+    # loop (the Rhino job at 4bb6d4d: zooming with labels on was 2 fps). The same picture as when they were
+    # placed: drawn there. Moving: carried along with their lines (logic.follow) until the view settles again.
+    vid = str(e.Viewport.Id)
+    sig = (tuple(drawn["size"]), tuple(round(v, 1) for s_ in on_screen for q in s_ for v in q),
+           tuple(round(v, 1) for shp in solids for q in shp for v in q),
+           tuple(tuple(round(v, 1) for v in t) for t in keep), tuple(i["key"] for i in items))
+    cached = (STATE.get("label_cache") or {}).get(vid) or {}
+    settled = cached.get("sig") == sig
+    pending = STATE.get("label_pending") or {}
+    spots = cached.get("spots") or {}
+    if not settled and items and (pending.get("sig") != sig or pending.get("view") != vid):   # moved: wait again
+        carried = {i["key"]: logic.follow(spots[i["key"]], i["line"]) for i in items if i["key"] in spots}
+        STATE["label_pending"] = {"view": vid, "doc": o.doc, "sig": sig, "at": time.time(), "items": items,
+                                  "size": tuple(drawn["size"]), "keep": [tuple(t) for t in keep], "dims": dims,
+                                  "shapes": solids, "lines": obstacles, "carried": carried}
+        _label_timer()
+    shown = [(item, spots[item["key"]]) for item in items if item["key"] in spots]   # never placed: at rest
+    if not settled:                          # moving: only those carried along that keep every HARD rule here and
+        shown = logic.shown_while_moving(    # now, the first placed first; the rest hidden until the view rests
+            [(item, logic.follow(got, item["line"])) for item, got in shown], tuple(drawn["size"]), keep, dims, solids)
+    for item, got in shown:
+        color, edge = colors[item["key"]]
+        (xa, ya), (xb, yb) = item["line"]
+        ui.paint_label(d, ((xa + xb) / 2, (ya + yb) / 2), got, color, dark, edge_leader=edge, line=item["line"])
+        drawn["labels"].append([item["text"], [got["left"], got["top"], got["w"], logic.label_height(
+            len(got["rows"]), got["size"]), got["top"]], len(got["rows"]), [list(q) for q in item["line"]],
+            got["led"], got["size"], got["forced"], got.get("order")])
+    drawn["settled"] = settled or not items
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
@@ -644,6 +682,67 @@ def draw_screen(o, e):
     rows = _status_rows(o, old)
     x, y, _, _ = logic.status_box(e.Viewport.Bounds.Width, rows)
     ui.draw_text_box(d, rows, color, int(x), y, dark, 13)
+
+
+def _icon_zoom():
+    """The display's scaling where Rhino's screen pixels are physical ones (Windows at 150 %: 1.5), for the size of
+    the world-axis icon kept clear; 1 on the Mac (its views count in points: the Rhino job at 8bfabdd) or when
+    Rhino doesn't say."""
+    try:
+        if Rhino.Runtime.HostUtils.RunningOnOSX:
+            return 1.0
+        return min(max(float(Rhino.UI.Dpi.DpiScale()), 1.0), 4.0)
+    except Exception:
+        return 1.0
+
+
+logic.AXIS_ICON_SCALE = _icon_zoom()
+
+
+def _label_timer():
+    """The timer that places the labels once the view has been still for LABEL_SETTLE_S (started on demand)."""
+    timer = STATE.get("label_timer")
+    if timer is None:
+        timer = ef.UITimer()
+        timer.Interval = 0.05
+        timer.Elapsed += logic.guard(logic.current_only(lambda s, e: _label_tick(), _is_current), "place the labels")
+        STATE["label_timer"] = timer
+        LEFTOVERS["label_timer"] = timer.Stop
+    timer.Start()
+
+
+def _label_tick():
+    pending = STATE.get("label_pending")
+    if pending is None:
+        if STATE.get("label_timer"):
+            STATE["label_timer"].Stop()
+        return
+    if time.time() - pending["at"] >= logic.LABEL_SETTLE_S:
+        settle_labels()                      # all at once, in one pass (the Rhino job at 5b46c99: about 70 ms at most,
+        # once, at rest; in budgeted ticks the old places showed meanwhile and then jumped)
+
+
+def settle_labels(budget_s=None):
+    """Place the labels the last frame asked for (logic.LabelRun), a few each call (`budget_s`: one label at least;
+    None: all, for the in-Rhino scripts), never in the drawing loop: Rhino stays responsive between the timer's
+    ticks, and a newer request (the view moved again) starts a new run. Once all are placed: kept for that view
+    and its document redrawn, which then draws them where they were placed. Whether a run finished."""
+    pending = STATE.get("label_pending")
+    if pending is None:
+        return False
+    run = pending.get("run")
+    if run is None:
+        run = pending["run"] = logic.LabelRun(pending["items"], pending["size"], pending["keep"], pending["dims"],
+                                              pending["shapes"], pending["lines"], pending.get("carried"))
+    if not run.step(budget_s):
+        return False
+    STATE.pop("label_pending", None)
+    STATE.setdefault("label_cache", {})[pending["view"]] = {"sig": pending["sig"], "spots": run.spots}
+    doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(pending["doc"]) if pending.get("doc") is not None else None
+    doc = doc or Rhino.RhinoDoc.ActiveDoc      # the document it was placed for (review of 3446e94)
+    if doc is not None:
+        doc.Views.Redraw()
+    return True
 
 
 def _status_rows(o, old):
@@ -894,6 +993,7 @@ def panel():
                 ui.set_auto_tick(p, _auto(doc))
                 STATE["panel_parts"] = p
                 LEFTOVERS["panel"] = p["form"].Close
+                _sync_ticks(doc)            # a panel made again: its ticks as the document has them
             if logic.place_panel_now(p.get("placed")):          # once: then where the architect puts it
                 p["placed"] = ui.fit_floating(host, Rhino.UI.RhinoEtoApp.MainWindowForDocument(doc) if doc else None)
             return p
@@ -902,6 +1002,7 @@ def panel():
         ui.set_auto_tick(p, _auto(doc))
         STATE["panel_parts"] = p
         LEFTOVERS["panel"] = p["form"].Close
+        _sync_ticks(doc)
         p["form"].Show()
     return p
 
@@ -949,7 +1050,8 @@ def set_labels(on):
         say(logic.NO_DOCUMENT)
         return
     state = dict(_ui_state(doc), show_labels=bool(on))
-    _save_ui_state(doc, state)
+    with logic.undo_step(doc, logic.UNDO_WORDS["labels"]):
+        _save_ui_state(doc, state)
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(state)
     doc.Views.Redraw()
 
@@ -974,7 +1076,8 @@ def set_auto_check(on):
         return
     if not STATE.get("live"):           # the tick needs edits noticed to act on them
         live(True)
-    _save_ui_state(doc, dict(_ui_state(doc), auto_check=bool(on)))
+    with logic.undo_step(doc, logic.UNDO_WORDS["auto_check"]):    # the setting saved in the file: one undo step
+        _save_ui_state(doc, dict(_ui_state(doc), auto_check=bool(on)))
     STATE.setdefault("auto_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
     ui.set_auto_tick(STATE.get("panel_parts"), on)
     # the edit's own time is kept (never moved earlier: a check from before it would then count as covering it,
@@ -1030,16 +1133,17 @@ def pick_survey():
         return
     facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
     facts["lot_surveyed"] = True
-    saved_ui = logic.settle(_ui_state(doc), "lot")
-    _save_ui_state(doc, saved_ui)
-    left = logic.unsettled(saved_ui)
-    if left:
-        facts["unsettled"] = left
-    else:
-        facts.pop("unsettled", None)
-    _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
-    save_facts(doc, facts)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["survey"]):     # one Ctrl+Z puts it all back (asked first, outside)
+        saved_ui = logic.settle(_ui_state(doc), "lot")
+        _save_ui_state(doc, saved_ui)
+        left = logic.unsettled(saved_ui)
+        if left:
+            facts["unsettled"] = left
+        else:
+            facts.pop("unsettled", None)
+        _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
+        save_facts(doc, facts)
+        run_check(doc, report=False)
 
 
 def _grade_points(doc, finished=False):
@@ -1116,13 +1220,44 @@ def enter_rooms(needs):
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
-    save_facts(doc, logic.update_counts(facts, answers))
-    run_check(doc, report=False)
-    refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
-    if refused:                         # fewer stories than the floors drawn: the measuring refuses it, so is it
+    new = logic.update_counts(facts, answers)
+    checked = "stories" in answers     # fewer stories than the floors drawn: the measuring refuses it, so a count
+    if checked:                         # is tried first, unrecorded and put back as stored: never a step of nothing
+        refused = _tried(doc, new)
+        if refused:
+            run_check(doc, report=False)           # the facts as stored, checked again
+            say(refused)
+            return
+    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):
+        save_facts(doc, new)
+    if not checked:                     # (tried: its check was of these very facts)
+        run_check(doc, report=False)
+
+
+def _tried(doc, facts):
+    """The measuring's words if it refuses `facts` (else None): checked with them saved while undo recording is off,
+    then the facts put back exactly as stored, so nothing is left changed and no undo step made (the last check is
+    of `facts`: the caller checks again if it doesn't keep them)."""
+    stored, recording = doc.Strings.GetValue(SECTION, ENTRY), doc.UndoRecordingEnabled
+    doc.UndoRecordingEnabled = False
+    try:
         save_facts(doc, facts)
         run_check(doc, report=False)
-        say(refused)
+        return logic.refused_stories((STATE.get("last") or {}).get("items"))
+    except Exception:
+        _put_back(doc, stored)
+        run_check(doc, report=False)               # never a result left on screen for facts not kept
+        raise
+    finally:
+        _put_back(doc, stored)
+        doc.UndoRecordingEnabled = recording         # as it was (never turned on by Gordium)
+
+
+def _put_back(doc, stored):
+    if stored is None:
+        doc.Strings.Delete(SECTION, ENTRY)
+    else:
+        doc.Strings.SetString(SECTION, ENTRY, stored)
 
 
 def pick_main_building():
@@ -1142,8 +1277,11 @@ def pick_main_building():
         return
     if picked:
         facts["main_building"] = picked
-        save_facts(doc, facts)
-    run_check(doc, report=False)
+        with logic.undo_step(doc, logic.UNDO_WORDS["main"]):
+            save_facts(doc, facts)
+            run_check(doc, report=False)
+    else:
+        run_check(doc, report=False)
 
 
 def add_to_check(ids):
@@ -1153,14 +1291,15 @@ def add_to_check(ids):
     if not ids:
         say("Nothing selected to add to the check: pick the objects in the row first.")
         return
-    index = _layer(doc, LAYERS["building"])
-    for i in ids or []:
-        o = _find(doc, i)
-        if o is not None:
-            attrs = o.Attributes.Duplicate()
-            attrs.LayerIndex = index
-            doc.Objects.ModifyAttributes(o, attrs, True)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["add"]):        # the Building layer made, if new, in the same step
+        index = _layer(doc, LAYERS["building"])
+        for i in ids or []:
+            o = _find(doc, i)
+            if o is not None:
+                attrs = o.Attributes.Duplicate()
+                attrs.LayerIndex = index
+                doc.Objects.ModifyAttributes(o, attrs, True)
+        run_check(doc, report=False)
 
 
 def _not_included(doc, lot):
@@ -1257,23 +1396,25 @@ def this_is_the_ground(ids):
     if not ids:
         say("Nothing selected to mark as the ground: pick the objects in the row first.")
         return
-    state = _ui_state(doc)
-    state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
-    _save_ui_state(doc, state)
-    n = len(state["ground_ids"])
-    _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
-                logic.ENTERED)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["ground"]):
+        state = _ui_state(doc)
+        state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
+        _save_ui_state(doc, state)
+        n = len(state["ground_ids"])
+        _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
+                    logic.ENTERED)
+        run_check(doc, report=False)
 
 
 def not_the_ground():
     """Undo "This is the ground": every object marked so is checked again (counted as left out until added)."""
     doc = Rhino.RhinoDoc.ActiveDoc
-    state = _ui_state(doc)
-    state.pop("ground_ids", None)
-    _save_ui_state(doc, state)
-    _set_source(doc, "ground_marked", None, None)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["not_ground"]):
+        state = _ui_state(doc)
+        state.pop("ground_ids", None)
+        _save_ui_state(doc, state)
+        _set_source(doc, "ground_marked", None, None)
+        run_check(doc, report=False)
 
 
 def _set_source(doc, key, value, source, confirmed_by="you"):
@@ -1444,8 +1585,10 @@ def _apply_box(doc, facts, state, saved_ui):
     return facts, saved_ui
 
 
-def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
-    """Each click places a spot grade; Enter or Esc when done. The ids of the points placed (none: nothing changed)."""
+def _place_spots(doc, prompt, layer_path=GRADE_LAYER, changing=lambda: None):
+    """Each click places a spot grade; Enter or Esc when done. The ids of the points placed (none: nothing changed).
+    `changing`: called before the model is first changed (the start box's undo step begins there)."""
+    changing()
     layer = _layer(doc, layer_path)
     placed = []
     while True:
@@ -1460,10 +1603,16 @@ def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
 
 
 class RhinoTable:
-    """The model as rhino_logic.BoxSession and apply_lookup use it: a few plain calls on one document."""
+    """The model as rhino_logic.BoxSession and apply_lookup use it: a few plain calls on one document. `step`: the
+    undo step a start box's edits go in (its first edit begins it, unless one is held; the box's caller ends it with
+    the facts saved after Draw: the whole box one step, its Cancel's rollback inside it too). None: recovery's own."""
 
-    def __init__(self, doc):
-        self.doc = doc
+    def __init__(self, doc, step=None):
+        self.doc, self.step = doc, step
+
+    def _changing(self):
+        if self.step and not STATE.get("undo"):
+            _begin_undo(self.doc, self.step)
 
     def exists(self, object_id):
         return _find(self.doc, object_id or "") is not None
@@ -1471,6 +1620,7 @@ class RhinoTable:
     def delete(self, object_id):
         o = _find(self.doc, object_id)
         if o is not None:
+            self._changing()
             self.doc.Objects.Delete(o, True)
 
     def layer_of(self, object_id):
@@ -1478,6 +1628,7 @@ class RhinoTable:
 
     def _move(self, object_id, layer_path, held_from):
         o = _find(self.doc, object_id)
+        self._changing()
         attrs = o.Attributes.Duplicate()
         attrs.LayerIndex = _layer(self.doc, layer_path)
         attrs.SetUserString(logic.HELD_FROM, held_from)
@@ -1505,6 +1656,7 @@ class RhinoTable:
     def _mark(self, object_id, key, value):
         o = _find(self.doc, object_id)
         if o is not None:
+            self._changing()
             attrs = o.Attributes.Duplicate()
             attrs.SetUserString(key, value)
             self.doc.Objects.ModifyAttributes(o, attrs, True)
@@ -1532,6 +1684,7 @@ class RhinoTable:
             return
         layer = self.doc.Layers[index]
         if not (self.doc.Objects.FindByLayer(layer) or []) and not layer.GetChildren():
+            self._changing()
             self.doc.Layers.Delete(index, True)
 
     def save_views(self):
@@ -1545,9 +1698,11 @@ class RhinoTable:
         self.doc.Views.Redraw()
 
     def add_lot(self, ring, name):
+        self._changing()
         return str(_add_lot(self.doc, {"lot": ring, "lot_name": name}))
 
     def add_spot(self, p):
+        self._changing()
         attrs = Rhino.DocObjects.ObjectAttributes()
         attrs.LayerIndex = _layer(self.doc, GRADE_LAYER)
         return str(self.doc.Objects.AddPoint(_model_point(self.doc, p[:2], p[2]), attrs))
@@ -1594,8 +1749,9 @@ def _recover(doc):
         say(said[0].upper() + said[1:] + ".")
 
 
-def _draw_lot(doc):
-    """Draw my lot…: click each corner (Enter closes it, Esc: nothing drawn). The new closed outline's id, or None."""
+def _draw_lot(doc, changing=lambda: None):
+    """Draw my lot…: click each corner (Enter closes it, Esc: nothing drawn). The new closed outline's id, or None.
+    `changing`: called before the model is changed (the start box's undo step begins there)."""
     corners = []
     while True:
         rc, point = Rhino.Input.RhinoGet.GetPoint(
@@ -1606,6 +1762,7 @@ def _draw_lot(doc):
         corners.append(point)
     if len(corners) < 3 or rc == Rhino.Commands.Result.Cancel:
         return None
+    changing()
     attrs = Rhino.DocObjects.ObjectAttributes()
     attrs.LayerIndex = _layer(doc, LAYERS["lot"])
     attrs.Name = "Lot · drawn by you"
@@ -1741,7 +1898,7 @@ def _pick_outcome(doc, what, facts, saved_ui, session):
         return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
                      _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
     if what == "draw_lot":                       # over the City's outline (a guide, never kept)
-        drawn = _draw_lot(doc)
+        drawn = _draw_lot(doc, session.table._changing)       # (in the box's one undo step)
         session.add([drawn])
         return drawn
     if what == "terrain":
@@ -1753,7 +1910,7 @@ def _pick_outcome(doc, what, facts, saved_ui, session):
     if what in ("spot", "regrade"):
         placed = _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
                               "Click the finished ground you'll grade to, at each wall (Enter when done)",
-                              GRADE_LAYER if what == "spot" else FINISHED_LAYER)
+                              GRADE_LAYER if what == "spot" else FINISHED_LAYER, session.table._changing)
         session.add(placed)
         return placed
     return None
@@ -1801,7 +1958,7 @@ def _confirm(doc, facts, options, mode):
     _highlight(doc, facts)
     _recover(doc)                       # anything an unfinished earlier box set aside, back first
     saved_ui = logic.box_opened(_ui_state(doc), facts)   # the lot's own address, this session only
-    session = logic.BoxSession(RhinoTable(doc))     # this box's model edits, owned here, never copied
+    session = logic.BoxSession(RhinoTable(doc, logic.UNDO_WORDS["edit_site"]))  # this box's model edits: one step
     try:
         return logic.run_box(session, lambda: _box_loop(doc, facts, options, mode, saved_ui, session))
     finally:
@@ -2034,7 +2191,8 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
         choice = _ask_reset(question, fresh, keep)
         if choice is None:
             return facts, saved_ui, False, state
-    _begin_undo(doc, "Gordium: start fresh for " + (saved_ui["_pending"].get("address") or "a new address"))
+    if not STATE.get("undo"):           # (the box's own step, if its edits began one: the reset goes in it)
+        _begin_undo(doc, "Gordium: start fresh for " + (saved_ui["_pending"].get("address") or "a new address"))
     facts, saved_ui, redraw, guide = logic.apply_reset(table, session, facts, saved_ui, choice,
                                                        STATE.get("zones") or [])
     STATE["redraw_house"] = redraw and mode == "check"     # (GordiumStart draws its house itself)
@@ -2072,12 +2230,49 @@ def _undo_redo(sender, e):
     if o is not None:
         _clear(o)
     STATE.pop("lookup_guide", None)
+    _settings_from_file(Rhino.RhinoDoc.ActiveDoc)
     STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())   # re-checked at the next idle (live)
+
+
+def _settings_from_file(doc):
+    """The panel's settings kept in memory, read again from the file after Undo or Redo (a setting undone is put
+    back in the file only; memory only, never the document: round 5, R5-1): Show on-screen labels, Hide starting
+    house (from its layer), Show neighbourhood (its live footprints are drawn by it), Check after every edit."""
+    if doc is None:
+        return
+    STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(_ui_state(doc))
+    STATE.pop("auto_by_doc", None)      # Check after every edit: read again from the file, its tick too (#27, C1)
+    _sync_ticks(doc)                    # every tick as the document has it now (Hide starting house: its layer)
+
+
+def _sync_ticks(doc):
+    """Every tick the panel has, as the document has it (the session's, for the envelope): the panel never shows a
+    tick as last clicked (the Rhino job at 540f718: Hide starting house stayed ticked after Cmd+Z). Run at every
+    check, failed ones too, and whenever the panel is made. (A layer switched in Rhino's Layers panel shows at
+    the next check, or after an Undo.)"""
+    p = STATE.get("panel_parts")             # (each setter does nothing without a panel)
+    if doc is None:
+        return
+    ui.set_labels_tick(p, logic.labels_on(_ui_state(doc)))
+    ui.set_massing_tick(p, _massing_hidden(doc))
+    ui.set_envelope_tick(p, STATE.get("envelope_on", True))
+    ui.set_context_tick(p, _context_on(doc))         # (#23: Show neighbourhood, kept per document)
+    ui.set_auto_tick(p, _auto(doc))                  # (#27: Check after every edit, kept per document)
+
+
+def _massing_hidden(doc):
+    """Whether this document's starting house layer (Gordium::Massing) is hidden: the panel's tick follows it."""
+    index = doc.Layers.FindByFullPath(logic.MASSING, -1) if doc is not None else -1
+    return index >= 0 and not doc.Layers[index].IsVisible
 
 
 def _drawn(doc, facts, state, saved_ui, session=None):
     """Draw: the facts for the checker, and every fact's source and confirmation saved in the .3dm; what the box
-    replaced goes for good."""
+    replaced goes for good. One undo step from here to the facts saved after the box closes (its caller ends it:
+    _end_undo), unless one is already held."""
+    if not STATE.get("undo"):
+        _begin_undo(doc, logic.UNDO_WORDS["edit_site"])
+
     def save():
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
         _save_ui_state(doc, ui_state)
@@ -2096,9 +2291,11 @@ def hide_massing(hidden):
     doc = Rhino.RhinoDoc.ActiveDoc
     index = doc.Layers.FindByFullPath(logic.MASSING, -1)
     if index < 0:
+        ui.set_massing_tick(STATE.get("panel_parts"), False)    # nothing hidden: never left ticked
         say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
         return
-    doc.Layers[index].IsVisible = not hidden
+    with logic.undo_step(doc, logic.UNDO_WORDS["massing"]):
+        doc.Layers[index].IsVisible = not hidden
     doc.Views.Redraw()
 
 
@@ -2241,9 +2438,9 @@ def _change_facts(doc, facts, options):
             runs = grown
             if not facts.get("corner_lot") and runs:      # (a refused click: asked again)
                 break
-        lines = logic.street_lines_of(outline, runs, None, picked)[0] if picked else []
-        if lines:                                          # unnamed: the lines picked here, never the old names
-            logic.set_street_lines(facts, lines)
+        lines, ids = logic.street_lines_of(outline, runs, None, picked) if picked else ([], None)
+        if lines:                         # never the old names; every line an id ("Street 1"…, as said): #18
+            logic.set_street_lines(facts, lines, ids)
         _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
@@ -2264,7 +2461,7 @@ def edit_facts():
         saved = current_facts(doc)
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
-    try:                                # one undo step from Draw's reset to the starting house, closed on any way out
+    try:                                # one undo step from the box's first model edit (or its Draw) to the facts
         try:
             facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options,
                             "check")
@@ -2295,7 +2492,7 @@ def _clear(o):
     o.toast = None
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
-    o.plan_lines = []
+    o.plan_lines, o.plan_solids = [], []
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
     o.doc = None
@@ -2352,6 +2549,12 @@ def _draw_plan(doc, o, result, facts):
     pts = o.lot_outline or []
     o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
         [line for b in _buildings(doc) for line in _plan_edges(b.Geometry)]
+    # what no plan label may cover (logic.place_dim_label's HARD rules): each building's footprint (its plan edges'
+    # ends: their hull on screen each frame) and each coloured part's own outline (model space)
+    o.plan_solids = [("building", [q for line in _plan_edges(b.Geometry) for q in (line.From, line.To)])
+                     for b in _buildings(doc)] + \
+        [("coloured", [_model_point(doc, (x, y)) for x, y in e["outline"]]) for e in plan.get("encroach") or []
+         if e.get("outline") and logic.highlight(e.get("status") or "does_not_comply")]
     o.yards_zone = None
     if lot is not None and plan.get("buildable"):
         inner = rg.PolylineCurve([_model_point(doc, p) for p in plan["buildable"] + plan["buildable"][:1]])
@@ -2426,9 +2629,7 @@ def run_check(doc, report=True):
         STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
         if not STATE.get("headless"):
             ui.show(panel(), view)
-            ui.set_labels_tick(STATE.get("panel_parts"), shown)
-            ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))
-            ui.set_context_tick(STATE.get("panel_parts"), _context_on(doc))
+            _sync_ticks(doc)
             if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
                 ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
@@ -2443,7 +2644,7 @@ def run_check(doc, report=True):
         STATE["last"] = {"error": str(e), "at": time.time()}
         if not STATE.get("headless"):
             ui.show(panel(), None, error=str(e)[:300])
-            ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))
+            _sync_ticks(doc)                # (a panel made here shows the document's ticks too)
         return None
     finally:
         STATE["running"] = False
@@ -2507,7 +2708,7 @@ def _new_document(sender, e):
     p = STATE.get("panel_parts")
     if p is not None and p["form"].Visible:
         p["view"] = None
-        ui.set_auto_tick(p, _auto(Rhino.RhinoDoc.ActiveDoc))      # this document's own setting
+        _sync_ticks(Rhino.RhinoDoc.ActiveDoc)   # its own ticks (Check after every edit too, before the header)
         ui.show(p, None, error="no check yet for this document (press Check)")
     STATE["dirty"] = None               # the last document's edits are not this one's (it is checked below)
     STATE["check_front"] = True         # check the document now in front once, if it has lot facts (not an edit:
@@ -2620,6 +2821,7 @@ def toggle_live():
 
 def toggle_envelope():
     STATE["envelope_on"] = not STATE.get("envelope_on", True)
+    ui.set_envelope_tick(STATE.get("panel_parts"), STATE["envelope_on"])
     run_check(Rhino.RhinoDoc.ActiveDoc, report=False)
 
 
@@ -2691,14 +2893,17 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-        try:
-            facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
-        finally:                        # GordiumCheck never draws a starting house: its box's flag goes with it
-            STATE.pop("redraw_house", None)
-        if facts is None:               # closed or Esc: nothing saved, nothing checked
-            Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
-            return None
-        save_facts(doc, facts)
+        try:                            # the box's undo step ends with the facts saved
+            try:
+                facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+            finally:                    # GordiumCheck never draws a starting house: its box's flag goes with it
+                STATE.pop("redraw_house", None)
+            if facts is None:           # closed or Esc: nothing saved, nothing checked
+                Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
+                return None
+            save_facts(doc, facts)
+        finally:
+            _end_undo(doc)
     result = run_check(doc, report=True)
     live(True)                                      # edits noticed (checked at Check, or each edit if ticked)
     if result is not None:
@@ -2828,7 +3033,8 @@ def _draw_starting_house(doc, facts):
                                  "(run GordiumStart again in " + _doc_name(doc) + ")")
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
-    if add_floors(doc, start) is None:
+    ids = add_floors(doc, start)
+    if ids is None:
         Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; " + logic.draw_one_hint(_auto(doc)))
         live(True)
         documents(True)
@@ -3218,21 +3424,22 @@ def show_context(on):
     if doc is None:
         say(logic.NO_DOCUMENT)
         return
-    _save_ui_state(doc, dict(_ui_state(doc), show_context=bool(on)))     # per file (coordinator, 2026-10-21)
-    STATE.setdefault("context_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
-    drawn = _context_visible(doc, on)
-    refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
-    loaded = not refetch
-    if on and refetch:                     # draw_context says what it drew, or why it couldn't
-        try:
-            facts = current_facts(doc)
-        except ValueError:
-            facts = {}
-        draw_context(doc, logic.context_frame(facts, _ui_state(doc)))
-    elif on:
+    with logic.undo_step(doc, logic.UNDO_WORDS["context"]):   # the tick, the layers and any fetch drawn: one step
+        _save_ui_state(doc, dict(_ui_state(doc), show_context=bool(on)))     # per file (coordinator, 2026-10-21)
+        STATE.setdefault("context_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
+        drawn = _context_visible(doc, on)
+        refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
+        loaded = not refetch
+        if on and refetch:                 # draw_context says what it drew, or why it couldn't
+            try:
+                facts = current_facts(doc)
+            except ValueError:
+                facts = {}
+            draw_context(doc, logic.context_frame(facts, _ui_state(doc)))
+    if on and not refetch:                 # (fetched: draw_context has said what it drew)
         doc.Views.Redraw()
         say("Neighbourhood shown (drawing only: the check never measures it).")
-    else:
+    elif not on:
         doc.Views.Redraw()
         say("Neighbourhood hidden." if drawn or loaded else "Neighbourhood off (none drawn in this file).")
 
@@ -3299,6 +3506,8 @@ def _release(key, value):
         if form is not None:
             form.Close()
     elif key == "toast_timer":
+        value.Stop()
+    elif key == "label_timer":
         value.Stop()
     elif key == "worker":
         _stop_worker()

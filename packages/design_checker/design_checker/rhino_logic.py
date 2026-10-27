@@ -2,8 +2,10 @@
 Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
+import contextlib
 import datetime as _dt
 import json
+import math
 import queue
 import threading
 
@@ -174,10 +176,14 @@ def missing(facts):
 
 
 def with_suggestions(saved, suggested):
-    """The facts to confirm: what is saved, with suggestions only for what is missing."""
+    """The facts to confirm: what is saved, with suggestions only for what is missing. The street lines and their
+    street ids are one fact: saved lines keep only their own saved ids, never the suggestion's (ids that name other
+    lines: two streets one id, a frontage read along both; street ids review round 3, F1), and suggested lines only
+    the suggestion's."""
     out = dict(suggested)
     out.update({k: v for k, v in (saved or {}).items() if v is not None})
-    return out
+    own = (saved or {}) if (saved or {}).get("street_line") else suggested or {}   # whose lines: their ids alone
+    return set_street_lines(out, out.get("street_line"), own.get("street_ids"))
 
 
 # The facts only the architect can state (the model can't show them), in the order they are asked: each with its
@@ -404,8 +410,8 @@ def suggested_facts(jurisdiction, zones, lots, buildings):
             # the whole street it is on (review round 1, F1: a tax-map street suggested as one piece), only when
             # both its ends are sure; else no suggestion, so the box asks for the click and the click asks the
             # question (round 3, F1: a curving street suggested as its first 30°, the front yard from part of it)
-            if run and run["maybe"] == [[], []]:
-                set_street_lines(facts, [outline[k] for k in run["pieces"]])
+            if run and run["maybe"] == [[], []]:            # (an id on every line: "Street 1")
+                set_street_lines(facts, [outline[k] for k in run["pieces"]], ["Street 1"] * len(run["pieces"]))
     ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
     if ground is not None:
         facts["grade_elevation"] = ground
@@ -523,60 +529,528 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     return left, top, False
 
 
-def box_gap(line, box):
-    """How far a box (left, top, w, h) is from a screen line ((x1, y1), (x2, y2)): 0 when they touch."""
+def _point_seg(px, py, line):
+    """A point's distance from a segment (screen pixels)."""
     (ax, ay), (bx, by) = line
+    dx, dy = bx - ax, by - ay
+    t = 0.0 if dx == dy == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+    return ((px - ax - t * dx) ** 2 + (py - ay - t * dy) ** 2) ** 0.5
+
+
+def box_gap(line, box):
+    """How far a box (left, top, w, h) is from a screen line ((x1, y1), (x2, y2)), exactly: 0 when they touch."""
     left, top, w, h = box
-    return min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
-               for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
+    if crosses(line, left, top, w, h):
+        return 0.0
+    corners = ((left, top), (left + w, top), (left, top + h), (left + w, top + h))
+    ends = [((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5) for x, y in line]
+    return min(ends + [_point_seg(x, y, line) for x, y in corners])
 
 
-def place_near(line, w, h, obstacles=(), taken=(), gap=12, view=None, avoid=(), dims=()):
-    """Where a w × h label goes when no spot beside its dimension `line` is clear: (left, top), or None. Never far
-    from its line: within one label height of it (beside it, or just past either end), on screen, over no box in
-    `taken` (the notice, the status box, the north arrow, other labels); of those, the one crossing the fewest lines
-    in `obstacles`, another yard's dimension line (`dims`) above all (the Rhino job at 81efd62: the southwest label
-    covered the front yard's dimension where a spot clear of it was in reach), and covering the fewest boxes in
-    `avoid` (other labels, when it must), then the nearest; never on
-    its own line. Beside its line is tried before past its ends (a leader along the line itself would be hidden by
-    it), `gap` (12 px) away so the leader the caller draws to it shows (review of b85effe: a 6 px leader hid under the
-    dimension's tick). The Rhino job at 0a94fc4: placed "outside the
-    drawing" with the shortest leader, the failing southwest yard's label came loose from its line (330 px away, under
-    the status box, no leader seen); at 27c8e5d, with no room beside its line, it had crossed 13 lines."""
+LABEL_MIN_SIZE = 9                 # a plan label's text is never smaller (readable on screen)
+LABEL_LEAD_REACH = 3               # how far a led label may sit from its line: this many label heights
+LABEL_STEP = 6                     # the lattice the spots near a line are tried on, screen pixels
+
+
+def label_height(rows, size):
+    """A plan label's height on screen: its lines (size + 5 px each: 16 px at 11 pt) and 4 of margin."""
+    return 4 + (size + 5) * rows
+
+
+def _over(box, other):
+    """Whether two (left, top, w, h) boxes overlap (touching edges don't)."""
+    return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
+        min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
+
+
+def _inside(x, y, poly):
+    """Whether a point is inside a polygon (screen points; even-odd)."""
+    inside = False
+    for (ax, ay), (bx, by) in zip(poly, poly[1:] + poly[:1]):
+        if (ay > y) != (by > y) and x < ax + (y - ay) * (bx - ax) / (by - ay):
+            inside = not inside
+    return inside
+
+
+def box_over_shape(box, poly):
+    """Whether a box (left, top, w, h) covers any of a polygon (its screen points), 3 px around it included."""
+    left, top, w, h = box[0] - 3, box[1] - 3, box[2] + 6, box[3] + 6
+    if len(poly) < 3:
+        return False
+    if any(crosses(edge, left, top, w, h) for edge in zip(poly, poly[1:] + poly[:1])):
+        return True
+    if any(left <= x <= left + w and top <= y <= top + h for x, y in poly):
+        return True
+    return _inside(left + w / 2, top + h / 2, poly)
+
+
+LABEL_INSET = 4                    # a plan label stays this far inside the view (#29 at e4e5018: one on its edge)
+AXIS_ICON_PX = 80                  # Rhino's world-axis icon, bottom left of every view: a square this wide kept clear
+# (the Rhino job at 8bfabdd: it spans x 34-76, y 593-634 in a 657 x 668 view), 3 px more around it
+AXIS_ICON_SCALE = 1.0              # the display's scaling where screen pixels are physical (set by the plugin)
+
+
+def axis_icon_box(view):
+    """Where Rhino draws the world-axis icon in a view (w, h): its bottom-left corner, AXIS_ICON_PX (scaled by
+    AXIS_ICON_SCALE) and 3 px around it (#29 at e4e5018: a label on it)."""
+    side = int(round(AXIS_ICON_PX * AXIS_ICON_SCALE)) + 3
+    return 0, view[1] - side, side, side
+
+
+def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes=(), placed=()):
+    """Which HARD rule a plan label's box (left, top, w, h) breaks, or None. HARD: on screen; over no building
+    footprint nor coloured part (`hard_shapes`: their outlines on screen, 3 px around them), nor the notice, the
+    status box or the north arrow (`hard_boxes`, 3 px around them), nor a label already placed (`placed`: a label is
+    never hidden under another, the Rhino job at 4bb6d4d); 3 px off its own dimension `line` (the front yard's ran along
+    its own label's edge, the Rhino job at 822fb6f) and every line in
+    `hard_lines` (every other yard's dimension, 3 px around it: the southwest label sat 1 px beside the front's)."""
+    left, top, w, h = box
+    if view is not None:
+        i_ = LABEL_INSET
+        if left < i_ or top < i_ or left + w > view[0] - i_ or top + h > view[1] - i_:
+            return "off screen or on its edge"
+        if _over(box, axis_icon_box(view)):
+            return "over the world-axis icon"
+    if any(box_over_shape(box, shape) for shape in hard_shapes):
+        return "over a building or its coloured part"
+    if any(_over(box, (a - 3, b - 3, c + 6, e + 6)) for a, b, c, e in hard_boxes):
+        return "over the notice, the status box or the north arrow"
+    if any(_over(box, other) for other in placed):
+        return "over another label"
+    if crosses(line, left - 3, top - 3, w + 6, h + 6):
+        return "on its own line"
+    if any(crosses(other, left - 3, top - 3, w + 6, h + 6) for other in hard_lines if other != line):
+        return "on another yard's dimension"
+    return None
+
+
+def label_spots(line, w, h, reach, step=LABEL_STEP):
+    """Every spot for a w × h label within `reach` of its dimension `line` (screen pixels), on a `step` lattice from
+    the line's own corner, nearest first."""
     (xa, ya), (xb, yb) = line
     x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
+    spots = []
+    nx, ny = int((x1 - x0 + w + 2 * reach) / step) + 1, int((y1 - y0 + h + 2 * reach) / step) + 1
+    for j in range(ny):
+        top = y0 - h - reach + j * step
+        for i in range(nx):
+            left = x0 - w - reach + i * step
+            gap = box_gap(line, (left, top, w, h))
+            if gap <= reach:
+                spots.append((gap, left, top))
+    spots.sort()
+    return spots
+
+
+def _seg_x_in_band(seg, ylo, yhi):
+    """The x extent of a segment's part inside the horizontal band ylo..yhi (screen pixels), or None."""
+    (x1, y1), (x2, y2) = seg
+    if max(y1, y2) < ylo or min(y1, y2) > yhi:
+        return None
+    if abs(y2 - y1) < 1e-12:
+        return min(x1, x2), max(x1, x2)
+    ta, tb = (ylo - y1) / (y2 - y1), (yhi - y1) / (y2 - y1)
+    t0, t1 = max(0.0, min(ta, tb)), min(1.0, max(ta, tb))
+    xa_, xb_ = x1 + t0 * (x2 - x1), x1 + t1 * (x2 - x1)
+    return min(xa_, xb_), max(xa_, xb_)
+
+
+class _LabelField:
+    """The things a plan label must keep off, prepared once for a label (the Rhino job at 822fb6f: testing every
+    spot against every obstacle took up to 309 ms a label). For one row of spots (a top, a w × h label) each
+    obstacle is the stretch of lefts it rules out, worked out once for the row: a box or a placed label its width
+    plus the label's; a line or a building's outline the extent of its part inside the row's band (3 px around),
+    plus the label's width. That is exact for boxes, lines and convex outlines, and never less than the truth for
+    others (a spot it lets through always keeps the HARD rules; label_breaks_hard still checks the one chosen)."""
+
+    def __init__(self, line, view, hard_boxes=(), hard_lines=(), hard_shapes=(), placed=(), soft_lines=()):
+        self.view = view
+        self.rects = [(a - 3, b - 3, c + 6, e + 6) for a, b, c, e in hard_boxes] + [tuple(p)[:4] for p in placed]
+        if view is not None:
+            self.rects.append(axis_icon_box(view))
+        self.segs = [(line, 3)] + [(d, 3) for d in hard_lines if d != line]
+        self.polys = []
+        for shape_ in hard_shapes:
+            if len(shape_) >= 3:
+                pts = [tuple(q) for q in shape_]
+                self.polys.append((list(zip(pts, pts[1:] + pts[:1])), min(q[1] for q in pts), max(q[1] for q in pts)))
+        self.soft = [s_ for s_ in soft_lines if s_ != line]
+
+    def _blocked(self, top, w, h):
+        out = []
+        for rx, ry, rw, rh in self.rects:
+            if min(top + h, ry + rh) > max(top, ry):
+                out.append((rx - w, rx + rw))
+        for seg, m in self.segs:
+            r = _seg_x_in_band(seg, top - m, top + h + m)
+            if r is not None:
+                out.append((r[0] - m - w, r[1] + m))
+        ylo, yhi = top - 3, top + h + 3
+        for edges, pymin, pymax in self.polys:
+            if pymax < ylo or pymin > yhi:
+                continue
+            lo = hi = None
+            for edge in edges:
+                r = _seg_x_in_band(edge, ylo, yhi)
+                if r is not None:
+                    lo = r[0] if lo is None else min(lo, r[0])
+                    hi = r[1] if hi is None else max(hi, r[1])
+            if lo is not None:
+                out.append((lo - 3 - w, hi + 3))
+        return out
+
+    def pieces(self, top, w, h, base, step, n):
+        """The runs of lattice spots (lefts base + i·step, i < n) on the row at `top` that keep every HARD rule,
+        each cut where the number of lot lines a label there crosses changes: [(i0, i1, crossed)]."""
+        if self.view is not None and (top < LABEL_INSET or top + h > self.view[1] - LABEL_INSET):
+            return []
+        lo_i, hi_i = 0, n - 1
+        if self.view is not None:
+            lo_i = max(lo_i, int(math.ceil((LABEL_INSET - base) / step - 1e-9)))
+            hi_i = min(hi_i, int(math.floor((self.view[0] - LABEL_INSET - w - base) / step + 1e-9)))
+        if lo_i > hi_i:
+            return []
+
+        def index_span(a, b):
+            return int(math.ceil((a - base) / step - 1e-9)), int(math.floor((b - base) / step + 1e-9))
+        blocked = sorted(index_span(a, b) for a, b in self._blocked(top, w, h))
+        free, at = [], lo_i
+        for a, b in blocked:
+            if b < at:
+                continue
+            if a > at:
+                free.append((at, min(a - 1, hi_i)))
+            at = max(at, b + 1)
+            if at > hi_i:
+                break
+        if at <= hi_i:
+            free.append((at, hi_i))
+        free = [(a, b) for a, b in free if a <= b]
+        if not free or not self.soft:
+            return [(a, b, 0) for a, b in free]
+        soft = []
+        for seg in self.soft:
+            r = _seg_x_in_band(seg, top, top + h)
+            if r is not None:
+                soft.append(index_span(r[0] - w, r[1]))
+        out = []
+        for a, b in free:
+            cuts = sorted({a, b + 1} | {c for s0, s1 in soft for c in (s0, s1 + 1) if a < c <= b})
+            for c0, c1 in zip(cuts, cuts[1:]):
+                out.append((c0, c1 - 1, sum(s0 <= c0 <= s1 for s0, s1 in soft)))
+        return out
+
+
+def _nearest_index(line, top, w, h, base, step, i0, i1):
+    """The spot in the run i0..i1 nearest its line (a label's distance from its line along a row is convex: one
+    least; worked out directly for a level or plumb line, else by a ternary search)."""
+    (xa, ya), (xb, yb) = line
+    if abs(xa - xb) < 1e-9 or abs(ya - yb) < 1e-9:      # level or plumb: the x gap alone decides along a row
+        lo = int(math.ceil((min(xa, xb) - w - base) / step - 1e-9))
+        hi = int(math.floor((max(xa, xb) - base) / step + 1e-9))
+        return i0 if hi < i0 else i1 if lo > i1 else max(i0, lo)
+
+    def g(i):
+        return box_gap(line, (base + i * step, top, w, h))
+    a, b = i0, i1
+    while b - a > 2:
+        m1, m2 = a + (b - a) // 3, b - (b - a) // 3
+        if g(m1) <= g(m2):
+            b = m2
+        else:
+            a = m1
+    return min(range(a, b + 1), key=lambda i: (g(i), i))
+
+
+def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_boxes=(), soft_lines=(),
+                    hard_shapes=(), placed=()):
+    """Where a plan label for the dimension `line` goes (screen pixels), by one complete set of rules (the Rhino job
+    at 319dc5d: each round's fix moved the southwest yard's label onto the next obstacle nobody had listed):
+    - HARD, never broken (label_breaks_hard): on screen; over no building footprint or coloured part
+      (`hard_shapes`), nor the notice, the status box or the north arrow (`hard_boxes`), nor a label placed before
+      (`placed`); 3 px off its own line and every other yard's dimension (`hard_lines`).
+    - SOFT, least first: other labels covered (`soft_boxes`), then, for a led label, the HARD things its leader
+      crosses, then lines crossed (`soft_lines`: the lot's edges), then its distance from its own line.
+    - Within one label height of its line, on one line, then on two (name, then numbers: label_lines), the spots
+      on a LABEL_STEP lattice; then smaller, a point at a time down to LABEL_MIN_SIZE; then, at its own size, up to
+      LABEL_LEAD_REACH label heights away; then the nearest spots anywhere on screen that break no HARD rule, at
+      its own size, then the smallest. A label more than 8 px from its line is led to it (`led`). Only when no spot
+      on the whole screen keeps every HARD rule is one broken (`forced`, never silent; still over no label placed
+      before), so a failing yard's label is never dropped.
+    Fast (the Rhino job at 822fb6f: up to 309 ms a label): each row of spots is worked out as runs that keep the
+    HARD rules (_LabelField), only the nearest spot of each run is weighed, and the rows nearest the line go first
+    (then those nearest its middle), stopping at the first spot beside the line with nothing SOFT against it.
+    Returns {"left", "top", "w", "h", "rows", "size", "led", "forced", "gap"}."""
+    (xa, ya), (xb, yb) = line
     mx, my = (xa + xb) / 2, (ya + yb) / 2
-    vw, vh = view if view is not None else (float("inf"), float("inf"))
-    steps = (0, -h / 2, h / 2, -h, h)
-    if x1 - x0 >= y1 - y0:               # mostly horizontal: above or below it, then past either end
-        spots = [(x, top) for top in (y0 - gap - h, y1 + gap) for x in (mx - w / 2, x0 - w, x1, x0 - w - gap, x1 + gap)] + \
-            [(x, my - h / 2 + d) for x in (x0 - gap - w, x1 + gap) for d in steps[1:] + steps[:1]]
-    else:                                # mostly vertical: right or left of it, then past either end
-        spots = [(left, y) for left in (x1 + gap, x0 - gap - w) for y in (my - h / 2, y0 - h, y1, y0 - h - gap, y1 + gap)] + \
-            [(mx - w / 2 + d, y) for y in (y0 - gap - h, y1 + gap) for d in (-w / 2, w / 2, 0)]
-    best = None
-    for k, (left, top) in enumerate(spots):
-        left, top = min(max(left, 0), max(vw - w, 0)), min(max(top, 0), max(vh - h, 0))   # kept on screen
-        if left + w > vw or top + h > vh or box_gap(line, (left, top, w, h)) > h:
+    x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
+    two = label_lines(text)
+    variants = [[text]] + ([two] if len(two) == 2 else [])
+    field = _LabelField(line, view, hard_boxes, hard_lines, hard_shapes, placed, soft_lines)
+    lead_boxes = list(hard_boxes) + list(soft_boxes)
+
+    def shape(rows, pt):
+        return max(label_width(r, pt) for r in rows), label_height(len(rows), pt)
+
+    def result(rows, pt, left, top, w, h, forced=False):
+        gap = box_gap(line, (left, top, w, h))
+        return {"left": left, "top": top, "w": w, "h": h, "rows": rows, "size": pt, "led": gap > 8,
+                "forced": forced, "gap": gap}
+
+    def score(box, gap):
+        left, top, w, h = box
+        covered = sum(_over(box, other) for other in soft_boxes)
+        led_hits = 0
+        if gap > 8:                      # its leader: from its line's middle to the label's nearest edge
+            lead = ((mx, my), leader_end((mx, my), box))
+            led_hits = sum(_seg_hits_shape(lead, shape_) for shape_ in hard_shapes) + \
+                sum(_seg_hits_box(lead, b_) for b_ in lead_boxes)
+        crossed = sum(crosses(s_, left, top, w, h) for s_ in field.soft)
+        return covered, led_hits, crossed, gap, left, top
+
+    def candidates(w, h, base_x, base_y, step, nx, ny, reach, enough=None):
+        """The nearest spot of each HARD-keeping run, rows nearest the line first (then nearest its middle); with
+        `enough`, stop once that many are found and no row left is nearer; else at the first row with a spot
+        beside the line (unled) with nothing SOFT against it, or once no row left could beat the best."""
+        rows_ = sorted((max(0.0, y0 - (base_y + j * step + h), base_y + j * step - y1),
+                        abs(base_y + j * step + h / 2 - my), j) for j in range(ny))   # nearest, then mid-line
+        found, best_ = [], None
+        for ydist, _, j in rows_:
+            if ydist > reach:
+                break
+            if best_ is not None and best_[:3] == (0, 0, 0) and ydist >= best_[3]:
+                break                                    # nothing in the rows left can beat it
+            if enough is not None and len(found) >= enough and ydist >= found[enough - 1][0]:
+                break
+            top = base_y + j * step
+            for i0, i1, _ in field.pieces(top, w, h, base_x, step, nx):
+                i = _nearest_index(line, top, w, h, base_x, step, i0, i1)
+                order_ = [i] + [k for d in range(1, i1 - i0 + 1) for k in (i - d, i + d) if i0 <= k <= i1]
+                for k in order_:                         # the nearest; a neighbour only if label_breaks_hard
+                    box = (base_x + k * step, top, w, h)  # refuses it (never expected: the runs are exact)
+                    gap = box_gap(line, box)
+                    if gap <= reach and not label_breaks_hard(line, box, view, hard_boxes, hard_lines, hard_shapes,
+                                                              placed):
+                        break
+                else:
+                    continue
+                if enough is not None:
+                    found.append((gap, box))
+                    found.sort(key=lambda q: (q[0], q[1][0], q[1][1]))
+                    continue
+                s_ = score(box, gap)
+                if s_[1]:                                # a led label's leader across something: the rest of
+                    for k in range(i0, i1 + 1):          # the run weighed too (the review of 9d021d8)
+                        box_ = (base_x + k * step, top, w, h)
+                        gap_ = box_gap(line, box_)
+                        if gap_ <= reach and not label_breaks_hard(line, box_, view, hard_boxes, hard_lines,
+                                                                   hard_shapes, placed):
+                            s_ = min(s_, score(box_, gap_))
+                if best_ is None or s_ < best_:
+                    best_ = s_
+            if best_ is not None and best_[:3] == (0, 0, 0) and best_[3] <= 8:
+                break                                    # beside its line, nothing SOFT against it: taken
+        return found if enough is not None else best_
+
+    def near(rows, pt, reach):
+        w, h = shape(rows, pt)
+        nx = int((x1 - x0 + w + 2 * reach) / LABEL_STEP) + 1
+        ny = int((y1 - y0 + h + 2 * reach) / LABEL_STEP) + 1
+        got = candidates(w, h, x0 - w - reach, y0 - h - reach, LABEL_STEP, nx, ny, reach)
+        return None if got is None else result(rows, pt, got[4], got[5], w, h)
+
+    for pt in range(int(size), LABEL_MIN_SIZE - 1, -1):          # within one label height: its size, then smaller
+        for rows in variants:
+            got = near(rows, pt, shape(rows, pt)[1])
+            if got is not None:
+                return got
+    for rows in variants:                                        # led, up to LABEL_LEAD_REACH heights away
+        got = near(rows, size, LABEL_LEAD_REACH * shape(rows, size)[1])
+        if got is not None:
+            return got
+    if view is not None:                                         # the nearest spots on screen that keep the rules
+        for pt in (int(size), LABEL_MIN_SIZE):
+            for rows in variants:
+                w, h = shape(rows, pt)
+                nx, ny = int((view[0] - w) // 12) + 1, int((view[1] - h) // 12) + 1
+                clear = candidates(w, h, 0, 0, 12, nx, ny, float("inf"), enough=40)[:40]
+                if clear:
+                    s_ = min(score(box, gap) for gap, box in clear)
+                    return result(rows, pt, s_[4], s_[5], w, h)
+    rows = variants[-1]                                          # nowhere keeps them all: never over another
+    w, h = shape(rows, LABEL_MIN_SIZE)                           # label still (the review of 3446e94), else
+    if view is not None:                                         # beside its line; said either way, never dropped
+        i_ = LABEL_INSET
+        free = sorted((box_gap(line, (left, top, w, h)), left, top) for top in range(i_, int(view[1] - h - i_) + 1, 12)
+                      for left in range(i_, int(view[0] - w - i_) + 1, 12)
+                      if not any(_over((left, top, w, h), other)
+                                 for other in list(placed) + [axis_icon_box(view)]))   # nor on the axis icon
+        if free:
+            return result(rows, LABEL_MIN_SIZE, free[0][1], free[0][2], w, h, forced=True)
+    left, top = min(xa, xb), max(ya, yb) + 6
+    if view is not None:
+        i_ = LABEL_INSET
+        left = min(max(left, i_), max(view[0] - w - i_, i_))
+        top = min(max(top, i_), max(view[1] - h - i_, i_))
+        if _over((left, top, w, h), axis_icon_box(view)):          # off the axis icon: above it (review of 7e6d824)
+            top = max(i_, axis_icon_box(view)[1] - h)
+    return result(rows, LABEL_MIN_SIZE, left, top, w, h, forced=True)
+
+
+def hull(points):
+    """The convex hull of screen points, counter-clockwise (a building's footprint on screen when its outline isn't
+    given in order: never smaller than the footprint, and turned with it, never its whole bounding box)."""
+    pts = sorted(set((round(x, 3), round(y, 3)) for x, y in points))
+    if len(pts) < 3:
+        return pts
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+LABEL_ORDER = {"does_not_comply": 0, "needs_review": 1, "complies": 2}   # failing first, the edges' lengths last
+LABEL_SETTLE_S = 0.08        # the view still this long: the labels are placed (never while it moves)
+
+
+class LabelRun:
+    """Placing a frame's plan labels a few at a time (place_dim_label), outside the drawing loop: failing yards
+    first, then those needing review, those that comply, the edges' lengths last; each one placed is HARD for the
+    ones after (never hidden under another, the Rhino job at 4bb6d4d). `step` places labels until its time budget
+    is spent (one at least), so Rhino stays responsive between steps (the review of 3446e94: the whole search at
+    once froze it each time the view came to rest). `items`: dicts with "key", "text", "line" (screen), "size" and
+    "status" (None for an edge). `spots`: {key: placement}, each with the line it was placed for ("line") and its
+    place in the order ("order")."""
+
+    def __init__(self, items, view, keep=(), dims=(), shapes=(), lines=(), carried=None):
+        self.view, self.keep, self.shapes, self.carried = view, list(keep), list(shapes), dict(carried or {})
+        self.dims = [tuple(map(tuple, d)) for d in dims]
+        self.lines = [tuple(map(tuple, s_)) for s_ in lines if tuple(map(tuple, s_)) not in self.dims]
+        self.todo = [item for _, item in sorted(enumerate(items), key=lambda ki: (
+            LABEL_ORDER.get(ki[1].get("status"), 3), ki[0]))]
+        self.placed, self.spots, self.slowest = [], {}, 0.0
+
+    def kept(self, item, own):
+        """The label's place carried with the view while it moved, when it still keeps every HARD rule beside its
+        line at its own size with nothing SOFT against it (no jump when the view comes to rest), else None."""
+        was = self.carried.get(item["key"])
+        if not was or was.get("forced") or was["size"] != item["size"]:
+            return None
+        box = (was["left"], was["top"], was["w"], was["h"])
+        gap = box_gap(own, box)
+        if gap > 8 or label_breaks_hard(own, box, self.view, self.keep, self.dims, self.shapes, self.placed):
+            return None
+        if any(crosses(s_, *box) for s_ in self.lines if s_ != own):
+            return None
+        return dict(was, led=False, gap=gap)
+
+    def step(self, budget_s=None):
+        """Place labels until the next would pass `budget_s` seconds (by the slowest so far; one at least; None:
+        all). Whether every one is placed."""
+        import time as time_
+        start, done = time_.perf_counter(), 0
+        while self.todo:
+            if budget_s is not None and done and time_.perf_counter() - start + self.slowest > budget_s:
+                break
+            done += 1
+            began = time_.perf_counter()
+            item = self.todo.pop(0)
+            own = tuple(map(tuple, item["line"]))
+            got = self.kept(item, own) or place_dim_label(
+                own, item["text"], item["size"], self.view, hard_boxes=self.keep, hard_lines=self.dims,
+                soft_lines=self.lines, hard_shapes=self.shapes, placed=list(self.placed))
+            got = dict(got, line=own, order=len(self.spots))
+            self.placed.append((got["left"], got["top"], got["w"], got["h"]))
+            self.spots[item["key"]] = got
+            self.slowest = max(self.slowest, time_.perf_counter() - began)
+        return not self.todo
+
+
+def place_labels(items, view, keep=(), dims=(), shapes=(), lines=()):
+    """Every plan label of a frame placed at once (LabelRun to the end): {key: placement}."""
+    run = LabelRun(items, view, keep, dims, shapes, lines)
+    run.step()
+    return run.spots
+
+
+def shown_while_moving(carried, view, keep=(), dims=(), shapes=()):
+    """Which labels carried along with a moving view (logic.follow) may be drawn this frame: only those that keep
+    every HARD rule where they are now (label_breaks_hard: on screen, off the buildings, the boxes, the dimensions
+    and the labels shown before them), in the order they were placed; the rest are hidden until the view rests and
+    they are placed again (the Rhino job at 5b46c99: old places on screen, then a jump). `carried`: [(item, got)]
+    with item["line"] the line on screen now. Returns the same pairs, those shown."""
+    out, taken = [], []
+    dims = [tuple(map(tuple, d)) for d in dims]
+    for item, got in sorted(carried, key=lambda ig: ig[1].get("order", 0)):
+        box = (got["left"], got["top"], got["w"], got["h"])
+        if label_breaks_hard(tuple(map(tuple, item["line"])), box, view, list(keep), dims, list(shapes), taken):
             continue
-        if any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken) or \
-                crosses(line, left, top, w, h):                  # never over the notice, status box, nor its own line
+        out.append((item, got))
+        taken.append(box)
+    return out
+
+
+def follow(got, line):
+    """A placement carried along while the view moves (never searched in the drawing loop): the same offset from
+    its line's middle as when it was placed, at the line's middle on screen now."""
+    (xa, ya), (xb, yb) = got["line"]
+    (xc, yc), (xd, yd) = line
+    dx, dy = (xc + xd) / 2 - (xa + xb) / 2, (yc + yd) / 2 - (ya + yb) / 2
+    return dict(got, left=got["left"] + dx, top=got["top"] + dy, line=tuple(map(tuple, line)))
+
+
+def _seg_hits_box(seg, box):
+    return crosses(seg, box[0], box[1], box[2], box[3])
+
+
+def _seg_hits_shape(seg, poly):
+    """Whether a segment touches a polygon (crosses an edge, or lies inside it)."""
+    (ax, ay), (bx, by) = seg
+    if len(poly) < 3:
+        return False
+    for (cx, cy), (dx, dy) in zip(poly, poly[1:] + poly[:1]):
+        d = (bx - ax) * (dy - cy) - (by - ay) * (dx - cx)
+        if abs(d) < 1e-12:
             continue
-        score = (sum(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in avoid),
-                 sum(crosses(s, left, top, w, h) for s in dims if s != line),
-                 sum(crosses(s, left, top, w, h) for s in obstacles if s != line), box_gap(line, (left, top, w, h)), k)
-        if best is None or score < best[0]:
-            best = (score, left, top)
-    return None if best is None else (best[1], best[2])
+        t = ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / d
+        u = ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / d
+        if 0 <= t <= 1 and 0 <= u <= 1:
+            return True
+    return _inside((ax + bx) / 2, (ay + by) / 2, poly)
+
+
+LABEL_KEEP = (                     # spaces never broken in a plan label (#29 at e4e5018: "101'-1" / "1/2"")
+    r"(\d+'-\d+) (\d+/\d+\")",            # a measurement: 101'-1 1/2", 7'-0 5/8" (as NOTICE_KEEP's first)
+    r"^([✕?✓]) (\S)",                     # a status mark with its first word: never alone on a line
+    r"\b(min|max|needs) (\d)",             # the word that says what the number is, with it
+)
 
 
 def label_lines(text):
     """A plan label as two lines, for when it won't fit beside its line on one: its name, then its numbers
     ("✕ Side yard, Southwest" / "7'-0 5/8", needs 10'-0" (approx.)"). One line when it has no name before a number
-    (a lot edge's length)."""
-    words = text.split(" ")
-    k = next((i for i, w in enumerate(words) if i and w[:1].isdigit()), None)
-    return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
+    (a lot edge's length), never broken inside a measurement nor after a status mark alone (LABEL_KEEP)."""
+    import re
+    kept = text
+    for keep in LABEL_KEEP:
+        kept = re.sub(keep, lambda m: "\u00a0".join(m.groups()), kept)
+    words = kept.split(" ")
+
+    def number(w):
+        return w.lstrip("✕?✓\u00a0")[:1].isdigit() or w.split("\u00a0")[-1][:1].isdigit() and "\u00a0" in w
+    k = next((i for i, w in enumerate(words) if i and number(w)), None)
+    if k is None or any(number(w) for w in words[:k]):     # no name before the numbers: one line
+        return [text]
+    return [" ".join(words[:k]).replace("\u00a0", " "), " ".join(words[k:]).replace("\u00a0", " ")]
 
 
 NOTICE_SHARES = (0.4, 0.5, 0.6, 0.7, 0.8)   # the notice's boxes, narrowest first: a share of the view's width each
@@ -951,7 +1425,7 @@ def street_name_after_pick(name, lines, picked, tolerance=0.5, ids=None):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
     a, b = picked
-    own = _street_lines().matching_ids(lines, ids)
+    own = _real_names(_street_lines().matching_ids(lines, ids))   # (Gordium's own "Street N": no name, asked: F2)
     for k, (c, d) in enumerate(lines or []):
         if (near(a, c) and near(b, d)) or (near(a, d) and near(b, c)):
             return own[k] if own is not None else (name or None)
@@ -1013,7 +1487,7 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
         # pieces around the click, of its own street or none, are kept as they are (never asked again, never
         # shrunk on a guess: round 10), and the street grows on from them.
         n = len(outline)
-        own_ids = _street_lines().matching_ids(lines, old_ids)
+        own_ids = _real_names(_street_lines().matching_ids(lines, old_ids))   # (Gordium's own ids: no name)
         names, saved = [None] * n, set()
         for k, line in enumerate(lines):
             q = _piece_at(outline, line, tolerance)
@@ -1023,7 +1497,7 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
         mine = name or names[at]
         if name:
             names[at] = name                               # the name on the clicked line only
-        label = mine or "This street"
+        label = mine or "Street 1"                         # (the id its unnamed lines get: one street)
         refused = refused_click(outline, picked, tolerance)
         if refused:                                        # a point clicked, not a line: nothing changes
             said.append({"words": refused, "refused": True})
@@ -1048,15 +1522,18 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
                     ids[hits[0]] = name
                 kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
                 out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
+                if street_verdict(*_end_to_end(kept, out))[0] == "one":     # (one id only for one street)
+                    fill = next((i for i in out if i), None) or label           # (its known name first: D2)
+                    out = [i or fill for i in out]
                 why = "the lot outline doesn't run end to end in order here, so Gordium can't follow the street along it"
                 said.append({"words": (f"{label}: the street lines kept as they were ({why})" if kept == lines else
                                        f"{street_words(label, kept, out)} ({why})"), "refused": False})   # (round 12)
-                return kept, (out if any(out) else None)
+                return kept, out
             said.append({"words": f"{label}: only the lot line clicked (the lot outline doesn't run end to end in "
                                   f"order here, so Gordium can't follow the street along it)", "refused": False})
-            return [list(map(list, picked))], ([name] if name else None)
+            return [list(map(list, picked))], [label]
         said.append({"words": got[1], "refused": False})
-        return street_lines_of(outline, [got[0]], names)
+        return street_lines_of(outline, [got[0]], names, labels=[label])
     # no outline (or a line not on it): the street lines themselves
     hits = [k for k, line in enumerate(lines)
             if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
@@ -1145,11 +1622,21 @@ def _piece_at(outline, picked, tolerance):
     return None
 
 
+def generated_id(name):
+    """Whether a street id is Gordium's own ("Street 1", "Street 2"... given to a run nobody named), not a name:
+    never read back as a street's identity (a new pick numbers its streets afresh: round ids, F4)."""
+    return _street_lines().generated_id(name)            # (street_lines: the measuring's own comparison)
+
+
+def _real_names(ids):
+    return [None if generated_id(i) else i for i in ids] if isinstance(ids, list) else ids
+
+
 def outline_names(outline, lines, ids, tolerance=0.5):
     """The street each piece of the lot outline is known to be on (one per piece, None where unknown): a piece that
     is one of the street lines `lines` takes that line's own name (`ids`, only when they match the lines one for one:
     street_lines.matching_ids); every other piece None."""
-    own = _street_lines().matching_ids(lines or [], ids)
+    own = _real_names(_street_lines().matching_ids(lines or [], ids))      # (Gordium's own ids: no name)
     out = []
     for piece in outline or []:
         k = next((k for k, line in enumerate(lines or []) if _same_piece(line, piece, tolerance)), None)
@@ -1507,23 +1994,35 @@ def add_street_pick(runs, outline, picked, names=None, ask=None, tolerance=0.5):
     return (runs + [run] if run else runs), words
 
 
-def street_lines_of(outline, runs, names=None, clicks=None):
-    """(street lines, their street names or None) from the runs kept (piece numbers), in click order, each piece
-    once; a piece's name is the one it was known by (`names`), never another's. No run (no click was a piece of
-    the outline): the lines clicked (`clicks`), each once (street_lines_after_picks), unnamed."""
+def street_lines_of(outline, runs, names=None, clicks=None, labels=None):
+    """(street lines, their street ids, one per line) from the runs kept (piece numbers), in click order, each piece
+    once (the measuring reads a corner lot's streets from the ids, never from the drawing: #18): a piece's own name
+    where it is known (`names`; Gordium's own "Street N" ids are no name), else its run's: the run's known name,
+    else `labels[i]`, else "Street 1", "Street 2"... by the run's place in the click order (as the command line
+    calls it), but only where the run is surely one street (street_verdict): else its unnamed lines stay unnamed,
+    and the measuring asks, never one frontage along two streets. No run (no click was a piece of the outline): the lines
+    clicked, each its own street; every click refused: nothing ([], None)."""
     if not any(runs) and clicks:
         if all(_piece_at(outline, c, JOINT) is None for c in clicks):   # none is a piece of the outline
-            return street_lines_after_picks(None, clicks, True), None
+            lines = street_lines_after_picks(None, clicks, True)
+            return lines, [f"Street {i + 1}" for i in range(len(lines))]
         return [], None          # every click refused (a point, a street already kept): nothing changes (round 8)
     names = list(names) if isinstance(names, list) and len(names) == len(outline or []) else [None] * len(outline or [])
     seen, lines, ids = set(), [], []
-    for run in runs:
-        for k in run:
-            if k not in seen:
-                seen.add(k)
-                lines.append([list(outline[k][0][:2]), list(outline[k][-1][:2])])
-                ids.append(names[k])
-    return lines, (ids if any(ids) else None)
+    for i, run in enumerate(runs):
+        mine = [k for k in run if k not in seen]
+        # a run gets one id only where it is surely one street (street_verdict over its lines and known names,
+        # the measuring's own test): else its unnamed lines stay unnamed and the measuring asks (round ids: a
+        # Yes round a rounded corner, a name across a corner, never one id for two streets)
+        sure = street_verdict(*_end_to_end([outline[k] for k in mine], [names[k] for k in mine]))[0] == "one" \
+            if mine else False
+        known = next((names[k] for k in mine if names[k]), None)
+        base = known or (labels[i] if labels and i < len(labels) and labels[i] else f"Street {i + 1}")
+        for k in mine:
+            seen.add(k)
+            lines.append([list(outline[k][0][:2]), list(outline[k][-1][:2])])
+            ids.append(names[k] or (base if sure else None))
+    return lines, (ids if lines else None)
 
 
 _STREETS = {}
@@ -1933,15 +2432,12 @@ def pick_effect(what, outcome, facts, saved_ui):
         else:
             saved_ui["street_name"] = outcome.get("name")      # the name on the clicked line only
         saved_ui["street_source"] = ENTERED
-    elif what == "street":
-        picks, name = outcome["picks"], outcome.get("name")
-        saved_ui = settle(saved_ui, "street")          # the architect's line: no looked-up name stays on it
-        if facts.get("corner_lot") is True:            # a corner lot: every line on a street (two streets: unnamed)
-            set_street_lines(facts, street_lines_after_picks(facts.get("street_line"), picks, True))
-        else:
-            lines, ids = pick_street(facts.get("street_line"), facts.get("street_ids"), picks[0], name)
-            set_street_lines(facts, lines, ids)        # the name on the clicked line only
-            saved_ui["street_name"] = name
+    elif what == "street" and facts.get("corner_lot") is not True:   # (a corner lot's clicks come as "lines"
+        picks, name = outcome["picks"], outcome.get("name")              # with their ids, never bare: #18 reads a
+        saved_ui = settle(saved_ui, "street")          # corner lot's streets only from them)
+        lines, ids = pick_street(facts.get("street_line"), facts.get("street_ids"), picks[0], name)
+        set_street_lines(facts, lines, ids)            # the name on the clicked line only
+        saved_ui["street_name"] = name
         saved_ui["street_source"] = ENTERED
     elif what in ("lot", "draw_lot"):
         facts = after_lot_pick(facts, outcome) if outcome != facts.get("lot_id") else facts
@@ -2045,6 +2541,12 @@ def starting_house_fact(note, today):
     return {"value": "as first drawn, " + said, "source": SUGGESTED, "confirmed_by": None, "date": today}
 
 
+# what the box's Change… on the street row does on a corner lot (_box_pick): one click per street keeps that whole
+# street, and Enter ends it (never "pick each lot line": a click already takes the street's every piece)
+CORNER_HINT = ("This lot faces two streets: click Change… on " + STREET_LABEL + ", then click once on each street "
+               "(one click keeps the whole street) and press Enter")
+
+
 def uncertain(state):
     """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
     says = (state.get("lookup") or {}).get("says")
@@ -2058,7 +2560,7 @@ def _question(state):
     if state.get("corner_lot") is None:          # never guessed: unanswered, the yards wait for it (§325-19C)
         asks.append("Does this lot face two streets? Answer Corner lot? under " + STREET_LABEL)
     elif state.get("corner_lot"):
-        asks.append("This lot faces two streets: click Change… and pick each lot line on a street")
+        asks.append(CORNER_HINT)
     if len(state.get("zones_found") or []) > 1:
         asks.append("This lot is in two zones: pick the zone that applies")
     return " · ".join(asks) or None
@@ -2365,27 +2867,27 @@ def last_check_at(checked_at, document):
     return (checked_at or {}).get(document)
 
 
-def gate_actions(actions, box_open, say, open_ok=("legend",)):
-    """The panel's actions, each doing nothing but saying BOX_BUSY while a start box is open (one choke point: none of
-    them writes to the model, runs a check or opens another box under an open one; verification round of PR #19).
-    `open_ok`: the ones that only show something (the legend)."""
-    def gated(name, fn):
-        def run(*args, **kwargs):
-            if box_open() and name not in open_ok:
-                say(BOX_BUSY)
-                return None
-            return fn(*args, **kwargs)
-        return run
-    return {name: gated(name, fn) for name, fn in actions.items()}
+# Each panel change is one Rhino undo step, named in Edit > Undo by what it did (a change written outside any undo
+# record is skipped by Ctrl+Z, which undoes the architect's own earlier edit instead: #32's review, 2026-10-26)
+UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",
+              "main": "Gordium: pick the main building", "add": "Gordium: add to check",
+              "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
+              "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
+              "edit_site": "Gordium: the start box", "grade": "Gordium: the start box",
+              "context": "Gordium: show or hide the neighbourhood", "auto_check": "Gordium: check after every edit"}
 
 
-def recovery_message(removed, back):
-    """What recovery did, in words (None when it did nothing)."""
-    def n(k):
-        return "%d object%s" % (k, "s" if k != 1 else "")
-    parts = (["removed %s an unfinished start box drew" % n(removed)] if removed else []) + \
-        (["put back %s it had set aside" % n(back)] if back else [])
-    return " and ".join(parts) or None
+@contextlib.contextmanager
+def undo_step(doc, words):
+    """Everything written to `doc` inside it is one undo step called `words` (Rhino's BeginUndoRecord /
+    EndUndoRecord), ended even when the change fails. Serial 0: Rhino is already recording (inside a command), and
+    that record holds the change: never ended here."""
+    serial = doc.BeginUndoRecord(words)
+    try:
+        yield
+    finally:
+        if serial:
+            doc.EndUndoRecord(serial)
 
 
 def undo_record_to_end(held, doc_serial):
@@ -2408,6 +2910,29 @@ def dirty_after_undo(dirty_at, now):
     before the Undo can never count as covering it (should_recheck: last_at >= dirty_at; review round 2, P1: an Undo
     within 0.5 s of a check left the screen cleared and the panel showing the model as it was before)."""
     return max(dirty_at or 0, now)
+
+
+def gate_actions(actions, box_open, say, open_ok=("legend",)):
+    """The panel's actions, each doing nothing but saying BOX_BUSY while a start box is open (one choke point: none of
+    them writes to the model, runs a check or opens another box under an open one; verification round of PR #19).
+    `open_ok`: the ones that only show something (the legend)."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if box_open() and name not in open_ok:
+                say(BOX_BUSY)
+                return None
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+def recovery_message(removed, back):
+    """What recovery did, in words (None when it did nothing)."""
+    def n(k):
+        return "%d object%s" % (k, "s" if k != 1 else "")
+    parts = (["removed %s an unfinished start box drew" % n(removed)] if removed else []) + \
+        (["put back %s it had set aside" % n(back)] if back else [])
+    return " and ".join(parts) or None
 
 
 def draw_then_commit(session, save):
@@ -2464,7 +2989,8 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         session.add([lot_id])
         facts["lot_id"] = lot_id
         if w.get("street_line"):
-            set_street_lines(facts, w["street_line"])    # unnamed lines: the measuring reads them from the drawing
+            set_street_lines(facts, w["street_line"])    # no ids: one street's lines (a corner lot's yards and
+            #   lot width wait for the street pick, #18 reading its streets only from the ids; one street: as drawn)
         if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
             facts["plan_north_deg"] = w["frame"]["rotation_deg"]
         spots = [] if FLAT_GROUND else [table.add_spot(p) for p in w.get("spots") or []]   # flat: none drawn
@@ -2877,7 +3403,7 @@ def exchange(sends, lines, request, limit):
     return answer_for(lines, request["id"], limit)
 
 
-HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer",
+HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",
            "worker", "worker_sends", "worker_lines")
 
 

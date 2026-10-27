@@ -95,6 +95,10 @@ def notice(g, doc):
     view.Redraw()
     view.CaptureToBitmap(System.Drawing.Size(view.ActiveViewport.Bounds.Width, view.ActiveViewport.Bounds.Height))
     # (the Rhino job at 6361a3f: on the Mac Redraw() only schedules the frame; a capture draws it now, the conduit too)
+    if g.settle_labels():                    # the labels placed as when the view rests, then that frame drawn
+        g.STATE.get("drawn", {}).pop(str(view.ActiveViewport.Id), None)
+        view.Redraw()
+        view.CaptureToBitmap(System.Drawing.Size(view.ActiveViewport.Bounds.Width, view.ActiveViewport.Bounds.Height))
     rec = g.STATE.get("drawn", {}).get(str(view.ActiveViewport.Id)) or {}
     rec = rec if rec.get("complete") else {}                              # the whole frame drawn
     room = bool(rec and held) and g.logic.notice_place(rec["size"][0], rec["size"][1], ["✕ " + t for t in held],

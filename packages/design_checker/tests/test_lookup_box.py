@@ -116,7 +116,7 @@ def test_a_lot_on_two_streets_asks_for_the_front(name):
     p = looked_up(name)
     facts, saved, state = box(p)
     assert p["facts"]["corner_lot"]["value"] == "ask" and facts["corner_lot"] is True
-    assert logic.uncertain(state) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain(state) == logic.CORNER_HINT
     placed = frame({"facts": p["facts"]})
     assert max(pt[1] for seg in placed["street_line"] for pt in seg) < 2.0          # the address street at the bottom
 
@@ -1092,7 +1092,7 @@ def test_every_tick_row_is_greyed_while_a_box_is_open():
     ticks = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
                  and any(isinstance(t, ast.Name) and t.id == "ticks" for t in n.targets))
     boxes = [ast.unparse(e.args[0]) for e in ticks.elts]
-    assert boxes == ["_auto_box(actions, parts)", "_envelope_box(actions)", "_massing_box(actions)",
+    assert boxes == ["_auto_box(actions, parts)", "_envelope_box(actions, parts)", "_massing_box(actions, parts)",
                      "_labels_box(actions, parts)",                        # + Check after every edit (the Check button)
                      "_context_box(actions, parts, context_on)"]          # + Show neighbourhood (PR #23)
     greyed = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
