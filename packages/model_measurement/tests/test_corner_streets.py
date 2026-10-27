@@ -173,3 +173,25 @@ def test_on_the_tax_map_a_short_piece_recorded_on_its_street_stays_on_it():
     facts = _facts(edges, range(3), ["Elm St", "Oak Ave", "Oak Ave"], lot_surveyed=False)   # the cut on Oak
     got = _widths(site, facts)
     assert got == sorted([59.8, round(99.8 + math.hypot(0.2, 0.2), 2)]), got
+
+
+def test_an_address_street_picked_in_part_is_its_whole_street():
+    """#18 independent round 1, R1: South St drawn in 2 pieces, East St 1; the address street given as South St's
+    first piece only. The rest of South St was read as part of a side lot line: lot depth 135.52 ft, said as certain.
+    Any of a street's recorded lines names the whole street: lot depth 120 ft, as with both pieces (the lot runs
+    from y = 0 at the street's ends to y = 120). An address across two streets is no street: needs review."""
+    edges, site = _site([(0, 0), (30, -8), (60, 0), (60, 120), (0, 120)])
+    ids = ["South St", "South St", "East St"]
+    for addr in ([edges[0]], [edges[1]], edges[:2]):
+        assert measure(site, _facts(edges, range(3), ids, address_street_line=addr))["lot_depth"]["value"] == 120.0
+    across = measure(site, _facts(edges, range(3), ids, address_street_line=edges[1:3]))["lot_depth"]
+    assert across["value"] is None and "isn't one run of the street lot lines on one street" in across["reason"]
+
+
+def test_a_street_recorded_in_two_runs_says_so_never_not_recorded():
+    """#18 independent round 1, R2: ids recorded for every street line, but one street's lines not next to each
+    other (A St, B St, A St): needs review, saying what is wrong, never "isn't recorded" (they are)."""
+    edges, site = _site([(0, 0), (60, 0), (60, 45), (0, 45)])
+    w = measure(site, _facts(edges, range(3), ["A St", "B St", "A St"]))["lot_width"]
+    assert w["value"] is None and not w.get("readings")
+    assert "aren't next to each other" in w["reason"] and "isn't recorded" not in w["reason"]

@@ -40,8 +40,10 @@ STOPS = {
     "street_ids_needed": "which street lot lines are on which street isn't recorded: pick the street side so Gordium "
                          "knows which lines are which street (a corner lot's lot width is the frontage on one street, "
                          "§325-8A col. 7)",
-    "address_not_a_street": "the address street given isn't one run of the street lot lines: pick the lot line(s) "
-                            "on the street the address is on again",
+    "street_lines_split": "the street lot lines recorded on one street aren't next to each other, or one lot line's "
+                          "pieces are recorded on two streets: pick the street side again, one click on each street",
+    "address_not_a_street": "the address street given isn't one run of the street lot lines on one street: pick the "
+                            "lot line(s) on the street the address is on again",
     "rear_on_street": "the lot line opposite the address street is on a street too (a through lot, §325-8A(14)(d)): "
                       "which yards are rear and front is an open question for the architects",
     "no_side_line": "every side lot line is on a street (a lot on three streets): which yard is a side yard is an "

@@ -35,7 +35,6 @@ MEASURES = list(load(MEASURES_FILE))
 
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
-PARALLEL = 30             # degrees: street lines turning more than this between them turn a corner
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
@@ -2211,9 +2210,7 @@ def _lot_lines(lot: Lot, facts: dict):
             # which lines are which street isn't recorded (or the names saved are stale): the lines given may all be
             # one street's, so no yard is measured from them (#18 round f, P0: a yard to one street line passed);
             # never told from where the lines turn
-            ids = facts.get("street_ids")
-            return stop("street_names_stale" if ids is not None and matching_ids(facts.get("street_line"), ids) is None
-                        else "street_ids_needed")
+            return _street_ids_stop(facts)
         if len(streets_of) < 2:
             return stop("corner_one_street")    # stated a corner lot, but every street line is on one street
         given = facts.get("address_street_line")
@@ -2224,7 +2221,13 @@ def _lot_lines(lot: Lot, facts: dict):
             idx = sorted({lot.line_of_piece(q) for q in hits if q is not None} & set(chain))
             if None in hits or not idx or not lot._contiguous(idx) or any(lot.line_of_piece(q) not in chain for q in hits):
                 return stop("address_not_a_street")
-            candidates = [idx]
+            # the address street is a whole street, the lines recorded on it (street_ids): a pick of some of its
+            # lines means that street, never a side lot line made of the rest of it; a pick across two streets
+            # isn't one (#18 independent round 1, R1: one piece picked read the other piece as a side line)
+            on = [g for g in streets_of if set(idx) & set(g)]
+            if len(on) != 1:
+                return stop("address_not_a_street")
+            candidates = [sorted(on[0])]
         else:
             # the address street is one of the streets, each the lines recorded on it (street_ids: the street pick,
             # or the lookup), never guessed from where the lines turn (#18 rounds b-e: no rule of angles could be
@@ -2265,6 +2268,20 @@ def _lot_lines(lot: Lot, facts: dict):
     problem = None if found else (problems[0] if problems else stop("no_rear_line"))
     return {"readings": found, "question": "; ".join(question), "basis": basis, "problem": problem,
             "candidates": candidates}
+
+
+def _street_ids_stop(facts: dict) -> str:
+    """Why a corner lot's streets can't be read from its street_ids (_street_groups gave None): saved for other
+    lines, not recorded for every street lot line, or recorded but one street's lines not next to each other (or a
+    lot line's pieces on two streets): each said as it is (#18 independent round 1, R2: recorded ids were told
+    "isn't recorded")."""
+    ids = facts.get("street_ids")
+    own = matching_ids(facts.get("street_line"), ids)
+    if ids is not None and own is None:
+        return stop("street_names_stale")
+    if own and all(own):
+        return stop("street_lines_split")
+    return stop("street_ids_needed")
 
 
 def _street_groups(lot: "Lot", facts: dict, chain: list) -> list[list[int]] | None:
@@ -2374,7 +2391,7 @@ def _width(lot: Lot, facts: dict, lines) -> dict:
         # guess from where the lines turn; not recorded, the lot width waits for the street pick
         groups = _street_groups(lot, facts, chain)
         if groups is None:
-            return _missing("lot_width", stop("street_ids_needed"))
+            return _missing("lot_width", _street_ids_stop(facts))
     width = []
     for g in groups:
         on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(lot.label(i) for i in g)})" if len(groups) > 1 else ""

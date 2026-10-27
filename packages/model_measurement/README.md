@@ -24,7 +24,8 @@ format report from it.
   | `zone`, `jurisdiction`, `use` | pick the rules |
   | `street_line` | **every** lot line on a street, each by its two ends (on a corner lot: both streets and any curve between them); front, side and rear all follow from it |
   | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review". On a corner lot every yard facing a street is a front yard (§325-19C, the law), the rear yard is opposite the street the address is on (§325-8A(14)(d)), and the one side yard left is checked against Column 13 (Gordium's reading, City practice) |
-  | `address_street_line` | on a corner lot: the lot line(s) on the street the lot's address is on (it decides which yard is the rear yard). Not given, each street is read as it, and the yards it changes need review |
+  | `street_ids` | one per `street_line`, in the same order: the street that lot line is on (the street's name, or Gordium's own "Street 1", "Street 2"… for a street nobody named), recorded by the Rhino street pick or the lookup. On a corner lot it is the only way Gordium knows which lines are which street (never guessed from where the lines turn): missing for any street line, saved for other lines, or one street's lines not next to each other, and the lot width, lot depth and every yard from the street lines say "needs review" and ask for the street pick |
+  | `address_street_line` | on a corner lot: the lot line(s) on the street the lot's address is on (it decides which yard is the rear yard); any of that street's lines means the whole street (its `street_ids`). Not given, each street is read as it, and the yards it changes need review |
   | `accessory_buildings` | the ids of the solids that are accessory buildings (a garage, a shed). A solid standing apart from the main building that isn't listed could be a freestanding deck (part of the building, §325-18A), so both are read. Listing them also picks the main building (the one left) |
   | `accessory_frame` | yes or no: the accessory buildings are frame. Frame ones keep §325-25C's distances by law; for others it is an open question (325-25C#1), read every way |
   | `eaves_confirmed` | a lot fact for one overhang (the panel will ask for it in a later release): [{overhang (its fingerprint, from the check), value: true, source, confirmed_by, date}]. Without it, a yard that meets its minimum only to the walls needs review; a later edit to the overhang asks again |
@@ -146,8 +147,10 @@ Every reason the code gives today comes from the table:
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
   lot yes or no"; "a corner lot, but the street lot lines given are all on one street: pick the lot lines on both
   streets"; "which street lot lines are on which street isn't recorded: pick the street side so Gordium knows which
-  lines are which street (a corner lot's lot width is the frontage on one street, §325-8A col. 7)"; "the address street given isn't one run of the street lot lines: pick
-  the lot line(s) on the street the address is on again"; "the lot line opposite the address street is on a street
+  lines are which street (a corner lot's lot width is the frontage on one street, §325-8A col. 7)"; "the street lot
+  lines recorded on one street aren't next to each other, or one lot line's pieces are recorded on two streets: pick
+  the street side again, one click on each street"; "the address street given isn't one run of the street lot lines
+  on one street: pick the lot line(s) on the street the address is on again"; "the lot line opposite the address street is on a street
   too (a through lot, §325-8A(14)(d)): which yards are rear and front is an open question for the architects";
   "every side lot line is on a street (a lot on three streets): which yard is a side yard is an open question for
   the architects".
