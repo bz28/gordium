@@ -267,10 +267,16 @@ def combined(citations: list[str]) -> str:
 LINK_WORDS = 5        # the search's least length; longer only where another line on the page begins alike
 
 
+_LIST_NUMBER = r"\((?:\d+|[a-z]|[ivx]+)\)"
+
+
 def _searchable(text: str) -> list[str]:
-    """The words a PDF viewer's search finds in one run: up to the first footnote marker ([fn4] is a superscript
-    digit in the PDF's text, so words on either side of it aren't adjacent there)."""
-    return text.split("[fn")[0].split()
+    """The words a PDF viewer's search finds in one run. The PDF stores a footnote marker ([fn4] is a superscript
+    digit) and a list number ("(1) ONE-FAMILY DETACHED DWELLING" on chapter 325 p.7, "HOME OCCUPATION — (1) A" on
+    p.12) apart from the words around them, so a search across one lands nowhere: leading markers are left out, and
+    the search stops before the next one."""
+    text = re.sub(r"^(?:\s*(?:\[fn\w*\]|" + _LIST_NUMBER + r"))+", "", text)
+    return re.split(r"\[fn|\s" + _LIST_NUMBER + r"(?=\s)", text)[0].split()
 
 
 def _unique_start(words: list[str], page: list[list[str]]) -> str:
