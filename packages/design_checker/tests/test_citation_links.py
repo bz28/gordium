@@ -76,3 +76,16 @@ def test_every_link_finds_its_words_in_the_pdf():
                     missing.append((rule["id"], s["page"], words))
     assert checked["law"] and checked["chart"], checked      # both kinds are really checked
     assert not missing, sorted(set(missing))[:20]
+
+
+def test_a_numbered_definition_links_without_its_list_number():
+    """Review round 3: chapter 325 p.7 lists the one-family configurations as "(1) ONE-FAMILY DETACHED DWELLING — ..."
+    but the PDF stores the list numbers apart from the words, so a search beginning "(1)" lands nowhere (R-2c's
+    lot-area quotes, on #24)."""
+    import urllib.parse
+    quote = {"file": "chapter_325_zoning_2026-10.pdf", "page": 7, "lines": [42, 42],
+             "quote": "(1) ONE-FAMILY DETACHED DWELLING — A building containing not more than one"}
+    link = present.link(quote, J, present._documents(J))
+    words = urllib.parse.unquote(link.split("&search=")[1]).strip('"')
+    assert words.startswith("ONE-FAMILY DETACHED DWELLING")
+    assert "".join(words.split()) in _pdf_text(quote["file"], 7)
