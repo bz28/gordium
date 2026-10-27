@@ -17,8 +17,8 @@ SRC = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
 REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_building", "add_to_check",
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
-        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "show_context",
-        "check_now", "set_auto_check", "_auto"]
+        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
+        "show_context", "_context_on", "check_now", "set_auto_check", "_auto"]
 
 
 class Doc:
@@ -115,6 +115,8 @@ def _plugin(doc, said):
           "ui": type("UI", (), {"legend": staticmethod(lambda code: None),
                                 "set_auto_tick": staticmethod(lambda parts, on: None),
                                 "show": staticmethod(lambda *a, **k: None),
+                                "set_labels_tick": staticmethod(lambda parts, on: None),
+                                "set_context_tick": staticmethod(lambda parts, on: None),
                                 "open_target": staticmethod(lambda path: (True, None))}),
           "_box_open": lambda: False, "run_check": lambda doc, report=False: {"report_error": "not in a test"},
           "current_facts": lambda doc: {"lot_id": "lot1", "zone": "R-1b"},
@@ -295,3 +297,32 @@ def test_an_undone_check_after_every_edit_is_read_again_from_the_file():
     doc.Strings.data[("Gordium", "ui")] = json.dumps({"auto_check": True})     # what Rhino's Undo put back
     ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
     assert ns["_auto"](doc) is True and ticks[-1] is True
+
+
+def test_an_undone_setting_is_read_again_from_the_file():
+    """Round 5, R5-1: Ctrl+Z on Show on-screen labels put the file's setting back but the plugin kept its own copy
+    (labels_by_doc) and the tick, until the next check. After Undo/Redo both follow the file."""
+    doc = Doc()
+    ns = _plugin(doc, [])
+    ticks = []
+    ns["ui"].set_labels_tick = staticmethod(lambda parts, on: ticks.append(on))
+    ns["_actions"]()["labels"](True)
+    assert ns["STATE"]["labels_by_doc"][1] is True
+    doc.Strings.data[("Gordium", "ui")] = json.dumps({"show_labels": False})     # what Rhino's Undo put back
+    ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
+    assert ns["STATE"]["labels_by_doc"][1] is False and ticks[-1] is False
+
+
+def test_an_undone_show_neighbourhood_is_read_again_from_the_file():
+    """Round 5, R5-1 (#23's part): Ctrl+Z on "Gordium: show or hide the neighbourhood" put the file's setting back,
+    but the plugin kept its own copy (context_by_doc: the live footprints drawn by it) and the tick, until the next
+    check. After Undo/Redo both follow the file."""
+    doc = Doc()
+    ns = _plugin(doc, [])
+    ticks = []
+    ns["ui"].set_context_tick = staticmethod(lambda parts, on: ticks.append(on))
+    ns["_actions"]()["context"](False)
+    assert ns["STATE"]["context_by_doc"][1] is False
+    doc.Strings.data[("Gordium", "ui")] = json.dumps({"show_context": True})     # what Rhino's Undo put back
+    ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
+    assert ns["STATE"]["context_by_doc"][1] is True and ticks[-1] is True

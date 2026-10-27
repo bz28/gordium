@@ -15,7 +15,9 @@ each panel action that changes the file, outside any command (as the panel's but
      every object's layer; the starting house layer's visibility);
   f. claim "<action>: nothing else": the architect's curve from a is still there;
   g. claim "<action>: checked again": the Undo marked the model changed (live mode re-checks it at the next idle).
-Actions: survey, enter (Bedrooms: 2), main, add, ground, not_ground (after a ground mark of its own), massing, labels.
+Actions: survey, enter (Bedrooms: 2), main, add, ground, not_ground (after a ground mark of its own), massing, labels,
+context (Show neighbourhood off: its layers hidden and the setting saved, one step), auto_check (Check after every
+edit on: the setting saved, one step).
 Writes <temp>/gordium_undo_steps/out.json ("done": true at the end); the command line says which claims fail."""
 import json
 import os
@@ -117,7 +119,8 @@ def main():
         loose = box(doc, 320, doc.Layers.CurrentLayerIndex)     # not measured: one to add to the check
         g.run_check(doc, report=False)
         for name, args in (("survey", ()), ("enter", (["sleeping_rooms"],)), ("main", ()), ("add", ([loose],)),
-                           ("ground", ([loose],)), ("massing", (True,)), ("labels", (True,))):
+                           ("ground", ([loose],)), ("massing", (True,)), ("labels", (True,)), ("context", (False,)),
+                           ("auto_check", (True,))):
             one(g, doc, name, args)
         g._actions()["ground"]([loose])                         # a ground mark of its own, so "Not the ground" has one
         one(g, doc, "not_ground", ())
