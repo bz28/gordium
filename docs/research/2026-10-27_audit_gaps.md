@@ -83,3 +83,34 @@ RU now do too (`<district>.attached_units_per_building`), from the whole buildin
 blank needs review). Whether a row of seven or more could instead be built as a multiple dwelling (§325-3B MULTIPLE
 DWELLING (5): "row house, townhouse") is not settled by the code (the definitions point both ways, as in questions
 §5.6); Gordium doesn't steer the architect to it, and doesn't check a row house's own limits yet.
+
+## 5. A yard used for two buildings (§325-7B) — C, with two A/B findings
+
+§325-7B (p.24): "No part of a yard or other open space about any building required for the purposes of complying with
+the provisions of this chapter shall be included as a part of a yard or other open space similarly required for
+another building." The code defines every yard between a building and a lot line (§325-3B YARD (1) to (3), p.20) and
+never between two buildings on one lot, so with two or more primary buildings it doesn't say where one building's
+yard ends and the next one's begins. **Open question for the architects** (questions §5.17): each building's yards
+measured to the lot lines with no building inside another's required yard (`to_lot_lines`), or also the space
+between two buildings at least their facing yards added together (`sum_between`). Gordium measures the yards from the
+main building only, so `<district>.yards_not_shared` needs review whenever there are two or more primary buildings,
+and doesn't apply with one.
+- **Accessory buildings (A):** §325-25: accessory structures "shall be exempt from side yard requirements" and "are
+  permitted in any side or rear yard but not in a required front yard" (p.66); §325-7B doesn't stop them, and their
+  own distances are checked by `<district>.accessory_buildings`.
+- **A neighbouring lot (B, Gordium's reading to confirm):** a yard is "That part of a lot" (§325-3B YARD, p.20), so
+  this lot's yards serve the buildings on it; a neighbouring building's required yards lie on its own lot. Some other
+  codes add "or on any other lot"; Ithaca's doesn't.
+
+## 6. The South Hill Overlay (§325-8E) — A
+
+§325-8E(1)(a) (p.29, added 11-1-2017 by Ord. No. 2017-14): in the South Hill Overlay District, on R-1 or R-2 land, no
+primary structure may be built on a parcel already containing one, and no more than one on a parcel containing none;
+"The preceding sentence shall not impact future changes to primary structures existing prior to the effective date of
+this subsection." Chart p.2 note 2 points R-1 and R-2 to it. So after new construction the parcel holds at most one
+primary structure (`<district>.south_hill_overlay` in R-1a, R-1b, R-2a, R-2b, R-2c). Whether the lot is in the
+overlay is stated by the architect (`south_hill_overlay`, blank by default): Gordium's site lookup reads the City's
+historic and gorge overlay layers but not this one, and adding a live map layer is a separate decision. With one
+primary building the rule complies either way, so the question is asked only where it matters. Gordium checks the
+design as new construction; a parcel that already had two or more primary structures before the amendment may keep
+and change them, which the rule notes but can't see.
