@@ -1297,7 +1297,7 @@ def test_the_panel_columns_fit_a_rhino_sized_panel_and_wrap():
     assert "col.Expand = i == 0" in ui and "ef.DrawableCell()" in ui and "ef.TextBoxCell(" not in ui
     assert int(re.search(r"^ROW_HEIGHT = (\d+)", ui, re.M).group(1)) >= 2 * 16           # two lines
     assert "ft.Wrap = ed.FormattedTextWrapMode.Word" in ui
-    for tick in ("_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)"):
+    for tick in ("_envelope_box(actions)", "_massing_box(actions, parts)", "_labels_box(actions, parts)"):
         assert "    layout.Add(row(%s))" % tick in ui, tick
 
 
