@@ -1,5 +1,5 @@
 #! python3
-"""GordiumLive: turn live re-checking on or off."""
+"""GordiumLive: turn Check after every edit on or off for this file (the Gordium panel's tick)."""
 import os
 import sys
 

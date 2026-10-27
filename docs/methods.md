@@ -156,8 +156,10 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
   building as stacked floor blocks (`envelope_builder.start`): inside every yard, at the coverage and height
   limits, one block per story. On any lot shape the building is measured and checked with the checker's own rules
   before it is drawn; if it would break one, nothing is drawn and Gordium says it can't generate a starting
-  building on this lot shape yet, so the architect draws one and Gordium checks it. Live checking is on: after each edit the corner message updates, failing parts
-  turn red, and a short note shows in the view only when a rule newly fails.
+  building on this lot shape yet, so the architect draws one and Gordium checks it. After an edit the results grey out ("Model changed since the
+  last check — press Check") until the panel's Check; with Check after every edit ticked, Gordium checks again by
+  itself. After a check the corner message updates, failing parts turn red, and a short note shows in the view
+  only when a rule newly fails.
 - **Stories from the shape:** Gordium's own floor blocks (each marked as one story when drawn) are counted.
   Anything else stacked (a podium, a bulkhead, a roof solid) and any typed count are readings: if they disagree
   it's a question. One solid with no floors asks for floors or a count. Never guessed from the height.

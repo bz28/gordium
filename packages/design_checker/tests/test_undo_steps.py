@@ -18,7 +18,7 @@ REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_bu
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
         "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
-        "show_context", "_context_on"]
+        "show_context", "_context_on", "check_now", "set_auto_check", "_auto"]
 
 
 class Doc:
@@ -111,7 +111,10 @@ def _plugin(doc, said):
           "LAYERS": logic.LAYERS, "Cancelled": logic.Cancelled,
           "Rhino": type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": doc}),
                                       "DocObjects": type("DO", (), {"ObjectType": type("OT", (), {"Curve": 4})})}),
+          "live": lambda on: None,
           "ui": type("UI", (), {"legend": staticmethod(lambda code: None),
+                                "set_auto_tick": staticmethod(lambda parts, on: None),
+                                "show": staticmethod(lambda *a, **k: None),
                                 "set_labels_tick": staticmethod(lambda parts, on: None),
                                 "set_context_tick": staticmethod(lambda parts, on: None),
                                 "open_target": staticmethod(lambda path: (True, None))}),
@@ -144,7 +147,9 @@ CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": (
          # the start box (Edit site…, Set grade…): its Draw and the facts saved after it closes, one step
          "edit_site": ((), True), "grade": ((), True),
          # Show neighbourhood (#23): the tick saved, the context layers shown, a neighbourhood fetched and drawn
-         "context": ((True,), True)}
+         "context": ((True,), True),
+         # Check (#27): a check, nothing written; Check after every edit: the setting saved in the file
+         "check": ((), False), "auto_check": ((False,), True)}
 
 
 def test_the_guard_covers_every_panel_action():
@@ -277,6 +282,21 @@ def test_the_plugin_still_compiles():
     """Undo steps round 4: a re-indented try left gordium_rhino.py unloadable, unseen by the guard (it runs functions
     cut from the source). The whole file must compile."""
     compile(SRC, "gordium_rhino.py", "exec")
+
+
+def test_an_undone_check_after_every_edit_is_read_again_from_the_file():
+    """Carry review C1: Ctrl+Z on "Gordium: check after every edit" put the file's setting back, but the plugin kept
+    its own copy (auto_by_doc): checks after edits (or none) as the undone setting said, the tick too, until the file
+    was reopened. After Undo/Redo the setting is read again from the file, and the tick follows it."""
+    doc = Doc()
+    ns = _plugin(doc, [])
+    ticks = []
+    ns["ui"].set_auto_tick = staticmethod(lambda parts, on: ticks.append(on))
+    ns["_actions"]()["auto_check"](False)
+    assert ns["_auto"](doc) is False
+    doc.Strings.data[("Gordium", "ui")] = json.dumps({"auto_check": True})     # what Rhino's Undo put back
+    ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
+    assert ns["_auto"](doc) is True and ticks[-1] is True
 
 
 def test_an_undone_setting_is_read_again_from_the_file():

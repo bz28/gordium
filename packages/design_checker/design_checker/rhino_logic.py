@@ -2768,14 +2768,64 @@ def recover_held(table, live=None):
     return len(removed), len(back)
 
 
-def should_recheck(dirty_at, now, running, box_open, wait, last_at=None):
-    """Live mode's re-check after an edit: only once the model has been still for `wait` seconds, no check is running,
-    no start box is open (its own edits mark the model changed; the check waits for the box to close, then runs:
-    verification round of PR #19), and no check has finished since that edit (`last_at`: GordiumStart's own check
-    after its box already covers the box's edits)."""
+def should_recheck(dirty_at, now, running, box_open, wait, last_at=None, auto=True):
+    """Live mode's re-check after an edit: only when the architect asked for it (`auto`: Check after every edit,
+    off by default; otherwise the Check button checks), once the model has been still for `wait` seconds, no check
+    is running, no start box is open (its own edits mark the model changed; the check waits for the box to close,
+    then runs: verification round of PR #19), and no check has finished since that edit (`last_at`: GordiumStart's
+    own check after its box already covers the box's edits)."""
+    if not auto:
+        return False
     if last_at is not None and dirty_at and last_at >= dirty_at:
         return False
     return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
+
+
+# ---- the Check button (Ben, 2026-10-21): no check after every edit unless asked ---------------------------------
+CHANGED_SINCE = "Model changed since the last check — press Check"
+AUTO_CHECK_LABEL = "Check after every edit"
+AUTO_CHECK_TIP = "Off: the results grey out after an edit until you press Check. On: Gordium checks again by itself."
+
+
+def changed_after_box(before, now, drawn, failed=False):
+    """When the model counts as changed after a start box closes (STATE["dirty"]): Cancel rolled the box's own edits
+    back, so the model is as it was when the box opened (`before`: changed then, or not); Draw's edits are checked
+    by Draw's own check, and any change left counts (`now`). A box that ended in an error is no Cancel: its rollback
+    may have stopped partway, so any edit seen during it counts (`now`, else `before`): the results grey out, never
+    shown as current for a model that may differ (the headless check-15, demo review of #26 with #27)."""
+    if failed:
+        return now or before
+    return now if drawn else before
+
+
+def auto_check(ui_state):
+    """Whether this document checks again by itself after every edit: off unless the architect ticked Check after
+    every edit in it (saved with the file)."""
+    return bool((ui_state or {}).get("auto_check", False))
+
+
+NEVER_CHECKED = "No check yet for this model — press Check"
+
+
+def out_of_date_line(auto, checked_before=True):
+    """What the panel's header and the viewport's status box say while the results are older than the model: a
+    check is on its way ("Checking…") only when one will run by itself; otherwise the architect is told to press
+    Check (the results stay greyed, never shown as if current); "since the last check" only when there was one."""
+    if auto:
+        return "Checking… (the model changed)"
+    return CHANGED_SINCE if checked_before else NEVER_CHECKED
+
+
+def draw_one_hint(auto):
+    """GordiumStart's line when no starting house could be drawn: who checks the one the architect draws."""
+    return ("draw one and Gordium will check it" if auto else
+            "draw one, then press Check in the Gordium panel")
+
+
+def should_check_front(front_pending, running, box_open):
+    """A document come to the front (new, opened, switched to): checked once, whatever Check after every edit says
+    (it is not an edit, and nothing of it is on screen yet), when no check is running and no start box is open."""
+    return bool(front_pending) and not running and not box_open
 
 
 def controls_enabled(box_open, zoom_ok):
@@ -2799,7 +2849,7 @@ UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the r
               "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
               "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
               "edit_site": "Gordium: the start box", "grade": "Gordium: the start box",
-              "context": "Gordium: show or hide the neighbourhood"}
+              "context": "Gordium: show or hide the neighbourhood", "auto_check": "Gordium: check after every edit"}
 
 
 @contextlib.contextmanager

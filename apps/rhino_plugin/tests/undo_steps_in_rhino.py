@@ -17,7 +17,8 @@ each panel action that changes the file, outside any command (as the panel's but
      _Undo took back exactly the record ended in b (by serial, from Rhino's undo events);
   g. claim "<action>: checked again": the Undo marked the model changed (live mode re-checks it at the next idle).
 Actions: survey, enter (Bedrooms: 2), main, add, ground, not_ground (after a ground mark of its own), massing, labels,
-context (Show neighbourhood off: its layers hidden and the setting saved, one step).
+context (Show neighbourhood off: its layers hidden and the setting saved, one step), auto_check (Check after every
+edit on: the setting saved, one step).
 Then, observed only (out.json "two_in_a_row", not a claim): two panel changes in a row with no command between and
 one _Undo, which records it takes back. Last, the control: an edit and an action deliberately in one record; its
 claim passes only if one _Undo takes the edit back too (so the claims above can tell a merged step from a good one).
@@ -151,7 +152,8 @@ def main():
         loose = box(doc, 320, doc.Layers.CurrentLayerIndex)     # not measured: one to add to the check
         g.run_check(doc, report=False)
         for name, args in (("survey", ()), ("enter", (["sleeping_rooms"],)), ("main", ()), ("add", ([loose],)),
-                           ("ground", ([loose],)), ("massing", (True,)), ("labels", (True,)), ("context", (False,))):
+                           ("ground", ([loose],)), ("massing", (True,)), ("labels", (True,)), ("context", (False,)),
+                           ("auto_check", (True,))):
             one(g, doc, name, args)
         g._actions()["ground"]([loose])                         # a ground mark of its own, so "Not the ground" has one
         one(g, doc, "not_ground", ())
