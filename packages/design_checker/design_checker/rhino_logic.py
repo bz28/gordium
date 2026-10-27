@@ -464,7 +464,8 @@ def implied_by(options, zone, use):
 
 
 def parse_answer(kind, text):
-    """A follow-up field's text as the fact's value: a whole number 0 or more (count), yes / no (yes_no); blank:
+    """A follow-up field's text as the fact's value: a whole number 0 or more (count), square feet 0 or more (area),
+    yes / no (yes_no); blank:
     None (unanswered: its rules stay NEEDS REVIEW, never 0 or no); anything else raises ValueError."""
     text = (text or "").strip().lower()
     if not text:
@@ -475,6 +476,11 @@ def parse_answer(kind, text):
         if text in ("no", "n"):
             return False
         raise ValueError("answer yes or no")
+    if kind == "area":              # #38's floor areas, typed in the box (#37): square feet, never rounded; digits and
+        whole, dot, part = text.partition(".")   # one point only ("500,4" or "1e3" is refused, never guessed at)
+        if not (whole + part).isascii() or not (whole + part).isdigit() or (dot and not part):
+            raise ValueError("a number of square feet, 0 or more")
+        return float(text) if part else int(whole)
     if not (text.isascii() and text.isdigit()):
         raise ValueError("a whole number, 0 or more")
     return int(text)
@@ -488,6 +494,40 @@ def answer_problem(kind, text):
     except ValueError as e:
         return f"Not kept: {e}. Its rules need review until it is."
     return None
+
+
+# The box's questions after Use, each as its words wrapped at QUESTION_WIDTH with its answer beside them, and one note
+# under them all: the start box stays laptop-sized (≤ ~900 px wide) with the longest questions (#38's household ones
+# ran ~1,200 px on one line and pushed the box to 1,560-2,020 px: Rhino run of demo 2c0a5c0). Pinned in
+# test_box_width.py, which lays the real box out and bounds its width.
+QUESTION_WIDTH = 360
+
+
+TEXT_PX = 6.0      # px a character at size 12, a little over the system font's (~5.5 measured in Rhino): errs wide
+
+
+def text_wider(text, size, px):
+    """Whether `text` at `size` (13 when not set) runs wider than `px` on one line (by TEXT_PX), so its label wraps."""
+    return len(text or "") * TEXT_PX * (size or 13) / 12 > px
+
+
+def answers_note(entries):
+    """The note under the box's questions, for `entries` [(key, kind, text)] in the order asked: FOLLOW_UP_HELP, or
+    every entry not kept, each named by its fact ("Rooms let for profit: Not kept: …"), so each is said at once and
+    never read as 0. Returns (text, refused)."""
+    said = []
+    for key, kind, text in entries:
+        try:
+            parse_answer(kind, text)
+        except ValueError as e:
+            said.append((STATED_FACTS[key][2] if key in STATED_FACTS else key.replace("_", " "), str(e)))
+    if not said:
+        return FOLLOW_UP_HELP, False
+    if len(said) == 1:
+        name, why = said[0]
+        return f"{name[0].upper() + name[1:]}: Not kept: {why}. Its rules need review until it is.", True
+    listed = ", ".join(f"{name} ({why})" for name, why in said)
+    return f"Not kept: {listed}. Their rules need review until they are.", True
 
 
 def needs_of(names, values, settles=None):

@@ -216,8 +216,8 @@ def test_an_unanswered_fact_says_tell_gordium_and_its_button_opens_the_box():
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert 'if i.get("needs") and logic.answered_in_box(i["needs"]):' in ui and 'a["edit_site"]' in ui
     box = ui[ui.index("def start_box("):ui.index("def text_box_size(")]
-    assert 'for q in state.get("follow_ups") or []:' in box and 'state["answers"] = answers' in box
-    assert 'logic.answer_problem("count", f.Text)' in box          # a refused entry is said at once
+    assert 'questions = state.get("follow_ups") or []' in box and 'for q in questions:' in box and 'state["answers"] = answers' in box
+    assert "logic.answers_note(" in box and "note.Text = text" in box     # a refused entry is said at once
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     apply_ = rhino[rhino.index("def _apply_box("):rhino.index("def _place_spots(")]
     assert 'logic.answers_applied(facts, state.get("answers"), state["zone"], state["use"],' in apply_
