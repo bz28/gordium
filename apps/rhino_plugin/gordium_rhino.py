@@ -2160,12 +2160,20 @@ def _undo_redo(sender, e):
 
 def _settings_from_file(doc):
     """The panel's settings kept in memory, read again from the file after Undo or Redo (a setting undone is put
-    back in the file only; memory only, never the document: round 5, R5-1): Show on-screen labels."""
+    back in the file only; memory only, never the document: round 5, R5-1): Show on-screen labels, Hide starting
+    house (from its layer)."""
     if doc is None:
         return
     shown = logic.labels_on(_ui_state(doc))
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
     ui.set_labels_tick(STATE.get("panel_parts"), shown)
+    ui.set_massing_tick(STATE.get("panel_parts"), _massing_hidden(doc))   # (its layer: an Undo puts it back)
+
+
+def _massing_hidden(doc):
+    """Whether this document's starting house layer (Gordium::Massing) is hidden: the panel's tick follows it."""
+    index = doc.Layers.FindByFullPath(logic.MASSING, -1) if doc is not None else -1
+    return index >= 0 and not doc.Layers[index].IsVisible
 
 
 def _drawn(doc, facts, state, saved_ui, session=None):
@@ -2529,6 +2537,7 @@ def run_check(doc, report=True):
         if not STATE.get("headless"):
             ui.show(panel(), view)
             ui.set_labels_tick(STATE.get("panel_parts"), shown)
+            ui.set_massing_tick(STATE.get("panel_parts"), _massing_hidden(doc))
             if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
                 ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
