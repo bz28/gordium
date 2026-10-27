@@ -162,7 +162,10 @@ STATED_FACTS = {
     "unrelated_persons_with_children": ("Most people in any one dwelling unit not related by blood, marriage or adoption "
                                         "to its household's family, minor dependent children counted too", "count",
                                         "unrelated people per unit, children counted"),
-    "owner_occupied": ("Does the owner (§325-3B OWNER) live in the dwelling?", "yes_no", "whether the owner lives there"),
+    # the unit with the unrelated people, not only an accessory dwelling unit on the lot: yes is right under every
+    # reading (the owner-and-ADU question, #38 review)
+    "owner_occupied": ("Does the owner (§325-3B OWNER) live in this dwelling unit, the one with the unrelated people "
+                       "(not only in an accessory dwelling unit on the lot)?", "yes_no", "whether the owner lives there"),
     "functional_family_unit": ("Is the household to be shown to the City to be a functional family unit (§325-3B)?",
                                "yes_no", "whether the household is a functional family unit"),
     "home_occupation": ("Is a home occupation planned (§325-3B: a business, studio or office run by a resident)?",

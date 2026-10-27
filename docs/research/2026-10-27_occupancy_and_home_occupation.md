@@ -56,6 +56,15 @@ permitted if the dwelling is owner-occupied." OWNER (p.16-17): an owner of recor
 residence in property for more than six months of each calendar year". Gordium asks `owner_occupied` (yes / no);
 blank, a household of two unrelated people needs review.
 
+**With an accessory dwelling unit — B.** If the owner lives only in an ADU on the lot, is the one-family dwelling
+"owner-occupied"? The sentence says "if the dwelling is owner-occupied"; a one-family dwelling is "A dwelling unit"
+(p.7) and an ADU is "a smaller, secondary dwelling unit" of its own (p.4); OWNER defines who the owner is
+("principal residence in property"), not which unit; §325-28 (ADUs, p.71-72) sets no owner-occupancy rule. Gordium's
+reading: the owner must live in the dwelling unit with the unrelated people. The question is asked that way ("this
+dwelling unit, the one with the unrelated people, not only an accessory dwelling unit"), so a yes is right under every
+reading and an owner living only in the ADU answers no (the limit of one: at worst a false fail, never a false pass).
+To confirm with the architects.
+
 ## 4. RU's limit — B
 
 The definition raises the one-unrelated-person limit only "In the R-1 Zones" (owner-occupied) and "In the R-2 and

@@ -195,3 +195,19 @@ def test_a_floor_area_is_kept_as_typed_never_rounded():
     assert outcome(size, {"use": "one_family_detached", "home_occupation": True, **facts}, USES) == "fail"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert '_square_feet(prompt) if kind == "area"' in rhino and "def _square_feet(prompt):" in rhino and "Rhino.Input.Custom.GetNumber()" in rhino
+
+
+def test_the_owner_question_is_about_this_dwelling_unit_never_an_accessory_one():
+    """#38 review (the split item, resolved): "if the dwelling is owner-occupied", a one-family dwelling being "A
+    dwelling unit" and an ADU a "secondary dwelling unit" of its own. Asked about the unit with the unrelated people,
+    so an owner living only in an ADU answers no (the limit of one): yes is right under every reading."""
+    from design_checker import rhino_logic as logic
+    from rule_format.rulebook import MEASURES_FILE
+    prompt = logic.STATED_FACTS["owner_occupied"][0]
+    assert "this dwelling unit" in prompt and "not only in an accessory dwelling unit" in prompt
+    assert "only in an accessory dwelling unit on the lot is a no" in MEASURES_FILE.read_text(encoding="utf-8")
+    for d in ("R-1a", "R-1b"):
+        f = next(f for f in rule(d, "occupancy_one_family")["findings"] if f["id"] == "owner_lives_in_this_unit")
+        assert f["kind"] == "reading" and f["confirm_with"] == "the architects"
+    # an owner only in the ADU: no, so 2 unrelated in the house does not comply (never the pass "yes" would give)
+    assert one_family("R-1b", unrelated_persons=2, owner_occupied=False, functional_family_unit=False) == "fail"
