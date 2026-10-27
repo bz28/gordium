@@ -41,10 +41,10 @@ def test_the_start_box_rows_options_and_tick_are_in_the_guide():
 
 def test_every_name_the_guide_gives_is_still_in_the_code():
     gone = sorted(n for n in _bold(GUIDE)
-                  if n.rstrip(":").replace("…", "") not in CODE and n not in
+                  if n.rstrip(":").replace("…", "") not in (CODE if " " in n.strip() else UI + LOGIC) and n not in
                   {"Complies", "Does not comply", "Needs review", "Not checked", "Yes", "No", "starting house",
                    "buildable envelope", "start box", "Purpose:", "For:", "Kept current by:", "Corner lot?",
-                   "Cancel", "Check", "Draw", "Zoom to", "red", "amber"})
+                   "Cancel", "Check", "Draw", "red", "amber"})
     assert not gone, "named in GUIDE.md but not in the code: %s" % gone
 
 
@@ -69,7 +69,10 @@ def test_every_fixed_command_line_prompt_in_the_code_is_in_the_guide():
     """The other way: a prompt added to (or reworded in) the code and not in the guide fails here."""
     calls = r'(?:_pick\(doc, |_yes_no\(|_place_spots\(doc, |SetCommandPrompt\(|GetNumber\(|RhinoGet\.GetPoint\()'
     code = re.findall(calls + r'"([^"]+)"', RHINO)
-    code += [v[0] for v in re.findall(r'\("([^"]+)", "(?:count|yes_no)"', LOGIC) if v]
-    assert len(code) >= 10
+    code += re.findall(r'\("([^"]+)", "(?:count|yes_no)"', LOGIC)
+    code += re.findall(r'(?:return \(|STREET_ANSWER_NEEDED = \()"((?:Click|Gordium needs)[^"]+?)(?: \("|")', LOGIC)
+    code += re.findall(r'WriteLine\("(Gordium: this lot has no street line[^"]*)"', RHINO)
+    assert len(code) >= 14 and not any(len(c) < 5 for c in code)
+    code = [c.split("): ")[0] + (")" if "): " in c else "") for c in code]
     missing = sorted({c.split(" (Enter to skip)")[0] for c in code if c.split(" (Enter")[0] not in GUIDE and c not in GUIDE})
     assert not missing, "command-line prompts in the code but not in GUIDE.md: %s" % missing

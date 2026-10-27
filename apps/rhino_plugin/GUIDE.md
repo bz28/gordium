@@ -84,6 +84,10 @@ Picking the street side (**Change…** on the start box):
 
 - `Click a lot line on the street` (then `(Enter when done)` once one is picked, or `(Enter keeps the blue one)`
   when it already has one). Click any piece: Gordium takes the whole street. On a corner lot, click each street once.
+- `Click each lot line on a street (` then the count picked then `); Enter when done` on a corner lot, and
+  `Click the lot line on the street` on one street.
+- `Gordium needs a Yes or a No here (Esc: nothing changes)`: said when you press Enter at the Yes/No question
+- `Gordium: this lot has no street line yet; click one (Esc cancels)`
 - `Which street is this lot line on? (Enter leaves it unnamed)`
 - When Gordium cannot tell whether the lot line bends along one street or turns a corner it asks a **Yes** or
   **No** question. It needs a real answer: Enter asks again, because a guess could pass a lot that does not comply.
@@ -94,6 +98,8 @@ Picking other things:
 - `Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it` and
   `Click the lot outline (a closed curve on the Site layer), or choose one; Enter keeps it`
 - `Click the main building (a solid on the Building layer), or choose one; Enter keeps it`
+The next two are asked only when the **Ground** row is on (see "Not shown in this version"):
+
 - `Click the terrain surface or mesh`
 - `Click a spot grade at a wall (Enter when done)` and
   `Click the finished ground you'll grade to, at each wall (Enter when done)`
@@ -105,7 +111,7 @@ Picking other things:
   `Is the lot outline from a survey?`
 
 A row's **Enter** button (for example "Enter bedrooms and parking spaces") asks the facts that row waits for, one
-at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, and
+at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, `Stories of the whole building`, and
 `Made by converting an existing building, not new construction? (§325-3B)`. Each ends with `(Enter to skip)`:
 skipping leaves the fact unset, so its rule keeps waiting (never 0 or No).
 
