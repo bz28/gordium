@@ -299,7 +299,7 @@ def test_the_table_is_the_same_whatever_python_hashes_sets_with():
             f"print(hashlib.sha256(a.build(Path({str(ITHACA)!r}))[0].encode()).hexdigest())")
     env = dict(os.environ, PYTHONPATH=os.pathsep.join(str(p) for p in sorted((REPO / "packages").iterdir())))
     runs = {subprocess.run([sys.executable, "-c", code], env=dict(env, PYTHONHASHSEED=seed), capture_output=True,
-                           text=True, check=True).stdout for seed in ("1", "2", "3")}
+                           text=True, encoding="utf-8", check=True).stdout for seed in ("1", "2", "3")}
     assert len(runs) == 1
 
 

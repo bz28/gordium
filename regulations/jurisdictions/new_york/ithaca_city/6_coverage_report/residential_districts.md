@@ -11,7 +11,7 @@ Every piece of Chapter 325 labeled **rule** (133) or **flag** (31), 164 pieces, 
 Each cell says one of:
 
 - **in the rulebook**: the district's rulebook has a rule for it (the rule ids);
-- **flag (needs review)**: the rulebook flags it, so the architect sees NEEDS REVIEW;
+- **flag (needs review)**: the rulebook flags it, so the result says NEEDS REVIEW (a person judges it);
 - **parked**: on Ben's later list;
 - **open question**: waiting on the architects or the City;
 - **not applicable**: the law itself keeps it out of the district (with the law's words);
