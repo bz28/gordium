@@ -109,7 +109,7 @@ primary structure may be built on a parcel already containing one, and no more t
 this subsection." Chart p.2 note 2 points R-1 and R-2 to it. So after new construction the parcel holds at most one
 primary structure (`<district>.south_hill_overlay` in R-1a, R-1b, R-2a, R-2b, R-2c). Whether the lot is in the
 overlay is stated by the architect (`south_hill_overlay`, blank by default): Gordium's site lookup reads the City's
-historic and gorge overlay layers but not this one, and adding a live map layer is a separate decision. With one
-primary building the rule complies either way, so the question is asked only where it matters. Gordium checks the
+historic and gorge overlay layers but not this one, and adding a live map layer is a separate decision. The rule applies
+only from two primary buildings, so the question is asked only where it matters. Gordium checks the
 design as new construction; a parcel that already had two or more primary structures before the amendment may keep
 and change them, which the rule notes but can't see.

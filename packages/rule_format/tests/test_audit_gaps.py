@@ -157,11 +157,11 @@ def test_the_south_hill_overlay_allows_one_primary_structure(district):
         assert rid not in rules
         return
     r = rules[rid]
-    cases = [({"south_hill_overlay": True, "primary_buildings": 1}, "pass"),
+    cases = [({"south_hill_overlay": True, "primary_buildings": 1}, "not_applicable"),
              ({"south_hill_overlay": True, "primary_buildings": 2}, "fail"),
              ({"south_hill_overlay": True, "primary_buildings": 3}, "fail"),
              ({"south_hill_overlay": False, "primary_buildings": 3}, "pass"),
-             ({"primary_buildings": 1}, "pass"),               # one complies in the overlay or out: not asked
+             ({"primary_buildings": 1}, "not_applicable"),     # one: never asked, no row
              ({"primary_buildings": 2}, "needs_review"),       # in the overlay or not: not said
              ({"south_hill_overlay": True}, "needs_review"),   # not counted
              ({}, "needs_review")]
