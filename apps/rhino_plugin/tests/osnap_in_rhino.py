@@ -106,6 +106,12 @@ try:
     g.run_check(doc, report=False)
     _, again = curves(g, doc)
     claim("3 a second check replaces them, never doubles them", len(again) == len(found), [len(found), len(again)])
+    # 3b. replacing them is no edit: with live mode's hooks on (a check turned them on), a check leaves the model
+    # unchanged, so its results stay current (UX review 2026-10-27: they greyed out right after each Check)
+    g.STATE["dirty"] = None
+    g.run_check(doc, report=False)
+    claim("3b a check's own redraw of them is no edit (the results stay current)",
+          g.STATE.get("live") and g.STATE.get("dirty") is None, [g.STATE.get("live"), g.STATE.get("dirty")])
     # 4. none of it recorded for Undo: Undo recording is off while the curves are worked out and drawn
     real_curves, seen_undo = g.logic.envelope_curves, []
 
