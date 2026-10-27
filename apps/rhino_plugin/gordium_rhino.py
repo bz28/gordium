@@ -2790,7 +2790,6 @@ if STATE.get("live"):                        # live mode was on before this copy
     live(True)
 # Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)
 _on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), "stop the checker"))
-# Undo / Redo: what was drawn for the model before it is cleared, never left on screen (the Rhino job, demo e631aae),
-# and a panel change undone is checked again (each is one undo step)
+# Undo / Redo: what was drawn for the model before it is cleared, never left on screen (the Rhino job, demo e631aae)
 _on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler[Rhino.Commands.UndoRedoEventArgs], _undo_redo,
                                                  "clear the drawing after Undo or Redo"))
