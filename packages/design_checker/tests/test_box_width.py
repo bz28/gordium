@@ -281,12 +281,16 @@ def test_long_text_in_every_other_row_still_fits(ui, monkeypatch):
     gordium_ui, _ = ui
     monkeypatch.setattr(gordium_ui.logic, "box_rows", lambda state: rows)
     # the lines under the rows too: Draw's reason, the amber line, the note under the questions (a combined refusal)
-    for name in ("draw_reason", "box_reason", "uncertain"):
-        monkeypatch.setattr(gordium_ui.logic, name, lambda state: long, raising=False)
+    # (draw_reason here; box_reason after #32, which the demo's box reads instead)
+    for name in [n for n in ("draw_reason", "box_reason", "uncertain") if hasattr(gordium_ui.logic, n)]:
+        monkeypatch.setattr(gordium_ui.logic, name, lambda state: long)
     monkeypatch.setattr(gordium_ui.logic, "FOLLOW_UP_HELP", long)
     state = dict(_state("R-1b", "one_family_detached", _questions(LONG_QUESTIONS)), use_note=long)
     px, layout = laid_out(ui, state, check.options(CITY))
-    assert long in texts(layout) and px <= LAPTOP_PX, px
+    shown = texts(layout)
+    # each long line laid out: the rows' own, then Draw's reason, the amber line ("?  " first) and the note
+    assert shown.count(long) >= 12 and "?  " + long in shown, shown
+    assert px <= LAPTOP_PX, px
 
 
 def test_each_refused_entry_is_named_in_the_one_note():
