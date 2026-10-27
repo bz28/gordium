@@ -36,6 +36,20 @@ FACTS = {"jurisdiction": ITHACA, "street_line": [[[0, 0], [50, 0]]], "corner_lot
          "main_building": "house", "accessory_buildings": ["shed"]}
 
 
+# The zones these tests treat as having only AI drafts: every district without a hand key on this branch. When a
+# checkout also holds those districts' hand keys (#24's R-2, #30's R-3aa, R-3b and RU, merged beside the drafts for the
+# rule-by-rule grading), they are hidden here, so these stay tests of a drafted-only zone (2026-10-27).
+DRAFTED_ONLY = ("R-2a", "R-2b", "R-2c", "R-3aa", "R-3b", "RU")
+
+
+@pytest.fixture(autouse=True)
+def drafted_only(monkeypatch):
+    hidden = {(J / "5_zoning_rules" / f"{z}.yaml").resolve() for z in DRAFTED_ONLY}
+    is_file, exists = Path.is_file, Path.exists
+    monkeypatch.setattr(Path, "is_file", lambda self: False if self.resolve() in hidden else is_file(self))
+    monkeypatch.setattr(Path, "exists", lambda self: False if self.resolve() in hidden else exists(self))
+
+
 @pytest.fixture
 def drafts_on(monkeypatch):
     """Ben's setting turned on, as checking a drafted zone needs."""
@@ -62,7 +76,7 @@ def test_a_hand_written_rulebook_always_wins_over_a_draft():
         hand = [r["id"] for r in __import__("rule_format.rulebook", fromlist=["load"]).load(J / "5_zoning_rules" / f"{d}.yaml")["rules"]]
         assert [r["id"] for r in zone_rules(J, d)] == hand
     off, on = check.options(ITHACA), check.options(ITHACA, offer_drafted=True)
-    hand_zones = sorted(p.stem for p in (J / "5_zoning_rules").glob("*.yaml"))
+    hand_zones = sorted(p.stem for p in (J / "5_zoning_rules").glob("*.yaml") if p.is_file())
     assert off["zones"] == hand_zones and all(off["labels"][z] == z for z in hand_zones)
     assert on["labels"]["R-1a"] == "R-1a" and on["labels"]["R-3a"] == "R-3a" and on["labels"]["R-2a"] == "R-2a (draft)"
     assert rulebook_for(J, "general") is None and zone_rulebooks(J, "general") == []   # never a zone
@@ -127,7 +141,7 @@ def test_the_start_box_offers_drafted_zones_only_behind_bens_setting_labeled_dra
     from design_checker import check
     assert check.offer_ai_drafted_zones() is False                       # default off until Ben turns it on
     off = check.options(ITHACA)
-    hand = sorted(p.stem for p in (J / "5_zoning_rules").glob("*.yaml"))       # the hand rulebooks only
+    hand = sorted(p.stem for p in (J / "5_zoning_rules").glob("*.yaml") if p.is_file())       # the hand rulebooks only
     assert off["zones"] == hand and off["labels"] == {z: z for z in hand} and off["default_zone"] == "R-1b"
     on = check.options(ITHACA, offer_drafted=True)
     assert "general" not in on["zones"] and {"R-1a", "R-2a", "RU"} <= set(on["zones"])
