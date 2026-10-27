@@ -1,0 +1,23 @@
+{
+ "open": {
+  "0 the sample's lot is from the tax map": true,
+  "8 the address is there too": true,
+  "8 the sample's Street side reads Ithaca Rd, from the lookup": true
+ },
+ "labels": {
+  "4 the Height limit label is 13 pt": true,
+  "5 every view was drawn": true,
+  "5 the status box once, in the active view": true
+ },
+ "scale": {
+  "7 the lot's zoom came to rest (its labels placed)": true,
+  "7 zoomed out to the 1,500 ft square: no plan labels drawn": true,
+  "7 the status box stays": true,
+  "7 zoomed to the lot: every edge's length is back, the yards' too": true,
+  "7 106's short 10'-4 1/8\" edge keeps its length, led to it": true
+ },
+ "close": {
+  "13 after every step, exactly one checker process is Rhino's": true,
+  "13 stopped when the script ends: none left": true
+ }
+}
