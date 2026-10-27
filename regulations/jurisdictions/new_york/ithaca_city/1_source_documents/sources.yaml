@@ -3,6 +3,8 @@
 # sha256 is the file's fingerprint: if a single byte changes, it changes.
 # To check: shasum -a 256 <file>
 # quotable: false means rules may not quote the document yet (the reason says why).
+# layout: ecode360 means the document is a city code chapter in eCode360's layout, so it is also cut
+# into sections at its own headings (document_extraction/sections.py) for labeling.
 
 documents:
 
@@ -66,6 +68,7 @@ documents:
     downloaded_on: 2026-10-19   # exported by hand by Ben (eCode360 blocks automated downloads)
     sha256: 5ceb5a4573ff5db14b44b6f1bd1be11a4703d14febd8186115f61dbecd4719da
     pages: 168
+    layout: ecode360   # cut into sections for labeling (2_extracted_text/<name>.sections.jsonl)
     contents: >
       The zoning law itself. Key parts for residential checks: §325-3 definitions
       (height of building, grade plane, story, building area, yards); §325-8

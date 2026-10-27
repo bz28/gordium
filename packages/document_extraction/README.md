@@ -25,6 +25,20 @@ One `.jsonl` file per PDF listed in `sources.yaml` (one JSON object per line):
 - Steeply tilted text (more than 5° from level: most map street labels, angled or vertical diagram labels) is left out; the header's `rotated_chars_skipped` says how many characters. Text within 5° of level is kept, including some slightly tilted map labels. The angle comes from each character's own orientation in the PDF.
 - PDFs whose fingerprint doesn't match `sources.yaml` are refused, not extracted.
 
+## Sections (for labeling)
+
+A document marked `layout: ecode360` in `sources.yaml` (a city code chapter in eCode360's layout, like Chapter 325) is also cut into pieces at its own headings, saved as `<document>.sections.jsonl` and checked by `--check` like the text:
+
+```
+{"file": "chapter_325_zoning_2026-10.pdf", "sha256": "5ceb…", "splitter": "document_extraction.sections v2", "pieces": 626, "problems": [], "furniture": [[1, 1], …]}
+{"id": "325-16C", "title": "Height and open space", "kind": "subsection", "lines": [[47, 6, 14]]}
+```
+
+- Pieces: the front matter (table of contents, history); each section (`§ 325-16`), with an article heading attached to the section after it; each lettered subsection (`325-16C`); each defined term in a Definitions section (`325-3B:height_of_building`); each editor's note.
+- Guards against false headings: a heading starts at the headings' margin (measured from the document; text inside a subsection is indented further), section numbers must increase, subsection letters must come in order (A, B, C), a subsection heading must be followed by an indented line or another heading (a section's own text wraps at the margin, so a margin line "A. ..." followed by more margin text is that text, and is reported), and a defined term is mostly capitals before its dash, inside a Definitions section. A line at the margin that looks like a heading but breaks the order is reported, never silently skipped, and every section in the document's own table of contents must be found (and no other). Any of these goes in the header's `problems` and fails CI.
+- Every line is in exactly one piece, or is page furniture (the repeated first line, the running header, the download footer). The coverage report checks this from the text itself.
+- Chapter 325: 626 pieces (83 sections, 275 subsections, 219 definitions, 48 editor's notes, the front matter), no problems; every section in the law's own table of contents is a piece.
+
 ## Decisions
 
 - **pdfplumber**, pinned to an exact version together with pdfminer.six, because a different version could read text differently and break reproducibility. Upgrading is a deliberate change: re-extract, review the diff.

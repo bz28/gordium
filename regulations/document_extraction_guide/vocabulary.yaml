@@ -4,7 +4,8 @@
 label_kinds:
   rule:             Checked automatically by code.
   flag:             Shown to the architect to judge; code can't decide it.
-  reference:        Points to another section or document.
+  reference:        Sets no requirement itself, but rules depend on it. Defines a word, says how to
+                    measure or read something, or points to another section or document.
   not_for_checking: Not about a building's design (procedures, fees, penalties...).
 
 # How architects read the code. Starting list; the final list should follow

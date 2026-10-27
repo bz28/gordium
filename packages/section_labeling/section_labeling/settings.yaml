@@ -1,0 +1,17 @@
+# How the labeling script calls the AI. Every value here is recorded in every run record.
+#
+# model: one setting for the whole run. claude-haiku-5-5 is the cheapest current model and labeling is a
+#   short classification; switch to claude-sonnet-5-5 or claude-opus-5-5 here if labels need more care.
+#   Prices for each model are in prices.yaml.
+# effort: how hard the model thinks before answering (low · medium · high). Thinking is billed as output.
+# There is no temperature setting: current Claude models reject a non-default temperature, so runs are
+#   not bit-for-bit repeatable. Repeatability comes from recording every call (prompt, input, answer).
+model: claude-haiku-5-5
+effort: low
+max_tokens: 2048          # an answer is ~100 tokens; the rest is room for thinking
+max_attempts: 3           # the first answer plus up to 2 retries when code rejects the quote
+# A hard cap on total spending across all runs, in US dollars. A run whose estimate exceeds what's left
+# is refused, and no call is sent whose worst case could cross the cap. Spending so far is kept in a
+# ledger in your home folder (~/.config/gordium/section_labeling_ledger.json), shared by every checkout,
+# and is never taken as less than the repository's run records add up to.
+budget_usd: 1.00
