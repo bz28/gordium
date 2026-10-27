@@ -33,14 +33,15 @@ STATUSES = ("draft", "approved")
 # A rule has a short `title`, not a plain-English retelling: the city's words are in `sources`, the
 # meaning is the `check` and its `examples`. (Retellings kept dropping or adding words.)
 RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
-               "notes", "open_questions", "answers", "drafted_by", "status", "approved_by", "approved_on",
+               "notes", "open_questions", "research", "findings", "answers", "drafted_by", "status", "approved_by", "approved_on",
                "approved_hash"}
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
                "examples": {"given", "expect", "note"}}
 CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
-APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "answers")
+APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "findings",
+                   "answers")
 UNIT_KINDS = {"text": "text", "yes_no": "boolean"}       # every other unit (ft, sf, count) is a number
 MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8")).items()}
 # Measures a draft asked for that aren't in measures.yaml yet: listed for engineers, never used silently.
@@ -141,6 +142,7 @@ class Context:
     cells: dict[str, dict[tuple, dict]] = field(default_factory=dict)  # file -> (page, section, row, column) -> cell
     districts: set[str] = field(default_factory=set)                 # district names, as the city writes them
     proposed: dict[str, dict] = field(default_factory=dict)          # measures drafts asked for, not yet in measures.yaml
+    pieces: set[str] = field(default_factory=set)                    # every piece id the law is cut into (research cites them)
 
     def kinds(self) -> dict:
         """Every usable measure's kind: "number", "text" or "boolean" (this context's measures, plus the
@@ -190,6 +192,9 @@ class Context:
             # Text is only trusted for a document whose own checks all passed.
             if extracted.exists() and name not in ctx.file_problems:
                 ctx._load_extracted(name, sha, extracted)
+            cut = j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
+            if cut.exists():
+                ctx.pieces |= {row["id"] for row in read_jsonl(cut)[1:]}
             cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
             if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
                 ctx._load_cells(name, sha, cells)
@@ -648,7 +653,7 @@ def _parses(text: str) -> bool:
 
 
 def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> list[str]:
-    p = open_question_problems(entry) + _answer_problems(entry.get("answers", []), ctx)
+    p = open_question_problems(entry) + research_problems(entry, ctx) + _answer_problems(entry.get("answers", []), ctx)
     if entry.get("status") not in STATUSES:
         p.append(f"status must be one of {STATUSES}")
     if not entry.get("drafted_by"):
@@ -678,6 +683,149 @@ def open_question_problems(entry: dict) -> list[str]:
     return []
 
 
+# Resolve before asking: a question reaches the architects only after the law and the City's practice were
+# searched. Each open question carries its `research` (what was searched, what was found, why it is still
+# open); a question research settled moves to `findings`: the law's own answer (kind law, quoted and checked
+# here) or a reading the sources support (kind reading, as strong as its best source, for someone to confirm).
+STRENGTHS = {"strong": 1, "city_practice": 2, "moderate": 3, "weak": 4}   # a reading is as strong as its best source
+SOURCE_RANKS = {1: "the city's code or charts", 2: "the City's own interpretations and zoning board (BZA) records",
+                3: "the NYS Uniform Code, IBC or IRC and their commentary", 4: "other places' codes"}
+PENDING = "pending"     # why_open of a question not researched yet starts with it: "pending the 2026-10-20 research pass"
+RESEARCH_FIELDS = {"question", "searched", "sources", "why_open", "readings", "report"}
+FINDING_FIELDS = {"id", "question", "kind", "answer", "sources", "strength", "confirm_with", "still_open", "report"}
+SLUG = re.compile(r"[a-z][a-z0-9_]*")
+
+
+def pending_research(question: str, why: str) -> dict:
+    """The research entry for a question raised by code (a drafting run): nothing searched yet, and it says so."""
+    return {"question": question, "searched": [], "sources": [], "why_open": f"{PENDING}: {why}"}
+
+
+def _research_source_problems(sources, ctx: Context, where: str) -> tuple[list[str], int | None]:
+    """Problems with research sources, and the best (lowest) rank among them. A source is the code itself
+    ({file, page, lines, quote}, rank 1, its quote checked like a rule's) or another one: {rank (2-4), cite,
+    url?, quote?}, which can't be checked here, so it is named and linked for a person."""
+    if not isinstance(sources, list) or not all(isinstance(x, dict) for x in sources):
+        return [f"{where}: 'sources' must be a list of sources"], None
+    p, ranks = [], []
+    for x in sources:
+        if "file" in x:
+            p += [f"{where}: {m}" for m in _source_problems([x], ctx)]
+            ranks.append(1)
+        elif x.keys() - {"rank", "cite", "url", "quote"} or not ({"rank", "cite"} <= x.keys()):
+            p.append(f"{where}: a source is the code ({{file, page, lines, quote}}) or {{rank, cite, url?, quote?}}")
+        elif x["rank"] not in (2, 3, 4):
+            p.append(f"{where}: rank must be 2, 3 or 4 ({'; '.join(f'{k} = {v}' for k, v in SOURCE_RANKS.items())}); "
+                     "the code itself is cited by file, page, lines and quote")
+        elif not (isinstance(x["cite"], str) and x["cite"].strip()):
+            p.append(f"{where}: 'cite' must say what the source is")
+        elif "url" in x and not (isinstance(x["url"], str) and x["url"].startswith("https://")):
+            p.append(f"{where}: 'url' must be an https:// link")
+        else:
+            ranks.append(x["rank"])
+    return p, min(ranks, default=None)
+
+
+def _report_problems(item: dict, where: str) -> list[str]:
+    """`report`: the research report it came from, "docs/research/<file>.md §<section>"; the file must exist."""
+    if "report" not in item:
+        return []
+    path, _, section = item["report"].partition(" §") if isinstance(item["report"], str) else (None, "", "")
+    if not path or not (REPO / path).is_file():
+        return [f"{where}: 'report' must name a research report in the repository, like "
+                "'docs/research/2026-10-20_architect_questions.md §2.1'"]
+    if section and not re.search(rf"^#+ {re.escape(section)}[ .]", (REPO / path).read_text(encoding="utf-8"), re.M):
+        return [f"{where}: {path} has no section {section} (a heading like '### {section} ...')"]
+    return []
+
+
+def research_problems(entry: dict, ctx: Context) -> list[str]:
+    """Show your work: every open question has exactly one `research` entry, {question (its exact text),
+    searched (the piece ids of the law read for it), sources, why_open, report?}; `searched` may be empty only
+    while why_open says it is pending. Each of `findings` is {question, kind, answer, sources, strength?,
+    confirm_with?, report?}: kind law is answered by the code's own words (a quote, checked; strength strong),
+    kind reading by sources that support it (strength no higher than its best source; confirm_with says who
+    should confirm it). A finding's question can't still be open."""
+    questions = entry.get("open_questions", [])
+    questions = [q for q in questions if isinstance(q, str)] if isinstance(questions, list) else []  # shape: above
+    research, findings = entry.get("research", []), entry.get("findings", [])
+    if not (isinstance(research, list) and all(isinstance(x, dict) for x in research)):
+        return ["'research' must be a list of {question, searched, sources, why_open}"]
+    if not (isinstance(findings, list) and all(isinstance(x, dict) for x in findings)):
+        return ["'findings' must be a list of {question, kind, answer, sources, ...}"]
+    p, covered = [], [x.get("question") for x in research]
+    for q in questions:
+        if covered.count(q) != 1:
+            p.append(f"open question {q[:70]!r}{'...' if len(q) > 70 else ''} needs exactly one 'research' entry "
+                     "(searched: the sections read for it; sources; why_open: why the law and practice don't settle "
+                     f"it, or '{PENDING} ...' until it is researched)")
+    for x in research:
+        where = f"research on {str(x.get('question'))[:50]!r}"
+        if x.keys() - RESEARCH_FIELDS or not ({"question", "searched", "sources", "why_open"} <= x.keys()):
+            p.append(f"{where}: needs exactly question, searched, sources, why_open (and report, if any)")
+            continue
+        if x["question"] not in questions:
+            p.append(f"{where}: isn't one of the open questions (answered? move what was found to 'findings')")
+        if not (isinstance(x["why_open"], str) and x["why_open"].strip()):
+            p.append(f"{where}: 'why_open' must say why the question is still open")
+            continue
+        pending = x["why_open"].startswith(PENDING)
+        searched = x["searched"]
+        if not (isinstance(searched, list) and all(isinstance(i, str) for i in searched)):
+            p.append(f"{where}: 'searched' must be a list of piece ids")
+        elif not searched and not pending:
+            p.append(f"{where}: 'searched' lists no sections; list what was read, or say why_open: '{PENDING} ...'")
+        elif ctx.pieces and (unknown := [i for i in searched if i not in ctx.pieces]):
+            p.append(f"{where}: searched pieces that don't exist: {', '.join(unknown)}")
+        p += _research_source_problems(x["sources"], ctx, where)[0] + _report_problems(x, where)
+        # The readings still in play, for the measurement code to compute every one: a design complies only if
+        # it passes under all of them, fails only if it fails under all of them, and otherwise needs review.
+        readings = x.get("readings", [])
+        if not (isinstance(readings, list) and all(isinstance(g, dict) and g.keys() == {"id", "reading"}
+                                                   and isinstance(g["id"], str) and SLUG.fullmatch(g["id"])
+                                                   and isinstance(g["reading"], str) and g["reading"].strip()
+                                                   for g in readings)):
+            p.append(f"{where}: 'readings' must be a list of {{id (lowercase_with_underscores), reading (text)}}")
+        elif len({g["id"] for g in readings}) != len(readings):
+            p.append(f"{where}: each reading's id is used once")
+        elif len(readings) == 1:
+            p.append(f"{where}: one reading isn't open; list two or more, or record it as a finding")
+    ids = [x.get("id") for x in findings if isinstance(x, dict) and "id" in x]
+    if len(set(ids)) != len(ids):
+        p.append("each finding's id is used once")
+    for x in findings:
+        where = f"finding on {str(x.get('question'))[:50]!r}"
+        if x.keys() - FINDING_FIELDS or not ({"question", "kind", "answer", "sources"} <= x.keys()):
+            p.append(f"{where}: needs question, kind, answer, sources (and strength, confirm_with, report)")
+            continue
+        if x["question"] in questions:
+            p.append(f"{where}: the question is still in open_questions; a question is open or found, not both")
+        if "id" in x and not (isinstance(x["id"], str) and SLUG.fullmatch(x["id"])):
+            p.append(f"{where}: 'id' (what measurement code calls it) is lowercase_with_underscores")
+        if not (isinstance(x["answer"], str) and x["answer"].strip()):
+            p.append(f"{where}: 'answer' must be text")
+        problems, best = _research_source_problems(x["sources"], ctx, where)
+        p += problems + _report_problems(x, where)
+        if x["kind"] == "law":
+            if not (isinstance(x["sources"], list) and any(isinstance(s, dict) and "file" in s for s in x["sources"])):
+                p.append(f"{where}: an answer from the law quotes the law (a source with file, page, lines, quote)")
+            if x.get("strength", "strong") != "strong":
+                p.append(f"{where}: an answer from the law is strong; a weaker one is a reading")
+        elif x["kind"] == "reading":
+            if x.get("strength") not in STRENGTHS:
+                p.append(f"{where}: a reading's 'strength' must be one of {', '.join(STRENGTHS)}")
+            elif best is not None and STRENGTHS[x["strength"]] < best:
+                p.append(f"{where}: strength {x['strength']!r} is stronger than its best source (rank {best}: "
+                         f"{SOURCE_RANKS[best]})")
+            elif best is None:
+                p.append(f"{where}: a reading needs at least one valid source")
+            if not (isinstance(x.get("confirm_with"), str) and x["confirm_with"].strip()):
+                p.append(f"{where}: a reading says who should confirm it ('confirm_with')")
+        else:
+            p.append(f"{where}: 'kind' must be law or reading")
+    return p
+
+
 # Definitions (4_term_definitions/definitions.yaml) and use names (uses.yaml): each entry is
 # keyed by its id and cites the city's exact words, like a rule does.
 TERM_SCHEMAS = {
@@ -685,8 +833,9 @@ TERM_SCHEMAS = {
     # A definition is the city's own words (whole sentences in `sources`), with no paraphrase: restating a
     # definition kept dropping limiting words. Interpretations are open_questions until an architect
     # answers; the answers are part of what's approved, so the measurement code follows a frozen record.
-    "definitions": {"label": "term", "approved": ("id", "term", "measures", "sources", "answers"),
-                    "fields": {"term", "measures", "sources", "open_questions", "answers", "notes"}},
+    "definitions": {"label": "term", "approved": ("id", "term", "measures", "sources", "findings", "answers"),
+                    "fields": {"term", "measures", "sources", "open_questions", "research", "findings", "answers",
+                               "notes"}},
     "uses": {"label": "name", "approved": ("id", "name", "sources"), "fields": {"name", "sources", "notes"}},
 }
 APPROVAL_FIELDS = {"drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
@@ -778,6 +927,92 @@ def _source_problems(sources: list[dict], ctx: Context, district: str | None = N
 
 
 # ---- one file's checks, shared by `python -m rule_format` and everything that uses a rulebook -----------
+
+def research_entries(jurisdiction) -> list[tuple[str, dict]]:
+    """(where, entry) for every entry that can hold open questions: definitions, rules (5_zoning_rules) and
+    section labels. `where` names it for a message ("definitions.yaml story", "R-1b.yaml R-1b.height")."""
+    j = Path(jurisdiction)
+    out = []
+    definitions = j / "4_term_definitions/definitions.yaml"
+    if definitions.exists():
+        out += [(f"definitions.yaml {k}", e) for k, e in (load(definitions) or {}).items() if isinstance(e, dict)]
+    for path in rulebook_paths(j / "5_zoning_rules"):
+        out += [(f"{path.name} {r.get('id')}", r) for r in (load(path) or {}).get("rules") or [] if isinstance(r, dict)]
+    for path in sorted((j / "3_section_labels").glob("*.yaml")):
+        book = load(path) or {}
+        out += [(f"{path.name} {k}", e) for k, e in (book.get("labels") or {}).items() if isinstance(e, dict)]
+    return out
+
+
+def _quoted_phrases(text: str) -> list[list[str]]:
+    """The tokens of each phrase a question quotes ("at any point"), three words or more."""
+    return [t for t in (tokenize(m) for m in re.findall(r'["\u201c]([^"\u201d]+)["\u201d]', text)) if len(t) >= 3]
+
+
+def _contains(tokens: list[str], part: list[str]) -> bool:
+    return any(tokens[i:i + len(part)] == part for i in range(len(tokens) - len(part) + 1))
+
+
+def open_question_tags(entries: list[tuple[str, dict]]) -> dict[str, tuple[str, str, dict]]:
+    """{"<id>#<n>": (where, question, its research)}: the n-th open question of each entry, the tags the questions
+    page and the spreadsheet use (where ends with the entry's id)."""
+    tags = {}
+    for where, e in entries:
+        for n, q in enumerate(q for q in e.get("open_questions") or [] if isinstance(q, str)):
+            x = next((r for r in e.get("research") or [] if isinstance(r, dict) and r.get("question") == q), {})
+            tags[f"{where.rsplit(' ', 1)[-1]}#{n + 1}"] = (where, q, x)
+    return tags
+
+
+def _overlap(a: dict, b: dict) -> bool:
+    return (isinstance(a, dict) and isinstance(b, dict) and "file" in a and "file" in b
+            and (a.get("file"), a.get("page")) == (b.get("file"), b.get("page"))
+            and _is_line_range(a.get("lines")) and _is_line_range(b.get("lines"))
+            and a["lines"][0] <= b["lines"][1] and b["lines"][0] <= a["lines"][1])
+
+
+def finding_conflicts(entries: list[tuple[str, dict]]) -> list[str]:
+    """A question is settled or open, never both, across every rule, definition and label. A finding may touch
+    what an open question still asks only by saying so, in `still_open: ["<id>#<n>", ...]` (each a real open
+    question, and the answer says what is still open). Touching means: the open question quotes words the
+    finding quotes, or its research cites lines the finding cites (in any entry). And in an entry that still has
+    open questions, every finding carries `still_open` (an empty list when it leaves none of them open), so the
+    relation is stated on purpose, never guessed from words like "eave"."""
+    tags = open_question_tags(entries)
+    p = []
+    for where, e in entries:
+        own = {t for t, (w, _, _) in tags.items() if w == where}
+        for f in e.get("findings") or []:
+            if not isinstance(f, dict):
+                continue
+            name = f"{where}: the finding {f.get('id') or str(f.get('question', ''))[:40]!r}"
+            listed = f.get("still_open", [])
+            if not (isinstance(listed, list) and all(isinstance(t, str) for t in listed)):
+                p.append(f"{name}: 'still_open' must be a list of open-question tags like '325-25C#1'")
+                continue
+            if unknown := [t for t in listed if t not in tags]:
+                p.append(f"{name}: still_open names {', '.join(unknown)}, which isn't an open question "
+                         "(answered or renumbered?)")
+            if listed and "still open" not in str(f.get("answer", "")):
+                p.append(f"{name}: lists still_open questions, so its answer must say what is still open")
+            if own and "still_open" not in f:
+                p.append(f"{name}: its entry still has open questions ({', '.join(sorted(own))}), so it says which "
+                         "of them it leaves open: still_open: [...] (or [] for none)")
+            code = [c for c in f.get("sources") or [] if isinstance(c, dict) and "file" in c and isinstance(c.get("quote"), str)]
+            quoted = [tokenize(c["quote"]) for c in code]
+            for tag, (owhere, q, x) in tags.items():
+                if tag in listed:
+                    continue
+                same = [ph for ph in _quoted_phrases(q) if any(_contains(t, ph) for t in quoted)]
+                shared = [c for c in code if any(_overlap(c, s) for s in x.get("sources") or [])]
+                if same or shared:
+                    why = (f"quotes {' '.join(same[0])!r}, which the open question {tag} asks about" if same else
+                           f"cites p.{shared[0]['page']} lines {shared[0]['lines'][0]}-{shared[0]['lines'][1]}, which "
+                           f"the research on open question {tag} cites")
+                    p.append(f"{name} {why} ({owhere}: {q[:50]}...): narrow the finding to what is settled and name "
+                             f"the question in still_open: [{tag!r}], or make it a reading")
+    return p
+
 
 def term_file_problems(jurisdiction, ctx: Context) -> dict[Path, list[str]]:
     """Each term file (4_term_definitions/<schema>.yaml) that exists, with its problems."""

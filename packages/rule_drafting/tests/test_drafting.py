@@ -15,7 +15,7 @@ import pytest
 
 from rule_drafting import __main__ as cli
 from rule_drafting import chart_values, drafter
-from rule_drafting.templates import SLOT, fill_template
+from rule_drafting.templates import DRAFTED_QUESTION, SLOT, fill_template
 from section_labeling.budget import Budget, BudgetExceeded
 
 USAGE = {"input_tokens": 900, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 9000, "output_tokens": 700}
@@ -206,6 +206,20 @@ def test_permitted_use_rules_follow_the_chart_marks(inputs):
     assert no_rule == {"R-3a", "R-3b"}                                          # nothing there fails: for a person
     assert all(any(g["rule"] == f"{d}.use" and "no failing example" in g["why"] for g in result["unresolved"])
                for d in no_rule)
+
+
+def test_a_drafted_question_says_it_is_not_researched_yet(inputs):
+    """A question a drafting run raises carries a research entry saying it is pending, so it passes the show-
+    your-work check honestly (nothing searched yet) instead of failing or claiming research it didn't do."""
+    from rule_format.rulebook import research_problems
+    r1b = cli.draft_uses(inputs)["rules"]["R-1b"][0]
+    assert [x["question"] for x in r1b["research"]] == r1b["open_questions"]
+    assert r1b["research"][0]["why_open"].startswith("pending") and research_problems(r1b, inputs.ctx) == []
+    asked = template("x", "front_yard >= 1", [], [({"front_yard": "2"}, "pass")]) | {"open_questions": ["Why?"]}
+    rule, why = fill_template(asked, None, {}, [], "claude")
+    assert why is None and rule["research"] == [{"question": "Why?", "searched": [], "sources": [],
+                                                 "why_open": "pending: " + DRAFTED_QUESTION}]
+    assert research_problems(rule, inputs.ctx) == []
 
 
 def test_footnotes_and_section_references_are_read_from_the_page(inputs):
@@ -868,3 +882,27 @@ def test_a_measure_added_since_isnt_a_to_do(inputs, tmp_path):
     rule = {"id": "R-1b.a", "kind": "rule", "check": "front_yard >= 1", "sources": [], "examples": []}
     cli.save_result(i, log, "u1", {"rules": {"R-1b": [rule]}, "proposed": {"front_yard": m}})
     assert not (i.records / "proposed_measures.yaml").exists()
+
+
+def test_the_yard_unit_reads_the_eaves_rule_as_background_never_as_a_source(inputs):
+    """The term index brings §325-18B (eaves may project 2 ft into a yard) into the yard chart unit, so the
+    drafter sees it; it's background only: a rule here can't quote it (it sets its own rule)."""
+    u = unit(inputs, "chart-p3-yard_dimensions")
+    context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+    related = [p["id"] for p in context["related"]]
+    assert "325-18B" in related and len(related) == len(set(related))
+    assert not set(related) & {p["id"] for p in context["pieces"]}             # never both pointed-to and related
+    assert set(related) <= inputs.law["requires"]                            # sections that set requirements only
+    assert sum(len(p["text"]) for p in context["related"]) <= drafter.RELATED_LIMIT
+    message = drafter.unit_message(u, context)
+    assert "Related sections" in message and "[piece 325-18B]" in message
+    template = {"quotes": [{"document": "law", "piece": "325-18B",
+                            "text": "such features shall not project more than two feet into any required yard"}]}
+    _, problems = drafter.resolve_quotes(template, u, context, inputs.law, inputs.ctx, inputs.notes)
+    assert any("isn't one given here" in p for p in problems)
+
+
+def test_without_a_term_index_the_drafter_still_runs(inputs):
+    u = unit(inputs, "chart-p3-yard_dimensions")
+    context = drafter.gather_context(u, inputs.law | {"terms": None}, {"notes": inputs.notes}, inputs.definitions)
+    assert context["related"] == [] and context["related_dropped"] == []
