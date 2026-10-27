@@ -2955,18 +2955,21 @@ def show_context(on):
     if doc is None:
         say(logic.NO_DOCUMENT)
         return
-    _save_ui_state(doc, dict(_ui_state(doc), show_context=bool(on)))     # per file (coordinator, 2026-10-21)
-    STATE.setdefault("context_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
-    drawn = _context_visible(doc, on)
-    refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
-    loaded = not refetch
-    if on and refetch:                     # draw_context says what it drew, or why it couldn't
-        try:
-            facts = current_facts(doc)
-        except ValueError:
-            facts = {}
-        draw_context(doc, logic.context_frame(facts, _ui_state(doc)))
-    elif on:
+    with logic.undo_step(doc, logic.UNDO_WORDS["context"]):   # the tick, the layers and any fetch drawn: one step
+        _save_ui_state(doc, dict(_ui_state(doc), show_context=bool(on)))     # per file (coordinator, 2026-10-21)
+        STATE.setdefault("context_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
+        drawn = _context_visible(doc, on)
+        refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
+        loaded = not refetch
+        if on and refetch:                 # draw_context says what it drew, or why it couldn't
+            try:
+                facts = current_facts(doc)
+            except ValueError:
+                facts = {}
+            draw_context(doc, logic.context_frame(facts, _ui_state(doc)))
+    if on and refetch:                     # (draw_context has said what it drew)
+        return
+    if on:
         doc.Views.Redraw()
         say("Neighbourhood shown (drawing only: the check never measures it).")
     else:

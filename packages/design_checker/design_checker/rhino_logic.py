@@ -1661,7 +1661,8 @@ UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the r
               "main": "Gordium: pick the main building", "add": "Gordium: add to check",
               "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
               "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
-              "edit_site": "Gordium: the start box", "grade": "Gordium: the start box"}
+              "edit_site": "Gordium: the start box", "grade": "Gordium: the start box",
+              "context": "Gordium: show or hide the neighbourhood"}
 
 
 @contextlib.contextmanager

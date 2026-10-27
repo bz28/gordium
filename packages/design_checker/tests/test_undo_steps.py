@@ -17,7 +17,7 @@ SRC = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
 REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_building", "add_to_check",
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
-        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo"]
+        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "show_context"]
 
 
 class Doc:
@@ -122,7 +122,11 @@ def _plugin(doc, said):
           "ask": lambda request: {"zones": []}, "suggested_facts": lambda doc, zones: {},
           "overlay": lambda: type("O", (), {})(), "_apply_box": lambda doc, facts, state, saved_ui: (facts, {}),
           # the start box: the architect presses Draw (the plugin's own _drawn), with the facts it was given
-          "confirm": lambda doc, facts, options, mode="check": ns["_drawn"](doc, facts, {}, {})}
+          "confirm": lambda doc, facts, options, mode="check": ns["_drawn"](doc, facts, {}, {}),
+          # the context layers and a fetched neighbourhood, written as _context_visible and draw_context write them
+          "_context_visible": lambda doc, on: setattr(doc.Layers[0], "IsVisible", on) or True,
+          "_context_record": lambda doc: None, "sync_context": lambda doc, facts: None,
+          "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}")}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     exec(SRC[SRC.index("class RhinoTable:"):].split("\ndef ", 1)[0], ns)      # noqa: S102
@@ -135,7 +139,9 @@ CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": (
          "zoom": ((None,), False), "report": ((), False), "envelope": ((True,), False), "legend": ((), False),
          "retry": ((), False),
          # the start box (Edit site…, Set grade…): its Draw and the facts saved after it closes, one step
-         "edit_site": ((), True), "grade": ((), True)}
+         "edit_site": ((), True), "grade": ((), True),
+         # Show neighbourhood (#23): the tick saved, the context layers shown, a neighbourhood fetched and drawn
+         "context": ((True,), True)}
 
 
 def test_the_guard_covers_every_panel_action():
