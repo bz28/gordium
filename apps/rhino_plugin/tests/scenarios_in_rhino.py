@@ -103,7 +103,7 @@ def draw(g, doc, data):
     a.LayerIndex = g._layer(doc, g.LAYERS["lot"])
     pts = [rg.Point3d(x, y, 0) for x, y in data["scenario"]["lot"]["points"]]
     lot = doc.Objects.AddPolyline(rg.Polyline(pts + pts[:1]), a)
-    ids = []
+    ids, guids = [], {}                   # a design's building id -> the Rhino objects drawn for it
     for s in data["solids"]["buildings"]:
         b = Rhino.DocObjects.ObjectAttributes()
         b.LayerIndex = g._layer(doc, g.LAYERS["building"])
@@ -111,6 +111,7 @@ def draw(g, doc, data):
         if s.get("floor") is not None:
             b.SetUserString(g.logic.FLOOR_KEY, s["name"].split()[-1] + ";" + repr(s["floor"]))
         ids.append(doc.Objects.AddBrep(g._prism(doc, s["outline"], s["base"], s["top"]), b))
+        guids.setdefault(s.get("building", s["id"]), []).append(str(ids[-1]))
     for s in data["solids"]["others"]:
         d = Rhino.DocObjects.ObjectAttributes()
         d.LayerIndex = g._layer(doc, "Default")
@@ -123,6 +124,11 @@ def draw(g, doc, data):
         doc.Objects.AddPoint(rg.Point3d(x, y, z), p)
     facts = {k: v for k, v in data["facts"].items() if k != "grade_points"}
     facts["lot_id"] = str(lot)
+    # a stated building (an accessory garage, the main building) by its design id -> the objects Rhino gave it
+    if facts.get("accessory_buildings"):
+        facts["accessory_buildings"] = [gid for b in facts["accessory_buildings"] for gid in guids.get(b, [b])]
+    if facts.get("main_building") in guids:
+        facts["main_building"] = guids[facts["main_building"]][0]
     g.save_facts(doc, facts)
     doc.Views.Redraw()
     return lot, ids

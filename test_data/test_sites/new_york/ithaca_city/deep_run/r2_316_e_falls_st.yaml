@@ -73,9 +73,9 @@ expected:
     working: "no eaves (a flat-roofed box): the outermost yards equal the yards above"
     cites: "§325-18B"
   R-2b.parking_dwelling_units:
-    status: needs_review
-    working: "1 space per dwelling unit for the first three bedrooms of each unit: worked out per unit by a person (a flag)"
-    cites: "chart p.14, Minimum Parking Requirement, Residential, R-2B"
+    status: complies
+    working: "each unit has 3 bedrooms (sleeping_rooms is per unit): 1 space per dwelling unit for the first three → 2 units × 1 = 2 spaces; 2 provided ≥ 2"
+    cites: "chart p.14, Minimum Parking Requirement, Residential, R-2B (first three bed or sleeping rooms per dwelling unit: 1 space per dwelling unit)"
   R-2b.occupancy_two_family:
     status: needs_review
     working: >-
@@ -85,6 +85,14 @@ expected:
       or boarders" a multiple dwelling, not permitted in R-2. Whether unrelated housemates are roomers or boarders
       the law doesn't say: a person decides (first worked as complies; changed on reading (3), before comparing)
     cites: "§325-3B DWELLING, TWO-FAMILY (p.9); §325-3B DWELLING, MULTIPLE OR MULTIPLE RESIDENCE (3) (p.7)"
+disagreements:
+  R-2b.parking_dwelling_units:
+    gordium: needs_review
+    finding: >-
+      R-2b's rulebook flags parking for semi-detached and two-family houses (a person works it out per unit) instead of
+      computing it; by the chart, 2 units of 3 bedrooms need 2 spaces and 2 are given. Cautious (needs review), never a
+      false pass.
+    question_for_architects: "none: the rule could compute it (owner: the R-2b rulebook, #24)"
 then:
   move: [-1.5, 0]
   expected:

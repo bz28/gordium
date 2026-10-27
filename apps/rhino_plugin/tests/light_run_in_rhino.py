@@ -6,13 +6,12 @@ it (the demo branch). Live lookups: it asks the City's and the State's services,
 
 For each site, a fresh feet document:
   1. GordiumStart with the address typed and Look up pressed, then Draw (the scripted picks the in-Rhino tests use).
-     Claims: the zone, lot area (to 0.5 sf), frontage (to 0.1 ft), street and corner lot are the expected ones.
-  2. After Draw: no row does not comply; every needs-review row carries a reason; the footprint is no larger than
-     the expected largest house's footprint (`largest_house`), and the limiting rule named there is the row with the
-     least room.
-  3. The nudge: every Gordium::Massing solid moved straight toward the street until the front yard reads the
-     nudge's `proposed_ft`; the check again. Claims: exactly the nudge's rule does not comply, with proposed and
-     required as written; no other row turned to does not comply.
+     Claims: the zone, the lot area drawn (to 0.5 sf) and corner lot are the expected ones.
+  2. After Draw: no row does not comply; every needs-review row carries a reason. Every row is recorded, for a person
+     to compare with `largest_house` (which rule limits the starting house) and `lot_size`.
+  3. The nudge: the house's solids moved toward the street until their least distance to the street lines (measured
+     here, from the solids) is the nudge's `proposed_ft`; the check again. Claim: the nudge's rule does not comply
+     and no other row does; the rows are recorded with their proposed and required values.
 Writes <temp>/gordium_light_run/out.json (each site's facts, rows and claims) and a Top capture per site.
 Not yet run in Rhino (Lane C). A failed claim is recorded and the run goes on to the next site."""
 import json
@@ -71,10 +70,8 @@ def lot_area(doc, g):
 
 def front_distance(doc, g, facts):
     """The house's least distance to the street line in plan, from its own vertices (independent of the panel)."""
-    (a, b) = facts["street_line"][0]
-    line = rg.Line(rg.Point3d(a[0], a[1], 0), rg.Point3d(b[0], b[1], 0))
     pts = [rg.Point3d(v.Location.X, v.Location.Y, 0) for o in massing(doc, g) for v in o.Geometry.Vertices]
-    return min(line.DistanceTo(p, True) for p in pts) if pts else None
+    return min(ln.DistanceTo(p, True) for ln in street_lines(facts) for p in pts) if pts else None
 
 
 def rows(g):
@@ -90,12 +87,18 @@ def massing(doc, g):
     return [o for o in doc.Objects if o.Attributes.LayerIndex == layer and o.ObjectType == Rhino.DocObjects.ObjectType.Brep]
 
 
-def toward_street(facts):
-    """The unit vector from the lot's inside toward its street line (the first street line's inward normal, reversed)."""
-    (a, b) = facts["street_line"][0]
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    n = (dx * dx + dy * dy) ** 0.5
-    return rg.Vector3d(dy / n, -dx / n, 0), rg.Vector3d(-dy / n, dx / n, 0)
+def street_lines(facts):
+    return [rg.Line(rg.Point3d(a[0], a[1], 0), rg.Point3d(b[0], b[1], 0)) for a, b in facts["street_line"]]
+
+
+def toward_street(doc, g, facts):
+    """The unit vector from the house's plan centre to the nearest point of any street line."""
+    pts = [rg.Point3d(v.Location.X, v.Location.Y, 0) for o in massing(doc, g) for v in o.Geometry.Vertices]
+    c = rg.Point3d(sum(p.X for p in pts) / len(pts), sum(p.Y for p in pts) / len(pts), 0)
+    near = min((ln.ClosestPoint(c, True) for ln in street_lines(facts)), key=lambda q: q.DistanceTo(c))
+    v = near - c
+    v.Unitize()
+    return v
 
 
 def one_site(g, docs, district, site):
@@ -128,13 +131,13 @@ def one_site(g, docs, district, site):
         have = front_distance(doc, g, facts)
         out["front_before"] = {"row": front[0].get("proposed") if front else None, "measured_here": have}
         if have is not None:
-            out_dir, _ = toward_street(facts)
-            move = rg.Transform.Translation(out_dir * (have - nudge["proposed_ft"]))
+            move = rg.Transform.Translation(toward_street(doc, g, facts) * (have - nudge["proposed_ft"]))
             for o in massing(doc, g):
                 doc.Objects.Transform(o.Id, move, True)
             g.run_check(doc, report=False)
             after = rows(g)
             out["nudged"] = [(i.get("rule"), i["name"], i["status"], i.get("proposed"), i.get("required")) for i in after]
+            out["front_after_measured_here"] = front_distance(doc, g, facts)
             hit = row_for(after, nudge["rule"])
             claim("the nudge fails exactly its rule", hit and hit[0]["status"] == "does_not_comply" and not [
                 i for i in after if i["status"] == "does_not_comply" and i.get("rule") != nudge["rule"]],

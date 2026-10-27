@@ -60,7 +60,8 @@ def solids(scenario: dict, moved: bool = False) -> dict:
             outline = [[x + dx + fx, y + dy + fy] for x, y in b["outline"]]
             out["buildings"].append({"id": f"{b['id']}_floor{k + 1}" if b.get("floors") else b["id"],
                                      "outline": outline, "base": z, "top": z + h,
-                                     "floor": h if b.get("floors") else None, "name": f"Floor {k + 1}"})
+                                     "floor": h if b.get("floors") else None, "building": b["id"],
+                                     "name": f"Floor {k + 1}" if b.get("floors") else b["id"]})
             z += h
     for o in scenario.get("others") or []:
         out["others"].append({"id": o["id"], "outline": [[x + dx, y + dy] for x, y in o["outline"]],

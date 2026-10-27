@@ -19,8 +19,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: R-1a
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
     lot:
       source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
       area_sf: 12990.5
@@ -80,8 +81,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: R-1b
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
     lot:
       source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
       area_sf: 8918.3
@@ -141,8 +143,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: R-2a
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
     lot:
       source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
       area_sf: 8750.0
@@ -202,8 +205,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: R-2b
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
     lot:
       source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
       area_sf: 4764.1
@@ -263,8 +267,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: R-2c
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
     lot:
       source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
       area_sf: 4335.8
@@ -326,8 +331,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: R-3a
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
     lot:
       source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
       area_sf: 6673.1
@@ -388,8 +394,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: R-3aa
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
     lot:
       source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
       area_sf: 7938.0
@@ -432,7 +439,9 @@ sites:
         37.9 ft
       largest_house: 'limited by lot coverage: footprint at most 35% × 7,138.4 sf (the tax-map lot with every line
         2 ft in) = 2,498.5 sf; the yards would leave 3,329.4 sf even 2 ft back from every limit, so coverage binds
-        first'
+        first. Chart p.3 note 2 may limit it further: a new primary structure''s footprint may be at most 120% of
+        the average footprint on the whole block front, which needs the neighbours'' buildings (not worked here;
+        R-3aa.footprint_block_front is a flag: needs review)'
       every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
         doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
       nudge:
@@ -450,8 +459,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: R-3b
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
     lot:
       source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
       area_sf: 4400.1
@@ -510,8 +520,9 @@ sites:
     looked_up: '2026-10-27'
     zone:
       expect: RU
-      source: City of Ithaca zoning map (City_Zoning layer), asked live 2026-10-27 through site_lookup; the map's
-        answer is not stored (its terms)
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
       note: 'the City''s map writes R-U; Gordium''s rulebook is RU: the start box must show RU and load RU''s rules
         (if it shows R-U with no rules, that is a lookup bug for #19)'
     lot:
@@ -562,9 +573,11 @@ sites:
         75 ft: both comply (worst case: Gordium''s tax-map rule, spec C2)'
       lot_depth_and_rear: lot depth = average of the side lines [137.84, 133.29] = 135.6 ft; rear yard required
         33.9 ft
-      largest_house: 'limited by lot coverage: footprint at most 25% × 12,973.9 sf (the tax-map lot with every line
-        2 ft in) = 3,243.5 sf; the yards would leave 6,260.4 sf even 2 ft back from every limit, so coverage binds
-        first'
+      largest_house: 'limited by chart p.3 note 13 or lot coverage, whichever is smaller: coverage allows 25% ×
+        12,973.9 sf (the worst-case lot) = 3,243.5 sf; note 13 keeps 50% of the developable lot area after the setbacks
+        as green space, and if that green space must lie within the buildable area (6,260.4 sf, 2 ft back from every
+        limit) the house may cover at most about 2,850–3,130 sf (depending on how the setbacks are drawn). Where the green space must be is an open reading (RU.green_space
+        is a flag: needs review)'
       every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
         doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
       nudge:

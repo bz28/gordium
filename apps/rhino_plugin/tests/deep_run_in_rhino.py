@@ -13,5 +13,8 @@ Not yet run in Rhino (Lane C)."""
 import os
 
 os.environ["GORDIUM_SCENARIO_FOLDER"] = "deep_run"
-_here = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios_in_rhino.py")
-exec(compile(open(_here, encoding="utf-8").read(), _here, "exec"))
+try:                                  # Rhino keeps environment variables between runs: never leave it set
+    _here = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios_in_rhino.py")
+    exec(compile(open(_here, encoding="utf-8").read(), _here, "exec"))
+finally:
+    os.environ.pop("GORDIUM_SCENARIO_FOLDER", None)
