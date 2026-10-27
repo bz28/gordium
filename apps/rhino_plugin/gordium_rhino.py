@@ -3026,7 +3026,7 @@ def _start_floors(doc):
             props = rg.VolumeMassProperties.Compute(o.Geometry) if isinstance(o.Geometry, rg.Brep) else None
             volume = props.Volume * _scale(doc) ** 3 if props is not None else None    # (a notch changes it)
             layer = doc.Layers[o.Attributes.LayerIndex]       # (a locked or hidden parent too: IsLocked, IsVisible)
-            locked = bool(o.IsLocked or o.IsHidden or layer.IsLocked or not layer.IsVisible)
+            locked = bool(o.IsLocked or o.IsHidden or o.IsReference or layer.IsLocked or not layer.IsVisible)
             found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume, locked))
     return found
 
@@ -3066,13 +3066,20 @@ def switch_side_yards():
         if ids is None:
             say("The switched starting house couldn't be drawn; the old one is kept.")
             return None
-        kept = [o for o, _, _, _, _ in found if not doc.Objects.Delete(o, True)]
-        if kept:                        # never two houses: the new one goes again, the old one stays (round 2, F1)
+        gone = []
+        for o, _, _, _, _ in found:
+            if not doc.Objects.Delete(o, True):
+                break
+            gone.append(o)
+        kept = len(found) - len(gone)
+        if kept:                        # never two houses: the new one goes again, the old one stays whole (round 2,
+            for o in gone:              # F1; round 4: the floors already deleted come back)
+                doc.Objects.Undelete(o)
             for i in ids:
                 new = doc.Objects.FindId(i)
                 if new is not None:
                     doc.Objects.Delete(new, True, True)
-            say("The old starting house couldn't be removed (" + str(len(kept)) + " floors), so it is kept as it was.")
+            say("The old starting house couldn't be removed (" + str(kept) + " floors), so it is kept as it was.")
             return None
         fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())
         if fact:

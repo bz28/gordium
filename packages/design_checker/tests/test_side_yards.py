@@ -210,5 +210,7 @@ def test_switch_in_rhino_is_one_undo_step_and_draws_before_it_deletes():
     body = rhino[rhino.index("def switch_side_yards"):rhino.index("def _said_sides")]
     assert body.index('split.get("larger_side") != plan["larger_side"]') < body.index("doc.BeginUndoRecord(") \
         < body.index("add_floors(doc, start,") < body.index("if not doc.Objects.Delete(o, True)") \
-        < body.index("doc.Objects.Delete(new, True, True)") < body.index("doc.EndUndoRecord(record)")
+        < body.index("doc.Objects.Undelete(o)") < body.index("doc.Objects.Delete(new, True, True)") \
+        < body.index("doc.EndUndoRecord(record)")
+    assert "o.IsReference" in rhino[rhino.index("def _start_floors"):rhino.index("def switch_side_yards")]
     assert "a.SetUserString(logic.START_KEY, logic.start_tag(start, i, floor_to_floor, design_buffer))" in rhino
