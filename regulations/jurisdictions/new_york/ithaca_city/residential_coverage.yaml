@@ -32,9 +32,9 @@ parked:
   adus: {name: "Accessory dwelling units", decided: "queue item 10 brief, 2026-10-27"}
 
 # Reused decisions.
-_unlisted_why: &unlisted_why Not a use the residential chart (p.2) lists for any residential district, so it isn't
-  permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's
-  uses (4_term_definitions/uses.yaml).
+_unlisted_why: &unlisted_why "Not a use the residential chart (p.2) lists for any residential district, so it isn't
+  permitted there (§325-8A(2) says the permitted uses are listed). Gordium accepts only the chart's uses
+  (4_term_definitions/uses.yaml)."
 _occupancy: &occupancy
   status: missing
   priority: medium
@@ -258,8 +258,8 @@ pieces:
 
   325-3B:large_beverage_producer:
     - what: Large beverage producers (production cap, silo height)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
 
   325-3B:neighborhood_commercial_facility:
     - quote: "Such facility shall be limited to the retail sale of convenience goods"
@@ -364,13 +364,13 @@ pieces:
 
   325-3B:trailer_or_travel_trailer:
     - what: Travel trailers (a temporary dwelling at most 8 ft wide and 32 ft long)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
 
   325-3B:urban_beverage_producer:
     - what: Urban beverage producers (production cap, silo height)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
 
   325-7A:
     - what: Every building and use conforms to its district's regulations
@@ -656,12 +656,12 @@ pieces:
       all: *operational
   325-15E:
     - what: Junkyards and salvage yards
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
   325-15F:
     - what: Gasoline service stations (referral for review)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
 
   325-16A:
     - quote: "The height limitations of this chapter shall not apply to"
@@ -837,36 +837,36 @@ pieces:
 
   325-22A:
     - what: Motels (lot size and frontage)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
   325-22B:
     - what: Motels (parking)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
   325-22C:
     - what: Motels (paving)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
   325-22D:
     - what: Motels (driveway width)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
   325-22E:
     - what: Motels (curb cuts)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
   325-22F:
     - what: Motels (landscaping)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
   325-22G:
     - what: Motels (lighting)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
   325-22H:
     - what: Motels (uses)
-      all: {status: not_applicable, why: *unlisted_why, page: 26,
-             quote: except where otherwise indicated by specific prohibition or omission}
+      all: {status: not_applicable, why: *unlisted_why, page: 24,
+             quote: Uses which are permitted in each use district are listed}
 
   325-23A:
     - what: General performance standards (noise, smoke, odor, dust...)
@@ -1020,10 +1020,12 @@ pieces:
     - what: Criteria for a zoning permit for a deficiency on an existing nonconforming building
       all: *nonconforming
 
-  325-44A: &csu
+  325-44A:
     - what: C-SU Zone review
-      all: {status: not_applicable, why: Applies only in the C-SU Zone., page: 126, quote: within the C-SU Zone}
-  325-44B: *csu
+      all: {status: not_applicable, why: Applies only in the C-SU Zone., page: 126, quote: construction of new buildings or parking areas within the C-SU Zone shall be subject to strict review}
+  325-44B:
+    - what: C-SU Zone design review
+      all: {status: not_applicable, why: Applies only in C-SU Zones., quote: in C-SU Zones shall be subject to design review}
 
   325-45.1C: &collegetown
     - what: Collegetown Area Form Districts

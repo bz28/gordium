@@ -321,9 +321,10 @@ class Audit:
                 p.append(f"{where}: a {WORDS[status]} decision gives the law's own words (`quote`) and where they are")
             elif dec.get("file", LAW) not in (LAW, CHART):
                 p.append(f"{where}: quote Chapter 325 or its chart, not {dec['file']}")
-            elif not (keys := self._quote_keys(pid, dec)):
-                p.append(f"{where}: quote not found at {self._location(pid, dec)}: {dec['quote']!r}")
-            elif dec.get("file", LAW) == LAW and keys <= self.furniture:
+            elif len(hits := self._quote_hits(pid, dec)) != 1:
+                p.append(f"{where}: quote " + ("not found" if not hits else f"found {len(hits)} times (quote enough to "
+                         "be unique, as a rule's source must be)") + f" at {self._location(pid, dec)}: {dec['quote']!r}")
+            elif dec.get("file", LAW) == LAW and (keys := hits[0]) <= self.furniture:
                 p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
             if dec.get("file") == CHART and not dec.get("cell"):
                 p.append(f"{where}: a chart quote names its `cell` ({{section, row}}), so the district's own cell is shown")
@@ -353,19 +354,24 @@ class Audit:
         cell = self.ctx.cells.get(CHART, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
         return None if cell is None else cell.get("value")
 
-    def _quote_keys(self, pid: str, dec: dict) -> set:
-        """Every (page, line) the decision's quote is found on: on `page` (of `file`), else inside `piece` (default:
-        this piece), across its page breaks. Empty when it isn't found."""
+    def _quote_hits(self, pid: str, dec: dict) -> list[set]:
+        """Each place the decision's quote occurs, as the (page, line)s it spans: on `page` (of `file`), else inside
+        `piece` (default: this piece), across its page breaks."""
         file = dec.get("file", LAW)
         pages = self.ctx.pages.get(file, {})
         quote = dec.get("quote") or ""
         if "page" in dec:
-            return {(dec["page"], n) for a, b in locate(quote, pages.get(dec["page"], {})) for n in range(a, b + 1)}
+            return [{(dec["page"], n) for n in range(a, b + 1)} for a, b in locate(quote, pages.get(dec["page"], {}))]
         if dec.get("piece") not in (None, *self.pieces):
-            return set()
+            return []
         keys = list(piece_keys(self.pieces[dec.get("piece", pid)]))
         joined = {i: pages.get(pg, {}).get(n, []) for i, (pg, n) in enumerate(keys)}
-        return {keys[i] for a, b in locate(quote, joined) for i in range(a, b + 1)}
+        return [{keys[i] for i in range(a, b + 1)} for a, b in locate(quote, joined)]
+
+    def _quote_keys(self, pid: str, dec: dict) -> set:
+        """The (page, line)s of the quote's one place (empty when it occurs nowhere, or more than once)."""
+        hits = self._quote_hits(pid, dec)
+        return hits[0] if len(hits) == 1 else set()
 
     def _quote_found(self, pid: str, dec: dict) -> bool:
         return bool(self._quote_keys(pid, dec))
@@ -417,8 +423,8 @@ class Audit:
                               and not self._reaches(d, r, pid, span)]
                     if dec.get("status") not in READINGS and not mapped:
                         continue
-                    key = (pid, i, dec.get("status"), dec.get("quote"), dec.get("why"), dec.get("mapped"),
-                           str(dec.get("cell")))
+                    key = (pid, i, repr(sorted(dec.items(), key=lambda kv: kv[0])), tuple(sorted(set(mapped))),
+                           tuple(self._expand(d, dec.get("rules"))))
                     entry = found.setdefault(key, {"piece": pid, "what": what, "status": dec.get("status"),
                                                    "dec": dec, "mapped": sorted(set(mapped)), "cells": []})
                     entry["cells"].append(d)
@@ -580,8 +586,9 @@ class Audit:
         out += ["", f"**Resting on a reading:** {len(rested)} of the {n * len(ds)} cells rest, in at least one part, on a "
                 "person's reading rather than a citation (cells by kind of reading, a cell counted once per part: not applicable "
                 f"{by['not_applicable']}, parked {by['parked']}, flag {by['flag']}, rules named by mapping "
-                f"{by['mapped']}). Each quotes the law; code checks only that the quote is the law's words where it "
-                "says, not that it supports the decision. They are listed after the table, for a person to check."]
+                f"{by['mapped']}). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it "
+                "says, not that it supports the decision; a mapping gives its reason in words. They are listed after "
+               "the table, for a person to check."]
         out += ["", "MISSING cells by priority (a piece missing in two parts counts twice):", "",
                 "| Priority | " + " | ".join(ds) + " |", "|---|" + "---|" * len(ds)]
         out += [f"| {k} | " + " | ".join(str(cells_by[d][k]) for d in ds) + " |" for k in PRIORITIES]
@@ -600,8 +607,8 @@ class Audit:
         out += ["", "## The table", "",
                 "✓ = in the rulebook (rule ids; (mapped) = by Gordium's stated mapping, the rules don't cite it); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; "
                 "(partly ✓ …) = some parts are covered by those rules, the rest not. [R12] = this cell rests on "
-                "reading R12: its quote of the law is in the readings list right after this table, for a person to "
-                "check. Each piece's reasons are in the section after that.", "",
+                "reading R12, listed right after this table with its quote of the law (or, for a mapping, its reason), "
+                "for a person to check. Each piece's reasons are in the section after that.", "",
                 "| Piece | Title | Label | " + " | ".join(ds) + " |", "|---|---|---|" + "---|" * len(ds)]
         for pid in self.rows:
             out.append(f"| §{pid} | {self._title(pid)} | {self.labels[pid]['label']} | "
@@ -625,6 +632,8 @@ class Audit:
             law = (f"“{dec['quote']}” ({self._location(e['piece'], dec)}"
                    + (f"; the district's own cell in row “{dec['cell']['row']}” is “-”" if dec.get("cell") else "")
                    + ")") if dec.get("quote") else "—"
+            if dec.get("note"):
+                decision += f" Note: {dec['note']}"
             out.append(f"| {e['id']} | §{e['piece']}: {e['what']} | {self._where(e['cells'])} | "
                        f"{decision.replace('|', '/')} | {law.replace('|', '/')} |")
         out += ["", "## Each piece, part by part", ""]

@@ -455,3 +455,40 @@ def test_the_summary_counts_cells_resting_on_a_reading(built):
     rested = {(e["piece"], d) for e in built.readings() for d in e["cells"]}
     assert f"**Resting on a reading:** {len(rested)} of the 1476 cells" in head
     assert "code checks only that the quote is the law's words where it says" in head
+
+
+# Provenance review round 1.
+
+def test_each_reading_lists_exactly_the_rules_each_of_its_districts_maps(built):
+    for e in built.readings():
+        i = built._parts(e["piece"]).index(e["what"])
+        for d in e["cells"]:
+            dec = built.cells[e["piece"]][d][i][1]
+            mapped = sorted({r for r in built._expand(d, dec.get("rules")) if dec.get("status") in ("rulebook", "flag")
+                             and not built._reaches(d, r, e["piece"], built.part_lines[e["piece"]][i])})
+            assert mapped == e["mapped"], (e["id"], d)
+
+
+def test_a_quote_must_occur_exactly_once_where_it_says(decisions):
+    found = problems(with_piece(decisions, "325-44A", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "page": 126, "quote": "within the C-SU Zone"}}]))
+    assert any("found 2 times" in p for p in found)
+
+
+def test_unlisted_uses_quote_the_sentence_that_says_permitted_uses_are_listed(built):
+    dec = built.cells["325-22A"]["R-1a"][0][1]
+    assert dec["quote"] == "Uses which are permitted in each use district are listed" and dec["page"] == 24
+
+
+def test_the_legend_says_a_mapping_gives_a_reason_not_a_quote(built):
+    assert "a mapping gives its reason in words" in built.render().split("## The table")[0]
+
+
+def test_a_readings_note_is_shown_in_the_readings_list(built):
+    readings = built.render().split("## Decisions resting on a reading")[1].split("## Each piece")[0]
+    assert "Whether §325-19E reaches R-3aa is an open question" in readings
+
+
+def test_c_su_design_review_quotes_its_own_words(built):
+    keys = built._quote_keys("325-44B", built.cells["325-44B"]["R-1a"][0][1])
+    assert keys and all(built.owner[k] == "325-44B" for k in keys)
