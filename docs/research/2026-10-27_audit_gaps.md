@@ -41,12 +41,14 @@ The chart's lot-size heading carries note 3, "(3) See §325-8(B)(1)." (p.3).
 
 So with two or more primary buildings the lot needs each building's figure, added together. Gordium checks it in
 every residential district (`<district>.lot_area_each_primary_building`):
-- one primary building: the use's own figure once, as the use's own lot-area rule asks;
+- one primary building: the use's own figure once, as the use's own lot-area rule asks (a use whose figure grows
+  with units, rooms or occupants, or is a flag or an open question, is left to its own rule);
 - two or more, every one holding the lot's use (`primary_buildings_same_use`): the use's figure once per building;
 - a building of another use, or that not said: needs review (each building's own figure, added by hand);
 - a use whose figure grows with the units, rooms let or occupants (R-2c's notes 4 to 6, R-3's note 7, R-3b's note
   8, RU's note 9), or is itself a flag or an open question for one building (a zero-lot-line house in R-3, a
-  dormitory or nursing home): needs review, since how they split between the buildings isn't known.
+  dormitory or nursing home), with two or more buildings: needs review, since how they split between the buildings
+  isn't known.
 
 ## 2. What is a primary building? — A, with a B
 
