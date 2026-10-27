@@ -3492,6 +3492,38 @@ def test_a_plan_label_keeps_every_hard_rule_the_southwest_cases():
     assert not logic_._seg_hits_shape(((230, 300), (ex, ey)), under[0]), led2
 
 
+# The label timing pins' absolute bounds were set on an idle Mac, where one exact HARD check (label_breaks_hard on the
+# sample's lot, the unit below) takes about IDLE_UNIT_S. On a busy machine (the parallel full suite beside other runs:
+# a 2.4 s label against a 0.03 s bound, main's run of 2026-10-27) everything is slower alike, so each absolute bound is
+# scaled by how much slower that unit is right now (never below 1: an idle or faster machine keeps the bound as set).
+# Only the clock's allowance moves: every placement check stays exact.
+IDLE_UNIT_S = 8.5e-6
+
+
+def _label_unit():
+    """One label_breaks_hard on the sample (the review of 9d021d8's unit of work), best of 5 runs of 400."""
+    import time as time_
+    from design_checker import rhino_logic as logic_
+    view, keep = (656, 668), [(12, 34, 506, 54), (543, 119, 61, 55)]
+    house = [(185, 250), (420, 250), (420, 415), (185, 415)]
+    band = [(185, 250), (420, 250), (420, 262), (185, 262)]
+    dims = [((158, 330), (185, 330)), ((420, 330), (501, 330)), ((300, 106), (300, 250)), ((300, 415), (300, 562))]
+    probe = [(10 + 7 * k % 600, 20 + 11 * k % 600, 120, 20) for k in range(400)]
+    unit = None
+    for _ in range(5):
+        t = time_.perf_counter()
+        for box in probe:
+            logic_.label_breaks_hard(dims[0], box, view, keep, dims, [house, band], [])
+        took = (time_.perf_counter() - t) / len(probe)
+        unit = took if unit is None else min(unit, took)
+    return unit
+
+
+def _load(*units):
+    """How much slower than the idle Mac this machine is now (the slowest of the units measured around the timing)."""
+    return max([1.0] + [u / IDLE_UNIT_S for u in units])
+
+
 def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
     """A property test: random lots, houses, coloured bands, notices and views (the docked 656 x 668 among them),
     every yard's label placed in turn. Each one breaks no HARD rule; whenever a spot at full size within one label
@@ -3502,6 +3534,7 @@ def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
     from design_checker import rhino_logic as logic_
     import time as time_
     rng = random.Random(1525)
+    unit_before = _label_unit()
     views = [(656, 668), (1000, 640), (800, 520), (480, 600), (420, 420)]
     checked, slowest = 0, 0.0
     for case in range(60):
@@ -3556,7 +3589,8 @@ def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
                 if lead is not None and lead[0] <= 3 * lead[1] - 12 and got["size"] == 11:
                     assert got["gap"] <= 3 * got["h"], (case, own, got, lead)
     assert checked >= 200                                                       # most labels placed by the rules
-    assert slowest < 0.03, slowest                # placing one label, at rest (never in the drawing loop): bounded
+    load = _load(unit_before, _label_unit())       # placing one label, at rest (never in the drawing loop): bounded
+    assert slowest < 0.03 * load, (slowest, load)
 
 
 def test_a_moved_label_is_led_and_the_draw_record_keeps_the_rules():
@@ -3602,11 +3636,14 @@ def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_re
     placed = {k: {"left": 10.0 + k, "top": 20.0 + k, "w": 80, "h": 20, "rows": ["x"], "size": 11, "led": False,
                   "forced": False, "gap": 6, "line": lines[k]} for k in range(40)}
     moved = [((x0 + 7, y0 - 3), (x1 + 7, y1 - 3)) for (x0, y0), (x1, y1) in lines]
+    unit_before = _label_unit()
     start = time_.perf_counter()
     for _ in range(20):
         carried = [logic_.follow(placed[k], moved[k]) for k in range(40)]
     per_frame = (time_.perf_counter() - start) / 20
-    assert per_frame < 0.016 and carried[0]["left"] == 17.0 and carried[0]["top"] == 17.0, per_frame
+    load = _load(unit_before, _label_unit())
+    assert carried[0]["left"] == 17.0 and carried[0]["top"] == 17.0, carried[0]
+    assert per_frame < 0.016 * load, (per_frame, load)
     # placing (at rest, outside the drawing loop): the sample's 4 yards and 5 edges, then a busy lot's 16 labels
     lot = (158, 106, 501, 562)
     house = [(185, 250), (420, 250), (420, 415), (185, 415)]
@@ -3688,7 +3725,8 @@ def test_placing_the_labels_is_fast_one_tick_for_the_sample_and_a_resting_label_
         unit = took_ if unit is None else min(unit, took_)
     total, worst = timed(items)
     assert worst < 400 * unit and total < 1500 * unit, (total / unit, worst / unit)   # each label, the sample
-    assert worst < 0.025 and total < 0.1                                        # and plainly bounded anywhere
+    load = _load(unit)                                                           # and plainly bounded anywhere
+    assert worst < 0.025 * load and total < 0.1 * load, (worst, total, load)
     total, worst = timed(busy)
     assert worst < 400 * unit, (total / unit, worst / unit)
     # a tick stops BEFORE a label that would take it past its budget (by the slowest so far): with labels taking
@@ -4116,3 +4154,12 @@ def test_another_document_shows_its_own_ticks():
     ns["STATE"]["panel_parts"] = {"form": form}
     ns["_new_document"](None, None)
     assert synced == [front]
+
+
+def test_the_label_timing_allowance_follows_the_machine_never_below_the_idle_bound():
+    """_load scales the label timing pins' absolute bounds by how much slower the machine is than the idle Mac,
+    never below 1 (a fast machine keeps them as set), so a busy machine can't fail them while a real slowdown of the
+    placement itself (every unit slower, the label far slower still) does."""
+    assert _load(IDLE_UNIT_S / 2) == 1.0 and _load() == 1.0
+    assert _load(IDLE_UNIT_S * 3, IDLE_UNIT_S) == pytest.approx(3.0)
+    assert 0 < _label_unit() < 1e-3
