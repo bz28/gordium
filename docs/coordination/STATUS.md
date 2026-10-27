@@ -243,16 +243,16 @@ Scripts cannot press real keys (Eto), so these are the claims left for a person.
 - Lane C: user guide review loop finished (11 rounds; round 11 clean; each finding checked by a sceptic agent); full suite on the final head 7132bd8: 1392 passed, 7 CI steps passed; pushed to rhino-ui. PRODUCT BUGS found by the guide review, owner #15 rhino-ui, NOT fixed: (a) on a corner lot, Esc at "Click each lot line on a street" acts like Enter and applies the clicks made so far (gordium_rhino.py _box_pick; the docstring says Esc changes nothing); (b) Esc at "Which street is this lot line on?" leaves the street unnamed but still saves the clicked line. GordiumStart then Cancel on a new file leaves the sample lot drawn (guide says so).
 - 2026-10-27 (Lane D) queue item 10 DONE: PR #39 coverage-audit at f9fd7d95 (base r3-hand #30): generated 6_coverage_report/residential_districts.md, 164 rule/flag pieces x 9 districts (python -m section_labeling audit [--check], CI step). Totals 1476 cells: rulebook 85, flag 10, parked 117, n/a 659, MISSING 605 (72 pieces, 49 ranked gaps; mostly wireless 21/district, nonconforming, operational). Real rules missing: HIGH §325-26 20 ft from stream banks (all 9), §325-8B(1) lot area per extra primary building (8; RU flagged); MEDIUM occupancy (Lane B), home occupation + SP accessory uses, §325-7B, South Hill overlay, 3-6 unit attached cap in R-3a/aa/b/RU. Review rounds 7/6/5/4 found, 6/5/5/4 confirmed (2 sceptics each), all fixed + revert-checked; CAP HIT: round 4 fixes not yet through a clean cold round. Full suite 1803 passed, 8 CI steps passed.
 
-## FOR BEN: merge 2 (Lane A, 2026-10-27; nothing merged)
+## FOR BEN: merge 2 (Lane A, 2026-10-27, updated after the Rhino runs; nothing merged)
 Heads now (each full suite = pytest + all 7 CI steps, all passed):
 | PR | branch | base now | head | suite |
 |---|---|---|---|---|
-| #15 | rhino-ui | main | c912159 (main #36 merged in; same files as fc42e5a) | 1,393 passed (at fc42e5a) |
-| #16 | site-lookup | rhino-ui | 40ae4fd | 1,443 passed |
-| #19 | start-box-lookup | site-lookup | 59d7184 | 1,563 passed |
-| #23 | context-map | start-box-lookup | 456f936 | 1,690 passed |
-| #27 | check-button | context-map | 7afad1c | 1,761 passed |
-| #26 | re-lookup | start-box-lookup | 19ed22f | 1,652 passed |
+| #15 | rhino-ui | main | e8c3654 | 1,393 passed |
+| #16 | site-lookup | rhino-ui | b604a0a | 1,443 passed |
+| #19 | start-box-lookup | site-lookup | 8e9fc22 | 1,563 passed |
+| #23 | context-map | start-box-lookup | e80bb05 | 1,690 passed |
+| #27 | check-button | context-map | 540f718 | 1,761 passed |
+| #26 | re-lookup | start-box-lookup | 5711450 | 1,652 passed |
 | #17 | term-index | rhino-ui | d1ff50c | 1,441 passed |
 | #18 | measurement-2 | term-index | c827907 | 2,166 passed |
 | #20 | answer-keys | measurement-2 | ce98fdc | 1,983 passed (earlier job; not re-run) |
@@ -274,3 +274,17 @@ Not carried, and whether it matters:
 - term-index/measurement-2 have rhino-ui fe5da8b, not the newest (guide, Esc): only #15's own plugin/guide files differ, and they merge cleanly (step 7 carries anyway).
 Undo review (step 4): rounds 5 (2 found: 1 fixed, 1 refuted), 6 (2 found: 1 comment fixed, 1 refuted), 7 clean. In-Rhino to run: apps/rhino_plugin/tests/undo_steps_in_rhino.py at 7afad1c (now also Show neighbourhood and Check after every edit).
 - Lane C, merge 2 Rhino runs (2026-10-27; evidence wip/start-box-lookup-rhino-59d7184, wip/re-lookup-rhino-19ed22f, wip/check-button-rhino-7afad1c): (1,4) undo_steps #19 17/33, #27 21/41: "one step" and "checked again" pass everywhere; "undone"/"nothing else" fail everywhere, but a control shows one _Undo from a rhinocode script undoes BOTH of two separate records, so this script cannot tell; real Ctrl+Z after a button press is left for a human; owner #19 (script). (2) pass2 at #19: claim 10 saves "Street 2" and passes; step "scale" claim 7 FAILS at #15 c912159, #16, #19, #27 (passes at demo e760f55): labels now placed by a settle timer (#15), script still records label_at in the draw loop: likely stale script, owner #15, not fixed. (3) re_lookup at #26 19ed22f: 8/9, stops at claim 2 "one Undo puts the sample back exactly": 3 objects missing after Undo (demo e760f55 control 29/30 passes claim 2): PRODUCT BUG candidate, owner #26. (5) demo smoke at #27: 7/7.
+
+On hold until Lane C re-runs (2026-10-27, Lane A): the three Rhino failures at the earlier heads were the scripts, not
+the product (two Opus sceptics each, from the runs' own undo events and code):
+- undo_steps (17/33, 21/41) and re_lookup claim 2 (3 floors missing): one scripted _Undo takes back every record the
+  script wrote outside a command (Lane C's control), so the architect's edit and the sample's own start record went
+  too. Fixed in the scripts: a real _Line command before each step, claims by undo serial, a control that must catch a
+  merged record.
+- pass2 claim 7: the script hooked ui.label_at, which the plugin no longer calls (labels are painted at rest since
+  #15 3446e94); it now reads what the frame painted after settle_labels.
+RE-RUN (Lane C): undo_steps_in_rhino.py at #19 8e9fc22 and #27 540f718; re_lookup_in_rhino.py at #26 5711450;
+pass2_in_rhino.py (step scale) at #15 e8c3654 and #27 540f718. Read out.json "two_in_a_row".
+BY HAND (a person in Rhino, the one real risk left): (1) Enter… then Pick the main building, nothing between,
+Ctrl+Z once: only the main building goes back. (2) _Line, then a panel button, Ctrl+Z once: only the button's change.
+(3) GordiumStart, then Edit site… Look up 96, Draw, Ctrl+Z once: the sample comes back with its house.
