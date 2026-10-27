@@ -14,7 +14,7 @@ from pathlib import Path
 
 import yaml
 
-from .rulebook import REPO, Context, jurisdictions, load, locate, not_quotable, validate
+from .rulebook import REPO, TERM_SCHEMAS, Context, jurisdictions, load, locate, not_quotable, validate, validate_terms
 
 
 def main() -> int:
@@ -30,6 +30,18 @@ def main() -> int:
         for problem in ctx.problems:
             print(f"✗ {place}: {problem}")
         failed += bool(ctx.problems)
+        for schema in TERM_SCHEMAS:
+            path = jurisdiction / "4_term_definitions" / f"{schema}.yaml"
+            if path.exists():
+                try:
+                    problems = validate_terms(load(path), ctx, schema)
+                except Exception as e:
+                    problems = [f"validator error ({type(e).__name__}: {e})"]
+                checked += 1
+                print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
+                for problem in problems:
+                    print(f"    {problem}")
+                failed += bool(problems)
         files = sorted(p for folder in (jurisdiction / "5_zoning_rules", REPO / "test_data/answer_keys" / place)
                        for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file())
         for path in files:
@@ -47,7 +59,7 @@ def main() -> int:
             for problem in problems:
                 print(f"    {problem}")
             failed += bool(problems)
-    print(f"{checked} rule files checked, {failed} with problems")
+    print(f"{checked} files checked, {failed} with problems")
     return 1 if failed else 0
 
 

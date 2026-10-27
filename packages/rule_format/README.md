@@ -46,7 +46,8 @@ Fails closed: `outcome(rule, values, allowed)` requires the city's allowed text 
 ## Checking rule files
 
 ```bash
-python -m rule_format       # validates every jurisdiction's 5_zoning_rules/ and answer keys
+python -m rule_format       # validates every jurisdiction's sources, 4_term_definitions/ (definitions.yaml,
+                            # uses.yaml), 5_zoning_rules/ and test_data/answer_keys/
 pytest packages/rule_format
 ```
 
@@ -59,5 +60,7 @@ Architect approval is deferred for now (decided 2026-10-19): rules stay `status:
 The page text and the quote are both split into **tokens** with one rule (`rulebook.tokenize`): a footnote marker (`[fn11]`), a whole word or number (`rear`, `2.5`, `1,500`, `3/2`, `.5`), or a single other character (`%`, `(`, `§`). `.`, `,` and `/` join only digit to digit (`3/35`, `2.5`), and a leading `.` only starts a number (`.5`); so `minimum/maximum` is three tokens. A quote matches only as a run of **whole tokens**, so `5` can never match inside `25`, `2.5` or `1/2`, `R-1` never inside `R-1b`, and a quote may end on a number before a sentence's period. Spaces and line breaks between words don't matter; inside a number (`2.5`, `1,500`, `3/35`), or around a `.` before a digit (`A.5` is not `A .5`), the quote must match the page exactly. Case, curly quotes and dash styles are unified.
 
 A source gives the **exact position** of its quote: the page and the first and last line (`lines: [first, last]`, the line numbers in `2_extracted_text`). The quote must start on the first line and end on the last, so it can't be matched anywhere else on the page. The quote must occur only once on the page, so a citation points at one place: a bare `35 ft` on a chart row is rejected; quote the row label too (`Height in feet 35 ft 35 ft`). One quote is one unbroken passage; cite separate passages as separate sources. To find the lines, run `python -m rule_format cite <state/place> <file> <page> "<quote>"`.
+
+Definitions (`4_term_definitions/definitions.yaml`) have `term`, `measures`, `sources` (the city's whole sentences, no paraphrase), `open_questions`, and once an architect answers a question, `answers`: `{question, answer, answered_by (a reviewer), answered_on}`. The answers are part of the approval fingerprint, so an answer can't change after approval. Use names (`uses.yaml`) have `name` and `sources`.
 
 Chart values: a quote pins the **row** (its line) but not yet the **column**. Until the chart reader (step 5, next PRs) cites table cells by row and column, a value read from the wrong district's column is caught by comparing the hand-written answer key with the chart reader's output (architect review is deferred for now).

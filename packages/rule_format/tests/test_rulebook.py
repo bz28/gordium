@@ -6,8 +6,8 @@ import math
 import pytest
 import yaml
 
-from rule_format.rulebook import (Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
-                                  validate)
+from rule_format.rulebook import (TERM_SCHEMAS, Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
+                                  validate, validate_terms)
 
 
 def quote_found(quote, tokens):
@@ -510,6 +510,94 @@ def test_source_entry_problems_reach_the_file(tmp_path):
     (j / "1_source_documents/sources.yaml").write_text(s + "    quoteable: false\n")
     ctx = Context.for_jurisdiction(j)
     assert any("unknown field 'quoteable'" in p for p in ctx.file_problems["doc.pdf"]) and "doc.pdf" not in ctx.pages
+
+
+DEFINITION = {
+    "term": "REAR YARD",
+    "measures": ["rear_yard"],
+    "sources": [SOURCE],
+    "open_questions": ["Which line is the rear lot line on an irregular lot?"],
+    "drafted_by": "claude",
+    "status": "draft",
+}
+
+
+def test_valid_definitions_and_uses(ctx):
+    assert validate_terms({"rear_yard": DEFINITION}, ctx, "definitions") == []
+    use = {"name": "One-family dwelling, detached", "sources": DEFINITION["sources"],
+           "drafted_by": "claude", "status": "draft"}
+    assert validate_terms({"one_family_detached": use}, ctx, "uses") == []
+
+
+@pytest.mark.parametrize("entries, problem", [
+    ({}, "non-empty mapping"),
+    ({"Rear Yard": DEFINITION}, "lowercase_with_underscores"),
+    ({"rear_yard": DEFINITION | {"measures": ["rear_yrd"]}}, "unknown measure 'rear_yrd'"),
+    ({"rear_yard": DEFINITION | {"says": "Open space behind the house."}}, "unknown field 'says'"),
+    ({"rear_yard": DEFINITION | {"term": ["REAR YARD"]}}, "'term' must be text"),
+    ({"rear_yard": DEFINITION | {"open_questions": "which line?"}}, "'open_questions' must be a list"),
+    ({"rear_yard": DEFINITION | {"colour": "red"}}, "unknown field 'colour'"),
+    ({"rear_yard": DEFINITION | {"sources": [SOURCE | {"quote": "Rear (minimum, % of depth or feet, 30%/"}]}},
+     "not on this page"),
+    ({"rear_yard": DEFINITION | {"status": "approved", "approved_by": "claude",
+                                 "approved_on": datetime.date(2026, 10, 19)}}, "approved_by must be a reviewer"),
+])
+def test_invalid_definitions_are_rejected(ctx, entries, problem):
+    assert any(problem in p for p in validate_terms(entries, ctx, "definitions"))
+
+
+ANSWER = {"question": "Which line is the rear lot line on an irregular lot?", "answer": "The one opposite the street.",
+          "answered_by": "jane", "answered_on": datetime.date(2026, 10, 20)}
+
+
+@pytest.mark.parametrize("answers, problem", [
+    ("the one opposite", "'answers' must be a list"),
+    ([{"question": "q?", "answer": "a"}], "exactly question, answer, answered_by, answered_on"),
+    ([ANSWER | {"answer": "  "}], "must be text"),
+    ([ANSWER | {"question": 3}], "must be text"),
+    ([ANSWER | {"answered_by": "claude"}], "answered_by must be a reviewer"),
+    ([ANSWER | {"answered_on": "2026-10-20x"}], "answered_on must be a date"),
+])
+def test_invalid_answers_are_rejected(ctx, answers, problem):
+    assert any(problem in p for p in validate_terms({"rear_yard": DEFINITION | {"answers": answers}}, ctx, "definitions"))
+
+
+def test_answered_definition_can_be_approved(ctx):
+    fields = TERM_SCHEMAS["definitions"]["approved"]
+    answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"} | {"answers": [ANSWER]}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20),
+                           "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
+    assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
+    reworded = approved | {"answers": [ANSWER | {"answer": "The one at the back."}]}  # an answer is frozen too
+    assert any("changed since it was approved" in p for p in validate_terms({"rear_yard": reworded}, ctx, "definitions"))
+
+
+def test_approved_definition_needs_reapproval_after_an_edit(ctx):
+    fields = TERM_SCHEMAS["definitions"]["approved"]
+    answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
+                           "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
+    assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
+    for edit in ({"term": "REAR YARDS"}, {"measures": ["rear_yard", "lot_depth"]}, {"answers": [ANSWER]},
+                 {"sources": [SOURCE | {"lines": [41, 43], "quote": "10 ft [fn15] " + QUOTE}]}):
+        assert any("changed since it was approved" in p
+                   for p in validate_terms({"rear_yard": approved | edit}, ctx, "definitions"))
+    assert any("changed since it was approved" in p                          # renamed: rules use the key
+               for p in validate_terms({"side_yard": approved}, ctx, "definitions"))
+    reopened = approved | {"open_questions": ["new doubt?"]}                 # a new question blocks approval
+    assert any("open_questions remain" in p for p in validate_terms({"rear_yard": reopened}, ctx, "definitions"))
+
+
+def test_definition_with_open_questions_cannot_be_approved(ctx):
+    approved = DEFINITION | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
+    approved["approved_hash"] = approval_hash(approved | {"id": "rear_yard"}, ctx, TERM_SCHEMAS["definitions"]["approved"])
+    assert any("open_questions remain" in p for p in validate_terms({"rear_yard": approved}, ctx, "definitions"))
+
+
+def test_approved_entry_without_drafter_is_reported_not_crashed(ctx):
+    entry = {k: v for k, v in DEFINITION.items() if k not in ("drafted_by", "open_questions")}
+    entry |= {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
+    assert any("missing 'drafted_by'" in p for p in validate_terms({"rear_yard": entry}, ctx, "definitions"))
 
 
 def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
