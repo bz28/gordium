@@ -5,7 +5,10 @@ Usage (from a checkout's root): /Users/benzhao/Documents/Gordium/.venv/bin/pytho
 Extra pytest args (e.g. a single test path) run pytest only, as before."""
 import fcntl, os, re, subprocess, sys, time, glob
 SLOTS = 2
-LOCKDIR = os.path.dirname(os.path.abspath(__file__))
+# One lock folder for the whole Mac: agents run their own copies of this file, so a per-copy folder
+# never limited anything (2026-10-27: 4 parallel full runs at once, load 17 on 8 cores).
+LOCKDIR = "/private/tmp/gordium_full_suite_locks"
+os.makedirs(LOCKDIR, exist_ok=True)
 start = time.time(); held = None
 while held is None:
     for i in range(SLOTS):
@@ -35,7 +38,7 @@ try:
     par = not sys.argv[1:]
 except ImportError:
     par = False
-code = run(base + (["-n", "4"] if par else []) + sys.argv[1:])
+code = run(base + (["-n", "3"] if par else []) + sys.argv[1:])
 if code and par:
     print("[full_suite] PARALLEL RUN FAILED: re-running one at a time; report both results", flush=True)
     code = run(base)
