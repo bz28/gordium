@@ -1220,6 +1220,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             why = worst + said + "."
             if not (measured.get("stories") or {}).get("count_settles") and PICK_MAIN_WHY not in why:
                 hint = PICK_MAIN if (measured.get("stories") or {}).get("main_assumed") else hint
+        span_ft = None                   # a limit read two ways (the lot depth open), in feet: its range
         if node is not None and required == "—" and st in (REVIEW, FAILS):
             # the limit waits on an open measurement (the lot depth, on which lines are side or rear): show the
             # limit's range over its readings, and say once what it depends on (architect review P1-3)
@@ -1236,6 +1237,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             if got:
                 unit = (measured.get(node.left.id) or {}).get("unit") or ""
                 lo, hi = min(got), max(got)
+                span_ft = [lo, hi] if unit == "ft" else None
                 required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
                             f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
                 # the same limit under every reading: it depends on none of them (#20 review round 1)
@@ -1328,6 +1330,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
             "objects": (measured.get(node.left.id) or {}).get("objects", []) if node is not None else [],
             "points": (measured.get(node.left.id) or {}).get("points") if node is not None else None,
+            # the limit as drawn, in feet, for the plan's faint required line (a yard, the height); None otherwise
+            "limit_ft": (numbers[1] if node is not None and numbers[3] == "ft" and isinstance(numbers[1], (int, float))
+                         else None),
+            "limit_span_ft": span_ft,
             "detail": {
                 "line": line,
                 "quotes": quotes,
@@ -1545,6 +1551,8 @@ def _raise_yards(items, measured, values, facts):
                     continue
                 t["required"], t["margin"], t["hint"] = value_text(req, unit, sign, False), margin_text(margin, unit), None
                 t["_node"] = c                           # its Delta and colours are the raised minimum's
+                if unit == "ft":                         # the plan's faint required line too (review round 1, F1)
+                    t["limit_ft"] = req
                 t["_raised"] = (i["rule"], expr)         # (and its "To comply", confirmed against it: settle)
                 t["_expr"] = f"({t['_expr']}) and ({expr})" if t.get("_expr") else expr
                 if worst is not None:                    # the raised minimum fails at the tax-map worst case
@@ -1587,6 +1595,49 @@ def _cautious_for_left_out(items, left_out, touching):
         i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=why + " · Add to check…")
 
 
+# What each looked-up fact decides (facts["unsettled"]): every measurement worked out from it. The lot outline decides
+# the lot's area, width and depth and every yard; the street side decides which line is the front, so the yards and
+# the lot's width and depth; the ground decides height and stories. An item needs review when ANY name in its rule's
+# formula is one of them, not only its own measurement: the height bonus (§325-16C) complies through the yards and
+# the lot depth (review round 1 of PR #19: it stayed "complies" on a doubtful lot).
+YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
+UNSETTLED_DECIDES = {
+    "lot": ("lot_area", "lot_width", "lot_depth") + YARDS,
+    "street": ("lot_width", "lot_depth") + YARDS,
+    "ground": ("building_height", "stories"),
+}
+UNSETTLED_NAMES = {"lot": "lot outline", "street": "street side", "ground": "ground levels"}
+
+
+def _formula_names(item, rules_by_id):
+    """Every measurement the item's rule reads (its formula), else its own measurement."""
+    rule = (rules_by_id or {}).get(item.get("rule")) or {}
+    try:
+        return set(formula.names(rule["check"])) if rule.get("check") else {item.get("measure")} - {None}
+    except Exception:                            # a formula that can't be read: its own measurement, at least
+        return {item.get("measure")} - {None}
+
+
+def _cautious_for_unsettled(items, unsettled, rules_by_id=None):
+    """A looked-up fact found doubtful, not yet confirmed or changed by the architect: every item whose rule reads a
+    measurement worked out from it needs review (coordinator, 2026-10-20: never a false pass)."""
+    for key, why in (unsettled or {}).items():
+        decides = set(UNSETTLED_DECIDES.get(key) or ())
+        for i in items:
+            if i["status"] != COMPLIES or not (_formula_names(i, rules_by_id) & decides):
+                continue
+            i.update(status=REVIEW, mark=MARK[REVIEW], hint="Edit site…",
+                     reason=f"Complies on the looked-up {UNSETTLED_NAMES[key]}, which needs review: {why} · "
+                            "confirm it (I checked this) or change it in Edit site…")
+
+
+def _on_context(extras):
+    """The left-out objects on the neighbourhood's layers (PR #23: its footprints are editable), said on the row."""
+    k = len((extras or {}).get("context_left_out") or [])
+    return (f" · {k} on the neighbourhood layers (Gordium::Context): move {'them' if k != 1 else 'it'} to the "
+            "Building layer if part of your design") if k else ""
+
+
 def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction=None) -> dict:
     """Every item, grouped; the summary; the header. `extras` is what the Rhino command adds: what it sent
     (scope), objects on the lot it didn't include, and the grade and lot sources."""
@@ -1609,6 +1660,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
     _cautious_for_left_out(items, left_out, extras.get("touching"))
+    _cautious_for_unsettled(items, facts.get("unsettled"), rules_by_id)
     for i in items:                                  # THE guard: never above the checker's verdict (round 3)
         checker = i.pop("_checker", None)
         if checker is not None and RANK[i["status"]] > RANK[checker]:
@@ -1644,7 +1696,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "points": None, "hint": "Add to check…",
                       "ground_like": [o for o in extras.get("ground_like") or [] if o in left_out],
                       "reason": f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t "
-                                "measured (not on the Building layer) · Add to check…" + (
+                                "measured (not on the Building layer) · Add to check…" + _on_context(extras) + (
                                     f" (" + str(len(extras.get("ground_like") or [])) + " looks like the ground: if it is, "
                                     "This is the ground)" if extras.get("ground_like") else ""),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
@@ -1702,6 +1754,9 @@ def grade_label(facts: dict) -> str:
     elevation 0'-0"", or "not set"."""
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
     if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
+        if facts.get("ground_fall"):                          # a lookup found the ground: say plainly how it falls
+            return (f"assumed flat (the looked-up ground falls about {facts['ground_fall']:g} ft across the lot; "
+                    "height is checked as if flat)")
         return f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)})"   # the team's words
     points = facts.get("grade_points") or []
     if points:
@@ -1740,7 +1795,8 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
 
 SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Front lot line (on the street)",
                 "corner_lot": "Corner lot", "ground_marked": "Marked as the ground", "starting_house": "Starting house",
-                "ground": "Ground"}
+                "ground": "Ground", "dwelling_units": "Dwelling units", "rooms_let_for_profit": "Rooms let for profit",
+                "conversion": "Conversion of an existing building"}
 
 
 def source_lines(sources: dict) -> list[str]:

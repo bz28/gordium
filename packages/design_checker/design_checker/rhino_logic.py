@@ -2,15 +2,18 @@
 Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
+import datetime as _dt
 import json
 import math
 import queue
+import re
 import threading
 
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
 FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew: "<story>;<height drawn, ft>"
 MASSING = "Gordium::Massing"            # where GordiumStart draws the starting building: building objects too
+MASSING_ROOF = MASSING + "::Roof"       # its roof's sublayer (the architect's own roof goes there too): a building
 SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
                 "Leader", "LinearDimension", "AngularDimension", "RadialDimension", "OrdinateDimension")
@@ -18,9 +21,82 @@ DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Ha
 REQUIRED = ("jurisdiction", "zone", "use", "street_line", "lot_surveyed")   # corner lot unanswered: the yards wait (C)
 
 
+def massing_floor(n):
+    """The sublayer of the starting house's floor n (1 up): Gordium::Massing::Floor 1, … (Ben, 2026-10-21)."""
+    return MASSING + "::Floor " + str(int(n))
+
+
 def on_layer(full_path, layer):
     """A layer or one of its sublayers ("Building::Garage")."""
     return full_path == layer or full_path.startswith(layer + "::")
+
+
+CONTEXT = "Gordium::Context"            # the context map (neighbouring parcels, streets, notes): drawing only
+ENVELOPE = "Gordium::Envelope"          # the curves the architect snaps to (the buildable outline, the yard lines)
+ENVELOPE_KEY = "gordium_envelope"       # on each of those curves: what it is (Gordium's own, redrawn each check)
+CONTEXT_KEY = "gordium_context"         # on each context object: the endpoints.yaml source it was drawn from
+HOLDING_LAYER = "Gordium::Replaced (Cancel restores)"   # objects a start box replaced, until Draw (BoxSession)
+HELD_FROM = "gordium_held_from"                          # on each held object: the layer it came from
+ADDED_BY = "gordium_added"                               # on each object a start box drew: its session, until Draw
+HELD_BY = "gordium_held_by"                              # on each held object: the session holding it
+OPEN_SESSIONS = set()          # the sessions of start boxes open now (recovery never touches theirs: review round 4)
+BOX_BUSY = "Finish or cancel the open start box first."
+
+
+class BoxGate:
+    """One start box at a time (review round 4: Edit site… from the panel during a pick opened a second box)."""
+
+    def __init__(self):
+        self.open = False
+
+    def enter(self):
+        if self.open:
+            return False
+        self.open = True
+        return True
+
+    def leave(self):
+        self.open = False
+
+
+def envelope_outlines(env, plan):
+    """The buildable outline(s) the blue envelope is drawn on (feet): on a tax-map lot the cautious one, every lot
+    line 2'-0" nearer (each piece of it; none where nothing is left: the as-drawn outline is then only the dashed
+    curve on Gordium::Envelope), so the envelope shows where a building complies however the tax map's lines lie
+    (Ben, 2026-10-21: "cautious envelope on tax-map lots"); on a survey the outline as drawn. Largest first, by the
+    shoelace area (_ring_area): plain Python, because Rhino's own Python runs this module and has no shapely (every
+    check in Rhino failed "No module named 'shapely'")."""
+    outline = (env or {}).get("outline")
+    if not outline:
+        return []
+    plan = plan or {}
+    cautious = plan.get("buildable_cautious")
+    if not plan.get("lot_from_tax_map") or cautious is None:
+        return [outline]
+    rings = [cautious] if cautious and isinstance(cautious[0][0], (int, float)) else list(cautious)
+    return sorted(rings, key=lambda r: -abs(_ring_area(r)))
+
+
+def envelope_curves(plan):
+    """The curves drawn on Gordium::Envelope for the architect to snap to (Osnap), from check.plan, in feet: each
+    {"points" [[x, y], ...], "closed", "dashed", "what"}. The buildable outline (on a tax-map lot the cautious one,
+    every lot line 2'-0" nearer, solid; the outline as drawn dashed) and each yard's required line in full (dashed
+    on a tax-map lot: it is as drawn). Never measured (classify); redrawn at every check."""
+    plan = plan or {}
+    tax = bool(plan.get("lot_from_tax_map"))        # dashed whenever the lot is the tax map's, whatever is left 2'-0"
+    cautious, drawn = plan.get("buildable_cautious") or [], plan.get("buildable")   # in (review of feature 4, F3)
+    if cautious and isinstance(cautious[0][0], (int, float)):       # (one ring)
+        cautious = [cautious]
+    out = []
+    for ring in cautious if tax else []:
+        out.append({"points": ring, "closed": True, "dashed": False, "what": "buildable outline (cautious)"})
+    if drawn:
+        out.append({"points": drawn, "closed": True, "dashed": tax,
+                    "what": "buildable outline" + (" (as drawn, tax map)" if tax else "")})
+    for y in plan.get("yard_lines") or []:
+        out.append({"points": y["points"], "closed": False, "dashed": tax,
+                    "what": "required line: " + (y.get("name") or y.get("measure") or "yard")})
+    return out
 
 
 def classify(full_path, kind, holds_building=False):
@@ -29,6 +105,12 @@ def classify(full_path, kind, holds_building=False):
     None (anything else, ignored), or a problem sentence. Nothing that could be part of a building is dropped:
     a block on the building layer, or a block holding building objects wherever it is placed, and any other
     geometry on the building layer, are problems, so the checker says NEEDS REVIEW."""
+    if on_layer(full_path, HOLDING_LAYER):           # held by an open start box: never measured or sent
+        return None
+    if on_layer(full_path, CONTEXT):                 # the neighbourhood drawn for context: never measured or sent
+        return None
+    if on_layer(full_path, ENVELOPE) and kind.endswith("Curve"):   # the curves to snap to: Gordium's, never
+        return None                                  # measured (anything else there is judged as anywhere: F7)
     if on_layer(full_path, MASSING):
         full_path = LAYERS["building"]
     if kind.startswith("InstanceReference") and (on_layer(full_path, LAYERS["building"]) or holds_building):
@@ -90,11 +172,48 @@ def highlight(status):
     return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
 
 
+def coloured_info(entry):
+    """What a coloured piece is, kept with it in the drawn list: why (yard or height), the row it is for (its
+    measure and name) and its building, from the plan's block (check.plan). The in-Rhino checks read exactly the
+    list that is drawn, so a claim can't mistake the rear yard's strip for the side yard's (Rhino check of #28)."""
+    return {k: entry.get(k) for k in ("why", "measure", "row", "building")}
+
+
+def block_span(entry, solid_bottom=None, solid_top=None):
+    """The heights (feet) a coloured block is cut from in Rhino: the checker's (check.plan), reaching to the real
+    solid's own top (and, for a yard strip, its own bottom) when Rhino's solid goes further. The checker measures
+    only the faces it can read (a curved vault is left out: its height needs review), so its top can be the wall
+    tops, while the vault above them is just as much over the limit (the Rhino check of #28 at fc0b023: only the
+    band from 35 to 36 ft was coloured, under a vault to 42 ft). A height block always starts at the limit."""
+    base, top = entry["base"], entry["top"]
+    if solid_top is not None:
+        top = max(top, solid_top)
+    if solid_bottom is not None and entry.get("why") != "height":
+        base = min(base, solid_bottom)
+    return base, top
+
+
+def offending_pieces(pieces, block):
+    """What a coloured block draws: the building's own part inside it (Rhino's boolean intersection, `pieces`), or
+    the block itself when the intersection gave nothing (it failed, or the building is a mesh or a solid Rhino
+    can't cut; a block instance is never measured: it is a setup problem, "explode it"), so a failing part is never
+    left uncoloured because a boolean failed."""
+    kept = [p for p in pieces or [] if p is not None]
+    return kept or [block]
+
+
 def labels_on(ui_state):
     """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
     unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the
     red stay either way."""
     return bool((ui_state or {}).get("show_labels", False))
+
+
+def context_shown(ui_state):
+    """Whether the neighbourhood (the context map) is shown: on unless the architect unticked Show neighbourhood in
+    this document. Kept per file, like Show on-screen labels (coordinator's decision, 2026-10-21: an architect
+    reopening a file expects the same view)."""
+    return bool((ui_state or {}).get("show_context", True))
 
 
 def yard_label_shown(labels, status):
@@ -107,13 +226,22 @@ def legend_text(code=None):
     """The legend ("?"): the marks, what the plan shows, the precision, and which version of the law was checked
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
-            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
-            "measured distance. Red marks only the part of the building inside a required yard or above the height "
-            "limit. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard "
+            "dimensioned square to its lot line from the wall facing it, as a drawing is: red where it fails, amber "
+            "where it needs review, complying ones neutral grey (colour only what's wrong); its number only, on its "
+            "line (✕ or ? before it when wrong; its name and what it needs are in the panel), the required line "
+            "dashed across it, tagged \"min\" where the yard fails or needs review; in the elevations the height, "
+            "dimensioned up from the grade plane, with the limit faint. In plan these lines are drawn over "
+            "everything; in every other view they hide behind the solids in front of them, as the model's own lines "
+            "do. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
-            "In the model: RED is the part of the building that does not comply (under every reading); AMBER is the "
-            "part a rule that needs review is about (for example inside the 2'-0\" tax-map caution zone of a yard). "
-            "The buildable envelope is only a see-through guide: colours come from the rules' results.")
+            "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
+            "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
+            "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
+            "block isn't measured until it is exploded). RED: it "
+            "fails there under every reading. AMBER: it fails there under some readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
+            "Nothing where it complies. The buildable envelope is only a see-through guide: colours come from the "
+            "rules' results.")
     return text + ("\n\nChecked against: " + code if code else "")
 
 
@@ -230,6 +358,288 @@ def refused_stories(items):
     return (i_said[0].upper() + i_said[1:] if i_said else "The count") + ". The count wasn't kept."
 
 
+INTERIOR_FACTS = ("sleeping_rooms", "parking_spaces")    # inside the building (on hold): never asked in the box
+# Read from the drawing (the main building is one; solids standing apart that could hold a home are readings), so the
+# box never asks them up front: the panel's Enter flow still does, where the drawing can't say (measure._primary_buildings)
+DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
+BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS)   # what the box can ask
+
+
+def answered_in_box(needs):
+    """Whether a row's missing facts are all ones the box asks (its button then opens the box, Edit site…, to answer
+    them there: Ben, 2026-10-25, "a link to answer in the box, not a pop-up")."""
+    return bool(needs) and all(k in BOX_ASKS for k in needs)
+
+
+# What a use itself says about a fact, from the City's own definitions, so it is never asked (Ben, 2026-10-25):
+# §325-3 "DWELLING, ONE-FAMILY — A dwelling unit…" (chapter p.7) and "DWELLING, TWO-FAMILY — A building containing two
+# dwelling units…" (p.9). Exactly these uses: a semi-detached or attached one-family dwelling is one unit of a
+# building the rules count as a whole (R-3a's note 7 reads the row's dwelling units), so its count is asked, never
+# taken as 1 (a row of six would pass a lot sized for three).
+IMPLIED_BY_USE = {"one_family_detached": {"dwelling_units": 1}, "two_family": {"dwelling_units": 2}}
+IMPLIED_SOURCE = "said by the use (City definition, §325-3)"
+
+
+def implied_facts(use):
+    """What the use itself says (IMPLIED_BY_USE), for this use only: never a prefix or a guess."""
+    return dict(IMPLIED_BY_USE.get(use) or {})
+
+
+# A fact that only matters once another is "yes": its rules are gated by it (a stream's distance by "a stream is within
+# 20 ft", the home occupation's floor areas by "a home occupation is planned"), so it is asked only after that answer.
+# Until then the rules say they need the first answer, never the second.
+ASKED_AFTER = {"home_occupation_area": "home_occupation", "home_occupation_unit_area": "home_occupation",
+               "stream_distance": "stream_near_lot"}
+
+
+def follow_up_keys(options, zone, use, answers=None):
+    """The facts the box asks after Use for this district and use (options["follow_ups"], from the rulebook). With
+    `answers` (the facts as entered so far), a fact in ASKED_AFTER is asked only when the one it waits on is yes;
+    without them, every fact the rules read."""
+    keys = [k for k in (((options or {}).get("follow_ups") or {}).get(zone) or {}).get(use) or [] if k in BOX_ASKS]
+    if answers is None:
+        return keys
+    return [k for k in keys if k not in ASKED_AFTER or answers.get(ASKED_AFTER[k]) is True]
+
+
+def gate_of(answers):
+    """The answers that decide which follow-up questions are asked (the ones ASKED_AFTER names): what the box compares
+    to know it must open again."""
+    return {p: (answers or {}).get(p) is True for p in sorted(set(ASKED_AFTER.values()))}
+
+
+# What each question is called in the box's compact "About this project" section (the full question is its hover text
+# and the panel's Enter prompt), and the one-click answers it offers after "Not answered". A yes / no question offers
+# its two answers in the architect's words; a count with a small range offers the numbers. Never a default: the
+# dropdown starts on "Not answered" and the rules that read the fact say so (NEVER a false pass).
+ABOUT_LABELS = {
+    "unrelated_persons": "Unrelated people in one home",
+    "unrelated_persons_with_children": "Unrelated people in one home",
+    "occupants": "Occupants on the lot",
+    "occupants_most_in_one_unit": "Most occupants in one unit",
+    "rooms_let_for_profit": "Rooms let for profit",
+    "dwelling_units": "Homes on this lot",
+    "attached_units_in_building": "Homes in the attached building",
+    "owner_occupied": "Owner lives in the house",
+    "accessory_dwelling_unit": "Accessory dwelling unit",
+    "functional_family_unit": "Functional family unit",
+    "home_occupation": "Home business",
+    "home_occupation_area": "Business floor area (sq ft)",
+    "home_occupation_unit_area": "Its home's floor area (sq ft)",
+    "stream_near_lot": "Stream or inlet",
+    "stream_distance": "Distance to it (ft)",
+    "south_hill_overlay": "South Hill Overlay",
+    "abuts_r1_district": "Next to R-1 land",
+    "conversion": "New or converted",
+}
+ABOUT_WORDS = {            # (the "no" answer, the "yes" answer)
+    "owner_occupied": ("Owner lives elsewhere", "Owner lives in the house"),
+    "accessory_dwelling_unit": ("No ADU on the lot", "ADU on the lot"),
+    "functional_family_unit": ("Not relying on one", "Will show it to the City"),
+    "home_occupation": ("No home business", "Home business planned"),
+    "stream_near_lot": ("No stream within 20 ft", "Stream or inlet within 20 ft"),
+    "south_hill_overlay": ("Not in the South Hill Overlay", "In the South Hill Overlay"),
+    "abuts_r1_district": ("No R-1 land touches it", "R-1 land touches or faces it"),
+}
+ABOUT_COUNTS = {            # a count's one-click numbers (a typed number is not offered here: the panel's Enter flow)
+    "unrelated_persons": [("0 (one family)", 0)] + [(str(n), n) for n in range(1, 7)],
+    "unrelated_persons_with_children": [("0 (one family)", 0)] + [(str(n), n) for n in range(1, 7)],
+    "rooms_let_for_profit": [("None", 0)] + [(str(n), n) for n in range(1, 7)],
+    "attached_units_in_building": [(str(n), n) for n in range(2, 9)],
+    "dwelling_units": [(str(n), n) for n in range(1, 9)],
+}
+# Several answers in one click (shown only when the district and use ask at least one of them; it fills the others
+# that are asked and leaves the rest as they were). Each is a statement the architect makes by picking it.
+QUICK_ANSWERS = (
+    ("1 family, no roomers", {"unrelated_persons": 0, "unrelated_persons_with_children": 0, "rooms_let_for_profit": 0,
+                              "functional_family_unit": False}),
+    ("Owner lives there, no ADU", {"owner_occupied": True, "accessory_dwelling_unit": False}),
+    ("No home business", {"home_occupation": False}),
+    ("No stream, not in South Hill", {"stream_near_lot": False, "south_hill_overlay": False}),
+)
+
+
+ABOUT_LABEL_WIDTH, ABOUT_FIELD_WIDTH, ABOUT_TYPED_WIDTH, ABOUT_QUICK_WIDTH = 190, 215, 100, 215   # px
+ABOUT_NOTE_WIDTH = 560
+QUICK_HINT = "Pick to fill several answers…"
+
+
+def about_label(key):
+    return ABOUT_LABELS.get(key) or STATED_FACTS[key][2][:1].upper() + STATED_FACTS[key][2][1:]
+
+
+def choices_for(key, kind, value=None):
+    """The one-click answers a question offers, [(words, value)], or None when it is typed (areas, distances, the
+    counts without a small range). A value already set that the list lacks (typed in the panel) stays among them."""
+    if kind == "yes_no":
+        no, yes = yes_no_words(key)
+        return [(no, False), (yes, True)]
+    listed = ABOUT_COUNTS.get(key)
+    if listed is None:
+        return None
+    if value is not None and value not in [v for _, v in listed]:
+        listed = listed + [(str(value), value)]
+    return list(listed)
+
+
+def quick_answers(keys):
+    """The one-click answers for several questions at once: [(words, {fact: value})], each only with the facts that are
+    asked (`keys`), and only when it fills at least one."""
+    out = []
+    for words, sets in QUICK_ANSWERS:
+        mine = {k: v for k, v in sets.items() if k in keys}
+        if mine:
+            out.append((words, mine))
+    return out
+
+
+def follow_up_rows(options, zone, use, facts):
+    """The box's questions after Use: the facts the district's rules need for this use (follow_up_keys), each
+    {"key", "label" (the full question), "short" (its name in the compact section), "kind" (count / yes_no / area /
+    length), "value" (as entered, or None), "choices" (its one-click answers, or None when typed)}; none when the
+    district has no such rule or the use says them."""
+    return [{"key": k, "label": STATED_FACTS[k][0], "short": about_label(k), "kind": STATED_FACTS[k][1],
+             "value": (facts or {}).get(k), "choices": choices_for(k, STATED_FACTS[k][1], (facts or {}).get(k))}
+            for k in follow_up_keys(options, zone, use, facts or {})]
+
+
+# The words a yes / no question's dropdown offers after "Not answered": (the "no" answer, the "yes" answer)
+YES_NO_WORDS = {"conversion": ("New construction", "Conversion of an existing building")}
+NOT_ANSWERED = "Not answered"
+FOLLOW_UP_HELP = "entered by you; left blank, the rules that need it say so (never read as 0 or no)"
+
+
+def yes_no_words(key):
+    return YES_NO_WORDS.get(key) or ABOUT_WORDS.get(key) or ("No", "Yes")
+
+
+def _listed(options, zone):
+    return ((options or {}).get("district_uses") or {}).get(zone) or []
+
+
+def use_note(options, zone, use):
+    """What the box says under Use when the pick isn't permitted by right in the district: the chart's own words
+    (a special permit), or, for a use the district's chart doesn't list at all, that its Use row won't comply.
+    None when it is permitted (or the district lists no uses)."""
+    listed = _listed(options, zone)
+    for u in listed:
+        if u["id"] == use:
+            return u.get("note")
+    if listed and use:
+        name = ((options or {}).get("uses") or {}).get(use, use)
+        return f"{name} isn't on {zone}'s list of uses in the zoning chart: its Use row won't comply."
+    return None
+
+
+def district_use_names(options, zone, current=None):
+    """The Use dropdown's choices for the district: [(id, name)], permitted first, as the chart lists them; every
+    city use when the district has none listed. The use already set stays among them even when the district doesn't
+    list it (last), so opening the box never changes it unasked (use_note says why it won't comply)."""
+    names = (options or {}).get("uses") or {}
+    out = [(u["id"], u["name"]) for u in _listed(options, zone)] or list(names.items())
+    if current and current not in [k for k, _ in out]:
+        out.append((current, names.get(current, current)))
+    return out
+
+
+def box_needs_refresh(options, shown, now):
+    """Whether the box must open again after a pick in its Use or district dropdown, or in a question another waits on
+    (a stream's yes opens its distance): `shown` and `now` are (zone, use) or (zone, use, gate_of(answers)) as laid
+    out and as picked. Again when the uses offered, the note under Use or the questions after it differ (their fields
+    are laid out once); never for a pick that changes none of them."""
+    def layout(zone, use, gate=None):
+        asked = None if gate is None else {p: True for p, yes in gate.items() if yes}
+        return district_use_names(options, zone, use), use_note(options, zone, use), \
+            follow_up_keys(options, zone, use, asked)
+    return layout(*shown) != layout(*now)
+
+
+def answers_applied(facts, answers, zone, use, options):
+    """The facts after the box: every fact the box can ask (BOX_ASKS) is set only from what this district's rules
+    need for this use: the architect's answer to each question asked (a blank or a refused entry: unset, so its
+    rules need review, never 0 or no), and what the use itself says for the facts its rules read (implied_by).
+    Anything else goes: an answer given for another use or district never stays behind (a multiple dwelling's 5
+    units checked as a two-family's). Returns (facts, the keys the architect answered)."""
+    asked = follow_up_keys(options, zone, use, answers or {})
+    given = {k: v for k, v in (answers or {}).items() if k in asked and v is not None}
+    out = {k: v for k, v in (facts or {}).items() if k not in BOX_ASKS}
+    out.update(implied_by(options, zone, use))
+    return update_counts(out, given), sorted(given)
+
+
+def implied_by(options, zone, use):
+    """What the use says for the facts this district's rules read (options["implied"]): never asked."""
+    return dict((((options or {}).get("implied") or {}).get(zone) or {}).get(use) or {})
+
+
+def parse_answer(kind, text, key=None):
+    """A follow-up field's text as the fact's value: a whole number (count: `key`'s least, 0 unless MINIMUM says
+    more), a number of square feet or feet (area, length: 0 or more, as typed, never rounded), yes / no (yes_no);
+    blank: None (unanswered: its rules stay NEEDS REVIEW, never 0 or no); anything else raises ValueError."""
+    text = (text or "").strip().lower()
+    if not text:
+        return None
+    if kind == "yes_no":
+        if text in ("yes", "y"):
+            return True
+        if text in ("no", "n"):
+            return False
+        raise ValueError("answer yes or no")
+    if kind in ("area", "length"):
+        if not re.fullmatch(r"(\d[\d,]*(\.\d+)?|\.\d+)", text, re.ASCII):
+            raise ValueError("a number of " + ("square feet" if kind == "area" else "feet") + ", 0 or more")
+        number = float(text.replace(",", ""))
+        return int(number) if number == int(number) else number
+    least = minimum(key) if key else 0
+    if not (text.isascii() and text.isdigit()) or int(text) < least:
+        raise ValueError(f"a whole number, {least} or more")
+    return int(text)
+
+
+def answer_problem(kind, text, key=None):
+    """What the box says beside a follow-up field whose text isn't an answer (None when it is, or is blank): the
+    entry is not kept, so the rules that need it say so (never read as 0)."""
+    try:
+        parse_answer(kind, text, key)
+    except ValueError as e:
+        return f"Not kept: {e}. Its rules need review until it is."
+    return None
+
+
+# The box's questions after Use, each as its words wrapped at QUESTION_WIDTH with its answer beside them, and one note
+# under them all: the start box stays laptop-sized (≤ ~900 px wide) with the longest questions (#38's household ones
+# ran ~1,200 px on one line and pushed the box to 1,560-2,020 px: Rhino run of demo 2c0a5c0). Pinned in
+# test_box_width.py, which lays the real box out and bounds its width.
+QUESTION_WIDTH = 360
+
+
+TEXT_PX = 6.0      # px a character at size 12, a little over the system font's (~5.5 measured in Rhino): errs wide
+
+
+def text_wider(text, size, px):
+    """Whether `text` at `size` (13 when not set) runs wider than `px` on one line (by TEXT_PX), so its label wraps."""
+    return len(text or "") * TEXT_PX * (size or 13) / 12 > px
+
+
+def answers_note(entries):
+    """The note under the box's questions, for `entries` [(key, kind, text)] in the order asked: FOLLOW_UP_HELP, or
+    every entry not kept, each named by its fact ("Rooms let for profit: Not kept: …"), so each is said at once and
+    never read as 0. Returns (text, refused)."""
+    said = []
+    for key, kind, text in entries:
+        try:
+            parse_answer(kind, text, key)
+        except ValueError as e:
+            said.append((STATED_FACTS[key][2] if key in STATED_FACTS else key.replace("_", " "), str(e)))
+    if not said:
+        return FOLLOW_UP_HELP, False
+    if len(said) == 1:
+        name, why = said[0]
+        return f"{name[0].upper() + name[1:]}: Not kept: {why}. Its rules need review until it is.", True
+    listed = ", ".join(f"{name} ({why})" for name, why in said)
+    return f"Not kept: {listed}. Their rules need review until they are.", True
+
+
 def needs_of(names, values, settles=None):
     """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked; never the
     stories count (asked only where the measuring asks for it: stories_needed). An optional one (OPTIONAL) only where
@@ -248,8 +658,15 @@ def enter_words(needs):
 
 
 def needs_reason(needs):
-    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show"."""
-    return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show" if needs else None
+    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show". Facts the start
+    box asks (answered_in_box) say where to answer them (Ben, 2026-10-25: in the box, not a pop-up): "Tell Gordium
+    the dwelling units (Edit site…): the model doesn't show them"."""
+    if not needs:
+        return None
+    if answered_in_box(needs):
+        return "Tell Gordium the " + _and([STATED_FACTS[k][2] for k in needs]) + " (Edit site…): the model doesn't " \
+            "show them"
+    return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show"
 
 
 def update_counts(facts, answers):
@@ -378,7 +795,8 @@ def after_lot_pick(facts, picked_lot):
     out = dict(facts)
     if picked_lot and picked_lot != out.get("lot_id"):
         out["lot_id"] = picked_lot
-        set_street_lines(out, None)
+        set_street_lines(out, None)          # the old lot's street lines and their names go with it
+        out.pop("plan_north_deg", None)      # the looked-up lot's turn belonged to it
     return out
 
 
@@ -410,15 +828,26 @@ def suggested_facts(jurisdiction, zones, lots, buildings):
     The largest outline is the lot, its lowest line on screen the street side; the ground is flat at the
     buildings' lowest point (or the lot's level); the lot is not from a survey; the first zone with rules; a
     detached one-family house; the largest solid the main building. The corner-lot question is never answered
-    here: always None, so the box asks it and the yards wait for the answer."""
+    here: always None, so the box asks it and the yards wait for the answer. A lot's "segments_ft" (the same
+    segments in feet, when given) decide the street's lengths and turns, in feet as everywhere (review round 6,
+    F2: a 6 mm slip in a millimetre model read as a 6 ft line)."""
     facts = {"jurisdiction": jurisdiction, "zone": zones[0] if zones else None, "use": "one_family_detached",
              "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}
     lot = max(lots, key=lambda l: l["area"]) if lots else None
     if lot is not None:
         facts["lot_id"] = lot["id"]
         if lot["segments"]:
-            a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
-            set_street_lines(facts, [[[a[0], a[1]], [b[0], b[1]]]])
+            outline = [[[p[0], p[1]], [q[0], q[1]]] for p, q in lot["segments"]]
+            feet = [[list(p[:2]) for p in line] for line in lot.get("segments_ft") or outline]
+            # the lowest piece a street can start from (never a point drawn twice: round 4; an arc drawn in short
+            # chords is a line: round 7)
+            run = next((r for k in sorted(range(len(feet)), key=lambda k: (outline[k][0][1] + outline[k][1][1]) / 2)
+                        for r in [street_run(feet, feet[k], tolerance=0.0)] if r is not None), None)
+            # the whole street it is on (review round 1, F1: a tax-map street suggested as one piece), only when
+            # both its ends are sure; else no suggestion, so the box asks for the click and the click asks the
+            # question (round 3, F1: a curving street suggested as its first 30°, the front yard from part of it)
+            if run and run["maybe"] == [[], []]:
+                set_street_lines(facts, [outline[k] for k in run["pieces"]])
     ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
     if ground is not None:
         facts["grade_elevation"] = ground
@@ -482,6 +911,142 @@ def label_width(text, size):
     return len(text) * size * 0.58 + 14
 
 
+DIM_TICK_PX = 10        # a dimension's architectural tick: this long on screen, at 45° to its line
+HALO_PX = 1           # a dimension's halo: this many pixels each side of its line
+FAINT_ALPHA = 110       # the required line, faint: the status colour at this opacity (of 255)
+
+
+# a yard's dimension and its label, placed on screen as a drawing would (Rhino checks of #29, 2026-10-25)
+DIM_RGB = {"complies": ((92, 96, 100), (176, 180, 184)),          # (light viewport, dark viewport): neutral grey,
+           "needs_review": ((138, 88, 0), (233, 180, 76)),          # amber, red: colour only what's wrong
+           "does_not_comply": ((184, 55, 31), (240, 122, 112))}
+REQUIRED_RGB = ((96, 96, 96), (190, 190, 190))     # the required line: a clear dashed grey, with its "min" tag
+# (darker on a light viewport, lighter on a dark one than the first version: Rhino check of #29 at f6642a9)
+DIM_LABEL_H_PX = 18     # a dimension's label: its height on screen
+DIM_LABEL_GAP_PX = 4    # and its gap from the dimension line (and past the line's outer end)
+
+
+def dim_rgb(status, dark):
+    """A dimension's colour (r, g, b): red fails, amber needs review, a neutral dark grey (light on a dark viewport)
+    complies: drafting's convention, and Ben's "colour only what's wrong"."""
+    return DIM_RGB.get(status, DIM_RGB["complies"])[1 if dark else 0]
+
+
+def rect_quad(box):
+    """An (x, y, w, h) screen box as its four corners."""
+    x, y, w, h = box
+    return [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+
+
+def _segments_cross(p, q, r, s_):
+    def side(a, b, c):
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    d1, d2, d3, d4 = side(r, s_, p), side(r, s_, q), side(p, q, r), side(p, q, s_)
+    return (d1 > 0) != (d2 > 0) and (d3 > 0) != (d4 > 0)
+
+
+def _point_in(pt, poly):
+    x, y = pt
+    hit = False
+    for k in range(len(poly)):
+        (x0, y0), (x1, y1) = poly[k - 1], poly[k]
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            hit = not hit
+    return hit
+
+
+def shapes_hit(a, b):
+    """Whether two screen polygons (lists of corners) overlap: an edge of one crosses the other's, or one lies
+    inside the other."""
+    for k in range(len(a)):
+        for j in range(len(b)):
+            if _segments_cross(a[k - 1], a[k], b[j - 1], b[j]):
+                return True
+    return bool(a and b) and (_point_in(a[0], b) or _point_in(b[0], a))
+
+
+def _along(a, b):
+    n = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+    return ((b[0] - a[0]) / n, (b[1] - a[1]) / n), n
+
+
+def _point_segment(p, a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = dx * dx + dy * dy
+    t = 0.0 if n <= 1e-12 else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / n))
+    return ((p[0] - a[0] - t * dx) ** 2 + (p[1] - a[1] - t * dy) ** 2) ** 0.5
+
+
+TAG_SIZE = 11            # a "min" tag's text size (readable at the default zoom: Rhino check of #29 at f6642a9)
+VIEW_MARGIN_PX = 3      # every number and tag stays this far inside the view
+
+
+def dim_number(mark, proposed, status):
+    """What a dimension shows on the drawing, as a drawing does: its number only, "✕ " or "? " before it when the
+    yard fails or needs review (colour says the rest). Its name, what it needs and "(approx.)" are the panel's and
+    the notice's (Rhino checks of #29: a long label never fit a plan)."""
+    return (mark + " " if status in ("does_not_comply", "needs_review") and mark else "") + proposed
+
+
+def inside_view(shape, view, margin=VIEW_MARGIN_PX):
+    """Whether a screen polygon lies wholly inside the view (w, h), `margin` px in. True without a view."""
+    if not view:
+        return True
+    return all(margin <= x <= view[0] - margin and margin <= y <= view[1] - margin for x, y in shape)
+
+
+PRIORITY = {"does_not_comply": 0, "needs_review": 1}      # what is wrong placed first: it gets the clear spots
+
+
+#                                        (0.7 × 11 px ≈ 8 px: the smallest that still reads)
+
+
+#                        of #29 at 5891efc: the rear number touched an edge length)
+
+
+def limit_label_spot(line, house, w, h=18, view=None, gap=8, taken=()):
+    """Where an elevation's "Height limit 35'-0"" label goes (screen): past an end of the limit line, outside the
+    building's extent (`house`: its box on screen, x0, y0, x1, y1), centred on the line's height, in view; the
+    left end first, and the end whose spot covers nothing drawn (`taken`, boxes: the height's number, the status
+    box, the notice) before one that does. It never covers the coloured parts (Rhino check of #28 at fc0b023).
+    (x, y) of its top left, or None when neither end has room in view."""
+    (ax, ay), (bx, by) = sorted(line)
+    spots = [(min(ax, house[0] if house else ax) - gap - w, ay - h / 2),
+             (max(bx, house[2] if house else bx) + gap, by - h / 2)]
+    shown = [(x, y) for x, y in spots if inside_view(rect_quad((x, y, w, h)), view)]
+    for x, y in shown:
+        if not any(shapes_hit(rect_quad((x, y, w, h)), rect_quad(t)) for t in taken):
+            return x, y
+    return shown[0] if shown else None
+
+
+def _bbox(shape):
+    xs, ys = [p[0] for p in shape], [p[1] for p in shape]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def dim_ticks(a, b, size=DIM_TICK_PX):
+    """A drawing-style dimension's two end ticks on screen: at each end of the line a to b, a short slash at 45°
+    to the line (as an architect draws one, whichever way the line runs), `size` pixels long. [] for a line of no
+    length on screen (seen end on)."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = (dx * dx + dy * dy) ** 0.5
+    if n < 1e-9:
+        return []
+    ux, uy = dx / n, dy / n
+    sx, sy = (ux - uy) * 0.5 ** 0.5 * size / 2, (uy + ux) * 0.5 ** 0.5 * size / 2   # the line turned 45°
+    return [((p[0] - sx, p[1] - sy), (p[0] + sx, p[1] + sy)) for p in (a, b)]
+
+
+def dims_shown(zoomed_in, elevation=False):
+    """Whether a yard's dimension (its line, ticks, faint required line) is drawn at all: only at working zoom
+    (zoomed out to the neighbourhood every dimension gives way with the labels, labels_shown), and never in an
+    elevation (Front, Right…), where every yard's line would lie flat on the ground line. Its words also follow
+    Show on-screen labels (yard_label_shown) and show in plan only. The height's dimension is the other way round:
+    elevations only."""
+    return bool(zoomed_in) and not elevation
+
+
 def labels_shown(lot_px):
     """Whether the lot's plan labels (its edge lengths, its yards) are drawn at this zoom: not when the lot on
     screen (`lot_px`, its larger side, pixels; None: no lot drawn, nothing to judge by) is under LABEL_MIN_LOT_PX,
@@ -536,6 +1101,289 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     return left, top, False
 
 
+def _point_seg(px, py, line):
+    """A point's distance from a segment (screen pixels)."""
+    (ax, ay), (bx, by) = line
+    dx, dy = bx - ax, by - ay
+    t = 0.0 if dx == dy == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+    return ((px - ax - t * dx) ** 2 + (py - ay - t * dy) ** 2) ** 0.5
+
+
+def box_gap(line, box):
+    """How far a box (left, top, w, h) is from a screen line ((x1, y1), (x2, y2)), exactly: 0 when they touch."""
+    left, top, w, h = box
+    if crosses(line, left, top, w, h):
+        return 0.0
+    corners = ((left, top), (left + w, top), (left, top + h), (left + w, top + h))
+    ends = [((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5) for x, y in line]
+    return min(ends + [_point_seg(x, y, line) for x, y in corners])
+
+
+LABEL_MIN_SIZE = 9                 # a plan label's text is never smaller (readable on screen)
+LABEL_LEAD_REACH = 3               # how far a led label may sit from its line: this many label heights
+LABEL_STEP = 6                     # the lattice the spots near a line are tried on, screen pixels
+
+
+def label_height(rows, size):
+    """A plan label's height on screen: its lines (size + 5 px each: 16 px at 11 pt) and 4 of margin."""
+    return 4 + (size + 5) * rows
+
+
+def _over(box, other):
+    """Whether two (left, top, w, h) boxes overlap (touching edges don't)."""
+    return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
+        min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
+
+
+def _inside(x, y, poly):
+    """Whether a point is inside a polygon (screen points; even-odd)."""
+    inside = False
+    for (ax, ay), (bx, by) in zip(poly, poly[1:] + poly[:1]):
+        if (ay > y) != (by > y) and x < ax + (y - ay) * (bx - ax) / (by - ay):
+            inside = not inside
+    return inside
+
+
+def box_over_shape(box, poly):
+    """Whether a box (left, top, w, h) covers any of a polygon (its screen points), 3 px around it included."""
+    left, top, w, h = box[0] - 3, box[1] - 3, box[2] + 6, box[3] + 6
+    if len(poly) < 3:
+        return False
+    if any(crosses(edge, left, top, w, h) for edge in zip(poly, poly[1:] + poly[:1])):
+        return True
+    if any(left <= x <= left + w and top <= y <= top + h for x, y in poly):
+        return True
+    return _inside(left + w / 2, top + h / 2, poly)
+
+
+def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes=(), placed=()):
+    """Which HARD rule a plan label's box (left, top, w, h) breaks, or None. HARD: on screen; over no building
+    footprint nor coloured part (`hard_shapes`: their outlines on screen, 3 px around them), nor the notice, the
+    status box or the north arrow (`hard_boxes`, 3 px around them), nor a label already placed (`placed`: a label is
+    never hidden under another, the Rhino job at 4bb6d4d); crossing neither its own dimension `line` nor any line in
+    `hard_lines` (every other yard's dimension, 3 px around it: the southwest label sat 1 px beside the front's)."""
+    left, top, w, h = box
+    if view is not None and (left < 0 or top < 0 or left + w > view[0] or top + h > view[1]):
+        return "off screen"
+    if any(box_over_shape(box, shape) for shape in hard_shapes):
+        return "over a building or its coloured part"
+    if any(_over(box, (a - 3, b - 3, c + 6, e + 6)) for a, b, c, e in hard_boxes):
+        return "over the notice, the status box or the north arrow"
+    if any(_over(box, other) for other in placed):
+        return "over another label"
+    if crosses(line, left, top, w, h):
+        return "on its own line"
+    if any(crosses(other, left - 3, top - 3, w + 6, h + 6) for other in hard_lines if other != line):
+        return "on another yard's dimension"
+    return None
+
+
+def label_spots(line, w, h, reach, step=LABEL_STEP):
+    """Every spot for a w × h label within `reach` of its dimension `line` (screen pixels), on a `step` lattice from
+    the line's own corner, nearest first."""
+    (xa, ya), (xb, yb) = line
+    x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
+    spots = []
+    nx, ny = int((x1 - x0 + w + 2 * reach) / step) + 1, int((y1 - y0 + h + 2 * reach) / step) + 1
+    for j in range(ny):
+        top = y0 - h - reach + j * step
+        for i in range(nx):
+            left = x0 - w - reach + i * step
+            gap = box_gap(line, (left, top, w, h))
+            if gap <= reach:
+                spots.append((gap, left, top))
+    spots.sort()
+    return spots
+
+
+def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_boxes=(), soft_lines=(),
+                    hard_shapes=(), placed=()):
+    """Where a plan label for the dimension `line` goes (screen pixels), by one complete set of rules (the Rhino job
+    at 319dc5d: each round's fix moved the southwest yard's label onto the next obstacle nobody had listed):
+    - HARD, never broken (label_breaks_hard): on screen; over no building footprint or coloured part
+      (`hard_shapes`), nor the notice, the status box or the north arrow (`hard_boxes`); on neither its own line nor
+      any other yard's dimension (`hard_lines`).
+    - SOFT, least first: other labels covered (`soft_boxes`), then, for a led label, the HARD things its leader
+      crosses, then lines crossed (`soft_lines`: the lot's edges), then its distance from its own line.
+    - Within one label height of its line, on one line, then on two (name, then numbers: label_lines), every spot
+      on a LABEL_STEP lattice tried; then smaller, a point at a time down to LABEL_MIN_SIZE; then, at its own size,
+      up to LABEL_LEAD_REACH label heights away; then the nearest spots anywhere on screen that break no HARD rule,
+      at its own size, then the smallest. A label more than 8 px from its line is led to it (`led`). Only when no
+      spot on the whole screen keeps every HARD rule is one broken (`forced`, never silent), so a failing yard's
+      label is never dropped.
+    Returns {"left", "top", "w", "h", "rows", "size", "led", "forced", "gap"}."""
+    (xa, ya), (xb, yb) = line
+    mx, my = (xa + xb) / 2, (ya + yb) / 2
+    two = label_lines(text)
+    variants = [[text]] + ([two] if len(two) == 2 else [])
+
+    def shape(rows, pt):
+        return max(label_width(r, pt) for r in rows), label_height(len(rows), pt)
+
+    def result(rows, pt, left, top, w, h, forced=False):
+        gap = box_gap(line, (left, top, w, h))
+        return {"left": left, "top": top, "w": w, "h": h, "rows": rows, "size": pt, "led": gap > 8,
+                "forced": forced, "gap": gap}
+
+    def soft(box, gap):
+        left, top, w, h = box
+        covered = sum(_over(box, other) for other in soft_boxes)
+        led_hits = 0
+        if gap > 8:                      # its leader: from its line's middle to the label's nearest edge
+            ex, ey = leader_end((mx, my), box)
+            lead = ((mx, my), (ex, ey))
+            led_hits = sum(_seg_hits_shape(lead, shape_) for shape_ in hard_shapes) + \
+                sum(_seg_hits_box(lead, b_) for b_ in list(hard_boxes) + list(soft_boxes))
+        crossed = sum(crosses(s_, left, top, w, h) for s_ in soft_lines if s_ != line)
+        return covered, led_hits, crossed, gap
+
+    def best(rows, pt, spots):
+        w, h = shape(rows, pt)
+        found = None
+        for gap, left, top in spots:
+            box = (left, top, w, h)
+            if label_breaks_hard(line, box, view, hard_boxes, hard_lines, hard_shapes, placed):
+                continue
+            score = soft(box, gap)
+            if found is None or score < found[0]:
+                found = (score, left, top, w, h)
+                if score[:3] == (0, 0, 0):           # nearest first: nothing better follows
+                    break
+        return None if found is None else result(rows, pt, *found[1:])
+
+    for pt in range(int(size), LABEL_MIN_SIZE - 1, -1):          # within one label height: its size, then smaller
+        for rows in variants:
+            w, h = shape(rows, pt)
+            got = best(rows, pt, label_spots(line, w, h, h))
+            if got is not None:
+                return got
+    for rows in variants:                                        # led, up to LABEL_LEAD_REACH heights away
+        w, h = shape(rows, size)
+        got = best(rows, size, label_spots(line, w, h, LABEL_LEAD_REACH * h))
+        if got is not None:
+            return got
+    if view is not None:                                         # the nearest spots on screen that keep the rules
+        for pt in (int(size), LABEL_MIN_SIZE):
+            for rows in variants:
+                w, h = shape(rows, pt)
+                grid = [(box_gap(line, (left, top, w, h)), left, top) for top in range(0, int(view[1] - h) + 1, 12)
+                        for left in range(0, int(view[0] - w) + 1, 12)]
+                grid.sort()
+                clear = [q for q in grid if not label_breaks_hard(line, (q[1], q[2], w, h), view, hard_boxes,
+                                                                  hard_lines, hard_shapes, placed)][:40]
+                got = best(rows, pt, clear)
+                if got is not None:
+                    return got
+    rows = variants[-1]                                          # nowhere keeps them all: never over another
+    w, h = shape(rows, LABEL_MIN_SIZE)                           # label still (the review of 3446e94), else
+    if view is not None:                                         # beside its line; said either way, never dropped
+        free = sorted((box_gap(line, (left, top, w, h)), left, top) for top in range(0, int(view[1] - h) + 1, 12)
+                      for left in range(0, int(view[0] - w) + 1, 12)
+                      if not any(_over((left, top, w, h), other) for other in placed))
+        if free:
+            return result(rows, LABEL_MIN_SIZE, free[0][1], free[0][2], w, h, forced=True)
+    left, top = min(xa, xb), max(ya, yb) + 6
+    if view is not None:
+        left, top = min(max(left, 0), max(view[0] - w, 0)), min(max(top, 0), max(view[1] - h, 0))
+    return result(rows, LABEL_MIN_SIZE, left, top, w, h, forced=True)
+
+
+def hull(points):
+    """The convex hull of screen points, counter-clockwise (a building's footprint on screen when its outline isn't
+    given in order: never smaller than the footprint, and turned with it, never its whole bounding box)."""
+    pts = sorted(set((round(x, 3), round(y, 3)) for x, y in points))
+    if len(pts) < 3:
+        return pts
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+LABEL_ORDER = {"does_not_comply": 0, "needs_review": 1, "complies": 2}   # failing first, the edges' lengths last
+LABEL_SETTLE_S = 0.15        # the view still this long: the labels are placed (never while it moves)
+
+
+class LabelRun:
+    """Placing a frame's plan labels a few at a time (place_dim_label), outside the drawing loop: failing yards
+    first, then those needing review, those that comply, the edges' lengths last; each one placed is HARD for the
+    ones after (never hidden under another, the Rhino job at 4bb6d4d). `step` places labels until its time budget
+    is spent (one at least), so Rhino stays responsive between steps (the review of 3446e94: the whole search at
+    once froze it each time the view came to rest). `items`: dicts with "key", "text", "line" (screen), "size" and
+    "status" (None for an edge). `spots`: {key: placement}, each with the line it was placed for ("line") and its
+    place in the order ("order")."""
+
+    def __init__(self, items, view, keep=(), dims=(), shapes=(), lines=()):
+        self.view, self.keep, self.shapes = view, list(keep), list(shapes)
+        self.dims = [tuple(map(tuple, d)) for d in dims]
+        self.lines = [tuple(map(tuple, s_)) for s_ in lines if tuple(map(tuple, s_)) not in self.dims]
+        self.todo = [item for _, item in sorted(enumerate(items), key=lambda ki: (
+            LABEL_ORDER.get(ki[1].get("status"), 3), ki[0]))]
+        self.placed, self.spots = [], {}
+
+    def step(self, budget_s=None):
+        """Place labels until `budget_s` seconds are spent (one at least; None: all). Whether every one is placed."""
+        import time as time_
+        start = time_.perf_counter()
+        while self.todo:
+            item = self.todo.pop(0)
+            own = tuple(map(tuple, item["line"]))
+            got = place_dim_label(own, item["text"], item["size"], self.view, hard_boxes=self.keep,
+                                  hard_lines=self.dims, soft_lines=self.lines, hard_shapes=self.shapes,
+                                  placed=list(self.placed))
+            got = dict(got, line=own, order=len(self.spots))
+            self.placed.append((got["left"], got["top"], got["w"], got["h"]))
+            self.spots[item["key"]] = got
+            if budget_s is not None and time_.perf_counter() - start >= budget_s:
+                break
+        return not self.todo
+
+
+def place_labels(items, view, keep=(), dims=(), shapes=(), lines=()):
+    """Every plan label of a frame placed at once (LabelRun to the end): {key: placement}."""
+    run = LabelRun(items, view, keep, dims, shapes, lines)
+    run.step()
+    return run.spots
+
+
+def follow(got, line):
+    """A placement carried along while the view moves (never searched in the drawing loop): the same offset from
+    its line's middle as when it was placed, at the line's middle on screen now."""
+    (xa, ya), (xb, yb) = got["line"]
+    (xc, yc), (xd, yd) = line
+    dx, dy = (xc + xd) / 2 - (xa + xb) / 2, (yc + yd) / 2 - (ya + yb) / 2
+    return dict(got, left=got["left"] + dx, top=got["top"] + dy, line=tuple(map(tuple, line)))
+
+
+def _seg_hits_box(seg, box):
+    return crosses(seg, box[0], box[1], box[2], box[3])
+
+
+def _seg_hits_shape(seg, poly):
+    """Whether a segment touches a polygon (crosses an edge, or lies inside it)."""
+    (ax, ay), (bx, by) = seg
+    if len(poly) < 3:
+        return False
+    for (cx, cy), (dx, dy) in zip(poly, poly[1:] + poly[:1]):
+        d = (bx - ax) * (dy - cy) - (by - ay) * (dx - cx)
+        if abs(d) < 1e-12:
+            continue
+        t = ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / d
+        u = ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / d
+        if 0 <= t <= 1 and 0 <= u <= 1:
+            return True
+    return _inside((ax + bx) / 2, (ay + by) / 2, poly)
+
+
 def label_lines(text):
     """A plan label as two lines, for when it won't fit beside its line on one: its name, then its numbers
     ("✕ Side yard, Southwest" / "7'-0 5/8", needs 10'-0" (approx.)"). One line when it has no name before a number
@@ -545,19 +1393,93 @@ def label_lines(text):
     return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
 
 
+NOTICE_SHARES = (0.4, 0.5, 0.6, 0.7, 0.8)   # the notice's boxes, narrowest first: a share of the view's width each
+NOTICE_MAX_SHARE = NOTICE_SHARES[-1]         # never wider (a two-line band above the model, never a bar over it)
+NOTICE_MIN_CHARS = 24                        # ...never narrower than this many characters a line
+
+
+NOTICE_KEEP = (                    # spaces never broken in the notice (each becomes a non-breaking one)
+    r"(\d+'-\d+) (\d+/\d+\")",            # a measurement: 7'-0 5/8"
+    r"(\d[\d,.]*) (sf|%|ft)\b",             # an area, a share, a length: 7,033 sf, 35 %
+    r"([\d\"'%]) (short|over|proposed|required)\b",   # the word that says what the number is
+    r"^(✕) (\S)",                           # the mark with its first word
+)
+
+
+def notice_lines(lines, view_w, share=NOTICE_MAX_SHARE, size=13):
+    """The notice's lines wrapped to at most `share` of the view's width (gordium_ui text_box_size's measure: size *
+    0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line. Broken between its " · " parts first;
+    a part is broken between its words only when it is too long even for NOTICE_MAX_SHARE (a heading kept whole where
+    a wider box allows it: review of 87e105d), and never at a space in NOTICE_KEEP (7'-0 5/8" stays whole: review
+    round 1); each notice line's rest indented under its first. Zoomed in tight, one long line was a bar across the
+    whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
+    import re
+    import textwrap
+    chars = max(NOTICE_MIN_CHARS, int((view_w * share - 22) / (size * 0.6)))
+    widest = max(NOTICE_MIN_CHARS, int((view_w * NOTICE_MAX_SHARE - 22) / (size * 0.6)))
+    out = []
+    for line in lines:
+        start, row = len(out), ""
+        for part in line.split(" · "):
+            for keep in NOTICE_KEEP:
+                part = re.sub(keep, lambda m: "\u00a0".join(m.groups()), part)
+            if row and len(row) + 3 + len(part) <= chars:
+                row += " · " + part
+                continue
+            if row:
+                out.append(row)
+            indent = "  " if len(out) > start else ""
+            if len(indent) + len(part) <= widest:          # whole, even past this share: the limit allows it
+                pieces = [part]
+            else:
+                pieces = textwrap.wrap(part, chars - 2, break_long_words=False, break_on_hyphens=False) or [part]
+            for k, piece in enumerate(pieces[:-1]):
+                out.append((indent if k == 0 else "  ") + piece)
+            row = (indent if len(pieces) == 1 else "  ") + pieces[-1]
+        out.append(row)
+    return [t.replace("\u00a0", " ") for t in out]
+
+
+def notice_box(lines, size=13):
+    """The (width, height) the notice's box takes on screen: gordium_ui.text_box_size's measure."""
+    return max(len(t) for t in lines) * (size * 0.6) + 22, len(lines) * (size + 9) + 10
+
+
+def notice_place(view_w, view_h, lines, model, taken=(), size=13):
+    """The notice as drawn in a view: (lines, (left, top), width, height), or None. Its most compact box first (lines
+    of at most 40 % of the view's width), then wider ones up to NOTICE_MAX_SHARE, never a box wider than that (fewer, longer lines: a band that fits above or
+    below the model where a tall box can't), each in the first corner clear of the model and of every box in `taken`
+    (notice_spot); None when no box fits a clear corner: then it is not drawn over the model, and the panel's
+    message line says it (review round 1: one narrow box alone hid the side yard's notice in the default framed
+    view; the Rhino job at a9a9a45: in the real docked Top view, 657 x 668 px, three lines at most 60 % wide were
+    4 px too tall for the band above the model, so it wasn't drawn: two lines at 80 % fit)."""
+    for share in NOTICE_SHARES:
+        wrapped = notice_lines(lines, view_w, share, size)
+        w, h = notice_box(wrapped, size)
+        if w > view_w * NOTICE_MAX_SHARE:    # a part that won't break narrower: never wider than the limit (review)
+            continue
+        spot = notice_spot(view_w, view_h, w, h, model, taken)
+        if spot is not None:
+            return wrapped, spot, w, h
+    return None
+
+
 def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
-    """Where the "no longer complies" notice (w × h) goes in a view (screen pixels): (left, top). The corners are
-    tried in turn (top left under the view's name, bottom left above the axes, top right, bottom right); the first
-    that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken`
-    (the status box) is used; if every corner covers some of the model, the one covering least (architect's
-    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions)."""
+    """Where a w × h notice goes in a view (screen pixels): (left, top), or None. The corners are tried in turn (top
+    left under the view's name, bottom left above the axes, top right, bottom right); the first that covers none of
+    the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken` (the status box) is used;
+    None when there is none: the notice is never drawn over the building or lot being judged, nor over the status box
+    (architect's review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions; #28 at 92cf742: zoomed
+    in tight, a bar across the plan)."""
     spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
 
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
-    free = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)] or spots
-    return min(free, key=lambda s: (overlap(s[0], s[1], model) if model else 0.0, free.index(s)))
+    clear = [(x, y) for x, y in spots if 0 <= x and x + w <= view_w and 0 <= y and y + h <= view_h   # on screen
+             and not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
+             and not (model and overlap(x, y, model))]
+    return clear[0] if clear else None
 
 
 def clear_spot(taken, x, y, w, h, avoid=()):
@@ -777,16 +1699,20 @@ def lot_size(area):
     return f"{math.floor(area + 1e-9):,} sf" if isinstance(area, (int, float)) else "area not known"
 
 
-def lot_source(surveyed):
-    return "your survey" if surveyed else "the tax map (±2 ft, approximate)"
+def lot_source(surveyed, source=None):
+    """Where the lot came from: your survey, or the tax map (with the map service the lookup read it from)."""
+    return "your survey" if surveyed else "the tax map (±2 ft, approximate)" + (" · " + source if source else "")
 
 
 NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+# a file with no lot the box can use (Edit site… in an empty file): its own lot, drawn or picked (never the sample)
+LOT_MISSING = "no lot yet: draw it, or pick a closed outline on the Site layer"
 
 
-def lot_text(area, surveyed):
-    """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"."""
-    return lot_size(area) + " · from " + lot_source(surveyed)
+def lot_text(area, surveyed, source=None):
+    """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"; with the map
+    service the lookup read it from ("… · NYS Tax Parcels Public")."""
+    return lot_size(area) + " · from " + lot_source(surveyed, source)
 
 
 def ground_text(ground):
@@ -798,7 +1724,27 @@ def ground_text(ground):
     span = ground.get("range") or ""
     what = {"spot": f"{ground.get('count', 0)} spot grades", "terrain": "terrain",
             "regrade": f"finished ground you set ({ground.get('count', 0)} spot grades)"}[kind]
-    return what + (", " + span if span else "") + " · " + ("picked by you" if kind == "terrain" else "placed by you")
+    return what + (", " + span if span else "") + " · " + (ground.get("source") or
+                                                         ("picked by you" if kind == "terrain" else "placed by you"))
+
+
+STREET_WORDS = {"road": "rd", "street": "st", "avenue": "ave", "place": "pl", "drive": "dr", "lane": "ln",
+                "court": "ct", "boulevard": "blvd", "terrace": "ter", "circle": "cir", "parkway": "pkwy",
+                "highway": "hwy", "north": "n", "south": "s", "east": "e", "west": "w"}
+
+
+def address_street(address, street):
+    """The street of `address` in the address's own words ("Ithaca Road" from "106 Ithaca Road, Ithaca, NY"), when
+    it is `street` (a looked-up street name: "ITHACA RD"); else None. Compared word by word with the usual
+    abbreviations (Road = Rd), never by a part of a name."""
+    first = str(address or "").split(",", 1)[0].split()
+    while first and any(ch.isdigit() for ch in first[0]):        # the house number (106, 106A, 106-108)
+        first = first[1:]
+
+    def words(text):
+        return [STREET_WORDS.get(w, w) for w in str(text or "").lower().replace(".", " ").split()]
+
+    return " ".join(first) if first and words(" ".join(first)) == words(street) else None
 
 
 def street_name(state):
@@ -854,19 +1800,78 @@ def street_lines_after_picks(lines, picks, corner):
     return out
 
 
-def pick_street(old_lines, old_ids, picked, name, tolerance=0.5):
+def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, ask=None, said=None):
     """(street lines, their street names) after the architect clicks a lot line as the street side (`picked`) and
     names its street (`name`, found or typed; None: unnamed). THE one order of steps (arch-fixes-2 review rounds
     9-11, where a name given for one line kept landing on other lines and two streets, or "one street or two?",
     became one): the name goes on the clicked line ONLY; every other line keeps the street it was known to be on,
     or none; then the street lines follow from those names (street_lines_after_pick: the clicked line's own street
     when the lines are known to be two streets, else every line). A line nobody named stays unnamed, so the
-    measuring still reads it from the drawing (a corner: one street or two?, needs review)."""
+    measuring still reads it from the drawing (a corner: one street or two?, needs review). A line not among them:
+    the whole street it is on along the lot `outline` (street_pick: never round a corner; an unclear end asked with
+    `ask`), else that line alone. `said` (a list): gets {"words", "refused"}, what the command line says and
+    whether the click was refused (a point clicked: the street lines and their name stay as they were)."""
+    if said is None:
+        said = []
+
     def near(p, q):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
     a, b = picked
     lines = [list(map(list, line)) for line in old_lines or []]
+    at = _piece_at(outline, picked, tolerance) if outline else None
+    if at is not None:
+        # on the lot outline: every street line is one of its pieces. The saved lines are snapped to the pieces
+        # they are (a lot nudged under 0.5 ft: the piece, never the stale line beside it; round 10), each with
+        # the street it was known to be on; the clicked piece takes the name given, and no other. The saved
+        # pieces around the click, of its own street or none, are kept as they are (never asked again, never
+        # shrunk on a guess: round 10), and the street grows on from them.
+        n = len(outline)
+        own_ids = _street_lines().matching_ids(lines, old_ids)
+        names, saved = [None] * n, set()
+        for k, line in enumerate(lines):
+            q = _piece_at(outline, line, tolerance)
+            if q is not None:
+                saved.add(q)
+                names[q] = names[q] or (own_ids[k] if own_ids is not None else None)
+        mine = name or names[at]
+        if name:
+            names[at] = name                               # the name on the clicked line only
+        label = mine or "This street"
+        refused = refused_click(outline, picked, tolerance)
+        if refused:                                        # a point clicked, not a line: nothing changes
+            said.append({"words": refused, "refused": True})
+            return lines, (list(old_ids) if own_ids is not None else None)
+
+        def with_me(q):
+            return names[q] is None or (mine is not None and _street_lines().same_street(names[q], mine))
+
+        seed = [at]
+        if at in saved:
+            while (seed[0] - 1) % n in saved and (seed[0] - 1) % n not in seed and with_me((seed[0] - 1) % n):
+                seed.insert(0, (seed[0] - 1) % n)
+            while (seed[-1] + 1) % n in saved and (seed[-1] + 1) % n not in seed and with_me((seed[-1] + 1) % n):
+                seed.append((seed[-1] + 1) % n)
+        got = street_pick(outline, picked, names, (), ask, label, tolerance, seed=seed)
+        if got is None:                 # an outline that doesn't run end to end: the saved street, else that line
+            hits = [k for k, line in enumerate(lines)
+                    if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
+            if hits:                    # never fewer on a guess (round 11): the saved street as it was
+                ids = list(own_ids or [None] * len(lines))
+                if name:
+                    ids[hits[0]] = name
+                kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
+                out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
+                why = "the lot outline doesn't run end to end in order here, so Gordium can't follow the street along it"
+                said.append({"words": (f"{label}: the street lines kept as they were ({why})" if kept == lines else
+                                       f"{street_words(label, kept, out)} ({why})"), "refused": False})   # (round 12)
+                return kept, (out if any(out) else None)
+            said.append({"words": f"{label}: only the lot line clicked (the lot outline doesn't run end to end in "
+                                  f"order here, so Gordium can't follow the street along it)", "refused": False})
+            return [list(map(list, picked))], ([name] if name else None)
+        said.append({"words": got[1], "refused": False})
+        return street_lines_of(outline, [got[0]], names)
+    # no outline (or a line not on it): the street lines themselves
     hits = [k for k, line in enumerate(lines)
             if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
     if not hits:                                           # a line not among them: that line alone
@@ -899,6 +1904,442 @@ def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
     return [list(map(list, line)) for line in lines]
 
 
+# A joint between two lot-line pieces that turns no more than this is the same street's wobble: a tax-map outline
+# draws a straight street in short pieces (106 Ithaca Rd: 8 pieces of about 10 ft, joints turning up to 7.5°). A
+# joint turning more than street_lines.TURN_LIMIT_DEG is a corner (the measuring's own limit for one street or
+# two); in between, or a run of small joints that swings past that limit in all, is unclear, and the architect is
+# asked (demo 00c04f1: one click on one of the 8 pieces kept that 9.8 ft piece as the whole street).
+PIECE_TURN_DEG = 15.0
+SHORT_PIECE_FT = 0.5   # a piece shorter than this (6 in) has no direction of its own (is_tiny)
+JOINT = 0.01      # ft: two pieces of one outline meet where they share an end (a click is matched within `tolerance`:
+                  # 106's 0.24 ft piece has both ends within 0.5 ft of its neighbours' ends)
+
+
+def is_tiny(line):
+    """A lot-line piece shorter than SHORT_PIECE_FT (6 in): a corner point drawn twice, a slip of the
+    pen or float noise, with no direction of its own: never a street of its own (it would be 0'-0" of frontage,
+    the front yard read from a point), never a corner or a bend (street-run review rounds 3 to 5); passed through
+    inside a street."""
+    import math
+    return math.dist(line[0][:2], line[-1][:2]) < SHORT_PIECE_FT
+
+
+def _same_piece(line, picked, tolerance):
+    (a, b), (c, d) = (line[0], line[-1]), (picked[0], picked[-1])
+    near = lambda p, q: abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance   # noqa: E731
+    return (near(a, c) and near(b, d)) or (near(a, d) and near(b, c))
+
+
+def _in_ring_order(outline):
+    """Whether the outline's pieces run end to end in order round the lot (as the measuring needs)."""
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+    lines = [[list(x[0][:2]), list(x[-1][:2])] for x in outline or []]
+    if len(lines) < 3:
+        return False
+    a, b = lines[0]
+    if not (near(b, lines[1][0]) or near(b, lines[1][1])):
+        a, b = b, a
+    first, end = a, b
+    for x, y in lines[1:]:
+        if near(y, end) and not near(x, end):
+            x, y = y, x
+        elif not near(x, end):
+            return False
+        end = y
+    return near(end, first)
+
+
+def _piece_at(outline, picked, tolerance):
+    """The outline piece a click names: the one it is exactly (within JOINT), else the first within `tolerance`
+    (a short piece beside another short one is never mistaken for it)."""
+    for tol in (JOINT, tolerance):
+        k = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tol)), None)
+        if k is not None:
+            return k
+    return None
+
+
+def outline_names(outline, lines, ids, tolerance=0.5):
+    """The street each piece of the lot outline is known to be on (one per piece, None where unknown): a piece that
+    is one of the street lines `lines` takes that line's own name (`ids`, only when they match the lines one for one:
+    street_lines.matching_ids); every other piece None."""
+    own = _street_lines().matching_ids(lines or [], ids)
+    out = []
+    for piece in outline or []:
+        k = next((k for k, line in enumerate(lines or []) if _same_piece(line, piece, tolerance)), None)
+        out.append(own[k] if own is not None and k is not None else None)
+    return out
+
+
+def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
+    """Where the street of the lot line the architect clicked (`picked`, [[x, y], [x, y]] in feet) runs along the lot
+    outline (`outline`: its pieces in order round the lot, each [[x, y], [x, y]], as Rhino gives a closed curve's
+    segments and as the measuring requires): the clicked piece and its neighbours, both ways round, for as long as
+    they are surely on the same street.
+
+    The outline is read as strokes: each long piece (SHORT_PIECE_FT or longer) is one; consecutive short pieces
+    are grouped into strokes whose ends are at least SHORT_PIECE_FT apart (an arc drawn as short chords keeps its
+    shape); short pieces left over between two strokes (a corner point drawn twice, a slip, a spike) have no
+    direction and stand in the gap between them. Going on from the last stroke kept to the next one:
+    - the next one is another click's street (`taken`): a sure stop (the gap before it is asked);
+    - both are named (`names`, one per piece, None where unknown): the same street joins, however it bends;
+      another street is a sure stop for it (the gap before it is asked);
+    - else a joint between two long pieces with nothing between them turning more than TURN_LIMIT_DEG is a sure
+      stop (a corner: never round onto the other street). Nothing else is ever a sure stop: no short piece
+      decides one (street-run review round 7);
+    - it joins when the joint turns PIECE_TURN_DEG or less, the run then swings no more than TURN_LIMIT_DEG in all
+      and the gap is under SHORT_PIECE_FT;
+    - anything else is unclear: the gap and the next stroke (and on over strokes in line with no gap, while that
+      stretch swings no more than TURN_LIMIT_DEG) are returned apart, never added on a guess, so the architect
+      is asked.
+    `seed`: a run already kept (its pieces in order round the lot), grown on from its ends.
+
+    {"pieces": the run's piece numbers in order round the lot, "maybe": [before, after] (the unclear pieces past
+    each end, nearest first; [] where the end is sure), "turn": [the swing of each unclear stretch from the run's
+    end, in degrees, or None when it is short pieces only]}; None when `picked` isn't a piece of the outline, is
+    already taken, is a short piece standing alone (a point, not a line), or the outline doesn't run end to end
+    in order (the measuring refuses such a lot)."""
+    import math
+    sl = _street_lines()
+    pieces = [[list(line[0][:2]), list(line[-1][:2])] for line in outline or [] if len(line) >= 2]
+    n = len(pieces)
+    hit = _piece_at(pieces, picked, tolerance)
+    taken = set(taken)
+    if hit is None or hit in taken or n < 3:
+        return None
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+    # each piece turned to run round the lot (its end the next one's start): the order Rhino and the measuring use
+    start, vec = [None] * n, [None] * n
+    a, b = pieces[0]
+    if not (near(b, pieces[1][0]) or near(b, pieces[1][1])):
+        a, b = b, a
+    end = b
+    start[0], vec[0] = a, (b[0] - a[0], b[1] - a[1])
+    for i in range(1, n):
+        a, b = pieces[i]
+        if near(b, end) and not near(a, end):
+            a, b = b, a
+        elif not near(a, end):
+            return None                                    # not end to end in order: nothing extended
+        start[i], vec[i], end = a, (b[0] - a[0], b[1] - a[1]), b
+    if not near(end, start[0]):
+        return None
+    length = [math.hypot(*v) for v in vec]
+    tiny = [x < SHORT_PIECE_FT for x in length]
+    names = list(names) if isinstance(names, list) and len(names) == n else [None] * n
+
+    # the strokes, in order round the lot from a long piece; each {"pieces", "dir", "long"}; gap[m]: the short
+    # pieces between stroke m and stroke m + 1
+    first = next((i for i in range(n) if not tiny[i]), 0)
+    strokes, gap, group = [], [], []
+
+    def close_group(final):
+        nonlocal group
+        while group:
+            g0 = start[group[0]]
+            cut = None
+            for c in range(len(group)):
+                e = group[c]
+                tip = (start[e][0] + vec[e][0], start[e][1] + vec[e][1])
+                if math.hypot(tip[0] - g0[0], tip[1] - g0[1]) >= SHORT_PIECE_FT:
+                    cut = c
+                    break
+            if cut is None:
+                if final:
+                    gap[-1] += group if strokes else []
+                    if not strokes:
+                        strokes.append({"pieces": list(group), "dir": None, "long": False})
+                        gap.append([])
+                group = []
+                return
+            part, group = group[:cut + 1], group[cut + 1:]
+            e = part[-1]
+            tip = (start[e][0] + vec[e][0], start[e][1] + vec[e][1])
+            strokes.append({"pieces": part, "dir": (tip[0] - g0[0], tip[1] - g0[1]), "long": False})
+            gap.append([])
+
+    for step_ in range(n):
+        i = (first + step_) % n
+        if tiny[i]:
+            group.append(i)
+            continue
+        close_group(True)
+        strokes.append({"pieces": [i], "dir": vec[i], "long": True})
+        gap.append([])
+    close_group(True)
+    m_of = {}
+    for m, s_ in enumerate(strokes):
+        for q in s_["pieces"]:
+            m_of[q] = m
+    if hit not in m_of:                                    # a short piece standing alone: a point, not a line
+        return None
+    S = len(strokes)
+
+    def name_of(m):
+        got = {names[q] for q in strokes[m]["pieces"]}
+        return got.pop() if len(got) == 1 else None
+
+    def turn(u, v):                                        # signed, degrees, from direction u to direction v
+        return math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]))
+
+    def swing(ms):                                         # the spread of the running heading over strokes
+        dirs = [strokes[m]["dir"] for m in ms if strokes[m]["dir"] is not None]
+        run_, low, high = 0.0, 0.0, 0.0
+        for u, v in zip(dirs, dirs[1:]):
+            run_ += turn(u, v)
+            low, high = min(low, run_), max(high, run_)
+        return high - low
+
+    def between(m, d):                                     # the gap from stroke m to its neighbour going d
+        return list(gap[m]) if d > 0 else list(reversed(gap[(m - 1) % S]))
+
+    def pieces_of(ms):
+        return [q for m in ms for q in strokes[m]["pieces"]]
+
+    hm = m_of[hit]
+    own = name_of(hm) or names[hit]
+    run = [hm]
+    if seed and hit in seed and not set(seed) & taken:     # the strokes the seed holds, grown out from the hit's
+        held = {m_of[q] for q in seed if q in m_of}
+        while (run[0] - 1) % S in held and (run[0] - 1) % S not in run:
+            run.insert(0, (run[0] - 1) % S)
+        while (run[-1] + 1) % S in held and (run[-1] + 1) % S not in run:
+            run.append((run[-1] + 1) % S)
+    held_gaps = set(seed or ()) - set(pieces_of(run))       # gap pieces a Yes already kept past the ends
+    maybe, swings = [[], []], [None, None]
+    for side, d in ((0, -1), (1, 1)):
+        while True:
+            last = run[0] if side == 0 else run[-1]
+            g = [q for q in between(last, d) if q not in held_gaps]
+            j = (last + d) % S
+            if j in run:                                   # the lot comes round
+                maybe[side] = g
+                break
+            jp = strokes[j]["pieces"]
+            if set(jp) & taken or set(g) & taken:          # another click's street: sure; the gap is asked
+                maybe[side] = [q for q in g if q not in taken] if not set(g) & taken else []
+                break
+            nj = name_of(j)
+            order = [j] + run if side == 0 else run + [j]
+            if own and nj:                                 # both named: the street's identity decides
+                if sl.same_street(own, nj) and not g:
+                    run[:] = order
+                    continue
+                if not sl.same_street(own, nj):
+                    maybe[side] = g                        # another street: sure for it, the gap asked
+                    break
+            u, v = strokes[last]["dir"], strokes[j]["dir"]
+            t = abs(turn(u, v)) if u is not None and v is not None else 180.0
+            if not g and strokes[last]["long"] and strokes[j]["long"] and t > sl.TURN_LIMIT_DEG:
+                break                                      # a corner, long piece to long piece
+            g_len = sum(length[q] for q in g)
+            # (onto a long piece only from a long one, or with one in the run already: a click on a rounded
+            # corner's chord never takes the side line unasked, round 8)
+            sure_dir = strokes[j]["long"] is False or strokes[last]["long"] or any(strokes[m]["long"] for m in run)
+            if t <= PIECE_TURN_DEG and swing(order) <= sl.TURN_LIMIT_DEG and g_len < SHORT_PIECE_FT and sure_dir:
+                run[:] = order
+                if g:                                       # (the gap joins with it)
+                    held_gaps.update(g)
+                continue
+            more_m, k = [j], j
+            while True:                                    # on over strokes in line with no gap
+                g2 = between(k, d)
+                nxt = (k + d) % S
+                if (g2 or nxt in run or nxt in more_m or set(strokes[nxt]["pieces"]) & taken
+                        or t > PIECE_TURN_DEG or strokes[k]["dir"] is None or strokes[nxt]["dir"] is None
+                        or abs(turn(strokes[k]["dir"], strokes[nxt]["dir"])) > PIECE_TURN_DEG
+                        or (name_of(nxt) and not (own and sl.same_street(own, name_of(nxt))))
+                        or swing([last] + more_m + [nxt]) > sl.TURN_LIMIT_DEG):
+                    break
+                more_m.append(nxt)
+                k = nxt
+            stretch = g + [q for m in more_m for q in (strokes[m]["pieces"] if d > 0 else
+                                                       list(reversed(strokes[m]["pieces"])))]
+            maybe[side] = stretch
+            swings[side] = swing([last] + more_m)
+            break
+    flat = []
+    for idx, m in enumerate(run):
+        flat += strokes[m]["pieces"]
+        if idx < len(run) - 1:
+            flat += gap[m]
+    before = [q for q in reversed(gap[(run[0] - 1) % S]) if q in held_gaps][::-1] if S > 1 else []
+    after = [q for q in gap[run[-1]] if q in held_gaps] if S > 1 else []
+    pieces_out = before + flat + after
+    seen = set()
+    pieces_out = [q for q in pieces_out if not (q in seen or seen.add(q))]
+    return {"pieces": pieces_out, "maybe": maybe, "turn": swings}
+
+
+def feet_words(feet):
+    """A length for the command line, rounded DOWN to the nearest 1/8 in (never in the architect's favour):
+    75.83 -> 75'-9 7/8"."""
+    import math
+    eighths = int(math.floor(feet * 96 + 1e-6))
+    ft, rest = divmod(eighths, 96)
+    inch, frac = divmod(rest, 8)
+    if frac:
+        g = math.gcd(frac, 8)
+        return f"{ft}'-{inch} {frac // g}/{8 // g}\""
+    return f"{ft}'-{inch}\""
+
+
+def _length(lines):
+    import math
+    return sum(math.dist(line[0][:2], line[-1][:2]) for line in lines)
+
+
+def _end_to_end(lines, ids=None):
+    """(lines, ids) in order end to end along the street, as the measuring reads them (measure.Lot puts the street
+    lines in outline order before its street_verdict): a click on a street line appends the rest of its street
+    after the old lines (street-run review round 2). Lines that don't run end to end: as they were."""
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+    n = len(lines)
+    ids = list(ids) if isinstance(ids, list) and len(ids) == n else None
+    ends = [(line[0], line[-1]) for line in lines]
+
+    def touches(k, p):
+        return [j for j in range(n) if j != k and (near(ends[j][0], p) or near(ends[j][1], p))]
+
+    starts = [k for k in range(n) if not touches(k, ends[k][0]) or not touches(k, ends[k][1])]
+    if not starts:
+        return lines, ids
+    order, k = [starts[0]], starts[0]
+    at = ends[k][1] if not touches(k, ends[k][0]) else ends[k][0]
+    while len(order) < n:
+        nxt = [j for j in touches(k, at) if j not in order]
+        if len(nxt) != 1:
+            return lines, ids
+        k = nxt[0]
+        at = ends[k][1] if near(ends[k][0], at) else ends[k][0]
+        order.append(k)
+    return [lines[k] for k in order], ([ids[k] for k in order] if ids is not None else None)
+
+
+def street_words(label, lines, ids=False):
+    """What the command line says a click kept: "Ithaca Rd: 8 lot-line pieces, 75'-10" of frontage". With `ids`
+    given (the lines' street names, or None: unnamed), lines that aren't surely one street (street_verdict) say so
+    instead of one frontage: the measuring asks one street or two."""
+    n = len(lines)
+    pieces = f"{label}: {n} lot-line piece{'s' if n != 1 else ''}"
+    if ids is not False and n > 1 and street_verdict(*_end_to_end(lines, ids))[0] != "one":
+        return pieces + ", not surely one street: Gordium asks one street or two before measuring along them"
+    return pieces + f", {feet_words(_length(lines))} of frontage"
+
+
+STREET_ANSWER_NEEDED = ("Gordium needs a Yes or a No here (Esc: nothing changes): kept as street, a "
+                        "line that isn't can pass lot width; left out, a line that is can pass the front yard. ")
+
+
+ESC_STREET = "Esc: nothing changed — the street side is as it was; this pick wasn't kept"
+
+
+def so_far(words):
+    """A corner lot's street click, said while the picking goes on: kept only when Enter ends it, so "so far"
+    ("Ithaca Rd: 8 lot-line pieces, 75'-10" so far — Enter when done"), never read as kept before an Esc."""
+    if words.endswith(" of frontage"):
+        return words[:-len(" of frontage")] + " so far — Enter when done"
+    return words + " (so far — Enter when done)"
+
+
+def street_more_question(label, outline, more, swing):
+    """The question when it isn't clear where a street ends (street_run's "maybe" pieces past one end)."""
+    lines = [outline[k] for k in more]
+    n = len(lines)
+    count = f"{n} more lot-line piece{'s' if n != 1 else ''}, {feet_words(_length(lines))}"
+    tail = f" Is that on {label} too? (Yes or No)"
+    if swing is None:                                  # short pieces only (no direction to give)
+        return f"Past there is a short piece of lot line ({count}), with no direction of its own.{tail}"
+    if swing > _street_lines().TURN_LIMIT_DEG:         # a corner, but with short pieces in it, or a bend
+        return f"Past there the lot line turns {round(swing)}° over short pieces, a corner or a bend ({count}).{tail}"
+    return f"Past there the lot line bends {round(swing)}° with no clear corner ({count}).{tail}"
+
+
+def refused_click(outline, picked, tolerance=0.5):
+    """What the command line says when a click can't start a street (a short piece standing alone: a point, not a
+    line), or None: asked before anything else (the street's name), so nothing is asked of a refused click
+    (street-run review round 9)."""
+    hit = _piece_at(outline, picked, tolerance)
+    if hit is not None and is_tiny(outline[hit]) and _in_ring_order(outline) \
+            and street_run(outline, outline[hit], None, (), 0.0) is None:
+        return "that piece is under 6 in long (a corner point drawn twice?), not a street line: click the lot line beside it"
+    return None
+
+
+def street_pick(outline, picked, names=None, taken=(), ask=None, label="This street", tolerance=0.5, seed=None):
+    """One click on the street side, the whole street it is on: (piece numbers in order along it, what to say);
+    street_run's run, with each unclear stretch past an end asked (`ask`: question -> True Yes, False No, None not
+    answered) and left out only on a No. The plugin's question takes only Yes or No (round 14: neither default is
+    safe, see gordium_rhino._ask_street_more); None (no one to ask: tests, headless runs) keeps it and says so.
+    ([], words) when the click is on a street already kept (`taken`) or on a short piece standing alone (a point,
+    not a line); None when it isn't a piece of the outline, or the outline doesn't run end to end in order."""
+    found = street_run(outline, picked, names, taken, tolerance, seed=seed)
+    if found is None:
+        hit = _piece_at(outline, picked, tolerance)
+        if hit is not None and hit in set(taken):
+            return [], "that lot line is on a street already kept"
+        if hit is not None and refused_click(outline, outline[hit], 0.0):
+            return [], refused_click(outline, outline[hit], 0.0)
+        return None
+    run, closed, skipped = list(found["pieces"]), set(), False
+    while True:            # each unclear stretch asked in turn; a Yes grows the street on from there, a No ends it
+        grew = False
+        for side in (0, 1):
+            more = found["maybe"][side]
+            if not more or side in closed:
+                continue
+            said = ask(street_more_question(label, outline, more, found["turn"][side])) if ask is not None else None
+            if said is False:                              # the architect's No: the street ends there
+                closed.add(side)
+            else:
+                run, grew = (list(reversed(more)) + run if side == 0 else run + more), True
+                skipped = skipped or said is not True
+        if not grew:
+            break
+        found = street_run(outline, picked, names, taken, tolerance, seed=run)
+        run = list(found["pieces"])
+    # what it says checks the street as the measuring will (a Yes past a bend: not surely one street)
+    known = list(names) if isinstance(names, list) and len(names) == len(outline) else [None] * len(outline)
+    words = street_words(label, [outline[k] for k in run], [known[k] for k in run])
+    return run, words + ("; a bend not answered is kept as street (answer No to leave it out)" if skipped else "")
+
+
+def add_street_pick(runs, outline, picked, names=None, ask=None, tolerance=0.5):
+    """A corner lot's street side, one click at a time: (`runs` with the clicked street's run added, what to say).
+    Each click keeps the whole street it is on (street_pick), never one already kept; the street is called by its
+    known name, else "Street 1", "Street 2"... in click order."""
+    hit = _piece_at(outline, picked, tolerance)
+    own = names[hit] if hit is not None and isinstance(names, list) and len(names) == len(outline) else None
+    label = own or f"Street {len(runs) + 1}"
+    got = street_pick(outline, picked, names, {k for run in runs for k in run}, ask, label, tolerance)
+    if got is None:
+        if hit is None:
+            return runs, "that isn't one of the lot's lines"
+        return runs + [[hit]], (f"{label}: only the lot line clicked (the lot outline doesn't run end to end in "
+                                f"order here, so Gordium can't follow the street along it: click each street line)")
+    run, words = got
+    return (runs + [run] if run else runs), words
+
+
+def street_lines_of(outline, runs, names=None, clicks=None):
+    """(street lines, their street names or None) from the runs kept (piece numbers), in click order, each piece
+    once; a piece's name is the one it was known by (`names`), never another's. No run (no click was a piece of
+    the outline): the lines clicked (`clicks`), each once (street_lines_after_picks), unnamed."""
+    if not any(runs) and clicks:
+        if all(_piece_at(outline, c, JOINT) is None for c in clicks):   # none is a piece of the outline
+            return street_lines_after_picks(None, clicks, True), None
+        return [], None          # every click refused (a point, a street already kept): nothing changes (round 8)
+    names = list(names) if isinstance(names, list) and len(names) == len(outline or []) else [None] * len(outline or [])
+    seen, lines, ids = set(), [], []
+    for run in runs:
+        for k in run:
+            if k not in seen:
+                seen.add(k)
+                lines.append([list(outline[k][0][:2]), list(outline[k][-1][:2])])
+                ids.append(names[k])
+    return lines, (ids if any(ids) else None)
+
+
 _STREETS = {}
 
 
@@ -922,34 +2363,413 @@ def street_verdict(lines, ids=None):
     return _street_lines().street_verdict(lines, ids)
 
 
-
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
-    tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,
-    lot_area, lot_surveyed, street_name, ground {kind, count, range}, no_regrading."""
+    tick (label, checked) or None, review (an amber line) or None, check ("I checked this", ticked) or None}.
+    `state`: address, zone, zone_source, district_confirmed, use, use_name, lot_area, lot_surveyed, street_name,
+    ground {kind, count, range}, no_regrading, lookup (this session's), doubts, live, checked, lot_missing.
+    `flat` (default FLAT_GROUND): the MVP shows no Ground row (flat ground is assumed). Until there is a lot, no
+    "Use my survey…" or street "Change…" (nothing to change yet: the architect's second pass, 6); "Draw my lot…"
+    when a lookup gave only the City's guide, or there is no lot."""
+    look = state.get("lookup") or {}
+    doubts, live = state.get("doubts") or {}, state.get("live") or {}
+    checked = set(state.get("checked") or [])
     has_lot = bool(state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed"))
+
+    def review(key):                  # a doubt about what is drawn (or this lookup's zone): amber, why, I checked this
+        why = live.get(key) or doubts.get(key)
+        if key == "zone":             # the zone's own doubts and the overlays found, together
+            why = " ".join(t for t in (live.get("zone"), live.get("overlays")) if t) or None
+        return {"review": "? " + why if why else None,
+                "check": ("I checked this", key in checked) if key in CHECKABLE and key in doubts else None}
+
+    lot_actions = [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot else []
+    if look.get("guide") or state.get("lot_missing"):
+        lot_actions.insert(0, ("draw_lot", "Draw my lot…", True))
     rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
-         "actions": [("lookup", "Look up (coming soon)", False)], "tick": None},
-        {"key": "zone", "label": "Zoning district",
-         "text": (state.get("zone") or "—") + " · " + (state.get("zone_source") or ENTERED),
+         "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))],
+         "tick": None, "matches": look.get("matches") or [],
+         "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
+        {"key": "zone", "label": "Zoning district", "text": zone_row_text(state),
          "actions": [("zone", "Change", True)], "tick": (ZONE_TICK, bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
-        {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed"))
-         if has_lot else NO_LOT,
-         "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot else [], "tick": None},
-        {"key": "street", "label": STREET_LABEL, "help": STREET_HELP, "text": street_name(state) if (state.get("street_name") or has_lot)
-            else "set from the lot, once there is one",
+        {"key": "lot", "label": "Lot",
+         "text": (LOT_MISSING if state.get("lot_missing") else
+                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))
+                  if has_lot else NO_LOT),
+         "actions": lot_actions, "tick": None},
+        {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
+         "text": street_name(state) if (state.get("street_name") or has_lot) else "set from the lot, once there is one",
          "actions": [("street", "Change…", True)] if has_lot else [], "tick": None,   # nothing to change yet: hidden
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],
          "tick": ("No regrading near the house", bool(state.get("no_regrading")))},
     ]
+    for r in rows:
+        r.update(review(r["key"]))
     if FLAT_GROUND if flat is None else flat:      # the MVP: no Ground row (flat ground is assumed)
         rows = [r for r in rows if r["key"] != "ground"]
     return rows
+
+
+# ---- the address lookup (design_checker.lookup_box runs it; this turns its answer into the box's choices) ----
+#
+# What the box keeps, and for how long (review round 1 of PR #19):
+# - saved_ui["doubts"] {row: reason}: what is doubtful about the lot, street side and ground DRAWN in the model. It
+#   changes only when that thing is replaced (a lookup that draws a new lot) or the architect confirms it (I checked
+#   this) or changes it; a failed, empty or own-lot lookup never touches it. Only a reason its sources allow keeping
+#   is saved; otherwise a plain DOUBT_KEPT.
+# - keys starting with "_" belong to this box session only (the lookup's live wording, its asks and matches, the
+#   City's zones and street name, the model edits to undo on Cancel) and are never written to the .3dm
+#   (storable_ui, the one write boundary).
+
+NO_RULES = "The City map says {zone}; Gordium doesn't have {zone}'s rules yet: pick a district only if you know it applies."
+
+
+NO_DISTRICT = "The City zoning map gave no district for this lot: pick one"
+
+
+def city_day(now=None):
+    """The City's own day (Ithaca: America/New_York) at `now` (UTC; default the present), as YYYY-MM-DD: the day a
+    lookup was checked and a Draw is saved, never the UTC day (after about 8 pm in Ithaca that is tomorrow). US
+    Eastern time by the federal rule (15 U.S.C. 260a: from 2 am on the second Sunday of March to 2 am on the
+    first Sunday of November, UTC-4; otherwise UTC-5), so no time-zone database is needed in Rhino's Python."""
+    now = now or _dt.datetime.now(_dt.timezone.utc)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=_dt.timezone.utc)
+    now = now.astimezone(_dt.timezone.utc).replace(tzinfo=None)
+
+    def sunday(month, nth):              # the nth Sunday of the month in now's year
+        first = _dt.datetime(now.year, month, 1)
+        return first + _dt.timedelta(days=(6 - first.weekday()) % 7 + 7 * (nth - 1))
+    summer = sunday(3, 2) + _dt.timedelta(hours=7) <= now < sunday(11, 1) + _dt.timedelta(hours=6)
+    return (now - _dt.timedelta(hours=4 if summer else 5)).date().isoformat()
+
+
+def two_zones_ask(zones):
+    """site_lookup's ask when the City map puts a lot in more than one zone, word for word (lookup._zoning)."""
+    return f"This lot is in {' and '.join(zones)}: pick the zone that applies."
+
+
+def no_rules(said, unknown):
+    """The box's line when the City map's district (or one of its districts) has no rules in Gordium."""
+    if len(said) == 1:
+        return NO_RULES.format(zone=said[0])
+    missing = ("the rules for " + " or ".join(unknown)) if len(unknown) > 1 else unknown[0] + "'s rules"
+    return (f"The City map puts this lot in {' and '.join(said)}; Gordium doesn't have {missing} yet: pick the "
+            "district that applies only if you know it.")
+
+
+def zone_row_text(state):
+    """The district row: the district and where it came from. None set: "not set" (never a past "suggested"). The
+    lookup's own words ("City zoning map says R-1b (checked 2026-10-21)") only this session and only for the
+    district it said, still suggested; a district the architect picked is theirs."""
+    zone, source = state.get("zone"), state.get("zone_source") or ENTERED
+    if not zone:
+        return "— · not set"
+    said = state.get("zone_said") or {}
+    if said.get("zone") == zone and source.startswith(SUGGESTED):
+        source = SUGGESTED + " · City zoning map says " + zone + " (checked " + said["date"] + ")"
+    return zone + " · " + source
+
+
+def saved_sources(saved_ui, state):
+    """The box's choices to keep after it: the district's source as the box ends with it (the architect's pick is
+    theirs, so a looked-up "suggested" never outranks it on reopen)."""
+    saved_ui = dict(saved_ui)
+    if state.get("zone") and state.get("zone_source"):
+        saved_ui["zone_source"] = state["zone_source"]
+    elif not state.get("zone"):
+        saved_ui.pop("zone_source", None)
+    return saved_ui
+
+
+def zone_picked(state, zone, first):
+    """The architect picked a district in the box's dropdown: it is set (and theirs, unless it is the one the box
+    opened with), so Draw follows at once (draw_reason)."""
+    state["zone"] = zone
+    if zone != first:
+        state["zone_source"] = ENTERED
+    return state
+LOOKUP_LIMIT_S = 45                               # the whole lookup; the box says so, the Rhino side stops it then
+LOOKING = "Looking up {}… (up to %d s)" % LOOKUP_LIMIT_S
+CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
+DOUBT_KEPT = "The lookup found this doubtful (its reason came from a source that can't be kept): check it."
+LOOKUP_SAYS = {                                   # the box's line when a lookup couldn't fill it in
+    "not_found": "No City of Ithaca address found for {query}: check the spelling, or draw the lot.",
+    "outside_city": "{message}",
+    "offline": "Couldn't reach the map services (offline?): enter the site by hand.",
+    "error": "A map service answered with an error: enter the site by hand.",
+    "timeout": "The lookup took too long: enter the site by hand, or try again.",
+    "multiple": "{message} Pick one under Address, then Look up again.",
+}
+ROW_OF = {"address": "lot", "parcel": "lot", "lot": "lot", "street_side": "street", "corner_lot": "street",
+          "ground": "ground", "zone": "zone", "overlays": "overlays"}
+SOURCE_OF = {"address": "NYS Geocoder", "lot": "NYS Tax Parcels Public", "street": "City roads",
+             "ground": "USGS 3DEP, today's ground", "zone": "City zoning map, used live"}   # if the payload has none
+GUIDE = ("The State's tax map didn't answer; the City's outline is shown as a dashed guide only (it can't be kept): "
+         "Draw my lot… over it, or pick your own outline.")
+
+
+def storable_ui(saved_ui):
+    """What of the box's choices may be written into the .3dm: never a session key ("_…": the lookup's live wording,
+    the City's zones and street name, its asks)."""
+    return {k: v for k, v in (saved_ui or {}).items() if not str(k).startswith("_")}
+
+
+def lookup_says(payload):
+    """The line for a lookup that didn't find the site (None when it did)."""
+    status = (payload or {}).get("status")
+    if status in (None, "found"):
+        return None
+    text = LOOKUP_SAYS.get(status, LOOKUP_SAYS["error"])
+    return text.format(query=payload.get("query") or "this address", message=payload.get("message") or "").strip()
+
+
+def lookup_may_replace(facts, saved_ui):
+    """Whether a lookup may replace the model's lot: none yet, or the one a lookup or the sample drew (and still the
+    lot). Never one the architect drew, picked or surveyed."""
+    lot = (facts or {}).get("lot_id")
+    return not lot or lot == (saved_ui or {}).get("replaceable_lot")
+
+
+def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
+    """(facts, saved_ui) after a lookup, as a pick returns them. Each found fact a suggestion with its own service's
+    name, never confirmed (the district must be ticked again: "_reconfirm"). The lot, street side and ground (and
+    their doubts) only when the lookup's lot replaces the model's (`replaces`); for the architect's own lot, only
+    the address and the district. A lookup that found nothing changes nothing but its own line."""
+    payload = payload or {}
+    facts, saved_ui = dict(facts), dict(saved_ui)
+    look = {"status": payload.get("status") or "error", "says": lookup_says(payload),
+            "asks": list(payload.get("asks") or []), "matches": list(payload.get("matches") or []),
+            "query": payload.get("query")}
+    saved_ui["_lookup"] = look
+    if look["status"] != "found":
+        return facts, saved_ui
+    got, details = payload.get("facts") or {}, payload.get("details") or {}
+    labels, kept = payload.get("labels") or {}, payload.get("kept_reasons") or {}
+
+    def value(name):
+        return (got.get(name) or {}).get("value")
+
+    def label(name, row):
+        return labels.get(name) or SOURCE_OF[row]
+
+    live, keep = {}, {}
+    for name, d in details.items():          # every doubtful or asked fact's reason, by row; reasons add up
+        if d.get("status") in ("needs_review", "ask") and d.get("reason"):
+            row = ROW_OF.get(name, name)
+            live[row] = _merged(live.get(row), d["reason"])
+            keep[row] = _merged(keep.get(row), kept.get(name) or DOUBT_KEPT)
+    found_overlays = value("overlays") or []
+    if found_overlays:                       # what was found, by name, not only that something was
+        live["overlays"] = _merged("Found on this lot: " + "; ".join(found_overlays) + ".", live.get("overlays") or "")
+    if value("address"):
+        facts["address"] = value("address")
+        saved_ui["address_source"] = SUGGESTED + " · " + label("address", "address")
+    zone = value("zone")
+    names = {z.lower(): z for z in zones} if zones else {}
+    said = zone if isinstance(zone, list) else [zone] if zone else []
+    if len(said) > 1 and live.get("zone"):
+        # site_lookup's own two-zones ask: the box says it once, its own way (no_rules on the row, or the amber
+        # question), so the lookup's words never say it again beside it (review of 8b8af5e, finding 1)
+        live["zone"] = " ".join(live["zone"].replace(two_zones_ask(said), " ").split())
+        if not live["zone"]:
+            live.pop("zone")
+    known = [names[z.lower()] for z in said if z.lower() in names] if zones else list(said)
+    unknown = [z for z in said if zones and z.lower() not in names]
+    if not said:                                 # found, but the zoning map gave no district: never the last
+        # address's district and its "suggested" left standing (zone round 3)
+        facts.pop("zone", None)
+        for key in ("zone_source", "_zones_found", "_zone_said"):
+            saved_ui.pop(key, None)
+        live["zone"] = _merged(live.get("zone"), NO_DISTRICT)
+    if unknown:
+        # the City map names a district Gordium has no rules for (alone or beside one it has): never another
+        # district preselected or called suggested in its place; none is set until the architect picks one. With
+        # two zones the row's own line names both and asks which applies (no_rules): said once, never again as the
+        # amber question too (Rhino check of 7efb1bd, 2026-10-22)
+        facts.pop("zone", None)
+        saved_ui.pop("zone_source", None)
+        saved_ui.pop("_zones_found", None)
+        live["zone"] = _merged(live.get("zone"), no_rules(said, unknown))
+        known = []
+    elif len(known) > 1:                         # two zones: the box asks which applies
+        saved_ui["_zones_found"] = known
+        facts["zone"] = known[0]
+    elif known:
+        facts["zone"] = known[0]
+        saved_ui.pop("_zones_found", None)
+    saved_ui.pop("_zone_said", None)
+    if known:                                    # stored: plain, never a date that goes stale on reopen
+        saved_ui["zone_source"] = SUGGESTED + " · " + label("zone", "zone")
+        when = payload.get("checked") or (got.get("zone") or {}).get("date")   # the City's day it was checked
+        if len(known) == 1 and when:             # shown this session only ("_"), as the map says it, with its date
+            saved_ui["_zone_said"] = {"zone": known[0], "date": str(when)}
+    saved_ui["_reconfirm"] = True                # a looked-up district is the architect's only once ticked again
+    saved_ui["_live"] = {k: v for k, v in live.items() if k in ("zone", "overlays")}
+    if not replaces:                             # the architect's own lot: its lot, street side and ground stay
+        return facts, saved_ui
+    side = value("street_side") or {}
+    # a street's name and source only with the street line this lookup draws (the State's lot): the City's parcels
+    # are a guide only, no line drawn, so nothing is said of a line that isn't there (review round 2 of 8b8af5e)
+    w = payload.get("writes") or {}
+    draws_line = bool(w.get("lot_ring") and w.get("street_line"))
+    if side.get("street") and draws_line:
+        # the address's own street is named in the address's words, which are kept: so the name is still there
+        # after Draw (it was this session's only, "the highlighted line" on reopen: Rhino check, 2026-10-22);
+        # another street's name may be kept only when its source allows
+        own = address_street(facts.get("address"), side["street"])
+        street_kept = payload.get("street_storable") or own is not None
+        saved_ui.pop("street_name" if not street_kept else "_street_name", None)
+        saved_ui["street_name" if street_kept else "_street_name"] = own or side["street"].title()
+        # credited to where each part came from: a name in the address's words is the address's (its geocoder),
+        # never the street service's, which is used live only (review of 8b8af5e, finding 2)
+        saved_ui["street_source"] = SUGGESTED + " · " + (
+            f"named as in the address ({label('address', 'address')}), the line from {label('street_side', 'street')}"
+            if own else label("street_side", "street"))
+    else:                                        # the replaced lot's street name goes with its street lines (the
+        saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street), and so
+        saved_ui.pop("_street_name", None)       # does its source: the street side's own, or none (headless check)
+        if side and draws_line:
+            saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
+        else:
+            saved_ui.pop("street_source", None)
+    corner = value("corner_lot")
+    streets = side.get("streets") or {}
+    if corner == "no":
+        facts["corner_lot"] = False
+    elif corner == "yes" or (corner == "ask" and len(streets) > 1):
+        facts["corner_lot"] = True               # it faces two streets (the box asks which line is the front)
+    else:
+        facts.pop("corner_lot", None)            # unknown: asked, never guessed
+    if corner:
+        saved_ui["corner_source"] = SUGGESTED + " · " + label("corner_lot", "street")
+    lot = value("lot") or {}
+    writes = payload.get("writes") or {}
+    if lot:
+        facts["lot_surveyed"] = False            # the tax map: ±2'-0" and the 2'-0" starting-house margin apply
+        saved_ui["lot_source"] = label("lot", "lot")
+        saved_ui["lot_area"] = lot.get("area_sf")
+    if writes.get("spots") and not FLAT_GROUND:  # the MVP assumes flat ground: the lookup's ground is never used
+        saved_ui["ground_kind"] = "spot"
+        saved_ui["ground_source"] = SUGGESTED + " · " + label("ground", "ground")
+    zs = [p[2] for p in writes.get("spots") or []]
+    if FLAT_GROUND and zs:                       # said, never used: how much the ground the lookup found falls
+        saved_ui["ground_fall"] = round(max(zs) - min(zs), 1)
+    else:
+        saved_ui.pop("ground_fall", None)
+    if lot and not writes.get("lot_ring"):      # the City's parcels: a guide only, never kept
+        look["guide"] = True
+        live["lot"] = GUIDE + (" " + live["lot"] if live.get("lot") else "")
+    # the doubts about what is now drawn: this lookup's, for the rows it replaced; earlier ticks don't carry over
+    saved_ui["doubts"] = {k: v for k, v in keep.items() if k in checkable()}
+    saved_ui["_live"].update({k: v for k, v in live.items() if k in checkable()})
+    saved_ui["checked"] = []
+    return facts, saved_ui
+
+
+def _merged(old, reason):
+    """Reasons add up, each said once (one that already holds another replaces it)."""
+    if not old or old in reason:
+        return reason
+    return old if reason in old else old + " " + reason
+
+
+def unsettled(saved_ui, checked=None):
+    """The checker's facts["unsettled"]: each doubt about what is drawn the architect hasn't ticked I checked this
+    for (or changed). Empty when there are none. Only kept-safe wording (the doubts saved)."""
+    done = set(checked if checked is not None else (saved_ui or {}).get("checked") or [])
+    return {k: v for k, v in ((saved_ui or {}).get("doubts") or {}).items() if k in checkable() and k not in done}
+
+
+def checkable():
+    """The rows "I checked this" settles, and so the doubts kept: with the MVP's flat ground the ground is not the
+    lookup's, so it has no doubt to keep (it would hold height and stories at needs review with no row to clear)."""
+    return tuple(k for k in CHECKABLE if not (FLAT_GROUND and k == "ground"))
+
+
+def settle(saved_ui, row):
+    """The architect changed that row (picked another street line, their survey or a lot they drew, other ground):
+    it is theirs now, so no doubt about it is left."""
+    saved_ui = dict(saved_ui)
+    saved_ui["doubts"] = {k: v for k, v in (saved_ui.get("doubts") or {}).items() if k != row}
+    saved_ui["_live"] = {k: v for k, v in (saved_ui.get("_live") or {}).items() if k != row}
+    saved_ui["checked"] = [k for k in saved_ui.get("checked") or [] if k != row]
+    if row == "lot":
+        saved_ui["replaceable_lot"] = None           # never replaced by a later lookup
+        saved_ui.pop("lot_source", None)
+    if row == "street":                          # the architect's own line: no looked-up name stays on it
+        saved_ui.pop("_street_name", None)
+        saved_ui.pop("street_name", None)
+    return saved_ui
+
+
+UNDER_A_BOX = ("check", "save_facts", "open_box")   # what may not happen while a start box is open
+
+
+def allowed(action, box_open):
+    """Whether `action` may run now: a check, writing the lot facts and opening a second start box never happen while
+    a start box is open (its own edits wait for it to close); anything else may."""
+    return not (box_open and action in UNDER_A_BOX)
+
+
+def pick_effect(what, outcome, facts, saved_ui):
+    """(facts, saved_ui) after one of the start box's picks, from what the pick gave (the Rhino side only gathers it):
+    street: {"lines", "ids": the street lines worked out at the pick (rhino-ui's street runs), "name"} or
+    {"picks": the lot lines [a, b] clicked, "name": the clicked line's street (street_name_after_pick, else
+    typed; None: unnamed)}; lot (Use my survey…): the outline picked; draw_lot: the outline drawn; terrain: the
+    surface picked; spot / regrade: the points placed. Esc, Enter or nothing picked (`outcome` empty): nothing
+    changes, every doubt stays (eval-integrity audit: Esc on Place spot grades wiped the ground's doubt).
+    The street lines change only through set_street_lines (arch-fixes-2 round 7): on a corner lot every line
+    clicked, no one name for them; otherwise pick_street, the name on the clicked line only (rounds 9-11)."""
+    facts, saved_ui = dict(facts), dict(saved_ui)
+    if not outcome or (what == "street" and not (outcome.get("picks") or outcome.get("lines"))):
+        return facts, saved_ui
+    if what == "street" and outcome.get("lines"):     # the street lines worked out at the pick (street runs)
+        saved_ui = settle(saved_ui, "street")
+        set_street_lines(facts, outcome["lines"], outcome.get("ids"))
+        if facts.get("corner_lot") is True:            # two streets: no one name for them
+            saved_ui.pop("street_name", None)
+        else:
+            saved_ui["street_name"] = outcome.get("name")      # the name on the clicked line only
+        saved_ui["street_source"] = ENTERED
+    elif what == "street":
+        picks, name = outcome["picks"], outcome.get("name")
+        saved_ui = settle(saved_ui, "street")          # the architect's line: no looked-up name stays on it
+        if facts.get("corner_lot") is True:            # a corner lot: every line on a street (two streets: unnamed)
+            set_street_lines(facts, street_lines_after_picks(facts.get("street_line"), picks, True))
+        else:
+            lines, ids = pick_street(facts.get("street_line"), facts.get("street_ids"), picks[0], name)
+            set_street_lines(facts, lines, ids)        # the name on the clicked line only
+            saved_ui["street_name"] = name
+        saved_ui["street_source"] = ENTERED
+    elif what in ("lot", "draw_lot"):
+        facts = after_lot_pick(facts, outcome) if outcome != facts.get("lot_id") else facts
+        facts["lot_surveyed"] = what == "lot"          # Use my survey…: a survey; drawn over the guide: not
+        saved_ui = settle(saved_ui, "lot")
+        if what == "draw_lot":
+            saved_ui["lot_source"] = "drawn by you"
+    elif what == "terrain":
+        saved_ui.update(terrain_id=outcome, ground_kind="terrain")
+        saved_ui = settle(saved_ui, "ground")
+    elif what in ("spot", "regrade"):
+        saved_ui = after_ground_pick(saved_ui, what, len(outcome))
+    return facts, saved_ui
+
+
+def after_ground_pick(saved_ui, what, placed):
+    """Place spot grades / I'll regrade, with `placed` points actually added: the ground is the architect's only
+    then. Esc or Enter with none placed changes nothing (review round 1: it settled a doubtful ground)."""
+    if not placed:
+        return dict(saved_ui)
+    saved_ui = settle(saved_ui, "ground")
+    saved_ui["ground_kind"] = what
+    saved_ui.pop("ground_source", None)
+    return saved_ui
 
 
 def parse_feet(text):
@@ -996,16 +2816,20 @@ BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""
 
 def draw_reason(state):
     """Why Draw is off, in one line; "" when it is on."""
+    if not state.get("zone"):
+        return "Pick the district to continue."
     if not state.get("district_confirmed"):
         return "Confirm the district to continue."
     if parse_feet(state.get("design_buffer")) is None:
         return BUFFER_UNREAD
+    if state.get("lot_missing"):
+        return "Draw or pick the lot to continue."
     return ""
 
 
 def can_draw(state):
-    """Draw is on only once the district is confirmed (Gordium doesn't look the zoning map up yet) and the design
-    buffer, if typed, can be read."""
+    """Draw is on only once the district is confirmed (a looked-up district is only a suggestion), the design
+    buffer, if typed, can be read, and there is a lot."""
     return draw_reason(state) == ""
 
 
@@ -1017,19 +2841,28 @@ def starting_house_fact(note, today):
     # the panel puts "Starting house: " in front, and it describes the house as Gordium drew it (the architect
     # may since have moved or replaced it), so it says so
     said = note[len("Starting house: "):] if note.startswith("Starting house: ") else \
-        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else note
+        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else \
+        "the l" + note[1:] if note.startswith("Largest house") else note
     return {"value": "as first drawn, " + said, "source": SUGGESTED, "confirmed_by": None, "date": today}
 
 
 def uncertain(state):
     """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
+    says = (state.get("lookup") or {}).get("says")
+    question = _question(state)
+    return " · ".join(t for t in (question, says) if t) or None     # never one instead of the other
+
+
+def _question(state):
+    """Every question the box still has (each one, never only the first)."""
+    asks = []
     if state.get("corner_lot") is None:          # never guessed: unanswered, the yards wait for it (§325-19C)
-        return "Does this lot face two streets? Answer Corner lot? under " + STREET_LABEL
-    if state.get("corner_lot"):
-        return "This lot faces two streets: click Change… and pick each lot line on a street"
+        asks.append("Does this lot face two streets? Answer Corner lot? under " + STREET_LABEL)
+    elif state.get("corner_lot"):
+        asks.append("This lot faces two streets: click Change… and pick each lot line on a street")
     if len(state.get("zones_found") or []) > 1:
-        return "This lot is in two zones: pick the zone that applies"
-    return None
+        asks.append("This lot is in two zones: pick the zone that applies")
+    return " · ".join(asks) or None
 
 
 # The MVP assumes flat ground (Ben, 2026-10-20): flat at the lot level and finished, so height and stories are
@@ -1037,6 +2870,7 @@ def uncertain(state):
 # stay, behind this one switch: set it to False to bring the Ground row back.
 FLAT_GROUND = True
 ASSUMED_FLAT = "assuming flat ground"
+ASSUMED_SOURCE = "assumed (flat ground, the MVP's rule)"
 
 
 def ground_facts(state, lot_level, flat=None):
@@ -1046,7 +2880,7 @@ def ground_facts(state, lot_level, flat=None):
     only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
     if FLAT_GROUND if flat is None else flat:
         return {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": lot_level, "grade_from": None,
-                "ground_assumed": "flat"}
+                "ground_assumed": "flat", **({"ground_fall": state["ground_fall"]} if state.get("ground_fall") else {})}
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
     finished = kind == "regrade" or bool(state.get("no_regrading"))
@@ -1074,16 +2908,41 @@ def fact_sources(state, today, confirmed):
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
+        # the follow-up answers (Ben, 2026-10-25): each saved as entered by you, and what the use itself says,
+        # shown in the panel and the report (exactly the facts answers_applied sends the checker)
+        **follow_up_sources(state, fact),
         # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
-        "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"))),
-        "street": fact(street_name(state),
+        "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"), state.get("lot_source"))),
+        # the street's name only when it may be kept (the City's roads may not: "street_name_saved" then None, and
+        # the address's street, a kept fact, says it instead)
+        "street": fact(street_name({**state, "street_name": state.get("street_name_saved")})
+                       if "street_name_saved" in state else street_name(state),
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
-        "ground": fact("assumed flat" if FLAT_GROUND else
-                       ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
-                       "as drawn" if kind == "flat" else ("picked by you" if kind == "terrain" else "placed by you")),
+        # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
+        "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
+                        "lot; height is checked as if flat)" if state.get("ground_fall") else ""),
+                        ASSUMED_SOURCE, None) if FLAT_GROUND else
+                   fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
+                        "as drawn" if kind == "flat" else ground.get("source") or
+                        ("picked by you" if kind == "terrain" else "placed by you"))),
     }
+
+
+def follow_up_sources(state, fact):
+    """The sources of the facts the box sets after Use (answers_applied's): each answer to a question asked,
+    "entered by you", and each fact the use says, IMPLIED_SOURCE."""
+    zone, use, options = state.get("zone"), state.get("use"), state.get("options")
+    facts, answered = answers_applied({}, state.get("answers"), zone, use, options)
+    return {k: fact({True: "yes", False: "no"}.get(v, v), ENTERED if k in answered else IMPLIED_SOURCE)
+            for k, v in facts.items()}
+
+
+def sources_kept(saved):
+    """The saved sources Draw keeps before adding the box's own: never an earlier follow-up answer (a fact the box
+    asks), which Draw sets again or drops with its fact (fact_sources)."""
+    return {k: v for k, v in (saved or {}).items() if k not in BOX_ASKS}
 
 
 def district_confirmed(mode, zone_fact, zone):
@@ -1120,7 +2979,7 @@ def shorten(text, most):
 def building_name(layer, name, grouped):
     """What the panel calls a building: the starting house Gordium drew (its floors grouped on the massing layer),
     else the object's name, else its layer ("a solid on Building")."""
-    if layer == MASSING:
+    if on_layer(layer, MASSING):                     # its floors and roof each on its own sublayer
         return "the starting house"
     if name:
         return name + (" (and its group)" if grouped else "")
@@ -1159,6 +3018,629 @@ def is_plan_view(parallel, direction_z, tolerance=0.99):
     down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
     up on the ground line)."""
     return bool(parallel) and direction_z <= -tolerance
+
+
+DIM_LIFT_FT = 0.1       # the yard dimensions stand this far above the lot's level (never in it, never under it)
+
+
+def dim_level(lot_level_ft):
+    """The height (feet) the yard dimensions are drawn at: just above the lot's own level (its outline's lowest
+    point), so the ground and a lot drawn above z 0 never hide them where they are depth-tested; 0 + lift
+    without a lot."""
+    return (lot_level_ft or 0.0) + DIM_LIFT_FT
+
+
+def lines_on_top(parallel, direction_z):
+    """Whether Gordium's lines (the lot line, the envelope's outline, the dimensions, the neighbourhood) are drawn
+    over everything in this view: in plan yes, so a line under the roof (the buildable outline, a dimension to the
+    wall) stays visible; in every other view (perspective, the elevations, shaded or not) no: depth-tested, hidden
+    behind the solids in front of them, as the model's own lines are (Ben, 2026-10-21)."""
+    return is_plan_view(parallel, direction_z)
+
+
+def model_ticks(a, b, size):
+    """A dimension's end ticks in the model (drawn depth-tested with it): for a level line, at each end a slash at
+    45° to it in plan (dim_ticks on x and y), at that end's own height; for an upright one (the height), a slash
+    leaning 45° across x, y and z, so it shows in the Front and the Right views alike. `size` in model units.
+    Each tick is a pair of (x, y, z)."""
+    if ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5 > 1e-9:
+        return [((p0[0], p0[1], end[2]), (p1[0], p1[1], end[2]))
+                for (p0, p1), end in zip(dim_ticks(a[:2], b[:2], size), (a, b))]
+    if abs(b[2] - a[2]) < 1e-9:
+        return []
+    s = size / 2 / 3 ** 0.5                  # a slash of length `size` along (1, -1, 1)
+    return [((p[0] - s, p[1] + s, p[2] - s), (p[0] + s, p[1] - s, p[2] + s)) for p in (a, b)]
+
+
+# ---- the start box as one transaction (review rounds 1-2 of PR #19) ----------------------------------------------
+#
+# The box's model edits go through one BoxSession, owned by the box (gordium_rhino.confirm) and never copied. An object
+# the session replaces is never deleted while the box is open: it is HELD, moved to a hidden holding layer with the
+# layer it came from written on it, so Cancel (or Esc, or any error) puts the very same object back, and so does the
+# next GordiumStart if Rhino closed in between (recover_held). Draw deletes what is held. Nothing on the holding layer
+# is ever measured or sent to the checker (classify). `table` is the model, as a few plain calls (gordium_rhino's
+# RhinoTable; a fake in the tests).
+
+class Cancelled(Exception):
+    """Esc at a prompt: the whole edit is cancelled and nothing is saved (Enter keeps what is there)."""
+
+
+class BoxSession:
+    def __init__(self, table):
+        import uuid
+        self.table = table
+        self.token = uuid.uuid4().hex                  # marks what this session draws and holds
+        OPEN_SESSIONS.add(self.token)                  # live: recovery leaves its objects alone
+        self.added, self.held = [], []
+        self.layers_before = set(table.layer_names())
+        self.views = table.save_views()
+
+    def add(self, ids):
+        """Objects this session drew: Cancel deletes them, and so does crash recovery (each carries the session's
+        mark in the model until Draw)."""
+        for i in ids:
+            if i:
+                self.table.mark_added(i, self.token)
+                self.added.append(i)
+
+    def hold(self, object_id):
+        """Take an object out of the model for this session: one it drew is simply deleted; any other is held (Cancel
+        brings it back as it was)."""
+        if not object_id or not self.table.exists(object_id):
+            return
+        if object_id in self.added:
+            self.added.remove(object_id)
+            self.table.delete(object_id)
+            return
+        self.held.append((object_id, self.table.layer_of(object_id)))
+        self.table.hold(object_id, self.token)
+
+    def rollback(self):
+        """Cancel, Esc or an error: the model as the box found it (objects, the layers it made, the views). Even if
+        a step fails, the session is closed (no longer live), so whatever it left is recovered at the next start
+        (verification round of PR #19: a raising rollback left its held objects stranded until Rhino restarted)."""
+        try:
+            for i in self.added:
+                if self.table.exists(i):
+                    self.table.delete(i)
+            for i, layer in self.held:
+                if self.table.exists(i):
+                    self.table.release(i, layer)
+            made = set(self.table.layer_names()) - self.layers_before
+            for name in sorted(made, key=lambda n: -n.count("::")):      # sublayers first
+                self.table.remove_layer_if_empty(name)
+            self.table.restore_views(self.views)
+            self.added, self.held = [], []
+        finally:
+            OPEN_SESSIONS.discard(self.token)
+
+    def commit(self):
+        """Draw: what was replaced goes for good, and what was drawn is kept (its session mark cleared)."""
+        for i, _ in self.held:
+            if self.table.exists(i):
+                self.table.delete(i)
+        for i in self.added:
+            if self.table.exists(i):
+                self.table.clear_mark(i)
+        self.table.remove_layer_if_empty(HOLDING_LAYER)
+        self.added, self.held = [], []
+        OPEN_SESSIONS.discard(self.token)
+
+
+def recover_held(table, live=None):
+    """Box sessions Rhino didn't finish (it closed): what they drew deleted, what they held back on the layer it came
+    from, so the model is as it was before those boxes opened. A session still open (`live`, OPEN_SESSIONS) is never
+    touched. (removed, put back)."""
+    live = OPEN_SESSIONS if live is None else live
+    removed = [i for i, token in table.added_objects() if token not in live]
+    for i in removed:
+        table.delete(i)
+    back = [(i, layer) for i, layer, token in table.held_objects() if token not in live]
+    for i, layer in back:
+        table.release(i, layer)
+    table.remove_layer_if_empty(HOLDING_LAYER)
+    return len(removed), len(back)
+
+
+def should_recheck(dirty_at, now, running, box_open, wait, last_at=None, auto=True):
+    """Live mode's re-check after an edit: only when the architect asked for it (`auto`: Check after every edit,
+    off by default; otherwise the Check button checks), once the model has been still for `wait` seconds, no check
+    is running, no start box is open (its own edits mark the model changed; the check waits for the box to close,
+    then runs: verification round of PR #19), and no check has finished since that edit (`last_at`: GordiumStart's
+    own check after its box already covers the box's edits)."""
+    if not auto:
+        return False
+    if last_at is not None and dirty_at and last_at >= dirty_at:
+        return False
+    return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
+
+
+# ---- the Check button (Ben, 2026-10-21): no check after every edit unless asked ---------------------------------
+CHANGED_SINCE = "Model changed since the last check — press Check"
+AUTO_CHECK_LABEL = "Check after every edit"
+AUTO_CHECK_TIP = "Off: the results grey out after an edit until you press Check. On: Gordium checks again by itself."
+
+
+def changed_after_box(before, now, drawn, failed=False):
+    """When the model counts as changed after a start box closes (STATE["dirty"]): Cancel rolled the box's own edits
+    back, so the model is as it was when the box opened (`before`: changed then, or not); Draw's edits are checked
+    by Draw's own check, and any change left counts (`now`). A box that ended in an error is no Cancel: its rollback
+    may have stopped partway, so any edit seen during it counts (`now`, else `before`): the results grey out, never
+    shown as current for a model that may differ (the headless check-15, demo review of #26 with #27)."""
+    if failed:
+        return now or before
+    return now if drawn else before
+
+
+def auto_check(ui_state):
+    """Whether this document checks again by itself after every edit: off unless the architect ticked Check after
+    every edit in it (saved with the file)."""
+    return bool((ui_state or {}).get("auto_check", False))
+
+
+NEVER_CHECKED = "No check yet for this model — press Check"
+
+
+def out_of_date_line(auto, checked_before=True):
+    """What the panel's header and the viewport's status box say while the results are older than the model: a
+    check is on its way ("Checking…") only when one will run by itself; otherwise the architect is told to press
+    Check (the results stay greyed, never shown as if current); "since the last check" only when there was one."""
+    if auto:
+        return "Checking… (the model changed)"
+    return CHANGED_SINCE if checked_before else NEVER_CHECKED
+
+
+def draw_one_hint(auto):
+    """GordiumStart's line when no starting house could be drawn: who checks the one the architect draws."""
+    return ("draw one and Gordium will check it" if auto else
+            "draw one, then press Check in the Gordium panel")
+
+
+def should_check_front(front_pending, running, box_open):
+    """A document come to the front (new, opened, switched to): checked once, whatever Check after every edit says
+    (it is not an edit, and nothing of it is on screen yet), when no check is running and no start box is open."""
+    return bool(front_pending) and not running and not box_open
+
+
+def controls_enabled(box_open, zoom_ok):
+    """(the panel's controls, Zoom to): all off while a start box is open; on closing, worked out from the panel as
+    it is now, never restored from a list saved when the box opened (the header's buttons may have been rebuilt in
+    between, after a document switch: verification round 4 of PR #19). Zoom to also needs a selected, current item
+    (`zoom_ok`, as gordium_ui.show decides it)."""
+    return (not box_open, (not box_open) and bool(zoom_ok))
+
+
+def last_check_at(checked_at, document):
+    """When the last completed check of THIS document finished (None: none yet). Never a placeholder's time, and
+    never another document's (verification round 4: switching documents dropped the pending re-check)."""
+    return (checked_at or {}).get(document)
+
+
+def gate_actions(actions, box_open, say, open_ok=("legend",)):
+    """The panel's actions, each doing nothing but saying BOX_BUSY while a start box is open (one choke point: none of
+    them writes to the model, runs a check or opens another box under an open one; verification round of PR #19).
+    `open_ok`: the ones that only show something (the legend)."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if box_open() and name not in open_ok:
+                say(BOX_BUSY)
+                return None
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+def recovery_message(removed, back):
+    """What recovery did, in words (None when it did nothing)."""
+    def n(k):
+        return "%d object%s" % (k, "s" if k != 1 else "")
+    parts = (["removed %s an unfinished start box drew" % n(removed)] if removed else []) + \
+        (["put back %s it had set aside" % n(back)] if back else [])
+    return " and ".join(parts) or None
+
+
+def draw_then_commit(session, save):
+    """Draw: everything that can fail first (the facts, the box's choices, the sources: `save`), the session's
+    commit last, so a failure leaves the session to be rolled back (run_box) with nothing lost."""
+    result = save()
+    session.commit()
+    return result
+
+
+def run_box(session, loop):
+    """The box's loop: any way out but Draw's (Cancel returns None from it; Esc, an error) rolls the session back."""
+    try:
+        result = loop()
+    except BaseException:
+        session.rollback()
+        raise
+    if result is None:
+        session.rollback()
+    return result
+
+
+def pick_or_nothing(pick, facts, saved_ui):
+    """One pick the box asked for: Esc at its prompt changes nothing."""
+    try:
+        return pick()
+    except Cancelled:
+        return facts, saved_ui
+
+
+def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
+    """(facts, saved_ui, guide ring or None) after a lookup's answer, with its model edits made through the session:
+    the lot it may replace (lookup_may_replace) and every spot grade drawn for that lot (a lookup's or the
+    architect's: grades never mix across lots) held; the State's outline drawn as the lot curve and USGS ground as
+    spot grades (only what lookup_box.writes allows); the City's outline only as a guide. The architect's own lot,
+    its street side and ground are never touched."""
+    replaces = lookup_may_replace(facts, saved_ui)
+    facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=replaces)
+    if (answer or {}).get("status") != "found":
+        return facts, saved_ui, None
+    if not replaces:
+        saved_ui["_lookup"]["says"] = "Your own lot is kept: the lookup filled in the address and the district only."
+        return facts, saved_ui, None
+    w = answer.get("writes") or {}
+    for old in [facts.get("lot_id")] + list(table.ground_points()):
+        session.hold(old)
+    for k in ("lot_id", "plan_north_deg"):
+        facts.pop(k, None)
+    set_street_lines(facts, None)                # the old lot's street lines and their names go with it
+    saved_ui.update(from_sample=False, replaceable_lot=None, lookup_frame=None, ground_kind="flat", lookup_spots=[])
+    guide = None
+    if w.get("lot_ring"):
+        lot_id = table.add_lot(w["lot_ring"], "Lot · " + (facts.get("address") or "looked up"))
+        session.add([lot_id])
+        facts["lot_id"] = lot_id
+        if w.get("street_line"):
+            set_street_lines(facts, w["street_line"])    # unnamed lines: the measuring reads them from the drawing
+        if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
+            facts["plan_north_deg"] = w["frame"]["rotation_deg"]
+        spots = [] if FLAT_GROUND else [table.add_spot(p) for p in w.get("spots") or []]   # flat: none drawn
+        session.add(spots)
+        saved_ui.update(replaceable_lot=lot_id, lookup_frame=w.get("frame"), lookup_spots=spots)
+        if spots:
+            saved_ui["ground_kind"] = "spot"
+    elif w.get("guide_ring"):
+        guide = w["guide_ring"]
+    saved_ui["lookup_snapshot"] = w.get("snapshot")
+    return facts, saved_ui, guide
+
+
+# ---- the context map (design_checker.context_box): the neighbourhood around a looked-up lot ---------------------
+CONTEXT_LIMIT_S = 20                    # the whole fetch (three map requests, about 1 s); the Rhino side stops it then
+CONTEXT_ENTRY = "context"               # the document string holding the context's snapshot (records, never data)
+NO_CONTEXT = ("No neighbourhood to show: it is drawn around a lot the start box looked up (GordiumStart, type the "
+              "address, Look up, Draw).")
+
+
+def context_command(python, frame, fixture=None):
+    """The context_box command for a lookup's saved frame (the box's `lookup_frame`), or None when there is no
+    looked-up lot to centre it on (the sample lot, a drawn or picked lot, a file saved before the context map)."""
+    frame = frame or {}
+    origin, shift = frame.get("origin_epsg2261_us_survey_ft"), frame.get("shift_ft")
+    if not origin or not shift or frame.get("rotation_deg") is None:
+        return None
+    args = [python, "-m", "design_checker.context_box", "--origin", repr(float(origin[0])), repr(float(origin[1])),
+            "--rotation", repr(float(frame["rotation_deg"])), "--shift", repr(float(shift[0])), repr(float(shift[1]))]
+    if frame.get("parcel_id"):
+        args += ["--parcel", str(frame["parcel_id"])]
+    return args + (["--fixture", fixture] if fixture else [])
+
+
+def context_frame(facts, saved_ui):
+    """The lookup frame to draw the neighbourhood around, only while the lot in the model is the one that lookup drew
+    (still its `replaceable_lot`): a lot the architect drew, picked or surveyed, or one a later lookup couldn't
+    place (no frame), has no neighbourhood drawn around an earlier address."""
+    saved_ui = saved_ui or {}
+    lot = (facts or {}).get("lot_id")
+    frame = saved_ui.get("lookup_frame")
+    if saved_ui.get("from_sample"):      # the sample lot (review round 3: it kept an earlier lookup's frame)
+        return None
+    return frame if frame and lot and lot == saved_ui.get("replaceable_lot") else None
+
+
+def same_frame(a, b):
+    """Whether two lookup frames are the same placement (one definition for every caller: context_step,
+    context_merge, and through it draw_context; review round 7)."""
+    return bool(a) and bool(b) and a == b
+
+
+def is_stored(layer):
+    """Whether a context layer's source may be kept in the file (store raw): its objects are in the .3dm. One
+    definition for writing (context_objects), keeping (context_merge) and the live footprints (keeps_live)."""
+    return (layer or {}).get("store") == "raw"
+
+
+def guides_of(held, doc_serial):
+    """Whether the live footprints held (STATE["context_guides"]) belong to this document."""
+    return bool(held) and held.get("doc") == doc_serial
+
+
+def guides_on_screen(held, doc_serial):
+    """Whether this document's footprints are on screen: held for it AND with something to draw. The drawing's and
+    the merge's question (keep the ones on screen?). Whether to fetch again is needs_refetch's (review round 8: a
+    fetch that worked and found none is not a failure)."""
+    return guides_of(held, doc_serial) and bool(held.get("lines"))
+
+
+def needs_refetch(held, record, doc_serial):
+    """Whether the tick or a Draw on the same lot should fetch the neighbourhood again: nothing drawn for this lot
+    yet (no record: after a Draw with the tick off, or a first fetch that failed outright; review of the editable
+    outlines, round 2), a live-only layer (a source that may not be kept, shown on screen and never saved) with
+    nothing on screen for this document (a reopened file), or any layer, stored or live-only, whose last fetch
+    failed (review round 9: parcels down on the first Draw were never fetched again). A layer kept from an earlier
+    fetch that worked carries that fetch's "found" entry (context_merge), so a kept layer doesn't loop. A fetch that
+    worked and found nothing is not fetched again (review round 8). guides_on_screen stays the drawing's and the
+    merge's question."""
+    layers = list(((record or {}).get("layers") or {}).values())
+    if not layers:
+        return True              # nothing drawn for this lot: the tick (or Draw) fetches it
+    if any(not is_stored(v) for v in layers) and not guides_of(held, doc_serial):
+        return True              # (the footprints are kept since 2026-10-21: a reopened file has them, nothing to fetch)
+    return any((v or {}).get("status") not in DREW for v in layers)
+
+
+def context_step(frame, drawn, on):
+    """What a box's Draw does to the neighbourhood: frame = the lot's (context_frame), drawn = the frame the one in
+    the file was drawn around (context_record), on = the panel's tick.
+    "keep": nothing to change (the same lot, or no lot of a lookup's and nothing drawn);
+    "clear": the lot isn't a lookup's any more, so the earlier neighbourhood goes;
+    "draw": a lookup's lot without its neighbourhood: the earlier one goes, this one is drawn;
+    "off": the same, with Show neighbourhood off: the earlier one goes, and the box says it wasn't drawn."""
+    if not frame:
+        return "clear" if drawn else "keep"
+    if same_frame(drawn, frame):
+        return "keep"
+    return "draw" if on else "off"
+
+
+def context_record(payload, frame):
+    """What the document's strings keep of a drawn neighbourhood: its snapshot (records and the storable layers'
+    counts, never a live-only source's data) and the frame it was drawn around."""
+    return dict((payload or {}).get("snapshot") or {}, frame=frame)
+
+
+DREW = ("found", "partial")             # a context layer whose service answered (its objects are replaced)
+
+
+def context_replaces(payload):
+    """The sources whose saved objects a fetch replaces: each layer whose service answered (found or partial), and
+    Gordium's own marks when any did. A layer whose service failed keeps what was saved (review of PR #23: one
+    service down deleted every layer's objects, and the record then said they had failed)."""
+    layers = (payload or {}).get("layers") or {}
+    out = set(v.get("source") for v in layers.values() if v.get("status") in DREW and v.get("source"))
+    return out | ({"gordium"} if out else set())
+
+
+LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.context's mark on a live-only layer's credit line
+NOTE_WIDTH = 60                          # characters per line of the Sources note (it sits inside the square)
+NOTE_HEIGHT_FT = 2.5                     # its text height (about the scale bar label's): ~95 ft wide at 60 characters
+NOTE_LINE_FT = 1.7 * NOTE_HEIGHT_FT      # the most one displayed line may take, spacing included (the in-Rhino claim)
+
+
+def note_text(credits):
+    """The Sources note: each credit line wrapped to NOTE_WIDTH characters (Rhino job's screenshots, PR #23: one long
+    line ran off the view). One helper for context_box (the first draw) and context_merge (a kept layer's line)."""
+    import textwrap
+    out = []
+    for line in credits or []:
+        out += textwrap.wrap(line, NOTE_WIDTH) or [""]
+    return "\n".join(out)
+
+
+def keeps_live(kept, old_record):
+    """Whether a live-only layer is among the kept ones (its guides on screen stay, its credit line is carried)."""
+    layers = (old_record or {}).get("layers") or {}
+    return any(not is_stored(layers.get(n)) for n in kept or [])
+
+
+def context_merge(payload, old_record, frame, live_on_screen=False):
+    """The plan for drawing a fetch over the neighbourhood already in the file: the ONE decision the panel's message,
+    the record, the objects deleted and the footprints on screen all follow (review rounds 6-7). A dict:
+    payload (what to draw and say), record (what the file keeps), kept (the layers kept), replace (the sources
+    whose objects go: rhino_logic.context_replaces around the same frame; None, every one, around another),
+    keep_guides (the footprints on screen stay).
+    Around the same frame, each layer whose service failed and that is still there is kept: a stored layer is in
+    the file; a live-only one (a source that may not be kept) only when its guides are on screen for this document
+    (`live_on_screen`, from guides_on_screen). A kept layer's record entries (the layer, its requests, its credit
+    line, when it was fetched) are carried over and the Sources dot still lists it. Around another frame (or none
+    saved) nothing is carried over: the earlier address's go."""
+    record = context_record(payload, frame)
+    old = old_record or {}
+    plan = {"payload": payload, "record": record, "kept": [], "replace": None, "keep_guides": False}
+    if not same_frame(old.get("frame"), frame):
+        return plan
+    plan["replace"] = context_replaces(payload)
+    was = old.get("layers") or {}
+    kept = [n for n, v in ((payload or {}).get("layers") or {}).items()
+            if v.get("status") not in DREW and (was.get(n) or {}).get("status") in DREW
+            and (is_stored(was.get(n)) or live_on_screen)]
+    if not kept:
+        return plan
+    live_kept = keeps_live(kept, old)
+    sources = set(was[n]["source"] for n in kept)
+    record["layers"] = dict(record.get("layers") or {}, **{n: was[n] for n in kept})
+    record["sources"] = list(record.get("sources") or []) + [r for r in old.get("sources") or []
+                                                              if r.get("source") in sources]
+    credits = list(record.get("credits") or [])
+    credits += [c for c in old.get("credits") or [] if c not in credits and (live_kept or LIVE_ONLY not in c)]
+    record["credits"] = credits
+    # when each layer kept in THIS fetch was really fetched (review round 6: never a layer fetched again since)
+    record["kept_from"] = {n: (old.get("kept_from") or {}).get(n) or old.get("fetched") for n in kept}
+    objects = []
+    for o in payload.get("objects") or []:
+        if o.get("source") == "gordium" and o.get("name") == "Sources":
+            o = dict(o, text=note_text(credits))
+        objects.append(o)
+    note = "Kept the %s drawn earlier (the service didn't answer)." % " and ".join(kept)
+    counts = dict(payload.get("counts") or {}, **{n: was[n]["count"] for n in kept if "count" in was[n]})
+    plan.update(kept=kept, keep_guides=live_kept,
+                payload=dict(payload, objects=objects, counts=counts,
+                             message=((payload.get("message") or "") + " " + note).strip()))
+    return plan
+
+
+CONTEXT_EDITABLE = (CONTEXT + "::Buildings",)   # left unlocked: the architect drags and edits the footprints (Ben)
+GEOM_KEY = "gordium_context_geom"       # on each outline Gordium draws: the fingerprint of its points as drawn
+PIECE_KEY = "gordium_context_id"        # on each outline: the parcel, street piece or footprint it is
+EDITED_KEY = "gordium_context_edited"   # on an outline the architect edited: it is theirs (Gordium never removes it)
+FRAME_KEY = "gordium_context_frame"     # on each outline: the lot (lookup frame) it was drawn around
+DRAWN_KEY = "gordium_context_drawn_as"  # on each outline: its own object id when drawn (a copy keeps it, but not as its
+                                        # own id: a copy is never the outline itself)
+
+
+def outermost_first(layers):
+    """Layer indexes (from (index, full path) pairs) ordered parent before sublayer, so setting a parent's state can
+    never undo a sublayer's set after it (Rhino 8: a parent's IsVisible gives its sublayers its lock; review round 5)."""
+    return [i for i, path in sorted(layers, key=lambda x: (x[1].count("::"), x[0]))]
+
+
+def context_not_cleared(count):
+    """What the architect is told when Rhino refused to delete or mark some of Gordium's neighbourhood objects (a
+    layer still locked or hidden): never drawn over silently (review round 5)."""
+    return ("Gordium could not remove %d neighbourhood object%s it drew earlier (a locked or hidden layer?). Unlock "
+            "and show the Gordium layers, then press Draw again, or delete them by hand." % (count, "" if count == 1 else "s"))
+
+
+def with_not_cleared(text, count):
+    """A message with the not-cleared warning first when Rhino refused to remove some of Gordium's objects: the panel
+    shows one line, so a warning said on its own is overwritten by the next message (review round 6); a "removed"
+    line never stands alone while objects are left."""
+    return text if not count else context_not_cleared(count) + " " + text
+
+
+def context_locked(path):
+    """Whether a context layer is locked after drawing: the leaf layers but the editable ones (the footprints), never
+    an ancestor of an editable one (Gordium::Context itself): in Rhino a locked parent locks its sublayers' objects,
+    so the footprints couldn't be dragged (review of the editable outlines, P1)."""
+    if not on_layer(path, CONTEXT) or any(on_layer(path, e) for e in CONTEXT_EDITABLE):
+        return False
+    return not any(on_layer(e, path) for e in CONTEXT_EDITABLE)
+
+
+def outline_key(points, attributes=None):
+    """The fingerprint of an outline as Rhino holds it: every coordinate of its points, Z included (to a millionth of
+    a model unit), and its attributes as the plugin's _attrs_print reads them (each of FINGERPRINT_ATTRIBUTES, the
+    layer, linetype and material by their ids, the groups, the architect's own user text). Review of the editable
+    outlines, P1: a footprint moved up to the terrain, renamed or recoloured was taken as unedited, deleted and drawn
+    again at z = 0."""
+    import hashlib
+    import json
+    flat = [[round(float(c), 6) for c in p] for p in points or []]
+    return hashlib.sha1(json.dumps([flat, attributes or {}], sort_keys=True).encode("utf-8")).hexdigest()[:20]
+
+
+def is_edited(stored_key, points, attributes=None):
+    """Whether an outline Gordium drew has been edited since (moved in any direction, reshaped, renamed, recoloured):
+    it no longer matches the fingerprint written when it was drawn (Ben, 2026-10-21: Gordium's redraw or clear removes
+    only outlines it drew that the architect hasn't edited; an edited one is the architect's and stays). No
+    fingerprint: not one of these."""
+    return bool(stored_key) and outline_key(points, attributes) != stored_key
+
+
+def frame_key(frame):
+    """A short fingerprint of a lookup frame (which lot, placed how): an outline remembers the lot it was drawn for."""
+    import hashlib
+    import json
+    return hashlib.sha1(json.dumps(frame or {}, sort_keys=True, default=str).encode("utf-8")).hexdigest()[:16]
+
+
+def suppressed(edited, current_frame_key):
+    """The ids not to draw again: those of outlines the architect edited that are the very outline Gordium drew (its
+    own id is the one it was drawn as: not a copy, which carries the original's user text under a new id) and were
+    drawn around this same lot (not one kept from another address, whose ids belong to another square). Review of the
+    editable outlines, P2: a copy, or an outline kept from another address, hid an unedited neighbour. `edited`:
+    [{id, frame, drawn_as, own}]."""
+    return sorted(set(e.get("id") for e in edited or [] if e.get("id") and e.get("frame") == current_frame_key
+                      and e.get("drawn_as") and e.get("drawn_as") == e.get("own")))
+
+
+# The attributes of an outline in its fingerprint (the plugin's _attrs_print), by name: each one an architect can
+# change on an outline in Rhino 7 or 8, one that Rhino lacks left out by _attrs_print (review of the editable outlines, round 2: a short list missed print width and
+# colour, material, groups). A fixed list, not every property by reflection (round 3): a property one Rhino version
+# adds would make every outline drawn under the last one look edited. Table positions are never fingerprinted (the
+# layer, linetype and material go by their ids, the groups by theirs: _attrs_print): a deleted layer isn't saved, so
+# on reopening a file the later layers' indexes move down, and every untouched outline looked edited, kept forever.
+FINGERPRINT_ATTRIBUTES = ("Name", "Url", "Mode", "Visible", "Space", "ViewportId", "DisplayOrder", "WireDensity",
+                          "ObjectDecoration", "ColorSource", "ObjectColor", "LinetypeSource", "PlotColorSource",
+                          "PlotColor", "PlotWeightSource", "PlotWeight", "MaterialSource", "CastsShadows",
+                          "ReceivesShadows", "LinetypePatternScale")   # the last: Rhino 8 only (round 4)
+
+
+def attribute_text(value):
+    """An attribute's value as stable text for the fingerprint (a number, a flag, an enum's name, an id; a colour by
+    its ARGB number, never its name, which a colour read back from a file doesn't keep)."""
+    if hasattr(value, "ToArgb"):
+        return str(int(value.ToArgb()))
+    if isinstance(value, float):
+        return repr(round(value, 9))
+    return str(value)
+
+
+def kept_on_clear(stored_key, drawn_as, own_id, points, attributes):
+    """Whether a clear or redraw keeps an object on the context layers (it is the architect's): any outline that isn't
+    exactly the one Gordium drew. A copy (pasted in place too: same points, same attributes) is never the outline
+    itself, its own id isn't the one it was drawn as; an edited outline no longer matches its fingerprint. Only
+    Gordium's own untouched outlines, and its notes (no fingerprint), are deleted (Ben, 2026-10-21; review round 2)."""
+    if not stored_key:
+        return False
+    return not drawn_as or drawn_as != own_id or is_edited(stored_key, points, attributes)
+
+
+def skip_edited(objects, edited_ids):
+    """The objects to draw, less those the architect has edited and kept (by their parcel, street piece or footprint
+    id): an edited outline is not drawn a second time beside it."""
+    edited = set(i for i in edited_ids or [] if i)
+    return [o for o in objects or [] if not o.get("id") or o["id"] not in edited]
+
+
+def left_out_candidate(layer_path):
+    """Whether a solid on this layer that reaches into the lot is one the check must say it left out (review row:
+    "Objects on the lot not included"): every layer but the Building layer and Gordium's own, except the
+    neighbourhood's (Gordium::Context), whose footprints the architect may extrude or put a building on (editable
+    since Ben's decision, 2026-10-21). Review of the editable outlines, P0: a solid there was never measured and
+    never made the check need review."""
+    return not on_layer(layer_path, "Gordium") or on_layer(layer_path, CONTEXT)
+
+
+def context_left_out(layers_by_id):
+    """Of the left-out objects (id: its layer), those on the neighbourhood's layers: the review row tells the
+    architect to move them to the Building layer."""
+    return sorted(i for i, layer in (layers_by_id or {}).items() if on_layer(layer or "", CONTEXT))
+
+
+def context_objects(payload):
+    """What may be written into the .3dm: objects from a source whose store is raw (the payload's layers say which),
+    and Gordium's own marks (frame, north arrow, scale bar, credits). Anything else is never written, whatever the
+    payload's object list holds."""
+    payload = payload or {}
+    raw = set(s.get("source") for s in (payload.get("layers") or {}).values() if is_stored(s))
+    return [o for o in payload.get("objects") or []
+            if (o.get("source") in raw or o.get("source") == "gordium") and on_layer(o.get("layer") or "", CONTEXT)]
+
+
+def context_guides(payload):
+    """What is only shown on screen (never written): every guide, from a source that may not be kept."""
+    return [g.get("points") for g in (payload or {}).get("guides") or [] if len(g.get("points") or []) > 1]
+
+
+def context_says(payload):
+    """The line after the neighbourhood is drawn (or why it isn't): what an architect needs, as "Neighbourhood drawn:
+    229 parcels, 38 streets, 322 buildings (footprints from 2014)." (architect review of PR #23: the line listed
+    agencies and storage rules). "shown only" is added only for footprints from a source that may not be kept. Who
+    made the data is on the drawing's Sources note; what a failed service left out follows (the payload's message)."""
+    payload = payload or {}
+    if payload.get("status") not in ("found",):
+        return payload.get("message") or "Couldn't fetch the neighbourhood: the lot is drawn without it."
+    n = payload.get("counts") or {}
+    said = "%d parcels, %d streets" % (n.get("parcels", 0), n.get("streets", 0))
+    if n.get("buildings"):
+        layer = (payload.get("layers") or {}).get("buildings") or {}
+        dates = ", ".join(layer.get("dates") or [])
+        said += ", %d buildings (footprints %s%s)" % (n["buildings"], "from " + dates if dates else "of unknown date",
+                                                       "" if is_stored(layer) else ", shown only")
+    return "Neighbourhood drawn: " + said + "." + (" " + payload["message"] if payload.get("message") else "")
 
 
 ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
@@ -1224,7 +3706,7 @@ def exchange(sends, lines, request, limit):
     return answer_for(lines, request["id"], limit)
 
 
-HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer",
+HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",
            "worker", "worker_sends", "worker_lines")
 
 

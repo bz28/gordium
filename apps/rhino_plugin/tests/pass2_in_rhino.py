@@ -269,7 +269,19 @@ try:
     elif step == "corner":
         lot = g._find(doc, g.current_facts(doc).get("lot_id") or "")
         segs = list(g._segments(lot.Geometry))
-        mids = [(s[0] + s[1]) / 2 for s in (segs[0], segs[len(segs) // 2])]      # two different lot lines
+        street0 = [[list(p) for p in line] for line in g.current_facts(doc).get("street_line") or []]
+        on_street = lambda s: any(all(abs(a - b) < 0.05 for a, b in zip(list(g._feet_point(doc, s[0])[:2]) +  # noqa
+                                  list(g._feet_point(doc, s[1])[:2]), line[0] + line[1])) or
+                                  all(abs(a - b) < 0.05 for a, b in zip(list(g._feet_point(doc, s[0])[:2]) +
+                                  list(g._feet_point(doc, s[1])[:2]), line[1] + line[0])) for line in street0)
+        east = max((p for line in street0 for p in line), key=lambda p: p[0])     # Ithaca Rd's east end
+        touches = lambda s: any(abs(g._feet_point(doc, q)[0] - east[0]) < 0.05 and  # noqa
+                                abs(g._feet_point(doc, q)[1] - east[1]) < 0.05 for q in s)
+        first = next(s for s in segs if on_street(s))
+        side = next(s for s in segs if not on_street(s) and touches(s))
+        # one Ithaca Rd piece, then the side street (the Rhino job at 7a16aa6 and 6361a3f: the outline's middle
+        # segment is another Ithaca Rd piece on 106's lot, not the side street)
+        mids = [(s[0] + s[1]) / 2 for s in (first, side)]
         clicks = [(Rhino.Commands.Result.Success, m) for m in mids] + [(Rhino.Commands.Result.Nothing, None)]
         prompts = []
         real = g._get_point
@@ -279,16 +291,39 @@ try:
             return clicks.pop(0)
 
         facts = dict(g.current_facts(doc), corner_lot=True)
+        ithaca = [[list(p) for p in line] for line in facts.get("street_line") or []]     # the sample's 8 pieces
         saved = dict(g._ui_state(doc))
+        asked, real_ask = [], g._ask_street_more
+        said = len(g.STATE.get("said") or [])
         g._get_point = click
-        try:
-            g._box_pick(doc, "street", facts, saved)
+        g._ask_street_more = lambda q: asked.append(q) or False    # the architect's No (see claim 10, third part)
+        try:                                            # (the box's own session: the pick draws nothing)
+            facts, saved = g._box_pick(doc, "street", facts, saved, g.logic.BoxSession(g.RhinoTable(doc)))
         finally:
             g._get_point = real
-        log["corner"] = {"prompts": prompts, "lines": facts.get("street_line"), "name": saved.get("street_name")}
-        claim("10 a corner lot's street side takes every line clicked, Enter when done",
-              len(facts.get("street_line") or []) == 2 and prompts[0].startswith("Click each lot line on a street")
-              and "(2 picked); Enter when done" in prompts[-1], log["corner"])
+            g._ask_street_more = real_ask
+        told = (g.STATE.get("said") or [])[said:]
+        log["corner"] = {"prompts": prompts, "lines": facts.get("street_line"), "ids": facts.get("street_ids"),
+                         "name": saved.get("street_name"), "said": told, "asked": asked}
+        claim("10 a corner lot's street side takes every street clicked, Enter when done",
+              prompts[0].startswith("Click each lot line on a street") and "(2 picked); Enter when done" in prompts[-1],
+              log["corner"])
+
+        def same(p, q):
+            return all(abs(p[i][j] - q[i][j]) < 0.01 for i in (0, 1) for j in (0, 1))
+
+        kept = facts.get("street_line") or []
+        # demo 00c04f1: one click on one of Ithaca Rd's 8 tax-map pieces kept only that 9.8 ft piece (frontage
+        # 9'-9 5/8"); the whole street is kept now, said, and the side street's own 3 pieces, never round a corner
+        claim("10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"",
+              len(ithaca) == 8 and all(any(same(p, q) or same(p, q[::-1]) for q in kept) for p in ithaca)
+              and "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far — Enter when done" in told, log["corner"])
+        # the side street's far corner has a 0.24 ft piece in it, so it is never a sure corner (review round 7):
+        # asked once, and No keeps the street to its own 2 pieces; Ithaca Rd's two corners are sure (not asked)
+        claim("10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner",
+              len(kept) == 10 and "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far — Enter when done" in told and len(asked) == 1
+              and asked[0].startswith("Past there the lot line turns 89° over short pieces, a corner or a bend")
+              and facts.get("street_ids") == ["Ithaca Rd"] * 8 + [None] * 2, log["corner"])
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
         state = dict(g._box_state(doc, facts, options, saved, "check"), corner_lot=False)   # the box: No
         after, after_ui = g._apply_box(doc, facts, state, saved)
@@ -445,7 +480,9 @@ try:
             g.STATE.pop("on_box_shown", None)
             g.STATE["auto_ok"] = True
         log["box"] = seen
-        claim("6 the box was shown with no lot", g.logic.NO_LOT in (seen.get("labels") or []), seen.get("labels"))
+        # the empty file's box (no lot to use): its own wording since #19's start box, LOT_MISSING, never the sample's
+        # NO_LOT (the headless run of the demo, 2026-10-22, found this claim still asking for NO_LOT)
+        claim("6 the box was shown with no lot", g.logic.LOT_MISSING in (seen.get("labels") or []), seen.get("labels"))
         claim("6 no Use my survey… or Change… until a lot exists",
               seen.get("buttons") and "Use my survey…" not in seen["buttons"] and "Change…" not in seen["buttons"],
               seen.get("buttons"))

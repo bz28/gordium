@@ -1,0 +1,55 @@
+{
+ "step": "grey",
+ "claims": {
+  "9 the rules not in Gordium yet are grouped as Not checked yet": {
+   "ok": true,
+   "detail": [
+    "Does not comply",
+    "Needs review",
+    "Complies",
+    "Not checked",
+    "Not checked yet"
+   ]
+  },
+  "9 the row says it's not in Gordium yet and which section to check by hand": {
+   "ok": true,
+   "detail": {
+    "groups": [
+     "Does not comply",
+     "Needs review",
+     "Complies",
+     "Not checked",
+     "Not checked yet"
+    ],
+    "row": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+    "detail": [
+     "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets) \u00b7 Not checked yet",
+     "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+     "\u00a7325-16A, \u00a7325-16B"
+    ]
+   }
+  },
+  "9 its detail is headed Not checked yet": {
+   "ok": true,
+   "detail": [
+    "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets) \u00b7 Not checked yet"
+   ]
+  }
+ },
+ "grey": {
+  "groups": [
+   "Does not comply",
+   "Needs review",
+   "Complies",
+   "Not checked",
+   "Not checked yet"
+  ],
+  "row": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+  "detail": [
+   "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets) \u00b7 Not checked yet",
+   "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+   "\u00a7325-16A, \u00a7325-16B"
+  ]
+ },
+ "ok": true
+}
