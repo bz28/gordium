@@ -141,7 +141,13 @@ def test_the_plugin_keeps_its_state_true_across_a_reload():
                                  'loaded: its hooks back on\n    live(True)\n'
                                  '# Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)\n'
                                  '_on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), '
-                                 '"stop the checker"))')       # (after the sweep: an earlier copy's is detached first)
+                                 '"stop the checker"))\n'
+                                 '# Undo / Redo: what was drawn for the model before it is cleared, never left on screen '
+                                 '(the Rhino job, demo e631aae)\n'
+                                 '_on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler'
+                                 '[Rhino.Commands.UndoRedoEventArgs], _undo_redo,\n'
+                                 '                                                 "clear the drawing after Undo or '
+                                 'Redo"))')       # (after the sweep: an earlier copy's is detached first)
     overlay = src.split("def overlay(", 1)[1].split("\ndef ", 1)[0]
     created = overlay.split("if o is None:", 1)[1].split("\n    o.Enabled = True", 1)[0]
     assert overlay.index('LEFTOVERS["overlay"]') < overlay.index("o.Enabled = True")

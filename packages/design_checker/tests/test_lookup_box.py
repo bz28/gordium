@@ -221,7 +221,7 @@ def test_only_what_each_source_allows_is_written_into_the_model():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
     assert 'answer["facts"]' not in body and "answer.get(\"facts\")" not in body     # geometry only from writes
-    assert 'STATE["lookup_guide"]' in body and "logic.apply_lookup(RhinoTable(doc), session" in body and "AddCurve" not in body
+    assert 'STATE["lookup_guide"]' in body and "logic.apply_lookup(session.table, session" in body and "AddCurve" not in body
 
 
 def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
