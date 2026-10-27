@@ -46,6 +46,7 @@ Other documents link here the first time they use a term. The legal meaning of z
 | <a id="drafting"></a>**Drafting** | An AI writing a first version of rules from the law. Code then checks every word of the draft |
 | <a id="answer-key"></a>**Answer key** | Rules or results worked out by hand (by the architects or by us before running Gordium), used to grade Gordium's output |
 | <a id="eval"></a>**Eval** | A measured test of how good an output is, e.g. how many AI-drafted rules match the answer key |
+| <a id="worker"></a>**Worker** | The Python program running in the background while Rhino is open; it measures and checks, and Rhino only draws |
 | <a id="artifact"></a>**Artifact (online doc)** | A web page on claude.ai, such as the System Map. Private unless shared |
 
 ## Software words

@@ -1,0 +1,31 @@
+title: 37 ft house with only some yards increased
+what: >-
+  The same 37 ft house, but the rear wall is pushed back to the ordinary 30 ft rear yard: front and sides were
+  increased by 2 ft, the rear wasn't. The height bonus needs every yard increased, so the height does not comply,
+  while the rear yard rule on its own is met exactly. Red: only the part above 35 ft.
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[12, 27], [48, 27], [48, 90], [38, 90], [38, 47], [12, 47]]
+    base: 0
+    floors: [12.3333, 12.3333, 12.3334]
+grade: {elevation: 0}
+expected:
+  R-1b.stories: {status: complies, working: "3 ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
+  R-1b.height:
+    status: does_not_comply
+    working: >-
+      37 ft > 35 ft: the bonus needs each yard + 2 ft. Front 27 ≥ 27 ✓, sides 12 ≥ 12 ✓, rear 120 − 90 = 30 < 32 ✕.
+      Without the bonus, 37 > 35 ✕. Does not comply either way.
+    cites: "§325-16C(1) (p.47); §325-8 chart, R-1b, Height in feet: 35 ft, note 10"
+  R-1b.lot_coverage: {status: complies, working: "36 × 20 + 10 × 43 = 1,150 sf ≤ 1,800 sf", cites: "§325-8 chart, R-1b, Percent of lot area"}
+  R-1b.front_yard: {status: complies, working: "27 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
+  R-1b.side_yards: {status: complies, working: "12, 12 ≥ 10", cites: "§325-8 chart, R-1b, Side"}
+  R-1b.rear_yard:
+    status: complies
+    at_limit: true
+    working: "30 ft ≥ max(min(30, 50), 20) = 30 ft (the plain rear yard rule is met exactly)"
+    cites: "§325-8 chart, R-1b, Rear, note 16"
+plan:
+  encroach: 1
+  encroach_why: [height]

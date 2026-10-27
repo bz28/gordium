@@ -258,5 +258,5 @@ finally:
     doc.Views.Redraw()
 verdict = "PASS" if not problems else "FAILED:\n" + "\n".join(problems)
 print(verdict)
-with open(os.path.join(tempfile.gettempdir(), "gordium_check_in_rhino.txt"), "w") as f:   # for scripted runs
+with open(os.path.join(tempfile.gettempdir(), "gordium_check_in_rhino.txt"), "w", encoding="utf-8") as f:   # for scripted runs
     f.write(verdict)

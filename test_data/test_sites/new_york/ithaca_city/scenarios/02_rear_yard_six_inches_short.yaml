@@ -1,0 +1,33 @@
+title: Rear yard 6 in. short
+what: >-
+  A two-story house on a 60 × 120 surveyed lot whose rear wall is half a foot into the 30 ft rear yard. Every
+  other limit is met with room to spare. The rear yard does not comply, short by 0'-6"; nothing is rounded toward
+  compliance, and only the half-foot strip inside the yard is red.
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[15, 30], [44, 30], [44, 90.5], [15, 90.5]]
+    base: 0
+    floors: [10, 10]
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: {status: complies, working: "60 × 120 = 7,200 sf ≥ 6,000 sf", cites: "§325-8 chart, R-1b, Lot area"}
+  R-1b.lot_width_one_family_detached: {status: complies, working: "60 ft ≥ 50 ft", cites: "§325-8 chart, R-1b, Lot width"}
+  R-1b.stories: {status: complies, working: "2 floor blocks = 2 stories ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
+  R-1b.height: {status: complies, working: "0 to 20 ft = 20 ft ≤ 35 ft", cites: "§325-3 HEIGHT OF BUILDING; §325-8 chart, Height"}
+  R-1b.lot_coverage:
+    status: complies
+    working: "29 × 60.5 = 1,754.5 sf; allowed 25% × 7,200 = 1,800 sf (24.37%)"
+    cites: "§325-8 chart, R-1b, Percent of lot area: 25%"
+  R-1b.front_yard: {status: complies, working: "30 ft ≥ 25 ft", cites: "§325-8 chart, R-1b, Front (minimum)"}
+  R-1b.side_yards: {status: complies, working: "west 15 ft, east 60 − 44 = 16 ft; each ≥ 10 ft", cites: "§325-8 chart, R-1b, Side"}
+  R-1b.rear_yard:
+    status: does_not_comply
+    margin: "−0'-6\""
+    proposed: "29'-6\""
+    required: "30'-0\""
+    working: "120 − 90.5 = 29.5 ft (29'-6\"); required max(min(0.25 × 120, 50), 20) = 30 ft; short by 0.5 ft = 0'-6\""
+    cites: "§325-8 chart, R-1b, Rear yard column, note 16; §325-3 REAR YARD (least distance from the rear lot line)"
+plan:
+  encroach: 1
+  encroach_why: [yard]

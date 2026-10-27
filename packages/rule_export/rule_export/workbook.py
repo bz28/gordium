@@ -62,13 +62,9 @@ def page_link(j: Path, documents: dict[str, dict], file: str, page) -> str:
 
 # ---- citations -----------------------------------------------------------------------------------------
 
-def citer(j: Path, documents: dict[str, dict]):
-    """citation(source): where a quote is, in words a reader can follow, e.g. "City of Ithaca Code, Chapter 325
-    Zoning (full text), §325-8A, p.24, lines 15–16". The document by its title in sources.yaml; for a document
-    cut into pieces (2_extracted_text/<doc>.sections.jsonl), the section the first cited line is in; then page
-    and lines. A chart cell is cited by its section, row and district column, e.g. "City of Ithaca Zoning
-    Charts, p.3, Yard Dimensions · Rear · R-1B". The exact words go in their own column, and the link opens
-    the page."""
+def sections_lookup(j: Path):
+    """section(file, page, line): the section a line of a document cut into pieces is in ("§325-8A", "§325-3B
+    (KITCHEN)", a title for front matter), or "". The one lookup, for citations here and in the Rhino panel."""
     sections = {}                                  # file -> [(page, first, last, piece id, title)]
     for path in sorted((j / "2_extracted_text").glob("*.sections.jsonl")):
         header, pieces = load_pieces(path)
@@ -83,6 +79,17 @@ def citer(j: Path, documents: dict[str, dict]):
                 number, _, term = pid.partition(":")            # 325-3B:kitchen is the definition of KITCHEN
                 return f"§{number}" + (f" ({piece_title})" if term else "")
         return ""
+    return section
+
+
+def citer(j: Path, documents: dict[str, dict]):
+    """citation(source): where a quote is, in words a reader can follow, e.g. "City of Ithaca Code, Chapter 325
+    Zoning (full text), §325-8A, p.24, lines 15–16". The document by its title in sources.yaml; for a document
+    cut into pieces (2_extracted_text/<doc>.sections.jsonl), the section the first cited line is in; then page
+    and lines. A chart cell is cited by its section, row and district column, e.g. "City of Ithaca Zoning
+    Charts, p.3, Yard Dimensions · Rear · R-1B". The exact words go in their own column, and the link opens
+    the page."""
+    section = sections_lookup(j)
 
     def citation(s: dict) -> str:
         if not s.get("file"):

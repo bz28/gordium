@@ -34,7 +34,7 @@ def write_project(tmp_path, **changes):
     project = load(SITE)
     project.update(changes)
     path = tmp_path / "p.yaml"
-    path.write_text(yaml.safe_dump(project, sort_keys=False))
+    path.write_text(yaml.safe_dump(project, sort_keys=False), encoding="utf-8")
     return path
 
 
@@ -99,9 +99,9 @@ def test_says_which_rulebook_it_used(t):
 def test_hand_drafted_rulebook_is_preferred(tmp_path):
     rules = tmp_path / "5_zoning_rules"
     (rules / "drafted").mkdir(parents=True)
-    (rules / "drafted/X.yaml").write_text("rules: []")
+    (rules / "drafted/X.yaml").write_text("rules: []", encoding="utf-8")
     assert rulebook_for(tmp_path, "X") == rules / "drafted/X.yaml"
-    (rules / "X.yaml").write_text("rules: []")
+    (rules / "X.yaml").write_text("rules: []", encoding="utf-8")
     assert rulebook_for(tmp_path, "X") == rules / "X.yaml"
     assert rulebook_for(tmp_path, "Y") is None
 
@@ -242,7 +242,7 @@ def test_committed_example_matches_a_fresh_build():
 def test_a_project_file_of_the_wrong_shape_gets_a_plain_message(tmp_path, text, match):
     from project_report.report import load_project
     path = tmp_path / "project.yaml"
-    path.write_text(text)
+    path.write_text(text, encoding="utf-8")
     with pytest.raises(ValueError, match=match):
         load_project(path)
 
@@ -252,9 +252,9 @@ def test_a_folder_that_is_not_a_jurisdiction_gets_a_plain_message(tmp_path):
     from project_report.report import load_project
     j = tmp_path / "j"
     (j / "5_zoning_rules").mkdir(parents=True)
-    (j / "5_zoning_rules/R-1b.yaml").write_text("district: R-1b\nrules: []\n")
+    (j / "5_zoning_rules/R-1b.yaml").write_text("district: R-1b\nrules: []\n", encoding="utf-8")
     path = tmp_path / "project.yaml"
-    path.write_text(f"title: x\njurisdiction: {j}\nzone: R-1b\nmeasurements: {{}}\n")
+    path.write_text(f"title: x\njurisdiction: {j}\nzone: R-1b\nmeasurements: {{}}\n", encoding="utf-8")
     with pytest.raises(ValueError, match="isn't a jurisdiction folder"):
         load_project(path)
 

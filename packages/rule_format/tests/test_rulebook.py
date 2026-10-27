@@ -213,7 +213,7 @@ def test_duplicate_ids_are_rejected(ctx):
 
 def test_duplicate_yaml_keys_are_rejected(tmp_path):
     path = tmp_path / "R-1b.yaml"
-    path.write_text("district: R-1b\nrules:\n  - check: a > 1\n    check: a > 2\n")
+    path.write_text("district: R-1b\nrules:\n  - check: a > 1\n    check: a > 2\n", encoding="utf-8")
     with pytest.raises(yaml.YAMLError, match="duplicate key 'check'"):
         load(path)
 
@@ -321,9 +321,9 @@ def _jurisdiction(tmp_path, pdf_bytes=b"%PDF fake", header_sha=None, rows=()):
     (j / "1_source_documents/doc.pdf").write_bytes(pdf_bytes)
     import hashlib
     sha = hashlib.sha256(b"%PDF fake").hexdigest()
-    (j / "1_source_documents/sources.yaml").write_text(f"documents:\n  - file: doc.pdf\n    sha256: {sha}\n")
+    (j / "1_source_documents/sources.yaml").write_text(f"documents:\n  - file: doc.pdf\n    sha256: {sha}\n", encoding="utf-8")
     lines = [json.dumps({"file": "doc.pdf", "sha256": header_sha or sha}), "", *map(json.dumps, rows)]
-    (j / "2_extracted_text/doc.jsonl").write_text("\n".join(lines) + "\n")
+    (j / "2_extracted_text/doc.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return j
 
 
@@ -360,7 +360,7 @@ def test_cli_reports_district_not_matching_file_name(tmp_path, monkeypatch, caps
     import rule_format.__main__ as cli
     j = _jurisdiction(tmp_path / "regulations/jurisdictions", rows=[])
     (j / "5_zoning_rules").mkdir()
-    (j / "5_zoning_rules/R-1a.yaml").write_text("district: R-1b\nrules: []\n")
+    (j / "5_zoning_rules/R-1a.yaml").write_text("district: R-1b\nrules: []\n", encoding="utf-8")
     monkeypatch.setattr(cli, "REPO", tmp_path)
     assert cli.main() == 1
     assert "doesn't match the file name 'R-1a'" in capsys.readouterr().out
@@ -371,7 +371,7 @@ def test_cli_keeps_going_when_validation_itself_fails(tmp_path, monkeypatch, cap
     j = _jurisdiction(tmp_path / "regulations/jurisdictions", rows=[])
     (j / "5_zoning_rules").mkdir()
     for name in ("R-1a", "R-1b"):
-        (j / f"5_zoning_rules/{name}.yaml").write_text(f"district: {name}\nrules: []\n")
+        (j / f"5_zoning_rules/{name}.yaml").write_text(f"district: {name}\nrules: []\n", encoding="utf-8")
     def broken(book, ctx):
         raise TypeError("boom")
     import rule_format.rulebook as rulebook
@@ -446,7 +446,7 @@ def test_cite_helper(tmp_path, monkeypatch, capsys):
     assert cli.cite([place, "doc.pdf", "9", "x"]) == 1 and "no page 9" in capsys.readouterr().out
     assert cli.cite([place, "typo.pdf", "2", "x"]) == 1 and "not in sources.yaml" in capsys.readouterr().out
     sources = tmp_path / "regulations/jurisdictions" / place / "1_source_documents/sources.yaml"
-    sources.write_text(sources.read_text() + "    quotable: false\n    not_quotable_because: two columns\n")
+    sources.write_text(sources.read_text(encoding="utf-8") + "    quotable: false\n    not_quotable_because: two columns\n", encoding="utf-8")
     assert cli.cite([place, "doc.pdf", "2", "Rear yard minimum twenty feet"]) == 1   # same answer as validation
     assert "isn't quotable yet: two columns" in capsys.readouterr().out
     assert cli.cite(["ny/nowhere", "doc.pdf", "2", "x"]) == 1 and "no jurisdiction" in capsys.readouterr().out
@@ -466,7 +466,7 @@ def test_cite_reports_only_the_asked_files_problems(tmp_path, monkeypatch, capsy
     j = _jurisdiction(tmp_path / "regulations/jurisdictions", header_sha="old", rows=[])   # doc.pdf: stale text
     (j / "1_source_documents/d.pdf").write_bytes(b"other")                                 # d.pdf: no text at all
     sha = hashlib.sha256(b"other").hexdigest()
-    with open(j / "1_source_documents/sources.yaml", "a") as f:
+    with open(j / "1_source_documents/sources.yaml", "a", encoding="utf-8") as f:
         f.write(f"  - file: d.pdf\n    sha256: {sha}\n")
     monkeypatch.setattr(cli, "REPO", tmp_path)
     assert cli.cite(["ny/town", "d.pdf", "1", "x"]) == 1
@@ -489,8 +489,8 @@ def test_text_is_not_trusted_for_a_document_that_failed_its_checks(tmp_path):
 
 def test_document_listed_twice_is_reported(tmp_path):
     j = _jurisdiction(tmp_path, rows=[{"page": 1, "line": 1, "text": "x"}])
-    s = (j / "1_source_documents/sources.yaml").read_text()
-    (j / "1_source_documents/sources.yaml").write_text(s + s.split("documents:\n", 1)[1])
+    s = (j / "1_source_documents/sources.yaml").read_text(encoding="utf-8")
+    (j / "1_source_documents/sources.yaml").write_text(s + s.split("documents:\n", 1)[1], encoding="utf-8")
     ctx = Context.for_jurisdiction(j)
     assert "listed more than once in sources.yaml" in ctx.file_problems["doc.pdf"]
     assert "doc.pdf" not in ctx.pages                                         # its text isn't trusted
@@ -523,8 +523,8 @@ def test_not_quotable_check_fails_closed(ctx, value):
 
 def test_source_entry_problems_reach_the_file(tmp_path):
     j = _jurisdiction(tmp_path, rows=[{"page": 1, "line": 1, "text": "x"}])
-    s = (j / "1_source_documents/sources.yaml").read_text()
-    (j / "1_source_documents/sources.yaml").write_text(s + "    quoteable: false\n")
+    s = (j / "1_source_documents/sources.yaml").read_text(encoding="utf-8")
+    (j / "1_source_documents/sources.yaml").write_text(s + "    quoteable: false\n", encoding="utf-8")
     ctx = Context.for_jurisdiction(j)
     assert any("unknown field 'quoteable'" in p for p in ctx.file_problems["doc.pdf"]) and "doc.pdf" not in ctx.pages
 
@@ -709,7 +709,7 @@ def test_no_number_is_left_in_any_reference_in_the_citys_text():
     from rule_format.rulebook import REPO, source_numbers
     path = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text/chapter_325_zoning_2026-10.jsonl"
     left = set()
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         text = json.loads(line).get("text", "")
         for m in re.finditer(r"(?i)(?:§+|\bsub(?:section|paragraph)s?\b|\bsections?\b)\s*[\w.\-()§, ]*?(?=\s+[a-z]{3,}\b|$)", text):
             ref = re.split(r"(?i)\s+(?:zoning|ithaca)\b", m.group(0))[0]           # page headers: "§ 325-16 ZONING § 325-16"

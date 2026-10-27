@@ -1,0 +1,53 @@
+title: Every limit exactly at the line
+what: >-
+  A 50 ft × 120 ft surveyed lot (exactly the minimum area and width) with an L-shaped three-story house that
+  touches every required yard line: 25 ft front, 10 ft each side, 30 ft rear, and a 35 ft flat roof. Exactly at a
+  limit complies; Gordium should say so and mark each one "at limit".
+lot: {points: [[0, 0], [50, 0], [50, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[10, 25], [40, 25], [40, 90], [30, 90], [30, 40], [10, 40]]
+    base: 0
+    floors: [11.6667, 11.6667, 11.6666]
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached:
+    status: complies
+    at_limit: true
+    working: "lot area = 50 × 120 = 6,000 sf; required ≥ 6,000 sf → exactly at the limit"
+    cites: "§325-8, District Regulations Chart, R-1b, Lot area, one-family dwelling detached: 6,000 sf"
+  R-1b.lot_width_one_family_detached:
+    status: complies
+    at_limit: true
+    working: "lot width = 50 ft; required ≥ 50 ft"
+    cites: "§325-8 chart, R-1b, Lot width at street line, one-family detached: 50 ft"
+  R-1b.stories:
+    status: complies
+    working: "3 floor blocks, each one story (§325-3 STORY) = 3; limit 3"
+    cites: "§325-8 chart, R-1b, Number of stories: 3"
+  R-1b.height:
+    status: complies
+    at_limit: true
+    working: "grade plane 0 (flat finished grade) to the flat roof at 11.6667 + 11.6667 + 11.6666 = 35.0 ft; limit 35 ft"
+    cites: "§325-3 HEIGHT OF BUILDING; §325-8 chart, R-1b, Height in feet: 35 ft"
+  R-1b.lot_coverage:
+    status: complies
+    working: "L footprint = 30 × 15 + 10 × 50 = 450 + 500 = 950 sf; allowed 25% × 6,000 = 1,500 sf; 15.83%"
+    cites: "§325-8 chart, R-1b, Percent of lot area: 25%"
+  R-1b.front_yard:
+    status: complies
+    at_limit: true
+    working: "street line y = 0 to the front wall at y = 25: 25 ft; required 25 ft"
+    cites: "§325-8 chart, R-1b, Front (minimum): 25 ft"
+  R-1b.side_yards:
+    status: complies
+    at_limit: true
+    working: "west: 10 − 0 = 10 ft; east: 50 − 40 = 10 ft; each required 10 ft"
+    cites: "§325-8 chart, R-1b, Side (one side / other side minimum): 10 ft"
+  R-1b.rear_yard:
+    status: complies
+    at_limit: true
+    working: "rear line y = 120 to the rear wall at y = 90: 30 ft; required max(min(25% × 120, 50), 20) = max(30, 20) = 30 ft"
+    cites: "§325-8 chart, R-1b, Rear (25% of depth or 50 ft, whichever is less), note 16 (not less than 20 ft); §325-3 REAR YARD"
+plan:
+  encroach: 0

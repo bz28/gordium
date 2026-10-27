@@ -1,0 +1,163 @@
+{
+ "claims": {
+  "1 one copy attached after two bad reloads (baseline + 1)": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "after": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    }
+   }
+  },
+  "1 the earlier copy is inert": {
+   "ok": true,
+   "detail": null
+  },
+  "2 a silent checker and a 2 MB request: a clear error within the limit": {
+   "ok": true,
+   "detail": {
+    "error": "the Gordium checker gave no answer in 3 s, so it was restarted (see gordium_worker.log in the temp folder)",
+    "seconds": 3.01
+   }
+  },
+  "2 the silent checker was stopped": {
+   "ok": true,
+   "detail": null
+  },
+  "3 a slow checker is still answered": {
+   "ok": true,
+   "detail": {
+    "answer": "late",
+    "seconds": 1.53
+   }
+  },
+  "4 the real checker answers afterwards": {
+   "ok": true,
+   "detail": "ValueError: unknown command 'no_such_command'"
+  },
+  "5 off() leaves nothing attached": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "after_off": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    }
+   }
+  },
+  "6 a reload that keeps the state: one copy's handlers attached (baseline + 1)": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "after": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    }
+   }
+  },
+  "6 the old drawing is off; the new one is on and registered": {
+   "ok": true,
+   "detail": null
+  },
+  "6 an edit is noticed by the new copy's live hook": {
+   "ok": true,
+   "detail": null
+  },
+  "6 and re-checked": {
+   "ok": true,
+   "detail": [
+    "12'-0 5/8\"",
+    "11'-0 5/8\""
+   ]
+  },
+  "7 the old copy is the pre-LEFTOVERS one": {
+   "ok": true,
+   "detail": "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_no_freeze/old_9303d10/apps/rhino_plugin/gordium_rhino.py"
+  },
+  "7 after the update: one copy's handlers attached (baseline + 1)": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "old_on": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    },
+    "after": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    }
+   }
+  },
+  "7 the old copy's drawing is off": {
+   "ok": true,
+   "detail": null
+  },
+  "7 the old copy's checker is stopped": {
+   "ok": true,
+   "detail": null
+  }
+ },
+ "baseline": {
+  "Idle": 0,
+  "AddRhinoObject": 0,
+  "EndOpenDocument": 0
+ },
+ "one_copy": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "two_reloads": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "after_off": {
+  "Idle": 0,
+  "AddRhinoObject": 0,
+  "EndOpenDocument": 0
+ },
+ "kept_state_reload": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "old_on": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "after_update": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "ok": true,
+ "left_attached": {
+  "Idle": 0,
+  "AddRhinoObject": 0,
+  "EndOpenDocument": 0
+ }
+}

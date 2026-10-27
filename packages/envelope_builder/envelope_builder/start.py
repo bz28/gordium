@@ -130,15 +130,18 @@ def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_
 
 
 def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], uses=None,
-                           verdict=None) -> dict:
+                           floor_to_floor: float | None = None, keep_back: float = 0.0,
+                           coverage_scale: float = 1.0, verdict=None) -> dict:
     """{"floors": [{"outline": [[x, y], ...], "base": z, "top": z}, ...], "stories", "height", "area",
     "coverage_allowed", "notes"}: the starting building, or no floors and the notes that say why.
 
     The guarantee, on any lot shape: the building returned has been measured and checked against every rule (each
     passes or needs review), or no building is returned and the notes say "Gordium can't generate..." (`CANT`).
-    `uses`: the city's use names (read from the jurisdiction in the facts when not given). `verdict`: the
-    checker's own result for one rule (design_checker.check.verdict, which also counts a rule that fails under
-    every reading); the checker passes it, since this package can't import the checker."""
+    `uses`: the city's use names (read from the jurisdiction in the facts when not given). `keep_back` (ft) moves
+    every yard line that much further in (the tax-map tolerance, a design buffer); `coverage_scale` scales the
+    coverage allowed (below 1: sized for the smallest lot the tax map allows). `verdict`: the checker's own result
+    for one rule (design_checker.check.verdict, which also counts a rule that fails under every reading); the
+    checker passes it, since this package can't import the checker."""
     out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": []}
     notes = out["notes"]
     sized, drawn = _as_drawn(measured)       # coverage on a lot not yet surveyed: from the lot as drawn (said below)
@@ -152,8 +155,8 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     if env["height"] is None or env["base"] is None:
         notes.append("no height limit or ground level: the building's height can't be set")
         return out
-    allowed = env["coverage"]["allowed"] if env["coverage"] else None
-    if drawn and allowed is not None:
+    allowed = env["coverage"]["allowed"] * coverage_scale if env["coverage"] else None
+    if drawn and allowed is not None and coverage_scale >= 1:     # below 1: sized for the worst case, it complies
         notes.append("lot coverage sized from the lot as drawn, which isn't from a survey: the check says NEEDS "
                      "REVIEW for coverage until the survey is confirmed")
     stories = _story_limit(rules, sized)
@@ -164,10 +167,17 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     lot = Lot(site, facts)
     angle, origin = _frame(lot)
     buildable = affinity.rotate(Polygon(env["outline"], env["holes"]), -angle, origin=origin, use_radians=True)
+    if keep_back > 0:                   # every yard line further in by the same distance (square corners kept)
+        buildable = buildable.buffer(-keep_back, join_style=2)
+        if buildable.is_empty:
+            notes.append("no buildable area left after keeping back " + f"{keep_back:g} ft from every limit")
+            return out
+        if buildable.geom_type != "Polygon":
+            buildable = max(buildable.geoms, key=lambda p: p.area)
     street = [affinity.rotate(Point(p), -angle, origin=origin, use_radians=True).y
               for i in lot.ordered_street() for p in lot.edges[i]]
     bend = max(street) - min(street)
-    front_line = max(street) + env["yards"]["front"]          # the front yard line, in the street's frame
+    front_line = max(street) + env["yards"]["front"] + keep_back    # the front yard line, in the street's frame
     found = _footprint(buildable, buildable.centroid.x, allowed, front_line,
                        front_line + (STEP if bend > 1e-9 else 0.0))
     if found is None:
@@ -192,9 +202,13 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     ring = [[x, y] for x, y in list(outline.exterior.coords)[:-1]]
     base, top = env["base"], env["base"] + env["height"]
     story = env["height"] / stories
+    if floor_to_floor:                  # the architect's floor-to-floor height: as many stories as fit, at most the limit
+        stories = max(1, min(stories, math.floor(env["height"] / floor_to_floor + 1e-9)))
+        story = floor_to_floor
+        top = base + stories * story
     out["floors"] = [{"outline": ring, "base": base + i * story, "top": top if i == stories - 1 else base + (i + 1) * story}
                      for i in range(stories)]
-    out.update(stories=stories, height=env["height"], area=outline.area, coverage_allowed=allowed)
+    out.update(stories=stories, height=top - base, area=outline.area, coverage_allowed=allowed)
     failing = _failing(site, facts, out["floors"], rules, uses, verdict)
     if failing:                          # never a wrong building: it is proven with the checker's own rules first
         notes.append(f"{CANT} (the rectangle found would break: {', '.join(failing)})")

@@ -3,6 +3,7 @@ and has a case here, a small lot or model that gives it. The measuring code give
 table (checked below), so a new stop can't be added without its README line and its case."""
 
 import ast
+import math
 import re
 import sys
 from pathlib import Path
@@ -16,13 +17,13 @@ from model_measurement.stops import STOPS
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))           # the lots and models the other tests build
-from test_measure import FACTS, RECT, box, floor, lot, sloped_roof_box  # noqa: E402
+from test_measure import FACTS, RECT, box, floor, lot, prism, sloped_roof_box  # noqa: E402
 from test_read_3dm import FACTS as FILE_FACTS  # noqa: E402
 from test_read_3dm import box as file_box  # noqa: E402
 from test_read_3dm import model, on, rect, write  # noqa: E402
 
 CODE = HERE.parent / "model_measurement"
-README = " ".join((HERE.parent / "README.md").read_text().split())     # as one line: wrapping doesn't matter
+README = " ".join((HERE.parent / "README.md").read_text(encoding="utf-8").split())     # as one line: wrapping doesn't matter
 # the blanks whose words are fixed by the code: the README must quote them as they are
 FIXED_BLANKS = {"limit": str(MAX_UNCLEAR_EDGES)}
 
@@ -156,6 +157,10 @@ CASES = {
     "no_street": _plain(street_line=[]),
     "street_not_a_lot_line": _plain(street_line=[[[0, 5], [50, 5]]]),
     "street_lines_apart": _plain(street_line=[[[0, 0], [50, 0]], [[50, 100], [0, 100]]], corner_lot=False),
+    "two_streets": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]]], street_ids=["A St", "B Ave"],
+                          corner_lot=False),
+    "one_street_or_two": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]]], corner_lot=False),
+    "street_names_stale": _plain(street_line=[[[0, 0], [50, 0]]], street_ids=["A St", "A St"], corner_lot=False),
     "all_street": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]], [[0, 100], [0, 0]]],
                          corner_lot=False),
     "corner_unknown": _plain(corner_lot=None),
@@ -164,6 +169,8 @@ CASES = {
     "no_rear_line": _plain(lot([(0, 0), (50, 0), (25, 100)]), buildings=[box(20, 10, 30, 30)]),
     "no_ground": _plain(grade_elevation=None),
     "ground_off_building": _plain(grade_elevation=812),
+    "ground_unclear": _plain(ground_is_flat=None, grade_elevation=None, buildings=[
+        floor(10, 25, 35, 65, z0=1, z1=12, id="floor 1")], grade_points=[[60, 0, 0], [61, 1, 0.0]]),
     "buried_solid": _plain(buildings=[box(10, 25, 25, 65, 812, 842, id="house"), box(26, 25, 35, 65, 0, 45, id="tower")],
                            grade_elevation=812, main_building="house"),
     "readings_differ": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]),
@@ -191,10 +198,20 @@ CASES = {
                                                       floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2")]),
     "no_rooms": _plain(),
     "ground_unknown": _plain(ground_is_flat=None),
+    "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
+    "existing_grade": _plain(grade_is="existing"),
+    "grade_with_others": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(40, 75, 48, 90, 0, 12, id="shed")],
+                                grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [44, 74.5, 0]],
+                                main_building="house",          # one spot grade at the shed: not at all its walls
+                                ground_is_flat=None, grade_elevation=None),
+    "grade_walls_unclear": _plain(buildings=[prism([(22 + 8 * math.cos(k * math.pi / 32), 45 + 8 * math.sin(k * math.pi / 32))
+                                                    for k in range(64)], 0, 30)],      # a round tower: 0.8 ft sides
+                                  grade_points=[[22, 36, 0]]),
     "sloped_ground": _plain(ground_is_flat=False),
     "no_building": _plain(buildings=[]),
     "same_id": _plain(buildings=[box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)]),   # both "house"
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
+    "empty_building": _plain(buildings=[{"id": "house", "faces": [], "problems": []}]),
     "outside_lot": _plain(buildings=[box(40, 25, 60, 65)]),
     "open_solid": _file(_open_brep),
     "open_mesh": _file(_open_mesh),
@@ -270,7 +287,7 @@ def test_the_measuring_gives_reasons_only_from_the_table():
     would be missed by the README and the cases. (conftest.py also checks every reason the tests make.)"""
     found = []
     for name in ("read_3dm.py", "measure.py"):
-        tree = ast.parse((CODE / name).read_text())
+        tree = ast.parse((CODE / name).read_text(encoding="utf-8"))
         bound = {}                      # module-level names (constants, tables); a local why_... is checked itself
         for node in tree.body:
             if isinstance(node, ast.Assign):

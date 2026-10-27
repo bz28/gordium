@@ -98,7 +98,7 @@ def test_every_word_of_a_row_is_in_its_label_or_one_cell(cells):
 
 
 def test_line_numbers_and_text_match_the_extracted_text():
-    saved = [json.loads(line) for line in (ITHACA / "2_extracted_text/zoning_charts_2026-04.jsonl").open()][1:]
+    saved = [json.loads(line) for line in (ITHACA / "2_extracted_text/zoning_charts_2026-04.jsonl").open(encoding="utf-8")][1:]
     with pdfplumber.open(CHARTS) as pdf:
         for page in PAGES:
             lines, body = page_lines(pdf.pages[page - 1])
@@ -162,13 +162,13 @@ def test_check_catches_a_hand_edited_cells_file(tmp_path, monkeypatch):
     src.mkdir(parents=True)
     shutil.copy(CHARTS, src / CHARTS.name)
     (src / "sources.yaml").write_text(f"documents:\n  - file: {CHARTS.name}\n    sha256: {sha256(CHARTS)}\n"
-                                      f"    chart_pages: [3]\n")
+                                      f"    chart_pages: [3]\n", encoding="utf-8")
     assert cli.main([]) == 0 and cli.main(["--check"]) == 0
     out = src.parent / "2_extracted_text" / f"{CHARTS.stem}.cells.jsonl"
-    rows = out.read_text().splitlines()
+    rows = out.read_text(encoding="utf-8").splitlines()
     n = next(i for i, r in enumerate(rows) if '"column": "R-1B"' in r and '"Front (minimum)"' in r)
     rows[n] = rows[n].replace('"value": "25 ft"', '"value": "20 ft"')
-    out.write_text("\n".join(rows) + "\n")
+    out.write_text("\n".join(rows) + "\n", encoding="utf-8")
     assert cli.main(["--check"]) == 1
 
 

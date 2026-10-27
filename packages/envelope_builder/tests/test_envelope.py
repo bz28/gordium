@@ -110,10 +110,12 @@ def test_a_yard_limit_written_another_way_is_read_or_stops_the_envelope():
         assert env["outline"] is None and any("can't read" in n for n in env["notes"]), check
 
 
-def test_no_envelope_unless_the_ground_is_confirmed_flat():
-    for flat in (False, None):
-        env, _ = build([(0, 0), (73, 0), (73, 90), (0, 90)], {**FACTS, "ground_is_flat": flat})
-        assert env["outline"] is None and any("flat" in n for n in env["notes"])
+def test_without_a_grade_the_buildable_area_is_drawn_but_never_a_height_plane():
+    level, _ = build([(0, 0), (73, 0), (73, 90), (0, 90)], FACTS)
+    for flat, grade in ((False, 0.0), (None, 0.0), (True, None)):
+        env, _ = build([(0, 0), (73, 0), (73, 90), (0, 90)], {**FACTS, "ground_is_flat": flat, "grade_elevation": grade})
+        assert env["outline"] == level["outline"]           # the yards don't depend on the grade
+        assert env["top"] is None and env["base"] is None and any("grade isn't set" in n for n in env["notes"])
 
 
 def test_no_coverage_numbers_from_a_lot_that_isnt_surveyed():
