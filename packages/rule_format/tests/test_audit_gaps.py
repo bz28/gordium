@@ -38,3 +38,14 @@ def test_an_attached_building_holds_three_to_six_units(district):
                    USES) == "fail"
     assert outcome(r, {"use": "one_family_attached", "dwelling_units": 3}, USES) == "needs_review"
     assert outcome(r, {"use": "multiple_family", "attached_units_in_building": 9}, USES) == "not_applicable"
+
+
+@pytest.mark.parametrize("district", sorted(ATTACHED_ALLOWED - {"R-2c"}))
+def test_a_row_of_seven_is_never_steered_to_another_use(district):
+    """Review round 1 (PR1): whether seven or more joined units may be built as a multiple dwelling (row house) is
+    not settled by the code (the definitions point both ways, questions §5.6), so the rule never tells the architect
+    to enter that use, and no worked example shows a joined row as settled under it."""
+    r = rules_of(district)[f"{district}.attached_units_per_building"]
+    notes = " ".join(r["notes"].split())
+    assert "enter that use" not in notes and "not settled" in notes and "§5.6" in notes
+    assert all(e["given"].get("use") != "multiple_family" for e in r["examples"])
