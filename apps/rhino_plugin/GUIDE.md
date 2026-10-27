@@ -29,7 +29,7 @@ Type a command's name in Rhino's command line.
    sample project (106 Ithaca Rd, district R-1b, one-family house).
 2. Read each row:
    - **Address**: the project's address. **Look up (coming soon)** is shown but off in this version.
-   - **Zoning district**: the district and where it came from ("entered by you"). Tick **This is the lot's
+   - **Zoning district**: the district and where it came from ("entered by you"); **Change** picks another. Tick **This is the lot's
      district** to confirm it. Nothing is drawn until you do: a district nobody confirmed is never trusted.
    - **Use**: the kind of building (one-family dwelling, detached, for now). **Change** picks another.
    - **Lot**: the lot's area and where it came from. **Use my survey…** replaces the tax-map lot with your own
@@ -37,9 +37,12 @@ Type a command's name in Rhino's command line.
    - **Front lot line (on the street)**: which lot line is on the street; Gordium measures the front yard from it.
      **Change…** lets you click it. **Corner lot?** is never guessed: **Not answered**, **No: one street** or
      **Yes: two streets**.
+   Until the district is ticked the box says `Confirm the district to continue.` and **Draw** stays off.
 3. Press **Draw**. Gordium draws the lot, the **buildable envelope** (the see-through blue volume where a building
    complies), and the largest legal house, the **starting house**, one block per floor. Then it checks it.
 
+`GordiumStart` begins from an empty lot. If the model already has a building, the command line says
+`Gordium: this model already has a building; GordiumStart begins from an empty lot (use GordiumCheck to check a design)`.
 When a file already has a project, the same box opens with its last button reading **Check** instead of **Draw**.
 **Cancel** closes the box and changes nothing.
 

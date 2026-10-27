@@ -76,3 +76,11 @@ def test_every_fixed_command_line_prompt_in_the_code_is_in_the_guide():
     code = [c.split("): ")[0] + (")" if "): " in c else "") for c in code]
     missing = sorted({c.split(" (Enter to skip)")[0] for c in code if c.split(" (Enter")[0] not in GUIDE and c not in GUIDE})
     assert not missing, "command-line prompts in the code but not in GUIDE.md: %s" % missing
+
+
+def test_the_messages_an_architect_reads_beside_draw_and_after_a_refused_start_are_in_the_guide():
+    for text, src in (("Confirm the district to continue.", LOGIC),
+                      ("Gordium: this model already has a building; GordiumStart begins from an empty lot", RHINO),
+                      ("(use GordiumCheck to check a design)", RHINO)):
+        assert text in src and text in GUIDE, text
+    assert "**Change** picks another" in GUIDE and '"zone", "Change"' in LOGIC
