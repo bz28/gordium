@@ -10,7 +10,7 @@ Gordium checks your massing against the City of Ithaca zoning rules while you de
 lot at a time). Every item gets one answer: **Complies**, **Does not comply**, **Needs review** or **Not
 checked**. It never says "Complies" when it is not sure: a missing fact or an unclear rule gives "Needs review".
 
-## The five commands
+## The commands
 
 Type a command's name in Rhino's command line.
 
