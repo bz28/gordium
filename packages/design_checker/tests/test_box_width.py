@@ -289,5 +289,6 @@ def test_each_refused_entry_is_named_in_the_one_note():
     assert logic.answers_note([("dwelling_units", "count", "4"), ("rooms_let_for_profit", "count", "lots")]) == (
         "Rooms let for profit: Not kept: a whole number, 0 or more. Its rules need review until it is.", True)
     both = logic.answers_note([("dwelling_units", "count", "x"), ("rooms_let_for_profit", "count", "lots")])[0]
-    assert both.startswith("Dwelling units: Not kept") and "Rooms let for profit: Not kept" in both
+    assert both == ("Not kept: dwelling units (a whole number, 0 or more), rooms let for profit (a whole number, 0 or "
+                    "more). Their rules need review until they are.")
     assert logic.answers_note([("dwelling_units", "count", "")]) == (logic.FOLLOW_UP_HELP, False)

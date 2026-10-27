@@ -443,11 +443,17 @@ def answers_note(entries):
     never read as 0. Returns (text, refused)."""
     said = []
     for key, kind, text in entries:
-        problem = answer_problem(kind, text)
-        if problem:
-            name = STATED_FACTS[key][2] if key in STATED_FACTS else key.replace("_", " ")
-            said.append(f"{name[0].upper() + name[1:]}: {problem}")
-    return (" ".join(said), True) if said else (FOLLOW_UP_HELP, False)
+        try:
+            parse_answer(kind, text)
+        except ValueError as e:
+            said.append((STATED_FACTS[key][2] if key in STATED_FACTS else key.replace("_", " "), str(e)))
+    if not said:
+        return FOLLOW_UP_HELP, False
+    if len(said) == 1:
+        name, why = said[0]
+        return f"{name[0].upper() + name[1:]}: Not kept: {why}. Its rules need review until it is.", True
+    listed = ", ".join(f"{name} ({why})" for name, why in said)
+    return f"Not kept: {listed}. Their rules need review until they are.", True
 
 
 def needs_of(names, values):
