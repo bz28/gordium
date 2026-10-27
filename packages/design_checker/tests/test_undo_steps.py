@@ -16,16 +16,18 @@ SRC = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
 # the plugin's own code, run as written (each function's source from gordium_rhino.py)
 REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_building", "add_to_check",
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
-        "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources"]
+        "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
+        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo"]
 
 
 class Doc:
     """A model's file: its strings, objects and layers. Writing any of them with no undo record open is the bug."""
 
     RuntimeSerialNumber = 1
+    UndoRecordingEnabled = True
 
     def __init__(self):
-        self.open, self.records, self.outside = [], [], []
+        self.open, self.records, self.outside, self.unrecorded = [], [], [], []
         doc = self
 
         class Strings:
@@ -37,6 +39,10 @@ class Doc:
 
             def GetValue(self, section, entry):
                 return self.data.get((section, entry))
+
+            def Delete(self, section, entry):
+                doc.wrote("string " + entry)
+                self.data.pop((section, entry), None)
 
         class Layer:
             _visible = True
@@ -69,7 +75,9 @@ class Doc:
         self.Views = type("Views", (), {"Redraw": lambda s: None})()
 
     def wrote(self, what):
-        if not self.open:
+        if not self.UndoRecordingEnabled:
+            self.unrecorded.append(what)          # undo off: allowed only when it leaves the file as it was
+        elif not self.open:
             self.outside.append(what)
 
     def BeginUndoRecord(self, words):
@@ -99,19 +107,23 @@ def _plugin(doc, said):
           "_buildings": lambda doc: [obj(), obj()], "_pick": lambda doc, prompt, objs, kind, *a: "lot2"
           if kind == "Lot" else "b2", "_count": lambda prompt: 2, "_ask_yes_no_or_skip": lambda prompt: True,
           "_layer": lambda doc, name: 0, "_find": lambda doc, i: obj(), "report_path": lambda doc: "/nowhere.xlsx",
-          "edit_facts": lambda: None, "set_grade": lambda: None, "hide_massing_tick": None}
+          "time": __import__("time"), "_clear": lambda o: None, "JURISDICTION": "ithaca",
+          "ask": lambda request: {"zones": []}, "suggested_facts": lambda doc, zones: {},
+          "overlay": lambda: type("O", (), {})(), "_apply_box": lambda doc, facts, state, saved_ui: (facts, {}),
+          # the start box: the architect presses Draw (the plugin's own _drawn), with the facts it was given
+          "confirm": lambda doc, facts, options, mode="check": ns["_drawn"](doc, facts, {}, {})}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     return ns
 
 
 # what each panel action is given (the panel's own arguments), and whether it changes the file
-CALLS = {"survey": ((), True), "enter": ((["stories"],), True), "main": ((), True), "add": ((["b2"],), True),
+CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": ((), True), "add": ((["b2"],), True),
          "ground": ((["mesh"],), True), "not_ground": ((), True), "massing": ((True,), True), "labels": ((True,), True),
          "zoom": ((None,), False), "report": ((), False), "envelope": ((True,), False), "legend": ((), False),
          "retry": ((), False),
-         # the start box (Edit site…, Set grade…): a transaction of its own, written only by its Draw
-         "edit_site": ((), False), "grade": ((), False)}
+         # the start box (Edit site…, Set grade…): its Draw and the facts saved after it closes, one step
+         "edit_site": ((), True), "grade": ((), True)}
 
 
 def test_the_guard_covers_every_panel_action():
@@ -125,21 +137,55 @@ def test_every_panel_change_is_exactly_one_named_undo_step(name):
     args, changes = CALLS[name]
     _plugin(doc, said)["_actions"]()[name](*args)
     assert doc.outside == [], f"{name} wrote {doc.outside} outside any undo record (Ctrl+Z would skip it)"
-    assert doc.open == []                                                   # every record it began, ended
+    assert doc.open == [] and doc.unrecorded == []                          # every record it began, ended
     assert doc.records == ([logic.UNDO_WORDS[name]] if changes else []), doc.records
 
 
-def test_a_refused_count_is_put_back_inside_the_same_one_step():
-    """Enter …: a story count the measuring refuses is written, checked, then put back: still one step, so one
-    Ctrl+Z never lands between the two writes."""
+def test_a_refused_count_leaves_the_file_as_it_was_and_no_undo_step():
+    """Enter …: a story count the measuring refuses is tried with undo recording off, then the facts put back exactly
+    as stored: no step that does nothing (one Ctrl+Z would seem to do nothing), the file unchanged, checked again."""
     doc, said = Doc(), []
     ns = _plugin(doc, said)
+    doc.Strings.data[("Gordium", "lot_facts")] = stored = json.dumps({"lot_id": "lot1", "stories": 3})
+    checks = []
 
     def check(doc, report=False):
-        ns["STATE"]["last"] = {"items": [{"refused": True, "reason": "x: does not comply under that reading. 1 story"}]}
+        facts = json.loads(doc.Strings.GetValue("Gordium", "lot_facts"))
+        checks.append(facts.get("stories"))
+        refused = facts.get("stories") == 2
+        ns["STATE"]["last"] = {"items": [{"refused": refused, "reason": "x: does not comply under that reading. "
+                                                                        "1 story"}]}
     ns["run_check"] = check
     ns["_actions"]()["enter"](["stories"])
-    assert doc.outside == [] and doc.records == [logic.UNDO_WORDS["enter"]] and said == ["1 story. The count wasn't kept."]
+    assert doc.records == [] and doc.outside == [] and doc.UndoRecordingEnabled
+    assert doc.Strings.data[("Gordium", "lot_facts")] == stored and checks == [2, 3]
+    assert said == ["1 story. The count wasn't kept."]
+    ns["_count"] = lambda prompt: 4                                       # a count it keeps: one step, one check
+    checks.clear()
+    ns["_actions"]()["enter"](["stories"])
+    assert doc.records == [logic.UNDO_WORDS["enter"]] and doc.outside == [] and checks == [4]
+    assert json.loads(doc.Strings.data[("Gordium", "lot_facts")])["stories"] == 4
+
+
+def test_a_start_box_closed_without_draw_makes_no_step_and_holds_none():
+    doc = Doc()
+    ns = _plugin(doc, [])
+    ns["confirm"] = lambda doc, facts, options, mode="check": None
+    ns["_actions"]()["edit_site"]()
+    assert doc.records == [] and doc.outside == [] and "undo" not in ns["STATE"]
+
+
+def test_an_undone_panel_change_is_checked_again():
+    """A panel change undone puts back only the file's strings (no object event notices it): Rhino's Undo or Redo,
+    finished, marks the model changed now, so live mode checks it again; never on a record merely begun."""
+    ns = _plugin(Doc(), [])
+    event = type("E", (), {"IsEndUndo": False, "IsEndRedo": False})
+    ns["_undo_redo"](None, event())
+    assert "dirty" not in ns["STATE"]
+    event.IsEndUndo = True
+    ns["_undo_redo"](None, event())
+    assert ns["STATE"]["dirty"] > 0
+    assert '_on(Rhino.Commands.Command, "UndoRedo", _handler(' in SRC          # hooked for every document
 
 
 def test_an_undo_step_ends_when_the_change_fails_and_never_ends_rhinos_own():

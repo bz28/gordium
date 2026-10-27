@@ -8,17 +8,20 @@ Building layer (so there is a main building to pick) and a box on Default (somet
 each panel action that changes the file, outside any command (as the panel's buttons run):
   a. the architect's own edit first: one curve, in its own undo record;
   b. the action, through the panel's own gate (g._actions()), its prompts answered by stand-ins;
-  c. claim "<action>: one step": exactly one undo record ended during the action, named logic.UNDO_WORDS[action];
+  c. claim "<action>: one step": exactly one undo record ended during the action, and the file changed (its name,
+     logic.UNDO_WORDS[action], is what Edit > Undo shows: read by eye, RhinoCommon can't read a record's name back);
   d. one Rhino _Undo;
   e. claim "<action>: undone": the file is exactly as before b (the facts, the box's choices and the sources strings;
      every object's layer; the starting house layer's visibility);
-  f. claim "<action>: nothing else": the architect's curve from a is still there.
+  f. claim "<action>: nothing else": the architect's curve from a is still there;
+  g. claim "<action>: checked again": the Undo marked the model changed (live mode re-checks it at the next idle).
 Actions: survey, enter (Bedrooms: 2), main, add, ground, not_ground (after a ground mark of its own), massing, labels.
 Writes <temp>/gordium_undo_steps/out.json ("done": true at the end); the command line says which claims fail."""
 import json
 import os
 import sys
 import tempfile
+import time
 import traceback
 
 import Rhino
@@ -87,11 +90,12 @@ def one(g, doc, name, args):
     log["events"] = []
     g._actions()[name](*args)
     ended = list(log["events"])
-    words = doc.GetUndoRecordDescription(ended[-1]) if ended and hasattr(doc, "GetUndoRecordDescription") else None
     claim(name + ": one step", len(ended) == 1 and before != snapshot(g, doc),
-          {"records_ended": ended, "named": words, "expected": g.logic.UNDO_WORDS[name]})
+          {"records_ended": ended, "named (by eye in Edit > Undo)": g.logic.UNDO_WORDS[name]})
+    undone_at = time.time()
     Rhino.RhinoApp.RunScript("_Undo", False)
     after = snapshot(g, doc)
+    claim(name + ": checked again", (g.STATE.get("dirty") or 0) >= undone_at, g.STATE.get("dirty"))
     claim(name + ": undone", after == before,
           {k: (before[k], after[k]) for k in before if before[k] != after[k]})
     claim(name + ": nothing else", doc.Objects.FindId(mine) is not None)

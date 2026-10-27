@@ -1030,15 +1030,44 @@ def enter_rooms(needs):
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
-    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):      # one step, a refused count put back inside it
-        save_facts(doc, logic.update_counts(facts, answers))
+    new = logic.update_counts(facts, answers)
+    checked = "stories" in answers     # fewer stories than the floors drawn: the measuring refuses it, so a count
+    if checked:                         # is tried first, unrecorded and put back as stored: never a step of nothing
+        refused = _tried(doc, new)
+        if refused:
+            run_check(doc, report=False)           # the facts as stored, checked again
+            say(refused)
+            return
+    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):
+        save_facts(doc, new)
+    if not checked:                     # (tried: its check was of these very facts)
         run_check(doc, report=False)
-        refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
-        if refused:                     # fewer stories than the floors drawn: the measuring refuses it, so is it
-            save_facts(doc, facts)
-            run_check(doc, report=False)
-    if refused:
-        say(refused)
+
+
+def _tried(doc, facts):
+    """The measuring's words if it refuses `facts` (else None): checked with them saved while undo recording is off,
+    then the facts put back exactly as stored, so nothing is left changed and no undo step made (the last check is
+    of `facts`: the caller checks again if it doesn't keep them)."""
+    stored = doc.Strings.GetValue(SECTION, ENTRY)
+    doc.UndoRecordingEnabled = False
+    try:
+        save_facts(doc, facts)
+        run_check(doc, report=False)
+        return logic.refused_stories((STATE.get("last") or {}).get("items"))
+    except Exception:
+        _put_back(doc, stored)
+        run_check(doc, report=False)               # never a result left on screen for facts not kept
+        raise
+    finally:
+        _put_back(doc, stored)
+        doc.UndoRecordingEnabled = True
+
+
+def _put_back(doc, stored):
+    if stored is None:
+        doc.Strings.Delete(SECTION, ENTRY)
+    else:
+        doc.Strings.SetString(SECTION, ENTRY, stored)
 
 
 def pick_main_building():
@@ -1770,7 +1799,11 @@ def _lookup_done(doc, facts, saved_ui, session):
 
 def _drawn(doc, facts, state, saved_ui, session=None):
     """Draw: the facts for the checker, and every fact's source and confirmation saved in the .3dm; what the box
-    replaced goes for good."""
+    replaced goes for good. One undo step from here to the facts saved after the box closes (its caller ends it:
+    _end_undo), unless one is already held."""
+    if not STATE.get("undo"):
+        _begin_undo(doc, logic.UNDO_WORDS["edit_site"])
+
     def save():
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
         _save_ui_state(doc, ui_state)
@@ -1782,6 +1815,35 @@ def _drawn(doc, facts, state, saved_ui, session=None):
     if session is None:
         return save()
     return logic.draw_then_commit(session, save)     # the commit last: a failure before it is rolled back
+
+
+def _begin_undo(doc, words):
+    """One undo step for everything a Draw does (the box's choices, the sources, the session's commit, the facts saved
+    after the box closes), held until _end_undo."""
+    _end_undo(doc)
+    STATE["undo"] = (doc.RuntimeSerialNumber, doc.BeginUndoRecord(words))
+
+
+def _end_undo(doc):
+    """Ends the Draw's undo record, only one this script began (rhino_logic.undo_record_to_end: serial 0 is Rhino
+    saying a command is already recording, whose record is Rhino's own to end)."""
+    held = STATE.pop("undo", None)
+    if logic.undo_record_to_end(held, doc.RuntimeSerialNumber if doc is not None else None):
+        doc.EndUndoRecord(held[1])
+
+
+def _undo_redo(sender, e):
+    """Rhino's Undo or Redo, finished: what the last check drew is of a model that is no longer there (a panel
+    change undone puts back only the file's strings, which no object event notices), so it is cleared
+    (rhino_logic.after_undo_redo) and the model is checked again at the next idle (live mode). Nothing in the
+    document is changed here: a change made while Rhino undoes or redoes breaks its Undo/Redo chain (RhinoCommon's
+    undo event rule)."""
+    if not logic.after_undo_redo(e.IsEndUndo, e.IsEndRedo):
+        return
+    o = STATE.get("overlay")
+    if o is not None:
+        _clear(o)
+    STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())   # re-checked at the next idle (live)
 
 
 def hide_massing(hidden):
@@ -1952,14 +2014,18 @@ def edit_facts():
         saved = current_facts(doc)
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
-    try:
-        facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options, "check")
-    finally:                            # the editing outline and names never stay on screen
-        o = overlay()
-        o.confirm, o.labels = None, []
-        doc.Views.Redraw()
-    if facts is not None:
-        save_facts(doc, facts)
+    try:                                # one undo step from the Draw to the facts saved, closed on any way out
+        try:
+            facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options,
+                            "check")
+        finally:                        # the editing outline and names never stay on screen
+            o = overlay()
+            o.confirm, o.labels = None, []
+            doc.Views.Redraw()
+        if facts is not None:
+            save_facts(doc, facts)
+    finally:
+        _end_undo(doc)
     run_check(doc, report=False)
 
 
@@ -2340,11 +2406,14 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-        facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
-        if facts is None:               # closed or Esc: nothing saved, nothing checked
-            Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
-            return None
-        save_facts(doc, facts)
+        try:                            # the Draw's undo step ends with the facts saved
+            facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+            if facts is None:           # closed or Esc: nothing saved, nothing checked
+                Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
+                return None
+            save_facts(doc, facts)
+        finally:
+            _end_undo(doc)
     result = run_check(doc, report=True)
     live(True)                                      # live mode is on by default
     if result is not None:
@@ -2435,11 +2504,14 @@ def gordium_start():
             saved = {}
         facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
     path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
-    facts = confirm(doc, facts, options, "start")
-    if facts is None:
-        Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
-        return None
-    save_facts(doc, facts)
+    try:                                # the Draw's undo step ends with the facts saved
+        facts = confirm(doc, facts, options, "start")
+        if facts is None:
+            Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
+            return None
+        save_facts(doc, facts)
+    finally:
+        _end_undo(doc)
     export(doc, path)                   # the model as the box left it (a lookup may have drawn a new lot)
     _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     saved_ui = _ui_state(doc)
@@ -2554,3 +2626,6 @@ if STATE.get("live"):                        # live mode was on before this copy
     live(True)
 # Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)
 _on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), "stop the checker"))
+# Undo / Redo: a panel change undone is checked again, never left on screen as it was (each is one undo step)
+_on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler[Rhino.Commands.UndoRedoEventArgs], _undo_redo,
+                                                 "clear the drawing after Undo or Redo"))
