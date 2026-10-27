@@ -118,9 +118,17 @@ def _revision_problems(revised, label) -> list[str]:
             p.append("a revision's by and why must be text")
         elif not isinstance(r["date"], datetime.date):
             p.append("a revision's date must be a date (YYYY-MM-DD)")
-    if not p:                                    # each label change goes from[i] -> the next from, the last -> label
-        changes = [r for r in revised if "from" in r]
-        targets = [r["from"] for r in changes[1:]] + [label]
+    if not p:
         p += [f"revision {i + 1} is from {r['from']!r} to the same label: a revision must change it"
-              for i, (r, to) in enumerate(zip(changes, targets)) if r["from"] == to]
+              for i, (r, to) in enumerate((r, to) for r, to in revision_steps(revised, label) if "from" in r)
+              if r["from"] == to]
     return p
+
+
+def revision_steps(revised: list[dict], label) -> list[tuple[dict, str | None]]:
+    """Each revision with what it changed to, oldest first: a label change goes from its `from` to the next
+    label change's `from`, the last one to the current label; a sources change has no label target (None)."""
+    positions = [i for i, r in enumerate(revised) if "from" in r]     # by position: one dict may repeat
+    targets = [revised[i]["from"] for i in positions[1:]] + [label]
+    to = dict(zip(positions, targets))
+    return [(r, to.get(i)) for i, r in enumerate(revised)]

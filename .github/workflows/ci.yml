@@ -23,3 +23,5 @@ jobs:
         run: python -m rule_format
       - name: Every line of the law is in exactly one piece; coverage report is current (no AI)
         run: python -m section_labeling coverage --check
+      - name: The rules workbook matches a fresh build (generated, never hand-edited)
+        run: python -m rule_export --check

@@ -512,6 +512,23 @@ def test_methods_doc_matches_what_this_branch_builds():
         assert "own branch (PR 6)" in section
 
 
+def test_cited_by_reads_every_rulebook_including_drafted_ones(tmp_path, law):
+    """A piece cited only by an AI-drafted rulebook (5_zoning_rules/drafted/) still counts as cited, so its
+    label is on the review list: rulebook files have one definition (rulebook_paths), which skips the
+    drafting script's own records (drafted/records/)."""
+    ctx, header, pieces, rows = law
+    pid = "325-16C"
+    page, line = pieces[pid]["lines"][0][:2]          # the piece's first line
+    j = tmp_path / "j"
+    (j / "5_zoning_rules/drafted").mkdir(parents=True)
+    (j / "5_zoning_rules/drafted/X.yaml").write_text(yaml.safe_dump({"district": "X", "rules": [
+        {"id": "X.a", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}))
+    (j / "5_zoning_rules/drafted/records").mkdir()
+    (j / "5_zoning_rules/drafted/records/run.yaml").write_text(yaml.safe_dump({"rules": [
+        {"id": "R.z", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}))
+    assert coverage.cited_by(j, LAW, pieces) == {pid: ["drafted:X.a"]}    # tagged, so it stays apart from a hand rule
+
+
 def test_methods_doc_says_whether_a_run_used_the_current_labeling_guide():
     """The run records keep the fingerprint of the guide each call was sent. If the current guide was never
     sent, methods.md must say so and must not call the change cosmetic."""

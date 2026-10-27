@@ -87,6 +87,15 @@ def load(path):
     return yaml.load(Path(path).read_text(), Loader=_StrictLoader)
 
 
+def rulebook_paths(folder) -> list[Path]:
+    """The rulebook files in a folder (5_zoning_rules/, an answer-key folder): every .yaml or .yml file
+    under it, except the drafting script's own run records (drafted/records/), which aren't rulebooks. The one
+    definition, used by the validator, the review list and the spreadsheet export alike."""
+    folder = Path(folder)
+    return sorted(p for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file()
+                  and "records" not in p.relative_to(folder).parts) if folder.is_dir() else []
+
+
 def read_jsonl(path) -> list[dict]:
     """Every row of a JSON-lines file, read as UTF-8, blank lines skipped. The one reader of the repository's
     .jsonl files (extracted text, sections, run records), so every package reads the same bytes the same way."""
