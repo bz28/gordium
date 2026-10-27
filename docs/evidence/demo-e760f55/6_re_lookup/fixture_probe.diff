@@ -1,0 +1,8 @@
+155c155
+<     g.STATE.update(box_picks=[], box_overrides={"address": address})
+---
+>     g.STATE.update(box_picks=[], box_overrides={"address": address}, lookup_fixture="96_ithaca_rd")
+160c160
+<         for k in ("box_picks", "box_overrides"):
+---
+>         for k in ("box_picks", "box_overrides", "lookup_fixture"):

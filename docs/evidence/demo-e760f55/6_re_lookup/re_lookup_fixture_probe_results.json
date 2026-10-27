@@ -1,0 +1,1197 @@
+{
+ "claims": {
+  "1 the sample: its lot and a starting house": {
+   "ok": true,
+   "detail": {
+    "lot": "ee8ca5b8-6ec8-49af-ba46-ed6ffd4d563f",
+    "house": [
+     "330283a6-5148-4157-9bae-927d9b12e5a2",
+     "20953e1d-f336-4fb3-a139-5a65c906bd4b",
+     "890a33de-4e2e-4bd2-98aa-75e595df8770"
+    ]
+   }
+  },
+  "2 Look up changed nothing in the model while the box was open": {
+   "ok": true,
+   "detail": {
+    "before": 4,
+    "during": 4
+   }
+  },
+  "2 the looked-up lot was shown dashed while the box was open": {
+   "ok": true,
+   "detail": {
+    "asked": [],
+    "objects": {
+     "330283a6-5148-4157-9bae-927d9b12e5a2": "Gordium::Massing",
+     "20953e1d-f336-4fb3-a139-5a65c906bd4b": "Gordium::Massing",
+     "890a33de-4e2e-4bd2-98aa-75e595df8770": "Gordium::Massing",
+     "ee8ca5b8-6ec8-49af-ba46-ed6ffd4d563f": "Site"
+    },
+    "guide_shown": true
+   }
+  },
+  "2 Draw asked nothing (all of it was Gordium's)": {
+   "ok": true,
+   "detail": []
+  },
+  "2 the sample's lot and house are gone": {
+   "ok": true,
+   "detail": []
+  },
+  "2 96's lot is drawn on Site": {
+   "ok": true,
+   "detail": "Lot \u00b7 96 Ithaca Road, Ithaca, NY, 14850"
+  },
+  "2 no starting house on 96, a corner lot (the architects' open question)": {
+   "ok": true,
+   "detail": [
+    "a corner lot: which yards are front, side and rear is an open question; no envelope drawn",
+    "no buildable area to start from"
+   ]
+  },
+  "2 the file says what is drawn: 96, and no house of Gordium's": {
+   "ok": true,
+   "detail": {
+    "drawn_address": "96 Ithaca Road, Ithaca, NY, 14850",
+    "house_fingerprint": null
+   }
+  },
+  "2 one Undo puts the sample back exactly": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "2 after Undo the file says the sample again (facts, choices, sources)": {
+   "ok": true,
+   "detail": {}
+  },
+  "2 after Undo nothing of 96 is left on screen": {
+   "ok": true,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": false,
+    "check_marks": false
+   }
+  },
+  "2 after Undo the sample is checked again (live mode)": {
+   "ok": true,
+   "detail": {
+    "dirty": 1793070156.8084989,
+    "last_check": 1793070156.774683,
+    "live": true,
+    "owed": true,
+    "done": false
+   }
+  },
+  "2 Redo draws 96's lot again (and no house: a corner lot), the sample gone": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "2 after Redo the file says 96 again (facts, choices, sources)": {
+   "ok": true,
+   "detail": {}
+  },
+  "2 after Redo nothing of the sample is left on screen": {
+   "ok": true,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": false,
+    "check_marks": false
+   }
+  },
+  "2 after Redo 96 is checked again (live mode)": {
+   "ok": true,
+   "detail": {
+    "dirty": 1793070156.81181,
+    "last_check": 1793070156.774683,
+    "live": true,
+    "owed": true,
+    "done": false
+   }
+  },
+  "2 a second Undo puts the sample back again": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "2 after the second Undo the file says the sample again": {
+   "ok": true,
+   "detail": {}
+  },
+  "2 after the second Undo nothing of 96 is left on screen": {
+   "ok": true,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": false,
+    "check_marks": false
+   }
+  },
+  "2 after the second Undo the sample is checked again (live mode)": {
+   "ok": true,
+   "detail": {
+    "dirty": 1793070156.82722,
+    "last_check": 1793070156.774683,
+    "live": true,
+    "owed": true,
+    "done": false
+   }
+  },
+  "2 a second Redo draws 96's lot again": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "2 after the second Redo the file says 96 again": {
+   "ok": true,
+   "detail": {}
+  },
+  "2 after the second Redo nothing of the sample is left on screen": {
+   "ok": true,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": false,
+    "check_marks": false
+   }
+  },
+  "2 after the second Redo 96 is checked again (live mode)": {
+   "ok": true,
+   "detail": {
+    "dirty": 1793070156.8300622,
+    "last_check": 1793070156.774683,
+    "live": true,
+    "owed": true,
+    "done": false
+   }
+  },
+  "3 asked once, naming the edited house": {
+   "ok": true,
+   "detail": [
+    [
+     "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed.",
+     [
+      "Start fresh",
+      "fresh"
+     ],
+     [
+      "Keep my building and check it on 96 Ithaca Road's lot",
+      "keep"
+     ]
+    ]
+   ]
+  },
+  "3 the Keep answer names 96's lot (the sample's lot was Gordium's: nothing of theirs replaced)": {
+   "ok": true,
+   "detail": [
+    "Keep my building and check it on 96 Ithaca Road's lot",
+    "keep"
+   ]
+  },
+  "3 Keep my building: the floors kept, the lot is 96's": {
+   "ok": true,
+   "detail": {
+    "kept": [
+     "e020ece9-a1c9-4255-b9a7-1eb720943e38",
+     "0766f448-fb06-4659-b37a-3cb20387b433",
+     "832e7e74-01e0-43b7-9d04-4f822b6310d8"
+    ]
+   }
+  },
+  "4 the same address: no question and nothing in the model changes": {
+   "ok": true,
+   "detail": []
+  },
+  "4 an address typed and not looked up: Draw says to look it up first, nothing changes": {
+   "ok": true,
+   "detail": {
+    "said": [
+     "Press Look up to find 109 Ithaca Rd, Ithaca, NY 14850 first."
+    ],
+    "ran": false,
+    "strings": {}
+   }
+  },
+  "4 the lot's own address (the box opened again on it): Draw goes through and checks it as it is": {
+   "ok": true,
+   "detail": {
+    "said": [
+     "Fetching the neighbourhood (up to 20 s)\u2026",
+     "Couldn't fetch the neighbourhood: the lot is drawn without it."
+    ],
+    "ran": true,
+    "own": "96 Ithaca Rd, Ithaca, NY 14850"
+   }
+  },
+  "5 asked once; the question says their surveyed lot will be replaced by 96's": {
+   "ok": true,
+   "detail": [
+    [
+     "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed. Your surveyed lot will be replaced by 96 Ithaca Road's lot.",
+     [
+      "Start fresh",
+      "fresh"
+     ],
+     [
+      "Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)",
+      "keep"
+     ]
+    ]
+   ]
+  },
+  "5 the Keep answer says their surveyed lot will be replaced": {
+   "ok": true,
+   "detail": [
+    "Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)",
+    "keep"
+   ]
+  },
+  "5 Keep my building: the floors kept, the surveyed lot replaced by 96's tax-map lot": {
+   "ok": true,
+   "detail": {
+    "kept": [
+     "0ebb9c03-2089-4d8e-a9c8-cd730ac88cc8",
+     "5bdf17fd-b35b-4e3a-bd03-3dae058a8a0d",
+     "04b1d9c5-5525-4060-9b26-48b83c108a7e"
+    ],
+    "lot": "Lot \u00b7 96 Ithaca Road, Ithaca, NY, 14850",
+    "surveyed": false
+   }
+  },
+  "5 one Undo puts the surveyed lot and the edited house back exactly": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "5 after Undo the file says the surveyed lot again (facts, choices, sources)": {
+   "ok": true,
+   "detail": {}
+  },
+  "5 after Undo nothing of 96 is left on screen": {
+   "ok": true,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": false,
+    "check_marks": false
+   }
+  },
+  "5 after Undo the surveyed lot is checked again (live mode)": {
+   "ok": true,
+   "detail": {
+    "dirty": 1793070169.4265301,
+    "last_check": 1793070169.3842418,
+    "live": true,
+    "owed": true,
+    "done": false
+   }
+  },
+  "5 Redo draws 96's lot again with the kept house, the surveyed lot gone": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "5 after Redo the file says 96 again (facts, choices, sources)": {
+   "ok": true,
+   "detail": {}
+  },
+  "5 after Redo nothing of the surveyed lot is left on screen": {
+   "ok": true,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": false,
+    "check_marks": false
+   }
+  },
+  "5 after Redo 96 is checked again (live mode)": {
+   "ok": true,
+   "detail": {
+    "dirty": 1793070169.429873,
+    "last_check": 1793070169.3842418,
+    "live": true,
+    "owed": true,
+    "done": false
+   }
+  }
+ },
+ "undo_events": [
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 17,
+   "at": null
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 17,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 17,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 17,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 17,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 18,
+   "at": null
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 18,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 18,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 18,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 19,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 19,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": true,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 18,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": true,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 18,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 18,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 19,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 19,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 20,
+   "at": "2 redo"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 20,
+   "at": "2 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": true,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 19,
+   "at": "2 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": true,
+   "IsPurgeRecord": false,
+   "serial": 19,
+   "at": "2 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 19,
+   "at": "2 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 20,
+   "at": "2 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 20,
+   "at": "2 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 21,
+   "at": "2 undo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 21,
+   "at": "2 undo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": true,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 20,
+   "at": "2 undo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": true,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 20,
+   "at": "2 undo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 20,
+   "at": "2 undo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 21,
+   "at": "2 undo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 21,
+   "at": "2 undo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 22,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 22,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": true,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 21,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": true,
+   "IsPurgeRecord": false,
+   "serial": 21,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 21,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 22,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 22,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 23,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 23,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 23,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 23,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 23,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 24,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 24,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 24,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 24,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 25,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 25,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 25,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 25,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 25,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 26,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 26,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 26,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 26,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 27,
+   "at": "5 undo"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 27,
+   "at": "5 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": true,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 26,
+   "at": "5 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": true,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 26,
+   "at": "5 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 26,
+   "at": "5 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 27,
+   "at": "5 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 27,
+   "at": "5 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 28,
+   "at": "5 redo"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 28,
+   "at": "5 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": true,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 27,
+   "at": "5 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": true,
+   "IsPurgeRecord": false,
+   "serial": 27,
+   "at": "5 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 27,
+   "at": "5 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 28,
+   "at": "5 redo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 28,
+   "at": "5 redo"
+  }
+ ],
+ "undo_records": [
+  {
+   "words": "Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850",
+   "serial": 18,
+   "in_command": false,
+   "at": null
+  },
+  {
+   "words": "Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850",
+   "serial": 24,
+   "in_command": false,
+   "at": "2 redo again"
+  },
+  {
+   "words": "Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850",
+   "serial": 26,
+   "in_command": false,
+   "at": "2 redo again"
+  }
+ ],
+ "step2": {
+  "asked": [],
+  "guide_shown": true
+ },
+ "at": "5 redo",
+ "command_at": 1793070169.428355,
+ "commands": [
+  [
+   "2 undo",
+   "Undo",
+   true
+  ],
+  [
+   "2 redo",
+   "Redo",
+   true
+  ],
+  [
+   "2 undo again",
+   "Undo",
+   true
+  ],
+  [
+   "2 redo again",
+   "Redo",
+   true
+  ],
+  [
+   "5 undo",
+   "Undo",
+   true
+  ],
+  [
+   "5 redo",
+   "Redo",
+   true
+  ]
+ ],
+ "step3": {
+  "asked": [
+   [
+    "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed.",
+    [
+     "Start fresh",
+     "fresh"
+    ],
+    [
+     "Keep my building and check it on 96 Ithaca Road's lot",
+     "keep"
+    ]
+   ]
+  ],
+  "guide_shown": true
+ },
+ "step4": {
+  "asked": [],
+  "guide_shown": true
+ },
+ "step5": {
+  "asked": [
+   [
+    "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed. Your surveyed lot will be replaced by 96 Ithaca Road's lot.",
+    [
+     "Start fresh",
+     "fresh"
+    ],
+    [
+     "Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)",
+     "keep"
+    ]
+   ]
+  ],
+  "guide_shown": true
+ },
+ "ok": true,
+ "done": true
+}

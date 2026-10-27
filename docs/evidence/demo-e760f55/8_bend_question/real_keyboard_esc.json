@@ -1,0 +1,9 @@
+{
+ "trial": "enter_then_esc",
+ "prompts": [
+  "Past there the lot line turns 20\u00b0 (a test). Is that on Street 2 too? (Yes or No)"
+ ],
+ "loaded_from": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/laneC/demo_e760f55/apps/rhino_plugin/gordium_rhino.py",
+ "raised": "Cancelled",
+ "done": true
+}

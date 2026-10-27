@@ -1,0 +1,118 @@
+{
+ "head": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/laneC/demo_e760f55",
+ "roof_solid": true,
+ "as_drawn": {
+  "error": null,
+  "rows": [
+   {
+    "name": "Side yard, narrower",
+    "status": "complies",
+    "proposed": "6'-6\" to 9'-6\"",
+    "required": "5'-0\"",
+    "delta": "at least 1'-6\" to spare",
+    "rule": "R-3a.side_yards",
+    "reason": "Complies to the full outline, whatever reaches past the walls is",
+    "hint": null,
+    "eave_candidates": [
+     "eave:3967d4a08fd58fc3df0024e2"
+    ]
+   },
+   {
+    "name": "Side yard, wider",
+    "status": "needs_review",
+    "proposed": "9'-0\" to 10'-0\"",
+    "required": "10'-0\"",
+    "delta": "up to 1'-0\" short",
+    "rule": "R-3a.side_yards",
+    "reason": "At worst 9'-0\" against 10'-0\": does not comply under that reading. Needs review: it complies only if the part reaching 3'-6\" past the walls toward the side yard is an eave (\u00a7325-18B allows eaves up to 2 ft into a required yard). Gordium will ask you to confirm it in the panel in the next release; until then this stays needs review \u00b7 confirm with the zoning office",
+    "hint": null,
+    "eave_candidates": [
+     "eave:3967d4a08fd58fc3df0024e2"
+    ]
+   },
+   {
+    "name": "Eaves into front yard",
+    "status": "needs_review",
+    "proposed": "30'-0\"",
+    "required": "8'-0\"",
+    "delta": "+22'-0\" if confirmed",
+    "rule": "R-3a.yard_projections",
+    "reason": "the readings give different values; which eave the average height of a pitched roof is taken from (the lowest eave, the wall plate or the drip edge) isn't settled yet: confirm with the zoning office; whether what the pitched roof reaches past the walls is an eave (\u00a7325-18B) or part of the building can't be told from the model: the architect confirms it (eaves_confirmed); the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office; whether what the pitched roof reaches past the walls is an eave (\u00a7325-18B) or part of the building can't be told from the model: the architect confirms it (eaves_confirmed) \u00b7 Gordium's reading \u00b7 confirm with the City zoning office: Midway between eave and ridge, on the roof section with the highest elevation",
+    "hint": null,
+    "eave_candidates": [
+     "eave:3967d4a08fd58fc3df0024e2"
+    ]
+   },
+   {
+    "name": "\u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+    "status": "not_checked",
+    "proposed": "",
+    "required": "",
+    "delta": null,
+    "rule": null,
+    "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18B",
+    "hint": null,
+    "eave_candidates": null
+   }
+  ]
+ },
+ "candidates": [
+  "eave:3967d4a08fd58fc3df0024e2"
+ ],
+ "eaves_confirmed": {
+  "error": null,
+  "rows": [
+   {
+    "name": "Side yard, East",
+    "status": "complies",
+    "proposed": "10'-0\"",
+    "required": "10'-0\"",
+    "delta": "at limit",
+    "rule": "R-3a.side_yards",
+    "reason": "eaves confirmed by the architect, 2026-10-26",
+    "hint": null,
+    "eave_candidates": [
+     "eave:3967d4a08fd58fc3df0024e2"
+    ]
+   },
+   {
+    "name": "Side yard, West",
+    "status": "complies",
+    "proposed": "9'-6\"",
+    "required": "5'-0\"",
+    "delta": "+4'-6\" to spare",
+    "rule": "R-3a.side_yards",
+    "reason": "eaves confirmed by the architect, 2026-10-26",
+    "hint": null,
+    "eave_candidates": [
+     "eave:3967d4a08fd58fc3df0024e2"
+    ]
+   },
+   {
+    "name": "Eaves into side yard",
+    "status": "does_not_comply",
+    "proposed": "6'-6\"",
+    "required": "8'-0\"",
+    "delta": "\u22121'-6\" short",
+    "rule": "R-3a.yard_projections",
+    "reason": "Fails under every reading considered (building height) \u00b7 Gordium's reading \u00b7 confirm with the City zoning office: Midway between eave and ridge, on the roof section with the highest elevation \u00b7 eaves confirmed by the architect, 2026-10-26",
+    "hint": null,
+    "eave_candidates": [
+     "eave:3967d4a08fd58fc3df0024e2"
+    ]
+   },
+   {
+    "name": "\u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+    "status": "not_checked",
+    "proposed": "",
+    "required": "",
+    "delta": null,
+    "rule": null,
+    "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18B",
+    "hint": null,
+    "eave_candidates": null
+   }
+  ]
+ },
+ "done": true
+}
