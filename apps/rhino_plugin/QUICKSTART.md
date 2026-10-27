@@ -2,8 +2,8 @@
 
 For an architect who has just opened Rhino. About 10 minutes the first time, then 1 minute per project.
 
-Gordium checks your massing against the City of Ithaca zoning rules (R-1b, one-family houses, for now) while
-you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
+Gordium checks your massing against the City of Ithaca zoning rules (the R-1a, R-1b and R-3a districts, for now;
+the sample project below is an R-1b one-family house) while you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
 **Contents:** [Set up (once)](#what-you-need-once) · [Your first project](#your-first-project-step-by-step) ·
@@ -249,6 +249,10 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    - **Zoning district**: "entered by you", or after Look up "suggested by Gordium · City of Ithaca zoning map,
      used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
      lookup, because the City's online map is informational: the district is your statement.
+   - **Address**: recorded on the project and the report. (Look up from the City's map is coming soon.)
+   - **Zoning district**: R-1b, "entered by you" (R-1a and R-3a can be picked too). Tick **I confirm**: Draw
+     stays off until you do, on every new
+     project, because Gordium doesn't look up the zoning map yet.
    - **Use**: one-family dwelling, detached.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my

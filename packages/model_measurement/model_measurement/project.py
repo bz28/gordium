@@ -20,6 +20,7 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).
 UNSETTLED = ("lot", "street", "ground")
+               "dwelling_units", "rooms_let_for_profit", "conversion", "abuts_r1_district",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
@@ -43,10 +44,10 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("plan_north_deg must be a number (degrees the plan is turned from true north)")
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
-    for k in ("stories", "sleeping_rooms", "parking_spaces"):
+    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
-    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame"):
+    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")
