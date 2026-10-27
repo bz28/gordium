@@ -31,6 +31,38 @@ parked:
   parking: {name: "Parking (typed count and read from the drawing): on hold", decided: "Ben's later list, 2026-10-25"}
   adus: {name: "Accessory dwelling units", decided: "queue item 10 brief, 2026-10-27"}
 
+# A piece whose scope another piece sets (its district or use is named there, not in its own words): a "not
+# applicable" quote may come from that piece. Each is the subsection that opens its section or article.
+scope_from:
+  325-11C: 325-11B
+  325-21A: 325-21B
+  325-24C: 325-24B
+  325-24D: 325-24B
+  325-24E: 325-24B
+  325-24F: 325-24B
+  325-24G: 325-24B
+  325-24H: 325-24B
+  325-24I: 325-24B
+  325-29.1E: 325-29.1D
+  325-29.1F: 325-29.1D
+  325-29.1G: 325-29.1D
+  325-29.2B: 325-29.2A
+  325-29.2C: 325-29.2A
+  325-44B: 325-44A
+  325-45.1D: 325-45.1C
+  325-45.2B: 325-45.2A
+  325-45.2D: 325-45.2A
+  325-45.2E: 325-45.2A
+  325-45.2F: 325-45.2A
+  325-45.2G: 325-45.2A
+  325-45.5A: 325-45.4
+  325-45.5B: 325-45.4
+  325-45.5C: 325-45.4
+  325-45.5D: 325-45.4
+  325-45.5E: 325-45.4
+  325-45.5F: 325-45.4
+  325-45.5G: 325-45.4
+
 # Reused decisions.
 _unlisted_why: &unlisted_why Not a use the residential chart (p.2) lists for any residential district, so it isn't
   permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's

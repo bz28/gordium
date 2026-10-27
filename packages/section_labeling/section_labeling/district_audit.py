@@ -7,7 +7,8 @@ One generated table (`6_coverage_report/residential_districts.md`) answers it fo
     flag            the district's rulebook flags it, so the architect sees NEEDS REVIEW (which ids)
     parked          on Ben's later list (which item)
     open_question   waiting on the architects or the City (a link to the question)
-    not_applicable  the law itself keeps it out of this district (the reason, with the law's own words)
+    not_applicable  the law itself keeps it out of this district, or it is a pointer with no requirement of its own
+                    (the reason says which, with the law's own words)
     missing         nothing covers it (why, how important, and whether every result already says so)
 
 What a person decides (why a piece doesn't apply, what is parked, what is missing) is written once, by hand, in
@@ -62,9 +63,6 @@ OMISSION = "except where otherwise indicated by specific prohibition or omission
 # The two sentences that say a use left out of a district's list isn't permitted there: §325-8B(3), all of it (p.26
 # lines 19-21), and §325-8A(2)-(3), "Uses which are permitted in each use district are listed" (p.24 lines 15-18).
 OMISSION_LINES = {(26, 19), (26, 20), (26, 21), (24, 15), (24, 16), (24, 17), (24, 18)}
-# A section whose scope is set by another section of the same article: Article X's §325-45.4 (legislative intent)
-# names the Cliff Street Retreat PUD District that §325-45.5 regulates.
-SAME_ARTICLE = {"325-45.5": {"325-45.4"}}
 MULTIPLE_KINDS = (7, (32, 33))   # §325-3B DWELLING, MULTIPLE (5): rooming house; boarding house; ...; row house (p.7)
 
 
@@ -171,6 +169,7 @@ class Audit:
         self.data = (load(j / DECISIONS) or {}) if data is None else data
         self.districts: list[str] = list(self.data.get("districts") or [])
         self.parked: dict = dict(self.data.get("parked") or {})
+        self.scope_from: dict = dict(self.data.get("scope_from") or {})
         self.ctx = Context.for_jurisdiction(j)
         self.owner = {k: pid for pid, p in self.pieces.items() for k in piece_keys(p)}
         self.definitions = _definitions(j, self.owner)
@@ -194,7 +193,10 @@ class Audit:
 
     def _resolve(self):
         self.problems += [f"{DECISIONS}: unknown key {k!r} (reused decisions start with _)" for k in self.data
-                          if k not in ("districts", "parked", "pieces") and not str(k).startswith("_")]
+                          if k not in ("districts", "parked", "pieces", "scope_from") and not str(k).startswith("_")]
+        for pid, src in self.scope_from.items():
+            if pid not in self.pieces or src not in self.pieces:
+                self.problems.append(f"scope_from {pid}: {src}: both must be pieces of the law")
         self.problems += [f"parked {k}: needs `name` and `decided`" for k, v in self.parked.items()
                           if not (isinstance(v, dict) and v.get("name") and v.get("decided"))]
         given = self.data.get("pieces") or {}
@@ -328,13 +330,13 @@ class Audit:
                 p.append(f"{where}: via_piece only goes with a chart `cell`")
             if dec.get("quote") and dec.get("file", LAW) == LAW and (keys := self._quote_keys(pid, dec)):
                 law = keys - {tuple(k) for k in self.header.get("furniture", [])}
-                major = lambda i: re.match(r"325-\d+(?:\.\d+)?", i or "")[0] if re.match(r"325-\d+", i or "") else None
-                mine = {major(pid)} | SAME_ARTICLE.get(major(pid), set())
+                mine = {pid, self.scope_from.get(pid)}           # the piece itself, or the piece that sets its scope
                 if not law:
                     p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
-                elif not (law & OMISSION_LINES) and not mine & {major(self.owner.get(k)) for k in law}:
-                    p.append(f"{where}: the quote is from another section of the law "
-                             f"({', '.join(sorted({str(self.owner.get(k)) for k in law}))}), not this piece's own")
+                elif not (law & OMISSION_LINES) and not mine & {self.owner.get(k) for k in law}:
+                    p.append(f"{where}: the quote is from another piece of the law "
+                             f"({', '.join(sorted({str(self.owner.get(k)) for k in law}))}), not this piece's own "
+                             "(a piece whose scope another sets names it in `scope_from`)")
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":
                 p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-' "
                          "(not permitted)")
@@ -462,9 +464,9 @@ class Audit:
         return " ".join(self.pieces[pid]["title"].replace("|", "/").split())
 
     def mapped_only(self, pid: str, d: str, kinds=("rulebook", "flag")) -> bool:
-        """Some part (of these statuses) is covered only through Gordium's stated mapping (its rules cite none of
-        its lines)."""
-        return any(dec.get("status") in kinds and not any(
+        """Some part (of these statuses) names a rule that covers it only through Gordium's stated mapping (the rule
+        cites none of the part's lines)."""
+        return any(dec.get("status") in kinds and not all(
             self._reaches(d, r, pid, self.part_lines[pid][i]) for r in self._expand(d, dec.get("rules")))
             for i, (_, dec) in enumerate(self.cells.get(pid, {}).get(d, [])))
 
@@ -584,7 +586,8 @@ class Audit:
                f"**In short.** {every({'rulebook', 'flag'})} pieces are in every district's rulebook (or flagged for "
                f"review): {', '.join('§' + p + (' (mapped)' if any(self.mapped_only(p, d) for d in ds) else '') for p in everywhere({'rulebook', 'flag'}))}; "
                "(mapped) = some part is covered only by Gordium's stated mapping, not a citation. "
-               f"{every({'not_applicable'})} don't apply in any of these districts; {every({'parked'})} are "
+               f"{every({'not_applicable'})} don't apply in any of these districts or are pointers with nothing of their "
+               f"own to check; {every({'parked'})} are "
                f"parked on the later list; {anywhere} are MISSING in at least one district. Of the gaps, {len(top)} are "
                "real rules that should exist (high or medium, listed first below); the rest are narrow or cautious "
                "gaps, how a property is run, or other kinds of project. Nothing here is a rule written in this table: "
@@ -594,7 +597,8 @@ class Audit:
                "- **flag (needs review)**: the rulebook flags it, so the result says NEEDS REVIEW (a person judges it);",
                "- **parked**: on Ben's later list;",
                "- **open question**: waiting on the architects or the City;",
-               "- **not applicable**: the law itself keeps it out of the district (with the law's words);",
+               "- **not applicable**: the law itself keeps it out of the district, or it is a pointer with no "
+               "requirement of its own (the reason says which, with the law's words);",
                "- **MISSING**: nothing covers it.", "",
                "A piece with several parts takes its worst part's status (MISSING first, then open question, parked, "
                "flag, in the rulebook, not applicable), so a cell never says more is covered than its weakest part. "

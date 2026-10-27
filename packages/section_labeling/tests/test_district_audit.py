@@ -469,7 +469,7 @@ def test_a_via_piece_must_name_this_piece(decisions):
 def test_page_furniture_is_not_the_law(decisions):
     found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
         "status": "not_applicable", "why": "w", "page": 2, "quote": "City of Ithaca"}}]))
-    assert any("from another section of the law (front_matter)" in p for p in found)    # p.2's text, not this piece
+    assert any("from another piece of the law (front_matter)" in p for p in found)    # p.2's text, not this piece
     found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
         "status": "not_applicable", "why": "w", "page": 67, "quote": "City of Ithaca, NY"}}]))
     assert any("only page furniture" in p for p in found)                                # p.67's running header
@@ -489,7 +489,7 @@ def test_a_quote_from_a_neighbouring_numbered_section_is_refused(decisions):
     found = problems(with_piece(decisions, "325-29", [{"what": "x", "all": {
         "status": "not_applicable", "why": "w", "page": 77,
         "quote": "Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3"}}]))
-    assert any("from another section of the law (325-29.2A)" in p for p in found)
+    assert any("from another piece of the law (325-29.2A)" in p for p in found)
 
 
 def test_not_applicable_quotes_only_chapter_325_or_its_chart(decisions):
@@ -497,3 +497,33 @@ def test_not_applicable_quotes_only_chapter_325_or_its_chart(decisions):
         "status": "not_applicable", "why": "w", "file": "ordinance_no_2025-12_southside_form_districts.pdf",
         "page": 1, "quote": "ORDINANCE"}}]))
     assert any("quotes Chapter 325 or its chart, not ordinance_no_2025-12" in p for p in found)
+
+
+
+# Review round 7.
+
+@pytest.mark.parametrize("pid,source,quote", [
+    ("325-3B:standard_canopy", "325-3B:occupant", "In R-2c Zones only"),
+    ("325-8E", "325-8D", "Additional restrictions in the CBD districts"),
+    ("325-16B", "325-16D", "in any U-1 District")])
+def test_a_sibling_subsections_scope_isnt_this_pieces(decisions, pid, source, quote):
+    found = problems(with_piece(decisions, pid, [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "piece": source, "quote": quote}}]))
+    assert any(f"from another piece of the law ({source})" in p for p in found)
+
+
+def test_a_piece_named_in_scope_from_may_quote_the_piece_that_sets_its_scope(decisions):
+    data = copy.deepcopy(decisions)
+    del data["scope_from"]["325-29.1E"]
+    assert any(p.startswith("325-29.1E part 1 (R-1a): the quote is from another piece") for p in problems(data))
+
+
+def test_mapped_shows_when_any_named_rule_is_mapped(built):
+    """§325-18A: the yard rules cite it; lot coverage is mapped."""
+    assert built.mapped_only("325-18A", "R-1b") and built._short("325-18A", "R-1b").endswith("(mapped)")
+
+
+def test_not_applicable_says_it_includes_pointers(built):
+    """§325-7A and §325-8B(7)/(8)/(10) apply everywhere but add nothing of their own: the legend says so."""
+    head = built.render().split("## The table")[0]
+    assert "or it is a pointer with no requirement of its own" in head and "or are pointers" in head
