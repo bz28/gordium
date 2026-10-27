@@ -1,0 +1,91 @@
+{
+ "claims": {
+  "1 each floor block on its own sublayer Gordium::Massing::Floor N, named Floor N": {
+   "ok": true,
+   "detail": [
+    [
+     "Gordium::Massing::Floor 1",
+     "Floor 1"
+    ],
+    [
+     "Gordium::Massing::Floor 2",
+     "Floor 2"
+    ],
+    [
+     "Gordium::Massing::Floor 3",
+     "Floor 3"
+    ]
+   ]
+  },
+  "1 the house one group (a Move moves it whole)": {
+   "ok": true,
+   "detail": [
+    [
+     0
+    ]
+   ]
+  },
+  "1 Gordium::Massing::Roof made": {
+   "ok": true,
+   "detail": null
+  },
+  "2 the check measures it: the stories counted from the floors on their sublayers": {
+   "ok": false,
+   "detail": null
+  },
+  "2 the house is named 'the starting house' (its floors on sublayers, one building)": {
+   "ok": false,
+   "detail": null
+  },
+  "3 the note: the largest house that complies even if the tax-map lines are 2'-0\" off, what limited it, and Use my survey\u2026 for the full size": {
+   "ok": true,
+   "detail": "as first drawn, the largest house that complies even if the tax-map lines are 2'-0\" off; limited by the yards (front 25'-0\", sides 10'-0\", rear 25'-5 1/2\"). Use my survey\u2026 for the full size."
+  },
+  "4 the envelope drawn is the cautious one": {
+   "ok": false,
+   "detail": {
+    "lines": false,
+    "outline": false
+   }
+  },
+  "5 Hide starting house hides every floor's sublayer, showing it shows them, none left locked": {
+   "ok": true,
+   "detail": {
+    "off": [
+     false,
+     false,
+     false
+    ],
+    "on": [
+     true,
+     true,
+     true
+    ],
+    "unlocked": [
+     true,
+     true,
+     true
+    ]
+   }
+  }
+ },
+ "floors": [
+  [
+   "Gordium::Massing::Floor 1",
+   "Floor 1"
+  ],
+  [
+   "Gordium::Massing::Floor 2",
+   "Floor 2"
+  ],
+  [
+   "Gordium::Massing::Floor 3",
+   "Floor 3"
+  ]
+ ],
+ "stories_row": null,
+ "header": {},
+ "note": "as first drawn, the largest house that complies even if the tax-map lines are 2'-0\" off; limited by the yards (front 25'-0\", sides 10'-0\", rear 25'-5 1/2\"). Use my survey\u2026 for the full size.",
+ "passed": 5,
+ "ok": false
+}

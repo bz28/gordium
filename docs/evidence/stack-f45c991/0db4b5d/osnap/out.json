@@ -1,0 +1,118 @@
+{
+ "claims": {
+  "1 a Gordium::Envelope layer, locked": {
+   "ok": true,
+   "detail": 9
+  },
+  "1 the cautious outline (closed, solid) and the outline as drawn (closed, dashed)": {
+   "ok": true,
+   "detail": [
+    "buildable outline (as drawn, tax map)",
+    "buildable outline (cautious)",
+    "required line: Front yard",
+    "required line: Rear yard",
+    "required line: Rear yard",
+    "required line: Side yard, Northeast",
+    "required line: Side yard, Southwest"
+   ]
+  },
+  "1 a required line for every measured yard, dashed on this tax-map lot": {
+   "ok": true,
+   "detail": {
+    "curves": 5,
+    "yards": 4
+   }
+  },
+  "1 the cautious outline 2'-0\" inside the one as drawn": {
+   "ok": true,
+   "detail": [
+    2.0,
+    2.012,
+    2.009,
+    2.006,
+    2.002,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+   ]
+  },
+  "2 real curves Osnap can snap to: in the document, visible, locked (not reference geometry)": {
+   "ok": true,
+   "detail": 7
+  },
+  "3 a second check replaces them, never doubles them": {
+   "ok": true,
+   "detail": [
+    7,
+    7
+   ]
+  },
+  "4 Undo recording is off while they are replaced (the architect's Undo never stops on them)": {
+   "ok": true,
+   "detail": [
+    false
+   ]
+  },
+  "5 'Show buildable envelope' off hides the layer; on shows it": {
+   "ok": true,
+   "detail": true
+  },
+  "5 replaced, never piled up, with the layer hidden and with 'Gordium' locked": {
+   "ok": true,
+   "detail": [
+    7,
+    7,
+    7
+   ]
+  },
+  "6 never measured: none is a lot candidate or a building": {
+   "ok": true,
+   "detail": 7
+  }
+ },
+ "curves": [
+  "buildable outline (as drawn, tax map)",
+  "buildable outline (cautious)",
+  "required line: Front yard",
+  "required line: Rear yard",
+  "required line: Rear yard",
+  "required line: Side yard, Northeast",
+  "required line: Side yard, Southwest"
+ ],
+ "gaps_ft": [
+  2.0,
+  2.012,
+  2.009,
+  2.006,
+  2.002,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0,
+  2.0
+ ],
+ "passed": 10,
+ "ok": true
+}

@@ -1,0 +1,143 @@
+{
+ "claims": {
+  "1 the house is one closed solid": {
+   "ok": true,
+   "detail": true
+  },
+  "1 the left side yard needs review (to the wall it complies, to the cantilever not)": {
+   "ok": false,
+   "detail": {}
+  },
+  "1 its pieces are amber only": {
+   "ok": false,
+   "detail": []
+  },
+  "1 the cantilever is coloured (1 ft out from the wall, 15 ft up)": {
+   "ok": false,
+   "detail": []
+  },
+  "1 the air under it is not (1 ft out from the wall, 5 ft up)": {
+   "ok": true,
+   "detail": []
+  },
+  "2 the house is one closed solid": {
+   "ok": true,
+   "detail": true
+  },
+  "2 the left side yard does not comply": {
+   "ok": false,
+   "detail": {}
+  },
+  "2 red and amber both drawn for it": {
+   "ok": false,
+   "detail": []
+  },
+  "2 in the cantilever (2 ft out from the wall, 15 ft up): red": {
+   "ok": false,
+   "detail": {
+    "point": "5.8883572387695935,46.48590564727783,15",
+    "from_line_ft": 5.265,
+    "got": []
+   }
+  },
+  "2 under the cantilever (2 ft out, 5 ft up): nothing": {
+   "ok": true,
+   "detail": {
+    "point": "5.8883572387695935,46.48590564727783,5",
+    "from_line_ft": 5.265,
+    "got": []
+   }
+  },
+  "2 the house's own strip within 8 ft of the line (5 ft up): red": {
+   "ok": false,
+   "detail": {
+    "point": "8.248357238769543,46.48590564727783,5",
+    "from_line_ft": 7.624,
+    "got": []
+   }
+  },
+  "2 past 8 ft (10 ft from the line, 5 ft up): amber": {
+   "ok": false,
+   "detail": {
+    "point": "10.618357238769493,46.48590564727783,5",
+    "from_line_ft": 9.994,
+    "got": []
+   }
+  },
+  "3 the house is one closed solid": {
+   "ok": true,
+   "detail": true
+  },
+  "3 the height row needs colour": {
+   "ok": false,
+   "detail": {}
+  },
+  "3 its pieces in its colour": {
+   "ok": false,
+   "detail": []
+  },
+  "3 near the ridge (42 ft up) coloured": {
+   "ok": false,
+   "detail": []
+  },
+  "3 the sky over the slope (44 ft up where the roof is 38 ft) not": {
+   "ok": true,
+   "detail": []
+  },
+  "3 the height pieces' volume is the wedge above the limit (within 5 %)": {
+   "ok": false,
+   "detail": {
+    "volume": 0.0,
+    "wedge": null,
+    "limit": null
+   }
+  },
+  "4 the vault house is one closed solid, its roof curved": {
+   "ok": true,
+   "detail": true
+  },
+  "4 the height row needs review (the curved vault is not measured), never complies": {
+   "ok": false,
+   "detail": {}
+  },
+  "4 coloured just inside each wall above the limit (+0.5 ft) and under the crown (41 ft)": {
+   "ok": false,
+   "detail": [
+    []
+   ]
+  },
+  "4 nothing coloured below the limit (1 ft under it, mid-plan)": {
+   "ok": true,
+   "detail": []
+  },
+  "4 the coloured volume is the vault's own part above the limit (within 5 %)": {
+   "ok": false,
+   "detail": {
+    "volume": 0.0,
+    "above_limit": 6822.346777966624
+   }
+  }
+ },
+ "house_box_ft": [
+  12.891689252023008,
+  48.80835723876953,
+  27.819238662719727,
+  65.15257263183594,
+  0.0
+ ],
+ "1": {
+  "pieces": [],
+  "wall_ft": 12.26738574844348,
+  "inside": "11.88835723877046,46.48590564727783,15",
+  "under": "11.88835723877046,46.48590564727783,5"
+ },
+ "2": {
+  "pieces": [],
+  "wall_ft": 7.267708637143622
+ },
+ "3": {
+  "pieces": []
+ },
+ "passed": 8,
+ "ok": false
+}

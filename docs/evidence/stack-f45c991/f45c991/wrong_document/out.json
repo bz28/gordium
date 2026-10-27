@@ -1,0 +1,49 @@
+{
+ "leftovers_closed": [],
+ "front": "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_test_docs/wrong_doc_Small_Objects_-_Millimeters.3dm",
+ "docs": {
+  "blank_laneC.3dm": {
+   "layer": null,
+   "objects": 0
+  },
+  "wrong_doc_Large_Objects_-_Feet.3dm": {
+   "layer": null,
+   "objects": 0
+  },
+  "wrong_doc_Large_Objects_-_Meters.3dm": {
+   "layer": null,
+   "objects": 0
+  },
+  "wrong_doc_Small_Objects_-_Millimeters.3dm": {
+   "layer": {
+    "visible": true,
+    "locked": false
+   },
+   "objects": 3,
+   "box_model": [
+    3929.4,
+    8479.3,
+    0.0,
+    14876.8,
+    19858.5,
+    10668.0
+   ],
+   "box_feet": [
+    12.89,
+    27.82,
+    0.0,
+    48.81,
+    65.15,
+    35.0
+   ],
+   "in_view": {
+    "Perspective": true,
+    "Top": true,
+    "Front": true,
+    "Right": true
+   }
+  }
+ },
+ "active_after": "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_test_docs/wrong_doc_Small_Objects_-_Millimeters.3dm",
+ "house_only_in_front": true
+}
