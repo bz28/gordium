@@ -226,3 +226,6 @@ Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from c
     - Nudge the house past one limit, and check that exactly the right rule fails with the right numbers.
   - Deep run, 3 families (R-1, R-2, R-3/RU): a full real model with every answer worked by hand (Lane B), then run in Rhino (Lane C).
 - Lane balancing (Ben): when a lane finishes early, the coordinator moves the next unstarted queue item to it, matched to the item's model. Rhino runs stay on the single Rhino lane, one at a time. Max 3 agents.
+
+## 2026-10-27 — Lane C (Rhino)
+- #33 address-autocomplete 7cc6e16 (wip/address-autocomplete-rhino-7cc6e16): root cause was list_row_px calling RectOfRow, absent on the Mac table (RectForRow(IntPtr)); fixed, autocomplete 15/15, progress_cancel 29/29 (Rhino in front), 2 review rounds clean. #37 use-questions 77202bc: 5/5 (wip/use-questions-rhino-77202bc). massing-floors 5f0c11a: massing 7/8 (was 5/8; claim 2 wants header "main" = "the starting house" but the header names a main building only when there are several: likely a stale script expectation, not fixed), offending-part 23/23 (was 8/23) (wip/massing-floors-rhino-5f0c11a, -offending).
