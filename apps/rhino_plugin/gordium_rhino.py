@@ -326,6 +326,13 @@ def current_facts(doc):
 
 
 def save_facts(doc, facts):
+    if not logic.allowed("save_facts", _box_open()):   # nothing writes the facts under an open box (Draw writes its own)
+        say(logic.BOX_BUSY)
+        return
+    _save_facts(doc, facts)
+
+
+def _save_facts(doc, facts):
     doc.Strings.SetString(SECTION, ENTRY, json.dumps(facts))
 
 
@@ -482,6 +489,9 @@ def draw_scene(o, e):
     if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
         pts = o.lot_outline
         d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
+    guide = STATE.get("lookup_guide")
+    if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
+        d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
     if o.confirm is not None:
         lot, lines, main = o.confirm
         if lot is not None:
@@ -862,7 +872,12 @@ def _prism(doc, outline, base, top):
 
 
 def _actions():
-    """What the panel's buttons do (gordium_ui.make_panel)."""
+    """What the panel's buttons do (gordium_ui.make_panel): each one gated, so while a start box is open none of them
+    touches the model (rhino_logic.gate_actions)."""
+    return logic.gate_actions(PANEL_ACTIONS(), _box_open, say)
+
+
+def PANEL_ACTIONS():
     return {"zoom": zoom_to, "report": open_report, "envelope": set_envelope, "edit_site": edit_facts,
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check,
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
@@ -938,6 +953,11 @@ def _fill_dock(host, serial):
     host.Content = label
 
 
+def _box_open():
+    gate = STATE.get("box_gate")
+    return bool(gate is not None and gate.open)
+
+
 def panel():
     """The Gordium panel, made once and shown: docked in Rhino's own panels (Mac and Windows), or a floating
     window if the panel couldn't be registered."""
@@ -1006,7 +1026,8 @@ def set_labels(on):
         say(logic.NO_DOCUMENT)
         return
     state = dict(_ui_state(doc), show_labels=bool(on))
-    _save_ui_state(doc, state)
+    with logic.undo_step(doc, logic.UNDO_WORDS["labels"]):
+        _save_ui_state(doc, state)
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(state)
     doc.Views.Redraw()
 
@@ -1024,7 +1045,8 @@ def _ui_state(doc):
 
 
 def _save_ui_state(doc, state):
-    doc.Strings.SetString(SECTION, UI_ENTRY, json.dumps(state))
+    """The box's choices into the .3dm: only what may be kept (rhino_logic.storable_ui: never a session key)."""
+    doc.Strings.SetString(SECTION, UI_ENTRY, json.dumps(logic.storable_ui(state)))
 
 
 def pick_survey():
@@ -1045,9 +1067,17 @@ def pick_survey():
         return
     facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
     facts["lot_surveyed"] = True
-    _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
-    save_facts(doc, facts)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["survey"]):     # one Ctrl+Z puts it all back (asked first, outside)
+        saved_ui = logic.settle(_ui_state(doc), "lot")
+        _save_ui_state(doc, saved_ui)
+        left = logic.unsettled(saved_ui)
+        if left:
+            facts["unsettled"] = left
+        else:
+            facts.pop("unsettled", None)
+        _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
+        save_facts(doc, facts)
+        run_check(doc, report=False)
 
 
 def _grade_points(doc, finished=False):
@@ -1124,13 +1154,44 @@ def enter_rooms(needs):
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
-    save_facts(doc, logic.update_counts(facts, answers))
-    run_check(doc, report=False)
-    refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
-    if refused:                         # fewer stories than the floors drawn: the measuring refuses it, so is it
+    new = logic.update_counts(facts, answers)
+    checked = "stories" in answers     # fewer stories than the floors drawn: the measuring refuses it, so a count
+    if checked:                         # is tried first, unrecorded and put back as stored: never a step of nothing
+        refused = _tried(doc, new)
+        if refused:
+            run_check(doc, report=False)           # the facts as stored, checked again
+            say(refused)
+            return
+    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):
+        save_facts(doc, new)
+    if not checked:                     # (tried: its check was of these very facts)
+        run_check(doc, report=False)
+
+
+def _tried(doc, facts):
+    """The measuring's words if it refuses `facts` (else None): checked with them saved while undo recording is off,
+    then the facts put back exactly as stored, so nothing is left changed and no undo step made (the last check is
+    of `facts`: the caller checks again if it doesn't keep them)."""
+    stored, recording = doc.Strings.GetValue(SECTION, ENTRY), doc.UndoRecordingEnabled
+    doc.UndoRecordingEnabled = False
+    try:
         save_facts(doc, facts)
         run_check(doc, report=False)
-        say(refused)
+        return logic.refused_stories((STATE.get("last") or {}).get("items"))
+    except Exception:
+        _put_back(doc, stored)
+        run_check(doc, report=False)               # never a result left on screen for facts not kept
+        raise
+    finally:
+        _put_back(doc, stored)
+        doc.UndoRecordingEnabled = recording         # as it was (never turned on by Gordium)
+
+
+def _put_back(doc, stored):
+    if stored is None:
+        doc.Strings.Delete(SECTION, ENTRY)
+    else:
+        doc.Strings.SetString(SECTION, ENTRY, stored)
 
 
 def pick_main_building():
@@ -1150,8 +1211,11 @@ def pick_main_building():
         return
     if picked:
         facts["main_building"] = picked
-        save_facts(doc, facts)
-    run_check(doc, report=False)
+        with logic.undo_step(doc, logic.UNDO_WORDS["main"]):
+            save_facts(doc, facts)
+            run_check(doc, report=False)
+    else:
+        run_check(doc, report=False)
 
 
 def add_to_check(ids):
@@ -1161,14 +1225,15 @@ def add_to_check(ids):
     if not ids:
         say("Nothing selected to add to the check: pick the objects in the row first.")
         return
-    index = _layer(doc, LAYERS["building"])
-    for i in ids or []:
-        o = _find(doc, i)
-        if o is not None:
-            attrs = o.Attributes.Duplicate()
-            attrs.LayerIndex = index
-            doc.Objects.ModifyAttributes(o, attrs, True)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["add"]):        # the Building layer made, if new, in the same step
+        index = _layer(doc, LAYERS["building"])
+        for i in ids or []:
+            o = _find(doc, i)
+            if o is not None:
+                attrs = o.Attributes.Duplicate()
+                attrs.LayerIndex = index
+                doc.Objects.ModifyAttributes(o, attrs, True)
+        run_check(doc, report=False)
 
 
 def _not_included(doc, lot):
@@ -1265,23 +1330,25 @@ def this_is_the_ground(ids):
     if not ids:
         say("Nothing selected to mark as the ground: pick the objects in the row first.")
         return
-    state = _ui_state(doc)
-    state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
-    _save_ui_state(doc, state)
-    n = len(state["ground_ids"])
-    _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
-                logic.ENTERED)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["ground"]):
+        state = _ui_state(doc)
+        state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
+        _save_ui_state(doc, state)
+        n = len(state["ground_ids"])
+        _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
+                    logic.ENTERED)
+        run_check(doc, report=False)
 
 
 def not_the_ground():
     """Undo "This is the ground": every object marked so is checked again (counted as left out until added)."""
     doc = Rhino.RhinoDoc.ActiveDoc
-    state = _ui_state(doc)
-    state.pop("ground_ids", None)
-    _save_ui_state(doc, state)
-    _set_source(doc, "ground_marked", None, None)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["not_ground"]):
+        state = _ui_state(doc)
+        state.pop("ground_ids", None)
+        _save_ui_state(doc, state)
+        _set_source(doc, "ground_marked", None, None)
+        run_check(doc, report=False)
 
 
 def _set_source(doc, key, value, source, confirmed_by="you"):
@@ -1292,7 +1359,7 @@ def _set_source(doc, key, value, source, confirmed_by="you"):
         sources.pop(key, None)
     else:
         sources[key] = {"value": value, "source": source, "confirmed_by": confirmed_by,
-                        "date": time.strftime("%Y-%m-%d")}
+                        "date": logic.city_day()}
     doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
 
 
@@ -1381,7 +1448,7 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
         amp = rg.AreaMassProperties.Compute(lot.Geometry)
         area = _feet_area(doc, amp.Area) if amp else None
     zone_fact = sources.get("zone") or {}
-    confirmed = logic.district_confirmed(mode, zone_fact, facts.get("zone"))
+    confirmed = logic.district_confirmed(mode, zone_fact, facts.get("zone")) and not saved_ui.get("_reconfirm")
     kind = saved_ui.get("ground_kind") or {"spot": "spot", "terrain": "terrain", "finished_spots": "regrade"}.get(
         facts.get("grade_from"), "flat")
     points = _grade_points(doc, kind == "regrade")      # the set the ground row names, never both mixed
@@ -1389,23 +1456,36 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
         kind = "flat"
     zs = [p[2] for p in points]
     span = (_ft_text(min(zs)) + " to " + _ft_text(max(zs))) if zs and kind in ("spot", "regrade") else ""
+    ground_source = saved_ui.get("ground_source") if kind == "spot" else None
     default = "the sample project" if saved_ui.get("from_sample") else logic.SUGGESTED
 
-    def source(key, fallback=None):                    # what was saved at the last Draw, else where it came from
-        return (sources.get(key) or {}).get("source") or fallback or default
+    def source(key, fallback=None):                    # a lookup's (this session), what was saved at the last Draw,
+        return saved_ui.get(key + "_source") or (sources.get(key) or {}).get("source") or fallback or default
 
     return {"address": facts.get("address") or "", "address_source": source("address"),
-            "zone": facts.get("zone"), "zone_source": source("zone", logic.ENTERED),
+            "zone": facts.get("zone"),          # no district: no source (never the last Draw's "suggested")
+            "zone_source": source("zone", logic.ENTERED) if facts.get("zone") else None,
+            "zone_said": saved_ui.get("_zone_said"),     # the lookup's words, this session only
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
             # the street's name only with its street line (a survey outline or a corner answer drops the line:
-            # review round 3, F6)
-            "street_name": saved_ui.get("street_name") if facts.get("street_line") else None, "street_source": saved_ui.get("street_source") or source("street"),
-            "ground": {"kind": kind, "count": len(points), "range": span},
+            # review round 3, F6); this session's lookup words first, then the name saved at the last Draw
+            "street_name": (saved_ui.get("_street_name") or saved_ui.get("street_name") or facts.get("street_name"))
+            if facts.get("street_line") else None,
+            "street_name_saved": None if saved_ui.get("_street_name") or not facts.get("street_line")
+            else saved_ui.get("street_name"),
+            "street_source": saved_ui.get("street_source") or source("street"),
+            "ground": {"kind": kind, "count": len(points), "range": span, "source": ground_source},
+            "ground_fall": saved_ui.get("ground_fall"),     # the looked-up ground's fall: said, never used (MVP)
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
-            "corner_source": source("corner_lot"), "zones_found": facts.get("zones_found") or [],
-            "design_buffer": saved_ui.get("design_buffer") or "0'-0\""}
+            "corner_source": saved_ui.get("corner_source") or source("corner_lot"),
+            "zones_found": saved_ui.get("_zones_found") or [],
+            "design_buffer": saved_ui.get("design_buffer") or "0'-0\"",
+            "lot_source": saved_ui.get("lot_source"), "lookup": saved_ui.get("_lookup") or {},
+            "doubts": saved_ui.get("doubts") or {}, "live": saved_ui.get("_live") or {},
+            "checked": list(saved_ui.get("checked") or []), "lot_missing": lot is None,
+            "_poll": _lookup_poll if (saved_ui.get("_lookup") or {}).get("looking") else None}
 
 
 def _ft_text(feet):
@@ -1429,21 +1509,174 @@ def _apply_box(doc, facts, state, saved_ui):
             facts.pop(key, None)
         else:
             facts[key] = value
-    saved_ui = dict(saved_ui, ground_kind=(state.get("ground") or {}).get("kind") or "flat",
-                    no_regrading=bool(state.get("no_regrading")), design_buffer=state.get("design_buffer") or "0'-0\"")
+    saved_ui = dict(logic.saved_sources(saved_ui, state), ground_kind=(state.get("ground") or {}).get("kind") or "flat",
+                    no_regrading=bool(state.get("no_regrading")), design_buffer=state.get("design_buffer") or "0'-0\"",
+                    checked=list(state.get("checked") or []))
+    left = logic.unsettled(saved_ui)                # looked-up facts found doubtful, not yet checked or changed
+    if left:
+        facts["unsettled"] = left
+    else:
+        facts.pop("unsettled", None)
     return facts, saved_ui
 
 
-def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
+def _place_spots(doc, prompt, layer_path=GRADE_LAYER, changing=lambda: None):
+    """Each click places a spot grade; Enter or Esc when done. The ids of the points placed (none: nothing changed).
+    `changing`: called before the model is first changed (the start box's undo step begins there)."""
+    changing()
     layer = _layer(doc, layer_path)
-    while True:                                      # each click places a spot grade; Enter when done
+    placed = []
+    while True:
         rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, True)
         if rc != Rhino.Commands.Result.Success:
             break
         attrs = Rhino.DocObjects.ObjectAttributes()
         attrs.LayerIndex = layer
-        doc.Objects.AddPoint(point, attrs)
+        placed.append(str(doc.Objects.AddPoint(point, attrs)))
         doc.Views.Redraw()
+    return placed
+
+
+class RhinoTable:
+    """The model as rhino_logic.BoxSession and apply_lookup use it: a few plain calls on one document. `step`: the
+    undo step a start box's edits go in (its first edit begins it, unless one is held; the box's caller ends it with
+    the facts saved after Draw: the whole box one step, its Cancel's rollback inside it too). None: recovery's own."""
+
+    def __init__(self, doc, step=None):
+        self.doc, self.step = doc, step
+
+    def _changing(self):
+        if self.step and not STATE.get("undo"):
+            _begin_undo(self.doc, self.step)
+
+    def exists(self, object_id):
+        return _find(self.doc, object_id or "") is not None
+
+    def delete(self, object_id):
+        o = _find(self.doc, object_id)
+        if o is not None:
+            self._changing()
+            self.doc.Objects.Delete(o, True)
+
+    def layer_of(self, object_id):
+        return self.doc.Layers[_find(self.doc, object_id).Attributes.LayerIndex].FullPath
+
+    def _move(self, object_id, layer_path, held_from):
+        o = _find(self.doc, object_id)
+        self._changing()
+        attrs = o.Attributes.Duplicate()
+        attrs.LayerIndex = _layer(self.doc, layer_path)
+        attrs.SetUserString(logic.HELD_FROM, held_from)
+        self.doc.Objects.ModifyAttributes(o, attrs, True)
+
+    def hold(self, object_id, token):
+        """Onto the hidden holding layer, the layer it came from and the session holding it written on it (for
+        Cancel, and for a Rhino that closed mid-session: recover_held)."""
+        self._move(object_id, logic.HOLDING_LAYER, self.layer_of(object_id))
+        self._mark(object_id, logic.HELD_BY, token)
+        holding = self.doc.Layers.FindByFullPath(logic.HOLDING_LAYER, -1)
+        if holding >= 0 and self.doc.Layers[holding].IsVisible:
+            self.doc.Layers[holding].IsVisible = False
+
+    def release(self, object_id, layer_path):
+        self._move(object_id, layer_path, None)
+        self._mark(object_id, logic.HELD_BY, None)
+
+    def mark_added(self, object_id, token):
+        self._mark(object_id, logic.ADDED_BY, token)
+
+    def clear_mark(self, object_id):
+        self._mark(object_id, logic.ADDED_BY, None)
+
+    def _mark(self, object_id, key, value):
+        o = _find(self.doc, object_id)
+        if o is not None:
+            self._changing()
+            attrs = o.Attributes.Duplicate()
+            attrs.SetUserString(key, value)
+            self.doc.Objects.ModifyAttributes(o, attrs, True)
+
+    def added_objects(self):
+        every = Rhino.DocObjects.ObjectEnumeratorSettings()
+        every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True
+        return [(str(o.Id), o.Attributes.GetUserString(logic.ADDED_BY)) for o in self.doc.Objects.GetObjectList(every)
+                if o.Attributes.GetUserString(logic.ADDED_BY)]
+
+    def held_objects(self):
+        index = self.doc.Layers.FindByFullPath(logic.HOLDING_LAYER, -1)
+        if index < 0:
+            return []
+        return [(str(o.Id), o.Attributes.GetUserString(logic.HELD_FROM) or LAYERS["lot"],
+                 o.Attributes.GetUserString(logic.HELD_BY))
+                for o in self.doc.Objects.FindByLayer(self.doc.Layers[index]) or []]
+
+    def layer_names(self):
+        return [layer.FullPath for layer in self.doc.Layers if not layer.IsDeleted]
+
+    def remove_layer_if_empty(self, path):
+        index = self.doc.Layers.FindByFullPath(path, -1)
+        if index < 0:
+            return
+        layer = self.doc.Layers[index]
+        if not (self.doc.Objects.FindByLayer(layer) or []) and not layer.GetChildren():
+            self._changing()
+            self.doc.Layers.Delete(index, True)
+
+    def save_views(self):
+        return [(v.ActiveViewportID, Rhino.DocObjects.ViewportInfo(v.ActiveViewport)) for v in self.doc.Views]
+
+    def restore_views(self, saved):
+        for view_id, info in saved or []:
+            view = self.doc.Views.Find(view_id)
+            if view is not None:
+                view.ActiveViewport.SetViewProjection(info, True)
+        self.doc.Views.Redraw()
+
+    def add_lot(self, ring, name):
+        self._changing()
+        return str(_add_lot(self.doc, {"lot": ring, "lot_name": name}))
+
+    def add_spot(self, p):
+        self._changing()
+        attrs = Rhino.DocObjects.ObjectAttributes()
+        attrs.LayerIndex = _layer(self.doc, GRADE_LAYER)
+        return str(self.doc.Objects.AddPoint(_model_point(self.doc, p[:2], p[2]), attrs))
+
+    def ground_points(self):
+        ids = []
+        for path in (GRADE_LAYER, FINISHED_LAYER):
+            index = self.doc.Layers.FindByFullPath(path, -1)
+            if index >= 0:
+                ids += [str(o.Id) for o in self.doc.Objects.FindByLayer(self.doc.Layers[index]) or []
+                        if isinstance(o.Geometry, rg.Point)]
+        return ids
+
+
+def _recover(doc):
+    """Objects a start box held when Rhino closed mid-session: back where they were (rhino_logic.recover_held)."""
+    said = logic.recovery_message(*logic.recover_held(RhinoTable(doc)))   # never a box still open
+    if said:
+        say(said[0].upper() + said[1:] + ".")
+
+
+def _draw_lot(doc, changing=lambda: None):
+    """Draw my lot…: click each corner (Enter closes it, Esc: nothing drawn). The new closed outline's id, or None.
+    `changing`: called before the model is changed (the start box's undo step begins there)."""
+    corners = []
+    while True:
+        rc, point = Rhino.Input.RhinoGet.GetPoint(
+            "Click the next corner of your lot (Enter closes it, at least 3)" if corners else
+            "Click the first corner of your lot (the dashed guide is the City's outline)", True)
+        if rc != Rhino.Commands.Result.Success:
+            break
+        corners.append(point)
+    if len(corners) < 3 or rc == Rhino.Commands.Result.Cancel:
+        return None
+    changing()
+    attrs = Rhino.DocObjects.ObjectAttributes()
+    attrs.LayerIndex = _layer(doc, LAYERS["lot"])
+    attrs.Name = "Lot · drawn by you"
+    return str(doc.Objects.AddCurve(rg.PolylineCurve(corners + [corners[0]]), attrs))
 
 
 def _get_point(prompt):
@@ -1488,135 +1721,343 @@ def _outline(doc, lot):
     return [[_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]] for a, b in _segments(lot.Geometry)]
 
 
-def _box_pick(doc, what, facts, saved_ui):
-    """One pick the start box asked for, with the box hidden. Esc or Enter: nothing changes."""
+def _box_pick(doc, what, facts, saved_ui, session):
+    """One pick the start box asked for, with the box hidden. Esc or Enter: nothing changes (Esc at any prompt,
+    rhino_logic.pick_or_nothing). Every model edit goes through the box's session."""
     try:
-        if what == "street" and facts.get("corner_lot") is True:   # a corner lot: every line on a street
-            lot = _find(doc, facts.get("lot_id") or "")
-            picks, runs = [], []
-            outline = _outline(doc, lot) if lot is not None else []
-            names = logic.outline_names(outline, facts.get("street_line"), facts.get("street_ids"))
-            while lot is not None:
-                rc, point = _get_point(logic.street_pick_prompt(True, len(picks)))
-                if rc == Rhino.Commands.Result.Cancel:               # Esc: nothing changes, the clicks so far too
-                    raise Cancelled
-                if rc != Rhino.Commands.Result.Success:              # Enter: done
-                    break
-                a, b = _clicked_piece(doc, lot, point)
-                line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
-                # the whole street that piece is on, never round a corner; said, and an unclear end asked; only a
-                # click that kept a street counts as picked (round 12)
-                grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)
-                say(logic.so_far(said) if grown != runs else said)    # (kept only at Enter: so far)
-                if grown != runs:
-                    picks.append(line)
-                runs = grown
-            lines, ids = logic.street_lines_of(outline, runs, names, picks)
-            if lines:                    # (every click refused: the street lines stay as they were)
-                logic.set_street_lines(facts, lines, ids)
-                saved_ui.pop("street_name", None)                    # (no one name for them)
-                saved_ui["street_source"] = logic.ENTERED
-        elif what == "street":
-            lot = _find(doc, facts.get("lot_id") or "")
-            if lot is not None:
-                rc, point = _get_point(logic.street_pick_prompt(False, 0))
-                if rc == Rhino.Commands.Result.Success:
-                    a, b = _clicked_piece(doc, lot, point)
-                    picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
-                    refused = logic.refused_click(_outline(doc, lot), picked)   # (before asking its name: round 9)
-                    if refused:
-                        say(refused)
-                        return facts, saved_ui
-                    name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
-                                                        picked, ids=facts.get("street_ids"))   # the line's own street?
-                    if name is None:                                       # else asked, never guessed
-                        ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga
-                        ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")   # St")
-                        ask.AcceptNothing(True)
-                        got = ask.GetLiteralString()
-                        if got == Rhino.Input.GetResult.Cancel:      # Esc: nothing changes, the click neither
-                            raise Cancelled
-                        name = (ask.StringResult() or "").strip() or None \
-                            if got == Rhino.Input.GetResult.String else None
-                    told = []
-                    lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,
-                                                   outline=_outline(doc, lot), ask=_ask_street_more, said=told)
-                    say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))
-                    if not (told and told[-1]["refused"]):     # (a point clicked: everything stays as it was)
-                        logic.set_street_lines(facts, lines, ids)   # the name on the clicked line only
-                        saved_ui["street_name"] = name
-                        saved_ui["street_source"] = logic.ENTERED
-        elif what == "lot":                          # Use my survey: the surveyed outline
-            lots = _lot_candidates(doc)
-            picked = _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
-                           lots, "Lot", Rhino.DocObjects.ObjectType.Curve)
-            if picked:
-                facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
-                facts["lot_surveyed"] = True
-        elif what == "terrain":
-            go = Rhino.Input.Custom.GetObject()
-            go.SetCommandPrompt("Click the terrain surface or mesh")
-            go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter | \
-                Rhino.DocObjects.ObjectType.Mesh
-            if go.Get() == Rhino.Input.GetResult.Object:
-                saved_ui["terrain_id"] = str(go.Object(0).ObjectId)
-                saved_ui["ground_kind"] = "terrain"
-        elif what in ("spot", "regrade"):
-            _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
-                         "Click the finished ground you'll grade to, at each wall (Enter when done)",
-                         GRADE_LAYER if what == "spot" else FINISHED_LAYER)
-            saved_ui["ground_kind"] = what
-    except Cancelled:                    # Esc (the bend question, a pick): nothing changes (rounds 15, 16)
-        say(logic.ESC_STREET if what == "street" else "Esc: nothing changed")
+        return logic.pick_or_nothing(lambda: _one_pick(doc, what, dict(facts), dict(saved_ui), session),
+                                     facts, saved_ui)
     finally:
         _highlight(doc, facts)
+
+
+def _one_pick(doc, what, facts, saved_ui, session):
+    if what == "lookup":
+        saved_ui = _lookup_start(facts, saved_ui)
+    elif what == "lookup_done":
+        facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
+    else:                                      # the pick's outcome only; rhino_logic.pick_effect decides the rest
+        facts, saved_ui = logic.pick_effect(what, _pick_outcome(doc, what, facts, saved_ui, session), facts, saved_ui)
+    _highlight(doc, facts)
     return facts, saved_ui
+
+
+def _pick_outcome(doc, what, facts, saved_ui, session):
+    """What one pick gave, or None (Esc at any prompt, Enter with nothing clicked). Drawn objects go through the
+    session. The street: {"lines", "ids": the street lines worked out from the clicks (the whole street a piece is
+    on, rhino_logic.add_street_pick / pick_street, asking at an unclear end), "name": the clicked line's street};
+    rhino_logic.pick_effect sets them (through set_street_lines)."""
+    if what == "street":
+        lot = _find(doc, facts.get("lot_id") or "")
+        if lot is None:
+            return None
+        outline = _outline(doc, lot)
+        try:
+            if facts.get("corner_lot") is True:      # a corner lot: every street clicked, Enter when done
+                picks, runs = [], []
+                names = logic.outline_names(outline, facts.get("street_line"), facts.get("street_ids"))
+                while True:
+                    rc, point = _get_point(logic.street_pick_prompt(True, len(picks)))
+                    if rc == Rhino.Commands.Result.Cancel:
+                        raise Cancelled()            # Esc: nothing changes, the lines clicked so far too
+                    if rc != Rhino.Commands.Result.Success:   # Enter: done
+                        break
+                    a, b = _clicked_piece(doc, lot, point)
+                    line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+                    # the whole street that piece is on, never round a corner; said, and an unclear end asked; only
+                    # a click that kept a street counts as picked (street-run round 12)
+                    grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)
+                    say(logic.so_far(said) if grown != runs else said)
+                    if grown != runs:
+                        picks.append(line)
+                    runs = grown
+                lines, ids = logic.street_lines_of(outline, runs, names, picks)
+                return {"lines": lines, "ids": ids, "name": None} if lines else None   # (every click refused)
+            rc, point = _get_point(logic.street_pick_prompt(False, 0))
+            if rc == Rhino.Commands.Result.Cancel:
+                raise Cancelled()
+            if rc != Rhino.Commands.Result.Success:
+                return None
+            a, b = _clicked_piece(doc, lot, point)
+            picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+            refused = logic.refused_click(_outline(doc, lot), picked)   # (before asking its name: round 9)
+            if refused:
+                say(refused)
+                return None
+            name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
+                                                picked, ids=facts.get("street_ids"))   # the line's own street?
+            if name is None:                                   # else asked, never guessed
+                ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga St")
+                ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")
+                ask.AcceptNothing(True)
+                got = ask.GetLiteralString()
+                if got == Rhino.Input.GetResult.Cancel:
+                    raise Cancelled()
+                name = (ask.StringResult() or "").strip() or None if got == Rhino.Input.GetResult.String else None
+            told = []
+            lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,
+                                           outline=_outline(doc, lot), ask=_ask_street_more, said=told)
+            say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))
+            if told and told[-1]["refused"]:          # (a point clicked: everything stays as it was)
+                return None
+            return {"lines": lines, "ids": ids, "name": name}
+        except Cancelled:                            # Esc (the bend question, a pick): nothing changes
+            say(logic.ESC_STREET)
+            return None
+    if what == "lot":                            # Use my survey: the surveyed outline
+        return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
+                     _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
+    if what == "draw_lot":                       # over the City's outline (a guide, never kept)
+        drawn = _draw_lot(doc, session.table._changing)       # (in the box's one undo step)
+        session.add([drawn])
+        return drawn
+    if what == "terrain":
+        go = Rhino.Input.Custom.GetObject()
+        go.SetCommandPrompt("Click the terrain surface or mesh")
+        go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter | \
+            Rhino.DocObjects.ObjectType.Mesh
+        return str(go.Object(0).ObjectId) if go.Get() == Rhino.Input.GetResult.Object else None
+    if what in ("spot", "regrade"):
+        placed = _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
+                              "Click the finished ground you'll grade to, at each wall (Enter when done)",
+                              GRADE_LAYER if what == "spot" else FINISHED_LAYER, session.table._changing)
+        session.add(placed)
+        return placed
+    return None
 
 
 def confirm(doc, facts, options, mode="check"):
     """The start box, prefilled (spec A). Draw keeps the facts once the district is confirmed, with where each came
     from (saved beside them); a pick closes the box, picks in the model, and shows the box again with the result;
     closing it (or Esc) saves nothing (None)."""
+    gate = STATE.setdefault("box_gate", logic.BoxGate())
+    if not logic.allowed("open_box", _box_open()) or not gate.enter():   # one start box at a time
+        say(logic.BOX_BUSY)
+        return None
+    try:
+        ui.set_box_open(STATE.get("panel_parts"), True)
+        return _confirm(doc, facts, options, mode)
+    finally:
+        gate.leave()
+        ui.set_box_open(STATE.get("panel_parts"), False)
+        if STATE.get("dirty"):          # edits made while the box was open: live mode checks them at the next idle
+            STATE["dirty"] = time.time() - IDLE_SECONDS
+
+
+def _confirm(doc, facts, options, mode):
     o = overlay()
     _clear(o)                           # facts are being set: no earlier result (of any model) stays shown
     o.message = None
     _highlight(doc, facts)
+    _recover(doc)                       # anything an unfinished earlier box set aside, back first
     saved_ui = _ui_state(doc)
+    session = logic.BoxSession(RhinoTable(doc, logic.UNDO_WORDS["edit_site"]))  # this box's model edits: one step
     try:
-        if STATE.get("auto_ok"):          # scripted runs (tests, the demo): the architect ticks and draws
-            state = _box_state(doc, facts, options, saved_ui, mode)
-            if STATE.get("on_confirm"):   # ...after recording what the box shows, before the tick
-                STATE["on_confirm"](doc, facts, _describe(facts, options["uses"]), state)
-            state = dict(state, district_confirmed=True, **(STATE.get("box_overrides") or {}))
-            return _drawn(doc, facts, state, saved_ui)
-        ticked = {}                       # this box session's ticks and changed sources, kept across picks
-        while True:
-            state = dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)
-            state["_on_shown"] = STATE.get("on_box_shown")     # the dialog capture in the in-Rhino test
-            what = ui.start_box(state, options, mode)
-            if what is None:
-                return None
-            if what == "draw":
-                return _drawn(doc, facts, state, saved_ui)
-            ticked = {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
-                                            "corner_source") if k in state}   # (saved only at Draw)
-            facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
-            facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui)
-            # (nothing saved until Draw: Cancel leaves the facts and the box's choices as they were)
+        return logic.run_box(session, lambda: _box_loop(doc, facts, options, mode, saved_ui, session))
     finally:
+        _lookup_stop()
         o.confirm = None
         o.labels = []
+        STATE.pop("lookup_guide", None)
         doc.Views.Redraw()
 
 
-def _drawn(doc, facts, state, saved_ui):
-    """Draw: the facts for the checker, and every fact's source and confirmation saved in the .3dm."""
-    facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
-    _save_ui_state(doc, saved_ui)
-    sources = fact_sources(doc)            # what the box doesn't set (the ground marking) is kept
-    sources.update(logic.fact_sources(state, time.strftime("%Y-%m-%d"), confirmed=True))
-    doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
-    return facts
+def _box_loop(doc, facts, options, mode, saved_ui, session):
+    """The box until Draw (the facts) or Cancel (None); rhino_logic.run_box rolls the session back on any way out
+    but Draw's, Esc and errors included."""
+    if STATE.get("auto_ok"):          # scripted runs (tests, the demo): the architect ticks and draws
+        STATE["zones"] = options.get("zones") or []
+        for what in STATE.get("box_picks") or []:      # ...after the picks the architect would make, in order
+            state = dict(_box_state(doc, facts, options, saved_ui, mode), **(STATE.get("box_overrides") or {}))
+            facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
+            facts, saved_ui = _box_pick(doc, what, facts, saved_ui, session)
+            started = time.time()
+            while what == "lookup" and _lookup_poll() is None and time.time() - started < logic.LOOKUP_LIMIT_S + 5:
+                time.sleep(0.2)
+            if what == "lookup":
+                facts, saved_ui = _box_pick(doc, "lookup_done", facts, saved_ui, session)
+            if STATE.get("box_cancel_after_picks"):   # the in-Rhino test of Cancel
+                return None
+        state = _box_state(doc, facts, options, saved_ui, mode)
+        if STATE.get("on_confirm"):   # ...after recording what the box shows, before the tick
+            STATE["on_confirm"](doc, facts, _describe(facts, options["uses"]), state)
+        state = dict(state, district_confirmed=True, **(STATE.get("box_overrides") or {}))
+        return _drawn(doc, facts, state, saved_ui, session)
+    ticked = {}                       # this box session's ticks and changed sources, kept across picks
+    while True:
+        state = dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)
+        state["_on_shown"] = STATE.get("on_box_shown")     # the dialog capture in the in-Rhino test
+        STATE["zones"] = options.get("zones") or []
+        what = ui.start_box(state, options, mode)
+        if what is None:
+            return None                      # rolled back by run_box: the model as it was
+        if what == "draw":
+            return _drawn(doc, facts, state, saved_ui, session)
+        ticked = {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
+                                        "corner_source", "checked") if k in state}   # (saved only at Draw)
+        if what in ("pick:lookup", "pick:lookup_done"):   # the lookup's answer replaces them (and the district
+            ticked = {}                                   # must be confirmed again)
+        facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
+        facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
+        # (nothing saved until Draw: Cancel leaves the facts, the box's choices and the model as they were)
+
+
+# ---- the address lookup: design_checker.lookup_box in its own short-lived process ----------------------------
+
+def _lookup_start(facts, saved_ui):
+    """Look up: start the lookup for the address typed (its own process, never Rhino's Python); the box opens again
+    saying "Looking up…" and closes itself when the answer is in (_lookup_poll)."""
+    _lookup_stop()
+    address = (facts.get("address") or "").strip()
+    if not address:                    # nothing else changes: the doubts about what is drawn stay
+        return dict(saved_ui, _lookup={"says": "Type the address first, then Look up."})
+    out = os.path.join(tempfile.gettempdir(), "gordium_lookup_%d.json" % int(time.time() * 1000))
+    packages = os.path.join(REPO, "packages")
+    env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"                             # UTF-8 everywhere, Windows included
+    env["PYTHONPATH"] = os.pathsep.join(STATE.get("extra_paths", []) + [
+        os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
+    args = [_python(), "-m", "design_checker.lookup_box", address]
+    if STATE.get("lookup_fixture"):                      # the in-Rhino test: recorded answers, no live call
+        args += ["--fixture", STATE["lookup_fixture"]]
+    sink = open(out, "w", encoding="utf-8")             # to a file: a long answer never fills a pipe
+    err = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8")
+    STATE["lookup"] = {"proc": ui.spawn(args, cwd=REPO, env=env, stdout=sink, stderr=err),   # no console window
+                       "out": out, "sink": sink, "err": err, "started": time.time(), "query": address}
+    return dict(saved_ui, _lookup={"looking": address})
+
+
+def _lookup_poll():
+    """None while the lookup runs; then its answer (also kept for _lookup_done). Stopped after LOOKUP_LIMIT_S."""
+    run = STATE.get("lookup")
+    if run is None:
+        return {"status": "error", "query": None}
+    if "answer" in run:
+        return run["answer"]
+    p = run["proc"]
+    if p.poll() is None:
+        if time.time() - run["started"] < logic.LOOKUP_LIMIT_S:
+            return None
+        run["answer"] = {"status": "timeout", "query": run["query"]}      # the answer first, then the cleanup
+        _lookup_kill(run)
+        _lookup_files_done(run)
+        return run["answer"]
+    run["sink"].close()
+    try:
+        with open(run["out"], encoding="utf-8") as f:
+            run["answer"] = json.loads(f.read().strip().splitlines()[-1])
+    except Exception as e:
+        run["answer"] = {"status": "error", "query": run["query"], "detail": str(e)[:200]}
+    _lookup_files_done(run)
+    return run["answer"]
+
+
+def _lookup_files_done(run):
+    """The lookup's output file and log handle: closed, and the output file removed. Never raises: a file Windows
+    still holds is left in the temp folder."""
+    for handle in (run.get("sink"), run.get("err")):
+        if handle is not None and not handle.closed:
+            handle.close()
+    try:
+        if os.path.exists(run.get("out") or ""):
+            os.remove(run["out"])
+    except OSError:
+        pass
+
+
+def _lookup_stop():
+    run = STATE.pop("lookup", None)
+    if run is None:
+        return
+    _lookup_kill(run)
+    _lookup_files_done(run)
+
+
+def _lookup_kill(run):
+    """Stop the lookup and wait for it to be gone (on Windows its output file stays open until then)."""
+    if run["proc"].poll() is None:
+        run["proc"].kill()
+        try:
+            run["proc"].wait(timeout=5)
+        except Exception:
+            pass
+
+
+def _lookup_done(doc, facts, saved_ui, session):
+    """The lookup's answer into the box and the model (rhino_logic.apply_lookup, tested in CI): only what each
+    source allows is drawn; the lot it may replace, and that lot's spot grades, are held by the session (Cancel
+    brings them back); the architect's own lot is never touched. The City's outline is a guide on screen only."""
+    answer = _lookup_poll() or {"status": "error"}
+    _lookup_stop()
+    facts, saved_ui, guide = logic.apply_lookup(session.table, session, answer, facts, saved_ui,
+                                                STATE.get("zones") or [])
+    STATE.pop("lookup_guide", None)
+    if guide:
+        pts = [_model_point(doc, p) for p in guide]
+        STATE["lookup_guide"] = pts + [pts[0]]
+    if answer.get("status") == "found":
+        logic.guard(frame_site, "frame the looked-up lot")(doc, facts)
+    return facts, saved_ui
+
+
+def _drawn(doc, facts, state, saved_ui, session=None):
+    """Draw: the facts for the checker, and every fact's source and confirmation saved in the .3dm; what the box
+    replaced goes for good. One undo step from here to the facts saved after the box closes (its caller ends it:
+    _end_undo), unless one is already held."""
+    if not STATE.get("undo"):
+        _begin_undo(doc, logic.UNDO_WORDS["edit_site"])
+
+    def save():
+        out, ui_state = _apply_box(doc, facts, state, saved_ui)
+        _save_ui_state(doc, ui_state)
+        sources = fact_sources(doc)        # what the box doesn't set (the ground marking) is kept
+        sources.update(logic.fact_sources(state, logic.city_day(), confirmed=True))
+        doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
+        return out
+
+    if session is None:
+        return save()
+    return logic.draw_then_commit(session, save)     # the commit last: a failure before it is rolled back
+
+
+def _begin_undo(doc, words):
+    """One undo step for everything a Draw does (the box's choices, the sources, the session's commit, the facts saved
+    after the box closes), held until _end_undo."""
+    _end_undo(doc)
+    STATE["undo"] = (doc.RuntimeSerialNumber, doc.BeginUndoRecord(words))
+
+
+def _end_undo(doc):
+    """Ends the Draw's undo record, only one this script began (rhino_logic.undo_record_to_end: serial 0 is Rhino
+    saying a command is already recording, whose record is Rhino's own to end)."""
+    held = STATE.pop("undo", None)
+    if logic.undo_record_to_end(held, doc.RuntimeSerialNumber if doc is not None else None):
+        doc.EndUndoRecord(held[1])
+
+
+def _undo_redo(sender, e):
+    """Rhino's Undo or Redo, finished: what the last check drew is of a model that is no longer there (a panel
+    change undone puts back only the file's strings, which no object event notices), so it is cleared
+    (rhino_logic.after_undo_redo) and the model is checked again at the next idle (live mode). Nothing in the
+    document is changed here: a change made while Rhino undoes or redoes breaks its Undo/Redo chain (RhinoCommon's
+    undo event rule)."""
+    if not logic.after_undo_redo(e.IsEndUndo, e.IsEndRedo):
+        return
+    o = STATE.get("overlay")
+    if o is not None:
+        _clear(o)
+    _settings_from_file(Rhino.RhinoDoc.ActiveDoc)
+    STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())   # re-checked at the next idle (live)
+
+
+def _settings_from_file(doc):
+    """The panel's settings kept in memory, read again from the file after Undo or Redo (a setting undone is put
+    back in the file only; memory only, never the document: round 5, R5-1): Show on-screen labels."""
+    if doc is None:
+        return
+    shown = logic.labels_on(_ui_state(doc))
+    STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
+    ui.set_labels_tick(STATE.get("panel_parts"), shown)
 
 
 def hide_massing(hidden):
@@ -1626,12 +2067,12 @@ def hide_massing(hidden):
     if index < 0:
         say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
         return
-    doc.Layers[index].IsVisible = not hidden
+    with logic.undo_step(doc, logic.UNDO_WORDS["massing"]):
+        doc.Layers[index].IsVisible = not hidden
     doc.Views.Redraw()
 
 
-class Cancelled(Exception):
-    """Esc at a prompt: the whole edit is cancelled and nothing is saved (Enter keeps what is there)."""
+Cancelled = logic.Cancelled          # Esc at a prompt: the whole edit is cancelled and nothing is saved
 
 
 def _go_on(rc):
@@ -1793,14 +2234,18 @@ def edit_facts():
         saved = current_facts(doc)
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
-    try:
-        facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options, "check")
-    finally:                            # the editing outline and names never stay on screen
-        o = overlay()
-        o.confirm, o.labels = None, []
-        doc.Views.Redraw()
-    if facts is not None:
-        save_facts(doc, facts)
+    try:                                # one undo step from the Draw to the facts saved, closed on any way out
+        try:
+            facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options,
+                            "check")
+        finally:                        # the editing outline and names never stay on screen
+            o = overlay()
+            o.confirm, o.labels = None, []
+            doc.Views.Redraw()
+        if facts is not None:
+            save_facts(doc, facts)
+    finally:
+        _end_undo(doc)
     run_check(doc, report=False)
 
 
@@ -1890,8 +2335,10 @@ def _draw_plan(doc, o, result, facts):
 
 def run_check(doc, report=True):
     """Measure and check the model now; draw the result; update the panel. If the check can't run, the old
-    result is cleared from the view and the panel says why, with Retry (H2): never left showing."""
-    if STATE.get("running"):
+    result is cleared from the view and the panel says why, with Retry (H2): never left showing. While a start box
+    is open it does nothing at all (its overlay, the panel and the "before" statuses stay): the box's own edits
+    would otherwise be checked mid-box; live mode checks once the box closes."""
+    if STATE.get("running") or not logic.allowed("check", _box_open()):
         return None
     o = overlay()
     facts = {}
@@ -1941,6 +2388,7 @@ def run_check(doc, report=True):
                          "header": head, "interior": [r["Rule id"] for r in result.get("interior", [])],
                          "encroach": len(o.encroach), "plan_encroach": len((result.get("plan") or {}).get("encroach") or []),
                          "envelope": result.get("envelope"), "at": time.time()}
+        STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()     # a real check, of this document
         if result.get("notice"):
             STATE.setdefault("toasts", []).append([result["notice"]])
             if not STATE.get("headless"):
@@ -2041,13 +2489,17 @@ def _opened(sender, e):
 
 def _idle(sender, e):
     t = STATE.get("dirty")
+    front = Rhino.RhinoDoc.ActiveDoc
+    last_at = logic.last_check_at(STATE.get("checked_at"), front.RuntimeSerialNumber if front is not None else None)
+    if t and last_at is not None and last_at >= t and not _box_open():   # a check since the edit covered it
+        STATE["dirty"] = t = None
     p = STATE.get("panel_parts")
     if t and time.time() - t >= ui.STALE_SECONDS and STATE.get("stale_shown") != t and p is not None \
             and p["form"].Visible:          # out of date: no marks until the re-check (H1, F7)
         STATE["stale_shown"] = t
         ui.show(p, None, checking=True)
         _redraw()
-    if t and time.time() - t >= IDLE_SECONDS and not STATE.get("running"):
+    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
         if doc is not None and doc.Strings.GetValue(SECTION, ENTRY):    # checked before: run_check says why
@@ -2181,6 +2633,7 @@ def off():
 def gordium_check():
     """Confirm the lot facts whenever any required one is missing (keeping what is saved), then check."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if not _buildings(doc) and not _lot_candidates(doc):    # an empty model: a new project starts here
         return gordium_start()
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
@@ -2189,11 +2642,14 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-        facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
-        if facts is None:               # closed or Esc: nothing saved, nothing checked
-            Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
-            return None
-        save_facts(doc, facts)
+        try:                            # the Draw's undo step ends with the facts saved
+            facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+            if facts is None:           # closed or Esc: nothing saved, nothing checked
+                Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
+                return None
+            save_facts(doc, facts)
+        finally:
+            _end_undo(doc)
     result = run_check(doc, report=True)
     live(True)                                      # live mode is on by default
     if result is not None:
@@ -2261,6 +2717,7 @@ def gordium_start():
     then the lot and the largest legal starting building as stacked floors, checked, with live mode on. Starts
     from a model with no building in it (an existing design is checked with GordiumCheck)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if _buildings(doc):
         Rhino.RhinoApp.WriteLine("Gordium: this model already has a building; GordiumStart begins from an empty lot "
                                  "(use GordiumCheck to check a design)")
@@ -2268,8 +2725,9 @@ def gordium_start():
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
         sample = ask({"cmd": "sample_site"})
-        _add_lot(doc, sample)
-        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True,      # its facts are the sample project's
+        sample_lot = str(_add_lot(doc, sample))
+        # its facts are the sample project's; a lookup may replace its lot (never one the architect drew or picked)
+        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True, replaceable_lot=sample_lot,
                                  street_name=sample.get("street_name"),     # its street, as the lookup named it
                                  street_source=sample.get("street_source")))
         facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
@@ -2282,12 +2740,15 @@ def gordium_start():
             saved = {}
         facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
     path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
-    export(doc, path)
-    facts = confirm(doc, facts, options, "start")
-    if facts is None:
-        Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
-        return None
-    save_facts(doc, facts)
+    try:                                # the Draw's undo step ends with the facts saved
+        facts = confirm(doc, facts, options, "start")
+        if facts is None:
+            Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
+            return None
+        save_facts(doc, facts)
+    finally:
+        _end_undo(doc)
+    export(doc, path)                   # the model as the box left it (a lookup may have drawn a new lot)
     _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     saved_ui = _ui_state(doc)
     # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless
@@ -2313,7 +2774,7 @@ def gordium_start():
         live(True)
         documents(True)
         return None
-    fact = logic.starting_house_fact(start.get("margin_note"), time.strftime("%Y-%m-%d"))   # Gordium's figure
+    fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())   # Gordium's figure
     if fact:
         _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
     doc.Views.Redraw()
@@ -2403,3 +2864,6 @@ if STATE.get("live"):                        # live mode was on before this copy
     live(True)
 # Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)
 _on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), "stop the checker"))
+# Undo / Redo: what was drawn for the model before it is cleared, never left on screen (the Rhino job, demo e631aae)
+_on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler[Rhino.Commands.UndoRedoEventArgs], _undo_redo,
+                                                 "clear the drawing after Undo or Redo"))

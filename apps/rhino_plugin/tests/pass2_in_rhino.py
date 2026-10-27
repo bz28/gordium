@@ -297,8 +297,8 @@ try:
         said = len(g.STATE.get("said") or [])
         g._get_point = click
         g._ask_street_more = lambda q: asked.append(q) or False    # the architect's No (see claim 10, third part)
-        try:
-            g._box_pick(doc, "street", facts, saved)
+        try:                                            # (the box's own session: the pick draws nothing)
+            facts, saved = g._box_pick(doc, "street", facts, saved, g.logic.BoxSession(g.RhinoTable(doc)))
         finally:
             g._get_point = real
             g._ask_street_more = real_ask
@@ -488,7 +488,9 @@ try:
             g.STATE.pop("on_box_shown", None)
             g.STATE["auto_ok"] = True
         log["box"] = seen
-        claim("6 the box was shown with no lot", g.logic.NO_LOT in (seen.get("labels") or []), seen.get("labels"))
+        # the empty file's box (no lot to use): its own wording since #19's start box, LOT_MISSING, never the sample's
+        # NO_LOT (the headless run of the demo, 2026-10-22, found this claim still asking for NO_LOT)
+        claim("6 the box was shown with no lot", g.logic.LOT_MISSING in (seen.get("labels") or []), seen.get("labels"))
         claim("6 no Use my survey… or Change… until a lot exists",
               seen.get("buttons") and "Use my survey…" not in seen["buttons"] and "Change…" not in seen["buttons"],
               seen.get("buttons"))
