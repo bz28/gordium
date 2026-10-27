@@ -101,8 +101,8 @@ STOPS = {
                          "depends on how the occupants are split)",
     "no_household": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, "
                     "whether the household is a functional family unit (§325-3B)",
-    "household_counts_disagree": "{with_} unrelated people counted with the children is fewer than the {without} "
-                                 "counted without them: check both counts",
+    "household_counts_disagree": "the count of unrelated people with minor dependent children included ({with_}) is "
+                                 "lower than the count without them ({without}): check both counts",
     "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
                           "unit's (§325-3B HOME OCCUPATION)",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",

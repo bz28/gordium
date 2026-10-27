@@ -141,11 +141,30 @@ def test_the_r3_and_ru_count_is_asked_on_its_own_and_a_mistyped_pair_is_set_asid
              "use": "one_family_detached", "unrelated_persons": 3, "unrelated_persons_with_children": 1}
     m = measure(site, facts)
     assert m["unrelated_persons_with_children"]["value"] is None
-    assert "fewer than the 3 counted without them" in m["unrelated_persons_with_children"]["reason"]
     values = {k: v["value"] for k, v in m.items()}
     assert outcome(rule("R-3a", "occupancy_one_family"), values, USES) == "needs_review"
+    assert "included (1) is lower than the count without them (3)" in m["unrelated_persons_with_children"]["reason"]
     ok = measure(site, {**facts, "unrelated_persons_with_children": 3})
     assert ok["unrelated_persons_with_children"]["value"] == 3
+    # review round 3: also when the drawing's geometry can't be worked out (the facts still stand there)
+    import model_measurement.measure as measure_mod
+    real = measure_mod._measure
+
+    def broken(*a, **k):
+        raise measure_mod.shapely.errors.GEOSException("TopologyException")
+
+    measure_mod._measure = broken
+    try:
+        g = measure(site, facts)
+    finally:
+        measure_mod._measure = real
+    assert g["unrelated_persons"]["value"] == 3 and g["unrelated_persons_with_children"]["value"] is None
+    # and the panel says it in every district, with the button to correct both counts
+    from model_measurement.project import fact_conflict_rows
+    assert fact_conflict_rows(facts) == [(
+        "the count of unrelated people with minor dependent children included (1) is lower than the count without "
+        "them (3): check both counts", ("unrelated_persons", "unrelated_persons_with_children"))]
+    assert fact_conflict_rows({**facts, "unrelated_persons_with_children": 3}) == []
 
 
 def test_every_fact_is_one_the_architect_can_state_everywhere():
