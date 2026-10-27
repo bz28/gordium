@@ -527,6 +527,19 @@ def box_over_shape(box, poly):
     return _inside(left + w / 2, top + h / 2, poly)
 
 
+LABEL_INSET = 4                    # a plan label stays this far inside the view (#29 at e4e5018: one on its edge)
+AXIS_ICON_PX = 80                  # Rhino's world-axis icon, bottom left of every view: a square this wide kept clear
+# (the Rhino job at 8bfabdd: it spans x 34-76, y 593-634 in a 657 x 668 view), 3 px more around it
+AXIS_ICON_SCALE = 1.0              # the display's scaling where screen pixels are physical (set by the plugin)
+
+
+def axis_icon_box(view):
+    """Where Rhino draws the world-axis icon in a view (w, h): its bottom-left corner, AXIS_ICON_PX (scaled by
+    AXIS_ICON_SCALE) and 3 px around it (#29 at e4e5018: a label on it)."""
+    side = int(round(AXIS_ICON_PX * AXIS_ICON_SCALE)) + 3
+    return 0, view[1] - side, side, side
+
+
 def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes=(), placed=()):
     """Which HARD rule a plan label's box (left, top, w, h) breaks, or None. HARD: on screen; over no building
     footprint nor coloured part (`hard_shapes`: their outlines on screen, 3 px around them), nor the notice, the
@@ -535,8 +548,12 @@ def label_breaks_hard(line, box, view, hard_boxes=(), hard_lines=(), hard_shapes
     its own label's edge, the Rhino job at 822fb6f) and every line in
     `hard_lines` (every other yard's dimension, 3 px around it: the southwest label sat 1 px beside the front's)."""
     left, top, w, h = box
-    if view is not None and (left < 0 or top < 0 or left + w > view[0] or top + h > view[1]):
-        return "off screen"
+    if view is not None:
+        i_ = LABEL_INSET
+        if left < i_ or top < i_ or left + w > view[0] - i_ or top + h > view[1] - i_:
+            return "off screen or on its edge"
+        if _over(box, axis_icon_box(view)):
+            return "over the world-axis icon"
     if any(box_over_shape(box, shape) for shape in hard_shapes):
         return "over a building or its coloured part"
     if any(_over(box, (a - 3, b - 3, c + 6, e + 6)) for a, b, c, e in hard_boxes):
@@ -592,6 +609,8 @@ class _LabelField:
     def __init__(self, line, view, hard_boxes=(), hard_lines=(), hard_shapes=(), placed=(), soft_lines=()):
         self.view = view
         self.rects = [(a - 3, b - 3, c + 6, e + 6) for a, b, c, e in hard_boxes] + [tuple(p)[:4] for p in placed]
+        if view is not None:
+            self.rects.append(axis_icon_box(view))
         self.segs = [(line, 3)] + [(d, 3) for d in hard_lines if d != line]
         self.polys = []
         for shape_ in hard_shapes:
@@ -626,12 +645,12 @@ class _LabelField:
     def pieces(self, top, w, h, base, step, n):
         """The runs of lattice spots (lefts base + i·step, i < n) on the row at `top` that keep every HARD rule,
         each cut where the number of lot lines a label there crosses changes: [(i0, i1, crossed)]."""
-        if self.view is not None and (top < 0 or top + h > self.view[1]):
+        if self.view is not None and (top < LABEL_INSET or top + h > self.view[1] - LABEL_INSET):
             return []
         lo_i, hi_i = 0, n - 1
         if self.view is not None:
-            lo_i = max(lo_i, int(math.ceil((0 - base) / step - 1e-9)))
-            hi_i = min(hi_i, int(math.floor((self.view[0] - w - base) / step + 1e-9)))
+            lo_i = max(lo_i, int(math.ceil((LABEL_INSET - base) / step - 1e-9)))
+            hi_i = min(hi_i, int(math.floor((self.view[0] - LABEL_INSET - w - base) / step + 1e-9)))
         if lo_i > hi_i:
             return []
 
@@ -804,14 +823,20 @@ def place_dim_label(line, text, size, view, hard_boxes=(), hard_lines=(), soft_b
     rows = variants[-1]                                          # nowhere keeps them all: never over another
     w, h = shape(rows, LABEL_MIN_SIZE)                           # label still (the review of 3446e94), else
     if view is not None:                                         # beside its line; said either way, never dropped
-        free = sorted((box_gap(line, (left, top, w, h)), left, top) for top in range(0, int(view[1] - h) + 1, 12)
-                      for left in range(0, int(view[0] - w) + 1, 12)
-                      if not any(_over((left, top, w, h), other) for other in placed))
+        i_ = LABEL_INSET
+        free = sorted((box_gap(line, (left, top, w, h)), left, top) for top in range(i_, int(view[1] - h - i_) + 1, 12)
+                      for left in range(i_, int(view[0] - w - i_) + 1, 12)
+                      if not any(_over((left, top, w, h), other)
+                                 for other in list(placed) + [axis_icon_box(view)]))   # nor on the axis icon
         if free:
             return result(rows, LABEL_MIN_SIZE, free[0][1], free[0][2], w, h, forced=True)
     left, top = min(xa, xb), max(ya, yb) + 6
     if view is not None:
-        left, top = min(max(left, 0), max(view[0] - w, 0)), min(max(top, 0), max(view[1] - h, 0))
+        i_ = LABEL_INSET
+        left = min(max(left, i_), max(view[0] - w - i_, i_))
+        top = min(max(top, i_), max(view[1] - h - i_, i_))
+        if _over((left, top, w, h), axis_icon_box(view)):          # off the axis icon: above it (review of 7e6d824)
+            top = max(i_, axis_icon_box(view)[1] - h)
     return result(rows, LABEL_MIN_SIZE, left, top, w, h, forced=True)
 
 
@@ -946,13 +971,29 @@ def _seg_hits_shape(seg, poly):
     return _inside((ax + bx) / 2, (ay + by) / 2, poly)
 
 
+LABEL_KEEP = (                     # spaces never broken in a plan label (#29 at e4e5018: "101'-1" / "1/2"")
+    r"(\d+'-\d+) (\d+/\d+\")",            # a measurement: 101'-1 1/2", 7'-0 5/8" (as NOTICE_KEEP's first)
+    r"^([✕?✓]) (\S)",                     # a status mark with its first word: never alone on a line
+    r"\b(min|max|needs) (\d)",             # the word that says what the number is, with it
+)
+
+
 def label_lines(text):
     """A plan label as two lines, for when it won't fit beside its line on one: its name, then its numbers
     ("✕ Side yard, Southwest" / "7'-0 5/8", needs 10'-0" (approx.)"). One line when it has no name before a number
-    (a lot edge's length)."""
-    words = text.split(" ")
-    k = next((i for i, w in enumerate(words) if i and w[:1].isdigit()), None)
-    return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
+    (a lot edge's length), never broken inside a measurement nor after a status mark alone (LABEL_KEEP)."""
+    import re
+    kept = text
+    for keep in LABEL_KEEP:
+        kept = re.sub(keep, lambda m: "\u00a0".join(m.groups()), kept)
+    words = kept.split(" ")
+
+    def number(w):
+        return w.lstrip("✕?✓\u00a0")[:1].isdigit() or w.split("\u00a0")[-1][:1].isdigit() and "\u00a0" in w
+    k = next((i for i, w in enumerate(words) if i and number(w)), None)
+    if k is None or any(number(w) for w in words[:k]):     # no name before the numbers: one line
+        return [text]
+    return [" ".join(words[:k]).replace("\u00a0", " "), " ".join(words[k:]).replace("\u00a0", " ")]
 
 
 NOTICE_SHARES = (0.4, 0.5, 0.6, 0.7, 0.8)   # the notice's boxes, narrowest first: a share of the view's width each

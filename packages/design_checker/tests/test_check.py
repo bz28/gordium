@@ -3383,7 +3383,7 @@ def test_a_plan_label_keeps_every_hard_rule_the_southwest_cases():
     assert near is not None and got["size"] == 11 and got["gap"] <= near[1], (got, near)    # in reach at full size
     assert got["led"] == (got["gap"] > 8)
     # each HARD rule, broken on purpose, is named
-    assert logic_.label_breaks_hard(own, (-5, 400, 100, 20), view) == "off screen"
+    assert logic_.label_breaks_hard(own, (-5, 400, 100, 20), view) == "off screen or on its edge"
     assert logic_.label_breaks_hard(own, (190, 300, 100, 20), view, [], [], [house]).startswith("over a building")
     assert logic_.label_breaks_hard(own, (14, 36, 30, 20), view, boxes).startswith("over the notice")
     assert logic_.label_breaks_hard(own, (150, 400, 30, 20), view) == "on its own line"
@@ -3480,6 +3480,11 @@ def test_a_plan_label_keeps_every_hard_rule_on_random_lots():
             box = (got["left"], got["top"], got["w"], got["h"])
             placed.append(box)
             assert got["rows"] and got["size"] >= logic_.LABEL_MIN_SIZE, got          # never dropped, readable
+            assert " ".join(got["rows"]) == text and all(r not in ("✕", "?") for r in got["rows"]), got
+            assert not any(r.endswith("7'-0") or r.startswith("5/8") for r in got["rows"]), got   # whole numbers
+            if not got["forced"]:                                               # inside the view, off the icon
+                assert logic_.LABEL_INSET <= got["left"] and got["top"] + got["h"] <= vh - logic_.LABEL_INSET
+                assert not logic_._over((got["left"], got["top"], got["w"], got["h"]), logic_.axis_icon_box((vw, vh)))
             if got["forced"]:                                                  # honest: nowhere keeps every rule
                 w, h = got["w"], got["h"]
                 assert all(logic_.label_breaks_hard(own, (x, y, w, h), (vw, vh), boxes, dims, shapes, before)
@@ -3700,6 +3705,66 @@ def test_while_the_view_moves_only_labels_that_still_keep_every_hard_rule_are_dr
     moving = draw.split("    if not settled:", 1)[1].split("    for item, got in shown:", 1)[0]
     assert "logic.shown_while_moving(" in moving and "logic.follow(got, item[\"line\"])" in moving
     assert "keep, dims, solids)" in moving                          # the same HARD things the placement keeps off
+
+
+def test_a_plan_label_never_wraps_inside_a_number_stays_inside_the_view_and_off_the_axis_icon():
+    """The Rhino job at #29 e4e5018 (its drawing dimensions use this placer): "101'-1" over "1/2"" and "92'-1" over
+    "3/8"" (wrapped inside a measurement); "✕" alone over "7'-0 5/8""; a number on the view's bottom edge;
+    "min 10'-0"" over Rhino's world-axis icon. Now a label wraps only between a name and its numbers, never inside a
+    measurement nor after a mark or "min"/"needs" alone (LABEL_KEEP, as the notice's); it stays LABEL_INSET px
+    inside the view; and the axis icon (bottom left) is HARD."""
+    import random
+    from design_checker import rhino_logic as logic_
+    for text in ("101'-1 1/2\"", "92'-1 3/8\"", "✕ 7'-0 5/8\"", "✕ 7'-0 5/8\", needs 10'-0\"", "min 10'-0\"",
+                 "? 12'-0\" (approx.)"):
+        assert logic_.label_lines(text) == [text], text                       # nothing to wrap: one line
+    assert logic_.label_lines("✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)") == [
+        "✕ Side yard, Southwest", "7'-0 5/8\", needs 10'-0\" (approx.)"]
+    assert logic_.label_lines("Side yard min 10'-0\"") == ["Side yard", "min 10'-0\""]
+    assert logic_.label_lines("Front yard 26'-11 1/4\"") == ["Front yard", "26'-11 1/4\""]
+    assert logic_.LABEL_KEEP[0] == logic_.NOTICE_KEEP[0]                       # the same measurement rule
+    view = (656, 668)
+    edge = ((100, 660), (300, 660))                                            # a line on the bottom edge
+    assert logic_.label_breaks_hard(edge, (150, 646, 60, 20), view) == "off screen or on its edge"
+    assert logic_.label_breaks_hard(edge, (150, 600, 60, 20), view) is None
+    assert logic_.label_breaks_hard(((10, 500), (10, 650)), (20, 610, 60, 20), view) == "over the world-axis icon"
+    icon = logic_.axis_icon_box((657, 668))          # the Rhino job at 8bfabdd: the icon spans x 34-76, y 593-634
+    assert icon[0] <= 34 - 3 and icon[0] + icon[2] >= 76 + 3 and icon[1] <= 593 - 3 and icon[1] + icon[3] >= 668
+    assert icon[2] <= 90                                                        # ...and not much more than it
+    was = logic_.AXIS_ICON_SCALE
+    try:
+        logic_.AXIS_ICON_SCALE = 1.5                                            # Windows at 150 %: physical pixels
+        assert logic_.axis_icon_box((657, 668))[2] == int(round(logic_.AXIS_ICON_PX * 1.5)) + 3
+    finally:
+        logic_.AXIS_ICON_SCALE = was
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.AXIS_ICON_SCALE = _icon_zoom()" in rhino and "RunningOnOSX" in rhino   # the Mac counts points
+    got = logic_.place_dim_label(edge, "101'-1 1/2\"", 11, view)
+    assert got["top"] + got["h"] <= 668 - logic_.LABEL_INSET and not got["forced"], got
+    near_icon = logic_.place_dim_label(((20, 560), (20, 660)), "min 10'-0\"", 11, view)
+    box = (near_icon["left"], near_icon["top"], near_icon["w"], near_icon["h"])
+    assert not logic_._over(box, logic_.axis_icon_box(view)) and not near_icon["forced"], near_icon
+    # nowhere keeps every rule (a building over the whole view): forced, but still off the icon (review of 7e6d824)
+    small = (400, 300)
+    cover = [(-10, -10), (410, -10), (410, 310), (-10, 310)]
+    forced = logic_.place_dim_label(((10, 280), (60, 280)), "min 10'-0\"", 11, small, hard_shapes=[cover])
+    assert forced["forced"] and not logic_._over((forced["left"], forced["top"], forced["w"], forced["h"]),
+                                                 logic_.axis_icon_box(small)), forced
+    stuck = logic_.place_dim_label(((10, 280), (60, 280)), "min 10'-0\"", 11, small, hard_shapes=[cover],
+                                   placed=[(0, 0, 400, 300)])                  # not even a spot clear of labels
+    assert stuck["forced"] and not logic_._over((stuck["left"], stuck["top"], stuck["w"], stuck["h"]),
+                                                logic_.axis_icon_box(small)), stuck
+    # random labels near every edge and the corner: never on an edge, never on the icon, never wrapped in a number
+    rng = random.Random(29)
+    for _ in range(150):
+        vw, vh = rng.choice([(656, 668), (420, 420), (1000, 640)])
+        x, y = rng.uniform(0, vw), rng.choice([rng.uniform(vh - 90, vh), rng.uniform(0, 30), rng.uniform(0, vh)])
+        line = ((x, y), (min(vw, x + rng.uniform(5, 120)), y))
+        text = rng.choice(["101'-1 1/2\"", "✕ 7'-0 5/8\"", "min 10'-0\"", "Side yard, East 6'-2 3/4\""])
+        g = logic_.place_dim_label(line, text, 11, (vw, vh))
+        b = (g["left"], g["top"], g["w"], g["h"])
+        assert not g["forced"] and logic_.label_breaks_hard(line, b, (vw, vh)) is None, (line, text, g)
+        assert all(not r.endswith(("'-1", "'-0", "✕", "min")) for r in g["rows"]), g["rows"]
 
 
 def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
