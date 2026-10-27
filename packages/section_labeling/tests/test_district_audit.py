@@ -202,11 +202,12 @@ def test_the_missing_list_is_ranked_high_first_then_silent_before_disclosed(buil
     assert streams["priority"] == "high" and streams["districts"] == built.districts
 
 
-def test_measures_say_where_each_value_comes_from_and_none_when_nothing_fills_it():
+def test_measures_say_where_each_value_comes_from_and_none_when_nothing_fills_it(built):
     model, stated = audit.measure_sources()
     assert {"lot_area", "front_yard", "building_height"} <= model and {"stories", "use", "district"} <= stated
-    text = SAVED.read_text(encoding="utf-8")
-    assert "| `R-1b.stories` | rule |" in text and "stories (stated)" in text and "lot_area (model)" in text
+    text = "\n".join(built._rules_section())
+    assert "| `R-1b.stories` | rule |" in text and "lot_area (model)" in text
+    assert "stories (model or stated)" in text and "stories (stated)" not in text    # floor blocks are counted
 
 
 def test_tested_on_a_model_comes_from_test_sites():
@@ -360,3 +361,39 @@ def test_an_attached_buildings_party_walls_and_doors_are_not_claimed_covered(bui
     i = part_index(built, "325-3B:one_family_attached_dwelling", "Each dwelling shares")
     assert built.cells["325-3B:one_family_attached_dwelling"]["R-2c"][i][1]["status"] == "missing"
     assert built.status("325-3B:one_family_attached_dwelling", "R-2c") == "missing"
+
+
+# Review round 3.
+
+def test_the_two_family_definition_is_covered_wherever_two_family_houses_are_permitted(built):
+    """Chart p.2: two-family is • from R-2a to RU, so the definition's own sentence is never 'not applicable' there."""
+    pid = "325-3B:dwelling_two_family"
+    i = part_index(built, pid, "What a two-family dwelling is")
+    for d in built.districts:
+        status = built.cells[pid][d][i][1]["status"]
+        assert status == ("not_applicable" if d in ("R-1a", "R-1b") else "rulebook"), d
+
+
+def test_the_omission_sentence_placed_by_piece_also_needs_an_unlisted_use(decisions):
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "piece": "325-8B", "quote": audit.OMISSION}}]))
+    assert any("needs `unlisted_use`" in p for p in found)
+
+
+@pytest.mark.parametrize("use", ["home occupation", "neighborhood garden", "accessory dwelling unit", "private garage",
+                                 "rooming house", "boarding house", "row house", "cooperative household",
+                                 "day care center"])
+def test_a_use_the_chart_or_the_multiple_dwelling_list_names_is_never_unlisted(built, use):
+    assert built._unlisted_problems("R-1a", {"unlisted_use": use}, "w")
+
+
+def test_the_unlisted_uses_the_decisions_rely_on_are_on_no_list(built):
+    for use in ("motel", "junkyard", "travel trailer", "gasoline service station", "large beverage producer"):
+        assert built._unlisted_problems("R-3a", {"unlisted_use": use}, "w") == [], use
+
+
+def test_a_cell_covered_only_by_a_mapping_says_so(built):
+    """§325-17A: no rule cites it; the yard rules cover it by Gordium's mapping, shown in the cell and summary."""
+    assert built._short("325-17A", "R-1b").endswith("(mapped)")
+    assert not built._short("325-19C", "R-1b").endswith("(mapped)")                  # front_yard cites it
+    assert "§325-17A (mapped)" in SAVED.read_text(encoding="utf-8").split("## The table")[0]

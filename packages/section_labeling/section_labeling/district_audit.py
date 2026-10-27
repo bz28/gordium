@@ -42,7 +42,7 @@ from pathlib import Path
 from document_extraction.sections import piece_keys
 from rule_format import formula
 from rule_format.labels import load_pieces
-from rule_format.rulebook import REPO, Context, district_name, load, locate, read_jsonl, rulebook_for
+from rule_format.rulebook import REPO, Context, district_name, load, locate, read_jsonl, rulebook_for, tokenize
 
 DECISIONS = "residential_coverage.yaml"
 OUTPUT = "6_coverage_report/residential_districts.md"
@@ -59,6 +59,8 @@ DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", 
                    "unlisted_use", "item", "link", "priority", "note"}
 CHART = "zoning_charts_2026-04.pdf"
 OMISSION = "except where otherwise indicated by specific prohibition or omission"   # §325-8B(3), p.26
+OMISSION_LINES = {(26, 19), (26, 20), (26, 21)}        # §325-8B(3), all of it (the extracted text, p.26)
+MULTIPLE_KINDS = (7, (32, 33))   # §325-3B DWELLING, MULTIPLE (5): rooming house; boarding house; ...; row house (p.7)
 
 
 def _law_rows(j: Path):
@@ -140,10 +142,16 @@ def model_tests(j: Path) -> dict[str, list[str]]:
     return {k: list(dict.fromkeys(v)) for k, v in out.items()}
 
 
+# Stated by the architect, but measured from the model when it is drawn that way: stories are counted from the floor
+# blocks drawn (model_measurement.measure._stories_whole); the typed count is the fallback, or a cross-check.
+DRAWN_OR_STATED = {"stories"}
+
+
 def measure_sources() -> tuple[set, set]:
-    """(measured from the model, stated by the architect): the names model_measurement fills in."""
+    """(measured from the model, stated by the architect): the names model_measurement fills in. A name in
+    DRAWN_OR_STATED is in both."""
     from model_measurement.measure import STATED, UNITS
-    return set(UNITS), set(STATED) | {"district"}
+    return set(UNITS) | (DRAWN_OR_STATED & set(STATED)), set(STATED) | {"district"}
 
 
 class Audit:
@@ -307,7 +315,7 @@ class Audit:
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":
                 p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-' "
                          "(not permitted)")
-            if self._quotes_omission(dec) or "unlisted_use" in dec:
+            if self._quotes_omission(pid, dec) or "unlisted_use" in dec:
                 p += self._unlisted_problems(d, dec, where)
         if status == "parked" and dec.get("item") not in self.parked:
             p.append(f"{where}: parked item must be one of {sorted(self.parked)}")
@@ -333,40 +341,51 @@ class Audit:
         cell = self.ctx.cells.get(CHART, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
         return None if cell is None else cell.get("value")
 
-    def _quotes_omission(self, dec: dict) -> bool:
+    def _quote_keys(self, pid: str, dec: dict) -> set:
+        """Every (page, line) the decision's quote is found on: on `page` (of `file`), else inside `piece` (default:
+        this piece), across its page breaks. Empty when it isn't found."""
+        file = dec.get("file", LAW)
+        pages = self.ctx.pages.get(file, {})
+        quote = dec.get("quote") or ""
+        if "page" in dec:
+            return {(dec["page"], n) for a, b in locate(quote, pages.get(dec["page"], {})) for n in range(a, b + 1)}
+        if dec.get("piece") not in (None, *self.pieces):
+            return set()
+        keys = list(piece_keys(self.pieces[dec.get("piece", pid)]))
+        joined = {i: pages.get(pg, {}).get(n, []) for i, (pg, n) in enumerate(keys)}
+        return {keys[i] for a, b in locate(quote, joined) for i in range(a, b + 1)}
+
+    def _quote_found(self, pid: str, dec: dict) -> bool:
+        return bool(self._quote_keys(pid, dec))
+
+    def _quotes_omission(self, pid: str, dec: dict) -> bool:
         """The quote shares a line with §325-8B(3) (permitted uses are listed; what is left out isn't), however
-        much or little of it is quoted."""
-        if "page" not in dec or dec.get("file", LAW) != LAW or not dec.get("quote"):
+        much or little of it is quoted, and however it is placed (`page` or `piece`)."""
+        if dec.get("file", LAW) != LAW or not dec.get("quote"):
             return False
-        page = self.ctx.pages.get(LAW, {}).get(dec["page"], {})
-        rule3 = {(dec["page"], n) for a, b in locate(OMISSION, page) for n in range(a, b + 1)}
-        if dec["page"] == 26:
-            rule3 |= {k for k, pid in self.owner.items() if pid == "325-8B" and k[0] == 26 and 19 <= k[1] <= 21}
-        return any((dec["page"], n) in rule3 for a, b in locate(dec["quote"], page) for n in range(a, b + 1))
+        return bool(self._quote_keys(pid, dec) & OMISSION_LINES)
 
     def _unlisted_problems(self, d: str, dec: dict, where: str) -> list[str]:
         """The omission quote (§325-8B(3)) backs "not applicable" only for a named use that is on no residential
-        list: not a use Gordium accepts (uses.yaml) and named in no district's use rule."""
+        list: no row of the residential use chart (p.2, primary or accessory), no use Gordium accepts (uses.yaml),
+        no kind of multiple dwelling §325-3B lists (p.7), and not named by the district's use rule. Compared on
+        words (singular), so "home occupations" and "Neighborhood or Community Garden" are caught."""
         use = str(dec.get("unlisted_use") or "")
         if not use:
             return [f"{where}: the omission quote needs `unlisted_use` (the use it is about)"]
-        key = use.lower().replace(" ", "_").replace("-", "_")
+        words = lambda s: {w[:-1] if w.endswith("s") and len(w) > 3 else w
+                           for w in tokenize(s.replace("_", " ").replace("-", " ")) if w.isalpha()}
+        mine = words(use)
         rule = self.books[d].get(f"{d}.use") or {}
-        text = " ".join(str(rule.get(k, "")) for k in ("check", "applies_when", "title")).lower()
-        if any(key in u or u in key for u in self.ctx.uses) or key in text or use.lower() in text:
-            return [f"{where}: {use!r} is a residential use (uses.yaml or {d}.use), so leaving it out isn't omission"]
+        lists = [r for (pg, sec, r, col) in self.ctx.cells.get(CHART, {}) if pg == 2]
+        lists += [u.replace("_", " ") for u in self.ctx.uses]
+        lists += [" ".join(str(rule.get(k, "")) for k in ("check", "applies_when", "review_when"))]
+        multiple = self.ctx.pages.get(LAW, {}).get(MULTIPLE_KINDS[0], {})
+        lists += [" ".join(" ".join(multiple.get(n, [])) for n in MULTIPLE_KINDS[1])]
+        if not mine or any(mine <= words(text) for text in lists):
+            return [f"{where}: {use!r} is a residential use (chart p.2, uses.yaml, §325-3B multiple dwellings or "
+                    f"{d}.use), so leaving it out isn't omission"]
         return []
-
-    def _quote_found(self, pid: str, dec: dict) -> bool:
-        file = dec.get("file", LAW)
-        pages = self.ctx.pages.get(file, {})
-        if "page" in dec:
-            return bool(locate(dec["quote"], pages.get(dec["page"], {})))
-        if dec.get("piece") not in (None, *self.pieces):
-            return False
-        keys = list(piece_keys(self.pieces[dec.get("piece", pid)]))   # inside a piece, across its page breaks
-        joined = {i: pages.get(pg, {}).get(n, []) for i, (pg, n) in enumerate(keys)}
-        return bool(locate(dec["quote"], joined))
 
     # -- the table ---------------------------------------------------------------------------------------
 
@@ -376,6 +395,12 @@ class Audit:
 
     def _title(self, pid: str) -> str:
         return " ".join(self.pieces[pid]["title"].replace("|", "/").split())
+
+    def mapped_only(self, pid: str, d: str) -> bool:
+        """Some part's covering rules reach it only through Gordium's stated mapping (they cite none of its lines)."""
+        return any(dec.get("status") in ("rulebook", "flag") and not any(
+            self._reaches(d, r, pid, self.part_lines[pid][i]) for r in self._expand(d, dec.get("rules")))
+            for i, (_, dec) in enumerate(self.cells.get(pid, {}).get(d, [])))
 
     def _pages(self, pid: str) -> str:
         pages = sorted({pg for pg, _, _ in self.pieces[pid]["lines"]})
@@ -389,6 +414,8 @@ class Audit:
                                        for r in self._expand(d, dec.get("rules"))))
             return (", ".join(found[:3]) + (f" +{len(found) - 3} more" if len(found) > 3 else "")) if found else ""
         checked, flagged = ids("rulebook"), ids("flag")
+        if self.mapped_only(pid, d) and checked:
+            checked += " (mapped)"
         if worst == "rulebook":
             return f"✓ {checked}"
         also = ([f"partly ✓ {checked}"] if checked else []) + ([f"partly flagged: {flagged}"] if flagged else [])
@@ -487,7 +514,8 @@ class Audit:
                f"{n} pieces, against each of the {len(ds)} residential districts ({', '.join(ds)}): {n * len(ds)} "
                "cells.", "",
                f"**In short.** {every({'rulebook', 'flag'})} pieces are in every district's rulebook (or flagged for "
-               f"review): {', '.join('§' + p for p in everywhere({'rulebook', 'flag'}))}. "
+               f"review): {', '.join('§' + p + (' (mapped)' if any(self.mapped_only(p, d) for d in ds) else '') for p in everywhere({'rulebook', 'flag'}))}; "
+               "(mapped) = some part is covered only by Gordium's stated mapping, not a citation. "
                f"{every({'not_applicable'})} don't apply in any of these districts; {every({'parked'})} are "
                f"parked on the later list; {anywhere} are MISSING in at least one district. Of the gaps, {len(top)} are "
                "real rules that should exist (high or medium, listed first below); the rest are narrow or cautious "
@@ -526,7 +554,7 @@ class Audit:
                 out.append(f"{k}. **{m['what']}** ({self._sections(m['pieces'])}). {self._where(m['districts'])}; "
                            f"{m['priority']}; {said}. {m['why']}" + (f" Note: {m['note']}" if m["note"] else ""))
         out += ["", "## The table", "",
-                "✓ = in the rulebook (rule ids); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; "
+                "✓ = in the rulebook (rule ids; (mapped) = by Gordium's stated mapping, the rules don't cite it); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; "
                 "(partly ✓ …) = some parts are covered by those rules, the rest not. Each piece's reasons are in "
                 "the next section.", "",
                 "| Piece | Title | Label | " + " | ".join(ds) + " |", "|---|---|---|" + "---|" * len(ds)]
@@ -552,7 +580,8 @@ class Audit:
         out = ["## Every rule in each rulebook: measured? tested on a model?", "",
                "**Measures**: each name the rule's formulas use, and where its value comes from: *model* = "
                "model_measurement measures it from the Rhino model; *stated* = the architect states it (the model "
-               "can't show it); *none* = nothing fills it in, so the rule can only say needs review. A flag has no "
+               "can't show it); *model or stated* = counted from the floor blocks drawn, else the architect's count; "
+               "*none* = nothing fills it in, so the rule can only say needs review. A flag has no "
                "check: it always says needs review where it applies. **Tested on a model**: *real model* = the "
                "architects' Rhino models of a test site (model_measurement/tests/test_models.py checks this rule's "
                "result on them); *scenario* = a design worked by hand from the law, drawn by code and checked "
@@ -568,7 +597,8 @@ class Audit:
                 cited = ", ".join(f"§{p}" + (" (via definition)" if links[p]["how"].startswith("via definition") else "")
                                   for p in self.pieces if p in links) or "— (the chart only)"
                 names = sorted(_formula_names(rule))
-                where = lambda n: "model" if n in model else "stated" if n in stated else "**none**"
+                where = lambda n: ("model or stated" if n in model and n in stated else "model" if n in model
+                                   else "stated" if n in stated else "**none**")
                 measures = ", ".join(f"{n} ({where(n)})" for n in names) or "—"
                 out.append(f"| `{rid}` | {rule.get('kind')} | {cited} | {measures} | "
                            + (", ".join(tests.get(rid, [])) or "**none**") + " |")

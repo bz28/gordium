@@ -153,7 +153,23 @@ pieces:
         why: Nothing checks party walls or each unit's own ground-floor door; a massing model shows neither.
 
   325-3B:dwelling_two_family:
-    - what: Who may occupy each unit of a two-family dwelling
+    - lines: [[9, 3, 4]]
+      what: What a two-family dwelling is (a building containing two dwelling units)
+      all:
+        status: rulebook
+        rules: [lot_area_two_family, lot_width_two_family]
+        mapped: The two-family lot size and width apply to the house type this sentence defines, which the architect
+          states as the use.
+      R-1a, R-1b: &two_family_not_permitted
+        status: not_applicable
+        why: A two-family dwelling isn't permitted in this district (chart p.2, "-").
+        file: zoning_charts_2026-04.pdf
+        page: 2
+        quote: "Two-family dwelling [fn4] - - • • • • • • •"
+        cell: {section: Primary Uses, row: "Two-family dwelling [fn4]"}
+      R-2c: {status: rulebook, rules: [lot_area_two_family]}
+    - lines: [[9, 4, 9]]
+      what: Who may occupy each unit of a two-family dwelling
       all:
         status: not_applicable
         why: Its occupancy limits name only R-1/CR-1 and R-2/CR-2 zones.
@@ -173,7 +189,6 @@ pieces:
         why: No rule counts unrelated occupants or checks who may live in a dwelling unit; the model can't show it
           and the architect isn't asked.
         note: Lane B is drafting occupancy rules on a branch stacked on r3-hand (not in this rulebook yet).
-        also: [lot_area_two_family]
 
   325-3B:dwelling_unit:
     - lines: [[9, 10, 12]]
