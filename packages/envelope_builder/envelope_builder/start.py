@@ -144,8 +144,8 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     checker passes it, since this package can't import the checker.
 
     Unequal side yards (R-2b: one 5 ft, the other 10 ft): the house takes the larger yard on one side only, the
-    side that gives the larger house; on a tie the side away from the street on a corner lot, else the left as
-    seen from the street. `larger_side` ("left" or "right") asks for that side instead (Switch side yards). Each
+    side that gives the larger house; on a tie the left as seen from the street (on a corner lot, once the envelope
+    draws corner lots, §325-19C: the side away from the side street, _tie_side). `larger_side` ("left" or "right") asks for that side instead (Switch side yards). Each
     house is proven like any other; one that would break a rule is never returned: the other side is tried (unless
     asked for), then the larger yard on both sides, as the envelope draws it. `side_split` says which was drawn:
     {"larger_side", "larger", "smaller", "left", "right", "left_toward", "right_toward", "asked"} (each side's
@@ -197,7 +197,8 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
 
 def _tie_side(lot: Lot, facts: dict, angle: float, origin) -> str:
     """Where the larger side yard goes when either side gives as large a house: on a corner lot, the side whose
-    side lines lie farther from a street line (away from the side street); else the left, seen from the street."""
+    side lines lie farther from a street line (away from the side street); else the left, seen from the street.
+    (Corner lots get no envelope yet, so today only the left is reached; this is ready for when they do.)"""
     if facts.get("corner_lot") is not True:
         return "left"
     streets = [LineString(line) for line in facts.get("street_line") or [] if len(line) >= 2]

@@ -155,8 +155,12 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
     for rule in rules:
         if rule.get("kind") == "flag" or not rule.get("check") or not _applies(rule, measured):
             continue
+        body = formula.parse(rule["check"]).body
+        # a side yard limit inside an `or` (two ways to comply) is never split: the panel's per-side rows read each
+        # side's comparison on its own, so only a plain `and` of minimums is safe to put on one side (review round 1)
+        plain = not any(isinstance(n, ast.BoolOp) and isinstance(n.op, ast.Or) for n in ast.walk(body))
         try:
-            limits = _needs(formula.parse(rule["check"]).body, measured)
+            limits = _needs(body, measured)
         except Unreadable as e:
             notes.append(f"{rule['id']}: a limit the envelope can't read ({e}); no envelope drawn")
             return out
@@ -167,7 +171,7 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
                 notes.append(f"{rule['id']}: the limit {limit} can't be worked out for this lot")
             need[key].append(worst)
             if name in split:
-                split[name].append(worst)
+                split[name].append(worst if plain else None)
     area = [v for v in need.pop("building_area")]
     if area and None not in area:            # coverage is numbers, never a shape; unknown without a surveyed lot
         have = (measured.get("building_area") or {}).get("value")
@@ -176,9 +180,10 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
         return out
     yards = {k: max(need[k], default=0.0) for k in ("front", "side", "rear")}
     out["yards"] = yards
-    smaller = max(split["side_yard_smaller"], default=0.0)    # the smaller side's minimum; the larger meets both
-    larger = max(split["side_yard_smaller"] + split["side_yard_larger"], default=0.0)
-    if larger > smaller + 1e-9:
+    smaller = max(split["side_yard_smaller"], default=0.0) if None not in split["side_yard_smaller"] else None
+    larger = max(split["side_yard_smaller"] + split["side_yard_larger"], default=0.0) \
+        if None not in split["side_yard_smaller"] + split["side_yard_larger"] else None
+    if smaller is not None and larger is not None and larger > smaller + 1e-9:   # the larger meets both)
         out["side_split"] = {"smaller": smaller, "larger": larger}
     if need["building_height"]:
         out["height"] = min(need["building_height"])

@@ -130,6 +130,18 @@ def test_on_a_corner_lot_a_tie_puts_the_larger_yard_away_from_the_side_street():
     assert _tie_side(lot, {"corner_lot": False, "street_line": [front, [[0, 100], [0, 0]]]}, angle, origin) == "left"
 
 
+def test_a_side_yard_rule_with_two_ways_to_comply_is_never_split(r2b):
+    """Review round 1, F1: with `(5 and 10) or (7 and 7)` the panel reads each side's comparison on its own (a 5 ft
+    side would show as failing 7 ft), so the starting house keeps the cautious larger yard on both sides."""
+    rules = [dict(r, check="(side_yard_smaller >= 5 and side_yard_larger >= 10) or "
+                           "(side_yard_smaller >= 7 and side_yard_larger >= 7)") if r["id"] == "R-1b.side_yards" else r
+             for r in r2b]
+    s = site(NARROW)
+    assert envelope(s, FACTS, measure(s, FACTS), rules)["side_split"] is None
+    _, out = house(rules)
+    assert out["side_split"] is None and "Side yards" not in out["margin_note"]
+
+
 def test_equal_side_yards_are_unchanged():
     """R-1b (10 ft both sides): no split, no side words, the same house whichever side is asked for."""
     rules = check.load(rulebook_for(REPO / ITHACA, "R-1b"))["rules"]
@@ -166,14 +178,18 @@ def test_switch_plan_redraws_only_the_house_as_drawn():
              "side_split": {"larger_side": "left"}}
     tags = [logic.start_tag(start, i, 11.0, 0.0) for i in range(2)]
     boxes = [((10, 10, 0), (30, 50, 11)), ((10, 10, 11), (30, 50, 22))]
-    assert logic.switch_plan(list(zip(tags, boxes))) == {"larger_side": "right", "floor_to_floor": 11.0,
-                                                         "design_buffer": 0.0}
+    volumes = [20 * 40 * 11.0] * 2
+    assert logic.switch_plan(list(zip(tags, boxes, volumes))) == {"larger_side": "right", "floor_to_floor": 11.0,
+                                                                  "design_buffer": 0.0}
     moved = [((11, 10, 0), (31, 50, 11)), boxes[1]]
-    assert "changed" in logic.switch_plan(list(zip(tags, moved)))["refused"]
-    assert "missing" in logic.switch_plan([(tags[0], boxes[0])])["refused"]
+    assert "changed" in logic.switch_plan(list(zip(tags, moved, volumes)))["refused"]
+    notched = [volumes[0] - 2 * 2 * 11, volumes[1]]          # a corner notched out: the same box, a smaller solid
+    assert "changed" in logic.switch_plan(list(zip(tags, boxes, notched)))["refused"]
+    assert "changed" in logic.switch_plan(list(zip(tags, boxes, [None, None])))["refused"]   # not measurable
+    assert "missing" in logic.switch_plan([(tags[0], boxes[0], volumes[0])])["refused"]
     assert "no starting house" in logic.switch_plan([])["refused"]
     same = [logic.start_tag({**start, "side_split": None}, i, 11.0, 0.0) for i in range(2)]
-    assert "same on both sides" in logic.switch_plan(list(zip(same, boxes)))["refused"]
+    assert "same on both sides" in logic.switch_plan(list(zip(same, boxes, volumes)))["refused"]
     assert json.loads(tags[0])["larger_side"] == "left"
     assert logic.can_switch("Starting house: as first drawn, the largest … Side yards: 10'-0\" on the left (west), …")
     assert not logic.can_switch("Starting house: as first drawn, the largest house the rules allow; limited by …")

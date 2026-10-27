@@ -57,11 +57,11 @@ def fresh_module():
 
 
 def floors(g, doc):
-    return sorted(((str(o.Id), json.loads(text)) for o, text, _ in g._start_floors(doc)), key=lambda f: f[1]["story"])
+    return sorted(((str(o.Id), json.loads(text)) for o, text, _, _ in g._start_floors(doc)), key=lambda f: f[1]["story"])
 
 
 def retag(g, doc, side):
-    for o, text, _ in g._start_floors(doc):
+    for o, text, _, _ in g._start_floors(doc):
         tag = dict(json.loads(text), larger_side=side)
         attrs = o.Attributes.Duplicate()
         attrs.SetUserString(g.logic.START_KEY, json.dumps(tag))

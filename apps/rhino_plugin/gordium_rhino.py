@@ -3012,13 +3012,15 @@ def gordium_start():
 
 def _start_floors(doc):
     """The starting house's floor blocks in the model (each carrying logic.START_KEY), with their bounding boxes in
-    feet."""
+    feet and their volumes in cubic feet (None when not a solid Rhino can measure: then never redrawn)."""
     found = []
     for o in doc.Objects:
         text = o.Attributes.GetUserString(logic.START_KEY) if not o.IsDeleted else None
         if text:
             b = o.Geometry.GetBoundingBox(True)
-            found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max)))))
+            props = rg.VolumeMassProperties.Compute(o.Geometry) if isinstance(o.Geometry, rg.Brep) else None
+            volume = props.Volume * _scale(doc) ** 3 if props is not None else None    # (a notch changes it)
+            found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume))
     return found
 
 
@@ -3029,7 +3031,7 @@ def switch_side_yards():
     never drawn: the old one stays and the panel says why); a house the architect has changed is never redrawn."""
     doc = Rhino.RhinoDoc.ActiveDoc
     found = _start_floors(doc)
-    plan = logic.switch_plan([(text, box) for _, text, box in found], tolerance=_feet_length(
+    plan = logic.switch_plan([(text, box, volume) for _, text, box, volume in found], tolerance=_feet_length(
         doc, doc.ModelAbsoluteTolerance) + 0.01)
     if plan.get("refused"):
         say(plan["refused"])
@@ -3056,7 +3058,7 @@ def switch_side_yards():
         if ids is None:
             say("The switched starting house couldn't be drawn; the old one is kept.")
             return None
-        for o, _, _ in found:
+        for o, _, _, _ in found:
             doc.Objects.Delete(o, True)
         fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())
         if fact:

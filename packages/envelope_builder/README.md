@@ -33,8 +33,9 @@ change with the design.
   on any side breaks a rule: the front yard, a side yard, or in depth the coverage limit or the rear yard.
 - **Unequal side yards** (R-2b: `side_yard_smaller >= 5 and side_yard_larger >= 10`): the envelope keeps the larger
   yard on both sides (`side_split` says the two minimums), but the starting house takes it on one side only: both
-  ways are tried and the larger house wins; a tie goes to the left as seen from the street (on a corner lot, the
-  side away from the side street). `larger_side="left"|"right"` asks for a side (Switch side yards in Rhino). Each
+  ways are tried and the larger house wins; a tie goes to the left as seen from the street (on a corner lot it will
+  be the side away from the side street, once corner lots get an envelope: today they get none). A side yard rule
+  with two ways to comply (an `or`) is never split. `larger_side="left"|"right"` asks for a side (Switch side yards in Rhino). Each
   is proven like any other house; one that would break a rule is never returned (then the larger yard on both
   sides). On the 35 ft lot: 35 − 10 − 5 = 20 ft wide, not 15.
 - **Height and stories:** up to the height limit, split into the story limit (`stories <= N`) evenly; the top

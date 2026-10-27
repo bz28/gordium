@@ -2479,7 +2479,9 @@ def start_tag(start, story, floor_to_floor, design_buffer):
     floor-to-floor height and design buffer it was drawn with."""
     floor = start["floors"][story]
     split = start.get("side_split") or {}
-    return json.dumps({"story": story, "stories": len(start["floors"]), "outline": floor["outline"],
+    ring = floor["outline"]
+    area = abs(sum(ring[i - 1][0] * ring[i][1] - ring[i][0] * ring[i - 1][1] for i in range(len(ring)))) / 2
+    return json.dumps({"volume": area * (floor["top"] - floor["base"]), "story": story, "stories": len(start["floors"]), "outline": floor["outline"],
                        "base": floor["base"], "top": floor["top"], "larger_side": split.get("larger_side"), "floor_to_floor": floor_to_floor,
                        "design_buffer": design_buffer or 0.0})
 
@@ -2492,20 +2494,24 @@ def can_switch(source_line):
 
 def switch_plan(found, tolerance=0.01):
     """What Switch side yards does with the starting house's floor blocks found in the model, each (its START_KEY
-    text, its bounding box in feet: (x0, y0, z0), (x1, y1, z1)): {"larger_side": the other side, "floor_to_floor",
+    text, its bounding box in feet: (x0, y0, z0), (x1, y1, z1), its volume in cubic feet or None): {"larger_side": the other side, "floor_to_floor",
     "design_buffer"} to redraw it, or {"refused": why} when there is nothing to switch, or the house is no longer as
     Gordium drew it (moved, stretched, a floor deleted): the architect's edits are never thrown away."""
     if not found:
         return {"refused": "There is no starting house in this file to switch (GordiumStart draws one)."}
     tags = []
-    for text, (low, high) in found:
+    for text, (low, high), volume in found:
         try:
             tag = json.loads(text)
         except (TypeError, ValueError):
             return {"refused": "The starting house's record can't be read, so it isn't redrawn."}
         xs, ys = [p[0] for p in tag["outline"]], [p[1] for p in tag["outline"]]
         want = (min(xs), min(ys), tag["base"]), (max(xs), max(ys), tag["top"])
-        if any(abs(a - b) > tolerance for a, b in zip(want[0] + want[1], tuple(low) + tuple(high))):
+        same_box = all(abs(a - b) <= tolerance for a, b in zip(want[0] + want[1], tuple(low) + tuple(high)))
+        # the same box but a different solid (a notch, a chamfered corner): changed too (review round 1, F5b)
+        same_solid = volume is not None and tag.get("volume") is not None and \
+            abs(volume - tag["volume"]) <= max(1e-3 * tag["volume"], 0.01)
+        if not (same_box and same_solid):
             return {"refused": "The starting house has changed since Gordium drew it, so it isn't redrawn (your "
                                "edits are kept). Delete it and run GordiumStart for a new one."}
         tags.append(tag)
