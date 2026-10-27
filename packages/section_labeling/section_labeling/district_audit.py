@@ -25,7 +25,7 @@ What a person decides (why a piece doesn't apply, what is parked, what is missin
   own words exactly where it says (the same matcher rule sources use; not page furniture; a chart quote names its
   cell, which must be "-" for that district). Code can't prove the words support the decision, so the table marks
   each such cell [R#] and lists every reading with its quote, and the summary counts the cells that rest on one;
-- a parked item must be on the later list kept in the decisions file; an open question's link must exist;
+- a parked item must be one the decisions file lists (Ben's later list, or the brief that parked it); an open question's link must exist;
 - every rule and flag piece has decisions for every district, exactly once.
 
 The second half lists every rule in every district's rulebook with the measures its formulas need (measured
@@ -565,7 +565,7 @@ class Audit:
                "(mapped) = some part is covered only by Gordium's stated mapping, not a citation. "
                f"{every({'not_applicable'})} don't apply in any of these districts or are pointers with nothing of their "
                f"own to check; {every({'parked'})} are "
-               f"parked on the later list; {anywhere} are MISSING in at least one district. Of the gaps, {len(top)} are "
+               f"parked (deliberately deferred); {anywhere} are MISSING in at least one district. Of the gaps, {len(top)} are "
                "real rules that should exist (high or medium, listed first below); the rest are narrow or cautious "
                "gaps, how a property is run, or other kinds of project. Nothing here is a rule written in this table: "
                "the list says what is missing, ranked.", "",

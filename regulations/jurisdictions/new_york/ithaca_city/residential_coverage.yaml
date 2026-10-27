@@ -408,7 +408,7 @@ pieces:
         priority: medium
         why: No rule checks the accessory uses on chart p.2 (towers, home occupations and gardens need a special
           permit; a private garage holds at most three cars in R-1 and R-2a/R-2b, six per building in R-2c; a
-          structure for construction purposes may stay two years). ADUs and parking are on the later list.
+          structure for construction purposes may stay two years). Parking is on the later list; ADUs are parked by the queue item 10 brief.
         note: Home occupations are being drafted on Lane B's branch.
     - quote: "The off-street parking spaces listed in this column shall be provided"
       lines: [[24, 19, 21]]
