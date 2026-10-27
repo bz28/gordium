@@ -17,7 +17,7 @@ Type a command's name in Rhino's command line.
 | Command | What it does |
 |---|---|
 | `GordiumStart` | Starts a new project: the start box (below), then draws the lot and the largest legal house. |
-| `GordiumCheck` | Checks the model now and shows the result in the panel. |
+| `GordiumCheck` | Checks the model now, shows the result in the panel and writes the zoning report. On an empty model it does what `GordiumStart` does; if facts are missing it opens the start box first. It also turns live checking on. |
 | `GordiumLive` | Turns live checking on or off. On, every edit is re-checked by itself. |
 | `GordiumFacts` | Opens the start box (the same as **Edit site…**) on the project's facts, to correct them, then checks again. |
 | `GordiumOff` | Turns Gordium off for this file and removes its drawing aids. |
@@ -25,7 +25,7 @@ Type a command's name in Rhino's command line.
 
 ## 1. Start a project
 
-1. Open an empty Rhino file (feet or inches) and type `GordiumStart`. The **start box** opens, filled in with the
+1. Open an empty Rhino file (any unit; Gordium converts) and type `GordiumStart`. The **start box** opens, filled in with the
    sample project (106 Ithaca Rd, district R-1b, one-family house).
 2. Read each row:
    - **Address**: the project's address. **Look up (coming soon)** is shown but off in this version.
@@ -41,7 +41,8 @@ Type a command's name in Rhino's command line.
 3. Press **Draw**. Gordium draws the lot, the **buildable envelope** (the see-through blue volume where a building
    complies), and the largest legal house, the **starting house**, one block per floor. Then it checks it.
 
-`GordiumStart` begins from an empty lot. If the model already has a building, the command line says
+`GordiumStart` begins from a model with no building in it (an empty file, or a lot you drew with no building yet: it
+uses that lot's facts). If the model already has a building, the command line says
 `Gordium: this model already has a building; GordiumStart begins from an empty lot (use GordiumCheck to check a design)`.
 When a file already has a project, the same box opens with its last button reading **Check** instead of **Draw**.
 **Cancel** closes the box and changes nothing.
@@ -55,7 +56,6 @@ Buttons along the panel:
 
 - **Edit site…**: reopen the start box to change the facts.
 - **Pick survey lot lines…**: choose your surveyed lot lines in the model.
-- **Set grade…**: tell Gordium the ground level.
 - **Main building…** and **Pick the main building…**: when the file holds several buildings, say which one is the
   house being checked.
 - **Add to check…**: include an object Gordium left out. **Not the ground** / **This is the ground**: correct
@@ -75,8 +75,8 @@ review is about. A small notice names a rule an edit has just broken ("Rear yard
 
 ## 3. Edit and watch
 
-Move a wall, raise the roof, add a garage: the panel and the colours update (with `GordiumLive` on, or after
-`GordiumCheck`). Undo puts the model and the answers back.
+Move a wall, raise the roof, add a garage: the panel and the colours update by themselves: live checking is on after `GordiumStart` and `GordiumCheck`
+(`GordiumLive` turns it off and on again). Undo puts the model and the answers back.
 
 ## What Gordium asks you in the command line
 
@@ -114,8 +114,8 @@ skipping leaves the fact unset, so its rule keeps waiting (never 0 or No).
 
 Two parts of the start box exist in the code but are switched off while the ground is assumed flat: the **Ground**
 row (**Place spot grades…**, **Pick terrain…**, **I'll regrade: set finished ground…**, and the tick **No
-regrading near the house**) and the **Advanced** section with **Design buffer**. They will be described here when
-they come back.
+regrading near the house**) and the **Advanced** section with **Design buffer**. The panel's **Set grade…** button (tell Gordium the ground level) is switched off with it. They will be described
+here when they come back.
 
 ## What "Needs review" means
 

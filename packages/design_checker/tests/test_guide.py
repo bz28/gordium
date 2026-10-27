@@ -27,7 +27,7 @@ def test_every_button_and_tick_box_in_the_ui_is_in_the_guide():
     names |= set(re.findall(r'\(\w+, "([^"]+…?)", (?:True|not state)', LOGIC))          # the start box's row actions
     names |= {"Draw", "Check", "Cancel"}
     names = {n.strip() for n in names} - {"Gordium", ""}
-    assert all('"%s"' % n in UI for n in ("Draw", "Check", "Cancel"))
+    assert all('"%s"' % n in UI for n in ("Draw", "Check", "Cancel"))      # (these come from `"Draw" if mode ...`)
     names |= {t for t in re.findall(r'"tick": \("([^"]+)"', LOGIC)} | set(re.findall(r'\("\w+", "([^"]+…)"\)', LOGIC))
     names |= {"Advanced", "Design buffer"}
     bold = _bold(GUIDE)
