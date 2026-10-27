@@ -8,7 +8,12 @@ from rule_format.rulebook import REPO
 PLUGIN = REPO / "apps/rhino_plugin"
 GUIDE = " ".join((PLUGIN / "GUIDE.md").read_text(encoding="utf-8").split())      # (line breaks are not part of a name)
 UI = (PLUGIN / "gordium_ui.py").read_text(encoding="utf-8")
-RHINO = (PLUGIN / "gordium_rhino.py").read_text(encoding="utf-8")
+RHINO_ALL = (PLUGIN / "gordium_rhino.py").read_text(encoding="utf-8")
+# change_facts / _change_facts (a command-line edit of every fact) is called from nowhere but a test script: its prompts
+# are not what an architect sees, so they are neither required nor allowed in the guide (review round 5)
+_a = RHINO_ALL.index("def change_facts(")
+_b = RHINO_ALL.index("\ndef ", RHINO_ALL.index("def _change_facts(") + 1)
+RHINO = RHINO_ALL[:_a] + RHINO_ALL[_b:]
 LOGIC = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
 CODE = UI + RHINO + LOGIC
 
@@ -31,6 +36,7 @@ def test_every_button_and_tick_box_in_the_ui_is_in_the_guide():
 
 
 def test_the_start_box_rows_options_and_tick_are_in_the_guide():
+    assert '"choice": ("Corner lot?", CORNER_CHOICES' in LOGIC     # the row's own question, not a mention elsewhere
     for label in ("Address", "Zoning district", "Use", "Lot", "Front lot line (on the street)", "Corner lot?"):
         assert "**%s**" % label in GUIDE and label in LOGIC, label
     for choice in ("Not answered", "No: one street", "Yes: two streets"):
@@ -62,7 +68,7 @@ def test_the_command_line_prompts_in_the_guide_are_the_codes():
     for p in prompts:
         assert p.split(" (")[0] in CODE, p
     assert "(Enter when done)" in GUIDE and "(Enter when done)" in RHINO
-    assert "(Enter keeps the blue one)" in GUIDE and "(Enter keeps the blue one)" in RHINO
+    assert "Corner lot (two streets meet at it)?" not in GUIDE and "Is the ground flat?" not in GUIDE   # dead code
 
 
 def test_every_fixed_command_line_prompt_in_the_code_is_in_the_guide():

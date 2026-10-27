@@ -19,7 +19,7 @@ Type a command's name in Rhino's command line.
 | `GordiumStart` | Starts a new project: the start box (below), then draws the lot and the largest legal house. |
 | `GordiumCheck` | Checks the model now and shows the result in the panel. |
 | `GordiumLive` | Turns live checking on or off. On, every edit is re-checked by itself. |
-| `GordiumFacts` | Shows the facts Gordium is using (district, lot, street side, ground) so you can correct them. |
+| `GordiumFacts` | Opens the start box (the same as **Edit site…**) on the project's facts, to correct them, then checks again. |
 | `GordiumOff` | Turns Gordium off for this file and removes its drawing aids. |
 | `GordiumPanel` | Opens the Gordium panel (it docks beside the viewports). |
 
@@ -83,35 +83,27 @@ Move a wall, raise the roof, add a garage: the panel and the colours update (wit
 Questions come in the command line (the line at the top or bottom of Rhino). **Esc** cancels the question and
 changes nothing.
 
-Picking the street side (**Change…** on the start box):
+Picking the street side (**Change…** on the start box). Esc or Enter leaves it as it was, unless said below:
 
-- `Click a lot line on the street` (then `(Enter when done)` once one is picked, or `(Enter keeps the blue one)`
-  when it already has one). Click any piece: Gordium takes the whole street. On a corner lot, click each street once.
-- `Click each lot line on a street (` then the count picked then `); Enter when done` on a corner lot, and
-  `Click the lot line on the street` on one street.
-- `Gordium needs a Yes or a No here (Esc: nothing changes)`: said when you press Enter at the Yes/No question
-- `Gordium: this lot has no street line yet; click one (Esc cancels)`
+- `Click the lot line on the street` on a one-street lot; on a corner lot,
+  `Click each lot line on a street (`, then how many are picked, then `); Enter when done`. Click any piece:
+  Gordium takes the whole street it is on.
 - `Which street is this lot line on? (Enter leaves it unnamed)`
 - When Gordium cannot tell whether the lot line bends along one street or turns a corner it asks a **Yes** or
-  **No** question. It needs a real answer: Enter asks again, because a guess could pass a lot that does not comply.
+  **No** question. It needs a real answer: Enter asks again, with
+  `Gordium needs a Yes or a No here (Esc: nothing changes)`, because a guess could pass a lot that does not comply.
 
 Picking other things:
 
 - `Click the surveyed lot outline (Site layer); Enter keeps the one outlined` (**Pick survey lot lines…**)
-- `Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it` and
-  `Click the lot outline (a closed curve on the Site layer), or choose one; Enter keeps it`
+- `Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it` (**Use my survey…**)
 - `Click the main building (a solid on the Building layer), or choose one; Enter keeps it`
+
 The next two are asked only when the **Ground** row is on (see "Not shown in this version"):
 
 - `Click the terrain surface or mesh`
 - `Click a spot grade at a wall (Enter when done)` and
   `Click the finished ground you'll grade to, at each wall (Enter when done)`
-
-`GordiumFacts` asks one question per fact; Enter keeps what is there:
-
-- `Zone (`, the districts Gordium knows, `)`
-- `Corner lot (two streets meet at it)?`, `Is the ground flat?`, `Ground level (z, in model units)` and
-  `Is the lot outline from a survey?`
 
 A row's **Enter** button (for example "Enter bedrooms and parking spaces") asks the facts that row waits for, one
 at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, `Stories of the whole building`, and
