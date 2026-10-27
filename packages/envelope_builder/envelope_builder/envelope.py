@@ -130,7 +130,7 @@ def _applies(rule: dict, measured: dict) -> bool:
         return True
 
 
-def envelope(site: dict, facts: dict, measured: dict, rules: list[dict]) -> dict:
+def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin: float = MARGIN) -> dict:
     """{"outline": [[x, y], ...] or None, "holes", "base", "top", "yards": {front, side, rear}, "height",
     "coverage": {...} or None, "notes": [...]}: the buildable area and height, and why anything is missing."""
     notes, need = [], {"front": [], "side": [], "rear": [], "building_height": [], "building_area": []}
@@ -180,7 +180,7 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict]) -> dict
     readings = lot.readings() or [("", [], [], rest)]   # sides unclear: every other line takes the larger yard
     keep = lot.polygon
     def push(i, d):
-        return LineString(lot.edges[i]).buffer(d + MARGIN, quad_segs=QUAD_SEGS) if d > 0 else Polygon()
+        return LineString(lot.edges[i]).buffer(d + margin, quad_segs=QUAD_SEGS) if d > 0 else Polygon()
 
     for _, left, right, back in readings:
         cut = [push(i, yards["front"]) for i in front] + [push(i, yards["side"]) for i in left + right]

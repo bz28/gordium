@@ -22,3 +22,29 @@ Plain code reading the zone's rules; no AI.
 Tested by `tests/test_envelope.py`: the 106 Ithaca Rd lot gives front 25, sides 10, rear 22.5 and 35 ft; no point
 is inside a yard (a jog, an inside corner); rules that don't apply and flags add nothing; the envelope doesn't
 change with the design.
+
+## The starting building (`start.py`, GordiumStart)
+
+`largest_legal_building(site, facts, measured, rules)`: the building an architect starts designing from, as
+**stacked floor blocks, one per story**.
+
+- **Footprint:** a rectangle square to the street, set right at the front yard line, as wide as the side yards
+  allow, then as deep as the lot-coverage limit and the rear yard allow (inside the envelope above). So growing it
+  on any side breaks a rule: the front yard, a side yard, or in depth the coverage limit or the rear yard.
+- **Height and stories:** up to the height limit, split into the story limit (`stories <= N`) evenly; the top
+  floor's top sits exactly on the limit.
+- **Every number from the rules,** never typed in the code: another zone's rules give that zone's building.
+- **A lot not yet surveyed:** coverage is sized from the lot as drawn, and a note says so; the check still says
+  NEEDS REVIEW for coverage until the survey is confirmed.
+- **Can't be drawn** (no buildable area, no height limit or ground level): no floors, and the notes say why.
+- **Proven before it is returned, on any lot shape:** the building found is measured and checked with the
+  checker's own rules (`measure`, then `outcome`). If it would break any rule the lot itself doesn't already
+  break, nothing is placed and the note says "Gordium can't generate a starting building on this lot shape yet;
+  draw one and Gordium will check it". Plain four-sided lots (the R-1b kind) always get one; a flag lot or a
+  narrow neck, where the side yards close the frontage, gets the note. Never a wrong building.
+
+Tested by `tests/test_start.py`: on a rectangle, a tilted lot, a wide lot, a jogged lot and 106 Ithaca Rd, the
+building passes every outside rule of the real R-1b rulebook; growing any side by 1 ft makes a rule fail; its
+floor blocks measure as 3 stories and 35 ft; numbers changed in a copy of the rules change the building. Over 60 random lot shapes (convex or not), every building
+placed breaks no rule; a search forced to return a rectangle too deep is refused; doubling a lot's depth at
+most about doubles the search (counted, not timed).

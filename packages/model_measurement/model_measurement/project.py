@@ -13,7 +13,7 @@ from rule_format.rulebook import load
 from .measure import measure
 from .read_3dm import read_site
 
-FACT_FIELDS = {"title", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
+FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces"}
 
 
@@ -28,7 +28,7 @@ def _point(p) -> bool:
 def fact_problems(facts: dict) -> list[str]:
     """What's wrong with lot facts, by field. One check for every way facts arrive (a file, the Rhino command)."""
     problems = [f"unknown lot fact {k!r}" for k in sorted(set(facts) - FACT_FIELDS)]
-    text = {"title", "jurisdiction", "zone", "use", "lot_id", "main_building"}
+    text = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "main_building"}
     problems += [f"{k} must be text" for k in sorted(text & set(facts))
                  if facts[k] is not None and not isinstance(facts[k], str)]
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):

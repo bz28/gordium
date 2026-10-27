@@ -16,7 +16,7 @@ from model_measurement.stops import STOPS
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))           # the lots and models the other tests build
-from test_measure import FACTS, RECT, box, lot, sloped_roof_box  # noqa: E402
+from test_measure import FACTS, RECT, box, floor, lot, sloped_roof_box  # noqa: E402
 from test_read_3dm import FACTS as FILE_FACTS  # noqa: E402
 from test_read_3dm import box as file_box  # noqa: E402
 from test_read_3dm import model, on, rect, write  # noqa: E402
@@ -169,7 +169,26 @@ CASES = {
     "readings_differ": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]),
     "no_use": _plain(use=None),
     "no_district": _plain(zone=None),
-    "no_stories": _plain(stories=None),
+    "no_stories": _plain(stories=None, buildings=[]),              # nothing drawn: the count isn't known
+    "stories_below_one": _plain(stories=0, buildings=[box(10, 25, 35, 65, 0, 30)]),
+    "stories_above_drawn": _plain(stories=5, buildings=[box(10, 25, 35, 65, 0, 30)]),     # 30 ft: at most 4
+    "stories_below_floors": _plain(stories=1, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
+        box(35, 25, 45, 45, 0, 32, id="wing")]),
+    "floors_apart": _plain(stories=2, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
+                                                 floor(10, 25, 35, 65, z0=22, z1=33, id="floor 3")],
+                           main_building="floor 1"),
+    "parts_overlap": _plain(stories=2, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=10.5, z1=21.5, id="floor 2")]),
+    "part_raised": _plain(stories=3, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35.1, 25, 45, 45, 25, 35, id="room")]),
+    "basement_part": _plain(main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35, 25, 45, 45, -10, 10.5, id="wing")]),
+    "floors_misaligned": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
+                                                         floor(13, 25, 38, 65, z0=11, z1=22, id="floor 2")]),
+    "basement_story": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=-9, z1=0, id="basement"),
+                                                      floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
+                                                      floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2")]),
     "no_rooms": _plain(),
     "ground_unknown": _plain(ground_is_flat=None),
     "sloped_ground": _plain(ground_is_flat=False),

@@ -97,10 +97,44 @@ Every reason the code gives today comes from the table:
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
   it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
-- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "enter the number of
-  stories"; "enter bedrooms / parking spaces".
+- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
+  are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
+  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces".
+- **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
+  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
+  roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
+  they disagree it's a question, never an override. "a floor block below the ground: whether a
+  basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
+  "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
+  together, or draw the overhang as part of its floor". Every solid one over another in plan (plain or floor
+  blocks) is the same building whatever the gap between them (a tolerance never decides what the building is), and
+  a real gap between its levels asks: "parts of the building drawn one over another don't stand on each other (from
+  {low} ft to {high} ft): a floor not drawn, or a space open to below? draw the missing floor, or check the
+  blocks". Parts at the same level (an L-shaped house of two stacks) are no gap. A plain part starting above the ground
+  (a room beside the roof edge or over it, touching in plan or not) asks, whatever was typed: "part of the
+  building ({what}) starts above the ground: it may be another story: draw its stories as floor blocks, or check
+  the count". One starting partly inside the one below
+  (a floor moved down into it, a room sunk into the roof) asks too: "part of the building ({what}) starts partly
+  inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
+  a part a tenth of a foot never turns one count into another. Stories are read from the drawing as far as it allows: floor blocks are
+  counted, and a part drawn as a plain solid (or plain solids stacked) h tall can hold at most floor(h / 7 ft)
+  stories (7 ft: the lowest ceiling a habitable room may have, NYS Residential Code R305.1), and every
+  building at least a first story (§325-3; a count of 0: "the stories typed ({typed}) are fewer than one: every
+  building has at least a first story (§325-3): check the count"). So a
+  12 ft garage holds one, and a 30 ft plain house one to four: then the count is a question ("a 30 ft solid could
+  hold up to 4 stories: draw its floors or enter the count"), and the count entered stands for the whole building
+  only within what the drawing allows: "the stories typed ({typed}) are fewer than the floor blocks drawn
+  ({drawn}): check the count, or the floors"; "the stories typed ({typed}) are more than the drawing could hold
+  ({what}, {height} ft tall: at most {most}, at 7 ft a story, R305.1): check the count, or the drawing". Only a
+  plain part standing on the ground and lower than 7 ft (a porch slab or steps) fits inside the first story and is
+  left out; one raised, on a roof or reaching below the ground (§325-3's STORY has no least height) asks. Any part reaching below the ground, whatever was typed: "part of the building
+  ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
+  question for the architects".
 - **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
-  measurements"; "more than one building: pick the main building"; "a
+  measurements"; "more than one building: pick the main building" (with none picked and exactly one starting house, it is
+  the main building, assumed: every measurement from it carries `main_assumed`, and every other building that
+  could be a principal one (enclosed, at least 7 ft tall and 70 sf: NYS Residential Code R305.1, R304.1) is also
+  read as if it were the main one, so the assumption never passes what a pick wouldn't); "a
   building isn't inside the lot: {what}" (which one; the yards wait only if it is the main building); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the

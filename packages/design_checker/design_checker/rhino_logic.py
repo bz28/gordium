@@ -7,6 +7,9 @@ import queue
 import threading
 
 LAYERS = {"lot": "Site", "building": "Building"}
+ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
+FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew: "<story>;<height drawn, ft>"
+MASSING = "Gordium::Massing"            # where GordiumStart draws the starting building: building objects too
 SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
                 "Leader", "LinearDimension", "AngularDimension", "RadialDimension", "OrdinateDimension")
@@ -25,6 +28,8 @@ def classify(full_path, kind, holds_building=False):
     None (anything else, ignored), or a problem sentence. Nothing that could be part of a building is dropped:
     a block on the building layer, or a block holding building objects wherever it is placed, and any other
     geometry on the building layer, are problems, so the checker says NEEDS REVIEW."""
+    if on_layer(full_path, MASSING):
+        full_path = LAYERS["building"]
     if kind.startswith("InstanceReference") and (on_layer(full_path, LAYERS["building"]) or holds_building):
         return "a block on the Building layer can't be measured yet (explode it)"
     if on_layer(full_path, LAYERS["lot"]):
@@ -171,8 +176,35 @@ def after_corner_answer(facts, was_corner):
     return out
 
 
+def notice(before, rows):
+    """(the failing rule ids now, the notice lines): one notice for the rules that fail now and didn't at the last
+    check ("Rear yard no longer complies: …", or "2 items no longer comply: Rear yard, Lot coverage"); none on the
+    first check (before is None) or when nothing newly fails. A rule failing under every reading counts."""
+    fails = [r for r in rows if r.get("Fails") or r.get("Error") == "FAIL"]
+    now = {r["Rule id"] for r in fails}
+    if before is None:
+        return now, []
+    new = [r for r in fails if r["Rule id"] not in before]
+    if not new:
+        return now, []
+    names = [r.get("Short") or r["Requirement"] for r in new]
+    if len(new) == 1:
+        detail = new[0].get("Line") or ""
+        if detail.startswith(names[0]):           # the line already names the item: say it once
+            detail = detail[len(names[0]):].lstrip(": ")
+        return now, [names[0] + " no longer complies" + (": " + detail if detail else "")]
+    return now, [str(len(new)) + " items no longer comply: " + ", ".join(names)]
+
+
+def suggested_ground(building_bottoms, lot_bottom):
+    """The ground level to suggest (feet or model units, as given): the lowest point of the buildings, or with no
+    building yet (a new project on the architect's own lot) the lot outline's level. Shown in the dialog, never
+    used unconfirmed."""
+    return min(building_bottoms) if building_bottoms else lot_bottom
+
+
 ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
-ASK_LIMITS_S = {}         # s, per command that can take longer
+ASK_LIMITS_S = {"start": 120}   # s, per command that can take longer: the largest building, on a deep lot
 
 
 def ask_limit(cmd):

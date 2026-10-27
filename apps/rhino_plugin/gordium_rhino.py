@@ -7,8 +7,8 @@ by its .venv in the background; docs/decisions/2026-10-20_rhino_talks_to_python.
 objects are copied into a small temporary .3dm, sent with the lot facts, and the answer is drawn. Nothing in
 the model is changed: highlights, the envelope and the message are drawn on top (a display conduit).
 
-Commands (set up by install.py): GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts),
-GordiumOff (stop and clear the drawing).
+Commands (set up by install.py): GordiumStart (a new project: the lot and the largest legal starting building),
+GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOff (stop and clear the drawing).
 """
 
 import json
@@ -79,6 +79,7 @@ LAYERS = logic.LAYERS
 ID_KEY = "gordium:id"
 SECTION, ENTRY = "Gordium", "lot_facts"
 IDLE_SECONDS = 0.5                           # a re-check waits this long after the last edit
+TOAST_SECONDS = 6                            # the "no longer complies" notice shows this long at most
 
 GREEN, RED, AMBER = System.Drawing.Color.FromArgb(31, 122, 77), System.Drawing.Color.FromArgb(200, 50, 43), \
     System.Drawing.Color.FromArgb(154, 100, 0)
@@ -236,9 +237,12 @@ def suggested_facts(doc, zones):
         facts["lot_id"] = str(lot.Id)
         a, b = min(_segments(lot.Geometry), key=lambda s: (s[0].Y + s[1].Y) / 2)
         facts["street_line"] = [[[a.X, a.Y], [b.X, b.Y]]]
+    boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
+    lot_z = max(lots, key=lambda o: _area(o.Geometry)).Geometry.GetBoundingBox(True).Min.Z if lots else None
+    ground = logic.suggested_ground([b.Min.Z for b in boxes], lot_z)
+    if ground is not None:
+        facts["grade_elevation"] = ground
     if buildings:
-        boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
-        facts["grade_elevation"] = min(b.Min.Z for b in boxes)
         if len(buildings) > 1:
             big = max(zip(buildings, boxes), key=lambda ob: ob[1].Diagonal.X * ob[1].Diagonal.Y * ob[1].Diagonal.Z)
             facts["main_building"] = str(big[0].Id)
@@ -288,6 +292,9 @@ def export(doc, path):
             attrs = Rhino.DocObjects.ObjectAttributes()
             attrs.LayerIndex = index
             attrs.SetUserString(ID_KEY, str(o.Id))
+            floor = o.Attributes.GetUserString(logic.FLOOR_KEY)
+            if floor:
+                attrs.SetUserString(logic.FLOOR_KEY, floor)
             g = o.Geometry
             if isinstance(g, rg.SubD):
                 g = g.ToBrep(rg.SubDToBrepOptions.Default)
@@ -403,11 +410,21 @@ def draw_screen(o, e):
         x, y = int(a.X) - width - 12 if a.X <= b.X else int(a.X) + 12, int(a.Y) - 30
         d.Draw2dRectangle(System.Drawing.Rectangle(x, y, width, 24), RED, 1, System.Drawing.Color.White)
         d.Draw2dText(label, RED, rg.Point2d(x + 8, y + 4), False, 14)
+    toast = getattr(o, "toast", None)
+    active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
+    if toast and time.time() < toast[1] and active is not None and e.Viewport.Id == active.ActiveViewportID:
+        rows = ["✕ " + line for line in toast[0]]         # bottom left, active view only
+        width = max(len(row) for row in rows) * 8 + 28
+        x, y = 14, int(e.Viewport.Bounds.Height) - (22 * len(rows) + 14) - 64   # above the axis icon
+        d.Draw2dRectangle(System.Drawing.Rectangle(x, y, width, 22 * len(rows) + 14), RED, 2,
+                          System.Drawing.Color.FromArgb(245, 255, 251, 250))
+        for i, row in enumerate(rows):
+            d.Draw2dText(row, RED, rg.Point2d(x + 14, y + 9 + i * 22), False, 14)
     if not o.message:
         return
     state, text, lines = o.message
-    color = {"pass": GREEN, "fail": RED, "review": AMBER}.get(state, AMBER)
-    mark = {"pass": "✓", "fail": "✗", "review": "?"}.get(state, "?")
+    color = {"pass": GREEN, "complies": GREEN, "fail": RED, "review": AMBER}.get(state, AMBER)
+    mark = {"pass": "✓", "complies": "✓", "fail": "✗", "review": "?"}.get(state, "?")
     rows = ["Gordium · " + mark + " " + text] + list(lines)[:6]
     x, y, h = 14, 14, 22
     width = max(len(r) for r in rows) * 8 + 24
@@ -509,11 +526,25 @@ def show_panel(p, result, facts, error=None):
               "NEEDS REVIEW": ed.Color.FromArgb(154, 100, 0)}
     if error is not None:                   # nothing is shown as checked when the check didn't run
         layout.AddRow(_label("Can't check this model: " + error, colors["NEEDS REVIEW"], True))
-    for r in (result or {}).get("rows", []):
+    def row(into, r):
         detail = str(r["Table limit"]) + " · you have " + str(r["Proposed"]) + " " + str(r["Units"])
         if r["Error"] == "NEEDS REVIEW":
-            detail = r["Why"]
-        layout.AddRow(_label(r["Error"], colors.get(r["Error"]), True), _label(r["Requirement"] + "\n" + detail))
+            detail = r["Why"] + (("\n✗ " if r.get("Fails") else "\n✓ ") + r["Provisional"] if r.get("Provisional") else "")
+        into.AddRow(_label(r["Error"], colors.get(r["Error"]), True), _label(r["Requirement"] + "\n" + detail))
+
+    for r in (result or {}).get("rows", []):
+        row(layout, r)
+    interior = (result or {}).get("interior") or []
+    if interior:                            # the inside of the building isn't checked in this phase: folded away
+        inside = ef.DynamicLayout()
+        inside.Spacing = ed.Size(6, 4)
+        for r in interior:
+            row(inside, r)
+        fold = ef.Expander()
+        fold.Header = _label("Not checked yet: interior (" + str(len(interior)) + ")")
+        fold.Content = inside
+        fold.Expanded = False
+        layout.AddRow(fold)
     env = (result or {}).get("envelope") or {}
     if env.get("coverage") and env["coverage"].get("over") is not None:
         c = env["coverage"]
@@ -552,7 +583,8 @@ def panel():
 
 def _describe(facts, uses):
     ground = facts.get("grade_elevation")
-    return (CITY + " · " + str(facts.get("zone")) + " · " + uses.get(facts.get("use"), str(facts.get("use"))) +
+    return ((facts["address"] + "\n" if facts.get("address") else "") +
+            CITY + " · zone " + str(facts.get("zone")) + " · " + uses.get(facts.get("use"), str(facts.get("use"))) +
             "\nStreet side = the highlighted blue line · " +
             ("a corner lot (two streets)" if facts.get("corner_lot") else "not a corner lot") +
             ("\nMain building = the one outlined in blue" if facts.get("main_building") else "") +
@@ -580,6 +612,8 @@ def confirm(doc, facts, options):
     _highlight(doc, facts)
     try:
         if STATE.get("auto_ok"):          # scripted runs (tests, the demo): accept the prefilled facts
+            if STATE.get("on_confirm"):   # ...after recording what the box shows (the demo captures it)
+                STATE["on_confirm"](doc, facts, _describe(facts, options["uses"]))
             return facts
         dialog = ef.Dialog[bool]()
         dialog.Title = "Gordium"
@@ -821,10 +855,13 @@ def run_check(doc, report=True):
         env = _envelope_brep(doc, result.get("envelope")) if STATE.get("envelope_on", True) else None
         o.envelope = env
         o.box = env.GetBoundingBox(True) if env else rg.BoundingBox.Empty
-        STATE["last"] = {"summary": s, "rows": [{k: r[k] for k in ("Requirement", "Table limit", "Proposed", "Units",
-                                                                    "Error", "Rule id", "Why")} for r in result["rows"]],
+        STATE["last"] = {"summary": s, "rows": [{k: r.get(k) for k in ("Requirement", "Table limit", "Proposed", "Units",
+                                                                        "Error", "Rule id", "Why", "Provisional")}
+                                                for r in result["rows"]],
+                         "interior": [r["Rule id"] for r in result.get("interior", [])],
                          "red": result["red"], "dims": result.get("dims"), "envelope": result.get("envelope"),
                          "at": time.time()}
+        _newly_failing(doc, result)
         if not STATE.get("headless"):
             show_panel(panel(), result, facts)
         return result
@@ -839,6 +876,56 @@ def run_check(doc, report=True):
     finally:
         STATE["running"] = False
         doc.Views.Redraw()
+
+
+# ---- "now fails": a short note, only when a rule starts failing --------------------------------------------
+
+def _newly_failing(doc, result):
+    """A short note for each rule that fails now and didn't at this document's last check: never for a failure
+    that was already there, never on the first check, and never in a dialog (it goes by itself)."""
+    seen = STATE.setdefault("fails_by_doc", {})
+    seen[doc.RuntimeSerialNumber], notice = logic.notice(seen.get(doc.RuntimeSerialNumber), result["rows"])
+    if not notice:
+        return []
+    STATE.setdefault("toasts", []).append(notice)      # kept for scripted runs (tests, the demo)
+    if not STATE.get("headless"):
+        _toast(notice)
+    return notice
+
+
+def _toast(lines):
+    """The notice, drawn bottom left in the active view (no window, no button); it clears at the next command or
+    after a few seconds."""
+    o = overlay()
+    o.toast = (list(lines), time.time() + TOAST_SECONDS)
+    if STATE.get("command_hook") is None:              # the next command clears it
+        hook = _handler(System.EventHandler[Rhino.Commands.CommandEventArgs], lambda s, e: _clear_toast())
+        _on(Rhino.Commands.Command, "BeginCommand", hook)
+        STATE["command_hook"] = hook
+    timer = STATE.get("toast_timer")
+    if timer is None:
+        timer = ef.UITimer()
+        timer.Interval = 0.5
+        timer.Elapsed += logic.current_only(lambda s, e: _toast_tick(), _is_current)
+        STATE["toast_timer"] = timer
+        LEFTOVERS["toast_timer"] = timer.Stop            # a later copy of this script stops it
+    timer.Start()
+    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
+
+
+def _toast_tick():
+    o = overlay()
+    if getattr(o, "toast", None) and time.time() >= o.toast[1]:
+        _clear_toast()
+
+
+def _clear_toast():
+    o = overlay()
+    if getattr(o, "toast", None):
+        o.toast = None
+        if STATE.get("toast_timer"):
+            STATE["toast_timer"].Stop()
+        Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
 
 
 # ---- live mode -------------------------------------------------------------------------------------------
@@ -956,6 +1043,10 @@ def open_report():
 def off():
     _unhook()
     documents(False)
+    hook = STATE.pop("command_hook", None)
+    if hook is not None:
+        _off(Rhino.Commands.Command, "BeginCommand", hook)
+    _clear_toast()
     STATE["live"] = False
     o = STATE.get("overlay")
     if o is not None:
@@ -974,6 +1065,8 @@ def off():
 def gordium_check():
     """Confirm the lot facts whenever any required one is missing (keeping what is saved), then check."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if not _buildings(doc) and not _lot_candidates(doc):    # an empty model: a new project starts here
+        return gordium_start()
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     try:
         facts = current_facts(doc)
@@ -989,6 +1082,112 @@ def gordium_check():
     live(True)                                      # live mode is on by default
     if result is not None:
         Rhino.RhinoApp.WriteLine("Gordium: " + result["summary"]["text"])
+    return result
+
+
+# ---- GordiumStart ----------------------------------------------------------------------------------------
+
+def _layer(doc, path):
+    """The layer at a full path ("Gordium::Massing"), made (with its parents) if it isn't there."""
+    index = doc.Layers.FindByFullPath(path, -1)
+    if index >= 0:
+        return index
+    parent = None
+    for depth, name in enumerate(path.split("::")):
+        full = "::".join(path.split("::")[:depth + 1])
+        index = doc.Layers.FindByFullPath(full, -1)
+        if index < 0:
+            layer = Rhino.DocObjects.Layer()
+            layer.Name = name
+            if parent is not None:
+                layer.ParentLayerId = doc.Layers[parent].Id
+            index = doc.Layers.Add(layer)
+        parent = index
+    return index
+
+
+def _add_lot(doc, sample):
+    """The sample lot (in feet) as a closed outline on the Site layer, named for where it came from."""
+    points = [_model_point(doc, p) for p in sample["lot"]]
+    curve = rg.PolylineCurve(points + [points[0]])
+    attrs = Rhino.DocObjects.ObjectAttributes()
+    attrs.LayerIndex = _layer(doc, LAYERS["lot"])
+    attrs.Name = sample["lot_name"]
+    return doc.Objects.AddCurve(curve, attrs)
+
+
+def add_floors(doc, start):
+    """The starting building: one solid per story, stacked, as one group on Gordium::Massing (so a Move moves the
+    house), named Floor 1, 2… None, with nothing added, if a floor isn't a box Rhino can make."""
+    k = 1.0 / _scale(doc)
+    breps = []
+    for floor in start["floors"]:
+        corners = [rg.Point3d(x * k, y * k, z * k) for z in (floor["base"], floor["top"]) for x, y in floor["outline"]]
+        breps.append(rg.Brep.CreateFromBox(corners) if len(corners) == 8 else None)
+    if not breps or any(b is None for b in breps):
+        return None                     # nothing added: the caller says so
+    group = doc.Groups.Add("Gordium starting building")
+    ids = []
+    for i, (floor, brep) in enumerate(zip(start["floors"], breps)):
+        a = Rhino.DocObjects.ObjectAttributes()
+        a.LayerIndex = _layer(doc, logic.MASSING)
+        a.Name = "Floor " + str(i + 1)
+        # one story, at the height drawn: what makes it count as a story (a stretched block no longer does)
+        a.SetUserString(logic.FLOOR_KEY, str(i + 1) + ";" + repr(floor["top"] - floor["base"]))
+        a.AddToGroup(group)
+        ids.append(doc.Objects.AddBrep(brep, a))
+    return ids
+
+
+def gordium_start():
+    """A new project: the prefilled facts (address, building type, zone, street side) for the architect to confirm,
+    then the lot and the largest legal starting building as stacked floors, checked, with live mode on. Starts
+    from a model with no building in it (an existing design is checked with GordiumCheck)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if _buildings(doc):
+        Rhino.RhinoApp.WriteLine("Gordium: this model already has a building; GordiumStart begins from an empty lot "
+                                 "(use GordiumCheck to check a design)")
+        return None
+    options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
+    if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
+        sample = ask({"cmd": "sample_site"})
+        _add_lot(doc, sample)
+        facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
+                                       suggested_facts(doc, options["zones"]))
+        facts["lot_id"] = str(_lot_candidates(doc)[0].Id)
+    else:                               # the architect's own lot: their saved facts, else the suggestions
+        try:
+            saved = current_facts(doc)
+        except ValueError:
+            saved = {}
+        facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
+    facts = confirm(doc, facts, options)
+    if facts is None:
+        Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
+        return None
+    save_facts(doc, facts)
+    path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
+    export(doc, path)
+    start = ask({"cmd": "start", "model": path, "facts": facts})
+    STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
+    for note in start.get("notes") or []:
+        Rhino.RhinoApp.WriteLine("Gordium: " + note)
+    if not start.get("floors"):
+        Rhino.RhinoApp.WriteLine("Gordium: no starting building could be drawn")
+        live(True)                   # the architect draws one; it is checked as they go
+        documents(True)
+        return None
+    if add_floors(doc, start) is None:
+        Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; draw one and Gordium will check it")
+        live(True)
+        documents(True)
+        return None
+    doc.Views.Redraw()
+    result = run_check(doc, report=False)
+    live(True)
+    documents(True)
+    Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
+                             logic.MASSING)
     return result
 
 

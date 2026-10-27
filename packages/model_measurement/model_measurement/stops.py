@@ -48,7 +48,28 @@ STOPS = {
     # facts a massing model doesn't show, until they are entered
     "no_use": "choose the use",
     "no_district": "enter the lot's zoning district (zone)",
-    "no_stories": "enter the number of stories",
+    "no_stories": "no floor blocks are drawn for the building, so its stories aren't drawn: draw each story as its "
+                  "own solid standing on the one below (as Gordium's starting building is), or enter the number of "
+                  "stories",
+    "stories_below_floors": "the stories typed ({typed}) are fewer than the floor blocks drawn ({drawn}): check the "
+                            "count, or the floors",
+    "floors_apart": "parts of the building drawn one over another don't stand on each other (from {low} ft to "
+                    "{high} ft): a floor not drawn, or a space open to below? draw the missing floor, or check the "
+                    "blocks",
+    "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
+                     "ft): move it to stand on the one below, or join them",
+    "part_raised": "part of the building ({what}) starts above the ground: it may be another story: draw its "
+                   "stories as floor blocks, or check the count",
+    "stories_below_one": "the stories typed ({typed}) are fewer than one: every building has at least a first story "
+                         "(§325-3): check the count",
+    "stories_above_drawn": "the stories typed ({typed}) are more than the drawing could hold ({what}, {height} ft "
+                           "tall: at most {most}, at 7 ft a story, R305.1): check the count, or the drawing",
+    "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "
+                     "story (§325-3) isn't measured yet: an open question for the architects",
+    "floors_misaligned": "floors misaligned: a floor block sticks out past the one below it (one floor moved on its "
+                         "own?): move the floors together, or draw the overhang as part of its floor",
+    "basement_story": "a floor block below the ground: whether a basement or cellar counts as a story (§325-3) isn't "
+                      "measured yet: an open question for the architects",
     "no_rooms": "enter bedrooms / parking spaces",
     # the buildings
     "no_building": "no building on the Building layer",

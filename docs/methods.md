@@ -149,7 +149,27 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
 - **Tested by:** the architects' design drawn exactly as their spreadsheet describes gives every one of their numbers and their PASS/FAIL on 11/11 rows; their own model, measured, confirms the discrepancies in `discrepancies_with_architects.md` §4 by code; made-up lots with known answers cover tilted lots, a curved street, a jog, corner lots, two buildings, an overhang and a pitched roof; CI re-measures every committed model.
 - **Weakness:** curved walls and roofs, sloped ground and story counting aren't measured yet (reported, never approximated); a part above the main roof (a chimney, parapet or bulkhead) gives NEEDS REVIEW, with the height read both leaving it out and to its top.
 
-## 16. What's not decided or not built
+## 16. Starting a project in Rhino (code, PR 14)
+
+- **What:** `GordiumStart` (or `GordiumCheck` on an empty model) shows one prefilled box first (address, zone,
+  building type, street side, survey, corner lot, ground). On OK it draws the lot and the largest legal starting
+  building as stacked floor blocks (`envelope_builder.start`): inside every yard, at the coverage and height
+  limits, one block per story. On any lot shape the building is measured and checked with the checker's own rules
+  before it is drawn; if it would break one, nothing is drawn and Gordium says it can't generate a starting
+  building on this lot shape yet, so the architect draws one and Gordium checks it. Live checking is on: after each edit the corner message updates, failing parts
+  turn red, and a short note shows in the view only when a rule newly fails.
+- **Stories from the shape:** Gordium's own floor blocks (each marked as one story when drawn) are counted.
+  Anything else stacked (a podium, a bulkhead, a roof solid) and any typed count are readings: if they disagree
+  it's a question. One solid with no floors asks for floors or a count. Never guessed from the height.
+- **"Complies" without a guess:** a rule waiting on how the law reads (which lines are side lot lines) is worked
+  out under every reading; if every reading passes, the design is said to comply whichever way the question is
+  answered. The rule's result stays NEEDS REVIEW. A lot not yet surveyed is a missing fact, not a reading: those
+  rules say "passes with the lot as drawn (confirm the survey)" and stay amber.
+- **Tested by:** the generated building passes every outside R-1b rule on made-up lots and 106 Ithaca Rd, and is
+  maximal (1 ft more on any side breaks a rule); over 60 random lot shapes no building placed breaks a rule; the whole flow run in Rhino 8 from an empty document (PR
+  description).
+
+## 17. What's not decided or not built
 
 - How model objects are identified beyond the layers (names, or asking every time).
 - Site facts: zone lookup from the address, lot lines and area (survey vs city records), ground levels.

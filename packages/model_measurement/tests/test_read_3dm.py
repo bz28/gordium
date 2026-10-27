@@ -268,6 +268,27 @@ def test_a_single_precision_mesh_that_far_out_is_reported_not_measured(tmp_path)
     assert h["value"] is None and "may be single precision" in h["reason"]
 
 
+def test_a_floor_blocks_mark_survives_the_file():
+    """GordiumStart marks each floor block "<story>;<height drawn>"; the copy sent to the checker keeps it."""
+    import tempfile
+    from pathlib import Path
+    from model_measurement.read_3dm import FLOOR_KEY
+    m = model()
+    rect(m, 0, 0, 50, 100)
+    a = on(1)
+    a.SetUserString(FLOOR_KEY, "1;11.5")
+    m.Objects.AddBrep(r.Brep.CreateFromBoundingBox(r.BoundingBox(10, 25, 0, 35, 65, 11.5)), a)
+    box(m, 10, 25, 35, 65, 30)
+    site = read_site(write(m, Path(tempfile.mkdtemp())), FACTS)
+    assert sorted(b["floor"] or 0 for b in site["buildings"]) == [0, 11.5]
+
+
+def test_the_rhino_side_uses_the_same_keys():
+    from design_checker import rhino_logic
+    from model_measurement import read_3dm
+    assert (rhino_logic.ID_KEY, rhino_logic.FLOOR_KEY) == (read_3dm.ID_KEY, read_3dm.FLOOR_KEY)
+
+
 def test_a_single_precision_mesh_reads_as_the_numbers_typed(tmp_path):
     """Stress test: a mesh made with Vertices.Add holds single-precision points; 27 ft drawn in millimetres
     (8229.6 mm) was read as 26.999999 ft, so a design exactly at a limit failed. Near the origin its points are
