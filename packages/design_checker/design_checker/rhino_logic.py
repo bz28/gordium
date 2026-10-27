@@ -2,6 +2,7 @@
 Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
+import contextlib
 import datetime as _dt
 import json
 import queue
@@ -1665,27 +1666,26 @@ def last_check_at(checked_at, document):
     return (checked_at or {}).get(document)
 
 
-def gate_actions(actions, box_open, say, open_ok=("legend",)):
-    """The panel's actions, each doing nothing but saying BOX_BUSY while a start box is open (one choke point: none of
-    them writes to the model, runs a check or opens another box under an open one; verification round of PR #19).
-    `open_ok`: the ones that only show something (the legend)."""
-    def gated(name, fn):
-        def run(*args, **kwargs):
-            if box_open() and name not in open_ok:
-                say(BOX_BUSY)
-                return None
-            return fn(*args, **kwargs)
-        return run
-    return {name: gated(name, fn) for name, fn in actions.items()}
+# Each panel change is one Rhino undo step, named in Edit > Undo by what it did (a change written outside any undo
+# record is skipped by Ctrl+Z, which undoes the architect's own earlier edit instead: #32's review, 2026-10-26)
+UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",
+              "main": "Gordium: pick the main building", "add": "Gordium: add to check",
+              "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
+              "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
+              "edit_site": "Gordium: the start box", "grade": "Gordium: the start box"}
 
 
-def recovery_message(removed, back):
-    """What recovery did, in words (None when it did nothing)."""
-    def n(k):
-        return "%d object%s" % (k, "s" if k != 1 else "")
-    parts = (["removed %s an unfinished start box drew" % n(removed)] if removed else []) + \
-        (["put back %s it had set aside" % n(back)] if back else [])
-    return " and ".join(parts) or None
+@contextlib.contextmanager
+def undo_step(doc, words):
+    """Everything written to `doc` inside it is one undo step called `words` (Rhino's BeginUndoRecord /
+    EndUndoRecord), ended even when the change fails. Serial 0: Rhino is already recording (inside a command), and
+    that record holds the change: never ended here."""
+    serial = doc.BeginUndoRecord(words)
+    try:
+        yield
+    finally:
+        if serial:
+            doc.EndUndoRecord(serial)
 
 
 def undo_record_to_end(held, doc_serial):
@@ -1708,6 +1708,29 @@ def dirty_after_undo(dirty_at, now):
     before the Undo can never count as covering it (should_recheck: last_at >= dirty_at; review round 2, P1: an Undo
     within 0.5 s of a check left the screen cleared and the panel showing the model as it was before)."""
     return max(dirty_at or 0, now)
+
+
+def gate_actions(actions, box_open, say, open_ok=("legend",)):
+    """The panel's actions, each doing nothing but saying BOX_BUSY while a start box is open (one choke point: none of
+    them writes to the model, runs a check or opens another box under an open one; verification round of PR #19).
+    `open_ok`: the ones that only show something (the legend)."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if box_open() and name not in open_ok:
+                say(BOX_BUSY)
+                return None
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+def recovery_message(removed, back):
+    """What recovery did, in words (None when it did nothing)."""
+    def n(k):
+        return "%d object%s" % (k, "s" if k != 1 else "")
+    parts = (["removed %s an unfinished start box drew" % n(removed)] if removed else []) + \
+        (["put back %s it had set aside" % n(back)] if back else [])
+    return " and ".join(parts) or None
 
 
 def draw_then_commit(session, save):

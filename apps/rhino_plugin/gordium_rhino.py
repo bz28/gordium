@@ -907,7 +907,8 @@ def set_labels(on):
         say(logic.NO_DOCUMENT)
         return
     state = dict(_ui_state(doc), show_labels=bool(on))
-    _save_ui_state(doc, state)
+    with logic.undo_step(doc, logic.UNDO_WORDS["labels"]):
+        _save_ui_state(doc, state)
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(state)
     doc.Views.Redraw()
 
@@ -947,16 +948,17 @@ def pick_survey():
         return
     facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
     facts["lot_surveyed"] = True
-    saved_ui = logic.settle(_ui_state(doc), "lot")
-    _save_ui_state(doc, saved_ui)
-    left = logic.unsettled(saved_ui)
-    if left:
-        facts["unsettled"] = left
-    else:
-        facts.pop("unsettled", None)
-    _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
-    save_facts(doc, facts)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["survey"]):     # one Ctrl+Z puts it all back (asked first, outside)
+        saved_ui = logic.settle(_ui_state(doc), "lot")
+        _save_ui_state(doc, saved_ui)
+        left = logic.unsettled(saved_ui)
+        if left:
+            facts["unsettled"] = left
+        else:
+            facts.pop("unsettled", None)
+        _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
+        save_facts(doc, facts)
+        run_check(doc, report=False)
 
 
 def _grade_points(doc, finished=False):
@@ -1033,13 +1035,44 @@ def enter_rooms(needs):
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
-    save_facts(doc, logic.update_counts(facts, answers))
-    run_check(doc, report=False)
-    refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
-    if refused:                         # fewer stories than the floors drawn: the measuring refuses it, so is it
+    new = logic.update_counts(facts, answers)
+    checked = "stories" in answers     # fewer stories than the floors drawn: the measuring refuses it, so a count
+    if checked:                         # is tried first, unrecorded and put back as stored: never a step of nothing
+        refused = _tried(doc, new)
+        if refused:
+            run_check(doc, report=False)           # the facts as stored, checked again
+            say(refused)
+            return
+    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):
+        save_facts(doc, new)
+    if not checked:                     # (tried: its check was of these very facts)
+        run_check(doc, report=False)
+
+
+def _tried(doc, facts):
+    """The measuring's words if it refuses `facts` (else None): checked with them saved while undo recording is off,
+    then the facts put back exactly as stored, so nothing is left changed and no undo step made (the last check is
+    of `facts`: the caller checks again if it doesn't keep them)."""
+    stored, recording = doc.Strings.GetValue(SECTION, ENTRY), doc.UndoRecordingEnabled
+    doc.UndoRecordingEnabled = False
+    try:
         save_facts(doc, facts)
         run_check(doc, report=False)
-        say(refused)
+        return logic.refused_stories((STATE.get("last") or {}).get("items"))
+    except Exception:
+        _put_back(doc, stored)
+        run_check(doc, report=False)               # never a result left on screen for facts not kept
+        raise
+    finally:
+        _put_back(doc, stored)
+        doc.UndoRecordingEnabled = recording         # as it was (never turned on by Gordium)
+
+
+def _put_back(doc, stored):
+    if stored is None:
+        doc.Strings.Delete(SECTION, ENTRY)
+    else:
+        doc.Strings.SetString(SECTION, ENTRY, stored)
 
 
 def pick_main_building():
@@ -1059,8 +1092,11 @@ def pick_main_building():
         return
     if picked:
         facts["main_building"] = picked
-        save_facts(doc, facts)
-    run_check(doc, report=False)
+        with logic.undo_step(doc, logic.UNDO_WORDS["main"]):
+            save_facts(doc, facts)
+            run_check(doc, report=False)
+    else:
+        run_check(doc, report=False)
 
 
 def add_to_check(ids):
@@ -1070,14 +1106,15 @@ def add_to_check(ids):
     if not ids:
         say("Nothing selected to add to the check: pick the objects in the row first.")
         return
-    index = _layer(doc, LAYERS["building"])
-    for i in ids or []:
-        o = _find(doc, i)
-        if o is not None:
-            attrs = o.Attributes.Duplicate()
-            attrs.LayerIndex = index
-            doc.Objects.ModifyAttributes(o, attrs, True)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["add"]):        # the Building layer made, if new, in the same step
+        index = _layer(doc, LAYERS["building"])
+        for i in ids or []:
+            o = _find(doc, i)
+            if o is not None:
+                attrs = o.Attributes.Duplicate()
+                attrs.LayerIndex = index
+                doc.Objects.ModifyAttributes(o, attrs, True)
+        run_check(doc, report=False)
 
 
 def _not_included(doc, lot):
@@ -1174,23 +1211,25 @@ def this_is_the_ground(ids):
     if not ids:
         say("Nothing selected to mark as the ground: pick the objects in the row first.")
         return
-    state = _ui_state(doc)
-    state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
-    _save_ui_state(doc, state)
-    n = len(state["ground_ids"])
-    _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
-                logic.ENTERED)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["ground"]):
+        state = _ui_state(doc)
+        state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
+        _save_ui_state(doc, state)
+        n = len(state["ground_ids"])
+        _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
+                    logic.ENTERED)
+        run_check(doc, report=False)
 
 
 def not_the_ground():
     """Undo "This is the ground": every object marked so is checked again (counted as left out until added)."""
     doc = Rhino.RhinoDoc.ActiveDoc
-    state = _ui_state(doc)
-    state.pop("ground_ids", None)
-    _save_ui_state(doc, state)
-    _set_source(doc, "ground_marked", None, None)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["not_ground"]):
+        state = _ui_state(doc)
+        state.pop("ground_ids", None)
+        _save_ui_state(doc, state)
+        _set_source(doc, "ground_marked", None, None)
+        run_check(doc, report=False)
 
 
 def _set_source(doc, key, value, source, confirmed_by="you"):
@@ -1359,8 +1398,10 @@ def _apply_box(doc, facts, state, saved_ui):
     return facts, saved_ui
 
 
-def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
-    """Each click places a spot grade; Enter or Esc when done. The ids of the points placed (none: nothing changed)."""
+def _place_spots(doc, prompt, layer_path=GRADE_LAYER, changing=lambda: None):
+    """Each click places a spot grade; Enter or Esc when done. The ids of the points placed (none: nothing changed).
+    `changing`: called before the model is first changed (the start box's undo step begins there)."""
+    changing()
     layer = _layer(doc, layer_path)
     placed = []
     while True:
@@ -1375,10 +1416,16 @@ def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
 
 
 class RhinoTable:
-    """The model as rhino_logic.BoxSession and apply_lookup use it: a few plain calls on one document."""
+    """The model as rhino_logic.BoxSession and apply_lookup use it: a few plain calls on one document. `step`: the
+    undo step a start box's edits go in (its first edit begins it, unless one is held; the box's caller ends it with
+    the facts saved after Draw: the whole box one step, its Cancel's rollback inside it too). None: recovery's own."""
 
-    def __init__(self, doc):
-        self.doc = doc
+    def __init__(self, doc, step=None):
+        self.doc, self.step = doc, step
+
+    def _changing(self):
+        if self.step and not STATE.get("undo"):
+            _begin_undo(self.doc, self.step)
 
     def exists(self, object_id):
         return _find(self.doc, object_id or "") is not None
@@ -1386,6 +1433,7 @@ class RhinoTable:
     def delete(self, object_id):
         o = _find(self.doc, object_id)
         if o is not None:
+            self._changing()
             self.doc.Objects.Delete(o, True)
 
     def layer_of(self, object_id):
@@ -1393,6 +1441,7 @@ class RhinoTable:
 
     def _move(self, object_id, layer_path, held_from):
         o = _find(self.doc, object_id)
+        self._changing()
         attrs = o.Attributes.Duplicate()
         attrs.LayerIndex = _layer(self.doc, layer_path)
         attrs.SetUserString(logic.HELD_FROM, held_from)
@@ -1420,6 +1469,7 @@ class RhinoTable:
     def _mark(self, object_id, key, value):
         o = _find(self.doc, object_id)
         if o is not None:
+            self._changing()
             attrs = o.Attributes.Duplicate()
             attrs.SetUserString(key, value)
             self.doc.Objects.ModifyAttributes(o, attrs, True)
@@ -1447,6 +1497,7 @@ class RhinoTable:
             return
         layer = self.doc.Layers[index]
         if not (self.doc.Objects.FindByLayer(layer) or []) and not layer.GetChildren():
+            self._changing()
             self.doc.Layers.Delete(index, True)
 
     def save_views(self):
@@ -1460,9 +1511,11 @@ class RhinoTable:
         self.doc.Views.Redraw()
 
     def add_lot(self, ring, name):
+        self._changing()
         return str(_add_lot(self.doc, {"lot": ring, "lot_name": name}))
 
     def add_spot(self, p):
+        self._changing()
         attrs = Rhino.DocObjects.ObjectAttributes()
         attrs.LayerIndex = _layer(self.doc, GRADE_LAYER)
         return str(self.doc.Objects.AddPoint(_model_point(self.doc, p[:2], p[2]), attrs))
@@ -1509,8 +1562,9 @@ def _recover(doc):
         say(said[0].upper() + said[1:] + ".")
 
 
-def _draw_lot(doc):
-    """Draw my lot…: click each corner (Enter closes it, Esc: nothing drawn). The new closed outline's id, or None."""
+def _draw_lot(doc, changing=lambda: None):
+    """Draw my lot…: click each corner (Enter closes it, Esc: nothing drawn). The new closed outline's id, or None.
+    `changing`: called before the model is changed (the start box's undo step begins there)."""
     corners = []
     while True:
         rc, point = Rhino.Input.RhinoGet.GetPoint(
@@ -1521,6 +1575,7 @@ def _draw_lot(doc):
         corners.append(point)
     if len(corners) < 3 or rc == Rhino.Commands.Result.Cancel:
         return None
+    changing()
     attrs = Rhino.DocObjects.ObjectAttributes()
     attrs.LayerIndex = _layer(doc, LAYERS["lot"])
     attrs.Name = "Lot · drawn by you"
@@ -1593,7 +1648,7 @@ def _pick_outcome(doc, what, facts, saved_ui, session):
         return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
                      _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
     if what == "draw_lot":                       # over the City's outline (a guide, never kept)
-        drawn = _draw_lot(doc)
+        drawn = _draw_lot(doc, session.table._changing)       # (in the box's one undo step)
         session.add([drawn])
         return drawn
     if what == "terrain":
@@ -1605,7 +1660,7 @@ def _pick_outcome(doc, what, facts, saved_ui, session):
     if what in ("spot", "regrade"):
         placed = _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
                               "Click the finished ground you'll grade to, at each wall (Enter when done)",
-                              GRADE_LAYER if what == "spot" else FINISHED_LAYER)
+                              GRADE_LAYER if what == "spot" else FINISHED_LAYER, session.table._changing)
         session.add(placed)
         return placed
     return None
@@ -1640,7 +1695,7 @@ def _confirm(doc, facts, options, mode):
     _highlight(doc, facts)
     _recover(doc)                       # anything an unfinished earlier box set aside, back first
     saved_ui = logic.box_opened(_ui_state(doc), facts)   # the lot's own address, this session only
-    session = logic.BoxSession(RhinoTable(doc))     # this box's model edits, owned here, never copied
+    session = logic.BoxSession(RhinoTable(doc, logic.UNDO_WORDS["edit_site"]))  # this box's model edits: one step
     try:
         return logic.run_box(session, lambda: _box_loop(doc, facts, options, mode, saved_ui, session))
     finally:
@@ -1873,7 +1928,8 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
         choice = _ask_reset(question, fresh, keep)
         if choice is None:
             return facts, saved_ui, False, state
-    _begin_undo(doc, "Gordium: start fresh for " + (saved_ui["_pending"].get("address") or "a new address"))
+    if not STATE.get("undo"):           # (the box's own step, if its edits began one: the reset goes in it)
+        _begin_undo(doc, "Gordium: start fresh for " + (saved_ui["_pending"].get("address") or "a new address"))
     facts, saved_ui, redraw, guide = logic.apply_reset(table, session, facts, saved_ui, choice,
                                                        STATE.get("zones") or [])
     STATE["redraw_house"] = redraw and mode == "check"     # (GordiumStart draws its house itself)
@@ -1916,7 +1972,11 @@ def _undo_redo(sender, e):
 
 def _drawn(doc, facts, state, saved_ui, session=None):
     """Draw: the facts for the checker, and every fact's source and confirmation saved in the .3dm; what the box
-    replaced goes for good."""
+    replaced goes for good. One undo step from here to the facts saved after the box closes (its caller ends it:
+    _end_undo), unless one is already held."""
+    if not STATE.get("undo"):
+        _begin_undo(doc, logic.UNDO_WORDS["edit_site"])
+
     def save():
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
         _save_ui_state(doc, ui_state)
@@ -1937,7 +1997,8 @@ def hide_massing(hidden):
     if index < 0:
         say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
         return
-    doc.Layers[index].IsVisible = not hidden
+    with logic.undo_step(doc, logic.UNDO_WORDS["massing"]):
+        doc.Layers[index].IsVisible = not hidden
     doc.Views.Redraw()
 
 
@@ -2097,7 +2158,7 @@ def edit_facts():
         saved = current_facts(doc)
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
-    try:                                # one undo step from Draw's reset to the starting house, closed on any way out
+    try:                                # one undo step from the box's first model edit (or its Draw) to the facts
         try:
             facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options,
                             "check")
@@ -2492,14 +2553,17 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-        try:
-            facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
-        finally:                        # GordiumCheck never draws a starting house: its box's flag goes with it
-            STATE.pop("redraw_house", None)
-        if facts is None:               # closed or Esc: nothing saved, nothing checked
-            Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
-            return None
-        save_facts(doc, facts)
+        try:                            # the box's undo step ends with the facts saved
+            try:
+                facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+            finally:                    # GordiumCheck never draws a starting house: its box's flag goes with it
+                STATE.pop("redraw_house", None)
+            if facts is None:           # closed or Esc: nothing saved, nothing checked
+                Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
+                return None
+            save_facts(doc, facts)
+        finally:
+            _end_undo(doc)
     result = run_check(doc, report=True)
     live(True)                                      # live mode is on by default
     if result is not None:
@@ -2726,6 +2790,7 @@ if STATE.get("live"):                        # live mode was on before this copy
     live(True)
 # Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)
 _on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), "stop the checker"))
-# Undo / Redo: what was drawn for the model before it is cleared, never left on screen (the Rhino job, demo e631aae)
+# Undo / Redo: what was drawn for the model before it is cleared, never left on screen (the Rhino job, demo e631aae),
+# and a panel change undone is checked again (each is one undo step)
 _on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler[Rhino.Commands.UndoRedoEventArgs], _undo_redo,
                                                  "clear the drawing after Undo or Redo"))

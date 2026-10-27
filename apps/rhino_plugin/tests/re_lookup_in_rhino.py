@@ -152,12 +152,12 @@ def type_only(g, doc, address):
         ran.append(True)
         return drawn(*a, **k)
     g._drawn = recorded
-    g.STATE.update(box_picks=[], box_overrides={"address": address})
+    g.STATE.update(box_picks=[], box_overrides={"address": address}, lookup_fixture="96_ithaca_rd")   # never live
     try:
         g.edit_facts()
     finally:
         g._drawn = drawn
-        for k in ("box_picks", "box_overrides"):
+        for k in ("box_picks", "box_overrides", "lookup_fixture"):
             g.STATE.pop(k, None)
     return (g.STATE.get("said") or [])[start:], bool(ran)
 
