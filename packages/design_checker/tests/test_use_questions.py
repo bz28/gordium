@@ -92,7 +92,10 @@ def test_only_the_facts_this_districts_rules_need_for_the_use_are_asked():
     assert implied_for(X, "two_family", NAMES) == {"dwelling_units": 2}
     assert implied_for(X, "school", NAMES) == {}                  # no rule reads its units: nothing sent
     city = options(CITY)
-    assert all(v == [] for v in city["follow_ups"]["R-1b"].values())       # R-1b's rules need none of them today
+    # R-1b's rules need none of the units, rooms let or conversion; since #38 (the demo build) its household and home
+    # occupation rules ask theirs (unanswered: needs review)
+    assert all(not set(v) & {"dwelling_units", "rooms_let_for_profit", "conversion"}
+               for v in city["follow_ups"]["R-1b"].values())
     assert all(v == {} for v in city["implied"]["R-1b"].values())          # so nothing is sent the checker can't use
 
 

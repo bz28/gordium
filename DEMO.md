@@ -37,12 +37,47 @@ cd $HOME\Documents\gordium
 git pull
 ```
 
-No install step this time (2026-10-26): no new Python packages and no new parts of Gordium since the last update,
-and the five commands are the same, so `install.py` is not needed either.
+No install step this time (2026-10-27): no new Python packages and no new parts of Gordium since the last update,
+and the commands are the same, so neither `pip install` nor `install.py` is needed.
 
 Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
 
-## What's new (2026-10-26)
+## What's new (2026-10-27)
+
+Everything in the 2026-10-26 preview below, plus:
+
+- **All nine residential districts.** Besides R-1a, R-1b and R-3a you can now pick **R-2a, R-2b, R-2c, R-3aa,
+  R-3b and RU**. Their rules were written out by hand from the chart and the code (like R-1a and R-3a), so they are
+  still drafts: tell Ben anything that looks wrong.
+- **Occupancy and home occupations.** Every district now also lists how many unrelated people may live in a
+  dwelling unit and the home occupation rules. Gordium can't see these in a massing model, so they show as
+  **? needs review** until you tell it (never as complies). Answering them up front in the start box is coming next.
+- **The Use list fits the district.** After you pick a district, **Use** lists that district's uses, the permitted
+  ones first, with a note when a use needs a special permit or isn't allowed there. Where the district's rules need
+  more about the use (for example how many dwelling units), the start box asks right under Use. Leave one blank and
+  the rules that need it say **needs review**; a row that waits for one has a **Tell Gordium in Edit site…** button.
+- **Address suggestions.** Type at least 4 characters of an address in the start box and pause: a list of City of
+  Ithaca addresses that start that way appears under it. Use **Down**/**Up** and **Enter**, or click one. No town
+  typed? Gordium looks it up in the City ("106 Ithaca Rd" becomes "106 Ithaca Rd, Ithaca, NY").
+- **You can stop a slow check.** A check that takes a while shows a small window, "Esc or Cancel to stop", and the
+  panel says "Checking…" with what it is doing. Press **Esc** or **Cancel**: nothing in the model changes and
+  nothing is shown as checked until you press **Check again**. With **Check after every edit** on, the re-check runs
+  in the background, so Rhino never freezes while you keep drawing.
+- **The part that breaks a rule is coloured.** Red where it does not comply, amber where it needs review, on the
+  part of the building concerned (not the whole house).
+- **Dimensions look like a drawing.** Each yard is dimensioned square from the lot line to the wall, where the yard
+  is shortest when it fails, with a faint line at the required distance. Lines and colours are hidden behind the
+  building when you look at it in 3D, as they would be in a drawing.
+- **Lines to snap to.** The buildable outline and each yard's required line are drawn as real (locked) curves on
+  the Gordium::Envelope layer, so you can snap to them with Osnap while you draw. On a tax-map lot the outline is the
+  cautious one (2'-0" in from every lot line); the outline as drawn is dashed.
+- **The starting house in floors.** The starting house is drawn floor by floor on its own sublayers
+  (Gordium::Massing::Floor 1, Floor 2…), so you can hide or edit one floor. A note says what limited its size (for
+  example "lot coverage 25%").
+- **Every panel change is one Undo.** Each panel button or tick is one step for Rhino's Undo (Cmd+Z / Ctrl+Z), and
+  the ticks follow what Undo puts back.
+
+## What was new on 2026-10-26
 
 Everything in the 2026-10-25 preview below, plus:
 
@@ -131,5 +166,6 @@ Everything in the 2026-10-21 evening preview, plus:
 - **Windows:** please confirm that no black console window appears and that Task Manager shows only one
   `python` checker while Rhino is open.
 - **Ground is taken as flat** at the lot's level (the panel says so).
-- **AI-drafted zones are not included** (left out on purpose while they are checked). Districts: R-1a, R-1b, R-3a.
+- **AI-drafted zones are not included** (left out on purpose while they are checked). Districts: the nine
+  residential ones (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU), each written by hand.
 - The address lookup needs the internet and works only for addresses in the **City** of Ithaca (not the Town).

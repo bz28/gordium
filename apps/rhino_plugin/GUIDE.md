@@ -117,7 +117,10 @@ The next two are asked only when the **Ground** row is on (see "Not shown in thi
 
 A row's **Enter** button (for example "Enter bedrooms and parking spaces") asks the facts that row waits for, one
 at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, `Stories of the whole building`, and
-`Made by converting an existing building, not new construction? (§325-3B)`. Each ends with `(Enter to skip)`:
+`Made by converting an existing building, not new construction? (§325-3B)`, and the household and home occupation
+questions, such as `Most occupants in any one dwelling unit (optional: how they are split)` and
+`Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?` (the start box asks the same ones under
+**Use** when the district's rules need them). Each ends with `(Enter to skip)`:
 skipping leaves the fact unset, so its rule keeps waiting (never 0 or No).
 
 ## Not shown in this version

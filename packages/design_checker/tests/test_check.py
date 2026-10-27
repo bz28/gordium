@@ -4011,7 +4011,8 @@ def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
         draw.index('drawn["complete"] = True') < draw.index("if not boxed:")
     assert draw.count('drawn["complete"]') == 1
     check = src[src.index("def run_check("):src.index("def _toast(")]
-    assert 'say(first + logic.report_message(path, False, result["report_error"], stale=had_report))' in check
+    assert 'say(first + logic.report_message(report_path(doc), False, result["report_error"], stale=begun["had_report"]))' \
+        in check                                                         # (#32 split run_check: the demo build)
     assert 'first = "✕ " + result["notice"] + " · " if result.get("notice") else ""' in check
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
@@ -4177,10 +4178,12 @@ def test_every_panel_tick_follows_the_document():
     sync = rhino[rhino.index("def _sync_ticks("):].split("\ndef ", 1)[0]
     for name in set(boxes):
         body = ui_src[ui_src.index("def _%s_box(" % name):].split("\ndef ", 1)[0]
-        assert 'parts["%s_box"] = box' % name in body and 'if not parts.get("_setting_%s")' % name in body, name
+        assert 'parts["%s_box"] = box' % name in body and ('if not parts.get("_setting_%s")' % name in body or
+                                                          'skip=lambda: parts.get("_setting_%s")' % name in body), name
         assert "def set_%s_tick(parts, " % name in ui_src, name
         assert "ui.set_%s_tick(" % name in sync, name
-    run = rhino[rhino.index("def run_check("):].split("\ndef ", 1)[0]
+    run = "".join(rhino[rhino.index("def %s(" % f):].split("\ndef ", 1)[0]          # (#32 split run_check:
+              for f in ("_check_apply", "_check_failed"))                           # the demo build)
     made = rhino[rhino.index("def panel("):].split("\ndef ", 1)[0]
     assert run.count("_sync_ticks(doc)") == 2 and made.count("ui.make_panel(") == made.count("_sync_ticks(doc)") == 2
 
