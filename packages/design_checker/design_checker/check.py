@@ -157,8 +157,7 @@ MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked
 MODEL_WORDS = {"model#eave": {"eave": "what reaches past the walls an eave",
                                "not_eave": "what reaches past the walls not an eave"},
                "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"},
-               "model#narrower": {"first": "the west (or south) side the narrower side yard",
-                                  "other": "the east (or north) side the narrower side yard"}}
+               "model#narrower": {}}          # its readings say their own line: "the side along lot line 3 …"
 EAVE_YARD_WORDS = {"front_yard": "front yard", "side_yard_smaller": "side yard", "side_yard_larger": "side yard",
                  "rear_yard": "rear yard"}
 

@@ -246,7 +246,7 @@ def test_a_garage_in_the_front_yard_does_not_comply_under_any_reading():
 # ---- 4. corner lots --------------------------------------------------------------------------------------------
 
 CORNER = {"corner_lot": True, "street_line": [[[0, 0], [60, 0]], [[60, 0], [60, 120]]],
-          "address_street_line": [[[0, 0], [60, 0]]]}
+          "street_ids": ["South St", "East St"], "address_street_line": [[[0, 0], [60, 0]]]}
 
 
 def test_C1_a_corner_lot_with_a_front_yard_on_each_street():
