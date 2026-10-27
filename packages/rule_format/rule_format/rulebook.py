@@ -96,6 +96,14 @@ def rulebook_paths(folder) -> list[Path]:
                   and "records" not in p.relative_to(folder).parts) if folder.is_dir() else []
 
 
+def rulebook_for(jurisdiction, zone: str) -> Path | None:
+    """The rulebook that holds a zone's rules: the hand-drafted 5_zoning_rules/<zone>.yaml when it exists,
+    else the AI-drafted 5_zoning_rules/drafted/<zone>.yaml, else None. The one definition, used by the
+    project report and the answer-key test alike."""
+    folder = Path(jurisdiction) / "5_zoning_rules"
+    return next((p for p in (folder / f"{zone}.yaml", folder / "drafted" / f"{zone}.yaml") if p.is_file()), None)
+
+
 def read_jsonl(path) -> list[dict]:
     """Every row of a JSON-lines file, read as UTF-8, blank lines skipped. The one reader of the repository's
     .jsonl files (extracted text, sections, run records), so every package reads the same bytes the same way."""
@@ -756,3 +764,34 @@ def _source_problems(sources: list[dict], ctx: Context, district: str | None = N
                 p.append(f"source {name} p.{page}: quote isn't at lines {lines[0]}-{lines[1]}"
                          f"{f'; it is at lines {at}' if found else '; not on this page'}: {quote!r}")
     return p
+
+
+# ---- one file's checks, shared by `python -m rule_format` and everything that uses a rulebook -----------
+
+def term_file_problems(jurisdiction, ctx: Context) -> dict[Path, list[str]]:
+    """Each term file (4_term_definitions/<schema>.yaml) that exists, with its problems."""
+    found = {}
+    for schema in TERM_SCHEMAS:
+        path = Path(jurisdiction) / "4_term_definitions" / f"{schema}.yaml"
+        if path.exists():
+            try:
+                found[path] = validate_terms(load(path), ctx, schema)
+            except Exception as e:  # reported, never raised: one broken file mustn't hide the rest
+                found[path] = [f"validator error ({type(e).__name__}: {e})"]
+    return found
+
+
+def rulebook_file_problems(path, ctx: Context) -> list[str]:
+    """Everything wrong with one rulebook file: it can be read, passes `validate`, and its district is its
+    file name."""
+    path = Path(path)
+    try:
+        book = load(path)
+        problems = validate(book, ctx)
+        if isinstance(book, dict) and book.get("district") != path.stem:
+            problems.append(f"district {book.get('district')!r} doesn't match the file name {path.stem!r}")
+        return problems
+    except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
+        return [f"can't read file ({type(e).__name__}: {e})"]
+    except Exception as e:  # reported, never raised: one broken file mustn't hide the rest
+        return [f"validator error ({type(e).__name__}: {e})"]

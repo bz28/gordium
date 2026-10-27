@@ -25,3 +25,5 @@ jobs:
         run: python -m section_labeling coverage --check
       - name: The rules workbook matches a fresh build (generated, never hand-edited)
         run: python -m rule_export --check
+      - name: The example project reports match a fresh build (results from the rule checker only)
+        run: python -m project_report --check

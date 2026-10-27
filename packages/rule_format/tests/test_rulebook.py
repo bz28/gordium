@@ -374,7 +374,8 @@ def test_cli_keeps_going_when_validation_itself_fails(tmp_path, monkeypatch, cap
         (j / f"5_zoning_rules/{name}.yaml").write_text(f"district: {name}\nrules: []\n")
     def broken(book, ctx):
         raise TypeError("boom")
-    monkeypatch.setattr(cli, "validate", broken)
+    import rule_format.rulebook as rulebook
+    monkeypatch.setattr(rulebook, "validate", broken)        # the one per-file check the CLI uses
     monkeypatch.setattr(cli, "REPO", tmp_path)
     assert cli.main() == 1
     out = capsys.readouterr().out

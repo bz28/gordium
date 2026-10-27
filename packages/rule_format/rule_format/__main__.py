@@ -14,11 +14,9 @@ import argparse
 import sys
 from pathlib import Path
 
-import yaml
-
 from .labels import load_pieces, validate_labels
-from .rulebook import (REPO, TERM_SCHEMAS, Context, jurisdictions, load, locate, not_quotable, rulebook_paths, validate,
-                       validate_terms)
+from .rulebook import (REPO, Context, jurisdictions, load, locate, not_quotable, rulebook_file_problems, rulebook_paths,
+                       term_file_problems)
 
 
 def main() -> int:
@@ -34,18 +32,12 @@ def main() -> int:
         for problem in ctx.problems:
             print(f"✗ {place}: {problem}")
         failed += bool(ctx.problems)
-        for schema in TERM_SCHEMAS:
-            path = jurisdiction / "4_term_definitions" / f"{schema}.yaml"
-            if path.exists():
-                try:
-                    problems = validate_terms(load(path), ctx, schema)
-                except Exception as e:
-                    problems = [f"validator error ({type(e).__name__}: {e})"]
-                checked += 1
-                print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
-                for problem in problems:
-                    print(f"    {problem}")
-                failed += bool(problems)
+        for path, problems in term_file_problems(jurisdiction, ctx).items():
+            checked += 1
+            print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
+            for problem in problems:
+                print(f"    {problem}")
+            failed += bool(problems)
         for path in sorted((jurisdiction / "3_section_labels").glob("*.yaml")):
             checked += 1
             pieces_file = jurisdiction / "2_extracted_text" / f"{path.stem}.sections.jsonl"
@@ -62,15 +54,7 @@ def main() -> int:
                  for p in rulebook_paths(folder)]
         for path in files:
             checked += 1
-            try:
-                book = load(path)
-                problems = validate(book, ctx)
-                if isinstance(book, dict) and book.get("district") != path.stem:
-                    problems.append(f"district {book.get('district')!r} doesn't match the file name {path.stem!r}")
-            except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
-                problems = [f"can't read file ({type(e).__name__}: {e})"]
-            except Exception as e:  # report and keep going: one broken file mustn't hide the rest
-                problems = [f"validator error ({type(e).__name__}: {e})"]
+            problems = rulebook_file_problems(path, ctx)
             print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
             for problem in problems:
                 print(f"    {problem}")

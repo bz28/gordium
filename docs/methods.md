@@ -1,5 +1,9 @@
 # Methods
 
+**Purpose:** every technique Gordium uses to turn the law into checkable rules and check designs: what it does, why it was chosen, what else was considered, its weak spots and how it is tested.\
+**For:** engineers and reviewers who want to evaluate or challenge a choice.\
+**Kept current by:** the engineer who adds or changes a technique, in that same PR.
+
 Every technique Gordium uses to turn a city's zoning documents into checkable rules: what it does, how, why it was chosen, what else was considered, its known weaknesses, how it's tested, and ideas to improve it. Written so the choices can be evaluated and challenged later. Numbers are from the City of Ithaca run (2026-10).
 
 Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded API call; drafts only), **people** (reviewers, architects).
@@ -128,7 +132,15 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
 - **Links:** the city's URL where it serves the PDF itself; otherwise the fingerprinted copy in the repository (private: needs access). The page number is shown too, since some viewers ignore `#page=N`.
 - **Tested by:** every rule, definition and use source, open question and piece of the law appears exactly once, attributed to its file, with the right words and link; text never becomes a formula; CI fails if the committed workbook differs from a fresh build (compared by content and look: values, links, fonts, fills, widths and frozen panes, not bytes, since Excel files carry timestamps).
 
-## 14. What's not decided or not built
+## 14. The project report (code, PR 10)
+
+- **What:** `python -m project_report <project.yaml>` fills in the architects' own two-tab spreadsheet (Inputs, Output; same headers, same order) for one project: its zone picks the rulebook (hand-drafted first, else AI-drafted), every rule in it becomes a row, and our columns (rule id, formula, why it needs review, citation, the city's words, link, rulebook) follow theirs, set apart by a light blue on the headers (not a color in their key). It looks like theirs: Arial in their ink color, their column widths, yellow typed-in values, FAIL in red.
+- **Results:** only from `outcome()`, the checker's own code. The table limit is worked out for the lot from the rule's formula (rear yard at 106 Ithaca Rd: max(min(0.25 × 90, 50), 20) = 22.5 ft) for people to read; it never decides the result.
+- **Refuses unchecked rules:** the report runs the same per-file checks as `python -m rule_format` (one shared function) on the sources, term files and rulebook, and gives no report if any fails. With approval deferred, this is what stops a rule edited and never checked from giving PASS.
+- **Tested by:** the 106 Ithaca Rd report gives the architects' PASS/FAIL on all 11 rows; a rulebook, term file or source list that fails the rule checks gives no report; every result equals `outcome()`; every row's page and link are its rule's source; every NEEDS REVIEW row says why; the architects' columns have their widths, fonts and colors; CI fails if the committed example differs from a fresh build in content or look.
+- **Weakness:** one example project; the measurements are typed in (from the architects' sheet), not measured from a model.
+
+## 15. What's not decided or not built
 
 - Rhino plugin language (C# vs Rhino 8 Python); how model objects are identified (layers, names, or asking).
 - Site facts: zone lookup from the address, lot lines and area (survey vs city records), ground levels.

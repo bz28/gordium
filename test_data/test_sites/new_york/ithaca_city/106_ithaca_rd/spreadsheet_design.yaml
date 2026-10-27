@@ -4,8 +4,13 @@
 # The test checks every cell value against the spreadsheet, runs our R-1b rules on these
 # measurements, and requires our result to equal their PASS/FAIL on every Output row.
 
+# It is also a project file for the compliance report (python -m project_report): the jurisdiction, the zone
+# (which picks the rulebook), a title, and the measurements, each with where its value comes from.
+
+title: New single-family home, 106 Ithaca Rd
+jurisdiction: regulations/jurisdictions/new_york/ithaca_city
+zone: R-1b
 spreadsheet: test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx
-rulebook: regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-1b.yaml
 
 measurements:
   use:               {value: one_family_detached, from: "Output!C3 (Detached one-family)"}
