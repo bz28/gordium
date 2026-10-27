@@ -251,9 +251,53 @@ def combined(citations: list[str]) -> str:
     return "; ".join(dict.fromkeys(rest + [f"District Regulations Chart, {n}" for n in notes]))
 
 
+LINK_WORDS = 5        # the search's least length; longer only where another line on the page begins alike
+
+
+def _searchable(text: str) -> list[str]:
+    """The words a PDF viewer's search finds in one run: up to the first footnote marker ([fn4] is a superscript
+    digit in the PDF's text, so words on either side of it aren't adjacent there)."""
+    return text.split("[fn")[0].split()
+
+
+def _unique_start(words: list[str], page: list[list[str]]) -> str:
+    """The first LINK_WORDS words, more if another line of the page begins with them too ("One-family dwelling,
+    detached, zero lot line - -" begins a row of both chart p.3 sections), so the search lands on this one."""
+    n = LINK_WORDS
+    while n < len(words) and sum(line[:n] == words[:n] for line in page) > 1:
+        n += 1
+    return " ".join(words[:n])
+
+
+@functools.lru_cache(maxsize=16)
+def _page_lines(j: Path, file: str) -> dict:
+    """{(page, line): text} of one document's extracted text (2_extracted_text/<file stem>.jsonl)."""
+    path = j / "2_extracted_text" / (Path(file).stem + ".jsonl")
+    return {(r["page"], r["line"]): r["text"] for r in (read_jsonl(path) if path.exists() else []) if "line" in r}
+
+
+def anchor_text(source: dict, j: Path) -> str:
+    """The words a source points at on its page: its quote; for a chart cell, its row's own line, the one of the
+    cell's row lines that begins with the row label (a label alone, "One-family dwelling, detached", is a row of
+    both the lot-size and the lot-width sections of chart p.3; a cell's first row line can be a neighbouring cell's
+    wrapped words, which the PDF doesn't hold in that order); else the label."""
+    if source.get("quote"):
+        return str(source["quote"])
+    want = source.get("cell") or {}
+    label = " ".join(str(want.get("row") or "").split())
+    cell = next((c for c in _chart_cells(j) if c.get("file") == source.get("file") and c.get("page") == source.get("page")
+                 and c.get("section") == want.get("section") and " ".join(str(c.get("row", "")).split()) == label), None)
+    lines = _page_lines(j, source.get("file") or "")
+    own = [lines.get((source.get("page"), n)) or "" for n in (cell or {}).get("row_lines") or []]
+    return next((t for t in own if label and " ".join(t.split()).startswith(label)), label)
+
+
 def link(source: dict, j: Path, documents: dict) -> str:
-    """The page, plus the first words of the quote to find on it, so two sections never share a link."""
-    words = " ".join(str(source.get("quote") or (source.get("cell") or {}).get("row") or "").split()[:5])
+    """The page, plus the first words of what the source points at on it (anchor_text), so two sections never
+    share a link."""
+    words = _unique_start(_searchable(anchor_text(source, j)),
+                          [_searchable(t) for (pg, _), t in _page_lines(j, source.get("file") or "").items()
+                           if pg == source.get("page")])
     base = page_link(j, documents, source["file"], source.get("page"))
     return base + ("&search=" + urllib.parse.quote(f'"{words}"') if words else "")
 
