@@ -312,3 +312,9 @@ Runs after merge 2. Conflicts below are real trial merges (`git merge --no-commi
 | #33 | address-autocomplete (#32) | 7cc6e16 | not re-run at this head (c4ad070: 1,656 passed) | + site_lookup/README.md | #32; autocomplete 15/15 |
 
 Order: (1) #24 → #30 → #38 (rules line; each carried from main first, suite each). (2) #21 then #40 (#40 last: it holds r3-hand and #21). (3) UI stack #28 → #29 → #31 → #34 → #35 → #37 (carry main into #28 once, then up the stack). (4) #32 → #33 (after merge 2's #26). #39 when Lane D marks it ready. Every carry: full suite + one review round on the merge, then Ben merges.
+- 2026-10-27 08:15 (coordinator) Ben's decisions (all of the coordinator's recommendations):
+  1. Generated reports pass once a round confirms no wrong content (CLAUDE.md updated on repo-skills #2, 560ba07c). #39 qualifies, since its last round's findings were display/check gaps and all are fixed: mark it ready.
+  2. The household and home-occupation facts are asked up front in the start box next to Use, with easy defaults. Unanswered still means needs review. → queue item 14 (owner: #37/#38 line; UI, Sonnet builder + Opus sceptic on the needs-review logic).
+  3. Build the 5 audit gaps before the later list → queue item 15: §325-26 stream setback 20 ft; §325-8B(1) lot area per extra primary building; §325-7B one yard per building; South Hill Overlay; 3–6 unit cap on attached houses in R-3a/R-3aa/R-3b/RU. Opus.
+  4. One-family = 1 unit (ADU later): keep.
+  5. Do-nothing undo after a start-box Cancel: leave it.
