@@ -109,11 +109,14 @@ def _why(row: dict, rules: dict, measured: dict, allowed: dict | None = None, fa
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
         rule = rules[row["Rule id"]]
+        values = {k: m.get("value") for k, m in measured.items()}
         own = _review_reasons(rule, measured, allowed, facts) if allowed is not None else []
         for name in sorted(set().union(*(formula.names(rule[k]) for k in ("applies_when", "check") if rule.get(k)))):
             if own and (measured.get(name) or {}).get("readings"):
                 continue                # needs review under every one of its readings: it changes nothing
             reason = (measured.get(name) or {}).get("reason")
+            if name in logic.OPTIONAL and not present.could_settle(rule, values, name):
+                continue        # an optional fact that can't change this row isn't why it needs review (r2 round 2)
             if (measured.get(name) or {}).get("value") is None and reason and reason not in reasons:
                 reasons.append(reason)
         reasons = own + reasons

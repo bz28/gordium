@@ -282,16 +282,36 @@ def with_suggestions(saved, suggested):
 STATED_FACTS = {
     "sleeping_rooms": ("Bedrooms", "count", "bedrooms"),
     "parking_spaces": ("Off-street parking spaces", "count", "parking spaces"),
-    "dwelling_units": ("Dwelling units", "count", "dwelling units"),
+    "dwelling_units": ("Dwelling units on this lot (a semi-detached or attached building split along its party walls: "
+                       "this lot's units only)", "count", "dwelling units"),
     "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
     "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
                    "whether it is a conversion"),
+    "occupants": ("Occupants on this lot, all dwelling units together (§325-3B OCCUPANT: in R-2c, every person with the "
+                  "right to occupy, living there yet or not)", "count", "occupants"),
+    "occupants_most_in_one_unit": ("Most occupants in any one dwelling unit (optional: how they are split)", "count",
+                                   "the most occupants in one unit"),
+    "attached_units_in_building": ("Dwelling units in the whole attached building, every lot it stands on (§325-3B: "
+                                   "three to six)", "count", "the units in the whole building"),
     "abuts_r1_district": ("Is any R-1a or R-1b land touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it? (§325-19E)",
                           "yes_no", "whether the lot abuts R-1 land"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
+# The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
+# at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
+# accept what the check refuses (#r2 review round 2).
+MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1}
+# Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit
+# is 1 to occupants): asked only where some value in that range would change the row (present.could_settle).
+OPTIONAL = {"occupants_most_in_one_unit": "occupants"}
+
+
+def minimum(key):
+    return MINIMUM.get(key, 0)
+
+
 STORIES_ASKED = ("enter the number of stories", "enter the count")      # the measuring's own words when it waits for the count
 
 
@@ -403,7 +423,10 @@ def answers_applied(facts, answers, zone, use, options):
     Anything else goes: an answer given for another use or district never stays behind (a multiple dwelling's 5
     units checked as a two-family's). Returns (facts, the keys the architect answered)."""
     asked = follow_up_keys(options, zone, use)
-    given = {k: v for k, v in (answers or {}).items() if k in asked and v is not None}
+    # (an answer under the fact's own least value, #24's MINIMUM, e.g. 0 for the most occupants in one unit: refused,
+    # so unset like any refused entry, never an error out of the box: the demo build of #37 with #24)
+    given = {k: v for k, v in (answers or {}).items() if k in asked and v is not None
+             and not (STATED_FACTS[k][1] == "count" and isinstance(v, int) and v < minimum(k))}
     out = {k: v for k, v in (facts or {}).items() if k not in BOX_ASKS}
     out.update(implied_by(options, zone, use))
     return update_counts(out, given), sorted(given)
@@ -441,9 +464,12 @@ def answer_problem(kind, text):
     return None
 
 
-def needs_of(names, values):
-    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
-    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None]
+def needs_of(names, values, settles=None):
+    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked; never the
+    stories count (asked only where the measuring asks for it: stories_needed). An optional one (OPTIONAL) only where
+    `settles(key)` says entering it could change the row."""
+    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None
+            and (k not in OPTIONAL or (settles is not None and settles(k)))]
 
 
 def _and(words):
@@ -472,11 +498,12 @@ def update_counts(facts, answers):
     whether the building is a conversion and whether the lot abuts R-1 land (yes / no) from the Lot facts prompts. An answer of None means the prompt
     was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
-    for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit"):
+    counts = list(dict.fromkeys(["stories"] + [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "count"]))
+    for key in counts:
         if answers.get(key) is not None:
             n = int(answers[key])
-            if n < 0 or n != answers[key]:
-                raise ValueError(f"{key} must be a whole number, 0 or more")
+            if n < minimum(key) or n != answers[key]:
+                raise ValueError(f"{key} must be a whole number, {minimum(key)} or more")
             out[key] = n
     for key in ("conversion", "abuts_r1_district"):
         if answers.get(key) is not None:
