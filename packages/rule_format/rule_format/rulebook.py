@@ -121,6 +121,9 @@ class Context:
             if counts[name] > 1:
                 ctx._problem(name, "listed more than once in sources.yaml")
         for name, entry in listed.items():
+            for problem in _source_entry_problems(entry):
+                ctx._problem(name, problem)
+        for name, entry in listed.items():
             pdf = j / "1_source_documents" / name
             sha = entry.get("sha256")
             if not sha:
@@ -137,8 +140,8 @@ class Context:
 
     def _load_extracted(self, name, sha, path):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
-        The header ties it to the PDF version. Once the text-extraction step is merged, CI also re-extracts
-        it from the PDF and requires an exact match; until then nothing here checks the text against the PDF."""
+        The header ties it to the PDF version; CI re-extracts the text from the PDF (python -m
+        document_extraction --check) and requires an exact match, so this file can't be edited by hand."""
         rows = read_jsonl(path)
         if not rows or rows[0].get("sha256") != sha:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
@@ -147,6 +150,30 @@ class Context:
         for row in rows[1:]:
             pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
         self.pages[name] = pages
+
+
+SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
+                 "adopted_on", "created_on", "quotable", "not_quotable_because"}
+
+
+def not_quotable(entry: dict) -> str | None:
+    """Why a listed document can't be quoted, or None. Fails closed: only `quotable` true or unset
+    allows quotes. Shared by validation and the cite helper so they never disagree."""
+    if entry.get("quotable", True) is not True:
+        return f"isn't quotable yet: {entry.get('not_quotable_because') or 'see sources.yaml'}"
+    return None
+
+
+def _source_entry_problems(entry: dict) -> list[str]:
+    """sources.yaml is edited by hand, so its gates must fail closed: no unknown keys (a typo could
+    drop a gate), `quotable` is true or false, and a document marked not quotable says why."""
+    p = [f"unknown field {k!r} in sources.yaml" for k in entry if k not in SOURCE_FIELDS]
+    if "quotable" in entry and not isinstance(entry["quotable"], bool):
+        p.append("'quotable' must be true or false")
+    if entry.get("quotable") is False and not (isinstance(entry.get("not_quotable_because"), str)
+                                               and entry["not_quotable_because"].strip()):
+        p.append("marked not quotable but 'not_quotable_because' is missing")
+    return p
 
 
 # A token is a footnote marker ("[fn11]"), a whole word or number ("rear", "1b", "2.5", "1,500", "3/2",
@@ -339,6 +366,10 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
         name, page, lines, quote = s.get("file"), s.get("page"), s.get("lines"), s.get("quote")
         if not isinstance(name, str) or name not in ctx.sources:
             p.append(f"source file {name!r} is not in sources.yaml")
+        elif reason := not_quotable(ctx.sources[name]):
+            p.append(f"source {name} {reason}")
+        elif name in ctx.file_problems:
+            p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
         elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and isinstance(lines, list)
                   and len(lines) == 2 and all(type(n) is int for n in lines)):
             p.append(f"source {name}: needs 'page' (number), 'lines' ([first, last]) and 'quote' (text)")

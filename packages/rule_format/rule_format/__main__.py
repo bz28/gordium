@@ -14,7 +14,7 @@ from pathlib import Path
 
 import yaml
 
-from .rulebook import REPO, Context, jurisdictions, load, locate, validate
+from .rulebook import REPO, Context, jurisdictions, load, locate, not_quotable, validate
 
 
 def main() -> int:
@@ -64,6 +64,9 @@ def cite(argv: list[str]) -> int:
     ctx = Context.for_jurisdiction(place)
     if args.file not in ctx.sources:
         print(f"{args.file} is not in sources.yaml")
+        return 1
+    if reason := not_quotable(ctx.sources[args.file]):
+        print(f"{args.file} {reason}")
         return 1
     if args.file not in ctx.pages:
         reasons = ctx.file_problems.get(args.file, [])

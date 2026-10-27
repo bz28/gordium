@@ -432,6 +432,10 @@ def test_cite_helper(tmp_path, monkeypatch, capsys):
     assert "more than once" in capsys.readouterr().out
     assert cli.cite([place, "doc.pdf", "9", "x"]) == 1 and "no page 9" in capsys.readouterr().out
     assert cli.cite([place, "typo.pdf", "2", "x"]) == 1 and "not in sources.yaml" in capsys.readouterr().out
+    sources = tmp_path / "regulations/jurisdictions" / place / "1_source_documents/sources.yaml"
+    sources.write_text(sources.read_text() + "    quotable: false\n    not_quotable_because: two columns\n")
+    assert cli.cite([place, "doc.pdf", "2", "Rear yard minimum twenty feet"]) == 1   # same answer as validation
+    assert "isn't quotable yet: two columns" in capsys.readouterr().out
     assert cli.cite(["ny/nowhere", "doc.pdf", "2", "x"]) == 1 and "no jurisdiction" in capsys.readouterr().out
 
 
@@ -477,6 +481,35 @@ def test_document_listed_twice_is_reported(tmp_path):
     ctx = Context.for_jurisdiction(j)
     assert "listed more than once in sources.yaml" in ctx.file_problems["doc.pdf"]
     assert "doc.pdf" not in ctx.pages                                         # its text isn't trusted
+
+
+def test_documents_marked_not_quotable_are_refused(ctx):
+    ctx.sources["charts.pdf"] |= {"quotable": False, "not_quotable_because": "two columns get mixed"}
+    assert any("isn't quotable yet: two columns get mixed" in p for p in validate(rulebook(), ctx))
+
+
+@pytest.mark.parametrize("entry, problem", [
+    ({"file": "a.pdf", "sha256": "x", "quoteable": False}, "unknown field 'quoteable'"),
+    ({"file": "a.pdf", "sha256": "x", "quotable": "false"}, "'quotable' must be true or false"),
+    ({"file": "a.pdf", "sha256": "x", "quotable": False}, "'not_quotable_because' is missing"),
+])
+def test_source_list_entries_fail_closed(entry, problem):
+    from rule_format.rulebook import _source_entry_problems
+    assert any(problem in p for p in _source_entry_problems(entry))
+
+
+@pytest.mark.parametrize("value", ["false", 0, None])
+def test_not_quotable_check_fails_closed(ctx, value):
+    ctx.sources["charts.pdf"]["quotable"] = value
+    assert any("isn't quotable yet" in p for p in validate(rulebook(), ctx))
+
+
+def test_source_entry_problems_reach_the_file(tmp_path):
+    j = _jurisdiction(tmp_path, rows=[{"page": 1, "line": 1, "text": "x"}])
+    s = (j / "1_source_documents/sources.yaml").read_text()
+    (j / "1_source_documents/sources.yaml").write_text(s + "    quoteable: false\n")
+    ctx = Context.for_jurisdiction(j)
+    assert any("unknown field 'quoteable'" in p for p in ctx.file_problems["doc.pdf"]) and "doc.pdf" not in ctx.pages
 
 
 def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):

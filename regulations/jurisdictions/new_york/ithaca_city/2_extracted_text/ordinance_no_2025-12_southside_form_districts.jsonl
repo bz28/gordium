@@ -1,0 +1,770 @@
+{"file": "ordinance_no_2025-12_southside_form_districts.pdf", "sha256": "147d0cebcfcb4959bcba1a14a04f7849787465381c5bbfdaefac8749f42cfc65", "pages": 37, "extractor": "pdfplumber 0.11.10 + pdfminer.six 20260107 (dedupe_chars, level text only, extract_text_lines, footnotes as [fnN])", "rotated_chars_skipped": 345}
+{"page": 1, "line": 1, "text": "AUTHENTICATION OF ORDINANCE NO. 2025-12", "x0": 186.6, "top": 90.2, "x1": 458.8, "bottom": 102.2}
+{"page": 1, "line": 2, "text": "(COPY ATTACHED)", "x0": 251.5, "top": 117.8, "x1": 360.9, "bottom": 129.8}
+{"page": 1, "line": 3, "text": "An Ordinance Amending The Municipal Code Of The City Of Ithaca,", "x0": 72.0, "top": 156.0, "x1": 487.9, "bottom": 167.1}
+{"page": 1, "line": 4, "text": "Chapter 325, Entitled “Zoning” To Establish Section 325-46 Southside", "x0": 72.0, "top": 170.4, "x1": 520.8, "bottom": 181.5}
+{"page": 1, "line": 5, "text": "Form Districts and to Rezone Portions of the R-2b, R-3a, R-3aa, P-1,", "x0": 72.0, "top": 185.0, "x1": 520.8, "bottom": 196.0}
+{"page": 1, "line": 6, "text": "B-2a, R-3b, SW-2, B-1a, B-2a, and WEDZ-1b to Traditional Residential", "x0": 72.0, "top": 199.4, "x1": 520.9, "bottom": 210.4}
+{"page": 1, "line": 7, "text": "(TR), Residential Transition (RT), Medium- Density Mixed-Use (MD-MU),", "x0": 72.0, "top": 213.8, "x1": 525.3, "bottom": 224.8}
+{"page": 1, "line": 8, "text": "and Urban Mixed-Use (UMU).", "x0": 72.0, "top": 228.2, "x1": 243.6, "bottom": 239.2}
+{"page": 1, "line": 9, "text": "WHEREAS, the “Greater Southside Neighborhood Plan” was endorsed by", "x0": 72.0, "top": 273.1, "x1": 507.7, "bottom": 284.1}
+{"page": 1, "line": 10, "text": "Common Council on April 3, 2019, and the adoption of a form-based code", "x0": 72.0, "top": 287.5, "x1": 531.6, "bottom": 298.5}
+{"page": 1, "line": 11, "text": "has been considered a central measure of its Land Use chapter goals,", "x0": 72.0, "top": 301.9, "x1": 521.0, "bottom": 312.9}
+{"page": 1, "line": 12, "text": "and", "x0": 72.0, "top": 316.3, "x1": 91.4, "bottom": 327.3}
+{"page": 1, "line": 13, "text": "WHEREAS, the “Greater Southside Neighborhood Plan” included a “Future", "x0": 72.0, "top": 338.9, "x1": 525.1, "bottom": 350.0}
+{"page": 1, "line": 14, "text": "Land Use” map of the Southside Neighborhood depicting four desired", "x0": 72.0, "top": 353.3, "x1": 507.8, "bottom": 364.4}
+{"page": 1, "line": 15, "text": "Form Districts, and", "x0": 72.0, "top": 367.7, "x1": 197.5, "bottom": 378.8}
+{"page": 1, "line": 16, "text": "WHEREAS, city staff has drafted a proposal to establish the desired", "x0": 72.0, "top": 390.4, "x1": 514.4, "bottom": 401.4}
+{"page": 1, "line": 17, "text": "Form Districts as described in the “Greater Southside Neighborhood", "x0": 72.0, "top": 404.7, "x1": 507.8, "bottom": 415.7}
+{"page": 1, "line": 18, "text": "Plan” that are modeled after the “Collegetown Area Form Districts” and", "x0": 72.0, "top": 419.2, "x1": 531.6, "bottom": 430.2}
+{"page": 1, "line": 19, "text": "that include regulations that reflect the neighborhood’s built", "x0": 72.0, "top": 433.6, "x1": 481.4, "bottom": 444.6}
+{"page": 1, "line": 20, "text": "environment; now, therefore,", "x0": 72.0, "top": 448.0, "x1": 256.9, "bottom": 459.0}
+{"page": 1, "line": 21, "text": "BE IT ORDAINED AND ENACTED by the Common Council of the City of Ithaca", "x0": 72.0, "top": 470.5, "x1": 531.4, "bottom": 481.9}
+{"page": 1, "line": 22, "text": "as follows:", "x0": 72.0, "top": 485.2, "x1": 144.7, "bottom": 496.2}
+{"page": 1, "line": 23, "text": "ORDINANCE NO. 2025-12", "x0": 222.6, "top": 507.8, "x1": 361.2, "bottom": 518.9}
+{"page": 1, "line": 24, "text": "Section 1. Declaration of Legislative Findings and Purpose", "x0": 72.0, "top": 550.2, "x1": 452.1, "bottom": 561.5}
+{"page": 1, "line": 25, "text": "The Land Use chapter of the “Greater Southside Neighborhood Plan”", "x0": 72.0, "top": 572.8, "x1": 501.1, "bottom": 583.9}
+{"page": 1, "line": 26, "text": "identifies several goals for future development in Southside. These", "x0": 72.0, "top": 587.2, "x1": 512.3, "bottom": 598.3}
+{"page": 1, "line": 27, "text": "goals include:", "x0": 72.0, "top": 601.6, "x1": 164.4, "bottom": 612.7}
+{"page": 1, "line": 28, "text": "•", "x0": 90.0, "top": 621.1, "x1": 95.1, "bottom": 632.2}
+{"page": 1, "line": 29, "text": "Allow architecturally compatible infill development within the", "x0": 108.0, "top": 626.2, "x1": 515.1, "bottom": 637.3}
+{"page": 1, "line": 30, "text": "Traditional Residential, Residential Transition, and Medium-", "x0": 108.0, "top": 640.4, "x1": 504.1, "bottom": 651.4}
+{"page": 1, "line": 31, "text": "Density Mixed Use areas;", "x0": 108.0, "top": 654.8, "x1": 266.5, "bottom": 665.8}
+{"page": 1, "line": 32, "text": "•", "x0": 90.0, "top": 666.3, "x1": 95.1, "bottom": 677.3}
+{"page": 1, "line": 33, "text": "Support the redevelopment of underutilized parcels and parking", "x0": 108.0, "top": 671.3, "x1": 517.3, "bottom": 682.4}
+{"page": 1, "line": 34, "text": "lots within the Urban Mixed Use areas to provide commercial uses", "x0": 108.0, "top": 685.6, "x1": 528.5, "bottom": 696.7}
+{"page": 1, "line": 35, "text": "and higher density housing;", "x0": 108.0, "top": 700.0, "x1": 286.3, "bottom": 711.0}
+{"page": 1, "line": 36, "text": "•", "x0": 90.0, "top": 711.5, "x1": 95.1, "bottom": 722.5}
+{"page": 1, "line": 37, "text": "Ensure zoning requirements are consistent with the historic", "x0": 108.0, "top": 716.6, "x1": 497.6, "bottom": 727.6}
+{"page": 1, "line": 38, "text": "character of the Henry St. John Historic District and other", "x0": 108.0, "top": 730.8, "x1": 497.4, "bottom": 741.9}
+{"page": 1, "line": 39, "text": "locally-designated structures;", "x0": 108.0, "top": 745.2, "x1": 306.0, "bottom": 756.3}
+{"page": 1, "line": 40, "text": "1", "x0": 582.4, "top": 763.2, "x1": 589.0, "bottom": 775.2}
+{"page": 2, "line": 1, "text": "•", "x0": 90.0, "top": 70.5, "x1": 95.1, "bottom": 81.5}
+{"page": 2, "line": 2, "text": "Provide regulation of built-form to ensure new development is", "x0": 108.0, "top": 75.5, "x1": 510.7, "bottom": 86.6}
+{"page": 2, "line": 3, "text": "compatible with the architectural character of the neighborhood;", "x0": 108.0, "top": 89.8, "x1": 528.4, "bottom": 100.9}
+{"page": 2, "line": 4, "text": "and", "x0": 108.0, "top": 104.1, "x1": 127.4, "bottom": 115.1}
+{"page": 2, "line": 5, "text": "•", "x0": 90.0, "top": 133.9, "x1": 95.1, "bottom": 145.0}
+{"page": 2, "line": 6, "text": "Preserve and enhance green space that is a vital component of the", "x0": 108.0, "top": 139.0, "x1": 534.9, "bottom": 150.1}
+{"page": 2, "line": 7, "text": "urban environment.", "x0": 108.0, "top": 153.2, "x1": 226.9, "bottom": 164.2}
+{"page": 2, "line": 8, "text": "The “Greater Southside Neighborhood Plan” recommends the adoption of a", "x0": 72.0, "top": 175.9, "x1": 531.9, "bottom": 186.9}
+{"page": 2, "line": 9, "text": "form-based code as a necessary step to implement the neighborhood", "x0": 72.0, "top": 190.3, "x1": 501.2, "bottom": 201.3}
+{"page": 2, "line": 10, "text": "plan.", "x0": 72.0, "top": 204.6, "x1": 104.6, "bottom": 215.7}
+{"page": 2, "line": 11, "text": "The Common Council finds that the establishment of the Southside Form", "x0": 72.0, "top": 227.2, "x1": 527.6, "bottom": 238.2}
+{"page": 2, "line": 12, "text": "Districts will advance the City’s goals for existing and future", "x0": 72.0, "top": 241.6, "x1": 488.0, "bottom": 252.6}
+{"page": 2, "line": 13, "text": "development in the Southside neighborhood as specified in the “Greater", "x0": 72.0, "top": 256.0, "x1": 531.9, "bottom": 267.0}
+{"page": 2, "line": 14, "text": "Southside Neighborhood Plan.”", "x0": 72.1, "top": 270.5, "x1": 263.5, "bottom": 281.6}
+{"page": 2, "line": 15, "text": "Section 2. Section 325-4 of the Municipal Code of the City of Ithaca", "x0": 72.1, "top": 293.0, "x1": 521.0, "bottom": 304.3}
+{"page": 2, "line": 16, "text": "are hereby amended to establish the Southside Form Districts which", "x0": 72.1, "top": 307.4, "x1": 507.8, "bottom": 318.4}
+{"page": 2, "line": 17, "text": "include the following zoning districts: Traditional Residential (TR),", "x0": 72.1, "top": 321.9, "x1": 525.3, "bottom": 332.9}
+{"page": 2, "line": 18, "text": "Residential Transition (RT), Medium Density, Mixed Use (MD-MU), and", "x0": 72.1, "top": 336.3, "x1": 514.3, "bottom": 347.3}
+{"page": 2, "line": 19, "text": "Urban Mixed Use (UMU).", "x0": 72.1, "top": 350.7, "x1": 217.3, "bottom": 361.7}
+{"page": 2, "line": 20, "text": "Section 3. Chapter 325 of the Municipal Code of the City of Ithaca is", "x0": 72.1, "top": 373.3, "x1": 527.6, "bottom": 384.7}
+{"page": 2, "line": 21, "text": "hereby amended to add a new Article to be inserted as Article X,", "x0": 72.1, "top": 387.9, "x1": 494.6, "bottom": 398.9}
+{"page": 2, "line": 22, "text": "entitled, \"Southside Zoning,\" and all subsequent articles and sections", "x0": 72.1, "top": 402.3, "x1": 531.8, "bottom": 413.3}
+{"page": 2, "line": 23, "text": "shall be hereby renumbered accordingly.", "x0": 72.0, "top": 416.7, "x1": 329.5, "bottom": 427.7}
+{"page": 2, "line": 24, "text": "Section 4. “§325-46 Southside Form Districts,” shall be inserted in", "x0": 72.0, "top": 439.2, "x1": 512.1, "bottom": 450.6}
+{"page": 2, "line": 25, "text": "its entirety into said Article X as §325-46.", "x0": 72.1, "top": 453.7, "x1": 362.5, "bottom": 464.8}
+{"page": 2, "line": 26, "text": "Section 5. The Official Zoning Map of the City of Ithaca is hereby", "x0": 72.1, "top": 476.0, "x1": 507.8, "bottom": 487.4}
+{"page": 2, "line": 27, "text": "amended to change the designation from R-2b, R-3a, R-3aa, R-3b, and P-", "x0": 72.1, "top": 490.6, "x1": 532.0, "bottom": 501.6}
+{"page": 2, "line": 28, "text": "1 to Traditional Residential for the following tax parcels: 93.-7-7;", "x0": 72.1, "top": 505.1, "x1": 520.9, "bottom": 516.1}
+{"page": 2, "line": 29, "text": "106.-1-2; 93.-7-6; 93.-7-5.1; 93.-7-4; 93.-7-2.1; 93.-7-2.2; 93.-7-1;", "x0": 72.1, "top": 519.6, "x1": 524.3, "bottom": 530.6}
+{"page": 2, "line": 30, "text": "105.-3-3; 105.-3-1; 105.-3-2; 93.-6-15; 93.-6-16; 93.-6-17; 93.-6-19;", "x0": 72.1, "top": 534.0, "x1": 524.1, "bottom": 545.0}
+{"page": 2, "line": 31, "text": "93.-6-20; 93.-6-21; 93.-6-22; 93.-6-1; 93.-6-2; 93.-6-3; 93.-6-4.1;", "x0": 72.1, "top": 548.4, "x1": 511.0, "bottom": 559.4}
+{"page": 2, "line": 32, "text": "93.-6-4.2; 93.-6-5; 93.-6-6; 93.-6-7.5; 93.-6-7.1; 93.-6-7.2; 93.-6-", "x0": 72.1, "top": 562.8, "x1": 517.7, "bottom": 573.8}
+{"page": 2, "line": 33, "text": "7.3; 93.-6-7.4; 93.-6-8; 93.-6-9; 93.-6-10; 93.-6-11; 93.-6-12; 93.-6-", "x0": 72.0, "top": 577.4, "x1": 530.8, "bottom": 588.4}
+{"page": 2, "line": 34, "text": "14; 105.-4-5; 105.-4-6; 105.-4-7; 105.-4-8; 105.-4-1; 105.-4-2; 105.-", "x0": 72.0, "top": 591.9, "x1": 524.5, "bottom": 602.9}
+{"page": 2, "line": 35, "text": "4-3; 93.-5-1; 93.-5-2; 93.-5-3; 93.-5-4; 93.-5-5; 93.-5-6; 93.-5-7;", "x0": 72.0, "top": 606.4, "x1": 511.3, "bottom": 617.5}
+{"page": 2, "line": 36, "text": "93.-5-8; 93.-5-9; 93.-5-10; 93.-5-11; 93.-5-12; 105.-2-2; 105.-2-3;", "x0": 72.1, "top": 620.8, "x1": 511.0, "bottom": 631.9}
+{"page": 2, "line": 37, "text": "105.-2-4; 105.-2-5; 105.-2-6; 105.-2-7; 105.-2-8; 105.-2-9; 105.-2-10;", "x0": 72.1, "top": 635.3, "x1": 530.6, "bottom": 646.4}
+{"page": 2, "line": 38, "text": "105.-2-11; 105.-2-1; 93.-5-13; 93.-5-14; 93.-5-15; 93.-5-16; 93.-5-17;", "x0": 72.1, "top": 649.9, "x1": 530.6, "bottom": 660.9}
+{"page": 2, "line": 39, "text": "93.-4-7; 93.-4-8; 93.-4-9; 93.-4-10; 93.-4-6; 93.-4-11; 93.-4-5; 93.-", "x0": 72.1, "top": 664.2, "x1": 524.4, "bottom": 675.3}
+{"page": 2, "line": 40, "text": "4-12; 93.-4-4; 93.-4-13; 93.-4-3; 93.-4-14; 93.-4-2; 93.-4-15; 93.-4-", "x0": 72.1, "top": 678.8, "x1": 524.4, "bottom": 689.8}
+{"page": 2, "line": 41, "text": "16; 93.-4-17; 93.-4-18; 93.-4-19; 93.-4-20; 93.-4-21; 93.-4-1; 105.-", "x0": 72.1, "top": 693.4, "x1": 518.0, "bottom": 704.4}
+{"page": 2, "line": 42, "text": "1.2.2; 105.-1-1; 105.-1-2.1; 105.-1-3; 105.-1-22; 105.-1-4; 105.-1-5;", "x0": 72.0, "top": 707.8, "x1": 524.2, "bottom": 718.9}
+{"page": 2, "line": 43, "text": "105.-1-6; 105.-1-7; 105.-1-8; 105.-1-9; 105.-1-10; 105.-1-11; 105.-1-", "x0": 72.0, "top": 722.2, "x1": 524.2, "bottom": 733.3}
+{"page": 2, "line": 44, "text": "12; 105.-1-13; 105.-1-14; 105.-1-15; 105.-1-16; 105.-1-17; 105.-1-18;", "x0": 72.0, "top": 736.7, "x1": 524.1, "bottom": 747.8}
+{"page": 2, "line": 45, "text": "105.-1-19; 105.-1-20; 105.-1-21; 105.-5-1; 105.-5-2; 105.-5-3; 105.-5-", "x0": 72.0, "top": 751.3, "x1": 530.8, "bottom": 762.3}
+{"page": 2, "line": 46, "text": "2", "x0": 582.4, "top": 763.2, "x1": 589.0, "bottom": 775.2}
+{"page": 3, "line": 1, "text": "4; 105.-5-5; 105.-5-6; 105.-5-7; 105.-5-8; 105.-5-9; 105.-5-10; 105.-", "x0": 72.0, "top": 73.5, "x1": 524.5, "bottom": 84.5}
+{"page": 3, "line": 2, "text": "5-11; 105.-5-12; 105.-5-13; 105.-5-14; 105.-5-15; 105.-5-16; 105.-5-", "x0": 72.0, "top": 89.9, "x1": 517.6, "bottom": 101.0}
+{"page": 3, "line": 3, "text": "17; 105.-5-18; 105.-5-19; 105.-5-20; 105.-5-21; 105.-5-22; 105.-5-23;", "x0": 72.1, "top": 104.5, "x1": 524.1, "bottom": 115.5}
+{"page": 3, "line": 4, "text": "105.-5-24; 105.-5-25; 105.-5-26; 105.-5-27; 105.-5-28; 105.-5-29;", "x0": 72.1, "top": 118.9, "x1": 497.9, "bottom": 129.9}
+{"page": 3, "line": 5, "text": "105.-5-30; 105.-5-31; 105.-6-6; 105.-6-7; 105.-6-1; 105.-6-2; 105.-6-", "x0": 72.1, "top": 133.4, "x1": 524.3, "bottom": 144.4}
+{"page": 3, "line": 6, "text": "3; 105.-6-4; 103.-3-1; 103.-3-2; 103.-3-3; 103.-3-4; 103.-3-5; 103.-3-", "x0": 72.1, "top": 147.9, "x1": 530.9, "bottom": 158.9}
+{"page": 3, "line": 7, "text": "6; 103.-3-7; 103.-3-8; 103.-3-9; 103.-3-10; 104.-1-3; 104.-1-4; 104.-", "x0": 72.1, "top": 162.4, "x1": 524.6, "bottom": 173.5}
+{"page": 3, "line": 8, "text": "1-5; 105.-1-6; 105.-1-7; 105.-1-8; 103.-2-1; 103.-2-2; 103.-2-3; 103.-", "x0": 72.1, "top": 176.8, "x1": 531.2, "bottom": 187.8}
+{"page": 3, "line": 9, "text": "2-4; 103.-2-5; 103.-2-6; 103.-2-7; 103.-2-8; 103.-2-9; 103.-2-10;", "x0": 72.2, "top": 191.3, "x1": 498.0, "bottom": 202.4}
+{"page": 3, "line": 10, "text": "103.-2-11; 103.-2-12; 103.-2-13; 103.-2-14; 103.-2-15; 103.-2-16;", "x0": 72.2, "top": 205.8, "x1": 498.0, "bottom": 216.9}
+{"page": 3, "line": 11, "text": "103.-2-17; 103.-2-18; 103.-2-19; 103.-2-20; 103.-2-21; 103.-2-22;", "x0": 72.0, "top": 220.3, "x1": 497.8, "bottom": 231.3}
+{"page": 3, "line": 12, "text": "103.-2-23; 103.-2-24; 103.-2-25; 94.-3-1; 94.-3-2; 94.-3-3; 94.-3-4;", "x0": 72.0, "top": 234.8, "x1": 517.7, "bottom": 245.8}
+{"page": 3, "line": 13, "text": "94.-3-5; 94.-3-6; 94.-3-7; 94.-3-8; 94.-3-9; 94.-3-10; 94.-3-11; 94.-", "x0": 72.0, "top": 249.3, "x1": 524.4, "bottom": 260.3}
+{"page": 3, "line": 14, "text": "3-12; 94.-3-13; 94.-3-14; 94.-3-15; 94.-3-16; 94.-3-17; 94.-3-18; 94.-", "x0": 72.0, "top": 263.8, "x1": 530.9, "bottom": 274.9}
+{"page": 3, "line": 15, "text": "3-19; 94.-3-20; 94.-3-21; 94.-3-22; 94.-3-23; 94.-3-24; 94.-3-25; 94.-", "x0": 72.1, "top": 278.3, "x1": 530.9, "bottom": 289.4}
+{"page": 3, "line": 16, "text": "3-26; 94.-3-27; 94.-3-28; 94.-3-29; 94.-3-30; 94.-3-31; 94.-3-32; 94.-", "x0": 72.1, "top": 292.9, "x1": 530.9, "bottom": 303.9}
+{"page": 3, "line": 17, "text": "3-33; 94.-3-34; 94.-3-35; 93.-1-1; 93.-1-2; 93.-1-3; 93.-1-4; 93.-1-5;", "x0": 72.1, "top": 307.4, "x1": 530.9, "bottom": 318.4}
+{"page": 3, "line": 18, "text": "93.-1-6; 93.-1-7; 93.-1-8; 93.-1-9; 93.-1-10; 93.-1-11; 93.-1-12; 93.-", "x0": 72.1, "top": 321.8, "x1": 530.9, "bottom": 332.8}
+{"page": 3, "line": 19, "text": "1-13; 93.-1-14; 93.-1-15; 93.-1-16; 93.-1-17; 93.-1-19; 93.-1-22; 93.-", "x0": 72.1, "top": 336.3, "x1": 531.0, "bottom": 347.3}
+{"page": 3, "line": 20, "text": "1-23; 93.-1-24; 93.-1-25; 93.-1-26; 93.-1-29; 93.-1-30.1; 93.-1-30.2;", "x0": 72.0, "top": 350.8, "x1": 524.0, "bottom": 361.9}
+{"page": 3, "line": 21, "text": "80.-8-1; 80.-8-2; 80.-8-3; 80.-8-5; 80.-8-6; 80.-8-7; 80.-8-8; 80.-8-", "x0": 72.0, "top": 365.3, "x1": 524.3, "bottom": 376.4}
+{"page": 3, "line": 22, "text": "9; 80.-8-10; 80.-8-11; 80.-8-12; 80.-8-13; 80.-8-14; 93.-2-1; 93.-2-2;", "x0": 72.0, "top": 379.7, "x1": 530.8, "bottom": 390.8}
+{"page": 3, "line": 23, "text": "93.-2-3; 93.-2-4; 93.-2-5; 93.-2-6; 93.-2-7; 93.-2-8; 93.-2-9; 93.-2-", "x0": 72.0, "top": 394.3, "x1": 524.3, "bottom": 405.3}
+{"page": 3, "line": 24, "text": "10; 80.-11-1.1; 80.-11-4; 80.-11-5; 93.-3-1; 93.-3-2; 93.-3-3; 93.-3-", "x0": 72.0, "top": 408.8, "x1": 524.3, "bottom": 419.8}
+{"page": 3, "line": 25, "text": "4; 93.-3-5; 93.-3-6; 70.-7-15; 70.-7-16; 80.-10-1; 80.-10-4; 80.-10-5;", "x0": 72.0, "top": 423.2, "x1": 530.8, "bottom": 434.2}
+{"page": 3, "line": 26, "text": "80.-10-6; 80.-10-7; 80.-10-8; 80.-10-9; 71.-10-4; 71.-10-5; 71.-10-6;", "x0": 72.0, "top": 437.7, "x1": 524.1, "bottom": 448.7}
+{"page": 3, "line": 27, "text": "71.-10-7; 71.-10-8; 71.-10-9; 71.-10-10; 71.-10-11; 80.-9-1; 80.-9-2;", "x0": 71.9, "top": 452.2, "x1": 524.1, "bottom": 463.2}
+{"page": 3, "line": 28, "text": "80.-9-3; 80.-9-4; 80.-9-5; 80.-9-6; 80.-9-7; 80.-9-8; 80.-9-9; 80.-9-", "x0": 71.9, "top": 466.7, "x1": 524.2, "bottom": 477.8}
+{"page": 3, "line": 29, "text": "10; 80.-9-11; 80.-9-12; 71.-9-4; 71.-9-5; 71.-9-6; 71.-9-7; 71.-9-8;", "x0": 72.0, "top": 481.1, "x1": 517.7, "bottom": 492.2}
+{"page": 3, "line": 30, "text": "71.-9-9; 71.-9-10; 71.-9-11; 80.-6-1; 80.-6-2; 80.-6-3; 80.-6-4; 80.-", "x0": 72.0, "top": 495.7, "x1": 524.3, "bottom": 506.7}
+{"page": 3, "line": 31, "text": "6-5; 80.-6-6; 80.-6-7; 80.-6-8; 80.-6-9; 80.-6-10; 80.-6-11; 80.-6-12;", "x0": 72.0, "top": 510.2, "x1": 530.7, "bottom": 521.2}
+{"page": 3, "line": 32, "text": "80.-6-13; 80.-6-14; 71.-8-7; 71.-8-8; 71.-8-9; 71.-8-10; 71.-8-11;", "x0": 72.0, "top": 524.6, "x1": 504.4, "bottom": 535.6}
+{"page": 3, "line": 33, "text": "71.-8-12; 71.-8-14; 71.-8-15; 71.-8-16; 80.-5-3; 80.-5-5; 80.-5-6;", "x0": 72.0, "top": 539.1, "x1": 504.6, "bottom": 550.1}
+{"page": 3, "line": 34, "text": "80.-5-7; 80.-5-8; 80.-5-9; 80.-5-10; 80.-5-11; 80.-5-12; 80.-5-13;", "x0": 72.1, "top": 553.6, "x1": 504.3, "bottom": 564.7}
+{"page": 3, "line": 35, "text": "80.-5-14; 80.-5-16.2; 80.-5-15; 71.-7-3; 71.-7-4; 71.-7-5; 71.-7-6;", "x0": 72.1, "top": 568.1, "x1": 511.2, "bottom": 579.2}
+{"page": 3, "line": 36, "text": "79.-9-3; 79.-9-4; 79.-9-5; 80.-1-2; 80.-1-3; 80.-1-4; 80.-1-5; 80.-1-", "x0": 72.1, "top": 582.5, "x1": 524.4, "bottom": 593.6}
+{"page": 3, "line": 37, "text": "6; 80.-1-7; 80.-1-9; 80.-1-10; 71.-7-19; 71.-7-20; 71.-7-21; 72.-8-17;", "x0": 72.1, "top": 597.0, "x1": 530.7, "bottom": 608.1}
+{"page": 3, "line": 38, "text": "72.-8-19; 79.-4-3; 79.-4-4; 79.-4-6; 79.-4-8; 79.-4-9; 79.-4-10; 79.-", "x0": 72.0, "top": 611.6, "x1": 524.3, "bottom": 622.6}
+{"page": 3, "line": 39, "text": "4-11; 79.-4-12; 79.-4-13; 79.-4-14; 79.-4-15; 79.-5-12; 79.-5-13; 79.-", "x0": 72.0, "top": 626.0, "x1": 530.8, "bottom": 637.0}
+{"page": 3, "line": 40, "text": "5-14; 79.-5-15; 79.-5-16; 79.-5-17; 79.-5-18.1; 79.-5-18.2; 79.-5-", "x0": 72.0, "top": 640.5, "x1": 504.5, "bottom": 651.5}
+{"page": 3, "line": 41, "text": "18.3; 79.-5-20; 79.-5-21.1; 79.-8-1; 79.-8-2; 79.-8-3; 79.-8-4; 79.-8-", "x0": 72.0, "top": 655.0, "x1": 530.8, "bottom": 666.1}
+{"page": 3, "line": 42, "text": "5; 79.-8-6; 79.-8-7; 79.-8-8; 79.-8-9.11; 79.-8-9.12; 79.-8-9.21; 79.-", "x0": 72.0, "top": 669.5, "x1": 530.8, "bottom": 680.6}
+{"page": 3, "line": 43, "text": "8-9.22; 80.-2-1; 80.-2-2; 80.-2-3; 80.-2-4; 80.-2-5; 80.-2-6; 80.-2-8;", "x0": 72.0, "top": 683.9, "x1": 530.8, "bottom": 695.0}
+{"page": 3, "line": 44, "text": "80.-2-9; 80.-2-10; 80.-2-11; 80.-2-12; 80.-2-14; 80.-2-15; 80.-2-16;", "x0": 72.0, "top": 698.4, "x1": 517.5, "bottom": 709.5}
+{"page": 3, "line": 45, "text": "80.-2-18; 80.-2-19; 80.-2-20; 79.-6-10; 79.-6-13; 79.-6-14; 79.-6-15;", "x0": 72.1, "top": 713.0, "x1": 524.0, "bottom": 724.0}
+{"page": 3, "line": 46, "text": "3", "x0": 582.4, "top": 763.2, "x1": 589.0, "bottom": 775.2}
+{"page": 4, "line": 1, "text": "79.-6-16; 79.-7-4; 79.-7-5; 79.-7-6; 79.-7-7; 80.-3-1; 80.-3-3; 80.-3-", "x0": 72.0, "top": 77.5, "x1": 530.9, "bottom": 88.5}
+{"page": 4, "line": 2, "text": "4.2; 80.-3-6; 80.-3-7; 80.-3-8; 80.-3-9; 80.-3-10; 80.-3-14; 80.-3-15;", "x0": 72.0, "top": 92.0, "x1": 530.7, "bottom": 103.0}
+{"page": 4, "line": 3, "text": "79.-6-8.2; 80.-4-1; 80.-4-2; 80.-4-3; 80.-4-4; 80.-4-5; 80.-4-6; 80.-", "x0": 72.0, "top": 106.4, "x1": 524.4, "bottom": 117.4}
+{"page": 4, "line": 4, "text": "4-7; 80.-4-8; 80.-4-9; 80.-4-10; 80.-4-11; 80.-4-12; 80.-4-13; 80.-4-", "x0": 72.0, "top": 120.9, "x1": 524.4, "bottom": 131.9}
+{"page": 4, "line": 5, "text": "15; 80.-4-17; 80.-4-18; 80.-7-1; and portions of 79.-6-8.2; 80.11-1.2;", "x0": 72.1, "top": 135.4, "x1": 530.5, "bottom": 146.5}
+{"page": 4, "line": 6, "text": "and 103.-1-1.2.", "x0": 72.1, "top": 150.1, "x1": 169.9, "bottom": 161.1}
+{"page": 4, "line": 7, "text": "The boundaries of this amendment are shown on the map entitled", "x0": 72.1, "top": 172.5, "x1": 481.4, "bottom": 183.5}
+{"page": 4, "line": 8, "text": "“Southside Form Districts – October 2025,” a copy of which shall be on", "x0": 72.1, "top": 186.9, "x1": 531.8, "bottom": 197.9}
+{"page": 4, "line": 9, "text": "file in the City Clerk’s office.", "x0": 72.1, "top": 201.3, "x1": 283.3, "bottom": 212.3}
+{"page": 4, "line": 10, "text": "Section 6. The Official Zoning Map of the City of Ithaca is hereby", "x0": 72.1, "top": 223.8, "x1": 507.8, "bottom": 235.2}
+{"page": 4, "line": 11, "text": "amended to change the designation from R-2b, R-3a, R-3aa, R-3b, and", "x0": 72.1, "top": 238.4, "x1": 514.3, "bottom": 249.4}
+{"page": 4, "line": 12, "text": "SW-2 to Residential Transition for the following tax parcels: 104.-1-", "x0": 72.1, "top": 252.8, "x1": 525.3, "bottom": 263.8}
+{"page": 4, "line": 13, "text": "2; 103.-1-2.1; 103.-1-2.2; 94.-1-6.2; 94.-1-8; 94.-1-9; 94.-1-10; 94.-", "x0": 72.1, "top": 267.3, "x1": 530.9, "bottom": 278.3}
+{"page": 4, "line": 14, "text": "1-11; 94.-1-12; 94.-1-13; 94.-1-14; 94.-1-15; and portions of 94.-1-22", "x0": 72.1, "top": 281.8, "x1": 530.9, "bottom": 292.8}
+{"page": 4, "line": 15, "text": "and 103.-1-1.2.", "x0": 72.1, "top": 296.2, "x1": 170.0, "bottom": 307.2}
+{"page": 4, "line": 16, "text": "The boundaries of this amendment are shown on the map entitled", "x0": 72.0, "top": 318.8, "x1": 481.3, "bottom": 329.8}
+{"page": 4, "line": 17, "text": "“Southside Form Districts – October 2025,” a copy of which shall be on", "x0": 72.0, "top": 333.2, "x1": 531.7, "bottom": 344.2}
+{"page": 4, "line": 18, "text": "file in the City Clerk’s office.", "x0": 72.0, "top": 347.7, "x1": 283.3, "bottom": 358.7}
+{"page": 4, "line": 19, "text": "Section 7. The Official Zoning Map of the City of Ithaca is hereby", "x0": 72.0, "top": 370.3, "x1": 507.8, "bottom": 381.6}
+{"page": 4, "line": 20, "text": "amended to change the designation from R-2b, R-3aa, B-1a, and B-2a to", "x0": 72.0, "top": 384.7, "x1": 527.4, "bottom": 395.7}
+{"page": 4, "line": 21, "text": "Medium Density Mixed Use for the following tax parcels: 70.-7-1; 70.-", "x0": 72.0, "top": 399.0, "x1": 527.5, "bottom": 410.1}
+{"page": 4, "line": 22, "text": "7-2; 70.-7-3; 71.-10-1; 71.-10-2; 71.-10-3; 71.-9-1; 71.-9-2; 71.-9-3;", "x0": 72.0, "top": 413.4, "x1": 531.9, "bottom": 424.5}
+{"page": 4, "line": 23, "text": "71.-8-1; 71.-8-2; 71.-8-3; 71.-8-4; 71.-8-5; 71.-8-6; 71.-7-1; 71.-7-", "x0": 72.0, "top": 427.8, "x1": 524.3, "bottom": 438.9}
+{"page": 4, "line": 24, "text": "2; 71.-7-7; 71.-7-8; 71.-7-9; 71.-7-10; 71.-7-11; 71.-7-12; 71.-7-13;", "x0": 72.0, "top": 442.5, "x1": 524.1, "bottom": 453.5}
+{"page": 4, "line": 25, "text": "71.-7-14; 71.-7-15; 71.-7-16; 71.-7-17; 71.-7-18; 72.-8-9; 72.-8-10;", "x0": 72.0, "top": 457.0, "x1": 517.5, "bottom": 468.0}
+{"page": 4, "line": 26, "text": "72.-8-11; 72.-8-12; 72.-8-13; 72.-8-14.2; 72.-8-15; 72.-8-16; 79.-6-", "x0": 72.0, "top": 471.5, "x1": 517.6, "bottom": 482.6}
+{"page": 4, "line": 27, "text": "8.1; and a portion of 79.-6-8.2.", "x0": 72.0, "top": 485.9, "x1": 281.5, "bottom": 497.0}
+{"page": 4, "line": 28, "text": "The boundaries of this amendment are shown on the map entitled", "x0": 72.0, "top": 508.5, "x1": 481.4, "bottom": 519.5}
+{"page": 4, "line": 29, "text": "“Southside Form Districts – October 2025,” a copy of which shall be on", "x0": 72.0, "top": 522.9, "x1": 531.8, "bottom": 533.9}
+{"page": 4, "line": 30, "text": "file in the City Clerk’s office.", "x0": 72.0, "top": 537.3, "x1": 283.3, "bottom": 548.3}
+{"page": 4, "line": 31, "text": "Section 8. The Official Zoning Map of the City of Ithaca is hereby", "x0": 72.0, "top": 559.8, "x1": 507.8, "bottom": 571.2}
+{"page": 4, "line": 32, "text": "amended to change the designation from R-2b, SW-2, and WEDZ-1b to", "x0": 72.0, "top": 574.2, "x1": 501.1, "bottom": 585.2}
+{"page": 4, "line": 33, "text": "Urban Mixed Use for the following tax parcels: 103.-1-1.1; 103.-1-3;", "x0": 72.0, "top": 588.8, "x1": 518.7, "bottom": 599.9}
+{"page": 4, "line": 34, "text": "94.-1-1; 72.-8-1; 79.-4-1; 79.-5-1.1; 79.-5-21.2; 79.-5-25.1; and a", "x0": 72.0, "top": 603.4, "x1": 514.3, "bottom": 614.4}
+{"page": 4, "line": 35, "text": "portion of 94.-1-22.", "x0": 72.1, "top": 618.5, "x1": 202.9, "bottom": 629.5}
+{"page": 4, "line": 36, "text": "The boundaries of this amendment are shown on the map entitled", "x0": 72.0, "top": 640.1, "x1": 481.3, "bottom": 651.2}
+{"page": 4, "line": 37, "text": "“Southside Form Districts – October 2025,” a copy of which shall be on", "x0": 72.0, "top": 654.7, "x1": 531.7, "bottom": 665.7}
+{"page": 4, "line": 38, "text": "file in the City Clerk’s office.", "x0": 72.0, "top": 669.1, "x1": 283.3, "bottom": 680.1}
+{"page": 4, "line": 39, "text": "4", "x0": 582.4, "top": 763.2, "x1": 589.0, "bottom": 775.2}
+{"page": 5, "line": 1, "text": "Section 9. All applicable sections within the Municipal Code of the", "x0": 72.0, "top": 77.6, "x1": 514.4, "bottom": 89.0}
+{"page": 5, "line": 2, "text": "City of Ithaca shall be updated in accordance with the amendments made", "x0": 72.0, "top": 92.0, "x1": 531.9, "bottom": 103.0}
+{"page": 5, "line": 3, "text": "herewith.", "x0": 72.0, "top": 106.4, "x1": 130.6, "bottom": 117.4}
+{"page": 5, "line": 4, "text": "Section 10. Severability. If any selection, subsection, sentence,", "x0": 72.0, "top": 128.9, "x1": 501.2, "bottom": 140.3}
+{"page": 5, "line": 5, "text": "clause, phrase or portion of this ordinance is held to be invalid or", "x0": 72.0, "top": 143.5, "x1": 518.3, "bottom": 154.5}
+{"page": 5, "line": 6, "text": "unconstitutional by a court of competent jurisdiction, then that", "x0": 72.0, "top": 157.8, "x1": 494.5, "bottom": 168.9}
+{"page": 5, "line": 7, "text": "decision shall not affect the validity of the remaining portions of", "x0": 72.0, "top": 172.2, "x1": 514.4, "bottom": 183.3}
+{"page": 5, "line": 8, "text": "this ordinance.", "x0": 72.0, "top": 186.6, "x1": 171.1, "bottom": 197.7}
+{"page": 5, "line": 9, "text": "Section 11. Effective date. This ordinance shall take effect", "x0": 72.0, "top": 209.3, "x1": 468.2, "bottom": 220.7}
+{"page": 5, "line": 10, "text": "immediately and in accordance with law upon publication of notices as", "x0": 72.0, "top": 223.7, "x1": 525.4, "bottom": 234.8}
+{"page": 5, "line": 11, "text": "provided in the Ithaca City Charter.", "x0": 72.0, "top": 238.1, "x1": 309.7, "bottom": 249.1}
+{"page": 5, "line": 12, "text": "Carried 8-1(Opposed: Kuehl)", "x0": 72.0, "top": 265.0, "x1": 250.3, "bottom": 276.0}
+{"page": 5, "line": 13, "text": "(Absent: Fabrizio, Haines-Sharp)", "x0": 72.0, "top": 277.5, "x1": 283.2, "bottom": 288.5}
+{"page": 5, "line": 14, "text": "5", "x0": 582.4, "top": 763.2, "x1": 589.0, "bottom": 775.2}
+{"page": 6, "line": 1, "text": "STATE OF NEW YORK", "x0": 72.0, "top": 71.6, "x1": 174.4, "bottom": 83.6}
+{"page": 6, "line": 2, "text": "COUNTY OF TOMPKINS ss:", "x0": 72.0, "top": 86.3, "x1": 228.7, "bottom": 98.3}
+{"page": 6, "line": 3, "text": "CITY OF ITHACA", "x0": 72.0, "top": 100.9, "x1": 148.5, "bottom": 112.9}
+{"page": 6, "line": 4, "text": "I, Shaniqua Lewis, Deputy City Clerk of the City of Ithaca, New York, do hereby certify that the foregoing", "x0": 72.0, "top": 129.0, "x1": 533.6, "bottom": 140.5}
+{"page": 6, "line": 5, "text": "is a true and exact copy of Ordinance 2025-12 “__An Ordinance Amending The Municipal Code Of The", "x0": 72.0, "top": 142.8, "x1": 531.9, "bottom": 153.9}
+{"page": 6, "line": 6, "text": "City Of Ithaca, Chapter 325, Entitled “Zoning” To Establish Section 325-46 Southside Form Districts and", "x0": 72.0, "top": 156.3, "x1": 537.4, "bottom": 167.3}
+{"page": 6, "line": 7, "text": "to Rezone Portions of the R-2b, R-3a, R-3aa, P-1, B-2a, R-3b, SW-2, B-1a, B-2a, and WEDZ-1b to", "x0": 72.0, "top": 169.7, "x1": 502.8, "bottom": 180.7}
+{"page": 6, "line": 8, "text": "Traditional Residential (TR), Residential Transition (RT), Medium- Density Mixed-Use (MD-MU), and", "x0": 72.0, "top": 183.0, "x1": 525.7, "bottom": 194.1}
+{"page": 6, "line": 9, "text": "Urban Mixed-Use (UMU)”, duly adopted by the Common Council of said City of Ithaca at a Special", "x0": 72.0, "top": 196.5, "x1": 509.8, "bottom": 207.6}
+{"page": 6, "line": 10, "text": "Meeting of Common Council held on November 19th 2025", "x0": 72.0, "top": 208.6, "x1": 329.2, "bottom": 221.0}
+{"page": 6, "line": 11, "text": "IN WITNESS WHEREOF, I have hereunto set my hand and the Corporate Seal of the City of Ithaca, New", "x0": 72.0, "top": 236.8, "x1": 529.6, "bottom": 248.3}
+{"page": 6, "line": 12, "text": "York, this 20th day of November 2025.", "x0": 72.0, "top": 249.1, "x1": 243.8, "bottom": 261.3}
+{"page": 6, "line": 13, "text": "Shaniqua Lewis, Deputy City Clerk", "x0": 288.2, "top": 317.4, "x1": 439.1, "bottom": 328.4}
+{"page": 6, "line": 14, "text": "City of Ithaca, New York", "x0": 288.0, "top": 330.8, "x1": 394.9, "bottom": 341.8}
+{"page": 6, "line": 15, "text": "(City Seal)", "x0": 72.0, "top": 357.2, "x1": 112.3, "bottom": 367.2}
+{"page": 6, "line": 16, "text": "6", "x0": 582.4, "top": 763.2, "x1": 589.0, "bottom": 775.2}
+{"page": 7, "line": 1, "text": "§325-46 SOUTHSIDE FORM DISTRICTS", "x0": 72.0, "top": 617.5, "x1": 463.9, "bottom": 640.5}
+{"page": 7, "line": 2, "text": "ITHACA, NEW YORK", "x0": 72.0, "top": 646.3, "x1": 285.9, "bottom": 669.3}
+{"page": 7, "line": 3, "text": "Adopted November 19, 2025", "x0": 72.0, "top": 678.3, "x1": 266.9, "bottom": 692.3}
+{"page": 8, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 230.0, "top": 393.2, "x1": 382.0, "bottom": 403.2}
+{"page": 9, "line": 1, "text": "§325-46 SOUTHSIDE FORM DISTRICTS", "x0": 72.0, "top": 72.5, "x1": 438.4, "bottom": 92.5}
+{"page": 9, "line": 2, "text": "CONTENTS", "x0": 72.0, "top": 134.0, "x1": 141.7, "bottom": 148.0}
+{"page": 9, "line": 3, "text": "325-46.1 GENERAL PROVISIONS ......................................................................1", "x0": 72.0, "top": 163.1, "x1": 410.0, "bottom": 173.1}
+{"page": 9, "line": 4, "text": "A. Short Title ...........................................................................................................1", "x0": 81.0, "top": 178.5, "x1": 410.0, "bottom": 188.5}
+{"page": 9, "line": 5, "text": "B. Intent ..................................................................................................................1", "x0": 81.0, "top": 197.7, "x1": 410.0, "bottom": 207.7}
+{"page": 9, "line": 6, "text": "C. Applicability .......................................................................................................1", "x0": 81.0, "top": 216.9, "x1": 410.0, "bottom": 226.9}
+{"page": 9, "line": 7, "text": "D. Design Review and Approval Required ................................................................1", "x0": 81.0, "top": 236.1, "x1": 410.0, "bottom": 246.1}
+{"page": 9, "line": 8, "text": "E. Landmarks Preservation Commission ..................................................................1", "x0": 81.0, "top": 255.3, "x1": 410.0, "bottom": 265.3}
+{"page": 9, "line": 9, "text": "F. Other Applicable Sections ...................................................................................2", "x0": 81.0, "top": 274.5, "x1": 410.0, "bottom": 284.5}
+{"page": 9, "line": 10, "text": "325-46.2 DISTRICT STANDARDS ......................................................................3", "x0": 72.0, "top": 300.4, "x1": 410.0, "bottom": 310.4}
+{"page": 9, "line": 11, "text": "A. Establishment of Districts ...................................................................................3", "x0": 81.0, "top": 315.8, "x1": 410.0, "bottom": 325.8}
+{"page": 9, "line": 12, "text": "B. Definitions and Related Standards .......................................................................3", "x0": 81.0, "top": 335.0, "x1": 410.0, "bottom": 345.0}
+{"page": 9, "line": 13, "text": "C. Southside Form Districts .....................................................................................7", "x0": 81.0, "top": 354.2, "x1": 410.0, "bottom": 364.2}
+{"page": 9, "line": 14, "text": "D. Traditional Residential (TR) ...............................................................................9", "x0": 81.0, "top": 373.4, "x1": 410.0, "bottom": 383.4}
+{"page": 9, "line": 15, "text": "E. Residential Transition (RT) ...............................................................................13", "x0": 81.0, "top": 392.6, "x1": 410.0, "bottom": 402.6}
+{"page": 9, "line": 16, "text": "F. Medium-Density Mixed Use (MD-MU) ...........................................................17", "x0": 81.0, "top": 411.8, "x1": 410.0, "bottom": 421.8}
+{"page": 9, "line": 17, "text": "G. Urban Mixed Use (MU) ....................................................................................21", "x0": 81.0, "top": 431.0, "x1": 410.0, "bottom": 441.0}
+{"page": 9, "line": 18, "text": "325-46.3 ALLOWED USES .............................................................................25", "x0": 81.0, "top": 449.7, "x1": 410.0, "bottom": 459.7}
+{"page": 9, "line": 19, "text": "A. Use Table ...........................................................................................................25", "x0": 81.0, "top": 469.4, "x1": 410.0, "bottom": 479.4}
+{"page": 10, "line": 1, "text": "Southside Form Districts", "x0": 64.8, "top": 76.1, "x1": 221.6, "bottom": 90.1}
+{"page": 11, "line": 1, "text": "325-46.1 General Provisions", "x0": 72.0, "top": 72.5, "x1": 281.6, "bottom": 90.5}
+{"page": 11, "line": 2, "text": "A. Short Title", "x0": 72.0, "top": 99.3, "x1": 151.4, "bottom": 113.3}
+{"page": 11, "line": 3, "text": "This section shall be known as the “Southside Form Districts.”", "x0": 72.0, "top": 114.6, "x1": 311.9, "bottom": 124.6}
+{"page": 11, "line": 4, "text": "B. Intent", "x0": 72.0, "top": 135.3, "x1": 125.4, "bottom": 149.3}
+{"page": 11, "line": 5, "text": "The intent of this section is to establish updated zoning regulations to implement the Greater Southside Neighborhood", "x0": 72.0, "top": 150.6, "x1": 530.4, "bottom": 160.6}
+{"page": 11, "line": 6, "text": "Plan, adopted by Common Council on April 3, 2019. This section establishes the zoning regulations necessary to guide", "x0": 72.0, "top": 162.6, "x1": 531.7, "bottom": 172.6}
+{"page": 11, "line": 7, "text": "implementation of the City-adopted vision for future land uses and development within the Southside neighborhood.", "x0": 72.0, "top": 174.6, "x1": 526.3, "bottom": 184.6}
+{"page": 11, "line": 8, "text": "Specifically, the Southside Form Districts are intended to:", "x0": 72.0, "top": 186.6, "x1": 293.7, "bottom": 196.6}
+{"page": 11, "line": 9, "text": "(1) Allow architecturally compatible infill development within the Traditional Residential, Residential Transition,", "x0": 88.5, "top": 205.8, "x1": 525.2, "bottom": 215.8}
+{"page": 11, "line": 10, "text": "and Medium-Density Mixed Use areas;", "x0": 103.5, "top": 217.8, "x1": 254.9, "bottom": 227.8}
+{"page": 11, "line": 11, "text": "(2) Support the redevelopment of underutilized parcels and parking lots within the Urban Mixed Use areas to", "x0": 88.5, "top": 237.0, "x1": 511.8, "bottom": 247.0}
+{"page": 11, "line": 12, "text": "provide commercial uses and higher density housing;", "x0": 103.5, "top": 249.0, "x1": 307.6, "bottom": 259.0}
+{"page": 11, "line": 13, "text": "(3) Ensure zoning requirements are consistent with the historic character of the Henry St. John Historic District and", "x0": 88.5, "top": 268.2, "x1": 538.4, "bottom": 278.2}
+{"page": 11, "line": 14, "text": "other locally-designated structures;", "x0": 103.5, "top": 280.2, "x1": 237.4, "bottom": 290.2}
+{"page": 11, "line": 15, "text": "(4) Provide regulation of built-form to ensure new development is compatible with the existing architectural", "x0": 88.5, "top": 299.4, "x1": 506.4, "bottom": 309.4}
+{"page": 11, "line": 16, "text": "character of the neighborhood; and", "x0": 103.5, "top": 311.4, "x1": 239.8, "bottom": 321.4}
+{"page": 11, "line": 17, "text": "(5) Preserve and enhance green space that is a vital component of the urban environment.", "x0": 88.5, "top": 330.6, "x1": 435.0, "bottom": 340.6}
+{"page": 11, "line": 18, "text": "C. Applicability", "x0": 72.0, "top": 351.3, "x1": 164.1, "bottom": 365.3}
+{"page": 11, "line": 19, "text": "(1) No building or part thereof within any district of the Southside Form Districts shall be erected, moved, or", "x0": 93.0, "top": 373.8, "x1": 516.3, "bottom": 383.8}
+{"page": 11, "line": 20, "text": "altered on its exterior unless in conformity with the regulations herein specified for the district in which it is", "x0": 108.0, "top": 385.8, "x1": 523.3, "bottom": 395.8}
+{"page": 11, "line": 21, "text": "located.", "x0": 108.0, "top": 397.8, "x1": 138.0, "bottom": 407.8}
+{"page": 11, "line": 22, "text": "(2) In the event that provisions of the Southside Form Districts conflict with other sections of the City Municipal", "x0": 93.0, "top": 417.0, "x1": 531.3, "bottom": 427.0}
+{"page": 11, "line": 23, "text": "Code, the Southside Form Districts shall prevail.", "x0": 108.0, "top": 429.0, "x1": 295.6, "bottom": 439.0}
+{"page": 11, "line": 24, "text": "(3) In cases of nonconforming uses, buildings, and lots, refer to Chapter 325 Zoning, Article VI.", "x0": 93.0, "top": 448.2, "x1": 466.5, "bottom": 458.2}
+{"page": 11, "line": 25, "text": "D. Design Review and Approval Required", "x0": 72.0, "top": 468.9, "x1": 310.6, "bottom": 482.9}
+{"page": 11, "line": 26, "text": "(1) All new construction (including parking lot construction or expansion) is subject to the design review process", "x0": 93.0, "top": 491.4, "x1": 529.4, "bottom": 501.4}
+{"page": 11, "line": 27, "text": "set forth in Chapter 160, Design Review, of the City Municipal Code.", "x0": 108.0, "top": 503.4, "x1": 378.9, "bottom": 513.4}
+{"page": 11, "line": 28, "text": "(2) No building permit shall be issued or structure or building shall be erected, and no exterior of an existing", "x0": 93.0, "top": 522.6, "x1": 512.8, "bottom": 532.6}
+{"page": 11, "line": 29, "text": "building or structure shall be altered, remodeled, enlarged or extended until the project or development has", "x0": 108.0, "top": 534.6, "x1": 521.3, "bottom": 544.6}
+{"page": 11, "line": 30, "text": "design review approval.", "x0": 108.0, "top": 546.6, "x1": 197.7, "bottom": 556.6}
+{"page": 11, "line": 31, "text": "E. Landmarks Preservation Commission", "x0": 72.0, "top": 567.3, "x1": 304.9, "bottom": 581.3}
+{"page": 11, "line": 32, "text": "Regardless of the underlying zoning, all new construction (including additions) within a designated local historic district", "x0": 72.0, "top": 582.6, "x1": 535.8, "bottom": 592.6}
+{"page": 11, "line": 33, "text": "or on the same tax parcel as an individually designated local landmark is subject to review and approval by the Ithaca", "x0": 72.0, "top": 594.6, "x1": 521.3, "bottom": 604.6}
+{"page": 11, "line": 34, "text": "Landmarks Preservation Commission for compliance with Sections 228-6(B) and (C) of the City Municipal Code.", "x0": 72.0, "top": 606.6, "x1": 514.3, "bottom": 616.6}
+{"page": 11, "line": 35, "text": "1", "x0": 524.7, "top": 751.3, "x1": 529.8, "bottom": 760.3}
+{"page": 11, "line": 36, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 12, "line": 1, "text": "F. Other Applicable Sections", "x0": 72.0, "top": 72.4, "x1": 238.9, "bottom": 86.4}
+{"page": 12, "line": 2, "text": "The following sections of Chapter 325 shall apply in the Southside Form districts. Those sections of Chapter 325 not", "x0": 72.0, "top": 87.7, "x1": 522.7, "bottom": 97.7}
+{"page": 12, "line": 3, "text": "listed below do not apply within the Southside Form districts.", "x0": 72.0, "top": 99.7, "x1": 310.7, "bottom": 109.7}
+{"page": 12, "line": 4, "text": "(1) § 325-2. Statutory authority, and purpose.", "x0": 93.0, "top": 118.9, "x1": 271.8, "bottom": 128.9}
+{"page": 12, "line": 5, "text": "(2) § 325-3. Definitions and word usage, except as modified in § 325-45.2 (B), Definitions and Related Standards.", "x0": 93.0, "top": 138.1, "x1": 536.8, "bottom": 148.1}
+{"page": 12, "line": 6, "text": "(3) § 325-4. Establishment of districts.", "x0": 93.0, "top": 157.3, "x1": 243.9, "bottom": 167.3}
+{"page": 12, "line": 7, "text": "(4) § 325-5. Zoning Map.", "x0": 93.0, "top": 176.5, "x1": 195.4, "bottom": 186.5}
+{"page": 12, "line": 8, "text": "(5) § 325-6. Interpretation of boundaries.", "x0": 93.0, "top": 195.7, "x1": 255.4, "bottom": 205.7}
+{"page": 12, "line": 9, "text": "(6) § 325-7. Application of regulations.", "x0": 93.0, "top": 214.9, "x1": 246.3, "bottom": 224.9}
+{"page": 12, "line": 10, "text": "(7) § 325-8. District regulations.", "x0": 93.0, "top": 234.1, "x1": 220.5, "bottom": 244.1}
+{"page": 12, "line": 11, "text": "(8) § 325-9. Standards. (Special Permits)", "x0": 93.0, "top": 253.3, "x1": 251.0, "bottom": 263.3}
+{"page": 12, "line": 12, "text": "(9) § 325-10. Accessory Apartments.", "x0": 93.0, "top": 272.5, "x1": 236.1, "bottom": 282.5}
+{"page": 12, "line": 13, "text": "(10) § 325-14. Application.", "x0": 88.0, "top": 291.7, "x1": 196.3, "bottom": 301.7}
+{"page": 12, "line": 14, "text": "(11) § 325-15. Use regulations.", "x0": 88.0, "top": 310.9, "x1": 210.4, "bottom": 320.9}
+{"page": 12, "line": 15, "text": "(12) § 325-16. Height regulations, except as expressly modified in this section.", "x0": 88.0, "top": 330.1, "x1": 391.9, "bottom": 340.1}
+{"page": 12, "line": 16, "text": "(13) § 325-17. Area regulations.", "x0": 88.0, "top": 349.3, "x1": 213.5, "bottom": 359.3}
+{"page": 12, "line": 17, "text": "(14) § 325-18. Yard regulations.", "x0": 88.0, "top": 368.5, "x1": 213.2, "bottom": 378.5}
+{"page": 12, "line": 18, "text": "(15) § 325-20. Off-street parking.", "x0": 88.0, "top": 387.7, "x1": 220.5, "bottom": 397.7}
+{"page": 12, "line": 19, "text": "(16) § 325-23. General standards applying to all land uses.", "x0": 88.0, "top": 406.9, "x1": 315.5, "bottom": 416.9}
+{"page": 12, "line": 20, "text": "(17) § 325-25. Location of accessory structures.", "x0": 88.0, "top": 426.1, "x1": 273.3, "bottom": 436.1}
+{"page": 12, "line": 21, "text": "(18) § 325-26. New structures along streams or inlets.", "x0": 88.0, "top": 445.3, "x1": 297.8, "bottom": 455.3}
+{"page": 12, "line": 22, "text": "(19) § 325-29. Landmarks.", "x0": 88.0, "top": 464.5, "x1": 194.4, "bottom": 474.5}
+{"page": 12, "line": 23, "text": "(20) § 325-29.1. Adult uses.", "x0": 88.0, "top": 483.7, "x1": 198.7, "bottom": 493.7}
+{"page": 12, "line": 24, "text": "(21) § 325-29.3. Dumpsters.", "x0": 88.0, "top": 502.9, "x1": 201.3, "bottom": 512.9}
+{"page": 12, "line": 25, "text": "(22) ARTICLE VA. Telecommunications Facilities, and Services.", "x0": 88.0, "top": 522.1, "x1": 338.6, "bottom": 532.1}
+{"page": 12, "line": 26, "text": "(23) ARTICLE VI. Nonconforming Uses, Buildings, and Lots.", "x0": 88.0, "top": 541.3, "x1": 331.8, "bottom": 551.3}
+{"page": 12, "line": 27, "text": "(24) ARTICLE VII. Administration and Enforcement.", "x0": 88.0, "top": 560.5, "x1": 300.3, "bottom": 570.5}
+{"page": 12, "line": 28, "text": "(25) ARTICLE IX. Amendments.", "x0": 88.0, "top": 579.7, "x1": 220.1, "bottom": 589.7}
+{"page": 12, "line": 29, "text": "(26) ARTICLE X. Penalties.", "x0": 88.0, "top": 598.9, "x1": 198.5, "bottom": 608.9}
+{"page": 12, "line": 30, "text": "2", "x0": 82.2, "top": 751.3, "x1": 87.3, "bottom": 760.3}
+{"page": 12, "line": 31, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 13, "line": 1, "text": "325-46.2 District Standards", "x0": 72.0, "top": 72.5, "x1": 276.4, "bottom": 90.5}
+{"page": 13, "line": 2, "text": "A. Establishment of Districts", "x0": 72.0, "top": 99.3, "x1": 238.8, "bottom": 113.3}
+{"page": 13, "line": 3, "text": "Six zoning districts are established for the Southside area. These districts are as follows:", "x0": 72.0, "top": 114.6, "x1": 404.4, "bottom": 124.6}
+{"page": 13, "line": 4, "text": "Abbreviation District", "x0": 94.2, "top": 141.6, "x1": 182.6, "bottom": 151.6}
+{"page": 13, "line": 5, "text": "TR Traditional Residential", "x0": 94.2, "top": 159.6, "x1": 240.7, "bottom": 169.6}
+{"page": 13, "line": 6, "text": "RT Residential Traditional", "x0": 94.2, "top": 175.6, "x1": 240.3, "bottom": 185.6}
+{"page": 13, "line": 7, "text": "MD-MU Medium-Density Mixed Use", "x0": 94.2, "top": 191.6, "x1": 264.2, "bottom": 201.6}
+{"page": 13, "line": 8, "text": "MU Urban Mixed Use", "x0": 94.2, "top": 207.6, "x1": 222.0, "bottom": 217.6}
+{"page": 13, "line": 9, "text": "B. Definitions and Related Standards", "x0": 72.0, "top": 233.4, "x1": 285.8, "bottom": 247.4}
+{"page": 13, "line": 10, "text": "The definitions of §325-3 shall control, except where a definition is provided below.", "x0": 72.0, "top": 248.7, "x1": 394.7, "bottom": 258.7}
+{"page": 13, "line": 11, "text": "(1) Blank Wall", "x0": 92.4, "top": 267.3, "x1": 153.0, "bottom": 277.3}
+{"page": 13, "line": 12, "text": "(a) Length of blank wall area means a portion of the exterior facade of the building that does not include:", "x0": 108.0, "top": 279.9, "x1": 518.5, "bottom": 289.9}
+{"page": 13, "line": 13, "text": "windows or doors; columns or pilasters; other articulation greater than 12 inches in depth; or a substantial", "x0": 126.0, "top": 291.9, "x1": 535.0, "bottom": 301.9}
+{"page": 13, "line": 14, "text": "material change (paint color is not considered a substantial change).", "x0": 126.0, "top": 303.9, "x1": 387.3, "bottom": 313.9}
+{"page": 13, "line": 15, "text": "(b) Maximum length of blank wall applies in both a vertical and horizontal direction on street-facing facades.", "x0": 108.0, "top": 315.9, "x1": 532.8, "bottom": 325.9}
+{"page": 13, "line": 16, "text": "The shortest dimension of any rectangular area of blank wall shall not exceed the maximum length for the", "x0": 126.0, "top": 327.9, "x1": 533.5, "bottom": 337.9}
+{"page": 13, "line": 17, "text": "district (8’ in TR, RT, and MD-MU districts and 12’ in the MU district).", "x0": 126.0, "top": 339.9, "x1": 409.9, "bottom": 349.9}
+{"page": 13, "line": 18, "text": "Blank", "x0": 372.9, "top": 401.2, "x1": 387.6, "bottom": 407.1}
+{"page": 13, "line": 19, "text": "Blank Wall Wall", "x0": 220.1, "top": 407.1, "x1": 385.8, "bottom": 414.1}
+{"page": 13, "line": 20, "text": "Blank Wall", "x0": 275.8, "top": 430.4, "x1": 303.4, "bottom": 436.3}
+{"page": 13, "line": 21, "text": "(2) Building Height", "x0": 92.4, "top": 485.7, "x1": 174.7, "bottom": 495.7}
+{"page": 13, "line": 22, "text": "(a) The existing definition of building height shall apply (refer to § 325-3 - “Height of Building”).", "x0": 108.0, "top": 498.3, "x1": 490.3, "bottom": 508.3}
+{"page": 13, "line": 23, "text": "(b) Building heights in the Southside districts are regulated using stories. No portion of any building shall", "x0": 108.0, "top": 510.3, "x1": 521.8, "bottom": 520.3}
+{"page": 13, "line": 24, "text": "exceed the maximum number of stories.", "x0": 126.0, "top": 522.3, "x1": 280.5, "bottom": 532.3}
+{"page": 13, "line": 25, "text": "(c) The only parts of the building which may exceed the maximum building height are bulkheads, housing for", "x0": 108.0, "top": 534.3, "x1": 536.8, "bottom": 544.3}
+{"page": 13, "line": 26, "text": "mechanical equipment, towers and similar constructions not intended for human occupancy, provided that", "x0": 126.0, "top": 546.3, "x1": 538.6, "bottom": 556.3}
+{"page": 13, "line": 27, "text": "the requirements of §325-46.2B(12) are met.", "x0": 126.0, "top": 558.3, "x1": 300.7, "bottom": 568.3}
+{"page": 13, "line": 28, "text": "(3) Building Projections", "x0": 92.4, "top": 576.9, "x1": 192.2, "bottom": 586.9}
+{"page": 13, "line": 29, "text": "No part of any building shall encroach into any setback, except as described below:", "x0": 108.0, "top": 589.5, "x1": 427.4, "bottom": 599.5}
+{"page": 13, "line": 30, "text": "(a) Overhanging eaves and bay windows may project up to 2 feet into any required setback.", "x0": 108.0, "top": 601.5, "x1": 465.2, "bottom": 611.5}
+{"page": 13, "line": 31, "text": "(b) Awnings and balconies may extend up to 5 feet into any required setback provided that such extension is at", "x0": 108.0, "top": 613.5, "x1": 538.8, "bottom": 623.5}
+{"page": 13, "line": 32, "text": "least 2 feet from the vertical plane of any lot line.", "x0": 126.0, "top": 625.5, "x1": 314.9, "bottom": 635.5}
+{"page": 13, "line": 33, "text": "3", "x0": 524.7, "top": 751.3, "x1": 529.8, "bottom": 760.3}
+{"page": 13, "line": 34, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 14, "line": 1, "text": "(4) Doors and Entries", "x0": 92.4, "top": 72.3, "x1": 182.5, "bottom": 82.3}
+{"page": 14, "line": 2, "text": "(a) An entrance providing both ingress and egress, operable to residents or customers, is required to meet the", "x0": 108.0, "top": 84.8, "x1": 531.0, "bottom": 94.8}
+{"page": 14, "line": 3, "text": "street-facing entrance requirements. Additional entrances off another street, pedestrian area or internal", "x0": 126.0, "top": 96.8, "x1": 519.4, "bottom": 106.8}
+{"page": 14, "line": 4, "text": "parking area are permitted.", "x0": 126.0, "top": 108.8, "x1": 229.9, "bottom": 118.8}
+{"page": 14, "line": 5, "text": "(b) The entrance spacing requirements must be met for each building.", "x0": 108.0, "top": 120.8, "x1": 381.4, "bottom": 130.8}
+{"page": 14, "line": 6, "text": "(5) Front Porches", "x0": 92.4, "top": 266.9, "x1": 164.6, "bottom": 276.9}
+{"page": 14, "line": 7, "text": "(a) A front porch must be a minimum of 6 feet deep, not including steps.", "x0": 108.0, "top": 279.4, "x1": 395.9, "bottom": 289.4}
+{"page": 14, "line": 8, "text": "(b) A front porch must cover at least 33% of the street-level story facade width of the building.", "x0": 108.0, "top": 291.4, "x1": 477.0, "bottom": 301.4}
+{"page": 14, "line": 9, "text": "(c) A front porch must be roofed and edged by balustrades (railings) or low walls, and posts that extend up to", "x0": 108.0, "top": 303.4, "x1": 534.0, "bottom": 313.4}
+{"page": 14, "line": 10, "text": "the roof. The entire front porch must be of open air construction with all exterior faces being at least 50%", "x0": 126.0, "top": 315.4, "x1": 535.9, "bottom": 325.4}
+{"page": 14, "line": 11, "text": "open.", "x0": 126.0, "top": 327.4, "x1": 147.6, "bottom": 337.4}
+{"page": 14, "line": 12, "text": "Min 33% 6’", "x0": 256.4, "top": 461.7, "x1": 384.5, "bottom": 469.2}
+{"page": 14, "line": 13, "text": "min", "x0": 377.1, "top": 468.8, "x1": 386.7, "bottom": 474.8}
+{"page": 14, "line": 14, "text": "(6) Front Stoops", "x0": 92.4, "top": 474.5, "x1": 160.4, "bottom": 484.5}
+{"page": 14, "line": 15, "text": "(a) A front stoop shall be a maximum of 5 feet deep, not including steps, and a maximum of 6 feet wide.", "x0": 108.0, "top": 487.1, "x1": 516.2, "bottom": 497.1}
+{"page": 14, "line": 16, "text": "(b) A front stoop may be roofed but not enclosed.", "x0": 108.0, "top": 499.1, "x1": 304.5, "bottom": 509.1}
+{"page": 14, "line": 17, "text": "6’ 5’", "x0": 262.0, "top": 651.6, "x1": 359.9, "bottom": 657.8}
+{"page": 14, "line": 18, "text": "max max", "x0": 257.9, "top": 659.4, "x1": 363.7, "bottom": 665.7}
+{"page": 14, "line": 19, "text": "(7) Glazing", "x0": 92.4, "top": 671.5, "x1": 139.8, "bottom": 681.5}
+{"page": 14, "line": 20, "text": "(a) When required, glazing is the minimum percentage of transparent windows and doors that must cover a", "x0": 108.0, "top": 684.0, "x1": 527.2, "bottom": 694.0}
+{"page": 14, "line": 21, "text": "street-level story’s street-facing facade.", "x0": 126.0, "top": 696.0, "x1": 271.3, "bottom": 706.0}
+{"page": 14, "line": 22, "text": "(b) Glazing is considered transparent where it has a transparency higher than 80% and external reflectance of", "x0": 108.0, "top": 708.0, "x1": 531.6, "bottom": 718.0}
+{"page": 14, "line": 23, "text": "less than 15%.", "x0": 126.0, "top": 720.0, "x1": 182.3, "bottom": 730.0}
+{"page": 14, "line": 24, "text": "(c) Glazing is measured between 2 and 12 feet above the abutting sidewalk.", "x0": 108.0, "top": 732.0, "x1": 402.8, "bottom": 742.0}
+{"page": 14, "line": 25, "text": "4", "x0": 82.2, "top": 751.3, "x1": 87.3, "bottom": 760.3}
+{"page": 14, "line": 26, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 15, "line": 1, "text": "12’", "x0": 395.6, "top": 162.8, "x1": 403.4, "bottom": 168.7}
+{"page": 15, "line": 2, "text": "2’", "x0": 395.6, "top": 187.2, "x1": 400.1, "bottom": 193.1}
+{"page": 15, "line": 3, "text": "(8) Infill Development in MU District", "x0": 92.4, "top": 206.8, "x1": 249.1, "bottom": 216.8}
+{"page": 15, "line": 4, "text": "(a) More than one principal structure is permitted on a parcel in the MU district provided that the first", "x0": 108.0, "top": 219.3, "x1": 510.2, "bottom": 229.3}
+{"page": 15, "line": 5, "text": "principal structure meets all requirements of §325-46.", "x0": 126.0, "top": 231.3, "x1": 334.5, "bottom": 241.3}
+{"page": 15, "line": 6, "text": "(b) Any additional principal structure placed behind a principal structure that abuts the street and sidewalk", "x0": 108.0, "top": 243.3, "x1": 524.4, "bottom": 253.3}
+{"page": 15, "line": 7, "text": "must meet all requirements of §325-46 except:", "x0": 126.0, "top": 255.3, "x1": 306.3, "bottom": 265.3}
+{"page": 15, "line": 8, "text": "(1) Front setback;", "x0": 126.0, "top": 267.3, "x1": 198.6, "bottom": 277.3}
+{"page": 15, "line": 9, "text": "(2) Distance between functioning entries;", "x0": 126.0, "top": 279.3, "x1": 290.2, "bottom": 289.3}
+{"page": 15, "line": 10, "text": "(3) Glazing; and", "x0": 126.0, "top": 291.3, "x1": 193.3, "bottom": 301.3}
+{"page": 15, "line": 11, "text": "(4) Street-level active uses required", "x0": 126.0, "top": 303.3, "x1": 263.3, "bottom": 313.3}
+{"page": 15, "line": 12, "text": "(c) If the above requirements are met, §325-8B(1) shall not apply to additional structures on a parcel in the", "x0": 108.0, "top": 315.3, "x1": 526.5, "bottom": 325.3}
+{"page": 15, "line": 13, "text": "MU district.", "x0": 126.0, "top": 327.3, "x1": 174.5, "bottom": 337.3}
+{"page": 15, "line": 14, "text": "(9) Parking Setback", "x0": 92.4, "top": 346.0, "x1": 174.1, "bottom": 356.0}
+{"page": 15, "line": 15, "text": "(a) Definition: A line which extends vertically and parallel to the street, in front of which parking on the site", "x0": 108.0, "top": 358.5, "x1": 532.3, "bottom": 368.5}
+{"page": 15, "line": 16, "text": "is not allowed.", "x0": 126.0, "top": 370.5, "x1": 181.8, "bottom": 380.5}
+{"page": 15, "line": 17, "text": "(b) All parking areas shall be located behind the parking setback line.", "x0": 108.0, "top": 382.5, "x1": 377.5, "bottom": 392.5}
+{"page": 15, "line": 18, "text": "(c) The parking setback line does not apply to on-street parking.", "x0": 108.0, "top": 394.5, "x1": 360.0, "bottom": 404.5}
+{"page": 15, "line": 19, "text": "(10) Recessed Entry", "x0": 87.2, "top": 413.2, "x1": 169.4, "bottom": 423.2}
+{"page": 15, "line": 20, "text": "(a) Definition: A functioning entry that is set back a minimum of 5’ from the front facade of the building.", "x0": 108.0, "top": 425.7, "x1": 525.1, "bottom": 435.7}
+{"page": 15, "line": 21, "text": "(11) Top Story Limitation", "x0": 87.2, "top": 444.4, "x1": 194.5, "bottom": 454.4}
+{"page": 15, "line": 22, "text": "A habitable 3rd story in the Traditional Residential district must be fully contained within a pitched roof. Pro-", "x0": 108.0, "top": 456.9, "x1": 532.5, "bottom": 466.9}
+{"page": 15, "line": 23, "text": "jecting eaves and dormers are permitted. The aggregate width of the dormers cannot exceed 50% of the width", "x0": 108.0, "top": 468.9, "x1": 530.4, "bottom": 478.9}
+{"page": 15, "line": 24, "text": "of the roof on the side where the dormer(s) are located, except as may be allowed by design review.", "x0": 108.0, "top": 480.9, "x1": 486.7, "bottom": 490.9}
+{"page": 15, "line": 25, "text": "(12) Utilities and Mechanical Equipment", "x0": 87.2, "top": 499.6, "x1": 255.9, "bottom": 509.6}
+{"page": 15, "line": 26, "text": "All utilities and mechanical equipment must be screened from public view.", "x0": 108.0, "top": 512.1, "x1": 395.7, "bottom": 522.1}
+{"page": 15, "line": 27, "text": "(a) Incorporation of mechanicals into stories with occupiable space is encouraged; if this is done, mechanicals", "x0": 108.0, "top": 524.1, "x1": 533.7, "bottom": 534.1}
+{"page": 15, "line": 28, "text": "will be calculated as part of building height.", "x0": 126.0, "top": 536.1, "x1": 294.8, "bottom": 546.1}
+{"page": 15, "line": 29, "text": "(b) Alternatively, mechanicals will not be measured as part of building height, provided that:", "x0": 108.0, "top": 548.1, "x1": 470.4, "bottom": 558.1}
+{"page": 15, "line": 30, "text": "(1) The mechanical equipment is not incorporated into stories with occupiable space;", "x0": 126.0, "top": 560.1, "x1": 458.5, "bottom": 570.1}
+{"page": 15, "line": 31, "text": "(2) The mechanical equipment is architecturally integrated into the building; and", "x0": 126.0, "top": 572.1, "x1": 443.1, "bottom": 582.1}
+{"page": 15, "line": 32, "text": "(3) The mechanical equipment is less than one-third of the building footprint and does not exceed 9 feet", "x0": 126.0, "top": 584.1, "x1": 532.5, "bottom": 594.1}
+{"page": 15, "line": 33, "text": "in height above the roof.", "x0": 144.0, "top": 596.1, "x1": 238.5, "bottom": 606.1}
+{"page": 15, "line": 34, "text": "5", "x0": 524.7, "top": 751.3, "x1": 529.8, "bottom": 760.3}
+{"page": 15, "line": 35, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 16, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 230.0, "top": 393.2, "x1": 382.0, "bottom": 403.2}
+{"page": 16, "line": 2, "text": "6", "x0": 82.2, "top": 751.3, "x1": 87.3, "bottom": 760.3}
+{"page": 16, "line": 3, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 17, "line": 1, "text": "C. Southside Form Districts", "x0": 72.0, "top": 72.4, "x1": 232.8, "bottom": 86.4}
+{"page": 17, "line": 2, "text": "7", "x0": 524.7, "top": 751.3, "x1": 529.8, "bottom": 760.3}
+{"page": 17, "line": 3, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 18, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 230.0, "top": 394.3, "x1": 382.0, "bottom": 404.3}
+{"page": 18, "line": 2, "text": "8", "x0": 82.2, "top": 751.3, "x1": 87.3, "bottom": 760.3}
+{"page": 18, "line": 3, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 19, "line": 1, "text": "D. Traditional Residential (TR)", "x0": 72.0, "top": 58.4, "x1": 252.3, "bottom": 72.4}
+{"page": 19, "line": 2, "text": "PURPOSE & INTENT", "x0": 72.0, "top": 344.5, "x1": 186.6, "bottom": 356.5}
+{"page": 19, "line": 3, "text": "The Traditional Residential district contains the", "x0": 72.0, "top": 365.6, "x1": 255.1, "bottom": 375.6}
+{"page": 19, "line": 4, "text": "majority of Southside’s existing residences, includ-", "x0": 72.0, "top": 377.6, "x1": 265.3, "bottom": 387.6}
+{"page": 19, "line": 5, "text": "ing single family homes, duplexes, and small-scale", "x0": 72.0, "top": 389.6, "x1": 264.0, "bottom": 399.6}
+{"page": 19, "line": 6, "text": "multiple dwellings. Many of these structures were", "x0": 72.0, "top": 401.6, "x1": 263.0, "bottom": 411.6}
+{"page": 19, "line": 7, "text": "constructed prior to the implementation of the", "x0": 72.0, "top": 413.6, "x1": 253.1, "bottom": 423.6}
+{"page": 19, "line": 8, "text": "City’s first zoning ordinance. Much of the Henry", "x0": 72.0, "top": 425.6, "x1": 260.5, "bottom": 435.6}
+{"page": 19, "line": 9, "text": "St. John historic district, which runs along South", "x0": 72.0, "top": 437.6, "x1": 260.8, "bottom": 447.6}
+{"page": 19, "line": 10, "text": "Geneva and South Albany Streets, is included", "x0": 72.0, "top": 449.6, "x1": 247.6, "bottom": 459.6}
+{"page": 19, "line": 11, "text": "in this area. The intent of this new district is to", "x0": 72.0, "top": 461.6, "x1": 252.7, "bottom": 471.6}
+{"page": 19, "line": 12, "text": "create regulations that better reflect the neighbor-", "x0": 72.0, "top": 473.6, "x1": 262.6, "bottom": 483.6}
+{"page": 19, "line": 13, "text": "hood’s existing residential environment.", "x0": 72.0, "top": 485.6, "x1": 225.1, "bottom": 495.6}
+{"page": 19, "line": 14, "text": "New construction in this district shall reflect the", "x0": 72.0, "top": 504.8, "x1": 258.1, "bottom": 514.8}
+{"page": 19, "line": 15, "text": "built environment of Southside in form and scale.", "x0": 72.0, "top": 516.8, "x1": 264.3, "bottom": 526.8}
+{"page": 19, "line": 16, "text": "Pitched roofs are a required feature, with front", "x0": 72.0, "top": 528.8, "x1": 250.7, "bottom": 538.8}
+{"page": 19, "line": 17, "text": "porches being optional. Newly constructed build-", "x0": 72.0, "top": 540.8, "x1": 263.5, "bottom": 550.8}
+{"page": 19, "line": 18, "text": "ings shall not exceed three stories in height.", "x0": 72.0, "top": 552.8, "x1": 239.0, "bottom": 562.8}
+{"page": 19, "line": 19, "text": "The Traditional Residential district accommodates", "x0": 72.0, "top": 572.0, "x1": 265.1, "bottom": 582.0}
+{"page": 19, "line": 20, "text": "single-family, two-family, and multi-family resi-", "x0": 72.0, "top": 584.0, "x1": 255.7, "bottom": 594.0}
+{"page": 19, "line": 21, "text": "dential uses. This district will bring many existing", "x0": 72.0, "top": 596.0, "x1": 263.0, "bottom": 606.0}
+{"page": 19, "line": 22, "text": "residential structures into compliance while ensur-", "x0": 72.0, "top": 608.0, "x1": 266.0, "bottom": 618.0}
+{"page": 19, "line": 23, "text": "ing new construction better reflects the character", "x0": 72.0, "top": 620.0, "x1": 259.9, "bottom": 630.0}
+{"page": 19, "line": 24, "text": "of the neighborhood.", "x0": 72.0, "top": 632.0, "x1": 154.0, "bottom": 642.0}
+{"page": 19, "line": 25, "text": "9", "x0": 524.7, "top": 751.3, "x1": 529.8, "bottom": 760.3}
+{"page": 19, "line": 26, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 20, "line": 1, "text": "Traditional Residential (TR)", "x0": 72.0, "top": 60.7, "x1": 211.1, "bottom": 72.7}
+{"page": 20, "line": 2, "text": "LOT CRITERIA SITING", "x0": 132.2, "top": 124.9, "x1": 469.4, "bottom": 136.9}
+{"page": 20, "line": 3, "text": "LOT SIZE PRINCIPAL BUILDING", "x0": 85.8, "top": 357.0, "x1": 423.6, "bottom": 366.8}
+{"page": 20, "line": 4, "text": "A Area, min 2,000 sf A Front setback, min 5’", "x0": 73.4, "top": 372.6, "x1": 514.1, "bottom": 382.6}
+{"page": 20, "line": 5, "text": "B Width at street line, min 30’ B Side, min 5’", "x0": 73.3, "top": 387.8, "x1": 514.1, "bottom": 397.9}
+{"page": 20, "line": 6, "text": "Other side, min 3’", "x0": 328.1, "top": 402.5, "x1": 514.1, "bottom": 412.5}
+{"page": 20, "line": 7, "text": "LOT COVERAGE C Rear setback, min 10’", "x0": 85.8, "top": 415.4, "x1": 516.6, "bottom": 427.1}
+{"page": 20, "line": 8, "text": "C Lot coverage by buildings, max 50%", "x0": 73.3, "top": 429.9, "x1": 282.7, "bottom": 440.5}
+{"page": 20, "line": 9, "text": "D Green space, min 20% ACCESSORY STRUCTURE", "x0": 73.2, "top": 444.7, "x1": 435.2, "bottom": 455.7}
+{"page": 20, "line": 10, "text": "D Side setback, min 3’", "x0": 316.3, "top": 460.4, "x1": 514.1, "bottom": 470.4}
+{"page": 20, "line": 11, "text": "MIN OFF-STREET PARKING E Rear setback, min 3’", "x0": 85.8, "top": 473.9, "x1": 514.1, "bottom": 485.6}
+{"page": 20, "line": 12, "text": "None Accessory Dwelling Unit (ADU)", "x0": 85.8, "top": 488.4, "x1": 454.3, "bottom": 499.8}
+{"page": 20, "line": 13, "text": "F 800 sf", "x0": 316.8, "top": 495.8, "x1": 522.2, "bottom": 505.8}
+{"page": 20, "line": 14, "text": "square footprint per unit, max", "x0": 328.1, "top": 501.8, "x1": 444.7, "bottom": 511.8}
+{"page": 20, "line": 15, "text": "All other structures square footage of 600 sf", "x0": 328.1, "top": 514.8, "x1": 522.2, "bottom": 524.8}
+{"page": 20, "line": 16, "text": "footprint per unit, max", "x0": 328.1, "top": 526.8, "x1": 417.7, "bottom": 536.8}
+{"page": 20, "line": 17, "text": "PARKING LOCATION", "x0": 328.2, "top": 553.2, "x1": 417.6, "bottom": 562.2}
+{"page": 20, "line": 18, "text": "G Garage setback from front facade, min 20’", "x0": 316.0, "top": 568.9, "x1": 516.6, "bottom": 578.9}
+{"page": 20, "line": 19, "text": "Parking setback at front", "x0": 328.1, "top": 583.0, "x1": 524.9, "bottom": 593.0}
+{"page": 20, "line": 20, "text": "facade", "x0": 498.4, "top": 595.0, "x1": 522.4, "bottom": 605.0}
+{"page": 20, "line": 21, "text": "10", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 20, "line": 22, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 21, "line": 1, "text": "Traditional Residential (TR)", "x0": 73.4, "top": 60.8, "x1": 212.6, "bottom": 72.8}
+{"page": 21, "line": 2, "text": "HEIGHT ACTIVATION", "x0": 148.7, "top": 124.9, "x1": 473.8, "bottom": 136.9}
+{"page": 21, "line": 3, "text": "PRINCIPAL BUILDING STREET FACADE", "x0": 90.9, "top": 357.8, "x1": 402.3, "bottom": 366.8}
+{"page": 21, "line": 4, "text": "A Height (stories), max 3 A Length of blank wall, max 8’", "x0": 77.3, "top": 371.5, "x1": 516.0, "bottom": 382.6}
+{"page": 21, "line": 5, "text": "B Height (stories), min 2", "x0": 77.1, "top": 387.9, "x1": 276.1, "bottom": 397.9}
+{"page": 21, "line": 6, "text": "Habitable space in the 3rd story must be fully DOORS AND ENTRIES", "x0": 90.9, "top": 400.2, "x1": 426.2, "bottom": 412.0}
+{"page": 21, "line": 7, "text": "contained within the pitched roof. See §325- B Functioning entry on the street-facing 1", "x0": 90.9, "top": 414.0, "x1": 514.8, "bottom": 425.4}
+{"page": 21, "line": 8, "text": "45.2B(11) facade, min", "x0": 90.9, "top": 426.0, "x1": 376.4, "bottom": 436.8}
+{"page": 21, "line": 9, "text": "For corner lots, one functioning entry is required on", "x0": 331.6, "top": 439.8, "x1": 533.2, "bottom": 449.8}
+{"page": 21, "line": 10, "text": "ACCESSORY STRUCTURE the primary street-facing facade", "x0": 90.9, "top": 451.8, "x1": 453.0, "bottom": 461.8}
+{"page": 21, "line": 11, "text": "C Height, (stories), max 2", "x0": 77.1, "top": 467.0, "x1": 276.1, "bottom": 478.1}
+{"page": 21, "line": 12, "text": "PORCH", "x0": 331.7, "top": 479.1, "x1": 363.9, "bottom": 488.1}
+{"page": 21, "line": 13, "text": "FLOOR HEIGHT (PRINCIPAL BUILDING) C Front porch or Stoop Required", "x0": 90.9, "top": 493.9, "x1": 529.9, "bottom": 504.7}
+{"page": 21, "line": 14, "text": "D Street-level (floor to floor), min 9’", "x0": 77.1, "top": 511.4, "x1": 277.3, "bottom": 521.4}
+{"page": 21, "line": 15, "text": "E 2nd story (floor to floor), min 9’", "x0": 77.3, "top": 526.7, "x1": 277.3, "bottom": 536.7}
+{"page": 21, "line": 16, "text": "ROOF", "x0": 90.9, "top": 555.1, "x1": 116.1, "bottom": 564.1}
+{"page": 21, "line": 17, "text": "F Pitched roof Required", "x0": 77.6, "top": 569.9, "x1": 291.2, "bottom": 579.9}
+{"page": 21, "line": 18, "text": "Shed roof not allowed as primary roof", "x0": 90.9, "top": 584.5, "x1": 237.1, "bottom": 594.5}
+{"page": 21, "line": 19, "text": "G Pitch of principal gable, min/max 6:12/12:12", "x0": 76.8, "top": 598.1, "x1": 295.2, "bottom": 609.2}
+{"page": 21, "line": 20, "text": "11", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 21, "line": 21, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 22, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 230.0, "top": 393.2, "x1": 382.0, "bottom": 403.2}
+{"page": 22, "line": 2, "text": "12", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 22, "line": 3, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 23, "line": 1, "text": "E. Residential Transition (RT)", "x0": 72.0, "top": 58.8, "x1": 243.5, "bottom": 72.8}
+{"page": 23, "line": 2, "text": "PURPOSE & INTENT", "x0": 73.0, "top": 344.5, "x1": 187.6, "bottom": 356.5}
+{"page": 23, "line": 3, "text": "The Residential Transition district includes a", "x0": 73.0, "top": 365.6, "x1": 244.3, "bottom": 375.6}
+{"page": 23, "line": 4, "text": "few areas of the neighborhood, primarily along", "x0": 73.0, "top": 377.6, "x1": 253.7, "bottom": 387.6}
+{"page": 23, "line": 5, "text": "South Cayuga Street, South Titus Avenue, and", "x0": 73.0, "top": 389.6, "x1": 252.4, "bottom": 399.6}
+{"page": 23, "line": 6, "text": "Fair Street. While single-family and two-family", "x0": 73.0, "top": 401.6, "x1": 254.1, "bottom": 411.6}
+{"page": 23, "line": 7, "text": "uses are permitted, this district will accommo-", "x0": 73.0, "top": 413.6, "x1": 251.0, "bottom": 423.6}
+{"page": 23, "line": 8, "text": "date higher-density residential housing such as", "x0": 73.0, "top": 425.6, "x1": 251.9, "bottom": 435.6}
+{"page": 23, "line": 9, "text": "rowhouses and mid-scale apartment buildings.", "x0": 73.0, "top": 437.6, "x1": 252.0, "bottom": 447.6}
+{"page": 23, "line": 10, "text": "The intent of this district is to serve as a transition", "x0": 73.0, "top": 449.6, "x1": 265.7, "bottom": 459.6}
+{"page": 23, "line": 11, "text": "between the neighborhood’s Traditional Residen-", "x0": 73.0, "top": 461.6, "x1": 261.8, "bottom": 471.6}
+{"page": 23, "line": 12, "text": "tial core and the new mixed-use district along the", "x0": 73.0, "top": 473.6, "x1": 263.0, "bottom": 483.6}
+{"page": 23, "line": 13, "text": "edge of West Green Street and South Meadow", "x0": 73.0, "top": 485.6, "x1": 250.9, "bottom": 495.6}
+{"page": 23, "line": 14, "text": "Street.", "x0": 73.0, "top": 497.6, "x1": 97.4, "bottom": 507.6}
+{"page": 23, "line": 15, "text": "To accommodate higher density, the Residential", "x0": 73.0, "top": 516.8, "x1": 258.0, "bottom": 526.8}
+{"page": 23, "line": 16, "text": "Transition district allows for larger buildings and", "x0": 73.0, "top": 528.8, "x1": 260.7, "bottom": 538.8}
+{"page": 23, "line": 17, "text": "greater lot coverage. Roofs may be pitched or flat,", "x0": 73.0, "top": 540.8, "x1": 264.0, "bottom": 550.8}
+{"page": 23, "line": 18, "text": "and structures may not exceed three stories in", "x0": 73.0, "top": 552.8, "x1": 248.4, "bottom": 562.8}
+{"page": 23, "line": 19, "text": "height. New construction in this district should", "x0": 73.0, "top": 564.8, "x1": 256.4, "bottom": 574.8}
+{"page": 23, "line": 20, "text": "accommodate medium-density residential use,", "x0": 73.0, "top": 576.8, "x1": 251.6, "bottom": 586.8}
+{"page": 23, "line": 21, "text": "filling the gap between the Traditional Residential", "x0": 73.0, "top": 588.8, "x1": 264.8, "bottom": 598.8}
+{"page": 23, "line": 22, "text": "and Mixed-Use districts in the broader neighbor-", "x0": 73.0, "top": 600.8, "x1": 262.2, "bottom": 610.8}
+{"page": 23, "line": 23, "text": "hood.", "x0": 73.0, "top": 612.8, "x1": 95.5, "bottom": 622.8}
+{"page": 23, "line": 24, "text": "13", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 23, "line": 25, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 24, "line": 1, "text": "Residential Transition (RT)", "x0": 72.0, "top": 60.7, "x1": 205.9, "bottom": 72.7}
+{"page": 24, "line": 2, "text": "LOT CRITERIA SITING", "x0": 132.2, "top": 124.9, "x1": 469.4, "bottom": 136.9}
+{"page": 24, "line": 3, "text": "LOT SIZE PRINCIPAL BUILDING", "x0": 86.7, "top": 331.4, "x1": 426.4, "bottom": 341.0}
+{"page": 24, "line": 4, "text": "A Area, min 2,000 sf A Front setback, min 5’", "x0": 74.3, "top": 346.8, "x1": 515.6, "bottom": 357.1}
+{"page": 24, "line": 5, "text": "B Width at street line, min 30’ B Side setback", "x0": 74.1, "top": 362.0, "x1": 377.9, "bottom": 372.3}
+{"page": 24, "line": 6, "text": "1. Side, min 5’", "x0": 339.9, "top": 376.7, "x1": 515.6, "bottom": 386.7}
+{"page": 24, "line": 7, "text": "LOT COVERAGE 2. Other Side, min 3’", "x0": 86.7, "top": 389.8, "x1": 515.6, "bottom": 400.7}
+{"page": 24, "line": 8, "text": "C Lot coverage by buildings, max 70% C Rear setback, min 10’", "x0": 74.1, "top": 404.4, "x1": 518.1, "bottom": 415.3}
+{"page": 24, "line": 9, "text": "D Green space, min 30%", "x0": 74.1, "top": 419.6, "x1": 282.9, "bottom": 430.2}
+{"page": 24, "line": 10, "text": "ACCESSORY STRUCTURE", "x0": 330.9, "top": 432.9, "x1": 437.9, "bottom": 441.9}
+{"page": 24, "line": 11, "text": "MIN OFF-STREET PARKING Side setback, min 3’", "x0": 86.7, "top": 447.9, "x1": 515.6, "bottom": 457.9}
+{"page": 24, "line": 12, "text": "None Rear setback, min 3’", "x0": 86.6, "top": 462.0, "x1": 515.6, "bottom": 472.9}
+{"page": 24, "line": 13, "text": "Accessory Dwelling Unit (ADU)", "x0": 330.9, "top": 475.5, "x1": 457.0, "bottom": 485.5}
+{"page": 24, "line": 14, "text": "800 sf", "x0": 500.1, "top": 481.5, "x1": 523.7, "bottom": 491.5}
+{"page": 24, "line": 15, "text": "square footprint per unit, max", "x0": 330.9, "top": 487.5, "x1": 447.5, "bottom": 497.5}
+{"page": 24, "line": 16, "text": "All other structures square footage of 600 sf", "x0": 330.9, "top": 500.5, "x1": 523.7, "bottom": 510.5}
+{"page": 24, "line": 17, "text": "footprint per unit, max", "x0": 330.9, "top": 512.5, "x1": 420.4, "bottom": 522.5}
+{"page": 24, "line": 18, "text": "PARKING LOCATION", "x0": 330.9, "top": 539.0, "x1": 420.4, "bottom": 548.0}
+{"page": 24, "line": 19, "text": "Garage or parking setback from front", "x0": 330.9, "top": 553.5, "x1": 474.6, "bottom": 563.5}
+{"page": 24, "line": 20, "text": "D 0’", "x0": 317.1, "top": 559.5, "x1": 515.6, "bottom": 569.5}
+{"page": 24, "line": 21, "text": "facade, min", "x0": 330.9, "top": 565.5, "x1": 375.6, "bottom": 575.5}
+{"page": 24, "line": 22, "text": "14", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 24, "line": 23, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 25, "line": 1, "text": "Residential Transition (RT)", "x0": 72.9, "top": 60.1, "x1": 206.7, "bottom": 72.1}
+{"page": 25, "line": 2, "text": "HEIGHT ACTIVATION", "x0": 148.7, "top": 124.9, "x1": 473.8, "bottom": 136.9}
+{"page": 25, "line": 3, "text": "PRINCIPAL BUILDING STREET FACADE", "x0": 92.4, "top": 357.8, "x1": 403.7, "bottom": 366.8}
+{"page": 25, "line": 4, "text": "A Height (stories), max 3 A Building length, primary street, max 75’", "x0": 78.8, "top": 371.5, "x1": 518.6, "bottom": 382.6}
+{"page": 25, "line": 5, "text": "ACCESSORY STRUCTURE B Length of blank wall, max 8’", "x0": 92.4, "top": 400.8, "x1": 516.1, "bottom": 411.4}
+{"page": 25, "line": 6, "text": "Height, (stories), max 2", "x0": 92.4, "top": 416.0, "x1": 278.5, "bottom": 426.5}
+{"page": 25, "line": 7, "text": "DOORS AND ENTRIES", "x0": 333.1, "top": 429.5, "x1": 427.6, "bottom": 438.5}
+{"page": 25, "line": 8, "text": "FLOOR HEIGHT (PRINCIPAL BUILDING) C Functioning entry on the street-facing 1", "x0": 92.4, "top": 443.5, "x1": 514.9, "bottom": 454.6}
+{"page": 25, "line": 9, "text": "facade, min", "x0": 333.0, "top": 456.0, "x1": 377.7, "bottom": 466.0}
+{"page": 25, "line": 10, "text": "B Street-level (floor to floor), min 10’", "x0": 78.6, "top": 459.2, "x1": 282.1, "bottom": 469.2}
+{"page": 25, "line": 11, "text": "C Upper-story (floor to floor), min 10’", "x0": 78.6, "top": 474.4, "x1": 282.1, "bottom": 484.4}
+{"page": 25, "line": 12, "text": "PORCH, STOOP OR RECESSED", "x0": 333.1, "top": 482.5, "x1": 455.9, "bottom": 491.0}
+{"page": 25, "line": 13, "text": "ENTRY", "x0": 333.1, "top": 492.7, "x1": 360.7, "bottom": 501.2}
+{"page": 25, "line": 14, "text": "ROOF Front porch, stoop or recessed entry required for", "x0": 92.4, "top": 502.9, "x1": 520.1, "bottom": 515.2}
+{"page": 25, "line": 15, "text": "D", "x0": 318.5, "top": 511.7, "x1": 325.0, "bottom": 520.7}
+{"page": 25, "line": 16, "text": "D Pitched or flat roof Allowed each functional entry", "x0": 78.6, "top": 517.2, "x1": 414.9, "bottom": 527.7}
+{"page": 25, "line": 17, "text": "15", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 25, "line": 18, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 26, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 237.6, "top": 393.4, "x1": 374.4, "bottom": 402.4}
+{"page": 26, "line": 2, "text": "16", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 26, "line": 3, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 27, "line": 1, "text": "F. Medium-Density Mixed Use (MD-MU)", "x0": 72.0, "top": 58.8, "x1": 312.7, "bottom": 72.8}
+{"page": 27, "line": 2, "text": "PURPOSE & INTENT", "x0": 73.0, "top": 344.5, "x1": 187.6, "bottom": 356.5}
+{"page": 27, "line": 3, "text": "The Medium-Density Mixed Use district (abbre-", "x0": 73.0, "top": 365.6, "x1": 260.7, "bottom": 375.6}
+{"page": 27, "line": 4, "text": "viated MD-MU) is primarily located along West", "x0": 73.0, "top": 377.6, "x1": 259.9, "bottom": 387.6}
+{"page": 27, "line": 5, "text": "Green Street, including a few structures in the", "x0": 73.0, "top": 389.6, "x1": 250.3, "bottom": 399.6}
+{"page": 27, "line": 6, "text": "Henry St. John Historic District. This corridor", "x0": 73.0, "top": 401.6, "x1": 252.9, "bottom": 411.6}
+{"page": 27, "line": 7, "text": "will primarily provide medium-density residential", "x0": 73.0, "top": 413.6, "x1": 264.4, "bottom": 423.6}
+{"page": 27, "line": 8, "text": "structures while also allowing small-scale com-", "x0": 73.0, "top": 425.6, "x1": 251.8, "bottom": 435.6}
+{"page": 27, "line": 9, "text": "mercial use. The district serves as an essential", "x0": 73.0, "top": 437.6, "x1": 245.5, "bottom": 447.6}
+{"page": 27, "line": 10, "text": "buffer to maintain the residential character of the", "x0": 73.0, "top": 449.6, "x1": 262.5, "bottom": 459.6}
+{"page": 27, "line": 11, "text": "neighborhood while allowing for more diverse", "x0": 73.0, "top": 461.6, "x1": 250.8, "bottom": 471.6}
+{"page": 27, "line": 12, "text": "uses.", "x0": 73.0, "top": 473.6, "x1": 91.0, "bottom": 483.6}
+{"page": 27, "line": 13, "text": "Many of the regulations for the MD-MU district", "x0": 73.0, "top": 492.8, "x1": 262.2, "bottom": 502.8}
+{"page": 27, "line": 14, "text": "are similar to Traditional Residential, includ-", "x0": 73.0, "top": 504.8, "x1": 245.6, "bottom": 514.8}
+{"page": 27, "line": 15, "text": "ing lot coverage, a required pitch roof, and a", "x0": 73.0, "top": 516.8, "x1": 243.5, "bottom": 526.8}
+{"page": 27, "line": 16, "text": "maximum building height of three stories. New", "x0": 73.0, "top": 528.8, "x1": 256.6, "bottom": 538.8}
+{"page": 27, "line": 17, "text": "construction or redevelopment in the district will", "x0": 73.0, "top": 540.8, "x1": 262.9, "bottom": 550.8}
+{"page": 27, "line": 18, "text": "reflect the existing built form of the area while", "x0": 73.0, "top": 552.8, "x1": 251.2, "bottom": 562.8}
+{"page": 27, "line": 19, "text": "allowing additional housing, offices, and small", "x0": 73.0, "top": 564.8, "x1": 251.2, "bottom": 574.8}
+{"page": 27, "line": 20, "text": "retail.", "x0": 73.0, "top": 576.8, "x1": 94.8, "bottom": 586.8}
+{"page": 27, "line": 21, "text": "17", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 27, "line": 22, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 28, "line": 1, "text": "Medium-Density Mixed Use (MD-MU)", "x0": 72.0, "top": 60.7, "x1": 265.8, "bottom": 72.7}
+{"page": 28, "line": 2, "text": "LOT CRITERIA SITING", "x0": 132.2, "top": 124.9, "x1": 469.4, "bottom": 136.9}
+{"page": 28, "line": 3, "text": "LOT SIZE PRINCIPAL BUILDING", "x0": 86.4, "top": 357.0, "x1": 428.3, "bottom": 366.8}
+{"page": 28, "line": 4, "text": "A Area, min 2,000 sf A Front setback, min 10’", "x0": 74.0, "top": 372.6, "x1": 517.4, "bottom": 382.6}
+{"page": 28, "line": 5, "text": "B Width at street line, min 30’ B Side setback, min 5’", "x0": 73.9, "top": 387.8, "x1": 514.9, "bottom": 397.9}
+{"page": 28, "line": 6, "text": "C Rear setback, min 20’", "x0": 318.9, "top": 403.1, "x1": 517.4, "bottom": 413.1}
+{"page": 28, "line": 7, "text": "LOT COVERAGE", "x0": 86.4, "top": 415.4, "x1": 154.9, "bottom": 424.4}
+{"page": 28, "line": 8, "text": "C Lot coverage by buildings, max 50% ACCESSORY STRUCTURE", "x0": 73.9, "top": 429.9, "x1": 439.9, "bottom": 440.5}
+{"page": 28, "line": 9, "text": "D Green space, min 30% D Side setback, min 3’", "x0": 73.8, "top": 445.2, "x1": 514.9, "bottom": 456.4}
+{"page": 28, "line": 10, "text": "E Rear setback, min 3’", "x0": 319.2, "top": 461.6, "x1": 514.9, "bottom": 471.6}
+{"page": 28, "line": 11, "text": "MIN OFF-STREET PARKING Accessory Dwelling Unit (ADU)", "x0": 86.4, "top": 473.9, "x1": 459.0, "bottom": 485.7}
+{"page": 28, "line": 12, "text": "F 800 sf", "x0": 319.4, "top": 481.7, "x1": 523.1, "bottom": 491.7}
+{"page": 28, "line": 13, "text": "None square footprint per unit, max", "x0": 86.4, "top": 487.7, "x1": 449.5, "bottom": 498.4}
+{"page": 28, "line": 14, "text": "All other structures square footage of 600 sf", "x0": 332.9, "top": 500.8, "x1": 523.1, "bottom": 510.8}
+{"page": 28, "line": 15, "text": "footprint per unit, max", "x0": 332.9, "top": 512.8, "x1": 422.4, "bottom": 522.8}
+{"page": 28, "line": 16, "text": "PARKING LOCATION", "x0": 332.9, "top": 539.2, "x1": 422.3, "bottom": 548.2}
+{"page": 28, "line": 17, "text": "G Garage setback from front facade, min 20’", "x0": 318.7, "top": 554.9, "x1": 517.4, "bottom": 564.9}
+{"page": 28, "line": 18, "text": "H Parking setback at front", "x0": 318.9, "top": 569.0, "x1": 525.7, "bottom": 579.6}
+{"page": 28, "line": 19, "text": "facade", "x0": 499.2, "top": 581.0, "x1": 523.3, "bottom": 591.0}
+{"page": 28, "line": 20, "text": "18", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 28, "line": 21, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 29, "line": 1, "text": "Medium-Density Mixed Use (MD-MU)", "x0": 72.0, "top": 60.7, "x1": 265.8, "bottom": 72.7}
+{"page": 29, "line": 2, "text": "HEIGHT ACTIVATION", "x0": 148.7, "top": 124.9, "x1": 473.8, "bottom": 136.9}
+{"page": 29, "line": 3, "text": "PRINCIPAL BUILDING STREET FACADE", "x0": 92.0, "top": 357.8, "x1": 402.2, "bottom": 366.8}
+{"page": 29, "line": 4, "text": "A Height (stories), max 3 A Building length, all streets, max 45’", "x0": 78.3, "top": 371.5, "x1": 517.6, "bottom": 382.6}
+{"page": 29, "line": 5, "text": "B Height (stories), min 2 B Length of blank wall, max 8’", "x0": 78.2, "top": 386.8, "x1": 515.1, "bottom": 397.9}
+{"page": 29, "line": 6, "text": "Habitable space in the 3rd story must be fully", "x0": 91.9, "top": 402.0, "x1": 268.3, "bottom": 412.0}
+{"page": 29, "line": 7, "text": "contained within the pitched roof. See §325- DOORS AND ENTRIES", "x0": 91.9, "top": 414.0, "x1": 426.1, "bottom": 424.5}
+{"page": 29, "line": 8, "text": "45.2B(11)", "x0": 91.9, "top": 426.0, "x1": 131.9, "bottom": 436.0}
+{"page": 29, "line": 9, "text": "C Functioning entry on the street-facing 1", "x0": 317.7, "top": 430.0, "x1": 513.9, "bottom": 440.6}
+{"page": 29, "line": 10, "text": "facade, min", "x0": 331.6, "top": 442.0, "x1": 376.3, "bottom": 452.0}
+{"page": 29, "line": 11, "text": "ACCESSORY STRUCTURE For corner lots, one functioning entry is required on", "x0": 92.0, "top": 452.5, "x1": 533.2, "bottom": 465.0}
+{"page": 29, "line": 12, "text": "C Height, (stories), max 2 the primary street-facing facade", "x0": 78.2, "top": 467.0, "x1": 453.0, "bottom": 478.1}
+{"page": 29, "line": 13, "text": "FLOOR HEIGHT (PRINCIPAL BUILDING) PORCH", "x0": 92.0, "top": 494.4, "x1": 363.8, "bottom": 504.7}
+{"page": 29, "line": 14, "text": "D Street-level (floor to floor), min 9’ D Front porch or stoop Required", "x0": 78.2, "top": 509.2, "x1": 529.0, "bottom": 521.4}
+{"page": 29, "line": 15, "text": "E 2nd story (floor to floor), min 9’", "x0": 78.4, "top": 526.7, "x1": 278.4, "bottom": 536.7}
+{"page": 29, "line": 16, "text": "ROOF", "x0": 92.0, "top": 555.1, "x1": 117.2, "bottom": 564.1}
+{"page": 29, "line": 17, "text": "F Pitched roof Required", "x0": 78.7, "top": 569.9, "x1": 292.3, "bottom": 579.9}
+{"page": 29, "line": 18, "text": "G Pitch of principal gable, min/max 6:12/12:12", "x0": 77.9, "top": 598.1, "x1": 296.3, "bottom": 609.2}
+{"page": 29, "line": 19, "text": "19", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 29, "line": 20, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 30, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 237.6, "top": 393.4, "x1": 374.4, "bottom": 402.4}
+{"page": 30, "line": 2, "text": "20", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 30, "line": 3, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 31, "line": 1, "text": "G. Urban Mixed Use (MU)", "x0": 72.1, "top": 53.8, "x1": 225.4, "bottom": 67.8}
+{"page": 31, "line": 2, "text": "E.", "x0": 293.3, "top": 214.2, "x1": 305.2, "bottom": 228.2}
+{"page": 31, "line": 3, "text": "PURPOSE & INTENT", "x0": 72.0, "top": 328.3, "x1": 186.6, "bottom": 340.3}
+{"page": 31, "line": 4, "text": "The Urban Mixed-Use district includes lots along", "x0": 72.0, "top": 349.4, "x1": 262.0, "bottom": 359.4}
+{"page": 31, "line": 5, "text": "South Meadow Street and a small area along", "x0": 72.0, "top": 361.4, "x1": 242.6, "bottom": 371.4}
+{"page": 31, "line": 6, "text": "South Cayuga Street. This district is intended for", "x0": 72.0, "top": 373.4, "x1": 260.4, "bottom": 383.4}
+{"page": 31, "line": 7, "text": "larger commercial uses than those found in the", "x0": 72.0, "top": 385.4, "x1": 252.5, "bottom": 395.4}
+{"page": 31, "line": 8, "text": "Medium-Density Mixed-Use district. High-densi-", "x0": 72.0, "top": 397.4, "x1": 264.7, "bottom": 407.4}
+{"page": 31, "line": 9, "text": "ty residential uses are encouraged.", "x0": 72.0, "top": 409.4, "x1": 202.2, "bottom": 419.4}
+{"page": 31, "line": 10, "text": "Unlike the other three districts, the Urban Mixed-", "x0": 72.0, "top": 428.6, "x1": 265.1, "bottom": 438.6}
+{"page": 31, "line": 11, "text": "Use district does not require off-street parking.", "x0": 72.0, "top": 440.6, "x1": 251.7, "bottom": 450.6}
+{"page": 31, "line": 12, "text": "Pitched or flat roofs are allowed, and a recessed", "x0": 72.0, "top": 452.6, "x1": 252.9, "bottom": 462.6}
+{"page": 31, "line": 13, "text": "entry is required for each functional entry. The", "x0": 72.0, "top": 464.6, "x1": 251.7, "bottom": 474.6}
+{"page": 31, "line": 14, "text": "Urban Mixed-Use district requires a minimum of", "x0": 72.0, "top": 476.6, "x1": 262.2, "bottom": 486.6}
+{"page": 31, "line": 15, "text": "three stories in building height, allowing for taller,", "x0": 72.0, "top": 488.6, "x1": 265.2, "bottom": 498.6}
+{"page": 31, "line": 16, "text": "higher density structures in the neighborhood.", "x0": 72.0, "top": 500.6, "x1": 251.1, "bottom": 510.6}
+{"page": 31, "line": 17, "text": "New construction or redevelopment in the Urban", "x0": 72.0, "top": 512.6, "x1": 263.7, "bottom": 522.6}
+{"page": 31, "line": 18, "text": "Mixed-Use district is expected to include larger", "x0": 72.0, "top": 524.6, "x1": 253.5, "bottom": 534.6}
+{"page": 31, "line": 19, "text": "buildings that accommodate a wide range of uses.", "x0": 72.0, "top": 536.6, "x1": 263.3, "bottom": 546.6}
+{"page": 31, "line": 20, "text": "21", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 31, "line": 21, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 32, "line": 1, "text": "Urban Mixed Use (MU)", "x0": 72.0, "top": 55.6, "x1": 188.6, "bottom": 67.6}
+{"page": 32, "line": 2, "text": "LOT CRITERIA SITING", "x0": 132.2, "top": 119.8, "x1": 469.4, "bottom": 131.8}
+{"page": 32, "line": 3, "text": "LOT SIZE PRINCIPAL BUILDING", "x0": 87.7, "top": 351.9, "x1": 426.3, "bottom": 361.8}
+{"page": 32, "line": 4, "text": "A Area, min 3,000 sf A Front setback, min 5’", "x0": 75.3, "top": 367.6, "x1": 514.5, "bottom": 377.6}
+{"page": 32, "line": 5, "text": "B Width at street line, min 30’ B Side setback, min 5’", "x0": 75.1, "top": 382.8, "x1": 514.5, "bottom": 392.8}
+{"page": 32, "line": 6, "text": "LOT COVERAGE C Rear setback, min 10’", "x0": 87.7, "top": 410.3, "x1": 517.0, "bottom": 422.1}
+{"page": 32, "line": 7, "text": "C Lot coverage by buildings, max 70% Spacing between primary structures", "x0": 75.1, "top": 424.9, "x1": 468.3, "bottom": 436.2}
+{"page": 32, "line": 8, "text": "5’", "x0": 507.1, "top": 432.2, "x1": 514.5, "bottom": 442.2}
+{"page": 32, "line": 9, "text": "D Green space, min 10% on same parcel, min", "x0": 75.1, "top": 438.2, "x1": 408.6, "bottom": 450.7}
+{"page": 32, "line": 10, "text": "ACCESSORY STRUCTURE", "x0": 330.9, "top": 464.7, "x1": 437.9, "bottom": 473.7}
+{"page": 32, "line": 11, "text": "MIN OFF-STREET PARKING", "x0": 87.7, "top": 468.8, "x1": 204.9, "bottom": 477.8}
+{"page": 32, "line": 12, "text": "Side setback, min 0’", "x0": 330.9, "top": 479.7, "x1": 514.5, "bottom": 489.7}
+{"page": 32, "line": 13, "text": "None", "x0": 87.7, "top": 483.4, "x1": 109.3, "bottom": 493.4}
+{"page": 32, "line": 14, "text": "Rear setback, min 0’", "x0": 330.9, "top": 493.8, "x1": 514.5, "bottom": 503.8}
+{"page": 32, "line": 15, "text": "Accessory Dwelling Unit (ADU)", "x0": 330.9, "top": 507.3, "x1": 457.0, "bottom": 517.3}
+{"page": 32, "line": 16, "text": "800 sf", "x0": 499.0, "top": 513.3, "x1": 522.6, "bottom": 523.3}
+{"page": 32, "line": 17, "text": "square footprint per unit, max", "x0": 330.9, "top": 519.3, "x1": 447.5, "bottom": 529.3}
+{"page": 32, "line": 18, "text": "All other structures square footage of 600 sf", "x0": 330.9, "top": 532.3, "x1": 522.6, "bottom": 542.3}
+{"page": 32, "line": 19, "text": "footprint per unit, max", "x0": 330.9, "top": 544.3, "x1": 420.4, "bottom": 554.3}
+{"page": 32, "line": 20, "text": "PARKING LOCATION", "x0": 330.9, "top": 570.8, "x1": 420.4, "bottom": 579.8}
+{"page": 32, "line": 21, "text": "D Parking setback, from front facade,", "x0": 317.4, "top": 585.3, "x1": 465.7, "bottom": 595.9}
+{"page": 32, "line": 22, "text": "30’", "x0": 504.6, "top": 591.3, "x1": 517.0, "bottom": 601.3}
+{"page": 32, "line": 23, "text": "min", "x0": 330.9, "top": 597.3, "x1": 346.6, "bottom": 607.3}
+{"page": 32, "line": 24, "text": "Internal or underground parking must be wrapped", "x0": 330.9, "top": 610.3, "x1": 526.3, "bottom": 620.3}
+{"page": 32, "line": 25, "text": "by residential on street-facing facades (except for", "x0": 330.9, "top": 622.3, "x1": 517.4, "bottom": 632.3}
+{"page": 32, "line": 26, "text": "entries/exits) and may not be visible from a public", "x0": 330.9, "top": 634.3, "x1": 523.9, "bottom": 644.3}
+{"page": 32, "line": 27, "text": "street.", "x0": 330.9, "top": 646.3, "x1": 353.9, "bottom": 656.3}
+{"page": 32, "line": 28, "text": "22", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 32, "line": 29, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 33, "line": 1, "text": "Urban Mixed Use (MU)", "x0": 72.1, "top": 57.7, "x1": 188.6, "bottom": 69.7}
+{"page": 33, "line": 2, "text": "HEIGHT ACTIVATION", "x0": 148.8, "top": 121.9, "x1": 473.8, "bottom": 133.9}
+{"page": 33, "line": 3, "text": "PRINCIPAL BUILDING STREET FACADE", "x0": 97.7, "top": 354.8, "x1": 401.8, "bottom": 363.8}
+{"page": 33, "line": 4, "text": "A Height (stories), max 5 A Building length, primary street, max", "x0": 84.1, "top": 368.5, "x1": 471.4, "bottom": 379.6}
+{"page": 33, "line": 5, "text": "B Height (stories), min 3 1. All structures 75’", "x0": 83.9, "top": 383.8, "x1": 517.9, "bottom": 394.9}
+{"page": 33, "line": 6, "text": "ACCESSORY STRUCTURE B Length of blank wall, max 12’", "x0": 97.7, "top": 411.8, "x1": 517.9, "bottom": 422.4}
+{"page": 33, "line": 7, "text": "Height, (stories), max 2", "x0": 97.7, "top": 427.0, "x1": 280.2, "bottom": 437.5}
+{"page": 33, "line": 8, "text": "DOORS AND ENTRIES", "x0": 331.2, "top": 440.5, "x1": 425.7, "bottom": 449.5}
+{"page": 33, "line": 9, "text": "FLOOR HEIGHT (PRINCIPAL BUILDING) C Distance between functioning street-", "x0": 97.7, "top": 454.5, "x1": 473.2, "bottom": 465.7}
+{"page": 33, "line": 10, "text": "35’", "x0": 505.6, "top": 461.0, "x1": 517.9, "bottom": 471.0}
+{"page": 33, "line": 11, "text": "facing entries, max", "x0": 331.1, "top": 467.0, "x1": 403.4, "bottom": 477.0}
+{"page": 33, "line": 12, "text": "C Street-level (floor to floor), min", "x0": 83.9, "top": 470.2, "x1": 219.0, "bottom": 480.2}
+{"page": 33, "line": 13, "text": "Commercial entries must be functioning and usable", "x0": 331.1, "top": 480.1, "x1": 531.1, "bottom": 490.1}
+{"page": 33, "line": 14, "text": "1. Residential 10’", "x0": 106.7, "top": 484.8, "x1": 283.8, "bottom": 494.8}
+{"page": 33, "line": 15, "text": "during business hours.", "x0": 331.1, "top": 492.1, "x1": 417.7, "bottom": 502.1}
+{"page": 33, "line": 16, "text": "2. Commercial 12’", "x0": 106.7, "top": 498.8, "x1": 283.8, "bottom": 508.8}
+{"page": 33, "line": 17, "text": "D Upper-story (floor to floor), min 10’", "x0": 83.9, "top": 513.4, "x1": 283.8, "bottom": 523.4}
+{"page": 33, "line": 18, "text": "RECESSED ENTRY", "x0": 331.2, "top": 519.6, "x1": 403.7, "bottom": 528.1}
+{"page": 33, "line": 19, "text": "D Recessed entry required for each functional entry", "x0": 317.3, "top": 534.2, "x1": 520.1, "bottom": 544.2}
+{"page": 33, "line": 20, "text": "ROOF", "x0": 97.7, "top": 541.9, "x1": 122.9, "bottom": 550.9}
+{"page": 33, "line": 21, "text": "E Pitched or flat roof Allowed", "x0": 84.1, "top": 556.7, "x1": 293.4, "bottom": 566.7}
+{"page": 33, "line": 22, "text": "23", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 33, "line": 23, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 34, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 237.6, "top": 394.0, "x1": 374.4, "bottom": 403.0}
+{"page": 34, "line": 2, "text": "24", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 34, "line": 3, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 35, "line": 1, "text": "325-46.3 Allowed Uses", "x0": 72.0, "top": 74.2, "x1": 240.2, "bottom": 92.2}
+{"page": 35, "line": 2, "text": "A. Use Table", "x0": 72.0, "top": 101.0, "x1": 144.6, "bottom": 115.0}
+{"page": 35, "line": 3, "text": "District Permitted Primary Use Permitted Accessory Use", "x0": 81.7, "top": 119.5, "x1": 472.4, "bottom": 129.5}
+{"page": 35, "line": 4, "text": "1. One-family or two-family dwelling 1. Off-street parking", "x0": 126.4, "top": 135.3, "x1": 398.2, "bottom": 145.3}
+{"page": 35, "line": 5, "text": "2. Multiple dwelling (see §325-3) 2. Private garage for not more than 4 cars", "x0": 126.4, "top": 147.3, "x1": 478.5, "bottom": 157.3}
+{"page": 35, "line": 6, "text": "3. Church and related buildings 3. Structures for construction purposes, not to remain", "x0": 126.4, "top": 159.3, "x1": 527.0, "bottom": 169.3}
+{"page": 35, "line": 7, "text": "4. Library or fire station over two years", "x0": 126.4, "top": 171.3, "x1": 383.6, "bottom": 181.3}
+{"page": 35, "line": 8, "text": "5. Nursery school, child day care center, 4. By Special Permit: Towers or structures for receipt", "x0": 126.4, "top": 183.3, "x1": 521.0, "bottom": 193.3}
+{"page": 35, "line": 9, "text": "group adult day care or transmission of electronic signals for commercial", "x0": 145.4, "top": 195.3, "x1": 527.1, "bottom": 205.3}
+{"page": 35, "line": 10, "text": "6. Nursing, convalescent or rest home purposes or for generation of electricity to be used", "x0": 126.4, "top": 207.3, "x1": 522.3, "bottom": 217.3}
+{"page": 35, "line": 11, "text": "TR", "x0": 90.9, "top": 212.1, "x1": 104.0, "bottom": 222.1}
+{"page": 35, "line": 12, "text": "7. Public park or playground on the premises where generated in any district", "x0": 126.4, "top": 219.3, "x1": 510.3, "bottom": 229.3}
+{"page": 35, "line": 13, "text": "(see §325-9). Except for personal wireless services", "x0": 329.0, "top": 231.3, "x1": 519.7, "bottom": 241.3}
+{"page": 35, "line": 14, "text": "By Special Permit of Board of Zoning Ap- facilities.", "x0": 126.4, "top": 243.3, "x1": 362.9, "bottom": 253.3}
+{"page": 35, "line": 15, "text": "peals: 5. Home occupations: Special Permits required in", "x0": 126.4, "top": 255.3, "x1": 510.3, "bottom": 265.3}
+{"page": 35, "line": 16, "text": "8. Bed and Breakfast Inns certain situations (see §325-9B).", "x0": 126.4, "top": 267.3, "x1": 454.2, "bottom": 277.3}
+{"page": 35, "line": 17, "text": "9. Neighborhood commercial facility (see 6. Accessory dwelling unit", "x0": 126.4, "top": 279.3, "x1": 420.1, "bottom": 289.3}
+{"page": 35, "line": 18, "text": "§325-3) 7. Private garden shed or similar accessory structure", "x0": 145.4, "top": 291.3, "x1": 517.5, "bottom": 301.3}
+{"page": 35, "line": 19, "text": "10. Public utility structure except office intended for personal storage", "x0": 126.4, "top": 303.3, "x1": 441.0, "bottom": 313.3}
+{"page": 35, "line": 20, "text": "11. Schools (all) and related buildings", "x0": 126.4, "top": 315.3, "x1": 276.2, "bottom": 325.3}
+{"page": 35, "line": 21, "text": "1. One-family or two-family dwelling 1. Off-street parking", "x0": 126.4, "top": 330.6, "x1": 398.2, "bottom": 340.6}
+{"page": 35, "line": 22, "text": "2. Multiple dwelling (see §325-3) 2. Private garage for not more than 4 cars", "x0": 126.4, "top": 342.6, "x1": 478.5, "bottom": 352.6}
+{"page": 35, "line": 23, "text": "3. Church and related buildings 3. By Special Permit: Towers or structures for receipt", "x0": 126.4, "top": 354.6, "x1": 521.0, "bottom": 364.6}
+{"page": 35, "line": 24, "text": "4. Library or fire station or transmission of electronic signals for commercial", "x0": 126.4, "top": 366.6, "x1": 527.1, "bottom": 376.6}
+{"page": 35, "line": 25, "text": "5. Nursery school, child day care center, purposes or for generation of electricity to be used", "x0": 126.4, "top": 378.6, "x1": 522.3, "bottom": 388.6}
+{"page": 35, "line": 26, "text": "group adult day care on the premises where generated in any district", "x0": 145.4, "top": 390.6, "x1": 510.3, "bottom": 400.6}
+{"page": 35, "line": 27, "text": "6. Nursing, convalescent or rest home (see §325-9). Except for personal wireless services", "x0": 126.4, "top": 402.6, "x1": 519.7, "bottom": 412.6}
+{"page": 35, "line": 28, "text": "7. Public park or playground facilities.", "x0": 126.4, "top": 414.6, "x1": 362.9, "bottom": 424.6}
+{"page": 35, "line": 29, "text": "RT", "x0": 91.1, "top": 420.6, "x1": 103.7, "bottom": 430.6}
+{"page": 35, "line": 30, "text": "4. Accessory dwelling unit", "x0": 310.0, "top": 426.6, "x1": 420.1, "bottom": 436.6}
+{"page": 35, "line": 31, "text": "By Special Permit of Board of Zoning Ap- 5. Private garden shed or similar accessory structure", "x0": 126.4, "top": 438.6, "x1": 517.5, "bottom": 448.6}
+{"page": 35, "line": 32, "text": "peals: intended for personal storage", "x0": 126.4, "top": 450.6, "x1": 441.0, "bottom": 460.6}
+{"page": 35, "line": 33, "text": "8. Bed and Breakfast Inns 6. Home occupations: Special Permits required in", "x0": 126.4, "top": 462.6, "x1": 510.3, "bottom": 472.6}
+{"page": 35, "line": 34, "text": "9. Neighborhood commercial facility (see certain situations (see §325-9B).", "x0": 126.4, "top": 474.6, "x1": 454.2, "bottom": 484.6}
+{"page": 35, "line": 35, "text": "§325-3)", "x0": 145.4, "top": 486.6, "x1": 176.9, "bottom": 496.6}
+{"page": 35, "line": 36, "text": "10. Public utility structure except office", "x0": 126.4, "top": 498.6, "x1": 282.2, "bottom": 508.6}
+{"page": 35, "line": 37, "text": "11. Schools (all) and related buildings", "x0": 126.4, "top": 510.6, "x1": 276.2, "bottom": 520.6}
+{"page": 35, "line": 38, "text": "25", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 35, "line": 39, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
+{"page": 36, "line": 1, "text": "District Permitted Primary Use Permitted Accessory Use", "x0": 81.7, "top": 79.8, "x1": 472.4, "bottom": 89.8}
+{"page": 36, "line": 2, "text": "1. One-family or two-family dwelling 1. Off-street parking", "x0": 126.4, "top": 95.5, "x1": 398.2, "bottom": 105.5}
+{"page": 36, "line": 3, "text": "2. Multiple dwelling (see §325-3) 2. Private garage for not more than 4 cars", "x0": 126.4, "top": 107.5, "x1": 478.5, "bottom": 117.5}
+{"page": 36, "line": 4, "text": "3. Church and related buildings 3. By Special Permit: Towers or structures for receipt", "x0": 126.4, "top": 119.5, "x1": 521.0, "bottom": 129.5}
+{"page": 36, "line": 5, "text": "4. Library or fire station or transmission of electronic signals for commercial", "x0": 126.4, "top": 131.5, "x1": 527.1, "bottom": 141.5}
+{"page": 36, "line": 6, "text": "5. Nursery school, child day care center, purposes or for generation of electricity to be used", "x0": 126.4, "top": 143.5, "x1": 522.3, "bottom": 153.5}
+{"page": 36, "line": 7, "text": "group adult day care on the premises where generated in any district", "x0": 145.4, "top": 155.5, "x1": 510.3, "bottom": 165.5}
+{"page": 36, "line": 8, "text": "6. Nursing, convalescent or rest home (see §325-9). Except for personal wireless services", "x0": 126.4, "top": 167.5, "x1": 519.7, "bottom": 177.5}
+{"page": 36, "line": 9, "text": "7. Public utility structure except office facilities.", "x0": 126.4, "top": 179.5, "x1": 362.9, "bottom": 189.5}
+{"page": 36, "line": 10, "text": "8. Public park or playground 4. Accessory dwelling unit", "x0": 126.4, "top": 191.5, "x1": 420.1, "bottom": 201.5}
+{"page": 36, "line": 11, "text": "9. Schools (all) and related buildings 5. Private garden shed or similar accessory structure", "x0": 126.4, "top": 203.5, "x1": 517.5, "bottom": 213.5}
+{"page": 36, "line": 12, "text": "MD-MU", "x0": 79.1, "top": 209.5, "x1": 115.8, "bottom": 219.5}
+{"page": 36, "line": 13, "text": "10. Business or professional office intended for personal storage", "x0": 126.4, "top": 215.5, "x1": 441.0, "bottom": 225.5}
+{"page": 36, "line": 14, "text": "11. Bank or monetary institution 6. Home occupations: Special Permits required in", "x0": 126.4, "top": 227.5, "x1": 510.3, "bottom": 237.5}
+{"page": 36, "line": 15, "text": "12. Club, lodge, or private social center certain situations (see §325-9B).", "x0": 126.4, "top": 239.5, "x1": 454.2, "bottom": 249.5}
+{"page": 36, "line": 16, "text": "13. Light hand fabrication as well as sales", "x0": 126.4, "top": 251.5, "x1": 289.2, "bottom": 261.5}
+{"page": 36, "line": 17, "text": "14. Funeral home or mortuary", "x0": 126.4, "top": 263.5, "x1": 248.5, "bottom": 273.5}
+{"page": 36, "line": 18, "text": "15. Inn", "x0": 126.4, "top": 275.5, "x1": 159.2, "bottom": 285.5}
+{"page": 36, "line": 19, "text": "16. Neighborhood commercial facility (see", "x0": 126.4, "top": 287.5, "x1": 295.0, "bottom": 297.5}
+{"page": 36, "line": 20, "text": "§325-3)", "x0": 145.4, "top": 299.5, "x1": 176.9, "bottom": 309.5}
+{"page": 36, "line": 21, "text": "17. Office of government", "x0": 126.4, "top": 311.5, "x1": 228.1, "bottom": 321.5}
+{"page": 36, "line": 22, "text": "1. One-family or two-family dwelling 1. Off-street parking", "x0": 126.4, "top": 338.8, "x1": 398.2, "bottom": 348.8}
+{"page": 36, "line": 23, "text": "2. Multiple dwelling (see §325-3) 2. By Special Permit: Towers or structures for receipt", "x0": 126.4, "top": 350.8, "x1": 521.0, "bottom": 360.8}
+{"page": 36, "line": 24, "text": "3. Church and related buildings or transmission of electronic signals for commercial", "x0": 127.4, "top": 362.8, "x1": 527.1, "bottom": 372.8}
+{"page": 36, "line": 25, "text": "4. Library or fire station purposes or for generation of electricity to be used", "x0": 126.4, "top": 374.8, "x1": 522.3, "bottom": 384.8}
+{"page": 36, "line": 26, "text": "5. Nursery school, child day care center, on the premises where generated in any district", "x0": 126.4, "top": 386.8, "x1": 510.3, "bottom": 396.8}
+{"page": 36, "line": 27, "text": "group adult day care (see §325-9). Except for personal wireless services", "x0": 145.4, "top": 398.8, "x1": 519.7, "bottom": 408.8}
+{"page": 36, "line": 28, "text": "6. Nursing, convalescent or rest home facilities.", "x0": 126.4, "top": 410.8, "x1": 362.9, "bottom": 420.8}
+{"page": 36, "line": 29, "text": "7. Public utility structure 3. Neighborhood parking area subject to regulations of", "x0": 126.4, "top": 422.8, "x1": 530.4, "bottom": 432.8}
+{"page": 36, "line": 30, "text": "8. Public park or playground §325-20(B)", "x0": 126.4, "top": 434.8, "x1": 374.7, "bottom": 444.8}
+{"page": 36, "line": 31, "text": "9. Business or professional office 4. Parking garage", "x0": 126.4, "top": 446.8, "x1": 385.3, "bottom": 456.8}
+{"page": 36, "line": 32, "text": "10. Bank or monetary institution", "x0": 126.4, "top": 458.8, "x1": 258.7, "bottom": 468.8}
+{"page": 36, "line": 33, "text": "11. Club, lodge, or private social center", "x0": 126.4, "top": 470.8, "x1": 282.3, "bottom": 480.8}
+{"page": 36, "line": 34, "text": "MU", "x0": 89.2, "top": 476.8, "x1": 105.7, "bottom": 486.8}
+{"page": 36, "line": 35, "text": "12. Light hand fabrication as well as sales", "x0": 126.4, "top": 482.8, "x1": 289.2, "bottom": 492.8}
+{"page": 36, "line": 36, "text": "13. Funeral home or mortuary", "x0": 126.4, "top": 494.8, "x1": 248.5, "bottom": 504.8}
+{"page": 36, "line": 37, "text": "14. Hospital or sanatorium", "x0": 126.4, "top": 506.8, "x1": 235.1, "bottom": 516.8}
+{"page": 36, "line": 38, "text": "15. Hotel", "x0": 126.4, "top": 518.8, "x1": 167.6, "bottom": 528.8}
+{"page": 36, "line": 39, "text": "16. Inn", "x0": 126.4, "top": 530.8, "x1": 159.2, "bottom": 540.8}
+{"page": 36, "line": 40, "text": "17. Schools (all) and related buildings", "x0": 126.4, "top": 542.8, "x1": 276.2, "bottom": 552.8}
+{"page": 36, "line": 41, "text": "18. Retail store or service commercial", "x0": 126.4, "top": 554.8, "x1": 274.8, "bottom": 564.8}
+{"page": 36, "line": 42, "text": "facility", "x0": 145.4, "top": 566.8, "x1": 171.4, "bottom": 576.8}
+{"page": 36, "line": 43, "text": "19. Restaurant, fast food establishment,", "x0": 126.4, "top": 578.8, "x1": 283.2, "bottom": 588.8}
+{"page": 36, "line": 44, "text": "tavern", "x0": 145.4, "top": 590.8, "x1": 169.3, "bottom": 600.8}
+{"page": 36, "line": 45, "text": "20. Theater, bowling alley, auditorium or", "x0": 126.4, "top": 602.8, "x1": 288.2, "bottom": 612.8}
+{"page": 36, "line": 46, "text": "other similar place of public assembly", "x0": 145.4, "top": 614.8, "x1": 290.0, "bottom": 624.8}
+{"page": 36, "line": 47, "text": "26", "x0": 79.7, "top": 751.3, "x1": 89.8, "bottom": 760.3}
+{"page": 36, "line": 48, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 37, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 237.6, "top": 393.4, "x1": 374.4, "bottom": 402.4}
+{"page": 37, "line": 2, "text": "27", "x0": 522.2, "top": 751.3, "x1": 532.3, "bottom": 760.3}
+{"page": 37, "line": 3, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
