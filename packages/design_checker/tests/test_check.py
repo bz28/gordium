@@ -1954,7 +1954,7 @@ def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the
     assert '"\\n" + logic.STREET_LABEL + " = the highlighted blue line · " +' in rhino
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert ('            if r.get("help"):          # what that row is, in a sentence (the front lot line\'s)\n'
-            '                layout.AddRow(None, row(label(r["help"], size=11)))') in ui
+            '                layout.AddRow(None, row(label(r["help"], size=11, width=560)))') in ui
 
 
 def test_the_envelope_never_uses_a_grade_the_measuring_refused():
