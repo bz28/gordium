@@ -6,7 +6,8 @@ A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, a tax-map lot)
 1. Each floor block on its own sublayer Gordium::Massing::Floor 1, 2, 3 (one block each, named Floor N, the whole
    house one group); Gordium::Massing::Roof made.
 2. The check measures it as before: the building found, its stories counted (the Stories row is not "not
-   checked"), the house named "the starting house".
+   checked"); one house has no Main building line (that line is for several buildings), and a picked floor's name is
+   "the starting house".
 3. The note: the panel's Starting house fact says the largest house that complies even if the tax-map lines are
    2'-0" off, what limited it with its number, and Use my survey… for the full size.
 4. The envelope drawn is the cautious one: its outline at the base 2'-0" inside the buildable outline as drawn
@@ -79,8 +80,14 @@ try:
           stories_row is not None and str(stories) in str(stories_row.get("proposed")), stories_row)
     main = (g.STATE.get("last") or {}).get("header") or {}
     log["header"] = main
-    claim("2 the house is named 'the starting house' (its floors on sublayers, one building)",
-          "the starting house" in str(main.get("main") or ""), main.get("main"))
+    # The name is the Main building line's, shown only when the file has several buildings (present.header: "Main
+    # building: <name>" needs facts.main_building); with one house the panel has no such line. So: one house, no
+    # line (not a stray "Main building: not picked yet"), and the name a picked house would carry is this house's.
+    first = house[0]
+    claim("2 one house: the panel has no Main building line; if one were picked it is named 'the starting house'",
+          not main.get("main") and g.logic.building_name(doc.Layers[first.Attributes.LayerIndex].FullPath,
+                                                         first.Attributes.Name, True) == "the starting house",
+          [main.get("main"), doc.Layers[first.Attributes.LayerIndex].FullPath])
     note = (g.fact_sources(doc).get("starting_house") or {}).get("value") or ""
     log["note"] = note
     claim("3 the note: the largest house that complies even if the tax-map lines are 2'-0\" off, what limited it, "
