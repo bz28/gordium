@@ -42,7 +42,7 @@ def test_every_verdict_difference_has_a_law_decision(cmp, data):
     assert verdict == set(decisions)
     for d in decisions.values():
         assert {"law", "side", "done"} <= set(d)
-        assert "§" in d["law"] or "chart" in d["law"]                 # the law quoted, with where it is
+        assert '"' in d["law"] and re.search(r"(Chapter 325|zoning chart|chart) p\.\d+", d["law"]), d["law"]  # quoted, placed
 
 
 def test_no_false_pass_and_the_height_rows_differ_only_where_the_bonus_isnt_drafted(data):
@@ -64,3 +64,17 @@ def test_a_cautious_answer_says_why(cmp):
     assert cmp.cause({"kind": "rule", "check": "stories <= 3 and building_height <= 35"}, {"stories": 2}, ctx) == (
         "reads an input the key's example doesn't give: building_height")
     assert cmp.kind_of("pass", "needs_review") == "cautious" and cmp.kind_of("pass", "fail") == "verdict"
+
+
+def test_each_cautious_example_is_counted_once_per_cause_and_a_use_condition_is_read(cmp, data):
+    """#item-11 review: a cause counted once per example (four flags holding one example back are one example), never
+    more than the rule's cautious examples; and a review condition reading the use is read as the checker reads it
+    (RU.use's chart-note reason, not "can't settle it")."""
+    for k in data["keys"].values():
+        for r in k["rules"]:
+            cautious = sum(1 for x in r["disagree"] if cmp.kind_of(x["key"], x["drafts"]) == "cautious")
+            assert all(n <= cautious for n in r["causes"].values()), (r["hand"], r["causes"], cautious)
+    ctx = Context.for_jurisdiction(cmp.te.ITHACA)
+    rule = {"kind": "rule", "check": "use in [\"church\"]",
+            "review_when": [{"when": "use == \"multiple_family\"", "reason": "Marked with note 5 on the chart. More."}]}
+    assert cmp.cause(rule, {"use": "multiple_family"}, ctx) == "a review condition fires: Marked with note 5 on the chart"

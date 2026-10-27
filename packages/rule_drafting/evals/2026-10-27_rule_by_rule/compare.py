@@ -22,7 +22,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from rule_format import formula
-from rule_format.rulebook import load, outcome
+from rule_format.rulebook import MEASURE_KINDS, load, outcome
 
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("test_eval", Path.cwd() / "packages/rule_drafting/tests/test_eval.py")
@@ -57,10 +57,11 @@ def cause(rule: dict, given: dict, ctx) -> str:
     """Why one drafted rule says "needs review" on an example: the drafter's to-do, in its words."""
     if rule.get("kind") == "flag":
         return "drafted as a flag (always needs review): draft a check"
-    for w in rule.get("review_when") or []:
+    kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in ctx.allowed().items()}
+    for w in rule.get("review_when") or []:        # read as the checker reads them (outcome: the uses described too)
         try:
-            if formula.evaluate(w["when"], given, ctx.kinds()) is True:
-                why = (w.get("reason") or "").split(". ")[0][:110]
+            if formula.evaluate(w["when"], given, kinds) is True:
+                why = (w.get("reason") or "").split(". ")[0]
                 if "as the AI drafted it" in (w.get("reason") or ""):
                     return "an exception not proven yet (complies only through it as drafted): prove it"
                 return f"a review condition fires: {why}"
@@ -70,7 +71,7 @@ def cause(rule: dict, given: dict, ctx) -> str:
     for t in [rule.get("applies_when"), rule.get("check")] + [w["when"] for w in rule.get("review_when") or []]:
         if t:
             names |= formula.names(t)
-    missing = sorted(n for n in names - set(given) - {"district"} if n not in ("use",))
+    missing = sorted(n for n in names - set(given) - {"district"})
     if missing:
         return "reads an input the key's example doesn't give: " + ", ".join(missing)
     return "the formula can't settle it on these inputs (three-valued logic)"
@@ -106,8 +107,8 @@ def compare(ctx) -> dict:
                 if kind_of(x["expect"], x["got"]) != "cautious":
                     continue
                 given = {"district": district} | x["given"]
-                said = [cause(r, given, ctx) for r in mine if outcome(r, given, ctx.allowed()) == CAUTIOUS]
-                causes.update(said or ["the rules together can't settle it"])
+                said = {cause(r, given, ctx) for r in mine if outcome(r, given, ctx.allowed()) == CAUTIOUS}
+                causes.update(said or {"the rules together can't settle it"})   # each example once per cause
             rules.append({
                 "hand": h["id"], "status": status, "drafted": ids, "examples": p["agree"] + len(p["disagree"]) + p["undrafted"],
                 "agree": p["agree"], "disagree": [{"given": x["given"], "key": x["expect"], "drafts": x["got"]}
@@ -117,7 +118,7 @@ def compare(ctx) -> dict:
                 "cited": {"key": _pages([h]), "drafts": _pages(mine)},
                 "kind": {"key": h.get("kind"), "drafts": sorted({r.get("kind") for r in mine})},
                 "applies": {"key": h.get("applies_when"), "drafts": [r.get("applies_when") for r in mine if r.get("applies_when")]},
-                "causes": dict(causes)})
+                "causes": dict(sorted(causes.items()))})
         out["keys"][path.name] = {"district": district, "rules": rules,
                                   "unmatched": sorted(entries.get("unmatched") or {}),
                                   "summary": g.get("summary") or {k: len(g[k]) if isinstance(g[k], list) else g[k]
@@ -154,16 +155,15 @@ def report(data: dict, drafts: str, keys: str, decisions: dict) -> str:
                       f"- **Done:** {d.get('done', 'NOT DECIDED')}", ""]
     lines += ["## Cautious differences, by cause (the drafter's to-do list)", "",
               "The drafts say \"needs review\" where the key decides: never a false pass, but each is a check the "
-              "drafts could make. Counted in examples (one example with two drafted rules waiting, for two causes, counts "
-              "under each); the rules under each cause follow.", ""]
+              "drafts could make. Counted in examples (an example two drafted rules hold back for two different causes "
+              "counts under each, once); the rules under each cause follow.", ""]
     by_cause = defaultdict(lambda: [0, set()])
     for k in data["keys"].values():
         for r in k["rules"]:
-            for c, n in r["causes"].items():
-                general = re.sub(r": .*", "", c) if c.startswith("a review condition fires") else c
-                by_cause[general][0] += n
-                by_cause[general][1].add(r["hand"])
-    for c, (n, hands) in sorted(by_cause.items(), key=lambda kv: -kv[1][0]):
+            for c, n in r["causes"].items():        # each review condition under its own reason (the to-do)
+                by_cause[c][0] += n
+                by_cause[c][1].add(r["hand"])
+    for c, (n, hands) in sorted(by_cause.items(), key=lambda kv: (-kv[1][0], kv[0])):   # ties by name: stable
         lines += [f"- **{c}** — {n} examples: {', '.join(sorted(hands))}"]
     lines += ["", "## Missing from the drafts (no drafted rule answers the key's question)", ""]
     for k in data["keys"].values():

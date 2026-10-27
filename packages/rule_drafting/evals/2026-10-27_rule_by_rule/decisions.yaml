@@ -11,7 +11,9 @@ R-2c.height:
   side: >-
     The key. "In any district" reaches R-2c; a 37 ft house with every yard 2 ft over its minimum complies. The drafts
     have only the chart's 35 ft row: their §325-16C bonus for R-2c is unresolved in the drafting log (the side-yard
-    cell holds two numbers, the template expects one), so they fail it: a false fail, never a false pass.
+    cell holds two numbers, the template expects one), so they fail it: a false fail, never a false pass. Where the
+    key says needs review (a zero-lot-line or semi-detached house whose narrow side is under its own minimum, which
+    R-2c's side-yard rule reviews), the drafts fail it: stricter still, never a false pass.
   done: >-
     The drafter's to-do (no AI spend now): fill §325-16C's template for R-2c's two-number side cell, then prove the
     bonus as R-1a/R-1b/R-2a/R-2b/R-3a/R-3aa/R-3b's are (records/proven_relaxers.yaml). Recorded in
@@ -27,9 +29,10 @@ RU.height:
   done: The drafter's to-do, as for R-2c.height; recorded in hand_to_drafted.yaml's reason for RU.height.
 R-3aa.stories:
   law: >-
-    R-3aa's chart cell sets a minimum of two stories; whether a small one-story building (a garage, a shed) may skip
-    it, and whether the minimum reaches an accessory building, is open question §5.10 of
-    docs/questions_for_architects.md (R-3aa.stories#1), researched and not settled by the code.
+    "(11) The first number refers to the maximum building stories allowed, the second number refers to the minimum
+    building stories required." (zoning chart p.3, note 11, on R-3aa's stories cell). Whether a small one-story
+    building (a garage, a shed) may skip that minimum, and whether it reaches an accessory building, is open question
+    §5.10 of docs/questions_for_architects.md (R-3aa.stories#1), researched and not settled by the code.
   side: >-
     The key: with the law genuinely unclear, a one-story building needs review (never a guess). The drafts fail it,
     which is one reading's answer.
