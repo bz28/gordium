@@ -46,7 +46,7 @@ STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking
           "functional_family_unit": "yes_no", "home_occupation": "yes_no", "home_occupation_area": "sf",
           "home_occupation_unit_area": "sf", "accessory_dwelling_unit": "yes_no",
           "primary_buildings": "count", "primary_buildings_same_use": "yes_no",
-          "south_hill_overlay": "yes_no"}
+          "south_hill_overlay": "yes_no", "stream_near_lot": "yes_no", "stream_distance": "ft"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
        "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
        "occupants": "no_occupants", "occupants_most_in_one_unit": "no_occupant_split",
@@ -56,7 +56,7 @@ ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "
        "home_occupation": "no_home_occupation", "home_occupation_area": "no_home_occupation",
        "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_household",
        "primary_buildings": "no_primary_buildings", "primary_buildings_same_use": "no_primary_buildings",
-       "south_hill_overlay": "no_south_hill"}
+       "south_hill_overlay": "no_south_hill", "stream_near_lot": "no_stream", "stream_distance": "no_stream"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",

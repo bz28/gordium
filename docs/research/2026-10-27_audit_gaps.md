@@ -113,3 +113,27 @@ historic and gorge overlay layers but not this one, and adding a live map layer 
 primary building the rule complies either way, so the question is asked only where it matters. Gordium checks the
 design as new construction; a parcel that already had two or more primary structures before the amendment may keep
 and change them, which the rule notes but can't see.
+
+## 7. New structures along streams or inlets (§325-26) — A
+
+§325-26 (p.67): "No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet
+channel or stream, measured at an average water level, except for those structures directly connected with marine or
+public or commercial recreation activities. (See illustration below.)" The districts it exempts by name (Cherry
+Street, Market, Newman, West End/Waterfront) aren't residential, so it applies in all nine
+(`<district>.stream_setback`).
+- **How it is measured (A):** the section's illustration (p.67, read from the PDF) draws "20' MIN" as a level
+  dimension from the new structure's face to the point where the "AVERAGE LEVEL" line meets the bank, between the
+  high-water and low-water lines.
+- **Which structures (A):** §325-3B STRUCTURE (p.19): "Anything constructed or erected on the ground or which is
+  attached to another structure or building. Structures shall not include patios or terraces." So a garage, deck,
+  shed or fence counts, not a patio. Gordium asks the distance from any new construction, an addition included (the
+  cautious way).
+- **Where the water is:** a massing model doesn't show it, the City publishes no stream layer Gordium uses, and the
+  research found no City record of how the bank is located; so the architect states whether any inlet wall or stream
+  bank is within 20 ft of the lot (`stream_near_lot`) and, if so, the distance (`stream_distance`). Both are blank
+  by default, and blank needs review. A lot more than 20 ft from any bank can't hold a structure nearer than 20 ft, so
+  "no" settles it without a distance.
+- **Not applied:** the exception for structures "directly connected with marine or public or commercial recreation
+  activities" (a dock or boathouse): such a structure nearer than 20 ft shows as not complying (stricter than the
+  law, never a false pass); ask the zoning office.
+- No City interpretation or Board of Zoning Appeals decision on §325-26 was found (2026-10-27).

@@ -257,6 +257,7 @@ CASES = {
     "no_home_occupation": _plain(),
     "no_primary_buildings": _plain(),
     "no_south_hill": _plain(),
+    "no_stream": _plain(),
     "household_counts_disagree": _plain(unrelated_persons=3, unrelated_persons_with_children=1),
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),

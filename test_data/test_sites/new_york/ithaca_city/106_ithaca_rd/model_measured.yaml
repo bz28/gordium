@@ -94,6 +94,12 @@ measurements:
   primary_buildings:
     value: 1
     from: 'measured from model.3dm: the main building only: every other solid touches it, is listed as an accessory building, or is too small or low to hold a habitable room'
+  stream_near_lot:
+    value: null
+    from: 'not measured: say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if so, how far the nearest new structure is from it (§325-26)'
+  stream_distance:
+    value: null
+    from: 'not measured: say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if so, how far the nearest new structure is from it (§325-26)'
   south_hill_overlay:
     value: null
     from: 'not measured: say whether the lot is in the South Hill Overlay District (§325-8E, on the City''s zoning map)'
