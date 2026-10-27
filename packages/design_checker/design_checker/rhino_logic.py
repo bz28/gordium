@@ -61,8 +61,9 @@ def envelope_outlines(env, plan):
     """The buildable outline(s) the blue envelope is drawn on (feet): on a tax-map lot the cautious one, every lot
     line 2'-0" nearer (each piece of it; none where nothing is left: the as-drawn outline is then only the dashed
     curve on Gordium::Envelope), so the envelope shows where a building complies however the tax map's lines lie
-    (Ben, 2026-10-21: "cautious envelope on tax-map lots"); on a survey the outline as drawn. Largest first."""
-    from shapely.geometry import Polygon
+    (Ben, 2026-10-21: "cautious envelope on tax-map lots"); on a survey the outline as drawn. Largest first, by the
+    shoelace area (_ring_area): plain Python, because Rhino's own Python runs this module and has no shapely (every
+    check in Rhino failed "No module named 'shapely'")."""
     outline = (env or {}).get("outline")
     if not outline:
         return []
@@ -71,7 +72,7 @@ def envelope_outlines(env, plan):
     if not plan.get("lot_from_tax_map") or cautious is None:
         return [outline]
     rings = [cautious] if cautious and isinstance(cautious[0][0], (int, float)) else list(cautious)
-    return sorted(rings, key=lambda r: -Polygon(r).area)
+    return sorted(rings, key=lambda r: -abs(_ring_area(r)))
 
 
 def envelope_curves(plan):
