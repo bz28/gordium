@@ -193,19 +193,80 @@ def drafted_as_checked(district: str, proven: frozenset | None = None) -> list[d
     return apply_relaxes(drafted_rules_for(district), proven_relaxers(ITHACA) if proven is None else proven)
 
 
-def relaxer_mismatches(hand_rule: dict, base: dict, relaxer: dict, district: str, ctx) -> list[dict]:
+def _edges(rules: list[dict], point: dict, ctx, moved: str | None = None) -> list[tuple[str, float]]:
+    """Where a verdict can turn near this design: for each comparison `measure op expression` in the rules, the
+    expression's value here (the cap 35 + 0.1 * 35, a yard's 25 + (building_height - 35)); and for each min / max of a
+    measure times a number and a number, the measure where the two meet (0.25 * lot_depth and 50: 200 ft). With
+    `moved`, only the edges that measure moves (a yard's edge moves with the height)."""
+    import ast
+    from rule_format import formula
+    out = []
+    for r in rules:
+        for t in [r.get("applies_when"), r.get("check")] + [w["when"] for w in r.get("review_when") or []]:
+            if not t:
+                continue
+            for node in ast.walk(ast.parse(t, mode="eval")):
+                if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and len(node.comparators) == 1:
+                    rhs = node.comparators[0]
+                    if moved is not None and moved not in {n.id for n in ast.walk(rhs) if isinstance(n, ast.Name)}:
+                        continue
+                    try:
+                        v = formula.evaluate(ast.unparse(rhs), point, ctx.kinds())
+                    except Exception:
+                        continue
+                    if type(v) in (int, float):
+                        out.append((node.left.id, float(v)))
+                if moved is None and isinstance(node, ast.Call) and getattr(node.func, "id", None) in ("min", "max"):
+                    consts = [a.value for a in node.args if isinstance(a, ast.Constant)]
+                    for arg in node.args:
+                        if isinstance(arg, ast.BinOp) and isinstance(arg.op, ast.Mult):
+                            for k, n in [(arg.left, arg.right), (arg.right, arg.left)]:
+                                if isinstance(k, ast.Constant) and isinstance(n, ast.Name) and k.value:
+                                    out += [(n.id, c / k.value) for c in consts]
+    return sorted(set(out))
+
+
+def proof_points(hand_rule: dict, rules: list[dict], district: str, ctx) -> list[dict]:
+    """design_points, then each design moved to just below, at and just above every edge a verdict can turn on
+    (_edges); then each design moved so, moved again to the edges that move with it (a height on its cap moves each
+    yard's edge): a slightly wrong cap (35 + 0.11 * 35) or a dropped 50 ft rear-yard cap is seen (#21 review: the
+    plain grid jumped from 38.01 to 38.99 ft and never tried 200 ft)."""
+    points = design_points(hand_rule, rules, district, ctx)
+    seen = {tuple(sorted(p.items())) for p in points}
+    every = [hand_rule] + rules
+
+    def moves(frontier, by_moved):
+        new = []
+        for point, moved in frontier:
+            for name, v in _edges(every, point, ctx, moved if by_moved else None):
+                if name in ("use", "district") or type(point.get(name, 0)) is bool:
+                    continue
+                for d in (-0.001, 0.0, 0.001):
+                    q = point | {name: round(v + d, 6)}
+                    key = tuple(sorted(q.items()))
+                    if q[name] >= 0 and key not in seen:
+                        seen.add(key)
+                        new.append((q, name))
+        return new
+    first = moves([(p, None) for p in points], False)
+    second = moves(first, True)
+    return points + [q for q, _ in first + second]
+
+
+def relaxer_mismatches(hand_rule: dict, base: dict, relaxer: dict, district: str, ctx, first: bool = False) -> list[dict]:
     """Where an AI-drafted relaxer, composed into the rule it relaxes as a trusted one, gives a different verdict from
-    the hand key's rule, over every design design_points makes for them (each input filled in, varied one at a time
-    over the examples' numbers and every constant and one either side): [] proves them equal, the proof
-    records/proven_relaxers.yaml needs. The uses: those the key allows in the district."""
+    the hand key's rule, over every design proof_points makes for them (design_points, then every edge a verdict can
+    turn on, each side of it): [] proves them equal, the proof records/proven_relaxers.yaml needs."""
     composed = {r["id"]: r for r in apply_relaxes([base, relaxer], frozenset({relaxer["id"]}))}[base["id"]]
-    points = design_points(hand_rule, [base, relaxer], district, ctx)
+    points = proof_points(hand_rule, [base, relaxer], district, ctx)
     assert len(points) > 100, (hand_rule["id"], len(points))       # never a proof over (next to) no designs
     out = []
     for point in points:
         key, got = outcome(hand_rule, point, ctx.allowed()), outcome(composed, point, ctx.allowed())
         if key != got:
             out.append({"given": point, "key": key, "composed": got})
+            if first:                  # one is enough to show a relaxer isn't proven
+                break
     return out
 
 
@@ -1020,24 +1081,23 @@ PROVEN = ITHACA / "5_zoning_rules/drafted/records/proven_relaxers.yaml"
 
 def test_every_proven_relaxer_equals_the_hand_key_rule_it_stands_for(ctx):
     """records/proven_relaxers.yaml (2026-10-27): each AI-drafted relaxer listed there widens the rule it relaxes
-    because, composed into it, it gives the hand key's verdict on every design design_points makes. Proven here again
-    wherever its key is present (the others name the key and the merge they were proven in)."""
+    because, composed into it, it gives the hand key's verdict on every design proof_points makes. Each is proven again
+    here, against its key (which must be in this checkout: no unchecked entry), and its fingerprint is the rule as it
+    now stands (rule_format trusts that content only)."""
+    from rule_format.rulebook import relaxer_fingerprint
     proven = load(PROVEN) or {}
     assert proven, "nothing proven"
-    checked = 0
-    for rid, why in proven.items():
+    for rid, entry in proven.items():
         district = rid.split(".", 1)[0]
-        key_path = ITHACA / "5_zoning_rules" / f"{district}.yaml"
-        said = re.search(r"relaxer_mismatches: equals (\S+) \((\S+\.yaml)\)", why)
-        assert said and said.group(2) == f"{district}.yaml", (rid, why)
-        if not key_path.exists():
-            continue
+        said = re.search(r"relaxer_mismatches: equals (\S+) \((\S+\.yaml)\)", entry["proof"])
+        assert said and said.group(2) == f"{district}.yaml", (rid, entry)
+        key_path = ITHACA / "5_zoning_rules" / said.group(2)
+        assert key_path.exists(), f"{rid}: proven against {said.group(2)}, which this checkout doesn't have"
         drafted = {r["id"]: r for r in drafted_rules_for(district)}
         relaxer = drafted[rid]
+        assert entry["fingerprint"] == relaxer_fingerprint(relaxer), f"{rid}: changed since it was proven"
         hand = {r["id"]: r for r in load(key_path)["rules"]}[said.group(1)]
         assert relaxer_mismatches(hand, drafted[relaxer["relaxes"]], relaxer, district, ctx) == [], rid
-        checked += 1
-    assert checked >= 1
 
 
 def test_a_relaxer_that_leaves_out_a_condition_is_never_proven(ctx):
@@ -1052,9 +1112,17 @@ def test_a_relaxer_that_leaves_out_a_condition_is_never_proven(ctx):
     no_sides = relaxer | {"applies_when": relaxer["applies_when"].replace(
         " and side_yard_larger >= 10 + (building_height - 35) and side_yard_smaller >= 10 + (building_height - 35)", "")}
     assert no_sides["applies_when"] != relaxer["applies_when"]
-    assert relaxer_mismatches(hand, base, no_sides, district, ctx)
+    assert relaxer_mismatches(hand, base, no_sides, district, ctx, first=True)
     twenty = relaxer | {"check": "building_height <= 35 + 0.2 * 35"}
-    assert relaxer_mismatches(hand, base, twenty, district, ctx)
+    assert relaxer_mismatches(hand, base, twenty, district, ctx, first=True)
+    # #21 review: a cap a little off, either way, and a rear-yard cap loosened or dropped, are seen too
+    for check in ("building_height <= 35 + 0.11 * 35", "building_height <= 35 + 0.1 * 35 + 0.4",
+                  "building_height <= 35 + 0.1 * 35 - 0.4"):
+        assert relaxer_mismatches(hand, base, relaxer | {"check": check}, district, ctx, first=True), check
+    for rear in ("max(20, min(0.25 * lot_depth, 48))", "max(20, 0.25 * lot_depth)", "max(18, min(0.25 * lot_depth, 50))"):
+        loose = relaxer | {"applies_when": relaxer["applies_when"].replace("max(20, min(0.25 * lot_depth, 50))", rear)}
+        assert loose["applies_when"] != relaxer["applies_when"]
+        assert relaxer_mismatches(hand, base, loose, district, ctx, first=True), rear
 
 
 def test_the_height_row_is_graded_as_the_checker_reads_it(ctx):

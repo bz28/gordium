@@ -1,7 +1,14 @@
-# AI-drafted relaxing rules proven equal to a hand key rule (rule_format.rulebook.proven_relaxers): each, composed into
-# the rule it relaxes, gives the hand key's verdict on every design packages/rule_drafting/tests/test_eval.py's
-# design_points makes (relaxer_mismatches == []), so it may widen that rule as a hand-written one does. Re-proven by
-# test_eval.test_every_proven_relaxer_equals_the_hand_key_rule_it_stands_for wherever its key is present.
-R-1a.325_16c_height_exception_extra_height: "relaxer_mismatches: equals R-1a.height (R-1a.yaml), composed (2026-10-27)"
-R-1b.325_16c_height_exception_extra_height: "relaxer_mismatches: equals R-1b.height (R-1b.yaml), composed (2026-10-27)"
-R-3a.325_16c_height_exception_extra_height: "relaxer_mismatches: equals R-3a.height (R-3a.yaml), composed (2026-10-27)"
+# AI-drafted relaxing rules proven equal to a hand key rule (rule_format.rulebook.proven_relaxers): each, composed
+# into the rule it relaxes, gives the hand key's verdict on every design rule_drafting tests/test_eval.py's
+# proof_points makes (relaxer_mismatches == []); the fingerprint is the rule as proven (a re-draft that changes it
+# is no longer trusted). Re-proven by test_eval.test_every_proven_relaxer_equals_the_hand_key_rule_it_stands_for.
+# Written by the proof run (2026-10-27), never by hand.
+R-1a.325_16c_height_exception_extra_height:
+  proof: "relaxer_mismatches: equals R-1a.height (R-1a.yaml), composed (2026-10-27)"
+  fingerprint: 85b810a48c3ab426
+R-1b.325_16c_height_exception_extra_height:
+  proof: "relaxer_mismatches: equals R-1b.height (R-1b.yaml), composed (2026-10-27)"
+  fingerprint: 496cc2b4e9e4e94b
+R-3a.325_16c_height_exception_extra_height:
+  proof: "relaxer_mismatches: equals R-3a.height (R-3a.yaml), composed (2026-10-27)"
+  fingerprint: eb888c5c9e22a25e

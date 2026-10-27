@@ -71,18 +71,28 @@ def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
 PROVEN_RELAXERS = "5_zoning_rules/drafted/records/proven_relaxers.yaml"
 
 
+def relaxer_fingerprint(rule: dict) -> str:
+    """What a proof covers: the relaxer's own formulas (its condition, check and review conditions) and which rule it
+    relaxes, as a short hash. A re-draft that changes any of them is no longer the rule that was proven."""
+    parts = {k: rule.get(k) for k in ("relaxes", "applies_when", "check", "review_when")}
+    return hashlib.sha256(json.dumps(parts, sort_keys=True).encode("utf-8")).hexdigest()[:16]
+
+
 def proven_relaxers(jurisdiction) -> frozenset:
     """The AI-drafted relaxing rules proven equivalent to a hand-written key rule by the generative test
-    (records/proven_relaxers.yaml: {rule id: the test and key that prove it}): §325-16C's height bonus where a key
-    proves it (rule_drafting tests/test_eval.py relaxer_mismatches)."""
+    (records/proven_relaxers.yaml: {rule id: {proof, fingerprint}}): §325-16C's height bonus where a key proves it
+    (rule_drafting tests/test_eval.py relaxer_mismatches). Each as "<id>@<fingerprint>", so only the rule as proven is
+    trusted (#21 review: by id alone, a changed re-draft stayed trusted)."""
     path = Path(jurisdiction) / PROVEN_RELAXERS
-    return frozenset((load(path) or {}) if path.exists() else {})
+    entries = (load(path) or {}) if path.exists() else {}
+    return frozenset(f"{rid}@{e.get('fingerprint')}" for rid, e in entries.items() if isinstance(e, dict))
 
 
 def trusted_relaxer(rule: dict, proven: frozenset = frozenset()) -> bool:
-    """A relaxing rule that may turn a fail into a pass: written by hand, approved, or proven (proven_relaxers)."""
+    """A relaxing rule that may turn a fail into a pass: written by hand, approved, or proven as it stands (its id with
+    its fingerprint in proven_relaxers; a bare id is a caller's explicit trust, as the proof itself gives)."""
     return (not str(rule.get("drafted_by", "")).startswith("rule_drafting/") or rule.get("status") == "approved"
-            or rule.get("id") in proven)
+            or rule.get("id") in proven or f"{rule.get('id')}@{relaxer_fingerprint(rule)}" in proven)
 
 
 def _flat(op, texts: list[str]) -> list:

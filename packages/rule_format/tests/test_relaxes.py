@@ -173,9 +173,16 @@ def test_a_proven_ai_relaxer_widens_where_the_checker_reads_rules(tmp_path):
             "lot_depth": 100}
     height = lambda: {r["id"]: r for r in zone_rules(tmp_path, "R-1b")}["R-1b.height_chart"]   # noqa: E731
     assert outcome(height(), tall, {}) == "needs_review"
-    (rules_dir / "drafted/records/proven_relaxers.yaml").write_text(
-        yaml.safe_dump({ai["id"]: "test_relaxes: equal to the hand R-1b height"}), encoding="utf-8")
+    from rule_format.rulebook import relaxer_fingerprint
+    (rules_dir / "drafted/records/proven_relaxers.yaml").write_text(yaml.safe_dump({ai["id"]: {
+        "proof": "test_relaxes: equal to the hand R-1b height", "fingerprint": relaxer_fingerprint(ai)}}),
+        encoding="utf-8")
     assert outcome(height(), tall, {}) == "pass"
+    # #21 review: trust is for the rule as proven: a re-draft changing its cap (same id) is no longer trusted
+    changed = ai | {"check": "building_height <= 35 + 0.11 * 35"}
+    (rules_dir / "R-1b.yaml").write_text(yaml.safe_dump({"district": "R-1b", "rules": [BASE, changed]}),
+                                         encoding="utf-8")
+    assert outcome(height(), tall, {}) == "needs_review"
 
 
 def test_an_approval_covers_which_rule_the_approved_rule_widens():
