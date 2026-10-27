@@ -2611,9 +2611,7 @@ def run_check(doc, report=True):
         return result
     except Exception as e:
         _clear(o)
-        dirty = STATE.get("dirty")     # deleting Gordium's own curves is no edit of the model: the failed check's
-        logic.guard(lambda: _envelope_curves(doc, None, facts), "clear the curves to snap to")()   # message stays
-        STATE["dirty"] = dirty         # (review of feature 4, round 4, F1: live mode read it as an edit)
+        logic.guard(lambda: _envelope_curves(doc, None, facts), "clear the curves to snap to")()   # no edit (F1)
         o.doc = doc.RuntimeSerialNumber
         o.message = ("needs_review", "⚠ Check could not run", [str(e)[:120]])
         STATE["last"] = {"error": str(e), "at": time.time()}
@@ -3034,9 +3032,13 @@ def _envelope_curves(doc, plan, facts):
     (GordiumCheck's Undo step never stops on them: F6). The layer shown only with "Show buildable envelope".
     `plan` None: only the old ones go (no layer made for that: a failed check in a file Gordium never drew in
     leaves no Gordium layers). How many old ones could not be deleted (0: all replaced; else the layer hidden and
-    the architect told, so stale curves never pass for current ones)."""
+    the architect told, so stale curves never pass for current ones). Replacing them is no edit of the model: the
+    "model changed" mark (STATE["dirty"], set by live mode's hooks on every add and delete) is left as it was
+    (UX review 2026-10-27: after any check but the first, its own redraw greyed the results it had just shown;
+    review of feature 4, round 4, F1: a failed check's clearing did the same)."""
     if plan is None and doc.Layers.FindByFullPath(logic.ENVELOPE, -1) < 0:
         return 0
+    dirty = STATE.get("dirty")
     was = doc.UndoRecordingEnabled
     doc.UndoRecordingEnabled = False             # the layer too: an Undo never removes it from under the curves
     try:                                         # (review of dd44f1b, F1)
@@ -3072,6 +3074,7 @@ def _envelope_curves(doc, plan, facts):
         return 0
     finally:
         doc.UndoRecordingEnabled = was
+        STATE["dirty"] = dirty
 
 
 def _envelope_objects(doc, index):
