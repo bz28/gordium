@@ -106,6 +106,9 @@ STOPS = {
                                  "lower than the count without them ({without}): check both counts",
     "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
                           "unit's (§325-3B HOME OCCUPATION)",
+    "no_primary_buildings": "enter the primary buildings on the lot (each separate building holding a home or other "
+                            "permitted primary use, the main one included; not a garage, shed or accessory dwelling "
+                            "unit) and whether every one holds the use entered (§325-8B(1))",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",

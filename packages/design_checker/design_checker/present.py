@@ -179,7 +179,15 @@ def _evaluate(text: str, values: dict):
 
 
 def _plain_rhs(node, values: dict, measured: dict) -> str:
-    """The limit with each measurement's value written in: max(min(25% × lot depth 90'-0", 50'-0"), 20'-0")."""
+    """The limit with each measurement's value written in: max(min(25% × lot depth 90'-0", 50'-0"), 20'-0"). A
+    choice the values decide ("6000 if use == ... else 7500" for the stated use, "7000 if conversion else 6000") is
+    written as the branch taken; one they don't decide is written whole."""
+
+    class Fold(ast.NodeTransformer):
+        def visit_IfExp(self, n):
+            self.generic_visit(n)
+            taken = _evaluate(ast.unparse(n.test), values)
+            return n.body if taken is True else n.orelse if taken is False else n
 
     class Show(ast.NodeTransformer):
         def visit_Name(self, n):
@@ -189,7 +197,7 @@ def _plain_rhs(node, values: dict, measured: dict) -> str:
             shown = value_text(values.get(n.id), m.get("unit") or "")
             return ast.Name(id=f"{n.id.replace('_', ' ')} {shown}")
 
-    text = ast.unparse(Show().visit(ast.parse(ast.unparse(node), mode="eval")))
+    text = ast.unparse(Show().visit(Fold().visit(ast.parse(ast.unparse(node), mode="eval"))))
     text = re.sub(r"\b0\.(\d+) \* ", lambda m: f"{int(m.group(1)) * 10 ** (2 - len(m.group(1)))}% × ", text)
     return text.replace(" * ", " × ")
 

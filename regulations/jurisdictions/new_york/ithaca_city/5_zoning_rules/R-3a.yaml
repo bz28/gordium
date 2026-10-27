@@ -22,7 +22,7 @@
 # Draft (approval deferred, decided 2026-10-19). Not covered yet, as in R-1b (later rules or flags): ornamental
 # parapets and cornices above the height limit (§325-16B), accessory uses and structures (p.2), accessory dwelling
 # units (§325-28), height exceptions for chimneys and similar (§325-16A,
-# applied when measuring height), more than one main building on a lot (§325-8B(1)), cluster subdivisions (§325-11),
+# applied when measuring height), cluster subdivisions (§325-11),
 # the loading rule for nonresidential uses ("Allowed by variance", p.14).
 #
 # Known gap (reported, not fixable in this file): on a corner lot one side yard is left, and the City checks it
@@ -629,6 +629,176 @@ rules:
       Other uses in R-3a: church, park, library or fire station, cemetery, public utility, school, nursery school,
       adult day care home, neighborhood commercial facility, nursing home, hospital, bed-and-breakfast inn, dormitory.
       The zero-lot-line house has its own row ("-" in R-3A): see R-3a.lot_size_zero_lot_line.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3a.lot_area_each_primary_building
+    kind: rule
+    topic: dimensions
+    title: "Each further primary building needs its own lot area (§325-8B(1))"
+    applies_when: primary_buildings >= 2
+    check: lot_area >= primary_buildings * (5000 if use in ["one_family_detached", "one_family_semi_detached", "two_family"] else 25000 if use == "fraternity_sorority_group_house" else 6000)
+    review_when:
+      - when: not primary_buildings_same_use
+        reason: >-
+          Not every primary building on the lot is stated to hold the lot's use: each building needs its own
+          use's lot area, added together (§325-8B(1)); check by hand.
+      - when: use in ["one_family_attached", "multiple_family", "dormitory", "nursing_home", "one_family_detached_zero_lot_line"]
+        reason: >-
+          This use's lot area grows with the units, rooms or occupants in each building (or is itself open,
+          or a flag), and how they are split between the buildings isn't known: check by hand, each
+          building's own lot area added together (§325-8B(1)).
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [11, 16]
+        quote: "(1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use districts, each square-footage requirement applies separately to the initial permitted primary use and to each additional permitted primary use located in a separate building on the property in question (e.g., in R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and an additional area of 3,000 square feet is required for each additional one-family house or two-family house on the property)."
+        not_limits: {1: "(1): the paragraph's number", 3000: "R-2b's figure, the code's own example"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 17
+        lines: [39, 40]
+        quote: "PRIMARY STRUCTURE — A single structure (located on a parcel) containing a use permitted in the zoning district in which it is located."
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [9, 9]
+        quote: "One-family dwelling, detached [fn4] • • • • • • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [10, 10]
+        quote: "One-family dwelling, detached, zero lot line [fn4] - - - - SP SP SP SP -"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [11, 11]
+        quote: "One-family dwelling, semi-detached [fn4] - - • • • • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [12, 12]
+        quote: "One-family dwelling, attached [fn4] - - - - SP • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [13, 13]
+        quote: "Two-family dwelling [fn4] - - • • • • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [14, 14]
+        quote: "Multiple family dwelling [fn4] - - - - - • • • •[fn5]"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [15, 15]
+        quote: "Fraternity, sorority, or group house - - - - - • • • •[fn5]"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [16, 16]
+        quote: "Dormitory - - - - - • - • •[fn5]"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [26, 26]
+        quote: "Nursing, convalescent or rest home - - - - - • • • -"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [48, 48]
+        quote: "(3) See §325-8(B)(1)."
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, detached", column: R-3A}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [10, 10]
+        quote: "One-family dwelling, detached 10,000 sf 6,000 sf 5,000 sf 3,000 sf 2,500 sf [fn4] 5,000 sf 5,000 sf 3,000 sf 10,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, semi-detached", column: R-3A}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [12, 12]
+        quote: "One-family dwelling, semi-detached - - 5,000 sf 3,000 sf 2,000 sf [fn5] 5,000 sf 5,000 sf 3,000 sf 15,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Two-family dwelling", column: R-3A}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [15, 15]
+        quote: "Two-family dwelling - - 5,000 sf 3,000 sf 2,000 sf [fn5] 5,000 sf 5,000 sf 3,000 sf 15,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Fraternity, sorority, or group house", column: R-3A}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [18, 18]
+        quote: "Fraternity, sorority, or group house 25,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Other use", column: R-3A}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [19, 19]
+        quote: "Other use 10,000 sf 7,500 sf 6,000 sf 4,000 sf 4,000 sf 6,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: "Primary Uses", row: "Dormitory", column: R-3A}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: "Primary Uses", row: "Nursing, convalescent or rest home", column: R-3A}
+    examples:
+      - given: {use: one_family_detached, primary_buildings: 1, lot_area: 5000}
+        expect: not_applicable
+        note: "one primary building: the use's own lot-area rule covers it"
+      - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 10000}
+        expect: pass
+        note: "two primary buildings need 2 x 5,000 sf"
+      - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 9999}
+        expect: fail
+        note: "enough for one building, not two"
+      - given: {use: one_family_detached, primary_buildings: 3, primary_buildings_same_use: true, lot_area: 15000}
+        expect: pass
+      - given: {use: one_family_detached, primary_buildings: 3, primary_buildings_same_use: true, lot_area: 14999}
+        expect: fail
+      - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: false, lot_area: 500000}
+        expect: needs_review
+        note: "another building holds another use: its own figure, added by hand"
+      - given: {use: one_family_detached, primary_buildings: 2, lot_area: 500000}
+        expect: needs_review
+        note: "whether every building holds this use not said"
+      - given: {use: one_family_detached, lot_area: 500000}
+        expect: needs_review
+        note: "the primary buildings not counted"
+      - given: {use: one_family_semi_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 10000}
+        expect: pass
+      - given: {use: one_family_semi_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 9999}
+        expect: fail
+      - given: {use: two_family, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 10000}
+        expect: pass
+      - given: {use: two_family, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 9999}
+        expect: fail
+      - given: {use: fraternity_sorority_group_house, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 50000}
+        expect: pass
+      - given: {use: fraternity_sorority_group_house, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 49999}
+        expect: fail
+      - given: {use: church, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 12000}
+        expect: pass
+        note: "Other use"
+      - given: {use: church, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 11999}
+        expect: fail
+      - given: {use: one_family_attached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+      - given: {use: multiple_family, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+      - given: {use: dormitory, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+      - given: {use: nursing_home, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+    notes: >-
+      §325-8B(1): every residential district's lot-size figure applies again to each further primary use in a separate
+      building on the lot (the code's own example: in R-2b, 3,000 sf for a house and 3,000 sf more for each further
+      house). With one primary building this rule doesn't apply: the use's own lot-area rule (R-3a.lot_area_*) checks
+      it. With two or more, the lot needs the figure once per building, when every building holds the lot's use
+      (primary_buildings_same_use); otherwise each building's own figure, added by hand. Gordium counts the primary
+      buildings from the drawing where it can (one building, or none standing apart that could hold a home); a
+      building standing apart that could (a large garage, a second house) is read both ways until the architect states
+      the count. An accessory building (a garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary
+      building.
     drafted_by: claude
     status: draft
 

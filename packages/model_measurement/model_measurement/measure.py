@@ -44,7 +44,8 @@ STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking
           "attached_units_in_building": "count", "abuts_r1_district": "yes_no",
           "unrelated_persons": "count", "unrelated_persons_with_children": "count", "owner_occupied": "yes_no",
           "functional_family_unit": "yes_no", "home_occupation": "yes_no", "home_occupation_area": "sf",
-          "home_occupation_unit_area": "sf", "accessory_dwelling_unit": "yes_no"}
+          "home_occupation_unit_area": "sf", "accessory_dwelling_unit": "yes_no",
+          "primary_buildings": "count", "primary_buildings_same_use": "yes_no"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
        "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
        "occupants": "no_occupants", "occupants_most_in_one_unit": "no_occupant_split",
@@ -52,7 +53,8 @@ ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "
        "unrelated_persons": "no_household", "unrelated_persons_with_children": "no_household",
        "owner_occupied": "no_household", "functional_family_unit": "no_household",
        "home_occupation": "no_home_occupation", "home_occupation_area": "no_home_occupation",
-       "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_household"}
+       "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_household",
+       "primary_buildings": "no_primary_buildings", "primary_buildings_same_use": "no_primary_buildings"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",
@@ -1883,6 +1885,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                 "the solids on the Building layer standing apart from the main building (§325-25)",
                 [i for b in detached for i in _parts(b)]))
     out["accessory_distances_apply"] = _distances_apply(facts, detached, why_building or why_main)
+    out["primary_buildings"] = _primary_buildings(out["primary_buildings"], facts, detached, why_building or why_main)
 
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None
@@ -2074,6 +2077,35 @@ def _touching(seed: dict, candidates: list[dict], plans: dict) -> list[dict]:
         found += new
         grown = ops.unary_union([grown] + [plans[b["id"]] for b in new])
     return found
+
+
+def _primary_buildings(stated: dict, facts: dict, detached: list[dict], why: str | None) -> dict:
+    """How many primary buildings stand on the lot (§325-3B PRIMARY STRUCTURE: a single structure containing a
+    permitted use; §325-8B(1): each further primary use "located in a separate building" needs its own lot area;
+    §325-7B, §325-8E). The architect's count when stated (the model can't tell a second house from a garage);
+    else read from the drawing: the main building is one, and each solid standing apart from it is a second one
+    only if it could hold a principal use (_could_be_principal: enclosed, a story tall, a habitable room's floor
+    area) and the architect hasn't listed it as an accessory building. None that could: one, measured. Some that
+    could: two readings, every one an accessory building (one) and every one a primary building (one more each);
+    the rules that read the count only ever grow stricter with it, so the two ends decide (never a pass the
+    count in between wouldn't give)."""
+    name = "primary_buildings"
+    if stated.get("value") is not None:
+        return stated
+    if why:
+        return _missing(name, why)
+    listed = facts.get("accessory_buildings") or []
+    could = [b for b in detached if _could_be_principal(b) and not any(i in _parts(b) for i in listed)]
+    if not could:
+        return _record(name, "count", 1, "the main building only: every other solid touches it, is listed as an "
+                       "accessory building, or is too small or low to hold a habitable room",
+                       [])
+    ids = [i for b in could for i in _parts(b)]
+    return _record(name, "count", None, "the main building and the solids standing apart from it", ids,
+                   readings=[{"reading": "every building standing apart is an accessory building", "value": 1},
+                             {"reading": "every building standing apart that could hold a home is a primary "
+                                         "building", "value": 1 + len(could)}],
+                   reason=stop("no_primary_buildings"))
 
 
 def _distances_apply(facts: dict, detached: list[dict], why: str | None) -> dict:
