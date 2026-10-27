@@ -32,13 +32,13 @@ def test_a_second_building_that_could_be_a_house_waits_for_the_count():
 
 def test_once_counted_the_row_is_decided():
     assert _rows(primary_buildings=2, primary_buildings_same_use=True)[RULE]["status"] == present.FAILS
-    assert _rows(primary_buildings=1)[RULE]["status"] == present.COMPLIES     # one: 9,000 sf of 6,000
+    assert RULE not in _rows(primary_buildings=1)               # one primary building: not applicable, not shown
     # the one-house lot-area row is unchanged: 9,000 sf of 6,000
     assert _rows(primary_buildings=1)["R-1b.lot_area_one_family_detached"]["status"] == present.COMPLIES
 
 
 def test_a_garage_listed_as_an_accessory_building_is_not_a_second_house():
-    assert _rows(accessory_buildings=["back_floor1"])[RULE]["status"] == present.COMPLIES
+    assert RULE not in _rows(accessory_buildings=["back_floor1"])
 
 
 def test_the_working_names_the_figure_for_the_stated_use():
@@ -74,3 +74,13 @@ def test_a_count_that_could_change_the_row_is_asked_even_on_a_big_lot():
     lot-area row from the readings' ends; it asks the count (needs review), never a pass, as the docs now say."""
     item = _rows(lot=(200, 300), primary_buildings_same_use=True)[RULE]      # 60,000 sf: enough for 1 or 2
     assert item["status"] == present.REVIEW and "primary_buildings" in item["needs"], item
+
+
+def test_a_use_row_cited_by_two_rules_has_one_name():
+    """The full suite (test_present.test_no_two_sections_share_a_link): the lot-area row for each primary building
+    cites the chart's use row, as the use rule does; one link, one name: "Use column"."""
+    seen = {}
+    for item in _rows(primary_buildings=2, primary_buildings_same_use=True).values():
+        for c in item["detail"].get("cited") or []:
+            seen.setdefault(c["link"], set()).add(c["citation"])
+    assert all(len(names) == 1 for names in seen.values()), {k: v for k, v in seen.items() if len(v) > 1}
