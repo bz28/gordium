@@ -422,6 +422,25 @@ def answer_problem(kind, text):
     return None
 
 
+# The box's questions after Use, each as its words wrapped at QUESTION_WIDTH with its answer beside them, and one note
+# under them all: the start box stays laptop-sized (≤ ~900 px wide) with the longest questions (#38's household ones
+# ran ~1,200 px on one line and pushed the box to 1,560-2,020 px: Rhino run of demo 2c0a5c0). Pinned in
+# test_box_width.py, which lays the real box out and bounds its width.
+QUESTION_WIDTH = 360
+
+
+def answers_note(entries):
+    """The one line under the box's questions, for `entries` [(key, kind, text)] in the order asked: FOLLOW_UP_HELP,
+    or the first entry not kept, named by its fact ("rooms let for profit: Not kept: …"), so it is said at once and
+    never read as 0. Returns (text, refused)."""
+    for key, kind, text in entries:
+        problem = answer_problem(kind, text)
+        if problem:
+            name = STATED_FACTS[key][2] if key in STATED_FACTS else key
+            return f"{name[0].upper() + name[1:]}: {problem}", True
+    return FOLLOW_UP_HELP, False
+
+
 def needs_of(names, values):
     """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
     return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None]

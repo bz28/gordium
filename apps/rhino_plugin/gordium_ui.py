@@ -824,7 +824,7 @@ def start_box(state, options, mode):
             state["use_source"] = logic.ENTERED
         answers = dict(state.get("answers") or {})
         for key, (kind, field) in asked.items():       # a blank stays unanswered (its rules: NEEDS REVIEW)
-            text = field.Text if kind == "count" else ["", "no", "yes"][max(field.SelectedIndex, 0)]
+            text = ["", "no", "yes"][max(field.SelectedIndex, 0)] if kind == "yes_no" else field.Text
             try:
                 answers[key] = logic.parse_answer(kind, text)
             except ValueError:
@@ -839,7 +839,7 @@ def start_box(state, options, mode):
         done("pick:" + what)
 
     draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
-    reason = label(logic.draw_reason(state), size=11)
+    reason = label(logic.draw_reason(state), size=11, width=560)   # wraps at the box's width
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
 
@@ -914,27 +914,32 @@ def start_box(state, options, mode):
             if state.get("use_note"):  # a pick the chart doesn't permit by right: said, with the chart's page
                 layout.AddRow(None, row(label(state["use_note"], eto_status_color("needs_review"), size=11,
                                               width=560)))
-            for q in state.get("follow_ups") or []:     # what this district's rules need for the use
-                if q["kind"] == "count":
-                    field = ef.TextBox()
-                    field.Width = 60
-                    field.Text = "" if q["value"] is None else str(q["value"])
-                else:
+            questions = state.get("follow_ups") or []     # what this district's rules need for the use
+            # each question's words wrap beside its answer, and one note under them all (logic.QUESTION_WIDTH: the
+            # box stays laptop-sized with the longest questions)
+            note = label(logic.FOLLOW_UP_HELP, size=11, width=560)
+
+            def typed(s, e, plain=note.TextColor):    # an entry that isn't an answer: said at once, never kept
+                text, refused = logic.answers_note([(k, kind, f.Text) for k, (kind, f) in asked.items()
+                                                    if kind != "yes_no"])
+                note.Text = text
+                note.TextColor = eto_status_color("needs_review") if refused else plain
+
+            for q in questions:
+                if q["kind"] == "yes_no":
                     field = ef.DropDown()
                     for t in (logic.NOT_ANSWERED,) + logic.yes_no_words(q["key"]):
                         field.Items.Add(t)
                     field.SelectedIndex = {None: 0, False: 1, True: 2}[q["value"]]
-                asked[q["key"]] = (q["kind"], field)
-                note = label(logic.FOLLOW_UP_HELP, size=11)
-                if q["kind"] == "count":     # a typed entry that isn't a whole number: said at once, never kept
-
-                    def typed(s, e, f=field, n=note, plain=note.TextColor):
-                        problem = logic.answer_problem("count", f.Text)
-                        n.Text = problem or logic.FOLLOW_UP_HELP
-                        n.TextColor = eto_status_color("needs_review") if problem else plain
-
+                else:                        # typed: a count (any other kind is typed too, never a yes / no)
+                    field = ef.TextBox()
+                    field.Width = 60
+                    field.Text = "" if q["value"] is None else str(q["value"])
                     field.TextChanged += logic.guard(typed, "type the answer")
-                layout.AddRow(label(q["label"], size=12), row(field, note))
+                asked[q["key"]] = (q["kind"], field)
+                layout.AddRow(None, row(label(q["label"], size=12, width=logic.QUESTION_WIDTH), field))
+            if questions:
+                layout.AddRow(None, row(note))
         elif key == "ground":
             layout.AddRow(title, row(label(r["text"], size=12)))          # left aligned, as the others
             layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
@@ -944,7 +949,7 @@ def start_box(state, options, mode):
             layout.AddRow(title, row(label(r["text"], size=12),
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             if r.get("help"):          # what that row is, in a sentence (the front lot line's)
-                layout.AddRow(None, row(label(r["help"], size=11)))
+                layout.AddRow(None, row(label(r["help"], size=11, width=560)))
             if r.get("choice"):        # the street side's question: Corner lot?
                 layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
         if r.get("review"):            # a looked-up fact found doubtful: why, in amber, and I checked this
@@ -964,7 +969,7 @@ def start_box(state, options, mode):
                                label("kept back from every limit by the starting house", size=11))
         layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
-    amber = label("", eto_status_color("needs_review"), size=12)    # one line, following the answers given
+    amber = label("", eto_status_color("needs_review"), size=12, width=560)   # following the answers; wraps
 
     def refresh_amber(*_):
         state["corner_lot"] = [None, False, True][max(corner.SelectedIndex, 0)]
