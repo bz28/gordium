@@ -4152,3 +4152,17 @@ def test_hide_starting_house_with_no_house_is_never_left_ticked():
     assert ticks == [False] and said and said[0].startswith("There is no starting house")
 
 
+
+
+def test_another_document_shows_its_own_ticks():
+    """Round 2 of the tick review: switching to another document cleared the panel but left the last document's
+    ticks (its labels, its hidden starting house) until a check, which a file with no lot facts never gets."""
+    synced = []
+    form = type("F", (), {"Visible": True})()
+    ui_ = type("UI", (), {"show": staticmethod(lambda *a, **k: None)})
+    front = object()
+    ns = _plugin_functions(["_new_document"], ui=ui_, _sync_ticks=synced.append, _clear=lambda o: None,
+                           Rhino=type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": front})}))
+    ns["STATE"]["panel_parts"] = {"form": form}
+    ns["_new_document"](None, None)
+    assert synced == [front]
