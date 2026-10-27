@@ -1,8 +1,8 @@
 # R-1b (City of Ithaca): rules drafted by Claude by reading the zoning charts (April 2026) and Chapter 325.
 # NOT yet an answer key: it would become one when the architects approve each rule (status: approved);
 # architect approval is deferred for now (decided 2026-10-19).
-# Until then it is a second, independent reading: the chart-reading code (next PR) must produce the same
-# chart values, and test_answer_keys.py compares these rules with the architects' own spreadsheet check
+# Until then it is a second, independent reading: the chart reader's R-1B cells must give the same chart
+# values (test_r1b_matches_chart.py), and test_answer_keys.py compares these rules with the architects' own spreadsheet check
 # (test_data/answer_keys/, their hand check of 106 Ithaca Rd).
 # Every quote is verified against the PDF text by `python -m rule_format`. Written under
 # regulations/document_extraction_guide/drafting_rules.md: a short title, no retelling (the quotes are the words);
@@ -209,7 +209,7 @@ rules:
     topic: dimensions
     title: "Maximum building height, with the §325-16C bonus"
     check: >-
-      building_height <= 35 or building_height <= 38.5
+      building_height <= 35 or building_height <= 35 + 0.1 * 35
       and front_yard >= 25 + (building_height - 35)
       and side_yard_smaller >= 10 + (building_height - 35)
       and side_yard_larger >= 10 + (building_height - 35)
@@ -227,6 +227,22 @@ rules:
         page: 3
         lines: [56, 56]
         quote: "(10) See §325-16."
+      - file: zoning_charts_2026-04.pdf             # the yard minimums the bonus increases
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
       - file: chapter_325_zoning_2026-10.pdf
         page: 47
         lines: [6, 7]
@@ -235,6 +251,7 @@ rules:
         page: 47
         lines: [8, 9]
         quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 47
         lines: [11, 12]
@@ -242,11 +259,15 @@ rules:
     examples:
       - given: {building_height: 35, front_yard: 25, side_yard_smaller: 10, side_yard_larger: 10, rear_yard: 24, lot_depth: 94.8}
         expect: pass
-      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 26, lot_depth: 94.8}
+      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 26, lot_depth: 94.8, stories: 3}
         expect: pass
-      - given: {building_height: 37, front_yard: 25, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 26, lot_depth: 94.8}
+      - given: {building_height: 37, front_yard: 25, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 26, lot_depth: 94.8, stories: 3}
         expect: fail
-      - given: {building_height: 39, front_yard: 40, side_yard_smaller: 20, side_yard_larger: 20, rear_yard: 40, lot_depth: 94.8}
+      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 10, side_yard_larger: 12, rear_yard: 26, lot_depth: 94.8, stories: 3}
+        expect: fail
+      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 24, lot_depth: 94.8, stories: 3}
+        expect: fail
+      - given: {building_height: 39, front_yard: 40, side_yard_smaller: 20, side_yard_larger: 20, rear_yard: 40, lot_depth: 94.8, stories: 3}
         expect: fail
       - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 22, lot_depth: 60}
         expect: pass                                 # a 60 ft lot: the 20 ft floor, plus 2 ft for 2 ft of extra height
@@ -284,6 +305,7 @@ rules:
         page: 25
         lines: [7, 9]
         quote: "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+        not_limits: {2: "what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's limit"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 25
         lines: [9, 10]
@@ -358,6 +380,7 @@ rules:
         page: 25
         lines: [24, 26]
         quote: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+        not_limits: {2: "the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit"}
     examples:
       - given: {rear_yard: 25, lot_depth: 94.8}
         expect: pass
@@ -381,7 +404,7 @@ rules:
     topic: parking_and_loading
     title: "Minimum off-street parking, residential (chart p.14)"
     applies_when: use == "one_family_detached"
-    check: parking_spaces >= (1 if sleeping_rooms <= 3 else 2 + max(sleeping_rooms - 5, 0))
+    check: parking_spaces >= (1 if sleeping_rooms <= 3 else 2 + 1 * max(sleeping_rooms - 5, 0))
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 14

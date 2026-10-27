@@ -65,7 +65,7 @@ Every document above is recorded in `regulations/jurisdictions/new_york/ithaca_c
 | 3 | Text extracted from the PDFs | The inspector needs it to verify quotes |
 | 4 | Ithaca's definitions and use names, this document | Rules depend on these words |
 | 5 | R-1b rules drafted by Claude, compared with the architects' spreadsheet | A second, independent reading the chart reader must match; an answer key once architects approve it |
-| 6 (next) | Code that reads the chart tables → rules for all 9 residential zones; compared with PR 5 | Proves the automation is right, then scales it |
+| 6 | Code that reads the chart tables into cells (row × district, from the rectangles the PDF draws); its R-1B cells must match PR 5's rules | Proves the automated reading is right on R-1b before it's trusted for the other zones |
 
 ## What people still decide
 

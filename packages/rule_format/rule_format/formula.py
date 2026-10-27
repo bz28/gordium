@@ -12,6 +12,7 @@ Allowed: numbers, quoted text, measure names, + - * / (numbers only), comparison
 of numbers or texts, and / or / not (true/false tests combine only with these), `a if condition else b`
 (two numbers or two texts), min() and max() of two or more numbers. The kinds each operator takes are one
 table, result_type, used both to check rule files (type_of) and when a formula is worked out.
+A yes/no measure is used on its own: `adu_separate_entrance`, `not accessory_in_front_yard`.
 
 Numbers are worked out exactly, as the decimals they are written as (0.2 * 132 is 26.4, not the binary
 26.400000000000002), and a comparison treats two numbers within AT_LIMIT of each other as equal: a design
@@ -229,9 +230,17 @@ def _type(node, kinds) -> str:
 
 
 def is_condition(text: str) -> bool:
-    """True if the formula can only produce true/false (a comparison, and/or, or not)."""
+    """True if the formula can only produce true/false (a comparison, and/or, or not), or is a
+    single measure name (true/false only if that measure is a yes/no one: see bare_name)."""
     body = parse(text).body
-    return isinstance(body, _CONDITIONS) or isinstance(body, ast.UnaryOp) and isinstance(body.op, ast.Not)
+    return (isinstance(body, _CONDITIONS) or isinstance(body, ast.UnaryOp) and isinstance(body.op, ast.Not)
+            or isinstance(body, ast.Name))
+
+
+def bare_name(text: str) -> str | None:
+    """The measure name if the whole formula is one measure (a yes/no test on its own), else None."""
+    body = parse(text).body
+    return body.id if isinstance(body, ast.Name) else None
 
 
 def names(text: str) -> set[str]:
@@ -246,11 +255,37 @@ def strings(text: str) -> set[str]:
     return {n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
 
 
+def compared_strings(text: str) -> list[tuple[str | None, str]]:
+    """(the measure it is compared with, or None; the quoted value) for each quoted text value in a formula:
+    'use in ["a", "b"] and district == "R-1b"' -> [("use", "a"), ("use", "b"), ("district", "R-1b")]."""
+    tree, out, seen = parse(text), [], set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Compare):
+            continue
+        operands = [node.left, *node.comparators]
+        names = [o.id for o in operands if isinstance(o, ast.Name)]
+        for o in operands:
+            values = o.elts if isinstance(o, (ast.List, ast.Tuple, ast.Set)) else [o]
+            for v in values:
+                if isinstance(v, ast.Constant) and isinstance(v.value, str):
+                    seen.add(id(v))
+                    out.append((names[0] if len(names) == 1 else None, v.value))
+    out += [(None, n.value) for n in ast.walk(tree)
+            if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in seen]
+    return out
+
+
+def numbers(text: str) -> list[float]:
+    """Number constants written in a formula (each must come from the rule's sources)."""
+    return [n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and type(n.value) in (int, float)]
+
+
 def evaluate(text: str, values: dict, kinds: dict):
     """Evaluate a formula. Raises MissingMeasure or EvaluationError when it can't.
 
     kinds describes every measure the formula may use: "number" (a non-negative number:
-    lengths, areas, counts) or the set of text values allowed (e.g. the city's use names).
+    lengths, areas, counts), "boolean" (a yes/no fact: True or False), or the set of text values
+    allowed (e.g. the city's use names).
     Fails closed: a measure with no description, or a value that doesn't fit, is unusable.
     Worked out exactly (see the module docstring); a number comes back as a float (an int where plain Python
     arithmetic would have given one).
@@ -369,6 +404,8 @@ def _measure(name, values, kinds):
     v, kind = values.get(name), kinds.get(name)
     if kind == "number" and type(v) in (int, float) and _finite(v) and v >= 0:
         return _exact(v)
+    if kind == "boolean" and type(v) is bool:
+        return v
     if isinstance(kind, (set, frozenset)) and type(v) is str and v in kind:
         return v
     return _Unknown(name, _kind_type(kind))

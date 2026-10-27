@@ -67,11 +67,14 @@ def report(rows: list[dict], header: dict, pieces: dict[str, dict], labels: dict
 
 def cited_by(j: Path, file: str, pieces: dict[str, dict]) -> dict[str, list[str]]:
     """{piece id: [rule or definition ids citing it]}, from every source in the rulebook (5_zoning_rules)
-    and the definitions and uses (4_term_definitions) that quotes this document."""
+    and the definitions and uses (4_term_definitions) that quotes this document. A rule drafted by the script
+    (5_zoning_rules/drafted/) is listed as "drafted:<id>", so it isn't merged with a hand rule of the same id."""
     owner = {k: pid for pid, p in pieces.items() for k in piece_keys(p)}
     citing: list[tuple[str, dict]] = []
-    for path in sorted((j / "5_zoning_rules").glob("*.yaml")):
-        citing += [(r.get("id", "?"), s) for r in (load(path) or {}).get("rules", []) for s in r.get("sources", [])]
+    rulebooks = j / "5_zoning_rules"          # the hand drafts and the script's drafted/ (not its records/)
+    for path in sorted(p for p in rulebooks.rglob("*.yaml") if "records" not in p.relative_to(rulebooks).parts):
+        tag = "drafted:" if "drafted" in path.relative_to(rulebooks).parts else ""
+        citing += [(tag + r.get("id", "?"), s) for r in (load(path) or {}).get("rules", []) for s in r.get("sources", [])]
     for path in sorted((j / "4_term_definitions").glob("*.yaml")):
         citing += [(f"{path.stem}.{key}", s) for key, e in (load(path) or {}).items() for s in e.get("sources", [])]
     out: dict[str, list[str]] = {}

@@ -36,19 +36,24 @@ RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_
                "approved_hash"}
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
-ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote"},
+ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
                "examples": {"given", "expect", "note"}}
+CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
 APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "answers")
-MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
-                 for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
+UNIT_KINDS = {"text": "text", "yes_no": "boolean"}       # every other unit (ft, sf, count) is a number
+MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
+# Measures a draft asked for that aren't in measures.yaml yet: listed for engineers, never used silently.
+PROPOSED_MEASURES = "5_zoning_rules/drafted/records/proposed_measures.yaml"
 
 
 def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
     """allowed: the values each text measure may take, e.g. {"use": the city's use names}.
     Required, so no caller can forget it. A value outside the list, or a text measure with
-    no list, is unrecognized. A missing or unusable measure is unknown: the result is pass or fail only if it is
-    the same whatever that measure turns out to be (three-valued logic, formula.evaluate); else needs review."""
-    kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in allowed.items()}
+    no list, is unrecognized. A measure that isn't in measures.yaml (one a draft proposed) is described here by
+    its kind instead: "number" or "boolean". A missing or unusable measure is unknown: the result is pass or fail
+    only if it is the same whatever that measure turns out to be (three-valued logic, formula.evaluate); else
+    needs review."""
+    kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
     try:
         if "applies_when" in rule and not _condition(rule["applies_when"], values, kinds):
             return "not_applicable"
@@ -105,6 +110,21 @@ class Context:
     problems: list[str] = field(default_factory=list)                # problems with the sources themselves
     file_problems: dict[str, list[str]] = field(default_factory=dict)  # the same, by source file
     use_rows: dict[str, list[dict]] = field(default_factory=dict)    # use -> its sources in uses.yaml
+    cells: dict[str, dict[tuple, dict]] = field(default_factory=dict)  # file -> (page, section, row, column) -> cell
+    districts: set[str] = field(default_factory=set)                 # district names, as the city writes them
+    proposed: dict[str, dict] = field(default_factory=dict)          # measures drafts asked for, not yet in measures.yaml
+
+    def kinds(self) -> dict:
+        """Every usable measure's kind: "number", "text" or "boolean" (this context's measures, plus the
+        proposed ones)."""
+        return {n: MEASURE_KINDS.get(n, "number") for n in self.measures} | {
+            n: UNIT_KINDS.get(m.get("unit"), "number") for n, m in self.proposed.items()}
+
+    def allowed(self) -> dict:
+        """What outcome() needs here: the text values each text measure may take, and each proposed
+        measure's kind (a proposed text measure has no list of values yet, so it is unrecognized)."""
+        proposed = {n: set() if k == "text" else k for n, k in self.kinds().items() if n in self.proposed}
+        return {"use": self.uses, "district": self.districts} | proposed
 
     def _problem(self, name: str, message: str):
         self.problems.append(f"{name}: {message}")
@@ -142,7 +162,29 @@ class Context:
             # Text is only trusted for a document whose own checks all passed.
             if extracted.exists() and name not in ctx.file_problems:
                 ctx._load_extracted(name, sha, extracted)
+            cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
+            if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
+                ctx._load_cells(name, sha, cells)
+        proposed = j / PROPOSED_MEASURES
+        if proposed.exists():
+            listed_measures = load(proposed) or {}
+            ctx.proposed = {n: m for n, m in listed_measures.items() if isinstance(m, dict) and n not in ctx.measures}
         return ctx
+
+    def _load_cells(self, name, sha, path):
+        """Chart cells read by the chart reader (document_extraction/charts.py). Only cells it read with
+        certainty are in the file; unresolved parts of a table can never be cited."""
+        rows = read_jsonl(path)
+        if not rows or rows[0].get("sha256") != sha:
+            self._problem(name, f"{path.name} was read from a different version; re-extract")
+            return
+        cells = {}
+        for r in rows[1:]:
+            if "columns" in r:
+                self.districts |= {district_name(c["name"]) for c in r["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])}
+            elif "value" in r and not r.get("heading"):
+                cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
+        self.cells[name] = cells
 
     def _load_extracted(self, name, sha, path):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
@@ -159,8 +201,31 @@ class Context:
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
-                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout"}
+                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages"}
 LAYOUTS = {"ecode360"}   # document layouts the section splitter knows (document_extraction/sections.py)
+# A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU): the one definition, used by the
+# chart reader, the inspector and the drafter alike. Ithaca's residential names; another city adds its own here.
+DISTRICT_COLUMN = re.compile(r"R-\d[A-Z]*|RU")
+
+
+def district_name(column: str) -> str:
+    """A chart column as the city writes the district in its law and in file names: R-1B -> R-1b."""
+    m = re.fullmatch(r"([A-Z]+-\d+)([A-Z]*)", column)
+    return m[1] + m[2].lower() if m else column
+
+
+def _text_problems(f: str, allowed: dict[str, set]) -> list[str]:
+    """Each quoted value must be one the measure it is compared with can take: a use for `use`, a district
+    for `district`. So `use == "R-2a"` (a district written where a use belongs) can't pass the inspector and
+    then never apply. A quoted value compared with anything else (another measure, or nothing) is refused."""
+    out = []
+    for name, value in formula.compared_strings(f):
+        if name not in allowed:
+            out.append(f"text value '{value}' in {f!r} must be compared with "
+                       f"{' or '.join(sorted(allowed))}, not {name or 'nothing'}")
+        elif value not in allowed[name]:
+            out.append(f"unknown {name} '{value}' in {f!r}")
+    return out
 
 
 def _use_rows(uses) -> dict[str, list[dict]]:
@@ -188,13 +253,159 @@ def _use_row_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[s
             named |= formula.strings(f) if isinstance(f, str) else set()
         except FormulaError:
             pass                                                # reported with the formula
-    cited = {(s.get("file"), s.get("page"), n) for s in sources
-             if isinstance(s.get("file"), str) and type(s.get("page")) is int and _is_line_range(s.get("lines"))
-             for n in range(s["lines"][0], s["lines"][1] + 1)}
+    cited = _cited_lines(sources, ctx)
     return [f"use '{u}' is decided here but its row isn't cited (cite {r['file']} p.{r['page']} lines {r['lines']})"
             for u in sorted(named & set(ctx.use_rows)) for r in ctx.use_rows[u][:1]
             if not any((r["file"], r["page"], n) in cited
                                                           for n in range(r["lines"][0], r["lines"][1] + 1))]
+
+
+def _cell(s: dict, ctx: "Context") -> dict | None:
+    """The chart cell a well-formed cell source points at, or None."""
+    c = s.get("cell")
+    if not (isinstance(c, dict) and c.keys() == CELL_FIELDS and all(isinstance(c[k], str) for k in CELL_FIELDS)):
+        return None
+    return ctx.cells.get(s.get("file"), {}).get((s.get("page"), c["section"], c["row"].strip(), c["column"]))
+
+
+def _cited_lines(sources: list[dict], ctx: "Context") -> set[tuple]:
+    """(file, page, line) of every line the sources cite: a quote's lines, or a cell's row."""
+    out = set()
+    for s in sources:
+        if (cell := _cell(s, ctx)) is not None:
+            out |= {(s["file"], s["page"], n) for n in cell["row_lines"]}
+        elif isinstance(s.get("file"), str) and type(s.get("page")) is int and _is_line_range(s.get("lines")):
+            out |= {(s["file"], s["page"], n) for n in range(s["lines"][0], s["lines"][1] + 1)}
+    return out
+
+
+_PARTS = r"(?:\s*\([0-9a-z]{1,4}\))*"                                    # (3)(b)
+_REF = (r"(?:(?:[a-z]-)?\d+[\d.\-]*[a-z]{0,2}(?![a-z])" + _PARTS +           # 325-20d(3)(b), 81-a, c-54
+        r"|[a-z]?\([0-9a-z]{1,4}\)" + _PARTS +                              # b(7), (2)
+        r"|[a-z](?![a-z]))")                                                # subsection c
+_REFS = rf"{_REF}(?:\s*(?:,|and|or|through|to|&)\s*(?:§+\s*)?{_REF})*"   # §§ 325-8 and 325-9; b(7) to b(10)
+NOT_A_LIMIT = re.compile(
+    r"\[fn[^\]]*\]"                                                    # a footnote marker
+    r"|\[(?:amended|added|repealed)[^\]]*\]"                           # an amendment note
+    r"|(?:^|(?<=[.:;]))\s*(?:\(\s*(?:\d+|[a-z])\s*\)\s*)+"             # list markers opening the text or a sentence/clause
+    rf"|\b(?:sections?\s+)?\d+\s*u\.\s*s\.\s*c\.\s*(?:§+\s*)?{_REFS}"  # a federal law: Section 47 U.S.C. 332(c)(7)
+    rf"|§+\s*{_REFS}"                                                  # a section reference: § 325-20D(3)(b)
+    rf"|\b(?:sub)?(?:sections?|paragraphs?|divisions?)\s+{_REFS}"      # Subsection B(7), Subsections (1), (2) and (3)
+    rf"|\b(?:columns?|chapters?|articles?|ord(?:inance)?\.?\s*nos?\.|local laws?\s*no\.)\s*{_REFS}")
+NUMBER_WORDS = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
+                "eight": 8, "nine": 9, "ten": 10, "twelve": 12, "twenty": 20, "fifty": 50, "hundred": 100}
+
+
+def source_numbers(text: str, percent_as_number: bool = True) -> set[float]:
+    """Numbers written in a quote or a cell: digits ("6,000", "2.5", "3/2" gives 3 and 2) and whole number
+    words ("three", not the "two" of "two-family"). Numbers that only label or point aren't limits and
+    don't count: footnote markers ([fn16], and "(16)" opening a note), list numbers ("(3)" opening a sentence
+    or clause), section, column, chapter and ordinance references (§325-16, Column 12, Chapter 228,
+    [Amended 6-5-2013 by Ord. No. 2013-15]). A percent counts divided by 100: "25%" supports 0.25, and also
+    25 unless percent_as_number is False (a typed number in a draft must be the fraction)."""
+    text = NOT_A_LIMIT.sub(" ", text.lower())
+    percent = r"(\d[\d,]*(?:\.\d+)?)\s*(?:%|percent\b)"
+    fractions = {float(n.replace(",", "")) / 100 for n in re.findall(percent, text)}
+    if not percent_as_number:
+        text = re.sub(percent, " ", text)
+    found = {float(n.replace(",", "")) for n in re.findall(r"\d[\d,]*(?:\.\d+)?|(?<![\w.])\.\d+", text)}
+    found |= {float(NUMBER_WORDS[w]) for w in re.findall(r"(?<![\w-])([a-z]+)(?![\w-])", text) if w in NUMBER_WORDS}
+    return found | fractions
+
+
+def _number_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[str]:
+    """Every number a formula uses must be written in one of the rule's own sources (a cited quote, or a
+    cited chart cell or its row label), so no limit can be typed in from nowhere. 0 needs no source."""
+    supported = {0.0}
+    for s in sources:
+        if (cell := _cell(s, ctx)) is not None:
+            supported |= source_numbers(f"{cell['value']} {cell['row']}")
+        elif isinstance(s.get("quote"), str):
+            supported |= source_numbers(s["quote"])
+    formulas = [(k, rule[k]) for k in ("applies_when", "check") if isinstance(rule.get(k), str)]
+    formulas += [("review_when", r["when"]) for r in _list_of_dicts(rule, "review_when") or [] if isinstance(r.get("when"), str)]
+    p = []
+    for key, text in formulas:
+        try:
+            missing = [n for n in formula.numbers(text) if not any(abs(n - s) < 1e-9 for s in supported)]
+        except FormulaError:
+            continue                                         # reported with the formula
+        p += [f"number {n:g} in '{key}' isn't written in any cited quote or chart cell" for n in dict.fromkeys(missing)]
+    return p
+
+
+def _unused_number_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[str]:
+    """The other direction: every number a cited footnote or law quote states must be used by the rule's
+    formulas, or be declared by that source in `not_limits` ({number: why it isn't a limit here}). "(16) But not
+    less than 20 ft." with a formula that drops the 20 is then a problem, not a silent false pass. Checked: the
+    law (a city code chapter: sources.yaml layout ecode360) and numbered notes ("(16) ..."). Left out: chart
+    rows (a row lists every district's number; the rule uses its own column's) and cited cells. Not yet for
+    rules the drafting scripts wrote (drafted_by "rule_drafting/..."): their quotes can't declare not_limits yet;
+    the drafting job turns it on for them. Not for a flag: it always needs review, and the numbers in its quote
+    are the limits it asks a person to apply by hand, shown to them with the quote."""
+    if str(rule.get("drafted_by", "")).startswith("rule_drafting/") or rule.get("kind") == "flag":
+        return []
+    used = [0.0]
+    for key in ("applies_when", "check"):
+        if isinstance(rule.get(key), str):
+            try:
+                used += formula.numbers(rule[key])
+            except FormulaError:
+                return []                                     # reported with the formula
+    for r in _list_of_dicts(rule, "review_when") or []:
+        if isinstance(r.get("when"), str):
+            try:
+                used += formula.numbers(r["when"])
+            except FormulaError:
+                return []
+    p = []
+    for s in sources:
+        declared = s.get("not_limits")
+        if declared is not None and not (isinstance(declared, dict) and all(
+                type(k) in (int, float) and isinstance(v, str) and v.strip() for k, v in declared.items())):
+            p.append(f"source {s.get('file')}: not_limits must map each number to why it isn't a limit here")
+            declared = {}
+        declared = declared or {}
+        quote = s.get("quote")
+        if not isinstance(quote, str) or _cell(s, ctx) is not None:
+            continue
+        law = isinstance(s.get("file"), str) and (ctx.sources.get(s["file"]) or {}).get("layout") == "ecode360"
+        if not law and not re.match(r"^\s*\(\d+\)", quote):
+            continue                                          # not the law, nor a note: a chart row lists every district
+        stated = source_numbers(quote, percent_as_number=False)
+        for n in sorted(declared):
+            if not any(abs(n - x) < 1e-9 for x in stated):
+                p.append(f"source {s.get('file')}: not_limits names {n:g}, which its quote doesn't state")
+        for n in sorted(stated):
+            if not any(abs(n - u) < 1e-9 for u in used) and not any(abs(n - d) < 1e-9 for d in declared):
+                p.append(f"number {n:g} in the quote \"{quote[:60]}…\" is never used by the rule's formulas "
+                         "(use it, or declare it in that source's not_limits with why it isn't a limit here)")
+    return p
+
+
+def _cell_source_problems(s: dict, ctx: "Context", district: str | None = None) -> list[str]:
+    """A chart cell cited by its page, section, row and district column, exactly as the chart reader read
+    it (2_extracted_text/<chart>.cells.jsonl). The cell's value is what's cited; there is no quote. In a
+    district's rulebook the cell must be that district's own column; a rulebook for every district
+    (`general`) can't cite one district's cell."""
+    name, c = s["file"], s.get("cell")
+    if district is not None and isinstance(c, dict) and isinstance(c.get("column"), str):
+        if district == "general":
+            return [f"source {name}: a rule for every district can't cite one district's cell ({c['column']})"]
+        if district_name(c["column"]) != district:
+            return [f"source {name}: cell column {c['column']} isn't district {district}"]
+    if s.keys() != {"file", "page", "cell"}:
+        return [f"source {name}: a cell source has exactly file, page and cell (no lines or quote)"]
+    if not (isinstance(c, dict) and c.keys() == CELL_FIELDS and all(isinstance(c[k], str) for k in CELL_FIELDS)):
+        return [f"source {name}: 'cell' needs section, row and column (text)"]
+    if s["page"] not in ctx.sources[name].get("chart_pages", []):
+        return [f"source {name}: page {s['page']!r} isn't one of the chart pages read into cells"]
+    if name not in ctx.cells:
+        return [f"source {name}: no cells file, cell not verified"]
+    if _cell(s, ctx) is None:
+        return [f"source {name} p.{s['page']}: no cell {c['section']!r} / {c['row']!r} / {c['column']!r} "
+                "(or the chart reader couldn't read it with certainty)"]
+    return []
 
 
 def not_quotable(entry: dict) -> str | None:
@@ -216,6 +427,11 @@ def _source_entry_problems(entry: dict) -> list[str]:
         p.append("marked not quotable but 'not_quotable_because' is missing")
     if "layout" in entry and entry["layout"] not in LAYOUTS:
         p.append(f"'layout' must be one of {sorted(LAYOUTS)}")
+    chart_pages = entry.get("chart_pages", [])
+    if not (isinstance(chart_pages, list) and all(type(n) is int and n >= 1 for n in chart_pages)
+            and len(set(chart_pages)) == len(chart_pages)
+            and (type(entry.get("pages")) is not int or all(n <= entry["pages"] for n in chart_pages))):
+        p.append("'chart_pages' must be a list of distinct page numbers in the document")
     return p
 
 
@@ -334,6 +550,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     if any("unknown field" in x for x in p):
         return p  # the approval fingerprint and other checks rely on well-formed items
 
+    kinds = ctx.kinds()
     conditions = [rule[k] for k in ("applies_when", "check") if k in rule]
     for r in review_when or []:
         if not (isinstance(r.get("reason"), str) and r["reason"].strip()):
@@ -346,16 +563,20 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         try:
             if not formula.is_condition(f):
                 p.append(f"{f!r} must be a true/false test (a comparison, and/or, or not)")
-            unknown = sorted(formula.names(f) - ctx.measures)
+            elif (name := formula.bare_name(f)) and kinds.get(name) != "boolean":
+                p.append(f"{f!r} is just a measure name; only a yes/no measure can be a test on its own")
+            unknown = sorted(formula.names(f) - set(kinds))
             p += [f"unknown measure '{n}' in {f!r}" for n in unknown]
-            p += [f"unknown use '{u}' in {f!r}" for u in sorted(formula.strings(f) - ctx.uses)]
+            p += _text_problems(f, {"use": ctx.uses, "district": ctx.districts})
             if not unknown:                 # well-typed for every value, or it is no rule (formula.type_of)
-                formula.type_of(f, MEASURE_KINDS | {n: "text" for n in formula.names(f) if n not in MEASURE_KINDS})
+                formula.type_of(f, kinds)
         except FormulaError as e:
             p.append(str(e))
 
-    p += _source_problems(sources, ctx) if sources is not None else []
+    p += _source_problems(sources, ctx, district) if sources is not None else []
     p += _use_row_problems(rule, sources or [], ctx)
+    p += _number_problems(rule, sources or [], ctx)
+    p += _unused_number_problems(rule, sources or [], ctx)
 
     expects = {ex.get("expect") for ex in examples or [] if isinstance(ex.get("expect"), str)}
     if rule.get("kind") == "rule" and not {"pass", "fail"} <= expects:
@@ -364,19 +585,38 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         given = ex.get("given")
         if not isinstance(given, dict) or not all(isinstance(k, str) for k in given):
             p.append(f"example {n}: 'given' must be a mapping of measurement names to values")
-        elif unknown := sorted(given.keys() - ctx.measures):
+        elif unknown := sorted(given.keys() - set(kinds)):
             p.append(f"example {n}: unknown measures {unknown}")
-        elif wrong := sorted(k for k, v in given.items() if MEASURE_KINDS.get(k) == "number"
-                             and type(v) not in (int, float) or MEASURE_KINDS.get(k) == "text" and type(v) is not str):
+        elif wrong := sorted(k for k, v in given.items() if not _fits(kinds[k], v)):
             p.append(f"example {n}: wrong kind of value for {wrong} (see measures.yaml units)")
         elif "use" in given and given["use"] not in ctx.uses:
             p.append(f"example {n}: unknown use {given['use']!r}")
+        elif "district" in given and given["district"] not in ctx.districts:
+            p.append(f"example {n}: unknown district {given['district']!r}")
         elif ex.get("expect") not in OUTCOMES:
             p.append(f"example {n}: expect must be one of {OUTCOMES}")
-        elif not p and (got := outcome(rule, given, {"use": ctx.uses})) != ex["expect"]:
+        elif not p and (got := outcome(rule, given, ctx.allowed())) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
 
-    return p + _approval_problems(rule, ctx, APPROVED_FIELDS)
+    p += _approval_problems(rule, ctx, APPROVED_FIELDS)
+    if rule.get("status") == "approved":
+        used = set().union(*(formula.names(f) for f in conditions if isinstance(f, str) and _parses(f)))
+        p += [f"uses proposed measure '{m}': an engineer must add it to measures.yaml before this can be approved"
+              for m in sorted(used & set(ctx.proposed))]
+    return p
+
+
+def _fits(kind: str, value) -> bool:
+    """An example value of the right kind: a number, text, or (for a yes/no measure) true/false."""
+    return {"number": type(value) in (int, float), "text": type(value) is str, "boolean": type(value) is bool}[kind]
+
+
+def _parses(text: str) -> bool:
+    try:
+        formula.parse(text)
+        return True
+    except FormulaError:
+        return False
 
 
 def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> list[str]:
@@ -474,7 +714,8 @@ def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
     return problems
 
 
-def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
+def _source_problems(sources: list[dict], ctx: Context, district: str | None = None) -> list[str]:
+    """Problems with sources. district: the rulebook a rule is in, so a cited cell must be its own column."""
     if not sources:
         return ["needs at least one source"]
     p = []
@@ -486,6 +727,8 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
             p.append(f"source {name} {reason}")
         elif name in ctx.file_problems:
             p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
+        elif "cell" in s:
+            p += _cell_source_problems(s, ctx, district)
         elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and _is_line_range(lines)):
             p.append(f"source {name}: needs 'page' (number), 'lines' ([first, last]) and 'quote' (text)")
         elif "…" in quote or "..." in quote:
