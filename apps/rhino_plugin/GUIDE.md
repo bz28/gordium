@@ -20,7 +20,7 @@ Type a command's name in Rhino's command line.
 | `GordiumCheck` | Checks the model now, shows the result in the panel and writes the zoning report. On an empty model it does what `GordiumStart` does; if facts are missing it opens the start box first. It also turns live checking on. |
 | `GordiumLive` | Turns live checking on or off. On, every edit is re-checked by itself. |
 | `GordiumFacts` | Opens the start box (the same as **Edit site…**) on the project's facts, to correct them, then checks again. |
-| `GordiumOff` | Turns Gordium off for this file and removes its drawing aids. |
+| `GordiumOff` | Turns Gordium off for this Rhino session: live checking stops, its hooks are removed, the panel closes and its overlay is cleared. Your model is untouched. |
 | `GordiumPanel` | Only makes the panel available to Rhino (it does not show it). `GordiumStart` and `GordiumCheck` show it, docked beside the viewports; Rhino's own Panels menu also lists it. |
 
 ## 1. Start a project
@@ -44,7 +44,7 @@ Type a command's name in Rhino's command line.
 `GordiumStart` begins from a model with no building in it (an empty file, or a lot you drew with no building yet: it
 uses that lot's facts). If the model already has a building, the command line says
 `Gordium: this model already has a building; GordiumStart begins from an empty lot (use GordiumCheck to check a design)`.
-When a file already has a project, the same box opens with its last button reading **Check** instead of **Draw**.
+From **Edit site…** (and `GordiumFacts`) the same box opens with its last button reading **Check** instead of **Draw**: it re-checks with the changed facts and draws nothing new.
 **Cancel** closes the box without drawing the house. On a new file the sample lot has already been drawn on the Site layer, and stays; the command line says nothing was started.
 
 ## 2. The panel
