@@ -1,0 +1,1298 @@
+{
+ "claims": {
+  "1 fewer than 4 characters: no list, nothing asked": {
+   "ok": true,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "106",
+    "asked": 0,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Floor area of the dwelling unit it is in (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 106 first."
+    ],
+    "look_up_on": true,
+    "list_height": 0,
+    "box_width": 2021,
+    "layout": {
+     "visible_h": 0.0,
+     "rows": 0,
+     "rows_bottom": 0.0,
+     "spacing": 0.0,
+     "row_h": 0.0,
+     "pitch": 0.0,
+     "painted": {
+      "error": "ArgumentNullException('Value cannot be null. (Parameter 'bitmapImageRep')')"
+     }
+    },
+    "box_height": 528,
+    "box_bottom": 774,
+    "screen_bottom": 956
+   }
+  },
+  "2 the list is as tall as its rows, laid out and painted: one row and eight, no scroll bar, no empty row": {
+   "ok": true,
+   "detail": {
+    "one": {
+     "visible_h": 16.0,
+     "rows": 1,
+     "rows_bottom": 16.0,
+     "spacing": 0.0,
+     "row_h": 16.0,
+     "pitch": 16.0,
+     "painted": {
+      "view_h": 18.0,
+      "ink_bottom": 14.5
+     }
+    },
+    "eight": {
+     "visible_h": 128.0,
+     "rows": 8,
+     "rows_bottom": 128.0,
+     "spacing": 0.0,
+     "row_h": 16.0,
+     "pitch": 16.0,
+     "painted": {
+      "view_h": 130.0,
+      "ink_bottom": 126.5
+     }
+    }
+   }
+  },
+  "2 typed a character at a time: one request after the pause, the list shows 106's address": {
+   "ok": true,
+   "detail": {
+    "seen": {
+     "items": [
+      "106 Ithaca Rd, Ithaca, NY"
+     ],
+     "visible": true,
+     "address": "106 Itha",
+     "asked": 1,
+     "labels": [
+      "Address",
+      "",
+      "Zoning district",
+      "entered by you",
+      "Use",
+      "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+      "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+      "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+      "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+      "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+      "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+      "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+      "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+      "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+      "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+      "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+      "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+      "Floor area of the dwelling unit it is in (sq ft)",
+      "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+      "Lot",
+      "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+      "Front lot line (on the street)",
+      "Ithaca Rd",
+      "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+      "Corner lot?",
+      "Not checked yet: overlays (historic, gorge, flood)",
+      "",
+      "Press Look up to find 106 Itha first."
+     ],
+     "look_up_on": true,
+     "list_height": 18,
+     "box_width": 2021,
+     "layout": {
+      "visible_h": 16.0,
+      "rows": 1,
+      "rows_bottom": 16.0,
+      "spacing": 0.0,
+      "row_h": 16.0,
+      "pitch": 16.0,
+      "painted": {
+       "view_h": 18.0,
+       "ink_bottom": 14.5
+      }
+     },
+     "box_height": 552,
+     "box_bottom": 798,
+     "screen_bottom": 956
+    },
+    "asked": [
+     [
+      1793114876.72,
+      "106 Itha",
+      false
+     ],
+     [
+      1793114880.97,
+      "200 ",
+      false
+     ],
+     [
+      1793114883.63,
+      "96 Itha",
+      false
+     ],
+     [
+      1793114884.17,
+      "1060 Ith",
+      false
+     ],
+     [
+      1793114887.79,
+      "96 Itha",
+      false
+     ],
+     [
+      1793114888.47,
+      "96 Ithac",
+      true
+     ],
+     [
+      1793114892.13,
+      "96 Ithac",
+      false
+     ],
+     [
+      1793114895.78,
+      "96 Itha",
+      false
+     ],
+     [
+      1793114897.92,
+      "96 Ithaca Rd",
+      false
+     ]
+    ]
+   }
+  },
+  "3 picked: the address field says it, the list closed, no new request": {
+   "ok": true,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "106 Ithaca Rd, Ithaca, NY",
+    "asked": 1,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Floor area of the dwelling unit it is in (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     ""
+    ],
+    "look_up_on": true,
+    "list_height": 18,
+    "box_width": 2021,
+    "layout": {
+     "visible_h": 16.0,
+     "rows": 0,
+     "rows_bottom": 0.0,
+     "spacing": 0.0,
+     "row_h": 0.0,
+     "pitch": 0.0,
+     "painted": {
+      "view_h": 18.0,
+      "ink_bottom": null
+     }
+    },
+    "box_height": 528,
+    "box_bottom": 774,
+    "screen_bottom": 956
+   }
+  },
+  "4 the earlier request was stopped when the newer typing was asked for": {
+   "ok": true,
+   "detail": {
+    "running_before": [
+     [
+      "106 Itha",
+      0,
+      0
+     ],
+     [
+      "200 ",
+      0,
+      0
+     ],
+     [
+      "96 Itha",
+      0,
+      0
+     ],
+     [
+      "1060 Ith",
+      1,
+      0
+     ],
+     [
+      "96 Itha",
+      0,
+      0
+     ],
+     [
+      "96 Ithac",
+      0,
+      0
+     ],
+     [
+      "96 Itha",
+      0,
+      0
+     ],
+     [
+      "96 Ithaca Rd",
+      0,
+      0
+     ]
+    ],
+    "asked": [
+     [
+      1793114876.72,
+      "106 Itha",
+      false
+     ],
+     [
+      1793114880.97,
+      "200 ",
+      false
+     ],
+     [
+      1793114883.63,
+      "96 Itha",
+      false
+     ],
+     [
+      1793114884.17,
+      "1060 Ith",
+      false
+     ],
+     [
+      1793114887.79,
+      "96 Itha",
+      false
+     ],
+     [
+      1793114888.47,
+      "96 Ithac",
+      true
+     ],
+     [
+      1793114892.13,
+      "96 Ithac",
+      false
+     ],
+     [
+      1793114895.78,
+      "96 Itha",
+      false
+     ],
+     [
+      1793114897.92,
+      "96 Ithaca Rd",
+      false
+     ]
+    ]
+   }
+  },
+  "4 the newer typing's list: 1060's address": {
+   "ok": true,
+   "detail": {
+    "items": [
+     "1060 Ithaca Rd, Ithaca, NY"
+    ],
+    "visible": true,
+    "address": "1060 Ith",
+    "asked": 4,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Floor area of the dwelling unit it is in (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 1060 Ith first."
+    ],
+    "look_up_on": true,
+    "list_height": 18,
+    "box_width": 2021,
+    "layout": {
+     "visible_h": 16.0,
+     "rows": 1,
+     "rows_bottom": 16.0,
+     "spacing": 0.0,
+     "row_h": 16.0,
+     "pitch": 16.0,
+     "painted": {
+      "view_h": 18.0,
+      "ink_bottom": 14.5
+     }
+    },
+    "box_height": 552,
+    "box_bottom": 798,
+    "screen_bottom": 956
+   }
+  },
+  "4 an answer for something no longer typed is dropped (no list for 96 Itha under 96 Ithac)": {
+   "ok": true,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "96 Ithac",
+    "asked": 6,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Floor area of the dwelling unit it is in (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 96 Ithac first."
+    ],
+    "look_up_on": true,
+    "list_height": 18,
+    "box_width": 2021,
+    "layout": {
+     "visible_h": 16.0,
+     "rows": 0,
+     "rows_bottom": 0.0,
+     "spacing": 0.0,
+     "row_h": 0.0,
+     "pitch": 0.0,
+     "painted": {
+      "view_h": 18.0,
+      "ink_bottom": null
+     }
+    },
+    "box_height": 528,
+    "box_bottom": 774,
+    "screen_bottom": 956
+   }
+  },
+  "4 then 96 Ithac's own answer shows 96's address": {
+   "ok": true,
+   "detail": {
+    "items": [
+     "96 Ithaca Rd, Ithaca, NY"
+    ],
+    "visible": true,
+    "address": "96 Ithac",
+    "asked": 7,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Floor area of the dwelling unit it is in (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 96 Ithac first."
+    ],
+    "look_up_on": true,
+    "list_height": 18,
+    "box_width": 2021,
+    "layout": {
+     "visible_h": 16.0,
+     "rows": 1,
+     "rows_bottom": 16.0,
+     "spacing": 0.0,
+     "row_h": 16.0,
+     "pitch": 16.0,
+     "painted": {
+      "view_h": 18.0,
+      "ink_bottom": 14.5
+     }
+    },
+    "box_height": 552,
+    "box_bottom": 798,
+    "screen_bottom": 956
+   }
+  },
+  "5 offline: no list, the quiet note, Look up still on": {
+   "ok": true,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "96 Itha",
+    "asked": 8,
+    "labels": [
+     "Address",
+     "Suggestions unavailable: type the full address and press Look up.",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Floor area of the dwelling unit it is in (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 96 Itha first."
+    ],
+    "look_up_on": true,
+    "list_height": 22,
+    "box_width": 2021,
+    "layout": {
+     "visible_h": 20.0,
+     "rows": 0,
+     "rows_bottom": 0.0,
+     "spacing": 0.0,
+     "row_h": 0.0,
+     "pitch": 0.0,
+     "painted": {
+      "view_h": 22.0,
+      "ink_bottom": null
+     }
+    },
+    "box_height": 528,
+    "box_bottom": 774,
+    "screen_bottom": 956
+   }
+  },
+  "6 no town typed: the lookup asked for 96 Ithaca Rd, Ithaca, NY, and found it (its lot shown dashed)": {
+   "ok": true,
+   "detail": {
+    "query": "96 Ithaca Rd, Ithaca, NY",
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "suggested by Gordium \u00b7 City zoning map says R-1b (checked 2026-10-20)",
+     "Use",
+     "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Floor area of the dwelling unit it is in (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Shown dashed: 96 Ithaca Road, Ithaca, NY 14850's lot. Nothing in the model changes until Draw, which replaces what Gordium drew with this lot and a new starting house.",
+     "Confirm the district to continue."
+    ]
+   }
+  },
+  "7 a lookup that found no lot: the box says so and that the lot shown is still 106's, the model unchanged": {
+   "ok": false,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "12345 Nowhere Blvd, Ithaca, NY 14850",
+    "asked": 9,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Floor area of the dwelling unit it is in (sq ft)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  No City of Ithaca address found for 12345 Nowhere Blvd, Ithaca, NY 14850: check the spelling and Look up again, or put back the lot's own address (or clear it) and draw the lot. The lot shown is still 106 Ithaca Rd's: nothing in the model changed.",
+     ""
+    ],
+    "look_up_on": true,
+    "list_height": 0,
+    "box_width": 2021,
+    "layout": {
+     "visible_h": 0.0,
+     "rows": 0,
+     "rows_bottom": 0.0,
+     "spacing": 0.0,
+     "row_h": 0.0,
+     "pitch": 0.0,
+     "painted": {
+      "error": "ArgumentNullException('Value cannot be null. (Parameter 'bitmapImageRep')')"
+     }
+    },
+    "box_height": 557,
+    "box_bottom": 789,
+    "screen_bottom": 956
+   }
+  }
+ },
+ "running_before": [
+  [
+   "106 Itha",
+   0,
+   0
+  ],
+  [
+   "200 ",
+   0,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "1060 Ith",
+   1,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "96 Ithac",
+   0,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "96 Ithaca Rd",
+   0,
+   0
+  ]
+ ],
+ "seen": {
+  "1": {
+   "items": [],
+   "visible": false,
+   "address": "106",
+   "asked": 0,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 106 first."
+   ],
+   "look_up_on": true,
+   "list_height": 0,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 0.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "spacing": 0.0,
+    "row_h": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "error": "ArgumentNullException('Value cannot be null. (Parameter 'bitmapImageRep')')"
+    }
+   },
+   "box_height": 528,
+   "box_bottom": 774,
+   "screen_bottom": 956
+  },
+  "2": {
+   "items": [
+    "106 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "106 Itha",
+   "asked": 1,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 106 Itha first."
+   ],
+   "look_up_on": true,
+   "list_height": 18,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 16.0,
+    "rows": 1,
+    "rows_bottom": 16.0,
+    "spacing": 0.0,
+    "row_h": 16.0,
+    "pitch": 16.0,
+    "painted": {
+     "view_h": 18.0,
+     "ink_bottom": 14.5
+    }
+   },
+   "box_height": 552,
+   "box_bottom": 798,
+   "screen_bottom": 956
+  },
+  "3": {
+   "items": [],
+   "visible": false,
+   "address": "106 Ithaca Rd, Ithaca, NY",
+   "asked": 1,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    ""
+   ],
+   "look_up_on": true,
+   "list_height": 18,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 16.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "spacing": 0.0,
+    "row_h": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "view_h": 18.0,
+     "ink_bottom": null
+    }
+   },
+   "box_height": 528,
+   "box_bottom": 774,
+   "screen_bottom": 956
+  },
+  "2m": {
+   "items": [
+    "200 Ash St, Ithaca, NY",
+    "200 Birch St, Ithaca, NY",
+    "200 Cedar St, Ithaca, NY",
+    "200 Dogwood St, Ithaca, NY",
+    "200 Elm St, Ithaca, NY",
+    "200 Fir St, Ithaca, NY",
+    "200 Grove St, Ithaca, NY",
+    "200 Hazel St, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "200 ",
+   "asked": 2,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 200 first."
+   ],
+   "look_up_on": true,
+   "list_height": 130,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 128.0,
+    "rows": 8,
+    "rows_bottom": 128.0,
+    "spacing": 0.0,
+    "row_h": 16.0,
+    "pitch": 16.0,
+    "painted": {
+     "view_h": 130.0,
+     "ink_bottom": 126.5
+    }
+   },
+   "box_height": 664,
+   "box_bottom": 910,
+   "screen_bottom": 956
+  },
+  "4": {
+   "items": [
+    "1060 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "1060 Ith",
+   "asked": 4,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 1060 Ith first."
+   ],
+   "look_up_on": true,
+   "list_height": 18,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 16.0,
+    "rows": 1,
+    "rows_bottom": 16.0,
+    "spacing": 0.0,
+    "row_h": 16.0,
+    "pitch": 16.0,
+    "painted": {
+     "view_h": 18.0,
+     "ink_bottom": 14.5
+    }
+   },
+   "box_height": 552,
+   "box_bottom": 798,
+   "screen_bottom": 956
+  },
+  "4b": {
+   "items": [],
+   "visible": false,
+   "address": "96 Ithac",
+   "asked": 6,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Ithac first."
+   ],
+   "look_up_on": true,
+   "list_height": 18,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 16.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "spacing": 0.0,
+    "row_h": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "view_h": 18.0,
+     "ink_bottom": null
+    }
+   },
+   "box_height": 528,
+   "box_bottom": 774,
+   "screen_bottom": 956
+  },
+  "4c": {
+   "items": [
+    "96 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "96 Ithac",
+   "asked": 7,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Ithac first."
+   ],
+   "look_up_on": true,
+   "list_height": 18,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 16.0,
+    "rows": 1,
+    "rows_bottom": 16.0,
+    "spacing": 0.0,
+    "row_h": 16.0,
+    "pitch": 16.0,
+    "painted": {
+     "view_h": 18.0,
+     "ink_bottom": 14.5
+    }
+   },
+   "box_height": 552,
+   "box_bottom": 798,
+   "screen_bottom": 956
+  },
+  "5": {
+   "items": [],
+   "visible": false,
+   "address": "96 Itha",
+   "asked": 8,
+   "labels": [
+    "Address",
+    "Suggestions unavailable: type the full address and press Look up.",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Itha first."
+   ],
+   "look_up_on": true,
+   "list_height": 22,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 20.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "spacing": 0.0,
+    "row_h": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "view_h": 22.0,
+     "ink_bottom": null
+    }
+   },
+   "box_height": 528,
+   "box_bottom": 774,
+   "screen_bottom": 956
+  },
+  "6": {
+   "query": "96 Ithaca Rd, Ithaca, NY",
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "suggested by Gordium \u00b7 City zoning map says R-1b (checked 2026-10-20)",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "?  Shown dashed: 96 Ithaca Road, Ithaca, NY 14850's lot. Nothing in the model changes until Draw, which replaces what Gordium drew with this lot and a new starting house.",
+    "Confirm the district to continue."
+   ]
+  },
+  "7": {
+   "items": [],
+   "visible": false,
+   "address": "12345 Nowhere Blvd, Ithaca, NY 14850",
+   "asked": 9,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Home occupation's indoor floor area, accessory buildings included (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Floor area of the dwelling unit it is in (sq ft)",
+    "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "?  No City of Ithaca address found for 12345 Nowhere Blvd, Ithaca, NY 14850: check the spelling and Look up again, or put back the lot's own address (or clear it) and draw the lot. The lot shown is still 106 Ithaca Rd's: nothing in the model changed.",
+    ""
+   ],
+   "look_up_on": true,
+   "list_height": 0,
+   "box_width": 2021,
+   "layout": {
+    "visible_h": 0.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "spacing": 0.0,
+    "row_h": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "error": "ArgumentNullException('Value cannot be null. (Parameter 'bitmapImageRep')')"
+    }
+   },
+   "box_height": 557,
+   "box_bottom": 789,
+   "screen_bottom": 956
+  }
+ },
+ "asked": [
+  [
+   1793114876.72,
+   "106 Itha",
+   false
+  ],
+  [
+   1793114880.97,
+   "200 ",
+   false
+  ],
+  [
+   1793114883.63,
+   "96 Itha",
+   false
+  ],
+  [
+   1793114884.17,
+   "1060 Ith",
+   false
+  ],
+  [
+   1793114887.79,
+   "96 Itha",
+   false
+  ],
+  [
+   1793114888.47,
+   "96 Ithac",
+   true
+  ],
+  [
+   1793114892.13,
+   "96 Ithac",
+   false
+  ],
+  [
+   1793114895.78,
+   "96 Itha",
+   false
+  ],
+  [
+   1793114897.92,
+   "96 Ithaca Rd",
+   false
+  ]
+ ],
+ "ok": false,
+ "error": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/demo6_rhino_f4ab8b3/apps/rhino_plugin/tests/autocomplete_in_rhino.py\", line 330, in main\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/demo6_rhino_f4ab8b3/apps/rhino_plugin/tests/autocomplete_in_rhino.py\", line 55, in claim\nAssertionError: 7 a lookup that found no lot: the box says so and that the lot shown is still 106's, the model unchanged: {'items': [], 'visible': False, 'address': '12345 Nowhere Blvd, Ithaca, NY 14850', 'asked': 9, 'labels': ['Address', '', 'Zoning district', 'entered by you', 'Use', \"Most people in any one dwelling unit not related by blood, marriage or adoption to its household's family (minor dependent children in a parent's or relative's care left out)\", 'entered by you; left blank, the rules that need it say so (never read as 0 or no)', 'Does the owner (\u00a7325-3B OWNER) live in the one-family dwelling itself (not only in an accessory dwelling unit on the lot)?', 'entered by you; left blank, the rules that need it say so (never read as 0 or no)', 'Is there an accessory dwelling unit (ADU) on the lot (\u00a7325-3B, \u00a7325-28)?', 'entered by you; left blank, the rules that need it say so (never read as 0 or no)', 'Is the household to be shown to the City to be a functional family unit (\u00a7325-3B)?', 'entered by you; left blank, the rules that need it say so (never read as 0 or no)', 'Is a home occupation planned (\u00a7325-3B: a business, studio or office run by a resident)?', 'entered by you; left blank, the rules that need it say so (never read as 0 or no)', \"Home occupation's indoor floor area, accessory buildings included (sq ft)\", 'entered by you; left blank, the rules that need it say so (never read as 0 or no)', 'Floor area of the dwelling unit it is in (sq ft)', 'entered by you; left blank, the rules that need it say so (never read as 0 or no)', 'Lot', '7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)', 'Front lot line (on the street)', 'Ithaca Rd', 'the highlighted blue line is the lot line on the street; Gordium measures the front yard from it', 'Corner lot?', 'Not checked yet: overlays (historic, gorge, flood)', \"?  No City of Ithaca address found for 12345 Nowhere Blvd, Ithaca, NY 14850: check the spelling and Look up again, or put back the lot's own address (or clear it) and draw the lot. The lot shown is still 106 Ithaca Rd's: nothing in the model changed.\", ''], 'look_up_on': True, 'list_height': 0, 'box_width': 2021, 'layout': {'visible_h': 0.0, 'rows': 0, 'rows_bottom': 0.0, 'spacing': 0.0, 'row_h': 0.0, 'pitch': 0.0, 'painted': {'error': \"ArgumentNullException('Value cannot be null. (Parameter 'bitmapImageRep')')\"}}, 'box_height': 557, 'box_bottom': 789, 'screen_bottom': 956}\n",
+ "done": true
+}

@@ -1,0 +1,463 @@
+{
+ "claims": {
+  "R-2a: Draw drew the starting house in R-2a": {
+   "ok": true,
+   "detail": {
+    "zone": "R-2a",
+    "parts": 3
+   }
+  },
+  "R-2a: occupancy / home occupation rows present": {
+   "ok": true,
+   "detail": [
+    "One-family occupancy",
+    "Home occupation size",
+    "Home occupation"
+   ]
+  },
+  "R-2a: every one of them needs review (never complies)": {
+   "ok": true,
+   "detail": [
+    [
+     "One-family occupancy",
+     "needs_review"
+    ],
+    [
+     "Home occupation size",
+     "needs_review"
+    ],
+    [
+     "Home occupation",
+     "needs_review"
+    ]
+   ]
+  },
+  "R-3b: Draw drew the starting house in R-3b": {
+   "ok": true,
+   "detail": {
+    "zone": "R-3b",
+    "parts": 3
+   }
+  },
+  "R-3b: occupancy / home occupation rows present": {
+   "ok": true,
+   "detail": [
+    "One-family occupancy",
+    "Home occupation size",
+    "Home occupation"
+   ]
+  },
+  "R-3b: every one of them needs review (never complies)": {
+   "ok": true,
+   "detail": [
+    [
+     "One-family occupancy",
+     "needs_review"
+    ],
+    [
+     "Home occupation size",
+     "needs_review"
+    ],
+    [
+     "Home occupation",
+     "needs_review"
+    ]
+   ]
+  }
+ },
+ "runs": {
+  "R-2a": {
+   "seconds": 76.5,
+   "zone_saved": "R-2a",
+   "house_parts": 3,
+   "summary": "5 need review \u00b7 9 comply \u00b7 2 not checked",
+   "occupancy_rows": [
+    {
+     "name": "One-family occupancy",
+     "status": "needs_review",
+     "id": "R-2a.occupancy_one_family",
+     "needs": [
+      "unrelated_persons",
+      "functional_family_unit"
+     ],
+     "reason": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an"
+    },
+    {
+     "name": "Home occupation size",
+     "status": "needs_review",
+     "id": "R-2a.home_occupation_size",
+     "needs": [
+      "home_occupation",
+      "home_occupation_area",
+      "home_occupation_unit_area"
+     ],
+     "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+    },
+    {
+     "name": "Home occupation",
+     "status": "needs_review",
+     "id": "R-2a.home_occupation",
+     "needs": [
+      "home_occupation"
+     ],
+     "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+    }
+   ],
+   "rows": [
+    {
+     "name": "Use",
+     "status": "complies",
+     "id": "R-2a.use",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Lot area",
+     "status": "complies",
+     "id": "R-2a.lot_area_one_family_detached",
+     "needs": [],
+     "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026"
+    },
+    {
+     "name": "Lot width",
+     "status": "complies",
+     "id": "R-2a.lot_width_one_family_detached",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Stories",
+     "status": "complies",
+     "id": "R-2a.stories",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Building height",
+     "status": "complies",
+     "id": "R-2a.height",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Lot coverage",
+     "status": "complies",
+     "id": "R-2a.lot_coverage",
+     "needs": [],
+     "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026 \u00b7 Gordium's reading \u00b7 confirm with the City zoning office: Coverage is the "
+    },
+    {
+     "name": "Front yard",
+     "status": "complies",
+     "id": "R-2a.front_yard",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Side yard, Northeast",
+     "status": "complies",
+     "id": "R-2a.side_yards#northeast",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Side yard, Southwest",
+     "status": "complies",
+     "id": "R-2a.side_yards#southwest",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Rear yard",
+     "status": "needs_review",
+     "id": "R-2a.rear_yard",
+     "needs": [],
+     "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office"
+    },
+    {
+     "name": "Eaves into front yard",
+     "status": "needs_review",
+     "id": "R-2a.yard_projections",
+     "needs": [],
+     "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office"
+    },
+    {
+     "name": "One-family occupancy",
+     "status": "needs_review",
+     "id": "R-2a.occupancy_one_family",
+     "needs": [
+      "unrelated_persons",
+      "functional_family_unit"
+     ],
+     "reason": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an"
+    },
+    {
+     "name": "Home occupation size",
+     "status": "needs_review",
+     "id": "R-2a.home_occupation_size",
+     "needs": [
+      "home_occupation",
+      "home_occupation_area",
+      "home_occupation_unit_area"
+     ],
+     "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+    },
+    {
+     "name": "Home occupation",
+     "status": "needs_review",
+     "id": "R-2a.home_occupation",
+     "needs": [
+      "home_occupation"
+     ],
+     "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+    },
+    {
+     "name": "Parking \u00b7 needs input",
+     "status": "not_checked",
+     "id": "R-2a.parking_one_family",
+     "needs": [
+      "sleeping_rooms",
+      "parking_spaces"
+     ],
+     "reason": "Needs bedrooms and parking spaces, which the model doesn't show"
+    },
+    {
+     "name": "Overlays \u00b7 not in this release",
+     "status": "not_checked",
+     "id": "release.overlays",
+     "needs": null,
+     "reason": "Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this re"
+    },
+    {
+     "name": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+     "status": "not_checked",
+     "id": "gap.height_exceptions",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B"
+    },
+    {
+     "name": "\u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+     "status": "not_checked",
+     "id": "gap.small_projections",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18B"
+    },
+    {
+     "name": "\u00a7325-17B Corner lots, the clear triangle at the street corner",
+     "status": "not_checked",
+     "id": "gap.corner_visibility",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-17B"
+    },
+    {
+     "name": "\u00a7325-25B, \u00a7325-25D Accessory structures below grade or across a common lot line",
+     "status": "not_checked",
+     "id": "gap.accessory_below_grade",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-25B, \u00a7325-25D"
+    },
+    {
+     "name": "\u00a7325-28 Accessory dwelling units",
+     "status": "not_checked",
+     "id": "gap.adus",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-28"
+    }
+   ]
+  },
+  "R-3b": {
+   "seconds": 137.2,
+   "zone_saved": "R-3b",
+   "house_parts": 3,
+   "summary": "5 need review \u00b7 8 comply \u00b7 2 not checked",
+   "occupancy_rows": [
+    {
+     "name": "One-family occupancy",
+     "status": "needs_review",
+     "id": "R-3b.occupancy_one_family",
+     "needs": [
+      "unrelated_persons_with_children",
+      "functional_family_unit"
+     ],
+     "reason": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an"
+    },
+    {
+     "name": "Home occupation size",
+     "status": "needs_review",
+     "id": "R-3b.home_occupation_size",
+     "needs": [
+      "home_occupation",
+      "home_occupation_area",
+      "home_occupation_unit_area"
+     ],
+     "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+    },
+    {
+     "name": "Home occupation",
+     "status": "needs_review",
+     "id": "R-3b.home_occupation",
+     "needs": [
+      "home_occupation"
+     ],
+     "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+    }
+   ],
+   "rows": [
+    {
+     "name": "Lot area",
+     "status": "complies",
+     "id": "R-3b.lot_area_one_family_detached",
+     "needs": [],
+     "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026"
+    },
+    {
+     "name": "Lot width",
+     "status": "complies",
+     "id": "R-3b.lot_width_one_family_detached",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Stories",
+     "status": "complies",
+     "id": "R-3b.stories",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Building height",
+     "status": "complies",
+     "id": "R-3b.height",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Lot coverage",
+     "status": "complies",
+     "id": "R-3b.lot_coverage",
+     "needs": [],
+     "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026 \u00b7 Gordium's reading \u00b7 confirm with the City zoning office: Coverage is the "
+    },
+    {
+     "name": "Front yard",
+     "status": "complies",
+     "id": "R-3b.front_yard",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Side yard, Northeast",
+     "status": "complies",
+     "id": "R-3b.side_yards#northeast",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Side yard, Southwest",
+     "status": "complies",
+     "id": "R-3b.side_yards#southwest",
+     "needs": [],
+     "reason": ""
+    },
+    {
+     "name": "Rear yard",
+     "status": "needs_review",
+     "id": "R-3b.rear_yard",
+     "needs": [],
+     "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office"
+    },
+    {
+     "name": "Eaves into front yard",
+     "status": "needs_review",
+     "id": "R-3b.yard_projections",
+     "needs": [],
+     "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office"
+    },
+    {
+     "name": "One-family occupancy",
+     "status": "needs_review",
+     "id": "R-3b.occupancy_one_family",
+     "needs": [
+      "unrelated_persons_with_children",
+      "functional_family_unit"
+     ],
+     "reason": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an"
+    },
+    {
+     "name": "Home occupation size",
+     "status": "needs_review",
+     "id": "R-3b.home_occupation_size",
+     "needs": [
+      "home_occupation",
+      "home_occupation_area",
+      "home_occupation_unit_area"
+     ],
+     "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+    },
+    {
+     "name": "Home occupation",
+     "status": "needs_review",
+     "id": "R-3b.home_occupation",
+     "needs": [
+      "home_occupation"
+     ],
+     "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+    },
+    {
+     "name": "Parking \u00b7 needs input",
+     "status": "not_checked",
+     "id": "R-3b.parking_one_family",
+     "needs": [
+      "sleeping_rooms",
+      "parking_spaces"
+     ],
+     "reason": "Needs bedrooms and parking spaces, which the model doesn't show"
+    },
+    {
+     "name": "Overlays \u00b7 not in this release",
+     "status": "not_checked",
+     "id": "release.overlays",
+     "needs": null,
+     "reason": "Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this re"
+    },
+    {
+     "name": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+     "status": "not_checked",
+     "id": "gap.height_exceptions",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B"
+    },
+    {
+     "name": "\u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+     "status": "not_checked",
+     "id": "gap.small_projections",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18B"
+    },
+    {
+     "name": "\u00a7325-17B Corner lots, the clear triangle at the street corner",
+     "status": "not_checked",
+     "id": "gap.corner_visibility",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-17B"
+    },
+    {
+     "name": "\u00a7325-25B, \u00a7325-25D Accessory structures below grade or across a common lot line",
+     "status": "not_checked",
+     "id": "gap.accessory_below_grade",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-25B, \u00a7325-25D"
+    },
+    {
+     "name": "\u00a7325-28 Accessory dwelling units",
+     "status": "not_checked",
+     "id": "gap.adus",
+     "needs": null,
+     "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-28"
+    }
+   ]
+  }
+ },
+ "ok": true,
+ "done": true
+}

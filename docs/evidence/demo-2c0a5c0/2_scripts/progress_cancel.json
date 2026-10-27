@@ -1,0 +1,3559 @@
+{
+ "claims": {
+  "0 the sample is drawn and checked": {
+   "ok": true,
+   "detail": {
+    "summary": {
+     "state": "review",
+     "text": "8 pass \u00b7 5 need review",
+     "lines": [
+      "Rear yard: passes under every reading",
+      "Eaves into required yards: passes under every reading",
+      "One-family occupancy: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "Home occupation size: say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Home occupation: say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+     ]
+    },
+    "view_summary": "5 need review \u00b7 9 comply \u00b7 2 not checked",
+    "state": "needs_review",
+    "rows": [
+     {
+      "Requirement": "Permitted primary uses (chart p.2)",
+      "Table limit": "Permitted: One-family dwelling, detached; Church or related building; Public park or playground; Library or fire station",
+      "Proposed": "One-family dwelling, detached",
+      "Units": "use",
+      "Error": "PASS",
+      "Rule id": "R-1b.use",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Minimum lot size, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 6,000",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_area_one_family_detached",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Minimum lot width, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 50",
+      "Proposed": 75.835064,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.lot_width_one_family_detached",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum number of stories (chart p.3)",
+      "Table limit": "\u2264 3",
+      "Proposed": 3.0,
+      "Units": "stories",
+      "Error": "PASS",
+      "Rule id": "R-1b.stories",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum building height, with the \u00a7325-16C bonus",
+      "Table limit": "building_height \u2264 35 or building_height \u2264 38.5; front_yard \u2265 25; side_yard_smaller \u2265 10; side_yard_larger \u2265 10; rear_yard \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + (building_height - 35))",
+      "Proposed": "building_height = 35; front_yard = 27.07; side_yard_smaller = 12.03; side_yard_larger = 12.05; rear_yard = not given",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.height",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum lot coverage by buildings (chart p.3, \u00a7325-8A(10))",
+      "Table limit": "\u2264 ? (0.25 * lot_area)",
+      "Proposed": "1,522.89",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_coverage",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Front yard minimum (chart p.3)",
+      "Table limit": "\u2265 25",
+      "Proposed": 27.070097,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.front_yard",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Side yards minimum, one side and other side (chart p.3)",
+      "Table limit": "side_yard_smaller \u2265 10; side_yard_larger \u2265 10",
+      "Proposed": "side_yard_smaller = 12.03; side_yard_larger = 12.05",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.side_yards",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Rear yard minimum (chart p.3, note 16; lot depth \u00a7325-8A(14))",
+      "Table limit": "\u2265 ? (max(min(0.25 * lot_depth, 50), 20))",
+      "Proposed": "not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.rear_yard",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)",
+      "Provisional": "passes under every reading"
+     },
+     {
+      "Requirement": "Eaves into required yards, at most 2 ft (\u00a7325-18B)",
+      "Table limit": "front_yard_eaves \u2265 23; side_yard_smaller_eaves \u2265 8; side_yard_larger_eaves \u2265 8; rear_yard_eaves \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2)",
+      "Proposed": "front_yard_eaves = 27.07; side_yard_smaller_eaves = 12.03; side_yard_larger_eaves = 12.05; rear_yard_eaves = not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.yard_projections",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)",
+      "Provisional": "passes under every reading"
+     },
+     {
+      "Requirement": "One-family occupancy (\u00a7325-3B: family + 1 unrelated; 2 if owner-occupied)",
+      "Table limit": "see formula",
+      "Proposed": "",
+      "Units": "",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.occupancy_one_family",
+      "Why": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Home occupation size (\u00a7325-3B: at most 25% of its unit and 500 sq ft)",
+      "Table limit": "\u2264 500; \u2264 ? (0.25 * home_occupation_unit_area)",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.home_occupation_size",
+      "Why": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Home occupation (chart p.2: special permit unless \u00a7325-9B(1)(i) is met)",
+      "Table limit": "a person decides",
+      "Proposed": "",
+      "Units": "",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.home_occupation",
+      "Why": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Provisional": null
+     }
+    ],
+    "items": [
+     {
+      "id": "R-1b.use",
+      "name": "Use",
+      "status": "complies",
+      "proposed": "One-family dwelling, detached",
+      "required": "permitted",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_area_one_family_detached",
+      "name": "Lot area",
+      "status": "complies",
+      "proposed": "7,033 sf",
+      "required": "6,000 sf",
+      "margin": "+1,033 sf",
+      "delta": "at least 357 sf to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_width_one_family_detached",
+      "name": "Lot width",
+      "status": "complies",
+      "proposed": "75'-10\"",
+      "required": "50'-0\"",
+      "margin": "+25'-10\"",
+      "delta": "at least 21'-10\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.stories",
+      "name": "Stories",
+      "status": "complies",
+      "proposed": "3",
+      "required": "3",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.height",
+      "name": "Building height",
+      "status": "complies",
+      "proposed": "35'-0\"",
+      "required": "35'-0\"",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_coverage",
+      "name": "Lot coverage",
+      "status": "complies",
+      "proposed": "21.7%",
+      "required": "25%",
+      "margin": "+3.34%",
+      "delta": "at least 1.04% to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026 \u00b7 Gordium's reading \u00b7 confirm with the City zoning office: Coverage is the outline, seen from above, of everything above ground: walls, cantilevered upper floors, roofed porches, decks, balconies projecting more than 2 ft, ramps and landings",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.front_yard",
+      "name": "Front yard",
+      "status": "complies",
+      "proposed": "27'-0 3/4\"",
+      "required": "25'-0\"",
+      "margin": "+2'-0 3/4\"",
+      "delta": "at least 0'-0 3/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.054582,
+        0.810981
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#northeast",
+      "name": "Side yard, Northeast",
+      "status": "complies",
+      "proposed": "12'-0 3/8\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 3/8\"",
+      "delta": "at least 0'-0 3/8\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        76.254106,
+        57.624467
+       ],
+       [
+        64.219932,
+        57.48568
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#southwest",
+      "name": "Side yard, Southwest",
+      "status": "complies",
+      "proposed": "12'-0 1/2\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 1/2\"",
+      "delta": "at least 0'-0 1/2\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        0.837221,
+        27.68207
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.rear_yard",
+      "name": "Rear yard",
+      "status": "needs_review",
+      "proposed": "34'-11 7/8\" to 36'-3 3/8\"",
+      "required": "24'-1 7/8\" to 32'-10 1/8\"",
+      "margin": "",
+      "delta": "at least 0'-5 1/4\" if confirmed",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        64.642102,
+        92.47946
+       ],
+       [
+        64.219932,
+        57.48568
+       ]
+      ],
+      "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.yard_projections",
+      "name": "Eaves into front yard",
+      "status": "needs_review",
+      "proposed": "27'-0 3/4\"",
+      "required": "23'-0\"",
+      "margin": "+4'-0 3/4\"",
+      "delta": "at least 2'-0 3/4\" if confirmed",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.054582,
+        0.810981
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.occupancy_one_family",
+      "name": "One-family occupancy",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "1",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "group": "building",
+      "needs": [
+       "unrelated_persons",
+       "owner_occupied",
+       "accessory_dwelling_unit",
+       "functional_family_unit"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.home_occupation_size",
+      "name": "Home occupation size",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "500 sf",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "group": "building",
+      "needs": [
+       "home_occupation",
+       "home_occupation_area",
+       "home_occupation_unit_area"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.home_occupation",
+      "name": "Home occupation",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "\u2014",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "group": "building",
+      "needs": [
+       "home_occupation"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.parking_one_family",
+      "name": "Parking \u00b7 needs input",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Needs bedrooms and parking spaces, which the model doesn't show",
+      "group": "not_checked",
+      "needs": [
+       "sleeping_rooms",
+       "parking_spaces"
+      ],
+      "hint": "Enter bedrooms and parking spaces",
+      "refused": null
+     },
+     {
+      "id": "release.overlays",
+      "name": "Overlays \u00b7 not in this release",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).",
+      "group": "not_checked",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.height_exceptions",
+      "name": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.small_projections",
+      "name": "\u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.corner_visibility",
+      "name": "\u00a7325-17B Corner lots, the clear triangle at the street corner",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-17B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.accessory_below_grade",
+      "name": "\u00a7325-25B, \u00a7325-25D Accessory structures below grade or across a common lot line",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-25B, \u00a7325-25D",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.adus",
+      "name": "\u00a7325-28 Accessory dwelling units",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-28",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     }
+    ],
+    "header": {
+     "place": "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+     "code": "Ch. 325 as amended through Ord. No. 2026-02 (May 6, 2026) \u00b7 District Regulations Chart, April 2026",
+     "draft": "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+     "lot": "Lot lines: tax map, approximate (\u00b12'-0\")",
+     "grade": "Ground: assumed flat (elevation 0'-0\")",
+     "actions": [
+      "Pick survey lot lines\u2026"
+     ],
+     "main": null,
+     "sources": [
+      "Address: 106 Ithaca Rd, Ithaca, NY \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Zoning district: R-1b \u00b7 entered by you \u00b7 confirmed by you, 2026-10-27",
+      "Use: One-family dwelling, detached \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Lot: 7,033 sf \u00b7 the tax map (\u00b12 ft, approximate) \u00b7 confirmed by you, 2026-10-27",
+      "Front lot line (on the street): Ithaca Rd \u00b7 the State tax map (the sample's lookup) \u00b7 confirmed by you, 2026-10-27",
+      "Corner lot: no, one street \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Starting house: as first drawn, the largest house that complies even if the tax-map lines are 2'-0\" off; limited by the yards (front 25'-0\", sides 10'-0\", rear 32'-10 1/8\"). Use my survey\u2026 for the full size. \u00b7 suggested by Gordium \u00b7 not confirmed",
+      "Ground: assumed flat \u00b7 assumed (flat ground, the MVP's rule) \u00b7 not confirmed"
+     ]
+    },
+    "interior": [
+     "R-1b.parking_one_family"
+    ],
+    "encroach": 0,
+    "plan_encroach": 0,
+    "envelope": {
+     "outline": [
+      [
+       59.55921194648549,
+       25.298796591321693
+      ],
+      [
+       59.24452169091939,
+       25.302722475481097
+      ],
+      [
+       58.92980694985941,
+       25.30268677899466
+      ],
+      [
+       58.61511759297641,
+       25.29868950751884
+      ],
+      [
+       58.30050348591887,
+       25.29073129446094
+      ],
+      [
+       49.73090685166342,
+       25.019980421186293
+      ],
+      [
+       39.94775779486651,
+       25.49035292800415
+      ],
+      [
+       39.86377591797361,
+       25.493874413775156
+      ],
+      [
+       39.77981486937491,
+       25.497861747080805
+      ],
+      [
+       39.710508778317426,
+       25.50030113429428
+      ],
+      [
+       39.641220656809885,
+       25.503206488913822
+      ],
+      [
+       39.557201889550356,
+       25.505697122705833
+      ],
+      [
+       39.473198232350924,
+       25.508653824550226
+      ],
+      [
+       39.40386742488139,
+       25.510242535732477
+      ],
+      [
+       39.334548867471185,
+       25.512297399748345
+      ],
+      [
+       39.25050586276179,
+       25.513756806481076
+      ],
+      [
+       39.16647224760395,
+       25.51568243159578
+      ],
+      [
+       39.09712716468682,
+       25.51642022749276
+      ],
+      [
+       39.02778861049384,
+       25.517624291449977
+      ],
+      [
+       38.94373402490248,
+       25.518052251342127
+      ],
+      [
+       38.85968310693905,
+       25.518946509735105
+      ],
+      [
+       38.790334191688586,
+       25.518833279237462
+      ],
+      [
+       38.72098608284421,
+       25.519186361808426
+      ],
+      [
+       38.63693257468236,
+       25.51858281041081
+      ],
+      [
+       38.552877011672365,
+       25.518445567410037
+      ],
+      [
+       38.48353470778,
+       25.51748132756987
+      ],
+      [
+       38.414187487854456,
+       25.516983375581642
+      ],
+      [
+       38.33014771527134,
+       25.515348403786877
+      ],
+      [
+       38.246100165673305,
+       25.514179680060646
+      ],
+      [
+       38.17677491583496,
+       25.512364576088935
+      ],
+      [
+       38.107439028264466,
+       25.511015664531246
+      ],
+      [
+       38.023425647340595,
+       25.508349518560074
+      ],
+      [
+       37.93939876840648,
+       25.506149490113877
+      ],
+      [
+       37.87010101274996,
+       25.5034837953586
+      ],
+      [
+       37.800786899263976,
+       25.501284127372575
+      ],
+      [
+       37.716812562105346,
+       25.49758720873676
+      ],
+      [
+       37.63281900797417,
+       25.4943562068868
+      ],
+      [
+       30.021443969414175,
+       25.15478391808486
+      ],
+      [
+       21.245701421179664,
+       25.178145439391837
+      ],
+      [
+       12.408686433945691,
+       25.777580219794025
+      ],
+      [
+       12.310501736403406,
+       25.783635329068627
+      ],
+      [
+       12.21234464764856,
+       25.79012263260128
+      ],
+      [
+       12.157390697408083,
+       25.79307777881356
+      ],
+      [
+       12.102461703675065,
+       25.796465282851592
+      ],
+      [
+       12.004210093754677,
+       25.80131505891264
+      ],
+      [
+       11.905980786854384,
+       25.806597335490597
+      ],
+      [
+       11.850994710355337,
+       25.80887788968148
+      ],
+      [
+       11.796028282789099,
+       25.811591075397093
+      ],
+      [
+       11.697724556821381,
+       25.81523478788616
+      ],
+      [
+       11.59943782474822,
+       25.81931124201799
+      ],
+      [
+       11.544427902691815,
+       25.820916860744386
+      ],
+      [
+       11.489432319033826,
+       25.82295531954181
+      ],
+      [
+       11.391091281198772,
+       25.825392419729177
+      ],
+      [
+       11.29276192557262,
+       25.8282624375159
+      ],
+      [
+       11.237736442249936,
+       25.82919287897756
+      ],
+      [
+       11.182719984633641,
+       25.830556303872363
+      ],
+      [
+       11.084356444730124,
+       25.831786424739715
+      ],
+      [
+       10.985999273589949,
+       25.833449573967208
+      ],
+      [
+       10.930966515637099,
+       25.833704698043054
+      ],
+      [
+       10.875937469337924,
+       25.83439288370849
+      ],
+      [
+       10.859865867032841,
+       25.83439663424062
+      ],
+      [
+       10.46831643412905,
+       60.28597672276004
+      ],
+      [
+       66.2295047244812,
+       59.61326493626528
+      ],
+      [
+       66.62677343971663,
+       25.166131159328597
+      ]
+     ],
+     "holes": [],
+     "base": 0.0,
+     "top": 35.0,
+     "yards": {
+      "front": 25,
+      "side": 10,
+      "rear": 32.843654
+     },
+     "height": 35,
+     "coverage": null,
+     "notes": [
+      "R-1b.lot_coverage: the limit 0.25 * lot_area can't be worked out for this lot"
+     ]
+    },
+    "at": 1793114930.651984
+   }
+  },
+  "1 the wait loop kept running and set the window's lines each pass (all three marks, seconds counting up; what is painted: by eye and the captures)": {
+   "ok": true,
+   "detail": {
+    "marks": [
+     "\u25cb\u25cb\u25cf",
+     "\u25cb\u25cf\u25cb",
+     "\u25cf\u25cb\u25cb"
+    ],
+    "seconds": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "frames": 99
+   }
+  },
+  "1 the wait window has the keyboard once shown, and then says 'Esc or Cancel to stop'": {
+   "ok": true,
+   "detail": {
+    "focus": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "hints": [
+     "Esc or Cancel to stop"
+    ]
+   }
+  },
+  "1 Rhino kept running while the check waited": {
+   "ok": true,
+   "detail": {
+    "ticks": 59,
+    "s": 6.4
+   }
+  },
+  "1 the wait said the checker's own steps": {
+   "ok": true,
+   "detail": [
+    "Slow test: waiting\u2026",
+    "Measuring the building\u2026",
+    "Checking the rules\u2026"
+   ]
+  },
+  "1 the panel said Checking\u2026 with the live line (the checker's step and the seconds)": {
+   "ok": true,
+   "detail": [
+    "Slow test: waiting\u2026  \u25cb\u25cf\u25cb  0 s",
+    "Slow test: waiting\u2026  \u25cb\u25cb\u25cf  0 s",
+    "Slow test: waiting\u2026  \u25cf\u25cb\u25cb  0 s",
+    "Slow test: waiting\u2026  \u25cf\u25cb\u25cb  1 s",
+    "Slow test: waiting\u2026  \u25cb\u25cf\u25cb  1 s",
+    "Slow test: waiting\u2026  \u25cb\u25cb\u25cf  1 s",
+    "Slow test: waiting\u2026  \u25cf\u25cb\u25cb  2 s",
+    "Slow test: waiting\u2026  \u25cb\u25cf\u25cb  2 s",
+    "Slow test: waiting\u2026  \u25cb\u25cb\u25cf  2 s",
+    "Measuring the building\u2026  \u25cb\u25cf\u25cb  3 s",
+    "Measuring the building\u2026  \u25cb\u25cb\u25cf  3 s",
+    "Measuring the building\u2026  \u25cf\u25cb\u25cb  3 s",
+    "Measuring the building\u2026  \u25cb\u25cf\u25cb  4 s",
+    "Measuring the building\u2026  \u25cb\u25cb\u25cf  4 s",
+    "Measuring the building\u2026  \u25cf\u25cb\u25cb  4 s",
+    "Measuring the building\u2026  \u25cb\u25cf\u25cb  5 s",
+    "Measuring the building\u2026  \u25cb\u25cb\u25cf  5 s",
+    "Checking the rules\u2026  \u25cb\u25cb\u25cf  5 s",
+    "Checking the rules\u2026  \u25cf\u25cb\u25cb  5 s",
+    "Checking the rules\u2026  \u25cb\u25cf\u25cb  5 s",
+    "Checking the rules\u2026  \u25cb\u25cb\u25cf  6 s"
+   ]
+  },
+  "1 the slow check finished normally": {
+   "ok": true,
+   "detail": {
+    "summary": {
+     "state": "review",
+     "text": "8 pass \u00b7 5 need review",
+     "lines": [
+      "Rear yard: passes under every reading",
+      "Eaves into required yards: passes under every reading",
+      "One-family occupancy: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "Home occupation size: say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Home occupation: say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+     ]
+    },
+    "view_summary": "5 need review \u00b7 9 comply \u00b7 2 not checked",
+    "state": "needs_review",
+    "rows": [
+     {
+      "Requirement": "Permitted primary uses (chart p.2)",
+      "Table limit": "Permitted: One-family dwelling, detached; Church or related building; Public park or playground; Library or fire station",
+      "Proposed": "One-family dwelling, detached",
+      "Units": "use",
+      "Error": "PASS",
+      "Rule id": "R-1b.use",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Minimum lot size, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 6,000",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_area_one_family_detached",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Minimum lot width, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 50",
+      "Proposed": 75.835064,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.lot_width_one_family_detached",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum number of stories (chart p.3)",
+      "Table limit": "\u2264 3",
+      "Proposed": 3.0,
+      "Units": "stories",
+      "Error": "PASS",
+      "Rule id": "R-1b.stories",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum building height, with the \u00a7325-16C bonus",
+      "Table limit": "building_height \u2264 35 or building_height \u2264 38.5; front_yard \u2265 25; side_yard_smaller \u2265 10; side_yard_larger \u2265 10; rear_yard \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + (building_height - 35))",
+      "Proposed": "building_height = 35; front_yard = 27.07; side_yard_smaller = 12.03; side_yard_larger = 12.05; rear_yard = not given",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.height",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum lot coverage by buildings (chart p.3, \u00a7325-8A(10))",
+      "Table limit": "\u2264 ? (0.25 * lot_area)",
+      "Proposed": "1,522.89",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_coverage",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Front yard minimum (chart p.3)",
+      "Table limit": "\u2265 25",
+      "Proposed": 27.070097,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.front_yard",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Side yards minimum, one side and other side (chart p.3)",
+      "Table limit": "side_yard_smaller \u2265 10; side_yard_larger \u2265 10",
+      "Proposed": "side_yard_smaller = 12.03; side_yard_larger = 12.05",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.side_yards",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Rear yard minimum (chart p.3, note 16; lot depth \u00a7325-8A(14))",
+      "Table limit": "\u2265 ? (max(min(0.25 * lot_depth, 50), 20))",
+      "Proposed": "not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.rear_yard",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)",
+      "Provisional": "passes under every reading"
+     },
+     {
+      "Requirement": "Eaves into required yards, at most 2 ft (\u00a7325-18B)",
+      "Table limit": "front_yard_eaves \u2265 23; side_yard_smaller_eaves \u2265 8; side_yard_larger_eaves \u2265 8; rear_yard_eaves \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2)",
+      "Proposed": "front_yard_eaves = 27.07; side_yard_smaller_eaves = 12.03; side_yard_larger_eaves = 12.05; rear_yard_eaves = not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.yard_projections",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)",
+      "Provisional": "passes under every reading"
+     },
+     {
+      "Requirement": "One-family occupancy (\u00a7325-3B: family + 1 unrelated; 2 if owner-occupied)",
+      "Table limit": "see formula",
+      "Proposed": "",
+      "Units": "",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.occupancy_one_family",
+      "Why": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Home occupation size (\u00a7325-3B: at most 25% of its unit and 500 sq ft)",
+      "Table limit": "\u2264 500; \u2264 ? (0.25 * home_occupation_unit_area)",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.home_occupation_size",
+      "Why": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Home occupation (chart p.2: special permit unless \u00a7325-9B(1)(i) is met)",
+      "Table limit": "a person decides",
+      "Proposed": "",
+      "Units": "",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.home_occupation",
+      "Why": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Provisional": null
+     }
+    ],
+    "items": [
+     {
+      "id": "R-1b.use",
+      "name": "Use",
+      "status": "complies",
+      "proposed": "One-family dwelling, detached",
+      "required": "permitted",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_area_one_family_detached",
+      "name": "Lot area",
+      "status": "complies",
+      "proposed": "7,033 sf",
+      "required": "6,000 sf",
+      "margin": "+1,033 sf",
+      "delta": "at least 357 sf to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_width_one_family_detached",
+      "name": "Lot width",
+      "status": "complies",
+      "proposed": "75'-10\"",
+      "required": "50'-0\"",
+      "margin": "+25'-10\"",
+      "delta": "at least 21'-10\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.stories",
+      "name": "Stories",
+      "status": "complies",
+      "proposed": "3",
+      "required": "3",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.height",
+      "name": "Building height",
+      "status": "complies",
+      "proposed": "35'-0\"",
+      "required": "35'-0\"",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_coverage",
+      "name": "Lot coverage",
+      "status": "complies",
+      "proposed": "21.7%",
+      "required": "25%",
+      "margin": "+3.34%",
+      "delta": "at least 1.04% to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026 \u00b7 Gordium's reading \u00b7 confirm with the City zoning office: Coverage is the outline, seen from above, of everything above ground: walls, cantilevered upper floors, roofed porches, decks, balconies projecting more than 2 ft, ramps and landings",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.front_yard",
+      "name": "Front yard",
+      "status": "complies",
+      "proposed": "27'-0 3/4\"",
+      "required": "25'-0\"",
+      "margin": "+2'-0 3/4\"",
+      "delta": "at least 0'-0 3/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.054582,
+        0.810981
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#northeast",
+      "name": "Side yard, Northeast",
+      "status": "complies",
+      "proposed": "12'-0 3/8\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 3/8\"",
+      "delta": "at least 0'-0 3/8\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        76.254106,
+        57.624467
+       ],
+       [
+        64.219932,
+        57.48568
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#southwest",
+      "name": "Side yard, Southwest",
+      "status": "complies",
+      "proposed": "12'-0 1/2\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 1/2\"",
+      "delta": "at least 0'-0 1/2\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        0.837221,
+        27.68207
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.rear_yard",
+      "name": "Rear yard",
+      "status": "needs_review",
+      "proposed": "34'-11 7/8\" to 36'-3 3/8\"",
+      "required": "24'-1 7/8\" to 32'-10 1/8\"",
+      "margin": "",
+      "delta": "at least 0'-5 1/4\" if confirmed",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        64.642102,
+        92.47946
+       ],
+       [
+        64.219932,
+        57.48568
+       ]
+      ],
+      "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.yard_projections",
+      "name": "Eaves into front yard",
+      "status": "needs_review",
+      "proposed": "27'-0 3/4\"",
+      "required": "23'-0\"",
+      "margin": "+4'-0 3/4\"",
+      "delta": "at least 2'-0 3/4\" if confirmed",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.054582,
+        0.810981
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.occupancy_one_family",
+      "name": "One-family occupancy",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "1",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "group": "building",
+      "needs": [
+       "unrelated_persons",
+       "owner_occupied",
+       "accessory_dwelling_unit",
+       "functional_family_unit"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.home_occupation_size",
+      "name": "Home occupation size",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "500 sf",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "group": "building",
+      "needs": [
+       "home_occupation",
+       "home_occupation_area",
+       "home_occupation_unit_area"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.home_occupation",
+      "name": "Home occupation",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "\u2014",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "group": "building",
+      "needs": [
+       "home_occupation"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.parking_one_family",
+      "name": "Parking \u00b7 needs input",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Needs bedrooms and parking spaces, which the model doesn't show",
+      "group": "not_checked",
+      "needs": [
+       "sleeping_rooms",
+       "parking_spaces"
+      ],
+      "hint": "Enter bedrooms and parking spaces",
+      "refused": null
+     },
+     {
+      "id": "release.overlays",
+      "name": "Overlays \u00b7 not in this release",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).",
+      "group": "not_checked",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.height_exceptions",
+      "name": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.small_projections",
+      "name": "\u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.corner_visibility",
+      "name": "\u00a7325-17B Corner lots, the clear triangle at the street corner",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-17B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.accessory_below_grade",
+      "name": "\u00a7325-25B, \u00a7325-25D Accessory structures below grade or across a common lot line",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-25B, \u00a7325-25D",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.adus",
+      "name": "\u00a7325-28 Accessory dwelling units",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-28",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     }
+    ],
+    "header": {
+     "place": "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+     "code": "Ch. 325 as amended through Ord. No. 2026-02 (May 6, 2026) \u00b7 District Regulations Chart, April 2026",
+     "draft": "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+     "lot": "Lot lines: tax map, approximate (\u00b12'-0\")",
+     "grade": "Ground: assumed flat (elevation 0'-0\")",
+     "actions": [
+      "Pick survey lot lines\u2026"
+     ],
+     "main": null,
+     "sources": [
+      "Address: 106 Ithaca Rd, Ithaca, NY \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Zoning district: R-1b \u00b7 entered by you \u00b7 confirmed by you, 2026-10-27",
+      "Use: One-family dwelling, detached \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Lot: 7,033 sf \u00b7 the tax map (\u00b12 ft, approximate) \u00b7 confirmed by you, 2026-10-27",
+      "Front lot line (on the street): Ithaca Rd \u00b7 the State tax map (the sample's lookup) \u00b7 confirmed by you, 2026-10-27",
+      "Corner lot: no, one street \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Starting house: as first drawn, the largest house that complies even if the tax-map lines are 2'-0\" off; limited by the yards (front 25'-0\", sides 10'-0\", rear 32'-10 1/8\"). Use my survey\u2026 for the full size. \u00b7 suggested by Gordium \u00b7 not confirmed",
+      "Ground: assumed flat \u00b7 assumed (flat ground, the MVP's rule) \u00b7 not confirmed"
+     ]
+    },
+    "interior": [
+     "R-1b.parking_one_family"
+    ],
+    "encroach": 0,
+    "plan_encroach": 0,
+    "envelope": {
+     "outline": [
+      [
+       59.55921194648549,
+       25.298796591321693
+      ],
+      [
+       59.24452169091939,
+       25.302722475481097
+      ],
+      [
+       58.92980694985941,
+       25.30268677899466
+      ],
+      [
+       58.61511759297641,
+       25.29868950751884
+      ],
+      [
+       58.30050348591887,
+       25.29073129446094
+      ],
+      [
+       49.73090685166342,
+       25.019980421186293
+      ],
+      [
+       39.94775779486651,
+       25.49035292800415
+      ],
+      [
+       39.86377591797361,
+       25.493874413775156
+      ],
+      [
+       39.77981486937491,
+       25.497861747080805
+      ],
+      [
+       39.710508778317426,
+       25.50030113429428
+      ],
+      [
+       39.641220656809885,
+       25.503206488913822
+      ],
+      [
+       39.557201889550356,
+       25.505697122705833
+      ],
+      [
+       39.473198232350924,
+       25.508653824550226
+      ],
+      [
+       39.40386742488139,
+       25.510242535732477
+      ],
+      [
+       39.334548867471185,
+       25.512297399748345
+      ],
+      [
+       39.25050586276179,
+       25.513756806481076
+      ],
+      [
+       39.16647224760395,
+       25.51568243159578
+      ],
+      [
+       39.09712716468682,
+       25.51642022749276
+      ],
+      [
+       39.02778861049384,
+       25.517624291449977
+      ],
+      [
+       38.94373402490248,
+       25.518052251342127
+      ],
+      [
+       38.85968310693905,
+       25.518946509735105
+      ],
+      [
+       38.790334191688586,
+       25.518833279237462
+      ],
+      [
+       38.72098608284421,
+       25.519186361808426
+      ],
+      [
+       38.63693257468236,
+       25.51858281041081
+      ],
+      [
+       38.552877011672365,
+       25.518445567410037
+      ],
+      [
+       38.48353470778,
+       25.51748132756987
+      ],
+      [
+       38.414187487854456,
+       25.516983375581642
+      ],
+      [
+       38.33014771527134,
+       25.515348403786877
+      ],
+      [
+       38.246100165673305,
+       25.514179680060646
+      ],
+      [
+       38.17677491583496,
+       25.512364576088935
+      ],
+      [
+       38.107439028264466,
+       25.511015664531246
+      ],
+      [
+       38.023425647340595,
+       25.508349518560074
+      ],
+      [
+       37.93939876840648,
+       25.506149490113877
+      ],
+      [
+       37.87010101274996,
+       25.5034837953586
+      ],
+      [
+       37.800786899263976,
+       25.501284127372575
+      ],
+      [
+       37.716812562105346,
+       25.49758720873676
+      ],
+      [
+       37.63281900797417,
+       25.4943562068868
+      ],
+      [
+       30.021443969414175,
+       25.15478391808486
+      ],
+      [
+       21.245701421179664,
+       25.178145439391837
+      ],
+      [
+       12.408686433945691,
+       25.777580219794025
+      ],
+      [
+       12.310501736403406,
+       25.783635329068627
+      ],
+      [
+       12.21234464764856,
+       25.79012263260128
+      ],
+      [
+       12.157390697408083,
+       25.79307777881356
+      ],
+      [
+       12.102461703675065,
+       25.796465282851592
+      ],
+      [
+       12.004210093754677,
+       25.80131505891264
+      ],
+      [
+       11.905980786854384,
+       25.806597335490597
+      ],
+      [
+       11.850994710355337,
+       25.80887788968148
+      ],
+      [
+       11.796028282789099,
+       25.811591075397093
+      ],
+      [
+       11.697724556821381,
+       25.81523478788616
+      ],
+      [
+       11.59943782474822,
+       25.81931124201799
+      ],
+      [
+       11.544427902691815,
+       25.820916860744386
+      ],
+      [
+       11.489432319033826,
+       25.82295531954181
+      ],
+      [
+       11.391091281198772,
+       25.825392419729177
+      ],
+      [
+       11.29276192557262,
+       25.8282624375159
+      ],
+      [
+       11.237736442249936,
+       25.82919287897756
+      ],
+      [
+       11.182719984633641,
+       25.830556303872363
+      ],
+      [
+       11.084356444730124,
+       25.831786424739715
+      ],
+      [
+       10.985999273589949,
+       25.833449573967208
+      ],
+      [
+       10.930966515637099,
+       25.833704698043054
+      ],
+      [
+       10.875937469337924,
+       25.83439288370849
+      ],
+      [
+       10.859865867032841,
+       25.83439663424062
+      ],
+      [
+       10.46831643412905,
+       60.28597672276004
+      ],
+      [
+       66.2295047244812,
+       59.61326493626528
+      ],
+      [
+       66.62677343971663,
+       25.166131159328597
+      ]
+     ],
+     "holes": [],
+     "base": 0.0,
+     "top": 35.0,
+     "yards": {
+      "front": 25,
+      "side": 10,
+      "rear": 32.843654
+     },
+     "height": 35,
+     "coverage": null,
+     "notes": [
+      "R-1b.lot_coverage: the limit 0.25 * lot_area can't be worked out for this lot"
+     ]
+    },
+    "at": 1793114943.501926
+   }
+  },
+  "2 Cancel: run_check returned within 2.5 s, nothing shown as checked": {
+   "ok": true,
+   "detail": {
+    "took": 1.09,
+    "last": {
+     "error": "the check was cancelled",
+     "cancelled": true,
+     "at": 1793114944.589018
+    }
+   }
+  },
+  "2 Cancel: the model and the file are as they were": {
+   "ok": true,
+   "detail": null
+  },
+  "2b an edit during the wait: the answer is dropped, nothing shown as checked": {
+   "ok": true,
+   "detail": {
+    "added": [
+     "ff406b36-4efd-49d2-b680-6ea137b7fd92"
+    ],
+    "last": {
+     "error": "The model changed while it was being checked: nothing is shown as checked. Press Retry.",
+     "outdated": true,
+     "at": 1793114951.823308
+    }
+   }
+  },
+  "2 the next check (a fresh checker) works": {
+   "ok": true,
+   "detail": {
+    "summary": {
+     "state": "review",
+     "text": "8 pass \u00b7 5 need review",
+     "lines": [
+      "Rear yard: passes under every reading",
+      "Eaves into required yards: passes under every reading",
+      "One-family occupancy: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "Home occupation size: say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Home occupation: say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)"
+     ]
+    },
+    "view_summary": "5 need review \u00b7 9 comply \u00b7 2 not checked",
+    "state": "needs_review",
+    "rows": [
+     {
+      "Requirement": "Permitted primary uses (chart p.2)",
+      "Table limit": "Permitted: One-family dwelling, detached; Church or related building; Public park or playground; Library or fire station",
+      "Proposed": "One-family dwelling, detached",
+      "Units": "use",
+      "Error": "PASS",
+      "Rule id": "R-1b.use",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Minimum lot size, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 6,000",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_area_one_family_detached",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Minimum lot width, one-family dwelling, detached (chart p.3)",
+      "Table limit": "\u2265 50",
+      "Proposed": 75.835064,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.lot_width_one_family_detached",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum number of stories (chart p.3)",
+      "Table limit": "\u2264 3",
+      "Proposed": 3.0,
+      "Units": "stories",
+      "Error": "PASS",
+      "Rule id": "R-1b.stories",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum building height, with the \u00a7325-16C bonus",
+      "Table limit": "building_height \u2264 35 or building_height \u2264 38.5; front_yard \u2265 25; side_yard_smaller \u2265 10; side_yard_larger \u2265 10; rear_yard \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + (building_height - 35))",
+      "Proposed": "building_height = 35; front_yard = 27.07; side_yard_smaller = 12.03; side_yard_larger = 12.05; rear_yard = not given",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.height",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Maximum lot coverage by buildings (chart p.3, \u00a7325-8A(10))",
+      "Table limit": "\u2264 ? (0.25 * lot_area)",
+      "Proposed": "1,522.89",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.lot_coverage",
+      "Why": "the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
+      "Provisional": "passes with the lot as drawn (confirm the survey)"
+     },
+     {
+      "Requirement": "Front yard minimum (chart p.3)",
+      "Table limit": "\u2265 25",
+      "Proposed": 27.070097,
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.front_yard",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Side yards minimum, one side and other side (chart p.3)",
+      "Table limit": "side_yard_smaller \u2265 10; side_yard_larger \u2265 10",
+      "Proposed": "side_yard_smaller = 12.03; side_yard_larger = 12.05",
+      "Units": "ft",
+      "Error": "PASS",
+      "Rule id": "R-1b.side_yards",
+      "Why": "",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Rear yard minimum (chart p.3, note 16; lot depth \u00a7325-8A(14))",
+      "Table limit": "\u2265 ? (max(min(0.25 * lot_depth, 50), 20))",
+      "Proposed": "not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.rear_yard",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)",
+      "Provisional": "passes under every reading"
+     },
+     {
+      "Requirement": "Eaves into required yards, at most 2 ft (\u00a7325-18B)",
+      "Table limit": "front_yard_eaves \u2265 23; side_yard_smaller_eaves \u2265 8; side_yard_larger_eaves \u2265 8; rear_yard_eaves \u2265 ? (max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2)",
+      "Proposed": "front_yard_eaves = 27.07; side_yard_smaller_eaves = 12.03; side_yard_larger_eaves = 12.05; rear_yard_eaves = not given",
+      "Units": "ft",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.yard_projections",
+      "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)",
+      "Provisional": "passes under every reading"
+     },
+     {
+      "Requirement": "One-family occupancy (\u00a7325-3B: family + 1 unrelated; 2 if owner-occupied)",
+      "Table limit": "see formula",
+      "Proposed": "",
+      "Units": "",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.occupancy_one_family",
+      "Why": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Home occupation size (\u00a7325-3B: at most 25% of its unit and 500 sq ft)",
+      "Table limit": "\u2264 500; \u2264 ? (0.25 * home_occupation_unit_area)",
+      "Proposed": "not given",
+      "Units": "sf",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.home_occupation_size",
+      "Why": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Provisional": null
+     },
+     {
+      "Requirement": "Home occupation (chart p.2: special permit unless \u00a7325-9B(1)(i) is met)",
+      "Table limit": "a person decides",
+      "Proposed": "",
+      "Units": "",
+      "Error": "NEEDS REVIEW",
+      "Rule id": "R-1b.home_occupation",
+      "Why": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "Provisional": null
+     }
+    ],
+    "items": [
+     {
+      "id": "R-1b.use",
+      "name": "Use",
+      "status": "complies",
+      "proposed": "One-family dwelling, detached",
+      "required": "permitted",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_area_one_family_detached",
+      "name": "Lot area",
+      "status": "complies",
+      "proposed": "7,033 sf",
+      "required": "6,000 sf",
+      "margin": "+1,033 sf",
+      "delta": "at least 357 sf to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026",
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_width_one_family_detached",
+      "name": "Lot width",
+      "status": "complies",
+      "proposed": "75'-10\"",
+      "required": "50'-0\"",
+      "margin": "+25'-10\"",
+      "delta": "at least 21'-10\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": null,
+      "group": "site",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.stories",
+      "name": "Stories",
+      "status": "complies",
+      "proposed": "3",
+      "required": "3",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.height",
+      "name": "Building height",
+      "status": "complies",
+      "proposed": "35'-0\"",
+      "required": "35'-0\"",
+      "margin": "at limit",
+      "delta": "at limit",
+      "approx": false,
+      "colour": "none",
+      "note": "assuming flat ground",
+      "points": null,
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.lot_coverage",
+      "name": "Lot coverage",
+      "status": "complies",
+      "proposed": "21.7%",
+      "required": "25%",
+      "margin": "+3.34%",
+      "delta": "at least 1.04% to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "Complies even at the tax-map worst case (lot area 6,357 sf) \u00b7 Pick survey lot lines\u2026 \u00b7 Gordium's reading \u00b7 confirm with the City zoning office: Coverage is the outline, seen from above, of everything above ground: walls, cantilevered upper floors, roofed porches, decks, balconies projecting more than 2 ft, ramps and landings",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.front_yard",
+      "name": "Front yard",
+      "status": "complies",
+      "proposed": "27'-0 3/4\"",
+      "required": "25'-0\"",
+      "margin": "+2'-0 3/4\"",
+      "delta": "at least 0'-0 3/4\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.054582,
+        0.810981
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#northeast",
+      "name": "Side yard, Northeast",
+      "status": "complies",
+      "proposed": "12'-0 3/8\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 3/8\"",
+      "delta": "at least 0'-0 3/8\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        76.254106,
+        57.624467
+       ],
+       [
+        64.219932,
+        57.48568
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.side_yards#southwest",
+      "name": "Side yard, Southwest",
+      "status": "complies",
+      "proposed": "12'-0 1/2\"",
+      "required": "10'-0\"",
+      "margin": "+2'-0 1/2\"",
+      "delta": "at least 0'-0 1/2\" to spare",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        0.837221,
+        27.68207
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": null,
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.rear_yard",
+      "name": "Rear yard",
+      "status": "needs_review",
+      "proposed": "34'-11 7/8\" to 36'-3 3/8\"",
+      "required": "24'-1 7/8\" to 32'-10 1/8\"",
+      "margin": "",
+      "delta": "at least 0'-5 1/4\" if confirmed",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        64.642102,
+        92.47946
+       ],
+       [
+        64.219932,
+        57.48568
+       ]
+      ],
+      "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.yard_projections",
+      "name": "Eaves into front yard",
+      "status": "needs_review",
+      "proposed": "27'-0 3/4\"",
+      "required": "23'-0\"",
+      "margin": "+4'-0 3/4\"",
+      "delta": "at least 2'-0 3/4\" if confirmed",
+      "approx": true,
+      "colour": "none",
+      "note": null,
+      "points": [
+       [
+        11.054582,
+        0.810981
+       ],
+       [
+        12.886599,
+        27.819014
+       ]
+      ],
+      "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office",
+      "group": "building",
+      "needs": [],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.occupancy_one_family",
+      "name": "One-family occupancy",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "1",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (\u00a7325-3B)",
+      "group": "building",
+      "needs": [
+       "unrelated_persons",
+       "owner_occupied",
+       "accessory_dwelling_unit",
+       "functional_family_unit"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.home_occupation_size",
+      "name": "Home occupation size",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "500 sf",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "group": "building",
+      "needs": [
+       "home_occupation",
+       "home_occupation_area",
+       "home_occupation_unit_area"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.home_occupation",
+      "name": "Home occupation",
+      "status": "needs_review",
+      "proposed": "\u2014",
+      "required": "\u2014",
+      "margin": "",
+      "delta": "",
+      "approx": false,
+      "colour": "none",
+      "note": null,
+      "points": null,
+      "reason": "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (\u00a7325-3B HOME OCCUPATION)",
+      "group": "building",
+      "needs": [
+       "home_occupation"
+      ],
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "R-1b.parking_one_family",
+      "name": "Parking \u00b7 needs input",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Needs bedrooms and parking spaces, which the model doesn't show",
+      "group": "not_checked",
+      "needs": [
+       "sleeping_rooms",
+       "parking_spaces"
+      ],
+      "hint": "Enter bedrooms and parking spaces",
+      "refused": null
+     },
+     {
+      "id": "release.overlays",
+      "name": "Overlays \u00b7 not in this release",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).",
+      "group": "not_checked",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.height_exceptions",
+      "name": "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-16A, \u00a7325-16B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.small_projections",
+      "name": "\u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-18B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.corner_visibility",
+      "name": "\u00a7325-17B Corner lots, the clear triangle at the street corner",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-17B",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.accessory_below_grade",
+      "name": "\u00a7325-25B, \u00a7325-25D Accessory structures below grade or across a common lot line",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-25B, \u00a7325-25D",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     },
+     {
+      "id": "gap.adus",
+      "name": "\u00a7325-28 Accessory dwelling units",
+      "status": "not_checked",
+      "proposed": "",
+      "required": "",
+      "margin": "",
+      "delta": null,
+      "approx": null,
+      "colour": null,
+      "note": null,
+      "points": null,
+      "reason": "Not in Gordium yet \u2014 coming in a later version. Check this by hand for now: \u00a7325-28",
+      "group": "not_covered",
+      "needs": null,
+      "hint": null,
+      "refused": null
+     }
+    ],
+    "header": {
+     "place": "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+     "code": "Ch. 325 as amended through Ord. No. 2026-02 (May 6, 2026) \u00b7 District Regulations Chart, April 2026",
+     "draft": "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+     "lot": "Lot lines: tax map, approximate (\u00b12'-0\")",
+     "grade": "Ground: assumed flat (elevation 0'-0\")",
+     "actions": [
+      "Pick survey lot lines\u2026"
+     ],
+     "main": null,
+     "sources": [
+      "Address: 106 Ithaca Rd, Ithaca, NY \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Zoning district: R-1b \u00b7 entered by you \u00b7 confirmed by you, 2026-10-27",
+      "Use: One-family dwelling, detached \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Lot: 7,033 sf \u00b7 the tax map (\u00b12 ft, approximate) \u00b7 confirmed by you, 2026-10-27",
+      "Front lot line (on the street): Ithaca Rd \u00b7 the State tax map (the sample's lookup) \u00b7 confirmed by you, 2026-10-27",
+      "Corner lot: no, one street \u00b7 the sample project \u00b7 confirmed by you, 2026-10-27",
+      "Starting house: as first drawn, the largest house that complies even if the tax-map lines are 2'-0\" off; limited by the yards (front 25'-0\", sides 10'-0\", rear 32'-10 1/8\"). Use my survey\u2026 for the full size. \u00b7 suggested by Gordium \u00b7 not confirmed",
+      "Ground: assumed flat \u00b7 assumed (flat ground, the MVP's rule) \u00b7 not confirmed"
+     ]
+    },
+    "interior": [
+     "R-1b.parking_one_family"
+    ],
+    "encroach": 0,
+    "plan_encroach": 0,
+    "envelope": {
+     "outline": [
+      [
+       59.55921194648549,
+       25.298796591321693
+      ],
+      [
+       59.24452169091939,
+       25.302722475481097
+      ],
+      [
+       58.92980694985941,
+       25.30268677899466
+      ],
+      [
+       58.61511759297641,
+       25.29868950751884
+      ],
+      [
+       58.30050348591887,
+       25.29073129446094
+      ],
+      [
+       49.73090685166342,
+       25.019980421186293
+      ],
+      [
+       39.94775779486651,
+       25.49035292800415
+      ],
+      [
+       39.86377591797361,
+       25.493874413775156
+      ],
+      [
+       39.77981486937491,
+       25.497861747080805
+      ],
+      [
+       39.710508778317426,
+       25.50030113429428
+      ],
+      [
+       39.641220656809885,
+       25.503206488913822
+      ],
+      [
+       39.557201889550356,
+       25.505697122705833
+      ],
+      [
+       39.473198232350924,
+       25.508653824550226
+      ],
+      [
+       39.40386742488139,
+       25.510242535732477
+      ],
+      [
+       39.334548867471185,
+       25.512297399748345
+      ],
+      [
+       39.25050586276179,
+       25.513756806481076
+      ],
+      [
+       39.16647224760395,
+       25.51568243159578
+      ],
+      [
+       39.09712716468682,
+       25.51642022749276
+      ],
+      [
+       39.02778861049384,
+       25.517624291449977
+      ],
+      [
+       38.94373402490248,
+       25.518052251342127
+      ],
+      [
+       38.85968310693905,
+       25.518946509735105
+      ],
+      [
+       38.790334191688586,
+       25.518833279237462
+      ],
+      [
+       38.72098608284421,
+       25.519186361808426
+      ],
+      [
+       38.63693257468236,
+       25.51858281041081
+      ],
+      [
+       38.552877011672365,
+       25.518445567410037
+      ],
+      [
+       38.48353470778,
+       25.51748132756987
+      ],
+      [
+       38.414187487854456,
+       25.516983375581642
+      ],
+      [
+       38.33014771527134,
+       25.515348403786877
+      ],
+      [
+       38.246100165673305,
+       25.514179680060646
+      ],
+      [
+       38.17677491583496,
+       25.512364576088935
+      ],
+      [
+       38.107439028264466,
+       25.511015664531246
+      ],
+      [
+       38.023425647340595,
+       25.508349518560074
+      ],
+      [
+       37.93939876840648,
+       25.506149490113877
+      ],
+      [
+       37.87010101274996,
+       25.5034837953586
+      ],
+      [
+       37.800786899263976,
+       25.501284127372575
+      ],
+      [
+       37.716812562105346,
+       25.49758720873676
+      ],
+      [
+       37.63281900797417,
+       25.4943562068868
+      ],
+      [
+       30.021443969414175,
+       25.15478391808486
+      ],
+      [
+       21.245701421179664,
+       25.178145439391837
+      ],
+      [
+       12.408686433945691,
+       25.777580219794025
+      ],
+      [
+       12.310501736403406,
+       25.783635329068627
+      ],
+      [
+       12.21234464764856,
+       25.79012263260128
+      ],
+      [
+       12.157390697408083,
+       25.79307777881356
+      ],
+      [
+       12.102461703675065,
+       25.796465282851592
+      ],
+      [
+       12.004210093754677,
+       25.80131505891264
+      ],
+      [
+       11.905980786854384,
+       25.806597335490597
+      ],
+      [
+       11.850994710355337,
+       25.80887788968148
+      ],
+      [
+       11.796028282789099,
+       25.811591075397093
+      ],
+      [
+       11.697724556821381,
+       25.81523478788616
+      ],
+      [
+       11.59943782474822,
+       25.81931124201799
+      ],
+      [
+       11.544427902691815,
+       25.820916860744386
+      ],
+      [
+       11.489432319033826,
+       25.82295531954181
+      ],
+      [
+       11.391091281198772,
+       25.825392419729177
+      ],
+      [
+       11.29276192557262,
+       25.8282624375159
+      ],
+      [
+       11.237736442249936,
+       25.82919287897756
+      ],
+      [
+       11.182719984633641,
+       25.830556303872363
+      ],
+      [
+       11.084356444730124,
+       25.831786424739715
+      ],
+      [
+       10.985999273589949,
+       25.833449573967208
+      ],
+      [
+       10.930966515637099,
+       25.833704698043054
+      ],
+      [
+       10.875937469337924,
+       25.83439288370849
+      ],
+      [
+       10.859865867032841,
+       25.83439663424062
+      ],
+      [
+       10.46831643412905,
+       60.28597672276004
+      ],
+      [
+       66.2295047244812,
+       59.61326493626528
+      ],
+      [
+       66.62677343971663,
+       25.166131159328597
+      ]
+     ],
+     "holes": [],
+     "base": 0.0,
+     "top": 35.0,
+     "yards": {
+      "front": 25,
+      "side": 10,
+      "rear": 32.843654
+     },
+     "height": 35,
+     "coverage": null,
+     "notes": [
+      "R-1b.lot_coverage: the limit 0.25 * lot_area can't be worked out for this lot"
+     ]
+    },
+    "at": 1793114956.8545432
+   }
+  },
+  "3 the report's own check was the work cancelled": {
+   "ok": true,
+   "detail": [
+    "Slow test: waiting\u2026"
+   ]
+  },
+  "3 Cancel: the report file is as it was, no half-written copy": {
+   "ok": true,
+   "detail": {
+    "path": "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_test_docs/progress_cancel_Large_Objects_-_Feet_gordium_report.xlsx",
+    "part_left": false
+   }
+  },
+  "3 Gordium said the report was cancelled": {
+   "ok": true,
+   "detail": [
+    "Zoning report cancelled: the report file wasn't changed."
+   ]
+  },
+  "4 the work cancelled was the starting house's": {
+   "ok": true,
+   "detail": [
+    "Slow test: waiting\u2026"
+   ]
+  },
+  "4 Cancel during Draw: nothing drawn, the model as before GordiumStart (the sample taken back)": {
+   "ok": true,
+   "detail": {
+    "now": {},
+    "before": {},
+    "at_box": {
+     "70f609bb-03cc-41d0-aeea-34d57376d003": "Site"
+    }
+   }
+  },
+  "4 Cancel during Draw: the file's strings as before GordiumStart": {
+   "ok": true,
+   "detail": {
+    "now": {
+     "lot_facts": null,
+     "ui": null,
+     "fact_sources": null
+    },
+    "before": {
+     "lot_facts": null,
+     "ui": null,
+     "fact_sources": null
+    }
+   }
+  },
+  "4 Gordium said Draw was cancelled": {
+   "ok": true,
+   "detail": [
+    "Zoning report cancelled: the report file wasn't changed.",
+    "Draw cancelled: nothing was drawn, and the model is as it was before the box opened (Draw again when you're ready)."
+   ]
+  },
+  "4 Draw again (nothing cancelled) draws the starting house": {
+   "ok": true,
+   "detail": {
+    "drawn": 12
+   }
+  },
+  "5 a background re-check started; Rhino not waiting on it; the panel's line moves": {
+   "ok": true,
+   "detail": {
+    "ticks": 5,
+    "panel": [
+     "Slow test: waiting\u2026  \u25cf\u25cb\u25cb  0 s",
+     "Slow test: waiting\u2026  \u25cb\u25cf\u25cb  0 s"
+    ]
+   }
+  },
+  "5 Cancel: Check cancelled, nothing drawn, not running": {
+   "ok": true,
+   "detail": {
+    "error": "the check was cancelled",
+    "cancelled": true,
+    "at": 1793115036.883857
+   }
+  }
+ },
+ "window_frames": [
+  [
+   1793114937.61,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  0 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114937.72,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  0 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114937.78,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  0 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114937.83,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  0 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114937.89,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  0 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114937.95,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  0 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.01,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  0 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.07,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  0 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.14,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.2,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.26,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.32,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.38,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.44,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.5,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.56,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.62,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.68,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.74,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.8,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.86,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.92,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114938.98,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.05,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.11,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  1 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.17,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.23,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.29,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.36,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.42,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.48,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cf\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.54,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.61,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.67,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.73,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.79,
+   "Slow test: waiting\u2026",
+   "\u25cb\u25cb\u25cf  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.86,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.92,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114939.98,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.04,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.11,
+   "Slow test: waiting\u2026",
+   "\u25cf\u25cb\u25cb  2 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.16,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.22,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.28,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.33,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.39,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.47,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.55,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.61,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.67,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.73,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.79,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.84,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.9,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114940.96,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.01,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.07,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  3 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.13,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.19,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.24,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.3,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.36,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.41,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.47,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.53,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.58,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.64,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.7,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.76,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.81,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.87,
+   "Measuring the building\u2026",
+   "\u25cf\u25cb\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.93,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114941.98,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.04,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.1,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  4 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.15,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.21,
+   "Measuring the building\u2026",
+   "\u25cb\u25cf\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.27,
+   "Measuring the building\u2026",
+   "\u25cb\u25cb\u25cf  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.33,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.38,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.44,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.5,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.55,
+   "Checking the rules\u2026",
+   "\u25cf\u25cb\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.61,
+   "Checking the rules\u2026",
+   "\u25cf\u25cb\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.67,
+   "Checking the rules\u2026",
+   "\u25cf\u25cb\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.73,
+   "Checking the rules\u2026",
+   "\u25cf\u25cb\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.78,
+   "Checking the rules\u2026",
+   "\u25cf\u25cb\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.84,
+   "Checking the rules\u2026",
+   "\u25cb\u25cf\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.9,
+   "Checking the rules\u2026",
+   "\u25cb\u25cf\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114942.96,
+   "Checking the rules\u2026",
+   "\u25cb\u25cf\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.01,
+   "Checking the rules\u2026",
+   "\u25cb\u25cf\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.07,
+   "Checking the rules\u2026",
+   "\u25cb\u25cf\u25cb  5 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.13,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  6 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.19,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  6 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.24,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  6 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.3,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  6 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.36,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  6 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.41,
+   "Checking the rules\u2026",
+   "\u25cb\u25cb\u25cf  6 s",
+   true,
+   "Esc or Cancel to stop"
+  ],
+  [
+   1793114943.47,
+   "Checking the rules\u2026",
+   "\u25cf\u25cb\u25cb  6 s",
+   true,
+   "Esc or Cancel to stop"
+  ]
+ ],
+ "ok": false,
+ "error": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/demo6_rhino_f4ab8b3/apps/rhino_plugin/tests/progress_cancel_in_rhino.py\", line 315, in main\nKeyError: 'live_check'\n",
+ "done": true
+}
