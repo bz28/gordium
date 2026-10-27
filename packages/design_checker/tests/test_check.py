@@ -3188,7 +3188,9 @@ def test_every_street_line_is_saved_with_its_street_id():
     assert calls and all(c.strip().endswith(", ids") or ", None" in c for c in calls), calls
     logic_src = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
     saves = re.findall(r"set_street_lines\((?!facts, lines, ids=None\))([^\n]*)", logic_src)
-    assert all("None)" in c or "* len(" in c for c in saves), saves
+    # (with_suggestions: the lines with their own source's ids, never the other source's: round 3, F1)
+    assert all("None)" in c or "* len(" in c or c.startswith('out, out.get("street_line"), own.get("street_ids"))')
+               for c in saves), saves
 
 
 def test_the_corner_pick_saves_one_id_per_street_and_the_hint_says_what_the_box_does():
@@ -3985,3 +3987,30 @@ def test_the_notice_keeps_its_heading_numbers_and_mark_whole():
             assert "7,033 sf" in joined and "35 % short" in joined, (view_w, share, area)
             got = logic_.notice_lines([side], view_w, share)
             assert "0'-11 1/4\" short" in "\n".join(got) and "7'-0 5/8\" proposed" in "\n".join(got), got
+
+
+def test_saved_street_lines_never_take_the_suggestions_street_ids():
+    """Street ids review round 3, F1 (P0): a corner lot saved before street ids existed (both streets' lines, no
+    ids) merged with a suggestion that carries "Street 1" ids for other lines kept the lines and took those ids,
+    so both streets were one "Street 1" (#18: one frontage along two streets). The lines and ids are one fact."""
+    from design_checker import rhino_logic as logic
+    segs = [((0, 0), (30, 0)), ((30, 0), (60, 0)), ((60, 0), (60, 100)), ((60, 100), (0, 100)), ((0, 100), (0, 0))]
+    sug = logic.suggested_facts("ithaca", ["R-1b"], [{"id": "lot", "area": 6000, "bottom": 0, "segments": segs}], [])
+    assert sug["street_ids"] == ["Street 1", "Street 1"]                   # the suggestion: the bottom's 2 pieces
+    corner = {"lot_id": "lot", "corner_lot": True, "street_line": [[[60, 100], [0, 100]], [[60, 0], [60, 100]]]}
+    merged = logic.with_suggestions(corner, sug)
+    assert merged["street_line"] == corner["street_line"] and "street_ids" not in merged      # unnamed: asked
+    three = {"lot_id": "lot", "street_line": [[[60, 0], [60, 100]], [[60, 100], [0, 100]], [[0, 100], [0, 0]]]}
+    assert "street_ids" not in logic.with_suggestions(three, sug)                             # never stale ids
+    named = dict(corner, street_ids=["A St", "B St"])
+    assert logic.with_suggestions(named, sug)["street_ids"] == ["A St", "B St"]               # its own ids kept
+    assert logic.with_suggestions({"lot_id": "lot"}, sug)["street_ids"] == sug["street_ids"]  # suggested: its own
+
+
+def test_gordiums_own_street_id_is_never_kept_as_the_streets_name():
+    """Street ids review round 3, F2: the box's suggested street carries Gordium's own "Street 1"; clicking that
+    line again kept "Street 1" as the street's name (never asked which street). Gordium's own ids are no name."""
+    from design_checker import rhino_logic as logic
+    lines = [[[0, 0], [30, 0]], [[30, 0], [60, 0]]]
+    assert logic.street_name_after_pick(None, lines, lines[0], ids=["Street 1", "Street 1"]) is None
+    assert logic.street_name_after_pick(None, lines, lines[0], ids=["Ithaca Rd", "Ithaca Rd"]) == "Ithaca Rd"

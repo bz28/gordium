@@ -127,10 +127,14 @@ def missing(facts):
 
 
 def with_suggestions(saved, suggested):
-    """The facts to confirm: what is saved, with suggestions only for what is missing."""
+    """The facts to confirm: what is saved, with suggestions only for what is missing. The street lines and their
+    street ids are one fact: saved lines keep only their own saved ids, never the suggestion's (ids that name other
+    lines: two streets one id, a frontage read along both; street ids review round 3, F1), and suggested lines only
+    the suggestion's."""
     out = dict(suggested)
     out.update({k: v for k, v in (saved or {}).items() if v is not None})
-    return out
+    own = (saved or {}) if (saved or {}).get("street_line") else suggested or {}   # whose lines: their ids alone
+    return set_street_lines(out, out.get("street_line"), own.get("street_ids"))
 
 
 # The facts only the architect can state (the model can't show them), in the order they are asked: each with its
@@ -1344,7 +1348,7 @@ def street_name_after_pick(name, lines, picked, tolerance=0.5, ids=None):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
     a, b = picked
-    own = _street_lines().matching_ids(lines, ids)
+    own = _real_names(_street_lines().matching_ids(lines, ids))   # (Gordium's own "Street N": no name, asked: F2)
     for k, (c, d) in enumerate(lines or []):
         if (near(a, c) and near(b, d)) or (near(a, d) and near(b, c)):
             return own[k] if own is not None else (name or None)
