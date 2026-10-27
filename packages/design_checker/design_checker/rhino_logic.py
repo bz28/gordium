@@ -157,7 +157,10 @@ STATED_FACTS = {
     "unrelated_persons": ("Most people in any one dwelling unit not related by blood, marriage or adoption to its "
                           "household's family (minor dependent children in a parent's or relative's care left out)",
                           "count", "unrelated people per unit"),
-    "unrelated_persons_with_children": ("The same count with minor dependent children counted too", "count",
+    # asked alone in R-3 and RU, so it says the whole count itself (review round 2: "the same count" pointed at a
+    # question never asked there)
+    "unrelated_persons_with_children": ("Most people in any one dwelling unit not related by blood, marriage or adoption "
+                                        "to its household's family, minor dependent children counted too", "count",
                                         "unrelated people per unit, children counted"),
     "owner_occupied": ("Does the owner (§325-3B OWNER) live in the dwelling?", "yes_no", "whether the owner lives there"),
     "functional_family_unit": ("Is the household to be shown to the City to be a functional family unit (§325-3B)?",

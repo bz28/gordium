@@ -1718,6 +1718,7 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
             for name, unit in STATED.items():           # what the architect stated still stands
                 if facts.get(name) is not None:
                     out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")
+            _counts_disagree(out, facts)
             if facts.get("zone"):
                 out["district"] = _record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
     finally:
@@ -1766,12 +1767,24 @@ def pick_main(buildings: list[dict], facts: dict) -> tuple:
     return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
+def _counts_disagree(out: dict, facts: dict) -> None:
+    """The unrelated people counted with minor dependent children can't be fewer than without them (review round 2):
+    a pair like that is a mistyped count, so the count R-3 and RU read is set aside with the reason (needs review),
+    never used to pass."""
+    without, with_ = facts.get("unrelated_persons"), facts.get("unrelated_persons_with_children")
+    if type(without) is int and type(with_) is int and with_ < without:
+        out["unrelated_persons_with_children"] = _record(
+            "unrelated_persons_with_children", STATED["unrelated_persons_with_children"],
+            reason=stop("household_counts_disagree", without=without, with_=with_))
+
+
 def _measure(site: dict, facts: dict) -> dict[str, dict]:
     out = {}
     for name, unit in STATED.items():
         v = facts.get(name)
         out[name] = (_record(name, unit, v, "stated by the architect (not measured from the model)")
                      if v is not None else _record(name, unit, reason=stop(ASK[name])))
+    _counts_disagree(out, facts)
     # the lot's zoning district is the zone the architect stated (the facts' "zone")
     out["district"] = (_record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
                        if facts.get("zone") else _record("district", "text", reason=stop("no_district")))

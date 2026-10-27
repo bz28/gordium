@@ -97,23 +97,55 @@ def _domain(name):
 
 @pytest.mark.parametrize("district", DISTRICTS)
 def test_a_blank_never_lets_a_rule_pass_that_some_answer_would_not(district):
-    """Never a false pass: for every new rule and every use it can apply to, any answers left blank give "pass" only
-    if every way of filling them in passes too (brute force over small values)."""
-    names = HOUSEHOLD + HOME
+    """Never a false pass: for every new rule and every use it can apply to, every complete set of answers to the
+    facts it reads (over small values around its limits) and every non-empty set of them left blank (one, two or
+    all) gives "pass" only if every way of filling the blanks in passes too (review round 2: pairs only before)."""
+    from rule_format import formula
     rules = [r for r in load(rulebook_for(ITHACA, district))["rules"]
              if r["id"].split(".", 1)[1] in ("occupancy_one_family", "occupancy_two_family", "home_occupation_size",
                                              "home_occupation")]
     assert len(rules) == (3 if district.startswith("R-1") else 4)
-    for r, use in itertools.product(rules, ("one_family_detached", "one_family_attached", "two_family")):
-        full = list(itertools.product(*[_domain(n) for n in names]))[::97]      # a spread of complete answers
-        for values in full:
-            facts = dict(zip(names, values))
-            for blank in itertools.combinations(names, 2):
-                given = {"use": use, **{k: v for k, v in facts.items() if k not in blank}}
-                if outcome(r, given, USES) != "pass":
-                    continue
-                for fill in itertools.product(*[_domain(n) for n in blank]):
-                    assert outcome(r, {**given, **dict(zip(blank, fill))}, USES) == "pass", (r["id"], given, fill)
+    checked = 0
+    for r in rules:
+        read = set().union(*(formula.names(t) for t in [r.get("applies_when"), r.get("check")] +
+                             [w["when"] for w in r.get("review_when") or []] if t))
+        names = [n for n in HOUSEHOLD + HOME if n in read]
+        assert names, r["id"]
+        for use in ("one_family_detached", "one_family_attached", "two_family"):
+            for values in itertools.product(*[_domain(n) for n in names]):
+                facts = dict(zip(names, values))
+                for k in range(1, len(names) + 1):
+                    for blank in itertools.combinations(names, k):
+                        given = {"use": use, **{n: v for n, v in facts.items() if n not in blank}}
+                        if outcome(r, given, USES) != "pass":
+                            continue
+                        for fill in itertools.product(*[_domain(n) for n in blank]):
+                            checked += 1
+                            assert outcome(r, {**given, **dict(zip(blank, fill))}, USES) == "pass", (r["id"], given)
+    assert checked                                    # some blanks did pass (each was then checked every way)
+
+
+def test_the_r3_and_ru_count_is_asked_on_its_own_and_a_mistyped_pair_is_set_aside():
+    """Review round 2: R-3 and RU read only the count with the children, so its prompt says the whole count itself
+    ("the same count" pointed at a question never asked there); and a count with the children below the count
+    without them is a mistyped pair: set aside with the reason, never a pass."""
+    from design_checker import rhino_logic as logic
+    from model_measurement.measure import measure
+    prompt = logic.STATED_FACTS["unrelated_persons_with_children"][0]
+    assert "same count" not in prompt and "not related by blood, marriage or adoption" in prompt
+    assert "children counted too" in prompt
+    lot = {"id": "lot", "edges": [{"points": [a, b]} for a, b in
+                                   zip([[0, 0], [60, 0], [60, 100], [0, 100]], [[60, 0], [60, 100], [0, 100], [0, 0]])]}
+    site = {"units": "ft", "lot": lot, "buildings": [], "problems": []}
+    facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-3a",
+             "use": "one_family_detached", "unrelated_persons": 3, "unrelated_persons_with_children": 1}
+    m = measure(site, facts)
+    assert m["unrelated_persons_with_children"]["value"] is None
+    assert "fewer than the 3 counted without them" in m["unrelated_persons_with_children"]["reason"]
+    values = {k: v["value"] for k, v in m.items()}
+    assert outcome(rule("R-3a", "occupancy_one_family"), values, USES) == "needs_review"
+    ok = measure(site, {**facts, "unrelated_persons_with_children": 3})
+    assert ok["unrelated_persons_with_children"]["value"] == 3
 
 
 def test_every_fact_is_one_the_architect_can_state_everywhere():

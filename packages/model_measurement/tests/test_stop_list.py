@@ -255,6 +255,7 @@ CASES = {
     "no_abuts_r1": _plain(),
     "no_household": _plain(),
     "no_home_occupation": _plain(),
+    "household_counts_disagree": _plain(unrelated_persons=3, unrelated_persons_with_children=1),
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
