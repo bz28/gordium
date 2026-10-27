@@ -1337,7 +1337,12 @@ def implied_for(rules: list, use: str | None, uses: dict) -> dict:
 def _read_for(rules: list, use: str | None, uses: dict) -> set:
     """Every name the district's rules read when they can apply to this use (applies_when not false for it)."""
     from rule_format import formula
-    kinds = {"use": set(uses)}
+    # every name a condition may read described by its kind (the city's measures, and the stated facts), so the
+    # formula's three-valued logic settles a condition false for this use whatever the rest turns out to be ("use
+    # in [multiple_family] and not conversion" for a one-family house: never asks "conversion"); a name with no
+    # kind still leaves the rule "may apply" (asked: over-asking is safe, missing a question is not)
+    kinds = dict(MEASURE_KINDS, use=set(uses),
+                 **{k: "number" if v[1] == "count" else "boolean" for k, v in logic.STATED_FACTS.items()})
     wanted = set()
     for rule in rules:
         if rule.get("applies_when") and use is not None:
@@ -1363,7 +1368,8 @@ def options(jurisdiction: str) -> dict:
     for zone in zones:
         rules = load(rulebook_for(j, zone))["rules"]
         district_uses[zone] = use_choices(rules, names, zone)
-        follow_ups[zone] = {u["id"]: follow_up_facts(rules, u["id"], names) for u in district_uses[zone]}
-        implied[zone] = {u["id"]: implied_for(rules, u["id"], names) for u in district_uses[zone]}
+        every = list(dict.fromkeys([u["id"] for u in district_uses[zone]] + list(names)))   # a saved use the
+        follow_ups[zone] = {u: follow_up_facts(rules, u, names) for u in every}           # district doesn't list
+        implied[zone] = {u: implied_for(rules, u, names) for u in every}                  # is asked its own too
     return {"zones": zones, "uses": names, "district_uses": district_uses, "follow_ups": follow_ups,
             "implied": implied}

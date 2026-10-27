@@ -796,7 +796,7 @@ def start_box(state, options, mode):
         use.Items.Add(n)
     ids = [k for k, _ in names]
     use.SelectedIndex = ids.index(state.get("use")) if state.get("use") in ids else 0
-    shown = (state.get("zone"), names[use.SelectedIndex][0] if names else None)   # what the Use rows are laid out for
+    laid_out = (state.get("zone"), names[use.SelectedIndex][0] if names else None)   # what the Use rows show
     asked = {}                        # each follow-up question's field (the facts this district's rules need)
     regrade = ef.CheckBox()
     regrade.Checked = bool(state.get("no_regrading"))
@@ -874,7 +874,7 @@ def start_box(state, options, mode):
     def refresh_if_needed():          # another use or district: its own uses, note and questions, so the box opens
         z = zone.SelectedValue.Text if zone.SelectedValue else None       # again with them (rhino_logic decides;
         if not looking and logic.box_needs_refresh(                       # a lookup's answer opens it again anyway)
-                options, shown, (z, names[use.SelectedIndex][0] if names else None)):
+                options, laid_out, (z, names[use.SelectedIndex][0] if names else None)):
             pick("refresh")
 
     zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")

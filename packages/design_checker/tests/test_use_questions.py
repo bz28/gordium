@@ -220,3 +220,33 @@ def test_an_unanswered_fact_says_tell_gordium_and_its_button_opens_the_box():
     assert 'logic.answers_applied(facts, state.get("answers"), state["zone"], state["use"],' in apply_
     state = rhino[rhino.index("def _box_state("):rhino.index("def _ft_text(")]
     assert '"follow_ups": logic.follow_up_rows(options, facts.get("zone"), facts.get("use"), facts)' in state
+
+
+def test_a_condition_false_for_the_use_never_asks_its_facts():
+    """Review round 1, F2: RU's 500 ft spacing applies to a multiple dwelling, a group house or a dormitory "and not
+    conversion". For a one-family house that is false whatever the answer, so "conversion" is never asked of it;
+    for a dormitory it may apply, so it is. A condition naming something with no kind still counts as may apply."""
+    spacing = {"id": "RU.spacing_500_ft", "kind": "rule",
+               "applies_when": 'use in ["multiple_family", "fraternity_sorority_group_house", "dormitory"] and '
+                               "not conversion", "check": "front_yard >= 0"}
+    names = dict(NAMES, dormitory="Dormitory", fraternity_sorority_group_house="Group house")
+    assert follow_up_facts([spacing], "one_family_detached", names) == []
+    assert follow_up_facts([spacing], "dormitory", names) == ["conversion"]
+    unknown = dict(spacing, applies_when="mystery_count > 0 and not conversion")
+    assert follow_up_facts([unknown], "one_family_detached", names) == ["conversion"]
+    # a saved use the district doesn't list still gets its own questions (never a row the box can't answer)
+    city = options(CITY)
+    assert set(city["follow_ups"]["R-1b"]) == set(city["uses"]) == set(city["implied"]["R-1b"])
+
+
+def test_the_box_reopens_with_the_pick_it_was_laid_out_for():
+    """Review round 1, F1: the refresh compares with what the Use rows were laid out for; that name is set once in
+    start_box (the test hook's own name rebound it, so every pick raised inside the guard and the box never
+    opened again)."""
+    import re
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    box = ui[ui.index("def start_box("):ui.index("def text_box_size(")]
+    assert "                options, laid_out, (z, names[use.SelectedIndex][0]" in box
+    assert len(re.findall(r"^\s+laid_out = ", box, re.M)) == 1
+    with pytest.raises(TypeError):                                 # what the rebound name did
+        logic.box_needs_refresh(_opts(), None, ("X", "school"))
