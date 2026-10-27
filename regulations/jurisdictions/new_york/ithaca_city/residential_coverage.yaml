@@ -303,7 +303,7 @@ pieces:
 
   325-3B:rooming_unit:
     - lines: [[18, 11, 13]]
-      what: A rooming unit and what it must include
+      what: A rooming unit (counted in the multiple-dwelling lot size)
       all: *multiple_not_permitted
       R-3a, R-3aa, R-3b, RU:
         status: rulebook

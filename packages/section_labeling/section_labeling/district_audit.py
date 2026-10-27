@@ -59,7 +59,9 @@ DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", 
                    "unlisted_use", "item", "link", "priority", "note"}
 CHART = "zoning_charts_2026-04.pdf"
 OMISSION = "except where otherwise indicated by specific prohibition or omission"   # §325-8B(3), p.26
-OMISSION_LINES = {(26, 19), (26, 20), (26, 21)}        # §325-8B(3), all of it (the extracted text, p.26)
+# The two sentences that say a use left out of a district's list isn't permitted there: §325-8B(3), all of it (p.26
+# lines 19-21), and §325-8A(2)-(3), "Uses which are permitted in each use district are listed" (p.24 lines 15-18).
+OMISSION_LINES = {(26, 19), (26, 20), (26, 21), (24, 15), (24, 16), (24, 17), (24, 18)}
 MULTIPLE_KINDS = (7, (32, 33))   # §325-3B DWELLING, MULTIPLE (5): rooming house; boarding house; ...; row house (p.7)
 
 
@@ -241,6 +243,7 @@ class Audit:
 
     def _spread(self, part: dict, where: str) -> dict[str, dict]:
         out: dict[str, dict] = {}
+        own: set[str] = set()                      # districts a key other than `all` decided
         for key, decision in part.items():
             if key in ("what", "note", "lines"):
                 continue
@@ -248,12 +251,14 @@ class Audit:
             for d in names:
                 if d not in self.districts:
                     self.problems.append(f"{where}: unknown district {d!r}")
-                elif key != "all" and d in out and out[d] is not part.get("all"):
+                elif key != "all" and d in own:
                     self.problems.append(f"{where}: {d} decided twice")
                 elif key == "all" and d in out:
                     continue                      # a district's own decision wins over `all`
                 else:
                     out[d] = decision if isinstance(decision, dict) else {}
+                    if key != "all":
+                        own.add(d)
         for d in self.districts:
             if d not in out:
                 self.problems.append(f"{where}: no decision for {d}")
@@ -316,7 +321,7 @@ class Audit:
                 p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-' "
                          "(not permitted)")
             if self._quotes_omission(pid, dec) or "unlisted_use" in dec:
-                p += self._unlisted_problems(d, dec, where)
+                p += self._unlisted_problems(d, dec, where, pid)
         if status == "parked" and dec.get("item") not in self.parked:
             p.append(f"{where}: parked item must be one of {sorted(self.parked)}")
         if status == "open_question":
@@ -365,7 +370,7 @@ class Audit:
             return False
         return bool(self._quote_keys(pid, dec) & OMISSION_LINES)
 
-    def _unlisted_problems(self, d: str, dec: dict, where: str) -> list[str]:
+    def _unlisted_problems(self, d: str, dec: dict, where: str, pid: str | None = None) -> list[str]:
         """The omission quote (§325-8B(3)) backs "not applicable" only for a named use that is on no residential
         list: no row of the residential use chart (p.2, primary or accessory), no use Gordium accepts (uses.yaml),
         no kind of multiple dwelling §325-3B lists (p.7), and not named by the district's use rule. Compared on
@@ -373,19 +378,42 @@ class Audit:
         use = str(dec.get("unlisted_use") or "")
         if not use:
             return [f"{where}: the omission quote needs `unlisted_use` (the use it is about)"]
-        words = lambda s: {w[:-1] if w.endswith("s") and len(w) > 3 else w
-                           for w in tokenize(s.replace("_", " ").replace("-", " ")) if w.isalpha()}
+        words = self._words
         mine = words(use)
+        if pid is not None and not mine <= self._piece_words(pid):
+            return [f"{where}: {use!r} isn't what this piece is about (its words aren't in the piece, its title, or "
+                    "its section's other pieces)"]
         rule = self.books[d].get(f"{d}.use") or {}
         lists = [r for (pg, sec, r, col) in self.ctx.cells.get(CHART, {}) if pg == 2]
         lists += [u.replace("_", " ") for u in self.ctx.uses]
         lists += [" ".join(str(rule.get(k, "")) for k in ("check", "applies_when", "review_when"))]
         multiple = self.ctx.pages.get(LAW, {}).get(MULTIPLE_KINDS[0], {})
         lists += [" ".join(" ".join(multiple.get(n, [])) for n in MULTIPLE_KINDS[1])]
-        if not mine or any(mine <= words(text) for text in lists):
+        labels = lists[:-2] + [k for k in " ".join(" ".join(multiple.get(n, [])) for n in MULTIPLE_KINDS[1])
+                                .replace(";", ",").split(",")]        # each listed name, for the reverse test
+        if not mine or any(mine <= words(text) for text in lists) or any(
+                words(label) and words(label) - {"or", "and", "the", "of"} <= mine for label in labels):
             return [f"{where}: {use!r} is a residential use (chart p.2, uses.yaml, §325-3B multiple dwellings or "
                     f"{d}.use), so leaving it out isn't omission"]
         return []
+
+    @staticmethod
+    def _words(s: str) -> set:
+        """Lower-case words, singular (a trailing s dropped), for comparing use names."""
+        return {w[:-1] if w.endswith("s") and len(w) > 3 else w
+                for w in tokenize(str(s).replace("_", " ").replace("-", " ")) if w.isalpha()}
+
+    def _piece_words(self, pid: str) -> set:
+        """The words of a piece, its title, and the other pieces of its section (§325-22B's motel is §325-22A's)."""
+        section = re.match(r"325-\d+(?:\.\d+)?", pid)[0] if not pid.startswith("325-3B:") else pid
+        pages = self.ctx.pages.get(LAW, {})
+        out = set()
+        for other, piece in self.pieces.items():
+            if other == pid or (re.match(r"325-\d+(?:\.\d+)?[A-Z]?$", other) and
+                                re.match(r"325-\d+(?:\.\d+)?", other)[0] == section):
+                out |= self._words(piece["title"])
+                out |= {w for k in piece_keys(piece) for w in self._words(" ".join(pages.get(k[0], {}).get(k[1], [])))}
+        return out
 
     # -- the table ---------------------------------------------------------------------------------------
 
@@ -396,9 +424,10 @@ class Audit:
     def _title(self, pid: str) -> str:
         return " ".join(self.pieces[pid]["title"].replace("|", "/").split())
 
-    def mapped_only(self, pid: str, d: str) -> bool:
-        """Some part's covering rules reach it only through Gordium's stated mapping (they cite none of its lines)."""
-        return any(dec.get("status") in ("rulebook", "flag") and not any(
+    def mapped_only(self, pid: str, d: str, kinds=("rulebook", "flag")) -> bool:
+        """Some part (of these statuses) is covered only through Gordium's stated mapping (its rules cite none of
+        its lines)."""
+        return any(dec.get("status") in kinds and not any(
             self._reaches(d, r, pid, self.part_lines[pid][i]) for r in self._expand(d, dec.get("rules")))
             for i, (_, dec) in enumerate(self.cells.get(pid, {}).get(d, [])))
 
@@ -414,8 +443,10 @@ class Audit:
                                        for r in self._expand(d, dec.get("rules"))))
             return (", ".join(found[:3]) + (f" +{len(found) - 3} more" if len(found) > 3 else "")) if found else ""
         checked, flagged = ids("rulebook"), ids("flag")
-        if self.mapped_only(pid, d) and checked:
+        if self.mapped_only(pid, d, ("rulebook",)) and checked:
             checked += " (mapped)"
+        if self.mapped_only(pid, d, ("flag",)) and flagged:
+            flagged += " (mapped)"
         if worst == "rulebook":
             return f"✓ {checked}"
         also = ([f"partly ✓ {checked}"] if checked else []) + ([f"partly flagged: {flagged}"] if flagged else [])

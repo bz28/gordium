@@ -254,12 +254,12 @@ def test_a_chart_not_applicable_checks_the_districts_own_cell(decisions):
 def test_the_omission_quote_needs_a_use_on_no_residential_list(decisions):
     base = {"status": "not_applicable", "why": "w", "page": 26, "quote": "except where otherwise indicated by "
             "specific prohibition or omission"}
-    assert problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(base, unlisted_use="motel")}])) == []
+    assert problems(with_piece(decisions, "325-22A", [{"what": "x", "all": dict(base, unlisted_use="motel")}])) == []
     found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": base}]))
     assert any("needs `unlisted_use`" in p for p in found)
+    listed = audit.Audit(ITHACA)
     for use in ("two-family", "school", "dormitory"):
-        found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(base, unlisted_use=use)}]))
-        assert any("is a residential use" in p for p in found), use
+        assert any("is a residential use" in p for p in listed._unlisted_problems("R-1a", {"unlisted_use": use}, "w")), use
 
 
 def test_a_definition_link_on_a_piece_of_several_parts_needs_mapped(decisions):
@@ -397,3 +397,43 @@ def test_a_cell_covered_only_by_a_mapping_says_so(built):
     assert built._short("325-17A", "R-1b").endswith("(mapped)")
     assert not built._short("325-19C", "R-1b").endswith("(mapped)")                  # front_yard cites it
     assert "§325-17A (mapped)" in SAVED.read_text(encoding="utf-8").split("## The table")[0]
+
+
+# Review round 4.
+
+@pytest.mark.parametrize("pid", ["325-26", "325-3B:home_occupation"])
+def test_the_unlisted_use_must_be_what_the_piece_is_about(decisions, pid):
+    """A motel is unlisted, but §325-26 (streams) and home occupations aren't about motels."""
+    found = problems(with_piece(decisions, pid, [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "page": 26, "quote": audit.OMISSION, "unlisted_use": "motel"}}]))
+    assert any("isn't what this piece is about" in p for p in found)
+
+
+def test_motels_in_every_part_of_section_22_are_what_their_pieces_are_about(built):
+    """§325-22B to H don't say 'motel' themselves; §325-22A, in the same section, does."""
+    assert all("motel" in built._piece_words(f"325-22{x}") for x in "ABCDEFGH")
+
+
+def test_a_listed_use_with_a_word_added_is_still_listed(built):
+    assert built._unlisted_problems("R-1a", {"unlisted_use": "home occupation business"}, "w")
+    assert built._unlisted_problems("R-1a", {"unlisted_use": "rooming house annex"}, "w")
+
+
+def test_the_column_2_sentence_is_the_same_argument_and_needs_an_unlisted_use(decisions):
+    found = problems(with_piece(decisions, "325-3B:home_occupation", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "page": 24,
+        "quote": "Uses which are permitted in each use district are listed"}}]))
+    assert any("needs `unlisted_use`" in p for p in found)
+
+
+def test_mapped_is_shown_on_the_kind_of_part_that_is_mapped(built):
+    """§325-8B in R-1a: use cites part (3) (✓, no label) and is only mapped onto part (4) (flagged, mapped)."""
+    assert "partly ✓ use;" in built._short("325-8B", "R-1a")
+    assert "partly flagged: use (mapped)" in built._short("325-8B", "R-1a")
+
+
+def test_a_district_decided_twice_through_an_alias_is_refused(decisions):
+    x = {"status": "missing", "priority": "low", "why": "w"}
+    y = {"status": "missing", "priority": "high", "why": "w2"}
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": x, "R-1a": x, "R-1a, R-1b": y}]))
+    assert "325-26 part 1: R-1a decided twice" in found
