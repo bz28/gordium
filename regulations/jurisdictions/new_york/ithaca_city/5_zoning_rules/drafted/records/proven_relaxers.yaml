@@ -9,6 +9,18 @@ R-1a.325_16c_height_exception_extra_height:
 R-1b.325_16c_height_exception_extra_height:
   proof: "relaxer_mismatches: equals R-1b.height (R-1b.yaml), composed (2026-10-27)"
   fingerprint: 496cc2b4e9e4e94b
+R-2a.325_16c_height_exception_extra_height:
+  proof: "relaxer_mismatches: equals R-2a.height (R-2a.yaml), composed (2026-10-27)"
+  fingerprint: 0da3890fb71f5421
+R-2b.325_16c_height_exception_extra_height:
+  proof: "relaxer_mismatches: equals R-2b.height (R-2b.yaml), composed (2026-10-27)"
+  fingerprint: 58e9f59160c59c7b
 R-3a.325_16c_height_exception_extra_height:
   proof: "relaxer_mismatches: equals R-3a.height (R-3a.yaml), composed (2026-10-27)"
   fingerprint: eb888c5c9e22a25e
+R-3aa.325_16c_height_exception_extra_height:
+  proof: "relaxer_mismatches: equals R-3aa.height (R-3aa.yaml), composed (2026-10-27)"
+  fingerprint: 78020035450aaba7
+R-3b.325_16c_height_exception_extra_height:
+  proof: "relaxer_mismatches: equals R-3b.height (R-3b.yaml), composed (2026-10-27)"
+  fingerprint: 3b7ec21aefd6f089

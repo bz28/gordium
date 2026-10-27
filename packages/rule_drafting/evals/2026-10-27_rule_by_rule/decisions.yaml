@@ -1,0 +1,47 @@
+# The law decision for each verdict difference between the drafts and the hand keys (compare.py, report.md): which
+# side matches the law, quoting it, and what was done. Written by hand from the City's documents (2026-10-27); a test
+# fails if a verdict difference has no decision here.
+
+R-2c.height:
+  law: >-
+    "C. Height and open space. In any district, any main building may be erected to a height in excess of that
+    specified for the district, provided that: (1) Each required front, side and rear yard is increased one foot on the
+    ground for each one foot of such additional height. ... (3) In each district, the number of additional feet may not
+    exceed 10% of the maximum building height allowed in that district." (§325-16C, Chapter 325 p.47 l.6-12)
+  side: >-
+    The key. "In any district" reaches R-2c; a 37 ft house with every yard 2 ft over its minimum complies. The drafts
+    have only the chart's 35 ft row: their §325-16C bonus for R-2c is unresolved in the drafting log (the side-yard
+    cell holds two numbers, the template expects one), so they fail it: a false fail, never a false pass.
+  done: >-
+    The drafter's to-do (no AI spend now): fill §325-16C's template for R-2c's two-number side cell, then prove the
+    bonus as R-1a/R-1b/R-2a/R-2b/R-3a/R-3aa/R-3b's are (records/proven_relaxers.yaml). Recorded in
+    hand_to_drafted.yaml's reason for R-2c.height.
+RU.height:
+  law: >-
+    "In any district, any main building may be erected to a height in excess of that specified for the district,
+    provided that: (1) Each required front, side and rear yard is increased one foot on the ground for each one foot
+    of such additional height." (§325-16C, Chapter 325 p.47 l.6-9)
+  side: >-
+    The key. The drafts have only RU's 35 ft row (§325-16C's extra height unresolved for RU in the drafting log), so a
+    taller house with larger yards fails where the law allows it: a false fail, never a false pass.
+  done: The drafter's to-do, as for R-2c.height; recorded in hand_to_drafted.yaml's reason for RU.height.
+R-3aa.stories:
+  law: >-
+    R-3aa's chart cell sets a minimum of two stories; whether a small one-story building (a garage, a shed) may skip
+    it, and whether the minimum reaches an accessory building, is open question §5.10 of
+    docs/questions_for_architects.md (R-3aa.stories#1), researched and not settled by the code.
+  side: >-
+    The key: with the law genuinely unclear, a one-story building needs review (never a guess). The drafts fail it,
+    which is one reading's answer.
+  done: >-
+    The drafter's to-do: the drafted minimum-stories rule needs the open question's review condition. Already on the
+    architects' page (§5.10); nothing new to ask.
+RU.spacing_500_ft:
+  law: >-
+    "(5) Restricted to one every 500 feet for new construction, measured from the edge of the property line." (zoning
+    chart p.2, note 5), marked on the multiple-family, fraternity and dormitory rows for RU, not on "Two-family
+    dwelling [fn4] - - • • • • • • •" (p.2 l.13).
+  side: >-
+    Both. For a two-family house the key's spacing rule doesn't apply and the drafts' only matching rule (RU.use)
+    passes the use: either way nothing is wrong and nothing is shown against the spacing note.
+  done: Nothing to change.
