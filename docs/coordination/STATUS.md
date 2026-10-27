@@ -242,3 +242,34 @@ Scripts cannot press real keys (Eto), so these are the claims left for a person.
 6. **One click takes the whole street (#15).** Corner lot? Yes, **Change...**, click one Ithaca Rd piece: the command line says "Ithaca Rd: 8 lot-line pieces, 75'-10" of frontage" and the blue highlight covers all of Ithaca Rd, never the rear. Click the side street, answer the question, press Enter when done.
 - Lane C: user guide review loop finished (11 rounds; round 11 clean; each finding checked by a sceptic agent); full suite on the final head 7132bd8: 1392 passed, 7 CI steps passed; pushed to rhino-ui. PRODUCT BUGS found by the guide review, owner #15 rhino-ui, NOT fixed: (a) on a corner lot, Esc at "Click each lot line on a street" acts like Enter and applies the clicks made so far (gordium_rhino.py _box_pick; the docstring says Esc changes nothing); (b) Esc at "Which street is this lot line on?" leaves the street unnamed but still saves the clicked line. GordiumStart then Cancel on a new file leaves the sample lot drawn (guide says so).
 - 2026-10-27 (Lane D) queue item 10 DONE: PR #39 coverage-audit at f9fd7d95 (base r3-hand #30): generated 6_coverage_report/residential_districts.md, 164 rule/flag pieces x 9 districts (python -m section_labeling audit [--check], CI step). Totals 1476 cells: rulebook 85, flag 10, parked 117, n/a 659, MISSING 605 (72 pieces, 49 ranked gaps; mostly wireless 21/district, nonconforming, operational). Real rules missing: HIGH §325-26 20 ft from stream banks (all 9), §325-8B(1) lot area per extra primary building (8; RU flagged); MEDIUM occupancy (Lane B), home occupation + SP accessory uses, §325-7B, South Hill overlay, 3-6 unit attached cap in R-3a/aa/b/RU. Review rounds 7/6/5/4 found, 6/5/5/4 confirmed (2 sceptics each), all fixed + revert-checked; CAP HIT: round 4 fixes not yet through a clean cold round. Full suite 1803 passed, 8 CI steps passed.
+
+## FOR BEN: merge 2 (Lane A, 2026-10-27; nothing merged)
+Heads now (each full suite = pytest + all 7 CI steps, all passed):
+| PR | branch | base now | head | suite |
+|---|---|---|---|---|
+| #15 | rhino-ui | main | c912159 (main #36 merged in; same files as fc42e5a) | 1,393 passed (at fc42e5a) |
+| #16 | site-lookup | rhino-ui | 40ae4fd | 1,443 passed |
+| #19 | start-box-lookup | site-lookup | 59d7184 | 1,563 passed |
+| #23 | context-map | start-box-lookup | 456f936 | 1,690 passed |
+| #27 | check-button | context-map | 7afad1c | 1,761 passed |
+| #26 | re-lookup | start-box-lookup | 19ed22f | 1,652 passed |
+| #17 | term-index | rhino-ui | d1ff50c | 1,441 passed |
+| #18 | measurement-2 | term-index | c827907 | 2,166 passed |
+| #20 | answer-keys | measurement-2 | ce98fdc | 1,983 passed (earlier job; not re-run) |
+| #22 | stress-tests | measurement-2 | 525bff3 | 1,949 passed (earlier job; not re-run) |
+
+Order (checked by merging the real heads onto main in a scratch copy). Each step: set the PR's base to main first (Edit next to the title), then Merge (merge commit, never squash).
+1. #15 → main.
+2. #16 → main.
+3. #19 → main.
+4. #23 → main.
+5. #27 → main.
+6. STOP: #26 then conflicts with #23/#27 in gordium_rhino.py (two PRs on the same base both changed it). Lane A merges main into re-lookup (as the demo build did), suite + review round, pushes; then #26 → main.
+7. STOP: the #17 line conflicts with the merged #19 line in docs/README.md, docs/methods.md and model_measurement/project.py. Lane A merges main into term-index, then measurement-2, then answer-keys and stress-tests, each with its suite; then #17, #18, #20, #22 → main in that order.
+(The other order, the #17 line first, is clean through #22 but then needs the carry on all five UI PRs: more work.)
+
+Not carried, and whether it matters:
+- site-lookup Esc tidy: done now (rhino-ui carried into #16 and up through #19/#23/#26/#27). Doesn't matter any more.
+- #20/#22 don't have #18's latest (99 commits behind measurement-2). They merge onto it cleanly, but their tests haven't run against the new #18: step 7 carries them and runs their suites before they merge.
+- term-index/measurement-2 have rhino-ui fe5da8b, not the newest (guide, Esc): only #15's own plugin/guide files differ, and they merge cleanly (step 7 carries anyway).
+Undo review (step 4): rounds 5 (2 found: 1 fixed, 1 refuted), 6 (2 found: 1 comment fixed, 1 refuted), 7 clean. In-Rhino to run: apps/rhino_plugin/tests/undo_steps_in_rhino.py at 7afad1c (now also Show neighbourhood and Check after every edit).
