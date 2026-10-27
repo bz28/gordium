@@ -239,6 +239,8 @@ def test_each_chart_value_is_exactly_where_the_rule_turns_from_pass_to_fail(dist
             for i, (measure, kind, fixed, limit, *expected) in enumerate(table[key]):
                 exact = expected[0] if expected else EXACT
                 bound = limit(numbers(c["value"]))
+                if measure == "lot_area":           # §325-8B(1): the figure applies once per primary building, so a
+                    bound *= base.get("primary_buildings", 1)   # rule worked out for two needs it twice (queue 15)
                 step = 1 if measure in COUNTS else 0.01
                 past = bound + step if kind == "max" else bound - step
                 at = outcome(rule, base | fixed | {measure: bound}, uses)
