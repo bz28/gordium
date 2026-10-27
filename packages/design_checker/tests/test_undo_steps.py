@@ -67,6 +67,9 @@ class Doc:
             def ModifyAttributes(self, o, attrs, quiet):
                 doc.wrote("object attributes")
 
+            def Delete(self, o, quiet):
+                doc.wrote("object deleted")
+
             def UnselectAll(self):
                 pass                                          # selection: never an undo step in Rhino
 
@@ -114,6 +117,7 @@ def _plugin(doc, said):
           "confirm": lambda doc, facts, options, mode="check": ns["_drawn"](doc, facts, {}, {})}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
+    exec(SRC[SRC.index("class RhinoTable:"):].split("\ndef ", 1)[0], ns)      # noqa: S102
     return ns
 
 
@@ -165,6 +169,32 @@ def test_a_refused_count_leaves_the_file_as_it_was_and_no_undo_step():
     ns["_actions"]()["enter"](["stories"])
     assert doc.records == [logic.UNDO_WORDS["enter"]] and doc.outside == [] and checks == [4]
     assert json.loads(doc.Strings.data[("Gordium", "lot_facts")])["stories"] == 4
+
+
+def test_the_start_box_is_one_step_from_its_first_edit_to_the_facts_saved():
+    """Undo steps round 2, F1: what the box draws before Draw (the City's lot, spot grades, the old lot held) was
+    written with no undo record, so one Ctrl+Z after Draw left the looked-up lot in the model with the old facts.
+    The box's own model edits begin its one step; Draw and the facts saved after it close are in it."""
+    doc = Doc()
+    ns = _plugin(doc, [])
+
+    def box(doc, facts, options, mode="check"):
+        ns["RhinoTable"](doc, logic.UNDO_WORDS["edit_site"]).delete("the old lot")   # an edit while the box is open
+        return ns["_drawn"](doc, facts, {}, {})
+    ns["confirm"] = box
+    ns["_actions"]()["edit_site"]()
+    assert doc.outside == [] and doc.open == [] and doc.records == [logic.UNDO_WORDS["edit_site"]]
+    ns["RhinoTable"](doc).delete("x")                          # recovery's own table: never begins the box's step
+    assert doc.records == [logic.UNDO_WORDS["edit_site"]] and "undo" not in ns["STATE"]
+
+
+def test_a_tried_count_leaves_undo_recording_as_it_was():
+    """Undo steps round 2, F3: recording off before (by someone else) stays off."""
+    doc = Doc()
+    ns = _plugin(doc, [])
+    doc.UndoRecordingEnabled = False
+    ns["_tried"](doc, {"stories": 2})
+    assert doc.UndoRecordingEnabled is False
 
 
 def test_a_start_box_closed_without_draw_makes_no_step_and_holds_none():

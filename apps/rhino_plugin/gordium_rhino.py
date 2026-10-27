@@ -1048,7 +1048,7 @@ def _tried(doc, facts):
     """The measuring's words if it refuses `facts` (else None): checked with them saved while undo recording is off,
     then the facts put back exactly as stored, so nothing is left changed and no undo step made (the last check is
     of `facts`: the caller checks again if it doesn't keep them)."""
-    stored = doc.Strings.GetValue(SECTION, ENTRY)
+    stored, recording = doc.Strings.GetValue(SECTION, ENTRY), doc.UndoRecordingEnabled
     doc.UndoRecordingEnabled = False
     try:
         save_facts(doc, facts)
@@ -1060,7 +1060,7 @@ def _tried(doc, facts):
         raise
     finally:
         _put_back(doc, stored)
-        doc.UndoRecordingEnabled = True
+        doc.UndoRecordingEnabled = recording         # as it was (never turned on by Gordium)
 
 
 def _put_back(doc, stored):
@@ -1412,10 +1412,16 @@ def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
 
 
 class RhinoTable:
-    """The model as rhino_logic.BoxSession and apply_lookup use it: a few plain calls on one document."""
+    """The model as rhino_logic.BoxSession and apply_lookup use it: a few plain calls on one document. `step`: the
+    undo step a start box's edits go in (its first edit begins it, unless one is held; the box's caller ends it with
+    the facts saved after Draw: the whole box one step, its Cancel's rollback inside it too). None: recovery's own."""
 
-    def __init__(self, doc):
-        self.doc = doc
+    def __init__(self, doc, step=None):
+        self.doc, self.step = doc, step
+
+    def _changing(self):
+        if self.step and not STATE.get("undo"):
+            _begin_undo(self.doc, self.step)
 
     def exists(self, object_id):
         return _find(self.doc, object_id or "") is not None
@@ -1423,6 +1429,7 @@ class RhinoTable:
     def delete(self, object_id):
         o = _find(self.doc, object_id)
         if o is not None:
+            self._changing()
             self.doc.Objects.Delete(o, True)
 
     def layer_of(self, object_id):
@@ -1430,6 +1437,7 @@ class RhinoTable:
 
     def _move(self, object_id, layer_path, held_from):
         o = _find(self.doc, object_id)
+        self._changing()
         attrs = o.Attributes.Duplicate()
         attrs.LayerIndex = _layer(self.doc, layer_path)
         attrs.SetUserString(logic.HELD_FROM, held_from)
@@ -1457,6 +1465,7 @@ class RhinoTable:
     def _mark(self, object_id, key, value):
         o = _find(self.doc, object_id)
         if o is not None:
+            self._changing()
             attrs = o.Attributes.Duplicate()
             attrs.SetUserString(key, value)
             self.doc.Objects.ModifyAttributes(o, attrs, True)
@@ -1484,6 +1493,7 @@ class RhinoTable:
             return
         layer = self.doc.Layers[index]
         if not (self.doc.Objects.FindByLayer(layer) or []) and not layer.GetChildren():
+            self._changing()
             self.doc.Layers.Delete(index, True)
 
     def save_views(self):
@@ -1497,9 +1507,11 @@ class RhinoTable:
         self.doc.Views.Redraw()
 
     def add_lot(self, ring, name):
+        self._changing()
         return str(_add_lot(self.doc, {"lot": ring, "lot_name": name}))
 
     def add_spot(self, p):
+        self._changing()
         attrs = Rhino.DocObjects.ObjectAttributes()
         attrs.LayerIndex = _layer(self.doc, GRADE_LAYER)
         return str(self.doc.Objects.AddPoint(_model_point(self.doc, p[:2], p[2]), attrs))
@@ -1648,7 +1660,7 @@ def _confirm(doc, facts, options, mode):
     _highlight(doc, facts)
     _recover(doc)                       # anything an unfinished earlier box set aside, back first
     saved_ui = _ui_state(doc)
-    session = logic.BoxSession(RhinoTable(doc))     # this box's model edits, owned here, never copied
+    session = logic.BoxSession(RhinoTable(doc, logic.UNDO_WORDS["edit_site"]))  # this box's model edits: one step
     try:
         return logic.run_box(session, lambda: _box_loop(doc, facts, options, mode, saved_ui, session))
     finally:
