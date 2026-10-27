@@ -116,7 +116,7 @@ class Box:
                  "lookup": sv.get("_lookup") or {}, "live": sv.get("_live") or {}, "doubts": sv.get("doubts") or {},
                  "known_addresses": logic.known_addresses(sv),
                  "checked": sv.get("checked") or []}
-        return dict(logic.show_pending_lot(state, f, sv), **self.typed)
+        return dict(logic.show_pending_lot(dict(state, **self.typed), f, sv), **self.typed)
 
     def _apply(self, state=None):                  # gordium_rhino._apply_box: the box's answers into the facts
         state = state or self.shown()
@@ -769,6 +769,21 @@ def test_no_after_draw_when_the_address_is_already_drawn_and_draw_would_draw_not
     del site.table.objects["lot1"]
     rows = _rows_of(site.box().look_up(answer("96_ithaca_rd")))
     assert "after Draw" not in rows["lot"] + rows["street"]
+
+
+def test_rows_do_not_show_the_found_lot_while_another_address_is_typed_or_looked_up():
+    """Review round 2: address A found, then B typed (or B being looked up): A's lot must not stay under B."""
+    site = Site()
+    before = _rows_of(site.box())
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert "after Draw" in _rows_of(box)["lot"]
+    box.type_address("109 Ithaca Rd, Ithaca, NY")
+    rows = _rows_of(box)
+    assert (rows["lot"], rows["street"]) == (before["lot"], before["street"])
+    box.typed.clear()
+    box.saved["_lookup"] = dict(box.saved["_lookup"], looking="109 Ithaca Rd")
+    rows = _rows_of(box)
+    assert (rows["lot"], rows["street"]) == (before["lot"], before["street"])
 
 
 def test_buildings_on_a_sublayer_are_asked_about():
