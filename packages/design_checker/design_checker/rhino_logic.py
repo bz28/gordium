@@ -2902,7 +2902,8 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         session.add([lot_id])
         facts["lot_id"] = lot_id
         if w.get("street_line"):
-            set_street_lines(facts, w["street_line"])    # unnamed lines: the measuring reads them from the drawing
+            set_street_lines(facts, w["street_line"])    # no ids: one street's lines (a corner lot's yards and
+            #   lot width wait for the street pick, #18 reading its streets only from the ids; one street: as drawn)
         if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
             facts["plan_north_deg"] = w["frame"]["rotation_deg"]
         spots = [] if FLAT_GROUND else [table.add_spot(p) for p in w.get("spots") or []]   # flat: none drawn
