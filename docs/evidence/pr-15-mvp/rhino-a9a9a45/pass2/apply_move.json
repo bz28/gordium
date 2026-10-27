@@ -1,0 +1,25 @@
+{
+ "step": "apply_move",
+ "claims": {
+  "1 doing exactly what it said: the row complies": {
+   "ok": true,
+   "detail": {
+    "name": "Side yard, Northeast",
+    "status": "complies",
+    "reason": null,
+    "delta": "at the limit at worst"
+   }
+  },
+  "1 and no other row worse": {
+   "ok": true,
+   "detail": []
+  }
+ },
+ "row": {
+  "name": "Side yard, Northeast",
+  "status": "complies",
+  "reason": null,
+  "delta": "at the limit at worst"
+ },
+ "ok": true
+}
