@@ -98,3 +98,15 @@ def test_the_stream_row_waits_for_the_architect_and_then_decides():
     assert _rows(primary_buildings=1, stream_near_lot=False)["R-1b.stream_setback"]["status"] == present.COMPLIES
     near = _rows(primary_buildings=1, stream_near_lot=True, stream_distance=12)["R-1b.stream_setback"]
     assert near["status"] == present.FAILS
+
+
+def test_contradictory_stream_answers_never_pass():
+    """PR4 review round 1 (P1): "no stream within 20 ft of the lot" with a structure said to be 5 ft from a bank
+    contradict each other (a structure stands on the lot); the "no" is set aside, so the row needs review and says
+    why, never complies."""
+    item = _rows(primary_buildings=1, stream_near_lot=False, stream_distance=5)["R-1b.stream_setback"]
+    assert item["status"] == present.REVIEW, item
+    assert "check both answers" in item["reason"], item["reason"]
+    # no contradiction at 20 ft or more: complies
+    assert _rows(primary_buildings=1, stream_near_lot=False, stream_distance=25)["R-1b.stream_setback"]["status"] \
+        == present.COMPLIES

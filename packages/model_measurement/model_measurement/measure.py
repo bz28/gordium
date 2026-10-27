@@ -66,6 +66,7 @@ YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
 EAVE_YARDS = tuple(f"{y}_eaves" for y in YARDS)
 ACCESSORY_YARDS = ("accessory_front_yard", "accessory_side_yard", "accessory_rear_yard")
 LOT_LINE_MEASURES = ("lot_width", "lot_depth") + YARDS + EAVE_YARDS + ACCESSORY_YARDS   # need the street side
+STREAM_SETBACK = 20       # ft: §325-26, the only distance stream_near_lot is asked about ("within 20 ft of the lot")
 TOUCH = 0.1               # ft: a solid this close to the main building (in plan) is part of it (a porch, steps)
 
 
@@ -1723,6 +1724,7 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
                 if facts.get(name) is not None:
                     out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")
             _counts_disagree(out, facts)
+            _stream_disagrees(out, facts)
             if facts.get("zone"):
                 out["district"] = _record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
     finally:
@@ -1771,6 +1773,16 @@ def pick_main(buildings: list[dict], facts: dict) -> tuple:
     return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
+def _stream_disagrees(out: dict, facts: dict) -> None:
+    """"No inlet wall or stream bank within 20 ft of the lot" and a new structure under 20 ft from one can't both be
+    true (a structure stands on the lot): the "no" is set aside with the reason, so §325-26's row needs review, never
+    a pass on the "no" (PR4 review round 1)."""
+    distance = facts.get("stream_distance")
+    if facts.get("stream_near_lot") is False and type(distance) in (int, float) and distance < STREAM_SETBACK:
+        out["stream_near_lot"] = _record("stream_near_lot", "yes_no",
+                                         reason=stop("stream_facts_disagree", distance=distance))
+
+
 def _counts_disagree(out: dict, facts: dict) -> None:
     """The unrelated people counted with minor dependent children can't be fewer than without them (review round 2):
     a pair like that is a mistyped count, so the count R-3 and RU read is set aside with the reason (needs review),
@@ -1789,6 +1801,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         out[name] = (_record(name, unit, v, "stated by the architect (not measured from the model)")
                      if v is not None else _record(name, unit, reason=stop(ASK[name])))
     _counts_disagree(out, facts)
+    _stream_disagrees(out, facts)
     # the lot's zoning district is the zone the architect stated (the facts' "zone")
     out["district"] = (_record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
                        if facts.get("zone") else _record("district", "text", reason=stop("no_district")))

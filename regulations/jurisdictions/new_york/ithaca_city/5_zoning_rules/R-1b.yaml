@@ -419,7 +419,7 @@ rules:
     - id: stream_setback_measured_level
       question: How is §325-26's 20 ft measured?
       kind: law
-      answer: 'Across, level, from the new structure to the point where the average water level meets the bank (or the inlet wall): the section''s own illustration draws "20'' MIN" as a horizontal dimension from the structure''s face to the bank at "AVERAGE LEVEL", between the high-water and low-water lines; the text says the distance is "measured at an average water level".'
+      answer: 'Across, level, from the new structure to the point where the average water level meets the bank (or the inlet wall): the section''s own illustration (p.67 of the PDF, below the text; read from the page, research §7) draws "20'' MIN" as a horizontal dimension from the structure''s face to the bank at "AVERAGE LEVEL", between the high-water and low-water lines; the text says the distance is "measured at an average water level".'
       sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 67
