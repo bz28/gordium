@@ -194,13 +194,14 @@ def test_several_matches_are_offered_under_the_address():
     facts, saved, state = box(p)
     rows = {r["key"]: r for r in logic.box_rows(state)}
     assert rows["address"]["matches"] == ["10 N Aurora St", "10 S Aurora St"]
-    assert logic.uncertain(state).endswith("Pick one under Address, then Look up again.")
+    # what to do, then that the model is as it was (the box says so after every lookup that found no lot)
+    assert logic.uncertain(state).endswith("Pick one under Address, then Look up again. " + logic.NOTHING_CHANGED)
 
 
 def test_looking_up_shows_its_state_and_keeps_draw_off():
     rows = {r["key"]: r for r in logic.box_rows({"lookup": {"looking": "106 Ithaca Rd"}})}
-    assert rows["address"]["actions"] == [("lookup", "Looking up…", False)]
-    assert rows["address"]["status"] == "Looking up 106 Ithaca Rd… (up to 45 s)"
+    assert rows["address"]["actions"] == [("lookup_cancel", "Cancel lookup", True)]    # the button stops it
+    assert rows["address"]["status"] == "Looking up 106 Ithaca Rd · Starting the lookup…  ●○○  0 s (stops at 45 s)"
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "draw.Enabled = logic.can_draw(state) and not looking" in ui and 'done("pick:lookup_done")' in ui
 
@@ -231,7 +232,11 @@ def test_only_what_each_source_allows_is_written_into_the_model():
 def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
     assert main(["106 Ithaca Rd, Ithaca, NY 14850", "--fixture", "106_ithaca_rd"]) == 0
     out = capsys.readouterr().out.strip().splitlines()
-    assert len(out) == 1 and json.loads(out[0])["status"] == "found"
+    # a progress line as each stage starts, then the answer, always last
+    assert [json.loads(line) for line in out[:-1]] == [{"step": t} for t in (
+        "Finding the address…", "Finding the tax parcel…", "Finding which lot lines face a street…",
+        "Reading the ground elevations…", "Reading the City zoning map…", "Checking the historic and gorge maps…")]
+    assert json.loads(out[-1])["status"] == "found" and logic.lookup_answer("\n".join(out))["status"] == "found"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert '"-m", "design_checker.lookup_box", address' in rhino and "logic.LOOKUP_LIMIT_S" in rhino
     assert "_lookup_kill(run)" in rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
@@ -895,7 +900,7 @@ def test_while_a_start_box_is_open_no_panel_action_does_anything_but_say_so():
     names = re.findall(r'"(\w+)": ', body)
     assert {"enter", "add", "ground", "not_ground", "retry", "edit_site", "survey", "grade", "report", "envelope",
             "massing", "zoom"} <= set(names)
-    assert "return logic.gate_actions(PANEL_ACTIONS(), _box_open, say)" in rhino
+    assert "logic.busy_actions(logic.gate_actions(PANEL_ACTIONS(), _box_open, say)," in rhino   # (and busy: #32)
     calls, said, box = [], [], {"open": True}
     gated = logic.gate_actions({n: (lambda *a, n=n: calls.append(n)) for n in names}, lambda: box["open"], said.append)
     for n in names:
@@ -921,7 +926,8 @@ def test_live_mode_never_rechecks_under_an_open_start_box():
     assert not logic.should_recheck(None, 11.0, False, False, wait)       # nothing changed
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     idle = rhino[rhino.index("def _idle("):rhino.index("def documents(")]
-    assert 'logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS,' in idle
+    assert 'busy = STATE.get("running") or STATE.get("asking") is not None' in idle    # a check, or any answer
+    assert 'logic.should_recheck(t, time.time(), busy, _box_open(), IDLE_SECONDS,' in idle
     assert idle.index("should_recheck") < idle.index('STATE["dirty"] = None')   # the pending edit kept until then
     check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
     assert 'if STATE.get("running") or not logic.allowed("check", _box_open()):\n        return None' in check
@@ -984,10 +990,13 @@ def test_switching_documents_with_a_pending_edit_still_rechecks_the_one_in_front
     assert logic.should_recheck(10.0, 13.0, False, False, 0.5, logic.last_check_at(checked_at, "doc B"))
     assert not logic.should_recheck(10.0, 13.0, False, False, 0.5, logic.last_check_at(checked_at, "doc A"))
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()' in check
-    assert check.index('"envelope": result.get("envelope"), "at": time.time()}') < check.index('"checked_at"') < \
-        check.index("except Exception")                  # only after a completed check, never on an error
+    apply = rhino[rhino.index("def _check_apply("):rhino.index("def _check_failed(")]
+    # a completed check only (never an error or a Cancel), dated when it READ the model: an edit made while a
+    # background re-check ran is newer, so it is checked again
+    assert 'STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = begun["at"]' in apply
+    assert apply.index('"envelope": result.get("envelope"), "at": time.time()}') < apply.index('"checked_at"')
+    others = rhino[rhino.index("def _check_failed("):rhino.index("def _check_live(")]
+    assert '"checked_at"' not in others
     new_doc = rhino.index("def _new_document(")
     assert '"checked_at"' not in rhino[new_doc:rhino.index("\ndef ", new_doc + 10)]
 

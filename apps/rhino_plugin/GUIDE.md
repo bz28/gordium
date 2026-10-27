@@ -68,6 +68,10 @@ Buttons along the panel:
 - **Zoning report…**: writes the report in the architects' spreadsheet format, opens it and says where it saved it.
 - **?**: the legend (what the marks and colours mean, and which version of the law was checked).
 - **Retry**: shown only when a check failed, to try it again.
+- **Check again**: shown after you stopped a check (Esc, or Cancel beside "Checking…"). Nothing in the model
+  changed, and nothing is shown as checked until you press it.
+- **Tell Gordium in Edit site…**: on a row that waits for something you answer in the start box (for example how
+  many dwelling units): it opens the start box. Until you answer, the row needs review.
 
 Tick boxes:
 

@@ -82,12 +82,20 @@ def uses(f: dict, *keys: str) -> dict:
     return f
 
 
-def lookup(address: str, http, now: dt.datetime | None = None) -> dict:
+# What the lookup is doing, in the architect's words, as it goes (the start box shows the latest one live).
+STEPS = {"address": "Finding the address…", "parcel": "Finding the tax parcel…",
+         "streets": "Finding which lot lines face a street…", "ground": "Reading the ground elevations…",
+         "zoning": "Reading the City zoning map…", "overlays": "Checking the historic and gorge maps…"}
+
+
+def lookup(address: str, http, now: dt.datetime | None = None, step=None) -> dict:
+    """`step(text)`, if given, is told each stage as it starts (STEPS), for a live progress line; it never changes
+    the answer."""
     f = Fetcher(http, now)
     today = f.now.date().isoformat()
     result = {"query": address, "status": "found", "message": "", "facts": {}, "asks": []}
     try:
-        _lookup(address, f, today, result)
+        _lookup(address, f, today, result, step or (lambda text: None))
     except Offline as e:
         result.update(status="offline", message="Couldn't reach the map services (offline?): enter the site by hand.",
                       detail=str(e))
@@ -105,9 +113,10 @@ FACT_KEYS = ("value", "source", "confirmed_by", "date")
 DETAIL_KEYS = ("status", "reason", "note", "source_detail", "source_url", "source_keys")
 
 
-def _lookup(address: str, f: Fetcher, today: str, result: dict) -> None:
+def _lookup(address: str, f: Fetcher, today: str, result: dict, say=lambda text: None) -> None:
     facts, asks = result["facts"], result["asks"]
     # ---- 1. address -> point ---------------------------------------------------------------------------
+    say(STEPS["address"])
     cands = [c for c in f.geocode(address) if c["score"] >= 90]
     points = [c for c in cands if c["type"] == "PointAddress"]
     chosen = _distinct(points) or _distinct([c for c in cands if c["type"] == "StreetAddress"])
@@ -152,6 +161,7 @@ def _lookup(address: str, f: Fetcher, today: str, result: dict) -> None:
     except (Offline, ServiceError):
         pass                                                   # a cross-check only; the State point stands
     # ---- 2. point -> parcel (the State copy is the stored outline; the City's adds City-only flags) ---------
+    say(STEPS["parcel"])
     try:
         state = f.state_parcels_at(c["point"])
     except (Offline, ServiceError):
@@ -202,11 +212,16 @@ def _lookup(address: str, f: Fetcher, today: str, result: dict) -> None:
                      ([("Worked out on the largest piece of a parcel in several pieces: check the lot outline.", "")]
                       if len(parcel["rings"]) > 1 else [])}
     # ---- 3. which lines face a street ------------------------------------------------------------------
+    say(STEPS["streets"])
     _streets(f, ring, c["street"], today, facts, asks, lot)
     # ---- 4. ground --------------------------------------------------------------------------------------
+    say(STEPS["ground"])
     _ground(f, ring, origin, today, facts, lot)
     # ---- 5. zoning suggestion and overlays (live, never stored) --------------------------------------------
+    say(STEPS["zoning"])
     _zoning(f, ring, c["street"], facts, asks, today, city_parcel, lot)
+    say(STEPS["overlays"])
+    _overlays(f, ring, city_parcel, ENDPOINTS["city_zoning"], today, facts, lot)
 
 
 def _distinct(cands: list[dict]) -> list[dict]:
@@ -329,6 +344,7 @@ def _ground(f: Fetcher, ring, origin, today: str, facts: dict, lot: dict | None 
 
 def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, today: str, city_parcel,
             lot: dict | None = None) -> None:
+    """The zone suggestion (the overlays are looked for after it, by _lookup, whatever this finds)."""
     src = ENDPOINTS["city_zoning"]
     try:
         polys = f.zoning_near(ring)
@@ -336,7 +352,6 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     except (Offline, ServiceError):
         facts["zone"] = fact(None, src["name"], src["url"], today, "needs_review",
                              "Couldn't reach the City's zoning map: choose the district.", key="city_zoning", lot=lot)
-        _overlays(f, ring, city_parcel, src, today, facts, lot)
         return
     samples = g.grid_inside(ring)
     counts: dict[str, int] = {}
@@ -352,7 +367,6 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     if not zones:
         facts["zone"] = fact(None, source, src["url"], today, "needs_review",
                              "This lot isn't on the City's zoning map: choose the district.", key="city_zoning", lot=lot)
-        _overlays(f, ring, city_parcel, src, today, facts, lot)
         return
     z = facts["zone"] = fact(zones[0] if len(zones) == 1 else zones, source, src["url"], today, key="city_zoning", lot=lot)
     if covered < 0.9:
@@ -378,7 +392,6 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
             notes.append(line + "; this lot is outside the area it rezoned.")
     if notes:
         z["note"] = " ".join(notes)
-    _overlays(f, ring, city_parcel, src, today, facts, lot)
 
 
 def _date(v) -> dt.date | None:

@@ -983,11 +983,16 @@ def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_p
     assert check(MODEL, facts, tmp_path / "ok.xlsx")["report_error"] is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
-    body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'if report and result.get("report_error"):' in body and "say(first + logic.report_message(path, False" in body
-    # round 12: "out of date" only for a report that was there before this check, not one its own write left
-    assert body.index("had_report = bool(report) and os.path.exists(report_path(doc))") < body.index("result = ask(")
-    assert 'result["report_error"], stale=had_report))' in body
+    body = rhino[rhino.index("def _check_apply("):rhino.index("def _check_failed(")]
+    assert 'if report and result.get("report_error"):' in body and \
+        "say(first + logic.report_message(report_path(doc), False" in body
+    # round 12: "out of date" only for a report that was there before this check, not one its own write left: read
+    # with the model, before the request is made (and run_check reads the model before it asks)
+    begin = rhino[rhino.index("def _check_begin("):rhino.index("def _check_apply(")]
+    assert begin.index("had_report = bool(report) and os.path.exists(report_path(doc))") < begin.index('"request":')
+    run = rhino[rhino.index("def run_check("):rhino.index("def _check_begin(")]
+    assert run.index("begun = _check_begin(doc, report)") < run.index("result = ask(")
+    assert 'result["report_error"], stale=begun["had_report"]))' in body
     from design_checker import rhino_logic as logic
     assert logic.report_message("/x/r.xlsx", False, "Permission denied", stale=True).endswith(
         "The report already at /x/r.xlsx is from an earlier check: out of date.")
@@ -1197,10 +1202,10 @@ def test_a_stray_line_on_the_workers_stdout_never_reaches_the_plugin(facts):
     import sys
     noisy = ("import os, design_checker.__main__ as m\n"
              "real = m.answer\n"
-             "def answer(r):\n"
+             "def answer(r, *more):\n"
              "    print('a library says hello')\n"
              "    os.write(1, b'C code says hello\\n')\n"
-             "    return real(r)\n"
+             "    return real(r, *more)\n"
              "m.answer = answer\n"
              "m.main(['serve'])\n")
     requests = [{"id": 1, "cmd": "facts", "facts": {"lot_area_sqft": 1}}, {"id": 2, "cmd": "facts", "facts": {}}]
@@ -1236,7 +1241,7 @@ def test_the_plugin_takes_only_this_requests_answer_and_never_waits_forever():
 def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_checker():
     """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
+    ask = src[src.index("def ask("):src.index("# ---- the model", src.index("def ask("))]   # ask, its job, its answer
     assert "logic.exchange(" in ask and "_stop_worker()" in ask and "readline" not in ask and "stdin" not in ask
     assert "logic.pipes(p)" in src                  # the pipes served by threads (test_checker_pipes.py)
 
@@ -2096,7 +2101,8 @@ def test_no_process_gordium_starts_from_rhino_opens_a_console_window_on_windows(
     opener = ui[ui.index("def open_target("):ui.index("def _open(")]
     assert '            os.startfile(what)' in opener and "logic.open_command(os.name, target)" in opener
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "p = ui.spawn([_python()" in rhino and "opened, why = ui.open_target(path)" in rhino
+    assert 'command = STATE.get("worker_command") or [_python(), "-u", "-m", "design_checker", "serve"]' in rhino
+    assert "p = ui.spawn(list(command)" in rhino and "opened, why = ui.open_target(path)" in rhino
 
 
 def test_one_street_or_two_is_the_streets_identity_and_only_then_the_drawings_whole_swing():

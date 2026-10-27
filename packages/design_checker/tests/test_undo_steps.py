@@ -47,6 +47,8 @@ class Doc:
 
         class Layer:
             _visible = True
+            IsDeleted = False                                 # (#35's hide_massing walks every Massing layer)
+            FullPath = logic.MASSING
 
             @property
             def IsVisible(self):
@@ -63,6 +65,9 @@ class Doc:
 
             def __getitem__(self, i):
                 return layer
+
+            def __iter__(self):
+                return iter([layer])
 
         class Objects:
             def ModifyAttributes(self, o, attrs, quiet):
@@ -134,7 +139,10 @@ def _plugin(doc, said):
           # the context layers and a fetched neighbourhood, written as _context_visible and draw_context write them
           "_context_visible": lambda doc, on: setattr(doc.Layers[0], "IsVisible", on) or True,
           "_context_record": lambda doc: None, "sync_context": lambda doc, facts: None,
-          "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}")}
+          "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}"),
+          # (the demo build: #34's envelope in every document, #35's layer locks, #32's running re-check finished)
+          "_envelope_everywhere": lambda: None, "_own_lock": lambda doc, layer: False,
+          "_set_own_lock": lambda doc, layer, own: None, "_settle_live": lambda: None}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     exec(SRC[SRC.index("class RhinoTable:"):].split("\ndef ", 1)[0], ns)      # noqa: S102

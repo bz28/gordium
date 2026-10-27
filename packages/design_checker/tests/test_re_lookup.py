@@ -620,7 +620,7 @@ def test_the_box_turns_draw_off_and_on_as_the_address_is_typed():
     typed = ui[ui.index("    def address_typed(s, e):"):ui.index('address.TextChanged += logic.guard(address_typed')]
     assert 'state["address"] = address.Text' in typed
     assert "draw.Enabled = logic.can_draw(state) and not looking" in typed and \
-        "reason.Text = logic.draw_reason(state)" in typed
+        "reason.Text = logic.box_reason(state)" in typed   # (draw_reason, said once: #33)
     rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "saved_ui = logic.box_opened(_ui_state(doc), facts)" in rhino[rhino.index("def _confirm("):]
     assert '"known_addresses": logic.known_addresses(saved_ui),' in rhino[rhino.index("def _box_state("):]
@@ -646,20 +646,21 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
              '                                                     saved_ui["_pending"].get("answer"))',
              "if choice is None:\n            return facts, saved_ui, False, state", "_begin_undo(",
              "logic.apply_reset(table, session, facts, saved_ui, choice",
-             "logic.after_reset_state(state, _box_state(doc, facts, options, saved_ui, mode))",
+             "_reset_state(doc, facts, options, saved_ui, mode, state)",   # (logic.after_reset_state, as the dry plan: #32)
              'if guide and not facts.get("lot_id"):', "return facts, saved_ui, True, fresh_state")
     at = [prep.find(step) for step in steps]
     assert -1 not in at and at == sorted(at), [st for st, i in zip(steps, at) if i == -1] or at
     loop = rhino[rhino.index("def _box_loop("):rhino.index("def _lookup_start(")]
     assert loop.count("_draw_prepare(doc, facts, state, saved_ui, session, mode, options)") == 2
-    assert "return _drawn(doc, facts, drawn_state, saved_ui, session)" in loop      # the rebuilt state is saved
+    assert "return _drawn(doc, facts, drawn_state, saved_ui, session, mode)" in loop   # the rebuilt state is saved
     draw = loop[loop.index('if what == "draw":'):]
     assert loop.index("ticked = {k: state[k]") < loop.index('if what == "draw":') and "continue" in draw
     assert "logic.box_facts(facts, saved_ui, state)" in rhino[rhino.index("def _apply_box("):]
     edit = rhino[rhino.index("def edit_facts("):rhino.index("def report_path(")]
     outer = edit.index("    try:                                # one undo step")
     assert outer < edit.index("facts = confirm(") < edit.index("    finally:\n        STATE.pop(\"redraw_house\"")
-    assert edit.rstrip().endswith("run_check(doc, report=False)") and "_end_undo(doc)" in edit
+    assert edit.rstrip().endswith("run_check(doc, report=False)        # the model as it is (as it was, after a "
+                                  "Cancel)\n    if cancelled:\n        say(cancelled)") and "_end_undo(doc)" in edit
     table = rhino[rhino.index("class RhinoTable"):]
     assert "return logic.own_buildings(" in table[table.index("def buildings("):]
     # one walk of the model for the checker's sorting and a reset's questions (round 3)
@@ -876,5 +877,7 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
     edit = (rhino.index("def edit_facts("), rhino.index("def report_path("))
     outside = [rhino.count("\n", 0, i) + 1 for i in readers if not edit[0] < i < edit[1]
                and not rhino.index("def confirm(") < i < rhino.index("def _confirm(")
-               and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")]
+               and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")
+               # (#32: Draw reads it, in its own box, to work out the house it will draw: logic.plans_house)
+               and not rhino.index("def _drawn(") < i < rhino.index("def hide_massing(")]
     assert outside == [], outside                                           # read nowhere else

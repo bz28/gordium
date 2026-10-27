@@ -58,7 +58,9 @@ def test_the_panel_has_the_check_button_first_and_the_tick_off():
     header = body(UI, "def _header(", "\ndef ")
     assert 'buttons = [button("Check", a["check"]), button("Edit site…", a["edit_site"])]' in header
     assert 'logic.out_of_date_line(parts.get("auto_check"), parts.get("checked_before", True))' in header
-    assert '"Checking…"' not in header
+    # "Checking…" alone only while a check really runs (#32's progress line); out of date, the line says what comes
+    assert header.count('"Checking…"') == 1 and \
+        header.index("elif out_of_date and (checking or job is not None):") < header.index('"Checking…"')
     tick = body(UI, "def _auto_box(", "\ndef ")
     assert "logic.AUTO_CHECK_LABEL" in tick and "box.Checked = False" in tick and 'actions["auto_check"]' in tick
     panel = body(UI, "def make_panel(", "\ndef ")
@@ -105,7 +107,8 @@ def test_a_document_come_to_the_front_is_checked_once_whatever_the_tick():
     assert 'STATE["check_front"] = True' in new and 'STATE["dirty"] = None' in new
     assert "_sync_ticks(Rhino.RhinoDoc.ActiveDoc)" in new and new.index("_sync_ticks(") < new.index("ui.show(")
     idle = body(RHINO, "def _idle(", "\ndef ")
-    assert 'logic.should_check_front(STATE.get("check_front"), STATE.get("running"), _box_open())' in idle
+    assert 'logic.should_check_front(STATE.get("check_front"), busy, _box_open())' in idle    # (#32: or any answer
+    assert "_check_live(front)" in idle                                                         # awaited; background)
 
 
 def test_never_checked_says_so_not_since_the_last_check():
@@ -176,8 +179,8 @@ def test_the_architects_docs_say_press_check():
 def test_edits_are_noticed_whichever_command_drew_the_results():
     """P1: only GordiumCheck and GordiumStart turned edit noticing on; after GordiumFacts / Edit site… an edit never
     greyed the results (old marks shown as current) and the tick did nothing."""
-    run = body(RHINO, "def run_check(", "\ndef _toast(")
-    at = run.index('STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()')
+    run = body(RHINO, "def _check_apply(", "\ndef _toast(")       # (#32 split run_check: the demo build)
+    at = run.index('STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = begun["at"]')
     assert run.index('if not STATE.get("live"):', at) < run.index("live(True)", at) < run.index("ui.show(panel(), view)")
     assert 'if not STATE.get("live"):' in body(RHINO, "def set_auto_check(", "\ndef ")
 
