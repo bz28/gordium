@@ -219,3 +219,10 @@ Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from c
   - 13 Merge 3 plan for Ben: #21, #24, #30, the #28–#37 stack and #32/#33, in stack order after merge 2.
   - Not queued: open legal questions (the #11 doc is waiting on the architects/City; we don't send it), later list (parked), architect sign-off (deferred by Ben).
 - 2026-10-27 00:30 (coordinator) Item 12 is split across lanes. Lane B: pick a real lot per district family (R-1, R-2, R-3/RU), build the model file, and work out the expected results by hand from the law (independent of Gordium's code); add the headless checks. Lane C: run each site in Rhino (lookup → Draw → Check → report) and confirm Gordium's answers match the hand-worked ones. A mismatch goes to the owning PR.
+- 2026-10-27 00:40 (coordinator) Item 12 has two levels.
+  - Light run, all 9 districts (Lane C in Rhino, Lane B picks the addresses): a real address per district goes through type-ahead → lookup.
+    - Check that the district, lot, street side and corner are right against the City's map.
+    - Draw the largest legal house. It must pass every rule, or "needs review" with a stated reason.
+    - Nudge the house past one limit, and check that exactly the right rule fails with the right numbers.
+  - Deep run, 3 families (R-1, R-2, R-3/RU): a full real model with every answer worked by hand (Lane B), then run in Rhino (Lane C).
+- Lane balancing (Ben): when a lane finishes early, the coordinator moves the next unstarted queue item to it, matched to the item's model. Rhino runs stay on the single Rhino lane, one at a time. Max 3 agents.
