@@ -1667,14 +1667,14 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "zone_said": saved_ui.get("_zone_said"),     # the lookup's words, this session only
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
-            # the uses the district's chart lists (permitted first), what a pick not permitted by right means, and
-            # the follow-up questions this district's rules need for the use (Ben, 2026-10-25; from the rulebook)
-            "use_choices": logic.district_use_names(options, facts.get("zone")),
-            "implied": options.get("implied") or {},     # what each use says for the facts the rules read
+            # the uses the district's chart lists (permitted first; the use set kept even if not listed), what a pick
+            # not permitted by right means, and the follow-up questions this district's rules need for the use, each
+            # with its saved answer (Ben, 2026-10-25; derived from the rulebook: check.options)
+            "use_choices": logic.district_use_names(options, facts.get("zone"), facts.get("use")),
             "use_note": logic.use_note(options, facts.get("zone"), facts.get("use")),
             "follow_ups": logic.follow_up_rows(options, facts.get("zone"), facts.get("use"), facts),
-            "answers": {r["key"]: r["value"] for r in logic.follow_up_rows(options, facts.get("zone"),
-                                                                            facts.get("use"), facts)},
+            "answers": {k: facts.get(k) for k in logic.follow_up_keys(options, facts.get("zone"), facts.get("use"))},
+            "options": options,          # for _apply_box and fact_sources: which facts the district and use read
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
             # the street's name only with its street line (a survey outline or a corner answer drops the line:
             # review round 3, F6); this session's lookup words first, then the name saved at the last Draw
@@ -1708,8 +1708,8 @@ def _apply_box(doc, facts, state, saved_ui):
     facts, saved_ui = logic.corner_answered(facts, saved_ui, state.get("corner_lot"))   # a changed answer: the
     facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],  # street picked again
                  lot_surveyed=bool(state.get("lot_surveyed")))
-    facts, _ = logic.answers_applied(facts, state.get("answers"),   # the follow-up answers (blank: unset, never 0)
-                                     logic.implied_by({"implied": state.get("implied")}, state["zone"], state["use"]))
+    facts, _ = logic.answers_applied(facts, state.get("answers"), state["zone"], state["use"],   # blank: unset,
+                                     state.get("options"))                                     # never 0 or no
     if not facts.get("address"):
         facts.pop("address")
     facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
@@ -2104,7 +2104,8 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         if what in ("pick:lookup", "pick:lookup_done"):   # the lookup's answer replaces them (and the district
             ticked = {}                                   # must be confirmed again)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
-        facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
+        if what != "pick:refresh":           # refresh: another use or district, the box again with its questions
+            facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
         # (nothing saved until Draw: Cancel leaves the facts, the box's choices and the model as they were)
 
 
@@ -2212,7 +2213,7 @@ def _drawn(doc, facts, state, saved_ui, session=None):
     def save():
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
         _save_ui_state(doc, ui_state)
-        sources = fact_sources(doc)        # what the box doesn't set (the ground marking) is kept
+        sources = logic.sources_kept(fact_sources(doc))   # what the box doesn't set (the ground marking) is kept
         sources.update(logic.fact_sources(state, logic.city_day(), confirmed=True))
         doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
         return out

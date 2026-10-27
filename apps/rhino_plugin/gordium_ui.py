@@ -790,11 +790,13 @@ def start_box(state, options, mode):
     confirm = ef.CheckBox()
     confirm.Checked = bool(state.get("district_confirmed"))
     use = ef.DropDown()
-    names = list(state.get("use_choices") or options["uses"].items())   # the district's chart's uses, permitted first
+    # the district's chart's uses, permitted first, and the use set even if not listed (never changed unasked)
+    names = list(state.get("use_choices") or logic.district_use_names(options, state.get("zone"), state.get("use")))
     for _, n in names:
         use.Items.Add(n)
     ids = [k for k, _ in names]
     use.SelectedIndex = ids.index(state.get("use")) if state.get("use") in ids else 0
+    shown = (state.get("zone"), names[use.SelectedIndex][0] if names else None)   # what the Use rows are laid out for
     asked = {}                        # each follow-up question's field (the facts this district's rules need)
     regrade = ef.CheckBox()
     regrade.Checked = bool(state.get("no_regrading"))
@@ -822,7 +824,7 @@ def start_box(state, options, mode):
             state["use_source"] = logic.ENTERED
         answers = dict(state.get("answers") or {})
         for key, (kind, field) in asked.items():       # a blank stays unanswered (its rules: NEEDS REVIEW)
-            text = (field.Text if kind == "count" else ["", "no", "yes"][max(field.SelectedIndex, 0)])
+            text = field.Text if kind == "count" else ["", "no", "yes"][max(field.SelectedIndex, 0)]
             try:
                 answers[key] = logic.parse_answer(kind, text)
             except ValueError:
@@ -867,13 +869,18 @@ def start_box(state, options, mode):
         reason.Text = logic.draw_reason(state)
         if "source" in zone_row:
             zone_row["source"].Text = logic.zone_row_text(state).split(" · ", 1)[-1]
+        refresh_if_needed()
+
+    def refresh_if_needed():          # another use or district: its own uses, note and questions, so the box opens
+        z = zone.SelectedValue.Text if zone.SelectedValue else None       # again with them (rhino_logic decides;
+        if not looking and logic.box_needs_refresh(                       # a lookup's answer opens it again anyway)
+                options, shown, (z, names[use.SelectedIndex][0] if names else None)):
+            pick("refresh")
 
     zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
 
-    def use_changed(s, e):            # another use (or district): its own questions, so the box opens again with them
-        if use.SelectedIndex != first["use"] and ((state.get("follow_ups") or []) or logic.follow_up_rows(
-                options, state.get("zone"), names[use.SelectedIndex][0] if names else None, {})):
-            pick("refresh")
+    def use_changed(s, e):
+        refresh_if_needed()
 
     use.SelectedIndexChanged += logic.guard(use_changed, "pick the use")
     cancel = button("Cancel", lambda: done(None))
@@ -914,12 +921,20 @@ def start_box(state, options, mode):
                     field.Text = "" if q["value"] is None else str(q["value"])
                 else:
                     field = ef.DropDown()
-                    for t in ("Not answered", "New construction", "Conversion of an existing building"):
+                    for t in (logic.NOT_ANSWERED,) + logic.yes_no_words(q["key"]):
                         field.Items.Add(t)
                     field.SelectedIndex = {None: 0, False: 1, True: 2}[q["value"]]
                 asked[q["key"]] = (q["kind"], field)
-                layout.AddRow(label(q["label"], size=12), row(field, label("entered by you; blank: the rules that "
-                                                                           "need it say so", size=11)))
+                note = label(logic.FOLLOW_UP_HELP, size=11)
+                if q["kind"] == "count":     # a typed entry that isn't a whole number: said at once, never kept
+
+                    def typed(s, e, f=field, n=note, plain=note.TextColor):
+                        problem = logic.answer_problem("count", f.Text)
+                        n.Text = problem or logic.FOLLOW_UP_HELP
+                        n.TextColor = eto_status_color("needs_review") if problem else plain
+
+                    field.TextChanged += logic.guard(typed, "type the answer")
+                layout.AddRow(label(q["label"], size=12), row(field, note))
         elif key == "ground":
             layout.AddRow(title, row(label(r["text"], size=12)))          # left aligned, as the others
             layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))

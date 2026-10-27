@@ -1280,28 +1280,39 @@ def _use_lists(body) -> list:
 
 def use_choices(rules: list, names: dict, district: str) -> list:
     """The uses the district's chart lists, for the box's Use dropdown (Ben, 2026-10-25): from the district's own
-    use rule, never a hand-kept list. Permitted ones first (its check), then those the chart marks otherwise (its
-    review_when: a special permit), each saying so with the chart's page: [{"id", "name", "permitted", "note"}].
-    Every city use when the district has no use rule (nothing to narrow it by)."""
+    use rule, never a hand-kept list, as [{"id", "name", "permitted", "note"}]. Permitted ones first, then those the
+    chart marks otherwise, each saying so with the chart's page. A use rule is written one of two ways: a rule
+    whose check lists the permitted uses and whose review_when lists the special-permit ones (R-1b), or a flag that
+    applies to the special-permit uses, every other city use permitted (R-3a's "every other listed use is
+    permitted"). Every city use, none marked, when the district has no use rule (nothing to narrow it by)."""
     from rule_format import formula
-    rule = next((r for r in rules if r.get("topic") == "uses" and r.get("check")), None)
+    rule = next((r for r in rules if r.get("topic") == "uses" and (r.get("check") or r.get("applies_when"))), None)
     if rule is None:
         return [{"id": k, "name": n, "permitted": None, "note": None} for k, n in names.items()]
     page = next((s.get("page") for s in rule.get("sources") or [] if "chart" in (s.get("file") or "")), None)
     cite = f"zoning chart p.{page}" if page else "the zoning chart"
+
+    def entry(u, note=None):
+        return {"id": u, "name": names.get(u, u.replace("_", " ")), "permitted": note is None, "note": note}
+
+    if rule.get("check"):
+        permitted = _use_lists(formula.parse(rule["check"]).body)
+        special = [(u, (r.get("reason") or "").split(". ")[0].rstrip(".")) for r in rule.get("review_when") or []
+                   for u in _use_lists(formula.parse(r["when"]).body)]
+    else:
+        flagged = _use_lists(formula.parse(rule["applies_when"]).body)
+        permitted = [u for u in names if u not in flagged]
+        special = [(u, "by special permit") for u in flagged]
     out, seen = [], set()
-    for u in _use_lists(formula.parse(rule["check"]).body):
+    for u in permitted:
         if u not in seen:
             seen.add(u)
-            out.append({"id": u, "name": names.get(u, u.replace("_", " ")), "permitted": True, "note": None})
-    for r in rule.get("review_when") or []:
-        why = (r.get("reason") or "").split(". ")[0].rstrip(".")      # its first sentence: what the chart marks
-        said = why if "chart" in why else (why + f" ({cite})" if why else cite)
-        for u in _use_lists(formula.parse(r["when"]).body):
-            if u not in seen:
-                seen.add(u)
-                out.append({"id": u, "name": names.get(u, u.replace("_", " ")), "permitted": False,
-                            "note": f"Not permitted by right in {district}: {said}."})
+            out.append(entry(u))
+    for u, why in special:
+        if u not in seen:
+            seen.add(u)
+            said = why if "chart" in why else (f"{why} ({cite})" if why else cite)
+            out.append(entry(u, f"Not permitted by right in {district}: {said}."))
     return out
 
 

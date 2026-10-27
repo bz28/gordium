@@ -764,7 +764,8 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
     assert "_save_ui_state" not in loop                                         # Cancel saves nothing
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
-    assert "sources = fact_sources(doc)" in drawn and "sources.update(" in drawn  # the ground marking is kept
+    assert "sources = logic.sources_kept(fact_sources(doc))" in drawn and "sources.update(" in drawn   # the ground
+    assert "ground_marked" not in logic.BOX_ASKS                    # marking is kept (only follow-up answers go)
     assert "from_sample=True" in rhino.split("def gordium_start(", 1)[1]
 
 
