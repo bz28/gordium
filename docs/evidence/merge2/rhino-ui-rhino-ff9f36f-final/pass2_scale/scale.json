@@ -1,0 +1,227 @@
+{
+ "step": "scale",
+ "claims": {
+  "7 the lot's zoom came to rest (its labels placed)": {
+   "ok": true,
+   "detail": {
+    "neighbourhood": {
+     "labels": [],
+     "status_box": 1,
+     "settled": true
+    },
+    "lot": {
+     "labels": [
+      "\u2713 Front yard 27'-0 3/4\" (approx.)",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)",
+      "\u2713 Side yard, Southwest 12'-0 5/8\" (approx.)",
+      "? Rear yard 27'-5 3/4\" to 27'-6 1/8\" (approx.)",
+      "75'-10\"",
+      "101'-1 1/2\"",
+      "10'-4 1/8\"",
+      "69'-6 1/8\"",
+      "92'-1 3/8\""
+     ],
+     "status_box": 1,
+     "edges": [
+      "10'-4 1/8\"",
+      "101'-1 1/2\"",
+      "69'-6 1/8\"",
+      "75'-10\"",
+      "92'-1 3/8\""
+     ],
+     "led": [
+      "10'-4 1/8\"",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)"
+     ],
+     "settled": true
+    }
+   }
+  },
+  "7 zoomed out to the 1,500 ft square: no plan labels drawn": {
+   "ok": true,
+   "detail": {
+    "neighbourhood": {
+     "labels": [],
+     "status_box": 1,
+     "settled": true
+    },
+    "lot": {
+     "labels": [
+      "\u2713 Front yard 27'-0 3/4\" (approx.)",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)",
+      "\u2713 Side yard, Southwest 12'-0 5/8\" (approx.)",
+      "? Rear yard 27'-5 3/4\" to 27'-6 1/8\" (approx.)",
+      "75'-10\"",
+      "101'-1 1/2\"",
+      "10'-4 1/8\"",
+      "69'-6 1/8\"",
+      "92'-1 3/8\""
+     ],
+     "status_box": 1,
+     "edges": [
+      "10'-4 1/8\"",
+      "101'-1 1/2\"",
+      "69'-6 1/8\"",
+      "75'-10\"",
+      "92'-1 3/8\""
+     ],
+     "led": [
+      "10'-4 1/8\"",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)"
+     ],
+     "settled": true
+    }
+   }
+  },
+  "7 the status box stays": {
+   "ok": true,
+   "detail": {
+    "neighbourhood": {
+     "labels": [],
+     "status_box": 1,
+     "settled": true
+    },
+    "lot": {
+     "labels": [
+      "\u2713 Front yard 27'-0 3/4\" (approx.)",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)",
+      "\u2713 Side yard, Southwest 12'-0 5/8\" (approx.)",
+      "? Rear yard 27'-5 3/4\" to 27'-6 1/8\" (approx.)",
+      "75'-10\"",
+      "101'-1 1/2\"",
+      "10'-4 1/8\"",
+      "69'-6 1/8\"",
+      "92'-1 3/8\""
+     ],
+     "status_box": 1,
+     "edges": [
+      "10'-4 1/8\"",
+      "101'-1 1/2\"",
+      "69'-6 1/8\"",
+      "75'-10\"",
+      "92'-1 3/8\""
+     ],
+     "led": [
+      "10'-4 1/8\"",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)"
+     ],
+     "settled": true
+    },
+    "frames": {
+     "scale_neighbourhood": 3,
+     "scale_lot": 3
+    }
+   }
+  },
+  "7 zoomed to the lot: every edge's length is back, the yards' too": {
+   "ok": true,
+   "detail": {
+    "neighbourhood": {
+     "labels": [],
+     "status_box": 1,
+     "settled": true
+    },
+    "lot": {
+     "labels": [
+      "\u2713 Front yard 27'-0 3/4\" (approx.)",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)",
+      "\u2713 Side yard, Southwest 12'-0 5/8\" (approx.)",
+      "? Rear yard 27'-5 3/4\" to 27'-6 1/8\" (approx.)",
+      "75'-10\"",
+      "101'-1 1/2\"",
+      "10'-4 1/8\"",
+      "69'-6 1/8\"",
+      "92'-1 3/8\""
+     ],
+     "status_box": 1,
+     "edges": [
+      "10'-4 1/8\"",
+      "101'-1 1/2\"",
+      "69'-6 1/8\"",
+      "75'-10\"",
+      "92'-1 3/8\""
+     ],
+     "led": [
+      "10'-4 1/8\"",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)"
+     ],
+     "settled": true
+    }
+   }
+  },
+  "7 106's short 10'-4 1/8\" edge keeps its length, led to it": {
+   "ok": true,
+   "detail": {
+    "neighbourhood": {
+     "labels": [],
+     "status_box": 1,
+     "settled": true
+    },
+    "lot": {
+     "labels": [
+      "\u2713 Front yard 27'-0 3/4\" (approx.)",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)",
+      "\u2713 Side yard, Southwest 12'-0 5/8\" (approx.)",
+      "? Rear yard 27'-5 3/4\" to 27'-6 1/8\" (approx.)",
+      "75'-10\"",
+      "101'-1 1/2\"",
+      "10'-4 1/8\"",
+      "69'-6 1/8\"",
+      "92'-1 3/8\""
+     ],
+     "status_box": 1,
+     "edges": [
+      "10'-4 1/8\"",
+      "101'-1 1/2\"",
+      "69'-6 1/8\"",
+      "75'-10\"",
+      "92'-1 3/8\""
+     ],
+     "led": [
+      "10'-4 1/8\"",
+      "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)"
+     ],
+     "settled": true
+    }
+   }
+  }
+ },
+ "frames": {
+  "scale_neighbourhood": 3,
+  "scale_lot": 3
+ },
+ "scale": {
+  "neighbourhood": {
+   "labels": [],
+   "status_box": 1,
+   "settled": true
+  },
+  "lot": {
+   "labels": [
+    "\u2713 Front yard 27'-0 3/4\" (approx.)",
+    "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)",
+    "\u2713 Side yard, Southwest 12'-0 5/8\" (approx.)",
+    "? Rear yard 27'-5 3/4\" to 27'-6 1/8\" (approx.)",
+    "75'-10\"",
+    "101'-1 1/2\"",
+    "10'-4 1/8\"",
+    "69'-6 1/8\"",
+    "92'-1 3/8\""
+   ],
+   "status_box": 1,
+   "edges": [
+    "10'-4 1/8\"",
+    "101'-1 1/2\"",
+    "69'-6 1/8\"",
+    "75'-10\"",
+    "92'-1 3/8\""
+   ],
+   "led": [
+    "10'-4 1/8\"",
+    "\u2713 Side yard, Northeast 27'-4 1/4\" (approx.)"
+   ],
+   "settled": true
+  }
+ },
+ "ok": true
+}
