@@ -1,6 +1,7 @@
 #! python3
 """Gordium in Rhino 8: GordiumCheck checks the open model against its zone's rules, shows the largest legal
-building (the envelope), and re-checks after every edit (live mode).
+building (the envelope). After an edit the results grey out until the panel's Check (or, with Check after every
+edit ticked, Gordium checks again by itself).
 
 This script only talks to Rhino. All measuring and checking is Gordium's own Python (the repo's packages, run
 by its .venv in the background; docs/decisions/2026-10-20_rhino_talks_to_python.md): the lot and building
@@ -8,7 +9,7 @@ objects are copied into a small temporary .3dm, sent with the lot facts, and the
 the model is changed: highlights, the envelope and the message are drawn on top (a display conduit).
 
 Commands (set up by install.py): GordiumStart (a new project: the lot and the largest legal starting building),
-GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOff (stop and clear the drawing).
+GordiumCheck, GordiumLive (Check after every edit, on/off), GordiumFacts (edit the lot facts), GordiumOff (stop and clear the drawing).
 """
 
 import json
@@ -742,8 +743,10 @@ def settle_labels(budget_s=None):
 def _status_rows(o, old):
     """The status box's lines: the summary, then up to 3 notes (never ✓ (D3); "–" means not checked)."""
     state, text, lines = o.message
-    if old:                                  # out of date: neutral, no status (F7)
-        state, text, lines = "stale", "Checking… (the model changed)", lines[:1]
+    if old:                                  # out of date: neutral, no status (F7); press Check, or checking
+        front = Rhino.RhinoDoc.ActiveDoc
+        never = logic.last_check_at(STATE.get("checked_at"), front.RuntimeSerialNumber if front else None) is None
+        state, text, lines = "stale", logic.out_of_date_line(_auto(front), not never), lines[:1]
     mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "")
     return ["Gordium · " + (mark + " " if mark else "") + text] + list(lines)[:3]
 
@@ -894,7 +897,7 @@ def PANEL_ACTIONS():
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
             "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
-            "context": show_context}
+            "context": show_context, "check": check_now, "auto_check": set_auto_check}
 
 
 DOCK_ID = "7c3e9a51-2d84-4b6f-9e17-5a0c8d2f4b63"   # the Gordium panel's id: Rhino remembers where it is docked
@@ -982,6 +985,7 @@ def panel():
         if host is not None:
             if p is None or getattr(p["form"], "host", None) is not host or not p["form"].Visible:
                 p = ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=_context_on(doc))
+                ui.set_auto_tick(p, _auto(doc))
                 STATE["panel_parts"] = p
                 LEFTOVERS["panel"] = p["form"].Close
                 _sync_ticks(doc)            # a panel made again: its ticks as the document has them
@@ -990,6 +994,7 @@ def panel():
             return p
     if p is None or not p["form"].Visible:
         p = ui.make_panel(_actions(), context_on=_context_on(doc))
+        ui.set_auto_tick(p, _auto(doc))
         STATE["panel_parts"] = p
         LEFTOVERS["panel"] = p["form"].Close
         _sync_ticks(doc)
@@ -1044,6 +1049,48 @@ def set_labels(on):
         _save_ui_state(doc, state)
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(state)
     doc.Views.Redraw()
+
+
+def _auto(doc):
+    """This document's Check after every edit (rhino_logic.auto_check), read once from its settings and kept per
+    document (the idle handler asks often)."""
+    if doc is None:
+        return False
+    known = STATE.setdefault("auto_by_doc", {})
+    if doc.RuntimeSerialNumber not in known:
+        known[doc.RuntimeSerialNumber] = logic.auto_check(_ui_state(doc))
+    return known[doc.RuntimeSerialNumber]
+
+
+def set_auto_check(on):
+    """Check after every edit, on or off, saved in this document. Turned on with the results out of date: checks
+    now (it would have)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        say(logic.NO_DOCUMENT)
+        return
+    if not STATE.get("live"):           # the tick needs edits noticed to act on them
+        live(True)
+    with logic.undo_step(doc, logic.UNDO_WORDS["auto_check"]):    # the setting saved in the file: one undo step
+        _save_ui_state(doc, dict(_ui_state(doc), auto_check=bool(on)))
+    STATE.setdefault("auto_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
+    ui.set_auto_tick(STATE.get("panel_parts"), on)
+    # the edit's own time is kept (never moved earlier: a check from before it would then count as covering it,
+    # review round 1, P1): turned on, the next idle checks it (it is already older than IDLE_SECONDS, or soon)
+    if STATE.get("dirty") and STATE.get("panel_parts") is not None:
+        ui.show(STATE["panel_parts"], None, checking=True)     # the header: checking, or press Check
+    say("Checks after every edit: " + ("on" if on else "off (press Check after you edit)"))
+    doc.Views.Redraw()
+
+
+def check_now():
+    """The panel's Check: the model as it is now, checked (the results no longer greyed)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        say(logic.NO_DOCUMENT)
+        return None
+    STATE["dirty"] = None
+    return run_check(doc, report=False)
 
 
 def set_envelope(on):
@@ -1851,14 +1898,23 @@ def confirm(doc, facts, options, mode="check"):
         say(logic.BOX_BUSY)
         return None
     result = None
-    try:
+    changed_before = STATE.get("dirty")
+    failed = True                       # until _confirm returns: an error inside the box (its rollback may have
+    try:                                # stopped partway) leaves the model counted as changed
         ui.set_box_open(STATE.get("panel_parts"), True)
         result = _confirm(doc, facts, options, mode)
+        failed = False
     finally:
         gate.leave()
         ui.set_box_open(STATE.get("panel_parts"), False)
-        if STATE.get("dirty"):          # edits made while the box was open: live mode checks them at the next idle
-            STATE["dirty"] = time.time() - IDLE_SECONDS
+        # Cancel put the model back: it is as changed (or not) as it was when the box opened, so current results
+        # never grey out for the box's own rolled-back edits (the Check button: nothing re-checks them)
+        # (the edit's own time kept: never moved earlier, which could let a check from before it count as covering
+        # it; with Check after every edit on, the next idle past IDLE_SECONDS checks: review round 1, P1). An error
+        # is no Cancel: the model may not be as it was, so the results grey out, never shown as current (the
+        # headless check-15, demo review of #26 with #27)
+        STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None,
+                                                 failed=failed)
     if result is not None:              # Draw (GordiumStart or Edit site…): the neighbourhood follows the lot
         logic.guard(sync_context, "draw the neighbourhood")(doc, result)
     return result
@@ -2073,10 +2129,11 @@ def _undo_redo(sender, e):
 def _settings_from_file(doc):
     """The panel's settings kept in memory, read again from the file after Undo or Redo (a setting undone is put
     back in the file only; memory only, never the document: round 5, R5-1): Show on-screen labels, Hide starting
-    house (from its layer), and Show neighbourhood (its live footprints are drawn by it)."""
+    house (from its layer), Show neighbourhood (its live footprints are drawn by it), Check after every edit."""
     if doc is None:
         return
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(_ui_state(doc))
+    STATE.pop("auto_by_doc", None)      # Check after every edit: read again from the file, its tick too (#27, C1)
     _sync_ticks(doc)                    # every tick as the document has it now (Hide starting house: its layer)
 
 
@@ -2092,6 +2149,7 @@ def _sync_ticks(doc):
     ui.set_massing_tick(p, _massing_hidden(doc))
     ui.set_envelope_tick(p, STATE.get("envelope_on", True))
     ui.set_context_tick(p, _context_on(doc))         # (#23: Show neighbourhood, kept per document)
+    ui.set_auto_tick(p, _auto(doc))                  # (#27: Check after every edit, kept per document)
 
 
 def _massing_hidden(doc):
@@ -2430,6 +2488,8 @@ def run_check(doc, report=True):
                          "encroach": len(o.encroach), "plan_encroach": len((result.get("plan") or {}).get("encroach") or []),
                          "envelope": result.get("envelope"), "at": time.time()}
         STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()     # a real check, of this document
+        if not STATE.get("live"):   # results on screen: edits are noticed from now on, whichever command drew them
+            live(True)              # (Edit site…, GordiumFacts, Check: review round 3 of the Check button)
         if result.get("notice"):
             STATE.setdefault("toasts", []).append([result["notice"]])
             if not STATE.get("headless"):
@@ -2517,9 +2577,11 @@ def _new_document(sender, e):
     p = STATE.get("panel_parts")
     if p is not None and p["form"].Visible:
         p["view"] = None
-        ui.show(p, None, error="no check yet for this document (run GordiumCheck)")
-        _sync_ticks(Rhino.RhinoDoc.ActiveDoc)   # its own ticks, never the last document's (checked or not)
-    STATE["dirty"] = time.time()        # re-check the document now in front, if it has lot facts
+        _sync_ticks(Rhino.RhinoDoc.ActiveDoc)   # its own ticks (Check after every edit too, before the header)
+        ui.show(p, None, error="no check yet for this document (press Check)")
+    STATE["dirty"] = None               # the last document's edits are not this one's (it is checked below)
+    STATE["check_front"] = True         # check the document now in front once, if it has lot facts (not an edit:
+    #                                     whatever Check after every edit says: review round 1 of the Check button)
 
 
 def _opened(sender, e):
@@ -2537,12 +2599,21 @@ def _idle(sender, e):
     if t and last_at is not None and last_at >= t and not _box_open():   # a check since the edit covered it
         STATE["dirty"] = t = None
     p = STATE.get("panel_parts")
-    if t and time.time() - t >= ui.STALE_SECONDS and STATE.get("stale_shown") != t and p is not None \
-            and p["form"].Visible:          # out of date: no marks until the re-check (H1, F7)
+    if t and time.time() - t >= ui.STALE_SECONDS and STATE.get("stale_shown") != t:
+        # out of date: no marks until the re-check, or until Check (H1, F7): the viewport greys whether or not the
+        # panel is open (it works "out of date" out as it draws, so it is redrawn now; review round 2, P0)
         STATE["stale_shown"] = t
-        ui.show(p, None, checking=True)
+        if p is not None and p["form"].Visible:
+            ui.set_auto_tick(p, _auto(front))
+            p["checked_before"] = last_at is not None
+            ui.show(p, None, checking=True)
         _redraw()
-    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at):
+    if logic.should_check_front(STATE.get("check_front"), STATE.get("running"), _box_open()):
+        STATE["check_front"] = False
+        if front is not None and front.Strings.GetValue(SECTION, ENTRY):   # it has lot facts: checked once
+            run_check(front, report=False)
+    elif logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at,
+                            auto=_auto(front)):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
         if doc is not None and doc.Strings.GetValue(SECTION, ENTRY):    # checked before: run_check says why
@@ -2588,8 +2659,8 @@ def _unhook():
 
 
 def live(on):
-    """Re-check after each edit: objects added, deleted, moved or changed, a layer change or hiding one
-    (attributes)."""
+    """Notice each edit (objects added, deleted, moved or changed, a layer change or hiding one): the results grey
+    out until a check; the idle handler checks by itself only with Check after every edit ticked."""
     _unhook()
     STATE["live"] = on
     if not on:
@@ -2608,8 +2679,13 @@ def live(on):
 
 
 def toggle_live():
-    live(not STATE.get("live"))
-    Rhino.RhinoApp.WriteLine("Gordium live mode " + ("on" if STATE["live"] else "off"))
+    """GordiumLive: Check after every edit on or off for this file (the panel's tick). Edits are always noticed (the
+    results grey out until checked): turning the edit hooks off would leave old marks showing as current after an
+    edit (review round 2 of the Check button)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if not STATE.get("live"):
+        live(True)
+    set_auto_check(not _auto(doc))
 
 
 def toggle_envelope():
@@ -2695,7 +2771,7 @@ def gordium_check():
         finally:
             _end_undo(doc)
     result = run_check(doc, report=True)
-    live(True)                                      # live mode is on by default
+    live(True)                                      # edits noticed (checked at Check, or each edit if ticked)
     if result is not None:
         Rhino.RhinoApp.WriteLine("Gordium: " + result["view"]["summary"])     # the panel's own words (D3)
     if not STATE.get("headless"):       # the command brings the panel forward (a live re-check never does)
@@ -2804,8 +2880,8 @@ def gordium_start():
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
     if not start.get("floors"):
-        Rhino.RhinoApp.WriteLine("Gordium: no starting building could be drawn")
-        live(True)                   # the architect draws one; it is checked as they go
+        Rhino.RhinoApp.WriteLine("Gordium: no starting building could be drawn; " + logic.draw_one_hint(_auto(doc)))
+        live(True)                   # the architect draws one: checked at Check (or after each edit, if ticked)
         documents(True)
         return None
     if Rhino.RhinoDoc.ActiveDoc is None or Rhino.RhinoDoc.ActiveDoc.RuntimeSerialNumber != doc.RuntimeSerialNumber:
@@ -2814,7 +2890,7 @@ def gordium_start():
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
     if add_floors(doc, start) is None:
-        Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; draw one and Gordium will check it")
+        Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; " + logic.draw_one_hint(_auto(doc)))
         live(True)
         documents(True)
         return None
