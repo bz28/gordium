@@ -218,3 +218,4 @@ Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from c
   - 12 One real test site per district family (R-1, R-2, R-3/RU), with hand-checked expected results. Only 106 Ithaca Rd exists today.
   - 13 Merge 3 plan for Ben: #21, #24, #30, the #28–#37 stack and #32/#33, in stack order after merge 2.
   - Not queued: open legal questions (the #11 doc is waiting on the architects/City; we don't send it), later list (parked), architect sign-off (deferred by Ben).
+- 2026-10-27 00:30 (coordinator) Item 12 is split across lanes. Lane B: pick a real lot per district family (R-1, R-2, R-3/RU), build the model file, and work out the expected results by hand from the law (independent of Gordium's code); add the headless checks. Lane C: run each site in Rhino (lookup → Draw → Check → report) and confirm Gordium's answers match the hand-worked ones. A mismatch goes to the owning PR.
