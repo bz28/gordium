@@ -545,8 +545,12 @@ def test_the_plugin_replaces_them_each_check_whatever_the_layers_state_and_out_o
     run = fns["run_check"]
     assert "logic.guard(lambda: _envelope_curves(doc, result.get(\"plan\"), sent)," in run          # F9
     assert "_envelope_curves(doc, None, facts)" in run
-    fail = run[run.index("_envelope_curves(doc, None, facts)") - 200:run.index("_envelope_curves(doc, None, facts)") + 200]
-    assert 'dirty = STATE.get("dirty")' in fail and 'STATE["dirty"] = dirty' in fail      # round 4, F1
+    # replacing them is no edit of the model, whoever calls it (a check's own redraw: UX review 2026-10-27; a failed
+    # check's clearing: round 4, F1): the "model changed" mark read before the first delete, put back after the
+    # last add, whatever happens between
+    assert body.index('dirty = STATE.get("dirty")') < body.index("doc.Objects.Delete(old, True, True)")
+    end = body[body.rindex("finally:"):]
+    assert body.index("doc.Objects.AddPolyline(") < body.rindex("finally:") and 'STATE["dirty"] = dirty' in end
     # the layer made with Undo off, and none made by a failed check (review of dd44f1b, F1); left ones hidden and said
     assert body.index("doc.UndoRecordingEnabled = False") < body.index("index = _layer(doc, logic.ENVELOPE)")
     assert body.index("if plan is None and doc.Layers.FindByFullPath(logic.ENVELOPE, -1) < 0:") < body.index("_layer(")
