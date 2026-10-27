@@ -423,6 +423,54 @@ rules:
     drafted_by: claude
     status: draft
 
+  - id: R-3aa.attached_units_per_building
+    kind: rule
+    topic: dimensions
+    title: "Attached building: three to six dwelling units (§325-3B)"
+    applies_when: use == "one_family_attached"
+    check: attached_units_in_building >= 3 and attached_units_in_building <= 6
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 8
+        lines: [11, 14]
+        quote: "(4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of which shares one or more party walls or structural elements with the other one-family dwellings in the building and which has direct exterior access from the ground floor. A maximum of six one-family dwelling units may be attached to form a single building."
+        not_limits: {1: "\"one or more party walls\": how the units are joined, not a count of units"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [32, 33]
+        quote: "(5) Rooming house; boarding house; cooperative household; fraternity, sorority, or group house; row house, townhouse, or garden apartment housing as defined in this section."
+    examples:
+      - given: {use: one_family_attached, attached_units_in_building: 3}
+        expect: pass
+        note: the fewest
+      - given: {use: one_family_attached, attached_units_in_building: 6}
+        expect: pass
+        note: the most
+      - given: {use: one_family_attached, attached_units_in_building: 2}
+        expect: fail
+        note: two units joined are a semi-detached building, not an attached one
+      - given: {use: one_family_attached, attached_units_in_building: 7}
+        expect: fail
+        note: seven joined are not a one-family attached dwelling; a row of them may be a multiple dwelling (row house)
+      - given: {use: one_family_attached, attached_units_in_building: 8, dwelling_units: 2}
+        expect: fail
+        note: two units on this lot of a row of eight; the cap is on the whole building, every lot it stands on
+      - given: {use: one_family_attached}
+        expect: needs_review
+        note: the building's units not given
+      - given: {use: multiple_family, attached_units_in_building: 8}
+        expect: not_applicable
+        note: a row of eight entered as a multiple dwelling (row house) is checked under that use
+    notes: >-
+      Counted over the whole building, every lot it stands on together (attached_units_in_building), not the units on
+      this lot (dwelling_units): a row house on its own lot is one unit of a building of three to six. Gordium's
+      massing model shows the building on this lot only, so the architect states the count. A building of seven or
+      more joined units is not a one-family attached dwelling (§325-3B); a row of them may be a multiple dwelling
+      (§325-3B MULTIPLE DWELLING (5): row house, townhouse), which R-3aa permits (chart p.2): enter that use instead
+      and its own rules apply. Two joined units are a one-family semi-detached dwelling (§325-3B (3)).
+    drafted_by: claude
+    status: draft
+
   - id: R-3aa.lot_area_multiple_family
     kind: rule
     topic: dimensions
