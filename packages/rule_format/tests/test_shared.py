@@ -87,7 +87,9 @@ def test_the_checks_recognise_any_spelling():
 
 def test_every_jsonl_file_is_read_by_the_one_reader():
     found = {p.relative_to(REPO).as_posix(): n for p in CODE if (n := _jsonl_readers(p.read_text()))}
-    assert found == {"packages/rule_format/rule_format/rulebook.py": 1}, f"use rulebook.read_jsonl: {found}"
+    # the one other: the Rhino worker's requests, read one at a time from a pipe as they arrive (not a file)
+    assert found == {"packages/rule_format/rule_format/rulebook.py": 1,
+                     "packages/design_checker/design_checker/__main__.py": 1}, f"use rulebook.read_jsonl: {found}"
 
 
 def test_every_jurisdiction_listing_uses_the_one_helper():

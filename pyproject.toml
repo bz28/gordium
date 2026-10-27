@@ -22,9 +22,10 @@ labeling = ["anthropic==1.15.0"]
 
 [tool.setuptools.packages.find]
 where = ["packages/rule_format", "packages/document_extraction", "packages/section_labeling", "packages/rule_drafting",
-         "packages/rule_export", "packages/project_report", "packages/model_measurement"]
+         "packages/rule_export", "packages/project_report", "packages/model_measurement", "packages/design_checker",
+         "packages/envelope_builder"]
 include = ["rule_format*", "document_extraction*", "section_labeling*", "rule_drafting*", "rule_export*", "project_report*",
-           "model_measurement*"]
+           "model_measurement*", "design_checker*", "envelope_builder*"]
 
 [tool.setuptools.package-data]
 rule_format = ["*.yaml"]

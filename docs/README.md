@@ -33,6 +33,7 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 
 | Document | Purpose | For whom | Updated when |
 |---|---|---|---|
+| [apps/rhino_plugin/README.md](../apps/rhino_plugin/README.md) | The Rhino commands: what each does, what happens on a check, and how we know it works | Engineers, architects trying it | A Rhino command changes |
 | [regulations/document_extraction_guide/README.md](../regulations/document_extraction_guide/README.md) | How any regulation document becomes rules; what the guide's files are | Engineers adding a city | The process changes |
 | [regulations/document_extraction_guide/drafting_rules.md](../regulations/document_extraction_guide/drafting_rules.md) | How to write a definition or a rule from the law (for AI and people alike) | Anyone drafting rules | A drafting rule changes |
 | [regulations/document_extraction_guide/labeling_guide.md](../regulations/document_extraction_guide/labeling_guide.md) | How to label one piece of the law; also the AI labeler's fixed instructions | Anyone labeling | The labeling instructions change |
@@ -70,6 +71,8 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 | [rule_export](../packages/rule_export/README.md) | The rules spreadsheet people read, with links to the City's words | Engineers | The spreadsheet changes |
 | [project_report](../packages/project_report/README.md) | A project's compliance report in the architects' own spreadsheet format | Engineers | The report changes |
 | [model_measurement](../packages/model_measurement/README.md) | Measures a Rhino model the way the City defines each measurement (lot, yards, building area, height) | Engineers | A measurement is added or changes |
+| [envelope_builder](../packages/envelope_builder/README.md) | The largest building the rules allow on a lot (the envelope) | Engineers | The envelope changes |
+| [design_checker](../packages/design_checker/README.md) | Checks a design in one call: measure, run the zone's rules, work out the envelope | Engineers | The check changes |
 
 **Regulation steps** (the data for each city, in numbered steps):
 
