@@ -206,16 +206,21 @@ def _edges(rules: list[dict], point: dict, ctx, moved: str | None = None) -> lis
             if not t:
                 continue
             for node in ast.walk(ast.parse(t, mode="eval")):
-                if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and len(node.comparators) == 1:
-                    rhs = node.comparators[0]
-                    if moved is not None and moved not in {n.id for n in ast.walk(rhs) if isinstance(n, ast.Name)}:
-                        continue
-                    try:
-                        v = formula.evaluate(ast.unparse(rhs), point, ctx.kinds())
-                    except Exception:
-                        continue
-                    if type(v) in (int, float):
-                        out.append((node.left.id, float(v)))
+                if isinstance(node, ast.Compare):        # each link of a chain, either way round (#21 round 2)
+                    sides = [node.left] + list(node.comparators)
+                    for a, b in zip(sides, sides[1:]):
+                        for name, other in ((a, b), (b, a)):
+                            if not isinstance(name, ast.Name) or isinstance(other, ast.Name) and other.id == name.id:
+                                continue
+                            if moved is not None and moved not in {n.id for n in ast.walk(other)
+                                                                   if isinstance(n, ast.Name)}:
+                                continue
+                            try:
+                                v = formula.evaluate(ast.unparse(other), point, ctx.kinds())
+                            except Exception:
+                                continue
+                            if type(v) in (int, float):
+                                out.append((name.id, float(v)))
                 if moved is None and isinstance(node, ast.Call) and getattr(node.func, "id", None) in ("min", "max"):
                     consts = [a.value for a in node.args if isinstance(a, ast.Constant)]
                     for arg in node.args:
@@ -1119,6 +1124,13 @@ def test_a_relaxer_that_leaves_out_a_condition_is_never_proven(ctx):
     for check in ("building_height <= 35 + 0.11 * 35", "building_height <= 35 + 0.1 * 35 + 0.4",
                   "building_height <= 35 + 0.1 * 35 - 0.4"):
         assert relaxer_mismatches(hand, base, relaxer | {"check": check}, district, ctx, first=True), check
+    # #21 round 2: written the other way round, a hair off the key's edge
+    for check in ("35 + 0.1 * 35 + 0.0009 >= building_height", "0 <= building_height <= 38.5009"):
+        assert relaxer_mismatches(hand, base, relaxer | {"check": check}, district, ctx, first=True), check
+    side = relaxer | {"applies_when": relaxer["applies_when"].replace(
+        "side_yard_larger >= 10 + (building_height - 35)", "10 + (building_height - 35) - 0.0005 <= side_yard_larger")}
+    assert side["applies_when"] != relaxer["applies_when"]
+    assert relaxer_mismatches(hand, base, side, district, ctx, first=True)
     for rear in ("max(20, min(0.25 * lot_depth, 48))", "max(20, 0.25 * lot_depth)", "max(18, min(0.25 * lot_depth, 50))"):
         loose = relaxer | {"applies_when": relaxer["applies_when"].replace("max(20, min(0.25 * lot_depth, 50))", rear)}
         assert loose["applies_when"] != relaxer["applies_when"]
