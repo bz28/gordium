@@ -1,4 +1,5 @@
 # RU (City of Ithaca; the code writes it "R-U", §325-4): rules drafted by Claude by hand, by reading the zoning
+# Occupancy (§325-3B one-family and two-family dwellings) and home occupations: the rules at the end (2026-10-27).
 # charts (April 2026) and Chapter 325, the same way R-1b.yaml, R-1a.yaml, R-2a.yaml to R-2c.yaml and R-3a.yaml
 # were. An ANSWER KEY for grading the drafting script: written without looking at anything the script drafted or
 # recorded, from the City's documents only (2_extracted_text/, the chart read cell by cell, the section labels, the
@@ -19,8 +20,7 @@
 #
 # Draft (approval deferred, decided 2026-10-19). Not covered yet, as in R-1b (later rules or flags): ornamental
 # parapets and cornices above the height limit (§325-16B), accessory uses and structures (p.2), accessory dwelling
-# units (§325-28; RU's accessory-dwelling-unit cell on p.2 is blank, neither • nor -), occupancy limits (p.2 note
-# 4), height exceptions for chimneys and similar (§325-16A, applied when measuring height), the loading rule for
+# units (§325-28; RU's accessory-dwelling-unit cell on p.2 is blank, neither • nor -), height exceptions for chimneys and similar (§325-16A, applied when measuring height), the loading rule for
 # nonresidential uses ("Allowed by variance", p.14). RU is not an R-3
 # district, so §325-19E doesn't apply, and §325-11B(1) doesn't allow cluster subdivisions in it. Parking is written
 # as in R-3a and stays "not checked yet: interior".
@@ -1692,5 +1692,323 @@ rules:
       additional 15,000 sf or major fraction (note 3); a nursing home, hospital or neighborhood commercial facility "-"
       (those uses are not permitted in RU). Each space at least 450 sf (§325-21A). Gordium counts neither units nor
       floor space, so this is NEEDS REVIEW, worked out by hand.
+    drafted_by: claude
+    status: draft
+
+  - id: RU.occupancy_one_family
+    kind: rule
+    topic: density_and_occupancy
+    title: "One-family occupancy (§325-3B: family + 1 unrelated)"
+    applies_when: >-
+      use in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached", "one_family_attached"]
+    check: unrelated_persons_with_children <= 1
+    review_when:
+      - when: unrelated_persons_with_children > 1 and functional_family_unit
+        reason: "A functional family unit may occupy a one-family dwelling whatever its size (§325-3B DWELLING, ONE-FAMILY); whether this household is one is the City's finding, on the criteria §325-3B FUNCTIONAL FAMILY UNIT lists, so a person checks it."
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [36, 37]
+        quote: "DWELLING, ONE-FAMILY — A dwelling unit occupied exclusively for residential purposes by an individual or family and not more than one unrelated individual or a functional family unit."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [39, 40]
+        quote: "In the R-2 and R-3 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted."
+        not_limits: {2: "the R-2 and R-3 Zones' limit, which RU doesn't have (the finding)", 3: "the district name R-3, not a number"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [28, 28]
+        quote: "(e) Nursery schools or child day-care centers in R-2, CR-2 and R-U Districts."
+        not_limits: {2: "the district names R-2 and CR-2, not numbers"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines: [27, 28]
+        quote: "FAMILY — One or more persons occupying a dwelling unit, all of whom are related by blood, marriage or adoption."
+        not_limits: {1: "one or more persons make a family: who counts, not a limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 10
+        lines: [11, 13]
+        quote: "FUNCTIONAL FAMILY UNIT — A group of individuals living together in a single dwelling unit and functioning as a family with respect to those characteristics that are consistent with the purposes of zoning restrictions in residential neighborhoods."
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [45, 45]
+        quote: "(4) See §325-3 for occupancy restrictions."
+    examples:
+      - given: {use: one_family_detached, unrelated_persons_with_children: 1}
+        expect: pass
+      - given: {use: one_family_detached, unrelated_persons_with_children: 2, functional_family_unit: false}
+        expect: fail
+      - given: {use: one_family_detached, unrelated_persons_with_children: 2, functional_family_unit: true}
+        expect: needs_review
+        note: "a functional family unit: the City's finding"
+      - given: {use: one_family_detached, unrelated_persons_with_children: 2}
+        expect: needs_review
+        note: "whether it is a functional family unit isn't said"
+      - given: {use: one_family_detached}
+        expect: needs_review
+        note: "who lives there isn't said"
+      - given: {use: church}
+        expect: not_applicable
+    findings:
+    - id: who_is_unrelated
+      question: "Who is an \"unrelated individual\" in a one-family or two-family dwelling?"
+      kind: law
+      answer: "Anyone in the dwelling unit not related by blood, marriage or adoption to the household's family (§325-3B FAMILY); in a household with no family, everyone but the individual the definition starts from (\"an individual or family and not more than ... unrelated\"). Gordium asks the most such people in any dwelling unit."
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines: [27, 28]
+        quote: "all of whom are related by blood, marriage or adoption"
+      strength: strong
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §1
+    - id: ru_has_the_base_limit
+      question: "Which one-family occupancy limit applies in RU?"
+      kind: reading
+      answer: "The definition's first sentence (an individual or family and not more than one unrelated individual, or a functional family unit): its later sentences raise it to two only \"In the R-1 Zones\" (owner-occupied) and \"In the R-2 and R-3 Zones\", and the code names R-U as a district of its own beside R-3 (e.g. §325-9B(1)(e))."
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [28, 28]
+        quote: "R-2, CR-2 and R-U Districts"
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §4
+    - id: children_counted_outside_r1_r2
+      question: "Outside R-1 and R-2, are minor dependent children counted among the unrelated people of a one-family dwelling?"
+      kind: reading
+      answer: "Gordium counts them: §325-8B(6) and chart note 1 leave them out \"In R-1 and R-2 Districts\" only, and the one-family definition has no such exception (the multiple-dwelling and cooperative-household definitions write theirs out). Counting them can only make a dwelling need review or not comply, never pass wrongly."
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [28, 28]
+        quote: "In R-1 and R-2 Districts, minor dependent children"
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §2.2
+    - id: functional_family_unit_is_the_citys_finding
+      question: "Can Gordium decide whether a household is a functional family unit?"
+      kind: law
+      answer: "No: §325-3B lists criteria that must be present (sharing the whole unit, stability shown by children, shared expenses, the same address for voting and taxes...) and presumptions against, weighed case by case. Over the limit with a household said to be such a unit, the rule needs review; said not to be, it does not comply."
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 10
+        lines: [15, 15]
+        quote: "the following criteria must be present"
+      strength: strong
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §5
+    notes: "Counts unrelated_persons_with_children: the most such people in any one dwelling unit (each semi-detached or attached dwelling is a one-family dwelling of its own). The limits are the definition's own (§325-3B); a person's say that the household is a functional family unit sends it to review. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
+    drafted_by: claude
+    status: draft
+
+  - id: RU.occupancy_two_family
+    kind: flag
+    topic: density_and_occupancy
+    title: "Two-family occupancy (§325-3B: unrelated people may make a multiple dwelling)"
+    applies_when: >-
+      use == "two_family" and unrelated_persons > 1
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines: [3, 4]
+        quote: "DWELLING, TWO-FAMILY — A building containing two dwelling units occupied exclusively for residential purposes."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [25, 26]
+        quote: "(2) A dwelling unit, occupied by a group of four or more unrelated persons, exclusive of minor dependent children in the care of a parent or relative."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [27, 29]
+        quote: "(3) A building containing living, sanitary and sleeping facilities occupied by one or two families and more than two roomers or boarders, exclusive of minor dependent children in the care of a parent or relative, residing with either one of such families."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines: [27, 28]
+        quote: "FAMILY — One or more persons occupying a dwelling unit, all of whom are related by blood, marriage or adoption."
+        not_limits: {1: "one or more persons make a family: who counts, not a limit"}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [45, 45]
+        quote: "(4) See §325-3 for occupancy restrictions."
+    examples:
+      - given: {use: two_family, unrelated_persons: 1}
+        expect: not_applicable
+        note: "at most two unrelated people in the building, and no group of four"
+      - given: {use: two_family, unrelated_persons: 2}
+        expect: needs_review
+        note: "possibly more than two roomers in the building: the open question"
+      - given: {use: two_family, unrelated_persons: 3}
+        expect: needs_review
+        note: "may be a multiple dwelling"
+      - given: {use: two_family}
+        expect: needs_review
+        note: "who lives there isn't said"
+      - given: {use: one_family_detached}
+        expect: not_applicable
+    findings:
+    - id: who_is_unrelated
+      question: "Who is an \"unrelated individual\" in a one-family or two-family dwelling?"
+      kind: law
+      answer: "Anyone in the dwelling unit not related by blood, marriage or adoption to the household's family (§325-3B FAMILY); in a household with no family, everyone but the individual the definition starts from (\"an individual or family and not more than ... unrelated\"). Gordium asks the most such people in any dwelling unit."
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines: [27, 28]
+        quote: "all of whom are related by blood, marriage or adoption"
+      still_open: []
+      strength: strong
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §1
+    - id: two_family_outside_r1_r2
+      question: "What limits who lives in each unit of a two-family dwelling outside R-1 and R-2?"
+      kind: reading
+      answer: "The two-family definition sets per-unit limits only \"In R-1 and CR-1 Zones\" and \"In R-2 and CR-2 Zones\". Elsewhere the limit is where it stops being a two-family dwelling: a unit \"occupied by a group of four or more unrelated persons\" ((2)), or a building of one or two families \"and more than two roomers or boarders\" ((3)), is a multiple dwelling. Gordium reads a group of four unrelated persons as four people none related to another, so a household's family member and three people unrelated to it can make one. Whether unrelated housemates are roomers is still open (§6.4), so until it is answered more than one unrelated person in a unit needs review."
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines: [4, 4]
+        quote: "In R-1 and CR-1 Zones"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines: [8, 8]
+        quote: "In R-2 and CR-2 Zones"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [25, 25]
+        quote: "occupied by a group of four or more unrelated persons"
+      still_open: [R-2a.occupancy_two_family#1, R-2b.occupancy_two_family#1, R-2c.occupancy_two_family#1, R-3a.occupancy_two_family#1, R-3aa.occupancy_two_family#1, R-3b.occupancy_two_family#1, RU.occupancy_two_family#1]
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §6.2
+    open_questions:
+    - "§325-3B DWELLING, MULTIPLE (3) makes a building \"occupied by one or two families and more than two roomers or boarders\" a multiple dwelling. Are the unrelated individuals the two-family definition counts in each unit \"roomers or boarders\" for this count, across the whole building?"
+    research:
+    - question: "§325-3B DWELLING, MULTIPLE (3) makes a building \"occupied by one or two families and more than two roomers or boarders\" a multiple dwelling. Are the unrelated individuals the two-family definition counts in each unit \"roomers or boarders\" for this count, across the whole building?"
+      searched:
+      - 325-3B:dwelling_multiple_or_multiple_residence
+      - 325-3B:dwelling_two_family
+      - 325-3B:boardinghouse
+      - 325-3B:rooming_house
+      - 325-3B:functional_family_unit
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [28, 28]
+        quote: "and more than two roomers or boarders"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 5
+        lines: [17, 17]
+        quote: "BOARDINGHOUSE — A multiple dwelling where sleeping facilities and meals are provided"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 10
+        lines: [17, 17]
+        quote: "act as separate roomers"
+      why_open: "\"Roomer\" and \"boarder\" aren't defined. BOARDINGHOUSE speaks of meals for paying guests, and FUNCTIONAL FAMILY UNIT sets \"separate roomers\" against a household sharing the whole unit, which points to lodgers who pay; but nothing says an unrelated housemate isn't one. The two-family definition lets an R-2 unit hold two unrelated individuals, four in the building, which (3) would make a multiple dwelling if they count. No City record found (web search 2026-10-27). Until answered, a unit with more than one unrelated person (so possibly more than two in the building) needs review: never a pass on the narrower reading."
+      readings:
+      - id: unrelated_are_roomers
+        reading: every unrelated person counts as a roomer or boarder, across the whole building
+      - id: roomers_are_paying_lodgers
+        reading: only people renting a room (with or without meals) count; unrelated housemates sharing the unit don't
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §6.4
+    notes: "More than one unrelated person in a unit: possibly more than two roomers or boarders in the building (§325-3B DWELLING, MULTIPLE (3), the open question), and from three a group of four or more unrelated persons in the unit ((2)): either makes it a multiple dwelling, with its own lot size and rules, so a person checks it as one. Never a fail: a multiple dwelling is permitted here under its own rules. Minor dependent children are left out of these counts by the definitions themselves. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
+    drafted_by: claude
+    status: draft
+
+  - id: RU.home_occupation_size
+    kind: rule
+    topic: uses
+    title: "Home occupation size (§325-3B: at most 25% of its unit and 500 sq ft)"
+    applies_when: >-
+      use in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached", "one_family_attached", "two_family", "multiple_family"] and home_occupation
+    check: home_occupation_area <= 500 and home_occupation_area <= 0.25 * home_occupation_unit_area
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 12
+        lines: [26, 28]
+        quote: "HOME OCCUPATION — (1) A subordinate use of a nonresidential nature which is conducted within a dwelling unit or a building accessory thereto by a resident of the dwelling unit,"
+        not_limits: {1: "the paragraph's number"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 13
+        lines: [18, 19]
+        quote: "(f) The occupation occupies no more than 25% of the dwelling unit and no more than a total of 500 indoor square feet, including accessory structures."
+    examples:
+      - given: {use: one_family_detached, home_occupation: false}
+        expect: not_applicable
+      - given: {use: one_family_detached, home_occupation: true, home_occupation_area: 300, home_occupation_unit_area: 1600}
+        expect: pass
+      - given: {use: one_family_detached, home_occupation: true, home_occupation_area: 500, home_occupation_unit_area: 2000}
+        expect: pass
+        note: "at both limits"
+      - given: {use: one_family_detached, home_occupation: true, home_occupation_area: 400, home_occupation_unit_area: 1200}
+        expect: fail
+        note: "over 25% of its dwelling unit"
+      - given: {use: one_family_detached, home_occupation: true, home_occupation_area: 501, home_occupation_unit_area: 4000}
+        expect: fail
+        note: "over 500 sq ft"
+      - given: {use: one_family_detached, home_occupation: true}
+        expect: needs_review
+        note: "its size isn't said"
+      - given: {use: one_family_detached}
+        expect: needs_review
+        note: "whether one is planned isn't said"
+      - given: {use: church, home_occupation: true}
+        expect: not_applicable
+        note: "conducted within a dwelling unit: not for a church"
+    findings:
+    - id: quarter_by_floor_area
+      question: "\"No more than 25% of the dwelling unit\": 25% of what?"
+      kind: reading
+      answer: "Of the dwelling unit's floor area, the measure (f) uses in the same sentence for its 500 indoor square feet."
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 13
+        lines: [18, 18]
+        quote: "no more than 25% of the dwelling unit"
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §8
+    notes: "Over either limit it is no home occupation at all (§325-3B). Its special permit is RU.home_occupation. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
+    drafted_by: claude
+    status: draft
+
+  - id: RU.home_occupation
+    kind: flag
+    topic: uses
+    title: "Home occupation (chart p.2: special permit unless §325-9B(1)(i) is met)"
+    applies_when: >-
+      use in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached", "one_family_attached", "two_family", "multiple_family"] and home_occupation
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 12
+        lines: [26, 28]
+        quote: "HOME OCCUPATION — (1) A subordinate use of a nonresidential nature which is conducted within a dwelling unit or a building accessory thereto by a resident of the dwelling unit,"
+        not_limits: {1: "the paragraph's number"}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: Home occupation, column: RU}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [37, 38]
+        quote: "(i) Home occupations in all residential districts, unless the home occupation meets all of the following criteria:"
+    examples:
+      - given: {use: one_family_detached, home_occupation: true}
+        expect: needs_review
+      - given: {use: one_family_detached, home_occupation: false}
+        expect: not_applicable
+      - given: {use: one_family_detached}
+        expect: needs_review
+        note: "whether one is planned isn't said"
+      - given: {use: church, home_occupation: true}
+        expect: not_applicable
+    findings:
+    - id: home_occupation_needs_a_person
+      question: "Can a home occupation ever simply comply?"
+      kind: law
+      answer: "Not on what Gordium knows: the chart marks it SP in every residential district, and §325-9B(1)(i) lifts that only if it meets all of its criteria (no stock, no traffic or parking beyond the residential use, no exterior alterations or display, no noise or other effects); §325-3B's other conditions are about how it runs too. So once a home occupation is planned it needs review; its size is checked on its own (home_occupation_size)."
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [37, 37]
+        quote: "(i) Home occupations in all residential districts"
+      strength: strong
+      report: docs/research/2026-10-27_occupancy_and_home_occupation.md §7
+    notes: "Always needs review once one is planned: whether it needs the special permit (§325-9B(1)(i)) and §325-3B's conditions on how it runs are a person's to check. Its size is RU.home_occupation_size. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
     drafted_by: claude
     status: draft

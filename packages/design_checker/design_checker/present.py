@@ -35,7 +35,7 @@ NOT_YET_WHY = "Not in Gordium yet — coming in a later version. Check this by h
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
           ("not_checked", "Not checked"), ("not_covered", NOT_YET)]
 
-from model_measurement.project import fact_conflicts  # noqa: E402  (lot facts that disagree: shown)
+from model_measurement.project import fact_conflict_rows  # noqa: E402  (lot facts that disagree: shown)
 from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
@@ -152,8 +152,7 @@ def _compares(check: str) -> list[ast.Compare]:
     return sorted(out, key=lambda n: (n.lineno, n.col_offset))
 
 
-# The stated facts a "Lot facts disagree" row offers to re-enter (r2 round 6): the two counts that disagree.
-CONFLICT_NEEDS = ("dwelling_units", "attached_units_in_building")
+# A "Lot facts disagree" row offers to re-enter the counts that disagree (r2 round 6): project.fact_conflict_rows.
 
 
 def could_settle(rule: dict, values: dict, key: str) -> bool:
@@ -1612,12 +1611,12 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     for i in items:                                  # measured from an assumed main building: said on the row
         if (measured.get(i.get("measure")) or {}).get("main_assumed"):
             i["note"] = "; ".join(n for n in (i.get("note"), ASSUMED_MAIN_NOTE) if n)
-    for k, conflict in enumerate(fact_conflicts(facts)):     # facts that disagree (r2 round 5): said, not hidden
+    for k, (conflict, needs) in enumerate(fact_conflict_rows(facts)):   # facts that disagree (r2 round 5): said
         items.append({"id": f"facts.conflict#{k + 1}", "rule": None, "name": "Lot facts disagree", "group": "site",
                       "status": REVIEW, "mark": MARK[REVIEW], "proposed": "", "required": "", "margin": "", "sign": "",
                       "zoom": None, "measure": None, "objects": [], "points": None,
                       # the same "Enter …" button as a row waiting on these counts, to correct either one
-                      "hint": rhino_logic.enter_words(CONFLICT_NEEDS), "reason": conflict, "needs": list(CONFLICT_NEEDS),
+                      "hint": rhino_logic.enter_words(needs), "reason": conflict, "needs": list(needs),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     if left_out:

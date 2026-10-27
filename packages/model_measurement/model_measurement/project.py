@@ -12,13 +12,19 @@ from rule_format.rulebook import load
 
 from .measure import measure
 from .read_3dm import read_site
+from .stops import STOPS
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
                "dwelling_units", "rooms_let_for_profit", "conversion", "occupants",
                "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district",
+               "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
+               "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids", "unsettled", "ground_fall"}
+# the unrelated people counted with the minor dependent children can't be fewer than without them: the measuring's
+# own words for it (one copy)
+COUNTS_DISAGREE = STOPS["household_counts_disagree"]
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).
@@ -36,11 +42,21 @@ def _point(p) -> bool:
 def fact_conflicts(facts: dict) -> list[str]:
     """Lot facts that are each well formed but disagree with each other. Not a refusal (the check runs; the rows they
     decide need review): the panel shows each one, so the architect can correct the count."""
+    return [message for message, _ in fact_conflict_rows(facts)]
+
+
+def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
+    """fact_conflicts, each with the facts to correct it (the panel's "Enter …" button asks those)."""
     out = []
     here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
     if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
-        out.append(f"{here} dwelling units on this lot but {building} in the attached building: part of another "
-                   "building may be on this lot, or one of the counts is off")
+        out.append((f"{here} dwelling units on this lot but {building} in the attached building: part of another "
+                    "building may be on this lot, or one of the counts is off",
+                    ("dwelling_units", "attached_units_in_building")))
+    without, with_ = facts.get("unrelated_persons"), facts.get("unrelated_persons_with_children")
+    if type(without) is int and type(with_) is int and with_ < without:     # review round 3: said in every district
+        out.append((COUNTS_DISAGREE.format(without=without, with_=with_),
+                    ("unrelated_persons", "unrelated_persons_with_children")))
     return out
 
 
@@ -54,13 +70,18 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("plan_north_deg must be a number (degrees the plan is turned from true north)")
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
-    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants"):
+    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants",
+              "unrelated_persons", "unrelated_persons_with_children"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
+    for k in ("home_occupation_area", "home_occupation_unit_area"):               # square feet, never rounded
+        if facts.get(k) is not None and not (_number(facts[k]) and facts[k] >= 0):
+            problems.append(f"{k} must be a number of square feet, 0 or more")
     for k in ("occupants_most_in_one_unit", "attached_units_in_building"):      # at least one, by definition
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
             problems.append(f"{k} must be a whole number, 1 or more")
-    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district"):
+    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district",
+              "owner_occupied", "functional_family_unit", "home_occupation", "accessory_dwelling_unit"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")

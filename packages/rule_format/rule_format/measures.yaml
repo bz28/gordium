@@ -28,6 +28,18 @@ attached_units_in_building: {unit: count, meaning: "Dwelling units in the whole 
 # Stated by the architect: whether §325-19E's stricter limits can apply (R-3a.abutting_r1). What "directly abuts"
 # reaches is open (R-3a.abutting_r1, open question 1); asked the cautious way, so "no" is right under every reading.
 abuts_r1_district:    {unit: yes_no, meaning: "Some R-1a or R-1b land is touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E's 'directly abuts', read the cautious way: Gordium's reading of the open question, to confirm)"}
+# Stated by the architect: who lives in each dwelling unit, for the occupancy limits in §325-3B's definitions of a
+# one-family and a two-family dwelling (research: docs/research/2026-10-27_occupancy_and_home_occupation.md).
+unrelated_persons:    {unit: count,  meaning: "The most people in any one dwelling unit on this lot who are not related by blood, marriage or adoption (§325-3B FAMILY) to its household's family (or, in a household with no family, to one person in it), leaving out minor dependent children in the care of a parent or relative (chart p.2 note 1)"}
+unrelated_persons_with_children: {unit: count, meaning: "The same count with every minor dependent child counted too: the most people in any one dwelling unit on this lot not related by blood, marriage or adoption to its household's family (or to one person in it)"}
+owner_occupied:       {unit: yes_no, meaning: "The owner (§325-3B OWNER: an owner of record who keeps the property as their principal residence more than six months of each year) lives in the one-family dwelling itself; an owner living only in an accessory dwelling unit on the lot is a no (Gordium's reading, to confirm)"}
+accessory_dwelling_unit: {unit: yes_no, meaning: "An accessory dwelling unit (§325-3B ACCESSORY DWELLING UNIT, §325-28) is on the lot, attached or detached"}
+functional_family_unit: {unit: yes_no, meaning: "The household is to be shown to the City to be a functional family unit (§325-3B FUNCTIONAL FAMILY UNIT); the City decides"}
+# Stated by the architect: a home occupation (§325-3B HOME OCCUPATION, chart p.2: special permit in every residential
+# district unless it meets §325-9B(1)(i)'s criteria).
+home_occupation:      {unit: yes_no, meaning: "A home occupation (§325-3B: a business, studio or office run by a resident in their dwelling unit or a building accessory to it) is planned"}
+home_occupation_area: {unit: sf,     meaning: "Indoor floor area the home occupation uses, its accessory structures included"}
+home_occupation_unit_area: {unit: sf, meaning: "Floor area of the dwelling unit the home occupation is in"}
 # Yards to the building seen from above, eaves and cornices included: §325-18B lets those project up to 2 ft
 # into a required yard (the yards above are measured to the building, its eaves left out).
 front_yard_eaves:        {unit: ft, meaning: "Depth of the front yard measured to the outermost part of the building, eaves included"}
