@@ -11,7 +11,7 @@ A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, R-1b: 10 ft si
    right. Switch replaces the house (new floors, each on its sublayer, one group, tagged "right"), the Starting
    house fact names the side, the panel offers the button under it (logic.can_switch), and it says what it did.
 5. One Undo brings the first house back and removes the new one; Redo brings the new one back.
-6. A house on a locked layer, or one the architect has moved, is never redrawn: refused, nothing changes.
+6. A house on a locked layer, a hidden one (Hide starting house), or one the architect has moved, is never redrawn: refused, nothing changes.
 Writes <temp>/gordium_side_yards/out.json; closes its document."""
 import json
 import os
@@ -126,6 +126,7 @@ try:
     claim("4 the Starting house fact names the side, the panel offers the button, and it says what it did",
           "10'-0\" on the right (east)" in note and g.logic.can_switch("Starting house: " + note)
           and "Starting house redrawn" in said(g), [note, said(g)])
+    log["switch_record"] = g.STATE.get("switch_record")    # 0: run inside this script's command (its Undo step)
     undo(doc)
     back = floors(g, doc)
     claim("5 one Undo brings the first house back and removes the new one",
@@ -144,6 +145,12 @@ try:
           "locked" in said(g) and [i for i, _ in floors(g, doc)] == before and len(g._buildings(doc)) == len(before),
           said(g))
     layer.IsLocked = False
+    g.hide_massing(True)                                 # Hide starting house: refused the same way, said so
+    g.switch_side_yards()
+    claim("6 a hidden house: refused, nothing changed (never two houses)",
+          "hidden" in said(g) and [i for i, _ in floors(g, doc)] == before and len(g._buildings(doc)) == len(before),
+          said(g))
+    g.hide_massing(False)
     o = g._start_floors(doc)[0][0]
     doc.Objects.Transform(o, rg.Transform.Translation(g._model_length(doc, 3.0), 0, 0), True)
     before = [i for i, _ in floors(g, doc)]

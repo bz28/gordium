@@ -3013,15 +3013,20 @@ def gordium_start():
 def _start_floors(doc):
     """The starting house's floor blocks in the model (each carrying logic.START_KEY), with their bounding boxes in
     feet, their volumes in cubic feet (None when not a solid Rhino can measure: then never redrawn) and whether each
-    is locked, itself or by its layer (then never redrawn: the architect's lock is kept)."""
+    is locked or hidden, itself or by its layer (then never redrawn: Rhino deletes neither, and the architect's lock
+    and Hide starting house are kept; review round 3)."""
     found = []
-    for o in doc.Objects:
+    settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+    settings.HiddenObjects = True                # every floor, whatever its state (a hidden one is refused, said so)
+    settings.LockedObjects = True
+    for o in doc.Objects.GetObjectList(settings):
         text = o.Attributes.GetUserString(logic.START_KEY) if not o.IsDeleted else None
         if text:
             b = o.Geometry.GetBoundingBox(True)
             props = rg.VolumeMassProperties.Compute(o.Geometry) if isinstance(o.Geometry, rg.Brep) else None
             volume = props.Volume * _scale(doc) ** 3 if props is not None else None    # (a notch changes it)
-            locked = bool(o.IsLocked or doc.Layers[o.Attributes.LayerIndex].IsLocked)   # (a locked parent too)
+            layer = doc.Layers[o.Attributes.LayerIndex]       # (a locked or hidden parent too: IsLocked, IsVisible)
+            locked = bool(o.IsLocked or o.IsHidden or layer.IsLocked or not layer.IsVisible)
             found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume, locked))
     return found
 
@@ -3055,6 +3060,7 @@ def switch_side_yards():
             "kept as it was.")
         return None
     record = doc.BeginUndoRecord("Gordium: " + logic.SWITCH_LABEL.lower())
+    STATE["switch_record"] = record              # 0 inside a running command (its own Undo step): for the tests
     try:                                # the new house first: if it can't be drawn, the old one is untouched
         ids = add_floors(doc, start, plan["floor_to_floor"], plan["design_buffer"])
         if ids is None:
@@ -3063,7 +3069,9 @@ def switch_side_yards():
         kept = [o for o, _, _, _, _ in found if not doc.Objects.Delete(o, True)]
         if kept:                        # never two houses: the new one goes again, the old one stays (round 2, F1)
             for i in ids:
-                doc.Objects.Delete(i, True, True)
+                new = doc.Objects.FindId(i)
+                if new is not None:
+                    doc.Objects.Delete(new, True, True)
             say("The old starting house couldn't be removed (" + str(len(kept)) + " floors), so it is kept as it was.")
             return None
         fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())
