@@ -59,7 +59,8 @@ def test_two_primary_buildings_bring_the_shared_yard_and_south_hill_rows():
     assert _rows(primary_buildings=2, south_hill_overlay=True)["R-1b.south_hill_overlay"]["status"] == present.FAILS
     one = _rows(primary_buildings=1)
     assert "R-1b.yards_not_shared" not in one
-    assert one["R-1b.south_hill_overlay"]["status"] == present.COMPLIES and not one["R-1b.south_hill_overlay"]["needs"]
+    assert "R-1b.south_hill_overlay" not in one             # one house: no row, nothing asked (full suite: no
+    # extra complying row on every R-1/R-2 design)
 
 
 def _ru(lot_w, lot_d):

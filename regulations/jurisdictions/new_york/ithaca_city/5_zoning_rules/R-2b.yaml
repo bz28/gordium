@@ -647,7 +647,8 @@ rules:
     kind: rule
     topic: dimensions
     title: "South Hill Overlay: no new primary structure past one per parcel (§325-8E)"
-    check: not south_hill_overlay or primary_buildings <= 1
+    applies_when: primary_buildings > 1
+    check: not south_hill_overlay
     sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 29
@@ -665,16 +666,14 @@ rules:
         quote: "PRIMARY STRUCTURE — A single structure (located on a parcel) containing a use permitted in the zoning district in which it is located."
     examples:
       - given: {south_hill_overlay: true, primary_buildings: 1}
-        expect: pass
+        expect: not_applicable
+        note: one primary structure on the parcel, in the overlay or out
       - given: {south_hill_overlay: true, primary_buildings: 2}
         expect: fail
         note: a second primary structure on a parcel in the overlay
       - given: {south_hill_overlay: false, primary_buildings: 2}
         expect: pass
         note: outside the overlay this rule doesn't limit them (§325-8B(1) still asks each its own lot area)
-      - given: {primary_buildings: 1}
-        expect: pass
-        note: one primary structure complies in the overlay or out, so whether the lot is in it needn't be asked
       - given: {primary_buildings: 2}
         expect: needs_review
         note: whether the lot is in the overlay not said
@@ -685,8 +684,8 @@ rules:
       §325-8E(1)(a) (added 2017-11-01, Ord. No. 2017-14): in the South Hill Overlay District, on R-1 or R-2 land, no
       primary structure may be built on a parcel that already has one, and no more than one on an empty parcel; so
       the parcel holds one primary structure after the work. Whether the lot is in the overlay is stated by the
-      architect (south_hill_overlay, blank by default: Gordium doesn't look up the overlay map yet); with one
-      primary building it complies either way, so it is asked only where it matters. Gordium checks the design as
+      architect (south_hill_overlay, blank by default: Gordium doesn't look up the overlay map yet); the rule applies
+      only from two primary buildings, so it is asked only where it matters (and adds no row to a one-house lot). Gordium checks the design as
       new construction: a parcel that already held two or more primary structures before the amendment may keep
       and change them (the subsection's last sentence), which this rule doesn't see; tell the zoning office if so.
       Garages, sheds and an accessory dwelling unit aren't primary structures (§325-3B). The primary buildings are
