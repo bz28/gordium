@@ -114,3 +114,19 @@ def test_only_a_use_row_on_the_chart_use_page_is_named_use_column():
     assert citation(note, "Occupancy", "R-1b", sect, docs).endswith("note 1")
     assert "Use column" not in citation(head, "Primary structures", "RU", sect, docs)
     assert citation(row, "Lot area", "R-1b", sect, docs).endswith("Use column")
+
+
+def test_every_link_in_an_ru_check_has_one_name():
+    """PR2 review round 6: RU.use and RU.primary_structures both cite RU's column heading ("RU [fn3] Regulations");
+    one link, one name (note 3), for every chart p.2 link across a whole RU check. (p.3's lot-size and lot-width
+    rows for a two-family dwelling share one search link already on the base branch: reported, not this PR's.)"""
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "12_r3a_two_family_at_the_building_limits.yaml"))
+    sc["district"], sc["use"] = "RU", "two_family"
+    sc["lot"]["points"] = [[0, 0], [300, 0], [300, 250], [0, 250]]
+    s, f, extras = scenarios.site(sc)
+    seen = {}
+    for item in check_site(s, f, extras=extras)["view"]["items"]:
+        for c in item["detail"].get("cited") or []:
+            if "Zoning-Charts" in c["link"] and "#page=2&" in c["link"]:
+                seen.setdefault(c["link"], set()).add(c["citation"])
+    assert seen and all(len(names) == 1 for names in seen.values()), {k: v for k, v in seen.items() if len(v) > 1}

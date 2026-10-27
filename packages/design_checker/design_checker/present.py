@@ -236,7 +236,9 @@ def citation(source: dict, item_name: str, district: str, section_of, documents:
     chart (a footnote line: "…, note 16"); "§325-8A, p.25" for the law."""
     if _is_chart(source, documents):
         quote = " ".join(str(source.get("quote", "")).split())
-        if re.match(r"^(NOTES:\s*)?\(\d+\)", quote):     # the footnote itself, at the bottom of the page
+        # the footnote itself, at the bottom of the page; or a district's column heading carrying one ("RU [fn3]
+        # Regulations": its note, one name whichever rule cites it, PR2 review round 6)
+        if re.match(r"^(NOTES:\s*)?\(\d+\)", quote) or re.match(r"^\S+ \[fn[\d,]+\] Regulations$", quote):
             return ", ".join(["§325-8", "District Regulations Chart", district] +
                              [f"note {n}" for n in _footnotes(quote)])
         # a row of the use list (chart p.2: a use and its marks, • / SP / - per district) is the Use column whichever
