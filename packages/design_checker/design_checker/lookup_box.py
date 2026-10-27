@@ -74,6 +74,7 @@ def frame(result: dict) -> dict | None:
     return {"ring": placed, "street_edges": edges,
             "street_line": [[placed[i], placed[(i + 1) % n]] for i in edges],
             "spots": spots, "datum_ft": datum, "rotation_deg": round(math.degrees(angle) % 360, 4),
+            "shift_ft": [round(x0, 6), round(y0, 6)],    # subtracted after turning (the context map is placed so)
             "origin_epsg2261_us_survey_ft": lot.get("origin_epsg2261_us_survey_ft")}
 
 
@@ -99,7 +100,9 @@ def writes(result: dict, placed: dict | None) -> dict:
     if _store(result, "lot") == "raw":
         out["lot_ring"] = placed["ring"]
         out["street_line"] = placed["street_line"]
-        out["frame"] = {k: placed[k] for k in ("origin_epsg2261_us_survey_ft", "rotation_deg", "datum_ft")}
+        out["frame"] = {k: placed[k] for k in ("origin_epsg2261_us_survey_ft", "rotation_deg", "datum_ft", "shift_ft")}
+        if _store(result, "parcel") == "raw":      # the context map leaves this parcel out (it is the lot)
+            out["frame"]["parcel_id"] = ((result.get("facts") or {}).get("parcel") or {}).get("value")
     else:
         out["guide_ring"] = placed["ring"]
     if out["lot_ring"] and _store(result, "ground") == "raw":
