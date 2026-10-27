@@ -1,0 +1,450 @@
+{
+ "claims": {
+  "outside any command": {
+   "ok": true,
+   "detail": null
+  },
+  "survey: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     112
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: use my survey"
+   }
+  },
+  "survey: checked again": {
+   "ok": true,
+   "detail": 1793088144.124741
+  },
+  "survey: undone": {
+   "ok": false,
+   "detail": {
+    "strings": [
+     {
+      "lot_facts": "{\"jurisdiction\": \"regulations/jurisdictions/new_york/ithaca_city\", \"zone\": \"R-1b\", \"use\": \"one_family_detached\", \"corner_lot\": false, \"ground_is_flat\": true, \"lot_surveyed\": false, \"lot_id\": \"801ff292-5a5a-4bed-8854-e9220729d0dd\", \"street_line\": [[[76.916, 0.2317], [67.113, 0.1516]], [[67.113, 0.1516], [59.09, 0.3022]], [[59.09, 0.3022], [49.525, 0.0]], [[49.525, 0.0], [38.7471, 0.5182]], [[38.7471, 0.5182], [30.5456, 0.1523]], [[30.5456, 0.1523], [20.3655, 0.1794]], [[20.3655, 0.1794], [10.7167, 0.8339]], [[10.7167, 0.8339], [1.1492, 0.2317]]], \"street_ids\": [\"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\"], \"grade_elevation\": 0.0, \"plan_north_deg\": 306.3799, \"address\": \"106 Ithaca Rd, Ithaca, NY\", \"grade_is\": \"finished\", \"ground_assumed\": \"flat\"}",
+      "ui": "{\"from_sample\": true, \"replaceable_lot\": \"801ff292-5a5a-4bed-8854-e9220729d0dd\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"zone_source\": \"entered by you\", \"ground_kind\": \"flat\", \"no_regrading\": false, \"design_buffer\": \"0'-0\\\"\", \"checked\": []}",
+      "fact_sources": "{\"address\": {\"value\": \"106 Ithaca Rd, Ithaca, NY\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"zone\": {\"value\": \"R-1b\", \"source\": \"entered by you\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"use\": {\"value\": \"One-family dwelling, detached\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"lot\": {\"value\": \"7,033 sf\", \"source\": \"the tax map (\\u00b12 ft, approximate)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"street\": {\"value\": \"Ithaca Rd\", \"source\": \"the State tax map (the sample's lookup)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"corner_lot\": {\"value\": \"no, one street\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"ground\": {\"value\": \"assumed flat\", \"source\": \"assumed (flat ground, the MVP's rule)\", \"confirmed_by\": null, \"date\": \"2026-10-27\"}, \"starting_house\": {\"value\": \"as first drawn, it keeps 2'-0\\\" back from each limit because the lot is from the tax map; use a survey for the full area.\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-27\"}}"
+     },
+     {
+      "lot_facts": null,
+      "ui": "{\"from_sample\": true, \"replaceable_lot\": \"801ff292-5a5a-4bed-8854-e9220729d0dd\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\"}",
+      "fact_sources": null
+     }
+    ],
+    "objects": [
+     {
+      "ed312e50-9e9f-4ac1-800a-4d33a3448fc2": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "survey: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "enter: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     117
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: enter the row's facts"
+   }
+  },
+  "enter: checked again": {
+   "ok": true,
+   "detail": 1793088144.147559
+  },
+  "enter: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "03e11329-3e06-402e-89c0-f349d093a916": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "enter: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "main: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     121
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: pick the main building"
+   }
+  },
+  "main: checked again": {
+   "ok": true,
+   "detail": 1793088144.164897
+  },
+  "main: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "853de8e7-cdde-4fb5-afc5-b0dfa0edc8fc": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "main: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "add: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     125
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: add to check"
+   }
+  },
+  "add: checked again": {
+   "ok": true,
+   "detail": 1793088144.177979
+  },
+  "add: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "3211d599-4d2a-4bf3-af51-349b31cad978": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "add: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "ground: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     129
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: this is the ground"
+   }
+  },
+  "ground: checked again": {
+   "ok": true,
+   "detail": 1793088144.191236
+  },
+  "ground: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "a02f83b2-4241-490b-85fe-e499d086539b": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "ground: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "massing: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     133
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: hide or show the starting house"
+   }
+  },
+  "massing: checked again": {
+   "ok": true,
+   "detail": 1793088144.195981
+  },
+  "massing: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "25780f9a-e2cf-448c-be6f-e5aec14ac5bb": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "massing: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "labels: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     137
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: on-screen labels"
+   }
+  },
+  "labels: checked again": {
+   "ok": true,
+   "detail": 1793088144.200865
+  },
+  "labels: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "3fa91d1a-3c84-4ae7-9c61-7e590aa26e43": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "labels: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "context: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     141
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: show or hide the neighbourhood"
+   }
+  },
+  "context: checked again": {
+   "ok": true,
+   "detail": 1793088144.20544
+  },
+  "context: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "46ee2edc-329f-4269-9026-4e517c309956": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "context: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "auto_check: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     145
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: check after every edit"
+   }
+  },
+  "auto_check: checked again": {
+   "ok": true,
+   "detail": 1793088144.2176929
+  },
+  "auto_check: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "14d1ab1d-f182-460d-97dd-eb9a8b6d3e23": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "auto_check: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "not_ground: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     150
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: not the ground"
+   }
+  },
+  "not_ground: checked again": {
+   "ok": true,
+   "detail": 1793088144.240994
+  },
+  "not_ground: undone": {
+   "ok": false,
+   "detail": {
+    "strings": [
+     {
+      "lot_facts": null,
+      "ui": "{\"from_sample\": true, \"replaceable_lot\": \"801ff292-5a5a-4bed-8854-e9220729d0dd\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"ground_ids\": [\"4f4474f3-ae17-4208-b943-96c233270abf\"]}",
+      "fact_sources": "{\"ground_marked\": {\"value\": \"1 object left out of the check as the ground\", \"source\": \"entered by you\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}}"
+     },
+     {
+      "lot_facts": null,
+      "ui": "{\"from_sample\": true, \"replaceable_lot\": \"801ff292-5a5a-4bed-8854-e9220729d0dd\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\"}",
+      "fact_sources": null
+     }
+    ],
+    "objects": [
+     {
+      "b978192f-9346-4d8e-ae2e-3bfa2a440ff6": 0,
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     },
+     {
+      "4f4474f3-ae17-4208-b943-96c233270abf": 0,
+      "556eb407-d5c3-4180-a1e5-38c05c018b70": 0,
+      "ee30bf8e-d23b-4949-938c-0082e65a28b3": 8,
+      "fafb0290-c64e-4a6f-9776-d3d93c482ceb": 8,
+      "6cbd82ed-71ac-4314-9327-22ff121ea5c0": 8,
+      "801ff292-5a5a-4bed-8854-e9220729d0dd": 6
+     }
+    ]
+   }
+  },
+  "not_ground: nothing else": {
+   "ok": false,
+   "detail": null
+  }
+ },
+ "events": [
+  150,
+  151,
+  152,
+  153
+ ],
+ "ok": false,
+ "done": true
+}
