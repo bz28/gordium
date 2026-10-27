@@ -977,6 +977,7 @@ def panel():
                 p = ui.make_panel(_actions(), ui.DockHost(dock, host))
                 STATE["panel_parts"] = p
                 LEFTOVERS["panel"] = p["form"].Close
+                _sync_ticks(doc)            # a panel made again: its ticks as the document has them
             if logic.place_panel_now(p.get("placed")):          # once: then where the architect puts it
                 p["placed"] = ui.fit_floating(host, Rhino.UI.RhinoEtoApp.MainWindowForDocument(doc) if doc else None)
             return p
@@ -984,6 +985,7 @@ def panel():
         p = ui.make_panel(_actions())
         STATE["panel_parts"] = p
         LEFTOVERS["panel"] = p["form"].Close
+        _sync_ticks(doc)
         p["form"].Show()
     return p
 
@@ -2164,10 +2166,21 @@ def _settings_from_file(doc):
     house (from its layer)."""
     if doc is None:
         return
-    shown = logic.labels_on(_ui_state(doc))
-    STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
-    ui.set_labels_tick(STATE.get("panel_parts"), shown)
-    ui.set_massing_tick(STATE.get("panel_parts"), _massing_hidden(doc))   # (its layer: an Undo puts it back)
+    STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(_ui_state(doc))
+    _sync_ticks(doc)                    # every tick as the document has it now (Hide starting house: its layer)
+
+
+def _sync_ticks(doc):
+    """Every tick the panel has, as the document has it (the session's, for the envelope): the panel never shows a
+    tick as last clicked (the Rhino job at 540f718: Hide starting house stayed ticked after Cmd+Z). Run at every
+    check, failed ones too, and whenever the panel is made. (A layer switched in Rhino's Layers panel shows at
+    the next check, or after an Undo.)"""
+    p = STATE.get("panel_parts")             # (each setter does nothing without a panel)
+    if doc is None:
+        return
+    ui.set_labels_tick(p, logic.labels_on(_ui_state(doc)))
+    ui.set_massing_tick(p, _massing_hidden(doc))
+    ui.set_envelope_tick(p, STATE.get("envelope_on", True))
 
 
 def _massing_hidden(doc):
@@ -2201,6 +2214,7 @@ def hide_massing(hidden):
     doc = Rhino.RhinoDoc.ActiveDoc
     index = doc.Layers.FindByFullPath(logic.MASSING, -1)
     if index < 0:
+        ui.set_massing_tick(STATE.get("panel_parts"), False)    # nothing hidden: never left ticked
         say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
         return
     with logic.undo_step(doc, logic.UNDO_WORDS["massing"]):
@@ -2536,8 +2550,7 @@ def run_check(doc, report=True):
         STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
         if not STATE.get("headless"):
             ui.show(panel(), view)
-            ui.set_labels_tick(STATE.get("panel_parts"), shown)
-            ui.set_massing_tick(STATE.get("panel_parts"), _massing_hidden(doc))
+            _sync_ticks(doc)
             if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
                 ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
@@ -2552,6 +2565,7 @@ def run_check(doc, report=True):
         STATE["last"] = {"error": str(e), "at": time.time()}
         if not STATE.get("headless"):
             ui.show(panel(), None, error=str(e)[:300])
+            _sync_ticks(doc)                # (a panel made here shows the document's ticks too)
         return None
     finally:
         STATE["running"] = False
@@ -2711,6 +2725,7 @@ def toggle_live():
 
 def toggle_envelope():
     STATE["envelope_on"] = not STATE.get("envelope_on", True)
+    ui.set_envelope_tick(STATE.get("panel_parts"), STATE["envelope_on"])
     run_check(Rhino.RhinoDoc.ActiveDoc, report=False)
 
 

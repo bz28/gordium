@@ -224,7 +224,7 @@ def test_a_floating_panel_is_placed_once_never_on_every_check():
     rhino = types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc),
                                   UI=types.SimpleNamespace(RhinoEtoApp=types.SimpleNamespace(
                                       MainWindowForDocument=lambda d: None)))
-    ns = {"STATE": {}, "LEFTOVERS": {}, "ui": ui, "logic": logic, "Rhino": rhino, "_actions": lambda: None,
+    ns = {"STATE": {}, "LEFTOVERS": {}, "ui": ui, "logic": logic, "Rhino": rhino, "_actions": lambda: None, "_sync_ticks": lambda doc: None,
           "register_dock": lambda: "dock", "sc": types.SimpleNamespace(sticky={"gordium_dock_hosts": {1: host}})}
     exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
     first = ns["panel"]()
