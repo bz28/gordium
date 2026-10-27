@@ -2518,6 +2518,7 @@ def _new_document(sender, e):
     if p is not None and p["form"].Visible:
         p["view"] = None
         ui.show(p, None, error="no check yet for this document (run GordiumCheck)")
+        _sync_ticks(Rhino.RhinoDoc.ActiveDoc)   # its own ticks, never the last document's (checked or not)
     STATE["dirty"] = time.time()        # re-check the document now in front, if it has lot facts
 
 
