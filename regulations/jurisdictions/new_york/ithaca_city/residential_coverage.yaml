@@ -87,12 +87,25 @@ pieces:
       all: {status: parked, item: adus}
 
   325-3B:building_area:
-    - what: What counts toward lot coverage (principal and accessory buildings, porches, decks, balconies over 2 ft,
+    - lines: [[5, 23, 28]]
+      what: What counts toward lot coverage (principal and accessory buildings, porches, decks, balconies over 2 ft,
         ramps, landings)
-      all: {status: rulebook, rules: [lot_coverage], mapped: &bldg_area "lot coverage measures building_area, which definitions.yaml defines from this piece (the first sentence)."}
-      R-3aa: {status: rulebook, rules: [lot_coverage], mapped: *bldg_area, also: [stories]}
-    - what: Pergolas, and terraces and patios above grade, kept out of required yards
-      all: *no_yard_object
+      all: {status: rulebook, rules: [lot_coverage]}
+      R-3aa: {status: rulebook, rules: [lot_coverage], also: [stories]}
+    - lines: [[5, 27, 29]]
+      what: Pergolas, and terraces and patios above grade, kept out of required yards
+      all: &yard_object_here
+        status: missing
+        priority: low
+        why: No rule names pergolas or raised terraces and patios; one is checked only if drawn as a solid on the
+          Building layer touching the house (then it is measured as part of the building).
+        also: [lot_coverage]
+      R-3aa:
+        status: missing
+        priority: low
+        why: No rule names pergolas or raised terraces and patios; one is checked only if drawn as a solid on the
+          Building layer touching the house (then it is measured as part of the building).
+        also: [lot_coverage, stories]
 
   325-3B:cooperative_household:
     - what: Four or more unrelated persons in one unit make it a multiple dwelling
@@ -111,8 +124,9 @@ pieces:
         also: [abutting_r1]
 
   325-3B:one_family_attached_dwelling:
-    - what: An attached building holds three to six one-family dwellings, each with its own ground-floor door
-      all:
+    - lines: [[8, 11, 14]]
+      what: An attached building holds three to six one-family dwellings
+      all: &attached_not_permitted
         status: not_applicable
         why: A one-family attached dwelling isn't permitted in this district (chart p.2, "-").
         file: zoning_charts_2026-04.pdf
@@ -125,6 +139,18 @@ pieces:
         priority: medium
         why: No rule holds an attached building to three to six dwelling units here (R-2c.attached_units_per_building
           does it from the stated attached_units_in_building), so a row of eight units can pass.
+    - lines: [[8, 11, 14]]
+      what: Each dwelling shares a party wall or structure and has direct exterior access from the ground floor
+      all: *attached_not_permitted
+      R-2c:
+        status: missing
+        priority: low
+        why: Nothing checks party walls or each unit's own ground-floor door; a massing model shows neither.
+        also: [attached_units_per_building, lot_area_one_family_attached]
+      R-3a, R-3aa, R-3b, RU:
+        status: missing
+        priority: low
+        why: Nothing checks party walls or each unit's own ground-floor door; a massing model shows neither.
 
   325-3B:dwelling_two_family:
     - what: Who may occupy each unit of a two-family dwelling
@@ -150,7 +176,8 @@ pieces:
         also: [lot_area_two_family]
 
   325-3B:dwelling_unit:
-    - what: What a dwelling unit is, as the rules count units and house types
+    - lines: [[9, 10, 12]]
+      what: What a dwelling unit is, as the rules count units and house types
       all:
         status: rulebook
         rules: [use]
@@ -169,8 +196,15 @@ pieces:
       R-2c:
         status: rulebook
         rules: [lot_area_one_family_attached, lot_area_one_family_semi_detached, lot_area_two_family]
-    - what: Each unit has its own entrance and living, cooking, sanitary and sleeping facilities
+    - lines: [[9, 10, 12]]
+      what: Each unit has its own entrance and living, cooking, sanitary and sleeping facilities
       all: *unit_facilities
+      R-2c:
+        status: missing
+        priority: low
+        why: Nothing checks that each unit has what the definition requires (its own entrance; the kitchen, sanitary
+          and sleeping facilities); a massing model shows no rooms.
+        also: [lot_area_one_family_attached, lot_area_one_family_semi_detached, lot_area_two_family]
 
   325-3B:functional_family_unit:
     - what: When unrelated people count as a functional family unit
@@ -218,13 +252,15 @@ pieces:
         cell: {section: Primary Uses, row: "Neighborhood commercial facility"}
 
   325-3B:occupant:
-    - what: Who counts as an occupant (R-2c), for the lot sizes that grow with occupants
+    - lines: [[16, 5, 14], [16, 28, 33]]
+      what: Who counts as an occupant (R-2c), for the lot sizes that grow with occupants
       all:
         status: not_applicable
         why: The definition is for R-2c only.
         quote: In R-2c Zones only
       R-2c: {status: rulebook, rules: [lot_area_one_family_detached]}
-    - what: Least habitable space per occupant (sleeping rooms 80/120/180/240 sf..., unit 150/250/350/450 sf...)
+    - lines: [[16, 15, 27]]
+      what: Least habitable space per occupant (sleeping rooms 80/120/180/240 sf..., unit 150/250/350/450 sf...)
       all:
         status: not_applicable
         why: The definition is for R-2c only.
@@ -234,28 +270,33 @@ pieces:
         priority: medium
         why: No rule checks the sleeping-room and unit floor areas each occupant needs; Gordium doesn't model rooms.
         note: Lane B is drafting occupancy rules on a branch stacked on r3-hand.
+        also: [lot_area_one_family_detached]
 
   325-3B:rooming_house:
-    - what: A rooming house (a multiple dwelling, §325-3B DWELLING, MULTIPLE (5)) and what it must include
+    - lines: [[18, 7, 10]]
+      what: A rooming house (a multiple dwelling, §325-3B DWELLING, MULTIPLE (5)) and what it must include
       all: *multiple_not_permitted
       R-3a, R-3aa, R-3b, RU:
         status: rulebook
         rules: [lot_area_multiple_family]
         mapped: A rooming house is a multiple dwelling (§325-3B DWELLING, MULTIPLE (5)), checked by the
           multiple-dwelling lot size.
-    - what: It must include complete kitchen facilities or a separate entrance
+    - lines: [[18, 8, 9]]
+      what: It must include complete kitchen facilities or a separate entrance
       all: *multiple_not_permitted
       R-3a, R-3aa, R-3b, RU: *unit_facilities
 
   325-3B:rooming_unit:
-    - what: A rooming unit and what it must include
+    - lines: [[18, 11, 13]]
+      what: A rooming unit and what it must include
       all: *multiple_not_permitted
       R-3a, R-3aa, R-3b, RU:
         status: rulebook
         rules: [lot_area_multiple_family]
         mapped: Rooming units are in rooming houses, which are multiple dwellings (§325-3B); in R-3a, R-3aa and R-3b
           each room let for profit adds lot area (chart p.3 notes 7 and 8).
-    - what: It must include complete kitchen facilities or a separate entrance
+    - lines: [[18, 12, 13]]
+      what: It must include complete kitchen facilities or a separate entrance
       all: *multiple_not_permitted
       R-3a, R-3aa, R-3b, RU: *unit_facilities
 
@@ -318,10 +359,12 @@ pieces:
           building by building (see §325-8B(1)).
 
   325-8A:
-    - what: "Column 2: permitted primary uses"
+    - lines: [[24, 12, 16]]
+      what: "Column 2: permitted primary uses"
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
-    - what: "Column 3: permitted accessory uses (chart p.2: private garage, structure for construction purposes,
+    - lines: [[24, 17, 18]]
+      what: "Column 3: permitted accessory uses (chart p.2: private garage, structure for construction purposes,
         adult day-care home, towers, home occupation, neighborhood parking area, gardens, ADU)"
       all:
         status: missing
@@ -330,13 +373,15 @@ pieces:
           permit; a private garage holds at most three cars in R-1 and R-2a/R-2b, six per building in R-2c; a
           structure for construction purposes may stay two years). ADUs and parking are on the later list.
         note: Home occupations are being drafted on Lane B's branch.
-    - what: "Column 4: off-street parking"
+    - lines: [[24, 19, 21]]
+      what: "Column 4: off-street parking"
       all:
         status: parked
         item: parking
         why: The rulebook checks one-family detached houses (parking_one_family) and flags the other uses; the rest
           of §325-20 waits for the parking work.
-    - what: "Column 5: off-street loading"
+    - lines: [[24, 22, 26]]
+      what: "Column 5: off-street loading"
       all:
         status: missing
         priority: low
@@ -352,28 +397,39 @@ pieces:
         priority: low
         why: R-2x.loading flags a neighborhood commercial facility; chart p.14's "Allowed by variance" row for other
           nonresidential uses has no rule or flag (R-2a.loading's notes say so).
-    - what: "Columns 6 and 7: minimum lot area and width"
+    - lines: [[24, 27, 34]]
+      what: "Columns 6 and 7: minimum lot area and width"
       all: {status: rulebook, rules: [lot_area_*, lot_width_*], mapped: "Columns 6 and 7 are the chart's lot-size rows (p.3), which these rules check."}
       R-3a, R-3aa, R-3b:
         status: flag
         rules: [lot_area_*, lot_width_*, lot_size_zero_lot_line]
         mapped: Columns 6 and 7 are the chart's lot-size rows (p.3); the zero-lot-line row ("-") is a flag.
-    - what: "Columns 8 and 9: stories (counted at the main entrance side) and height"
+    - lines: [[24, 35, 39], [25, 3, 4]]
+      what: "Columns 8 and 9: stories (counted at the main entrance side) and height"
       all: {status: rulebook, rules: [stories, height], mapped: "Columns 8 and 9 are the chart's height rows (p.3), which these rules check."}
-    - what: "Column 10: lot coverage (principal and accessory buildings, porches, decks, balconies, ramps, landings)"
+    - lines: [[25, 5, 11]]
+      what: "Column 10: lot coverage (principal and accessory buildings, porches, decks, balconies, ramps, landings)"
       all: {status: rulebook, rules: [lot_coverage]}
-    - what: "Columns 11 to 15: front, side and rear yards (the rear yard opposite the address street on a corner or
+      R-3aa: {status: rulebook, rules: [lot_coverage], also: [stories]}
+    - lines: [[25, 12, 34], [26, 3, 3]]
+      what: "Columns 11 to 15: front, side and rear yards (the rear yard opposite the address street on a corner or
         through lot)"
-      all: {status: rulebook, rules: [front_yard, side_yards, rear_yard, yard_projections], mapped: "Columns 11 to 15 are the chart's yard rows (p.3), which these rules check."}
-    - what: "Column 16: minimum height"
+      all: {status: rulebook, rules: [front_yard, side_yards, rear_yard, yard_projections, height], mapped: "Columns 11 to 15 are the chart's yard rows (p.3), which these rules check."}
+    - lines: [[26, 4, 9]]
+      what: "Column 16: minimum height"
       all:
         status: not_applicable
-        why: The residential chart (p.3) has no minimum-height row (R-3aa's two-story minimum is chart note 11,
-          checked by R-3aa.stories).
+        why: The residential chart (p.3) has no minimum-height row for this district.
         quote: Buildings hereafter erected shall have a minimum height as specified herein
+      R-3aa:
+        status: rulebook
+        rules: [stories]
+        note: R-3aa's two-story minimum (chart p.3 note 11) with this column's 500 sf exemption; whether the exemption
+          reaches a small building alone is an open question (questions_for_architects.md 5.10).
 
   325-8B:
-    - what: "(1) Each additional primary building on the lot needs its own minimum lot area"
+    - lines: [[26, 10, 16]]
+      what: "(1) Each additional primary building on the lot needs its own minimum lot area"
       all:
         status: missing
         priority: high
@@ -381,44 +437,51 @@ pieces:
           are on the lot. With two houses drawn it asks which is the main building; once one is picked, the other
           is read as an accessory building or a deck, so a second house on a lot sized for one can pass.
       RU: {status: flag, rules: [primary_structures]}
-    - what: "(2) Landfilling and bulkheading plans need Board of Public Works approval"
+    - lines: [[26, 17, 18]]
+      what: "(2) Landfilling and bulkheading plans need Board of Public Works approval"
       all: {status: missing, priority: low, why: "No flag; a massing model doesn't show fill or bulkheads."}
-    - what: "(3) Permitted uses are listed; what is left out is not permitted"
+    - lines: [[26, 19, 21]]
+      what: "(3) Permitted uses are listed; what is left out is not permitted"
       all: {status: rulebook, rules: [use]}
-      R-3a, R-3aa, R-3b: {status: flag, rules: [use, lot_size_zero_lot_line]}
-    - what: "(4) A use allowed by special permit or variance follows the stricter district's regulations"
+      R-3a, R-3b: {status: flag, rules: [use]}
+    - lines: [[26, 22, 25]]
+      what: "(4) A use allowed by special permit or variance follows the stricter district's regulations"
       all:
         status: flag
         rules: [use]
-        note: A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out
-          by hand.
-    - what: "(5) Every use meets the general performance standards (§325-23)"
+        mapped: &sp_review A special-permit use goes to needs review (the use entry), where the stricter regulations are
+          worked out by hand.
+      R-3a, R-3aa, R-3b: {status: flag, rules: [use, lot_size_zero_lot_line], mapped: *sp_review}
+    - lines: [[26, 26, 27]]
+      what: "(5) Every use meets the general performance standards (§325-23)"
       all: *operational
-    - what: "(6) Minor children aren't counted as unrelated occupants (R-1 and R-2)"
+    - lines: [[26, 28, 28], [27, 3, 3]]
+      what: "(6) Minor children aren't counted as unrelated occupants (R-1 and R-2)"
       all: *occupancy
       R-3a, R-3aa, R-3b, RU:
         status: not_applicable
         why: Applies in R-1 and R-2 districts only.
         quote: In R-1 and R-2 Districts, minor dependent children
-    - what: "(7), (8), (10): pointers to the NYS Uniform Code, to Article V and to §325-8A(15)"
+    - lines: [[27, 4, 8], [27, 11, 12]]
+      what: "(7), (8), (10): pointers to the NYS Uniform Code, to Article V and to §325-8A(15)"
       all:
         status: not_applicable
         why: Pointers with no requirement of their own; each Article V section is its own row in this table, and the
           Uniform Code is outside Chapter 325.
         quote: All columns established by this section are subject to the supplementary regulations stated in Article V
       R-3aa:
-        status: not_applicable
-        why: Pointers with no requirement of their own; each Article V section is its own row in this table, and the
-          Uniform Code is outside Chapter 325.
-        quote: All columns established by this section are subject to the supplementary regulations stated in Article V
-        also: [stories]
-    - what: "(9) R-3 land that directly abuts R-1 (§325-19E)"
+        status: rulebook
+        rules: [stories]
+        note: (10) points to §325-8A(15), whose 500 sf exemption R-3aa.stories applies to the two-story minimum.
+    - lines: [[27, 9, 10]]
+      what: "(9) R-3 land that directly abuts R-1 (§325-19E)"
       all:
         status: not_applicable
         why: Applies only to R-3 property next to R-1.
         quote: For special conditions on development of property in R-3 that directly abuts R-1
       R-3a, R-3aa, R-3b: {status: flag, rules: [abutting_r1]}
-    - what: "(11) Nonconforming uses and structures follow Article VI"
+    - lines: [[27, 13, 15]]
+      what: "(11) Nonconforming uses and structures follow Article VI"
       all: *nonconforming
 
   325-8C:
@@ -445,25 +508,30 @@ pieces:
         quote: with a zoning designation of R-1 or R-2
 
   325-9B:
-    - what: "Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood
+    - lines: [[30, 21, 36], [31, 34, 36], [31, 38, 39], [32, 3, 6]]
+      what: "Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood
         commercial, hospitals, day care, bed-and-breakfasts)"
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
-    - what: Accessory uses that need a special permit
+    - lines: [[30, 37, 38], [31, 3, 33], [31, 37, 37]]
+      what: Accessory uses that need a special permit
       all: *accessory_sp
 
   325-9D:
-    - what: Criteria the Board uses to grant a special permit, for a primary use
+    - lines: [[33, 7, 37]]
+      what: Criteria the Board uses to grant a special permit, for a primary use
       all:
         status: flag
         rules: [use]
         mapped: A special-permit primary use goes to needs review (the use entry); the criteria are the Board's
           judgment.
-    - what: Accessory uses that need a special permit
+    - lines: [[33, 7, 37]]
+      what: Accessory uses that need a special permit
       all: *accessory_sp
 
   325-10C:
-    - what: "Bed-and-breakfast inns (special-permit conditions)"
+    - lines: [[35, 3, 20]]
+      what: "Bed-and-breakfast inns (special-permit conditions)"
       all:
         status: not_applicable
         why: A bed-and-breakfast inn isn't permitted in this district (chart p.2, "-").
@@ -475,12 +543,14 @@ pieces:
         status: flag
         rules: [use]
         mapped: A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review.
-    - what: "Neighborhood gardens (special-permit conditions)"
+    - lines: [[35, 21, 40], [36, 3, 44], [37, 3, 6]]
+      what: "Neighborhood gardens (special-permit conditions)"
       all:
         status: missing
         priority: low
         why: A garden is an accessory use needing a special permit (chart p.2); nothing asks about one.
-    - what: "Schools and related uses (special-permit conditions)"
+    - lines: [[37, 7, 25]]
+      what: "Schools and related uses (special-permit conditions)"
       all:
         status: flag
         rules: [use]
@@ -610,14 +680,17 @@ pieces:
         mapped: The yard rules (and the height bonus, which grows the yards) use the yards defined from §325-18A
           (definition yard_projections); lot coverage counts porches and decks through building_area (§325-8A(10)).
   325-18B:
-    - what: Eaves may project at most 2 ft into a required yard
+    - lines: [[49, 13, 16]]
+      what: Eaves may project at most 2 ft into a required yard
       all: {status: rulebook, rules: [yard_projections], also: [front_yard, side_yards, rear_yard, height]}
-    - what: Windowsills, belt courses, cornices and other features may project at most 2 ft
+    - lines: [[49, 13, 16]]
+      what: Windowsills, belt courses, cornices and other features may project at most 2 ft
       all:
         status: missing
         priority: low
         why: A massing model shows eaves only; a feature drawn as part of the solid is measured as the building, so it
           can only be stricter than the law (never a false pass).
+        also: [front_yard, side_yards, rear_yard, height, yard_projections]
   325-18C:
     - what: U-1 Zone setback next to a residential zone
       all: {status: not_applicable, why: Applies to buildings in the U-1 Zone., quote: in the U-1 Zone}
@@ -666,21 +739,45 @@ pieces:
       all: {status: not_applicable, why: Applies only in the U-1 District., quote: Parking for the U-1 Zoning District}
 
   325-21A:
-    - what: Size of an off-street loading space (450 sf)
+    - lines: [[63, 41, 42]]
+      what: Loading space size (450 sf), for the uses the district's loading flag lists
       all: {status: flag, rules: [loading]}
       R-2a, R-2b, R-2c: {status: flag, rules: [loading], mapped: "R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes)."}
-      R-1a, R-1b: &no_loading_uses
+      R-1a, R-1b: &no_loading_flag
         status: not_applicable
-        why: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); none
-          is permitted in R-1 (chart p.2).
+        why: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B);
+          no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the
+          next part.
         piece: 325-21B
         quote: shall apply to all business and industrial land uses and multiple dwelling structures having more than
           25 units
+    - lines: [[63, 41, 42]]
+      what: Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)
+      all: &variance_loading
+        status: missing
+        priority: low
+        why: Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag (each rulebook's header
+          says so); the loading flag covers only the uses it lists.
+        also: [loading]
+      R-1a, R-1b, R-2a, R-2b, R-2c:
+        status: missing
+        priority: low
+        why: Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag (each rulebook's header
+          says so); the loading flag covers only the uses it lists.
   325-21B:
-    - what: Which uses need loading spaces, and how many
+    - lines: [[63, 43, 43], [64, 3, 8]]
+      what: Which uses need loading spaces, and how many, for the uses the district's loading flag lists
       all: {status: flag, rules: [loading]}
       R-2a, R-2b, R-2c: {status: flag, rules: [loading], mapped: "R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes)."}
-      R-1a, R-1b: *no_loading_uses
+      R-1a, R-1b: *no_loading_flag
+    - lines: [[63, 43, 43], [64, 3, 8]]
+      what: Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)
+      all: *variance_loading
+      R-1a, R-1b, R-2a, R-2b, R-2c:
+        status: missing
+        priority: low
+        why: Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag (each rulebook's header
+          says so); the loading flag covers only the uses it lists.
   325-21C:
     - what: No loading in CBD districts
       all: {status: not_applicable, why: Applies only in CBD districts., quote: in any CBD zoning district}

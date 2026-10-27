@@ -72,39 +72,36 @@ def _formula_names(rule: dict) -> set[str]:
     return set().union(*(formula.names(t) for t in texts if t)) if any(texts) else set()
 
 
-def citations(rule: dict, owner: dict, definitions: dict) -> dict[str, str]:
-    """{piece id: how this rule cites it}: a source, a finding's source, or a definition of a measure it uses."""
-    out: dict[str, str] = {}
+def _source_lines(sources) -> list[tuple[int, int]]:
+    """Every (page, line) of the law the sources quote."""
+    return [(s.get("page"), n) for s in sources or [] if s.get("file") == LAW and len(s.get("lines") or []) == 2
+            for n in range(s["lines"][0], s["lines"][1] + 1)]
 
-    def add(sources, how):
-        for s in sources or []:
-            lines = s.get("lines") or []
-            if s.get("file") != LAW or len(lines) != 2:
-                continue
-            for n in range(lines[0], lines[1] + 1):
-                if (pid := owner.get((s.get("page"), n))) and pid not in out:
-                    out[pid] = how
-    add(rule.get("sources"), "cited")
+
+def citations(rule: dict, owner: dict, definitions: dict) -> dict[str, dict]:
+    """{piece id: {"how": how this rule cites it first, "lines": every (page, line) of the piece it reaches}}: a
+    source, a finding's source, or a definition (definitions.yaml) of a measure its formulas use."""
+    out: dict[str, dict] = {}
+
+    def add(keys, how):
+        for key in keys:
+            if pid := owner.get(key):
+                out.setdefault(pid, {"how": how, "lines": set()})["lines"].add(key)
+    add(_source_lines(rule.get("sources")), "cited")
     for f in rule.get("findings") or []:
-        add(f.get("sources"), f"cited in finding {f.get('id', '?')}")
+        add(_source_lines(f.get("sources")), f"cited in finding {f.get('id', '?')}")
     used = _formula_names(rule)
-    for term, (pieces, measures) in definitions.items():
+    for term, (keys, measures) in definitions.items():
         if used & measures:
-            for pid in sorted(pieces):        # a set: sorted, so the output is the same on every run
-                out.setdefault(pid, f"via definition {term}")
+            add(keys, f"via definition {term}")
     return out
 
 
-def _definitions(j: Path, owner: dict) -> dict[str, tuple[set, set]]:
-    """{term: (pieces its sources sit in, measures it defines)} from 4_term_definitions/definitions.yaml."""
+def _definitions(j: Path, owner: dict) -> dict[str, tuple[list, set]]:
+    """{term: (the (page, line)s its sources quote, the measures it defines)} from definitions.yaml."""
     path = j / "4_term_definitions/definitions.yaml"
-    out = {}
-    for term, e in ((load(path) or {}) if path.exists() else {}).items():
-        pieces = {owner[(s["page"], n)] for s in e.get("sources") or [] if s.get("file") == LAW
-                  and len(s.get("lines") or []) == 2 for n in range(s["lines"][0], s["lines"][1] + 1)
-                  if (s["page"], n) in owner}
-        out[term] = (pieces, set(e.get("measures") or []))
-    return out
+    return {term: (_source_lines(e.get("sources")), set(e.get("measures") or []))
+            for term, e in ((load(path) or {}) if path.exists() else {}).items()}
 
 
 def disclosed_sections(j: Path) -> list[str]:
@@ -177,6 +174,7 @@ class Audit:
         self.disclosed = disclosed_sections(j)
         self.rows = [pid for pid in self.pieces if self.labels.get(pid, {}).get("label") in ("rule", "flag")]
         self.cells: dict[str, dict[str, list[tuple[str, dict]]]] = {}   # piece -> district -> [(part what, decision)]
+        self.part_lines: dict[str, list[set]] = {}                         # piece -> each part's (page, line)s
         self._resolve()
 
     # -- reading and checking the decisions ------------------------------------------------------------------
@@ -195,27 +193,48 @@ class Audit:
                 self.problems.append(f"{pid}: no decisions (a list of parts, each with `what`)")
                 continue
             cell = self.cells[pid] = {d: [] for d in self.districts}
+            spans = self.part_lines[pid] = self._part_lines(pid, parts)
             for i, part in enumerate(parts):
                 where = f"{pid} part {i + 1}"
                 if not isinstance(part, dict) or not part.get("what"):
                     self.problems.append(f"{where}: needs `what`")
                     continue
                 for d, decision in self._spread(part, where).items():
-                    self._check(pid, d, decision, f"{where} ({d})")
+                    self._check(pid, d, decision, f"{where} ({d})", spans[i])
                     cell[d].append((part["what"], decision))
-            for d in self.districts:
-                named = {r for _, dec in cell[d] for r in (self._expand(d, dec.get("rules", []))
-                                                           if dec.get("status") in ("rulebook", "flag") else [])
-                         + list(dec.get("also") or [])}
-                for rid, cited in self.cites[d].items():
-                    if pid in cited and rid.split(".", 1)[1] not in named:
-                        self.problems.append(f"{pid} ({d}): {rid} {cited[pid]} but no decision names it "
-                                             "(add it to `rules`, or to `also` if it covers none of the parts)")
+                    # every rule that cites lines of this part is named on this part: a stale "not applicable" or
+                    # "missing" can't stand beside a rule that now reaches it
+                    named = set(self._expand(d, decision.get("rules")) if decision.get("status") in ("rulebook", "flag")
+                                else []) | set(decision.get("also") or [])
+                    for rid, cited in self.cites[d].items():
+                        if pid in cited and cited[pid]["lines"] & spans[i] and rid.split(".", 1)[1] not in named:
+                            self.problems.append(f"{where} ({d}): {rid} {cited[pid]['how']} but this part doesn't "
+                                                 "name it (add it to `rules`, or to `also` if it covers none of it)")
+
+    def _part_lines(self, pid: str, parts: list) -> list[set]:
+        """The (page, line)s each part covers: the whole piece for a piece of one part; else each part's `lines`
+        ([[page, first, last], ...]), all inside the piece and together covering every line of it."""
+        whole = set(piece_keys(self.pieces[pid]))
+        if len(parts) == 1 and not (isinstance(parts[0], dict) and parts[0].get("lines")):
+            return [whole]
+        out = []
+        for i, part in enumerate(parts):
+            spec = part.get("lines") if isinstance(part, dict) else None
+            keys = {(pg, n) for pg, a, b in spec or [] for n in range(a, b + 1)} if isinstance(spec, list) else set()
+            if not keys:
+                self.problems.append(f"{pid} part {i + 1}: a piece of several parts gives each part its `lines` "
+                                     "([[page, first, last], ...])")
+            elif keys - whole:
+                self.problems.append(f"{pid} part {i + 1}: lines outside the piece: {sorted(keys - whole)[:3]}")
+            out.append(keys & whole)
+        if left := whole - set().union(*out):
+            self.problems.append(f"{pid}: lines in no part: {sorted(left)[:5]}")
+        return out
 
     def _spread(self, part: dict, where: str) -> dict[str, dict]:
         out: dict[str, dict] = {}
         for key, decision in part.items():
-            if key in ("what", "note"):
+            if key in ("what", "note", "lines"):
                 continue
             names = self.districts if key == "all" else [k.strip() for k in str(key).split(",")]
             for d in names:
@@ -242,7 +261,7 @@ class Audit:
             out += [i for i in ids if r[:-1] and i.startswith(r[:-1])] if str(r).endswith("*") else [r]
         return out
 
-    def _check(self, pid: str, d: str, dec: dict, where: str):
+    def _check(self, pid: str, d: str, dec: dict, where: str, span: set):
         p = self.problems
         status = dec.get("status")
         p += [f"{where}: unknown field {k!r}" for k in sorted(dec.keys() - DECISION_FIELDS)]
@@ -254,7 +273,6 @@ class Audit:
             if not ids:
                 p.append(f"{where}: name the rules (`rules`)")
             uncited, reviews = [], False
-            several = len((self.data.get("pieces") or {}).get(pid) or []) > 1
             for rid in ids:
                 rule = self.books[d].get(f"{d}.{rid}")
                 if rule is None:
@@ -263,10 +281,7 @@ class Audit:
                 if status == "rulebook" and rule.get("kind") != "rule":
                     p.append(f"{where}: {d}.{rid} is a {rule.get('kind')}, not a rule (status flag?)")
                 reviews |= rule.get("kind") == "flag" or bool(rule.get("review_when"))
-                how = self.cites[d].get(f"{d}.{rid}", {}).get(pid)
-                # a definition links its whole piece; on a piece of several parts it can't show which part, so it
-                # counts as a citation only with `mapped` saying why (it still has to be named, below)
-                if how is None or (several and how.startswith("via definition")):
+                if not self._reaches(d, rid, pid, span):         # cites none of this part's lines
                     uncited.append(rid)
             if status == "flag" and ids and not reviews:
                 p.append(f"{where}: none of {', '.join(ids)} ever says needs review (no flag, no review_when)")
@@ -278,7 +293,7 @@ class Audit:
             p += [f"{where}: `{k}` only goes with rulebook or flag (a rule that cites the piece but covers none of "
                   "it goes in `also`)" for k in ("rules", "mapped") if k in dec]
         for rid in dec.get("also") or []:
-            if pid not in self.cites[d].get(f"{d}.{rid}", {}):
+            if not self._reaches(d, rid, pid, span):
                 p.append(f"{where}: `also` names {d}.{rid}, which doesn't cite the piece")
         if status in ("not_applicable", "missing", "open_question") and not dec.get("why"):
             p.append(f"{where}: say why (`why`)")
@@ -292,7 +307,7 @@ class Audit:
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":
                 p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-' "
                          "(not permitted)")
-            if dec.get("quote") == OMISSION or "unlisted_use" in dec:
+            if self._quotes_omission(dec) or "unlisted_use" in dec:
                 p += self._unlisted_problems(d, dec, where)
         if status == "parked" and dec.get("item") not in self.parked:
             p.append(f"{where}: parked item must be one of {sorted(self.parked)}")
@@ -306,6 +321,10 @@ class Audit:
         if status == "missing" and dec.get("priority") not in PRIORITIES:
             p.append(f"{where}: priority must be one of {list(PRIORITIES)}")
 
+    def _reaches(self, d: str, rid: str, pid: str, span: set) -> bool:
+        """The rule cites (a source, a finding, or a definition of a measure it uses) a line of this part."""
+        return bool(self.cites[d].get(f"{d}.{rid}", {}).get(pid, {}).get("lines", set()) & span)
+
     def _cell(self, d: str, dec: dict):
         """The district's own chart cell for the decision's row (None if the chart reader has no such cell)."""
         c = dec["cell"]
@@ -313,6 +332,17 @@ class Audit:
                        if district_name(col) == d), None)
         cell = self.ctx.cells.get(CHART, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
         return None if cell is None else cell.get("value")
+
+    def _quotes_omission(self, dec: dict) -> bool:
+        """The quote shares a line with §325-8B(3) (permitted uses are listed; what is left out isn't), however
+        much or little of it is quoted."""
+        if "page" not in dec or dec.get("file", LAW) != LAW or not dec.get("quote"):
+            return False
+        page = self.ctx.pages.get(LAW, {}).get(dec["page"], {})
+        rule3 = {(dec["page"], n) for a, b in locate(OMISSION, page) for n in range(a, b + 1)}
+        if dec["page"] == 26:
+            rule3 |= {k for k, pid in self.owner.items() if pid == "325-8B" and k[0] == 26 and 19 <= k[1] <= 21}
+        return any((dec["page"], n) in rule3 for a, b in locate(dec["quote"], page) for n in range(a, b + 1))
 
     def _unlisted_problems(self, d: str, dec: dict, where: str) -> list[str]:
         """The omission quote (§325-8B(3)) backs "not applicable" only for a named use that is on no residential
@@ -405,12 +435,13 @@ class Audit:
             return f"§{pids[0]} {self._title(pids[0])}"
         return ", ".join(f"§{p}" for p in pids)
 
-    def _decision_text(self, pid: str, d: str, dec: dict) -> str:
+    def _decision_text(self, pid: str, d: str, dec: dict, index: int) -> str:
         """One decision in words. Rule ids without the district, so districts decided alike read as one line."""
         s = dec["status"]
         if s in ("rulebook", "flag"):
             ids = self._expand(d, dec.get("rules"))
-            how = [f"`{rid}`" + (f" ({cited})" if (cited := self.cites[d].get(f"{d}.{rid}", {}).get(pid))
+            span = self.part_lines[pid][index]
+            how = [f"`{rid}`" + (f" ({self.cites[d][f'{d}.{rid}'][pid]['how']})" if self._reaches(d, rid, pid, span)
                                  else " (mapped)") for rid in ids]
             text = f"{WORDS[s]}: " + ", ".join(how)
             if dec.get("mapped"):
@@ -509,7 +540,7 @@ class Audit:
                 out.append(f"- **{what}**")
                 groups: dict[str, list[str]] = {}
                 for d in ds:
-                    groups.setdefault(self._decision_text(pid, d, self.cells[pid][d][i][1]), []).append(d)
+                    groups.setdefault(self._decision_text(pid, d, self.cells[pid][d][i][1], i), []).append(d)
                 out += [f"  - {self._where(g)}: {t}" for t, g in groups.items()]
             out.append("")
         out += self._rules_section()
@@ -534,7 +565,7 @@ class Audit:
                     "| Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |", "|---|---|---|---|---|"]
             for rid, rule in rules.items():
                 links = self.cites[d][rid]
-                cited = ", ".join(f"§{p}" + (" (via definition)" if links[p].startswith("via definition") else "")
+                cited = ", ".join(f"§{p}" + (" (via definition)" if links[p]["how"].startswith("via definition") else "")
                                   for p in self.pieces if p in links) or "— (the chart only)"
                 names = sorted(_formula_names(rule))
                 where = lambda n: "model" if n in model else "stated" if n in stated else "**none**"

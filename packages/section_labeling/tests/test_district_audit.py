@@ -71,7 +71,7 @@ def test_a_new_citation_must_be_named_so_a_stale_missing_cant_stand_beside_it(tm
     path = tmp_path / "R-1b.yaml"
     path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True), encoding="utf-8")
     found = audit.Audit(ITHACA, books={"R-1b": path}).problems
-    assert any(p.startswith("325-26 (R-1b): R-1b.front_yard cited but no decision names it") for p in found)
+    assert any(p.startswith("325-26 part 1 (R-1b): R-1b.front_yard cited but this part doesn't name it") for p in found)
 
 
 def test_the_saved_decisions_have_no_problems(built):
@@ -232,7 +232,7 @@ def test_rules_or_mapped_on_a_decision_that_isnt_covered_are_refused(decisions):
         "status": "not_applicable", "why": "w", "quote": "Corner lot transition", "rules": ["front_yard"]}}])
     found = problems(data)
     assert any("`rules` only goes with rulebook or flag" in p for p in found)
-    assert any("R-1a.front_yard cited but no decision names it" in p for p in found)
+    assert any("R-1a.front_yard cited but this part doesn't name it" in p for p in found)
     data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "low", "why": "w",
                                                                     "mapped": "m"}}])
     assert any("`mapped` only goes with rulebook or flag" in p for p in problems(data))
@@ -300,3 +300,63 @@ def test_the_table_is_the_same_whatever_python_hashes_sets_with():
     runs = {subprocess.run([sys.executable, "-c", code], env=dict(env, PYTHONHASHSEED=seed), capture_output=True,
                            text=True, check=True).stdout for seed in ("1", "2", "3")}
     assert len(runs) == 1
+
+
+# Review round 2: citations are matched part by part (each part of a piece gives its lines).
+
+def part_index(built, pid, prefix):
+    return next(k for k, w in enumerate(built._parts(pid)) if w.startswith(prefix))
+
+
+def test_a_rule_citing_a_part_must_be_named_on_that_part(decisions, built):
+    """R-3aa.stories cites §325-8A(15) (Column 16) and is named under Columns 8 and 9: Column 16 can't say N/A."""
+    parts = copy.deepcopy(decisions["pieces"]["325-8A"])
+    i = part_index(built, "325-8A", "Column 16")
+    parts[i] = {k: v for k, v in parts[i].items() if k != "R-3aa"}
+    found = problems(with_piece(decisions, "325-8A", parts))
+    assert any(p.startswith(f"325-8A part {i + 1} (R-3aa): R-3aa.stories cited but this part doesn't name it")
+               for p in found)
+    assert {built.cells["325-8A"][d][i][1]["status"] for d in ["R-3aa"]} == {"rulebook"}
+
+
+def test_a_rule_counts_as_citing_a_part_only_through_that_parts_lines(decisions, built):
+    """use cites §325-8B only on p.26 line 20, part (3): naming it on part (4) without `mapped` is refused."""
+    parts = copy.deepcopy(decisions["pieces"]["325-8B"])
+    i = part_index(built, "325-8B", "(4)")
+    parts[i]["all"] = {"status": "flag", "rules": ["use"]}
+    found = problems(with_piece(decisions, "325-8B", parts))
+    assert any(p.startswith(f"325-8B part {i + 1} (R-1a): use don't cite the piece") for p in found)
+
+
+def test_a_piece_of_several_parts_needs_lines_on_each_covering_the_whole_piece(decisions):
+    parts = copy.deepcopy(decisions["pieces"]["325-18B"])
+    del parts[1]["lines"]
+    assert any("325-18B part 2: a piece of several parts gives each part its `lines`" in p
+               for p in problems(with_piece(decisions, "325-18B", parts)))
+    parts = copy.deepcopy(decisions["pieces"]["325-18B"])
+    parts[0]["lines"] = parts[1]["lines"] = [[49, 13, 15]]
+    assert any("325-18B: lines in no part: [(49, 16)]" in p for p in problems(with_piece(decisions, "325-18B", parts)))
+    parts[0]["lines"] = [[49, 13, 17]]
+    assert any("lines outside the piece" in p for p in problems(with_piece(decisions, "325-18B", parts)))
+
+
+def test_any_quote_from_the_omission_sentence_needs_an_unlisted_use(decisions):
+    for quote in ("by specific prohibition or omission", "Regulations, standards and permitted uses are generally cumulative"):
+        found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
+            "status": "not_applicable", "why": "w", "page": 26, "quote": quote}}]))
+        assert any("needs `unlisted_use`" in p for p in found), quote
+
+
+def test_loading_for_a_use_allowed_by_variance_is_missing_everywhere_and_agrees_with_column_5(built):
+    col5 = part_index(built, "325-8A", "Column 5")
+    for pid in ("325-21A", "325-21B"):
+        i = part_index(built, pid, "Loading for a nonresidential use allowed by variance")
+        for d in built.districts:
+            assert built.cells[pid][d][i][1]["status"] == built.cells["325-8A"][d][col5][1]["status"] == "missing"
+            assert built.status(pid, d) == "missing", (pid, d)
+
+
+def test_an_attached_buildings_party_walls_and_doors_are_not_claimed_covered(built):
+    i = part_index(built, "325-3B:one_family_attached_dwelling", "Each dwelling shares")
+    assert built.cells["325-3B:one_family_attached_dwelling"]["R-2c"][i][1]["status"] == "missing"
+    assert built.status("325-3B:one_family_attached_dwelling", "R-2c") == "missing"
