@@ -262,3 +262,9 @@ def test_an_undo_step_ends_when_the_change_fails_and_never_ends_rhinos_own():
                                       "EndUndoRecord": lambda s, n: pytest.fail("ended Rhino's own record")})()
     with logic.undo_step(inside_a_command, "Gordium: x"):
         pass
+
+
+def test_the_plugin_still_compiles():
+    """Undo steps round 4: a re-indented try left gordium_rhino.py unloadable, unseen by the guard (it runs functions
+    cut from the source). The whole file must compile."""
+    compile(SRC, "gordium_rhino.py", "exec")

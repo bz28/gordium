@@ -2422,7 +2422,7 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-            try:                            # the Draw's undo step ends with the facts saved
+        try:                            # the Draw's undo step ends with the facts saved
             facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
             if facts is None:           # closed or Esc: nothing saved, nothing checked
                 Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
