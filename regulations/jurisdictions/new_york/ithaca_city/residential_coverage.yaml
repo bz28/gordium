@@ -62,6 +62,7 @@ _multiple_not_permitted: &multiple_not_permitted
   page: 2
   quote: "Multiple family dwelling [fn4] - - - - - • • • •[fn5]"
   cell: {section: Primary Uses, row: "Multiple family dwelling [fn4]"}
+  via_piece: 325-3B:dwelling_multiple_or_multiple_residence
 _unit_facilities: &unit_facilities
   status: missing
   priority: low
@@ -75,6 +76,13 @@ _accessory_sp: &accessory_sp
     four conditions; an antenna or dish over 6 ft, in the front yard or over 10 ft tall; a tower for electricity;
     a neighborhood garden; neighborhood parking).
   note: Home occupations are being drafted on Lane B's branch.
+_bnb_conflict: &bnb_conflict
+  status: missing
+  priority: medium
+  why: The chart (p.2) marks a bed-and-breakfast inn "-" in R-1 and R-2, so the use rule fails one here; but
+    §325-9B(1)(p) and §325-10C(2) say bed-and-breakfast inns need a special permit "in all districts". The law's text
+    and its chart disagree, and nothing in Gordium settles or surfaces it; to research (resolve before asking), then
+    ask the architects or the City if still unclear.
 _no_yard_object: &no_yard_object
   status: missing
   priority: low
@@ -304,7 +312,12 @@ pieces:
   325-3B:rooming_unit:
     - lines: [[18, 11, 13]]
       what: A rooming unit (counted in the multiple-dwelling lot size)
-      all: *multiple_not_permitted
+      all:
+        status: missing
+        priority: low
+        why: The law names a rooming house as a multiple dwelling (§325-3B DWELLING, MULTIPLE (5)), not a rooming unit,
+          and R-2c's occupant definition speaks of "other lodging units permitted in R-2c Zones" (p.16). Whether a
+          rooming unit can exist here, and what limits it, is not settled; nothing checks it.
       R-3a, R-3aa, R-3b, RU:
         status: rulebook
         rules: [lot_area_multiple_family]
@@ -312,8 +325,7 @@ pieces:
           each room let for profit adds lot area (chart p.3 notes 7 and 8).
     - lines: [[18, 12, 13]]
       what: It must include complete kitchen facilities or a separate entrance
-      all: *multiple_not_permitted
-      R-3a, R-3aa, R-3b, RU: *unit_facilities
+      all: *unit_facilities
 
   325-3B:row_house:
     - what: A row house's modules (facade at most 25 ft, one street-facing entry each)
@@ -523,11 +535,17 @@ pieces:
         quote: with a zoning designation of R-1 or R-2
 
   325-9B:
-    - lines: [[30, 21, 36], [31, 34, 36], [31, 38, 39], [32, 3, 6]]
+    - lines: [[30, 21, 36], [31, 34, 35], [31, 38, 39], [32, 3, 6]]
       what: "Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood
-        commercial, hospitals, day care, bed-and-breakfasts)"
+        commercial, hospitals, day care)"
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
+    - lines: [[31, 36, 36]]
+      what: "(p) Bed-and-breakfast inns need a special permit in all districts"
+      all: *bnb_conflict
+      R-3a, R-3aa, R-3b, RU:
+        status: flag
+        rules: [use]
     - lines: [[30, 37, 38], [31, 3, 33], [31, 37, 37]]
       what: Accessory uses that need a special permit
       all: *accessory_sp
@@ -547,13 +565,7 @@ pieces:
   325-10C:
     - lines: [[35, 3, 20]]
       what: "Bed-and-breakfast inns (special-permit conditions)"
-      all:
-        status: not_applicable
-        why: A bed-and-breakfast inn isn't permitted in this district (chart p.2, "-").
-        file: zoning_charts_2026-04.pdf
-        page: 2
-        quote: "Bed-and-breakfast inn - - - - - SP SP SP SP"
-        cell: {section: Primary Uses, row: "Bed-and-breakfast inn"}
+      all: *bnb_conflict
       R-3a, R-3aa, R-3b, RU:
         status: flag
         rules: [use]

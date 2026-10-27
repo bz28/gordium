@@ -55,7 +55,7 @@ PRIORITIES = {"high": "a real design rule that should exist; a design can pass t
               "low": "a narrow or cautious gap (a permission not used, a rare case, or a pointer)",
               "operational": "how a property is run or permitted, not what is drawn",
               "other_project": "a different kind of project (not a building on a residential lot)"}
-DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", "page", "piece", "cell",
+DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", "page", "piece", "cell", "via_piece",
                    "unlisted_use", "item", "link", "priority", "note"}
 CHART = "zoning_charts_2026-04.pdf"
 OMISSION = "except where otherwise indicated by specific prohibition or omission"   # §325-8B(3), p.26
@@ -317,6 +317,18 @@ class Audit:
                 p.append(f"{where}: quote not found: {dec['quote']!r}")
             if dec.get("file") == CHART and not dec.get("cell"):
                 p.append(f"{where}: a chart quote needs `cell` ({{section, row}}), so the district's own cell is checked")
+            if dec.get("cell"):
+                p += self._row_problems(pid, dec, where)
+            elif "via_piece" in dec:
+                p.append(f"{where}: via_piece only goes with a chart `cell`")
+            if dec.get("quote") and dec.get("file", LAW) == LAW and (keys := self._quote_keys(pid, dec)):
+                law = keys - {tuple(k) for k in self.header.get("furniture", [])}
+                major = lambda i: re.match(r"325-\d+", i or "")[0] if re.match(r"325-\d+", i or "") else None
+                if not law:
+                    p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
+                elif not (law & OMISSION_LINES) and major(pid) not in {major(self.owner.get(k)) for k in law}:
+                    p.append(f"{where}: the quote is from another section of the law "
+                             f"({', '.join(sorted({str(self.owner.get(k)) for k in law}))}), not this piece's own")
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":
                 p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-' "
                          "(not permitted)")
@@ -400,20 +412,39 @@ class Audit:
     @staticmethod
     def _words(s: str) -> set:
         """Lower-case words, singular (a trailing s dropped), for comparing use names."""
-        return {w[:-1] if w.endswith("s") and len(w) > 3 else w
-                for w in tokenize(str(s).replace("_", " ").replace("-", " ")) if w.isalpha()}
+        def one(w):
+            return w[:-3] + "y" if w.endswith("ies") and len(w) > 4 else w[:-1] if w.endswith("s") and len(w) > 3 else w
+        return {one(w) for w in tokenize(str(s).replace("_", " ").replace("-", " ")) if w.isalpha()}
 
     def _piece_words(self, pid: str) -> set:
-        """The words of a piece, its title, and the other pieces of its section (§325-22B's motel is §325-22A's)."""
-        section = re.match(r"325-\d+(?:\.\d+)?", pid)[0] if not pid.startswith("325-3B:") else pid
+        """The words of a piece (title and text) and of its section's own title (§325-22B's motel is in §325-22's
+        title, "Motels."); never a sibling subsection's words."""
         pages = self.ctx.pages.get(LAW, {})
-        out = set()
-        for other, piece in self.pieces.items():
-            if other == pid or (re.match(r"325-\d+(?:\.\d+)?[A-Z]?$", other) and
-                                re.match(r"325-\d+(?:\.\d+)?", other)[0] == section):
-                out |= self._words(piece["title"])
-                out |= {w for k in piece_keys(piece) for w in self._words(" ".join(pages.get(k[0], {}).get(k[1], [])))}
+        piece = self.pieces[pid]
+        out = self._words(piece["title"])
+        out |= {w for k in piece_keys(piece) for w in self._words(" ".join(pages.get(k[0], {}).get(k[1], [])))}
+        section = re.match(r"325-\d+(?:\.\d+)?", pid)[0]
+        if not pid.startswith("325-3B:") and section in self.pieces and section != pid:
+            out |= self._words(self.pieces[section]["title"])
         return out
+
+    def _row_problems(self, pid: str, dec: dict, where: str) -> list[str]:
+        """A chart row backs "not applicable" only for the piece it is about: the row's words are the piece's own,
+        or (with `via_piece`) those of a §325-3B definition that names this piece's title (DWELLING, MULTIPLE lists
+        the rooming house and the row house)."""
+        row = self._words(dec["cell"].get("row", ""))
+        allowed = self._piece_words(pid)
+        via = dec.get("via_piece")
+        if via:
+            if via not in self.pieces or not str(via).startswith("325-3B:"):
+                return [f"{where}: via_piece {via!r} isn't a §325-3B definition"]
+            if not self._quote_found(via, {"quote": self.pieces[pid]["title"], "piece": via}):
+                return [f"{where}: {via} doesn't name {self.pieces[pid]['title']!r}"]
+            allowed |= self._piece_words(via)
+        if not row <= allowed:
+            return [f"{where}: the chart row {dec['cell'].get('row')!r} isn't about this piece (words "
+                    f"{sorted(row - allowed)} aren't in it{'' if via else '; a §325-3B link goes in via_piece'})"]
+        return []
 
     # -- the table ---------------------------------------------------------------------------------------
 

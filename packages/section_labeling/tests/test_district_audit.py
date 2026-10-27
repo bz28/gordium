@@ -437,3 +437,46 @@ def test_a_district_decided_twice_through_an_alias_is_refused(decisions):
     y = {"status": "missing", "priority": "high", "why": "w2"}
     found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": x, "R-1a": x, "R-1a, R-1b": y}]))
     assert "325-26 part 1: R-1a decided twice" in found
+
+
+# Review round 5.
+
+def test_a_sibling_subsections_words_dont_make_a_use_this_pieces(decisions):
+    """§325-15C (unsanitary storage) never mentions a junkyard; §325-15E does."""
+    found = problems(with_piece(decisions, "325-15C", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "page": 26, "quote": audit.OMISSION, "unlisted_use": "junkyard"}}]))
+    assert any("isn't what this piece is about" in p for p in found)
+
+
+def test_a_chart_row_must_be_about_the_piece(decisions):
+    """The multiple-dwelling row says nothing about streams (§325-26)."""
+    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "high", "why": "w"},
+                                             "R-1a, R-1b": decisions["_multiple_not_permitted"]}])
+    assert any("doesn't name 'New structures along streams" in p for p in problems(data))
+    other = dict(decisions["_multiple_not_permitted"], quote="RESIDENTIAL DISTRICTS USE LIST")
+    other.pop("via_piece")
+    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "high", "why": "w"},
+                                             "R-1a": other}])
+    assert any("isn't about this piece" in p for p in problems(data))
+
+
+def test_a_via_piece_must_name_this_piece(decisions):
+    """DWELLING, MULTIPLE lists the rooming house but not the rooming unit."""
+    data = with_piece(decisions, "325-3B:rooming_unit", [{"what": "x", "all": decisions["_multiple_not_permitted"]}])
+    assert any("doesn't name 'ROOMING UNIT'" in p for p in problems(data))
+
+
+def test_page_furniture_is_not_the_law(decisions):
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "page": 2, "quote": "City of Ithaca"}}]))
+    assert any("from another section of the law (front_matter)" in p for p in found)    # p.2's text, not this piece
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "page": 67, "quote": "City of Ithaca, NY"}}]))
+    assert any("only page furniture" in p for p in found)                                # p.67's running header
+
+
+def test_rooming_units_and_bed_and_breakfasts_in_r1_r2_are_not_claimed_settled(built):
+    for d in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c"):
+        assert {dec["status"] for _, dec in built.cells["325-3B:rooming_unit"][d]} == {"missing"}
+        assert built.cells["325-10C"][d][part_index(built, "325-10C", "Bed-and-breakfast")][1]["status"] == "missing"
+        assert built.cells["325-9B"][d][part_index(built, "325-9B", "(p) Bed-and-breakfast")][1]["status"] == "missing"
