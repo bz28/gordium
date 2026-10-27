@@ -111,3 +111,22 @@ before its parent. The claim should drop that part, or lock Grade after "Gordium
 |---|---|
 | `106_context_top_e997f0e.png` | Top view at e997f0e |
 | `106_context_perspective_e997f0e.png` | The same in 3D |
+
+## Re-run at 994012d (2026-10-25): 17 of 17, and the lock probe
+
+The test as run: 994012d's own `context_in_rhino.py`, in a copy that records every claim
+(`context_results_994012d.json`), with recorded answers. **17 of 17.** Both reworked claim-4 cases pass: Grade locked
+before "Gordium", and Grade locked after it. In each, the redraw replaces without doubling; unlocking "Gordium"
+leaves Parcels, Streets and Notes locked and Buildings not; and Grade is exactly as plain Rhino leaves it.
+
+`lock_probe_in_rhino.py` (Rhino's own layer locks, no Gordium), cases 1–5 (`lock_probe_994012d.json`). The two
+"layer_command" cases were left out: they type Rhino's `-_Layer` command, and the script asks for it to be typed by
+hand first, which the Rhino job doesn't do (no interactive commands).
+- **1, 2: a sublayer locked by `IsLocked`** (with `SetPersistentLocking` first or not), its top then locked and
+  unlocked: it comes out unlocked, and it never has an own lock. Plain Rhino, as Grade.
+- **3: `SetPersistentLocking(True)` alone, the top unlocked**: no own lock is recorded.
+- **4: relock**, with the top locked, the sublayer locked and given its own lock (as Gordium's `_set_own_lock`
+  does), then the top unlocked: the sublayer stays locked. Locked and unlocked again: it still stays locked, and
+  its own lock is kept. Rhino **keeps** an own lock through a later lock and unlock of the parent; it doesn't
+  reset it.
+- **5: nested** (an unlocked Mid between the top and the sublayer, as `Gordium::Context` sits): the same as 1 and 4.
