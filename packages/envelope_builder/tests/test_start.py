@@ -18,6 +18,9 @@ ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 RULES = load(rulebook_for(ITHACA, "R-1b"))["rules"]
 USES = {"use": Context.for_jurisdiction(ITHACA).uses}
 INTERIOR = {"sleeping_rooms", "parking_spaces"}
+# who lives there and a home occupation (§325-3B): the architect's to state, never the starting building's to settle
+HOUSEHOLD = {"unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
+             "home_occupation", "home_occupation_area", "home_occupation_unit_area"}
 SITE_106 = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 FACTS = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b", "use": "one_family_detached",
          "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0}
@@ -46,7 +49,9 @@ def results(site, facts):
     """Every exterior rule's result for the site as built."""
     m = measure(site, facts)
     values = {k: v["value"] for k, v in m.items()}
-    exterior = [r for r in RULES if not (set(r.get("check", "") and __import__("rule_format").formula.names(r["check"])) & INTERIOR)]
+    names = __import__("rule_format").formula.names
+    exterior = [r for r in RULES if not (set(r.get("check", "") and names(r["check"])) & INTERIOR)
+                and not set().union(*(names(r[k]) for k in ("applies_when", "check") if r.get(k))) & HOUSEHOLD]
     return {r["id"]: outcome(r, values, USES) for r in exterior}, m
 
 

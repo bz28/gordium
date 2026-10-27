@@ -99,6 +99,10 @@ STOPS = {
     "no_building_units": "enter the dwelling units in the whole attached building, every lot it stands on",
     "no_occupant_split": "optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that "
                          "depends on how the occupants are split)",
+    "no_household": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, "
+                    "whether the household is a functional family unit (§325-3B)",
+    "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
+                          "unit's (§325-3B HOME OCCUPATION)",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",

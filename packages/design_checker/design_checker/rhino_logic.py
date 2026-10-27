@@ -3,6 +3,7 @@ Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
 import json
+import math
 import queue
 import threading
 
@@ -151,6 +152,24 @@ STATED_FACTS = {
                                    "three to six)", "count", "the units in the whole building"),
     "abuts_r1_district": ("Is any R-1a or R-1b land touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it? (§325-19E)",
                           "yes_no", "whether the lot abuts R-1 land"),
+    # who lives there (§325-3B's one-family and two-family dwellings) and a home occupation: blank until said, so
+    # the rules that read them need review (never 0 or no)
+    "unrelated_persons": ("Most people in any one dwelling unit not related by blood, marriage or adoption to its "
+                          "household's family (minor dependent children in a parent's or relative's care left out)",
+                          "count", "unrelated people per unit"),
+    "unrelated_persons_with_children": ("The same count with minor dependent children counted too", "count",
+                                        "unrelated people per unit, children counted"),
+    "owner_occupied": ("Does the owner (§325-3B OWNER) live in the dwelling?", "yes_no", "whether the owner lives there"),
+    "functional_family_unit": ("Is the household to be shown to the City to be a functional family unit (§325-3B)?",
+                               "yes_no", "whether the household is a functional family unit"),
+    "home_occupation": ("Is a home occupation planned (§325-3B: a business, studio or office run by a resident)?",
+                        "yes_no", "whether a home occupation is planned"),
+    # floor areas in square feet, any number 0 or more (never rounded: 500.4 sq ft typed as 500 would pass the
+    # 500 sq ft limit; review round 1)
+    "home_occupation_area": ("Home occupation's indoor floor area, accessory buildings included (sq ft)", "area",
+                             "the home occupation's floor area"),
+    "home_occupation_unit_area": ("Floor area of the dwelling unit it is in (sq ft)", "area",
+                                  "its dwelling unit's floor area"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
@@ -221,7 +240,13 @@ def update_counts(facts, answers):
             if n < minimum(key) or n != answers[key]:
                 raise ValueError(f"{key} must be a whole number, {minimum(key)} or more")
             out[key] = n
-    for key in ("conversion", "abuts_r1_district"):
+    for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "area"]:
+        if answers.get(key) is not None:
+            a = answers[key]
+            if type(a) not in (int, float) or not math.isfinite(a) or a < 0:
+                raise ValueError(f"{key} must be a number of square feet, 0 or more")
+            out[key] = a
+    for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "yes_no"]:
         if answers.get(key) is not None:
             out[key] = bool(answers[key])
     return out

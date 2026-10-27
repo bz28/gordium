@@ -996,7 +996,8 @@ def enter_rooms(needs):
         answers = {}
         for key in needs:
             prompt, kind, _ = logic.STATED_FACTS[key]
-            answers[key] = _count(prompt, logic.minimum(key)) if kind == "count" else _ask_yes_no_or_skip(prompt)
+            answers[key] = (_count(prompt, logic.minimum(key)) if kind == "count" else _area(prompt) if kind == "area"
+                            else _ask_yes_no_or_skip(prompt))
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
@@ -1476,6 +1477,18 @@ def _count(prompt, least=0):
     got = gi.Get()
     _go_on(got)
     return gi.Number() if got == Rhino.Input.GetResult.Number else None
+
+
+def _area(prompt):
+    """A floor area in square feet the architect types, 0 or more, as typed (never rounded), or None when the prompt
+    is skipped (never a default)."""
+    gn = Rhino.Input.Custom.GetNumber()
+    gn.SetCommandPrompt(prompt + " (Enter to skip)")
+    gn.AcceptNothing(True)
+    gn.SetLowerLimit(0.0, False)
+    got = gn.Get()
+    _go_on(got)
+    return gn.Number() if got == Rhino.Input.GetResult.Number else None
 
 
 def _ask_yes_no_or_skip(prompt):

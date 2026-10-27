@@ -67,6 +67,27 @@ measurements:
   abuts_r1_district:
     value: null
     from: 'not measured: say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)'
+  unrelated_persons:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)'
+  unrelated_persons_with_children:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)'
+  owner_occupied:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)'
+  functional_family_unit:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)'
+  home_occupation:
+    value: null
+    from: 'not measured: say whether a home occupation is planned and, if so, its floor area and its dwelling unit''s (§325-3B HOME OCCUPATION)'
+  home_occupation_area:
+    value: null
+    from: 'not measured: say whether a home occupation is planned and, if so, its floor area and its dwelling unit''s (§325-3B HOME OCCUPATION)'
+  home_occupation_unit_area:
+    value: null
+    from: 'not measured: say whether a home occupation is planned and, if so, its floor area and its dwelling unit''s (§325-3B HOME OCCUPATION)'
   front_yard_eaves:
     value: 30.0
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building, eaves included; between (10, 0) and (10, 30)'

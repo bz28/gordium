@@ -17,6 +17,8 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
                "dwelling_units", "rooms_let_for_profit", "conversion", "occupants",
                "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district",
+               "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
+               "home_occupation", "home_occupation_area", "home_occupation_unit_area",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
@@ -51,13 +53,18 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("plan_north_deg must be a number (degrees the plan is turned from true north)")
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
-    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants"):
+    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants",
+              "unrelated_persons", "unrelated_persons_with_children"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
+    for k in ("home_occupation_area", "home_occupation_unit_area"):               # square feet, never rounded
+        if facts.get(k) is not None and not (_number(facts[k]) and facts[k] >= 0):
+            problems.append(f"{k} must be a number of square feet, 0 or more")
     for k in ("occupants_most_in_one_unit", "attached_units_in_building"):      # at least one, by definition
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
             problems.append(f"{k} must be a whole number, 1 or more")
-    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district"):
+    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district",
+              "owner_occupied", "functional_family_unit", "home_occupation"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")

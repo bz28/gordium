@@ -41,11 +41,18 @@ MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear:
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count",
           "dwelling_units": "count", "rooms_let_for_profit": "count", "conversion": "yes_no",
           "occupants": "count", "occupants_most_in_one_unit": "count",
-          "attached_units_in_building": "count", "abuts_r1_district": "yes_no"}
+          "attached_units_in_building": "count", "abuts_r1_district": "yes_no",
+          "unrelated_persons": "count", "unrelated_persons_with_children": "count", "owner_occupied": "yes_no",
+          "functional_family_unit": "yes_no", "home_occupation": "yes_no", "home_occupation_area": "sf",
+          "home_occupation_unit_area": "sf"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
        "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
        "occupants": "no_occupants", "occupants_most_in_one_unit": "no_occupant_split",
-       "attached_units_in_building": "no_building_units", "abuts_r1_district": "no_abuts_r1"}
+       "attached_units_in_building": "no_building_units", "abuts_r1_district": "no_abuts_r1",
+       "unrelated_persons": "no_household", "unrelated_persons_with_children": "no_household",
+       "owner_occupied": "no_household", "functional_family_unit": "no_household",
+       "home_occupation": "no_home_occupation", "home_occupation_area": "no_home_occupation",
+       "home_occupation_unit_area": "no_home_occupation"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",
