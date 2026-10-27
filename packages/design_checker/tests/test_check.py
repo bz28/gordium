@@ -1063,7 +1063,9 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
     assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
     check_code = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert "logic.labels_on(_ui_state(doc))" in check_code and "ui.set_labels_tick(" in check_code
+    sync = rhino[rhino.index("def _sync_ticks("):].split("\ndef ", 1)[0]          # (every tick, at every check)
+    assert "logic.labels_on(_ui_state(doc))" in check_code and "_sync_ticks(doc)" in check_code
+    assert "ui.set_labels_tick(p, logic.labels_on(_ui_state(doc)))" in sync
     assert '"labels": set_labels' in rhino
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert 'box.Text = "Show on-screen labels"' in ui and "box.Checked = False" in ui.split("def _labels_box(")[1]
