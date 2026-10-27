@@ -120,3 +120,19 @@ def test_a_use_row_cited_by_two_rules_has_one_name():
         for c in item["detail"].get("cited") or []:
             seen.setdefault(c["link"], set()).add(c["citation"])
     assert all(len(names) == 1 for names in seen.values()), {k: v for k, v in seen.items() if len(v) > 1}
+
+
+def test_only_a_use_row_on_the_chart_use_page_is_named_use_column():
+    """PR2 review round 5: the "Use column" name is for a use row (its marks per district), never a note or a
+    heading on the same page: R-1b's note 1 ("NOTES: (1) ...") is note 1, RU's heading is not the Use column."""
+    from design_checker.present import citation, _documents
+    from rule_format.rulebook import REPO
+    j = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    docs, sect = _documents(j), (lambda *a: "")
+    chart = "zoning_charts_2026-04.pdf"
+    note = {"file": chart, "page": 2, "lines": [41, 41], "quote": "NOTES: (1) In R-1 and R-2 Districts, minor"}
+    head = {"file": chart, "page": 2, "lines": [6, 6], "quote": "RU [fn3] Regulations"}
+    row = {"file": chart, "page": 2, "lines": [9, 9], "quote": "One-family dwelling, detached [fn4] • • • • • • • • •"}
+    assert citation(note, "Occupancy", "R-1b", sect, docs).endswith("note 1")
+    assert "Use column" not in citation(head, "Primary structures", "RU", sect, docs)
+    assert citation(row, "Lot area", "R-1b", sect, docs).endswith("Use column")
