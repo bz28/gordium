@@ -2055,7 +2055,8 @@ def box_rows(state, flat=None):
         return {"review": "? " + why if why else None,
                 "check": ("I checked this", key in checked) if key in CHECKABLE and key in doubts else None}
 
-    lot_actions = [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot else []
+    after = AFTER_DRAW if state.get("after_draw") else ""     # the looked-up lot, not drawn yet (show_pending_lot)
+    lot_actions = [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot and not after else []
     if look.get("guide") or state.get("lot_missing"):
         lot_actions.insert(0, ("draw_lot", "Draw my lot…", True))
     rows = [
@@ -2069,12 +2070,13 @@ def box_rows(state, flat=None):
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot",
          "text": (LOT_MISSING if state.get("lot_missing") else
-                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))
+                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source")) + after
                   if has_lot else NO_LOT),
          "actions": lot_actions, "tick": None},
         {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
-         "text": street_name(state) if (state.get("street_name") or has_lot) else "set from the lot, once there is one",
-         "actions": [("street", "Change…", True)] if has_lot else [], "tick": None,   # nothing to change yet: hidden
+         "text": (street_name(state) + after) if (state.get("street_name") or has_lot)
+         else "set from the lot, once there is one",
+         "actions": [("street", "Change…", True)] if has_lot and not after else [], "tick": None,   # nothing to change yet: hidden
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],
@@ -3185,6 +3187,34 @@ def same_address(a, b):
 
 
 MISSING = object()
+AFTER_DRAW = " · after Draw"       # on a row that describes the looked-up lot, which Draw has yet to draw
+
+
+def show_pending_lot(state, facts, saved_ui):
+    """The box's state with the Lot and Front lot line rows describing the looked-up lot (marked "after Draw")
+    when nothing of the architect's or Gordium's is drawn yet: no lot, or only the sample's stand-in (Ben,
+    2026-10-27: the rows kept saying the sample's 7,033 sf and Ithaca Rd). Display only: no fact is written
+    before Draw. Once a lot is drawn (Gordium's from a lookup, or the architect's own) the rows describe the
+    drawing, and the state comes back as it was. A City guide alone is left as it was (its own flow)."""
+    pending = (saved_ui or {}).get("_pending")
+    sample_only = not (facts or {}).get("lot_id") or (saved_ui or {}).get("from_sample")
+    if not pending or not sample_only or not lookup_may_replace(facts, saved_ui):
+        return state
+    answer = pending.get("answer") or {}
+    got = answer.get("facts") or {}
+    w = answer.get("writes") or {}
+    lot = (got.get("lot") or {}).get("value") or {}
+    if not (lot and w.get("lot_ring")):                      # the City's guide only: no lot of it is drawn (its
+        return state                                         # own flow: Draw clears, then the architect draws)
+    side = (got.get("street_side") or {}).get("value") or {}
+    street = None
+    if side.get("street") and w.get("street_line"):
+        street = address_street(pending.get("address"), side["street"]) or side["street"].title()
+    label = (answer.get("labels") or {}).get("lot") or SOURCE_OF["lot"]
+    return dict(state, has_lot=True, lot_missing=False, lot_area=lot.get("area_sf"), lot_surveyed=False,
+                lot_source=label, street_name=street, after_draw=True)
+
+
 PREVIEW_SAYS = ("Shown dashed: {address}'s lot. Nothing in the model changes until Draw, which replaces what Gordium "
                 "drew with this lot and a new starting house.")
 SET_ASIDE = "The lookup of {address} was set aside (the address was changed): Look up to preview another address."

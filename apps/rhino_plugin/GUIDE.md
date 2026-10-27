@@ -34,6 +34,9 @@ Type a command's name in Rhino's command line.
    - **Use**: the kind of building (one-family dwelling, detached, for now). **Change** picks another.
    - **Lot**: the lot's area and where it came from. **Use my survey…** replaces the tax-map lot with your own
      surveyed lot lines (tax-map lines can be about 2 ft off; Gordium says so and keeps its answers safe).
+     In a new file, after **Look up** finds an address, this row and the street row below show the *found* lot's
+     area and street marked `· after Draw` (nothing is drawn until you press Draw; a failed or new lookup never
+     leaves another address's numbers behind). Once a lot is drawn, they describe the drawing.
    - **Front lot line (on the street)**: which lot line is on the street; Gordium measures the front yard from it.
      **Change…** lets you click it. **Corner lot?** is never guessed: **Not answered**, **No: one street** or
      **Yes: two streets**.

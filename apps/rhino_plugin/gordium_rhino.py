@@ -1445,6 +1445,12 @@ def _lot_level(doc, facts):
 
 
 def _box_state(doc, facts, options, saved_ui, mode="check"):
+    """The box's state: what is drawn, except that in a file with nothing drawn yet a found lookup's lot and street
+    are shown (marked "after Draw": rhino_logic.show_pending_lot, tested in CI)."""
+    return logic.show_pending_lot(_box_state_drawn(doc, facts, options, saved_ui, mode), facts, saved_ui)
+
+
+def _box_state_drawn(doc, facts, options, saved_ui, mode="check"):
     """The start box's state from the facts, their saved sources and the box's own choices (rhino_logic.box_rows
     turns it into rows). "I confirm" is unticked on every new project: only a district confirmed at an earlier
     Draw, and unchanged since, stays ticked."""

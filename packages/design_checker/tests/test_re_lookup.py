@@ -116,7 +116,7 @@ class Box:
                  "lookup": sv.get("_lookup") or {}, "live": sv.get("_live") or {}, "doubts": sv.get("doubts") or {},
                  "known_addresses": logic.known_addresses(sv),
                  "checked": sv.get("checked") or []}
-        return dict(state, **self.typed)
+        return dict(logic.show_pending_lot(state, f, sv), **self.typed)
 
     def _apply(self, state=None):                  # gordium_rhino._apply_box: the box's answers into the facts
         state = state or self.shown()
@@ -714,6 +714,50 @@ def test_a_failed_lookup_after_a_preview_leaves_nothing_of_it():
     assert box.type_address(SAMPLE).draw() == "drawn"            # no preview left to drop (the lookup failed)
     assert site.facts["zone"] == "R-1b" and site.saved["zone_source"] == "entered by you"
     assert "lot_area" not in site.saved and not site.saved.get("street_source")
+
+
+def _rows_of(box):
+    return {r["key"]: r["text"] for r in logic.box_rows(box.shown())}
+
+
+def test_in_an_empty_file_a_found_lookup_shows_its_own_lot_and_street_after_draw():
+    """Ben, 2026-10-27: after Look up in an empty file (only the sample's stand-in lot) the Lot and Front lot line
+    rows kept the sample's 7,033 sf and Ithaca Rd until Draw. They show the looked-up lot, marked "after Draw"."""
+    site = Site()
+    sample = _rows_of(site.box())
+    assert "after Draw" not in sample["lot"] + sample["street"]
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    found = answer("96_ithaca_rd")["facts"]["lot"]["value"]["area_sf"]
+    rows = _rows_of(box)
+    assert rows["lot"].startswith(logic.lot_size(found)) and rows["lot"].endswith(" · after Draw")
+    assert "from the tax map" in rows["lot"] or "NYS" in rows["lot"]
+    assert rows["street"].endswith(" · after Draw") and rows["street"] != sample["street"] + " · after Draw"
+    assert logic.lot_size(6570.0) not in rows["lot"]               # never the sample lot's area
+    assert all(a[0] not in ("lot", "street") for r in logic.box_rows(box.shown())
+               if r["key"] in ("lot", "street") for a in r["actions"])
+    assert box.facts.get("lot_id") == "lot1" and "lot_area" not in box.saved     # display only: no fact written
+
+
+def test_with_a_lot_drawn_a_lookup_leaves_the_lot_and_street_rows_describing_the_drawing():
+    for lot in ("looked_up", "theirs"):
+        site = Site(lot=lot)
+        before = _rows_of(site.box())
+        rows = _rows_of(site.box().look_up(answer("96_ithaca_rd")))
+        assert rows["lot"] == before["lot"] and rows["street"] == before["street"], lot
+        assert "after Draw" not in rows["lot"] + rows["street"]
+
+
+def test_a_failed_lookup_after_a_found_one_leaves_none_of_its_lot_and_street():
+    site = Site()
+    before = _rows_of(site.box())
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert _rows_of(box)["lot"] != before["lot"]
+    box.look_up(answer("not_found"))
+    after = _rows_of(box)
+    assert (after["lot"], after["street"]) == (before["lot"], before["street"])
+    box.look_up(answer("96_ithaca_rd")).look_up(answer("109_ithaca_rd"))       # a new lookup: only the new one's
+    rows = _rows_of(box)
+    assert rows["lot"].startswith(logic.lot_size(answer("109_ithaca_rd")["facts"]["lot"]["value"]["area_sf"]))
 
 
 def test_buildings_on_a_sublayer_are_asked_about():
