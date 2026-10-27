@@ -1619,6 +1619,12 @@ def _drawn(doc, facts, state, saved_ui):
     return facts
 
 
+def _massing_hidden(doc):
+    """Whether this document's starting house layer (Gordium::Massing) is hidden: the panel's tick follows it."""
+    index = doc.Layers.FindByFullPath(logic.MASSING, -1) if doc is not None else -1
+    return index >= 0 and not doc.Layers[index].IsVisible
+
+
 def hide_massing(hidden):
     """Hide starting house: the Gordium::Massing layer off (still checked: only its drawing is turned off)."""
     doc = Rhino.RhinoDoc.ActiveDoc
@@ -1950,6 +1956,7 @@ def run_check(doc, report=True):
         if not STATE.get("headless"):
             ui.show(panel(), view)
             ui.set_labels_tick(STATE.get("panel_parts"), shown)
+            ui.set_massing_tick(STATE.get("panel_parts"), _massing_hidden(doc))
             if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
                 ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written

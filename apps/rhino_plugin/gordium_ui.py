@@ -317,7 +317,7 @@ def make_panel(actions, host=None):
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
     layout.Add(row(_envelope_box(actions)))         # each tick its own row: side by side they ran off at 380
-    layout.Add(row(_massing_box(actions)))
+    layout.Add(row(_massing_box(actions, parts)))
     layout.Add(row(_labels_box(actions, parts)))     # its own row: beside the others it ran off the panel
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
     layout.Add(parts["message"])
@@ -336,14 +336,31 @@ def say(parts, text):
         parts["message"].Text = text or ""
 
 
-def _massing_box(actions):
+def _massing_box(actions, parts):
     """Hide starting house: the Gordium::Massing layer off. Hidden, it is still checked (a hidden building still
-    counts, as everywhere in Gordium): only drawing it is turned off."""
+    counts, as everywhere in Gordium): only drawing it is turned off. Ticked as the document's layer is
+    (set_massing_tick), never left as last clicked (an Undo puts the layer back: the Rhino job at 540f718)."""
     box = ef.CheckBox()
     box.Text = "Hide starting house"
     box.Checked = False
-    box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
+
+    def changed(s, e):
+        if not parts.get("_setting_massing"):       # set from the document (set_massing_tick): not a change
+            actions["massing"](bool(box.Checked))
+    box.CheckedChanged += logic.guard(changed, "hide the starting house")
+    parts["massing_box"] = box
     return box
+
+
+def set_massing_tick(parts, hidden):
+    """The tick as this document's starting house layer is: ticked when it is hidden."""
+    if parts is None or parts.get("massing_box") is None:
+        return
+    parts["_setting_massing"] = True
+    try:
+        parts["massing_box"].Checked = bool(hidden)
+    finally:
+        parts["_setting_massing"] = False
 
 
 def _labels_box(actions, parts):
