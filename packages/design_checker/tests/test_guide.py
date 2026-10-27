@@ -73,7 +73,7 @@ def test_the_command_line_prompts_in_the_guide_are_the_codes():
 
 def test_every_fixed_command_line_prompt_in_the_code_is_in_the_guide():
     """The other way: a prompt added to (or reworded in) the code and not in the guide fails here."""
-    calls = r'(?:_pick\(doc, |_yes_no\(|_place_spots\(doc, |SetCommandPrompt\(|GetNumber\(|RhinoGet\.GetPoint\()'
+    calls = r'(?:(?<!_box)_pick\(doc, |_yes_no\(|_place_spots\(doc, |SetCommandPrompt\(|GetNumber\(|RhinoGet\.GetPoint\()'
     code = re.findall(calls + r'"([^"]+)"', RHINO)
     code += re.findall(r'\("([^"]+)", "(?:count|yes_no)"', LOGIC)
     code += re.findall(r'(?:return \(|STREET_ANSWER_NEEDED = \()"((?:Click|Gordium needs)[^"]+?)(?: \("|")', LOGIC)

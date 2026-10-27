@@ -623,7 +623,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
     rows = logic.box_rows(_box(), flat=False)
     assert [r["key"] for r in rows] == ["address", "zone", "use", "lot", "street", "ground"]
     by = {r["key"]: r for r in rows}
-    assert by["address"]["actions"] == [("lookup", "Look up (coming soon)", False)]      # lookup: a later PR
+    assert by["address"]["actions"] == [("lookup", "Look up", True)]          # the address lookup (PR #19)
     assert by["zone"]["text"] == "R-1b · entered by you"
     assert by["lot"]["text"] == "6,570 sf · from the tax map (±2 ft, approximate)"
     assert by["lot"]["actions"] == [("lot", "Use my survey…", True)]
@@ -732,7 +732,7 @@ def test_finished_ground_and_existing_spot_grades_are_never_mixed():
 
 def test_the_confirm_tick_survives_a_pick_and_ground_marking_can_be_undone():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    loop = rhino.split("def confirm(", 1)[1].split("\ndef ", 1)[0]
+    loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0]
     assert "dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)" in loop
     assert '"district_confirmed"' in loop.split("ticked = {k: state[k]", 1)[1].split(")", 1)[0]
     assert "def not_the_ground(" in rhino and '"not_ground": not_the_ground' in rhino
@@ -758,7 +758,7 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
     assert "_ui_state" not in check_facts.split("elif", 1)[0]                   # the points from the facts alone
-    loop = rhino.split("def confirm(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
+    loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
     assert "_save_ui_state" not in loop                                         # Cancel saves nothing
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
     assert "sources = fact_sources(doc)" in drawn and "sources.update(" in drawn  # the ground marking is kept
@@ -857,7 +857,7 @@ def test_a_design_buffer_is_read_or_draw_stays_off():
     from design_checker import rhino_logic as logic
     assert logic.parse_feet('6"') == 0.5 and logic.parse_feet("6 in") == 0.5 and logic.parse_feet("1'-6\"") == 1.5
     assert logic.parse_feet("") == 0.0 and logic.parse_feet("abc") is None and logic.parse_feet("-1") is None
-    state = {"district_confirmed": True, "design_buffer": "abc"}
+    state = {"zone": "R-1b", "district_confirmed": True, "design_buffer": "abc"}
     assert not logic.can_draw(state) and logic.draw_reason(state) == logic.BUFFER_UNREAD
     assert logic.can_draw({**state, "design_buffer": '6"'})
 
@@ -876,7 +876,7 @@ def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
 def test_frame_site_frames_the_lot_and_house_not_the_whole_file():
     """Review round 7: Zoom All Extents undid the per-view framing and took in anything far away in the file."""
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    start = rhino.index("def frame_site")
+    start = rhino.index("def frame_site(doc, facts):")
     body = rhino[start:start + 1800]
     assert "_Extents" not in body and '"_-Zoom _All _Selected"' in body and "doc.Objects.Select(i)" in body
 
@@ -892,7 +892,7 @@ def test_spec_item_ids_are_unique():
 def _panel_actions(rhino):
     """The functions the panel's buttons call (gordium_rhino._actions), by name."""
     import re
-    body = rhino[rhino.index("def _actions():"):rhino.index("\ndef panel():")]
+    body = rhino[rhino.index("def PANEL_ACTIONS():"):rhino.index("\ndef _box_open(")]
     return sorted(set(re.findall(r'"\w+": (\w+)[,}]', body)) - {"ui"})
 
 
@@ -1016,6 +1016,17 @@ def test_a_starting_house_is_drawn_on_existing_spot_grades_placed_at_the_lot(fac
                         "grade_from": "spot", "grade_is": "existing", "grade_points": spots})
     assert len(got["floors"]) == 3 and any("drawn on the ground as it is" in n for n in got["notes"])
     assert got["floors"][0]["base"] == pytest.approx(2.5, abs=0.01)          # the spots' plane: their average
+
+
+
+def test_no_backup_or_copy_files_are_committed():
+    """Verification round of PR #19: an 870-line rhino_logic.py.bak had been committed (left by a revert check)."""
+    import re
+    import subprocess
+    files = subprocess.run(["git", "ls-files", "packages", "apps"], cwd=REPO, capture_output=True, text=True,
+                           encoding="utf-8", check=True).stdout.splitlines()
+    junk = [f for f in files if re.search(r"(\.bak|\.orig|\.swp|~|[ _]copy|_backup|\.backup)(\.\w+)?$", f, re.I)]
+    assert files and junk == [], junk
 
 
 def test_the_panel_header_has_no_code_edition_line_but_the_report_keeps_it(facts, tmp_path):
@@ -1300,7 +1311,7 @@ def test_the_panel_columns_fit_a_rhino_sized_panel_and_wrap():
     assert int(re.search(r"^ROW_HEIGHT = (\d+)", ui, re.M).group(1)) >= 2 * 16           # two lines
     assert "ft.Wrap = ed.FormattedTextWrapMode.Word" in ui
     for tick in ("_envelope_box(actions, parts)", "_massing_box(actions, parts)", "_labels_box(actions, parts)"):
-        assert "    layout.Add(row(%s))" % tick in ui, tick
+        assert "row(%s)" % tick in ui and "row(%s, " % tick not in ui, tick     # each in a row of its own
 
 
 def test_a_yard_label_sits_beside_its_dimension_line_never_on_it():
@@ -1770,16 +1781,38 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     assert logic.street_name_after_pick("Ithaca Rd", lines, side) is None
     assert logic.street_name_after_pick(None, lines, lines[0]) is None              # no name known: nothing to keep
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    pick = rhino[rhino.index('        elif what == "street":'):rhino.index('        elif what == "lot":')]
+    # the Rhino side clicks and asks (the name first from the line's own street, else typed); rhino_logic.pick_effect
+    # sets the lines from them (PR #19: every pick's effect decided there, tested by behaviour)
+    pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
     assert pick.index('name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),') \
-        < pick.index("ask.GetLiteralString()") < pick.index('saved_ui["street_name"] = name')
+        < pick.index("ask.GetLiteralString()") < pick.index('return {"lines": lines, "ids": ids, "name": name}')
     assert "RhinoGet.GetString(" not in pick        # a space would end it: "Cayuga St" saved as "Cayuga" (R3)
     assert 'street_name=sample.get("street_name"),' in rhino
     # the name only with its street line (round 3, F6), and the whole street kept when one of its lines is picked
-    assert '"street_name": saved_ui.get("street_name") if facts.get("street_line") else None,' in rhino
+    state_src = rhino[rhino.index("def _box_state("):rhino.index("def _ft_text(")]
+    assert '"street_name": (saved_ui.get("_street_name") or saved_ui.get("street_name") or facts.get("street_name"))\n' \
+        '            if facts.get("street_line") else None,' in state_src
+    source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
+    assert 'lines, ids = pick_street(facts.get("street_line"), facts.get("street_ids"), picks[0], name)' in effect
+    assert "set_street_lines(facts, lines, ids)" in effect
+    # ...and by behaviour: a pick of one of 106's lines, its name found, keeps the whole street and its names
+    f, s = logic.pick_effect("street", {"picks": [lines[2]], "name": "Ithaca Rd"},
+                             {"street_line": lines, "street_ids": ["Ithaca Rd"] * len(lines)}, {"street_name": "Ithaca Rd"})
+    assert f["street_line"] == [list(map(list, x)) for x in lines] and f["street_ids"] == ["Ithaca Rd"] * len(lines)
+    assert s["street_name"] == "Ithaca Rd" and s["street_source"] == logic.ENTERED
+    f, s = logic.pick_effect("street", {"picks": [side], "name": None}, {"street_line": lines,
+                             "street_ids": ["Ithaca Rd"] * len(lines)}, {"street_name": "Ithaca Rd"})
+    assert f["street_line"] == [side] and "street_ids" not in f and not s.get("street_name")   # unnamed, asked
+    # with the box state, a name read only with a street line (no line: no name, and none saved as its source)
+    assert '"street_name_saved": None if saved_ui.get("_street_name") or not facts.get("street_line")' in state_src
     assert ('lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,\n'
-            '                                                   outline=_outline(doc, lot), ask=_ask_street_more, said=told)') in pick
-    assert "logic.set_street_lines(facts, lines, ids)" in pick
+            '                                           outline=_outline(doc, lot), ask=_ask_street_more, said=told)') in pick
+    assert 'return {"lines": lines, "ids": ids, "name": name}' in pick
+    f, s = logic.pick_effect("street", {"lines": lines, "ids": ["Ithaca Rd"] * len(lines), "name": "Ithaca Rd"},
+                             {"street_line": [side]}, {"_street_name": "X"})
+    assert f["street_line"] == [list(map(list, x)) for x in lines] and s["street_name"] == "Ithaca Rd"
+    assert "_street_name" not in s and s["street_source"] == logic.ENTERED
     assert logic.street_lines_after_pick(lines, lines[3]) == [list(map(list, x)) for x in lines]   # round 3, F4
     assert logic.street_lines_after_pick(lines, list(reversed(lines[3]))) == [list(map(list, x)) for x in lines]
     assert logic.street_lines_after_pick(lines, side) == [side]
@@ -1874,11 +1907,20 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
     assert logic.street_pick_prompt(True, 1) == "Click each lot line on a street (1 picked); Enter when done"
     assert logic.street_pick_prompt(False, 0) == "Click the lot line on the street"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
-                   rhino.index('        elif what == "street":')]
-    assert "            while lot is not None:" in corner and "_get_point(logic.street_pick_prompt(True, len(picks)))" in corner
+    pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
+    corner = pick[pick.index('            if facts.get("corner_lot") is True:'):pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))")]
+    assert "                while True:" in corner and "_get_point(logic.street_pick_prompt(True, len(picks)))" in corner
     assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in corner
     assert 'grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)' in corner
+    f, s = logic.pick_effect("street", {"lines": [b, c], "ids": [None, None], "name": None},
+                             {"corner_lot": True, "street_line": [a]}, {"street_name": "A St"})
+    assert f["street_line"] == [b, c] and "street_name" not in s and s["street_source"] == logic.ENTERED
+    source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
+    assert "street_lines_after_picks(" not in effect     # a corner lot's lines are never saved without their ids
+    f, s = logic.pick_effect("street", {"picks": [b, c, b], "name": None},
+                             {"corner_lot": True, "street_line": [a], "street_ids": ["A St"]}, {"street_name": "A St"})
+    assert f["street_line"] == [a] and f["street_ids"] == ["A St"] and s == {"street_name": "A St"}   # nothing
 
 
 def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the_district():
@@ -2210,7 +2252,10 @@ def test_street_names_go_with_their_street_lines_on_every_path_and_never_stop_th
     scaled = source[source.index("def to_feet("):source.index("def set_street_lines(")]
     for text in (rhino, source.replace(helper, "").replace(scaled, "")):
         assert re.findall(r'\["street_(?:line|ids)"\] = |\.pop\("street_(?:line|ids)"', text) == []
-    assert rhino.count("logic.set_street_lines(") == 3
+    assert rhino.count("logic.set_street_lines(") == 1               # the command line's (Edit site) pick
+    effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
+    assert effect.count("set_street_lines(") == 2                    # the start box's picks (PR #19: decided there;
+    #                                                                   the street runs' lines and ids, or one line's)
     # stale names (saved before the lines changed): the check still runs, lot width needs review and says why
     stale = dict(sample["facts"], street_line=sample["facts"]["street_line"][:1], lot_surveyed=True)
     assert fact_problems(stale) == []
@@ -2902,7 +2947,7 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     assert told[0]["words"].endswith("a bend not answered is kept as street (answer No to leave it out)"), told
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert '            if not facts.get("corner_lot") and runs:      # (a refused click: asked again)' in rhino
-    assert "if not (told and told[-1][\"refused\"]):" in rhino
+    assert "if told and told[-1][\"refused\"]:          # (a point clicked: everything stays as it was)" in rhino
     # (F3) the rounded corner: 47 ft front, a 3 ft radius in 12 chords, a 97 ft side
     pts = [(0.0, 0.0), (50.0, 0.0)]
     for i in range(1, 13):
@@ -2925,14 +2970,14 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     assert "not surely one street" in told[-1]["words"]
     assert '            keeps = not runs and logic.street_enter_keeps(facts)' in rhino and \
         '                if runs or keeps:\n                    break' in rhino
-    one = rhino[rhino.index('        elif what == "street":'):rhino.index('        elif what == "lot":')]
+    pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
+    one = pick[pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))"):]
     assert one.index("refused = logic.refused_click(_outline(doc, lot), picked)") < \
         one.index("name = logic.street_name_after_pick(")
     slip = _ring([(0, 0), (50, 0), (50.2, 0.2), (50.2, 100), (0, 100)])
     assert logic.refused_click(slip, slip[1]).startswith("that piece is under 6 in long")
     assert logic.refused_click(slip, slip[0]) is None
-    assert ('                    if refused:\n                        say(refused)\n                        return facts, saved_ui\n'
-            in one)
+    assert '            if refused:\n                say(refused)\n                return None\n' in one
     # round 10: (F1) a click on a saved street line grows on from the saved pieces: nothing kept is asked again
     # (and a No to what is asked really leaves it out); (F2) saved lines are snapped to the outline's pieces (a lot
     # nudged under 0.5 ft: the piece, never the stale line beside it as well); (F3) Edit site answers every click
@@ -2967,9 +3012,10 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     lines, ids = logic.pick_street(two, ["A St"] * 3 + ["B Ave"], gappy[1], "A St", outline=gappy, said=told)
     assert lines == gappy[:3] and "kept as they were" not in told[-1]["words"], (lines, told)
     assert told[-1]["words"].startswith("A St: 3 lot-line pieces, 60'-0\" of frontage (the lot outline")
-    corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
-                   rhino.index('        elif what == "street":')]
-    assert "                if grown != runs:\n                    picks.append(line)\n                runs = grown" in corner
+    pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
+    corner = pick[pick.index('            if facts.get("corner_lot") is True:'):
+                  pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))")]
+    assert "                    if grown != runs:\n                        picks.append(line)\n                    runs = grown" in corner
     # what is said reads lines end to end whatever order they come in (round 2)
     assert logic.street_words("X", [gappy[2], gappy[0], gappy[1]], None) == "X: 3 lot-line pieces, 60'-0\" of frontage"
     # (F4)
@@ -3041,8 +3087,7 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
     with pytest.raises(ns["Cancelled"]):
         ns["_ask_street_more"]("q")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    pick = rhino[rhino.index("def _box_pick(doc, what, facts, saved_ui):"):rhino.index("def confirm(")]
-    # ... run: the plugin's own _box_pick with stand-ins for Rhino, Esc at the bend question on the corner path
+    # ... run: the plugin's own _pick_outcome with stand-ins for Rhino, Esc at the bend question on the corner path
     # (one street already answered) and on the one-street path (a name already given): nothing changed (round 16)
     import copy
     said, clicks = [], []
@@ -3058,12 +3103,13 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
         clicks[:] = [("ok", o[0]), ("none", None)] if corner else [("ok", o[0])]
         saved = {"street_name": "A St", "street_source": "the tax map"}
         before = (copy.deepcopy(facts), copy.deepcopy(saved))
-        nsb = _plugin_functions(["_box_pick"], Rhino=rhino2, Cancelled=cancelled, _find=lambda doc, i: lot_obj,
+        nsb = _plugin_functions(["_pick_outcome"], Rhino=rhino2, Cancelled=cancelled, _find=lambda doc, i: lot_obj,
                                 _outline=lambda doc, lot: o, _get_point=lambda p: clicks.pop(0),
                                 _clicked_piece=lambda doc, lot, point: point, _feet_point=lambda doc, p: p,
                                 _ask_street_more=esc, say=said.append, _highlight=lambda doc, f: None)
-        got = nsb["_box_pick"](None, "street", facts, saved)
-        assert (got[0], got[1]) == before and (facts, saved) == before, (corner, got)
+        outcome = nsb["_pick_outcome"](None, "street", facts, saved, None)
+        got = logic.pick_effect("street", outcome, facts, saved)
+        assert outcome is None and (got[0], got[1]) == before and (facts, saved) == before, (corner, got)
         assert said[-1] == "Esc: nothing changed — the street side is as it was; this pick wasn't kept", said
 
 
@@ -3078,10 +3124,11 @@ def test_a_corner_click_is_said_as_so_far_and_esc_says_the_pick_was_not_kept():
                         "measuring along them").endswith("(so far — Enter when done)")
     assert logic.ESC_STREET == "Esc: nothing changed — the street side is as it was; this pick wasn't kept"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
-                   rhino.index('        elif what == "street":')]
+    pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
+    corner = pick[pick.index('            if facts.get("corner_lot") is True:'):
+                  pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))")]
     assert "say(logic.so_far(said) if grown != runs else said)" in corner
-    assert 'say(logic.ESC_STREET if what == "street" else "Esc: nothing changed")' in rhino
+    assert "        except Cancelled:" in pick and "            say(logic.ESC_STREET)\n            return None" in pick
     assert 'say(logic.so_far(said) if grown != runs and facts.get("corner_lot") else said)' in rhino
 
 
@@ -3190,9 +3237,12 @@ def test_every_street_line_is_saved_with_its_street_id():
     assert calls and all(c.strip().endswith(", ids") or ", None" in c for c in calls), calls
     logic_src = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
     saves = re.findall(r"set_street_lines\((?!facts, lines, ids=None\))([^\n]*)", logic_src)
-    # (with_suggestions: the lines with their own source's ids, never the other source's: round 3, F1)
-    assert all("None)" in c or "* len(" in c or c.startswith('out, out.get("street_line"), own.get("street_ids"))')
-               for c in saves), saves
+    # (with_suggestions: the lines with their own source's ids, never the other source's: round 3, F1; the start
+    # box's picks: the street runs' own ids, #19; the lookup's address street: one street, unnamed, a corner lot
+    # still asks for the street pick, #18 reading its streets only from the pick's ids)
+    allowed = ('out, out.get("street_line"), own.get("street_ids"))', 'facts, outcome["lines"], outcome.get("ids"))',
+               'facts, w["street_line"])', 'facts, lines, ids)')
+    assert all("None)" in c or "* len(" in c or c.startswith(allowed) for c in saves), saves
 
 
 def test_the_corner_pick_saves_one_id_per_street_and_the_hint_says_what_the_box_does():
@@ -3208,12 +3258,12 @@ def test_the_corner_pick_saves_one_id_per_street_and_the_hint_says_what_the_box_
     clicks = [("ok", o[3]), ("ok", o[14]), ("none", None)]
     result = type("Result", (), {"Success": "ok", "Nothing": "none", "Cancel": "esc"})
     rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result})})
-    ns = _plugin_functions(["_box_pick"], Rhino=rhino2, Cancelled=type("Cancelled", (Exception,), {}),
+    ns = _plugin_functions(["_box_pick", "_one_pick", "_pick_outcome"], Rhino=rhino2, Cancelled=type("Cancelled", (Exception,), {}),
                            _find=lambda doc, i: type("Lot", (), {"Geometry": None})(), _outline=lambda doc, lot: o,
                            _get_point=lambda p: clicks.pop(0), _clicked_piece=lambda doc, lot, point: point,
                            _feet_point=lambda doc, p: p, _ask_street_more=lambda q: False, say=said.append,
                            _highlight=lambda doc, f: None)
-    facts, saved = ns["_box_pick"](None, "street", {"lot_id": "l", "corner_lot": True}, {})
+    facts, saved = ns["_box_pick"](None, "street", {"lot_id": "l", "corner_lot": True}, {}, None)
     assert facts["street_ids"] == ["Street 1"] * 8 + ["Street 2"] * 2, facts.get("street_ids")
     assert len(facts["street_line"]) == 10
     assert said[0].startswith("Street 1: 8 lot-line pieces") and said[1].startswith("Street 2: 2 lot-line pieces")
@@ -3251,22 +3301,22 @@ def test_esc_at_any_street_prompt_changes_nothing():
                                 "Input": type("Input", (), {"GetResult": get,
                                                             "Custom": type("Custom", (), {"GetString": GetString})})})
     clicks = []
-    ns = _plugin_functions(["_box_pick"], Rhino=rhino2, Cancelled=cancelled,
+    ns = _plugin_functions(["_box_pick", "_one_pick", "_pick_outcome"], Rhino=rhino2, Cancelled=cancelled,
                            _find=lambda doc, i: type("Lot", (), {"Geometry": None})(), _outline=lambda doc, lot: o,
                            _get_point=lambda p: clicks.pop(0), _clicked_piece=lambda doc, lot, point: point,
                            _feet_point=lambda doc, p: p, _ask_street_more=lambda q: False, say=said.append,
                            _highlight=lambda doc, f: None)
     corner = {"lot_id": "l", "corner_lot": True, "street_line": [o[0]], "street_ids": ["Ithaca Rd"]}
     clicks[:] = [("ok", o[3]), ("esc", None)]                       # a click, then Esc
-    facts, saved = ns["_box_pick"](None, "street", dict(corner), {})
+    facts, saved = ns["_box_pick"](None, "street", dict(corner), {}, None)
     assert facts["street_line"] == [o[0]] and facts["street_ids"] == ["Ithaca Rd"] and said[-1] == logic.ESC_STREET
     clicks[:] = [("ok", o[3]), ("none", None)]                      # the same click, then Enter: kept
-    facts, saved = ns["_box_pick"](None, "street", dict(corner), {})
+    facts, saved = ns["_box_pick"](None, "street", dict(corner), {}, None)
     assert len(facts["street_line"]) == 8
     inside = {"lot_id": "l", "corner_lot": False, "street_line": [o[0]], "street_ids": ["Ithaca Rd"]}
     clicks[:] = [("ok", o[13])]                                      # a line of no known street: its name asked
     answers[:] = ["esc"]                                             # Esc at "Which street is this lot line on?"
-    facts, saved = ns["_box_pick"](None, "street", dict(inside), {"street_name": "Ithaca Rd"})
+    facts, saved = ns["_box_pick"](None, "street", dict(inside), {"street_name": "Ithaca Rd"}, None)
     assert facts["street_line"] == [o[0]] and facts["street_ids"] == ["Ithaca Rd"] and saved == {"street_name":
                                                                                                   "Ithaca Rd"}
     assert said[-1] == logic.ESC_STREET

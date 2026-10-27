@@ -28,7 +28,7 @@ Type a command's name in Rhino's command line.
 1. Open an empty Rhino file (any unit; Gordium converts) and type `GordiumStart`. The **start box** opens, filled in with the
    sample project (106 Ithaca Rd, district R-1b, one-family house).
 2. Read each row:
-   - **Address**: the project's address. **Look up (coming soon)** is shown but off in this version.
+   - **Address**: the project's address. **Look up** asks the City's and the State's maps about that address and fills in what they give (the lot, its district); each row says where its answer came from.
    - **Zoning district**: the district and where it came from ("entered by you"); **Change** picks another. Tick **This is the lot's
      district** to confirm it. Nothing is drawn until you do: a district nobody confirmed is never trusted.
    - **Use**: the kind of building (one-family dwelling, detached, for now). **Change** picks another.

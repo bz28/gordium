@@ -39,3 +39,5 @@ site_lookup = ["*.yaml"]
 [tool.pytest.ini_options]
 testpaths = ["packages"]
 addopts = "--import-mode=importlib"
+# a test still running after 5 minutes prints every thread's stack (the run then shows where it hangs)
+faulthandler_timeout = 300
