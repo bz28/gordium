@@ -1,0 +1,54 @@
+title: One floor moved on its own
+what: >-
+  A three-story house drawn as three floor blocks, and the second floor gets dragged 3 ft east by itself. It
+  still stands outside the side yard (12 ft from the east line), but the floors no longer stack: Gordium can't be
+  sure the blocks are still one story each, so Stories needs review with "Floors misaligned" (spec B4). By the code
+  the yards are measured "from the ground upward" to the nearest part of the building, so the overhang counts:
+  12 ft ≥ 10 ft still complies, and the 3 ft overhang adds to the lot coverage.
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[15, 30], [45, 30], [45, 70], [15, 70]]
+    base: 0
+    floors: [10, 10, 10]
+    move_floor: {floor: 2, by: [3, 0]}
+grade: {elevation: 0}
+expected:
+  R-1b.stories:
+    status: needs_review
+    reason_has: "floors misaligned"
+    working: "floor 2 sticks out 3 ft past floor 1: not a clean stack of floor blocks (spec B4)"
+    cites: "§325-3 STORY; spec B4"
+  R-1b.side_yards:
+    status: complies
+    working: >-
+      REAR/SIDE YARD is open "from the ground upward": east yard to the overhang 60 − 48 = 12 ft ≥ 10; west 15 ft.
+    cites: "§325-3 yard definitions (\"unoccupied and unobstructed ... from the ground upward\"); §325-8 chart, R-1b, Side"
+  R-1b.lot_coverage:
+    status: complies
+    working: "footprint seen from above: 30 × 40 + 3 × 40 = 1,320 sf ≤ 1,800 sf (the overhang counts, §325-8A p.25)"
+    cites: "§325-8A, p.25 (area covered by buildings above ground); §325-8 chart, R-1b, Percent of lot area"
+  R-1b.height: {status: complies, working: "0 to 30 ft = 30 ≤ 35", cites: "§325-8 chart, R-1b, Height"}
+  R-1b.front_yard: {status: complies, working: "30 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
+  R-1b.rear_yard: {status: complies, working: "50 ≥ 30", cites: "§325-8 chart, R-1b, Rear"}
+# added after running Gordium (the expected results above are as written before it ran, commit 6d28ce0)
+disagreements:
+  R-1b.side_yards:
+    gordium: needs_review
+    direction: gordium_more_cautious
+    finding: >-
+      Investigated 2026-10-20. Gordium measures the yard two ways: to the overhanging second floor (12'-0") and to
+      the ground-floor wall (15'-0"), because whether an overhang counts is an open question (definitions.yaml
+      yard_projections). Both readings comply, and the panel says "Complies under every reading, but it depends on an open question: whether a yard is measured to the wall or to overhangs ...;
+      confirm with the zoning office". Not a false pass. The hand-worked result reads "unobstructed from the ground
+      upward" (§325-3) as settling it: the overhang counts, and 12'-0" complies.
+    question_for_architects: >-
+      Does an upper floor that overhangs the floor below count for the side yard (measured to the overhang)? If
+      yes, Gordium can drop the second reading and say complies here.
+  R-1b.lot_coverage:
+    gordium: needs_review
+    direction: gordium_more_cautious
+    finding: >-
+      Same open question for coverage (building_area: whether an overhang counts): 1,320 sf with it, 1,200 sf
+      without; both under 1,800 sf. Gordium: "Complies under every reading"; needs review. Not a false pass.
+    question_for_architects: "Does an upper-floor overhang count in lot coverage (\"area covered ... above ground\", §325-8A p.25)?"

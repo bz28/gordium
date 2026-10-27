@@ -1,0 +1,24 @@
+title: Lot coverage 1 sf over
+what: >-
+  A two-story house whose footprint is 1,801 sf on a lot that allows 1,800 sf (25% of 7,200 sf). One square foot
+  over does not comply; it must never be rounded to "25%" and called compliant.
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[10, 30], [50, 30], [50, 75.025], [10, 75.025]]
+    base: 0
+    floors: [10, 10]
+grade: {elevation: 0}
+expected:
+  R-1b.lot_coverage:
+    status: does_not_comply
+    working: "40 × 45.025 = 1,801 sf; allowed 25% × 7,200 = 1,800 sf; over by 1 sf (25.01%)"
+    cites: "§325-8 chart, R-1b, Percent of lot area: 25%"
+    measured: {building_area: 1801.0}
+  R-1b.front_yard: {status: complies, working: "30 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
+  R-1b.side_yards: {status: complies, at_limit: true, working: "10 and 60 − 50 = 10, each ≥ 10", cites: "§325-8 chart, R-1b, Side"}
+  R-1b.rear_yard: {status: complies, working: "120 − 75.025 = 44.975 ≥ 30", cites: "§325-8 chart, R-1b, Rear"}
+  R-1b.height: {status: complies, working: "20 ≤ 35", cites: "§325-8 chart, R-1b, Height"}
+  R-1b.stories: {status: complies, working: "2 ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
+plan:
+  encroach: 0

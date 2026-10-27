@@ -32,16 +32,16 @@ from .budget import worst_case
 
 HERE = Path(__file__).parent
 GUIDE_FILE = REPO / "regulations/document_extraction_guide/labeling_guide.md"
-SETTINGS = yaml.safe_load((HERE / "settings.yaml").read_text())
-PRICES = yaml.safe_load((HERE / "prices.yaml").read_text())
+SETTINGS = yaml.safe_load((HERE / "settings.yaml").read_text(encoding="utf-8"))
+PRICES = yaml.safe_load((HERE / "prices.yaml").read_text(encoding="utf-8"))
 
 
 def system_prompt() -> str:
     """The fixed instructions: identical for every piece, so they're cached after the first call."""
-    vocab = yaml.safe_load(VOCABULARY_FILE.read_text())
+    vocab = yaml.safe_load(VOCABULARY_FILE.read_text(encoding="utf-8"))
     kinds = "\n".join(f"- {k}: {' '.join(v.split())}" for k, v in vocab["label_kinds"].items())
     topics = "\n".join(f"- {k}: {' '.join(v.split())}" for k, v in vocab["topics"].items())
-    return (f"{GUIDE_FILE.read_text()}\n## Label kinds (use these exact names)\n{kinds}\n\n"
+    return (f"{GUIDE_FILE.read_text(encoding="utf-8")}\n## Label kinds (use these exact names)\n{kinds}\n\n"
             f"## Topics (use these exact names)\n{topics}\n")
 
 

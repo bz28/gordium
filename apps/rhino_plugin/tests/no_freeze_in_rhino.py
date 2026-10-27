@@ -78,8 +78,8 @@ def load_the_bad_way():
 
 def fake_worker(g, code):
     """A stand-in checker as the current one (same code fingerprint, so ask() doesn't replace it)."""
-    p = subprocess.Popen([g._python(), "-c", code], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                         stderr=subprocess.DEVNULL, universal_newlines=True, encoding="utf-8")
+    p = g.ui.spawn([g._python(), "-c", code], stdin=subprocess.PIPE, stdout=subprocess.PIPE,   # (no console)
+                   stderr=subprocess.DEVNULL, universal_newlines=True, encoding="utf-8")
     g.STATE["worker_sends"], g.STATE["worker_lines"] = g.logic.pipes(p)
     g.STATE["worker"] = p
     g.STATE["worker_code"] = g.logic.code_fingerprint(os.path.join(g.REPO, "packages"))
@@ -147,10 +147,11 @@ try:
     # 6 (review round 1): a reload that KEEPS the plugin's state, with live mode and the drawing on
     doc = TestDocs("nofreeze").__enter__().open("Large Objects - Feet")
     g = load_the_bad_way()
-    g.STATE["auto_ok"] = True
-    g.gordium_check()                                    # GordiumCheck: live mode on, the drawing, the panel
+    g.gordium_check()                                    # GordiumStart: live mode on, the drawing, the panel
     first_overlay = g.STATE["overlay"]
-    for name in ("gordium_rhino", "rhino_logic"):
+    west = lambda m: {i["name"]: i for i in (m.STATE.get("last") or {}).get("items", [])}["Side yard, Southwest"]  # noqa
+    before = west(g)["proposed"]
+    for name in ("gordium_rhino", "rhino_logic", "gordium_ui"):
         sys.modules.pop(name, None)
     import gordium_rhino as g3                           # the state kept: a reload as Rhino or an update does it
     g = g3
@@ -162,23 +163,22 @@ try:
           not first_overlay.Enabled and g.STATE["overlay"] is not first_overlay and g.STATE["overlay"].Enabled and
           "overlay" in g.LEFTOVERS)
     g.STATE["dirty"] = None
-    log["buildings"] = len(list(g._buildings(doc)))
-    added = doc.Objects.AddPoint(Rhino.Geometry.Point3d(0, 0, 0))   # an edit any document has (an object added)
-    claim("6 an edit is noticed by the new copy's live hook", g.STATE.get("dirty") is not None,
-          {"buildings": log["buildings"]})
-    doc.Objects.Delete(added, True)
+    ft = 1.0 / g._scale(doc)
+    for o in g._buildings(doc):
+        doc.Objects.Transform(o.Id, Rhino.Geometry.Transform.Translation(-1 * ft, 0, 0), True)
+    claim("6 an edit is noticed by the new copy's live hook", g.STATE.get("dirty") is not None)
     g.STATE["dirty"] = time.time() - 2 * g.IDLE_SECONDS  # as if Rhino went idle after the edit
-    g.STATE["last"] = None
     g._idle(None, None)
-    claim("6 and re-checked", bool(g.STATE.get("last")), g.STATE.get("last"))
+    claim("6 and re-checked", (before, west(g)["proposed"]) == ("12'-0 5/8\"", "11'-0 5/8\""),
+          (before, west(g)["proposed"]))
     # 7 (review round 2): an update over a copy from before LEFTOVERS existed (9303d10: what a cofounder has
     # before git pull), with that copy on and STATE kept, the new copy imported WITHOUT off()
     g.off()
     old_root = S + "old_9303d10"
     if not os.path.isdir(old_root + "/apps"):
         os.makedirs(old_root, exist_ok=True)
-        tar = subprocess.run(["git", "-C", WT, "archive", "9303d10"], capture_output=True, check=True).stdout
-        subprocess.run(["tar", "-x", "-C", old_root], input=tar, check=True)
+        tar = g.ui.spawn(["git", "-C", WT, "archive", "9303d10"], run=True, capture_output=True, check=True).stdout
+        g.ui.spawn(["tar", "-x", "-C", old_root], run=True, input=tar, check=True)
     venv = os.path.dirname(os.path.dirname(g._python()))      # .venv/bin/python -> .venv
     if os.path.realpath(old_root + "/.venv") != os.path.realpath(venv):
         if os.path.islink(old_root + "/.venv"):

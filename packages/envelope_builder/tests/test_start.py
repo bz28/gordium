@@ -182,6 +182,8 @@ def test_a_lot_whose_sides_lean_outward_still_gets_a_full_building_at_the_front_
                   [(0, 0), (60, 0), (160, 100), (160, 200), (-100, 200), (-100, 100)])
         street = [[list(points[0]), list(points[1])]]
     facts = {**FACTS, "street_line": street}
+    if name == "cul-de-sac pie":         # one street round its bulb (it swings 60°): named, as the lookup names it
+        facts["street_ids"] = ["Bulb Ct"] * len(street)
     start, site = generated(points, facts)
     assert start["floors"], start["notes"]
     got, m = results(site, facts)

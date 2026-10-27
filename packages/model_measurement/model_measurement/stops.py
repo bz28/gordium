@@ -25,6 +25,12 @@ STOPS = {
     "no_street": "the street side isn't given: pick the lot line on the street",
     "street_not_a_lot_line": "a street line given doesn't match a lot line: pick the street side again",
     "street_lines_apart": "the street lot lines given aren't next to each other",
+    "two_streets": "the street lot lines given are on two streets: a corner lot (§325-19C), so which yards are front, "
+                   "side and rear, and which street's frontage is the lot width, are open questions; answer Corner lot?",
+    "one_street_or_two": "the street lot lines given turn {turn}° in all: do they face one street that bends, or two "
+                         "streets at a corner? Answer Corner lot?, or name the street each lot line is on",
+    "street_names_stale": "the street names saved for the street lot lines no longer match them (the lines were "
+                          "picked again): pick the street side again",
     "all_street": "every lot line is on a street: which yards are front, side and rear is an open question for the "
                   "architects",
     # corner lots (§325-19C)
@@ -39,12 +45,23 @@ STOPS = {
     # the ground
     "no_ground": "the ground level isn't given: enter it (the grade plane)",
     "ground_unknown": "say whether the ground is flat",
+    "ground_unclear": "the spot grades don't show the ground under the building (too few, or in a line): place "
+                      "spot grades around the building",
     "ground_off_building": "the ground level ({ground} ft) doesn't meet the buildings (they run from {bottom} to "
                            "{top} ft): check the ground level",
     "buried_solid": "a solid lies wholly under the ground ({ground} ft; it runs from {bottom} to {top} ft) and isn't "
                     "joined directly under the building: check the ground level and where the solid is",
     "sloped_ground": "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't "
                      "measured yet",
+    "grade_off_walls": "spot grades no longer at the building's walls ({off} of {count} more than 2 ft from a wall, "
+                       "{bare} walls without one): set the grade again",
+    "grade_with_others": "with the other solids as part of the building, the grade plane needs spot grades at their "
+                         "walls too (§325-3: each side of the building): place spot grades around every solid on "
+                         "the Building layer",
+    "grade_walls_unclear": "the building's walls can't be told apart in plan (no wall longer than 1 ft, a round or "
+                           "finely faceted outline): set the grade as flat ground instead",
+    "existing_grade": "measured from existing grade; the code's grade plane is finished ground level (§325-3): tick "
+                      "No regrading near the house, or set the finished ground",
     # facts a massing model doesn't show, until they are entered
     "no_use": "choose the use",
     "no_district": "enter the lot's zoning district (zone)",
@@ -74,9 +91,10 @@ STOPS = {
     # the buildings
     "no_building": "no building on the Building layer",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
+    "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
     "no_main_building": "more than one building: pick the main building",
     "outside_lot": "a building isn't inside the lot: {what}",
-    "open_solid": "a building isn't a closed solid",
+    "open_solid": "a building isn't a closed solid: {what}",
     "open_mesh": "a building mesh isn't closed",
     "curved_surface": "a building has a curved surface (not measured yet)",
     "curved_edge": "a building has a curved edge (not measured yet)",

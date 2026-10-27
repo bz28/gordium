@@ -19,6 +19,7 @@ import traceback
 from pathlib import Path
 
 from model_measurement.project import fact_problems, load_facts
+from rule_format.rulebook import utf8_console
 
 from .check import check, options, sample_site, start
 
@@ -28,9 +29,10 @@ def answer(request: dict) -> dict:
         if request.get("cmd") == "check":
             report = request.get("report")
             result = check(Path(request["model"]), request["facts"], Path(report) if report else None,
-                           request.get("building_problems"))
+                           request.get("building_problems"), request.get("extras"))
         elif request.get("cmd") == "start":
-            result = start(Path(request["model"]), request["facts"])
+            result = start(Path(request["model"]), request["facts"], request.get("floor_to_floor"),
+                           request.get("design_buffer") or 0.0)
         elif request.get("cmd") == "sample_site":
             result = sample_site()
         elif request.get("cmd") == "facts":
@@ -79,16 +81,17 @@ def main(argv: list[str]) -> int:
     except ValueError as e:
         print(f"✗ {e}")
         return 1
-    s = result["summary"]
-    print({"pass": "✓", "fail": "✗", "review": "?"}[s["state"]], s["text"])
-    for line in s["lines"]:
-        print("   ", line)
-    for row in result["rows"]:
-        print(f"  {row['Error']:13} {row['Requirement']}")
+    v = result["view"]                  # the panel's own summary and rows (D3: one summary everywhere, never a ✓)
+    print("Gordium ·", v["summary"])
+    for i in v["items"]:
+        if i["group"] != "not_covered":
+            print(f"  {i['mark'] or ' '} {i['name']:34} {i['proposed']:>14} {i['required']:>12} {i['margin']:>10}"
+                  + (f"  · {i['reason']}" if i.get("reason") else ""))
     env = result["envelope"]
     print(f"  envelope: yards {env['yards']}, height {env['height']}, top {env['top']}; notes {env['notes']}")
     return 0
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

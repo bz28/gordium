@@ -1,0 +1,53 @@
+title: Tax-map lot, front yard within 2 ft of the line
+what: >-
+  The lot lines come from the county tax map, not a survey; tax-map lines can be off by about 2 ft. The front wall
+  is 26 ft back: 1 ft more than the 25 ft needed, but within the 2 ft the line could be off, so it needs review
+  ("at worst 24'-0""). The side yards (13 ft) and the rear yard keep more than 2 ft of room under every reading and
+  comply. Lot area (and so coverage) needs a survey.
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: false}
+buildings:
+  - id: house
+    outline: [[13, 26], [47, 26], [47, 76], [13, 76]]
+    base: 0
+    floors: [10, 10]
+grade: {elevation: 0}
+expected:
+  R-1b.front_yard:
+    status: needs_review
+    reason_has: "at worst 24'-0\""
+    working: "26 ft drawn; the street line could be 2 ft off: at worst 24 ft < 25 ft, at best 28 ft ≥ 25 ft: depends on the survey"
+    cites: "§325-8 chart, R-1b, Front: 25 ft; tax-map tolerance ±2'-0\" (spec C2)"
+  R-1b.side_yards:
+    status: complies
+    working: "13 ft each; at worst 13 − 2 = 11 ft ≥ 10 ft"
+    cites: "§325-8 chart, R-1b, Side; spec C2"
+  R-1b.rear_yard:
+    status: complies
+    working: "120 − 76 = 44 ft; at worst 42 ft, against at most max(min(0.25 × 122, 50), 20) = 30.5 ft ✓"
+    cites: "§325-8 chart, R-1b, Rear, note 16; spec C2"
+  R-1b.lot_width_one_family_detached: {status: complies, working: "60 ft; at worst 58 ≥ 50", cites: "§325-8 chart, R-1b, Lot width; spec C2"}
+  R-1b.lot_area_one_family_detached:
+    status: needs_review
+    working: "7,200 sf as drawn; Gordium's lot area needs a survey (stop: not_surveyed), so it can't be confirmed"
+    cites: "measures.yaml lot_area; §325-8 chart, R-1b, Lot area"
+  R-1b.lot_coverage:
+    status: needs_review
+    working: "34 × 50 = 1,700 sf against 25% of a lot area not from a survey (1,800 sf as drawn): depends on the survey"
+    cites: "§325-8 chart, R-1b, Percent of lot area"
+  R-1b.height: {status: complies, working: "20 ≤ 35 (height isn't from the lot lines)", cites: "§325-8 chart, R-1b, Height"}
+  R-1b.stories: {status: complies, working: "2 ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
+# added after running Gordium (the expected results above are as written before it ran, commit 6d28ce0)
+disagreements:
+  R-1b.lot_area_one_family_detached:
+    gordium: complies
+    direction: gordium_less_cautious
+    finding: >-
+      2026-10-20, after the spec's C2 was corrected (the tax-map worst case applies to every lot-dependent item,
+      areas included; docs/design/rhino_ui_spec.md C2). The hand-worked result followed the old rule that a lot area
+      always waits for a survey. Worked by hand at the worst case (Ben, 2026-10-21: every lot line 2 ft in): 56 × 116 =
+      6,496 sf ≥ 6,000 sf. Complies under every lot the tax map allows; Gordium says so and names 6,496 sf.
+    relies_on:                          # checked by test_scenarios: the smallest lot the tax map allows, surveyed
+      - {lot: [[0, 0], [56, 0], [56, 116], [0, 116]], why: "every tax-map lot line 2 ft in"}
+    question_for_architects: >-
+      Is a lot area that complies even with every tax-map length 2 ft short acceptable without a survey, or does
+      the zoning office require a survey for any lot-area finding?

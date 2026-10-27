@@ -82,6 +82,14 @@ Every reason the code gives today comes from the table:
   architects)".
 - **The street side:** "the street side isn't given: pick the lot line on the street"; "a street line given
   doesn't match a lot line: pick the street side again"; "the street lot lines given aren't next to each other";
+  "the street lot lines given are on two streets: a corner lot (§325-19C), so which yards are front, side and rear,
+  and which street's frontage is the lot width, are open questions; answer Corner lot?"; "the street lot lines given
+  turn 90° in all: do they face one street that bends, or two streets at a corner? Answer Corner lot?, or name the
+  street each lot line is on" (lot width is frontage on one public right-of-way, §325-8 Column 7: never measured
+  along two streets; one street or two is the street's identity first, the drawing's total swing only when none is
+  known: street_lines.py); "the street names saved for the street lot lines no longer match them (the lines were
+  picked again): pick the street side again" (names saved before the lines changed are set aside, never used:
+  the lot facts are still read and checked);
   "every lot line is on a street: which yards are front, side and rear is an open question for the architects".
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
   lot yes or no"; "a corner lot: which yards are front, side and rear yards, and which street's frontage is the
@@ -92,11 +100,27 @@ Every reason the code gives today comes from the table:
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
   of all the buildings, or under the lowest point of all of them, as when a survey elevation is typed for a model
-  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual); "a solid lies wholly under the
+  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual; with spot grades,
+  one test whatever the points' positions: each connected building group (touching in plan or one over another,
+  so a balcony against the house is part of it) meets the ground if its bottom is at or below the ground the
+  points describe at some corner of its footprint, and its top is above it); "the spot grades don't show the
+  ground under the building (too few, or in a line): place spot grades around the building"; "a solid lies wholly under the
   ground (<ground> ft; it runs from <bottom> to <top> ft) and isn't joined directly under the building: check the
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
   it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
+  With spot grades placed in the model (or the terrain, which the Rhino command samples at the walls each time it
+  checks), the grade plane is the average of each of the main building's walls' points within 2 ft of it (a point
+  at another building's walls is that building's ground, left out); after the building moves:
+  "spot grades no longer at the building's walls (<off> of <count> more than 2 ft from a wall, <bare> walls
+  without one): set the grade again". Read with the other solids as part of the building, the grade plane is the
+  ground at all of their walls: "with the other solids as part of the building, the grade plane needs spot grades
+  at their walls too (§325-3: each side of the building): place spot grades around every solid on the Building
+  layer". A round or finely faceted outline: "the building's walls can't be told
+  apart in plan (no wall longer than 1 ft, a round or finely faceted outline): set the grade as flat ground
+  instead". Measured from existing ground instead of finished: "measured from existing
+  grade; the code's grade plane is finished ground level (§325-3): tick No regrading near the house, or set the
+  finished ground" (height and stories).
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
   are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
   below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces".
@@ -134,8 +158,9 @@ Every reason the code gives today comes from the table:
   measurements"; "more than one building: pick the main building" (with none picked and exactly one starting house, it is
   the main building, assumed: every measurement from it carries `main_assumed`, and every other building that
   could be a principal one (enclosed, at least 7 ft tall and 70 sf: NYS Residential Code R305.1, R304.1) is also
-  read as if it were the main one, so the assumption never passes what a pick wouldn't); "a
-  building isn't inside the lot: {what}" (which one; the yards wait only if it is the main building); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  read as if it were the main one, so the assumption never passes what a pick wouldn't); "a building object has
+  nothing to measure (no faces): check it on the Building layer"; "a
+  building isn't inside the lot: {what}" (which one; the yards wait only if it is the main building); "a building isn't a closed solid: {what}" (which object: its Rhino name, else its id; the rows waiting on it point at it, so Zoom to finds it); "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

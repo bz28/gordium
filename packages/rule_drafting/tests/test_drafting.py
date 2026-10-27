@@ -461,7 +461,7 @@ def test_the_docs_describe_the_typed_number_rule_the_code_enforces():
     from pathlib import Path
     root = Path(drafter.__file__).resolve().parents[3]
     for doc in (root / "packages/rule_drafting/README.md", root / "docs/methods.md"):
-        text = doc.read_text()
+        text = doc.read_text(encoding="utf-8")
         assert "with no slots may not contain numbers" not in text
         # Ben's policy B, as the code enforces it: only the rule's own evidence, anything else refused, no questions
         assert "a footnote whose marker is on the slot's own cell" in text and "that slot's own row label" in text
@@ -475,7 +475,7 @@ def test_every_eval_result_the_docs_cite_has_its_committed_record():
     import re
     from pathlib import Path
     root = Path(drafter.__file__).resolve().parents[3]
-    section = root.joinpath("docs/methods.md").read_text().split("## 10.")[1].split("## 11.")[0]
+    section = root.joinpath("docs/methods.md").read_text(encoding="utf-8").split("## 10.")[1].split("## 11.")[0]
     cited = re.findall(r"packages/rule_drafting/evals/[\w.-]+/", section)
     assert {"packages/rule_drafting/evals/2026-10-19_model_choice/",
             "packages/rule_drafting/evals/2026-10-20_prompt_a/"} <= set(cited)
@@ -777,7 +777,7 @@ def test_drafted_rules_are_listed_apart_from_hand_rules_with_the_same_id(tmp_pat
     (tmp_path / "5_zoning_rules/drafted").mkdir(parents=True)
     (tmp_path / "4_term_definitions").mkdir()
     for path in ("5_zoning_rules/R-1b.yaml", "5_zoning_rules/drafted/R-1b.yaml"):
-        (tmp_path / path).write_text(cli.yaml.safe_dump({"district": "R-1b", "rules": [rule]}))
+        (tmp_path / path).write_text(cli.yaml.safe_dump({"district": "R-1b", "rules": [rule]}), encoding="utf-8")
     pieces = {"p": {"id": "p", "lines": [[1, 1, 3]]}}
     assert coverage.cited_by(tmp_path, "law.pdf", pieces) == {"p": ["R-1b.x", "drafted:R-1b.x"]}
 
@@ -785,7 +785,7 @@ def test_drafted_rules_are_listed_apart_from_hand_rules_with_the_same_id(tmp_pat
 def test_the_methods_doc_counts_the_units_the_script_drafts(inputs):
     """The full-run budget decision rests on this count, so it is worked out from the units, not typed."""
     from rule_format.rulebook import REPO
-    doc = (REPO / "docs/methods.md").read_text()
+    doc = (REPO / "docs/methods.md").read_text(encoding="utf-8")
     m = re.search(r"(\d+) AI calls: (\d+) chart sections, (\d+) law pieces", doc)
     ai = [u for u in inputs.units() if not u.get("code")]
     assert m and tuple(map(int, m.groups())) == (len(ai), sum("section" in u for u in ai), sum("piece" in u for u in ai))

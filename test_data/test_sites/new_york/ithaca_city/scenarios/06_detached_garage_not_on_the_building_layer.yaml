@@ -1,0 +1,44 @@
+title: A detached garage on the lot, not on the Building layer
+what: >-
+  A 1,500 sf house plus a 24 × 24 ft detached garage at the back of the lot, drawn on the Default layer, so
+  Gordium doesn't measure it. Lot coverage counts principal AND accessory buildings: 1,500 + 576 = 2,076 sf, over
+  the 1,800 sf allowed. Gordium can't see the garage, so the honest answer is "needs review" for the objects left
+  out and for lot coverage (the garage would change it); it must never say coverage complies.
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[15, 30], [45, 30], [45, 80], [15, 80]]
+    base: 0
+    floors: [10, 10]
+others:
+  - id: garage
+    outline: [[20, 90], [44, 90], [44, 114], [20, 114]]
+    base: 0
+    top: 12
+grade: {elevation: 0}
+expected:
+  scope.not_included:
+    status: needs_review
+    working: "1 closed solid on the lot isn't on the Building layer, so it isn't measured"
+    cites: "spec D (scope): objects on the lot not included"
+  R-1b.lot_coverage:
+    status: needs_review
+    working: >-
+      By the code: house 30 × 50 = 1,500 sf + garage 24 × 24 = 576 sf = 2,076 sf > 1,800 sf (28.83%): does not
+      comply. Gordium measures only the house (1,500 sf, 20.83%), so it can't say complies; needs review.
+    cites: "§325-8A, p.25: \"no greater percentage of total lot area may be covered by principal and accessory buildings above ground\"; §325-8 chart, R-1b, Percent of lot area: 25%"
+  R-1b.rear_yard:
+    status: complies
+    working: "the rear yard is to the rearmost MAIN building: 120 − 80 = 40 ≥ 30 (the garage is accessory)"
+    cites: "§325-3 REAR YARD (\"rearmost main building\"); accessory buildings in yards are §325-25 (not checked yet)"
+  R-1b.side_yards: {status: complies, working: "15 and 15 ≥ 10 (to the principal building; §325-25 exempts accessory structures)", cites: "§325-8 chart, R-1b, Side; §325-25"}
+  R-1b.front_yard: {status: complies, working: "30 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
+  R-1b.height: {status: complies, working: "20 ≤ 35", cites: "§325-8 chart, R-1b, Height"}
+  R-1b.stories: {status: complies, working: "2 ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
+# added after running Gordium (the expected results above are as written before it ran, commit 6d28ce0)
+fixed:
+  R-1b.lot_coverage: >-
+    First run, 2026-10-20: Gordium said lot coverage complies (1,500 sf of the house alone): a FALSE PASS, since
+    the garage it couldn't see makes it 2,076 sf. Fixed in code (design_checker/present.py
+    _cautious_for_left_out): any solid on the lot left out of the check makes lot coverage need review, and one
+    touching the building makes the yards, height and stories need review too (it may be a porch or deck).

@@ -5,7 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gordium"
 version = "0.1.0"
-requires-python = ">=3.12"
+# The Pythons CI tests (3.12 on Linux; 3.12 and 3.14 on Windows; Mac checked on 3.14). The upper bound makes pip
+# refuse a newer Python with "requires a different Python" before it tries to build rhino3dm, shapely and pyyaml
+# from source (no 3.15 wheels yet: on Windows that ends in "Microsoft Visual C++ 14.0 or greater is required").
+requires-python = ">=3.12,<3.15"
 # pdfplumber and pdfminer.six are pinned exactly: a different version could extract text differently.
 # shapely, numpy and rhino3dm are pinned too: measuring a model must give the same numbers on every machine
 # (numpy fits the roof planes, model_measurement.measure._planes).
