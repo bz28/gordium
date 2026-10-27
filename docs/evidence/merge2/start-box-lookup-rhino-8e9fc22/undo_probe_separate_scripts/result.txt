@@ -1,0 +1,1 @@
+[false, false]  (after p1 two records in one script, p2 one _Undo in a separate script)

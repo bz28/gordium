@@ -1,0 +1,528 @@
+{
+ "claims": {
+  "outside any command": {
+   "ok": true,
+   "detail": null
+  },
+  "survey: the architect's edit made": {
+   "ok": true,
+   "detail": null
+  },
+  "survey: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     192
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: use my survey"
+   }
+  },
+  "survey: only its own record undone": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     192,
+     191,
+     189
+    ],
+    "its record": [
+     192
+    ]
+   }
+  },
+  "survey: checked again": {
+   "ok": true,
+   "detail": 1793095821.077854
+  },
+  "survey: undone": {
+   "ok": false,
+   "detail": {
+    "strings": [
+     {
+      "lot_facts": "{\"jurisdiction\": \"regulations/jurisdictions/new_york/ithaca_city\", \"zone\": \"R-1b\", \"use\": \"one_family_detached\", \"corner_lot\": false, \"ground_is_flat\": true, \"lot_surveyed\": false, \"lot_id\": \"39215e01-4a32-43df-9773-ba892814e36c\", \"street_line\": [[[76.916, 0.2317], [67.113, 0.1516]], [[67.113, 0.1516], [59.09, 0.3022]], [[59.09, 0.3022], [49.525, 0.0]], [[49.525, 0.0], [38.7471, 0.5182]], [[38.7471, 0.5182], [30.5456, 0.1523]], [[30.5456, 0.1523], [20.3655, 0.1794]], [[20.3655, 0.1794], [10.7167, 0.8339]], [[10.7167, 0.8339], [1.1492, 0.2317]]], \"street_ids\": [\"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\"], \"grade_elevation\": 0.0, \"plan_north_deg\": 306.3799, \"address\": \"106 Ithaca Rd, Ithaca, NY\", \"grade_is\": \"finished\", \"ground_assumed\": \"flat\"}",
+      "ui": "{\"from_sample\": true, \"replaceable_lot\": \"39215e01-4a32-43df-9773-ba892814e36c\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"zone_source\": \"entered by you\", \"ground_kind\": \"flat\", \"no_regrading\": false, \"design_buffer\": \"0'-0\\\"\", \"checked\": []}",
+      "fact_sources": "{\"address\": {\"value\": \"106 Ithaca Rd, Ithaca, NY\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"zone\": {\"value\": \"R-1b\", \"source\": \"entered by you\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"use\": {\"value\": \"One-family dwelling, detached\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"lot\": {\"value\": \"7,033 sf\", \"source\": \"the tax map (\\u00b12 ft, approximate)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"street\": {\"value\": \"Ithaca Rd\", \"source\": \"the State tax map (the sample's lookup)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"corner_lot\": {\"value\": \"no, one street\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}, \"ground\": {\"value\": \"assumed flat\", \"source\": \"assumed (flat ground, the MVP's rule)\", \"confirmed_by\": null, \"date\": \"2026-10-27\"}, \"starting_house\": {\"value\": \"as first drawn, it keeps 2'-0\\\" back from each limit because the lot is from the tax map; use a survey for the full area.\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-27\"}}"
+     },
+     {
+      "lot_facts": null,
+      "ui": "{\"from_sample\": true, \"replaceable_lot\": \"39215e01-4a32-43df-9773-ba892814e36c\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\"}",
+      "fact_sources": null
+     }
+    ],
+    "objects": [
+     {
+      "45fad04e-e8df-4349-b722-6547405cfe50": 0,
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     },
+     {
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     }
+    ]
+   }
+  },
+  "survey: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "enter: the architect's edit made": {
+   "ok": true,
+   "detail": null
+  },
+  "enter: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     197
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: enter the row's facts"
+   }
+  },
+  "enter: only its own record undone": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     197,
+     196
+    ],
+    "its record": [
+     197
+    ]
+   }
+  },
+  "enter: checked again": {
+   "ok": true,
+   "detail": 1793095821.1978571
+  },
+  "enter: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "c96f5be6-fbbc-461c-ad00-039d783e99c0": 0,
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     },
+     {
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     }
+    ]
+   }
+  },
+  "enter: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "main: the architect's edit made": {
+   "ok": true,
+   "detail": null
+  },
+  "main: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     201
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: pick the main building"
+   }
+  },
+  "main: only its own record undone": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     201,
+     200
+    ],
+    "its record": [
+     201
+    ]
+   }
+  },
+  "main: checked again": {
+   "ok": true,
+   "detail": 1793095821.3132842
+  },
+  "main: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "58370f2a-29a6-4db9-bfc4-79eab15ae1fc": 0,
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     },
+     {
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     }
+    ]
+   }
+  },
+  "main: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "add: the architect's edit made": {
+   "ok": true,
+   "detail": null
+  },
+  "add: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     205
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: add to check"
+   }
+  },
+  "add: only its own record undone": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     205,
+     204
+    ],
+    "its record": [
+     205
+    ]
+   }
+  },
+  "add: checked again": {
+   "ok": true,
+   "detail": 1793095821.4160352
+  },
+  "add: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "be7b0c89-a38b-478a-822b-38fedc323b0a": 0,
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     },
+     {
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     }
+    ]
+   }
+  },
+  "add: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "ground: the architect's edit made": {
+   "ok": true,
+   "detail": null
+  },
+  "ground: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     209
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: this is the ground"
+   }
+  },
+  "ground: only its own record undone": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     209,
+     208
+    ],
+    "its record": [
+     209
+    ]
+   }
+  },
+  "ground: checked again": {
+   "ok": true,
+   "detail": 1793095821.5221279
+  },
+  "ground: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "303fe32e-83de-497b-b607-47b7d5ff932b": 0,
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     },
+     {
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     }
+    ]
+   }
+  },
+  "ground: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "massing: the architect's edit made": {
+   "ok": true,
+   "detail": null
+  },
+  "massing: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     213
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: hide or show the starting house"
+   }
+  },
+  "massing: only its own record undone": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     213,
+     212
+    ],
+    "its record": [
+     213
+    ]
+   }
+  },
+  "massing: checked again": {
+   "ok": true,
+   "detail": 1793095821.626553
+  },
+  "massing: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "4f3bebb1-3df7-4814-8636-e0d29db23a03": 0,
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     },
+     {
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     }
+    ]
+   }
+  },
+  "massing: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "labels: the architect's edit made": {
+   "ok": true,
+   "detail": null
+  },
+  "labels: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     217
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: on-screen labels"
+   }
+  },
+  "labels: only its own record undone": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     217,
+     216
+    ],
+    "its record": [
+     217
+    ]
+   }
+  },
+  "labels: checked again": {
+   "ok": true,
+   "detail": 1793095821.693526
+  },
+  "labels: undone": {
+   "ok": false,
+   "detail": {
+    "objects": [
+     {
+      "ae058922-5f59-4b7c-8107-6625734b390f": 0,
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     },
+     {
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     }
+    ]
+   }
+  },
+  "labels: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "not_ground: the architect's edit made": {
+   "ok": true,
+   "detail": null
+  },
+  "not_ground: one step": {
+   "ok": true,
+   "detail": {
+    "records_ended": [
+     222
+    ],
+    "named (by eye in Edit > Undo)": "Gordium: not the ground"
+   }
+  },
+  "not_ground: only its own record undone": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     222,
+     221,
+     220
+    ],
+    "its record": [
+     222
+    ]
+   }
+  },
+  "not_ground: checked again": {
+   "ok": true,
+   "detail": 1793095821.808928
+  },
+  "not_ground: undone": {
+   "ok": false,
+   "detail": {
+    "strings": [
+     {
+      "lot_facts": null,
+      "ui": "{\"from_sample\": true, \"replaceable_lot\": \"39215e01-4a32-43df-9773-ba892814e36c\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"ground_ids\": [\"485e743e-b146-4d4f-8d39-45542dd57b14\"]}",
+      "fact_sources": "{\"ground_marked\": {\"value\": \"1 object left out of the check as the ground\", \"source\": \"entered by you\", \"confirmed_by\": \"you\", \"date\": \"2026-10-27\"}}"
+     },
+     {
+      "lot_facts": null,
+      "ui": "{\"from_sample\": true, \"replaceable_lot\": \"39215e01-4a32-43df-9773-ba892814e36c\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\"}",
+      "fact_sources": null
+     }
+    ],
+    "objects": [
+     {
+      "265778b5-1972-4841-92c1-1194d5979470": 0,
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     },
+     {
+      "485e743e-b146-4d4f-8d39-45542dd57b14": 0,
+      "38bd5243-bab3-4f11-9c2f-41c70b74f28b": 0,
+      "c7381f70-685f-48a1-87e3-fe4e8935b85f": 8,
+      "060ea346-76d5-4dae-a8e2-78c1b8f0e225": 8,
+      "ec9e578e-d773-48f2-bc98-47ce014da48e": 8,
+      "39215e01-4a32-43df-9773-ba892814e36c": 6
+     }
+    ]
+   }
+  },
+  "not_ground: nothing else": {
+   "ok": false,
+   "detail": null
+  },
+  "control: a merged record is caught (the edit went with the action)": {
+   "ok": true,
+   "detail": {
+    "undone": [
+     233,
+     232
+    ],
+    "merged record": 233
+   }
+  }
+ },
+ "events": [
+  227,
+  228,
+  229,
+  230,
+  231,
+  232,
+  233,
+  234,
+  235
+ ],
+ "undone": [
+  233,
+  232
+ ],
+ "two_in_a_row": {
+  "records": [
+   227,
+   228
+  ],
+  "undone_by_one_undo": [
+   228,
+   227,
+   226
+  ]
+ },
+ "ok": false,
+ "done": true
+}

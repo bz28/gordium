@@ -1,0 +1,3 @@
+# #19 at 8e9fc22 in Rhino 8 (2026-10-27)
+
+undo_steps_in_rhino.py: 26 of 50. New 'only its own record undone' fails for every action, e.g. labels undone [217, 216] where its own record is 217: one _Undo also took the architect's earlier edit. two_in_a_row: records [227, 228], one _Undo took [228, 227, 226]. The deliberate-merge control PASSES (it is caught). The control does not explain the baseline: undo_probe_separate_scripts (no Gordium code) writes two plain undo records in one script and one _Undo in a SEPARATE script takes both ([false, false]). So Rhino merges everything one script run writes into one undo unit, and a script cannot test per-record undo. The product is neither proved nor disproved here; a real Ctrl+Z after a panel button is a human check.
