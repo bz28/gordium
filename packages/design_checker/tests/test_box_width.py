@@ -263,7 +263,8 @@ def test_the_model_sizes_the_old_box_at_its_measured_width_or_wider(ui):
 
 def test_long_text_in_every_other_row_still_fits(ui, monkeypatch):
     """Every row's own text made long (a lookup's status, the district's source, the lot, the street, the ground,
-    a review line, the corner question): each wraps, the box stays <= LAPTOP_PX."""
+    a review line, the corner question, Draw's reason, the amber line, the questions' note): each wraps, the box
+    stays <= LAPTOP_PX."""
     long = "a long line of words the box shows, " * 8
     rows = [{"key": "address", "label": "Address", "text": "106", "actions": [("lookup", "Look up", True)],
              "matches": ["106 Ithaca Rd, Ithaca, NY 14850"], "status": long, "review": long, "check": ("I checked this", False)},
@@ -279,6 +280,10 @@ def test_long_text_in_every_other_row_still_fits(ui, monkeypatch):
              "tick": (long[:40], False)}]
     gordium_ui, _ = ui
     monkeypatch.setattr(gordium_ui.logic, "box_rows", lambda state: rows)
+    # the lines under the rows too: Draw's reason, the amber line, the note under the questions (a combined refusal)
+    for name in ("draw_reason", "box_reason", "uncertain"):
+        monkeypatch.setattr(gordium_ui.logic, name, lambda state: long, raising=False)
+    monkeypatch.setattr(gordium_ui.logic, "FOLLOW_UP_HELP", long)
     state = dict(_state("R-1b", "one_family_detached", _questions(LONG_QUESTIONS)), use_note=long)
     px, layout = laid_out(ui, state, check.options(CITY))
     assert long in texts(layout) and px <= LAPTOP_PX, px
