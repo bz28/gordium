@@ -311,7 +311,7 @@ def make_panel(actions, host=None, context_on=True):
     footer = row(button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control
-    ticks = [row(_envelope_box(actions)), row(_massing_box(actions)), row(_labels_box(actions, parts)),
+    ticks = [row(_envelope_box(actions)), row(_massing_box(actions, parts)), row(_labels_box(actions, parts)),
              row(_context_box(actions, parts, context_on))]
     # while a start box is open these are off; the legend ("?") is not among them: it only shows something
     parts["greyed"] = [tree, detail_scroll, *ticks, footer.Items[0].Control, footer.Items[1].Control]
@@ -339,13 +339,19 @@ def say(parts, text):
         parts["message"].Text = text or ""
 
 
-def _massing_box(actions):
+def _massing_box(actions, parts):
     """Hide starting house: the Gordium::Massing layer off. Hidden, it is still checked (a hidden building still
-    counts, as everywhere in Gordium): only drawing it is turned off."""
+    counts, as everywhere in Gordium): only drawing it is turned off. Ticked as the document's layer is
+    (set_massing_tick), never left as last clicked (an Undo puts the layer back: the Rhino job at 540f718)."""
     box = ef.CheckBox()
     box.Text = "Hide starting house"
     box.Checked = False
-    box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
+
+    def changed(s, e):
+        if not parts.get("_setting_massing"):       # set from the document (set_massing_tick): not a change
+            actions["massing"](bool(box.Checked))
+    box.CheckedChanged += logic.guard(changed, "hide the starting house")
+    parts["massing_box"] = box
     return box
 
 
@@ -376,6 +382,17 @@ def set_context_tick(parts, shown):
         parts["context_box"].Checked = bool(shown)
     finally:
         parts["_setting_context"] = False
+
+
+def set_massing_tick(parts, hidden):
+    """The tick as this document's starting house layer is: ticked when it is hidden."""
+    if parts is None or parts.get("massing_box") is None:
+        return
+    parts["_setting_massing"] = True
+    try:
+        parts["massing_box"].Checked = bool(hidden)
+    finally:
+        parts["_setting_massing"] = False
 
 
 def _labels_box(actions, parts):

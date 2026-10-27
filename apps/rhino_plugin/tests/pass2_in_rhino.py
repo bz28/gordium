@@ -433,9 +433,12 @@ try:
             finally:
                 g.ui.draw_text_box, g._here = draw_box, here
             log.setdefault("frames", {})[name] = len(frames)
+            # the screen's own frame, read before the capture: CaptureToBitmap draws Top again at 1000 x 640, a
+            # different size, so a different placement to wait for (and its record would replace the screen's:
+            # the Rhino job at e8c3654 read that one, all 8 labels carried, "settled" never)
+            rec = dict(g.STATE.get("drawn", {}).get(vid) or {})
             view = top.CaptureToBitmap(System.Drawing.Size(1000, 640))
             view.Save(OUT + name + "_view.png")
-            rec = g.STATE.get("drawn", {}).get(vid) or {}
             labels = rec.get("labels") or []
             return [lab[0] for lab in labels], sum(boxes), labels, bool(rec.get("settled"))
 
