@@ -311,7 +311,7 @@ def make_panel(actions, host=None, context_on=True):
     footer = row(button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control
-    ticks = [row(_auto_box(actions, parts)), row(_envelope_box(actions)), row(_massing_box(actions, parts)),
+    ticks = [row(_auto_box(actions, parts)), row(_envelope_box(actions, parts)), row(_massing_box(actions, parts)),
              row(_labels_box(actions, parts)), row(_context_box(actions, parts, context_on))]
     # while a start box is open these are off; the legend ("?") is not among them: it only shows something
     parts["greyed"] = [tree, detail_scroll, *ticks, footer.Items[0].Control, footer.Items[1].Control]
@@ -453,12 +453,30 @@ def set_labels_tick(parts, shown):
         parts["_setting_labels"] = False
 
 
-def _envelope_box(actions):
+def _envelope_box(actions, parts):
+    """Show buildable envelope: on by default, this Rhino session's own setting (never saved in the file): ticked as
+    it is (set_envelope_tick), never left as last clicked on a panel built again."""
     box = ef.CheckBox()
     box.Text = "Show buildable envelope"
     box.Checked = True
-    box.CheckedChanged += logic.guard(lambda s, e: actions["envelope"](bool(box.Checked)), "show or hide the envelope")
+
+    def changed(s, e):
+        if not parts.get("_setting_envelope"):      # set from the session (set_envelope_tick): not a change
+            actions["envelope"](bool(box.Checked))
+    box.CheckedChanged += logic.guard(changed, "show or hide the envelope")
+    parts["envelope_box"] = box
     return box
+
+
+def set_envelope_tick(parts, on):
+    """The tick as the session's envelope setting is."""
+    if parts is None or parts.get("envelope_box") is None:
+        return
+    parts["_setting_envelope"] = True
+    try:
+        parts["envelope_box"].Checked = bool(on)
+    finally:
+        parts["_setting_envelope"] = False
 
 
 def _wrap_width(parts):
