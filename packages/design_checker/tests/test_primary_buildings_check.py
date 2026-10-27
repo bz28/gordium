@@ -45,3 +45,31 @@ def test_the_working_names_the_figure_for_the_stated_use():
     the panel says 2 × 6000 = 12,000 sf, not the whole "6000 if use == ... else 7500" choice."""
     calc = _rows(primary_buildings=2, primary_buildings_same_use=True)[RULE]["detail"]["calc"]
     assert calc == "Required: primary buildings 2 × 6000 = 12,000 sf", calc
+
+
+def _ru(lot_w, lot_d):
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "12_r3a_two_family_at_the_building_limits.yaml"))
+    sc["district"], sc["use"] = "RU", "two_family"
+    sc["lot"]["points"] = [[0, 0], [lot_w, 0], [lot_w, lot_d], [0, lot_d]]
+    sc["buildings"] = [{"id": "house", "outline": [[40, 40], [80, 40], [80, 80], [40, 80]], "base": 0, "floors": [10, 10]},
+                       {"id": "back", "outline": [[40, 150], [70, 150], [70, 175], [40, 175]], "base": 0, "floors": [10]}]
+    s, f, extras = scenarios.site(sc)
+    res = check_site(s, {**f, "main_building": "house_floor1"}, extras=extras)
+    return {i["rule"]: i for i in res["view"]["items"]}["RU.primary_structures"]
+
+
+def test_ru_two_possible_buildings_on_a_big_lot_never_read_as_not_complying():
+    """Review round 1 (PR2): on a 75,000 sf RU lot, two primary buildings need review for the ILPC's and the
+    Planning Board's approval (note 3), so the row's words never say "does not comply" at the two-building reading;
+    on a 50,000 sf lot two don't comply, and the row says so first."""
+    big = _ru(250, 300)
+    assert big["status"] == present.REVIEW and "does not comply" not in big["reason"], big["reason"]
+    small = _ru(200, 250)
+    assert small["status"] == present.REVIEW and "does not comply under that reading" in small["reason"], small["reason"]
+
+
+def test_a_count_that_could_change_the_row_is_asked_even_on_a_big_lot():
+    """Review round 1 (PR2, F2): with a building standing apart that could be a house, Gordium doesn't decide the
+    lot-area row from the readings' ends; it asks the count (needs review), never a pass, as the docs now say."""
+    item = _rows(primary_buildings_same_use=True)[RULE]
+    assert item["status"] == present.REVIEW and "primary_buildings" in item["needs"]

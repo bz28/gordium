@@ -61,8 +61,7 @@ building is one. A solid standing apart from it is counted as a second only if i
 least a 7 ft story tall, a habitable room's 70 sf: the test Gordium already uses for which building could be the
 main one) and the architect hasn't listed it as an accessory building. A shed or a deck is never counted. A large
 garage or a second house can't be told apart, so both are read (every one an accessory building / every one a
-primary building), and a rule that the count would change waits for the architect's count. The rules reading the
-count only grow stricter with it, so the two ends decide.
+primary building), and a rule that the count could change waits for the architect's count (needs review).
 
 ## 3. RU: how many primary buildings (chart p.2 note 3) — A, with the open question kept
 

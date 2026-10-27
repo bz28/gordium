@@ -108,7 +108,7 @@ listed, and the reason names the open question for the architects, so the checke
 | A curved street line | along the curve / straight across | lot_width |
 | Something below the roof sticking out past the walls at the ground (an upper floor, a bay window) | to the building / to its walls at ground level | yard_projections (bay windows) |
 | A solid standing apart from the main building, not listed in `accessory_buildings` | every yard to the main building (an accessory building, §325-25) / with it as a freestanding deck (§325-18A) | §325-25, §325-18A |
-| The same solid, if it could hold a home (enclosed, a story tall, a habitable room's floor area), for the count of primary buildings (`primary_buildings`) | every one an accessory building / every one a primary building; the rules reading the count grow stricter with it, so the two ends decide | not a question: the architect states the count |
+| The same solid, if it could hold a home (enclosed, a story tall, a habitable room's floor area), for the count of primary buildings (`primary_buildings`) | every one an accessory building / every one a primary building; a rule the count could change needs review until the architect states it | not a question: the architect states the count |
 | A pitched roof | midway between eave and ridge, the eave at the underside of the lowest eave / the top of the wall plate / the drip edge (named readings) | height_of_building#1 |
 | Eaves, for lot coverage | left out / the part beyond 2 ft counted / counted in full (named readings) | building_area#1 |
 | A corner lot whose address street isn't given | each street read as the address street (the rear yard is opposite it) | §325-8A(14)(d) |
