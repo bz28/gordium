@@ -220,7 +220,7 @@ def test_the_list_is_sized_from_where_its_rows_are_laid_out():
     assert "row_rect(table, 1).Y" in fn and "row_rect(table, 0).Y" in fn
     assert fn.index("row_rect(table, 1)") < fn.index("else:") < fn.index("row_rect(table, 0).Height")
     one_row = fn[fn.index("else:"):fn.index("return int(")]
-    assert "IntercellSpacing" not in one_row     # a row's rectangle already includes the gap under it (cold review)
+    assert "IntercellSpacing" in one_row         # a lone row's rectangle leaves out the gap under it (AppKit; cold review)
 
 
 def test_the_in_rhino_list_claim_needs_the_pixels():
@@ -318,7 +318,7 @@ def test_the_found_address_reads_cleanly():
 
 # ---- Rhino run of c4ad070 ------------------------------------------------------------------------------------------
 
-def _mac_list_row_px(rows, pitch):
+def _mac_list_row_px(rows, pitch, gap=0):
     """list_row_px run on a stand-in for Rhino 8's Mac table, which has what the Rhino run listed
     (docs/evidence/pr-33/rhino-c4ad070/table_methods.json): RowCount, and RectForRow taking an IntPtr (a plain int is
     refused, as Python.NET refuses it) -- and no RectOfRow."""
@@ -334,11 +334,12 @@ def _mac_list_row_px(rows, pitch):
 
     class Table:
         RowCount = rows
+        IntercellSpacing = Rect(0, gap)
 
         def RectForRow(self, index):
             if not isinstance(index, IntPtr):
                 raise TypeError("'int' value cannot be converted to System.IntPtr")
-            return Rect(index * pitch, pitch)
+            return Rect(index * pitch, pitch - gap)     # (AppKit: a row's rect leaves out the spacing under it)
 
     ns = {"math": math, "logic": logic, "System": types.SimpleNamespace(IntPtr=IntPtr)}
     exec(part(UI, "def native_number(", "def start_box("), ns)
@@ -350,4 +351,5 @@ def test_the_row_pitch_is_read_through_the_macs_own_row_rectangle():
     fallback, and the list (and the box) came out taller than the rows Rhino painted (16 pt apart)."""
     assert logic.LIST_ROW_PX == 20
     assert _mac_list_row_px(8, 16) == 16 and _mac_list_row_px(1, 16) == 16 and _mac_list_row_px(3, 17.2) == 18
+    assert _mac_list_row_px(1, 18, gap=2) == 18 and _mac_list_row_px(5, 18, gap=2) == 18   # one row = many rows
     assert ".RectOfRow(" not in UI

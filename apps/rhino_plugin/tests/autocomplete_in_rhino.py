@@ -120,8 +120,9 @@ def laid_out(listbox):
         last = rect(table, rows - 1) if rows else None      # where the last row is laid out (painted)
         return {"visible_h": num(scroll.ContentSize.Height), "rows": rows,
                 "rows_bottom": (num(last.Y) + num(last.Height)) if last is not None else 0.0,
+                "spacing": num(table.IntercellSpacing.Height), "row_h": num(rect(table, 0).Height),
                 "pitch": (num(rect(table, 1).Y) - num(rect(table, 0).Y)) if rows >= 2 else
-                         (num(rect(table, 0).Height) if rows else 0.0),
+                         (num(rect(table, 0).Height) + num(table.IntercellSpacing.Height) if rows else 0.0),
                 "painted": painted(scroll)}
     except Exception:
         return None

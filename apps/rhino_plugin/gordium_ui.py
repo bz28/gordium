@@ -840,7 +840,8 @@ def list_row_px(listbox):
         if int(native_number(table.RowCount)) >= 2:
             pitch = native_number(row_rect(table, 1).Y) - native_number(row_rect(table, 0).Y)
         else:
-            pitch = native_number(row_rect(table, 0).Height)   # (see the Rhino run: whether this includes the spacing)
+            pitch = native_number(row_rect(table, 0).Height) + native_number(table.IntercellSpacing.Height)   # (a row's own rect
+            #   leaves out the gap under it; two rows' Y difference above already has it)
         return int(math.ceil(pitch - 1e-6)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX   # up: never a row short
     except Exception:
         return logic.LIST_ROW_PX
