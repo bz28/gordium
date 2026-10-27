@@ -12,6 +12,7 @@ from rule_format.rulebook import load
 
 from .measure import measure
 from .read_3dm import read_site
+from .stops import STOPS
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
@@ -21,9 +22,9 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "home_occupation", "home_occupation_area", "home_occupation_unit_area",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
-# the unrelated people counted with the minor dependent children can't be fewer than without them
-COUNTS_DISAGREE = ("the count of unrelated people with minor dependent children included ({with_}) is lower than the "
-                   "count without them ({without}): check both counts")
+# the unrelated people counted with the minor dependent children can't be fewer than without them: the measuring's
+# own words for it (one copy)
+COUNTS_DISAGREE = STOPS["household_counts_disagree"]
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 
 
