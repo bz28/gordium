@@ -20,7 +20,7 @@ Every rule is written the same way. Here is R-1b's rear yard, with what each lin
 
 | Line | Example | Meaning |
 |---|---|---|
-| `says` | Rear yard must be at least 25% of lot depth or 50 ft, whichever is less, but never under 20 ft. | The rule in plain English (what an architect reads, and approves once approval is switched on) |
+| `title` | Rear yard minimum (chart p.3, note 16) | A short label so you can tell rules apart. There's no retelling of the law: you read the city's own words in `sources`, and `examples` show what the rule does |
 | `check` | `rear_yard >= max(min(0.25 * lot_depth, 50), 20)` | The same rule as a yes/no question the computer can answer |
 | `applies_when` | `use == "one_family_detached"` | Which buildings it applies to (optional) |
 | `review_when` | lot depth unclear on an irregular lot | When the computer must hand it to an architect instead of deciding |
@@ -65,7 +65,7 @@ If a measurement is missing or unusable (no value, not a real number, negative, 
 It can tell whether a rule is **well-formed and traceable**, not whether it **reads the law correctly**. That is confirmed separately:
 
 1. **The quote is real and in the right place**: checked automatically against the exact lines of the document's extracted text. The extracted text is re-made from the PDF on every change (`python -m document_extraction --check` in CI) and must match exactly, so it can't be edited by hand. For chart values, the right *column* (district) is confirmed by step 2 (architect review is deferred for now), until the chart reader cites table cells.
-2. **Two independent versions agree**: R-1b written by hand from reading must match R-1b produced by code from the chart tables.
+2. **Two independent versions agree**: R-1b drafted by Claude from reading (an answer key once architects approve it) must match R-1b produced by code from the chart tables, and agrees with the architects' own spreadsheet check (`test_answer_keys.py`).
 3. **An architect approves it** (deferred for now: until approval is switched on, people read and check the rules through the generated rules spreadsheet, with links to the city's exact words).
 4. **Real city decisions** (planned): run the rules on real Ithaca projects the city has already ruled on (permits, zoning board decisions). A mismatch means a rule or an exception is wrong.
 

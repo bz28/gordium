@@ -1,0 +1,40 @@
+# The architects' spreadsheet design for 106 Ithaca Rd, as our measurements.
+# Source: test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx (unedited).
+# Each measurement names the spreadsheet cell it comes from, or how it's worked out from cells.
+# The test checks every cell value against the spreadsheet, runs our R-1b rules on these
+# measurements, and requires our result to equal their PASS/FAIL on every Output row.
+
+spreadsheet: test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx
+rulebook: regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-1b.yaml
+
+measurements:
+  use:               {value: one_family_detached, from: "Output!C3 (Detached one-family)"}
+  lot_area:          {value: 6674, from: "Inputs!B5"}
+  lot_width:         {value: 73,   from: "Inputs!B3"}
+  lot_depth:         {value: 90,   from: "Inputs!B4"}
+  building_area:     {value: 1855, from: "Inputs!B10"}
+  building_height:   {value: 35,   from: "Inputs!B12"}
+  stories:           {value: 3,    from: "Inputs!B13"}
+  sleeping_rooms:    {value: 3,    from: "Inputs!B14"}
+  parking_spaces:    {value: 1,    from: "Inputs!B15"}
+  front_yard:        {value: 30,   from: "Inputs!B9"}
+  # Left side yard is the left offset; right = lot width - left offset - house width = 73 - 10 - 53.
+  side_yard_smaller: {value: 10,   from: "Inputs!B8"}
+  side_yard_larger:  {value: 10,   from: "Inputs!B3 - Inputs!B8 - Inputs!B6"}
+  # Rear yard = lot depth - front offset - house depth = 90 - 30 - 35. (The "Back Offset" input,
+  # 20 ft, isn't used by the spreadsheet; see docs/discrepancies_with_architects.md 2.2.)
+  rear_yard:         {value: 25,   from: "Inputs!B4 - Inputs!B9 - Inputs!B7"}
+
+# Their Output row (column A) → our rule. Their result is read from column G.
+compare:
+  "Detached one-family use":         R-1b.use
+  "Minimum lot size":                R-1b.lot_area_one_family_detached
+  "Minimum lot width":               R-1b.lot_width_one_family_detached
+  "Maximum stories":                 R-1b.stories
+  "Maximum height":                  R-1b.height
+  "Percent of lot area":             R-1b.lot_coverage
+  "Minimum front yard (offset)":     R-1b.front_yard
+  "Minimum left side yard (offset)": R-1b.side_yards
+  "Minimum right side yard (offset)": R-1b.side_yards
+  "Minimum rear yard (offset)":      R-1b.rear_yard
+  "Minimum parking":                 R-1b.parking_one_family

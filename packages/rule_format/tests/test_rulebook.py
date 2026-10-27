@@ -23,7 +23,7 @@ RULE = {
     "id": "R-1b.rear_yard",
     "kind": "rule",
     "topic": "dimensions",
-    "says": "Rear yard at least 25% of lot depth or 50 ft, whichever is less, never under 20 ft.",
+    "title": "Rear yard minimum (chart p.3, note 16)",
     "applies_when": 'use == "one_family_detached"',
     "check": "rear_yard >= max(min(0.25 * lot_depth, 50), 20)",
     "review_when": [{"when": "lot_depth > 500", "reason": "unusually deep lot"}],
@@ -129,7 +129,15 @@ def test_valid_rulebooks(ctx):
     ({"id": "R-2a.rear_yard"}, "id must start with 'R-1b.'"),
     ({"kind": "maybe"}, "kind must be one of"),
     ({"topic": "vibes"}, "unknown topic"),
-    ({"says": None}, "missing 'says'"),
+    ({"title": None}, "missing 'title'"),
+    ({"title": "   "}, "missing 'title'"),
+    ({"title": "Rear yard\nminimum"}, "one-line label"),
+    ({"title": "Rear yard\rminimum"}, "one-line label"),
+    ({"title": "Rear yard at least 25% of lot depth or 50 ft, whichever is less, but never under 20 ft."},
+     "one-line label"),                                                      # a retelling, not a label
+    ({"says": "Rear yard at least 25% of lot depth."}, "unknown field 'says'"),
+    ({"answers": [{"question": "q?", "answer": "a", "answered_by": "claude",
+                   "answered_on": datetime.date(2026, 10, 20)}]}, "answered_by must be a reviewer"),
     ({"check": None}, "a 'rule' needs a 'check'"),
     ({"check": "rear_yard >= setback"}, "unknown measure 'setback'"),
     ({"applies_when": 'use == "castle"'}, "unknown use 'castle'"),
@@ -598,6 +606,39 @@ def test_approved_entry_without_drafter_is_reported_not_crashed(ctx):
     entry = {k: v for k, v in DEFINITION.items() if k not in ("drafted_by", "open_questions")}
     entry |= {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
     assert any("missing 'drafted_by'" in p for p in validate_terms({"rear_yard": entry}, ctx, "definitions"))
+
+
+def test_a_use_decided_by_a_rule_must_cite_its_row(ctx):
+    ctx.use_rows = {"one_family_detached": [SOURCE]}
+    decides = rulebook(check='use == "one_family_detached" and rear_yard >= 20', applies_when=None,
+                       examples=[{"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90}, "expect": "pass"},
+                                 {"given": {"use": "one_family_detached", "rear_yard": 10, "lot_depth": 90}, "expect": "fail"}])
+    assert validate(decides, ctx) == []                                       # its row (lines 42-43) is cited
+    elsewhere = {**SOURCE, "lines": [41, 41], "quote": "10 ft [fn15]"}
+    ctx.use_rows = {"one_family_detached": [elsewhere]}
+    assert any("use 'one_family_detached' is decided here but its row isn't cited" in p
+               for p in validate(decides, ctx))
+    assert validate(rulebook(), ctx) == []                                    # applies_when only scopes the rule
+    flags = rulebook(review_when=[{"when": 'use == "one_family_detached"', "reason": "check by hand"}])
+    assert any("use 'one_family_detached' is decided here" in p for p in validate(flags, ctx))  # review_when decides too
+
+
+@pytest.mark.parametrize("uses", [["one_family_detached"], {"x": {"sources": "p.2"}},
+                                  {"x": {"sources": [{"page": 2, "lines": [9, 9]}]}}, {"x": "y"}])
+def test_malformed_uses_are_left_out_not_crashed(uses):
+    from rule_format.rulebook import _use_rows
+    assert _use_rows(uses) in ({}, {"x": []})
+
+
+@pytest.mark.parametrize("edit", [{"title": "Rear yard"}, {"answers": [ANSWER | {"answer": "The one at the back."}]},
+                                  {"answers": []}])
+def test_approved_rule_needs_reapproval_after_answer_or_title_edit(ctx, edit):
+    answered = copy.deepcopy(RULE) | {"answers": [ANSWER]}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20),
+                           "approved_hash": approval_hash(answered, ctx)}
+    assert validate({"district": "R-1b", "rules": [approved]}, ctx) == []
+    assert any("changed since it was approved" in p
+               for p in validate({"district": "R-1b", "rules": [approved | edit]}, ctx))
 
 
 def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):

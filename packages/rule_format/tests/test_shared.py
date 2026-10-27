@@ -267,3 +267,19 @@ def test_no_doc_claims_a_rear_yard_floor_across_readings():
     claims = re.compile(r"(rear|setback)[^.\n]*(any reading|at least 22\.6)|22\.6 ft under", re.IGNORECASE)
     found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in claims.finditer(p.read_text())]
     assert not found, found
+
+
+def test_the_106_ithaca_rd_areas_are_quoted_as_measured():
+    """The areas of the architects' model, as measured (shoelace area of its Site polylines, in feet): the
+    lot is 6,674.5 sf (their spreadsheet types 6,674) and the buildable-area outline 2,169.2 sf. Figures
+    that match neither (6,674.7 and 2,169.5 once spread through the docs) are kept out."""
+    def area(points):
+        return abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(points, points[1:] + points[:1]))) / 2
+    lot = [(395.432, 360.94), (439.51, 419.13), (367.546, 473.642), (326.184, 420.017), (315.713, 420.262)]
+    buildable = [(344.641, 411.2), (377.402, 386.822), (409.558, 429.273), (377.381, 453.647)]
+    assert (round(area(lot), 1), round(area(buildable), 1)) == (6674.5, 2169.2)
+    site = (REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/README.md").read_text()
+    assert "6,674.5 sf" in site and "2,169.2 sf" in site
+    files = [p for p in REPO.rglob("*") if p.suffix in (".md", ".yaml") and p.is_file()
+             and not {".git", ".claude", ".venv"} & set(p.relative_to(REPO).parts)]
+    assert not [p.relative_to(REPO) for p in files if re.search(r"6,?674\.7|2,?169\.5", p.read_text())]

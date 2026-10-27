@@ -29,12 +29,16 @@ REVIEWERS_FILE = REPO / "regulations/reviewers.yaml"
 OUTCOMES = ("pass", "fail", "needs_review", "not_applicable")
 KINDS = ("rule", "flag")  # rule: code checks it; flag: an architect must judge it
 STATUSES = ("draft", "approved")
-RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources", "examples",
-               "notes", "open_questions", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
-TEXT_FIELDS = ("id", "kind", "topic", "says", "drafted_by", "status", "approved_by")
+# A rule has a short `title`, not a plain-English retelling: the city's words are in `sources`, the
+# meaning is the `check` and its `examples`. (Retellings kept dropping or adding words.)
+RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
+               "notes", "open_questions", "answers", "drafted_by", "status", "approved_by", "approved_on",
+               "approved_hash"}
+TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
+TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote"},
                "examples": {"given", "expect", "note"}}
-APPROVED_FIELDS = ("id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources")
+APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "answers")
 MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
                  for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
 
@@ -100,6 +104,7 @@ class Context:
     pages: dict[str, dict[int, dict[int, list[str]]]] = field(default_factory=dict)  # file -> page -> line -> tokens
     problems: list[str] = field(default_factory=list)                # problems with the sources themselves
     file_problems: dict[str, list[str]] = field(default_factory=dict)  # the same, by source file
+    use_rows: dict[str, list[dict]] = field(default_factory=dict)    # use -> its sources in uses.yaml
 
     def _problem(self, name: str, message: str):
         self.problems.append(f"{name}: {message}")
@@ -112,7 +117,8 @@ class Context:
         documents = load(j / "1_source_documents/sources.yaml")["documents"]
         listed = {d["file"]: d for d in documents}
         ctx = cls(measures=set(load(MEASURES_FILE)),
-                  uses=set(load(uses_file) or ()) if uses_file.exists() else set(),
+                  uses=set(uses_list := (load(uses_file) or {}) if uses_file.exists() else {}),
+                  use_rows=_use_rows(uses_list),
                   topics=set(load(VOCABULARY_FILE)["topics"]),
                   reviewers=set(load(REVIEWERS_FILE) or ()),
                   sources=listed)
@@ -154,6 +160,40 @@ class Context:
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
                  "adopted_on", "created_on", "quotable", "not_quotable_because"}
+
+
+def _use_rows(uses) -> dict[str, list[dict]]:
+    """Each use's well-formed cited rows from uses.yaml. Malformed entries are left out here and
+    reported by validate_terms(uses), so a typo there can't crash rule validation."""
+    if not isinstance(uses, dict):
+        return {}
+    return {k: [r for r in v.get("sources") if isinstance(r, dict) and isinstance(r.get("file"), str)
+                and type(r.get("page")) is int and _is_line_range(r.get("lines"))]
+            for k, v in uses.items() if isinstance(v, dict) and isinstance(v.get("sources"), list)}
+
+
+def _is_line_range(lines) -> bool:
+    return isinstance(lines, list) and len(lines) == 2 and all(type(n) is int for n in lines)
+
+
+def _use_row_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[str]:
+    """A rule that decides about a use (in `check` or `review_when`) must cite that use's own row,
+    the one uses.yaml cites, so every allowed or flagged use is traceable. (`applies_when` only scopes
+    a rule; its own quotes cover that.)"""
+    decisions = [rule.get("check")] + [r.get("when") for r in _list_of_dicts(rule, "review_when") or []]
+    named = set()
+    for f in decisions:
+        try:
+            named |= formula.strings(f) if isinstance(f, str) else set()
+        except FormulaError:
+            pass                                                # reported with the formula
+    cited = {(s.get("file"), s.get("page"), n) for s in sources
+             if isinstance(s.get("file"), str) and type(s.get("page")) is int and _is_line_range(s.get("lines"))
+             for n in range(s["lines"][0], s["lines"][1] + 1)}
+    return [f"use '{u}' is decided here but its row isn't cited (cite {r['file']} p.{r['page']} lines {r['lines']})"
+            for u in sorted(named & set(ctx.use_rows)) for r in ctx.use_rows[u][:1]
+            if not any((r["file"], r["page"], n) in cited
+                                                          for n in range(r["lines"][0], r["lines"][1] + 1))]
 
 
 def not_quotable(entry: dict) -> str | None:
@@ -275,8 +315,11 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p.append(f"kind must be one of {KINDS}")
     if rule.get("topic") not in ctx.topics:
         p.append(f"unknown topic {rule.get('topic')!r}")
-    if not rule.get("says"):
-        p.append("missing 'says' (plain-English rule)")
+    title = rule.get("title")
+    if not (isinstance(title, str) and title.strip()):
+        p.append("missing 'title' (a short label)")
+    elif len(title) > TITLE_MAX or len(title.strip().splitlines()) > 1:
+        p.append(f"'title' is a one-line label of at most {TITLE_MAX} characters; the rule is its quotes and check")
     if (rule.get("kind") == "rule") != ("check" in rule):
         p.append("a 'rule' needs a 'check'; a 'flag' must not have one")
     review_when, sources, examples = (_list_of_dicts(rule, k) for k in ("review_when", "sources", "examples"))
@@ -309,6 +352,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append(str(e))
 
     p += _source_problems(sources, ctx) if sources is not None else []
+    p += _use_row_problems(rule, sources or [], ctx)
 
     expects = {ex.get("expect") for ex in examples or [] if isinstance(ex.get("expect"), str)}
     if rule.get("kind") == "rule" and not {"pass", "fail"} <= expects:
@@ -333,7 +377,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
 
 
 def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> list[str]:
-    p = open_question_problems(entry)
+    p = open_question_problems(entry) + _answer_problems(entry.get("answers", []), ctx)
     if entry.get("status") not in STATUSES:
         p.append(f"status must be one of {STATUSES}")
     if not entry.get("drafted_by"):
@@ -354,7 +398,7 @@ def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> li
 def open_question_problems(entry: dict) -> list[str]:
     """Interpretations the law leaves open, for the architects: a list of text. Nothing with open
     questions can be approved (so the checker never uses it) until the answers are recorded
-    (a definition's in `answers`; a rule's in its `says` and `check`)."""
+    in `answers` (question, answer, answered_by, answered_on), which is part of what's approved."""
     questions = entry.get("open_questions", [])
     if not (isinstance(questions, list) and all(isinstance(q, str) and q.strip() for q in questions)):
         return ["'open_questions' must be a list of text"]
@@ -422,8 +466,6 @@ def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
             p += [f"unknown measure '{m}'" for m in measures if m not in ctx.measures]
         sources = _list_of_dicts(entry, "sources")
         p += ["'sources' must be a list of mappings"] if sources is None else _source_problems(sources, ctx)
-        if "answers" in s["fields"]:
-            p += _answer_problems(entry.get("answers", []), ctx)
         p += _approval_problems(entry | {"id": key}, ctx, s["approved"])
         problems += [f"{key}: {x}" for x in p]
     return problems
@@ -441,8 +483,7 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
             p.append(f"source {name} {reason}")
         elif name in ctx.file_problems:
             p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
-        elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and isinstance(lines, list)
-                  and len(lines) == 2 and all(type(n) is int for n in lines)):
+        elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and _is_line_range(lines)):
             p.append(f"source {name}: needs 'page' (number), 'lines' ([first, last]) and 'quote' (text)")
         elif "…" in quote or "..." in quote:
             p.append(f"source {name}: a quote is one exact passage; cite separate passages as separate sources")
