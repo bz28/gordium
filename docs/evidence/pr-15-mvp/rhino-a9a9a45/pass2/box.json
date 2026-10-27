@@ -1,0 +1,81 @@
+{
+ "step": "box",
+ "claims": {
+  "6 the box was shown with no lot": {
+   "ok": true,
+   "detail": [
+    "Address",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)",
+    "Front lot line (on the street)",
+    "set from the lot, once there is one",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+    "Confirm the district to continue."
+   ]
+  },
+  "6 no Use my survey\u2026 or Change\u2026 until a lot exists": {
+   "ok": true,
+   "detail": [
+    "Look up (coming soon)",
+    "Cancel",
+    "Draw"
+   ]
+  },
+  "11 the box says Front lot line (on the street), what it is, and This is the lot's district": {
+   "ok": true,
+   "detail": {
+    "labels": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)",
+     "Front lot line (on the street)",
+     "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+     "Confirm the district to continue."
+    ],
+    "ticks": [
+     "This is the lot's district"
+    ]
+   }
+  }
+ },
+ "box": {
+  "buttons": [
+   "Look up (coming soon)",
+   "Cancel",
+   "Draw"
+  ],
+  "labels": [
+   "Address",
+   "Zoning district",
+   "entered by you",
+   "Use",
+   "Lot",
+   "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)",
+   "Front lot line (on the street)",
+   "set from the lot, once there is one",
+   "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+   "Corner lot?",
+   "Not checked yet: overlays (historic, gorge, flood)",
+   "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+   "Confirm the district to continue."
+  ],
+  "ticks": [
+   "This is the lot's district"
+  ]
+ },
+ "ok": true,
+ "box_closed": true
+}
