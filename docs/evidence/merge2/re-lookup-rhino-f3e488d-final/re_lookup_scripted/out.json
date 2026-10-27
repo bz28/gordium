@@ -1,0 +1,488 @@
+{
+ "claims": {
+  "1 the sample: its lot and a starting house": {
+   "ok": true,
+   "detail": {
+    "lot": "e0ebc447-7418-4db3-8257-714782cba198",
+    "house": [
+     "50e4c25f-c3e3-4c6e-a7cc-caf0c213842c",
+     "84ff730c-c4c2-486f-aa92-8f3be40ae5bc",
+     "3deca7b1-dad5-4264-9615-5ebdd0be19ab"
+    ]
+   }
+  },
+  "1 a command between: the command between ran": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "made": 1
+   }
+  },
+  "2 Look up changed nothing in the model while the box was open": {
+   "ok": true,
+   "detail": {
+    "before": 5,
+    "during": 5
+   }
+  },
+  "2 the looked-up lot was shown dashed while the box was open": {
+   "ok": true,
+   "detail": {
+    "asked": [],
+    "objects": {
+     "a6187253-3c09-49cb-aced-cbce8ce1b98d": "Default",
+     "50e4c25f-c3e3-4c6e-a7cc-caf0c213842c": "Gordium::Massing",
+     "84ff730c-c4c2-486f-aa92-8f3be40ae5bc": "Gordium::Massing",
+     "3deca7b1-dad5-4264-9615-5ebdd0be19ab": "Gordium::Massing",
+     "e0ebc447-7418-4db3-8257-714782cba198": "Site"
+    },
+    "guide_shown": true
+   }
+  },
+  "2 Draw asked nothing (all of it was Gordium's)": {
+   "ok": true,
+   "detail": []
+  },
+  "2 the sample's lot and house are gone": {
+   "ok": true,
+   "detail": []
+  },
+  "2 96's lot is drawn on Site": {
+   "ok": true,
+   "detail": "Lot \u00b7 96 Ithaca Road, Ithaca, NY, 14850"
+  },
+  "2 no starting house on 96, a corner lot (the architects' open question)": {
+   "ok": true,
+   "detail": [
+    "a corner lot: which yards are front, side and rear is an open question; no envelope drawn",
+    "no buildable area to start from"
+   ]
+  },
+  "2 the file says what is drawn: 96, and no house of Gordium's": {
+   "ok": true,
+   "detail": {
+    "drawn_address": "96 Ithaca Road, Ithaca, NY, 14850",
+    "house_fingerprint": null
+   }
+  },
+  "2 the re-lookup's Draw is one undo record": {
+   "ok": true,
+   "detail": [
+    388
+   ]
+  },
+  "2 one Undo takes back exactly that record": {
+   "ok": false,
+   "detail": {
+    "undone": [
+     386,
+     387,
+     388
+    ],
+    "draw": [
+     388
+    ]
+   }
+  }
+ },
+ "undo_events": [
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 386,
+   "at": null
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 386,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 386,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 386,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 387,
+   "at": "1 a command between"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 387,
+   "at": "1 a command between"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 387,
+   "at": "1 a command between"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 387,
+   "at": "1 a command between"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 388,
+   "at": "1 a command between"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 388,
+   "at": "1 a command between"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 388,
+   "at": "1 a command between"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 388,
+   "at": "1 a command between"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 389,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 389,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": true,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 388,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": true,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 388,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 388,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 389,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 389,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 390,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 390,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": true,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 387,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": true,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 387,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 387,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 390,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 390,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 391,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 391,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": true,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 386,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": true,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 386,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 386,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 391,
+   "at": "2 undo"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 391,
+   "at": "2 undo"
+  }
+ ],
+ "undo_records": [
+  {
+   "words": "Gordium: the start box",
+   "serial": 386,
+   "in_command": false,
+   "at": null
+  },
+  {
+   "words": "Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850",
+   "serial": 388,
+   "in_command": false,
+   "at": "1 a command between"
+  }
+ ],
+ "at": "2 undo",
+ "command_at": 1793108863.44815,
+ "commands": [
+  [
+   "1 a command between",
+   "Line 0,-300,0 10,-300,0",
+   true
+  ],
+  [
+   "2 undo",
+   "Undo",
+   true
+  ]
+ ],
+ "step2": {
+  "asked": [],
+  "guide_shown": true
+ },
+ "ok": false,
+ "trace": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/laneC2/x_rl/apps/rhino_plugin/tests/re_lookup_in_rhino.py\", line 271, in main\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/laneC2/x_rl/apps/rhino_plugin/tests/re_lookup_in_rhino.py\", line 62, in claim\nAssertionError: 2 one Undo takes back exactly that record: {'undone': [386, 387, 388], 'draw': [388]}\n",
+ "done": true
+}
