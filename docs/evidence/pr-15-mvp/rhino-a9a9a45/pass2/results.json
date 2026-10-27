@@ -1,0 +1,54 @@
+{
+ "open": {
+  "0 the sample's lot is from the tax map": true,
+  "8 the address is there too": true,
+  "8 the sample's Street side reads Ithaca Rd, from the lookup": true
+ },
+ "side_yard": {
+  "1 on the tax map: every part at least the requirement plus the 2'-0\" margin, as drawn; now 3'-0\" short": true,
+  "1 the panel shows it": true
+ },
+ "apply_move": {
+  "1 doing exactly what it said: the row complies": true,
+  "1 and no other row worse": true
+ },
+ "zoom": {
+  "3 Zoom to selects the row's objects": true
+ },
+ "button": {
+  "2 the button comes right after the reason": true,
+  "2 its words aren't repeated as text": true,
+  "2 the button is on screen without scrolling": true
+ },
+ "grey": {
+  "9 the rules not in Gordium yet are grouped as Not checked yet": true,
+  "9 the row says it's not in Gordium yet and which section to check by hand": true,
+  "9 its detail is headed Not checked yet": true
+ },
+ "corner": {
+  "10 a corner lot's street side takes every street clicked, Enter when done": true,
+  "10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"": true,
+  "10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner": true,
+  "12 answering No in the box drops both streets' lines (picked again: review round 5, P0)": true
+ },
+ "labels": {
+  "4 the Height limit label is 13 pt": true,
+  "5 every view was drawn": true,
+  "5 the status box once, in the active view": true
+ },
+ "scale": {
+  "7 zoomed out to the 1,500 ft square: no plan labels drawn": true,
+  "7 the status box stays": true,
+  "7 zoomed to the lot: every edge's length is back, the yards' too": true,
+  "7 106's short 10'-4 1/8\" edge keeps its length, led to it": true
+ },
+ "close": {
+  "13 after every step, exactly one checker process is Rhino's": true,
+  "13 stopped when the script ends: none left": true
+ },
+ "box": {
+  "6 the box was shown with no lot": true,
+  "6 no Use my survey\u2026 or Change\u2026 until a lot exists": true,
+  "11 the box says Front lot line (on the street), what it is, and This is the lot's district": true
+ }
+}

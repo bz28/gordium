@@ -1,0 +1,26 @@
+{
+ "step": "open",
+ "claims": {
+  "0 the sample's lot is from the tax map": {
+   "ok": true,
+   "detail": false
+  },
+  "8 the address is there too": {
+   "ok": true,
+   "detail": "106 Ithaca Rd, Ithaca, NY"
+  },
+  "8 the sample's Street side reads Ithaca Rd, from the lookup": {
+   "ok": true,
+   "detail": {
+    "text": "Ithaca Rd",
+    "source": "the State tax map (the sample's lookup)"
+   }
+  }
+ },
+ "surveyed": false,
+ "street": {
+  "text": "Ithaca Rd",
+  "source": "the State tax map (the sample's lookup)"
+ },
+ "ok": true
+}
