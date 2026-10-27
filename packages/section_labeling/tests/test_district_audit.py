@@ -1,0 +1,236 @@
+"""The district coverage audit (district_audit.py): the saved table is current, and no decision can claim more than
+the files show. A wrong "covered" would read as a false pass, so each check that refuses a decision is pinned here
+with the decision it must refuse."""
+
+import copy
+from pathlib import Path
+
+import pytest
+import yaml
+
+from document_extraction.sections import piece_keys
+from rule_format.rulebook import load
+from section_labeling import __main__ as cli
+from section_labeling import district_audit as audit
+
+REPO = Path(__file__).resolve().parents[3]
+ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+SAVED = ITHACA / audit.OUTPUT
+
+
+@pytest.fixture(scope="module")
+def decisions():
+    return load(ITHACA / audit.DECISIONS)
+
+
+@pytest.fixture(scope="module")
+def built():
+    return audit.Audit(ITHACA)
+
+
+def problems(data, **kw):
+    return audit.Audit(ITHACA, data=data, **kw).problems
+
+
+def with_piece(decisions, pid, parts):
+    data = copy.deepcopy(decisions)
+    data["pieces"][pid] = parts
+    return data
+
+
+def test_saved_audit_is_current(capsys):
+    """The staleness check CI runs: a rulebook or decision changed without regenerating fails here."""
+    assert cli.main(["audit", "--check"]) == 0, capsys.readouterr().out
+
+
+def test_a_rulebook_change_not_regenerated_differs_from_the_saved_table(tmp_path):
+    book = load(ITHACA / "5_zoning_rules/R-1b.yaml")
+    book["rules"] = [r for r in book["rules"] if r["id"] != "R-1b.parking_other_uses"]   # cites no piece of Ch. 325
+    path = tmp_path / "R-1b.yaml"
+    path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    text, found = audit.build(ITHACA, books={"R-1b": path})
+    assert found == [] and text != SAVED.read_text(encoding="utf-8")
+    assert "R-1b.parking_other_uses" in SAVED.read_text(encoding="utf-8") and "R-1b.parking_other_uses" not in text
+
+
+def test_a_rule_removed_from_a_rulebook_stops_every_decision_naming_it(tmp_path):
+    book = load(ITHACA / "5_zoning_rules/R-1a.yaml")
+    book["rules"] = [r for r in book["rules"] if r["id"] != "R-1a.lot_coverage"]
+    path = tmp_path / "R-1a.yaml"
+    path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    text, found = audit.build(ITHACA, books={"R-1a": path})
+    assert text is None and any("R-1a.lot_coverage isn't in the rulebook" in p for p in found)
+
+
+def test_a_new_citation_must_be_named_so_a_stale_missing_cant_stand_beside_it(tmp_path):
+    """A rule that starts citing §325-26 (decided MISSING) must be named in §325-26's decisions."""
+    page, line = next(iter(piece_keys(audit.Audit(ITHACA).pieces["325-26"])))
+    book = load(ITHACA / "5_zoning_rules/R-1b.yaml")
+    rule = next(r for r in book["rules"] if r["id"] == "R-1b.front_yard")
+    rule["sources"].append({"file": audit.LAW, "page": page, "lines": [line, line], "quote": "x"})
+    path = tmp_path / "R-1b.yaml"
+    path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    found = audit.Audit(ITHACA, books={"R-1b": path}).problems
+    assert any(p.startswith("325-26 (R-1b): R-1b.front_yard cited but no decision names it") for p in found)
+
+
+def test_the_saved_decisions_have_no_problems(built):
+    assert built.problems == []
+
+
+def test_every_rule_and_flag_piece_is_a_row_with_every_district(built):
+    labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
+    wanted = [p for p, e in labels.items() if e["label"] in ("rule", "flag")]
+    assert sorted(built.rows) == sorted(wanted) and len(wanted) == 164
+    assert built.districts == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "RU"]
+    table = SAVED.read_text(encoding="utf-8").split("## The table")[1].split("## Each piece")[0]
+    assert sum(1 for line in table.splitlines() if line.startswith("| §")) == 164
+
+
+def test_a_piece_without_decisions_is_refused(decisions):
+    data = copy.deepcopy(decisions)
+    del data["pieces"]["325-26"]
+    assert "325-26: no decisions (a list of parts, each with `what`)" in problems(data)
+
+
+def test_a_district_left_undecided_is_refused(decisions):
+    data = with_piece(decisions, "325-19E", [{"what": "x", "R-3a": {"status": "flag", "rules": ["abutting_r1"]}}])
+    assert "325-19E part 1: no decision for R-1a" in problems(data)
+
+
+def test_covered_by_a_rule_that_doesnt_cite_the_piece_needs_a_stated_mapping(decisions):
+    """§325-26 (streams) is cited by no rule: calling it covered by the front yard rule is refused unless the
+    mapping is said, and then the table says it is a mapping, not a citation."""
+    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "rulebook", "rules": ["front_yard"]}}])
+    assert any("front_yard don't cite the piece: say why in `mapped`" in p for p in problems(data))
+
+
+def test_a_mapping_where_every_rule_cites_is_refused(decisions):
+    data = with_piece(decisions, "325-19C", [{"what": "x", "all": {"status": "rulebook", "rules": ["front_yard"],
+                                                                     "mapped": "because"}}])
+    assert any("every rule named cites the piece; drop `mapped`" in p for p in problems(data))
+
+
+def test_a_rule_that_isnt_in_the_rulebook_is_refused(decisions):
+    data = with_piece(decisions, "325-19C", [{"what": "x", "all": {"status": "rulebook",
+                                                                     "rules": ["front_yard", "no_such_rule"]}}])
+    assert any("R-1b.no_such_rule isn't in the rulebook" in p for p in problems(data))
+
+
+def test_in_the_rulebook_must_be_a_rule_not_a_flag(decisions):
+    data = with_piece(decisions, "325-3B:green_space", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "quote": "Where a minimum green space requirement applies"},
+        "RU": {"status": "rulebook", "rules": ["green_space"]}}])
+    assert any("RU.green_space is a flag, not a rule" in p for p in problems(data))
+
+
+def test_a_flag_must_name_something_that_says_needs_review(decisions):
+    data = with_piece(decisions, "325-19C", [{"what": "x", "all": {"status": "flag", "rules": ["front_yard"]}}])
+    assert any("none of front_yard ever says needs review" in p for p in problems(data))
+
+
+def test_not_applicable_needs_the_laws_own_words_found_where_it_says(decisions):
+    base = {"status": "not_applicable", "why": "w"}
+    for quote, extra in (("in any U-1 District", {}), ("in any U-1 District", {"page": 47})):
+        ok = with_piece(decisions, "325-16D", [{"what": "x", "all": dict(base, quote=quote, **extra)}])
+        assert problems(ok) == []
+    for quote, extra in (("in any U-2 District", {}), ("in any U-1 District", {"page": 48}),
+                         ("in any U-1 District", {"piece": "325-26"}), ("", {})):
+        bad = with_piece(decisions, "325-16D", [{"what": "x", "all": dict(base, quote=quote, **extra)}])
+        assert any("quote not found" in p or "give the law's own words" in p for p in problems(bad)), (quote, extra)
+
+
+def test_a_quote_may_run_across_a_page_break_inside_its_piece(built):
+    """§325-21B's scope sentence runs from p.63 onto p.64: found inside the piece, not on either page alone."""
+    quote = "shall apply to all business and industrial land uses and multiple dwelling structures"
+    assert built._quote_found("325-21B", {"quote": quote})
+    assert built._quote_found("325-21A", {"quote": quote, "piece": "325-21B"})
+    assert not built._quote_found("325-21A", {"quote": quote})                    # not in §325-21A itself
+    assert not any(built._quote_found("325-21B", {"quote": quote, "page": pg}) for pg in (63, 64))
+    assert not built._quote_found("325-21A", {"quote": quote, "piece": "325-99Z"})
+
+
+def test_parked_must_be_on_the_later_list_and_missing_needs_a_priority_and_why(decisions):
+    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "parked", "item": "streams"}}])
+    assert any("parked item must be one of" in p for p in problems(data))
+    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "why": "w"}}])
+    assert any("priority must be one of" in p for p in problems(data))
+    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "low"}}])
+    assert any("say why" in p for p in problems(data))
+
+
+def test_an_open_question_must_link_a_real_question(decisions):
+    good = {"status": "open_question", "why": "w", "link": "docs/questions_for_architects.md#5.11"}
+    assert problems(with_piece(decisions, "325-26", [{"what": "x", "all": good}])) == []
+    for link in ("docs/nope.md", "docs/questions_for_architects.md#9.99 no such heading"):
+        found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(good, link=link)}]))
+        assert any("link" in p or "has no" in p for p in found), link
+
+
+def test_also_must_really_cite_the_piece(decisions):
+    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "high", "why": "w",
+                                                                    "also": ["front_yard"]}}])
+    assert any("`also` names R-1a.front_yard, which doesn't cite the piece" in p for p in problems(data))
+
+
+def test_a_cell_takes_its_worst_part(decisions):
+    """§325-18B: eaves are in the rulebook, other projections are missing: the cell is MISSING, never covered."""
+    a = audit.Audit(ITHACA)
+    statuses = [dec["status"] for _, dec in a.cells["325-18B"]["R-1b"]]
+    assert statuses == ["rulebook", "missing"] and a.status("325-18B", "R-1b") == "missing"
+    assert a._short("325-18B", "R-1b").startswith("**MISSING** (partly ✓ yard_projections")
+
+
+def test_the_worst_status_order_puts_missing_first_and_not_applicable_last():
+    assert audit.STATUSES == ("missing", "open_question", "parked", "flag", "rulebook", "not_applicable")
+
+
+def test_already_disclosed_means_the_section_is_on_every_results_not_checked_list():
+    assert audit.is_disclosed("325-28C", ["325-28"]) and audit.is_disclosed("325-16A", ["325-16A"])
+    assert not audit.is_disclosed("325-28C", ["325-2"]) and not audit.is_disclosed("325-16", ["325-16A"])
+    assert "325-18B" in audit.disclosed_sections(ITHACA)
+
+
+def test_the_missing_list_is_ranked_high_first_then_silent_before_disclosed(built):
+    ranked = built.missing()
+    order = [list(audit.PRIORITIES).index(m["priority"]) for m in ranked]
+    assert order == sorted(order) and ranked[0]["priority"] == "high"
+    for p in audit.PRIORITIES:
+        same = [m["disclosed"] for m in ranked if m["priority"] == p]
+        assert same == sorted(same), p                          # False (silent) before True (disclosed)
+    streams = next(m for m in ranked if m["pieces"] == ["325-26"])
+    assert streams["priority"] == "high" and streams["districts"] == built.districts
+
+
+def test_measures_say_where_each_value_comes_from_and_none_when_nothing_fills_it():
+    model, stated = audit.measure_sources()
+    assert {"lot_area", "front_yard", "building_height"} <= model and {"stories", "use", "district"} <= stated
+    text = SAVED.read_text(encoding="utf-8")
+    assert "| `R-1b.stories` | rule |" in text and "stories (stated)" in text and "lot_area (model)" in text
+
+
+def test_tested_on_a_model_comes_from_test_sites():
+    tests = audit.model_tests(ITHACA)
+    assert any(t.startswith("real model 106_ithaca_rd") for t in tests["R-1b.rear_yard"])
+    assert "scenario 12" in tests["R-3a.height"] and "scenario 11" in tests["R-1a.lot_coverage"]
+    assert "R-2a.height" not in tests                            # no R-2 model yet: the table says none
+
+
+def test_the_cli_refuses_to_write_when_a_decision_isnt_backed(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(audit, "build", lambda j: (None, ["a problem"]))
+    monkeypatch.setattr(audit, "OUTPUT", "../../../../../" + str(tmp_path / "never.md"))
+    assert cli.main(["audit"]) == 1
+    assert "✗ new_york/ithaca_city: a problem" in capsys.readouterr().out and not (tmp_path / "never.md").exists()
+
+
+def test_the_table_is_the_same_whatever_python_hashes_sets_with():
+    """Definitions cite pieces as a set: iterated sorted, so two runs (different hash seeds) write the same table."""
+    import os
+    import subprocess
+    import sys
+    code = ("import hashlib; from section_labeling import district_audit as a; from pathlib import Path; "
+            f"print(hashlib.sha256(a.build(Path({str(ITHACA)!r}))[0].encode()).hexdigest())")
+    env = dict(os.environ, PYTHONPATH=os.pathsep.join(str(p) for p in sorted((REPO / "packages").iterdir())))
+    runs = {subprocess.run([sys.executable, "-c", code], env=dict(env, PYTHONHASHSEED=seed), capture_output=True,
+                           text=True, check=True).stdout for seed in ("1", "2", "3")}
+    assert len(runs) == 1
