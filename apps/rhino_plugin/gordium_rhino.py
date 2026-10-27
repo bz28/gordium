@@ -1933,6 +1933,8 @@ def _undo_redo(sender, e):
     o = STATE.get("overlay")
     if o is not None:
         _clear(o)
+    STATE.pop("auto_by_doc", None)      # Check after every edit read again from the file (an undone tick: never the
+    ui.set_auto_tick(STATE.get("panel_parts"), _auto(Rhino.RhinoDoc.ActiveDoc))   # setting it had; memory only)
     STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())   # re-checked at the next idle (live)
 
 
