@@ -55,20 +55,24 @@ def _pdf_text(file, page, cache={}):
     return cache[(file, page)]
 
 
-def test_every_chart_link_finds_its_words_in_the_pdf():
-    """Review round 1 (the link fix): a chart link's search is words the PDF page really holds in that order, so a
-    viewer lands on it: never a neighbouring cell's wrapped words ("1 space 1 space" for Dormitory parking), never
-    words on both sides of a footnote's superscript."""
+def test_every_link_finds_its_words_in_the_pdf():
+    """Review round 1 (the link fix): a link's search is words the PDF page really holds in that order, so a viewer
+    lands on it: never a neighbouring cell's wrapped words ("1 space 1 space" for Dormitory parking), never words on
+    both sides of a footnote's superscript. Round 2: law quotes (chapter 325) are checked the same way as chart cells,
+    not skipped."""
     import urllib.parse
     docs = present._documents(J)
-    missing = []
+    missing, checked = [], {"law": 0, "chart": 0}
     for path in sorted((J / "5_zoning_rules").glob("*.yaml")):
         for rule in load(path)["rules"]:
             for s in rule.get("sources") or []:
-                if not s["file"].startswith("zoning_charts"):
+                if not s["file"].endswith(".pdf"):
                     continue
                 link = present.link(s, J, docs)
-                words = urllib.parse.unquote(link.split("&search=")[1]).strip('"') if "&search=" in link else ""
+                assert "&search=" in link, (rule["id"], link)
+                words = urllib.parse.unquote(link.split("&search=")[1]).strip('"')
+                checked["chart" if s["file"].startswith("zoning_charts") else "law"] += 1
                 if "".join(words.split()) not in _pdf_text(s["file"], s["page"]):
                     missing.append((rule["id"], s["page"], words))
+    assert checked["law"] and checked["chart"], checked      # both kinds are really checked
     assert not missing, sorted(set(missing))[:20]
