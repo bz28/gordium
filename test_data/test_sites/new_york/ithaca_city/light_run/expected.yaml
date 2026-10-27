@@ -36,6 +36,7 @@ sites:
       - 3
       frontage_ft: 100.0
       corner_lot: 'no'
+      drawn_area_sf: 12990.42
     ground:
       range_ft:
       - 717.01
@@ -98,6 +99,7 @@ sites:
       - 0
       frontage_ft: 59.9
       corner_lot: 'no'
+      drawn_area_sf: 8918.09
     ground:
       range_ft:
       - 730.26
@@ -160,6 +162,7 @@ sites:
       - 2
       frontage_ft: 50.0
       corner_lot: 'no'
+      drawn_area_sf: 8748.84
     ground:
       range_ft:
       - 407.59
@@ -222,6 +225,7 @@ sites:
       - 0
       frontage_ft: 56.0
       corner_lot: 'no'
+      drawn_area_sf: 4764.13
     ground:
       range_ft:
       - 398.02
@@ -285,6 +289,7 @@ sites:
       - 0
       frontage_ft: 50.0
       corner_lot: 'no'
+      drawn_area_sf: 4336.07
     ground:
       range_ft:
       - 397.88
@@ -312,7 +317,7 @@ sites:
       lot_depth_and_rear: lot depth = average of the side lines [92.31, 85.55] = 88.9 ft; rear yard required 22.2
         ft
       largest_house: 'limited by lot coverage: footprint at most 35% × 3,798.5 sf (the tax-map lot with every line
-        2 ft in) = 1,329.5 sf; the yards would leave 1,571.7 sf even 2 ft back from every limit, so coverage binds
+        2 ft in) = 1,329.5 sf; the yards would leave 1,564.7 sf even 2 ft back from every limit, so coverage binds
         first'
       every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
         doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
@@ -349,6 +354,7 @@ sites:
       - 1
       frontage_ft: 51.4
       corner_lot: 'no'
+      drawn_area_sf: 6672.12
     ground:
       range_ft:
       - 433.35
@@ -412,6 +418,7 @@ sites:
       - 2
       frontage_ft: 52.5
       corner_lot: 'no'
+      drawn_area_sf: 7937.99
     ground:
       range_ft:
       - 397.36
@@ -438,7 +445,7 @@ sites:
       lot_depth_and_rear: lot depth = average of the side lines [151.45, 151.52] = 151.5 ft; rear yard required
         37.9 ft
       largest_house: 'limited by lot coverage: footprint at most 35% × 7,138.4 sf (the tax-map lot with every line
-        2 ft in) = 2,498.5 sf; the yards would leave 3,329.4 sf even 2 ft back from every limit, so coverage binds
+        2 ft in) = 2,498.5 sf; the yards would leave 3,329.0 sf even 2 ft back from every limit, so coverage binds
         first. Chart p.3 note 2 may limit it further: a new primary structure''s footprint may be at most 120% of
         the average footprint on the whole block front, which needs the neighbours'' buildings (not worked here;
         R-3aa.footprint_block_front is a flag: needs review)'
@@ -476,6 +483,7 @@ sites:
       - 0
       frontage_ft: 33.1
       corner_lot: 'no'
+      drawn_area_sf: 4400.05
     ground:
       range_ft:
       - 391.6
@@ -548,6 +556,7 @@ sites:
       - 6
       frontage_ft: 110.6
       corner_lot: 'no'
+      drawn_area_sf: 13924.87
     ground:
       range_ft:
       - 609.93
@@ -575,9 +584,10 @@ sites:
         33.9 ft
       largest_house: 'limited by chart p.3 note 13 or lot coverage, whichever is smaller: coverage allows 25% ×
         12,973.9 sf (the worst-case lot) = 3,243.5 sf; note 13 keeps 50% of the developable lot area after the setbacks
-        as green space, and if that green space must lie within the buildable area (6,260.4 sf, 2 ft back from every
-        limit) the house may cover at most about 2,850–3,130 sf (depending on how the setbacks are drawn). Where the green space must be is an open reading (RU.green_space
-        is a flag: needs review)'
+        as green space: the setbacks leave 6,302.8 sf (yards measured as least distances, round at the corners),
+        so 3,151.4 sf must stay green, and if that green space must lie within the same area the house may cover
+        at most 6,302.8 − 3,151.4 = 3,151.4 sf, less than coverage allows. If the green space may be anywhere on
+        the lot, coverage binds. Where it must be is an open reading (RU.green_space is a flag: needs review)'
       every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
         doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
       nudge:

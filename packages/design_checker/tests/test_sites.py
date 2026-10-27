@@ -107,3 +107,24 @@ def test_the_largest_house_names_the_chart_notes_that_may_limit_it():
 def test_the_light_run_nudge_measures_to_every_street_line():
     src = (REPO / "apps/rhino_plugin/tests/light_run_in_rhino.py").read_text(encoding="utf-8")
     assert "for ln in street_lines(facts)" in src and "street_line\"][0]" not in src
+
+
+
+# Review round 2.
+
+def test_the_drawn_area_is_the_area_of_the_stored_corners():
+    """Rhino draws the lot from the stored corners (to 0.01 ft): the light run compares with their area, not the
+    lookup's unrounded area_sf (R-2a differs by 1.16 sf)."""
+    doc = yaml.safe_load((LIGHT / "expected.yaml").read_text(encoding="utf-8"))
+    for district, site in doc["sites"].items():
+        pts = json.loads((LIGHT / "lookups" / f"{district}.json").read_text(encoding="utf-8"))["facts"]["lot"]["value"]["outline_ft"]
+        n = len(pts)
+        area = abs(sum(pts[i][0] * pts[(i + 1) % n][1] - pts[(i + 1) % n][0] * pts[i][1] for i in range(n))) / 2
+        assert abs(site["lot"]["drawn_area_sf"] - area) < 0.01, district
+    src = (REPO / "apps/rhino_plugin/tests/light_run_in_rhino.py").read_text(encoding="utf-8")
+    assert 'lot["drawn_area_sf"]' in src and 'lot["area_sf"]) <= 0.5' not in src
+
+
+def test_rus_green_space_cap_uses_the_area_the_yards_leave():
+    doc = yaml.safe_load((LIGHT / "expected.yaml").read_text(encoding="utf-8"))
+    assert "6,302.8 − 3,151.4 = 3,151.4" in doc["sites"]["RU"]["expected"]["largest_house"]

@@ -6,7 +6,7 @@ it (the demo branch). Live lookups: it asks the City's and the State's services,
 
 For each site, a fresh feet document:
   1. GordiumStart with the address typed and Look up pressed, then Draw (the scripted picks the in-Rhino tests use).
-     Claims: the zone, the lot area drawn (to 0.5 sf) and corner lot are the expected ones.
+     Claims: the zone, the lot area drawn (to 0.5 sf of `drawn_area_sf`) and corner lot are the expected ones.
   2. After Draw: no row does not comply; every needs-review row carries a reason. Every row is recorded, for a person
      to compare with `largest_house` (which rule limits the starting house) and `lot_size`.
   3. The nudge: the house's solids moved toward the street until their least distance to the street lines (measured
@@ -120,8 +120,10 @@ def one_site(g, docs, district, site):
         out["drawn"] = [(i.get("rule"), i["name"], i["status"], i.get("proposed"), i.get("required"), i.get("reason"))
                         for i in items]
         drawn_area = lot_area(doc, g)
-        claim("lot area as the tax map's (to 0.5 sf)", drawn_area is not None and abs(drawn_area - lot["area_sf"]) <= 0.5,
-              drawn_area)
+        # drawn_area_sf: the area of the outline as stored (corners to 0.01 ft), which is what Rhino draws; the
+        # lookup's own area_sf is from the unrounded outline and can differ by about 1 sf
+        claim("lot area as drawn from the tax map's corners (to 0.5 sf)", drawn_area is not None and
+              abs(drawn_area - lot["drawn_area_sf"]) <= 0.5, drawn_area)
         claim("after Draw no row does not comply", not [i for i in items if i["status"] == "does_not_comply"],
               [i["name"] for i in items if i["status"] == "does_not_comply"])
         claim("every needs-review row says why", all(i.get("reason") for i in items if i["status"] == "needs_review"),
