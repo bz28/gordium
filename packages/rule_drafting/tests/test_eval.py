@@ -23,7 +23,8 @@ from pathlib import Path
 import openpyxl
 import pytest
 
-from rule_format.rulebook import Context, _cited_lines, district_name, load, outcome, validate
+from rule_format.rulebook import (Context, _cited_lines, apply_relaxes, district_name, load, outcome, proven_relaxers,
+                                  validate)
 
 REPO = Path(__file__).resolve().parents[3]
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
@@ -184,6 +185,30 @@ def drafted_rules_for(district: str) -> list[dict]:
     return [r for b in books if b.exists() for r in load(b)["rules"]]
 
 
+def drafted_as_checked(district: str, proven: frozenset | None = None) -> list[dict]:
+    """The drafted rules as the checker reads them (rule_format.zone_rules): each exception composed into the rule it
+    relaxes (apply_relaxes), an AI-drafted one widening only once proven (records/proven_relaxers.yaml), else the
+    relaxed rule needs review where only it would pass. Graded so, the drafts' height row reads as the checker shows it
+    (2026-10-27: graded apart, the chart's 35 ft failed a 37 ft house the §325-16C bonus allows)."""
+    return apply_relaxes(drafted_rules_for(district), proven_relaxers(ITHACA) if proven is None else proven)
+
+
+def relaxer_mismatches(hand_rule: dict, base: dict, relaxer: dict, district: str, ctx) -> list[dict]:
+    """Where an AI-drafted relaxer, composed into the rule it relaxes as a trusted one, gives a different verdict from
+    the hand key's rule, over every design design_points makes for them (each input filled in, varied one at a time
+    over the examples' numbers and every constant and one either side): [] proves them equal, the proof
+    records/proven_relaxers.yaml needs. The uses: those the key allows in the district."""
+    composed = {r["id"]: r for r in apply_relaxes([base, relaxer], frozenset({relaxer["id"]}))}[base["id"]]
+    points = design_points(hand_rule, [base, relaxer], district, ctx)
+    assert len(points) > 100, (hand_rule["id"], len(points))       # never a proof over (next to) no designs
+    out = []
+    for point in points:
+        key, got = outcome(hand_rule, point, ctx.allowed()), outcome(composed, point, ctx.allowed())
+        if key != got:
+            out.append({"given": point, "key": key, "composed": got})
+    return out
+
+
 MAPPING = REPO / "packages/rule_drafting/evals/2026-10-20_stage1/hand_to_drafted.yaml"
 
 
@@ -333,8 +358,8 @@ def grade_hand_key(path, ctx, drafted=None) -> dict:
     district = book["district"]
     entries = mapping()["keys"].get(Path(path).name, {}).get("rules")
     if drafted is None and entries is not None:           # a key in the reviewed mapping: graded by its pairs
-        return grade_mapped(book, entries, drafted_rules_for(district), ctx)
-    drafted = drafted_rules_for(district) if drafted is None else drafted
+        return grade_mapped(book, entries, drafted_as_checked(district), ctx)
+    drafted = drafted_as_checked(district) if drafted is None else drafted
     out = {"district": district, "total": 0, "agree": [], "disagree": [], "undrafted": [], "false_pass": []}
     for h in book["rules"]:
         cov = covering(h, drafted, ctx)
@@ -988,3 +1013,56 @@ def test_a_rule_whose_job_is_its_review_is_probed_by_losing_it(ctx):
     assert grade_mapped(book, entries, [use], ctx)["false_pass"] == []
     assert grade_mapped(book, entries, [_loosened(use)], ctx)["false_pass"] == []            # the check alone: idle
     assert grade_mapped(book, entries, [_loosened(use, review=False)], ctx)["false_pass"]    # its review: caught
+
+
+PROVEN = ITHACA / "5_zoning_rules/drafted/records/proven_relaxers.yaml"
+
+
+def test_every_proven_relaxer_equals_the_hand_key_rule_it_stands_for(ctx):
+    """records/proven_relaxers.yaml (2026-10-27): each AI-drafted relaxer listed there widens the rule it relaxes
+    because, composed into it, it gives the hand key's verdict on every design design_points makes. Proven here again
+    wherever its key is present (the others name the key and the merge they were proven in)."""
+    proven = load(PROVEN) or {}
+    assert proven, "nothing proven"
+    checked = 0
+    for rid, why in proven.items():
+        district = rid.split(".", 1)[0]
+        key_path = ITHACA / "5_zoning_rules" / f"{district}.yaml"
+        said = re.search(r"relaxer_mismatches: equals (\S+) \((\S+\.yaml)\)", why)
+        assert said and said.group(2) == f"{district}.yaml", (rid, why)
+        if not key_path.exists():
+            continue
+        drafted = {r["id"]: r for r in drafted_rules_for(district)}
+        relaxer = drafted[rid]
+        hand = {r["id"]: r for r in load(key_path)["rules"]}[said.group(1)]
+        assert relaxer_mismatches(hand, drafted[relaxer["relaxes"]], relaxer, district, ctx) == [], rid
+        checked += 1
+    assert checked >= 1
+
+
+def test_a_relaxer_that_leaves_out_a_condition_is_never_proven(ctx):
+    """The proof is not vacuous: §325-16C's bonus with the side yards left out, or a 20% allowance, differs from the
+    hand key somewhere on the designs."""
+    district = "R-1b"
+    drafted = {r["id"]: r for r in drafted_rules_for(district)}
+    relaxer = drafted["R-1b.325_16c_height_exception_extra_height"]
+    hand = {r["id"]: r for r in load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"]}["R-1b.height"]
+    base = drafted[relaxer["relaxes"]]
+    assert relaxer_mismatches(hand, base, relaxer, district, ctx) == []
+    no_sides = relaxer | {"applies_when": relaxer["applies_when"].replace(
+        " and side_yard_larger >= 10 + (building_height - 35) and side_yard_smaller >= 10 + (building_height - 35)", "")}
+    assert no_sides["applies_when"] != relaxer["applies_when"]
+    assert relaxer_mismatches(hand, base, no_sides, district, ctx)
+    twenty = relaxer | {"check": "building_height <= 35 + 0.2 * 35"}
+    assert relaxer_mismatches(hand, base, twenty, district, ctx)
+
+
+def test_the_height_row_is_graded_as_the_checker_reads_it(ctx):
+    """2026-10-27: graded rule by rule, the chart's 35 ft failed the hand key's 37 ft house with every yard increased
+    (the §325-16C bonus, drafted as its own rule relaxing it). Composed as the checker composes it, and proven equal to
+    the key, every height example agrees."""
+    if not (DRAFTED / "general.yaml").exists():
+        pytest.skip("nothing drafted yet")
+    for path in hand_keys():
+        g = grade_hand_key(path, ctx)
+        assert not [x for x in g["disagree"] if x["hand"].endswith(".height")], path.name

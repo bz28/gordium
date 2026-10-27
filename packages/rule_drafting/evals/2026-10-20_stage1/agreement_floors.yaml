@@ -8,12 +8,12 @@
 # building (now reviewed); the loading flag reaching dormitories and group houses directly (§325-3B), which graded
 # by citation passed a dormitory (under the reviewed pairing the general non-residential loading flag reviewed it). Every difference is in
 # grade_all_with_hand_keys.json.
-R-1b.yaml: 39       # of 48 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
-R-1a.yaml: 60       # of 74 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-1b.yaml: 41       # of 48 (§325-16C's bonus composed and proven, 2026-10-27; parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-1a.yaml: 62       # of 74 (§325-16C's bonus composed and proven, 2026-10-27; parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
 R-2a.yaml: 79       # of 98 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
 R-2b.yaml: 73       # of 99 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
 R-2c.yaml: 118       # of 229 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
-R-3a.yaml: 92       # of 145 (parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
+R-3a.yaml: 93       # of 145 (§325-16C's bonus composed and proven, 2026-10-27; parking on hold (Ben, 2026-10-25): chart p.14's parking rules are not checked yet, so its examples count as undrafted)
 R-3aa.yaml: 106       # of 179 (PR #30's key; parking on hold, so its parking examples count as undrafted)
 R-3b.yaml: 109       # of 179 (PR #30's key; parking on hold, so its parking examples count as undrafted)
 RU.yaml: 100       # of 147 (PR #30's key; parking on hold, so its parking examples count as undrafted)

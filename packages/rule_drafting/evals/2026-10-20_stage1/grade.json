@@ -394,6 +394,24 @@
    {
     "hand": "R-1a.height",
     "given": {
+     "building_height": 38.5,
+     "front_yard": 28.5,
+     "side_yard_smaller": 13.5,
+     "side_yard_larger": 13.5,
+     "rear_yard": 36,
+     "lot_depth": 130
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.height",
+    "given": {
      "building_height": 38.51,
      "front_yard": 40,
      "side_yard_smaller": 20,
@@ -457,6 +475,24 @@
     },
     "expect": "fail",
     "got": "fail",
+    "drafted": [
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.height",
+    "given": {
+     "building_height": 37,
+     "front_yard": 27,
+     "side_yard_smaller": 12,
+     "side_yard_larger": 12,
+     "rear_yard": 52,
+     "lot_depth": 240
+    },
+    "expect": "pass",
+    "got": "pass",
     "drafted": [
      "R-1a.max_height_ft",
      "R-1a.325_16c_height_exception_extra_height"
@@ -930,42 +966,6 @@
     ]
    },
    {
-    "hand": "R-1a.height",
-    "given": {
-     "building_height": 38.5,
-     "front_yard": 28.5,
-     "side_yard_smaller": 13.5,
-     "side_yard_larger": 13.5,
-     "rear_yard": 36,
-     "lot_depth": 130
-    },
-    "expect": "pass",
-    "got": "fail",
-    "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_height_exception_extra_height"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1a.height",
-    "given": {
-     "building_height": 37,
-     "front_yard": 27,
-     "side_yard_smaller": 12,
-     "side_yard_larger": 12,
-     "rear_yard": 52,
-     "lot_depth": 240
-    },
-    "expect": "pass",
-    "got": "fail",
-    "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_height_exception_extra_height"
-    ],
-    "notes": []
-   },
-   {
     "hand": "R-1a.yard_projections",
     "given": {
      "front_yard_eaves": 26,
@@ -1092,12 +1092,12 @@
   "false_pass": [],
   "summary": {
    "examples": 74,
-   "agree": 60,
-   "disagree": 7,
+   "agree": 62,
+   "disagree": 5,
    "undrafted": 7,
    "false_pass": 0,
-   "agree_of_all": "60/74",
-   "agree_of_drafted": "60/67"
+   "agree_of_all": "62/74",
+   "agree_of_drafted": "62/67"
   }
  },
  "R-1b.yaml": {
@@ -1304,6 +1304,25 @@
     "hand": "R-1b.height",
     "given": {
      "building_height": 37,
+     "front_yard": 27,
+     "side_yard_smaller": 12,
+     "side_yard_larger": 12,
+     "rear_yard": 26,
+     "lot_depth": 94.8,
+     "stories": 3
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.height",
+    "given": {
+     "building_height": 37,
      "front_yard": 25,
      "side_yard_smaller": 12,
      "side_yard_larger": 12,
@@ -1370,6 +1389,24 @@
     },
     "expect": "fail",
     "got": "fail",
+    "drafted": [
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.height",
+    "given": {
+     "building_height": 37,
+     "front_yard": 27,
+     "side_yard_smaller": 12,
+     "side_yard_larger": 12,
+     "rear_yard": 22,
+     "lot_depth": 60
+    },
+    "expect": "pass",
+    "got": "pass",
     "drafted": [
      "R-1b.max_height_ft",
      "R-1b.325_16c_height_exception_extra_height"
@@ -1732,43 +1769,6 @@
     ]
    },
    {
-    "hand": "R-1b.height",
-    "given": {
-     "building_height": 37,
-     "front_yard": 27,
-     "side_yard_smaller": 12,
-     "side_yard_larger": 12,
-     "rear_yard": 26,
-     "lot_depth": 94.8,
-     "stories": 3
-    },
-    "expect": "pass",
-    "got": "fail",
-    "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_height_exception_extra_height"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1b.height",
-    "given": {
-     "building_height": 37,
-     "front_yard": 27,
-     "side_yard_smaller": 12,
-     "side_yard_larger": 12,
-     "rear_yard": 22,
-     "lot_depth": 60
-    },
-    "expect": "pass",
-    "got": "fail",
-    "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_height_exception_extra_height"
-    ],
-    "notes": []
-   },
-   {
     "hand": "R-1b.yard_projections",
     "given": {
      "front_yard_eaves": 25,
@@ -1859,12 +1859,12 @@
   "false_pass": [],
   "summary": {
    "examples": 48,
-   "agree": 39,
-   "disagree": 6,
+   "agree": 41,
+   "disagree": 4,
    "undrafted": 3,
    "false_pass": 0,
-   "agree_of_all": "39/48",
-   "agree_of_drafted": "39/45"
+   "agree_of_all": "41/48",
+   "agree_of_drafted": "41/45"
   }
  },
  "R-3a.yaml": {
@@ -2602,6 +2602,24 @@
     },
     "expect": "fail",
     "got": "fail",
+    "drafted": [
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.height",
+    "given": {
+     "building_height": 44,
+     "front_yard": 14,
+     "side_yard_smaller": 9,
+     "side_yard_larger": 14,
+     "rear_yard": 29,
+     "lot_depth": 125
+    },
+    "expect": "pass",
+    "got": "pass",
     "drafted": [
      "R-3a.max_height_ft",
      "R-3a.325_16c_height_exception_extra_height"
@@ -3721,24 +3739,6 @@
     ]
    },
    {
-    "hand": "R-3a.height",
-    "given": {
-     "building_height": 44,
-     "front_yard": 14,
-     "side_yard_smaller": 9,
-     "side_yard_larger": 14,
-     "rear_yard": 29,
-     "lot_depth": 125
-    },
-    "expect": "pass",
-    "got": "fail",
-    "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_height_exception_extra_height"
-    ],
-    "notes": []
-   },
-   {
     "hand": "R-3a.yard_projections",
     "given": {
      "front_yard_eaves": 12,
@@ -4040,12 +4040,12 @@
   "false_pass": [],
   "summary": {
    "examples": 145,
-   "agree": 92,
-   "disagree": 37,
+   "agree": 93,
+   "disagree": 36,
    "undrafted": 16,
    "false_pass": 0,
-   "agree_of_all": "92/145",
-   "agree_of_drafted": "92/129"
+   "agree_of_all": "93/145",
+   "agree_of_drafted": "93/129"
   }
  }
 }

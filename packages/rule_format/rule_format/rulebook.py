@@ -73,7 +73,8 @@ PROVEN_RELAXERS = "5_zoning_rules/drafted/records/proven_relaxers.yaml"
 
 def proven_relaxers(jurisdiction) -> frozenset:
     """The AI-drafted relaxing rules proven equivalent to a hand-written key rule by the generative test
-    (records/proven_relaxers.yaml: {rule id: the test and key that prove it}); none yet."""
+    (records/proven_relaxers.yaml: {rule id: the test and key that prove it}): §325-16C's height bonus where a key
+    proves it (rule_drafting tests/test_eval.py relaxer_mismatches)."""
     path = Path(jurisdiction) / PROVEN_RELAXERS
     return frozenset((load(path) or {}) if path.exists() else {})
 
