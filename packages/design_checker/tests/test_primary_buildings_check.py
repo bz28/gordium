@@ -32,13 +32,13 @@ def test_a_second_building_that_could_be_a_house_waits_for_the_count():
 
 def test_once_counted_the_row_is_decided():
     assert _rows(primary_buildings=2, primary_buildings_same_use=True)[RULE]["status"] == present.FAILS
-    assert _rows(primary_buildings=1)[RULE]["status"] == present.COMPLIES     # one: 9,000 sf of 6,000
+    assert RULE not in _rows(primary_buildings=1)               # one primary building: not applicable, not shown
     # the one-house lot-area row is unchanged: 9,000 sf of 6,000
     assert _rows(primary_buildings=1)["R-1b.lot_area_one_family_detached"]["status"] == present.COMPLIES
 
 
 def test_a_garage_listed_as_an_accessory_building_is_not_a_second_house():
-    assert _rows(accessory_buildings=["back_floor1"])[RULE]["status"] == present.COMPLIES
+    assert RULE not in _rows(accessory_buildings=["back_floor1"])
 
 
 def test_the_working_names_the_figure_for_the_stated_use():
@@ -110,3 +110,13 @@ def test_contradictory_stream_answers_never_pass():
     # no contradiction at 20 ft or more: complies
     assert _rows(primary_buildings=1, stream_near_lot=False, stream_distance=25)["R-1b.stream_setback"]["status"] \
         == present.COMPLIES
+
+
+def test_a_use_row_cited_by_two_rules_has_one_name():
+    """The full suite (test_present.test_no_two_sections_share_a_link): the lot-area row for each primary building
+    cites the chart's use row, as the use rule does; one link, one name: "Use column"."""
+    seen = {}
+    for item in _rows(primary_buildings=2, primary_buildings_same_use=True).values():
+        for c in item["detail"].get("cited") or []:
+            seen.setdefault(c["link"], set()).add(c["citation"])
+    assert all(len(names) == 1 for names in seen.values()), {k: v for k, v in seen.items() if len(v) > 1}

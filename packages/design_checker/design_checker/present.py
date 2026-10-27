@@ -239,7 +239,9 @@ def citation(source: dict, item_name: str, district: str, section_of, documents:
         if re.match(r"^\(\d+\)", quote):                  # the footnote itself, at the bottom of the page
             return ", ".join(["§325-8", "District Regulations Chart", district] +
                              [f"note {n}" for n in _footnotes(quote)])
-        row = _chart_row((source.get("cell") or {}).get("row") or quote) or item_name
+        # a row of the use list (chart p.2) is the Use column whichever rule cites it, so one link has one name
+        uses = source.get("page") == 2 or (source.get("cell") or {}).get("section") == "Primary Uses"
+        row = _chart_row((source.get("cell") or {}).get("row") or quote) or ("Use" if uses else item_name)
         return ", ".join(["§325-8", "District Regulations Chart", district, f"{row} column"])
     lines = source.get("lines") or [None]
     where = section_of(source.get("file"), source.get("page"), lines[0]) if lines[0] else ""

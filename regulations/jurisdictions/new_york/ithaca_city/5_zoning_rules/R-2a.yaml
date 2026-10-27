@@ -354,7 +354,8 @@ rules:
   - id: R-2a.lot_area_each_primary_building
     kind: rule
     topic: dimensions
-    title: "Lot area for each primary building on the lot (§325-8B(1))"
+    title: "Each further primary building needs its own lot area (§325-8B(1))"
+    applies_when: primary_buildings >= 2
     check: lot_area >= primary_buildings * (5000 if use == "one_family_detached" else 5000 if use == "one_family_semi_detached" else 5000 if use == "two_family" else 6000)
     review_when:
       - when: primary_buildings >= 2 and not primary_buildings_same_use
@@ -416,17 +417,15 @@ rules:
         lines: [19, 19]
         quote: "Other use 10,000 sf 7,500 sf 6,000 sf 4,000 sf 4,000 sf 6,000 sf 6,000 sf 4,000 sf 30,000 sf"
     examples:
-      - given: {use: one_family_detached, primary_buildings: 1, lot_area: 5000}
-        expect: pass
-        note: "one primary building: the use's own figure"
-      - given: {use: one_family_detached, primary_buildings: 1, lot_area: 4999}
-        expect: fail
       - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 10000}
         expect: pass
         note: "two primary buildings need 2 x 5,000 sf"
       - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 9999}
         expect: fail
         note: "enough for one building, not two"
+      - given: {use: one_family_detached, primary_buildings: 1, lot_area: 5000}
+        expect: not_applicable
+        note: "one primary building: the use's own lot-area rule decides"
       - given: {use: one_family_detached, primary_buildings: 3, primary_buildings_same_use: true, lot_area: 15000}
         expect: pass
       - given: {use: one_family_detached, primary_buildings: 3, primary_buildings_same_use: true, lot_area: 14999}
@@ -456,13 +455,13 @@ rules:
     notes: >-
       §325-8B(1): every residential district's lot-size figure applies again to each further primary use in a separate
       building on the lot (the code's own example: in R-2b, 3,000 sf for a house and 3,000 sf more for each further
-      house). With one primary building this asks the use's own figure once, as the use's own lot-area rule does (a
-      use whose figure grows with units, rooms or occupants is left to its own rule). With two or more, the lot needs
-      the figure once per building, when every building holds the lot's use (primary_buildings_same_use); otherwise
-      each building's own figure, added by hand. Gordium counts the primary buildings from the drawing where it can
-      (one building, or none standing apart that could hold a home); a building standing apart that could (a large
-      garage, a second house) is read both ways until the architect states the count. An accessory building (a garage,
-      a shed, an accessory dwelling unit, §325-3B) isn't a primary building.
+      house). With one primary building this rule doesn't apply: the use's own lot-area rule (R-2a.lot_area_*) checks
+      it. With two or more, the lot needs the figure once per building, when every building holds the lot's use
+      (primary_buildings_same_use); otherwise each building's own figure, added by hand. Gordium counts the primary
+      buildings from the drawing where it can (one building, or none standing apart that could hold a home); a
+      building standing apart that could (a large garage, a second house) is read both ways until the architect states
+      the count. An accessory building (a garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary
+      building.
     drafted_by: claude
     status: draft
 

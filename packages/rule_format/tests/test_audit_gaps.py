@@ -91,9 +91,8 @@ def test_each_primary_building_needs_its_own_lot_area(district):
             same = {"use": use, "primary_buildings": n, "primary_buildings_same_use": True}
             assert each(district, **same, lot_area=n * f) == "pass", (use, n)
             assert each(district, **same, lot_area=n * f - 1) == "fail", (use, n)
-        # one primary building: the use's own figure, once
-        assert each(district, use=use, primary_buildings=1, lot_area=f) == "pass"
-        assert each(district, use=use, primary_buildings=1, lot_area=f - 1) == "fail"
+        # one primary building: the use's own rule decides (not this one), whatever the lot
+        assert each(district, use=use, primary_buildings=1, lot_area=1) == "not_applicable"
         # another use in one of the buildings, or not said: its own figure, by hand; never a pass
         assert each(district, use=use, primary_buildings=2, primary_buildings_same_use=False,
                     lot_area=10 ** 7) == "needs_review"
@@ -104,6 +103,9 @@ def test_each_primary_building_needs_its_own_lot_area(district):
                     lot_area=10 ** 7) == "needs_review", use
         # one building of it: its own rule (units, rooms, occupants) decides, never this one's fixed figure
         assert each(district, use=use, primary_buildings=1, lot_area=1) == "not_applicable", use
+        # two: needs review whatever the fixed "Other use" figure says (review round 3: never that figure)
+        assert each(district, use=use, primary_buildings=2, primary_buildings_same_use=True, lot_area=1) == \
+            "needs_review", use
 
 
 def test_the_codes_own_example():
