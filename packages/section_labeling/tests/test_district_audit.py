@@ -492,3 +492,23 @@ def test_a_readings_note_is_shown_in_the_readings_list(built):
 def test_c_su_design_review_quotes_its_own_words(built):
     keys = built._quote_keys("325-44B", built.cells["325-44B"]["R-1a"][0][1])
     assert keys and all(built.owner[k] == "325-44B" for k in keys)
+
+
+# Provenance review round 2.
+
+def test_a_chart_quote_must_be_the_line_of_the_cell_it_names(decisions):
+    """The multiple-dwelling line paired with the Dormitory row's '-' (R-3aa) is refused."""
+    bad = dict(decisions["_multiple_not_permitted"], cell={"section": "Primary Uses", "row": "Dormitory"})
+    data = with_piece(decisions, "325-3B:row_house", [{"what": "x", "all": {"status": "missing", "priority": "low",
+                                                                            "why": "w"}, "R-3aa": bad}])
+    assert any("the quote isn't the line of the cell it names" in p for p in problems(data))
+
+
+def test_special_permit_primary_uses_are_flagged_in_every_district(built):
+    i = part_index(built, "325-9B", "Primary uses that need a special permit")
+    assert {built.cells["325-9B"][d][i][1]["status"] for d in built.districts} == {"flag"}
+
+
+def test_parked_says_who_parked_it(built):
+    head = built.render().split("## The table")[0]
+    assert "or the brief that parked it" in head and built.parked["adus"]["decided"].startswith("queue item 10")

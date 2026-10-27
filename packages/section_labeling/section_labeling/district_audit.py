@@ -5,7 +5,7 @@ One generated table (`6_coverage_report/residential_districts.md`) answers it fo
 
     rulebook        the district's rulebook has a rule for it (which rule ids)
     flag            the district's rulebook flags it, so the architect sees NEEDS REVIEW (which ids)
-    parked          on Ben's later list (which item)
+    parked          deliberately deferred: Ben's later list, or the brief that parked it (the item says which)
     open_question   waiting on the architects or the City (a link to the question)
     not_applicable  the law itself keeps it out of this district, or it is a pointer with no requirement of its own
                     (the reason says which, with the law's own words)
@@ -328,6 +328,9 @@ class Audit:
                 p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
             if dec.get("file") == CHART and not dec.get("cell"):
                 p.append(f"{where}: a chart quote names its `cell` ({{section, row}}), so the district's own cell is shown")
+            if dec.get("cell") and dec.get("quote") and (cell := self._cell_record(d, dec)) and \
+                    not {(dec.get("page", 2), n) for n in cell.get("row_lines") or []} <= self._quote_keys(pid, dec):
+                p.append(f"{where}: the quote isn't the line of the cell it names (row {dec['cell'].get('row')!r})")
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":
                 p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-'")
         if status == "parked" and dec.get("item") not in self.parked:
@@ -346,12 +349,15 @@ class Audit:
         """The rule cites (a source, a finding, or a definition of a measure it uses) a line of this part."""
         return bool(self.cites[d].get(f"{d}.{rid}", {}).get(pid, {}).get("lines", set()) & span)
 
-    def _cell(self, d: str, dec: dict):
-        """The district's own chart cell for the decision's row (None if the chart reader has no such cell)."""
+    def _cell_record(self, d: str, dec: dict) -> dict | None:
+        """The district's own chart cell for the decision's row, as the chart reader read it (None if it has none)."""
         c = dec["cell"]
         column = next((col for (pg, sec, row, col) in self.ctx.cells.get(CHART, {})
                        if district_name(col) == d), None)
-        cell = self.ctx.cells.get(CHART, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
+        return self.ctx.cells.get(CHART, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
+
+    def _cell(self, d: str, dec: dict):
+        cell = self._cell_record(d, dec)
         return None if cell is None else cell.get("value")
 
     def _quote_hits(self, pid: str, dec: dict) -> list[set]:
@@ -566,7 +572,7 @@ class Audit:
                "Each cell says one of:", "",
                "- **in the rulebook**: the district's rulebook has a rule for it (the rule ids);",
                "- **flag (needs review)**: the rulebook flags it, so the result says NEEDS REVIEW (a person judges it);",
-               "- **parked**: on Ben's later list;",
+               "- **parked**: deliberately deferred (Ben's later list, or the brief that parked it; the item says which);",
                "- **open question**: waiting on the architects or the City;",
                "- **not applicable**: the law itself keeps it out of the district, or it is a pointer with no "
                "requirement of its own (the reason says which, with the law's words);",

@@ -12,7 +12,7 @@ Each cell says one of:
 
 - **in the rulebook**: the district's rulebook has a rule for it (the rule ids);
 - **flag (needs review)**: the rulebook flags it, so the result says NEEDS REVIEW (a person judges it);
-- **parked**: on Ben's later list;
+- **parked**: deliberately deferred (Ben's later list, or the brief that parked it; the item says which);
 - **open question**: waiting on the architects or the City;
 - **not applicable**: the law itself keeps it out of the district, or it is a pointer with no requirement of its own (the reason says which, with the law's words);
 - **MISSING**: nothing covers it.
@@ -29,7 +29,7 @@ A piece with several parts takes its worst part's status (MISSING first, then op
 | not applicable | 75 | 75 | 73 | 73 | 73 | 70 | 72 | 70 | 73 | 654 |
 | **pieces** | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 1476 |
 
-**Resting on a reading:** 879 of the 1476 cells rest, in at least one part, on a person's reading rather than a citation (cells by kind of reading, a cell counted once per part: not applicable 707, parked 126, flag 26, rules named by mapping 110). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it says, not that it supports the decision; a mapping gives its reason in words. They are listed after the table, for a person to check.
+**Resting on a reading:** 884 of the 1476 cells rest, in at least one part, on a person's reading rather than a citation (cells by kind of reading, a cell counted once per part: not applicable 707, parked 126, flag 33, rules named by mapping 110). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it says, not that it supports the decision; a mapping gives its reason in words. They are listed after the table, for a person to check.
 
 MISSING cells by priority (a piece missing in two parts counts twice):
 
@@ -146,7 +146,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 | §325-8C | Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, | rule | n/a [R44] | n/a [R44] | n/a [R44] | n/a [R44] | n/a [R44] | n/a [R44] | n/a [R44] | n/a [R44] | n/a [R44] |
 | §325-8D | Additional restrictions in the CBD districts | rule | n/a [R45] | n/a [R45] | n/a [R45] | n/a [R45] | n/a [R45] | n/a [R45] | n/a [R45] | n/a [R45] | n/a [R45] |
 | §325-8E | Additional restrictions in the South Hill area | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | n/a [R46] | n/a [R46] | n/a [R46] | n/a [R46] |
-| §325-9B | Applicability | rule | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly flagged: use) [R47, R48] | **MISSING** (partly ✓ use; partly flagged: use) [R48] | **MISSING** (partly flagged: use) [R47, R48] | **MISSING** (partly ✓ use; partly flagged: use) [R48] |
+| §325-9B | Applicability | rule | **MISSING** (partly flagged: use) [R47] | **MISSING** (partly flagged: use) [R47] | **MISSING** (partly flagged: use) [R47] | **MISSING** (partly flagged: use) [R47] | **MISSING** (partly flagged: use) [R47] | **MISSING** (partly flagged: use) [R47, R48] | **MISSING** (partly flagged: use) [R47, R48] | **MISSING** (partly flagged: use) [R47, R48] | **MISSING** (partly flagged: use) [R47, R48] |
 | §325-9D | Permit review criteria | flag | **MISSING** (partly flagged: use (mapped)) [R49] | **MISSING** (partly flagged: use (mapped)) [R49] | **MISSING** (partly flagged: use (mapped)) [R49] | **MISSING** (partly flagged: use (mapped)) [R49] | **MISSING** (partly flagged: use (mapped)) [R49] | **MISSING** (partly flagged: use (mapped)) [R49] | **MISSING** (partly flagged: use (mapped)) [R49] | **MISSING** (partly flagged: use (mapped)) [R49] | **MISSING** (partly flagged: use (mapped)) [R49] |
 | §325-10C | Additional conditions | rule | **MISSING** (partly flagged: use (mapped)) [R51] | **MISSING** (partly flagged: use (mapped)) [R51] | **MISSING** (partly flagged: use (mapped)) [R51] | **MISSING** (partly flagged: use (mapped)) [R51] | **MISSING** (partly flagged: use (mapped)) [R51] | **MISSING** (partly flagged: use (mapped)) [R50, R51] | **MISSING** (partly flagged: use (mapped)) [R50, R51] | **MISSING** (partly flagged: use (mapped)) [R50, R51] | **MISSING** (partly flagged: use (mapped)) [R50, R51] |
 | §325-11B | Authorization and minimum requirements | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | n/a [R52] | **MISSING** | n/a [R52] | **MISSING** | n/a [R52] |
@@ -323,7 +323,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R34 | §325-8A: Columns 11 to 15: front, side and rear yards (the rear yard opposite the address street on a corner or through lot) | all 9 districts | in the rulebook by mapping: front_yard. Columns 11 to 15 are the chart's yard rows (p.3), which these rules check. | — |
 | R35 | §325-8A: Column 16: minimum height | R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU | not applicable: The residential chart (p.3) has no minimum-height row for this district. | “Buildings hereafter erected shall have a minimum height as specified herein” (Ch. 325 p.26 l.4–5) |
 | R36 | §325-8B: (1) Each additional primary building on the lot needs its own minimum lot area | RU | flag: primary_structures | “each square-footage requirement applies separately to the initial permitted primary use” (Ch. 325 p.26 l.12–13) |
-| R37 | §325-8B: (3) Permitted uses are listed; what is left out is not permitted | R-3a, R-3b | flag: use | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R37 | §325-8B: (3) Uses are generally cumulative, except where a specific prohibition or omission says otherwise | R-3a, R-3b | flag: use | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
 | R38 | §325-8B: (4) A use allowed by special permit or variance follows the stricter district's regulations | R-1a, R-1b, R-2a, R-2b, R-2c, RU | flag (needs review) by mapping: use. A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out by hand. | “the regulations applying to such use shall be those of whichever district has the stricter regulations” (Ch. 325 p.26 l.23–24) |
 | R39 | §325-8B: (4) A use allowed by special permit or variance follows the stricter district's regulations | R-3a, R-3aa, R-3b | flag (needs review) by mapping: use. A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out by hand. | “the regulations applying to such use shall be those of whichever district has the stricter regulations” (Ch. 325 p.26 l.23–24) |
 | R40 | §325-8B: (6) Minor children aren't counted as unrelated occupants (R-1 and R-2) | R-3a, R-3aa, R-3b, RU | not applicable: Applies in R-1 and R-2 districts only. | “In R-1 and R-2 Districts, minor dependent children” (Ch. 325 p.26 l.28) |
@@ -333,7 +333,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R44 | §325-8C: West End/Waterfront, Cherry Street, Market and Newman districts | all 9 districts | not applicable: Applies only in those districts. | “Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, and the Newman Districts” (Ch. 325 p.27 l.16–17) |
 | R45 | §325-8D: CBD districts | all 9 districts | not applicable: Applies only in the CBD districts. | “Additional restrictions in the CBD districts” (Ch. 325 p.28 l.19) |
 | R46 | §325-8E: South Hill Overlay: no second primary structure on a parcel (R-1 and R-2) | R-3a, R-3aa, R-3b, RU | not applicable: Applies to R-1 and R-2 property in the overlay only. | “with a zoning designation of R-1 or R-2” (Ch. 325 p.29 l.32) |
-| R47 | §325-9B: Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood commercial, hospitals, day care) | R-3a, R-3b | flag: use | “which require a special permit from the Planning and Development Board, are as follows” (Ch. 325 p.30 l.22–23) |
+| R47 | §325-9B: Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood commercial, hospitals, day care) | all 9 districts | flag: use | “which require a special permit from the Planning and Development Board, are as follows” (Ch. 325 p.30 l.22–23) |
 | R48 | §325-9B: (p) Bed-and-breakfast inns need a special permit in all districts | R-3a, R-3aa, R-3b, RU | flag: use | “Bed-and-breakfast inns in all districts” (Ch. 325 p.31 l.36) |
 | R49 | §325-9D: Criteria the Board uses to grant a special permit, for a primary use | all 9 districts | flag (needs review) by mapping: use. A special-permit primary use goes to needs review (the use entry); the criteria are the Board's judgment. | “A special permit shall be granted for a proposed use or activity if it meets the following criteria” (Ch. 325 p.33 l.9–10) |
 | R50 | §325-10C: Bed-and-breakfast inns (special-permit conditions) | R-3a, R-3aa, R-3b, RU | flag (needs review) by mapping: use. A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review. | “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5) |
@@ -631,7 +631,7 @@ Code can't prove that the law's words support a decision; it proves only that th
   - RU: flag (needs review): `primary_structures` (cited) The law: “each square-footage requirement applies separately to the initial permitted primary use” (Ch. 325 p.26 l.12–13).
 - **(2) Landfilling and bulkheading plans need Board of Public Works approval**
   - all 9 districts: **MISSING** (low): No flag; a massing model doesn't show fill or bulkheads.
-- **(3) Permitted uses are listed; what is left out is not permitted**
+- **(3) Uses are generally cumulative, except where a specific prohibition or omission says otherwise**
   - R-1a, R-1b, R-2a, R-2b, R-2c, R-3aa, RU: in the rulebook: `use` (cited in finding chart_marks)
   - R-3a, R-3b: flag (needs review): `use` (cited in finding chart_marks) The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 - **(4) A use allowed by special permit or variance follows the stricter district's regulations**
@@ -670,8 +670,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 ### §325-9B Applicability (rule, pp.30–32)
 
 - **Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood commercial, hospitals, day care)**
-  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3aa, RU: in the rulebook: `use` (cited)
-  - R-3a, R-3b: flag (needs review): `use` (cited) The law: “which require a special permit from the Planning and Development Board, are as follows” (Ch. 325 p.30 l.22–23).
+  - all 9 districts: flag (needs review): `use` (cited) The law: “which require a special permit from the Planning and Development Board, are as follows” (Ch. 325 p.30 l.22–23).
 - **(p) Bed-and-breakfast inns need a special permit in all districts**
   - R-1a, R-1b, R-2a, R-2b, R-2c: **MISSING** (medium): The chart (p.2) marks a bed-and-breakfast inn "-" in R-1 and R-2, so the use rule fails one here; but §325-9B(1)(p) and §325-10C(2) say bed-and-breakfast inns need a special permit "in all districts". The law's text and its chart disagree, and nothing in Gordium settles or surfaces it; to research (resolve before asking), then ask the architects or the City if still unclear.
   - R-3a, R-3aa, R-3b, RU: flag (needs review): `use` (cited) The law: “Bed-and-breakfast inns in all districts” (Ch. 325 p.31 l.36).

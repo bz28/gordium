@@ -2,8 +2,10 @@
 # for each residential district. The table built from it is 6_coverage_report/residential_districts.md
 # (`python -m section_labeling audit`; never hand-edit the table). Code checks every decision against the files
 # (packages/section_labeling/section_labeling/district_audit.py): a rule named here must exist and cite the piece
-# (or say why in `mapped`); every rule that cites a piece must be named; the law's words for "not applicable" must
-# be on the page; a parked item must be on the later list below.
+# (or say why in `mapped`); every rule that cites a piece must be named; a not_applicable, parked or flag decision
+# quotes the law, and the quote must occur exactly once, word for word, where it says (code can't check that the
+# words support the decision: the table lists each such reading for a person to check); a parked item must be on the
+# list below.
 #
 # Each piece is a list of parts. A part has `what` (in plain words) and a decision for `all` districts and/or for
 # named districts ("R-1a, R-1b": overrides `all`). A decision:
@@ -11,8 +13,12 @@
 #   rules: [rule ids without the district, e.g. lot_coverage; lot_area_* for every lot-area rule]
 #   mapped: why the rules named cover it although they don't cite the piece (shown as Gordium's mapping)
 #   also: [rules that cite the piece but cover none of this part]
-#   why: the reason, in plain words;  quote (+ page, file): the law's own words (not_applicable)
-#   item: the later-list item (parked);  link: path#heading (open_question)
+#   why: the reason, in plain words
+#   quote: the law's own words (not_applicable, parked, flag; a part's `quote` serves its decisions that give none),
+#     found once on `page` (of `file`: Chapter 325 by default, or the zoning chart), or else inside `piece` (default:
+#     this piece); a chart quote names its `cell` ({section, row}), whose line it must be, and the district's own cell
+#     there must be "-"
+#   item: the parked item (parked);  link: path#heading (open_question)
 #   priority: high | medium | low | operational | other_project (missing);  note: anything else
 # Drafted by Claude (Lane D, queue item 10, 2026-10-27) from the law's text; a second reading, not an architect's.
 
@@ -476,7 +482,7 @@ pieces:
       all: {status: missing, priority: low, why: "No flag; a massing model doesn't show fill or bulkheads."}
     - quote: "except where otherwise indicated by specific prohibition or omission"
       lines: [[26, 19, 21]]
-      what: "(3) Permitted uses are listed; what is left out is not permitted"
+      what: "(3) Uses are generally cumulative, except where a specific prohibition or omission says otherwise"
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
     - quote: "the regulations applying to such use shall be those of whichever district has the stricter regulations"
@@ -549,8 +555,7 @@ pieces:
       lines: [[30, 21, 36], [31, 34, 35], [31, 38, 39], [32, 3, 6]]
       what: "Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood
         commercial, hospitals, day care)"
-      all: {status: rulebook, rules: [use]}
-      R-3a, R-3b: {status: flag, rules: [use]}
+      all: {status: flag, rules: [use]}
     - quote: "Bed-and-breakfast inns in all districts"
       lines: [[31, 36, 36]]
       what: "(p) Bed-and-breakfast inns need a special permit in all districts"
