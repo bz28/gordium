@@ -12,8 +12,7 @@ One generated table (`6_coverage_report/residential_districts.md`) answers it fo
     missing         nothing covers it (why, how important, and whether every result already says so)
 
 What a person decides (why a piece doesn't apply, what is parked, what is missing) is written once, by hand, in
-`<jurisdiction>/residential_coverage.yaml`. Everything else is worked out here, from the files, and checked, so a
-decision can't claim more than the files show:
+`<jurisdiction>/residential_coverage.yaml`. Code checks what the files can show, and shows the rest for a person:
 
 - a rule named as covering a piece must exist in that district's rulebook, be of the right kind (`rulebook`: a
   rule; `flag`: a flag, or a rule that sends some cases to review), and cite the piece (a source or a finding's
@@ -22,7 +21,10 @@ decision can't claim more than the files show:
   words, shown in the table as Gordium's mapping, not a citation;
 - every rule that cites a piece must be named in that piece's decisions for that district (`rules` or `also`),
   so a rulebook change can't leave a stale "not applicable" or "missing" beside a rule that now covers it;
-- the law's words given for "not applicable" must really be on the page (the same matcher rule sources use);
+- a decision that rests on a reading (not applicable, parked, flag) quotes the law, and the quote must be the law's
+  own words exactly where it says (the same matcher rule sources use; not page furniture; a chart quote names its
+  cell, which must be "-" for that district). Code can't prove the words support the decision, so the table marks
+  each such cell [R#] and lists every reading with its quote, and the summary counts the cells that rest on one;
 - a parked item must be on the later list kept in the decisions file; an open question's link must exist;
 - every rule and flag piece has decisions for every district, exactly once.
 
@@ -56,15 +58,10 @@ PRIORITIES = {"high": "a real design rule that should exist; a design can pass t
               "low": "a narrow or cautious gap (a permission not used, a rare case, or a pointer)",
               "operational": "how a property is run or permitted, not what is drawn",
               "other_project": "a different kind of project (not a building on a residential lot)"}
-DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", "page", "piece", "cell", "via_piece",
-                   "unlisted_use", "item", "link", "priority", "note"}
+DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", "page", "piece", "cell", "item", "link",
+                   "priority", "note"}
+READINGS = ("not_applicable", "parked", "flag")      # decisions resting on a person's reading: each quotes the law
 CHART = "zoning_charts_2026-04.pdf"
-OMISSION = "except where otherwise indicated by specific prohibition or omission"   # §325-8B(3), p.26
-# The two sentences that say a use left out of a district's list isn't permitted there: §325-8B(3), all of it (p.26
-# lines 19-21), and §325-8A(2)-(3), "Uses which are permitted in each use district are listed" (p.24 lines 15-18).
-OMISSION_LINES = {(26, 19), (26, 20), (26, 21), (24, 15), (24, 16), (24, 17), (24, 18)}
-USE_SECTIONS = ("Primary Uses", "Accessory Uses")   # chart p.2's sections, where "-" means not permitted
-MULTIPLE_KINDS = (7, (32, 33))   # §325-3B DWELLING, MULTIPLE (5): rooming house; boarding house; ...; row house (p.7)
 
 
 def _law_rows(j: Path):
@@ -170,10 +167,7 @@ class Audit:
         self.data = (load(j / DECISIONS) or {}) if data is None else data
         self.districts: list[str] = list(self.data.get("districts") or [])
         self.parked: dict = dict(self.data.get("parked") or {})
-        raw = dict(self.data.get("scope_from") or {})
-        # {piece: the piece that sets its scope}; an entry outside its own numbered section says why ({piece, why})
-        self.scope_from: dict = {k: (v.get("piece") if isinstance(v, dict) else v) for k, v in raw.items()}
-        self.scope_why: dict = {k: v.get("why") for k, v in raw.items() if isinstance(v, dict)}
+        self.furniture = {tuple(k) for k in self.header.get("furniture", [])}
         self.ctx = Context.for_jurisdiction(j)
         self.owner = {k: pid for pid, p in self.pieces.items() for k in piece_keys(p)}
         self.definitions = _definitions(j, self.owner)
@@ -197,13 +191,7 @@ class Audit:
 
     def _resolve(self):
         self.problems += [f"{DECISIONS}: unknown key {k!r} (reused decisions start with _)" for k in self.data
-                          if k not in ("districts", "parked", "pieces", "scope_from") and not str(k).startswith("_")]
-        section = lambda i: (re.match(r"325-\d+(?:\.\d+)?", i or "") or [None])[0]
-        for pid, src in self.scope_from.items():
-            if pid not in self.pieces or src not in self.pieces:
-                self.problems.append(f"scope_from {pid}: {src}: both must be pieces of the law")
-            elif section(pid) != section(src) and not self.scope_why.get(pid):
-                self.problems.append(f"scope_from {pid}: {src} is in another section; say why ({{piece, why}})")
+                          if k not in ("districts", "parked", "pieces") and not str(k).startswith("_")]
         self.problems += [f"parked {k}: needs `name` and `decided`" for k, v in self.parked.items()
                           if not (isinstance(v, dict) and v.get("name") and v.get("decided"))]
         given = self.data.get("pieces") or {}
@@ -257,7 +245,7 @@ class Audit:
         out: dict[str, dict] = {}
         own: set[str] = set()                      # districts a key other than `all` decided
         for key, decision in part.items():
-            if key in ("what", "note", "lines"):
+            if key in ("what", "note", "lines", "quote", "file", "page", "piece"):
                 continue
             names = self.districts if key == "all" else [k.strip() for k in str(key).split(",")]
             for d in names:
@@ -276,6 +264,9 @@ class Audit:
                 self.problems.append(f"{where}: no decision for {d}")
         if part.get("note"):
             out = {d: dict(dec, note=dec.get("note") or part["note"]) for d, dec in out.items()}
+        if part.get("quote"):                      # the part's law words, for any decision that gives none of its own
+            words = {k: part[k] for k in ("quote", "file", "page", "piece") if k in part}
+            out = {d: dec if dec.get("quote") else dict(dec, **words) for d, dec in out.items()}
         return out
 
     def _expand(self, d: str, rules) -> list[str]:
@@ -287,7 +278,6 @@ class Audit:
         return out
 
     def _check(self, pid: str, d: str, dec: dict, where: str, span: set):
-        opening = next(iter(piece_keys(self.pieces[pid])))       # a definition's first line names its scope
         p = self.problems
         status = dec.get("status")
         p += [f"{where}: unknown field {k!r}" for k in sorted(dec.keys() - DECISION_FIELDS)]
@@ -323,37 +313,22 @@ class Audit:
                 p.append(f"{where}: `also` names {d}.{rid}, which doesn't cite the piece")
         if status in ("not_applicable", "missing", "open_question") and not dec.get("why"):
             p.append(f"{where}: say why (`why`)")
-        if status == "not_applicable":
+        if status in READINGS:
+            # A reading: code can't prove the law's words support it, only that they are the law's words, exactly
+            # where the decision says (the same standard as a rule's sources). The table shows each one beside its
+            # cell for a person to check.
             if not dec.get("quote"):
-                p.append(f"{where}: give the law's own words (`quote`)")
-            elif not self._quote_found(pid, dec):
-                p.append(f"{where}: quote not found: {dec['quote']!r}")
-            if dec.get("file", LAW) not in (LAW, CHART):
-                p.append(f"{where}: a 'not applicable' quotes Chapter 325 or its chart, not {dec['file']}")
+                p.append(f"{where}: a {WORDS[status]} decision gives the law's own words (`quote`) and where they are")
+            elif dec.get("file", LAW) not in (LAW, CHART):
+                p.append(f"{where}: quote Chapter 325 or its chart, not {dec['file']}")
+            elif not (keys := self._quote_keys(pid, dec)):
+                p.append(f"{where}: quote not found at {self._location(pid, dec)}: {dec['quote']!r}")
+            elif dec.get("file", LAW) == LAW and keys <= self.furniture:
+                p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
             if dec.get("file") == CHART and not dec.get("cell"):
-                p.append(f"{where}: a chart quote needs `cell` ({{section, row}}), so the district's own cell is checked")
-            if dec.get("cell"):
-                p += self._row_problems(pid, dec, where)
-            elif "via_piece" in dec:
-                p.append(f"{where}: via_piece only goes with a chart `cell`")
-            if dec.get("quote") and dec.get("file", LAW) == LAW and (keys := self._quote_keys(pid, dec)):
-                law = keys - {tuple(k) for k in self.header.get("furniture", [])}
-                scope = self.scope_from.get(pid)
-                # this part's own lines, the piece's opening line, or the piece that sets its scope
-                ok = lambda k: k in span or k == opening or (scope and self.owner.get(k) == scope)
-                if not law:
-                    p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
-                elif not (law & OMISSION_LINES) and not any(ok(k) for k in law):
-                    p.append(f"{where}: the quote is from another piece or part of the law "
-                             f"({', '.join(sorted({str(self.owner.get(k)) for k in law}))}), not this part's own "
-                             "(a piece whose scope another sets names it in `scope_from`)")
-            if dec.get("cell") and (dec.get("page", 2) != 2 or dec["cell"].get("section") not in USE_SECTIONS):
-                p.append(f"{where}: '-' means 'not permitted' only in the use chart (p.2, {' or '.join(USE_SECTIONS)})")
+                p.append(f"{where}: a chart quote names its `cell` ({{section, row}}), so the district's own cell is shown")
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":
-                p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-' "
-                         "(not permitted)")
-            if self._quotes_omission(pid, dec) or "unlisted_use" in dec:
-                p += self._unlisted_problems(d, dec, where, pid)
+                p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-'")
         if status == "parked" and dec.get("item") not in self.parked:
             p.append(f"{where}: parked item must be one of {sorted(self.parked)}")
         if status == "open_question":
@@ -395,76 +370,18 @@ class Audit:
     def _quote_found(self, pid: str, dec: dict) -> bool:
         return bool(self._quote_keys(pid, dec))
 
-    def _quotes_omission(self, pid: str, dec: dict) -> bool:
-        """The quote shares a line with §325-8B(3) (permitted uses are listed; what is left out isn't), however
-        much or little of it is quoted, and however it is placed (`page` or `piece`)."""
-        if dec.get("file", LAW) != LAW or not dec.get("quote"):
-            return False
-        return bool(self._quote_keys(pid, dec) & OMISSION_LINES)
-
-    def _unlisted_problems(self, d: str, dec: dict, where: str, pid: str | None = None) -> list[str]:
-        """The omission quote (§325-8B(3)) backs "not applicable" only for a named use that is on no residential
-        list: no row of the residential use chart (p.2, primary or accessory), no use Gordium accepts (uses.yaml),
-        no kind of multiple dwelling §325-3B lists (p.7), and not named by the district's use rule. Compared on
-        words (singular), so "home occupations" and "Neighborhood or Community Garden" are caught."""
-        use = str(dec.get("unlisted_use") or "")
-        if not use:
-            return [f"{where}: the omission quote needs `unlisted_use` (the use it is about)"]
-        words = self._words
-        mine = words(use)
-        if pid is not None and not mine <= self._piece_words(pid):
-            return [f"{where}: {use!r} isn't what this piece is about (its words aren't in the piece, its title, or "
-                    "its section's other pieces)"]
-        rule = self.books[d].get(f"{d}.use") or {}
-        lists = [r for (pg, sec, r, col) in self.ctx.cells.get(CHART, {}) if pg == 2]
-        lists += [u.replace("_", " ") for u in self.ctx.uses]
-        lists += [" ".join(str(rule.get(k, "")) for k in ("check", "applies_when", "review_when"))]
-        multiple = self.ctx.pages.get(LAW, {}).get(MULTIPLE_KINDS[0], {})
-        lists += [" ".join(" ".join(multiple.get(n, [])) for n in MULTIPLE_KINDS[1])]
-        labels = lists[:-2] + [k for k in " ".join(" ".join(multiple.get(n, [])) for n in MULTIPLE_KINDS[1])
-                                .replace(";", ",").split(",")]        # each listed name, for the reverse test
-        if not mine or any(mine <= words(text) for text in lists) or any(
-                words(label) and words(label) - {"or", "and", "the", "of"} <= mine for label in labels):
-            return [f"{where}: {use!r} is a residential use (chart p.2, uses.yaml, §325-3B multiple dwellings or "
-                    f"{d}.use), so leaving it out isn't omission"]
-        return []
-
-    @staticmethod
-    def _words(s: str) -> set:
-        """Lower-case words, singular (a trailing s dropped), for comparing use names."""
-        def one(w):
-            return w[:-3] + "y" if w.endswith("ies") and len(w) > 4 else w[:-1] if w.endswith("s") and len(w) > 3 else w
-        return {one(w) for w in tokenize(str(s).replace("_", " ").replace("-", " ")) if w.isalpha()}
-
-    def _piece_words(self, pid: str) -> set:
-        """The words of a piece (title and text) and of its section's own title (§325-22B's motel is in §325-22's
-        title, "Motels."); never a sibling subsection's words."""
-        pages = self.ctx.pages.get(LAW, {})
-        piece = self.pieces[pid]
-        out = self._words(piece["title"])
-        out |= {w for k in piece_keys(piece) for w in self._words(" ".join(pages.get(k[0], {}).get(k[1], [])))}
-        section = re.match(r"325-\d+(?:\.\d+)?", pid)[0]
-        if not pid.startswith("325-3B:") and section in self.pieces and section != pid:
-            out |= self._words(self.pieces[section]["title"])
-        return out
-
-    def _row_problems(self, pid: str, dec: dict, where: str) -> list[str]:
-        """A chart row backs "not applicable" only for the piece it is about: the row's words are the piece's own,
-        or (with `via_piece`) those of a §325-3B definition that names this piece's title (DWELLING, MULTIPLE lists
-        the rooming house and the row house)."""
-        row = self._words(dec["cell"].get("row", ""))
-        allowed = self._piece_words(pid)
-        via = dec.get("via_piece")
-        if via:
-            if via not in self.pieces or not str(via).startswith("325-3B:"):
-                return [f"{where}: via_piece {via!r} isn't a §325-3B definition"]
-            if not self._quote_found(via, {"quote": self.pieces[pid]["title"], "piece": via}):
-                return [f"{where}: {via} doesn't name {self.pieces[pid]['title']!r}"]
-            allowed |= self._piece_words(via)
-        if not row <= allowed:
-            return [f"{where}: the chart row {dec['cell'].get('row')!r} isn't about this piece (words "
-                    f"{sorted(row - allowed)} aren't in it{'' if via else '; a §325-3B link goes in via_piece'})"]
-        return []
+    def _location(self, pid: str, dec: dict) -> str:
+        """Where the quote is, as a reader finds it: file, page and lines (or where it was looked for)."""
+        keys = sorted(self._quote_keys(pid, dec)) if dec.get("quote") else []
+        file = dec.get("file", LAW)
+        name = "Ch. 325" if file == LAW else "zoning chart" if file == CHART else file
+        if keys:
+            pages = sorted({pg for pg, _ in keys})
+            spans = "; ".join(f"p.{pg} l.{min(n for g, n in keys if g == pg)}"
+                              + (f"–{m}" if (m := max(n for g, n in keys if g == pg)) != min(n for g, n in keys if g == pg)
+                                 else "") for pg in pages)
+            return f"{name} {spans}"
+        return f"{name} p.{dec['page']}" if "page" in dec else f"§{dec.get('piece', pid)}"
 
     # -- the table ---------------------------------------------------------------------------------------
 
@@ -486,7 +403,43 @@ class Audit:
         pages = sorted({pg for pg, _, _ in self.pieces[pid]["lines"]})
         return f"p.{pages[0]}" if len(pages) == 1 else f"pp.{pages[0]}–{pages[-1]}"
 
+    def readings(self) -> list[dict]:
+        """Every decision that rests on a person's reading, not a citation: not applicable, parked, flag (each quoting
+        the law, checked only for being the law's words where it says), and any rule named by a stated mapping.
+        One entry per (piece, part, decision); `cells` are the districts it decides. Numbered R1, R2, ... in order."""
+        found: dict[tuple, dict] = {}
+        for pid in self.rows:
+            for i, what in enumerate(self._parts(pid)):
+                for d in self.districts:
+                    dec = self.cells[pid][d][i][1]
+                    span = self.part_lines[pid][i]
+                    mapped = [r for r in self._expand(d, dec.get("rules")) if dec.get("status") in ("rulebook", "flag")
+                              and not self._reaches(d, r, pid, span)]
+                    if dec.get("status") not in READINGS and not mapped:
+                        continue
+                    key = (pid, i, dec.get("status"), dec.get("quote"), dec.get("why"), dec.get("mapped"),
+                           str(dec.get("cell")))
+                    entry = found.setdefault(key, {"piece": pid, "what": what, "status": dec.get("status"),
+                                                   "dec": dec, "mapped": sorted(set(mapped)), "cells": []})
+                    entry["cells"].append(d)
+        out = list(found.values())
+        for k, e in enumerate(out, 1):
+            e["id"] = f"R{k}"
+        return out
+
+    def _reading_ids(self, pid: str, d: str) -> list[str]:
+        if not hasattr(self, "_reading_index"):
+            self._reading_index = {}
+            for e in self.readings():
+                for dd in e["cells"]:
+                    self._reading_index.setdefault((e["piece"], dd), []).append(e["id"])
+        return self._reading_index.get((pid, d), [])
+
     def _short(self, pid: str, d: str) -> str:
+        marks = self._reading_ids(pid, d)
+        return self._short_status(pid, d) + (f" [{', '.join(marks)}]" if marks else "")
+
+    def _short_status(self, pid: str, d: str) -> str:
         parts = self.cells.get(pid, {}).get(d, [])
         worst = self.status(pid, d)
         def ids(status):
@@ -556,14 +509,7 @@ class Audit:
             if dec.get("mapped"):
                 text += f". Gordium's mapping, not a citation: {dec['mapped']}"
         elif s == "not_applicable":
-            where = (f"{dec.get('file', LAW)} p.{dec['page']}" if "page" in dec
-                     else f"§{dec['piece']}" if dec.get("piece") else "this piece")
-            cell = f"; the district's own cell in row “{dec['cell']['row']}” is “-”" if dec.get("cell") else ""
-            scope = self.scope_from.get(pid)
-            via = (f"; its scope set by §{scope}, Gordium's reading" + (f": {self.scope_why[pid]}" if self.scope_why.get(pid) else "")
-                   if scope and dec.get("file", LAW) == LAW and any(self.owner.get(k) == scope for k in self._quote_keys(pid, dec))
-                   else "")
-            text = f"not applicable: {dec['why']} The law: “{dec['quote']}” ({where}{cell}{via})"
+            text = f"not applicable: {dec['why']}"
         elif s == "parked":
             item = self.parked[dec["item"]]
             text = f"parked: {item['name']} ({item['decided']})" + (f". {dec['why']}" if dec.get("why") else "")
@@ -571,6 +517,9 @@ class Audit:
             text = f"open question: {dec['why']} ({dec['link']})"
         else:
             text = f"**MISSING** ({dec['priority']}): {dec['why']}"
+        if s in READINGS and dec.get("quote"):
+            cell = f"; the district's own cell in row “{dec['cell']['row']}” is “-”" if dec.get("cell") else ""
+            text += f" The law: “{dec['quote']}” ({self._location(pid, dec)}{cell})."
         if dec.get("also"):
             text += f" (also cites the piece: {', '.join(f'`{r}`' for r in dec['also'])}; covers none of this part)"
         if dec.get("note"):
@@ -626,6 +575,13 @@ class Audit:
         for s in STATUSES:
             out.append(f"| {WORDS[s]} | " + " | ".join(str(counts[d][s]) for d in ds) + f" | {total[s]} |")
         out.append("| **pieces** | " + " | ".join(str(n) for _ in ds) + f" | {n * len(ds)} |")
+        rested = {(e["piece"], d) for e in self.readings() for d in e["cells"]}
+        by = Counter(e["status"] if not e["mapped"] else "mapped" for e in self.readings() for _ in e["cells"])
+        out += ["", f"**Resting on a reading:** {len(rested)} of the {n * len(ds)} cells rest, in at least one part, on a "
+                "person's reading rather than a citation (cells by kind of reading, a cell counted once per part: not applicable "
+                f"{by['not_applicable']}, parked {by['parked']}, flag {by['flag']}, rules named by mapping "
+                f"{by['mapped']}). Each quotes the law; code checks only that the quote is the law's words where it "
+                "says, not that it supports the decision. They are listed after the table, for a person to check."]
         out += ["", "MISSING cells by priority (a piece missing in two parts counts twice):", "",
                 "| Priority | " + " | ".join(ds) + " |", "|---|" + "---|" * len(ds)]
         out += [f"| {k} | " + " | ".join(str(cells_by[d][k]) for d in ds) + " |" for k in PRIORITIES]
@@ -643,12 +599,34 @@ class Audit:
                            f"{m['priority']}; {said}. {m['why']}" + (f" Note: {m['note']}" if m["note"] else ""))
         out += ["", "## The table", "",
                 "✓ = in the rulebook (rule ids; (mapped) = by Gordium's stated mapping, the rules don't cite it); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; "
-                "(partly ✓ …) = some parts are covered by those rules, the rest not. Each piece's reasons are in "
-                "the next section.", "",
+                "(partly ✓ …) = some parts are covered by those rules, the rest not. [R12] = this cell rests on "
+                "reading R12: its quote of the law is in the readings list right after this table, for a person to "
+                "check. Each piece's reasons are in the section after that.", "",
                 "| Piece | Title | Label | " + " | ".join(ds) + " |", "|---|---|---|" + "---|" * len(ds)]
         for pid in self.rows:
             out.append(f"| §{pid} | {self._title(pid)} | {self.labels[pid]['label']} | "
                        + " | ".join(self._short(pid, d) for d in ds) + " |")
+        out += ["", "## Decisions resting on a reading", "",
+                "Code can't prove that the law's words support a decision; it proves only that the quote is the law's "
+                "own words, exactly where it says (the same standard as a rule's sources). Each decision below rests "
+                "on a person's reading of that quote (Claude's, drafted from the law; architect sign-off is deferred). "
+                "Read the quote and judge it.", "",
+                "| Reading | Piece and part | Districts | Decision | The law's words (where) |", "|---|---|---|---|---|"]
+        for e in self.readings():
+            dec = e["dec"]
+            if e["mapped"]:
+                decision = f"{WORDS[e['status']]} by mapping: {', '.join(e['mapped'])}. {dec.get('mapped', '')}"
+            elif e["status"] == "parked":
+                decision = f"parked: {self.parked[dec['item']]['name']}"
+            elif e["status"] == "flag":
+                decision = f"flag: {', '.join(self._expand(e['cells'][0], dec.get('rules')))}"
+            else:
+                decision = f"not applicable: {dec.get('why', '')}"
+            law = (f"“{dec['quote']}” ({self._location(e['piece'], dec)}"
+                   + (f"; the district's own cell in row “{dec['cell']['row']}” is “-”" if dec.get("cell") else "")
+                   + ")") if dec.get("quote") else "—"
+            out.append(f"| {e['id']} | §{e['piece']}: {e['what']} | {self._where(e['cells'])} | "
+                       f"{decision.replace('|', '/')} | {law.replace('|', '/')} |")
         out += ["", "## Each piece, part by part", ""]
         for pid in self.rows:
             out += [f"### §{pid} {self._title(pid)} ({self.labels[pid]['label']}, {self._pages(pid)})", ""]

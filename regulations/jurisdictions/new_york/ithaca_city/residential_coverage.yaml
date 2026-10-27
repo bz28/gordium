@@ -31,39 +31,6 @@ parked:
   parking: {name: "Parking (typed count and read from the drawing): on hold", decided: "Ben's later list, 2026-10-25"}
   adus: {name: "Accessory dwelling units", decided: "queue item 10 brief, 2026-10-27"}
 
-# A piece whose scope another piece sets (its district or use is named there, not in its own words): a "not
-# applicable" quote may come from that piece, shown in the table as Gordium's reading. The piece must be in the same
-# numbered section, or the entry says why ({piece, why}).
-scope_from:
-  325-11C: 325-11B
-  325-21A: 325-21B
-  325-24C: 325-24B
-  325-24D: 325-24B
-  325-24E: 325-24B
-  325-24F: 325-24B
-  325-24G: 325-24B
-  325-24H: 325-24B
-  325-24I: 325-24B
-  325-29.1E: 325-29.1D
-  325-29.1F: 325-29.1D
-  325-29.1G: 325-29.1D
-  325-29.2B: 325-29.2A
-  325-29.2C: 325-29.2A
-  325-44B: 325-44A
-  325-45.1D: 325-45.1C
-  325-45.2B: 325-45.2A
-  325-45.2D: 325-45.2A
-  325-45.2E: 325-45.2A
-  325-45.2F: 325-45.2A
-  325-45.2G: 325-45.2A
-  325-45.5A: &cliff_scope {piece: 325-45.4, why: "Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates"}
-  325-45.5B: *cliff_scope
-  325-45.5C: *cliff_scope
-  325-45.5D: *cliff_scope
-  325-45.5E: *cliff_scope
-  325-45.5F: *cliff_scope
-  325-45.5G: *cliff_scope
-
 # Reused decisions.
 _unlisted_why: &unlisted_why Not a use the residential chart (p.2) lists for any residential district, so it isn't
   permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's
@@ -95,7 +62,6 @@ _multiple_not_permitted: &multiple_not_permitted
   page: 2
   quote: "Multiple family dwelling [fn4] - - - - - • • • •[fn5]"
   cell: {section: Primary Uses, row: "Multiple family dwelling [fn4]"}
-  via_piece: 325-3B:dwelling_multiple_or_multiple_residence
 _unit_facilities: &unit_facilities
   status: missing
   priority: low
@@ -124,7 +90,8 @@ _no_yard_object: &no_yard_object
 
 pieces:
   325-3B:accessory_dwelling_unit:
-    - what: What an accessory dwelling unit is and must have
+    - quote: "A smaller, secondary dwelling unit located on the same lot"
+      what: What an accessory dwelling unit is and must have
       all: {status: parked, item: adus}
 
   325-3B:building_area:
@@ -232,7 +199,8 @@ pieces:
         note: Lane B is drafting occupancy rules on a branch stacked on r3-hand (not in this rulebook yet).
 
   325-3B:dwelling_unit:
-    - lines: [[9, 10, 12]]
+    - quote: "One or more rooms designed or used for living quarters by one household"
+      lines: [[9, 10, 12]]
       what: What a dwelling unit is, as the rules count units and house types
       all:
         status: rulebook
@@ -267,7 +235,8 @@ pieces:
       all: *occupancy
 
   325-3B:green_space:
-    - what: Green space, at least 75% softscape, where a minimum applies
+    - quote: "Where a minimum green space requirement applies"
+      what: Green space, at least 75% softscape, where a minimum applies
       all:
         status: not_applicable
         why: The residential chart sets a green-space minimum only for RU (chart p.3, note 13).
@@ -289,11 +258,12 @@ pieces:
 
   325-3B:large_beverage_producer:
     - what: Large beverage producers (production cap, silo height)
-      all: {status: not_applicable, unlisted_use: large beverage producer, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
 
   325-3B:neighborhood_commercial_facility:
-    - what: What a neighborhood commercial facility may sell
+    - quote: "Such facility shall be limited to the retail sale of convenience goods"
+      what: What a neighborhood commercial facility may sell
       all:
         status: flag
         rules: [use]
@@ -394,12 +364,12 @@ pieces:
 
   325-3B:trailer_or_travel_trailer:
     - what: Travel trailers (a temporary dwelling at most 8 ft wide and 32 ft long)
-      all: {status: not_applicable, unlisted_use: travel trailer, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
 
   325-3B:urban_beverage_producer:
     - what: Urban beverage producers (production cap, silo height)
-      all: {status: not_applicable, unlisted_use: urban beverage producer, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
 
   325-7A:
@@ -419,7 +389,8 @@ pieces:
           building by building (see §325-8B(1)).
 
   325-8A:
-    - lines: [[24, 12, 16]]
+    - quote: "Uses which are permitted in each use district are listed"
+      lines: [[24, 12, 16]]
       what: "Column 2: permitted primary uses"
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
@@ -433,7 +404,8 @@ pieces:
           permit; a private garage holds at most three cars in R-1 and R-2a/R-2b, six per building in R-2c; a
           structure for construction purposes may stay two years). ADUs and parking are on the later list.
         note: Home occupations are being drafted on Lane B's branch.
-    - lines: [[24, 19, 21]]
+    - quote: "The off-street parking spaces listed in this column shall be provided"
+      lines: [[24, 19, 21]]
       what: "Column 4: off-street parking"
       all:
         status: parked
@@ -457,7 +429,8 @@ pieces:
         priority: low
         why: R-2x.loading flags a neighborhood commercial facility; chart p.14's "Allowed by variance" row for other
           nonresidential uses has no rule or flag (R-2a.loading's notes say so).
-    - lines: [[24, 27, 34]]
+    - quote: "Lots hereafter used for a permitted use in each use district shall be of a size equal to or greater than"
+      lines: [[24, 27, 34]]
       what: "Columns 6 and 7: minimum lot area and width"
       all: {status: rulebook, rules: [lot_area_*, lot_width_*], mapped: "Columns 6 and 7 are the chart's lot-size rows (p.3), which these rules check."}
       R-3a, R-3aa, R-3b:
@@ -488,7 +461,8 @@ pieces:
           reaches a small building alone is an open question (questions_for_architects.md 5.10).
 
   325-8B:
-    - lines: [[26, 10, 16]]
+    - quote: "each square-footage requirement applies separately to the initial permitted primary use"
+      lines: [[26, 10, 16]]
       what: "(1) Each additional primary building on the lot needs its own minimum lot area"
       all:
         status: missing
@@ -500,11 +474,13 @@ pieces:
     - lines: [[26, 17, 18]]
       what: "(2) Landfilling and bulkheading plans need Board of Public Works approval"
       all: {status: missing, priority: low, why: "No flag; a massing model doesn't show fill or bulkheads."}
-    - lines: [[26, 19, 21]]
+    - quote: "except where otherwise indicated by specific prohibition or omission"
+      lines: [[26, 19, 21]]
       what: "(3) Permitted uses are listed; what is left out is not permitted"
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
-    - lines: [[26, 22, 25]]
+    - quote: "the regulations applying to such use shall be those of whichever district has the stricter regulations"
+      lines: [[26, 22, 25]]
       what: "(4) A use allowed by special permit or variance follows the stricter district's regulations"
       all:
         status: flag
@@ -533,7 +509,8 @@ pieces:
         status: rulebook
         rules: [stories]
         note: (10) points to §325-8A(15), whose 500 sf exemption R-3aa.stories applies to the two-story minimum.
-    - lines: [[27, 9, 10]]
+    - quote: "For special conditions on development of property in R-3 that directly abuts R-1"
+      lines: [[27, 9, 10]]
       what: "(9) R-3 land that directly abuts R-1 (§325-19E)"
       all:
         status: not_applicable
@@ -568,12 +545,14 @@ pieces:
         quote: with a zoning designation of R-1 or R-2
 
   325-9B:
-    - lines: [[30, 21, 36], [31, 34, 35], [31, 38, 39], [32, 3, 6]]
+    - quote: "which require a special permit from the Planning and Development Board, are as follows"
+      lines: [[30, 21, 36], [31, 34, 35], [31, 38, 39], [32, 3, 6]]
       what: "Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood
         commercial, hospitals, day care)"
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
-    - lines: [[31, 36, 36]]
+    - quote: "Bed-and-breakfast inns in all districts"
+      lines: [[31, 36, 36]]
       what: "(p) Bed-and-breakfast inns need a special permit in all districts"
       all: *bnb_conflict
       R-3a, R-3aa, R-3b, RU:
@@ -584,7 +563,8 @@ pieces:
       all: *accessory_sp
 
   325-9D:
-    - lines: [[33, 7, 37]]
+    - quote: "A special permit shall be granted for a proposed use or activity if it meets the following criteria"
+      lines: [[33, 7, 37]]
       what: Criteria the Board uses to grant a special permit, for a primary use
       all:
         status: flag
@@ -596,7 +576,8 @@ pieces:
       all: *accessory_sp
 
   325-10C:
-    - lines: [[35, 3, 20]]
+    - quote: "Bed-and-breakfast inns in all districts"
+      lines: [[35, 3, 20]]
       what: "Bed-and-breakfast inns (special-permit conditions)"
       all: *bnb_conflict
       R-3a, R-3aa, R-3b, RU:
@@ -609,7 +590,8 @@ pieces:
         status: missing
         priority: low
         why: A garden is an accessory use needing a special permit (chart p.2); nothing asks about one.
-    - lines: [[37, 7, 25]]
+    - quote: "Schools and related uses. The following specific conditions shall be applicable"
+      lines: [[37, 7, 25]]
       what: "Schools and related uses (special-permit conditions)"
       all:
         status: flag
@@ -674,15 +656,16 @@ pieces:
       all: *operational
   325-15E:
     - what: Junkyards and salvage yards
-      all: {status: not_applicable, unlisted_use: junkyard, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
   325-15F:
     - what: Gasoline service stations (referral for review)
-      all: {status: not_applicable, unlisted_use: gasoline service station, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
 
   325-16A:
-    - what: Height exceptions (spires, chimneys, mechanical equipment, solar, antennas) and their 20%/30% area cap
+    - quote: "The height limitations of this chapter shall not apply to"
+      what: Height exceptions (spires, chimneys, mechanical equipment, solar, antennas) and their 20%/30% area cap
       all:
         status: parked
         item: chimney_fence
@@ -719,17 +702,20 @@ pieces:
         rules: [front_yard, side_yards, rear_yard]
         mapped: The yards are checked on the lot as drawn, so a lot reduced below them fails.
   325-17B:
-    - what: Corner visibility triangle (nothing over 2 ft within 20 ft of the street corner)
+    - quote: "On a corner lot in any residential district, no fence, wall, grading, hedge or other structure or planting more than two feet in height"
+      what: Corner visibility triangle (nothing over 2 ft within 20 ft of the street corner)
       all:
         status: parked
         item: chimney_fence
         why: Fences, walls, hedges, grading and plantings aren't identified in the model (research X4 settled the
           rule).
   325-17C:
-    - what: No fence, wall, sign or planting that hides traffic
+    - quote: "In all districts, no fence, wall, grading, hedge, sign, assembly or other structure or planting"
+      what: No fence, wall, sign or planting that hides traffic
       all: {status: parked, item: chimney_fence}
   325-17D:
-    - what: Fences may not block a neighbor's light, air or view
+    - quote: "No fence or wall other than a building may be built to a height that will interfere with the light, air or view of any neighboring property"
+      what: Fences may not block a neighbor's light, air or view
       all: {status: parked, item: chimney_fence}
 
   325-18A:
@@ -768,22 +754,27 @@ pieces:
     - what: No transitions in B-2d
       all: {status: not_applicable, why: Applies only in the B-2d District., quote: shall not apply in the B-2d District}
   325-19E:
-    - what: Stricter limits for R-3 development abutting R-1 land
+    - quote: "The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling"
+      what: Stricter limits for R-3 development abutting R-1 land
       all: {status: not_applicable, why: Applies only in R-3a and R-3b., quote: in the R-3a or R-3b Zoning District}
       R-3a, R-3b: {status: flag, rules: [abutting_r1]}
       R-3aa: {status: flag, rules: [abutting_r1], note: "Whether §325-19E reaches R-3aa is an open question (questions_for_architects.md 5.11); flagged in case."}
 
   325-20C:
-    - what: Parking for nonconforming uses
+    - quote: "the amount of off-street parking permitted on a property containing a nonconforming use"
+      what: Parking for nonconforming uses
       all: {status: parked, item: parking}
   325-20D:
-    - what: Parking areas and driveways (permits, dimensions, surfacing, screening)
+    - quote: "In all zoning districts, no parking area or driveway may be constructed"
+      what: Parking areas and driveways (permits, dimensions, surfacing, screening)
       all: {status: parked, item: parking}
   325-20E:
-    - what: Parking in front yards (orientation, driveway width)
+    - quote: "In all residential districts, all front yard parking within 15 feet of the front property line"
+      what: Parking in front yards (orientation, driveway width)
       all: {status: parked, item: parking}
   325-20F:
-    - what: New or enlarged parking areas of three or more spaces in residential districts
+    - quote: "on lots within residential zoning districts"
+      what: New or enlarged parking areas of three or more spaces in residential districts
       all: {status: parked, item: parking}
   325-20G:
     - what: Parking areas in nonresidential districts
@@ -799,7 +790,8 @@ pieces:
       all: {status: not_applicable, why: Applies only in the U-1 District., quote: Parking for the U-1 Zoning District}
 
   325-21A:
-    - lines: [[63, 41, 42]]
+    - quote: "An off-street loading space shall have a minimum of 450 square feet"
+      lines: [[63, 41, 42]]
       what: Loading space size (450 sf), for the uses the district's loading flag lists
       all: {status: flag, rules: [loading]}
       R-2a, R-2b, R-2c: {status: flag, rules: [loading], mapped: "R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes)."}
@@ -825,7 +817,8 @@ pieces:
         why: Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag (each rulebook's header
           says so); the loading flag covers only the uses it lists.
   325-21B:
-    - lines: [[63, 43, 43], [64, 3, 8]]
+    - quote: "shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units"
+      lines: [[63, 43, 43], [64, 3, 8]]
       what: Which uses need loading spaces, and how many, for the uses the district's loading flag lists
       all: {status: flag, rules: [loading]}
       R-2a, R-2b, R-2c: {status: flag, rules: [loading], mapped: "R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes)."}
@@ -844,35 +837,35 @@ pieces:
 
   325-22A:
     - what: Motels (lot size and frontage)
-      all: {status: not_applicable, unlisted_use: motel, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
   325-22B:
     - what: Motels (parking)
-      all: {status: not_applicable, unlisted_use: motel, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
   325-22C:
     - what: Motels (paving)
-      all: {status: not_applicable, unlisted_use: motel, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
   325-22D:
     - what: Motels (driveway width)
-      all: {status: not_applicable, unlisted_use: motel, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
   325-22E:
     - what: Motels (curb cuts)
-      all: {status: not_applicable, unlisted_use: motel, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
   325-22F:
     - what: Motels (landscaping)
-      all: {status: not_applicable, unlisted_use: motel, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
   325-22G:
     - what: Motels (lighting)
-      all: {status: not_applicable, unlisted_use: motel, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
   325-22H:
     - what: Motels (uses)
-      all: {status: not_applicable, unlisted_use: motel, why: *unlisted_why, page: 26,
+      all: {status: not_applicable, why: *unlisted_why, page: 26,
              quote: except where otherwise indicated by specific prohibition or omission}
 
   325-23A:
@@ -936,15 +929,18 @@ pieces:
       all: *operational
 
   325-28B:
-    - what: Accessory dwelling units (applicability)
+    - quote: "This section applies to all accessory dwelling units (ADUs) within the City of Ithaca"
+      what: Accessory dwelling units (applicability)
       all: {status: parked, item: adus}
   325-28C:
-    - what: Accessory dwelling unit requirements (one per parcel, size, height, setbacks)
+    - quote: "A maximum of one ADU is allowed per parcel"
+      what: Accessory dwelling unit requirements (one per parcel, size, height, setbacks)
       all: {status: parked, item: adus, also: [parking_one_family]}
       RU: {status: parked, item: adus}
 
   325-29:
-    - what: Landmarks and landmark districts (Chapter 228 review)
+    - quote: "Officially designated landmarks or landmark districts of the City shall be governed by the provisions of Chapter 228"
+      what: Landmarks and landmark districts (Chapter 228 review)
       all: {status: parked, item: historic_flood}
 
   325-29.1D: &adult_use
@@ -1038,7 +1034,8 @@ pieces:
         quote: within any district of the Collegetown Area Form Districts
   325-45.1D: *collegetown
   325-45.1E:
-    - what: New construction in a local historic district or on a landmark's parcel needs Landmarks Commission approval
+    - quote: "Regardless of the underlying zoning, all new construction (including additions) within a designated local historic district"
+      what: New construction in a local historic district or on a landmark's parcel needs Landmarks Commission approval
       all:
         status: parked
         item: historic_flood

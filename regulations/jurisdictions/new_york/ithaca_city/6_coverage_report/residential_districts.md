@@ -29,6 +29,8 @@ A piece with several parts takes its worst part's status (MISSING first, then op
 | not applicable | 75 | 75 | 73 | 73 | 73 | 70 | 72 | 70 | 73 | 654 |
 | **pieces** | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 1476 |
 
+**Resting on a reading:** 879 of the 1476 cells rest, in at least one part, on a person's reading rather than a citation (cells by kind of reading, a cell counted once per part: not applicable 707, parked 126, flag 26, rules named by mapping 110). Each quotes the law; code checks only that the quote is the law's words where it says, not that it supports the decision. They are listed after the table, for a person to check.
+
 MISSING cells by priority (a piece missing in two parts counts twice):
 
 | Priority | R-1a | R-1b | R-2a | R-2b | R-2c | R-3a | R-3aa | R-3b | RU |
@@ -110,102 +112,102 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 
 ## The table
 
-✓ = in the rulebook (rule ids; (mapped) = by Gordium's stated mapping, the rules don't cite it); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; (partly ✓ …) = some parts are covered by those rules, the rest not. Each piece's reasons are in the next section.
+✓ = in the rulebook (rule ids; (mapped) = by Gordium's stated mapping, the rules don't cite it); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; (partly ✓ …) = some parts are covered by those rules, the rest not. [R12] = this cell rests on reading R12: its quote of the law is in the readings list right after this table, for a person to check. Each piece's reasons are in the section after that.
 
 | Piece | Title | Label | R-1a | R-1b | R-2a | R-2b | R-2c | R-3a | R-3aa | R-3b | RU |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| §325-3B:accessory_dwelling_unit | ACCESSORY DWELLING UNIT | rule | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus |
+| §325-3B:accessory_dwelling_unit | ACCESSORY DWELLING UNIT | rule | parked: adus [R1] | parked: adus [R1] | parked: adus [R1] | parked: adus [R1] | parked: adus [R1] | parked: adus [R1] | parked: adus [R1] | parked: adus [R1] | parked: adus [R1] |
 | §325-3B:building_area | BUILDING AREA | rule | **MISSING** (partly ✓ lot_coverage) | **MISSING** (partly ✓ lot_coverage) | **MISSING** (partly ✓ lot_coverage) | **MISSING** (partly ✓ lot_coverage) | **MISSING** (partly ✓ lot_coverage) | **MISSING** (partly ✓ lot_coverage) | **MISSING** (partly ✓ lot_coverage) | **MISSING** (partly ✓ lot_coverage) | **MISSING** (partly ✓ lot_coverage) |
 | §325-3B:cooperative_household | COOPERATIVE HOUSEHOLD | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-3B:dwelling_one_family | DWELLING, ONE-FAMILY | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-3B:one_family_attached_dwelling | ONE-FAMILY ATTACHED DWELLING | rule | n/a | n/a | n/a | n/a | **MISSING** (partly ✓ attached_units_per_building) | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-3B:dwelling_two_family | DWELLING, TWO-FAMILY | rule | n/a | n/a | **MISSING** (partly ✓ lot_area_two_family, lot_width_two_family (mapped)) | **MISSING** (partly ✓ lot_area_two_family, lot_width_two_family (mapped)) | **MISSING** (partly ✓ lot_area_two_family) | ✓ lot_area_two_family, lot_width_two_family (mapped) | ✓ lot_area_two_family, lot_width_two_family (mapped) | ✓ lot_area_two_family, lot_width_two_family (mapped) | ✓ lot_area_two_family, lot_width_two_family (mapped) |
-| §325-3B:dwelling_unit | DWELLING UNIT | rule | **MISSING** (partly ✓ use (mapped)) | **MISSING** (partly ✓ use (mapped)) | **MISSING** (partly ✓ use (mapped)) | **MISSING** (partly ✓ use (mapped)) | **MISSING** (partly ✓ lot_area_one_family_attached, lot_area_one_family_semi_detached, lot_area_two_family) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly ✓ lot_area_one_family_attached, lot_area_multiple_family (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly ✓ lot_area_one_family_attached, lot_area_multiple_family (mapped)) |
+| §325-3B:one_family_attached_dwelling | ONE-FAMILY ATTACHED DWELLING | rule | n/a [R2, R3] | n/a [R2, R3] | n/a [R2, R3] | n/a [R2, R3] | **MISSING** (partly ✓ attached_units_per_building) | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
+| §325-3B:dwelling_two_family | DWELLING, TWO-FAMILY | rule | n/a [R4, R6] | n/a [R4, R6] | **MISSING** (partly ✓ lot_area_two_family, lot_width_two_family (mapped)) [R5] | **MISSING** (partly ✓ lot_area_two_family, lot_width_two_family (mapped)) [R5] | **MISSING** (partly ✓ lot_area_two_family) | ✓ lot_area_two_family, lot_width_two_family (mapped) [R5, R7] | ✓ lot_area_two_family, lot_width_two_family (mapped) [R5, R7] | ✓ lot_area_two_family, lot_width_two_family (mapped) [R5, R7] | ✓ lot_area_two_family, lot_width_two_family (mapped) [R5, R7] |
+| §325-3B:dwelling_unit | DWELLING UNIT | rule | **MISSING** (partly ✓ use (mapped)) [R8] | **MISSING** (partly ✓ use (mapped)) [R8] | **MISSING** (partly ✓ use (mapped)) [R8] | **MISSING** (partly ✓ use (mapped)) [R8] | **MISSING** (partly ✓ lot_area_one_family_attached, lot_area_one_family_semi_detached, lot_area_two_family) | **MISSING** (partly flagged: use (mapped)) [R9] | **MISSING** (partly ✓ lot_area_one_family_attached, lot_area_multiple_family (mapped)) [R10] | **MISSING** (partly flagged: use (mapped)) [R9] | **MISSING** (partly ✓ lot_area_one_family_attached, lot_area_multiple_family (mapped)) [R10] |
 | §325-3B:functional_family_unit | FUNCTIONAL FAMILY UNIT | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-3B:green_space | GREEN SPACE | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | flag: green_space |
+| §325-3B:green_space | GREEN SPACE | rule | n/a [R11] | n/a [R11] | n/a [R11] | n/a [R11] | n/a [R11] | n/a [R11] | n/a [R11] | n/a [R11] | flag: green_space [R12] |
 | §325-3B:height_of_building | HEIGHT OF BUILDING | rule | ✓ height, yard_projections | ✓ height, yard_projections | ✓ height, yard_projections | ✓ height, yard_projections | ✓ height, yard_projections | ✓ height, yard_projections | ✓ height, yard_projections | ✓ height, yard_projections | ✓ height, yard_projections |
 | §325-3B:home_occupation | HOME OCCUPATION | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-3B:large_beverage_producer | LARGE BEVERAGE PRODUCER | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-3B:neighborhood_commercial_facility | NEIGHBORHOOD COMMERCIAL FACILITY | rule | n/a | n/a | flag: use (mapped) | flag: use (mapped) | flag: use (mapped) | flag: use (mapped) | flag: use (mapped) | flag: use (mapped) | n/a |
-| §325-3B:occupant | OCCUPANT | rule | n/a | n/a | n/a | n/a | **MISSING** (partly ✓ lot_area_one_family_detached) | n/a | n/a | n/a | n/a |
-| §325-3B:rooming_house | ROOMING HOUSE | rule | n/a | n/a | n/a | n/a | n/a | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) |
-| §325-3B:rooming_unit | ROOMING UNIT | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) |
-| §325-3B:row_house | ROW HOUSE | rule | n/a | n/a | n/a | n/a | n/a | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
+| §325-3B:large_beverage_producer | LARGE BEVERAGE PRODUCER | rule | n/a [R13] | n/a [R13] | n/a [R13] | n/a [R13] | n/a [R13] | n/a [R13] | n/a [R13] | n/a [R13] | n/a [R13] |
+| §325-3B:neighborhood_commercial_facility | NEIGHBORHOOD COMMERCIAL FACILITY | rule | n/a [R14] | n/a [R14] | flag: use (mapped) [R15] | flag: use (mapped) [R15] | flag: use (mapped) [R15] | flag: use (mapped) [R15] | flag: use (mapped) [R15] | flag: use (mapped) [R15] | n/a [R14] |
+| §325-3B:occupant | OCCUPANT | rule | n/a [R16, R17] | n/a [R16, R17] | n/a [R16, R17] | n/a [R16, R17] | **MISSING** (partly ✓ lot_area_one_family_detached) | n/a [R16, R17] | n/a [R16, R17] | n/a [R16, R17] | n/a [R16, R17] |
+| §325-3B:rooming_house | ROOMING HOUSE | rule | n/a [R18, R20] | n/a [R18, R20] | n/a [R18, R20] | n/a [R18, R20] | n/a [R18, R20] | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) [R19] | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) [R19] | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) [R19] | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) [R19] |
+| §325-3B:rooming_unit | ROOMING UNIT | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) [R21] | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) [R21] | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) [R21] | **MISSING** (partly ✓ lot_area_multiple_family (mapped)) [R21] |
+| §325-3B:row_house | ROW HOUSE | rule | n/a [R22] | n/a [R22] | n/a [R22] | n/a [R22] | n/a [R22] | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-3B:standard_canopy | STANDARD CANOPY | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-3B:standard_awning | STANDARD AWNING | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-3B:story | STORY | rule | ✓ stories | ✓ stories | ✓ stories | ✓ stories | ✓ stories | ✓ stories | ✓ stories | ✓ stories | ✓ stories |
 | §325-3B:terrace_or_patio | TERRACE OR PATIO | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-3B:trailer_or_travel_trailer | TRAILER OR TRAVEL TRAILER | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-3B:urban_beverage_producer | URBAN BEVERAGE PRODUCER | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-7A | Compliance with district regulations | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-3B:trailer_or_travel_trailer | TRAILER OR TRAVEL TRAILER | rule | n/a [R23] | n/a [R23] | n/a [R23] | n/a [R23] | n/a [R23] | n/a [R23] | n/a [R23] | n/a [R23] | n/a [R23] |
+| §325-3B:urban_beverage_producer | URBAN BEVERAGE PRODUCER | rule | n/a [R24] | n/a [R24] | n/a [R24] | n/a [R24] | n/a [R24] | n/a [R24] | n/a [R24] | n/a [R24] | n/a [R24] |
+| §325-7A | Compliance with district regulations | rule | n/a [R25] | n/a [R25] | n/a [R25] | n/a [R25] | n/a [R25] | n/a [R25] | n/a [R25] | n/a [R25] | n/a [R25] |
 | §325-7B | Use of yard for another building | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-8A | The District Regulations Chart is hereby made a part of this chapter | rule | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_other_use +9 more (mapped)) | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_other_use +9 more (mapped)) | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_one_family_semi_detached +13 more (mapped)) | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_one_family_semi_detached +13 more (mapped)) | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_zero_lot_line +17 more (mapped)) | **MISSING** (partly ✓ stories, height, lot_coverage +4 more (mapped); partly flagged: use, lot_area_one_family_detached, lot_area_one_family_semi_detached +13 more (mapped)) | **MISSING** (partly ✓ use, stories, height +5 more (mapped); partly flagged: lot_area_one_family_detached, lot_area_one_family_semi_detached, lot_area_two_family +12 more (mapped)) | **MISSING** (partly ✓ stories, height, lot_coverage +4 more (mapped); partly flagged: use, lot_area_one_family_detached, lot_area_one_family_semi_detached +13 more (mapped)) | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_one_family_semi_detached +19 more (mapped)) |
-| §325-8B | General notes pertaining to regulations | rule | **MISSING** (partly ✓ use; partly flagged: use (mapped)) | **MISSING** (partly ✓ use; partly flagged: use (mapped)) | **MISSING** (partly ✓ use; partly flagged: use (mapped)) | **MISSING** (partly ✓ use; partly flagged: use (mapped)) | **MISSING** (partly ✓ use; partly flagged: use (mapped)) | **MISSING** (partly flagged: use, lot_size_zero_lot_line, abutting_r1 (mapped)) | **MISSING** (partly ✓ use, stories; partly flagged: use, lot_size_zero_lot_line, abutting_r1 (mapped)) | **MISSING** (partly flagged: use, lot_size_zero_lot_line, abutting_r1 (mapped)) | **MISSING** (partly ✓ use; partly flagged: primary_structures, use (mapped)) |
-| §325-8C | Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-8D | Additional restrictions in the CBD districts | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-8E | Additional restrictions in the South Hill area | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | n/a | n/a | n/a | n/a |
-| §325-9B | Applicability | rule | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly flagged: use) | **MISSING** (partly ✓ use; partly flagged: use) | **MISSING** (partly flagged: use) | **MISSING** (partly ✓ use; partly flagged: use) |
-| §325-9D | Permit review criteria | flag | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) |
-| §325-10C | Additional conditions | rule | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) | **MISSING** (partly flagged: use (mapped)) |
-| §325-11B | Authorization and minimum requirements | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | n/a | **MISSING** | n/a | **MISSING** | n/a |
-| §325-11C | Approval; information to be submitted | flag | **MISSING** | **MISSING** | **MISSING** | **MISSING** | n/a | **MISSING** | n/a | **MISSING** | n/a |
-| §325-12C | Establishment and location | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-12D | Permitted principal and accessory uses | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-12E | Site plan approval | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-12F | Criteria | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-12H | Additional requirements | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-8A | The District Regulations Chart is hereby made a part of this chapter | rule | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_other_use +9 more (mapped)) [R27, R28, R30, R31, R32] | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_other_use +9 more (mapped)) [R27, R28, R30, R31, R32] | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_one_family_semi_detached +13 more (mapped)) [R27, R28, R30, R31, R32] | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_one_family_semi_detached +13 more (mapped)) [R27, R28, R30, R31, R32] | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_zero_lot_line +17 more (mapped)) [R27, R28, R30, R31, R32] | **MISSING** (partly ✓ stories, height, lot_coverage +4 more (mapped); partly flagged: use, lot_area_one_family_detached, lot_area_one_family_semi_detached +13 more (mapped)) [R26, R27, R29, R30, R31, R32] | **MISSING** (partly ✓ use, stories, height +5 more (mapped); partly flagged: lot_area_one_family_detached, lot_area_one_family_semi_detached, lot_area_two_family +12 more (mapped)) [R27, R29, R30, R31] | **MISSING** (partly ✓ stories, height, lot_coverage +4 more (mapped); partly flagged: use, lot_area_one_family_detached, lot_area_one_family_semi_detached +13 more (mapped)) [R26, R27, R29, R30, R31, R32] | **MISSING** (partly ✓ use, lot_area_one_family_detached, lot_area_one_family_semi_detached +19 more (mapped)) [R27, R28, R30, R31, R32] |
+| §325-8B | General notes pertaining to regulations | rule | **MISSING** (partly ✓ use; partly flagged: use (mapped)) [R35, R37, R38] | **MISSING** (partly ✓ use; partly flagged: use (mapped)) [R35, R37, R38] | **MISSING** (partly ✓ use; partly flagged: use (mapped)) [R35, R37, R38] | **MISSING** (partly ✓ use; partly flagged: use (mapped)) [R35, R37, R38] | **MISSING** (partly ✓ use; partly flagged: use (mapped)) [R35, R37, R38] | **MISSING** (partly flagged: use, lot_size_zero_lot_line, abutting_r1 (mapped)) [R34, R35, R36, R37, R39] | **MISSING** (partly ✓ use, stories; partly flagged: use, lot_size_zero_lot_line, abutting_r1 (mapped)) [R35, R36, R39] | **MISSING** (partly flagged: use, lot_size_zero_lot_line, abutting_r1 (mapped)) [R34, R35, R36, R37, R39] | **MISSING** (partly ✓ use; partly flagged: primary_structures, use (mapped)) [R33, R35, R36, R37, R38] |
+| §325-8C | Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, | rule | n/a [R40] | n/a [R40] | n/a [R40] | n/a [R40] | n/a [R40] | n/a [R40] | n/a [R40] | n/a [R40] | n/a [R40] |
+| §325-8D | Additional restrictions in the CBD districts | rule | n/a [R41] | n/a [R41] | n/a [R41] | n/a [R41] | n/a [R41] | n/a [R41] | n/a [R41] | n/a [R41] | n/a [R41] |
+| §325-8E | Additional restrictions in the South Hill area | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | n/a [R42] | n/a [R42] | n/a [R42] | n/a [R42] |
+| §325-9B | Applicability | rule | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly ✓ use) | **MISSING** (partly flagged: use) [R43, R44] | **MISSING** (partly ✓ use; partly flagged: use) [R44] | **MISSING** (partly flagged: use) [R43, R44] | **MISSING** (partly ✓ use; partly flagged: use) [R44] |
+| §325-9D | Permit review criteria | flag | **MISSING** (partly flagged: use (mapped)) [R45] | **MISSING** (partly flagged: use (mapped)) [R45] | **MISSING** (partly flagged: use (mapped)) [R45] | **MISSING** (partly flagged: use (mapped)) [R45] | **MISSING** (partly flagged: use (mapped)) [R45] | **MISSING** (partly flagged: use (mapped)) [R45] | **MISSING** (partly flagged: use (mapped)) [R45] | **MISSING** (partly flagged: use (mapped)) [R45] | **MISSING** (partly flagged: use (mapped)) [R45] |
+| §325-10C | Additional conditions | rule | **MISSING** (partly flagged: use (mapped)) [R47] | **MISSING** (partly flagged: use (mapped)) [R47] | **MISSING** (partly flagged: use (mapped)) [R47] | **MISSING** (partly flagged: use (mapped)) [R47] | **MISSING** (partly flagged: use (mapped)) [R47] | **MISSING** (partly flagged: use (mapped)) [R46, R47] | **MISSING** (partly flagged: use (mapped)) [R46, R47] | **MISSING** (partly flagged: use (mapped)) [R46, R47] | **MISSING** (partly flagged: use (mapped)) [R46, R47] |
+| §325-11B | Authorization and minimum requirements | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | n/a [R48] | **MISSING** | n/a [R48] | **MISSING** | n/a [R48] |
+| §325-11C | Approval; information to be submitted | flag | **MISSING** | **MISSING** | **MISSING** | **MISSING** | n/a [R49] | **MISSING** | n/a [R49] | **MISSING** | n/a [R49] |
+| §325-12C | Establishment and location | flag | n/a [R50] | n/a [R50] | n/a [R50] | n/a [R50] | n/a [R50] | n/a [R50] | n/a [R50] | n/a [R50] | n/a [R50] |
+| §325-12D | Permitted principal and accessory uses | rule | n/a [R51] | n/a [R51] | n/a [R51] | n/a [R51] | n/a [R51] | n/a [R51] | n/a [R51] | n/a [R51] | n/a [R51] |
+| §325-12E | Site plan approval | flag | n/a [R52] | n/a [R52] | n/a [R52] | n/a [R52] | n/a [R52] | n/a [R52] | n/a [R52] | n/a [R52] | n/a [R52] |
+| §325-12F | Criteria | flag | n/a [R53] | n/a [R53] | n/a [R53] | n/a [R53] | n/a [R53] | n/a [R53] | n/a [R53] | n/a [R53] | n/a [R53] |
+| §325-12H | Additional requirements | flag | n/a [R54] | n/a [R54] | n/a [R54] | n/a [R54] | n/a [R54] | n/a [R54] | n/a [R54] | n/a [R54] | n/a [R54] |
 | §325-15A | Removal of topsoil; grading | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-15B | Mobile homes | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-15B | Mobile homes | rule | n/a [R55] | n/a [R55] | n/a [R55] | n/a [R55] | n/a [R55] | n/a [R55] | n/a [R55] | n/a [R55] | n/a [R55] |
 | §325-15C | Unsightly or unsanitary storage | flag | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-15D | Garage sales | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-15E | Junkyards and salvage yards | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-15F | Gasoline service stations | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-16A | Exceptions | rule | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence |
+| §325-15E | Junkyards and salvage yards | rule | n/a [R56] | n/a [R56] | n/a [R56] | n/a [R56] | n/a [R56] | n/a [R56] | n/a [R56] | n/a [R56] | n/a [R56] |
+| §325-15F | Gasoline service stations | flag | n/a [R57] | n/a [R57] | n/a [R57] | n/a [R57] | n/a [R57] | n/a [R57] | n/a [R57] | n/a [R57] | n/a [R57] |
+| §325-16A | Exceptions | rule | parked: chimney_fence [R58] | parked: chimney_fence [R58] | parked: chimney_fence [R58] | parked: chimney_fence [R58] | parked: chimney_fence [R58] | parked: chimney_fence [R58] | parked: chimney_fence [R58] | parked: chimney_fence [R58] | parked: chimney_fence [R58] |
 | §325-16B | Ornamental and architectural features | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-16C | Height and open space | rule | ✓ height, stories, yard_projections | ✓ height, stories, yard_projections | ✓ height, stories, yard_projections | ✓ height, stories, yard_projections | ✓ height, stories, yard_projections | ✓ height, stories, yard_projections | ✓ height, stories, yard_projections | ✓ height, stories, yard_projections | ✓ height, stories, yard_projections |
-| §325-16D | Notwithstanding anything to the contrary contained herein, in any U-1 District: [Added 6-3-1998 by | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-16F | Notwithstanding anything to the contrary contained herein, in the WEDZ-1 District: [Added | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-16G | Notwithstanding anything to the contrary contained herein, in the CBD-60, CBD-85, CBD-100, | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-17A | Reduced lot area | rule | ✓ front_yard, side_yards, rear_yard (mapped) | ✓ front_yard, side_yards, rear_yard (mapped) | ✓ front_yard, side_yards, rear_yard (mapped) | ✓ front_yard, side_yards, rear_yard (mapped) | ✓ front_yard, side_yards, rear_yard (mapped) | ✓ front_yard, side_yards, rear_yard (mapped) | ✓ front_yard, side_yards, rear_yard (mapped) | ✓ front_yard, side_yards, rear_yard (mapped) | ✓ front_yard, side_yards, rear_yard (mapped) |
-| §325-17B | Visibility at intersections | rule | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence |
-| §325-17C | Obstructions dangerous to traffic | flag | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence |
-| §325-17D | Fences | flag | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence | parked: chimney_fence |
-| §325-18A | Porches and structures | rule | ✓ front_yard, side_yards, rear_yard +3 more (mapped) | ✓ front_yard, side_yards, rear_yard +3 more (mapped) | ✓ front_yard, side_yards, rear_yard +3 more (mapped) | ✓ front_yard, side_yards, rear_yard +3 more (mapped) | ✓ front_yard, side_yards, rear_yard +3 more (mapped) | ✓ front_yard, side_yards, rear_yard +3 more (mapped) | ✓ front_yard, side_yards, rear_yard +3 more (mapped) | ✓ front_yard, side_yards, rear_yard +3 more (mapped) | ✓ front_yard, side_yards, rear_yard +3 more (mapped) |
+| §325-16D | Notwithstanding anything to the contrary contained herein, in any U-1 District: [Added 6-3-1998 by | rule | n/a [R59] | n/a [R59] | n/a [R59] | n/a [R59] | n/a [R59] | n/a [R59] | n/a [R59] | n/a [R59] | n/a [R59] |
+| §325-16F | Notwithstanding anything to the contrary contained herein, in the WEDZ-1 District: [Added | rule | n/a [R60] | n/a [R60] | n/a [R60] | n/a [R60] | n/a [R60] | n/a [R60] | n/a [R60] | n/a [R60] | n/a [R60] |
+| §325-16G | Notwithstanding anything to the contrary contained herein, in the CBD-60, CBD-85, CBD-100, | rule | n/a [R61] | n/a [R61] | n/a [R61] | n/a [R61] | n/a [R61] | n/a [R61] | n/a [R61] | n/a [R61] | n/a [R61] |
+| §325-17A | Reduced lot area | rule | ✓ front_yard, side_yards, rear_yard (mapped) [R62] | ✓ front_yard, side_yards, rear_yard (mapped) [R62] | ✓ front_yard, side_yards, rear_yard (mapped) [R62] | ✓ front_yard, side_yards, rear_yard (mapped) [R62] | ✓ front_yard, side_yards, rear_yard (mapped) [R62] | ✓ front_yard, side_yards, rear_yard (mapped) [R62] | ✓ front_yard, side_yards, rear_yard (mapped) [R62] | ✓ front_yard, side_yards, rear_yard (mapped) [R62] | ✓ front_yard, side_yards, rear_yard (mapped) [R62] |
+| §325-17B | Visibility at intersections | rule | parked: chimney_fence [R63] | parked: chimney_fence [R63] | parked: chimney_fence [R63] | parked: chimney_fence [R63] | parked: chimney_fence [R63] | parked: chimney_fence [R63] | parked: chimney_fence [R63] | parked: chimney_fence [R63] | parked: chimney_fence [R63] |
+| §325-17C | Obstructions dangerous to traffic | flag | parked: chimney_fence [R64] | parked: chimney_fence [R64] | parked: chimney_fence [R64] | parked: chimney_fence [R64] | parked: chimney_fence [R64] | parked: chimney_fence [R64] | parked: chimney_fence [R64] | parked: chimney_fence [R64] | parked: chimney_fence [R64] |
+| §325-17D | Fences | flag | parked: chimney_fence [R65] | parked: chimney_fence [R65] | parked: chimney_fence [R65] | parked: chimney_fence [R65] | parked: chimney_fence [R65] | parked: chimney_fence [R65] | parked: chimney_fence [R65] | parked: chimney_fence [R65] | parked: chimney_fence [R65] |
+| §325-18A | Porches and structures | rule | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] | ✓ front_yard, side_yards, rear_yard +3 more (mapped) [R66] |
 | §325-18B | Projecting architectural features | rule | **MISSING** (partly ✓ yard_projections) | **MISSING** (partly ✓ yard_projections) | **MISSING** (partly ✓ yard_projections) | **MISSING** (partly ✓ yard_projections) | **MISSING** (partly ✓ yard_projections) | **MISSING** (partly ✓ yard_projections) | **MISSING** (partly ✓ yard_projections) | **MISSING** (partly ✓ yard_projections) | **MISSING** (partly ✓ yard_projections) |
-| §325-18C | [fn11]Notwithstanding anything herein contained to the contrary, in the U-1 Zone, for any building which | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-19A | [fn12]Side yard and rear yard transition | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-19B | Front yard transition | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-18C | [fn11]Notwithstanding anything herein contained to the contrary, in the U-1 Zone, for any building which | rule | n/a [R67] | n/a [R67] | n/a [R67] | n/a [R67] | n/a [R67] | n/a [R67] | n/a [R67] | n/a [R67] | n/a [R67] |
+| §325-19A | [fn12]Side yard and rear yard transition | rule | n/a [R68] | n/a [R68] | n/a [R68] | n/a [R68] | n/a [R68] | n/a [R68] | n/a [R68] | n/a [R68] | n/a [R68] |
+| §325-19B | Front yard transition | rule | n/a [R69] | n/a [R69] | n/a [R69] | n/a [R69] | n/a [R69] | n/a [R69] | n/a [R69] | n/a [R69] | n/a [R69] |
 | §325-19C | Corner lot transition | rule | ✓ front_yard | ✓ front_yard | ✓ front_yard | ✓ front_yard | ✓ front_yard | ✓ front_yard | ✓ front_yard | ✓ front_yard | ✓ front_yard |
-| §325-19D | Notwithstanding the above, the transition regulations as provided for in this section shall not apply in | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-19E | Development in R-3 Districts which abut R-1 Districts | rule | n/a | n/a | n/a | n/a | n/a | flag: abutting_r1 | flag: abutting_r1 | flag: abutting_r1 | n/a |
-| §325-20C | Nonconforming uses | rule | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking |
-| §325-20D | General requirements | rule | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking |
-| §325-20E | Parking in front yards | rule | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking |
-| §325-20F | Requirements for new or enlarged parking areas with the capacity for three or more parking spaces | rule | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking | parked: parking |
-| §325-20G | Parking areas on lots in nonresidential zoning districts | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-20H | Parking in WEDZ-1 District | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-20I | Parking in the Southwest Area | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-20J | Parking for the U-1 Zoning District | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-21A | Size requirements | rule | **MISSING** | **MISSING** | **MISSING** (partly flagged: loading (mapped)) | **MISSING** (partly flagged: loading (mapped)) | **MISSING** (partly flagged: loading (mapped)) | **MISSING** (partly flagged: loading) | **MISSING** (partly flagged: loading) | **MISSING** (partly flagged: loading) | **MISSING** (partly flagged: loading) |
-| §325-21B | Space requirements | rule | **MISSING** | **MISSING** | **MISSING** (partly flagged: loading (mapped)) | **MISSING** (partly flagged: loading (mapped)) | **MISSING** (partly flagged: loading (mapped)) | **MISSING** (partly flagged: loading) | **MISSING** (partly flagged: loading) | **MISSING** (partly flagged: loading) | **MISSING** (partly flagged: loading) |
-| §325-21C | There shall be no off-street loading requirement for any properties located in any CBD zoning district | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-22A | Lot size and frontage | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-22B | Parking | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-22C | Paving | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-22D | Driveway width | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-22E | Curb cuts | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-22F | Landscaping | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-22G | Illumination | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-22H | Uses | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-19D | Notwithstanding the above, the transition regulations as provided for in this section shall not apply in | rule | n/a [R70] | n/a [R70] | n/a [R70] | n/a [R70] | n/a [R70] | n/a [R70] | n/a [R70] | n/a [R70] | n/a [R70] |
+| §325-19E | Development in R-3 Districts which abut R-1 Districts | rule | n/a [R71] | n/a [R71] | n/a [R71] | n/a [R71] | n/a [R71] | flag: abutting_r1 [R72] | flag: abutting_r1 [R72] | flag: abutting_r1 [R72] | n/a [R71] |
+| §325-20C | Nonconforming uses | rule | parked: parking [R73] | parked: parking [R73] | parked: parking [R73] | parked: parking [R73] | parked: parking [R73] | parked: parking [R73] | parked: parking [R73] | parked: parking [R73] | parked: parking [R73] |
+| §325-20D | General requirements | rule | parked: parking [R74] | parked: parking [R74] | parked: parking [R74] | parked: parking [R74] | parked: parking [R74] | parked: parking [R74] | parked: parking [R74] | parked: parking [R74] | parked: parking [R74] |
+| §325-20E | Parking in front yards | rule | parked: parking [R75] | parked: parking [R75] | parked: parking [R75] | parked: parking [R75] | parked: parking [R75] | parked: parking [R75] | parked: parking [R75] | parked: parking [R75] | parked: parking [R75] |
+| §325-20F | Requirements for new or enlarged parking areas with the capacity for three or more parking spaces | rule | parked: parking [R76] | parked: parking [R76] | parked: parking [R76] | parked: parking [R76] | parked: parking [R76] | parked: parking [R76] | parked: parking [R76] | parked: parking [R76] | parked: parking [R76] |
+| §325-20G | Parking areas on lots in nonresidential zoning districts | rule | n/a [R77] | n/a [R77] | n/a [R77] | n/a [R77] | n/a [R77] | n/a [R77] | n/a [R77] | n/a [R77] | n/a [R77] |
+| §325-20H | Parking in WEDZ-1 District | rule | n/a [R78] | n/a [R78] | n/a [R78] | n/a [R78] | n/a [R78] | n/a [R78] | n/a [R78] | n/a [R78] | n/a [R78] |
+| §325-20I | Parking in the Southwest Area | rule | n/a [R79] | n/a [R79] | n/a [R79] | n/a [R79] | n/a [R79] | n/a [R79] | n/a [R79] | n/a [R79] | n/a [R79] |
+| §325-20J | Parking for the U-1 Zoning District | rule | n/a [R80] | n/a [R80] | n/a [R80] | n/a [R80] | n/a [R80] | n/a [R80] | n/a [R80] | n/a [R80] | n/a [R80] |
+| §325-21A | Size requirements | rule | **MISSING** [R81] | **MISSING** [R81] | **MISSING** (partly flagged: loading (mapped)) [R82] | **MISSING** (partly flagged: loading (mapped)) [R82] | **MISSING** (partly flagged: loading (mapped)) [R82] | **MISSING** (partly flagged: loading) [R83] | **MISSING** (partly flagged: loading) [R83] | **MISSING** (partly flagged: loading) [R83] | **MISSING** (partly flagged: loading) [R83] |
+| §325-21B | Space requirements | rule | **MISSING** [R84] | **MISSING** [R84] | **MISSING** (partly flagged: loading (mapped)) [R85] | **MISSING** (partly flagged: loading (mapped)) [R85] | **MISSING** (partly flagged: loading (mapped)) [R85] | **MISSING** (partly flagged: loading) [R86] | **MISSING** (partly flagged: loading) [R86] | **MISSING** (partly flagged: loading) [R86] | **MISSING** (partly flagged: loading) [R86] |
+| §325-21C | There shall be no off-street loading requirement for any properties located in any CBD zoning district | rule | n/a [R87] | n/a [R87] | n/a [R87] | n/a [R87] | n/a [R87] | n/a [R87] | n/a [R87] | n/a [R87] | n/a [R87] |
+| §325-22A | Lot size and frontage | rule | n/a [R88] | n/a [R88] | n/a [R88] | n/a [R88] | n/a [R88] | n/a [R88] | n/a [R88] | n/a [R88] | n/a [R88] |
+| §325-22B | Parking | rule | n/a [R89] | n/a [R89] | n/a [R89] | n/a [R89] | n/a [R89] | n/a [R89] | n/a [R89] | n/a [R89] | n/a [R89] |
+| §325-22C | Paving | rule | n/a [R90] | n/a [R90] | n/a [R90] | n/a [R90] | n/a [R90] | n/a [R90] | n/a [R90] | n/a [R90] | n/a [R90] |
+| §325-22D | Driveway width | rule | n/a [R91] | n/a [R91] | n/a [R91] | n/a [R91] | n/a [R91] | n/a [R91] | n/a [R91] | n/a [R91] | n/a [R91] |
+| §325-22E | Curb cuts | rule | n/a [R92] | n/a [R92] | n/a [R92] | n/a [R92] | n/a [R92] | n/a [R92] | n/a [R92] | n/a [R92] | n/a [R92] |
+| §325-22F | Landscaping | rule | n/a [R93] | n/a [R93] | n/a [R93] | n/a [R93] | n/a [R93] | n/a [R93] | n/a [R93] | n/a [R93] | n/a [R93] |
+| §325-22G | Illumination | flag | n/a [R94] | n/a [R94] | n/a [R94] | n/a [R94] | n/a [R94] | n/a [R94] | n/a [R94] | n/a [R94] | n/a [R94] |
+| §325-22H | Uses | rule | n/a [R95] | n/a [R95] | n/a [R95] | n/a [R95] | n/a [R95] | n/a [R95] | n/a [R95] | n/a [R95] | n/a [R95] |
 | §325-23A | All uses shall conform to the current New York State Board of Health requirements and to the | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-24B | General restrictions | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-24C | Noise | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-24D | Vibration | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-24E | Smoke | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-24F | Dust, dirt, odor and fumes | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-24G | Fire and safety | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-24H | Glare and heat | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-24I | Industrial sewage and waste | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-24B | General restrictions | rule | n/a [R96] | n/a [R96] | n/a [R96] | n/a [R96] | n/a [R96] | n/a [R96] | n/a [R96] | n/a [R96] | n/a [R96] |
+| §325-24C | Noise | rule | n/a [R97] | n/a [R97] | n/a [R97] | n/a [R97] | n/a [R97] | n/a [R97] | n/a [R97] | n/a [R97] | n/a [R97] |
+| §325-24D | Vibration | flag | n/a [R98] | n/a [R98] | n/a [R98] | n/a [R98] | n/a [R98] | n/a [R98] | n/a [R98] | n/a [R98] | n/a [R98] |
+| §325-24E | Smoke | rule | n/a [R99] | n/a [R99] | n/a [R99] | n/a [R99] | n/a [R99] | n/a [R99] | n/a [R99] | n/a [R99] | n/a [R99] |
+| §325-24F | Dust, dirt, odor and fumes | flag | n/a [R100] | n/a [R100] | n/a [R100] | n/a [R100] | n/a [R100] | n/a [R100] | n/a [R100] | n/a [R100] | n/a [R100] |
+| §325-24G | Fire and safety | rule | n/a [R101] | n/a [R101] | n/a [R101] | n/a [R101] | n/a [R101] | n/a [R101] | n/a [R101] | n/a [R101] | n/a [R101] |
+| §325-24H | Glare and heat | flag | n/a [R102] | n/a [R102] | n/a [R102] | n/a [R102] | n/a [R102] | n/a [R102] | n/a [R102] | n/a [R102] | n/a [R102] |
+| §325-24I | Industrial sewage and waste | rule | n/a [R103] | n/a [R103] | n/a [R103] | n/a [R103] | n/a [R103] | n/a [R103] | n/a [R103] | n/a [R103] | n/a [R103] |
 | §325-25 | Location of accessory structures. | rule | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings |
 | §325-25A | Accessory structures wholly or partially above grade | rule | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings | ✓ accessory_buildings |
 | §325-25B | Accessory structures below grade | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
@@ -214,21 +216,21 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 | §325-26 | New structures along streams or inlets. | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-27D | Short-term rental regulations | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-27F | Operational requirements | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-28B | Applicability | rule | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus |
-| §325-28C | ADU requirements | rule | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus | parked: adus |
-| §325-29 | Landmarks. | flag | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood |
-| §325-29.1D | Location | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-29.1E | Public view and lighting | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-29.1F | Sale of alcohol prohibited | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-29.1G | Site plan review/landscaping | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-29.2A | General note | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-29.2B | Building setback | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-29.2C | Minimum store size | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-28B | Applicability | rule | parked: adus [R104] | parked: adus [R104] | parked: adus [R104] | parked: adus [R104] | parked: adus [R104] | parked: adus [R104] | parked: adus [R104] | parked: adus [R104] | parked: adus [R104] |
+| §325-28C | ADU requirements | rule | parked: adus [R105] | parked: adus [R105] | parked: adus [R105] | parked: adus [R105] | parked: adus [R105] | parked: adus [R105] | parked: adus [R105] | parked: adus [R105] | parked: adus [R105] |
+| §325-29 | Landmarks. | flag | parked: historic_flood [R106] | parked: historic_flood [R106] | parked: historic_flood [R106] | parked: historic_flood [R106] | parked: historic_flood [R106] | parked: historic_flood [R106] | parked: historic_flood [R106] | parked: historic_flood [R106] | parked: historic_flood [R106] |
+| §325-29.1D | Location | rule | n/a [R107] | n/a [R107] | n/a [R107] | n/a [R107] | n/a [R107] | n/a [R107] | n/a [R107] | n/a [R107] | n/a [R107] |
+| §325-29.1E | Public view and lighting | rule | n/a [R108] | n/a [R108] | n/a [R108] | n/a [R108] | n/a [R108] | n/a [R108] | n/a [R108] | n/a [R108] | n/a [R108] |
+| §325-29.1F | Sale of alcohol prohibited | rule | n/a [R109] | n/a [R109] | n/a [R109] | n/a [R109] | n/a [R109] | n/a [R109] | n/a [R109] | n/a [R109] | n/a [R109] |
+| §325-29.1G | Site plan review/landscaping | flag | n/a [R110] | n/a [R110] | n/a [R110] | n/a [R110] | n/a [R110] | n/a [R110] | n/a [R110] | n/a [R110] | n/a [R110] |
+| §325-29.2A | General note | flag | n/a [R111] | n/a [R111] | n/a [R111] | n/a [R111] | n/a [R111] | n/a [R111] | n/a [R111] | n/a [R111] | n/a [R111] |
+| §325-29.2B | Building setback | rule | n/a [R112] | n/a [R112] | n/a [R112] | n/a [R112] | n/a [R112] | n/a [R112] | n/a [R112] | n/a [R112] | n/a [R112] |
+| §325-29.2C | Minimum store size | rule | n/a [R113] | n/a [R113] | n/a [R113] | n/a [R113] | n/a [R113] | n/a [R113] | n/a [R113] | n/a [R113] | n/a [R113] |
 | §325-29.3C | It shall be the duty and responsibility of all owners of property in the City of Ithaca to ensure the | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-29.3D | In making any determination with respect to any proposed dumpster, the Board of Zoning Appeals | flag | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-29.3E | In granting any variance, the Board of Zoning Appeals shall specify the exact location of any | flag | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-29.6D | Unpermitted facilities, mounts, or equipment ineligible for collocation | flag | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-29.6F | Due to the limited visual impact of underground or cable-based broadband installations, such | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-29.6F | Due to the limited visual impact of underground or cable-based broadband installations, such | rule | n/a [R114] | n/a [R114] | n/a [R114] | n/a [R114] | n/a [R114] | n/a [R114] | n/a [R114] | n/a [R114] | n/a [R114] |
 | §325-29.7B | All PWSFs shall be classified as follows: | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-29.8A | Location standards | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-29.8B | Siting standards | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
@@ -260,31 +262,170 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 | §325-34B | When a nonconforming building or structure that is used in its entirety for a conforming use is | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-35A | The Director may issue a zoning permit for specific deficiencies on existing nonconforming | rule | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
 | §325-41B | Criteria for approval | flag | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** | **MISSING** |
-| §325-44A | Demolition, exterior alterations or additions to existing structures and parking areas and construction | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-44B | Demolition, exterior alteration or enlargement of structures or parking areas or construction of new | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.1C | Applicability | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.1D | Design review and approval required | flag | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.1E | Landmarks Preservation Commission | flag | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood | parked: historic_flood |
-| §325-45.2B | Definitions and related standards | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.2D | Maximum Height (in stories) Map | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.2E | Collegetown Residential (CR-1, CR-2, CR-3) | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.2F | Collegetown Residential 4 (CR-4) | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.2G | Mixed Use (MU-1, MU-2) | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.3B | Street-level active uses required | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.5A | Permitted uses | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.5B | Off-street parking/loading requirements | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.5C | Minimum lot size | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.5D | Maximum building height | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.5E | Maximum percentage of lot coverage by buildings: 35% | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.5F | Yard dimensions | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| §325-45.5G | Minimum building height: none | rule | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| §325-44A | Demolition, exterior alterations or additions to existing structures and parking areas and construction | flag | n/a [R115] | n/a [R115] | n/a [R115] | n/a [R115] | n/a [R115] | n/a [R115] | n/a [R115] | n/a [R115] | n/a [R115] |
+| §325-44B | Demolition, exterior alteration or enlargement of structures or parking areas or construction of new | flag | n/a [R116] | n/a [R116] | n/a [R116] | n/a [R116] | n/a [R116] | n/a [R116] | n/a [R116] | n/a [R116] | n/a [R116] |
+| §325-45.1C | Applicability | rule | n/a [R117] | n/a [R117] | n/a [R117] | n/a [R117] | n/a [R117] | n/a [R117] | n/a [R117] | n/a [R117] | n/a [R117] |
+| §325-45.1D | Design review and approval required | flag | n/a [R118] | n/a [R118] | n/a [R118] | n/a [R118] | n/a [R118] | n/a [R118] | n/a [R118] | n/a [R118] | n/a [R118] |
+| §325-45.1E | Landmarks Preservation Commission | flag | parked: historic_flood [R119] | parked: historic_flood [R119] | parked: historic_flood [R119] | parked: historic_flood [R119] | parked: historic_flood [R119] | parked: historic_flood [R119] | parked: historic_flood [R119] | parked: historic_flood [R119] | parked: historic_flood [R119] |
+| §325-45.2B | Definitions and related standards | rule | n/a [R120] | n/a [R120] | n/a [R120] | n/a [R120] | n/a [R120] | n/a [R120] | n/a [R120] | n/a [R120] | n/a [R120] |
+| §325-45.2D | Maximum Height (in stories) Map | rule | n/a [R121] | n/a [R121] | n/a [R121] | n/a [R121] | n/a [R121] | n/a [R121] | n/a [R121] | n/a [R121] | n/a [R121] |
+| §325-45.2E | Collegetown Residential (CR-1, CR-2, CR-3) | rule | n/a [R122] | n/a [R122] | n/a [R122] | n/a [R122] | n/a [R122] | n/a [R122] | n/a [R122] | n/a [R122] | n/a [R122] |
+| §325-45.2F | Collegetown Residential 4 (CR-4) | rule | n/a [R123] | n/a [R123] | n/a [R123] | n/a [R123] | n/a [R123] | n/a [R123] | n/a [R123] | n/a [R123] | n/a [R123] |
+| §325-45.2G | Mixed Use (MU-1, MU-2) | rule | n/a [R124] | n/a [R124] | n/a [R124] | n/a [R124] | n/a [R124] | n/a [R124] | n/a [R124] | n/a [R124] | n/a [R124] |
+| §325-45.3B | Street-level active uses required | rule | n/a [R125] | n/a [R125] | n/a [R125] | n/a [R125] | n/a [R125] | n/a [R125] | n/a [R125] | n/a [R125] | n/a [R125] |
+| §325-45.5A | Permitted uses | rule | n/a [R126] | n/a [R126] | n/a [R126] | n/a [R126] | n/a [R126] | n/a [R126] | n/a [R126] | n/a [R126] | n/a [R126] |
+| §325-45.5B | Off-street parking/loading requirements | rule | n/a [R127] | n/a [R127] | n/a [R127] | n/a [R127] | n/a [R127] | n/a [R127] | n/a [R127] | n/a [R127] | n/a [R127] |
+| §325-45.5C | Minimum lot size | rule | n/a [R128] | n/a [R128] | n/a [R128] | n/a [R128] | n/a [R128] | n/a [R128] | n/a [R128] | n/a [R128] | n/a [R128] |
+| §325-45.5D | Maximum building height | rule | n/a [R129] | n/a [R129] | n/a [R129] | n/a [R129] | n/a [R129] | n/a [R129] | n/a [R129] | n/a [R129] | n/a [R129] |
+| §325-45.5E | Maximum percentage of lot coverage by buildings: 35% | rule | n/a [R130] | n/a [R130] | n/a [R130] | n/a [R130] | n/a [R130] | n/a [R130] | n/a [R130] | n/a [R130] | n/a [R130] |
+| §325-45.5F | Yard dimensions | rule | n/a [R131] | n/a [R131] | n/a [R131] | n/a [R131] | n/a [R131] | n/a [R131] | n/a [R131] | n/a [R131] | n/a [R131] |
+| §325-45.5G | Minimum building height: none | rule | n/a [R132] | n/a [R132] | n/a [R132] | n/a [R132] | n/a [R132] | n/a [R132] | n/a [R132] | n/a [R132] | n/a [R132] |
+
+## Decisions resting on a reading
+
+Code can't prove that the law's words support a decision; it proves only that the quote is the law's own words, exactly where it says (the same standard as a rule's sources). Each decision below rests on a person's reading of that quote (Claude's, drafted from the law; architect sign-off is deferred). Read the quote and judge it.
+
+| Reading | Piece and part | Districts | Decision | The law's words (where) |
+|---|---|---|---|---|
+| R1 | §325-3B:accessory_dwelling_unit: What an accessory dwelling unit is and must have | all 9 districts | parked: Accessory dwelling units | “A smaller, secondary dwelling unit located on the same lot” (Ch. 325 p.4 l.7–8) |
+| R2 | §325-3B:one_family_attached_dwelling: An attached building holds three to six one-family dwellings | R-1a, R-1b, R-2a, R-2b | not applicable: A one-family attached dwelling isn't permitted in this district (chart p.2, "-"). | “One-family dwelling, attached [fn4] - - - - SP • • • •” (zoning chart p.2 l.12; the district's own cell in row “One-family dwelling, attached [fn4]” is “-”) |
+| R3 | §325-3B:one_family_attached_dwelling: Each dwelling shares a party wall or structure and has direct exterior access from the ground floor | R-1a, R-1b, R-2a, R-2b | not applicable: A one-family attached dwelling isn't permitted in this district (chart p.2, "-"). | “One-family dwelling, attached [fn4] - - - - SP • • • •” (zoning chart p.2 l.12; the district's own cell in row “One-family dwelling, attached [fn4]” is “-”) |
+| R4 | §325-3B:dwelling_two_family: What a two-family dwelling is (a building containing two dwelling units) | R-1a, R-1b | not applicable: A two-family dwelling isn't permitted in this district (chart p.2, "-"). | “Two-family dwelling [fn4] - - • • • • • • •” (zoning chart p.2 l.13; the district's own cell in row “Two-family dwelling [fn4]” is “-”) |
+| R5 | §325-3B:dwelling_two_family: What a two-family dwelling is (a building containing two dwelling units) | R-2a, R-2b, R-3a, R-3aa, R-3b, RU | in the rulebook by mapping: lot_area_two_family, lot_width_two_family. The two-family lot size and width apply to the house type this sentence defines, which the architect states as the use. | — |
+| R6 | §325-3B:dwelling_two_family: Who may occupy each unit of a two-family dwelling | R-1a, R-1b | not applicable: A two-family dwelling isn't permitted in this district (chart p.2, "-"), whatever this definition's R-1 sentence says. | “Two-family dwelling [fn4] - - • • • • • • •” (zoning chart p.2 l.13; the district's own cell in row “Two-family dwelling [fn4]” is “-”) |
+| R7 | §325-3B:dwelling_two_family: Who may occupy each unit of a two-family dwelling | R-3a, R-3aa, R-3b, RU | not applicable: Its occupancy limits name only R-1/CR-1 and R-2/CR-2 zones. | “In R-2 and CR-2 Zones, each unit of a two-family dwelling may be occupied” (Ch. 325 p.9 l.8–9) |
+| R8 | §325-3B:dwelling_unit: What a dwelling unit is, as the rules count units and house types | R-1a, R-1b, R-2a, R-2b | in the rulebook by mapping: use. Each house type the architect states (one-family, two-family, ...) is defined by its dwelling units. Research §6 (docs/research/2026-10-20_architect_questions.md) reads the definition as a category, not a limit. | “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10) |
+| R9 | §325-3B:dwelling_unit: What a dwelling unit is, as the rules count units and house types | R-3a, R-3b | flag (needs review) by mapping: use. Each house type the architect states is defined by its dwelling units (research §6, a category); R-3a's and R-3b's use entry is a flag for the special-permit uses. | “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10) |
+| R10 | §325-3B:dwelling_unit: What a dwelling unit is, as the rules count units and house types | R-3aa, RU | in the rulebook by mapping: lot_area_multiple_family, lot_area_one_family_attached. These lot sizes grow with the dwelling units the architect states (research §6, a category). | “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10) |
+| R11 | §325-3B:green_space: Green space, at least 75% softscape, where a minimum applies | R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b | not applicable: The residential chart sets a green-space minimum only for RU (chart p.3, note 13). | “Where a minimum green space requirement applies” (Ch. 325 p.12 l.4) |
+| R12 | §325-3B:green_space: Green space, at least 75% softscape, where a minimum applies | RU | flag: green_space | “Where a minimum green space requirement applies” (Ch. 325 p.12 l.4) |
+| R13 | §325-3B:large_beverage_producer: Large beverage producers (production cap, silo height) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R14 | §325-3B:neighborhood_commercial_facility: What a neighborhood commercial facility may sell | R-1a, R-1b, RU | not applicable: Not permitted in this district (chart p.2, "-"). | “Neighborhood commercial facility - - SP SP SP SP SP SP -” (zoning chart p.2 l.25; the district's own cell in row “Neighborhood commercial facility” is “-”) |
+| R15 | §325-3B:neighborhood_commercial_facility: What a neighborhood commercial facility may sell | R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b | flag (needs review) by mapping: use. A neighborhood commercial facility is a special-permit use here (chart p.2, SP), so the use entry says needs review. | “Such facility shall be limited to the retail sale of convenience goods” (Ch. 325 p.15 l.28–29) |
+| R16 | §325-3B:occupant: Who counts as an occupant (R-2c), for the lot sizes that grow with occupants | R-1a, R-1b, R-2a, R-2b, R-3a, R-3aa, R-3b, RU | not applicable: The definition is for R-2c only. | “In R-2c Zones only” (Ch. 325 p.16 l.5) |
+| R17 | §325-3B:occupant: Least habitable space per occupant (sleeping rooms 80/120/180/240 sf..., unit 150/250/350/450 sf...) | R-1a, R-1b, R-2a, R-2b, R-3a, R-3aa, R-3b, RU | not applicable: The definition is for R-2c only. | “In R-2c Zones only” (Ch. 325 p.16 l.5) |
+| R18 | §325-3B:rooming_house: A rooming house (a multiple dwelling, §325-3B DWELLING, MULTIPLE (5)) and what it must include | R-1a, R-1b, R-2a, R-2b, R-2c | not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). | “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning chart p.2 l.14; the district's own cell in row “Multiple family dwelling [fn4]” is “-”) |
+| R19 | §325-3B:rooming_house: A rooming house (a multiple dwelling, §325-3B DWELLING, MULTIPLE (5)) and what it must include | R-3a, R-3aa, R-3b, RU | in the rulebook by mapping: lot_area_multiple_family. A rooming house is a multiple dwelling (§325-3B DWELLING, MULTIPLE (5)), checked by the multiple-dwelling lot size. | — |
+| R20 | §325-3B:rooming_house: It must include complete kitchen facilities or a separate entrance | R-1a, R-1b, R-2a, R-2b, R-2c | not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). | “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning chart p.2 l.14; the district's own cell in row “Multiple family dwelling [fn4]” is “-”) |
+| R21 | §325-3B:rooming_unit: A rooming unit (counted in the multiple-dwelling lot size) | R-3a, R-3aa, R-3b, RU | in the rulebook by mapping: lot_area_multiple_family. Rooming units are in rooming houses, which are multiple dwellings (§325-3B); in R-3a, R-3aa and R-3b each room let for profit adds lot area (chart p.3 notes 7 and 8). | — |
+| R22 | §325-3B:row_house: A row house's modules (facade at most 25 ft, one street-facing entry each) | R-1a, R-1b, R-2a, R-2b, R-2c | not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). | “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning chart p.2 l.14; the district's own cell in row “Multiple family dwelling [fn4]” is “-”) |
+| R23 | §325-3B:trailer_or_travel_trailer: Travel trailers (a temporary dwelling at most 8 ft wide and 32 ft long) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R24 | §325-3B:urban_beverage_producer: Urban beverage producers (production cap, silo height) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R25 | §325-7A: Every building and use conforms to its district's regulations | all 9 districts | not applicable: No requirement of its own beyond the district's regulations, each of which is its own row here (the checker applies the lot's zone's whole rulebook, rulebook.rulebook_for). | “unless in conformity with the regulations herein specified for the district in which it is located” (Ch. 325 p.24 l.6–7) |
+| R26 | §325-8A: Column 2: permitted primary uses | R-3a, R-3b | flag: use | “Uses which are permitted in each use district are listed” (Ch. 325 p.24 l.15) |
+| R27 | §325-8A: Column 4: off-street parking | all 9 districts | parked: Parking (typed count and read from the drawing): on hold | “The off-street parking spaces listed in this column shall be provided” (Ch. 325 p.24 l.19–20) |
+| R28 | §325-8A: Columns 6 and 7: minimum lot area and width | R-1a, R-1b, R-2a, R-2b, R-2c, RU | in the rulebook by mapping: lot_area_one_family_detached, lot_area_other_use. Columns 6 and 7 are the chart's lot-size rows (p.3), which these rules check. | “Lots hereafter used for a permitted use in each use district shall be of a size equal to or greater than” (Ch. 325 p.24 l.27–28) |
+| R29 | §325-8A: Columns 6 and 7: minimum lot area and width | R-3a, R-3aa, R-3b | flag (needs review) by mapping: lot_area_fraternity, lot_area_multiple_family, lot_area_one_family_attached, lot_area_one_family_detached, lot_area_one_family_semi_detached, lot_area_other_use, lot_area_two_family, lot_size_zero_lot_line. Columns 6 and 7 are the chart's lot-size rows (p.3); the zero-lot-line row ("-") is a flag. | “Lots hereafter used for a permitted use in each use district shall be of a size equal to or greater than” (Ch. 325 p.24 l.27–28) |
+| R30 | §325-8A: Columns 8 and 9: stories (counted at the main entrance side) and height | all 9 districts | in the rulebook by mapping: height. Columns 8 and 9 are the chart's height rows (p.3), which these rules check. | — |
+| R31 | §325-8A: Columns 11 to 15: front, side and rear yards (the rear yard opposite the address street on a corner or through lot) | all 9 districts | in the rulebook by mapping: front_yard. Columns 11 to 15 are the chart's yard rows (p.3), which these rules check. | — |
+| R32 | §325-8A: Column 16: minimum height | R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU | not applicable: The residential chart (p.3) has no minimum-height row for this district. | “Buildings hereafter erected shall have a minimum height as specified herein” (Ch. 325 p.26 l.4–5) |
+| R33 | §325-8B: (1) Each additional primary building on the lot needs its own minimum lot area | RU | flag: primary_structures | “each square-footage requirement applies separately to the initial permitted primary use” (Ch. 325 p.26 l.12–13) |
+| R34 | §325-8B: (3) Permitted uses are listed; what is left out is not permitted | R-3a, R-3b | flag: use | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R35 | §325-8B: (4) A use allowed by special permit or variance follows the stricter district's regulations | all 9 districts | flag (needs review) by mapping: use. A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out by hand. | “the regulations applying to such use shall be those of whichever district has the stricter regulations” (Ch. 325 p.26 l.23–24) |
+| R36 | §325-8B: (6) Minor children aren't counted as unrelated occupants (R-1 and R-2) | R-3a, R-3aa, R-3b, RU | not applicable: Applies in R-1 and R-2 districts only. | “In R-1 and R-2 Districts, minor dependent children” (Ch. 325 p.26 l.28) |
+| R37 | §325-8B: (7), (8), (10): pointers to the NYS Uniform Code, to Article V and to §325-8A(15) | R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU | not applicable: Pointers with no requirement of their own; each Article V section is its own row in this table, and the Uniform Code is outside Chapter 325. | “All columns established by this section are subject to the supplementary regulations stated in Article V” (Ch. 325 p.27 l.7–8) |
+| R38 | §325-8B: (9) R-3 land that directly abuts R-1 (§325-19E) | R-1a, R-1b, R-2a, R-2b, R-2c, RU | not applicable: Applies only to R-3 property next to R-1. | “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9) |
+| R39 | §325-8B: (9) R-3 land that directly abuts R-1 (§325-19E) | R-3a, R-3aa, R-3b | flag: abutting_r1 | “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9) |
+| R40 | §325-8C: West End/Waterfront, Cherry Street, Market and Newman districts | all 9 districts | not applicable: Applies only in those districts. | “Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, and the Newman Districts” (Ch. 325 p.27 l.16–17) |
+| R41 | §325-8D: CBD districts | all 9 districts | not applicable: Applies only in the CBD districts. | “Additional restrictions in the CBD districts” (Ch. 325 p.28 l.19) |
+| R42 | §325-8E: South Hill Overlay: no second primary structure on a parcel (R-1 and R-2) | R-3a, R-3aa, R-3b, RU | not applicable: Applies to R-1 and R-2 property in the overlay only. | “with a zoning designation of R-1 or R-2” (Ch. 325 p.29 l.32) |
+| R43 | §325-9B: Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood commercial, hospitals, day care) | R-3a, R-3b | flag: use | “which require a special permit from the Planning and Development Board, are as follows” (Ch. 325 p.30 l.22–23) |
+| R44 | §325-9B: (p) Bed-and-breakfast inns need a special permit in all districts | R-3a, R-3aa, R-3b, RU | flag: use | “Bed-and-breakfast inns in all districts” (Ch. 325 p.31 l.36) |
+| R45 | §325-9D: Criteria the Board uses to grant a special permit, for a primary use | all 9 districts | flag (needs review) by mapping: use. A special-permit primary use goes to needs review (the use entry); the criteria are the Board's judgment. | “A special permit shall be granted for a proposed use or activity if it meets the following criteria” (Ch. 325 p.33 l.9–10) |
+| R46 | §325-10C: Bed-and-breakfast inns (special-permit conditions) | R-3a, R-3aa, R-3b, RU | flag (needs review) by mapping: use. A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review. | “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5) |
+| R47 | §325-10C: Schools and related uses (special-permit conditions) | all 9 districts | flag (needs review) by mapping: use. A school is a special-permit use in every residential district (chart p.2), so the use entry says needs review. | “Schools and related uses. The following specific conditions shall be applicable” (Ch. 325 p.37 l.7) |
+| R48 | §325-11B: Cluster subdivisions (deviations the Planning and Development Board may approve) | R-2c, R-3aa, RU | not applicable: Cluster subdivisions aren't permitted in this district. | “Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts” (Ch. 325 p.38 l.26–27) |
+| R49 | §325-11C: What a cluster subdivision application must show | R-2c, R-3aa, RU | not applicable: Cluster subdivisions aren't permitted in this district (§325-11B(1)). | “Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts” (Ch. 325 p.38 l.26–27) |
+| R50 | §325-12C: Planned unit development (PUD) intent | all 9 districts | not applicable: A PUD is its own district, made by rezoning. | “In reaching its decision on whether to rezone to a PUD” (Ch. 325 p.41 l.36) |
+| R51 | §325-12D: PUD uses and limits | all 9 districts | not applicable: A PUD's limits are set by its own rezoning law. | “shall be as set forth in the legislation rezoning the area to a PUD” (Ch. 325 p.41 l.43) |
+| R52 | §325-12E: PUD site plan approval | all 9 districts | not applicable: Applies within a PUD, its own district. | “No structure shall be erected or placed within a PUD” (Ch. 325 p.42 l.9) |
+| R53 | §325-12F: PUD criteria | all 9 districts | not applicable: Applies to an application to rezone to a PUD. | “The Common Council will consider an application for any PUD” (Ch. 325 p.42 l.13) |
+| R54 | §325-12H: PUD conditions | all 9 districts | not applicable: Applies to a rezoning to a PUD. | “In any rezoning to a PUD” (Ch. 325 p.43 l.41) |
+| R55 | §325-15B: Mobile homes follow Chapter 210 (Housing Standards) | all 9 districts | not applicable: A pointer to Chapter 210, outside Chapter 325; no zoning requirement of its own. | “Mobile homes and mobile home parks shall be in conformity with Article II of Chapter 210” (Ch. 325 p.45 l.22–23) |
+| R56 | §325-15E: Junkyards and salvage yards | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R57 | §325-15F: Gasoline service stations (referral for review) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R58 | §325-16A: Height exceptions (spires, chimneys, mechanical equipment, solar, antennas) and their 20%/30% area cap | all 9 districts | parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) | “The height limitations of this chapter shall not apply to” (Ch. 325 p.46 l.13) |
+| R59 | §325-16D: U-1 District gorge areas | all 9 districts | not applicable: Applies only in the U-1 District. | “in any U-1 District” (Ch. 325 p.47 l.15) |
+| R60 | §325-16F: WEDZ-1 District stories | all 9 districts | not applicable: Applies only in the WEDZ-1 District. | “in the WEDZ-1 District” (Ch. 325 p.47 l.33) |
+| R61 | §325-16G: Two-story minimum in CBD and B districts | all 9 districts | not applicable: Applies only in the CBD and B districts it names. | “in the CBD-60, CBD-85, CBD-100, CBD-120, CBD-140, B-1a, B-1b, B-2c, and B-2d Zoning Districts” (Ch. 325 p.48 l.13–14) |
+| R62 | §325-17A: A lot can't be made so small that a required yard shrinks | all 9 districts | in the rulebook by mapping: front_yard, rear_yard, side_yards. The yards are checked on the lot as drawn, so a lot reduced below them fails. | — |
+| R63 | §325-17B: Corner visibility triangle (nothing over 2 ft within 20 ft of the street corner) | all 9 districts | parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) | “On a corner lot in any residential district, no fence, wall, grading, hedge or other structure or planting more than two feet in height” (Ch. 325 p.48 l.23–24) |
+| R64 | §325-17C: No fence, wall, sign or planting that hides traffic | all 9 districts | parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) | “In all districts, no fence, wall, grading, hedge, sign, assembly or other structure or planting” (Ch. 325 p.48 l.28; p.49 l.3) |
+| R65 | §325-17D: Fences may not block a neighbor's light, air or view | all 9 districts | parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) | “No fence or wall other than a building may be built to a height that will interfere with the light, air or view of any neighboring property” (Ch. 325 p.49 l.5–6) |
+| R66 | §325-18A: Porches, decks, balconies over 2 ft, ramps and landings are part of the building, for yards and coverage | all 9 districts | in the rulebook by mapping: lot_coverage, yard_projections. The yard rules (and the height bonus, which grows the yards) use the yards defined from §325-18A (definition yard_projections); lot coverage counts porches and decks through building_area (§325-8A(10)). | — |
+| R67 | §325-18C: U-1 Zone setback next to a residential zone | all 9 districts | not applicable: Applies to buildings in the U-1 Zone. | “in the U-1 Zone” (Ch. 325 p.49 l.17) |
+| R68 | §325-19A: Business or industrial lots next to residential lots keep a residential yard | all 9 districts | not applicable: The extra yard is on the business or industrial lot, not the residential one. | “Where a lot in a business or industrial district abuts a lot in a residential district” (Ch. 325 p.49 l.23–24) |
+| R69 | §325-19B: Front yard transition into a business or industrial district | all 9 districts | not applicable: The reduced front yard is in the business or industrial district. | “the front yard depth in the business or industrial district shall be equal to 1/2” (Ch. 325 p.50 l.4) |
+| R70 | §325-19D: No transitions in B-2d | all 9 districts | not applicable: Applies only in the B-2d District. | “shall not apply in the B-2d District” (Ch. 325 p.50 l.10–11) |
+| R71 | §325-19E: Stricter limits for R-3 development abutting R-1 land | R-1a, R-1b, R-2a, R-2b, R-2c, RU | not applicable: Applies only in R-3a and R-3b. | “in the R-3a or R-3b Zoning District” (Ch. 325 p.50 l.12–13) |
+| R72 | §325-19E: Stricter limits for R-3 development abutting R-1 land | R-3a, R-3aa, R-3b | flag: abutting_r1 | “The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling” (Ch. 325 p.50 l.12–13) |
+| R73 | §325-20C: Parking for nonconforming uses | all 9 districts | parked: Parking (typed count and read from the drawing): on hold | “the amount of off-street parking permitted on a property containing a nonconforming use” (Ch. 325 p.51 l.27–28) |
+| R74 | §325-20D: Parking areas and driveways (permits, dimensions, surfacing, screening) | all 9 districts | parked: Parking (typed count and read from the drawing): on hold | “In all zoning districts, no parking area or driveway may be constructed” (Ch. 325 p.51 l.34–35) |
+| R75 | §325-20E: Parking in front yards (orientation, driveway width) | all 9 districts | parked: Parking (typed count and read from the drawing): on hold | “In all residential districts, all front yard parking within 15 feet of the front property line” (Ch. 325 p.57 l.19) |
+| R76 | §325-20F: New or enlarged parking areas of three or more spaces in residential districts | all 9 districts | parked: Parking (typed count and read from the drawing): on hold | “on lots within residential zoning districts” (Ch. 325 p.58 l.8) |
+| R77 | §325-20G: Parking areas in nonresidential districts | all 9 districts | not applicable: Applies to lots in nonresidential districts. | “Parking areas on lots in nonresidential zoning districts” (Ch. 325 p.60 l.32) |
+| R78 | §325-20H: Parking in WEDZ-1 | all 9 districts | not applicable: Applies only in WEDZ-1. | “Parking in WEDZ-1 District” (Ch. 325 p.61 l.27) |
+| R79 | §325-20I: Parking in the Southwest Area | all 9 districts | not applicable: Applies only in the Southwest Area. | “Parking in the Southwest Area” (Ch. 325 p.61 l.38) |
+| R80 | §325-20J: Parking in U-1 | all 9 districts | not applicable: Applies only in the U-1 District. | “Parking for the U-1 Zoning District” (Ch. 325 p.61 l.41) |
+| R81 | §325-21A: Loading space size (450 sf), for the uses the district's loading flag lists | R-1a, R-1b | not applicable: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the next part. | “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3) |
+| R82 | §325-21A: Loading space size (450 sf), for the uses the district's loading flag lists | R-2a, R-2b, R-2c | flag (needs review) by mapping: loading. R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes). | “An off-street loading space shall have a minimum of 450 square feet” (Ch. 325 p.63 l.41) |
+| R83 | §325-21A: Loading space size (450 sf), for the uses the district's loading flag lists | R-3a, R-3aa, R-3b, RU | flag: loading | “An off-street loading space shall have a minimum of 450 square feet” (Ch. 325 p.63 l.41) |
+| R84 | §325-21B: Which uses need loading spaces, and how many, for the uses the district's loading flag lists | R-1a, R-1b | not applicable: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the next part. | “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3) |
+| R85 | §325-21B: Which uses need loading spaces, and how many, for the uses the district's loading flag lists | R-2a, R-2b, R-2c | flag (needs review) by mapping: loading. R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes). | “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3) |
+| R86 | §325-21B: Which uses need loading spaces, and how many, for the uses the district's loading flag lists | R-3a, R-3aa, R-3b, RU | flag: loading | “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3) |
+| R87 | §325-21C: No loading in CBD districts | all 9 districts | not applicable: Applies only in CBD districts. | “in any CBD zoning district” (Ch. 325 p.64 l.9) |
+| R88 | §325-22A: Motels (lot size and frontage) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R89 | §325-22B: Motels (parking) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R90 | §325-22C: Motels (paving) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R91 | §325-22D: Motels (driveway width) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R92 | §325-22E: Motels (curb cuts) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R93 | §325-22F: Motels (landscaping) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R94 | §325-22G: Motels (lighting) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R95 | §325-22H: Motels (uses) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20) |
+| R96 | §325-24B: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R97 | §325-24C: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R98 | §325-24D: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R99 | §325-24E: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R100 | §325-24F: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R101 | §325-24G: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R102 | §325-24H: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R103 | §325-24I: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R104 | §325-28B: Accessory dwelling units (applicability) | all 9 districts | parked: Accessory dwelling units | “This section applies to all accessory dwelling units (ADUs) within the City of Ithaca” (Ch. 325 p.72 l.4) |
+| R105 | §325-28C: Accessory dwelling unit requirements (one per parcel, size, height, setbacks) | all 9 districts | parked: Accessory dwelling units | “A maximum of one ADU is allowed per parcel” (Ch. 325 p.72 l.8) |
+| R106 | §325-29: Landmarks and landmark districts (Chapter 228 review) | all 9 districts | parked: Historic district and flood zone lookups | “Officially designated landmarks or landmark districts of the City shall be governed by the provisions of Chapter 228” (Ch. 325 p.73 l.4–5) |
+| R107 | §325-29.1D: Adult uses | all 9 districts | not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. | “Adult uses may only be located within the Adult Use Overlay Zone” (Ch. 325 p.76 l.8) |
+| R108 | §325-29.1E: Adult uses | all 9 districts | not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. | “Adult uses may only be located within the Adult Use Overlay Zone” (Ch. 325 p.76 l.8) |
+| R109 | §325-29.1F: Adult uses | all 9 districts | not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. | “Adult uses may only be located within the Adult Use Overlay Zone” (Ch. 325 p.76 l.8) |
+| R110 | §325-29.1G: Adult uses | all 9 districts | not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. | “Adult uses may only be located within the Adult Use Overlay Zone” (Ch. 325 p.76 l.8) |
+| R111 | §325-29.2A: Southwest Area districts (SW-1, SW-2, SW-3) | all 9 districts | not applicable: Applies only in the Southwest Area districts. | “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (Ch. 325 p.77 l.4–5) |
+| R112 | §325-29.2B: Southwest Area districts (SW-1, SW-2, SW-3) | all 9 districts | not applicable: Applies only in the Southwest Area districts. | “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (Ch. 325 p.77 l.4–5) |
+| R113 | §325-29.2C: Southwest Area districts (SW-1, SW-2, SW-3) | all 9 districts | not applicable: Applies only in the Southwest Area districts. | “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (Ch. 325 p.77 l.4–5) |
+| R114 | §325-29.6F: Underground or cable broadband isn't governed by Article V-A | all 9 districts | not applicable: An exemption: nothing to check. | “such installations are not governed by the zoning requirements of this article” (Ch. 325 p.88 l.40–41) |
+| R115 | §325-44A: C-SU Zone review | all 9 districts | not applicable: Applies only in the C-SU Zone. | “within the C-SU Zone” (Ch. 325 p.126 l.27–30) |
+| R116 | §325-44B: C-SU Zone review | all 9 districts | not applicable: Applies only in the C-SU Zone. | “within the C-SU Zone” (Ch. 325 p.126 l.27–30) |
+| R117 | §325-45.1C: Collegetown Area Form Districts | all 9 districts | not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). | “within any district of the Collegetown Area Form Districts” (Ch. 325 p.128 l.23) |
+| R118 | §325-45.1D: Collegetown Area Form Districts | all 9 districts | not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). | “within any district of the Collegetown Area Form Districts” (Ch. 325 p.128 l.23) |
+| R119 | §325-45.1E: New construction in a local historic district or on a landmark's parcel needs Landmarks Commission approval | all 9 districts | parked: Historic district and flood zone lookups | “Regardless of the underlying zoning, all new construction (including additions) within a designated local historic district” (Ch. 325 p.128 l.35–36) |
+| R120 | §325-45.2B: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2) | all 9 districts | not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. | “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5) |
+| R121 | §325-45.2D: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2) | all 9 districts | not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. | “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5) |
+| R122 | §325-45.2E: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2) | all 9 districts | not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. | “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5) |
+| R123 | §325-45.2F: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2) | all 9 districts | not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. | “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5) |
+| R124 | §325-45.2G: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2) | all 9 districts | not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. | “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5) |
+| R125 | §325-45.3B: MU-2 street-level active uses | all 9 districts | not applicable: Applies only in the MU-2 District (Collegetown). | “Within the MU-2 District” (Ch. 325 p.160 l.12) |
+| R126 | §325-45.5A: Cliff Street Retreat Planned Unit Development District | all 9 districts | not applicable: Applies only in the Cliff Street Retreat PUD District. | “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4) |
+| R127 | §325-45.5B: Cliff Street Retreat Planned Unit Development District | all 9 districts | not applicable: Applies only in the Cliff Street Retreat PUD District. | “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4) |
+| R128 | §325-45.5C: Cliff Street Retreat Planned Unit Development District | all 9 districts | not applicable: Applies only in the Cliff Street Retreat PUD District. | “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4) |
+| R129 | §325-45.5D: Cliff Street Retreat Planned Unit Development District | all 9 districts | not applicable: Applies only in the Cliff Street Retreat PUD District. | “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4) |
+| R130 | §325-45.5E: Cliff Street Retreat Planned Unit Development District | all 9 districts | not applicable: Applies only in the Cliff Street Retreat PUD District. | “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4) |
+| R131 | §325-45.5F: Cliff Street Retreat Planned Unit Development District | all 9 districts | not applicable: Applies only in the Cliff Street Retreat PUD District. | “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4) |
+| R132 | §325-45.5G: Cliff Street Retreat Planned Unit Development District | all 9 districts | not applicable: Applies only in the Cliff Street Retreat PUD District. | “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4) |
 
 ## Each piece, part by part
 
 ### §325-3B:accessory_dwelling_unit ACCESSORY DWELLING UNIT (rule, p.4)
 
 - **What an accessory dwelling unit is and must have**
-  - all 9 districts: parked: Accessory dwelling units (queue item 10 brief, 2026-10-27)
+  - all 9 districts: parked: Accessory dwelling units (queue item 10 brief, 2026-10-27) The law: “A smaller, secondary dwelling unit located on the same lot” (Ch. 325 p.4 l.7–8).
 
 ### §325-3B:building_area BUILDING AREA (rule, p.5)
 
@@ -309,31 +450,31 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-3B:one_family_attached_dwelling ONE-FAMILY ATTACHED DWELLING (rule, p.8)
 
 - **An attached building holds three to six one-family dwellings**
-  - R-1a, R-1b, R-2a, R-2b: not applicable: A one-family attached dwelling isn't permitted in this district (chart p.2, "-"). The law: “One-family dwelling, attached [fn4] - - - - SP • • • •” (zoning_charts_2026-04.pdf p.2; the district's own cell in row “One-family dwelling, attached [fn4]” is “-”)
+  - R-1a, R-1b, R-2a, R-2b: not applicable: A one-family attached dwelling isn't permitted in this district (chart p.2, "-"). The law: “One-family dwelling, attached [fn4] - - - - SP • • • •” (zoning chart p.2 l.12; the district's own cell in row “One-family dwelling, attached [fn4]” is “-”).
   - R-2c: in the rulebook: `attached_units_per_building` (cited) (also cites the piece: `lot_area_one_family_attached`; covers none of this part)
   - R-3a, R-3aa, R-3b, RU: **MISSING** (medium): No rule holds an attached building to three to six dwelling units here (R-2c.attached_units_per_building does it from the stated attached_units_in_building), so a row of eight units can pass.
 - **Each dwelling shares a party wall or structure and has direct exterior access from the ground floor**
-  - R-1a, R-1b, R-2a, R-2b: not applicable: A one-family attached dwelling isn't permitted in this district (chart p.2, "-"). The law: “One-family dwelling, attached [fn4] - - - - SP • • • •” (zoning_charts_2026-04.pdf p.2; the district's own cell in row “One-family dwelling, attached [fn4]” is “-”)
+  - R-1a, R-1b, R-2a, R-2b: not applicable: A one-family attached dwelling isn't permitted in this district (chart p.2, "-"). The law: “One-family dwelling, attached [fn4] - - - - SP • • • •” (zoning chart p.2 l.12; the district's own cell in row “One-family dwelling, attached [fn4]” is “-”).
   - R-2c: **MISSING** (low): Nothing checks party walls or each unit's own ground-floor door; a massing model shows neither. (also cites the piece: `attached_units_per_building`, `lot_area_one_family_attached`; covers none of this part)
   - R-3a, R-3aa, R-3b, RU: **MISSING** (low): Nothing checks party walls or each unit's own ground-floor door; a massing model shows neither.
 
 ### §325-3B:dwelling_two_family DWELLING, TWO-FAMILY (rule, p.9)
 
 - **What a two-family dwelling is (a building containing two dwelling units)**
-  - R-1a, R-1b: not applicable: A two-family dwelling isn't permitted in this district (chart p.2, "-"). The law: “Two-family dwelling [fn4] - - • • • • • • •” (zoning_charts_2026-04.pdf p.2; the district's own cell in row “Two-family dwelling [fn4]” is “-”)
+  - R-1a, R-1b: not applicable: A two-family dwelling isn't permitted in this district (chart p.2, "-"). The law: “Two-family dwelling [fn4] - - • • • • • • •” (zoning chart p.2 l.13; the district's own cell in row “Two-family dwelling [fn4]” is “-”).
   - R-2a, R-2b, R-3a, R-3aa, R-3b, RU: in the rulebook: `lot_area_two_family` (mapped), `lot_width_two_family` (mapped). Gordium's mapping, not a citation: The two-family lot size and width apply to the house type this sentence defines, which the architect states as the use.
   - R-2c: in the rulebook: `lot_area_two_family` (cited)
 - **Who may occupy each unit of a two-family dwelling**
-  - R-1a, R-1b: not applicable: A two-family dwelling isn't permitted in this district (chart p.2, "-"), whatever this definition's R-1 sentence says. The law: “Two-family dwelling [fn4] - - • • • • • • •” (zoning_charts_2026-04.pdf p.2; the district's own cell in row “Two-family dwelling [fn4]” is “-”)
+  - R-1a, R-1b: not applicable: A two-family dwelling isn't permitted in this district (chart p.2, "-"), whatever this definition's R-1 sentence says. The law: “Two-family dwelling [fn4] - - • • • • • • •” (zoning chart p.2 l.13; the district's own cell in row “Two-family dwelling [fn4]” is “-”).
   - R-2a, R-2b, R-2c: **MISSING** (medium): No rule counts unrelated occupants or checks who may live in a dwelling unit; the model can't show it and the architect isn't asked. Note: Lane B is drafting occupancy rules on a branch stacked on r3-hand (not in this rulebook yet).
-  - R-3a, R-3aa, R-3b, RU: not applicable: Its occupancy limits name only R-1/CR-1 and R-2/CR-2 zones. The law: “In R-2 and CR-2 Zones, each unit of a two-family dwelling may be occupied” (this piece)
+  - R-3a, R-3aa, R-3b, RU: not applicable: Its occupancy limits name only R-1/CR-1 and R-2/CR-2 zones. The law: “In R-2 and CR-2 Zones, each unit of a two-family dwelling may be occupied” (Ch. 325 p.9 l.8–9).
 
 ### §325-3B:dwelling_unit DWELLING UNIT (rule, p.9)
 
 - **What a dwelling unit is, as the rules count units and house types**
   - R-1a, R-1b, R-2a, R-2b: in the rulebook: `use` (mapped). Gordium's mapping, not a citation: Each house type the architect states (one-family, two-family, ...) is defined by its dwelling units. Research §6 (docs/research/2026-10-20_architect_questions.md) reads the definition as a category, not a limit.
   - R-2c: in the rulebook: `lot_area_one_family_attached` (cited), `lot_area_one_family_semi_detached` (cited), `lot_area_two_family` (cited)
-  - R-3a, R-3b: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: Each house type the architect states is defined by its dwelling units (research §6, a category); R-3a's and R-3b's use entry is a flag for the special-permit uses.
+  - R-3a, R-3b: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: Each house type the architect states is defined by its dwelling units (research §6, a category); R-3a's and R-3b's use entry is a flag for the special-permit uses. The law: “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10).
   - R-3aa, RU: in the rulebook: `lot_area_one_family_attached` (mapped), `lot_area_multiple_family` (mapped). Gordium's mapping, not a citation: These lot sizes grow with the dwelling units the architect states (research §6, a category).
 - **Each unit has its own entrance and living, cooking, sanitary and sleeping facilities**
   - R-1a, R-1b, R-2a, R-2b, R-3a, R-3aa, R-3b, RU: **MISSING** (low): Nothing checks that each unit has what the definition requires (its own entrance; the kitchen, sanitary and sleeping facilities); a massing model shows no rooms. Research §6 (docs/research/2026-10-20_architect_questions.md) reads it as a category the stated house type carries, so a design is only as right as that statement.
@@ -347,8 +488,8 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-3B:green_space GREEN SPACE (rule, pp.11–12)
 
 - **Green space, at least 75% softscape, where a minimum applies**
-  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b: not applicable: The residential chart sets a green-space minimum only for RU (chart p.3, note 13). The law: “Where a minimum green space requirement applies” (this piece)
-  - RU: flag (needs review): `green_space` (cited)
+  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b: not applicable: The residential chart sets a green-space minimum only for RU (chart p.3, note 13). The law: “Where a minimum green space requirement applies” (Ch. 325 p.12 l.4).
+  - RU: flag (needs review): `green_space` (cited) The law: “Where a minimum green space requirement applies” (Ch. 325 p.12 l.4).
 
 ### §325-3B:height_of_building HEIGHT OF BUILDING (rule, p.12)
 
@@ -363,30 +504,30 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-3B:large_beverage_producer LARGE BEVERAGE PRODUCER (rule, p.14)
 
 - **Large beverage producers (production cap, silo height)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-3B:neighborhood_commercial_facility NEIGHBORHOOD COMMERCIAL FACILITY (rule, p.15)
 
 - **What a neighborhood commercial facility may sell**
-  - R-1a, R-1b, RU: not applicable: Not permitted in this district (chart p.2, "-"). The law: “Neighborhood commercial facility - - SP SP SP SP SP SP -” (zoning_charts_2026-04.pdf p.2; the district's own cell in row “Neighborhood commercial facility” is “-”)
-  - R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A neighborhood commercial facility is a special-permit use here (chart p.2, SP), so the use entry says needs review.
+  - R-1a, R-1b, RU: not applicable: Not permitted in this district (chart p.2, "-"). The law: “Neighborhood commercial facility - - SP SP SP SP SP SP -” (zoning chart p.2 l.25; the district's own cell in row “Neighborhood commercial facility” is “-”).
+  - R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A neighborhood commercial facility is a special-permit use here (chart p.2, SP), so the use entry says needs review. The law: “Such facility shall be limited to the retail sale of convenience goods” (Ch. 325 p.15 l.28–29).
 
 ### §325-3B:occupant OCCUPANT (rule, p.16)
 
 - **Who counts as an occupant (R-2c), for the lot sizes that grow with occupants**
-  - R-1a, R-1b, R-2a, R-2b, R-3a, R-3aa, R-3b, RU: not applicable: The definition is for R-2c only. The law: “In R-2c Zones only” (this piece)
+  - R-1a, R-1b, R-2a, R-2b, R-3a, R-3aa, R-3b, RU: not applicable: The definition is for R-2c only. The law: “In R-2c Zones only” (Ch. 325 p.16 l.5).
   - R-2c: in the rulebook: `lot_area_one_family_detached` (cited)
 - **Least habitable space per occupant (sleeping rooms 80/120/180/240 sf..., unit 150/250/350/450 sf...)**
-  - R-1a, R-1b, R-2a, R-2b, R-3a, R-3aa, R-3b, RU: not applicable: The definition is for R-2c only. The law: “In R-2c Zones only” (this piece)
+  - R-1a, R-1b, R-2a, R-2b, R-3a, R-3aa, R-3b, RU: not applicable: The definition is for R-2c only. The law: “In R-2c Zones only” (Ch. 325 p.16 l.5).
   - R-2c: **MISSING** (medium): No rule checks the sleeping-room and unit floor areas each occupant needs; Gordium doesn't model rooms. (also cites the piece: `lot_area_one_family_detached`; covers none of this part) Note: Lane B is drafting occupancy rules on a branch stacked on r3-hand.
 
 ### §325-3B:rooming_house ROOMING HOUSE (rule, p.18)
 
 - **A rooming house (a multiple dwelling, §325-3B DWELLING, MULTIPLE (5)) and what it must include**
-  - R-1a, R-1b, R-2a, R-2b, R-2c: not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). The law: “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning_charts_2026-04.pdf p.2; the district's own cell in row “Multiple family dwelling [fn4]” is “-”)
+  - R-1a, R-1b, R-2a, R-2b, R-2c: not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). The law: “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning chart p.2 l.14; the district's own cell in row “Multiple family dwelling [fn4]” is “-”).
   - R-3a, R-3aa, R-3b, RU: in the rulebook: `lot_area_multiple_family` (mapped). Gordium's mapping, not a citation: A rooming house is a multiple dwelling (§325-3B DWELLING, MULTIPLE (5)), checked by the multiple-dwelling lot size.
 - **It must include complete kitchen facilities or a separate entrance**
-  - R-1a, R-1b, R-2a, R-2b, R-2c: not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). The law: “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning_charts_2026-04.pdf p.2; the district's own cell in row “Multiple family dwelling [fn4]” is “-”)
+  - R-1a, R-1b, R-2a, R-2b, R-2c: not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). The law: “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning chart p.2 l.14; the district's own cell in row “Multiple family dwelling [fn4]” is “-”).
   - R-3a, R-3aa, R-3b, RU: **MISSING** (low): Nothing checks that each unit has what the definition requires (its own entrance; the kitchen, sanitary and sleeping facilities); a massing model shows no rooms. Research §6 (docs/research/2026-10-20_architect_questions.md) reads it as a category the stated house type carries, so a design is only as right as that statement.
 
 ### §325-3B:rooming_unit ROOMING UNIT (rule, p.18)
@@ -400,7 +541,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-3B:row_house ROW HOUSE (rule, p.18)
 
 - **A row house's modules (facade at most 25 ft, one street-facing entry each)**
-  - R-1a, R-1b, R-2a, R-2b, R-2c: not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). The law: “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning_charts_2026-04.pdf p.2; the district's own cell in row “Multiple family dwelling [fn4]” is “-”)
+  - R-1a, R-1b, R-2a, R-2b, R-2c: not applicable: A multiple dwelling isn't permitted in this district (chart p.2, "-"). The law: “Multiple family dwelling [fn4] - - - - - • • • •[fn5]” (zoning chart p.2 l.14; the district's own cell in row “Multiple family dwelling [fn4]” is “-”).
   - R-3a, R-3aa, R-3b, RU: **MISSING** (low): A row house is a multiple dwelling (§325-3B DWELLING, MULTIPLE (5)); no rule checks its module widths or street-facing entries.
 
 ### §325-3B:standard_canopy STANDARD CANOPY (rule, pp.18–19)
@@ -426,17 +567,17 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-3B:trailer_or_travel_trailer TRAILER OR TRAVEL TRAILER (rule, p.19)
 
 - **Travel trailers (a temporary dwelling at most 8 ft wide and 32 ft long)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-3B:urban_beverage_producer URBAN BEVERAGE PRODUCER (rule, pp.19–20)
 
 - **Urban beverage producers (production cap, silo height)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-7A Compliance with district regulations (rule, p.24)
 
 - **Every building and use conforms to its district's regulations**
-  - all 9 districts: not applicable: No requirement of its own beyond the district's regulations, each of which is its own row here (the checker applies the lot's zone's whole rulebook, rulebook.rulebook_for). The law: “unless in conformity with the regulations herein specified for the district in which it is located” (this piece)
+  - all 9 districts: not applicable: No requirement of its own beyond the district's regulations, each of which is its own row here (the checker applies the lot's zone's whole rulebook, rulebook.rulebook_for). The law: “unless in conformity with the regulations herein specified for the district in which it is located” (Ch. 325 p.24 l.6–7).
 
 ### §325-7B Use of yard for another building (rule, p.24)
 
@@ -447,11 +588,11 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 
 - **Column 2: permitted primary uses**
   - R-1a, R-1b, R-2a, R-2b, R-2c, R-3aa, RU: in the rulebook: `use` (cited)
-  - R-3a, R-3b: flag (needs review): `use` (cited)
+  - R-3a, R-3b: flag (needs review): `use` (cited) The law: “Uses which are permitted in each use district are listed” (Ch. 325 p.24 l.15).
 - **Column 3: permitted accessory uses (chart p.2: private garage, structure for construction purposes, adult day-care home, towers, home occupation, neighborhood parking area, gardens, ADU)**
   - all 9 districts: **MISSING** (medium): No rule checks the accessory uses on chart p.2 (towers, home occupations and gardens need a special permit; a private garage holds at most three cars in R-1 and R-2a/R-2b, six per building in R-2c; a structure for construction purposes may stay two years). ADUs and parking are on the later list. Note: Home occupations are being drafted on Lane B's branch.
 - **Column 4: off-street parking**
-  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25). The rulebook checks one-family detached houses (parking_one_family) and flags the other uses; the rest of §325-20 waits for the parking work.
+  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25). The rulebook checks one-family detached houses (parking_one_family) and flags the other uses; the rest of §325-20 waits for the parking work. The law: “The off-street parking spaces listed in this column shall be provided” (Ch. 325 p.24 l.19–20).
 - **Column 5: off-street loading**
   - R-1a, R-1b: **MISSING** (low): Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag in R-1 (R-1a's header says so).
   - R-2a, R-2b, R-2c: **MISSING** (low): R-2x.loading flags a neighborhood commercial facility; chart p.14's "Allowed by variance" row for other nonresidential uses has no rule or flag (R-2a.loading's notes say so).
@@ -461,7 +602,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
   - R-1b: in the rulebook: `lot_area_one_family_detached` (mapped), `lot_area_other_use` (mapped), `lot_width_one_family_detached` (via definition lot_width), `lot_width_other_use` (via definition lot_width). Gordium's mapping, not a citation: Columns 6 and 7 are the chart's lot-size rows (p.3), which these rules check.
   - R-2a, R-2b: in the rulebook: `lot_area_one_family_detached` (mapped), `lot_area_one_family_semi_detached` (mapped), `lot_area_two_family` (mapped), `lot_area_other_use` (mapped), `lot_width_one_family_detached` (cited), `lot_width_one_family_semi_detached` (via definition lot_width), `lot_width_two_family` (via definition lot_width), `lot_width_other_use` (via definition lot_width). Gordium's mapping, not a citation: Columns 6 and 7 are the chart's lot-size rows (p.3), which these rules check.
   - R-2c: in the rulebook: `lot_area_one_family_detached` (mapped), `lot_area_zero_lot_line` (mapped), `lot_area_one_family_semi_detached` (mapped), `lot_area_two_family` (mapped), `lot_area_one_family_attached` (mapped), `lot_area_other_use` (mapped), `lot_width_one_family_detached` (cited), `lot_width_zero_lot_line` (via definition lot_width), `lot_width_one_family_semi_detached` (via definition lot_width), `lot_width_one_family_attached` (via definition lot_width), `lot_width_two_family` (via definition lot_width), `lot_width_other_use` (via definition lot_width). Gordium's mapping, not a citation: Columns 6 and 7 are the chart's lot-size rows (p.3), which these rules check.
-  - R-3a, R-3aa, R-3b: flag (needs review): `lot_area_one_family_detached` (mapped), `lot_area_one_family_semi_detached` (mapped), `lot_area_two_family` (mapped), `lot_area_one_family_attached` (mapped), `lot_area_multiple_family` (mapped), `lot_area_fraternity` (mapped), `lot_area_other_use` (mapped), `lot_width_one_family_detached` (cited), `lot_width_one_family_semi_detached` (via definition lot_width), `lot_width_one_family_attached` (via definition lot_width), `lot_width_two_family` (via definition lot_width), `lot_width_multiple_family` (via definition lot_width), `lot_width_fraternity` (via definition lot_width), `lot_width_other_use` (via definition lot_width), `lot_size_zero_lot_line` (mapped). Gordium's mapping, not a citation: Columns 6 and 7 are the chart's lot-size rows (p.3); the zero-lot-line row ("-") is a flag.
+  - R-3a, R-3aa, R-3b: flag (needs review): `lot_area_one_family_detached` (mapped), `lot_area_one_family_semi_detached` (mapped), `lot_area_two_family` (mapped), `lot_area_one_family_attached` (mapped), `lot_area_multiple_family` (mapped), `lot_area_fraternity` (mapped), `lot_area_other_use` (mapped), `lot_width_one_family_detached` (cited), `lot_width_one_family_semi_detached` (via definition lot_width), `lot_width_one_family_attached` (via definition lot_width), `lot_width_two_family` (via definition lot_width), `lot_width_multiple_family` (via definition lot_width), `lot_width_fraternity` (via definition lot_width), `lot_width_other_use` (via definition lot_width), `lot_size_zero_lot_line` (mapped). Gordium's mapping, not a citation: Columns 6 and 7 are the chart's lot-size rows (p.3); the zero-lot-line row ("-") is a flag. The law: “Lots hereafter used for a permitted use in each use district shall be of a size equal to or greater than” (Ch. 325 p.24 l.27–28).
   - RU: in the rulebook: `lot_area_one_family_detached` (mapped), `lot_area_one_family_semi_detached` (mapped), `lot_area_two_family` (mapped), `lot_area_one_family_attached` (mapped), `lot_area_multiple_family` (mapped), `lot_area_fraternity` (mapped), `lot_area_other_use` (mapped), `lot_width_one_family_detached` (cited), `lot_width_one_family_semi_detached` (via definition lot_width), `lot_width_one_family_attached` (via definition lot_width), `lot_width_two_family` (via definition lot_width), `lot_width_multiple_family` (via definition lot_width), `lot_width_fraternity` (via definition lot_width), `lot_width_other_use` (via definition lot_width). Gordium's mapping, not a citation: Columns 6 and 7 are the chart's lot-size rows (p.3), which these rules check.
 - **Columns 8 and 9: stories (counted at the main entrance side) and height**
   - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU: in the rulebook: `stories` (via definition story), `height` (mapped). Gordium's mapping, not a citation: Columns 8 and 9 are the chart's height rows (p.3), which these rules check.
@@ -473,67 +614,67 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
   - R-1a, R-1b, R-2a, R-2b: in the rulebook: `front_yard` (mapped), `side_yards` (via definition side_yard), `rear_yard` (cited), `yard_projections` (via definition lot_depth), `height` (via definition lot_depth). Gordium's mapping, not a citation: Columns 11 to 15 are the chart's yard rows (p.3), which these rules check.
   - R-2c, R-3a, R-3aa, R-3b, RU: in the rulebook: `front_yard` (mapped), `side_yards` (cited), `rear_yard` (cited), `yard_projections` (via definition lot_depth), `height` (via definition lot_depth). Gordium's mapping, not a citation: Columns 11 to 15 are the chart's yard rows (p.3), which these rules check.
 - **Column 16: minimum height**
-  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU: not applicable: The residential chart (p.3) has no minimum-height row for this district. The law: “Buildings hereafter erected shall have a minimum height as specified herein” (this piece)
+  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU: not applicable: The residential chart (p.3) has no minimum-height row for this district. The law: “Buildings hereafter erected shall have a minimum height as specified herein” (Ch. 325 p.26 l.4–5).
   - R-3aa: in the rulebook: `stories` (cited) Note: R-3aa's two-story minimum (chart p.3 note 11) with this column's 500 sf exemption; whether the exemption reaches a small building alone is an open question (questions_for_architects.md 5.10).
 
 ### §325-8B General notes pertaining to regulations (rule, pp.26–27)
 
 - **(1) Each additional primary building on the lot needs its own minimum lot area**
   - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b: **MISSING** (high): Gordium checks the lot area once, for one main building, and nothing asks how many primary buildings are on the lot. With two houses drawn it asks which is the main building; once one is picked, the other is read as an accessory building or a deck, so a second house on a lot sized for one can pass.
-  - RU: flag (needs review): `primary_structures` (cited)
+  - RU: flag (needs review): `primary_structures` (cited) The law: “each square-footage requirement applies separately to the initial permitted primary use” (Ch. 325 p.26 l.12–13).
 - **(2) Landfilling and bulkheading plans need Board of Public Works approval**
   - all 9 districts: **MISSING** (low): No flag; a massing model doesn't show fill or bulkheads.
 - **(3) Permitted uses are listed; what is left out is not permitted**
   - R-1a, R-1b, R-2a, R-2b, R-2c, R-3aa, RU: in the rulebook: `use` (cited in finding chart_marks)
-  - R-3a, R-3b: flag (needs review): `use` (cited in finding chart_marks)
+  - R-3a, R-3b: flag (needs review): `use` (cited in finding chart_marks) The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 - **(4) A use allowed by special permit or variance follows the stricter district's regulations**
-  - R-1a, R-1b, R-2a, R-2b, R-2c, RU: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out by hand.
-  - R-3a, R-3aa, R-3b: flag (needs review): `use` (mapped), `lot_size_zero_lot_line` (cited). Gordium's mapping, not a citation: A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out by hand.
+  - R-1a, R-1b, R-2a, R-2b, R-2c, RU: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out by hand. The law: “the regulations applying to such use shall be those of whichever district has the stricter regulations” (Ch. 325 p.26 l.23–24).
+  - R-3a, R-3aa, R-3b: flag (needs review): `use` (mapped), `lot_size_zero_lot_line` (cited). Gordium's mapping, not a citation: A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out by hand. The law: “the regulations applying to such use shall be those of whichever district has the stricter regulations” (Ch. 325 p.26 l.23–24).
 - **(5) Every use meets the general performance standards (§325-23)**
   - all 9 districts: **MISSING** (operational): Governs how the property is used or run (or a permit for it), not what is drawn; no rule or flag.
 - **(6) Minor children aren't counted as unrelated occupants (R-1 and R-2)**
   - R-1a, R-1b, R-2a, R-2b, R-2c: **MISSING** (medium): No rule counts unrelated occupants or checks who may live in a dwelling unit; the model can't show it and the architect isn't asked. Note: Lane B is drafting occupancy rules on a branch stacked on r3-hand (not in this rulebook yet).
-  - R-3a, R-3aa, R-3b, RU: not applicable: Applies in R-1 and R-2 districts only. The law: “In R-1 and R-2 Districts, minor dependent children” (this piece)
+  - R-3a, R-3aa, R-3b, RU: not applicable: Applies in R-1 and R-2 districts only. The law: “In R-1 and R-2 Districts, minor dependent children” (Ch. 325 p.26 l.28).
 - **(7), (8), (10): pointers to the NYS Uniform Code, to Article V and to §325-8A(15)**
-  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU: not applicable: Pointers with no requirement of their own; each Article V section is its own row in this table, and the Uniform Code is outside Chapter 325. The law: “All columns established by this section are subject to the supplementary regulations stated in Article V” (this piece)
+  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU: not applicable: Pointers with no requirement of their own; each Article V section is its own row in this table, and the Uniform Code is outside Chapter 325. The law: “All columns established by this section are subject to the supplementary regulations stated in Article V” (Ch. 325 p.27 l.7–8).
   - R-3aa: in the rulebook: `stories` (cited) Note: (10) points to §325-8A(15), whose 500 sf exemption R-3aa.stories applies to the two-story minimum.
 - **(9) R-3 land that directly abuts R-1 (§325-19E)**
-  - R-1a, R-1b, R-2a, R-2b, R-2c, RU: not applicable: Applies only to R-3 property next to R-1. The law: “For special conditions on development of property in R-3 that directly abuts R-1” (this piece)
-  - R-3a, R-3aa, R-3b: flag (needs review): `abutting_r1` (cited)
+  - R-1a, R-1b, R-2a, R-2b, R-2c, RU: not applicable: Applies only to R-3 property next to R-1. The law: “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9).
+  - R-3a, R-3aa, R-3b: flag (needs review): `abutting_r1` (cited) The law: “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9).
 - **(11) Nonconforming uses and structures follow Article VI**
   - all 9 districts: **MISSING** (low): Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never asked about.
 
 ### §325-8C Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, (rule, pp.27–28)
 
 - **West End/Waterfront, Cherry Street, Market and Newman districts**
-  - all 9 districts: not applicable: Applies only in those districts. The law: “Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, and the Newman Districts” (this piece)
+  - all 9 districts: not applicable: Applies only in those districts. The law: “Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, and the Newman Districts” (Ch. 325 p.27 l.16–17).
 
 ### §325-8D Additional restrictions in the CBD districts (rule, pp.28–29)
 
 - **CBD districts**
-  - all 9 districts: not applicable: Applies only in the CBD districts. The law: “Additional restrictions in the CBD districts” (this piece)
+  - all 9 districts: not applicable: Applies only in the CBD districts. The law: “Additional restrictions in the CBD districts” (Ch. 325 p.28 l.19).
 
 ### §325-8E Additional restrictions in the South Hill area (rule, p.29)
 
 - **South Hill Overlay: no second primary structure on a parcel (R-1 and R-2)**
   - R-1a, R-1b, R-2a, R-2b, R-2c: **MISSING** (medium): Nothing looks up the South Hill Overlay or asks how many primary structures stand on the parcel.
-  - R-3a, R-3aa, R-3b, RU: not applicable: Applies to R-1 and R-2 property in the overlay only. The law: “with a zoning designation of R-1 or R-2” (this piece)
+  - R-3a, R-3aa, R-3b, RU: not applicable: Applies to R-1 and R-2 property in the overlay only. The law: “with a zoning designation of R-1 or R-2” (Ch. 325 p.29 l.32).
 
 ### §325-9B Applicability (rule, pp.30–32)
 
 - **Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood commercial, hospitals, day care)**
   - R-1a, R-1b, R-2a, R-2b, R-2c, R-3aa, RU: in the rulebook: `use` (cited)
-  - R-3a, R-3b: flag (needs review): `use` (cited)
+  - R-3a, R-3b: flag (needs review): `use` (cited) The law: “which require a special permit from the Planning and Development Board, are as follows” (Ch. 325 p.30 l.22–23).
 - **(p) Bed-and-breakfast inns need a special permit in all districts**
   - R-1a, R-1b, R-2a, R-2b, R-2c: **MISSING** (medium): The chart (p.2) marks a bed-and-breakfast inn "-" in R-1 and R-2, so the use rule fails one here; but §325-9B(1)(p) and §325-10C(2) say bed-and-breakfast inns need a special permit "in all districts". The law's text and its chart disagree, and nothing in Gordium settles or surfaces it; to research (resolve before asking), then ask the architects or the City if still unclear.
-  - R-3a, R-3aa, R-3b, RU: flag (needs review): `use` (cited)
+  - R-3a, R-3aa, R-3b, RU: flag (needs review): `use` (cited) The law: “Bed-and-breakfast inns in all districts” (Ch. 325 p.31 l.36).
 - **Accessory uses that need a special permit**
   - all 9 districts: **MISSING** (medium): No rule or flag asks about the accessory uses that need a special permit (a home occupation unless it meets four conditions; an antenna or dish over 6 ft, in the front yard or over 10 ft tall; a tower for electricity; a neighborhood garden; neighborhood parking). Note: Home occupations are being drafted on Lane B's branch.
 
 ### §325-9D Permit review criteria (flag, p.33)
 
 - **Criteria the Board uses to grant a special permit, for a primary use**
-  - all 9 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A special-permit primary use goes to needs review (the use entry); the criteria are the Board's judgment.
+  - all 9 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A special-permit primary use goes to needs review (the use entry); the criteria are the Board's judgment. The law: “A special permit shall be granted for a proposed use or activity if it meets the following criteria” (Ch. 325 p.33 l.9–10).
 - **Accessory uses that need a special permit**
   - all 9 districts: **MISSING** (medium): No rule or flag asks about the accessory uses that need a special permit (a home occupation unless it meets four conditions; an antenna or dish over 6 ft, in the front yard or over 10 ft tall; a tower for electricity; a neighborhood garden; neighborhood parking). Note: Home occupations are being drafted on Lane B's branch.
 
@@ -541,48 +682,48 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 
 - **Bed-and-breakfast inns (special-permit conditions)**
   - R-1a, R-1b, R-2a, R-2b, R-2c: **MISSING** (medium): The chart (p.2) marks a bed-and-breakfast inn "-" in R-1 and R-2, so the use rule fails one here; but §325-9B(1)(p) and §325-10C(2) say bed-and-breakfast inns need a special permit "in all districts". The law's text and its chart disagree, and nothing in Gordium settles or surfaces it; to research (resolve before asking), then ask the architects or the City if still unclear.
-  - R-3a, R-3aa, R-3b, RU: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review.
+  - R-3a, R-3aa, R-3b, RU: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review. The law: “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5).
 - **Neighborhood gardens (special-permit conditions)**
   - all 9 districts: **MISSING** (low): A garden is an accessory use needing a special permit (chart p.2); nothing asks about one.
 - **Schools and related uses (special-permit conditions)**
-  - all 9 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A school is a special-permit use in every residential district (chart p.2), so the use entry says needs review.
+  - all 9 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A school is a special-permit use in every residential district (chart p.2), so the use entry says needs review. The law: “Schools and related uses. The following specific conditions shall be applicable” (Ch. 325 p.37 l.7).
 
 ### §325-11B Authorization and minimum requirements (rule, pp.38–39)
 
 - **Cluster subdivisions (deviations the Planning and Development Board may approve)**
   - R-1a, R-1b, R-2a, R-2b, R-3a, R-3b: **MISSING** (low): A cluster subdivision's approved deviations aren't modelled; Gordium checks one lot under the district's own rules.
-  - R-2c, R-3aa, RU: not applicable: Cluster subdivisions aren't permitted in this district. The law: “Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts” (this piece)
+  - R-2c, R-3aa, RU: not applicable: Cluster subdivisions aren't permitted in this district. The law: “Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts” (Ch. 325 p.38 l.26–27).
 
 ### §325-11C Approval; information to be submitted (flag, pp.39–41)
 
 - **What a cluster subdivision application must show**
   - R-1a, R-1b, R-2a, R-2b, R-3a, R-3b: **MISSING** (low): An approval process for a subdivision; no flag.
-  - R-2c, R-3aa, RU: not applicable: Cluster subdivisions aren't permitted in this district (§325-11B(1)). The law: “Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts” (chapter_325_zoning_2026-10.pdf p.38; its scope set by §325-11B, Gordium's reading)
+  - R-2c, R-3aa, RU: not applicable: Cluster subdivisions aren't permitted in this district (§325-11B(1)). The law: “Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts” (Ch. 325 p.38 l.26–27).
 
 ### §325-12C Establishment and location (flag, p.41)
 
 - **Planned unit development (PUD) intent**
-  - all 9 districts: not applicable: A PUD is its own district, made by rezoning. The law: “In reaching its decision on whether to rezone to a PUD” (this piece)
+  - all 9 districts: not applicable: A PUD is its own district, made by rezoning. The law: “In reaching its decision on whether to rezone to a PUD” (Ch. 325 p.41 l.36).
 
 ### §325-12D Permitted principal and accessory uses (rule, pp.41–42)
 
 - **PUD uses and limits**
-  - all 9 districts: not applicable: A PUD's limits are set by its own rezoning law. The law: “shall be as set forth in the legislation rezoning the area to a PUD” (this piece)
+  - all 9 districts: not applicable: A PUD's limits are set by its own rezoning law. The law: “shall be as set forth in the legislation rezoning the area to a PUD” (Ch. 325 p.41 l.43).
 
 ### §325-12E Site plan approval (flag, p.42)
 
 - **PUD site plan approval**
-  - all 9 districts: not applicable: Applies within a PUD, its own district. The law: “No structure shall be erected or placed within a PUD” (this piece)
+  - all 9 districts: not applicable: Applies within a PUD, its own district. The law: “No structure shall be erected or placed within a PUD” (Ch. 325 p.42 l.9).
 
 ### §325-12F Criteria (flag, p.42)
 
 - **PUD criteria**
-  - all 9 districts: not applicable: Applies to an application to rezone to a PUD. The law: “The Common Council will consider an application for any PUD” (this piece)
+  - all 9 districts: not applicable: Applies to an application to rezone to a PUD. The law: “The Common Council will consider an application for any PUD” (Ch. 325 p.42 l.13).
 
 ### §325-12H Additional requirements (flag, p.43)
 
 - **PUD conditions**
-  - all 9 districts: not applicable: Applies to a rezoning to a PUD. The law: “In any rezoning to a PUD” (this piece)
+  - all 9 districts: not applicable: Applies to a rezoning to a PUD. The law: “In any rezoning to a PUD” (Ch. 325 p.43 l.41).
 
 ### §325-15A Removal of topsoil; grading (rule, p.45)
 
@@ -592,7 +733,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-15B Mobile homes (rule, p.45)
 
 - **Mobile homes follow Chapter 210 (Housing Standards)**
-  - all 9 districts: not applicable: A pointer to Chapter 210, outside Chapter 325; no zoning requirement of its own. The law: “Mobile homes and mobile home parks shall be in conformity with Article II of Chapter 210” (this piece)
+  - all 9 districts: not applicable: A pointer to Chapter 210, outside Chapter 325; no zoning requirement of its own. The law: “Mobile homes and mobile home parks shall be in conformity with Article II of Chapter 210” (Ch. 325 p.45 l.22–23).
 
 ### §325-15C Unsightly or unsanitary storage (flag, p.45)
 
@@ -607,17 +748,17 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-15E Junkyards and salvage yards (rule, pp.45–46)
 
 - **Junkyards and salvage yards**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-15F Gasoline service stations (flag, p.46)
 
 - **Gasoline service stations (referral for review)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-16A Exceptions (rule, p.46)
 
 - **Height exceptions (spires, chimneys, mechanical equipment, solar, antennas) and their 20%/30% area cap**
-  - all 9 districts: parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) (Ben's later list, 2026-10-25). Needs a way to tell such objects apart in the model. Until then anything above the main roof is measured both ways (left out and to its top), so the height needs review rather than passing.
+  - all 9 districts: parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) (Ben's later list, 2026-10-25). Needs a way to tell such objects apart in the model. Until then anything above the main roof is measured both ways (left out and to its top), so the height needs review rather than passing. The law: “The height limitations of this chapter shall not apply to” (Ch. 325 p.46 l.13).
 
 ### §325-16B Ornamental and architectural features (rule, p.47)
 
@@ -632,17 +773,17 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-16D Notwithstanding anything to the contrary contained herein, in any U-1 District: [Added 6-3-1998 by (rule, p.47)
 
 - **U-1 District gorge areas**
-  - all 9 districts: not applicable: Applies only in the U-1 District. The law: “in any U-1 District” (this piece)
+  - all 9 districts: not applicable: Applies only in the U-1 District. The law: “in any U-1 District” (Ch. 325 p.47 l.15).
 
 ### §325-16F Notwithstanding anything to the contrary contained herein, in the WEDZ-1 District: [Added (rule, pp.47–48)
 
 - **WEDZ-1 District stories**
-  - all 9 districts: not applicable: Applies only in the WEDZ-1 District. The law: “in the WEDZ-1 District” (this piece)
+  - all 9 districts: not applicable: Applies only in the WEDZ-1 District. The law: “in the WEDZ-1 District” (Ch. 325 p.47 l.33).
 
 ### §325-16G Notwithstanding anything to the contrary contained herein, in the CBD-60, CBD-85, CBD-100, (rule, p.48)
 
 - **Two-story minimum in CBD and B districts**
-  - all 9 districts: not applicable: Applies only in the CBD and B districts it names. The law: “in the CBD-60, CBD-85, CBD-100, CBD-120, CBD-140, B-1a, B-1b, B-2c, and B-2d Zoning Districts” (this piece)
+  - all 9 districts: not applicable: Applies only in the CBD and B districts it names. The law: “in the CBD-60, CBD-85, CBD-100, CBD-120, CBD-140, B-1a, B-1b, B-2c, and B-2d Zoning Districts” (Ch. 325 p.48 l.13–14).
 
 ### §325-17A Reduced lot area (rule, p.48)
 
@@ -652,17 +793,17 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-17B Visibility at intersections (rule, p.48)
 
 - **Corner visibility triangle (nothing over 2 ft within 20 ft of the street corner)**
-  - all 9 districts: parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) (Ben's later list, 2026-10-25). Fences, walls, hedges, grading and plantings aren't identified in the model (research X4 settled the rule).
+  - all 9 districts: parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) (Ben's later list, 2026-10-25). Fences, walls, hedges, grading and plantings aren't identified in the model (research X4 settled the rule). The law: “On a corner lot in any residential district, no fence, wall, grading, hedge or other structure or planting more than two feet in height” (Ch. 325 p.48 l.23–24).
 
 ### §325-17C Obstructions dangerous to traffic (flag, pp.48–49)
 
 - **No fence, wall, sign or planting that hides traffic**
-  - all 9 districts: parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) (Ben's later list, 2026-10-25)
+  - all 9 districts: parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) (Ben's later list, 2026-10-25) The law: “In all districts, no fence, wall, grading, hedge, sign, assembly or other structure or planting” (Ch. 325 p.48 l.28; p.49 l.3).
 
 ### §325-17D Fences (flag, p.49)
 
 - **Fences may not block a neighbor's light, air or view**
-  - all 9 districts: parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) (Ben's later list, 2026-10-25)
+  - all 9 districts: parked: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK) (Ben's later list, 2026-10-25) The law: “No fence or wall other than a building may be built to a height that will interfere with the light, air or view of any neighboring property” (Ch. 325 p.49 l.5–6).
 
 ### §325-18A Porches and structures (rule, p.49)
 
@@ -680,17 +821,17 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-18C [fn11]Notwithstanding anything herein contained to the contrary, in the U-1 Zone, for any building which (rule, p.49)
 
 - **U-1 Zone setback next to a residential zone**
-  - all 9 districts: not applicable: Applies to buildings in the U-1 Zone. The law: “in the U-1 Zone” (this piece)
+  - all 9 districts: not applicable: Applies to buildings in the U-1 Zone. The law: “in the U-1 Zone” (Ch. 325 p.49 l.17).
 
 ### §325-19A [fn12]Side yard and rear yard transition (rule, p.49)
 
 - **Business or industrial lots next to residential lots keep a residential yard**
-  - all 9 districts: not applicable: The extra yard is on the business or industrial lot, not the residential one. The law: “Where a lot in a business or industrial district abuts a lot in a residential district” (this piece)
+  - all 9 districts: not applicable: The extra yard is on the business or industrial lot, not the residential one. The law: “Where a lot in a business or industrial district abuts a lot in a residential district” (Ch. 325 p.49 l.23–24).
 
 ### §325-19B Front yard transition (rule, p.50)
 
 - **Front yard transition into a business or industrial district**
-  - all 9 districts: not applicable: The reduced front yard is in the business or industrial district. The law: “the front yard depth in the business or industrial district shall be equal to 1/2” (this piece)
+  - all 9 districts: not applicable: The reduced front yard is in the business or industrial district. The law: “the front yard depth in the business or industrial district shall be equal to 1/2” (Ch. 325 p.50 l.4).
 
 ### §325-19C Corner lot transition (rule, p.50)
 
@@ -700,61 +841,61 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-19D Notwithstanding the above, the transition regulations as provided for in this section shall not apply in (rule, p.50)
 
 - **No transitions in B-2d**
-  - all 9 districts: not applicable: Applies only in the B-2d District. The law: “shall not apply in the B-2d District” (this piece)
+  - all 9 districts: not applicable: Applies only in the B-2d District. The law: “shall not apply in the B-2d District” (Ch. 325 p.50 l.10–11).
 
 ### §325-19E Development in R-3 Districts which abut R-1 Districts (rule, pp.50–51)
 
 - **Stricter limits for R-3 development abutting R-1 land**
-  - R-1a, R-1b, R-2a, R-2b, R-2c, RU: not applicable: Applies only in R-3a and R-3b. The law: “in the R-3a or R-3b Zoning District” (this piece)
-  - R-3a, R-3b: flag (needs review): `abutting_r1` (cited)
-  - R-3aa: flag (needs review): `abutting_r1` (cited) Note: Whether §325-19E reaches R-3aa is an open question (questions_for_architects.md 5.11); flagged in case.
+  - R-1a, R-1b, R-2a, R-2b, R-2c, RU: not applicable: Applies only in R-3a and R-3b. The law: “in the R-3a or R-3b Zoning District” (Ch. 325 p.50 l.12–13).
+  - R-3a, R-3b: flag (needs review): `abutting_r1` (cited) The law: “The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling” (Ch. 325 p.50 l.12–13).
+  - R-3aa: flag (needs review): `abutting_r1` (cited) The law: “The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling” (Ch. 325 p.50 l.12–13). Note: Whether §325-19E reaches R-3aa is an open question (questions_for_architects.md 5.11); flagged in case.
 
 ### §325-20C Nonconforming uses (rule, p.51)
 
 - **Parking for nonconforming uses**
-  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25)
+  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25) The law: “the amount of off-street parking permitted on a property containing a nonconforming use” (Ch. 325 p.51 l.27–28).
 
 ### §325-20D General requirements (rule, pp.51–57)
 
 - **Parking areas and driveways (permits, dimensions, surfacing, screening)**
-  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25)
+  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25) The law: “In all zoning districts, no parking area or driveway may be constructed” (Ch. 325 p.51 l.34–35).
 
 ### §325-20E Parking in front yards (rule, pp.57–58)
 
 - **Parking in front yards (orientation, driveway width)**
-  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25)
+  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25) The law: “In all residential districts, all front yard parking within 15 feet of the front property line” (Ch. 325 p.57 l.19).
 
 ### §325-20F Requirements for new or enlarged parking areas with the capacity for three or more parking spaces (rule, pp.58–60)
 
 - **New or enlarged parking areas of three or more spaces in residential districts**
-  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25)
+  - all 9 districts: parked: Parking (typed count and read from the drawing): on hold (Ben's later list, 2026-10-25) The law: “on lots within residential zoning districts” (Ch. 325 p.58 l.8).
 
 ### §325-20G Parking areas on lots in nonresidential zoning districts (rule, pp.60–61)
 
 - **Parking areas in nonresidential districts**
-  - all 9 districts: not applicable: Applies to lots in nonresidential districts. The law: “Parking areas on lots in nonresidential zoning districts” (this piece)
+  - all 9 districts: not applicable: Applies to lots in nonresidential districts. The law: “Parking areas on lots in nonresidential zoning districts” (Ch. 325 p.60 l.32).
 
 ### §325-20H Parking in WEDZ-1 District (rule, p.61)
 
 - **Parking in WEDZ-1**
-  - all 9 districts: not applicable: Applies only in WEDZ-1. The law: “Parking in WEDZ-1 District” (this piece)
+  - all 9 districts: not applicable: Applies only in WEDZ-1. The law: “Parking in WEDZ-1 District” (Ch. 325 p.61 l.27).
 
 ### §325-20I Parking in the Southwest Area (rule, p.61)
 
 - **Parking in the Southwest Area**
-  - all 9 districts: not applicable: Applies only in the Southwest Area. The law: “Parking in the Southwest Area” (this piece)
+  - all 9 districts: not applicable: Applies only in the Southwest Area. The law: “Parking in the Southwest Area” (Ch. 325 p.61 l.38).
 
 ### §325-20J Parking for the U-1 Zoning District (rule, pp.61–63)
 
 - **Parking in U-1**
-  - all 9 districts: not applicable: Applies only in the U-1 District. The law: “Parking for the U-1 Zoning District” (this piece)
+  - all 9 districts: not applicable: Applies only in the U-1 District. The law: “Parking for the U-1 Zoning District” (Ch. 325 p.61 l.41).
 
 ### §325-21A Size requirements (rule, p.63)
 
 - **Loading space size (450 sf), for the uses the district's loading flag lists**
-  - R-1a, R-1b: not applicable: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the next part. The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (§325-21B; its scope set by §325-21B, Gordium's reading)
-  - R-2a, R-2b, R-2c: flag (needs review): `loading` (mapped). Gordium's mapping, not a citation: R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes).
-  - R-3a, R-3aa, R-3b, RU: flag (needs review): `loading` (cited)
+  - R-1a, R-1b: not applicable: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the next part. The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3).
+  - R-2a, R-2b, R-2c: flag (needs review): `loading` (mapped). Gordium's mapping, not a citation: R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes). The law: “An off-street loading space shall have a minimum of 450 square feet” (Ch. 325 p.63 l.41).
+  - R-3a, R-3aa, R-3b, RU: flag (needs review): `loading` (cited) The law: “An off-street loading space shall have a minimum of 450 square feet” (Ch. 325 p.63 l.41).
 - **Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)**
   - R-1a, R-1b, R-2a, R-2b, R-2c: **MISSING** (low): Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag (each rulebook's header says so); the loading flag covers only the uses it lists.
   - R-3a, R-3aa, R-3b, RU: **MISSING** (low): Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag (each rulebook's header says so); the loading flag covers only the uses it lists. (also cites the piece: `loading`; covers none of this part)
@@ -762,9 +903,9 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-21B Space requirements (rule, pp.63–64)
 
 - **Which uses need loading spaces, and how many, for the uses the district's loading flag lists**
-  - R-1a, R-1b: not applicable: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the next part. The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (§325-21B)
-  - R-2a, R-2b, R-2c: flag (needs review): `loading` (mapped). Gordium's mapping, not a citation: R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes).
-  - R-3a, R-3aa, R-3b, RU: flag (needs review): `loading` (cited)
+  - R-1a, R-1b: not applicable: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the next part. The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3).
+  - R-2a, R-2b, R-2c: flag (needs review): `loading` (mapped). Gordium's mapping, not a citation: R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes). The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3).
+  - R-3a, R-3aa, R-3b, RU: flag (needs review): `loading` (cited) The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3).
 - **Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)**
   - R-1a, R-1b, R-2a, R-2b, R-2c: **MISSING** (low): Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag (each rulebook's header says so); the loading flag covers only the uses it lists.
   - R-3a, R-3aa, R-3b, RU: **MISSING** (low): Chart p.14's "Allowed by variance" row for nonresidential uses has no rule or flag (each rulebook's header says so); the loading flag covers only the uses it lists. (also cites the piece: `loading`; covers none of this part)
@@ -772,47 +913,47 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-21C There shall be no off-street loading requirement for any properties located in any CBD zoning district (rule, p.64)
 
 - **No loading in CBD districts**
-  - all 9 districts: not applicable: Applies only in CBD districts. The law: “in any CBD zoning district” (this piece)
+  - all 9 districts: not applicable: Applies only in CBD districts. The law: “in any CBD zoning district” (Ch. 325 p.64 l.9).
 
 ### §325-22A Lot size and frontage (rule, p.64)
 
 - **Motels (lot size and frontage)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-22B Parking (rule, p.64)
 
 - **Motels (parking)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-22C Paving (rule, p.64)
 
 - **Motels (paving)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-22D Driveway width (rule, p.64)
 
 - **Motels (driveway width)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-22E Curb cuts (rule, p.64)
 
 - **Motels (curb cuts)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-22F Landscaping (rule, p.64)
 
 - **Motels (landscaping)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-22G Illumination (flag, p.64)
 
 - **Motels (lighting)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-22H Uses (rule, p.64)
 
 - **Motels (uses)**
-  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (chapter_325_zoning_2026-10.pdf p.26)
+  - all 9 districts: not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (permitted uses are listed; what is left out is not, §325-8B(3)). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). The law: “except where otherwise indicated by specific prohibition or omission” (Ch. 325 p.26 l.20).
 
 ### §325-23A All uses shall conform to the current New York State Board of Health requirements and to the (rule, pp.64–65)
 
@@ -822,42 +963,42 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-24B General restrictions (rule, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24C Noise (rule, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24D Vibration (flag, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24E Smoke (rule, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24F Dust, dirt, odor and fumes (flag, pp.65–66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24G Fire and safety (rule, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24H Glare and heat (flag, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24I Industrial sewage and waste (rule, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-25 Location of accessory structures. (rule, p.66)
 
@@ -902,53 +1043,53 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-28B Applicability (rule, p.72)
 
 - **Accessory dwelling units (applicability)**
-  - all 9 districts: parked: Accessory dwelling units (queue item 10 brief, 2026-10-27)
+  - all 9 districts: parked: Accessory dwelling units (queue item 10 brief, 2026-10-27) The law: “This section applies to all accessory dwelling units (ADUs) within the City of Ithaca” (Ch. 325 p.72 l.4).
 
 ### §325-28C ADU requirements (rule, p.72)
 
 - **Accessory dwelling unit requirements (one per parcel, size, height, setbacks)**
-  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b: parked: Accessory dwelling units (queue item 10 brief, 2026-10-27) (also cites the piece: `parking_one_family`; covers none of this part)
-  - RU: parked: Accessory dwelling units (queue item 10 brief, 2026-10-27)
+  - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b: parked: Accessory dwelling units (queue item 10 brief, 2026-10-27) The law: “A maximum of one ADU is allowed per parcel” (Ch. 325 p.72 l.8). (also cites the piece: `parking_one_family`; covers none of this part)
+  - RU: parked: Accessory dwelling units (queue item 10 brief, 2026-10-27) The law: “A maximum of one ADU is allowed per parcel” (Ch. 325 p.72 l.8).
 
 ### §325-29 Landmarks. (flag, p.73)
 
 - **Landmarks and landmark districts (Chapter 228 review)**
-  - all 9 districts: parked: Historic district and flood zone lookups (Ben's later list, 2026-10-25)
+  - all 9 districts: parked: Historic district and flood zone lookups (Ben's later list, 2026-10-25) The law: “Officially designated landmarks or landmark districts of the City shall be governed by the provisions of Chapter 228” (Ch. 325 p.73 l.4–5).
 
 ### §325-29.1D Location (rule, p.76)
 
 - **Adult uses**
-  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76)
+  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (Ch. 325 p.76 l.8).
 
 ### §325-29.1E Public view and lighting (rule, p.76)
 
 - **Adult uses**
-  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76; its scope set by §325-29.1D, Gordium's reading)
+  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (Ch. 325 p.76 l.8).
 
 ### §325-29.1F Sale of alcohol prohibited (rule, p.76)
 
 - **Adult uses**
-  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76; its scope set by §325-29.1D, Gordium's reading)
+  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (Ch. 325 p.76 l.8).
 
 ### §325-29.1G Site plan review/landscaping (flag, p.76)
 
 - **Adult uses**
-  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76; its scope set by §325-29.1D, Gordium's reading)
+  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (Ch. 325 p.76 l.8).
 
 ### §325-29.2A General note (flag, p.77)
 
 - **Southwest Area districts (SW-1, SW-2, SW-3)**
-  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (chapter_325_zoning_2026-10.pdf p.77)
+  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (Ch. 325 p.77 l.4–5).
 
 ### §325-29.2B Building setback (rule, p.77)
 
 - **Southwest Area districts (SW-1, SW-2, SW-3)**
-  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (chapter_325_zoning_2026-10.pdf p.77; its scope set by §325-29.2A, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (Ch. 325 p.77 l.4–5).
 
 ### §325-29.2C Minimum store size (rule, p.77)
 
 - **Southwest Area districts (SW-1, SW-2, SW-3)**
-  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (chapter_325_zoning_2026-10.pdf p.77; its scope set by §325-29.2A, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (Ch. 325 p.77 l.4–5).
 
 ### §325-29.3C It shall be the duty and responsibility of all owners of property in the City of Ithaca to ensure the (rule, pp.77–79)
 
@@ -973,7 +1114,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-29.6F Due to the limited visual impact of underground or cable-based broadband installations, such (rule, p.88)
 
 - **Underground or cable broadband isn't governed by Article V-A**
-  - all 9 districts: not applicable: An exemption: nothing to check. The law: “such installations are not governed by the zoning requirements of this article” (this piece)
+  - all 9 districts: not applicable: An exemption: nothing to check. The law: “such installations are not governed by the zoning requirements of this article” (Ch. 325 p.88 l.40–41).
 
 ### §325-29.7B All PWSFs shall be classified as follows: (rule, p.89)
 
@@ -1133,92 +1274,92 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-44A Demolition, exterior alterations or additions to existing structures and parking areas and construction (flag, p.126)
 
 - **C-SU Zone review**
-  - all 9 districts: not applicable: Applies only in the C-SU Zone. The law: “within the C-SU Zone” (chapter_325_zoning_2026-10.pdf p.126)
+  - all 9 districts: not applicable: Applies only in the C-SU Zone. The law: “within the C-SU Zone” (Ch. 325 p.126 l.27–30).
 
 ### §325-44B Demolition, exterior alteration or enlargement of structures or parking areas or construction of new (flag, pp.126–127)
 
 - **C-SU Zone review**
-  - all 9 districts: not applicable: Applies only in the C-SU Zone. The law: “within the C-SU Zone” (chapter_325_zoning_2026-10.pdf p.126; its scope set by §325-44A, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the C-SU Zone. The law: “within the C-SU Zone” (Ch. 325 p.126 l.27–30).
 
 ### §325-45.1C Applicability (rule, p.128)
 
 - **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (Ch. 325 p.128 l.23).
 
 ### §325-45.1D Design review and approval required (flag, p.128)
 
 - **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128; its scope set by §325-45.1C, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (Ch. 325 p.128 l.23).
 
 ### §325-45.1E Landmarks Preservation Commission (flag, pp.128–129)
 
 - **New construction in a local historic district or on a landmark's parcel needs Landmarks Commission approval**
-  - all 9 districts: parked: Historic district and flood zone lookups (Ben's later list, 2026-10-25). It applies "regardless of the underlying zoning", so in residential districts too; it needs the historic district lookup.
+  - all 9 districts: parked: Historic district and flood zone lookups (Ben's later list, 2026-10-25). It applies "regardless of the underlying zoning", so in residential districts too; it needs the historic district lookup. The law: “Regardless of the underlying zoning, all new construction (including additions) within a designated local historic district” (Ch. 325 p.128 l.35–36).
 
 ### §325-45.2B Definitions and related standards (rule, pp.130–133)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5).
 
 ### §325-45.2D Maximum Height (in stories) Map (rule, pp.133–134)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5).
 
 ### §325-45.2E Collegetown Residential (CR-1, CR-2, CR-3) (rule, pp.134–146)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5).
 
 ### §325-45.2F Collegetown Residential 4 (CR-4) (rule, pp.146–151)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5).
 
 ### §325-45.2G Mixed Use (MU-1, MU-2) (rule, pp.151–160)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (Ch. 325 p.130 l.5).
 
 ### §325-45.3B Street-level active uses required (rule, pp.160–161)
 
 - **MU-2 street-level active uses**
-  - all 9 districts: not applicable: Applies only in the MU-2 District (Collegetown). The law: “Within the MU-2 District” (this piece)
+  - all 9 districts: not applicable: Applies only in the MU-2 District (Collegetown). The law: “Within the MU-2 District” (Ch. 325 p.160 l.12).
 
 ### §325-45.5A Permitted uses (rule, pp.162–163)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4).
 
 ### §325-45.5B Off-street parking/loading requirements (rule, p.163)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4).
 
 ### §325-45.5C Minimum lot size (rule, pp.163–164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4).
 
 ### §325-45.5D Maximum building height (rule, p.164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4).
 
 ### §325-45.5E Maximum percentage of lot coverage by buildings: 35% (rule, p.164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4).
 
 ### §325-45.5F Yard dimensions (rule, p.164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4).
 
 ### §325-45.5G Minimum building height: none (rule, p.164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (Ch. 325 p.162 l.4).
 
 ## Every rule in each rulebook: measured? tested on a model?
 

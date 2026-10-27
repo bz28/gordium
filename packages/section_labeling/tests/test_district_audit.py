@@ -129,17 +129,6 @@ def test_a_flag_must_name_something_that_says_needs_review(decisions):
     assert any("none of front_yard ever says needs review" in p for p in problems(data))
 
 
-def test_not_applicable_needs_the_laws_own_words_found_where_it_says(decisions):
-    base = {"status": "not_applicable", "why": "w"}
-    for quote, extra in (("in any U-1 District", {}), ("in any U-1 District", {"page": 47})):
-        ok = with_piece(decisions, "325-16D", [{"what": "x", "all": dict(base, quote=quote, **extra)}])
-        assert problems(ok) == []
-    for quote, extra in (("in any U-2 District", {}), ("in any U-1 District", {"page": 48}),
-                         ("in any U-1 District", {"piece": "325-26"}), ("", {})):
-        bad = with_piece(decisions, "325-16D", [{"what": "x", "all": dict(base, quote=quote, **extra)}])
-        assert any("quote not found" in p or "give the law's own words" in p for p in problems(bad)), (quote, extra)
-
-
 def test_a_quote_may_run_across_a_page_break_inside_its_piece(built):
     """§325-21B's scope sentence runs from p.63 onto p.64: found inside the piece, not on either page alone."""
     quote = "shall apply to all business and industrial land uses and multiple dwelling structures"
@@ -239,29 +228,6 @@ def test_rules_or_mapped_on_a_decision_that_isnt_covered_are_refused(decisions):
     assert any("`mapped` only goes with rulebook or flag" in p for p in problems(data))
 
 
-def test_a_chart_not_applicable_checks_the_districts_own_cell(decisions):
-    """Multiple dwellings are • in R-3a: "not permitted" there is refused; a chart quote without a cell too."""
-    base = decisions["_multiple_not_permitted"]
-    data = with_piece(decisions, "325-3B:row_house", [{"what": "x", "all": base}])
-    found = problems(data)
-    assert any(p.startswith("325-3B:row_house part 1 (R-3a): the chart's R-3a cell") and "'•'" in p for p in found)
-    assert not any("(R-1a): the chart's" in p for p in found)                  # "-" in R-1a: fine
-    no_cell = {k: v for k, v in base.items() if k != "cell"}
-    data = with_piece(decisions, "325-3B:row_house", [{"what": "x", "all": no_cell}])
-    assert any("a chart quote needs `cell`" in p for p in problems(data))
-
-
-def test_the_omission_quote_needs_a_use_on_no_residential_list(decisions):
-    base = {"status": "not_applicable", "why": "w", "page": 26, "quote": "except where otherwise indicated by "
-            "specific prohibition or omission"}
-    assert problems(with_piece(decisions, "325-22A", [{"what": "x", "all": dict(base, unlisted_use="motel")}])) == []
-    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": base}]))
-    assert any("needs `unlisted_use`" in p for p in found)
-    listed = audit.Audit(ITHACA)
-    for use in ("two-family", "school", "dormitory"):
-        assert any("is a residential use" in p for p in listed._unlisted_problems("R-1a", {"unlisted_use": use}, "w")), use
-
-
 def test_a_definition_link_on_a_piece_of_several_parts_needs_mapped(decisions):
     """`height` reaches §325-8A only through the lot_depth definition (8A(14)); naming it for Columns 8 and 9
     without saying why is refused."""
@@ -341,13 +307,6 @@ def test_a_piece_of_several_parts_needs_lines_on_each_covering_the_whole_piece(d
     assert any("lines outside the piece" in p for p in problems(with_piece(decisions, "325-18B", parts)))
 
 
-def test_any_quote_from_the_omission_sentence_needs_an_unlisted_use(decisions):
-    for quote in ("by specific prohibition or omission", "Regulations, standards and permitted uses are generally cumulative"):
-        found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
-            "status": "not_applicable", "why": "w", "page": 26, "quote": quote}}]))
-        assert any("needs `unlisted_use`" in p for p in found), quote
-
-
 def test_loading_for_a_use_allowed_by_variance_is_missing_everywhere_and_agrees_with_column_5(built):
     col5 = part_index(built, "325-8A", "Column 5")
     for pid in ("325-21A", "325-21B"):
@@ -374,56 +333,14 @@ def test_the_two_family_definition_is_covered_wherever_two_family_houses_are_per
         assert status == ("not_applicable" if d in ("R-1a", "R-1b") else "rulebook"), d
 
 
-def test_the_omission_sentence_placed_by_piece_also_needs_an_unlisted_use(decisions):
-    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "piece": "325-8B", "quote": audit.OMISSION}}]))
-    assert any("needs `unlisted_use`" in p for p in found)
-
-
-@pytest.mark.parametrize("use", ["home occupation", "neighborhood garden", "accessory dwelling unit", "private garage",
-                                 "rooming house", "boarding house", "row house", "cooperative household",
-                                 "day care center"])
-def test_a_use_the_chart_or_the_multiple_dwelling_list_names_is_never_unlisted(built, use):
-    assert built._unlisted_problems("R-1a", {"unlisted_use": use}, "w")
-
-
-def test_the_unlisted_uses_the_decisions_rely_on_are_on_no_list(built):
-    for use in ("motel", "junkyard", "travel trailer", "gasoline service station", "large beverage producer"):
-        assert built._unlisted_problems("R-3a", {"unlisted_use": use}, "w") == [], use
-
-
 def test_a_cell_covered_only_by_a_mapping_says_so(built):
     """§325-17A: no rule cites it; the yard rules cover it by Gordium's mapping, shown in the cell and summary."""
-    assert built._short("325-17A", "R-1b").endswith("(mapped)")
-    assert not built._short("325-19C", "R-1b").endswith("(mapped)")                  # front_yard cites it
+    assert "(mapped)" in built._short("325-17A", "R-1b")
+    assert "(mapped)" not in built._short("325-19C", "R-1b")                         # front_yard cites it
     assert "§325-17A (mapped)" in SAVED.read_text(encoding="utf-8").split("## The table")[0]
 
 
 # Review round 4.
-
-@pytest.mark.parametrize("pid", ["325-26", "325-3B:home_occupation"])
-def test_the_unlisted_use_must_be_what_the_piece_is_about(decisions, pid):
-    """A motel is unlisted, but §325-26 (streams) and home occupations aren't about motels."""
-    found = problems(with_piece(decisions, pid, [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "page": 26, "quote": audit.OMISSION, "unlisted_use": "motel"}}]))
-    assert any("isn't what this piece is about" in p for p in found)
-
-
-def test_motels_in_every_part_of_section_22_are_what_their_pieces_are_about(built):
-    """§325-22B to H don't say 'motel' themselves; §325-22A, in the same section, does."""
-    assert all("motel" in built._piece_words(f"325-22{x}") for x in "ABCDEFGH")
-
-
-def test_a_listed_use_with_a_word_added_is_still_listed(built):
-    assert built._unlisted_problems("R-1a", {"unlisted_use": "home occupation business"}, "w")
-    assert built._unlisted_problems("R-1a", {"unlisted_use": "rooming house annex"}, "w")
-
-
-def test_the_column_2_sentence_is_the_same_argument_and_needs_an_unlisted_use(decisions):
-    found = problems(with_piece(decisions, "325-3B:home_occupation", [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "page": 24,
-        "quote": "Uses which are permitted in each use district are listed"}}]))
-    assert any("needs `unlisted_use`" in p for p in found)
 
 
 def test_mapped_is_shown_on_the_kind_of_part_that_is_mapped(built):
@@ -441,39 +358,6 @@ def test_a_district_decided_twice_through_an_alias_is_refused(decisions):
 
 # Review round 5.
 
-def test_a_sibling_subsections_words_dont_make_a_use_this_pieces(decisions):
-    """§325-15C (unsanitary storage) never mentions a junkyard; §325-15E does."""
-    found = problems(with_piece(decisions, "325-15C", [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "page": 26, "quote": audit.OMISSION, "unlisted_use": "junkyard"}}]))
-    assert any("isn't what this piece is about" in p for p in found)
-
-
-def test_a_chart_row_must_be_about_the_piece(decisions):
-    """The multiple-dwelling row says nothing about streams (§325-26)."""
-    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "high", "why": "w"},
-                                             "R-1a, R-1b": decisions["_multiple_not_permitted"]}])
-    assert any("doesn't name 'New structures along streams" in p for p in problems(data))
-    other = dict(decisions["_multiple_not_permitted"], quote="RESIDENTIAL DISTRICTS USE LIST")
-    other.pop("via_piece")
-    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "high", "why": "w"},
-                                             "R-1a": other}])
-    assert any("isn't about this piece" in p for p in problems(data))
-
-
-def test_a_via_piece_must_name_this_piece(decisions):
-    """DWELLING, MULTIPLE lists the rooming house but not the rooming unit."""
-    data = with_piece(decisions, "325-3B:rooming_unit", [{"what": "x", "all": decisions["_multiple_not_permitted"]}])
-    assert any("doesn't name 'ROOMING UNIT'" in p for p in problems(data))
-
-
-def test_page_furniture_is_not_the_law(decisions):
-    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "page": 2, "quote": "City of Ithaca"}}]))
-    assert any("from another piece or part of the law (front_matter)" in p for p in found)    # p.2's text, not this piece
-    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "page": 67, "quote": "City of Ithaca, NY"}}]))
-    assert any("only page furniture" in p for p in found)                                # p.67's running header
-
 
 def test_rooming_units_and_bed_and_breakfasts_in_r1_r2_are_not_claimed_settled(built):
     for d in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c"):
@@ -484,43 +368,13 @@ def test_rooming_units_and_bed_and_breakfasts_in_r1_r2_are_not_claimed_settled(b
 
 # Review round 6.
 
-def test_a_quote_from_a_neighbouring_numbered_section_is_refused(decisions):
-    """§325-29 (landmarks) isn't §325-29.2 (the Southwest districts)."""
-    found = problems(with_piece(decisions, "325-29", [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "page": 77,
-        "quote": "Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3"}}]))
-    assert any("from another piece or part of the law (325-29.2A)" in p for p in found)
-
-
-def test_not_applicable_quotes_only_chapter_325_or_its_chart(decisions):
-    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "file": "ordinance_no_2025-12_southside_form_districts.pdf",
-        "page": 1, "quote": "ORDINANCE"}}]))
-    assert any("quotes Chapter 325 or its chart, not ordinance_no_2025-12" in p for p in found)
-
-
 
 # Review round 7.
-
-@pytest.mark.parametrize("pid,source,quote", [
-    ("325-3B:standard_canopy", "325-3B:occupant", "In R-2c Zones only"),
-    ("325-8E", "325-8D", "Additional restrictions in the CBD districts"),
-    ("325-16B", "325-16D", "in any U-1 District")])
-def test_a_sibling_subsections_scope_isnt_this_pieces(decisions, pid, source, quote):
-    found = problems(with_piece(decisions, pid, [{"what": "x", "all": {
-        "status": "not_applicable", "why": "w", "piece": source, "quote": quote}}]))
-    assert any(f"from another piece or part of the law ({source})" in p for p in found)
-
-
-def test_a_piece_named_in_scope_from_may_quote_the_piece_that_sets_its_scope(decisions):
-    data = copy.deepcopy(decisions)
-    del data["scope_from"]["325-29.1E"]
-    assert any(p.startswith("325-29.1E part 1 (R-1a): the quote is from another piece") for p in problems(data))
 
 
 def test_mapped_shows_when_any_named_rule_is_mapped(built):
     """§325-18A: the yard rules cite it; lot coverage is mapped."""
-    assert built.mapped_only("325-18A", "R-1b") and built._short("325-18A", "R-1b").endswith("(mapped)")
+    assert built.mapped_only("325-18A", "R-1b") and "(mapped)" in built._short("325-18A", "R-1b")
 
 
 def test_not_applicable_says_it_includes_pointers(built):
@@ -529,34 +383,75 @@ def test_not_applicable_says_it_includes_pointers(built):
     assert "or it is a pointer with no requirement of its own" in head and "or are pointers" in head
 
 
-
 # Review round 8.
 
-def test_a_quote_from_another_part_of_the_same_piece_is_refused(decisions, built):
-    """§325-8B(6) names R-1 and R-2; it says nothing about note (1)'s lot area in R-3."""
-    parts = copy.deepcopy(decisions["pieces"]["325-8B"])
-    i = part_index(built, "325-8B", "(1)")
-    parts[i]["R-3a, R-3aa, R-3b"] = {"status": "not_applicable", "why": "w",
-                                     "quote": "In R-1 and R-2 Districts, minor dependent children"}
-    found = problems(with_piece(decisions, "325-8B", parts))
-    assert any(p.startswith(f"325-8B part {i + 1} (R-3a): the quote is from another piece or part") for p in found)
 
 
-def test_scope_from_outside_its_section_needs_a_reason(decisions):
-    data = copy.deepcopy(decisions)
-    data["scope_from"]["325-26"] = "325-16D"
-    assert "scope_from 325-26: 325-16D is in another section; say why ({piece, why})" in problems(data)
 
 
-def test_a_not_applicable_by_scope_says_so(built):
+# The provenance design (coordinator, after round 8): a decision resting on a reading (not applicable, parked, flag)
+# quotes the law; code checks only that the quote is the law's words, exactly where it says; the table shows each
+# quote beside its cell, and the summary counts the cells that rest on a reading.
+
+@pytest.mark.parametrize("decision", [
+    {"status": "not_applicable", "why": "w"},
+    {"status": "parked", "item": "parking"},
+    {"status": "flag", "rules": ["front_yard"], "mapped": "m"}])
+def test_a_reading_must_quote_the_law(decisions, decision):
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": decision}]))
+    assert any("gives the law's own words (`quote`)" in p for p in found)
+
+
+def test_the_quote_must_be_the_laws_words_exactly_where_it_says(decisions):
+    base = {"status": "not_applicable", "why": "w"}
+    for extra in ({"quote": "No new structure shall be located nearer than 20 feet"},
+                  {"quote": "in any U-1 District", "page": 47}, {"quote": "in any U-1 District", "piece": "325-16D"}):
+        assert problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(base, **extra)}])) == [], extra
+    for extra in ({"quote": "No new structure shall be located nearer than 25 feet"},
+                  {"quote": "in any U-1 District", "page": 48}, {"quote": "in any U-1 District", "piece": "325-26"},
+                  {"quote": "in any U-1 District", "piece": "325-99Z"}):
+        found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(base, **extra)}]))
+        assert any("quote not found at" in p for p in found), extra
+
+
+def test_page_furniture_and_other_files_are_not_the_law(decisions):
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "page": 67, "quote": "City of Ithaca, NY"}}]))
+    assert any("only page furniture" in p for p in found)
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "file": "ordinance_no_2025-12_southside_form_districts.pdf",
+        "page": 1, "quote": "ORDINANCE"}}]))
+    assert any("quote Chapter 325 or its chart, not ordinance_no_2025-12" in p for p in found)
+
+
+def test_a_chart_quote_names_its_cell_and_the_cell_must_say_so_for_the_district(decisions):
+    base = decisions["_multiple_not_permitted"]
+    found = problems(with_piece(decisions, "325-3B:row_house", [{"what": "x", "all": base}]))
+    assert any(p.startswith("325-3B:row_house part 1 (R-3a): the chart's R-3a cell") and "'•'" in p for p in found)
+    assert not any("(R-1a): the chart's" in p for p in found)
+    no_cell = {k: v for k, v in base.items() if k != "cell"}
+    assert any("names its `cell`" in p for p in problems(with_piece(decisions, "325-3B:row_house",
+                                                                     [{"what": "x", "all": no_cell}])))
+
+
+def test_every_cell_resting_on_a_reading_points_to_its_quote(built):
+    """Each n/a, parked and flag decision, and each mapped rule, is a reading listed with its quote; its cell says
+    which reading."""
+    readings = {e["id"]: e for e in built.readings()}
+    for pid in built.rows:
+        for d in built.districts:
+            reading_parts = [dec for _, dec in built.cells[pid][d] if dec["status"] in audit.READINGS]
+            marks = built._reading_ids(pid, d)
+            assert bool(marks) >= bool(reading_parts), (pid, d)
+            assert all(f"[{', '.join(marks)}]" in built._short(pid, d) for _ in [0] if marks)
     text = built.render()
-    assert "its scope set by §325-24B, Gordium's reading" in text and "its scope set by §325-45.4" in text
+    for e in readings.values():
+        if e["status"] in audit.READINGS:
+            assert e["dec"]["quote"] in text.split("## Decisions resting on a reading")[1].split("## Each piece")[0]
 
 
-def test_a_chart_cell_means_not_permitted_only_in_the_use_chart(decisions):
-    bad = {"status": "not_applicable", "why": "w", "file": "zoning_charts_2026-04.pdf", "page": 3,
-           "quote": "One-family dwelling, detached, zero lot line",
-           "cell": {"section": "Minimum Lot Size [fn3]", "row": "One-family dwelling, detached, zero lot line"}}
-    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "high",
-                                                                              "why": "w"}, "R-3a": bad}]))
-    assert any("means 'not permitted' only in the use chart" in p for p in found)
+def test_the_summary_counts_cells_resting_on_a_reading(built):
+    head = built.render().split("## The table")[0]
+    rested = {(e["piece"], d) for e in built.readings() for d in e["cells"]}
+    assert f"**Resting on a reading:** {len(rested)} of the 1476 cells" in head
+    assert "code checks only that the quote is the law's words where it says" in head
