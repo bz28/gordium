@@ -95,6 +95,10 @@ STOPS = {
                       "measured yet: an open question for the architects",
     "no_rooms": "enter bedrooms / parking spaces",
     "no_units": "enter the dwelling units, the rooms let for profit, and whether it is a conversion",
+    "no_occupants": "enter the occupants (§325-3B OCCUPANT: in R-2c, every person with the right to occupy)",
+    "no_building_units": "enter the dwelling units in the whole attached building, every lot it stands on",
+    "no_occupant_split": "optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that "
+                         "depends on how the occupants are split)",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",

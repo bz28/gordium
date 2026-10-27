@@ -1,6 +1,7 @@
 """The evaluation: the chart reader's cells against the rules drafted by reading (the hand answer keys).
 
-Two independent readings of the same chart must agree, for every hand-drafted rulebook (R-1b, R-1a, R-3a). For
+Two independent readings of the same chart must agree, for every hand-drafted rulebook (the nine residential
+districts, DISTRICTS below). For
 every chart row a rule cites (by page and lines, or a cell), the rule must pass exactly at the reader's value in
 that district's column and fail just past it; for the use list, a • must be allowed, an SP must go to review, a -
 must be neither. And in the other direction, every cell of the district that holds a number, and every primary use
@@ -23,7 +24,8 @@ ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 CELLS = ITHACA / "2_extracted_text/zoning_charts_2026-04.cells.jsonl"
 CHART = "zoning_charts_2026-04.pdf"
 # each hand-drafted rulebook and the chart's spelling of its district column
-DISTRICTS = {"R-1b": "R-1B", "R-1a": "R-1A", "R-3a": "R-3A"}
+DISTRICTS = {"R-1b": "R-1B", "R-1a": "R-1A", "R-2a": "R-2A", "R-2b": "R-2B", "R-2c": "R-2C", "R-3a": "R-3A",
+             "R-3aa": "R-3AA", "R-3b": "R-3B", "RU": "RU"}
 COLUMN = DISTRICTS["R-1b"]     # the drafting eval (rule_drafting/tests/test_eval.py) grades R-1b drafts with this module
 NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?%?")
 SIDE_ONE = (3, "Yard Dimensions", "Side (one side minimum)")
@@ -87,6 +89,7 @@ LIMITS = {
                           ("Multiple family dwelling", "multiple_family"))
        for how in ("new construction", "by conversion")},
     **_by_use(LOT_SIZE, "Fraternity, sorority, or group house", "lot_area", "fraternity_sorority_group_house"),
+    **_by_use(LOT_WIDTH, "One-family dwelling, detached, zero lot line", "lot_width", "one_family_detached_zero_lot_line"),
     **_by_use(LOT_WIDTH, "One-family dwelling, semi-detached", "lot_width", "one_family_semi_detached"),
     **_by_use(LOT_WIDTH, "One-family dwelling, attached", "lot_width", "one_family_attached"),
     **_by_use(LOT_WIDTH, "Two-family dwelling", "lot_width", "two_family"),
@@ -128,23 +131,86 @@ FLAG_ONLY = {
     (14, "Minimum Loading Requirement", "Neighborhood commercial facility"),   # "See §325-21": a reference, no limit
 }
 COUNTS = {"stories", "parking_spaces"}     # whole numbers: one more (or fewer) is the next value
+EXACT = ("pass", "fail")                   # a limit's usual meaning: it passes at the figure and fails just past it
+
+# R-2C's cells state several figures, each for its own uses (chart p.3 notes 4-6, 12, 14, 15), and its lot sizes
+# grow with the occupants. Each figure is one limit for one use, with the stated facts that make the figure itself
+# the limit: one occupant (note 4); one dwelling unit on the lot, a semi-detached house split along its party wall
+# (note 5); one occupant in a two-family house's two units, so twice the figure (note 5); one occupant in three
+# units, three times the figure (attached, note 6). With one occupant there is no split of occupants between units
+# to choose, so the figure is exact. The 5th element, when given, is what the rule says
+# at the figure and just past it where the law's figure holds only on a side Gordium can't identify: the strictest
+# reading's 10 ft passes and just under it needs review ("pass", "needs_review"); the most lenient reading's 0 ft
+# needs review and just under it fails ("needs_review", "fail"), tested where the height bonus (38 ft: 0 + 3 ft, its
+# eaves 1 ft) lifts it above the lot line (a negative distance isn't a measurement).
+_Z, _S, _A = "one_family_detached_zero_lot_line", "one_family_semi_detached", "one_family_attached"
+# every yard well clear, so only the one measured binds (the other rules citing the cell pass on both sides)
+_CLEAR = {y: 100 for y in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")}
+_CLEAR |= {f"{y}_eaves": 100 for y in _CLEAR}
+R2C = {
+    (*LOT_SIZE, "One-family dwelling, detached"):
+        [("lot_area", "min", {"use": "one_family_detached", "occupants": 1}, lambda n: n[0])],
+    (*LOT_SIZE, "One-family dwelling, detached, zero lot line"):
+        [("lot_area", "min", {"use": _Z, "occupants": 1}, lambda n: n[0])],
+    (*LOT_SIZE, "One-family dwelling, semi-detached"):
+        [("lot_area", "min", {"use": _S, "dwelling_units": 1, "occupants": 1}, lambda n: n[0])],
+    (*LOT_SIZE, "Two-family dwelling"): [("lot_area", "min", {"use": "two_family", "occupants": 1}, lambda n: 2 * n[0])],
+    **{(*LOT_SIZE, f"One-family dwelling, attached, {how}"):
+       [("lot_area", "min", {"use": _A, "dwelling_units": 3, "occupants": 1, "attached_units_in_building": 3}, lambda n: 3 * n[0])]
+       for how in ("new construction", "by conversion")},
+    (3, "Maximum lot coverage by buildings", "Percent of lot area"): [
+        ("building_area", "max", {"lot_area": 10_000, "use": use}, lambda n, i=i: n[i] * 10_000)
+        for i, use in enumerate(("one_family_detached", "two_family", _A))],
+    SIDE_ONE: [  # note 14: 10 ft (detached, two-family, other uses; unattached sides), 15 ft (zero lot line)
+        ("side_yard_larger", "min", {"side_yard_smaller": 100, "use": "one_family_detached"}, lambda n: n[0]),
+        ("side_yard_larger_eaves", "min", {"side_yard_smaller_eaves": 100, "use": "one_family_detached"},
+         lambda n: n[0] - 2),
+        ("side_yard_larger", "min", {**_CLEAR, "use": _Z}, lambda n: n[1]),
+        ("side_yard_larger_eaves", "min", {**_CLEAR, "use": _Z}, lambda n: n[1] - 2),
+        ("side_yard_smaller", "min", {**_CLEAR, "use": _S}, lambda n: n[0], ("pass", "needs_review")),
+        ("side_yard_smaller_eaves", "min", {**_CLEAR, "use": _S}, lambda n: n[0] - 2,
+         ("pass", "needs_review"))],
+    SIDE_OTHER: [  # note 15: 0 ft (zero lot line, semi-detached attached side), 5 ft (detached, two-family, other),
+        # 10 ft (zero lot line next to a non-zero-lot-line building or lot)
+        ("side_yard_smaller", "min", {"side_yard_larger": 100, "use": "one_family_detached"}, lambda n: n[1]),
+        ("side_yard_smaller_eaves", "min", {"side_yard_larger_eaves": 100, "use": "one_family_detached"},
+         lambda n: n[1] - 2),
+        ("side_yard_smaller", "min", {**_CLEAR, "use": _S, "building_height": 38}, lambda n: n[0] + 3,
+         ("needs_review", "fail")),
+        ("side_yard_smaller_eaves", "min", {**_CLEAR, "use": _S, "building_height": 38}, lambda n: n[0] + 3 - 2,
+         ("needs_review", "fail")),
+        ("side_yard_smaller", "min", {**_CLEAR, "use": _Z}, lambda n: n[2], ("pass", "needs_review")),
+        ("side_yard_smaller_eaves", "min", {**_CLEAR, "use": _Z}, lambda n: n[2] - 2,
+         ("pass", "needs_review"))],
+}
+# R-3AA's stories cell "3/2 [fn11]" states two figures (note 11): the first the most stories, the second the fewest.
+# The fewest binds a building covering more than 500 sf (§325-8A(15)'s exemption is R-3aa.stories' open question).
+R3AA = {(3, "Maximum Building Height [fn10]", "Number of stories"): [
+    ("stories", "max", {}, lambda n: n[0]),
+    ("stories", "min", {"building_area": 1000}, lambda n: n[1])]}
+PER_DISTRICT = {"R-2C": R2C, "R-3AA": R3AA}
 
 
 def limits(cells) -> dict:
     """LIMITS for one district. Columns 12 and 13 together require one side yard at least the larger figure and the
-    other at least the smaller (§325-8A(12), (13)): R-3a's 10 ft and 5 ft bind the wider and the narrower yard."""
+    other at least the smaller (§325-8A(12), (13)): R-3a's 10 ft and 5 ft bind the wider and the narrower yard.
+    A district whose cells hold several figures, each for its own uses (R-2C) or its own limit (R-3AA's "3/2"), has
+    its own meanings for those rows (PER_DISTRICT), laid over the rest."""
+    columns = {c["column"] for c in cells}
+    own = next((PER_DISTRICT[c] for c in sorted(columns & set(PER_DISTRICT))), {})
     side = {(c["page"], c["section"], c["row"]): numbers(c["value"]) for c in cells
             if (c["page"], c["section"], c["row"]) in (SIDE_ONE, SIDE_OTHER)}
     one, other = side.get(SIDE_ONE, [0])[0], side.get(SIDE_OTHER, [0])[0]
     out = dict(LIMITS)
-    if one == other:
-        return out
-    wide, narrow = ((SIDE_ONE, SIDE_OTHER) if one > other else (SIDE_OTHER, SIDE_ONE))
-    out[wide] = [("side_yard_larger", "min", {"side_yard_smaller": 100}, lambda n: n[0]),
-                 ("side_yard_larger_eaves", "min", {"side_yard_smaller_eaves": 100}, lambda n: n[0] - 2)]
-    out[narrow] = [("side_yard_smaller", "min", {"side_yard_larger": 100}, lambda n: n[0]),
-                   ("side_yard_smaller_eaves", "min", {"side_yard_larger_eaves": 100}, lambda n: n[0] - 2)]
-    return out
+    if one != other:
+        wide, narrow = ((SIDE_ONE, SIDE_OTHER) if one > other else (SIDE_OTHER, SIDE_ONE))
+        # the other wall at the narrower figure, so only this side can carry the larger one (each side's eaves are
+        # held to the minimum their side carries, #18's P0: a wall far out on both sides leaves either side open)
+        out[wide] = [("side_yard_larger", "min", {"side_yard_smaller": min(one, other)}, lambda n: n[0]),
+                     ("side_yard_larger_eaves", "min", {"side_yard_smaller_eaves": 100}, lambda n: n[0] - 2)]
+        out[narrow] = [("side_yard_smaller", "min", {"side_yard_larger": 100}, lambda n: n[0]),
+                       ("side_yard_smaller_eaves", "min", {"side_yard_larger_eaves": 100}, lambda n: n[0] - 2)]
+    return {**out, **own}
 
 
 def numbered(cells) -> list[dict]:
@@ -170,18 +236,27 @@ def test_each_chart_value_is_exactly_where_the_rule_turns_from_pass_to_fail(dist
             if c["page"] == 2:
                 continue
             assert key in table, f"{rule['id']} cites {key}, which has no stated meaning here"
-            for measure, kind, fixed, limit in table[key]:
+            for i, (measure, kind, fixed, limit, *expected) in enumerate(table[key]):
+                exact = expected[0] if expected else EXACT
                 bound = limit(numbers(c["value"]))
                 step = 1 if measure in COUNTS else 0.01
                 past = bound + step if kind == "max" else bound - step
                 at = outcome(rule, base | fixed | {measure: bound}, uses)
                 beyond = outcome(rule, base | fixed | {measure: past}, uses)
-                assert (at, beyond) in {("pass", "fail"), ("pass", "pass")}, \
+                # not binding here: passes on both sides (or, for a side Gordium can't identify, reviews on both); or a
+                # row cited as an input for another use (R-3b's other-use rule cites the multiple-family row for its
+                # reading's least, so for a multiple dwelling it doesn't apply): that row is enforced by its own rule,
+                # which the `tried` check below still requires
+                idle = {("pass", "pass"), ("not_applicable", "not_applicable")} | (
+                    {("needs_review", "needs_review")} if expected else set())
+                assert (at, beyond) in {exact} | idle, \
                     f"{rule['id']}: chart {c['value']!r} for {c['row']!r} → {measure} {kind} {bound}; got {at} at it, {beyond} past it"
-                if (at, beyond) == ("pass", "fail"):
-                    tried.add(key)
-    # every stated limit in this district's column is enforced exactly by some rule
-    assert tried == {(c["page"], c["section"], c["row"]) for c in numbered(cells)} - FLAG_ONLY
+                if (at, beyond) == exact:
+                    tried.add((key, i))
+    # every stated limit in this district's column (each figure of a cell that states several, R-2C's) is enforced
+    # exactly by some rule
+    want = {(c["page"], c["section"], c["row"]) for c in numbered(cells)} - FLAG_ONLY
+    assert tried == {(key, i) for key in want for i in range(len(table[key]))}
 
 
 def _with_number_changed(text: str, n: float, new: float, which: int) -> tuple[str, int]:
@@ -223,7 +298,7 @@ def number_matters(rule, n, where, which, cells, allowed, table=LIMITS) -> bool:
     probes = [ex["given"] for ex in rule["examples"]]
     for base in (ex["given"] for ex in rule["examples"] if ex["expect"] == "pass"):
         for c in cells:
-            for measure, _, fixed, limit in table.get((c["page"], c["section"], c["row"]), []):
+            for measure, _, fixed, limit, *_ in table.get((c["page"], c["section"], c["row"]), []):
                 probes += [base | fixed | {measure: limit(numbers(c["value"])) + k / 2} for k in range(-20, 21)]
     return any(outcome(rule, p, allowed) != outcome(changed, p, allowed) for p in probes)
 
@@ -262,10 +337,33 @@ def test_every_numbered_cell_is_cited_by_a_rule_and_has_a_meaning(district):
     cited = {id(c) for rule in rules for c in cited_rows(rule, cells)}
     assert [(c["page"], c["section"], c["row"], c["value"]) for c in numbered(cells) if id(c) not in cited] == []
     keys = {(c["page"], c["section"], c["row"]) for c in numbered(cells)}
-    assert keys <= set(LIMITS) | FLAG_ONLY
+    assert keys <= set(limits(cells)) | FLAG_ONLY
     by_rules = {(c["page"], c["section"], c["row"]) for rule in rules if rule["kind"] == "rule"
                 for c in cited_rows(rule, cells)}
     assert not by_rules & FLAG_ONLY                       # a figure no measurement can check is never in a formula
+
+
+# Hand rulebooks written before this check whose headers don't name p.14's "Allowed by variance" row (to fix in their
+# own PR): R-1b's header lists no loading at all.
+UNNAMED_TEXT_CELLS = {"R-1B"}
+
+
+def test_every_worded_cell_is_cited_or_named_as_not_covered(district):
+    """A cell that states a requirement in words, not a number (p.14's "Allowed by variance [fn2]" for nonresidential
+    loading, "See §325-21"), is either cited by a rule or flag, or named in the rulebook's header as not covered yet,
+    so the gap is never silent (#r3-hand review round 1: R-3aa's and RU's headers had dropped it)."""
+    rules, cells = district
+    column = cells[0]["column"]
+    if column in UNNAMED_TEXT_CELLS:
+        pytest.skip(f"{column}: known gap, fixed in its own PR")
+    name = next(k for k, v in DISTRICTS.items() if v == column)
+    header = "".join(line for line in (ITHACA / f"5_zoning_rules/{name}.yaml").read_text(encoding="utf-8")
+                     .splitlines(keepends=True) if line.startswith("#"))
+    cited = {id(c) for rule in rules for c in cited_rows(rule, cells)}
+    worded = [c for c in cells if c["page"] != 2 and not numbers(c["value"]) and c["value"].strip() not in ("", "-")]
+    missing = [(c["row"], c["value"]) for c in worded if id(c) not in cited
+               and re.sub(r"\s*\[fn[^\]]*\]", "", c["value"]).strip() not in header]
+    assert missing == []
 
 
 def test_use_list_matches_the_chart_marks(district):
@@ -280,7 +378,14 @@ def test_use_list_matches_the_chart_marks(district):
         return ids[0]
 
     primary = [c for c in cells if c["page"] == 2 and c["section"] == "Primary Uses"]
-    marks = {use_of(c): c["value"] for c in primary}
+    # a mark may carry a note ("•[fn5]" in RU: new construction one every 500 ft): the mark is the •, and the note
+    # must be a rule of its own, a flag naming that use and quoting the note
+    noted = {use_of(c): re.search(r"\[fn(\d+)\]", c["value"])[1] for c in primary if "[fn" in c["value"]}
+    marks = {use_of(c): re.sub(r"\s*\[fn\d+\]", "", c["value"]) for c in primary}
+    for use, n in noted.items():
+        assert any(r["kind"] == "flag" and "applies_when" in r and use in formula.strings(r["applies_when"])
+                   and any(s.get("page") == 2 and str(s.get("quote", "")).startswith(f"({n})") for s in r["sources"])
+                   for r in rules), f"{use}'s note {n} (chart p.2) has no flag of its own"
     assert set(marks.values()) <= {"•", "SP", "-"}
     assert set(marks) == set(uses)                                            # every use has a mark
     if use_rule["kind"] == "rule":

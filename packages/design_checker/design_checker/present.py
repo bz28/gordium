@@ -18,7 +18,7 @@ from pathlib import Path
 
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, load, read_jsonl
+from rule_format.rulebook import MEASURE_KINDS, REPO, load, outcome, read_jsonl
 from design_checker.gaps import zone_gaps
 
 from design_checker import reading_set, rhino_logic
@@ -36,6 +36,7 @@ NOT_YET_WHY = "Not in Gordium yet — coming in a later version. Check this by h
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
           ("not_checked", "Not checked"), ("not_covered", NOT_YET)]
 
+from model_measurement.project import fact_conflicts  # noqa: E402  (lot facts that disagree: shown)
 from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
@@ -152,9 +153,29 @@ def _compares(check: str) -> list[ast.Compare]:
     return sorted(out, key=lambda n: (n.lineno, n.col_offset))
 
 
+# The stated facts a "Lot facts disagree" row offers to re-enter (r2 round 6): the two counts that disagree.
+CONFLICT_NEEDS = ("dwelling_units", "attached_units_in_building")
+
+
+def could_settle(rule: dict, values: dict, key: str) -> bool:
+    """Would entering an optional stated fact change this rule's result? Only if the rule's outcome differs between the
+    least and the most it can be (the most occupants in one unit: 1 to the occupants). Unknown bounds: no."""
+    hi = (values or {}).get(rhino_logic.OPTIONAL.get(key))
+    if key not in rhino_logic.OPTIONAL or type(hi) is not int or hi < rhino_logic.minimum(key):
+        return False
+    use = values.get("use")
+    allowed = {"use": {use}} if isinstance(use, str) else {"use": set()}
+    known = {k: v for k, v in values.items() if v is not None}
+    return outcome(rule, known | {key: rhino_logic.minimum(key)}, allowed) != outcome(rule, known | {key: hi}, allowed)
+
+
 def _evaluate(text: str, values: dict):
+    """A rule's expression at these values. A limit that depends on the use (R-2c's side yards, coverage: "15 if use
+    == ...") is worked out for the stated use, as envelope._known_true does; with no use stated it can't be (None)."""
+    use = values.get("use")
+    kinds = MEASURE_KINDS | ({"use": frozenset([use])} if isinstance(use, str) else {})
     try:
-        return formula.evaluate(text, values, MEASURE_KINDS)
+        return formula.evaluate(text, values, kinds)
     except (formula.EvaluationError, formula.MissingMeasure, ArithmeticError):
         return None
 
@@ -1184,7 +1205,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # the open questions that verdict turns on: while there are any, no change to the design makes it comply
             "_turns_on": (side_row if side_row is not None else row).get("Turns on") or [],
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
-            "needs": (rhino_logic.needs_of(reading_set.rule_names(rule), values) + (
+            "needs": (rhino_logic.needs_of(reading_set.rule_names(rule), values,
+                                           lambda k: st == REVIEW and could_settle(rule, values, k)) + (
                 ["stories"] if "stories" in reading_set.rule_names(rule) and (
                     (measured.get("stories") or {}).get("stories_refused") or     # refused: Enter again, always
                     rhino_logic.stories_needed(measured.get("stories"))
@@ -1498,6 +1520,14 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     for i in items:                                  # measured from an assumed main building: said on the row
         if (measured.get(i.get("measure")) or {}).get("main_assumed"):
             i["note"] = "; ".join(n for n in (i.get("note"), ASSUMED_MAIN_NOTE) if n)
+    for k, conflict in enumerate(fact_conflicts(facts)):     # facts that disagree (r2 round 5): said, not hidden
+        items.append({"id": f"facts.conflict#{k + 1}", "rule": None, "name": "Lot facts disagree", "group": "site",
+                      "status": REVIEW, "mark": MARK[REVIEW], "proposed": "", "required": "", "margin": "", "sign": "",
+                      "zoom": None, "measure": None, "objects": [], "points": None,
+                      # the same "Enter …" button as a row waiting on these counts, to correct either one
+                      "hint": rhino_logic.enter_words(CONFLICT_NEEDS), "reason": conflict, "needs": list(CONFLICT_NEEDS),
+                      "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
+                                 "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     if left_out:
         n = len(left_out)
         items.append({"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",

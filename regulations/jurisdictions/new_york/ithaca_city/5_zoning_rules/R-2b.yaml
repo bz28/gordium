@@ -1,0 +1,1136 @@
+# R-2b (City of Ithaca): rules drafted by Claude by hand, by reading the zoning charts (April 2026) and Chapter 325,
+# the same way R-1b.yaml, R-1a.yaml and R-3a.yaml were. An ANSWER KEY for grading the drafting script: written
+# without looking at anything the script drafted or recorded, from the City's documents only (2_extracted_text/, the
+# chart read cell by cell, the section labels, the definitions), with R-1a.yaml and R-3a.yaml as the model of the
+# format.
+#
+# Why R-2b: the middle two-family district (the chart's fourth column). It has R-2a's uses but much smaller lots
+# (3,000 sf, 35 ft wide), a 10 ft front yard, and unequal side yards (10 ft and 5 ft, like R-3a), so a drafter that
+# copies R-2a's or R-1's yards, or reads R-2C's stacked cells into R-2B, fails here.
+#
+# Every chart number was read two ways and agrees: the chart's text line (quoted), and the chart reader's R-2B cell
+# (cited); R-2B is the fourth value in each row. Lot coverage and the front yard are confirmed a third way by
+# §325-11B(3)(d) and (e) (cluster subdivisions: "R-2b 35" percent; "10 feet in the R-2b, R-3a and R-3b Zones"), and
+# the lot size a fourth way by §325-8B(1)'s own example ("in R-2b Districts, an area of 3,000 square feet is required
+# for a one family house or a two-family house"). test_r1b_matches_chart.py checks the rules against the R-2B cells.
+#
+# Where R-2b differs from R-1b (chart p.3, column R-2B): uses (p.2, the same marks as R-2A: semi-detached and
+# two-family dwellings permitted; nursery schools, adult day care homes and neighborhood commercial facilities by
+# special permit); lot size 3,000 sf for a one-family detached, semi-detached or two-family dwelling and 4,000 sf for
+# other uses; lot width 35 ft for those three and 40 ft for other uses; lot coverage 35%; front yard 10 ft; side
+# yards 10 ft on one side and 5 ft on the other; accessory buildings 3 ft from side and rear lot lines (R-2b is not
+# an R-1 District). The same as R-1b: 3 stories, 35 ft (bonus to 38.5 ft), rear 25% of the lot depth up to 50 ft
+# but not less than 20 ft, parking (p.14).
+#
+# Draft (approval deferred, decided 2026-10-19). Not covered yet, as in R-1b (later rules or flags): ornamental
+# parapets and cornices above the height limit (§325-16B), accessory uses and structures (p.2: the private garage
+# "for not more than three cars", note 6), accessory dwelling units (§325-28), occupancy limits (p.2 notes 1, 4;
+# §325-3B DWELLING, ONE-FAMILY and TWO-FAMILY: in R-2, a family and not more than two unrelated individuals per
+# unit), the South Hill Overlay (p.2 note 2, §325-8E), height exceptions for chimneys and similar (§325-16A, applied
+# when measuring height), more than one main building on a lot (§325-8B(1)), cluster subdivisions (§325-11), loading
+# for nonresidential uses ("Allowed by variance", p.14).
+#
+# Known gap (as in R-3a, not fixable in this file): on a corner lot one side yard is left, and the City checks it
+# against Column 13 (5 ft in R-2b; the corner_lot_side_yard_column_13 finding). The measurements give that one yard
+# as both side measures, and the rule language has no corner-lot measure, so R-2b.side_yards asks 10 ft of it: a
+# stricter answer than the City's practice (a false fail, never a false pass) until a corner_lot measure exists.
+
+district: R-2b
+rules:
+
+  - id: R-2b.use
+    kind: rule
+    topic: uses
+    title: "Permitted primary uses (chart p.2)"
+    check: >-
+      use in ["one_family_detached", "one_family_semi_detached", "two_family", "church", "public_park_or_playground",
+      "library_or_fire_station"]
+    review_when:
+      - when: >-
+          use in ["cemetery", "public_utility_structure", "school", "nursery_school_or_child_day_care",
+          "adult_day_care_home", "neighborhood_commercial_facility"]
+        reason: >-
+          Marked SP for R-2B on the zoning chart (p.2). §325-9B(1) lists cemeteries, public utility facilities,
+          schools, nursery schools and child day-care centers in R-2, neighborhood commercial facilities in R-2, and
+          group or adult day-care facilities in R-2 as requiring a special permit from the Planning and Development
+          Board.
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [7, 7]
+        quote: "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA R-3B"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [15, 16]
+        quote: "(2) Column 2: Permitted Primary Uses. Uses which are permitted in each use district are listed, subject to the further regulations in this section and of Article V."
+      # marked • for R-2B
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "One-family dwelling, detached [fn4]", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "One-family dwelling, semi-detached [fn4]", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Two-family dwelling [fn4]", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Church or related building", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Public park or playground", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Library or fire station", column: R-2B}
+      # marked SP for R-2B
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Cemetery or related building", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Public utility structure except office", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "School and related buildings", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Nursery school, child day care center", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Adult day care home", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Neighborhood commercial facility", column: R-2B}
+      # marked - for R-2B (not permitted): the rows of the uses an R-2 drafter is most likely to let in
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [10, 10]
+        quote: "One-family dwelling, detached, zero lot line [fn4] - - - - SP SP SP SP -"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [12, 12]
+        quote: "One-family dwelling, attached [fn4] - - - - SP • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [14, 14]
+        quote: "Multiple family dwelling [fn4] - - - - - • • • •[fn5]"
+      # the special permits
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [22, 23]
+        quote: "(1) The uses listed under the district regulations in § 325-8, District regulations, which require a special permit from the Planning and Development Board, are as follows:"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [25, 25]
+        quote: "(b) Cemeteries in all districts."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [26, 26]
+        quote: "(c) Public utility facilities in all districts."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [27, 27]
+        quote: "(d) Schools and related uses in all residential districts."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [28, 28]
+        quote: "(e) Nursery schools or child day-care centers in R-2, CR-2 and R-U Districts."
+        not_limits: {2: "district names (R-2, CR-2), not numbers"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [29, 30]
+        quote: "(f) Neighborhood retail or service commercial facilities in R-2, R-3, CR-2, CR-3, and CR-4 Districts."
+        not_limits: {2: "district names (R-2, CR-2), not numbers", 3: "district names (R-3, CR-3), not numbers", 4: "a district name (CR-4), not a number"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 31
+        lines: [34, 34]
+        quote: "(n) Group or adult day-care facilities in R-2 and CR-2 Districts."
+        not_limits: {2: "district names (R-2, CR-2), not numbers"}
+    examples:
+      - given: {use: one_family_detached}
+        expect: pass
+      - given: {use: one_family_semi_detached}
+        expect: pass
+        note: marked • for R-2B (- in R-1)
+      - given: {use: two_family}
+        expect: pass
+        note: marked • for R-2B (- in R-1)
+      - given: {use: one_family_attached}
+        expect: fail
+        note: marked - for R-2B (SP in R-2C, • in R-3)
+      - given: {use: one_family_detached_zero_lot_line}
+        expect: fail
+        note: marked - for R-2B (SP in R-2C)
+      - given: {use: multiple_family}
+        expect: fail
+      - given: {use: dormitory}
+        expect: fail
+      - given: {use: nursing_home}
+        expect: fail
+      - given: {use: nursery_school_or_child_day_care}
+        expect: needs_review
+        note: SP in R-2 (- in R-1, • in R-3)
+      - given: {use: adult_day_care_home}
+        expect: needs_review
+      - given: {use: neighborhood_commercial_facility}
+        expect: needs_review
+      - given: {use: school}
+        expect: needs_review
+    findings:
+    - id: chart_marks
+      question: The chart has no legend for its marks. We read • as permitted and - as not permitted; SP matches §325-9B(1)'s
+        list of uses needing a special permit from the Planning and Development Board. Confirm.
+      kind: reading
+      answer: • = permitted (the uses Column 2 lists, §325-8A(2)); - = not permitted (left out, §325-8B(3)); SP = needs
+        a special permit (the uses §325-9B(1) lists). The chart has no legend; this reads the code's own text.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [15, 15]
+        quote: Uses which are permitted in each use district are listed
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [20, 20]
+        quote: except where otherwise indicated by specific prohibition or omission
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [22, 23]
+        quote: which require a special permit from the Planning and Development Board, are as follows
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §5.1
+    - id: adult_day_care_same_use
+      question: The chart's use is "Adult day care home"; §325-9B(1)(n) says "Group or adult day-care facilities in R-2".
+        Are these the same use?
+      kind: reading
+      answer: 'The same use: §325-9B(1)(n) is the only special-permit item for adult day care, it names R-2, and the
+        chart marks the use SP in exactly R-2A, R-2B and R-2C. Either way it needs a special permit, so the result is
+        NEEDS REVIEW.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 31
+        lines: [34, 34]
+        quote: Group or adult day-care facilities in R-2 and CR-2 Districts
+      strength: strong
+      confirm_with: the architects
+    - id: permitted_use_still_has_rules
+      question: '"Subject to the further regulations in this section and of Article V": can a use marked • still need
+        review because of those regulations (e.g. occupancy limits, chart p.2 notes)?'
+      kind: law
+      answer: Yes. Column 2's uses are subject to the rest of §325-8 and to Article V, and every column is subject to
+        Article V's supplementary regulations. Those are rules of their own.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [16, 16]
+        quote: subject to the further regulations in this section and of Article V
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §5.3
+    notes: >-
+      R-2B is the fourth mark in each row of page 2 (R-1A, R-1B, R-2A, R-2B, ...). Its marks, row by row against the
+      chart reader's R-2B cells: • detached, semi-detached and two-family dwellings, church, park, library or fire
+      station; SP cemetery, public utility, school, nursery school, adult day care home, neighborhood commercial
+      facility; - for the rest (zero-lot-line and attached one-family dwellings, multiple dwellings, fraternity houses,
+      dormitories, nursing homes, hospitals, bed-and-breakfast inns). R-2B's marks are the same as R-2A's in every
+      primary-use row; R-2C, next to it, marks the zero-lot-line and attached houses SP. What the marks mean is Gordium's reading (the chart_marks finding).
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_area_one_family_detached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, one-family dwelling, detached (chart p.3)"
+    applies_when: use == "one_family_detached"
+    check: lot_area >= 3000
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, detached", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [10, 10]
+        quote: "One-family dwelling, detached 10,000 sf 6,000 sf 5,000 sf 3,000 sf 2,500 sf [fn4] 5,000 sf 5,000 sf 3,000 sf 10,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [48, 48]
+        quote: "(3) See §325-8(B)(1)."
+    examples:
+      - given: {use: one_family_detached, lot_area: 4000}
+        expect: pass
+      - given: {use: one_family_detached, lot_area: 3000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: one_family_detached, lot_area: 2999}
+        expect: fail
+        note: R-2C's 2,500 sf (one occupant) is not enough in R-2b
+      - given: {use: two_family, lot_area: 2000}
+        expect: not_applicable
+    notes: >-
+      The fourth value of the row is R-2B's (3,000 sf, after R-2A's 5,000). Chart note 3 points to §325-8B(1): the
+      minimum applies to each main building on the lot, and §325-8B(1)'s own example is R-2b's: 3,000 sf for a
+      one-family or two-family house, and another 3,000 sf for each further house on the lot.
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_area_one_family_semi_detached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, one-family dwelling, semi-detached (chart p.3)"
+    applies_when: use == "one_family_semi_detached"
+    check: lot_area >= 3000
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, semi-detached", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [12, 12]
+        quote: "One-family dwelling, semi-detached - - 5,000 sf 3,000 sf 2,000 sf [fn5] 5,000 sf 5,000 sf 3,000 sf 15,000 sf"
+    examples:
+      - given: {use: one_family_semi_detached, lot_area: 3000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: one_family_semi_detached, lot_area: 2999}
+        expect: fail
+      - given: {use: one_family_detached, lot_area: 2000}
+        expect: not_applicable
+    notes: >-
+      A semi-detached dwelling is one building holding two one-family dwellings that share a party wall (§325-3B).
+      R-2B's value is the second in the row (R-1A and R-1B are "-"). In R-2b the building stands whole on one lot:
+      the side yards (10 ft and 5 ft) leave no 0 ft side for a party wall on a lot line (only R-2C's note 15 allows
+      that).
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_area_two_family
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, two-family dwelling (chart p.3)"
+    applies_when: use == "two_family"
+    check: lot_area >= 3000
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Two-family dwelling", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [15, 15]
+        quote: "Two-family dwelling - - 5,000 sf 3,000 sf 2,000 sf [fn5] 5,000 sf 5,000 sf 3,000 sf 15,000 sf"
+    examples:
+      - given: {use: two_family, lot_area: 4000}
+        expect: pass
+      - given: {use: two_family, lot_area: 3000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: two_family, lot_area: 2999}
+        expect: fail
+      - given: {use: two_family, lot_area: 2000}
+        expect: fail
+        note: R-2C's 2,000 sf (note 5) is not enough in R-2b
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_area_other_use
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, other use (chart p.3)"
+    applies_when: use not in ["one_family_detached", "one_family_semi_detached", "two_family"]
+    check: lot_area >= 4000
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Other use", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [19, 19]
+        quote: "Other use 10,000 sf 7,500 sf 6,000 sf 4,000 sf 4,000 sf 6,000 sf 6,000 sf 4,000 sf 30,000 sf"
+    examples:
+      - given: {use: church, lot_area: 5000}
+        expect: pass
+      - given: {use: church, lot_area: 4000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: church, lot_area: 3999}
+        expect: fail
+      - given: {use: school, lot_area: 3000}
+        expect: fail
+        note: enough for a house in R-2b, not for another use
+      - given: {use: two_family, lot_area: 1000}
+        expect: not_applicable
+    notes: >-
+      Other uses in R-2b: church, park, library or fire station, cemetery, public utility, school, nursery school,
+      adult day care home, neighborhood commercial facility. The uses marked "-" on p.2 fail R-2b.use whatever their
+      lot; their lot is checked here too, as R-1b does.
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_width_one_family_detached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, one-family dwelling, detached (chart p.3)"
+    applies_when: use == "one_family_detached"
+    check: lot_width >= 35
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "One-family dwelling, detached", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [21, 21]
+        quote: "One-family dwelling, detached 75 ft 50 ft 45 ft 35 ft 40 ft 40 ft 50 ft 30 ft 75 ft"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [31, 33]
+        quote: "(7) Column 7: Minimum Lot Size, Width in Feet at Street Line. Lots hereafter used for a permitted use in each use district shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column"
+    examples:
+      - given: {use: one_family_detached, lot_width: 50}
+        expect: pass
+      - given: {use: one_family_detached, lot_width: 35}
+        expect: pass
+        note: exactly at the minimum (R-2A's 45 ft would fail it)
+      - given: {use: one_family_detached, lot_width: 34.99}
+        expect: fail
+      - given: {use: two_family, lot_width: 20}
+        expect: not_applicable
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_width_one_family_semi_detached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, one-family dwelling, semi-detached (chart p.3)"
+    applies_when: use == "one_family_semi_detached"
+    check: lot_width >= 35
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "One-family dwelling, semi-detached", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [23, 23]
+        quote: "One-family dwelling, semi-detached - - 45 ft 35 ft 50 ft 40 ft 50 ft 30 ft 100 ft"
+    examples:
+      - given: {use: one_family_semi_detached, lot_width: 35}
+        expect: pass
+      - given: {use: one_family_semi_detached, lot_width: 34.99}
+        expect: fail
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_width_two_family
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, two-family dwelling (chart p.3)"
+    applies_when: use == "two_family"
+    check: lot_width >= 35
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "Two-family dwelling", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [25, 25]
+        quote: "Two-family dwelling - - 45 ft 35 ft 50 ft 40 ft 50 ft 30 ft 100 ft"
+    examples:
+      - given: {use: two_family, lot_width: 35}
+        expect: pass
+      - given: {use: two_family, lot_width: 34.99}
+        expect: fail
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_width_other_use
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, other use (chart p.3)"
+    applies_when: use not in ["one_family_detached", "one_family_semi_detached", "two_family"]
+    check: lot_width >= 40
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: Other use, column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [28, 28]
+        quote: "Other use 75 ft 60 ft 50 ft 40 ft 40 ft 50 ft 50 ft 40 ft 125 ft"
+    examples:
+      - given: {use: church, lot_width: 40}
+        expect: pass
+      - given: {use: church, lot_width: 39.99}
+        expect: fail
+      - given: {use: church, lot_width: 35}
+        expect: fail
+        note: enough for a house, not for another use
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.stories
+    kind: rule
+    topic: dimensions
+    title: "Maximum number of stories (chart p.3)"
+    check: stories <= 3
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Maximum Building Height [fn10]", row: Number of stories, column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [30, 30]
+        quote: "Number of stories 3 3 3 3"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [10, 10]
+        quote: "(2) In all districts, the number of stories permitted may not be exceeded."
+    examples:
+      - given: {stories: 2}
+        expect: pass
+      - given: {stories: 3}
+        expect: pass
+        note: exactly at the limit
+      - given: {stories: 4}
+        expect: fail
+    notes: >-
+      The 3-story limit has no bonus: it still applies when the height bonus (R-2b.height) is used. Stories are
+      counted at the main entrance side (§325-8A(8)).
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.height
+    kind: rule
+    topic: dimensions
+    title: "Maximum building height, with the §325-16C bonus"
+    check: >-
+      building_height <= 35 or building_height <= 35 + 0.1 * 35
+      and front_yard >= 10 + (building_height - 35)
+      and side_yard_smaller >= 5 + (building_height - 35)
+      and side_yard_larger >= 10 + (building_height - 35)
+      and rear_yard >= max(min(0.25 * lot_depth, 50), 20) + (building_height - 35)
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [31, 31]
+        quote: "Height in feet 35 ft 35 ft 35 ft 35 ft"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [56, 56]
+        quote: "(10) See §325-16."
+      - file: zoning_charts_2026-04.pdf             # the yard minimums the bonus increases
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [6, 7]
+        quote: "In any district, any main building may be erected to a height in excess of that specified for the district, provided that:"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [8, 9]
+        quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [11, 12]
+        quote: "(3) In each district, the number of additional feet may not exceed 10% of the maximum building height allowed in that district."
+    examples:
+      - given: {building_height: 35, front_yard: 10, side_yard_smaller: 5, side_yard_larger: 10, rear_yard: 25, lot_depth: 100}
+        expect: pass
+        note: exactly at 35 ft with every yard at its minimum (rear 25% of 100 = 25)
+      - given: {building_height: 35.01, front_yard: 10, side_yard_smaller: 5, side_yard_larger: 10, rear_yard: 25, lot_depth: 100}
+        expect: fail
+        note: over 35 ft, so every yard must grow by the extra height
+      - given: {building_height: 38.5, front_yard: 13.5, side_yard_smaller: 8.5, side_yard_larger: 13.5, rear_yard: 28.5, lot_depth: 100}
+        expect: pass
+        note: the most the bonus allows (10% of 35 = 3.5 ft), each yard 3.5 ft larger
+      - given: {building_height: 38.51, front_yard: 40, side_yard_smaller: 20, side_yard_larger: 20, rear_yard: 50, lot_depth: 100}
+        expect: fail
+        note: past 38.5 ft, however large the yards
+      - given: {building_height: 37, front_yard: 11.99, side_yard_smaller: 7, side_yard_larger: 12, rear_yard: 27, lot_depth: 100}
+        expect: fail
+        note: the front yard must be 10 + 2 = 12
+      - given: {building_height: 37, front_yard: 12, side_yard_smaller: 6.99, side_yard_larger: 12, rear_yard: 27, lot_depth: 100}
+        expect: fail
+        note: the narrower side yard must be 5 + 2 = 7
+      - given: {building_height: 37, front_yard: 12, side_yard_smaller: 7, side_yard_larger: 11.99, rear_yard: 27, lot_depth: 100}
+        expect: fail
+        note: the wider side yard must be 10 + 2 = 12
+      - given: {building_height: 37, front_yard: 12, side_yard_smaller: 7, side_yard_larger: 12, rear_yard: 26.99, lot_depth: 100}
+        expect: fail
+        note: the rear yard must be 25 + 2 = 27
+      - given: {building_height: 37, front_yard: 12, side_yard_smaller: 7, side_yard_larger: 12, rear_yard: 27, lot_depth: 100}
+        expect: pass
+        note: every yard exactly 2 ft past its minimum at 37 ft
+      - given: {building_height: 37, front_yard: 12, side_yard_smaller: 7, side_yard_larger: 12, rear_yard: 52, lot_depth: 240}
+        expect: pass
+        note: on a deep lot the rear yard is capped at 50 ft (25% of 240 = 60), then + 2
+    open_questions:
+    - '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height, or allowed
+      on top of the bonus height too?'
+    research:
+    - question: '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height,
+        or allowed on top of the bonus height too?'
+      searched:
+      - 325-16
+      - 325-16A
+      - 325-16B
+      - 325-16C
+      - 325-3B:height_of_building
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [4, 4]
+        quote: cornice for ornament
+      why_open: §325-16B allows an ornamental parapet or cornice up to 5 ft above the height limit, but doesn't say
+        whether that is the chart's limit or the bonus height §325-16C allows, or whether a parapet that guards a roof
+        deck (not "for ornament") qualifies. No City record found. (The same question as R-1b.height's, since the words
+        are the same in every district.)
+      readings:
+      - id: from_chart_limit
+        reading: the 5 ft is measured from the chart's height limit (the stricter reading)
+      - id: from_bonus_height
+        reading: the 5 ft is measured from the bonus height §325-16C allows
+      report: docs/research/2026-10-20_architect_questions.md §4.6
+    findings:
+    - id: height_bonus_every_yard
+      question: '§325-16C(1): we read "each required ... yard is increased one foot ... for each one foot of such additional
+        height" as: each yard must be at least its normal requirement plus the extra height (both side yards included).
+        Confirm.'
+      kind: law
+      answer: 'Confirmed: every required front, side and rear yard grows one foot for each foot of extra height.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [8, 8]
+        quote: Each required front, side and rear yard is increased one foot on the ground for each one foot
+      still_open: []
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §4.5
+    - id: height_bonus_main_building_only
+      question: Does the bonus apply to accessory buildings too, or only the main building ("any main building")?
+      kind: law
+      answer: Only the main building ("any main building"). The number of stories still can't be exceeded, and the extra
+        feet are at most 10% of the maximum building height.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [6, 6]
+        quote: any main building may be erected to a height in excess of that
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [10, 10]
+        quote: the number of stories permitted may not be exceeded
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [11, 12]
+        quote: may not exceed 10% of the maximum building height
+      still_open: []
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §4.5
+    notes: >-
+      Arithmetic for the bonus: 10% of the 35 ft maximum = 3.5 ft, so at most 38.5 ft, with every required yard 1 ft
+      larger per extra foot (R-2B's yards: front 10, sides 10 and 5, so the wider side yard grows from 10 and the
+      narrower from 5; rear 25% of the lot depth, at most 50 ft, at least 20 ft). All yard measurements are needed to check the height rule, even for buildings at or under 35 ft
+      (the checker evaluates every part, so a missing measurement can't hide).
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.lot_coverage
+    kind: rule
+    topic: dimensions
+    title: "Maximum lot coverage by buildings (chart p.3, §325-8A(10))"
+    check: building_area <= 0.35 * lot_area
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Maximum lot coverage by buildings, row: Percent of lot area, column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [34, 34]
+        quote: "Percent of lot area 20% 25% 30% 35%"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [5, 7]
+        quote: "On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings above ground."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [7, 9]
+        quote: "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+        not_limits: {2: "what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [9, 10]
+        quote: "This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in this column."
+    open_questions:
+    - 'Coverage waits on two questions recorded with the definitions: what lot area to use without a survey (lot), and
+      whether roof eaves count (building_area). Garages count: see building_area''s findings.'
+    research:
+    - question: 'Coverage waits on two questions recorded with the definitions: what lot area to use without a survey
+        (lot), and whether roof eaves count (building_area). Garages count: see building_area''s findings.'
+      searched:
+      - 325-8A
+      - 325-3B:building_area
+      - 325-3B:lot
+      sources: []
+      why_open: It depends on the lot and building_area questions, which are still open; see their research.
+      report: docs/research/2026-10-20_architect_questions.md §3.2
+    findings:
+    - id: below_ground_not_counted
+      question: '"Above ground": are parts of a building below grade (e.g. a buried garage under a deck) left out of
+        building_area?'
+      kind: reading
+      answer: Parts wholly below ground don't count (Column 10 counts what is covered "above ground"; §325-25B lets
+        wholly below-grade accessory structures go anywhere). A deck on top of a buried garage does count.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [6, 7]
+        quote: covered by principal and accessory buildings above ground
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [4, 4]
+        quote: entirely below the finished grade
+      still_open: []
+      strength: strong
+      confirm_with: the City zoning office
+      report: docs/research/2026-10-20_architect_questions.md §3.2
+    examples:
+      - given: {building_area: 1000, lot_area: 4000}
+        expect: pass
+      - given: {building_area: 1400, lot_area: 4000}
+        expect: pass
+        note: exactly 35% of 4,000 sf
+      - given: {building_area: 1401, lot_area: 4000}
+        expect: fail
+      - given: {building_area: 1300, lot_area: 4000}
+        expect: pass
+        note: 32.5%, over R-2a's 30% but under R-2b's 35%
+    notes: >-
+      R-2B's 35% is the fourth value of the line ("20% 25% 30% 35% 35% 35% 40% 25%": eight values, because R-2C's
+      stacked "35%/40% /50%" is printed on the lines above and below, so the fifth 35% is R-3A's, not R-2C's).
+      §325-11B(3)(d)'s cluster-subdivision table gives the same figure ("R-2b 35").
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.front_yard
+    kind: rule
+    topic: dimensions
+    title: "Front yard minimum (chart p.3)"
+    check: front_yard >= 10
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [37, 37]
+        quote: "Front (minimum) 25 ft 25 ft 25 ft 10 ft"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [7, 9]
+        quote: "C. Corner lot transition. On corner lots in residential districts; buildings must be erected so that yards facing public streets shall conform to the minimum front yard requirements of said residential district. Such lots shall be deemed to have two adjoining front yards."
+        not_limits: {2: "two adjoining front yards: which yards are front yards on a corner lot (measured to every street line), not a limit"}
+    examples:
+      - given: {front_yard: 15}
+        expect: pass
+      - given: {front_yard: 10}
+        expect: pass
+        note: exactly at the minimum (R-2A's is 25 ft)
+      - given: {front_yard: 9.99}
+        expect: fail
+    notes: >-
+      On a corner lot every yard facing a street is a front yard (§325-19C; the corner_lot_two_front_yards finding in
+      definitions.yaml): front_yard is the least distance from any street lot line, so each street-facing yard must be
+      10 ft. §325-11B(3)(e) gives the same front yard for R-2b ("10 feet in the R-2b, R-3a and R-3b Zones").
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.side_yards
+    kind: rule
+    topic: dimensions
+    title: "Side yards minimum: one side 10 ft, the other 5 ft (chart p.3)"
+    check: side_yard_smaller >= 5 and side_yard_larger >= 10
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [38, 38]
+        quote: "Side (one side minimum) 10 ft 10 ft 10 ft 10 ft"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [40, 40]
+        quote: "Side (other side minimum) 10 ft 10 ft 10 ft 5 ft"
+    examples:
+      - given: {side_yard_smaller: 5, side_yard_larger: 10}
+        expect: pass
+        note: both exactly at their minimums (R-2a would fail the 5 ft yard)
+      - given: {side_yard_smaller: 4.99, side_yard_larger: 20}
+        expect: fail
+      - given: {side_yard_smaller: 7, side_yard_larger: 9.99}
+        expect: fail
+        note: neither side yard is 10 ft
+      - given: {side_yard_smaller: 6, side_yard_larger: 6}
+        expect: fail
+        note: two 6 ft yards don't do; one must be 10 ft
+    notes: >-
+      Column 12 (one side at least 10 ft) and Column 13 (the other at least 5 ft) together mean: the wider side yard
+      at least 10 ft and the narrower at least 5 ft (§325-8A(12), (13)). R-2B's values are the fourth on each line
+      (10 ft, and 5 ft after R-1A, R-1B and R-2A's 10 ft); R-2C's stacked "10 ft /15 ft" and "0 ft /5 ft / 10 ft" are
+      R-2C's own (notes 14 and 15) and don't apply here. A semi-detached or two-family house is checked as one
+      building: R-2b has no 0 ft side for a party wall. Corner lots: see the known gap in this file's header.
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.rear_yard
+    kind: rule
+    topic: dimensions
+    title: "Rear yard minimum (chart p.3, note 16; lot depth §325-8A(14))"
+    check: rear_yard >= max(min(0.25 * lot_depth, 50), 20)
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [42, 43]
+        quote: "Rear (minimum, % of depth or feet, 25%/ 25%/ 25%/ 25%/ 25%/ 20%/ 25%/ 20%/ 25% / whichever is less) 50 ft [fn16] 50 ft [fn16]"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [24, 26]
+        quote: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+        not_limits: {2: "the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit"}
+    examples:
+      - given: {rear_yard: 30, lot_depth: 120}
+        expect: pass
+        note: exactly 25% of 120
+      - given: {rear_yard: 29.99, lot_depth: 120}
+        expect: fail
+      - given: {rear_yard: 50, lot_depth: 240}
+        expect: pass
+        note: 25% would be 60 ft; the chart caps it at 50 ft
+      - given: {rear_yard: 49.99, lot_depth: 240}
+        expect: fail
+      - given: {rear_yard: 20, lot_depth: 60}
+        expect: pass
+        note: 25% would be 15 ft; note 16 sets the floor at 20 ft
+      - given: {rear_yard: 19.99, lot_depth: 60}
+        expect: fail
+      - given: {rear_yard: 24, lot_depth: 120}
+        expect: fail
+        note: R-3a's 20% (24 ft) is not enough in R-2b
+    notes: >-
+      R-2B's cell is "25%/ 50 ft [fn16]", the fourth value. Lot depth is the average of the two side lot lines if they
+      differ (§325-8A(14)(a)). The percentage governs for lot depths from 80 ft (25% = 20 ft) to 200 ft (25% = 50 ft).
+    open_questions:
+    - 'Which lines are the side lot lines on a lot with more than four sides? See lot_depth: Gordium uses the Zoning
+      Administrator''s perpendicular method, and one detail of it is still open.'
+    research:
+    - question: 'Which lines are the side lot lines on a lot with more than four sides? See lot_depth: Gordium uses the
+        Zoning Administrator''s perpendicular method, and one detail of it is still open.'
+      searched:
+      - 325-8A
+      - 325-3B:yard
+      - 325-3B:rear_yard
+      sources:
+      - rank: 2
+        cite: 'Zoning Administrator''s affidavit (2019) and staff memo to the BZA, Appeal #3202, 815 S. Aurora St (a
+          five-sided lot), 2019-2022'
+        url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_02012022-2446
+        quote: side lot lines should be drawn at a 90-degree angle perpendicular to the front lot line to determine
+          the average lot depth
+      why_open: It depends on the lot_depth question that is still open; see its research.
+      report: docs/research/2026-10-20_architect_questions.md §1.2
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.yard_projections
+    kind: rule
+    topic: dimensions
+    title: "Eaves into required yards, at most 2 ft (§325-18B)"
+    check: >-
+      front_yard_eaves >= 10 + max(building_height - 35, 0) - 2
+      and side_yard_smaller_eaves >= 5 + max(building_height - 35, 0) - 2
+      and side_yard_larger_eaves >= 10 + max(building_height - 35, 0) - 2
+      and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 49
+        lines: [13, 16]
+        quote: "B. Projecting architectural features. The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that such features shall not project more than two feet into any required yard."
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [8, 9]
+        quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-2B}
+    examples:
+      - given: {front_yard_eaves: 12, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+        expect: pass
+        note: eaves clear of every required yard
+      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+        expect: pass
+        note: eaves exactly 2 ft into the front (10 − 2), narrower side (5 − 2), wider side (10 − 2) and rear (25% of 120 = 30, − 2) yards
+      - given: {front_yard_eaves: 7.99, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+        expect: fail
+        note: an eave just over 2 ft into the 10 ft front yard
+      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 2.99, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+        expect: fail
+        note: an eave just over 2 ft into the 5 ft side yard
+      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 7.99, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+        expect: fail
+      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 27.99, lot_depth: 120, building_height: 30}
+        expect: fail
+      - given: {front_yard_eaves: 11, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 31, lot_depth: 120, building_height: 38}
+        expect: pass
+        note: with the height bonus every required yard grows 3 ft (§325-16C), and an eave may reach 2 ft into each
+      - given: {front_yard_eaves: 10.99, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 31, lot_depth: 120, building_height: 38}
+        expect: fail
+        note: the 13 ft front yard the bonus requires, less 2 ft, is 11
+    notes: >-
+      The yards themselves (R-2b.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
+      its eaves left out (the yards_to_nearest_part finding, §325-3 YARD, §325-18A); this rule measures the same
+      yards to the outermost part, eaves included, and lets that be up to 2 ft less. A massing model shows eaves,
+      not windowsills, belt courses or cornices: those are for the architect to check. On a corner lot every yard
+      facing a street is a front yard (§325-19C).
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.accessory_buildings
+    kind: rule
+    topic: dimensions
+    title: "Accessory buildings: not in the front yard; 3 ft side and rear (§325-25)"
+    applies_when: accessory_buildings > 0
+    check: >-
+      accessory_front_yard >= 10
+      and (not accessory_distances_apply or accessory_side_yard >= 3 and accessory_rear_yard >= 3)
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [34, 36]
+        quote: "Accessory structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or similar structures, shall be exempt from side yard requirements contained in the District Regulations Chart in § 325-8[fn22] and shall be governed by the requirements below:"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [37, 40]
+        quote: "A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard, except as permitted under the further provisions of this section. Corner lots shall be considered to have two front yards."
+        not_limits: {2: "two front yards on a corner lot: which yards are front yards (the accessory front yard is measured to every street line), not a limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [6, 9]
+        quote: "C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this section."
+        not_limits: {1: "the district name R-1, not a number of feet", 6: "six feet applies in R-1 districts only; in R-2b it is three feet (accessory_side_yard >= 3)"}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [6, 6]
+        quote: "R-1 R-2 R-3 [fn1]"
+    examples:
+      - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 3}
+        expect: pass
+        note: exactly 3 ft from the side and rear lot lines (6 ft would be needed in R-1)
+      - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 2.99, accessory_rear_yard: 3}
+        expect: fail
+      - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 2.99}
+        expect: fail
+      - given: {accessory_buildings: 1, accessory_front_yard: 9.99, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 3}
+        expect: fail
+        note: in the required front yard
+      - given: {accessory_buildings: 1, accessory_front_yard: 10, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 3}
+        expect: pass
+        note: at the edge of the required front yard (10 ft)
+      - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: false, accessory_side_yard: 1, accessory_rear_yard: 1}
+        expect: pass
+        note: an accessory building that isn't frame, under the readings that give it no side or rear distance
+      - given: {accessory_buildings: 0}
+        expect: not_applicable
+    notes: >-
+      R-2b is not an R-1 District (the chart groups R-2A, R-2B and R-2C under "R-2", p.2, p.3, p.14), so §325-25C's
+      first sentence applies: frame accessory buildings 3 ft from any side or rear lot line (the "six feet" is R-1's
+      only). Whether the distances apply to an accessory building that isn't frame is §325-25C's open question
+      (325-25C#1, in the section labels): accessory_distances_apply is measured under every reading, and outside R-1
+      its readings differ for a building not stated as frame, so that gives NEEDS REVIEW until the architect says the
+      building is frame (accessory_frame). Below-grade accessory structures (§325-25B) and garages on a common lot line
+      by agreement (§325-25D) aren't checked; §325-25 sets no height limit.
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.parking_one_family
+    kind: rule
+    topic: parking_and_loading
+    title: "Minimum off-street parking, one-family detached (chart p.14)"
+    applies_when: use == "one_family_detached"
+    check: parking_spaces >= (1 if sleeping_rooms <= 3 else 2 + 1 * max(sleeping_rooms - 5, 0))
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [9, 10]
+        quote: "First three bed or sleeping rooms per dwelling 1 space per dwelling unit"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [12, 12]
+        quote: "4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [13, 13]
+        quote: "Each additional bed or sleeping room + 1 space per room"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Residential, row: First three bed or sleeping rooms per dwelling unit, column: R-2B}
+    findings:
+    - id: adu_needs_no_parking
+      question: 'The requirement is per dwelling unit. R-2b allows an accessory dwelling unit (chart p.2): does a house
+        with an ADU need parking for both units? (Not checked yet; ADUs aren''t measured.)'
+      kind: law
+      answer: 'No: an ADU needs no off-street parking (§325-28C(2)). The house''s own parking is unchanged.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [9, 9]
+        quote: There shall be no off-street parking requirement for an ADU
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §5.4
+    examples:
+      - given: {use: one_family_detached, sleeping_rooms: 3, parking_spaces: 1}
+        expect: pass
+      - given: {use: one_family_detached, sleeping_rooms: 3, parking_spaces: 0}
+        expect: fail
+      - given: {use: one_family_detached, sleeping_rooms: 4, parking_spaces: 1}
+        expect: fail
+      - given: {use: one_family_detached, sleeping_rooms: 5, parking_spaces: 2}
+        expect: pass
+      - given: {use: one_family_detached, sleeping_rooms: 6, parking_spaces: 3}
+        expect: pass
+      - given: {use: one_family_detached, sleeping_rooms: 6, parking_spaces: 2}
+        expect: fail
+      - given: {use: two_family, sleeping_rooms: 3, parking_spaces: 0}
+        expect: not_applicable
+        note: two dwelling units, see R-2b.parking_dwelling_units
+    notes: The residential parking rows span every residential district's column (one merged cell from R-1A to RU),
+      so R-2b's numbers are R-1b's. The sleeping_rooms measure counts one dwelling unit's rooms, so this rule is for the
+      one use with exactly one dwelling unit.
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.parking_dwelling_units
+    kind: flag
+    topic: parking_and_loading
+    title: "Parking per dwelling unit for semi-detached and two-family houses (chart p.14)"
+    applies_when: use in ["one_family_semi_detached", "two_family"]
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [9, 10]
+        quote: "First three bed or sleeping rooms per dwelling 1 space per dwelling unit"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [12, 12]
+        quote: "4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [13, 13]
+        quote: "Each additional bed or sleeping room + 1 space per room"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Residential, row: First three bed or sleeping rooms per dwelling unit, column: R-2B}
+    examples:
+      - given: {use: two_family}
+        expect: needs_review
+      - given: {use: one_family_semi_detached}
+        expect: needs_review
+      - given: {use: one_family_detached}
+        expect: not_applicable
+    notes: >-
+      The requirement is worked out for each dwelling unit and added up: worked by hand, a two-family house with a
+      3-bedroom and a 4-bedroom unit needs 1 + 2 = 3 spaces. Gordium measures the sleeping rooms of one dwelling unit
+      only (sleeping_rooms), so it can't add them up yet: NEEDS REVIEW, added up by hand.
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.parking_other_uses
+    kind: flag
+    topic: parking_and_loading
+    title: "Parking for other uses: §325-20, an architect's judgment call"
+    applies_when: use not in ["one_family_detached", "one_family_semi_detached", "two_family"]
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [24, 24]
+        quote: "NOTES: (1) For all other uses see §325-20."
+    examples:
+      - given: {use: church}
+        expect: needs_review
+      - given: {use: one_family_detached}
+        expect: not_applicable
+    drafted_by: claude
+    status: draft
+
+  - id: R-2b.loading
+    kind: flag
+    topic: parking_and_loading
+    title: "Off-street loading for a neighborhood commercial facility (chart p.14, §325-21)"
+    applies_when: use == "neighborhood_commercial_facility"
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Minimum Loading Requirement, row: Neighborhood commercial facility, column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Minimum Loading Requirement, row: Nonresidential use, column: R-2B}
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [25, 25]
+        quote: "(2) See §325-21."
+    examples:
+      - given: {use: neighborhood_commercial_facility}
+        expect: needs_review
+      - given: {use: two_family}
+        expect: not_applicable
+    notes: >-
+      The R-2A, R-2B and R-2C columns share one cell per row on p.14: a neighborhood commercial facility "See
+      §325-21"; other nonresidential uses "Allowed by variance" (note 2: see §325-21); a multiple dwelling with 25+
+      units and a nursing home or hospital "-" (those uses are not permitted in R-2). Gordium doesn't measure floor
+      space or loading spaces, so this is NEEDS REVIEW, worked out by hand under §325-21. (The nonresidential
+      "Allowed by variance" row is not covered yet, as in R-1b.)
+    drafted_by: claude
+    status: draft

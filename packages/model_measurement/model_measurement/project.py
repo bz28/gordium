@@ -15,7 +15,8 @@ from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
-               "dwelling_units", "rooms_let_for_profit", "conversion", "abuts_r1_district",
+               "dwelling_units", "rooms_let_for_profit", "conversion", "occupants",
+               "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
@@ -29,6 +30,17 @@ def _point(p) -> bool:
     return isinstance(p, list) and len(p) == 2 and all(_number(v) for v in p)
 
 
+def fact_conflicts(facts: dict) -> list[str]:
+    """Lot facts that are each well formed but disagree with each other. Not a refusal (the check runs; the rows they
+    decide need review): the panel shows each one, so the architect can correct the count."""
+    out = []
+    here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
+    if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
+        out.append(f"{here} dwelling units on this lot but {building} in the attached building: part of another "
+                   "building may be on this lot, or one of the counts is off")
+    return out
+
+
 def fact_problems(facts: dict) -> list[str]:
     """What's wrong with lot facts, by field. One check for every way facts arrive (a file, the Rhino command)."""
     problems = [f"unknown lot fact {k!r}" for k in sorted(set(facts) - FACT_FIELDS)]
@@ -39,9 +51,12 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("plan_north_deg must be a number (degrees the plan is turned from true north)")
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
-    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit"):
+    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
+    for k in ("occupants_most_in_one_unit", "attached_units_in_building"):      # at least one, by definition
+        if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
+            problems.append(f"{k} must be a whole number, 1 or more")
     for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
