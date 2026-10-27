@@ -1,0 +1,490 @@
+{
+ "claims": {
+  "1 fewer than 4 characters: no list, nothing asked": {
+   "ok": true,
+   "detail": {
+    "items": [],
+    "visible": false,
+    "address": "106",
+    "asked": 0,
+    "labels": [
+     "Address",
+     "",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+     "Front lot line (on the street)",
+     "Ithaca Rd",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Press Look up to find 106 first."
+    ],
+    "look_up_on": true,
+    "list_height": 0,
+    "box_width": 780,
+    "layout": {
+     "visible_h": 0.0,
+     "rows": 0,
+     "rows_bottom": 0.0,
+     "pitch": 0.0,
+     "painted": {
+      "error": "ArgumentNullException('Value cannot be null. (Parameter 'bitmapImageRep')')"
+     }
+    },
+    "box_height": 345,
+    "box_bottom": 505,
+    "screen_bottom": 871
+   }
+  },
+  "2 the list is as tall as its rows, laid out and painted: one row and eight, no scroll bar, no empty row": {
+   "ok": false,
+   "detail": {
+    "one": null,
+    "eight": null
+   }
+  }
+ },
+ "running_before": [
+  [
+   "106 Itha",
+   0,
+   0
+  ],
+  [
+   "200 ",
+   0,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "1060 Ith",
+   1,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "96 Ithac",
+   0,
+   0
+  ],
+  [
+   "96 Itha",
+   0,
+   0
+  ],
+  [
+   "96 Ithaca Rd",
+   0,
+   0
+  ],
+  [
+   "12345 Nowhere Blvd, Ithaca, NY 14850",
+   0,
+   0
+  ]
+ ],
+ "seen": {
+  "1": {
+   "items": [],
+   "visible": false,
+   "address": "106",
+   "asked": 0,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 106 first."
+   ],
+   "look_up_on": true,
+   "list_height": 0,
+   "box_width": 780,
+   "layout": {
+    "visible_h": 0.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "error": "ArgumentNullException('Value cannot be null. (Parameter 'bitmapImageRep')')"
+    }
+   },
+   "box_height": 345,
+   "box_bottom": 505,
+   "screen_bottom": 871
+  },
+  "2": {
+   "items": [
+    "106 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "106 Itha",
+   "asked": 1,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 106 Itha first."
+   ],
+   "look_up_on": true,
+   "list_height": 22,
+   "box_width": 780,
+   "layout": null,
+   "box_height": 351,
+   "box_bottom": 511,
+   "screen_bottom": 871
+  },
+  "3": {
+   "items": [],
+   "visible": false,
+   "address": "106 Ithaca Rd, Ithaca, NY",
+   "asked": 1,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    ""
+   ],
+   "look_up_on": true,
+   "list_height": 22,
+   "box_width": 780,
+   "layout": {
+    "visible_h": 20.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "error": "TypeError(\"'int' value cannot be converted to System.IntPtr in method AppKit.NSColor ColorAt(IntPtr, IntPtr)\")"
+    }
+   },
+   "box_height": 345,
+   "box_bottom": 505,
+   "screen_bottom": 871
+  },
+  "2m": {
+   "items": [
+    "200 Ash St, Ithaca, NY",
+    "200 Birch St, Ithaca, NY",
+    "200 Cedar St, Ithaca, NY",
+    "200 Dogwood St, Ithaca, NY",
+    "200 Elm St, Ithaca, NY",
+    "200 Fir St, Ithaca, NY",
+    "200 Grove St, Ithaca, NY",
+    "200 Hazel St, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "200 ",
+   "asked": 2,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 200 first."
+   ],
+   "look_up_on": true,
+   "list_height": 162,
+   "box_width": 780,
+   "layout": null,
+   "box_height": 513,
+   "box_bottom": 673,
+   "screen_bottom": 871
+  },
+  "4": {
+   "items": [
+    "1060 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "1060 Ith",
+   "asked": 4,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 1060 Ith first."
+   ],
+   "look_up_on": true,
+   "list_height": 22,
+   "box_width": 780,
+   "layout": null,
+   "box_height": 373,
+   "box_bottom": 533,
+   "screen_bottom": 871
+  },
+  "4b": {
+   "items": [],
+   "visible": false,
+   "address": "96 Ithac",
+   "asked": 6,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Ithac first."
+   ],
+   "look_up_on": true,
+   "list_height": 22,
+   "box_width": 780,
+   "layout": {
+    "visible_h": 20.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "error": "TypeError(\"'int' value cannot be converted to System.IntPtr in method AppKit.NSColor ColorAt(IntPtr, IntPtr)\")"
+    }
+   },
+   "box_height": 345,
+   "box_bottom": 505,
+   "screen_bottom": 871
+  },
+  "4c": {
+   "items": [
+    "96 Ithaca Rd, Ithaca, NY"
+   ],
+   "visible": true,
+   "address": "96 Ithac",
+   "asked": 7,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Ithac first."
+   ],
+   "look_up_on": true,
+   "list_height": 22,
+   "box_width": 780,
+   "layout": null,
+   "box_height": 373,
+   "box_bottom": 533,
+   "screen_bottom": 871
+  },
+  "5": {
+   "items": [],
+   "visible": false,
+   "address": "96 Itha",
+   "asked": 8,
+   "labels": [
+    "Address",
+    "Suggestions unavailable: type the full address and press Look up.",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Press Look up to find 96 Itha first."
+   ],
+   "look_up_on": true,
+   "list_height": 22,
+   "box_width": 780,
+   "layout": {
+    "visible_h": 20.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "error": "TypeError(\"'int' value cannot be converted to System.IntPtr in method AppKit.NSColor ColorAt(IntPtr, IntPtr)\")"
+    }
+   },
+   "box_height": 345,
+   "box_bottom": 505,
+   "screen_bottom": 871
+  },
+  "6": {
+   "query": "96 Ithaca Rd, Ithaca, NY",
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "suggested by Gordium \u00b7 City zoning map says R-1b (checked 2026-10-20)",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "?  Shown dashed: 96 Ithaca Road, Ithaca, NY 14850's lot. Nothing in the model changes until Draw, which replaces what Gordium drew with this lot and a new starting house.",
+    "Confirm the district to continue."
+   ]
+  },
+  "7": {
+   "items": [],
+   "visible": false,
+   "address": "12345 Nowhere Blvd, Ithaca, NY 14850",
+   "asked": 10,
+   "labels": [
+    "Address",
+    "",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate)",
+    "Front lot line (on the street)",
+    "Ithaca Rd",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "?  No City of Ithaca address found for 12345 Nowhere Blvd, Ithaca, NY 14850: check the spelling and Look up again, or put back the lot's own address (or clear it) and draw the lot. The lot shown is still 106 Ithaca Rd's: nothing in the model changed.",
+    ""
+   ],
+   "look_up_on": true,
+   "list_height": 0,
+   "box_width": 780,
+   "layout": {
+    "visible_h": 0.0,
+    "rows": 0,
+    "rows_bottom": 0.0,
+    "pitch": 0.0,
+    "painted": {
+     "error": "ArgumentNullException('Value cannot be null. (Parameter 'bitmapImageRep')')"
+    }
+   },
+   "box_height": 374,
+   "box_bottom": 526,
+   "screen_bottom": 871
+  }
+ },
+ "asked": [
+  [
+   1793071854.71,
+   "106 Itha",
+   false
+  ],
+  [
+   1793071858.97,
+   "200 ",
+   false
+  ],
+  [
+   1793071861.63,
+   "96 Itha",
+   false
+  ],
+  [
+   1793071862.17,
+   "1060 Ith",
+   false
+  ],
+  [
+   1793071865.73,
+   "96 Itha",
+   false
+  ],
+  [
+   1793071866.42,
+   "96 Ithac",
+   true
+  ],
+  [
+   1793071870.07,
+   "96 Ithac",
+   false
+  ],
+  [
+   1793071873.68,
+   "96 Itha",
+   false
+  ],
+  [
+   1793071875.77,
+   "96 Ithaca Rd",
+   false
+  ],
+  [
+   1793071877.06,
+   "12345 Nowhere Blvd, Ithaca, NY 14850",
+   false
+  ]
+ ],
+ "ok": false,
+ "error": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/laneC/ac/apps/rhino_plugin/tests/autocomplete_in_rhino.py\", line 296, in main\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/laneC/ac/apps/rhino_plugin/tests/autocomplete_in_rhino.py\", line 55, in claim\nAssertionError: 2 the list is as tall as its rows, laid out and painted: one row and eight, no scroll bar, no empty row: {'one': None, 'eight': None}\n",
+ "done": true
+}
