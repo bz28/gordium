@@ -945,7 +945,8 @@ def set_auto_check(on):
         return
     if not STATE.get("live"):           # the tick needs edits noticed to act on them
         live(True)
-    _save_ui_state(doc, dict(_ui_state(doc), auto_check=bool(on)))
+    with logic.undo_step(doc, logic.UNDO_WORDS["auto_check"]):    # the setting saved in the file: one undo step
+        _save_ui_state(doc, dict(_ui_state(doc), auto_check=bool(on)))
     STATE.setdefault("auto_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
     ui.set_auto_tick(STATE.get("panel_parts"), on)
     # the edit's own time is kept (never moved earlier: a check from before it would then count as covering it,

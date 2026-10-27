@@ -17,7 +17,8 @@ SRC = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
 REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_building", "add_to_check",
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
-        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "show_context"]
+        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "show_context",
+        "check_now", "set_auto_check"]
 
 
 class Doc:
@@ -110,7 +111,10 @@ def _plugin(doc, said):
           "LAYERS": logic.LAYERS, "Cancelled": logic.Cancelled,
           "Rhino": type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": doc}),
                                       "DocObjects": type("DO", (), {"ObjectType": type("OT", (), {"Curve": 4})})}),
+          "live": lambda on: None,
           "ui": type("UI", (), {"legend": staticmethod(lambda code: None),
+                                "set_auto_tick": staticmethod(lambda parts, on: None),
+                                "show": staticmethod(lambda *a, **k: None),
                                 "open_target": staticmethod(lambda path: (True, None))}),
           "_box_open": lambda: False, "run_check": lambda doc, report=False: {"report_error": "not in a test"},
           "current_facts": lambda doc: {"lot_id": "lot1", "zone": "R-1b"},
@@ -141,7 +145,9 @@ CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": (
          # the start box (Edit site…, Set grade…): its Draw and the facts saved after it closes, one step
          "edit_site": ((), True), "grade": ((), True),
          # Show neighbourhood (#23): the tick saved, the context layers shown, a neighbourhood fetched and drawn
-         "context": ((True,), True)}
+         "context": ((True,), True),
+         # Check (#27): a check, nothing written; Check after every edit: the setting saved in the file
+         "check": ((), False), "auto_check": ((False,), True)}
 
 
 def test_the_guard_covers_every_panel_action():
