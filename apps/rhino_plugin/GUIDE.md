@@ -42,9 +42,9 @@ Type a command's name in Rhino's command line.
    complies), and the largest legal house, the **starting house**, one block per floor. Then it checks it.
 
 `GordiumStart` begins from a model with no building in it (an empty file, or a lot you drew with no building yet: it
-uses that lot's facts). If the model already has a building, the command line says
-`Gordium: this model already has a building; GordiumStart begins from an empty lot (use GordiumCheck to check a design)`.
-From **Edit site…** (and `GordiumFacts`) the same box opens with its last button reading **Check** instead of **Draw**: it re-checks with the changed facts and draws nothing new.
+uses that lot's facts). If the model already has a building, Gordium says (in a message and on the command line)
+`This model already has a building. To start over on another address, use Edit site… in the Gordium panel: Look up the new address and press Draw (the lot and starting house are drawn again for it). To check the building you have, use GordiumCheck.`
+From **Edit site…** (and `GordiumFacts`) the same box opens with its last button reading **Check** instead of **Draw**: it re-checks with the changed facts; a new address looked up there is drawn clean (Gordium asks once before removing anything you drew).
 **Cancel** closes the box without drawing the house. On a new file the sample lot has already been drawn on the Site layer, and stays; the command line says nothing was started.
 
 ## 2. The panel

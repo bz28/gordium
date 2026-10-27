@@ -233,7 +233,8 @@ def test_the_boxs_own_drawing_is_in_its_step_from_the_first_line():
     assert "_draw_lot(doc, session.table._changing)" in pick and "session.table._changing)" in pick.split(
         "_place_spots(", 1)[1]
     done = SRC[SRC.index("def _lookup_done("):].split("\ndef ", 1)[0]
-    assert "apply_lookup(session.table," in done and "RhinoTable(doc)" not in done
+    # (#26: the lookup only previews, the model changed at Draw, inside the box's step; never a table of its own)
+    assert ("apply_lookup(session.table," in done or "preview_lookup(" in done) and "RhinoTable(doc)" not in done
 
 
 def test_a_tried_count_leaves_undo_recording_as_it_was():
@@ -297,6 +298,12 @@ def test_an_undone_check_after_every_edit_is_read_again_from_the_file():
     doc.Strings.data[("Gordium", "ui")] = json.dumps({"auto_check": True})     # what Rhino's Undo put back
     ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
     assert ns["_auto"](doc) is True and ticks[-1] is True
+def test_a_new_addresss_reset_goes_in_the_boxs_own_step():
+    """#26 with #19's one step per box: a reset to a new address began a record of its own, ending the box's step
+    (Draw my lot or spot grades placed before it): two steps for one box. It begins one only if none is held."""
+    prepare = SRC[SRC.index("def _draw_prepare("):].split("\ndef ", 1)[0]
+    assert '    if not STATE.get("undo"):' in prepare and prepare.index('if not STATE.get("undo")') < prepare.index(
+        '_begin_undo(doc, "Gordium: start fresh for "')
 
 
 def test_an_undone_setting_is_read_again_from_the_file():

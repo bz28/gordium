@@ -2,6 +2,7 @@
 summary, which objects turn red, the failing distances, and the background JSON worker."""
 
 import io
+import inspect
 import json
 import math
 
@@ -2011,9 +2012,12 @@ def test_a_corner_lot_answered_no_never_keeps_both_streets_and_never_reads_its_w
     yards = [i for i in r["view"]["items"] if i.get("measure") in ("front_yard", "side_yard_smaller", "side_yard_larger",
                                                                     "rear_yard")]
     assert yards and all(i["status"] != "complies" for i in yards)
-    # the box and the command line call the one helper
+    # the box and the command line call the one helper (the box through logic.box_facts, _apply_box's pure part)
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert rhino.count("logic.corner_answered(") == 2 and "logic.after_corner_answer(" not in rhino
+    apply_box = rhino[rhino.index("def _apply_box("):rhino.index("def _place_spots(")]
+    box_facts = inspect.getsource(logic.box_facts)
+    assert "logic.box_facts(" in apply_box and "corner_answered(" in box_facts
+    assert rhino.count("logic.corner_answered(") == 1 and "logic.after_corner_answer(" not in rhino
     assert logic.uncertain({"corner_lot": True}) == logic.CORNER_HINT
 
 

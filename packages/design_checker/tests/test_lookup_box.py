@@ -170,7 +170,8 @@ def test_an_unsettled_lot_makes_every_item_measured_from_it_need_review_never_co
 # ---- what can't be filled in: the box keeps working and says why ---------------------------------------------
 
 @pytest.mark.parametrize("name, kw, says", [
-    ("106_ithaca_rd", {"offline": True}, "Couldn't reach the map services (offline?): enter the site by hand."),
+    ("106_ithaca_rd", {"offline": True}, "Couldn't reach the map services (offline?): Look up again later, or put "
+                                         "back the lot's own address (or clear it)"),
     ("not_found", {}, "No City of Ithaca address found for"),
     ("953_danby_rd_town", {}, "not the City of Ithaca"),
 ])
@@ -221,7 +222,10 @@ def test_only_what_each_source_allows_is_written_into_the_model():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
     assert 'answer["facts"]' not in body and "answer.get(\"facts\")" not in body     # geometry only from writes
-    assert 'STATE["lookup_guide"]' in body and "logic.apply_lookup(session.table, session" in body and "AddCurve" not in body
+    # Look up previews (logic.preview_lookup: nothing in the model); Draw writes through logic.apply_reset, which
+    # draws by apply_lookup (Ben, 2026-10-21: re-lookup)
+    assert 'STATE["lookup_guide"]' in body and "logic.preview_lookup(answer, facts, saved_ui" in body and \
+        "logic.apply_reset(table, session, facts, saved_ui, choice" in body and "AddCurve" not in body
 
 
 def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
@@ -493,7 +497,7 @@ def test_p3_the_lookups_files_are_closed_one_time_limit_and_no_silent_failure():
     poll = rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
     assert poll.count("_lookup_files_done(run)") == 2 and "_lookup_files_done(run)" in \
         rhino[rhino.index("def _lookup_stop("):rhino.index("def _lookup_done(")]
-    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(frame_site, "frame the looked-up lot")' in rhino
+    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(_frame_points, "frame the looked-up lot")' in rhino
     assert "frame_site_box" not in rhino
     assert "LOOKUP_LIMIT_S = " not in (REPO / "packages/design_checker/design_checker/lookup_box.py").read_text(
         encoding="utf-8")
@@ -566,7 +570,10 @@ class FakeTable:
         return "new%d" % self.n
 
     def add_lot(self, ring, name):
-        return self._new("Site", "lot")
+        i = self._new("Site", "lot")
+        if ring:
+            self.objects[i]["area"] = area([list(p) for p in ring])
+        return i
 
     def add_spot(self, p):
         return self._new("Gordium::Grade", "point")
@@ -574,6 +581,17 @@ class FakeTable:
     def ground_points(self):
         return [i for i, o in self.objects.items() if o["kind"] == "point"
                 and o["layer"] in ("Gordium::Grade", "Gordium::Grade::Finished")]
+
+    def massing(self):                       # the starting house's floors (Gordium::Massing and its sublayers)
+        return [i for i, o in self.objects.items() if logic.on_layer(o["layer"], logic.MASSING)]
+
+    def buildings(self):                     # the architect's buildings, as the plugin's RhinoTable finds them
+        kinds = {"brep": "Brep", "lot": "PolylineCurve", "point": "Point"}
+        return logic.own_buildings((i, o["layer"], o.get("type") or kinds.get(o["kind"], o["kind"]), o.get("holds"))
+                                   for i, o in self.objects.items())
+
+    def fingerprint(self, ids):
+        return repr(sorted((i, self.objects[i].get("geom")) for i in ids))
 
     def snapshot(self):
         return {i: (o["layer"], o["kind"]) for i, o in self.objects.items()}, sorted(self.layers), self.views

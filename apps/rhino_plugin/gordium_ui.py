@@ -802,7 +802,8 @@ def start_box(state, options, mode):
         keep()
         done("pick:" + what)
 
-    draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
+    draw = button(state.get("_draw_label") or ("Draw" if mode == "start" else "Check"),   # as what it does
+                  lambda: (keep(), done("draw")))
     reason = label(logic.draw_reason(state), size=11)
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
@@ -813,6 +814,13 @@ def start_box(state, options, mode):
             pick("lookup")
 
     address.KeyDown += logic.guard(enter_looks_up, "look up the address")
+
+    def address_typed(s, e):           # Draw off for an address not looked up, on again when the known one is back
+        state["address"] = address.Text
+        draw.Enabled = logic.can_draw(state) and not looking
+        reason.Text = logic.draw_reason(state)
+
+    address.TextChanged += logic.guard(address_typed, "follow the address typed")
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
     buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None   # (Advanced: off with flat ground)
 
