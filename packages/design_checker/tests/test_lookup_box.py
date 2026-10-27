@@ -1074,7 +1074,7 @@ def test_every_tick_row_is_greyed_while_a_box_is_open():
     ticks = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
                  and any(isinstance(t, ast.Name) and t.id == "ticks" for t in n.targets))
     boxes = [ast.unparse(e.args[0]) for e in ticks.elts]
-    assert boxes == ["_auto_box(actions, parts)", "_envelope_box(actions)", "_massing_box(actions)",
+    assert boxes == ["_auto_box(actions, parts)", "_envelope_box(actions, parts)", "_massing_box(actions, parts)",
                      "_labels_box(actions, parts)",                        # + Check after every edit (the Check button)
                      "_context_box(actions, parts, context_on)"]          # + Show neighbourhood (PR #23)
     greyed = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)

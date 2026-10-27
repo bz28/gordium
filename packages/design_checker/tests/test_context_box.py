@@ -583,7 +583,8 @@ def test_the_tick_is_kept_per_file_like_the_labels_tick():
     # document switch or a reopen: the tick as this document has it
     assert 'ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=_context_on(doc))' in RHINO
     assert 'ui.make_panel(_actions(), context_on=_context_on(doc))' in RHINO and RHINO.count("ui.make_panel(") == 2
-    assert 'ui.set_context_tick(STATE.get("panel_parts"), _context_on(doc))' in RHINO
+    sync = RHINO[RHINO.index("def _sync_ticks("):].split("\ndef ", 1)[0]     # (every tick, at every check)
+    assert "ui.set_context_tick(p, _context_on(doc))" in sync and "_sync_ticks(doc)" in RHINO
     scene = RHINO[RHINO.index("def draw_scene("):RHINO.index("def draw_screen(")]
     assert '(STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True)' in scene
     sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_on(")]
