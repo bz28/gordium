@@ -11,7 +11,7 @@ A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, R-1b: 10 ft si
    right. Switch replaces the house (new floors, each on its sublayer, one group, tagged "right"), the Starting
    house fact names the side, the panel offers the button under it (logic.can_switch), and it says what it did.
 5. One Undo brings the first house back and removes the new one; Redo brings the new one back.
-6. A house the architect has moved is never redrawn: refused, nothing changes.
+6. A house on a locked layer, or one the architect has moved, is never redrawn: refused, nothing changes.
 Writes <temp>/gordium_side_yards/out.json; closes its document."""
 import json
 import os
@@ -57,11 +57,11 @@ def fresh_module():
 
 
 def floors(g, doc):
-    return sorted(((str(o.Id), json.loads(text)) for o, text, _, _ in g._start_floors(doc)), key=lambda f: f[1]["story"])
+    return sorted(((str(o.Id), json.loads(text)) for o, text, _, _, _ in g._start_floors(doc)), key=lambda f: f[1]["story"])
 
 
 def retag(g, doc, side):
-    for o, text, _, _ in g._start_floors(doc):
+    for o, text, _, _, _ in g._start_floors(doc):
         tag = dict(json.loads(text), larger_side=side)
         attrs = o.Attributes.Duplicate()
         attrs.SetUserString(g.logic.START_KEY, json.dumps(tag))
@@ -130,9 +130,20 @@ try:
     back = floors(g, doc)
     claim("5 one Undo brings the first house back and removes the new one",
           sorted(i for i, _ in back) == sorted(ids), [i for i, _ in back])
+    after = (g.fact_sources(doc).get("starting_house") or {}).get("value") or ""
+    claim("5 after Undo the Starting house fact no longer names the switched side",
+          "on the right (east)" not in after, after)
     undo(doc, redo=True)
     claim("5 Redo brings the new house back", sorted(i for i, _ in floors(g, doc)) == sorted(i for i, _ in second),
           [i for i, _ in floors(g, doc)])
+    layer = doc.Layers[doc.Layers.FindByFullPath(g.logic.massing_floor(1), -1)]
+    layer.IsLocked = True
+    before = [i for i, _ in floors(g, doc)]
+    g.switch_side_yards()
+    claim("6 a locked floor: refused, nothing changed (never two houses)",
+          "locked" in said(g) and [i for i, _ in floors(g, doc)] == before and len(g._buildings(doc)) == len(before),
+          said(g))
+    layer.IsLocked = False
     o = g._start_floors(doc)[0][0]
     doc.Objects.Transform(o, rg.Transform.Translation(g._model_length(doc, 3.0), 0, 0), True)
     before = [i for i, _ in floors(g, doc)]

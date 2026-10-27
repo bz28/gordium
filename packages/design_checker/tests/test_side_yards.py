@@ -186,6 +186,10 @@ def test_switch_plan_redraws_only_the_house_as_drawn():
     notched = [volumes[0] - 2 * 2 * 11, volumes[1]]          # a corner notched out: the same box, a smaller solid
     assert "changed" in logic.switch_plan(list(zip(tags, boxes, notched)))["refused"]
     assert "changed" in logic.switch_plan(list(zip(tags, boxes, [None, None])))["refused"]   # not measurable
+    chase = [volumes[0] - 1 * 1 * 10, volumes[1]]            # a 1 ft x 1 ft chase, 10 ft tall: still an edit
+    assert "changed" in logic.switch_plan(list(zip(tags, boxes, chase)))["refused"]
+    assert "locked" in logic.switch_plan([(t, b, v, i == 1) for i, (t, b, v) in
+                                          enumerate(zip(tags, boxes, volumes))])["refused"]
     assert "missing" in logic.switch_plan([(tags[0], boxes[0], volumes[0])])["refused"]
     assert "no starting house" in logic.switch_plan([])["refused"]
     same = [logic.start_tag({**start, "side_split": None}, i, 11.0, 0.0) for i in range(2)]
@@ -205,6 +209,6 @@ def test_switch_in_rhino_is_one_undo_step_and_draws_before_it_deletes():
     assert 'if logic.can_switch(s):' in ui and 'button(logic.SWITCH_LABEL, a["switch_sides"])' in ui
     body = rhino[rhino.index("def switch_side_yards"):rhino.index("def _said_sides")]
     assert body.index('split.get("larger_side") != plan["larger_side"]') < body.index("doc.BeginUndoRecord(") \
-        < body.index("add_floors(doc, start,") < body.index("doc.Objects.Delete(o, True)") \
-        < body.index("doc.EndUndoRecord(record)")
+        < body.index("add_floors(doc, start,") < body.index("if not doc.Objects.Delete(o, True)") \
+        < body.index("doc.Objects.Delete(i, True, True)") < body.index("doc.EndUndoRecord(record)")
     assert "a.SetUserString(logic.START_KEY, logic.start_tag(start, i, floor_to_floor, design_buffer))" in rhino

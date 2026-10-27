@@ -2494,13 +2494,17 @@ def can_switch(source_line):
 
 def switch_plan(found, tolerance=0.01):
     """What Switch side yards does with the starting house's floor blocks found in the model, each (its START_KEY
-    text, its bounding box in feet: (x0, y0, z0), (x1, y1, z1), its volume in cubic feet or None): {"larger_side": the other side, "floor_to_floor",
+    text, its bounding box in feet: (x0, y0, z0), (x1, y1, z1), its volume in cubic feet or None, and whether it is
+    locked, itself or by its layer): {"larger_side": the other side, "floor_to_floor",
     "design_buffer"} to redraw it, or {"refused": why} when there is nothing to switch, or the house is no longer as
     Gordium drew it (moved, stretched, a floor deleted): the architect's edits are never thrown away."""
     if not found:
         return {"refused": "There is no starting house in this file to switch (GordiumStart draws one)."}
     tags = []
-    for text, (low, high), volume in found:
+    if any(len(f) > 3 and f[3] for f in found):     # the architect's lock is kept: nothing deleted from under it
+        return {"refused": "The starting house is locked (or on a locked layer), so it isn't redrawn. Unlock it "
+                           "and press " + SWITCH_LABEL + " again."}
+    for text, (low, high), volume, *_ in found:
         try:
             tag = json.loads(text)
         except (TypeError, ValueError):
@@ -2510,7 +2514,7 @@ def switch_plan(found, tolerance=0.01):
         same_box = all(abs(a - b) <= tolerance for a, b in zip(want[0] + want[1], tuple(low) + tuple(high)))
         # the same box but a different solid (a notch, a chamfered corner): changed too (review round 1, F5b)
         same_solid = volume is not None and tag.get("volume") is not None and \
-            abs(volume - tag["volume"]) <= max(1e-3 * tag["volume"], 0.01)
+            abs(volume - tag["volume"]) <= 1e-6 * tag["volume"] + 1e-4   # a box measures exactly (round 2, F2)
         if not (same_box and same_solid):
             return {"refused": "The starting house has changed since Gordium drew it, so it isn't redrawn (your "
                                "edits are kept). Delete it and run GordiumStart for a new one."}

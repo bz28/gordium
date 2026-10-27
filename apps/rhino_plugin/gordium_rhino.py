@@ -3012,7 +3012,8 @@ def gordium_start():
 
 def _start_floors(doc):
     """The starting house's floor blocks in the model (each carrying logic.START_KEY), with their bounding boxes in
-    feet and their volumes in cubic feet (None when not a solid Rhino can measure: then never redrawn)."""
+    feet, their volumes in cubic feet (None when not a solid Rhino can measure: then never redrawn) and whether each
+    is locked, itself or by its layer (then never redrawn: the architect's lock is kept)."""
     found = []
     for o in doc.Objects:
         text = o.Attributes.GetUserString(logic.START_KEY) if not o.IsDeleted else None
@@ -3020,7 +3021,8 @@ def _start_floors(doc):
             b = o.Geometry.GetBoundingBox(True)
             props = rg.VolumeMassProperties.Compute(o.Geometry) if isinstance(o.Geometry, rg.Brep) else None
             volume = props.Volume * _scale(doc) ** 3 if props is not None else None    # (a notch changes it)
-            found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume))
+            locked = bool(o.IsLocked or doc.Layers[o.Attributes.LayerIndex].IsLocked)   # (a locked parent too)
+            found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume, locked))
     return found
 
 
@@ -3031,7 +3033,7 @@ def switch_side_yards():
     never drawn: the old one stays and the panel says why); a house the architect has changed is never redrawn."""
     doc = Rhino.RhinoDoc.ActiveDoc
     found = _start_floors(doc)
-    plan = logic.switch_plan([(text, box, volume) for _, text, box, volume in found], tolerance=_feet_length(
+    plan = logic.switch_plan([(text, box, volume, locked) for _, text, box, volume, locked in found], tolerance=_feet_length(
         doc, doc.ModelAbsoluteTolerance) + 0.01)
     if plan.get("refused"):
         say(plan["refused"])
@@ -3058,8 +3060,12 @@ def switch_side_yards():
         if ids is None:
             say("The switched starting house couldn't be drawn; the old one is kept.")
             return None
-        for o, _, _, _ in found:
-            doc.Objects.Delete(o, True)
+        kept = [o for o, _, _, _, _ in found if not doc.Objects.Delete(o, True)]
+        if kept:                        # never two houses: the new one goes again, the old one stays (round 2, F1)
+            for i in ids:
+                doc.Objects.Delete(i, True, True)
+            say("The old starting house couldn't be removed (" + str(len(kept)) + " floors), so it is kept as it was.")
+            return None
         fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())
         if fact:
             _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
