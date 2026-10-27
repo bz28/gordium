@@ -158,6 +158,10 @@ Everything in the 2026-10-21 evening preview, plus:
 
 ## Known limits
 
+- **The start box can be very wide** (new, 2026-10-27): the household and home occupation questions under **Use**
+  are long sentences that don't wrap yet, so on a laptop screen the box can run off the right edge (about 1,560 px
+  wide, more with a long lookup message). Leave them blank if you like (those rows then need review); a fix is on
+  its way.
 - **Keyboard check wanted:** at the street question press Enter (asks again) and Esc (nothing changes) and tell Ben.
 - **Corner lots get no starting house** (which yard is the front is still an open question for the architects):
   after a lookup of a corner lot, draw your building yourself.
