@@ -1065,7 +1065,7 @@ def PANEL_ACTIONS():
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check,
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
-            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
+            "massing": hide_massing, "switch_sides": switch_side_yards, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
             "context": show_context, "check": check_now, "auto_check": set_auto_check}
 
 
@@ -2911,10 +2911,11 @@ def _add_lot(doc, sample):
     return doc.Objects.AddCurve(curve, attrs)
 
 
-def add_floors(doc, start):
+def add_floors(doc, start, floor_to_floor=None, design_buffer=0.0):
     """The starting building: one solid per story, stacked, as one group (so a Move moves the house), each on its own
-    sublayer Gordium::Massing::Floor 1, 2… (named Floor 1, 2…), with Gordium::Massing::Roof made for the roof. None,
-    with nothing added, if a floor isn't a box Rhino can make."""
+    sublayer Gordium::Massing::Floor 1, 2… (named Floor 1, 2…), with Gordium::Massing::Roof made for the roof, each
+    carrying how it was drawn (logic.start_tag: what Switch side yards reads). None, with nothing added, if a floor
+    isn't a box Rhino can make."""
     breps = []
     for floor in start["floors"]:
         corners = [_model_point(doc, (x, y), z) for z in (floor["base"], floor["top"]) for x, y in floor["outline"]]
@@ -2930,6 +2931,7 @@ def add_floors(doc, start):
         a.Name = "Floor " + str(i + 1)
         # one story, at the height drawn: what makes it count as a story (a stretched block no longer does)
         a.SetUserString(logic.FLOOR_KEY, str(i + 1) + ";" + repr(floor["top"] - floor["base"]))
+        a.SetUserString(logic.START_KEY, logic.start_tag(start, i, floor_to_floor, design_buffer))
         a.AddToGroup(group)
         ids.append(doc.Objects.AddBrep(brep, a))
     return ids
@@ -2973,9 +2975,10 @@ def gordium_start():
     saved_ui = _ui_state(doc)
     # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless
     # GordiumFacts set another
-    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
-                 "floor_to_floor": logic.parse_feet(saved_ui.get("floor_to_floor")) or logic.FLOOR_TO_FLOOR,
-                 "design_buffer": logic.parse_feet(saved_ui.get("design_buffer")) or 0.0})   # Draw is off if unread
+    floor_to_floor = logic.parse_feet(saved_ui.get("floor_to_floor")) or logic.FLOOR_TO_FLOOR
+    design_buffer = logic.parse_feet(saved_ui.get("design_buffer")) or 0.0              # Draw is off if unread
+    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts), "floor_to_floor": floor_to_floor,
+                 "design_buffer": design_buffer})
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
@@ -2989,7 +2992,7 @@ def gordium_start():
                                  "(run GordiumStart again in " + _doc_name(doc) + ")")
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
-    if add_floors(doc, start) is None:
+    if add_floors(doc, start, floor_to_floor, design_buffer) is None:
         Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; " + logic.draw_one_hint(_auto(doc)))
         live(True)
         documents(True)
@@ -3005,6 +3008,72 @@ def gordium_start():
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
                              logic.MASSING + "::Floor 1…" + str(len(start["floors"])))
     return result
+
+
+def _start_floors(doc):
+    """The starting house's floor blocks in the model (each carrying logic.START_KEY), with their bounding boxes in
+    feet."""
+    found = []
+    for o in doc.Objects:
+        text = o.Attributes.GetUserString(logic.START_KEY) if not o.IsDeleted else None
+        if text:
+            b = o.Geometry.GetBoundingBox(True)
+            found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max)))))
+    return found
+
+
+def switch_side_yards():
+    """Switch side yards (the panel, under the Starting house site fact): where the district lets the two side yards
+    differ (R-2b: one 10 ft, the other 5 ft), the starting house is redrawn with the larger one on the other side,
+    as one Undo step. The new house is proven by the checker like the first (a house that would break a rule is
+    never drawn: the old one stays and the panel says why); a house the architect has changed is never redrawn."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    found = _start_floors(doc)
+    plan = logic.switch_plan([(text, box) for _, text, box in found], tolerance=_feet_length(
+        doc, doc.ModelAbsoluteTolerance) + 0.01)
+    if plan.get("refused"):
+        say(plan["refused"])
+        return None
+    try:
+        facts = current_facts(doc)
+    except ValueError as e:
+        say("The site facts can't be read, so the starting house isn't redrawn: " + str(e))
+        return None
+    path = os.path.join(tempfile.gettempdir(), "gordium_switch_" + str(doc.RuntimeSerialNumber) + ".3dm")
+    export(doc, path)                   # (the checker leaves the model's buildings out when it draws a new house)
+    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
+                 "floor_to_floor": plan["floor_to_floor"], "design_buffer": plan["design_buffer"],
+                 "larger_side": plan["larger_side"]})
+    split = start.get("side_split") or {}
+    if not start.get("floors") or split.get("larger_side") != plan["larger_side"]:
+        why = "; ".join(start.get("notes") or []) or "no house could be drawn that way"
+        say("The larger side yard can't go on the " + plan["larger_side"] + " (" + why + "): the starting house is "
+            "kept as it was.")
+        return None
+    record = doc.BeginUndoRecord("Gordium: " + logic.SWITCH_LABEL.lower())
+    try:                                # the new house first: if it can't be drawn, the old one is untouched
+        ids = add_floors(doc, start, plan["floor_to_floor"], plan["design_buffer"])
+        if ids is None:
+            say("The switched starting house couldn't be drawn; the old one is kept.")
+            return None
+        for o, _, _ in found:
+            doc.Objects.Delete(o, True)
+        fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())
+        if fact:
+            _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
+    finally:
+        doc.EndUndoRecord(record)
+    doc.Views.Redraw()
+    result = run_check(doc, report=False)
+    say("Starting house redrawn. " + (_said_sides(start) or ""))
+    return result
+
+
+def _said_sides(start):
+    """The new house's side yards, as its note says them ("Side yards: 10'-0" on the right (east), …")."""
+    note = start.get("margin_note") or ""
+    at = note.find(logic.SIDE_YARDS_SAID)
+    return note[at:] if at >= 0 else None
 
 
 # ---- the context map: the neighbourhood around a looked-up lot (design_checker.context_box) ---------------------

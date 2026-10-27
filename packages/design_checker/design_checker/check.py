@@ -1118,10 +1118,29 @@ def limit_words(out, lot_area):
     if out.get("limited_by") == "coverage" and out.get("coverage_allowed") and lot_area:
         return "lot coverage " + present._pct(out["coverage_allowed"] / lot_area * 100, "down", 2)
     yards = out.get("yards") or {}
+    split = out.get("side_split")
+    sides = ("sides " + ft(split["larger"]) + " and " + ft(split["smaller"])) if split else \
+        ("sides " + ft(yards.get("side", 0)))
     if yards:
-        return ("the yards (front " + ft(yards.get("front", 0)) + ", sides " + ft(yards.get("side", 0)) + ", rear " +
-                ft(yards.get("rear", 0)) + ")")
+        return "the yards (front " + ft(yards.get("front", 0)) + ", " + sides + ", rear " + ft(yards.get("rear", 0)) + ")"
     return "the yards"
+
+
+def side_words(split, plan_north_deg=0.0):
+    """Which side the larger side yard is on, in the architect's words, seen from the street, each side with its
+    true compass point: 'Side yards: 10'-0" on the left (north), 5'-0" on the right (south), seen from the street.'
+    None when the two side yards are the same (no choice was made)."""
+    if not split:
+        return None
+    ft = lambda v: present.feet_inches(v, "up")                    # noqa: E731 (a minimum: up, as the panel)
+
+    def named(side):
+        where = present.compass(*split[side + "_toward"], plan_north_deg or 0.0)
+        return f"{ft(split[side])} on the {side}" + (f" ({where.lower()})" if where else "")
+
+    first = split["larger_side"]
+    second = "right" if first == "left" else "left"
+    return f"Side yards: {named(first)}, {named(second)}, seen from the street."
 
 
 def margin_note(keep, buffer, tax, proven, limit="the yards"):
@@ -1147,12 +1166,14 @@ def margin_note(keep, buffer, tax, proven, limit="the yards"):
 LOT_ONLY = {"lot_area", "lot_width", "lot_depth"}   # items about the lot itself, whatever the house
 
 
-def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer):
+def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer, larger_side=None):
     """The starting house, kept back from the limits so that it complies even at the tax-map worst case (Ben,
     2026-10-20): on a lot not from a survey, every yard line moves in by the tax-map tolerance and coverage is sized
     for the smallest lot the tax map allows; on a survey it goes to the limits. A design buffer (ft) is added on top
     of either. Proven, not assumed: the house is checked with the panel's own worst case, and if any item would still
-    need review from the tolerance (a rear yard minimum also grows with the lot depth) it steps back 3 in. more."""
+    need review from the tolerance (a rear yard minimum also grows with the lot depth) it steps back 3 in. more.
+    `larger_side`: where the larger side yard goes ("left" or "right", seen from the street; None: Gordium's choice),
+    kept on the side first chosen while it steps back."""
     from envelope_builder.start import floor_solids
     tax = not drawing.get("lot_surveyed")
     buffer = max(design_buffer or 0.0, 0.0)
@@ -1161,7 +1182,9 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     drawn = next((r["value"] for r in (measured.get("lot_area") or {}).get("readings") or []), None)
     scale = tol["low"] / drawn if tax and tol and drawn else 1.0
     out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
-                                 coverage_scale=scale)
+                                 coverage_scale=scale, larger_side=larger_side)
+    first = out.get("side_split")
+    side = first["larger_side"] if first else larger_side
     proven = not tax
     for _ in range(12):
         if not tax or not out.get("floors"):
@@ -1173,7 +1196,9 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
             break
         keep += 0.25
         out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
-                                     coverage_scale=scale)
+                                     coverage_scale=scale, larger_side=side)
+    if first and out.get("side_split"):          # Gordium's choice stays its choice while it steps back
+        out["side_split"]["asked"] = first["asked"]
     out["kept_back"] = keep
     if out.get("coverage_allowed") and scale:      # the rule's own allowance on the lot as drawn; what it was sized to
         out["coverage_target"] = out["coverage_allowed"]
@@ -1181,12 +1206,16 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     lot_area = (measured.get("lot_area") or {}).get("value") or drawn   # what the allowance is a share of
     out["margin_note"] = margin_note(keep, buffer, tax, proven, limit_words(out, lot_area)) \
         if out.get("floors") else None
+    sides = side_words(out.get("side_split"), drawing.get("plan_north_deg")) if out["margin_note"] else None
+    if sides:                                    # which side the larger side yard is on (Switch side yards swaps)
+        out["margin_note"] += " " + sides
     if out["margin_note"]:                        # said always: what the house is and what limits it (Ben's
         out["notes"].append(out["margin_note"])   # "reassure in place")
     return out
 
 
-def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0) -> dict:
+def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0,
+          larger_side: str | None = None) -> dict:
     """The largest legal starting building for the lot in a model (its buildings, if any, left out): stacked
     floor blocks, one per story, from the zone's rules (envelope_builder.start). With no grade set, it is drawn
     standing at the lot's own level (and said so): the check then says height and stories need review until the
@@ -1221,7 +1250,7 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}
     measured = measure(site, drawing)
-    out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer)
+    out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer, larger_side)
     if existing and out.get("floors"):
         out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "
                             "No regrading near the house (or set the finished ground)")

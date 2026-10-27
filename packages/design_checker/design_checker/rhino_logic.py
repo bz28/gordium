@@ -2467,6 +2467,63 @@ def can_draw(state):
     return draw_reason(state) == ""
 
 
+START_KEY = "gordium:start"          # on each floor block GordiumStart drew: how it was drawn (start_tag), for Switch
+SWITCH_LABEL = "Switch side yards"
+SIDE_YARDS_SAID = "Side yards: "       # how the starting house's note names the larger side yard's side (check.side_words)
+
+
+def start_tag(start, story, floor_to_floor, design_buffer):
+    """What a floor block of the starting house carries (START_KEY), so Switch side yards can redraw the house as it
+    was asked for and tell whether it is still as drawn: its floor (outline, base, top, in feet), where the larger
+    side yard is ("left" or "right", seen from the street; None when the zone's side yards are the same), and the
+    floor-to-floor height and design buffer it was drawn with."""
+    floor = start["floors"][story]
+    split = start.get("side_split") or {}
+    return json.dumps({"story": story, "stories": len(start["floors"]), "outline": floor["outline"],
+                       "base": floor["base"], "top": floor["top"], "larger_side": split.get("larger_side"), "floor_to_floor": floor_to_floor,
+                       "design_buffer": design_buffer or 0.0})
+
+
+def can_switch(source_line):
+    """The panel's Switch side yards button goes under the Starting house site fact when the house has one larger
+    side yard (its note says which side)."""
+    return bool(source_line) and source_line.startswith("Starting house") and SIDE_YARDS_SAID in source_line
+
+
+def switch_plan(found, tolerance=0.01):
+    """What Switch side yards does with the starting house's floor blocks found in the model, each (its START_KEY
+    text, its bounding box in feet: (x0, y0, z0), (x1, y1, z1)): {"larger_side": the other side, "floor_to_floor",
+    "design_buffer"} to redraw it, or {"refused": why} when there is nothing to switch, or the house is no longer as
+    Gordium drew it (moved, stretched, a floor deleted): the architect's edits are never thrown away."""
+    if not found:
+        return {"refused": "There is no starting house in this file to switch (GordiumStart draws one)."}
+    tags = []
+    for text, (low, high) in found:
+        try:
+            tag = json.loads(text)
+        except (TypeError, ValueError):
+            return {"refused": "The starting house's record can't be read, so it isn't redrawn."}
+        xs, ys = [p[0] for p in tag["outline"]], [p[1] for p in tag["outline"]]
+        want = (min(xs), min(ys), tag["base"]), (max(xs), max(ys), tag["top"])
+        if any(abs(a - b) > tolerance for a, b in zip(want[0] + want[1], tuple(low) + tuple(high))):
+            return {"refused": "The starting house has changed since Gordium drew it, so it isn't redrawn (your "
+                               "edits are kept). Delete it and run GordiumStart for a new one."}
+        tags.append(tag)
+    if sorted(t.get("story", -1) for t in tags) != list(range(tags[0].get("stories") or 0)):
+        return {"refused": "The starting house has changed since Gordium drew it (a floor is missing or added), so "
+                           "it isn't redrawn (your edits are kept). Delete it and run GordiumStart for a new one."}
+    sides = {t.get("larger_side") for t in tags}
+    inputs = {(t.get("floor_to_floor"), t.get("design_buffer")) for t in tags}
+    if len(sides) != 1 or len(inputs) != 1:
+        return {"refused": "The starting house's floors weren't drawn together, so it isn't redrawn."}
+    side = sides.pop()
+    if side not in ("left", "right"):
+        return {"refused": "This district's side yards are the same on both sides: there is nothing to switch."}
+    floor_to_floor, buffer = inputs.pop()
+    return {"larger_side": "right" if side == "left" else "left", "floor_to_floor": floor_to_floor,
+            "design_buffer": buffer or 0.0}
+
+
 def starting_house_fact(note, today):
     """The site fact for how far the starting house keeps back from the limits: Gordium's own figure, so never
     "confirmed by you" (the architect didn't confirm it). None when no house was drawn (`note` None)."""

@@ -274,7 +274,13 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      your roof). **Hide starting house** in the panel hides it (it is still checked). On a lot from the tax map it
      keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off; on a survey it goes to the
      limits. The panel says why it is that size, for example "Largest house that complies even if the tax-map lines
-     are 2'-0" off; limited by lot coverage 25%. Use my survey… for the full size.";
+     are 2'-0" off; limited by lot coverage 25%. Use my survey… for the full size.". Where the district lets the
+     two side yards differ (R-2b: one side 10 ft, the other 5 ft), the starting house takes the 10 ft yard on one
+     side only: the side that gives the larger house, else the left as seen from the street. The note says which,
+     for example "Side yards: 10'-0" on the left (west), 5'-0" on the right (east), seen from the street."; under the
+     panel's Starting house fact, **Switch side yards** redraws it with the sides swapped (one Undo step; proven by
+     the checker first, and never over a house you have moved or edited). The blue envelope and every check stay
+     cautious: the envelope keeps the larger side yard on both sides;
    - on a tax-map lot the blue envelope is the cautious one: every lot line 2'-0" nearer;
    - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing, all kept in the file:
      the neighbouring tax parcels and the street centerlines in grey on locked `Gordium::Context` layers; the

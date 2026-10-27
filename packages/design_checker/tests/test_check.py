@@ -855,7 +855,7 @@ def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
     body = rhino[rhino.index("def gordium_start"):]
     # round 8: cleared before any way out (a start that draws nothing keeps no earlier start's margin)
     assert body.index('_set_source(doc, "starting_house", None, None)') < body.index('if not start.get("floors")') \
-        < body.index("add_floors(doc, start)") < body.index("logic.starting_house_fact(")
+        < body.index("add_floors(doc, start, ") < body.index("logic.starting_house_fact(")
 
 
 def test_a_design_buffer_is_read_or_draw_stays_off():
