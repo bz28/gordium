@@ -1626,8 +1626,8 @@ def _sync_ticks(doc):
     tick as last clicked (the Rhino job at 540f718: Hide starting house stayed ticked after Cmd+Z). Run at every
     check, failed ones too, and whenever the panel is made. (A layer switched in Rhino's Layers panel shows at
     the next check, or after an Undo.)"""
-    p = STATE.get("panel_parts")
-    if p is None or doc is None:
+    p = STATE.get("panel_parts")             # (each setter does nothing without a panel)
+    if doc is None:
         return
     ui.set_labels_tick(p, logic.labels_on(_ui_state(doc)))
     ui.set_massing_tick(p, _massing_hidden(doc))
