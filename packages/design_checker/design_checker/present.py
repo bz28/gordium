@@ -693,8 +693,11 @@ def _holding_way(check: str, values: dict) -> list | None:
     return None
 
 
-def _worst_reading(node, measured: dict, values: dict):
-    """(worst reading, required) as text when the comparison fails under one of the measurement's readings."""
+def _worst_reading(node, measured: dict, values: dict, review=()):
+    """(worst reading, required) as text when the comparison fails under one of the measurement's readings, and the
+    rule says fail there: none of its review conditions (`review`: the rule's review_when) holds at that reading
+    (RU's note 3: two primary buildings on a lot over 60,000 sf fail the check but need review for the approvals,
+    never "does not comply": PR2 review round 1)."""
     m = node.left.id
     readings = [r["value"] for r in (measured.get(m) or {}).get("readings") or [] if r.get("value") is not None]
     sign = SIGNS[type(node.ops[0])]
@@ -703,6 +706,8 @@ def _worst_reading(node, measured: dict, values: dict):
     worst = min(readings) if sign in ("≥", ">") else max(readings)
     trial = dict(values, **{m: worst})
     if _evaluate(ast.unparse(node), trial) is not False:
+        return None
+    if any(_evaluate(r["when"], trial) is not False for r in review):
         return None
     shown = _display(*_numbers(node, trial, measured, ""))
     return shown[0], shown[1]
@@ -1103,7 +1108,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     allowed = _evaluate(ast.unparse(node.comparators[0]), values)
                     if isinstance(allowed, (int, float)):
                         required = _pct(allowed / values["lot_area"] * 100, _toward(numbers[4], False), 1)
-                worst = _worst_reading(node, measured, values)
+                worst = _worst_reading(node, measured, values, rule.get("review_when") or ())
                 # (the overhang question in coverage is settled in PR 18: coverage_seen_from_above, so
                 # term-index's "both ways" words for it have nothing left to say)
                 if worst is not None:                   # say the bad one first: "probably fine" it isn't

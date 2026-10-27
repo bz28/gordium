@@ -2089,8 +2089,7 @@ def _primary_buildings(stated: dict, facts: dict, detached: list[dict], why: str
     only if it could hold a principal use (_could_be_principal: enclosed, a story tall, a habitable room's floor
     area) and the architect hasn't listed it as an accessory building. None that could: one, measured. Some that
     could: two readings, every one an accessory building (one) and every one a primary building (one more each);
-    the rules that read the count only ever grow stricter with it, so the two ends decide (never a pass the
-    count in between wouldn't give)."""
+    the readings show the range; a rule the count could change needs review until the architect states it."""
     name = "primary_buildings"
     if stated.get("value") is not None:
         return stated

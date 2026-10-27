@@ -41,7 +41,7 @@ The chart's lot-size heading carries note 3, "(3) See §325-8(B)(1)." (p.3).
 
 So with two or more primary buildings the lot needs each building's figure, added together. Gordium checks it in
 every residential district (`<district>.lot_area_each_primary_building`):
-- one primary building: the use's own lot-area rule decides (this rule doesn't apply);
+- one primary building: the use's own figure once, as the use's own lot-area rule asks;
 - two or more, every one holding the lot's use (`primary_buildings_same_use`): the use's figure once per building;
 - a building of another use, or that not said: needs review (each building's own figure, added by hand);
 - a use whose figure grows with the units, rooms let or occupants (R-2c's notes 4 to 6, R-3's note 7, R-3b's note
@@ -61,8 +61,7 @@ building is one. A solid standing apart from it is counted as a second only if i
 least a 7 ft story tall, a habitable room's 70 sf: the test Gordium already uses for which building could be the
 main one) and the architect hasn't listed it as an accessory building. A shed or a deck is never counted. A large
 garage or a second house can't be told apart, so both are read (every one an accessory building / every one a
-primary building), and a rule that the count would change waits for the architect's count. The rules reading the
-count only grow stricter with it, so the two ends decide.
+primary building), and a rule that the count could change waits for the architect's count (needs review).
 
 ## 3. RU: how many primary buildings (chart p.2 note 3) — A, with the open question kept
 
@@ -73,7 +72,7 @@ one complies on any lot; two on a lot over 60,000 sf, or three on 90,000 sf or m
 approvals (Gordium can't know they were given); fewer square feet or more buildings do not comply. The existing open
 question (questions §5.13: a lot of exactly 60,000 sf; whether "primary uses" means buildings) stays open; two
 buildings on exactly 60,000 sf need review under both readings, so it changes no result yet. Each building is read
-as one primary use (Gordium's use is one per lot).
+as one primary use (Gordium's use is one per lot): Gordium's reading of the question's second part for now, to confirm; under the other reading (uses, not buildings) two buildings of one use on a large lot need no approvals, where Gordium says needs review (the cautious side).
 
 ## 4. Three to six units in an attached building (§325-3B) — A
 
