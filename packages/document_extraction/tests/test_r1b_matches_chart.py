@@ -71,14 +71,21 @@ LIMITS = {
     (3, "Maximum Building Height [fn10]", "Height in feet"): [("building_height", "max", {}, lambda n: n[0])],
     (3, "Maximum lot coverage by buildings", "Percent of lot area"):
         [("building_area", "max", {"lot_area": 10_000}, lambda n: n[0] * 10_000)],
-    (3, "Yard Dimensions", "Front (minimum)"): [("front_yard", "min", {}, lambda n: n[0])],
+    # each yard, and the same yard to the eaves, which §325-18B lets reach 2 ft into it ("not ... more than two
+    # feet into any required yard")
+    (3, "Yard Dimensions", "Front (minimum)"): [("front_yard", "min", {}, lambda n: n[0]),
+                                                 ("front_yard_eaves", "min", {}, lambda n: n[0] - 2)],
     (3, "Yard Dimensions", "Side (one side minimum)"):
-        [("side_yard_smaller", "min", {"side_yard_larger": 100}, lambda n: n[0])],
+        [("side_yard_smaller", "min", {"side_yard_larger": 100}, lambda n: n[0]),
+         ("side_yard_smaller_eaves", "min", {"side_yard_larger_eaves": 100}, lambda n: n[0] - 2)],
     (3, "Yard Dimensions", "Side (other side minimum)"):
-        [("side_yard_larger", "min", {"side_yard_smaller": 100}, lambda n: n[0])],
+        [("side_yard_larger", "min", {"side_yard_smaller": 100}, lambda n: n[0]),
+         ("side_yard_larger_eaves", "min", {"side_yard_smaller_eaves": 100}, lambda n: n[0] - 2)],
     (3, "Yard Dimensions", "Rear (minimum, % of depth or feet, whichever is less)"): [
         ("rear_yard", "min", {"lot_depth": 160}, lambda n: n[0] * 160),       # the % governs
-        ("rear_yard", "min", {"lot_depth": 400}, lambda n: n[1])],            # the cap governs
+        ("rear_yard", "min", {"lot_depth": 400}, lambda n: n[1]),             # the cap governs
+        ("rear_yard_eaves", "min", {"lot_depth": 160, "rear_yard": 1000}, lambda n: n[0] * 160 - 2),
+        ("rear_yard_eaves", "min", {"lot_depth": 400, "rear_yard": 1000}, lambda n: n[1] - 2)],
     (14, "Residential", "First three bed or sleeping rooms per dwelling unit"):
         [("parking_spaces", "min", {"sleeping_rooms": 3}, lambda n: n[0])],
     (14, "Residential", "4-5 bed or sleeping rooms per dwelling unit"):

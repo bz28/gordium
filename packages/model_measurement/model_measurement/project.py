@@ -20,6 +20,9 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).
 UNSETTLED = ("lot", "street", "ground")
+               "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
+               "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
+CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 
 
 def _number(x) -> bool:
@@ -43,7 +46,7 @@ def fact_problems(facts: dict) -> list[str]:
     for k in ("stories", "sleeping_rooms", "parking_spaces"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
-    for k in ("corner_lot", "lot_surveyed", "ground_is_flat"):
+    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")
@@ -64,6 +67,21 @@ def fact_problems(facts: dict) -> list[str]:
     if street is not None and not (isinstance(street, list) and street and all(
             isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):
         problems.append("street_line must be a list of lot lines, each two points [[x, y], [x, y]]")
+    for k in ("street_line", "address_street_line"):
+        street = facts.get(k)
+        if street is not None and not (isinstance(street, list) and street and all(
+                isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):
+            problems.append(f"{k} must be a list of lot lines, each two points [[x, y], [x, y]]")
+    confirmed = facts.get("eaves_confirmed")
+    if confirmed is not None and not (isinstance(confirmed, list) and all(
+            isinstance(c, dict) and c.keys() == CONFIRMATION_FIELDS and isinstance(c["overhang"], str)
+            and c["value"] is True and all(isinstance(c[k], str) and c[k].strip() for k in ("source", "confirmed_by"))
+            and c["date"] for c in confirmed)):
+        problems.append("eaves_confirmed must be a list of {overhang (the overhang's fingerprint, as the check names "
+                        "it), value: true, source, confirmed_by, date}: an architect's confirmation that it is eaves")
+    listed = facts.get("accessory_buildings")
+    if listed is not None and not (isinstance(listed, list) and all(isinstance(i, str) for i in listed)):
+        problems.append("accessory_buildings must be a list of object ids (the solids that are accessory buildings)")
     # street_ids (the street each street line is on) is never refused here: names that don't match the lines one
     # for one are set aside by the measuring, which says so (stop street_names_stale); refusing them made the check
     # fail and saved facts unreadable (review round 7, P1)
@@ -101,6 +119,8 @@ def working(record: dict, model: str) -> str:
     if record["readings"]:
         shown = "; ".join(f"{r['reading']} = {_num(r['value'])}" for r in record["readings"])
         text += f" [readings: {shown}]"
+    if record.get("outline"):           # the lot lines read from a cleaned outline: said, so it can be traced
+        text += f" ({record['outline']})"
     return text
 
 
