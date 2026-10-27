@@ -38,7 +38,7 @@ COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # What sets a row aside as "not checked yet: interior" (out of the counts): only these, inside the building. Every
 # other stated fact (rhino_logic.STATED_FACTS: what can be ASKED, such as R-3a's dwelling units) leaves its row a
 # review row, with its own "Enter …" button from `needs` (PR #20 round 2: never hidden, even when it fails).
-INTERIOR = {"sleeping_rooms", "parking_spaces"}
+INTERIOR = set(logic.INTERIOR_FACTS)
 NUMBER = re.compile(r"^([≥≤<>=]) (-?[\d,]+(?:\.\d+)?)$")
 
 
@@ -1265,11 +1265,94 @@ def sample_site() -> dict:
             "facts": {k: v for k, v in facts.items() if k in keep}}
 
 
+def _use_lists(body) -> list:
+    """The use names a formula lists in `use in [...]` (the chart's own rows), in order."""
+    import ast
+    out = []
+    for node in ast.walk(body):
+        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use" and \
+                any(isinstance(op, ast.In) for op in node.ops):
+            for comp in node.comparators:
+                if isinstance(comp, ast.List):
+                    out += [e.value for e in comp.elts if isinstance(e, ast.Constant) and isinstance(e.value, str)]
+    return out
+
+
+def use_choices(rules: list, names: dict, district: str) -> list:
+    """The uses the district's chart lists, for the box's Use dropdown (Ben, 2026-10-25): from the district's own
+    use rule, never a hand-kept list. Permitted ones first (its check), then those the chart marks otherwise (its
+    review_when: a special permit), each saying so with the chart's page: [{"id", "name", "permitted", "note"}].
+    Every city use when the district has no use rule (nothing to narrow it by)."""
+    from rule_format import formula
+    rule = next((r for r in rules if r.get("topic") == "uses" and r.get("check")), None)
+    if rule is None:
+        return [{"id": k, "name": n, "permitted": None, "note": None} for k, n in names.items()]
+    page = next((s.get("page") for s in rule.get("sources") or [] if "chart" in (s.get("file") or "")), None)
+    cite = f"zoning chart p.{page}" if page else "the zoning chart"
+    out, seen = [], set()
+    for u in _use_lists(formula.parse(rule["check"]).body):
+        if u not in seen:
+            seen.add(u)
+            out.append({"id": u, "name": names.get(u, u.replace("_", " ")), "permitted": True, "note": None})
+    for r in rule.get("review_when") or []:
+        why = (r.get("reason") or "").split(". ")[0].rstrip(".")      # its first sentence: what the chart marks
+        said = why if "chart" in why else (why + f" ({cite})" if why else cite)
+        for u in _use_lists(formula.parse(r["when"]).body):
+            if u not in seen:
+                seen.add(u)
+                out.append({"id": u, "name": names.get(u, u.replace("_", " ")), "permitted": False,
+                            "note": f"Not permitted by right in {district}: {said}."})
+    return out
+
+
+def follow_up_facts(rules: list, use: str | None, uses: dict) -> list:
+    """The facts the box asks after the use, derived from the rulebook (Ben, 2026-10-25: no hand-kept list): every
+    stated fact (rhino_logic.STATED_FACTS: what only the architect can say) that a rule of this district reads, in
+    its applies_when, check or review_when, when that rule can apply to this use (its applies_when not false for
+    it). Never the stories (measured), never the interior's (bedrooms, parking: on hold), never one the use itself
+    says (one-family: one dwelling unit)."""
+    implied = logic.implied_facts(use)
+    return [k for k in logic.STATED_FACTS if k in _read_for(rules, use, uses) and k != "stories"
+            and k not in INTERIOR and k not in implied]
+
+
+def implied_for(rules: list, use: str | None, uses: dict) -> dict:
+    """What the use itself says (rhino_logic.implied_facts) for the facts this district's rules read for it, and
+    only those (a fact no rule reads is never sent: the checker knows only the facts its rules can use)."""
+    read = _read_for(rules, use, uses)
+    return {k: v for k, v in logic.implied_facts(use).items() if k in read}
+
+
+def _read_for(rules: list, use: str | None, uses: dict) -> set:
+    """Every name the district's rules read when they can apply to this use (applies_when not false for it)."""
+    from rule_format import formula
+    kinds = {"use": set(uses)}
+    wanted = set()
+    for rule in rules:
+        if rule.get("applies_when") and use is not None:
+            try:
+                if formula.evaluate(rule["applies_when"], {"use": use}, kinds) is False:
+                    continue                      # not this use's rule: nothing it reads is asked
+            except (formula.MissingMeasure, formula.EvaluationError):
+                pass                              # depends on what isn't known yet: it may apply, so asked
+        wanted |= reading_set.rule_names(rule)
+    return wanted
+
+
 def options(jurisdiction: str) -> dict:
-    """What the confirm dialog offers: the zones that have a rulebook, and the city's use names."""
+    """What the confirm dialog offers: the zones that have a rulebook, the city's use names, and per district the
+    uses its chart lists (use_choices) and per use the facts to ask after it (follow_up_facts)."""
     j = REPO / jurisdiction
     zones = sorted({p.stem for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
                     for p in folder.glob("*.yaml") if rulebook_for(j, p.stem)})
     uses_file = j / "4_term_definitions/uses.yaml"
     uses = load(uses_file) or {} if uses_file.exists() else {}
-    return {"zones": zones, "uses": {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}}
+    names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}
+    district_uses, follow_ups, implied = {}, {}, {}
+    for zone in zones:
+        rules = load(rulebook_for(j, zone))["rules"]
+        district_uses[zone] = use_choices(rules, names, zone)
+        follow_ups[zone] = {u["id"]: follow_up_facts(rules, u["id"], names) for u in district_uses[zone]}
+        implied[zone] = {u["id"]: implied_for(rules, u["id"], names) for u in district_uses[zone]}
+    return {"zones": zones, "uses": names, "district_uses": district_uses, "follow_ups": follow_ups,
+            "implied": implied}

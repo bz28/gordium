@@ -291,6 +291,86 @@ def refused_stories(items):
     return (i_said[0].upper() + i_said[1:] if i_said else "The count") + ". The count wasn't kept."
 
 
+INTERIOR_FACTS = ("sleeping_rooms", "parking_spaces")    # inside the building (on hold): never asked in the box
+BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS)   # what the box can ask
+
+
+def answered_in_box(needs):
+    """Whether a row's missing facts are all ones the box asks (its button then opens the box, Edit site…, to answer
+    them there: Ben, 2026-10-25, "a link to answer in the box, not a pop-up")."""
+    return bool(needs) and all(k in BOX_ASKS for k in needs)
+
+
+IMPLIED_BY_USE = (("one_family", {"dwelling_units": 1}), ("two_family", {"dwelling_units": 2}))   # the use says it
+
+
+def implied_facts(use):
+    """What a use itself says, so it is never asked (Ben, 2026-10-25: one-family and two-family imply the units)."""
+    for prefix, facts in IMPLIED_BY_USE:
+        if (use or "").startswith(prefix):
+            return dict(facts)
+    return {}
+
+
+def follow_up_rows(options, zone, use, facts):
+    """The box's questions after Use: the facts the district's rules need for this use (options["follow_ups"], from
+    the rulebook), each {"key", "label", "kind" (count / yes_no), "value" (as entered, or None)}; none when the
+    district has no such rule (R-1b today) or the use says them."""
+    keys = ((options or {}).get("follow_ups") or {}).get(zone, {}).get(use) or []
+    return [{"key": k, "label": STATED_FACTS[k][0], "kind": STATED_FACTS[k][1], "value": (facts or {}).get(k)}
+            for k in keys if k in STATED_FACTS]
+
+
+def use_note(options, zone, use):
+    """What the box says under Use when the pick isn't permitted by right in the district (the chart's own cite),
+    else None."""
+    for u in ((options or {}).get("district_uses") or {}).get(zone) or []:
+        if u["id"] == use:
+            return u.get("note")
+    return None
+
+
+def district_use_names(options, zone):
+    """The Use dropdown's choices for the district: [(id, name)], permitted first, as the chart lists them; every
+    city use when the district has none listed."""
+    listed = ((options or {}).get("district_uses") or {}).get(zone) or []
+    return [(u["id"], u["name"]) for u in listed] or list(((options or {}).get("uses") or {}).items())
+
+
+def answers_applied(facts, answers, implied=None):
+    """The box's follow-up answers into the facts (a blank: the fact unset, so its rules need review, never 0 or
+    no), and what the use itself says for the facts its rules read (`implied`: options["implied"]); the keys the
+    architect answered, for their source ("entered by you")."""
+    answers = answers or {}
+    out = update_counts({k: v for k, v in (facts or {}).items() if not (k in answers and answers[k] is None)},
+                        {k: v for k, v in answers.items() if v is not None})
+    for k, v in (implied or {}).items():
+        out.setdefault(k, v)
+    return out, sorted(k for k, v in answers.items() if v is not None)
+
+
+def implied_by(options, zone, use):
+    """What the use says for the facts this district's rules read (options["implied"]): never asked."""
+    return ((options or {}).get("implied") or {}).get(zone, {}).get(use) or {}
+
+
+def parse_answer(kind, text):
+    """A follow-up field's text as the fact's value: a whole number 0 or more (count), yes / no (yes_no); blank:
+    None (unanswered: its rules stay NEEDS REVIEW, never 0 or no); anything else raises ValueError."""
+    text = (text or "").strip().lower()
+    if not text:
+        return None
+    if kind == "yes_no":
+        if text in ("yes", "y", "conversion"):
+            return True
+        if text in ("no", "n", "new", "new construction"):
+            return False
+        raise ValueError("answer yes or no")
+    if not text.isdigit():
+        raise ValueError("a whole number, 0 or more")
+    return int(text)
+
+
 def needs_of(names, values):
     """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
     return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None]
@@ -306,8 +386,10 @@ def enter_words(needs):
 
 
 def needs_reason(needs):
-    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show"."""
-    return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show" if needs else None
+    """Why the row isn't checked, and where to answer it (Ben, 2026-10-25: "tell Gordium the <fact>", in the box,
+    not a pop-up): "Tell Gordium the dwelling units (Edit site…): the model doesn't show them"."""
+    return ("Tell Gordium the " + _and([STATED_FACTS[k][2] for k in needs]) + " (Edit site…): the model doesn't "
+            "show them") if needs else None
 
 
 def update_counts(facts, answers):
@@ -2541,6 +2623,9 @@ def fact_sources(state, today, confirmed):
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
+        # the follow-up answers (Ben, 2026-10-25): each saved as entered by you, shown in the panel and the report
+        **{k: fact({True: "yes", False: "no"}.get(v, v), ENTERED) for k, v in (state.get("answers") or {}).items()
+           if v is not None and k in STATED_FACTS},
         # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
         "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"), state.get("lot_source"))),
         # the street's name only when it may be kept (the City's roads may not: "street_name_saved" then None, and

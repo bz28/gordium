@@ -631,7 +631,9 @@ def show_detail(parts):
     # what to do about it, right under the reason: a button where there is one (never its words twice, nor the
     # button scrolled out of sight below the measuring notes: the architect's review), else the hint's words
     buttons = []
-    if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn
+    if i.get("needs") and logic.answered_in_box(i["needs"]):     # answered in the box, not a pop-up (Ben)
+        buttons.append(button("Tell Gordium in Edit site…", a["edit_site"]))
+    elif i.get("needs"):                  # exactly the stated facts this row waits for, asked in turn
         buttons.append(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"])))
     if i.get("hint") == "Pick the main building…":
         buttons.append(button("Pick the main building…", a["main"]))
@@ -788,10 +790,12 @@ def start_box(state, options, mode):
     confirm = ef.CheckBox()
     confirm.Checked = bool(state.get("district_confirmed"))
     use = ef.DropDown()
-    names = list(options["uses"].items())
+    names = list(state.get("use_choices") or options["uses"].items())   # the district's chart's uses, permitted first
     for _, n in names:
         use.Items.Add(n)
-    use.SelectedIndex = max(0, [k for k, _ in names].index(state.get("use")) if state.get("use") in options["uses"] else 0)
+    ids = [k for k, _ in names]
+    use.SelectedIndex = ids.index(state.get("use")) if state.get("use") in ids else 0
+    asked = {}                        # each follow-up question's field (the facts this district's rules need)
     regrade = ef.CheckBox()
     regrade.Checked = bool(state.get("no_regrading"))
     corner = ef.DropDown()                # Corner lot? never guessed: "Not answered" until the architect says
@@ -816,6 +820,14 @@ def start_box(state, options, mode):
             state["address_source"] = logic.ENTERED
         if use.SelectedIndex != first["use"]:
             state["use_source"] = logic.ENTERED
+        answers = dict(state.get("answers") or {})
+        for key, (kind, field) in asked.items():       # a blank stays unanswered (its rules: NEEDS REVIEW)
+            text = (field.Text if kind == "count" else ["", "no", "yes"][max(field.SelectedIndex, 0)])
+            try:
+                answers[key] = logic.parse_answer(kind, text)
+            except ValueError:
+                answers[key] = None
+        state["answers"] = answers
         if corner.SelectedIndex != first["corner"]:
             state["corner_source"] = logic.ENTERED
 
@@ -857,6 +869,13 @@ def start_box(state, options, mode):
             zone_row["source"].Text = logic.zone_row_text(state).split(" · ", 1)[-1]
 
     zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
+
+    def use_changed(s, e):            # another use (or district): its own questions, so the box opens again with them
+        if use.SelectedIndex != first["use"] and ((state.get("follow_ups") or []) or logic.follow_up_rows(
+                options, state.get("zone"), names[use.SelectedIndex][0] if names else None, {})):
+            pick("refresh")
+
+    use.SelectedIndexChanged += logic.guard(use_changed, "pick the use")
     cancel = button("Cancel", lambda: done(None))
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
@@ -885,6 +904,22 @@ def start_box(state, options, mode):
             layout.AddRow(title, row(zone, zone_row["source"], confirm))
         elif key == "use":
             layout.AddRow(title, use)
+            if state.get("use_note"):  # a pick the chart doesn't permit by right: said, with the chart's page
+                layout.AddRow(None, row(label(state["use_note"], eto_status_color("needs_review"), size=11,
+                                              width=560)))
+            for q in state.get("follow_ups") or []:     # what this district's rules need for the use
+                if q["kind"] == "count":
+                    field = ef.TextBox()
+                    field.Width = 60
+                    field.Text = "" if q["value"] is None else str(q["value"])
+                else:
+                    field = ef.DropDown()
+                    for t in ("Not answered", "New construction", "Conversion of an existing building"):
+                        field.Items.Add(t)
+                    field.SelectedIndex = {None: 0, False: 1, True: 2}[q["value"]]
+                asked[q["key"]] = (q["kind"], field)
+                layout.AddRow(label(q["label"], size=12), row(field, label("entered by you; blank: the rules that "
+                                                                           "need it say so", size=11)))
         elif key == "ground":
             layout.AddRow(title, row(label(r["text"], size=12)))          # left aligned, as the others
             layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
