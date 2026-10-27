@@ -350,6 +350,10 @@ rules:
       sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 66
+        lines: [35, 35]
+        quote: shall be exempt from side yard requirements contained in the District Regulations Chart
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
         lines: [37, 38]
         quote: Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard
       still_open: []
@@ -357,7 +361,7 @@ rules:
     - id: yards_on_this_lot
       question: Does §325-7B reach a building on a neighbouring lot (a lot split off from one whose building needed the land as its yard)?
       kind: reading
-      answer: 'Gordium reads it within one lot: a yard is "That part of a lot" (§325-3B YARD), so this lot''s yards serve the buildings on it, and a neighbouring building''s required yards lie on its own lot, where its own rules check them. Unlike some other codes, Ithaca''s clause doesn''t add "or on any other lot".'
+      answer: 'Gordium reads it within one lot: a yard is "That part of a lot" (§325-3B YARD), so this lot''s yards serve the buildings on it, and a neighbouring building''s required yards lie on its own lot, where its own rules check them.'
       sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 20
@@ -447,7 +451,7 @@ rules:
   - id: R-1b.south_hill_overlay
     kind: rule
     topic: dimensions
-    title: "South Hill Overlay: one primary structure per parcel (§325-8E)"
+    title: "South Hill Overlay: no new primary structure past one per parcel (§325-8E)"
     check: not south_hill_overlay or primary_buildings <= 1
     sources:
       - file: chapter_325_zoning_2026-10.pdf

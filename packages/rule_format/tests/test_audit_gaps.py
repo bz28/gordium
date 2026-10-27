@@ -68,10 +68,15 @@ FIXED = {
     "RU": {"one_family_detached": 10000, "one_family_semi_detached": 15000, "two_family": 15000,
            "fraternity_sorority_group_house": 30000, "church": 30000},
 }
-BY_UNITS = {"R-2c": ["one_family_detached", "one_family_semi_detached", "two_family", "one_family_attached"],
-            "R-3a": ["one_family_attached", "multiple_family", "dormitory"],
-            "R-3aa": ["one_family_attached", "multiple_family"],
-            "R-3b": ["one_family_attached", "multiple_family", "dormitory"],
+# (and, review round 3: the uses whose one-building lot size is itself a flag or an open question, the zero-lot-line
+# house and the nursing home, never fall into the fixed "Other use" figure)
+BY_UNITS = {"R-2c": ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+                     "two_family", "one_family_attached"],
+            "R-3a": ["one_family_attached", "multiple_family", "dormitory", "nursing_home",
+                     "one_family_detached_zero_lot_line"],
+            "R-3aa": ["one_family_attached", "multiple_family", "nursing_home", "one_family_detached_zero_lot_line"],
+            "R-3b": ["one_family_attached", "multiple_family", "dormitory", "nursing_home",
+                     "one_family_detached_zero_lot_line"],
             "RU": ["one_family_attached", "multiple_family", "dormitory"]}
 
 

@@ -16,6 +16,8 @@ format report from it.
 
 - **The model.** The lot is the closed outline on the `Site` layer; buildings are the solids or closed meshes
   on the `Building` layer (the layers the architects already use). Any units; everything is converted to feet.
+  The model is the whole lot: every building on it, existing ones to stay included, is drawn on the `Building`
+  layer, since lot coverage, the count of primary buildings and every rule reading them see only what is drawn.
 - **Lot facts**: what a model can't show, stated by the architect. In Rhino they are asked once (prefilled)
   and saved in the file; on disk they sit next to the model as `<model>_facts.yaml`:
 
