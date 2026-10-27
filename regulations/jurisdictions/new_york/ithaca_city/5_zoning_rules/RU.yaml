@@ -639,15 +639,15 @@ rules:
   - id: RU.lot_area_each_primary_building
     kind: rule
     topic: dimensions
-    title: "Each further primary building needs its own lot area (§325-8B(1))"
-    applies_when: primary_buildings >= 2
-    check: lot_area >= primary_buildings * (10000 if use == "one_family_detached" else 15000 if use in ["one_family_semi_detached", "two_family"] else 30000)
+    title: "Lot area for each primary building on the lot (§325-8B(1))"
+    applies_when: primary_buildings >= 2 or use not in ["one_family_attached", "multiple_family", "dormitory"]
+    check: lot_area >= primary_buildings * (10000 if use == "one_family_detached" else 15000 if use == "one_family_semi_detached" else 15000 if use == "two_family" else 30000 if use == "fraternity_sorority_group_house" else 30000)
     review_when:
-      - when: not primary_buildings_same_use
+      - when: primary_buildings >= 2 and not primary_buildings_same_use
         reason: >-
           Not every primary building on the lot is stated to hold the lot's use: each building needs its own
           use's lot area, added together (§325-8B(1)); check by hand.
-      - when: use in ["one_family_attached", "multiple_family", "dormitory"]
+      - when: primary_buildings >= 2 and use in ["one_family_attached", "multiple_family", "dormitory"]
         reason: >-
           This use's lot area grows with the units, rooms or occupants in each building (or is itself open,
           or a flag), and how they are split between the buildings isn't known: check by hand, each
@@ -727,9 +727,6 @@ rules:
         cell: {section: "Minimum Lot Size [fn3]", row: "Other use", column: RU}
       - file: zoning_charts_2026-04.pdf
         page: 3
-        cell: {section: "Minimum Lot Size [fn3]", row: "Multiple family dwelling, new construction", column: RU}
-      - file: zoning_charts_2026-04.pdf
-        page: 3
         lines: [19, 19]
         quote: "Other use 10,000 sf 7,500 sf 6,000 sf 4,000 sf 4,000 sf 6,000 sf 6,000 sf 4,000 sf 30,000 sf"
       - file: zoning_charts_2026-04.pdf
@@ -737,8 +734,10 @@ rules:
         cell: {section: "Primary Uses", row: "Dormitory", column: RU}
     examples:
       - given: {use: one_family_detached, primary_buildings: 1, lot_area: 10000}
-        expect: not_applicable
-        note: "one primary building: the use's own lot-area rule covers it"
+        expect: pass
+        note: "one primary building: the use's own figure"
+      - given: {use: one_family_detached, primary_buildings: 1, lot_area: 9999}
+        expect: fail
       - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 20000}
         expect: pass
         note: "two primary buildings need 2 x 10,000 sf"
@@ -775,6 +774,9 @@ rules:
         note: "Other use"
       - given: {use: church, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 59999}
         expect: fail
+      - given: {use: one_family_attached, primary_buildings: 1, lot_area: 1}
+        expect: not_applicable
+        note: "one primary building of a use whose figure grows with units, rooms or occupants: its own rule decides"
       - given: {use: one_family_attached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
         expect: needs_review
       - given: {use: multiple_family, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
@@ -784,13 +786,13 @@ rules:
     notes: >-
       §325-8B(1): every residential district's lot-size figure applies again to each further primary use in a separate
       building on the lot (the code's own example: in R-2b, 3,000 sf for a house and 3,000 sf more for each further
-      house). With one primary building this rule doesn't apply: the use's own lot-area rule (RU.lot_area_*) checks
-      it. With two or more, the lot needs the figure once per building, when every building holds the lot's use
-      (primary_buildings_same_use); otherwise each building's own figure, added by hand. Gordium counts the primary
-      buildings from the drawing where it can (one building, or none standing apart that could hold a home); a
-      building standing apart that could (a large garage, a second house) is read both ways until the architect states
-      the count. An accessory building (a garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary
-      building.
+      house). With one primary building this asks the use's own figure once, as the use's own lot-area rule does (a
+      use whose figure grows with units, rooms or occupants is left to its own rule). With two or more, the lot needs
+      the figure once per building, when every building holds the lot's use (primary_buildings_same_use); otherwise
+      each building's own figure, added by hand. Gordium counts the primary buildings from the drawing where it can
+      (one building, or none standing apart that could hold a home); a building standing apart that could (a large
+      garage, a second house) is read both ways until the architect states the count. An accessory building (a garage,
+      a shed, an accessory dwelling unit, §325-3B) isn't a primary building.
     drafted_by: claude
     status: draft
 
@@ -1664,9 +1666,12 @@ rules:
         that two primary uses may be two buildings. "Less than 60,000 SF" and "greater than 60,000 SF" leave a lot of
         exactly 60,000 sf in neither. The note isn't in Chapter 325's text (searched §325-8, the South Hill overlay
         §325-8E, which has a primary-structure rule for R-1 and R-2 only). No City record found (searched again
-        2026-10-27: no City interpretation or Board of Zoning Appeals decision found online). A lot of exactly 60,000 sf
-        with two primary buildings needs review under both readings (the approvals are needed anyway where two are
-        allowed), so the question changes no result yet.
+        2026-10-27: no City interpretation or Board of Zoning Appeals decision found online). The 60,000 sf part
+        changes no result yet: two primary buildings on exactly 60,000 sf need review under both readings (the
+        approvals are needed anyway where two are allowed). For the other part Gordium counts primary buildings,
+        each read as one primary use (its use is one per lot): Gordium's reading for now, to confirm. Under the
+        other reading (primary uses, not buildings), two buildings of one use on a lot over 60,000 sf would need no
+        approvals, where Gordium says needs review: the cautious side, never a pass the law wouldn't give.
       readings:
       - id: sixty_thousand_one_structure
         reading: a lot of exactly 60,000 sf may have one primary structure (two need more than 60,000 sf)

@@ -11,10 +11,11 @@ from design_checker.check import check_site
 RULE = "R-1b.lot_area_each_primary_building"
 
 
-def _rows(**facts):
+def _rows(lot=(60, 150), **facts):
     sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "12_r3a_two_family_at_the_building_limits.yaml"))
     sc["district"], sc["use"] = "R-1b", "one_family_detached"
-    sc["lot"]["points"] = [[0, 0], [60, 0], [60, 150], [0, 150]]
+    w, d = lot
+    sc["lot"]["points"] = [[0, 0], [w, 0], [w, d], [0, d]]
     sc["buildings"] = [{"id": "house", "outline": [[15, 25], [45, 25], [45, 60], [15, 60]], "base": 0, "floors": [10, 10]},
                        {"id": "back", "outline": [[15, 100], [45, 100], [45, 125], [15, 125]], "base": 0, "floors": [10]}]
     s, f, extras = scenarios.site(sc)
@@ -31,13 +32,13 @@ def test_a_second_building_that_could_be_a_house_waits_for_the_count():
 
 def test_once_counted_the_row_is_decided():
     assert _rows(primary_buildings=2, primary_buildings_same_use=True)[RULE]["status"] == present.FAILS
-    assert RULE not in _rows(primary_buildings=1)               # one primary building: not applicable, not shown
+    assert _rows(primary_buildings=1)[RULE]["status"] == present.COMPLIES     # one: 9,000 sf of 6,000
     # the one-house lot-area row is unchanged: 9,000 sf of 6,000
     assert _rows(primary_buildings=1)["R-1b.lot_area_one_family_detached"]["status"] == present.COMPLIES
 
 
 def test_a_garage_listed_as_an_accessory_building_is_not_a_second_house():
-    assert RULE not in _rows(accessory_buildings=["back_floor1"])
+    assert _rows(accessory_buildings=["back_floor1"])[RULE]["status"] == present.COMPLIES
 
 
 def test_the_working_names_the_figure_for_the_stated_use():
@@ -71,5 +72,5 @@ def test_ru_two_possible_buildings_on_a_big_lot_never_read_as_not_complying():
 def test_a_count_that_could_change_the_row_is_asked_even_on_a_big_lot():
     """Review round 1 (PR2, F2): with a building standing apart that could be a house, Gordium doesn't decide the
     lot-area row from the readings' ends; it asks the count (needs review), never a pass, as the docs now say."""
-    item = _rows(primary_buildings_same_use=True)[RULE]
-    assert item["status"] == present.REVIEW and "primary_buildings" in item["needs"]
+    item = _rows(lot=(200, 300), primary_buildings_same_use=True)[RULE]      # 60,000 sf: enough for 1 or 2
+    assert item["status"] == present.REVIEW and "primary_buildings" in item["needs"], item
