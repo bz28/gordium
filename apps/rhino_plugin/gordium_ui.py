@@ -47,6 +47,28 @@ HIGHLIGHT_EDGE = {"red": 3, "amber": 1}
 HIGHLIGHT_PROUD_FT = 0.02    # each block stands this far proud of the house, so their shared faces never fight
 
 
+def dim_color(status, dark):
+    """A dimension's colour (logic.dim_rgb): red fails, amber needs review, neutral grey complies."""
+    r, g, b = logic.dim_rgb(status, dark)
+    return System.Drawing.Color.FromArgb(r, g, b)
+
+
+def required_color(dark):
+    """A yard's required line and its "min" tag: clear mid-grey (logic.REQUIRED_RGB)."""
+    r, g, b = logic.REQUIRED_RGB[1 if dark else 0]
+    return System.Drawing.Color.FromArgb(r, g, b)
+
+
+def halo(dark):
+    """The thin halo under a dimension: near-black on a light viewport, near-white on a dark one."""
+    return System.Drawing.Color.FromArgb(220, 245, 245, 245) if dark else System.Drawing.Color.FromArgb(220, 25, 25, 25)
+
+
+def faint(color):
+    """A colour at the required line's faint opacity (logic.FAINT_ALPHA)."""
+    return System.Drawing.Color.FromArgb(logic.FAINT_ALPHA, color.R, color.G, color.B)
+
+
 def viewport_dark():
     return _dark(Rhino.ApplicationSettings.AppearanceSettings.ViewportBackgroundColor)
 
@@ -644,7 +666,9 @@ def show_detail(parts):
     # what to do about it, right under the reason: a button where there is one (never its words twice, nor the
     # button scrolled out of sight below the measuring notes: the architect's review), else the hint's words
     buttons = []
-    if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn
+    if i.get("needs") and logic.answered_in_box(i["needs"]):     # answered in the box, not a pop-up (Ben)
+        buttons.append(button("Tell Gordium in Edit site…", a["edit_site"]))
+    elif i.get("needs"):                  # exactly the stated facts this row waits for, asked in turn
         buttons.append(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"])))
     if i.get("hint") == "Pick the main building…":
         buttons.append(button("Pick the main building…", a["main"]))
@@ -802,10 +826,14 @@ def start_box(state, options, mode):
     confirm = ef.CheckBox()
     confirm.Checked = bool(state.get("district_confirmed"))
     use = ef.DropDown()
-    names = list(options["uses"].items())
+    # the district's chart's uses, permitted first, and the use set even if not listed (never changed unasked)
+    names = list(state.get("use_choices") or logic.district_use_names(options, state.get("zone"), state.get("use")))
     for _, n in names:
         use.Items.Add(n)
-    use.SelectedIndex = max(0, [k for k, _ in names].index(state.get("use")) if state.get("use") in options["uses"] else 0)
+    ids = [k for k, _ in names]
+    use.SelectedIndex = ids.index(state.get("use")) if state.get("use") in ids else 0
+    laid_out = (state.get("zone"), names[use.SelectedIndex][0] if names else None)   # what the Use rows show
+    asked = {}                        # each follow-up question's field (the facts this district's rules need)
     regrade = ef.CheckBox()
     regrade.Checked = bool(state.get("no_regrading"))
     corner = ef.DropDown()                # Corner lot? never guessed: "Not answered" until the architect says
@@ -830,6 +858,14 @@ def start_box(state, options, mode):
             state["address_source"] = logic.ENTERED
         if use.SelectedIndex != first["use"]:
             state["use_source"] = logic.ENTERED
+        answers = dict(state.get("answers") or {})
+        for key, (kind, field) in asked.items():       # a blank stays unanswered (its rules: NEEDS REVIEW)
+            text = field.Text if kind == "count" else ["", "no", "yes"][max(field.SelectedIndex, 0)]
+            try:
+                answers[key] = logic.parse_answer(kind, text)
+            except ValueError:
+                answers[key] = None
+        state["answers"] = answers
         if corner.SelectedIndex != first["corner"]:
             state["corner_source"] = logic.ENTERED
 
@@ -877,8 +913,20 @@ def start_box(state, options, mode):
         reason.Text = logic.draw_reason(state)
         if "source" in zone_row:
             zone_row["source"].Text = logic.zone_row_text(state).split(" · ", 1)[-1]
+        refresh_if_needed()
+
+    def refresh_if_needed():          # another use or district: its own uses, note and questions, so the box opens
+        z = zone.SelectedValue.Text if zone.SelectedValue else None       # again with them (rhino_logic decides;
+        if not looking and logic.box_needs_refresh(                       # a lookup's answer opens it again anyway)
+                options, laid_out, (z, names[use.SelectedIndex][0] if names else None)):
+            pick("refresh")
 
     zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
+
+    def use_changed(s, e):
+        refresh_if_needed()
+
+    use.SelectedIndexChanged += logic.guard(use_changed, "pick the use")
     cancel = button("Cancel", lambda: done(None))
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
@@ -907,6 +955,30 @@ def start_box(state, options, mode):
             layout.AddRow(title, row(zone, zone_row["source"], confirm))
         elif key == "use":
             layout.AddRow(title, use)
+            if state.get("use_note"):  # a pick the chart doesn't permit by right: said, with the chart's page
+                layout.AddRow(None, row(label(state["use_note"], eto_status_color("needs_review"), size=11,
+                                              width=560)))
+            for q in state.get("follow_ups") or []:     # what this district's rules need for the use
+                if q["kind"] == "count":
+                    field = ef.TextBox()
+                    field.Width = 60
+                    field.Text = "" if q["value"] is None else str(q["value"])
+                else:
+                    field = ef.DropDown()
+                    for t in (logic.NOT_ANSWERED,) + logic.yes_no_words(q["key"]):
+                        field.Items.Add(t)
+                    field.SelectedIndex = {None: 0, False: 1, True: 2}[q["value"]]
+                asked[q["key"]] = (q["kind"], field)
+                note = label(logic.FOLLOW_UP_HELP, size=11)
+                if q["kind"] == "count":     # a typed entry that isn't a whole number: said at once, never kept
+
+                    def typed(s, e, f=field, n=note, plain=note.TextColor):
+                        problem = logic.answer_problem("count", f.Text)
+                        n.Text = problem or logic.FOLLOW_UP_HELP
+                        n.TextColor = eto_status_color("needs_review") if problem else plain
+
+                    field.TextChanged += logic.guard(typed, "type the answer")
+                layout.AddRow(label(q["label"], size=12), row(field, note))
         elif key == "ground":
             layout.AddRow(title, row(label(r["text"], size=12)))          # left aligned, as the others
             layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))

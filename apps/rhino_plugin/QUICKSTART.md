@@ -268,10 +268,18 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 4. **Draw.** You see:
    - the lot's property line with each edge's length (in Top view);
    - the buildable envelope, see-through blue: the space every yard and the height limit leave;
-   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
-     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
-     lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
-     on a survey it goes to the limits;
+   - on a locked layer **Gordium::Envelope**, real curves to snap to (Osnap): the buildable outline at ground
+     level and each yard's required line in full. On a tax-map lot (any lot not marked as from a survey) the
+     outline 2'-0" in from every lot line is solid and everything as drawn dashed; where nothing is left 2'-0" in,
+     only the dashed one. Gordium replaces them at every check (never measured; Undo never stops on them); untick
+     **Show buildable envelope** to hide them;
+   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, each floor on its
+     own sublayer `Gordium::Massing::Floor 1`, `Floor 2`, `Floor 3` (a `Gordium::Massing::Roof` sublayer is made for
+     your roof). **Hide starting house** in the panel hides it (it is still checked). On a lot from the tax map it
+     keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off; on a survey it goes to the
+     limits. The panel says why it is that size, for example "Largest house that complies even if the tax-map lines
+     are 2'-0" off; limited by lot coverage 25%. Use my survey… for the full size.";
+   - on a tax-map lot the blue envelope is the cautious one: every lot line 2'-0" nearer;
    - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing, all kept in the file:
      the neighbouring tax parcels and the street centerlines in grey on locked `Gordium::Context` layers; the
      neighbouring building footprints as outlines (no heights) on the unlocked `Gordium::Context::Buildings` layer,
@@ -288,9 +296,19 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    after you stop (kept with the file). After a check:
    - when something newly stops complying, a short note appears bottom left ("✕ Rear yard no longer complies ·
      29'-6" proposed · 30'-0" required · −0'-6""). It goes by itself;
-   - only the part of the building inside a required yard, or above the height limit, turns red. The rest stays
-     neutral;
-   - in Top view each yard is drawn as measured, marked ✓ ? or ✕.
+   - only the offending part of the building is coloured: the part inside a required yard, or above the height
+     limit. Red where it fails under every reading; amber where it fails only under some (for example within the
+     tax map's 2'-0" of a lot line). The rest stays neutral;
+   - in Top view each yard is dimensioned as a drawing is: square to its lot line from the wall facing it, red
+     where it fails, amber where it needs review, complying ones neutral grey; it shows its number only, on its
+     line or just past its end (✕ or ? before it when something is wrong; the yard's name and what it needs are in
+     the panel); the required line is dashed across it, tagged "min 10'-0"" where the yard fails or needs review;
+     what is wrong is placed first and every number stays in view; in the Front
+     and Right views the height is dimensioned up from the grade plane, the limit faint. Zoomed out to the
+     neighbourhood the dimensions give way.
+   - in Top view Gordium's lines (the lot line, the envelope's outline, the dimensions) are drawn over everything,
+     so none is lost under a roof; in Perspective and the elevations they hide behind your solids, as Rhino's own
+     lines do.
 6. **Read the panel.** Click any row. The bottom half shows the city's exact words, the examiner-style citation
    ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was
    measured and worked out, and what to change ("To comply: move the building 0'-6" farther from that lot
