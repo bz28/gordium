@@ -29,7 +29,7 @@ A piece with several parts takes its worst part's status (MISSING first, then op
 | not applicable | 75 | 75 | 73 | 73 | 73 | 70 | 72 | 70 | 73 | 654 |
 | **pieces** | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 164 | 1476 |
 
-**Resting on a reading:** 884 of the 1476 cells rest, in at least one part, on a person's reading rather than a citation (cells by kind of reading, a cell counted once per part: not applicable 707, parked 126, flag 33, rules named by mapping 110). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it says, not that it supports the decision; a mapping gives its reason in words. They are listed after the table, for a person to check.
+**Resting on a reading:** 884 of the 1476 cells rest, in at least one part, on a person's reading rather than a citation (counted once per part of a cell: not applicable 707, parked 126, flag 81; and 110 with rules named by mapping, 48 of them on flags). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it says, not that it supports the decision; a mapping gives its reason in words. They are listed after the table, for a person to check.
 
 MISSING cells by priority (a piece missing in two parts counts twice):
 

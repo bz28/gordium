@@ -251,7 +251,7 @@ def test_compliance_with_district_regulations_is_not_counted_as_covered(built, d
 
 
 def test_a_flagged_part_is_never_shown_with_a_check_mark(built):
-    """§325-8B in R-3a: abutting_r1 and lot_size_zero_lot_line are flags, the use part a flag too."""
+    """§325-8B in RU: primary_structures is a flag, so it is shown as flagged, never with a check mark."""
     short = built._short("325-8B", "RU")
     assert "partly flagged: primary_structures" in short and "✓ primary_structures" not in short
 
@@ -366,8 +366,6 @@ def test_rooming_units_and_bed_and_breakfasts_in_r1_r2_are_not_claimed_settled(b
         assert built.cells["325-9B"][d][part_index(built, "325-9B", "(p) Bed-and-breakfast")][1]["status"] == "missing"
 
 
-# Review round 6.
-
 
 # Review round 7.
 
@@ -382,8 +380,6 @@ def test_not_applicable_says_it_includes_pointers(built):
     head = built.render().split("## The table")[0]
     assert "or it is a pointer with no requirement of its own" in head and "or are pointers" in head
 
-
-# Review round 8.
 
 
 
@@ -525,3 +521,20 @@ def test_a_chart_quote_is_exactly_its_cells_line(decisions):
 
 def test_the_mapped_legend_says_at_least_one_rule(built):
     assert "at least one of these rules covers it only by Gordium's stated mapping" in built.render()
+
+
+
+# Provenance review round 4.
+
+def test_a_quote_on_any_decision_is_checked(decisions):
+    """A mapped rulebook decision's quote is shown as the law's words too, so it must be the law's words."""
+    data = with_piece(decisions, "325-17A", [{"what": "x", "all": {
+        "status": "rulebook", "rules": ["front_yard", "side_yards", "rear_yard"], "mapped": "m",
+        "quote": "Lots in residential districts may be reduced freely"}}])
+    assert any("quote not found" in p for p in problems(data))
+
+
+def test_the_summary_counts_every_flag_and_mapped_flags_apart(built):
+    head = built.render().split("## The table")[0]
+    flags = sum(len(e["cells"]) for e in built.readings() if e["status"] == "flag")
+    assert f"flag {flags};" in head and "of them on flags" in head

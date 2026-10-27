@@ -8,7 +8,7 @@ Proof that nothing in the source documents was skipped: one report per document 
 
 Every piece labeled `rule` or `flag` against each of the nine residential districts (R-1a to RU). Each cell says
 whether the district's rulebook has a rule for it (which), flags it for review, doesn't need it because the law
-keeps it out of the district or it is a pointer with nothing of its own (with the law's words), has it parked on the later list, is waiting on an open question,
+keeps it out of the district or it is a pointer with nothing of its own (with the law's words), has it parked (deliberately deferred: Ben's later list, or the brief that parked it), is waiting on an open question,
 or is MISSING. It opens with the counts and the MISSING list, ranked, and ends with every rule in each rulebook:
 whether model_measurement measures what it needs, and whether a test checks it on a model in `test_data/test_sites`.
 

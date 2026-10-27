@@ -313,7 +313,7 @@ class Audit:
                 p.append(f"{where}: `also` names {d}.{rid}, which doesn't cite the piece")
         if status in ("not_applicable", "missing", "open_question") and not dec.get("why"):
             p.append(f"{where}: say why (`why`)")
-        if status in READINGS:
+        if status in READINGS or dec.get("quote"):     # any quote shown as the law's words is checked
             # A reading: code can't prove the law's words support it, only that they are the law's words, exactly
             # where the decision says (the same standard as a rule's sources). The table shows each one beside its
             # cell for a person to check.
@@ -588,11 +588,13 @@ class Audit:
             out.append(f"| {WORDS[s]} | " + " | ".join(str(counts[d][s]) for d in ds) + f" | {total[s]} |")
         out.append("| **pieces** | " + " | ".join(str(n) for _ in ds) + f" | {n * len(ds)} |")
         rested = {(e["piece"], d) for e in self.readings() for d in e["cells"]}
-        by = Counter(e["status"] if not e["mapped"] else "mapped" for e in self.readings() for _ in e["cells"])
+        by = Counter(e["status"] for e in self.readings() if e["status"] in READINGS for _ in e["cells"])
+        mapped = sum(len(e["cells"]) for e in self.readings() if e["mapped"])
+        mapped_flags = sum(len(e["cells"]) for e in self.readings() if e["mapped"] and e["status"] == "flag")
         out += ["", f"**Resting on a reading:** {len(rested)} of the {n * len(ds)} cells rest, in at least one part, on a "
-                "person's reading rather than a citation (cells by kind of reading, a cell counted once per part: not applicable "
-                f"{by['not_applicable']}, parked {by['parked']}, flag {by['flag']}, rules named by mapping "
-                f"{by['mapped']}). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it "
+                "person's reading rather than a citation (counted once per part of a cell: not applicable "
+                f"{by['not_applicable']}, parked {by['parked']}, flag {by['flag']}; and {mapped} with rules named by "
+                f"mapping, {mapped_flags} of them on flags). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it "
                 "says, not that it supports the decision; a mapping gives its reason in words. They are listed after "
                "the table, for a person to check."]
         out += ["", "MISSING cells by priority (a piece missing in two parts counts twice):", "",
