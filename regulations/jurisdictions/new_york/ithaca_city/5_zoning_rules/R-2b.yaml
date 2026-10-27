@@ -1203,6 +1203,27 @@ rules:
       and side_yard_smaller_eaves >= 5 + max(building_height - 35, 0) - 2
       and side_yard_larger_eaves >= 10 + max(building_height - 35, 0) - 2
       and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2
+    review_when:
+      - when: >-
+          (side_yard_smaller >= 10 + max(building_height - 35, 0) or side_yard_larger < 10 + max(building_height - 35, 0))
+          and side_yard_smaller_eaves >= 10 + max(building_height - 35, 0) - 2
+          and side_yard_larger_eaves >= 5 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves < 10 + max(building_height - 35, 0) - 2
+          and front_yard_eaves >= 10 + max(building_height - 35, 0) - 2 and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2
+        reason: >-
+          Which side yard is the 10 ft one (both minimums more on a building over 35 ft tall) is open: the walls are at
+          least that far from both side lot lines, or from neither, so either side may be. The eaves fit only if the
+          side whose walls are farther from its line is the 5 ft one. Say which side is meant to be the 10 ft
+          one.
+      - when: >-
+          (side_yard_smaller >= 10 + max(building_height - 35, 0) or side_yard_larger < 10 + max(building_height - 35, 0))
+          and side_yard_larger_eaves >= 10 + max(building_height - 35, 0) - 2
+          and side_yard_smaller_eaves >= 5 + max(building_height - 35, 0) - 2 and side_yard_smaller_eaves < 10 + max(building_height - 35, 0) - 2
+          and front_yard_eaves >= 10 + max(building_height - 35, 0) - 2 and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2
+        reason: >-
+          Which side yard is the 10 ft one (both minimums more on a building over 35 ft tall) is open: the walls are at
+          least that far from both side lot lines, or from neither, so either side may be. The eaves fit only if the
+          side whose walls are nearer to its line is the 5 ft one. Say which side is meant to be the 10 ft
+          one.
     sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 49
@@ -1233,34 +1254,96 @@ rules:
         page: 3
         cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-2B}
     examples:
-      - given: {front_yard_eaves: 12, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+      - given: {side_yard_smaller: 9, side_yard_larger: 16, front_yard_eaves: 12, side_yard_smaller_eaves: 8.5, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
         expect: pass
         note: eaves clear of every required yard
-      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+      - given: {side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
         expect: pass
         note: eaves exactly 2 ft into the front (10 − 2), narrower side (5 − 2), wider side (10 − 2) and rear (25% of 120 = 30, − 2) yards
-      - given: {front_yard_eaves: 7.99, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+      - given: {side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 7.99, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
         expect: fail
         note: an eave just over 2 ft into the 10 ft front yard
-      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 2.99, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+      - given: {side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 8, side_yard_smaller_eaves: 2.99, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
         expect: fail
         note: an eave just over 2 ft into the 5 ft side yard
-      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 7.99, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+      - given: {side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 7.99, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
         expect: fail
-      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 27.99, lot_depth: 120, building_height: 30}
+      - given: {side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 27.99, lot_depth: 120, building_height: 30}
         expect: fail
-      - given: {front_yard_eaves: 11, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 31, lot_depth: 120, building_height: 38}
+      - given: {side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 11, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 31, lot_depth: 120, building_height: 38}
         expect: pass
         note: with the height bonus every required yard grows 3 ft (§325-16C), and an eave may reach 2 ft into each
-      - given: {front_yard_eaves: 10.99, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 31, lot_depth: 120, building_height: 38}
+      - given: {side_yard_smaller: 6, side_yard_larger: 16, front_yard_eaves: 10.99, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 31, lot_depth: 120, building_height: 38}
         expect: fail
         note: the 13 ft front yard the bonus requires, less 2 ft, is 11
+      # which side carries the 10 ft minimum follows the walls (each side's eaves to its own lot line, #18's P0 fix)
+      - given: {side_yard_smaller: 9, side_yard_larger: 10, front_yard_eaves: 12, side_yard_smaller_eaves: 9, side_yard_larger_eaves: 6.5, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+        expect: fail
+        note: >-
+          walls 9 and 10 ft: only the wider side can be the 10 ft one, and its eave, 6'-6" from the line, is 3'-6" into
+          it (#21 review round 22's false pass)
+      - given: {side_yard_smaller: 12, side_yard_larger: 15, front_yard_eaves: 12, side_yard_smaller_eaves: 7, side_yard_larger_eaves: 15, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+        expect: needs_review
+        note: >-
+          walls 12 and 15 ft: either side may be the 10 ft one; the narrower side's eave (7 ft from its line) fits only
+          if that side is the 5 ft one
+      - given: {side_yard_smaller: 12, side_yard_larger: 15, front_yard_eaves: 12, side_yard_smaller_eaves: 9, side_yard_larger_eaves: 7, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+        expect: needs_review
+        note: walls 12 and 15 ft; the wider side's eave (7 ft) fits only if that side is the 5 ft one
+      - given: {side_yard_smaller: 12, side_yard_larger: 15, front_yard_eaves: 12, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 8, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+        expect: pass
+        note: both eaves 8 ft from their lines fit whichever side is the 10 ft one
+      - given: {side_yard_smaller: 12, side_yard_larger: 15, front_yard_eaves: 7.99, side_yard_smaller_eaves: 7, side_yard_larger_eaves: 15, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+        expect: fail
+        note: the front eave fails whichever side is the 10 ft one
+      - given: {side_yard_smaller: 7, side_yard_larger: 9, front_yard_eaves: 12, side_yard_smaller_eaves: 7, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+        expect: needs_review
+        note: neither side's walls are 10 ft from its line (the side yards fail); which side's eave the 10 ft limit is for is open
+      # the height bonus moves which side can carry the 10 ft minimum (40 ft: 15 and 10)
+      - given: {side_yard_smaller: 9, side_yard_larger: 12, front_yard_eaves: 20, side_yard_smaller_eaves: 9, side_yard_larger_eaves: 13, rear_yard_eaves: 48, lot_depth: 120, building_height: 40}
+        expect: needs_review
+        note: at 40 ft neither side's walls are 15 ft from the line, so either side may be the larger one; the eaves fit one way only
+      - given: {side_yard_smaller: 12, side_yard_larger: 16, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 120, building_height: 40}
+        expect: fail
+        note: at 40 ft only the 16 ft side can be the 15 ft one, and its eave (9 ft) is over 2 ft into it
+      # each figure in the which-side reviews decides an answer (worked by hand: the rear yard's 25%, its 50 ft cap,
+      # the bonus over 35 ft, the 0 ft side)
+      - given: {side_yard_smaller: 9, side_yard_larger: 9, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 3, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: needs_review
+      - given: {side_yard_smaller: 14, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {side_yard_smaller: 14, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 7.5, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {side_yard_smaller: 14, side_yard_larger: 14, front_yard_eaves: 12.5, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {side_yard_smaller: 14, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 8, rear_yard_eaves: 22.5, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {side_yard_smaller: 9, side_yard_larger: 9, front_yard_eaves: 8, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 3, rear_yard_eaves: 48, lot_depth: 300, building_height: 30}
+        expect: needs_review
+      - given: {side_yard_smaller: 3, side_yard_larger: 9, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: needs_review
+      - given: {side_yard_smaller: 9.5, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: needs_review
+      - given: {side_yard_smaller: 3, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {side_yard_smaller: 9.5, side_yard_larger: 14, front_yard_eaves: 12.5, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 23, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {side_yard_smaller: 9.5, side_yard_larger: 14, front_yard_eaves: 13, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 13, rear_yard_eaves: 22.5, lot_depth: 60, building_height: 40}
+        expect: fail
+      - given: {side_yard_smaller: 3, side_yard_larger: 9, front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 48, lot_depth: 300, building_height: 30}
+        expect: needs_review
     notes: >-
       The yards themselves (R-2b.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
       its eaves left out (the yards_to_nearest_part finding, §325-3 YARD, §325-18A); this rule measures the same
       yards to the outermost part, eaves included, and lets that be up to 2 ft less. A massing model shows eaves,
       not windowsills, belt courses or cornices: those are for the architect to check. On a corner lot every yard
       facing a street is a front yard (§325-19C).
+      Each side's eaves are measured to that side's own lot line (side_yard_smaller_eaves to the line of the narrower
+      side yard to the walls), so each eave is held to the minimum its side carries. Only a side whose walls are at
+      least the larger minimum from its line can carry it; where both can, or neither, either side may, and the
+      eaves must fit both ways, else needs review (review_when: Gordium's cautious reading, to confirm with the
+      architects; the chart says only that one side yard is at least the one number and the other at least
+      the other).
     drafted_by: claude
     status: draft
 
