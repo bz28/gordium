@@ -18,7 +18,7 @@ REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_bu
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
         "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
-        "show_context", "_context_on", "_massing_hidden"]
+        "show_context", "_context_on", "_massing_hidden", "_sync_ticks"]
 
 
 class Doc:
@@ -115,6 +115,7 @@ def _plugin(doc, said):
                                 "set_labels_tick": staticmethod(lambda parts, on: None),
                                 "set_context_tick": staticmethod(lambda parts, on: None),
                                 "set_massing_tick": staticmethod(lambda parts, on: None),
+                                "set_envelope_tick": staticmethod(lambda parts, on: None),
                                 "open_target": staticmethod(lambda path: (True, None))}),
           "_box_open": lambda: False, "run_check": lambda doc, report=False: {"report_error": "not in a test"},
           "current_facts": lambda doc: {"lot_id": "lot1", "zone": "R-1b"},
@@ -316,9 +317,11 @@ def test_every_panel_tick_is_read_again_after_undo():
     tick follows its layer."""
     import re
     ui_src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    ticks = set(re.findall(r"\ndef set_(\w+)_tick\(parts, ", ui_src)) - {"envelope"}
+    ticks = set(re.findall(r"\ndef set_(\w+)_tick\(parts, ", ui_src))
     settings = SRC[SRC.index("def _settings_from_file("):].split("\ndef ", 1)[0]
-    assert "massing" in ticks and all("ui.set_%s_tick(" % t in settings for t in ticks), (ticks, settings)
+    sync = SRC[SRC.index("def _sync_ticks("):].split("\ndef ", 1)[0]
+    assert "_sync_ticks(doc)" in settings and "massing" in ticks
+    assert all("ui.set_%s_tick(" % t in sync for t in ticks), (ticks, sync)
     doc = Doc()
     ns = _plugin(doc, [])
     ticks_set = []
