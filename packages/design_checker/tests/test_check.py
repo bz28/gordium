@@ -3744,6 +3744,31 @@ def test_the_starting_house_note_says_what_limited_it_with_its_number():
     assert fact["value"].startswith("as first drawn, the largest house that complies even if the tax-map lines")
 
 
+def test_rhino_logic_runs_without_anything_rhinos_python_lacks(monkeypatch):
+    """Rhino's own Python runs rhino_logic and has none of the .venv's packages: every check in Rhino failed with
+    "No module named 'shapely'" (envelope_outlines, Lane C in Rhino at f45c991). With shapely hidden the envelope's
+    outlines still come out, largest first (a clockwise ring too); and rhino_logic imports only the standard
+    library, anywhere in the module."""
+    import ast
+    import sys
+    for name in ("shapely", "shapely.geometry", "numpy"):
+        monkeypatch.setitem(sys.modules, name, None)            # import raises, as in Rhino
+    env = {"outline": [[0, 0], [40, 0], [40, 60], [0, 60]]}
+    small, inner = [[0, 0], [1, 0], [1, 1], [0, 1]], [[2, 2], [2, 58], [38, 58], [38, 2]]   # inner: clockwise
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small, inner]}) == [
+        inner, small]
+    big_ccw, small_cw = [[0, 0], [10, 0], [10, 10], [0, 10]], [[0, 0], [0, 1], [1, 1], [1, 0]]   # either winding
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small_cw, big_ccw]}) == [
+        big_ccw, small_cw]
+    from pathlib import Path
+    tree = ast.parse(Path(logic.__file__).read_text(encoding="utf-8"))
+    imported = {(a.name if isinstance(n, ast.Import) else n.module).split(".")[0]
+                for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom)) and not getattr(n, "level", 0)
+                for a in (n.names if isinstance(n, ast.Import) else [n])}
+    assert imported <= set(sys.stdlib_module_names), imported - set(sys.stdlib_module_names)
+    assert not [n for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.level]   # no package-relative import
+
+
 def test_on_a_tax_map_lot_the_envelope_is_drawn_on_the_cautious_outline():
     """Ben (2026-10-21): the cautious envelope on tax-map lots; on a survey the outline as drawn."""
     env = {"outline": [[0, 0], [40, 0], [40, 60], [0, 60]]}
