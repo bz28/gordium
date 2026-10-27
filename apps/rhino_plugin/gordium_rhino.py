@@ -902,7 +902,8 @@ def set_labels(on):
         say(logic.NO_DOCUMENT)
         return
     state = dict(_ui_state(doc), show_labels=bool(on))
-    _save_ui_state(doc, state)
+    with logic.undo_step(doc, logic.UNDO_WORDS["labels"]):
+        _save_ui_state(doc, state)
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(state)
     doc.Views.Redraw()
 
@@ -942,16 +943,17 @@ def pick_survey():
         return
     facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
     facts["lot_surveyed"] = True
-    saved_ui = logic.settle(_ui_state(doc), "lot")
-    _save_ui_state(doc, saved_ui)
-    left = logic.unsettled(saved_ui)
-    if left:
-        facts["unsettled"] = left
-    else:
-        facts.pop("unsettled", None)
-    _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
-    save_facts(doc, facts)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["survey"]):     # one Ctrl+Z puts it all back (asked first, outside)
+        saved_ui = logic.settle(_ui_state(doc), "lot")
+        _save_ui_state(doc, saved_ui)
+        left = logic.unsettled(saved_ui)
+        if left:
+            facts["unsettled"] = left
+        else:
+            facts.pop("unsettled", None)
+        _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
+        save_facts(doc, facts)
+        run_check(doc, report=False)
 
 
 def _grade_points(doc, finished=False):
@@ -1028,12 +1030,14 @@ def enter_rooms(needs):
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
-    save_facts(doc, logic.update_counts(facts, answers))
-    run_check(doc, report=False)
-    refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
-    if refused:                         # fewer stories than the floors drawn: the measuring refuses it, so is it
-        save_facts(doc, facts)
+    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):      # one step, a refused count put back inside it
+        save_facts(doc, logic.update_counts(facts, answers))
         run_check(doc, report=False)
+        refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
+        if refused:                     # fewer stories than the floors drawn: the measuring refuses it, so is it
+            save_facts(doc, facts)
+            run_check(doc, report=False)
+    if refused:
         say(refused)
 
 
@@ -1054,8 +1058,11 @@ def pick_main_building():
         return
     if picked:
         facts["main_building"] = picked
-        save_facts(doc, facts)
-    run_check(doc, report=False)
+        with logic.undo_step(doc, logic.UNDO_WORDS["main"]):
+            save_facts(doc, facts)
+            run_check(doc, report=False)
+    else:
+        run_check(doc, report=False)
 
 
 def add_to_check(ids):
@@ -1065,14 +1072,15 @@ def add_to_check(ids):
     if not ids:
         say("Nothing selected to add to the check: pick the objects in the row first.")
         return
-    index = _layer(doc, LAYERS["building"])
-    for i in ids or []:
-        o = _find(doc, i)
-        if o is not None:
-            attrs = o.Attributes.Duplicate()
-            attrs.LayerIndex = index
-            doc.Objects.ModifyAttributes(o, attrs, True)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["add"]):        # the Building layer made, if new, in the same step
+        index = _layer(doc, LAYERS["building"])
+        for i in ids or []:
+            o = _find(doc, i)
+            if o is not None:
+                attrs = o.Attributes.Duplicate()
+                attrs.LayerIndex = index
+                doc.Objects.ModifyAttributes(o, attrs, True)
+        run_check(doc, report=False)
 
 
 def _not_included(doc, lot):
@@ -1169,23 +1177,25 @@ def this_is_the_ground(ids):
     if not ids:
         say("Nothing selected to mark as the ground: pick the objects in the row first.")
         return
-    state = _ui_state(doc)
-    state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
-    _save_ui_state(doc, state)
-    n = len(state["ground_ids"])
-    _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
-                logic.ENTERED)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["ground"]):
+        state = _ui_state(doc)
+        state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
+        _save_ui_state(doc, state)
+        n = len(state["ground_ids"])
+        _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
+                    logic.ENTERED)
+        run_check(doc, report=False)
 
 
 def not_the_ground():
     """Undo "This is the ground": every object marked so is checked again (counted as left out until added)."""
     doc = Rhino.RhinoDoc.ActiveDoc
-    state = _ui_state(doc)
-    state.pop("ground_ids", None)
-    _save_ui_state(doc, state)
-    _set_source(doc, "ground_marked", None, None)
-    run_check(doc, report=False)
+    with logic.undo_step(doc, logic.UNDO_WORDS["not_ground"]):
+        state = _ui_state(doc)
+        state.pop("ground_ids", None)
+        _save_ui_state(doc, state)
+        _set_source(doc, "ground_marked", None, None)
+        run_check(doc, report=False)
 
 
 def _set_source(doc, key, value, source, confirmed_by="you"):
@@ -1781,7 +1791,8 @@ def hide_massing(hidden):
     if index < 0:
         say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
         return
-    doc.Layers[index].IsVisible = not hidden
+    with logic.undo_step(doc, logic.UNDO_WORDS["massing"]):
+        doc.Layers[index].IsVisible = not hidden
     doc.Views.Redraw()
 
 
