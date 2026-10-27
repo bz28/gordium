@@ -1396,8 +1396,10 @@ def _apply_box(doc, facts, state, saved_ui):
     return facts, saved_ui
 
 
-def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
-    """Each click places a spot grade; Enter or Esc when done. The ids of the points placed (none: nothing changed)."""
+def _place_spots(doc, prompt, layer_path=GRADE_LAYER, changing=lambda: None):
+    """Each click places a spot grade; Enter or Esc when done. The ids of the points placed (none: nothing changed).
+    `changing`: called before the model is first changed (the start box's undo step begins there)."""
+    changing()
     layer = _layer(doc, layer_path)
     placed = []
     while True:
@@ -1533,8 +1535,9 @@ def _recover(doc):
         say(said[0].upper() + said[1:] + ".")
 
 
-def _draw_lot(doc):
-    """Draw my lot…: click each corner (Enter closes it, Esc: nothing drawn). The new closed outline's id, or None."""
+def _draw_lot(doc, changing=lambda: None):
+    """Draw my lot…: click each corner (Enter closes it, Esc: nothing drawn). The new closed outline's id, or None.
+    `changing`: called before the model is changed (the start box's undo step begins there)."""
     corners = []
     while True:
         rc, point = Rhino.Input.RhinoGet.GetPoint(
@@ -1545,6 +1548,7 @@ def _draw_lot(doc):
         corners.append(point)
     if len(corners) < 3 or rc == Rhino.Commands.Result.Cancel:
         return None
+    changing()
     attrs = Rhino.DocObjects.ObjectAttributes()
     attrs.LayerIndex = _layer(doc, LAYERS["lot"])
     attrs.Name = "Lot · drawn by you"
@@ -1617,7 +1621,7 @@ def _pick_outcome(doc, what, facts, saved_ui, session):
         return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
                      _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
     if what == "draw_lot":                       # over the City's outline (a guide, never kept)
-        drawn = _draw_lot(doc)
+        drawn = _draw_lot(doc, session.table._changing)       # (in the box's one undo step)
         session.add([drawn])
         return drawn
     if what == "terrain":
@@ -1629,7 +1633,7 @@ def _pick_outcome(doc, what, facts, saved_ui, session):
     if what in ("spot", "regrade"):
         placed = _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
                               "Click the finished ground you'll grade to, at each wall (Enter when done)",
-                              GRADE_LAYER if what == "spot" else FINISHED_LAYER)
+                              GRADE_LAYER if what == "spot" else FINISHED_LAYER, session.table._changing)
         session.add(placed)
         return placed
     return None
@@ -1798,7 +1802,7 @@ def _lookup_done(doc, facts, saved_ui, session):
     brings them back); the architect's own lot is never touched. The City's outline is a guide on screen only."""
     answer = _lookup_poll() or {"status": "error"}
     _lookup_stop()
-    facts, saved_ui, guide = logic.apply_lookup(RhinoTable(doc), session, answer, facts, saved_ui,
+    facts, saved_ui, guide = logic.apply_lookup(session.table, session, answer, facts, saved_ui,
                                                 STATE.get("zones") or [])
     STATE.pop("lookup_guide", None)
     if guide:
@@ -2418,7 +2422,7 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-        try:                            # the Draw's undo step ends with the facts saved
+            try:                            # the Draw's undo step ends with the facts saved
             facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
             if facts is None:           # closed or Esc: nothing saved, nothing checked
                 Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")

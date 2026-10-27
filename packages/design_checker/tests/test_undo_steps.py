@@ -70,6 +70,14 @@ class Doc:
             def Delete(self, o, quiet):
                 doc.wrote("object deleted")
 
+            def AddCurve(self, curve, attrs):
+                doc.wrote("curve added")
+                return "curve"
+
+            def AddPoint(self, point, attrs):
+                doc.wrote("point added")
+                return "point"
+
             def UnselectAll(self):
                 pass                                          # selection: never an undo step in Rhino
 
@@ -186,6 +194,32 @@ def test_the_start_box_is_one_step_from_its_first_edit_to_the_facts_saved():
     assert doc.outside == [] and doc.open == [] and doc.records == [logic.UNDO_WORDS["edit_site"]]
     ns["RhinoTable"](doc).delete("x")                          # recovery's own table: never begins the box's step
     assert doc.records == [logic.UNDO_WORDS["edit_site"]] and "undo" not in ns["STATE"]
+
+
+def test_the_boxs_own_drawing_is_in_its_step_from_the_first_line():
+    """Undo steps round 3, U5: Draw my lot, spot grades and a lookup with nothing to hold wrote the model before the
+    box's step began (it began only at the session's mark): the lot drawn, or the points, left by one Ctrl+Z."""
+    doc = Doc()
+    ns = _plugin(doc, [])
+    clicks = [(1, "p1"), (1, "p2"), (1, "p3"), (0, None)]
+    result = type("Result", (), {"Success": 1, "Cancel": 2})
+    ns["Rhino"].Input = type("Input", (), {"RhinoGet": type("G", (), {"GetPoint": staticmethod(
+        lambda prompt, ok: clicks.pop(0))})})
+    ns["Rhino"].Commands = type("Commands", (), {"Result": result})
+    ns["Rhino"].DocObjects.ObjectAttributes = lambda: type("A", (), {})()
+    ns.update(rg=type("rg", (), {"PolylineCurve": lambda pts: pts}), GRADE_LAYER="Gordium::Grade")
+    for name in ("_draw_lot", "_place_spots"):
+        exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
+    table = ns["RhinoTable"](doc, logic.UNDO_WORDS["edit_site"])
+    ns["_draw_lot"](doc, table._changing)
+    clicks[:] = [(1, "q"), (0, None)]
+    ns["_place_spots"](doc, "spot", "Gordium::Grade", table._changing)
+    assert doc.outside == [] and doc.records == [logic.UNDO_WORDS["edit_site"]]
+    pick = SRC[SRC.index("def _pick_outcome("):].split("\ndef ", 1)[0]
+    assert "_draw_lot(doc, session.table._changing)" in pick and "session.table._changing)" in pick.split(
+        "_place_spots(", 1)[1]
+    done = SRC[SRC.index("def _lookup_done("):].split("\ndef ", 1)[0]
+    assert "apply_lookup(session.table," in done and "RhinoTable(doc)" not in done
 
 
 def test_a_tried_count_leaves_undo_recording_as_it_was():
