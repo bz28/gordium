@@ -23,6 +23,10 @@ in CI; the logic is tested in CI (packages/design_checker/tests/test_re_lookup.p
    surveyed lot will be replaced)") say so. Keep: the floors kept, the surveyed lot gone, 96's tax-map lot drawn
    (not marked as a survey). Undo puts the surveyed lot and the edited house back exactly; Redo, 96's lot and the
    kept house again; after each, the file's saved strings follow, nothing stale is drawn, and a re-check is owed.
+Before each re-lookup a Rhino command (_Line) runs, as there always is in Rhino between a start and a later Edit
+site…: records one script writes outside any command one after another are all taken back by one _Undo (Lane C's
+control at 59d7184), so without it the sample's own record went with the re-lookup's. Step 2 also claims the
+re-lookup's Draw is one undo record and that one Undo takes back exactly that record (by serial).
 It runs as the architect works: outside any command (started from the Script Editor or RunPythonScript, it waits
 for that command to end, then runs at the next idle, as the panel's Edit site… button runs), Undo and Redo as
 Rhino's own _Undo and _Redo commands. Rhino's undo events during the run and each Draw's undo record (its serial,
@@ -106,6 +110,20 @@ def rhino(command, at):
     ran = bool(Rhino.RhinoApp.RunScript("_" + command, False))
     log.setdefault("commands", []).append([at, command, ran])
     return ran
+
+
+def separate(doc, at):
+    """A Rhino command between two Gordium steps (_Line), as there always is in Rhino: whether it ran and drew
+    exactly one line (else the Undo claims after it could be the harness's again)."""
+    known = {o.Id for o in doc.Objects}
+    ran = rhino("Line 0,-300,0 10,-300,0", at)
+    made = [o.Id for o in doc.Objects if o.Id not in known]
+    claim(at + ": the command between ran", ran and len(made) == 1, {"ran": ran, "made": len(made)})
+
+
+def records(since, kind):
+    """The undo serials Rhino reported since event `since`: ended ("IsEndRecording") or taken back ("IsBeginUndo")."""
+    return sorted({e["serial"] for e in log["undo_events"][since:] if e[kind]})
 
 
 def saved(g, doc):
@@ -206,11 +224,16 @@ def main():
         g.gordium_check()                              # an empty file: GordiumStart, the sample drawn
         facts = g.current_facts(doc)
         sample_lot, house = facts.get("lot_id"), g.RhinoTable(doc).massing()
-        before = objects(doc)
-        said_before = saved(g, doc)
         claim("1 the sample: its lot and a starting house", g._find(doc, sample_lot) is not None and len(house) >= 2,
               {"lot": sample_lot, "house": house})
         capture(doc, "1_sample")
+        # a command between the sample and the re-lookup, as there always is in Rhino: records written one after
+        # another by one script outside any command are all taken back by one _Undo (Lane C's control at 59d7184),
+        # which took the sample's own GordiumStart record back with the re-lookup's (19ed22f: 3 floors "missing")
+        separate(doc, "1 a command between")
+        before = objects(doc)
+        said_before = saved(g, doc)
+        marks = len(log["undo_events"])
 
         # 2. a new address over what Gordium drew
         seen = edit_site(g, doc, "96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd")
@@ -239,8 +262,14 @@ def main():
               g.logic.same_address(ui_state.get("drawn_address"), "96 Ithaca Rd") and not ui_state.get("house_fingerprint"),
               {k: ui_state.get(k) for k in ("drawn_address", "house_fingerprint")})
         capture(doc, "2_drawn_96")
+        draw_records = records(marks, "IsEndRecording")
+        claim("2 the re-lookup's Draw is one undo record", len(draw_records) == 1, draw_records)
+        marks = len(log["undo_events"])
         ran = rhino("Undo", "2 undo")
         undone = objects(doc)
+        took = records(marks, "IsBeginUndo")
+        claim("2 one Undo takes back exactly that record", took == draw_records, {"undone": took,
+                                                                                  "draw": draw_records})
         claim("2 one Undo puts the sample back exactly", ran and undone == before,
               {"ran": ran, "missing": sorted(set(before) - set(undone)), "extra": sorted(set(undone) - set(before))})
         claim("2 after Undo the file says the sample again (facts, choices, sources)", saved(g, doc) == said_before,
@@ -342,8 +371,10 @@ def main():
         floor = g._find(doc, house[-1])
         moved = str(doc.Objects.Transform(floor, Rhino.Geometry.Transform.Translation(3, 0, 0), True))
         house = house[:-1] + [moved]
+        separate(doc, "5 a command between")     # (as in step 1: the start's own record apart)
         before = objects(doc)
         said_before = saved(g, doc)              # after the survey and the edit: what Undo must give back
+        marks = len(log["undo_events"])
         seen = edit_site(g, doc, "96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd", lambda fresh, keep: keep[1])
         log["step5"] = {k: v for k, v in seen.items() if k != "objects"}
         asked = seen["asked"]
@@ -365,7 +396,13 @@ def main():
               {"kept": g.RhinoTable(doc).massing(), "lot": lot.Attributes.Name if lot else None,
                "surveyed": facts.get("lot_surveyed")})
         capture(doc, "5_kept_on_96_survey_replaced")
+        draw_records = records(marks, "IsEndRecording")
+        claim("5 the re-lookup's Draw is one undo record", len(draw_records) == 1, draw_records)
+        marks = len(log["undo_events"])
         ran = rhino("Undo", "5 undo")
+        took = records(marks, "IsBeginUndo")
+        claim("5 one Undo takes back exactly that record", took == draw_records, {"undone": took,
+                                                                                  "draw": draw_records})
         undone = objects(doc)
         claim("5 one Undo puts the surveyed lot and the edited house back exactly", ran and undone == before,
               {"ran": ran, "missing": sorted(set(before) - set(undone)), "extra": sorted(set(undone) - set(before))})
