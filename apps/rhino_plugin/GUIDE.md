@@ -77,12 +77,44 @@ Move a wall, raise the roof, add a garage: the panel and the colours update (wit
 
 ## What Gordium asks you in the command line
 
+Questions come in the command line (the line at the top or bottom of Rhino). **Esc** cancels the question and
+changes nothing.
+
+Picking the street side (**Change…** on the start box):
+
 - `Click a lot line on the street` (then `(Enter when done)` once one is picked, or `(Enter keeps the blue one)`
   when it already has one). Click any piece: Gordium takes the whole street. On a corner lot, click each street once.
 - `Which street is this lot line on? (Enter leaves it unnamed)`
-- `Corner lot (two streets meet at it)?` and the other Yes/No questions: answer **Yes** or **No**. Gordium needs a
-  real answer here; a guess could pass a lot that does not comply.
-- `Click the terrain surface or mesh` (when you set the ground from terrain).
+- When Gordium cannot tell whether the lot line bends along one street or turns a corner it asks a **Yes** or
+  **No** question. It needs a real answer: Enter asks again, because a guess could pass a lot that does not comply.
+
+Picking other things:
+
+- `Click the surveyed lot outline (Site layer); Enter keeps the one outlined` (**Pick survey lot lines…**)
+- `Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it` and
+  `Click the lot outline (a closed curve on the Site layer), or choose one; Enter keeps it`
+- `Click the main building (a solid on the Building layer), or choose one; Enter keeps it`
+- `Click the terrain surface or mesh`
+- `Click a spot grade at a wall (Enter when done)` and
+  `Click the finished ground you'll grade to, at each wall (Enter when done)`
+
+`GordiumFacts` asks one question per fact; Enter keeps what is there:
+
+- `Zone (`, the districts Gordium knows, `)`
+- `Corner lot (two streets meet at it)?`, `Is the ground flat?`, `Ground level (z, in model units)` and
+  `Is the lot outline from a survey?`
+
+A row's **Enter** button (for example "Enter bedrooms and parking spaces") asks the facts that row waits for, one
+at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, and
+`Made by converting an existing building, not new construction? (§325-3B)`. Each ends with `(Enter to skip)`:
+skipping leaves the fact unset, so its rule keeps waiting (never 0 or No).
+
+## Not shown in this version
+
+Two parts of the start box exist in the code but are switched off while the ground is assumed flat: the **Ground**
+row (**Place spot grades…**, **Pick terrain…**, **I'll regrade: set finished ground…**, and the tick **No
+regrading near the house**) and the **Advanced** section with **Design buffer**. They will be described here when
+they come back.
 
 ## What "Needs review" means
 

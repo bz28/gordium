@@ -22,8 +22,12 @@ def test_every_button_and_tick_box_in_the_ui_is_in_the_guide():
     names |= set(re.findall(r'\(\w+, "([^"]+…?)", (?:True|not state)', LOGIC))          # the start box's row actions
     names |= {"Draw", "Check", "Cancel"}
     names = {n.strip() for n in names} - {"Gordium", ""}
-    missing = sorted(n for n in names if n not in GUIDE)
-    assert not missing, "buttons/tick boxes in the code but not in GUIDE.md: %s" % missing
+    assert all('"%s"' % n in UI for n in ("Draw", "Check", "Cancel"))
+    names |= {t for t in re.findall(r'"tick": \("([^"]+)"', LOGIC)} | set(re.findall(r'\("\w+", "([^"]+…)"\)', LOGIC))
+    names |= {"Advanced", "Design buffer"}
+    bold = _bold(GUIDE)
+    missing = sorted(n for n in names if n not in bold)       # as a bold name: a word elsewhere in the prose is not it
+    assert not missing, "buttons/tick boxes in the code but not shown in bold in GUIDE.md: %s" % missing
 
 
 def test_the_start_box_rows_options_and_tick_are_in_the_guide():
@@ -59,3 +63,13 @@ def test_the_command_line_prompts_in_the_guide_are_the_codes():
         assert p.split(" (")[0] in CODE, p
     assert "(Enter when done)" in GUIDE and "(Enter when done)" in RHINO
     assert "(Enter keeps the blue one)" in GUIDE and "(Enter keeps the blue one)" in RHINO
+
+
+def test_every_fixed_command_line_prompt_in_the_code_is_in_the_guide():
+    """The other way: a prompt added to (or reworded in) the code and not in the guide fails here."""
+    calls = r'(?:_pick\(doc, |_yes_no\(|_place_spots\(doc, |SetCommandPrompt\(|GetNumber\(|RhinoGet\.GetPoint\()'
+    code = re.findall(calls + r'"([^"]+)"', RHINO)
+    code += [v[0] for v in re.findall(r'\("([^"]+)", "(?:count|yes_no)"', LOGIC) if v]
+    assert len(code) >= 10
+    missing = sorted({c.split(" (Enter to skip)")[0] for c in code if c.split(" (Enter")[0] not in GUIDE and c not in GUIDE})
+    assert not missing, "command-line prompts in the code but not in GUIDE.md: %s" % missing
