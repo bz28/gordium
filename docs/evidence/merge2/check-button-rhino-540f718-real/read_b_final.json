@@ -1,0 +1,83 @@
+{
+ "doc": "real_Large_Objects_-_Feet.3dm",
+ "count": 5,
+ "layers_vis": {
+  "Gordium::Massing": true
+ },
+ "curves": 2,
+ "names": [
+  "Floor 1",
+  "Floor 2",
+  "Floor 3",
+  "Lot \u00b7 106 Ithaca Rd \u00b7 from the State tax map (parcel 84.-2-6), each line \u00b12'-0\", not a survey",
+  "None"
+ ],
+ "labels_on": false,
+ "labels_by_doc": {
+  "268435531": false,
+  "268435530": true,
+  "268435532": false
+ },
+ "check_header": "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+ "check_items": [
+  [
+   "Use",
+   "complies"
+  ],
+  [
+   "Lot area",
+   "complies"
+  ],
+  [
+   "Lot width",
+   "complies"
+  ],
+  [
+   "Stories",
+   "complies"
+  ],
+  [
+   "Building height",
+   "complies"
+  ],
+  [
+   "Lot coverage",
+   "complies"
+  ],
+  [
+   "Front yard",
+   "complies"
+  ],
+  [
+   "Side yard, Northeast",
+   "complies"
+  ],
+  [
+   "Side yard, Southwest",
+   "complies"
+  ],
+  [
+   "Rear yard",
+   "needs_review"
+  ],
+  [
+   "Parking \u00b7 needs input",
+   "not_checked"
+  ],
+  [
+   "Overlays \u00b7 not in this release",
+   "not_checked"
+  ],
+  [
+   "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+   "not_checked"
+  ],
+  [
+   "\u00a7325-18 Projections into yards (porches, decks, eaves)",
+   "not_checked"
+  ]
+ ],
+ "dirty": 1793096431.755855,
+ "ui_auto_check": null,
+ "ui_labels": null
+}
