@@ -429,16 +429,25 @@ def answer_problem(kind, text):
 QUESTION_WIDTH = 360
 
 
+TEXT_PX = 6.0      # px a character at size 12, a little over the system font's (~5.5 measured in Rhino): errs wide
+
+
+def text_wider(text, size, px):
+    """Whether `text` at `size` (13 when not set) runs wider than `px` on one line (by TEXT_PX), so its label wraps."""
+    return len(text or "") * TEXT_PX * (size or 13) / 12 > px
+
+
 def answers_note(entries):
-    """The one line under the box's questions, for `entries` [(key, kind, text)] in the order asked: FOLLOW_UP_HELP,
-    or the first entry not kept, named by its fact ("rooms let for profit: Not kept: …"), so it is said at once and
+    """The note under the box's questions, for `entries` [(key, kind, text)] in the order asked: FOLLOW_UP_HELP, or
+    every entry not kept, each named by its fact ("Rooms let for profit: Not kept: …"), so each is said at once and
     never read as 0. Returns (text, refused)."""
+    said = []
     for key, kind, text in entries:
         problem = answer_problem(kind, text)
         if problem:
-            name = STATED_FACTS[key][2] if key in STATED_FACTS else key
-            return f"{name[0].upper() + name[1:]}: {problem}", True
-    return FOLLOW_UP_HELP, False
+            name = STATED_FACTS[key][2] if key in STATED_FACTS else key.replace("_", " ")
+            said.append(f"{name[0].upper() + name[1:]}: {problem}")
+    return (" ".join(said), True) if said else (FOLLOW_UP_HELP, False)
 
 
 def needs_of(names, values):

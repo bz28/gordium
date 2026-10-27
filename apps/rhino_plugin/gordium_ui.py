@@ -884,6 +884,10 @@ def start_box(state, options, mode):
 
     use.SelectedIndexChanged += logic.guard(use_changed, "pick the use")
     cancel = button("Cancel", lambda: done(None))
+
+    def fit(text, room, **kw):        # a label that wraps at `room` px when its text is wider (logic.text_wider)
+        return label(text, width=room if logic.text_wider(text, kw.get("size"), room) else None, **kw)
+
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
     for r in logic.box_rows(state):
@@ -904,10 +908,10 @@ def start_box(state, options, mode):
                 matches.SelectedIndexChanged += logic.guard(matched, "pick the address")
                 layout.AddRow(None, row(matches))
             if r.get("status"):            # Looking up 106 Ithaca Rd… (the box stays usable; Cancel works)
-                layout.AddRow(None, row(label(r["status"], size=11)))
+                layout.AddRow(None, row(fit(r["status"], 560, size=11)))
         elif key == "zone":
             confirm.Text = r["tick"][0]
-            zone_row["source"] = label(r["text"].split(" · ", 1)[-1], size=11)
+            zone_row["source"] = fit(r["text"].split(" · ", 1)[-1], 260, size=11)
             layout.AddRow(title, row(zone, zone_row["source"], confirm))
         elif key == "use":
             layout.AddRow(title, use)
@@ -941,17 +945,17 @@ def start_box(state, options, mode):
             if questions:
                 layout.AddRow(None, row(note))
         elif key == "ground":
-            layout.AddRow(title, row(label(r["text"], size=12)))          # left aligned, as the others
+            layout.AddRow(title, row(fit(r["text"], 560, size=12)))          # left aligned, as the others
             layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             regrade.Text = r["tick"][0]
             layout.AddRow(None, regrade)
         else:                          # lot, street side: what it is, and the one way to change it
-            layout.AddRow(title, row(label(r["text"], size=12),
+            layout.AddRow(title, row(fit(r["text"], 360, size=12),
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             if r.get("help"):          # what that row is, in a sentence (the front lot line's)
                 layout.AddRow(None, row(label(r["help"], size=11, width=560)))
             if r.get("choice"):        # the street side's question: Corner lot?
-                layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
+                layout.AddRow(None, row(fit(r["choice"][0], 300, size=12), corner))
         if r.get("review"):            # a looked-up fact found doubtful: why, in amber, and I checked this
             layout.AddRow(None, row(label(r["review"], eto_status_color("needs_review"), size=11, width=560)))
         if r.get("check"):

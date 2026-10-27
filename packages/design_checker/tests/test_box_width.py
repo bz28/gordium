@@ -175,7 +175,7 @@ def width(c):
         return 100
     if kind == "Expander":
         return max(width(c.__dict__.get("Header")), width(c.__dict__.get("Content")))
-    return 0
+    raise AssertionError(f"no width for a {kind}: add it to width() (a control sized 0 could hide a wide box)")
 
 
 def box_width(layout):
@@ -248,17 +248,46 @@ def test_every_district_and_use_fits_a_laptop(ui):
     assert widest[0] <= LAPTOP_PX, widest
 
 
-def test_the_bound_is_not_loose():
-    """The model sizes the one-line question the 2c0a5c0 box had at its measured width or wider (so a box this test
-    passes is no wider in Rhino): that box's widest row was R-1b's unrelated-persons question on one line (size 12)
-    with a 60 px field and the help note (size 11) beside it, measured 1,563 px."""
-    text = LONG_QUESTIONS[0][2]
-    modelled = 2 * PADDING + _text_px(text, 12) + SPACING + 60 + 6 + _text_px(logic.FOLLOW_UP_HELP, 11)
-    assert modelled >= 1563
+def test_the_model_sizes_the_old_box_at_its_measured_width_or_wider(ui):
+    """The 2c0a5c0 box's widest row, built as it was laid out (R-1b's unrelated-persons question unwrapped in the first
+    column, a 60 px field and the help note beside it) and sized by width() / box_width: at least the 1,563 px Rhino
+    measured, so a box this model passes is no wider in Rhino."""
+    gordium_ui, _ = ui
+    field = gordium_ui.ef.TextBox()
+    field.Width = 60
+    layout = gordium_ui.ef.DynamicLayout()
+    layout.AddRow(gordium_ui.label(LONG_QUESTIONS[0][2], size=12),
+                  gordium_ui.row(field, gordium_ui.label(logic.FOLLOW_UP_HELP, size=11)))
+    assert box_width(layout)[0] >= 1563
 
 
-def test_a_refused_entry_is_named_in_the_one_note():
+def test_long_text_in_every_other_row_still_fits(ui, monkeypatch):
+    """Every row's own text made long (a lookup's status, the district's source, the lot, the street, the ground,
+    a review line, the corner question): each wraps, the box stays <= LAPTOP_PX."""
+    long = "a long line of words the box shows, " * 8
+    rows = [{"key": "address", "label": "Address", "text": "106", "actions": [("lookup", "Look up", True)],
+             "matches": ["106 Ithaca Rd, Ithaca, NY 14850"], "status": long, "review": long, "check": ("I checked this", False)},
+            {"key": "zone", "label": "Zoning district", "text": "R-1b · " + long, "tick": ("This is the lot's district",
+                                                                                          False), "review": long},
+            {"key": "use", "label": "Use", "text": "x"},
+            {"key": "lot", "label": "Lot", "text": long, "actions": [("lot", "Change…", True), ("survey", "Use my "
+                                                                                             "survey…", True)]},
+            {"key": "street", "label": logic.STREET_LABEL, "help": long, "text": long, "actions": [("street",
+                                                                                                "Change…", True)],
+             "choice": (long, logic.CORNER_CHOICES, 0)},
+            {"key": "ground", "label": "Ground", "text": long, "actions": [("ground", "Change…", True)],
+             "tick": (long[:40], False)}]
+    gordium_ui, _ = ui
+    monkeypatch.setattr(gordium_ui.logic, "box_rows", lambda state: rows)
+    state = dict(_state("R-1b", "one_family_detached", _questions(LONG_QUESTIONS)), use_note=long)
+    px, layout = laid_out(ui, state, check.options(CITY))
+    assert long in texts(layout) and px <= LAPTOP_PX, px
+
+
+def test_each_refused_entry_is_named_in_the_one_note():
     assert logic.answers_note([]) == (logic.FOLLOW_UP_HELP, False)
     assert logic.answers_note([("dwelling_units", "count", "4"), ("rooms_let_for_profit", "count", "lots")]) == (
         "Rooms let for profit: Not kept: a whole number, 0 or more. Its rules need review until it is.", True)
+    both = logic.answers_note([("dwelling_units", "count", "x"), ("rooms_let_for_profit", "count", "lots")])[0]
+    assert both.startswith("Dwelling units: Not kept") and "Rooms let for profit: Not kept" in both
     assert logic.answers_note([("dwelling_units", "count", "")]) == (logic.FOLLOW_UP_HELP, False)
