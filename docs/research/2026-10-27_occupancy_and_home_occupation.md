@@ -56,14 +56,18 @@ permitted if the dwelling is owner-occupied." OWNER (p.16-17): an owner of recor
 residence in property for more than six months of each calendar year". Gordium asks `owner_occupied` (yes / no);
 blank, a household of two unrelated people needs review.
 
-**With an accessory dwelling unit — B.** If the owner lives only in an ADU on the lot, is the one-family dwelling
-"owner-occupied"? The sentence says "if the dwelling is owner-occupied"; a one-family dwelling is "A dwelling unit"
-(p.7) and an ADU is "a smaller, secondary dwelling unit" of its own (p.4); OWNER defines who the owner is
-("principal residence in property"), not which unit; §325-28 (ADUs, p.71-72) sets no owner-occupancy rule. Gordium's
-reading: the owner must live in the dwelling unit with the unrelated people. The question is asked that way ("this
-dwelling unit, the one with the unrelated people, not only an accessory dwelling unit"), so a yes is right under every
-reading and an owner living only in the ADU answers no (the limit of one: at worst a false fail, never a false pass).
-To confirm with the architects.
+**With an accessory dwelling unit — C (open question for the architects, questions page §5.16).** If an ADU is on the
+lot, which unit must the owner live in for the one-family dwelling to be "owner-occupied"? The sentence says "if the
+dwelling is owner-occupied"; a one-family dwelling is "A dwelling unit" (p.7), an ADU "a smaller, secondary dwelling
+unit" of its own (p.4), and PRIMARY RESIDENCE is "A dwelling unit where the owner ... resides" (p.17): the house itself.
+But DWELLING is "Any building or structure or part thereof used and occupied for human habitation" (p.7), and OWNER
+says "principal residence in property" (p.16): the property. §325-28 (ADUs, p.71-72, added 2025) sets no
+owner-occupancy or occupancy rule, and the one-family limits predate ADUs, so whether they reach the ADU's own
+occupants is open too. Searched: the definitions named, §325-28, a web search on 2026-10-27 (no City record).
+Gordium asks whether the owner lives in the one-family dwelling itself (not only in an ADU) and whether an ADU is on
+the lot (`accessory_dwelling_unit`); two unrelated people with the owner in the house need review when an ADU is on
+the lot or that isn't said, and comply only when there is none (review of #38: a single owner answer for the whole
+lot could otherwise pass a house whose ADU holds the unrelated people).
 
 ## 4. RU's limit — B
 

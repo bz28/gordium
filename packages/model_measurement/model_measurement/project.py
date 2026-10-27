@@ -19,7 +19,7 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "dwelling_units", "rooms_let_for_profit", "conversion", "occupants",
                "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district",
                "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
-               "home_occupation", "home_occupation_area", "home_occupation_unit_area",
+               "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 # the unrelated people counted with the minor dependent children can't be fewer than without them: the measuring's
@@ -78,7 +78,7 @@ def fact_problems(facts: dict) -> list[str]:
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
             problems.append(f"{k} must be a whole number, 1 or more")
     for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district",
-              "owner_occupied", "functional_family_unit", "home_occupation"):
+              "owner_occupied", "functional_family_unit", "home_occupation", "accessory_dwelling_unit"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")

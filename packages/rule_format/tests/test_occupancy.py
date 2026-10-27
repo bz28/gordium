@@ -11,7 +11,8 @@ from rule_format.rulebook import REPO, Context, load, outcome, rulebook_for
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 DISTRICTS = ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "RU"]
 USES = {"use": Context.for_jurisdiction(ITHACA).uses}
-HOUSEHOLD = ("unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit")
+HOUSEHOLD = ("unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
+             "accessory_dwelling_unit")
 HOME = ("home_occupation", "home_occupation_area", "home_occupation_unit_area")
 
 
@@ -40,7 +41,7 @@ def test_the_one_family_limit_each_district_sets(district):
     assert one_family(district, **{n: limit + 1}, **owner, functional_family_unit=False) == "fail"
     assert one_family(district, **{n: limit + 1}, **owner, functional_family_unit=True) == "needs_review"
     if district.startswith("R-1"):                    # two if owner-occupied, never three
-        assert one_family(district, **{n: 2}, owner_occupied=True) == "pass"
+        assert one_family(district, **{n: 2}, owner_occupied=True, accessory_dwelling_unit=False) == "pass"
         assert one_family(district, **{n: 3}, owner_occupied=True, functional_family_unit=False) == "fail"
 
 
@@ -197,17 +198,22 @@ def test_a_floor_area_is_kept_as_typed_never_rounded():
     assert '_square_feet(prompt) if kind == "area"' in rhino and "def _square_feet(prompt):" in rhino and "Rhino.Input.Custom.GetNumber()" in rhino
 
 
-def test_the_owner_question_is_about_this_dwelling_unit_never_an_accessory_one():
-    """#38 review (the split item, resolved): "if the dwelling is owner-occupied", a one-family dwelling being "A
-    dwelling unit" and an ADU a "secondary dwelling unit" of its own. Asked about the unit with the unrelated people,
-    so an owner living only in an ADU answers no (the limit of one): yes is right under every reading."""
+def test_the_owner_question_is_about_the_house_and_an_adu_on_the_lot_needs_review():
+    """#38 review (the split item, resolved): "if the dwelling is owner-occupied" reads two ways once an ADU is on the
+    lot (the house itself, or anywhere on the property; and whether the ADU's own occupants are limited): an open
+    question for the architects. Two unrelated people with the owner said to live in the house: complies only with no
+    ADU on the lot; with one, or not said, needs review (the owner answering yes for the whole lot can't pass)."""
     from design_checker import rhino_logic as logic
     from rule_format.rulebook import MEASURES_FILE
     prompt = logic.STATED_FACTS["owner_occupied"][0]
-    assert "this dwelling unit" in prompt and "not only in an accessory dwelling unit" in prompt
+    assert "the one-family dwelling itself" in prompt and "not only in an accessory dwelling unit" in prompt
     assert "only in an accessory dwelling unit on the lot is a no" in MEASURES_FILE.read_text(encoding="utf-8")
     for d in ("R-1a", "R-1b"):
-        f = next(f for f in rule(d, "occupancy_one_family")["findings"] if f["id"] == "owner_lives_in_this_unit")
-        assert f["kind"] == "reading" and f["confirm_with"] == "the architects"
-    # an owner only in the ADU: no, so 2 unrelated in the house does not comply (never the pass "yes" would give)
-    assert one_family("R-1b", unrelated_persons=2, owner_occupied=False, functional_family_unit=False) == "fail"
+        r = rule(d, "occupancy_one_family")
+        f = next(f for f in r["findings"] if f["id"] == "owner_lives_in_this_unit")
+        assert f["kind"] == "reading" and f["strength"] == "moderate" and f["still_open"] == ["R-1a.occupancy_one_family#1", "R-1b.occupancy_one_family#1"]
+        two = {"use": "one_family_detached", "unrelated_persons": 2, "owner_occupied": True}
+        assert outcome(r, {**two, "accessory_dwelling_unit": False}, USES) == "pass"
+        assert outcome(r, {**two, "accessory_dwelling_unit": True}, USES) == "needs_review"
+        assert outcome(r, two, USES) == "needs_review"
+        assert outcome(r, {**two, "unrelated_persons": 1}, USES) == "pass"          # one: the ADU doesn't matter

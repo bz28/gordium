@@ -2262,7 +2262,7 @@ rules:
         page: 7
         lines: [25, 25]
         quote: "occupied by a group of four or more unrelated persons"
-      still_open: [R-3aa.occupancy_two_family#1]
+      still_open: [R-2a.occupancy_two_family#1, R-2b.occupancy_two_family#1, R-2c.occupancy_two_family#1, R-3a.occupancy_two_family#1, R-3aa.occupancy_two_family#1, R-3b.occupancy_two_family#1, RU.occupancy_two_family#1]
       strength: strong
       confirm_with: the architects
       report: docs/research/2026-10-27_occupancy_and_home_occupation.md §6.2
