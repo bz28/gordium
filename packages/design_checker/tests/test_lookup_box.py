@@ -1073,7 +1073,7 @@ def test_every_tick_row_is_greyed_while_a_box_is_open():
     ticks = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
                  and any(isinstance(t, ast.Name) and t.id == "ticks" for t in n.targets))
     boxes = [ast.unparse(e.args[0]) for e in ticks.elts]
-    assert boxes == ["_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)"]
+    assert boxes == ["_envelope_box(actions, parts)", "_massing_box(actions, parts)", "_labels_box(actions, parts)"]
     greyed = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
                   and any(ast.unparse(t) == "parts['greyed']" for t in n.targets))
     assert any(isinstance(e, ast.Starred) and ast.unparse(e.value) == "ticks" for e in greyed.elts)
