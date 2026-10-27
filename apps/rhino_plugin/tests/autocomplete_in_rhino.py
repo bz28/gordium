@@ -72,8 +72,18 @@ def fresh_module():
     return gordium_rhino
 
 
+REDRAWN = "Gordium::Envelope"   # what each check redraws with new ids (#34's snap curves): never the model's own
+
+
 def objects(doc):
-    return {str(o.Id): doc.Layers[o.Attributes.LayerIndex].FullPath for o in doc.Objects}
+    """The model's objects by id and layer, without what every check redraws (REDRAWN): counting those, "the model
+    unchanged" failed on a check with nothing changed (demo 2c0a5c0 run)."""
+    out = {}
+    for o in doc.Objects:
+        path = doc.Layers[o.Attributes.LayerIndex].FullPath
+        if path != REDRAWN and not path.startswith(REDRAWN + "::"):
+            out[str(o.Id)] = path
+    return out
 
 
 class Script:
