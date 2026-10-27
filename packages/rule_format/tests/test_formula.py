@@ -311,7 +311,7 @@ def _random_formula(rnd, depth, want="bool"):
     return rnd.choice(shapes[want])()
 
 
-_YES_NO = []                    # yes/no measures, where the language has them (none here)
+_YES_NO = ["y"]                 # a yes/no measure (this PR's kind), missing or either value
 _KINDS = {"a": "number", "b": "number", "u": frozenset({"x", "z"}), "v": frozenset({"w", "x"})}
 _TEXT_VALUES = {"u": ["x", "z"], "v": ["w", "x"]}
 

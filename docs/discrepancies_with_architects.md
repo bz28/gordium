@@ -1,5 +1,9 @@
 # Where our findings differ from the architects'
 
+**Purpose:** where Gordium's reading of the law differs from the architects' hand-worked 106 Ithaca Rd example, ranked by whether it changes a result.\
+**For:** the architects and Ben.\
+**Kept current by:** whoever finds or resolves a difference, in that same PR.
+
 Their worked example: a new single-family house at **106 Ithaca Road (R-1b)**, received 2026-10-17 (workflow doc, links doc, spreadsheet, Rhino model).
 Checked by us on 2026-10-19 against the official sources in `regulations/jurisdictions/new_york/ithaca_city/1_source_documents/` and the City's GIS records.
 
@@ -15,7 +19,7 @@ Checked by us on 2026-10-19 against the official sources in `regulations/jurisdi
 
 | | Architects | Official / us | Severity |
 |---|---|---|---|
-| Lot area | 6,674.7 sf | ~7,034 sf (City tax parcel) | 🟡 Coverage limit depends on it (25% = 1,669 vs 1,759 sf). A survey would settle it. |
+| Lot area | 6,674.5 sf as drawn (6,674 in the spreadsheet) | ~7,034 sf (City tax parcel) | 🟡 Coverage limit depends on it (25% = 1,669 vs 1,759 sf). A survey would settle it. |
 | Street edge | One straight 73 ft line | Curved | 🟡 Affects front yard and lot area |
 | Spreadsheet lot | 73 × 90 ft rectangle | Irregular 5-sided lot | 🟡 Yards and depth are approximations |
 
@@ -43,17 +47,31 @@ Checked by us on 2026-10-19 against the official sources in `regulations/jurisdi
 | # | Issue | Severity |
 |---|---|---|
 | 4.1 | **The building is ~76 ft away from the buildable area.** All four of its corners are outside the lot. | 🔴 |
-| 4.2 | **Rear setback drawn at 20 ft, but the rule requires ~22.6–24.8 ft** (25% of a lot depth of 90.3–99.4 ft, never less than 20). The buildable area is too deep. | 🔴 |
+| 4.2 | **Rear setback drawn at 20 ft; most readings of the side lot lines require more (23.7 or 25.015 ft).** The code takes 25% of the *average* of the two side lot lines when they differ (Chapter 325 §325-8A(14)(a), p.25). If the 90.28 and 99.37 ft lines are the side lot lines: (90.28 + 99.37) / 2 = 94.8 ft → **23.7 ft**. Most readings of this 5-sided lot need more than 20 ft: 23.7 ft as above, or 25.015 ft if the jog is added to the 99.37 ft line it continues ((90.28 + 109.84) / 2 = 100.06 ft). Only averaging all three lines that aren't front or rear ((90.28 + 10.47 + 99.37) / 3 = 66.7 ft) gives the 20 ft minimum. So 20 ft fails under most readings, not all. (Which lines count as "side lot lines" is an open question.) | 🔴 |
 | 4.3 | **The building fills the whole buildable area** (2,169 sf ≈ 32.5% of the lot), over the 25% coverage limit. | 🔴 |
 | 4.4 | The building is ~53 × 41 ft. The spreadsheet's house is 53 × 35 ft. | 🟡 |
 | 4.5 | The buildable-area outline is on the "Site" layer, not "Setback". | ⚪ |
 | 4.6 | Front setback drawn at 30 ft (the minimum is 25 ft). That's allowed, just stricter than needed. Intended? | ⚪ |
 
+**Confirmed by measuring the model with code (PR 11, `packages/model_measurement/tests/test_models.py`).** As sent, the house solid is outside the lot, so Gordium measures the lot (6,674.5 sf, 73.0 ft frontage) and the height (35 ft) but gives no yards (4.1). With the solid moved onto its own outline on the Site layer (an exact copy, shifted by 48.68 ft and 58.78 ft):
+
+| Measure | Their spreadsheet | Their model, measured | Why they differ |
+|---|---|---|---|
+| Lot width | 73 | 73.0 | same |
+| Front yard | 30 | 30.0 | same |
+| Side yards | 10 / 10 | 10.0 / 10.0 | same |
+| Height | 35 | 35.0 | same |
+| Building area | 1,855 sf (53 × 35) | 2,169.2 sf | the model's house is about 53.3–53.6 × 40.4–40.8 ft, not quite rectangular (4.4) |
+| Rear yard | 25 ft | 20.0 ft | the model's deeper house; 20 ft is the spreadsheet's unused "Back offset" input (2.2) |
+| Lot depth | 90 ft | no single value: 94.82 ft (the jog as a rear lot line) or 100.06 ft (as a side lot line) | §325-8A(14)(a) averages the two side lot lines; 90 ft is neither reading (4.2) |
+
+With those numbers the R-1b results agree with the spreadsheet on 7 of its 11 rows. The other four are NEEDS REVIEW: rear yard and height (both use the lot depth) until the architects say which lines are the side lot lines, and lot size and coverage (both use the lot area) because the model's lot is drawn from the City's map, not a survey. Under either reading the model's 20 ft rear yard is short (23.7 or 25.0 ft required).
+
 ## 5. The workflow document
 
 | # | Issue | Severity |
 |---|---|---|
-| 5.1 | Says 73 × 90 = 6,675 sf; it's 6,570. (6,674.7 is the real irregular lot.) | ⚪ |
+| 5.1 | Says 73 × 90 = 6,675 sf; it's 6,570. (The irregular lot as drawn is 6,674.5 sf.) | ⚪ |
 | 5.2 | Front offset 25 ft in the doc, 30 ft in the spreadsheet and model. | ⚪ |
 | 5.3 | Step 8 switches to a different lot (60 × 120 ft). | ⚪ |
 | 5.4 | Steps 6 and 9 are missing; step 11 is unfinished. | ⚪ |

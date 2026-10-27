@@ -8,7 +8,7 @@ The shape every rule must have, the formula language rules are written in, and t
 - id: R-1b.rear_yard                 # district + short name
   kind: rule                         # rule: code checks it · flag: an architect must judge it
   topic: dimensions                  # from regulations/document_extraction_guide/vocabulary.yaml
-  says: Rear yard at least 25% of lot depth or 50 ft, whichever is less, never under 20 ft.
+  title: Rear yard minimum (chart p.3, note 16)   # a one-line label (≤ 80 chars), not a retelling
   applies_when: use == "one_family_detached"     # optional; otherwise applies to everything
   check: rear_yard >= max(min(0.25 * lot_depth, 50), 20)
   review_when:                                   # optional; true -> "needs review"
@@ -25,8 +25,10 @@ The shape every rule must have, the formula language rules are written in, and t
       expect: pass
     - given: {use: one_family_detached, rear_yard: 21, lot_depth: 90}
       expect: fail
+  notes: 106 Ithaca Rd needs 23.7 ft            # optional explanation; never used to decide a result
   drafted_by: claude
   open_questions: []                             # interpretations for the architects; none allowed once approved
+  answers: []                                    # architects' answers: {question, answer, answered_by, answered_on}
   status: draft                                  # approved also needs approved_by, approved_on, approved_hash
 ```
 
@@ -46,11 +48,12 @@ Fails closed: `outcome(rule, values, allowed)` requires the city's allowed text 
 ## Checking rule files
 
 ```bash
-python -m rule_format       # validates every jurisdiction's 5_zoning_rules/ and answer keys
+python -m rule_format       # validates every jurisdiction's sources, 4_term_definitions/ (definitions.yaml,
+                            # uses.yaml), 5_zoning_rules/ and test_data/answer_keys/
 pytest packages/rule_format
 ```
 
-Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version (once the text-extraction step is merged, CI also re-extracts the text from the PDF and requires an exact match, so it can't be hand-edited); every quote found exactly on its cited lines as whole tokens (see below); at least one passing and one failing worked example, each giving its expected outcome, with values of the right kind; `open_questions` a list of text, and empty before approval; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a date, with `approved_hash` matching the rule's current content, id and the fingerprints of the documents it cites (`rulebook.approval_hash`), so any edit, move, or replaced source document after approval needs re-approval. A file's `district` must match its file name. (The hash catches later edits; it doesn't prove who approved: see `docs/how_rules_are_checked.md`.)
+Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version (CI also re-extracts the text from the PDF with `python -m document_extraction --check` and requires an exact match, so it can't be hand-edited); every quote found exactly on its cited lines as whole tokens (see below); at least one passing and one failing worked example, each giving its expected outcome, with values of the right kind; a `title` of one line and at most 80 characters (a label, not a retelling); `open_questions` a list of text, and empty before approval; `answers` each with question, answer, answered_by (a reviewer) and answered_on (a date), and part of the approval fingerprint; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a date, with `approved_hash` matching the rule's current content, id and the fingerprints of the documents it cites (`rulebook.approval_hash`), so any edit, move, or replaced source document after approval needs re-approval. A file's `district` must match its file name. (The hash catches later edits; it doesn't prove who approved: see `docs/how_rules_are_checked.md`.)
 
 Architect approval is deferred for now (decided 2026-10-19): rules stay `status: draft` and are used once every other check passes. The approval checks above apply when approval is switched on.
 
@@ -60,4 +63,12 @@ The page text and the quote are both split into **tokens** with one rule (`ruleb
 
 A source gives the **exact position** of its quote: the page and the first and last line (`lines: [first, last]`, the line numbers in `2_extracted_text`). The quote must start on the first line and end on the last, so it can't be matched anywhere else on the page. The quote must occur only once on the page, so a citation points at one place: a bare `35 ft` on a chart row is rejected; quote the row label too (`Height in feet 35 ft 35 ft`). One quote is one unbroken passage; cite separate passages as separate sources. To find the lines, run `python -m rule_format cite <state/place> <file> <page> "<quote>"`.
 
-Chart values: a quote pins the **row** (its line) but not yet the **column**. Until the chart reader (step 5, next PRs) cites table cells by row and column, a value read from the wrong district's column is caught by comparing the hand-written answer key with the chart reader's output (architect review is deferred for now).
+Definitions (`4_term_definitions/definitions.yaml`) have `term`, `measures`, `sources` (the city's whole sentences, no paraphrase), `open_questions`, and once an architect answers a question, `answers`: `{question, answer, answered_by (a reviewer), answered_on}`. The answers are part of the approval fingerprint, so an answer can't change after approval. Use names (`uses.yaml`) have `name` and `sources`.
+
+Section labels (`3_section_labels/<document>.yaml`, see `rule_format/labels.py`) are checked the same way: a label from the vocabulary, a known topic, a reason, a quote that is the city's words **inside its piece**, a fingerprint of the piece as labeled (re-cut or new PDF → label again), and the usual draft/approval rules.
+
+Chart values: a quote pins the **row** (its line) but not the **column**. A source can instead cite one **chart cell**: `{file, page, cell: {section, row, column}}`, checked against the chart reader's cells (`2_extracted_text/*.cells.jsonl`; a part of a table the reader couldn't read with certainty can never be cited). A cited cell counts as citing its row's lines (so it satisfies the use-row check). The drafting script cites cells; a value read from the wrong district's column in a hand-drafted rule is caught by comparing it with the reader's cells (`packages/document_extraction/tests/test_r1b_matches_chart.py`) (architect review is deferred for now).
+
+Numbers: every number in a formula (`check`, `applies_when`, `review_when`) must be written in one of the rule's own sources: a cited quote, or a cited cell or its row label. "25%" supports 0.25, number words count ("three"), footnote markers don't, and 0 needs no source. A worked-out number is written as the arithmetic from cited inputs (`35 + 0.1 * 35`, not 38.5).
+
+Yes/no measures: a measure with unit `yes_no` is a true/false fact from the model ("the accessory dwelling unit has a separate entrance"); a formula may be just its name (`adu_separate_entrance`, `not accessory_in_required_front_yard`), and examples give it `true` or `false`. A measure a draft needs that isn't in `measures.yaml` yet is listed in the jurisdiction's `5_zoning_rules/drafted/records/proposed_measures.yaml`: rules may use it while drafts, but can't be approved until an engineer adds it to `measures.yaml`. `district` is a text measure whose values are the chart's district columns as the city writes them (R-1B → `R-1b`).

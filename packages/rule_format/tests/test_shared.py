@@ -8,7 +8,8 @@ import yaml
 
 from rule_format.rulebook import REPO, jurisdictions, read_jsonl
 
-CODE = [p for p in (REPO / "packages").rglob("*.py") if "tests" not in p.relative_to(REPO).parts]
+CODE = [p for p in (REPO / "packages").rglob("*.py")   # dated eval records (evals/) are frozen as they were run
+        if not {"tests", "evals"} & set(p.relative_to(REPO).parts)]
 # Paths are judged inside the repository: a checkout can itself sit in a folder named .claude.
 DOCS = [p for p in REPO.rglob("*.md")
         if not {".git", ".claude", ".venv", "node_modules"} & set(p.relative_to(REPO).parts)
@@ -86,7 +87,9 @@ def test_the_checks_recognise_any_spelling():
 
 def test_every_jsonl_file_is_read_by_the_one_reader():
     found = {p.relative_to(REPO).as_posix(): n for p in CODE if (n := _jsonl_readers(p.read_text()))}
-    assert found == {"packages/rule_format/rule_format/rulebook.py": 1}, f"use rulebook.read_jsonl: {found}"
+    # the one other: the Rhino worker's requests, read one at a time from a pipe as they arrive (not a file)
+    assert found == {"packages/rule_format/rule_format/rulebook.py": 1,
+                     "packages/design_checker/design_checker/__main__.py": 1}, f"use rulebook.read_jsonl: {found}"
 
 
 def test_every_jurisdiction_listing_uses_the_one_helper():
@@ -244,3 +247,42 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
                for line in (_yaml_sentences if p.suffix == ".yaml" else _sentences)(p.read_text())
                if _promises_architect_review(line)]
     assert not silent and not false and not confirm, (silent, false, confirm)
+
+
+def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
+    """Item 4.2 (the 106 Ithaca Rd rear setback) must state the readings as the R-1b formula gives them:
+    one reading of the lot's side lines allows the drawn 20 ft, so it may not say 20 ft fails 'under any reading'."""
+    def required(depth):
+        return max(min(0.25 * depth, 50), 20)
+    readings = {"23.7": (90.28 + 99.37) / 2,              # the two long side lines
+                "25.015": (90.28 + (99.37 + 10.47)) / 2,  # the jog added to the line it continues
+                "20": (90.28 + 10.47 + 99.37) / 3}        # every line that isn't front or rear
+    assert [round(required(d), 3) for d in readings.values()] == [23.706, 25.015, 20]
+    item = next(line for line in (REPO / "docs/discrepancies_with_architects.md").read_text().splitlines()
+                if line.startswith("| 4.2 "))
+    assert "any reading" not in item and all(f"{k} ft" in item for k in readings)
+    assert "requires more.**" not in item              # the headline may not settle the open question either
+
+
+def test_no_doc_claims_a_rear_yard_floor_across_readings():
+    """On the 106 Ithaca Rd lot one reading of the side lot lines gives the 20 ft minimum (item 4.2), so no
+    document may claim the rear setback needs more 'under any reading' or quote 22.6 ft as a floor."""
+    claims = re.compile(r"(rear|setback)[^.\n]*(any reading|at least 22\.6)|22\.6 ft under", re.IGNORECASE)
+    found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in claims.finditer(p.read_text())]
+    assert not found, found
+
+
+def test_the_106_ithaca_rd_areas_are_quoted_as_measured():
+    """The areas of the architects' model, as measured (shoelace area of its Site polylines, in feet): the
+    lot is 6,674.5 sf (their spreadsheet types 6,674) and the buildable-area outline 2,169.2 sf. Figures
+    that match neither (6,674.7 and 2,169.5 once spread through the docs) are kept out."""
+    def area(points):
+        return abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(points, points[1:] + points[:1]))) / 2
+    lot = [(395.432, 360.94), (439.51, 419.13), (367.546, 473.642), (326.184, 420.017), (315.713, 420.262)]
+    buildable = [(344.641, 411.2), (377.402, 386.822), (409.558, 429.273), (377.381, 453.647)]
+    assert (round(area(lot), 1), round(area(buildable), 1)) == (6674.5, 2169.2)
+    site = (REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/README.md").read_text()
+    assert "6,674.5 sf" in site and "2,169.2 sf" in site
+    files = [p for p in REPO.rglob("*") if p.suffix in (".md", ".yaml") and p.is_file()
+             and not {".git", ".claude", ".venv"} & set(p.relative_to(REPO).parts)]
+    assert not [p.relative_to(REPO) for p in files if re.search(r"6,?674\.7|2,?169\.5", p.read_text())]

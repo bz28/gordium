@@ -4,17 +4,19 @@
     python -m rule_format cite new_york/ithaca_city zoning_charts_2026-04.pdf 3 "Height in feet 35 ft"
                                    # prints the lines to cite: lines: [31, 31]
 
-For each jurisdiction: its source documents (fingerprints, extracted text), then
-every rule file in 5_zoning_rules/ and in its test_data/answer_keys/ folder.
+For each jurisdiction: its source documents (fingerprints, extracted text), its definitions and
+uses (4_term_definitions/), its section labels (3_section_labels/<document>.yaml, against the pieces in
+2_extracted_text/<document>.sections.jsonl), then every rule file in 5_zoning_rules/ and in its
+test_data/answer_keys/ folder.
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-import yaml
-
-from .rulebook import REPO, Context, jurisdictions, load, locate, validate
+from .labels import load_pieces, validate_labels
+from .rulebook import (REPO, Context, jurisdictions, load, locate, not_quotable, rulebook_file_problems, rulebook_paths,
+                       term_file_problems)
 
 
 def main() -> int:
@@ -30,24 +32,34 @@ def main() -> int:
         for problem in ctx.problems:
             print(f"✗ {place}: {problem}")
         failed += bool(ctx.problems)
-        files = sorted(p for folder in (jurisdiction / "5_zoning_rules", REPO / "test_data/answer_keys" / place)
-                       for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file())
-        for path in files:
+        for path, problems in term_file_problems(jurisdiction, ctx).items():
             checked += 1
+            print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
+            for problem in problems:
+                print(f"    {problem}")
+            failed += bool(problems)
+        for path in sorted((jurisdiction / "3_section_labels").glob("*.yaml")):
+            checked += 1
+            pieces_file = jurisdiction / "2_extracted_text" / f"{path.stem}.sections.jsonl"
             try:
-                book = load(path)
-                problems = validate(book, ctx)
-                if isinstance(book, dict) and book.get("district") != path.stem:
-                    problems.append(f"district {book.get('district')!r} doesn't match the file name {path.stem!r}")
-            except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
-                problems = [f"can't read file ({type(e).__name__}: {e})"]
+                problems = (validate_labels(load(path), ctx, *load_pieces(pieces_file)) if pieces_file.exists()
+                            else [f"no sections file {pieces_file.relative_to(REPO)} (set layout in sources.yaml)"])
             except Exception as e:  # report and keep going: one broken file mustn't hide the rest
                 problems = [f"validator error ({type(e).__name__}: {e})"]
             print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
             for problem in problems:
                 print(f"    {problem}")
             failed += bool(problems)
-    print(f"{checked} rule files checked, {failed} with problems")
+        files = [p for folder in (jurisdiction / "5_zoning_rules", REPO / "test_data/answer_keys" / place)
+                 for p in rulebook_paths(folder)]
+        for path in files:
+            checked += 1
+            problems = rulebook_file_problems(path, ctx)
+            print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
+            for problem in problems:
+                print(f"    {problem}")
+            failed += bool(problems)
+    print(f"{checked} files checked, {failed} with problems")
     return 1 if failed else 0
 
 
@@ -64,6 +76,9 @@ def cite(argv: list[str]) -> int:
     ctx = Context.for_jurisdiction(place)
     if args.file not in ctx.sources:
         print(f"{args.file} is not in sources.yaml")
+        return 1
+    if reason := not_quotable(ctx.sources[args.file]):
+        print(f"{args.file} {reason}")
         return 1
     if args.file not in ctx.pages:
         reasons = ctx.file_problems.get(args.file, [])

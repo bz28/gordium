@@ -1,0 +1,243 @@
+# How the City of Ithaca defines the words its residential rules depend on.
+# Quotes are the city's exact words (verified against 2_extracted_text by `python -m rule_format`).
+# `measures` links each definition to the measurement names rules use (packages/rule_format/.../measures.yaml).
+# A definition is the city's own whole sentences, with no paraphrase (drafting_rules.md). Read the quotes.
+# `open_questions` are gaps or interpretations for the architects; never resolved by guessing.
+# A definition with open questions can't be approved. Draft: architect confirmation is deferred for now.
+
+grade_plane:
+  term: GRADE PLANE
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 11
+      lines: [32, 33]
+      quote: "GRADE PLANE — A reference plane representing the average of finished ground level on each side of the building at exterior walls."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 11
+      lines: [33, 34]
+      quote: "On the sides of the building where grade is level, the measurement will be taken at a point adjoining the building."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 11
+      lines: [34, 37]
+      quote: "Where the finished ground level slopes away from the exterior walls, the measurement shall be taken at the lowest point within the area between the building and the lot line or, where the lot line is more than six feet from the building, between the building and a point six feet from the building."
+  open_questions:
+    - "\"Average of finished ground level on each side\": one value per side, simply averaged, or weighted by the length of each wall?"
+    - "What counts as a \"side\" for an L-shaped or irregular footprint?"
+  drafted_by: claude
+  status: draft
+
+height_of_building:
+  term: HEIGHT OF BUILDING
+  measures: [building_height]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 12
+      lines: [19, 22]
+      quote: "HEIGHT OF BUILDING — he vertical distance measured from grade plane to the highest level of a flat or mansard roof or to the average height of a pitched, gabled, hip or gambrel roof, excluding bulkheads, housing for mechanical equipment, towers and similar constructions not intended for human occupancy or necessary equipment carried above roof level."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 12
+      lines: [22, 24]
+      quote: "Where a building contains sections of a roof of varying heights, the height of that building shall be measured using that section of the roof that has the highest elevation from grade plane."
+  open_questions:
+    - "\"Average height\" of a pitched, gabled, hip or gambrel roof: midway between eave and ridge? Which eave, if the eaves are at different heights? How for gambrel and hip roofs?"
+    - "The city's text reads \"he vertical distance\" (a typo for \"The\" in the official code). No effect on meaning."
+    - "§325-16A (p.46) separately exempts features like chimneys, spires and skylights from height limits. Those will be rules of their own; confirm they don't change how height itself is measured."
+  drafted_by: claude
+  status: draft
+
+story:
+  term: STORY
+  measures: [stories]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 19
+      lines: [13, 14]
+      quote: "STORY — The portion of a building which is between one floor level and the next higher floor level or the roof."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 19
+      lines: [14, 17]
+      quote: "A mezzanine, as defined in the New York State Uniform Fire Prevention and Building Code, is not a story. A basement shall be deemed to be a story when the finished surface of the floor next above is 1) more than six feet above grade plane or 2) more than 12 feet above the finished ground level at any point. A cellar shall not be deemed a story."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 19
+      lines: [17, 18]
+      quote: "An attic shall not be deemed to be a story if unfinished and without human occupancy."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 24
+      lines: [35, 36]
+      quote: "Buildings hereafter erected shall be limited to the number of stories herein specified, computed at the main entrance side."
+  open_questions:
+    - "Which entrance is the \"main entrance\" when a house has more than one?"
+    - "The basement test says \"12 feet above the finished ground level at any point\", while stories are \"computed at the main entrance side\". Does the 12 ft test look at every side, or only the main entrance side?"
+  drafted_by: claude
+  status: draft
+
+basement:
+  term: BASEMENT
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 5
+      lines: [10, 11]
+      quote: "BASEMENT — That space of a building that is partly below grade which has more than half of its height, measured from floor to ceiling, above the finished ground level at any point."
+  open_questions:
+    - "\"Above the finished ground level at any point\": at one point is enough (e.g. a walk-out side), or at every point around the building?"
+    - "On a sloped lot, a space can meet both this definition (more than half above ground at some point) and the cellar definition (more than half below the average curb level or adjoining ground). Is it then a basement (can count as a story) or a cellar (never a story)?"
+  drafted_by: claude
+  status: draft
+
+cellar:
+  term: CELLAR
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 6
+      lines: [6, 8]
+      quote: "CELLAR — That space of a building that is partly or entirely below grade which has more than half of its height, measured from floor to ceiling, below the average established curb level or finished grade of the ground adjoining the building."
+  open_questions:
+    - "\"Average established curb level or finished grade of the ground adjoining the building\": which applies when they differ, and is the adjoining grade averaged around the building?"
+    - "See the basement question about a space that meets both definitions."
+  drafted_by: claude
+  status: draft
+
+building_area:
+  term: BUILDING AREA (lot coverage)
+  measures: [building_area]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 5
+      lines: [23, 25]
+      quote: "BUILDING AREA — The total area (taken on a horizontal plane at the main grade level) of the principal building and all accessory buildings, including porches, attached or free standing decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 5
+      lines: [25, 29]
+      quote: "The total building area shall be used for determining required yards and maximum percentage of allowed lot coverage but shall not include parking areas and parking spaces. Pergolas and terraces and patios shall be exempt from total lot coverage requirements. However, neither pergolas or terraces and patios above grade shall be located in a required yard."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 25
+      lines: [5, 10]
+      quote: "Column 10: Maximum Percentage of Lot Coverage by Buildings. On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings above ground. For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings. This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in this column."
+  open_questions:
+    - "Does the floor area of a garage (attached or detached) count as building area, or is it excluded as a \"parking space\"?"
+    - "\"Taken on a horizontal plane at the main grade level\" (§325-3) vs \"covered by principal and accessory buildings above ground\" (Column 10): is coverage the footprint at grade, or the outline of everything above ground (upper floors that overhang, roof eaves)?"
+  drafted_by: claude
+  status: draft
+
+lot:
+  term: LOT
+  measures: [lot_area]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 14
+      lines: [34, 36]
+      quote: "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings that are united by a common interest or use and the customary accessories and open spaces belonging to the same."
+  open_questions:
+    - "\"Lot area\" itself isn't defined. Is it the area inside the lot lines from a survey? What should be used when there's no survey (the tax parcel map can differ: 106 Ithaca Rd is ~7,034 sf on the tax map vs 6,674.5 sf in the architects' model)?"
+  drafted_by: claude
+  status: draft
+
+lot_width:
+  term: LOT WIDTH (minimum lot size, width in feet at street line)
+  measures: [lot_width]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 24
+      lines: [31, 34]
+      quote: "Column 7: Minimum Lot Size, Width in Feet at Street Line. Lots hereafter used for a permitted use in each use district shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column, subject to the further regulations of Column 6 of the District Regulations Chart and of Article V."
+  open_questions:
+    - "For a curved street line (like 106 Ithaca Rd), is frontage measured along the curve or as a straight line between the side lot corners?"
+  drafted_by: claude
+  status: draft
+
+lot_depth:
+  term: LOT DEPTH (for the rear yard percentage)
+  measures: [lot_depth]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 25
+      lines: [24, 26]
+      quote: "Such percentage shall be taken of the lot depth. If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+  open_questions:
+    - "A lot with more than two side lot lines (106 Ithaca Rd has a 10.47 ft jog): which lines count as \"the two side lot lines\"?"
+    - "When the two side lot lines are equal, is the lot depth simply their length? (Implied, but not stated.)"
+  drafted_by: claude
+  status: draft
+
+yard:
+  term: YARD
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 20
+      lines: [28, 30]
+      quote: "YARD — That part of a lot not occupied by the principal building or structure and which shall not be occupied by any other building or structure from the ground upward unless specifically authorized in this chapter or other provisions of the City of Ithaca Code."
+  drafted_by: claude
+  status: draft
+
+front_yard:
+  term: FRONT YARD
+  measures: [front_yard]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 20
+      lines: [31, 34]
+      quote: "(1) FRONT YARD — An open space extending the full width of the lot between a main building and the front lot line, unoccupied and unobstructed by buildings or structures from the ground upward, the depth of which shall be the least distance between the front lot line and the front of such main building."
+  open_questions:
+    - "§325-19C (p.50): on corner lots in residential districts, \"yards facing public streets shall conform to the minimum front yard requirements\" and the lot has \"two adjoining front yards\". So front_yard must be checked for each street-facing yard, and only the remaining yards are side or rear yards. Confirm. (This will be a rule of its own.)"
+  drafted_by: claude
+  status: draft
+
+side_yard:
+  term: SIDE YARD
+  measures: [side_yard_smaller, side_yard_larger]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 20
+      lines: [35, 38]
+      quote: "(2) SIDE YARD — An open space extending from the front yard to the rear yard between any building and the side lot line, unoccupied and unobstructed by buildings or structures from the ground upward. The required width of side yards shall be measured horizontally from the nearest point of the side lot line to the nearest part of any building."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 25
+      lines: [15, 17]
+      quote: "(12) Column 12: Yard Dimensions, Side, One Side at Least. Buildings hereafter altered or erected in each district must be located so that one side yard will be at least as wide as specified in this column, subject to the further regulations of Column 13."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 25
+      lines: [18, 20]
+      quote: "(13) Column 13: Yard Dimensions, Side, Other at Least. Buildings hereafter erected in each use district must have two side yards as specified in this column and Column 12. One side yard shall be at least as wide as specified in this column, subject to the further regulations of Column 12."
+  open_questions:
+    - "§325-25 (p.66): accessory structures (private garages, storage sheds, toolhouses, garden houses, playhouses or similar) \"shall be exempt from side yard requirements contained in the District Regulations Chart\" and follow §325-25's own rules. So the chart side yards are measured to the principal building only, not to a detached garage or shed. Confirm. (§325-25 will be rules of their own.)"
+    - "Corner lots: §325-19C (p.50) gives two adjoining front yards and §325-8A(14)(d) (pp.25-26) makes the yard opposite the address street the rear yard, which leaves one side yard. Does Column 13's \"two side yards\" still apply? If so, what is the second side yard; if not, which minimum (Column 12 or 13) applies to the one side yard?"
+  drafted_by: claude
+  status: draft
+
+rear_yard:
+  term: REAR YARD
+  measures: [rear_yard]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 20
+      lines: [39, 42]
+      quote: "(3) REAR YARD — An open space extending the full width of a lot between the rearmost main building and the rear lot line, unoccupied and unobstructed by buildings or structures from the ground upward except as hereinafter specified, the depth of which shall be the least distance between the rear lot line and the rear of such main building."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 25
+      lines: [34, 34]
+      quote: "(d) On a corner lot or through-block lot, the yard on the opposite side of the lot from the street"
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 26
+      lines: [3, 3]
+      quote: "whose address the lot bears shall be designated as the rear yard."
+  open_questions:
+    - "\"Except as hereinafter specified\": which later sections allow something in the rear yard (e.g. accessory buildings)? Those will be rules of their own."
+  drafted_by: claude
+  status: draft
+
+yard_projections:
+  term: PORCHES AND PROJECTIONS IN YARDS
+  measures: [front_yard, side_yard_smaller, side_yard_larger, rear_yard]
+  sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 49
+      lines: [9, 11]
+      quote: "All porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings shall be considered a part of the building in both the determination of required yards and lot coverage."
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 49
+      lines: [13, 16]
+      quote: "B. Projecting architectural features. The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that such features shall not project more than two feet into any required yard."
+  open_questions:
+    - "Is a yard's depth measured to the wall (ignoring sills, cornices and eaves that project up to 2 ft), or to the outermost eave? If an eave projects more than 2 ft, is the yard measured to the eave?"
+  drafted_by: claude
+  status: draft

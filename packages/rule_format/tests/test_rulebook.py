@@ -6,8 +6,8 @@ import math
 import pytest
 import yaml
 
-from rule_format.rulebook import (Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
-                                  validate)
+from rule_format.rulebook import (TERM_SCHEMAS, Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
+                                  validate, validate_terms)
 
 
 def quote_found(quote, tokens):
@@ -16,18 +16,22 @@ def quote_found(quote, tokens):
 
 PAGE_3 = {41: "Side (other side minimum) 10 ft 10 ft",
           42: "Rear (minimum, % of depth or feet, 25%/ 25%/",
-          43: "whichever is less) 50 ft [fn16] 50 ft [fn16]"}
+          43: "whichever is less) 50 ft [fn16] 50 ft [fn16]",
+          66: "(16) But not less than 20 ft.",
+          67: "(18) A lot deeper than 500 ft is reviewed by the Board."}
 QUOTE = "Rear (minimum, % of depth or feet, 25%/ 25%/ whichever is less) 50 ft [fn16]"
 SOURCE = {"file": "charts.pdf", "page": 3, "lines": [42, 43], "quote": QUOTE}
+NOTES = [{"file": "charts.pdf", "page": 3, "lines": [66, 66], "quote": "(16) But not less than 20 ft."},
+         {"file": "charts.pdf", "page": 3, "lines": [67, 67], "quote": "(18) A lot deeper than 500 ft is reviewed by the Board."}]
 RULE = {
     "id": "R-1b.rear_yard",
     "kind": "rule",
     "topic": "dimensions",
-    "says": "Rear yard at least 25% of lot depth or 50 ft, whichever is less, never under 20 ft.",
+    "title": "Rear yard minimum (chart p.3, note 16)",
     "applies_when": 'use == "one_family_detached"',
     "check": "rear_yard >= max(min(0.25 * lot_depth, 50), 20)",
     "review_when": [{"when": "lot_depth > 500", "reason": "unusually deep lot"}],
-    "sources": [SOURCE],
+    "sources": [SOURCE, *NOTES],
     "examples": [
         {"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90}, "expect": "pass"},
         {"given": {"use": "one_family_detached", "rear_yard": 21, "lot_depth": 90}, "expect": "fail"},
@@ -129,7 +133,15 @@ def test_valid_rulebooks(ctx):
     ({"id": "R-2a.rear_yard"}, "id must start with 'R-1b.'"),
     ({"kind": "maybe"}, "kind must be one of"),
     ({"topic": "vibes"}, "unknown topic"),
-    ({"says": None}, "missing 'says'"),
+    ({"title": None}, "missing 'title'"),
+    ({"title": "   "}, "missing 'title'"),
+    ({"title": "Rear yard\nminimum"}, "one-line label"),
+    ({"title": "Rear yard\rminimum"}, "one-line label"),
+    ({"title": "Rear yard at least 25% of lot depth or 50 ft, whichever is less, but never under 20 ft."},
+     "one-line label"),                                                      # a retelling, not a label
+    ({"says": "Rear yard at least 25% of lot depth."}, "unknown field 'says'"),
+    ({"answers": [{"question": "q?", "answer": "a", "answered_by": "claude",
+                   "answered_on": datetime.date(2026, 10, 20)}]}, "answered_by must be a reviewer"),
     ({"check": None}, "a 'rule' needs a 'check'"),
     ({"check": "rear_yard >= setback"}, "unknown measure 'setback'"),
     ({"applies_when": 'use == "castle"'}, "unknown use 'castle'"),
@@ -362,7 +374,8 @@ def test_cli_keeps_going_when_validation_itself_fails(tmp_path, monkeypatch, cap
         (j / f"5_zoning_rules/{name}.yaml").write_text(f"district: {name}\nrules: []\n")
     def broken(book, ctx):
         raise TypeError("boom")
-    monkeypatch.setattr(cli, "validate", broken)
+    import rule_format.rulebook as rulebook
+    monkeypatch.setattr(rulebook, "validate", broken)        # the one per-file check the CLI uses
     monkeypatch.setattr(cli, "REPO", tmp_path)
     assert cli.main() == 1
     out = capsys.readouterr().out
@@ -432,6 +445,10 @@ def test_cite_helper(tmp_path, monkeypatch, capsys):
     assert "more than once" in capsys.readouterr().out
     assert cli.cite([place, "doc.pdf", "9", "x"]) == 1 and "no page 9" in capsys.readouterr().out
     assert cli.cite([place, "typo.pdf", "2", "x"]) == 1 and "not in sources.yaml" in capsys.readouterr().out
+    sources = tmp_path / "regulations/jurisdictions" / place / "1_source_documents/sources.yaml"
+    sources.write_text(sources.read_text() + "    quotable: false\n    not_quotable_because: two columns\n")
+    assert cli.cite([place, "doc.pdf", "2", "Rear yard minimum twenty feet"]) == 1   # same answer as validation
+    assert "isn't quotable yet: two columns" in capsys.readouterr().out
     assert cli.cite(["ny/nowhere", "doc.pdf", "2", "x"]) == 1 and "no jurisdiction" in capsys.readouterr().out
 
 
@@ -477,6 +494,336 @@ def test_document_listed_twice_is_reported(tmp_path):
     ctx = Context.for_jurisdiction(j)
     assert "listed more than once in sources.yaml" in ctx.file_problems["doc.pdf"]
     assert "doc.pdf" not in ctx.pages                                         # its text isn't trusted
+
+
+def test_documents_marked_not_quotable_are_refused(ctx):
+    ctx.sources["charts.pdf"] |= {"quotable": False, "not_quotable_because": "two columns get mixed"}
+    assert any("isn't quotable yet: two columns get mixed" in p for p in validate(rulebook(), ctx))
+
+
+@pytest.mark.parametrize("entry, problem", [
+    ({"file": "a.pdf", "sha256": "x", "quoteable": False}, "unknown field 'quoteable'"),
+    ({"file": "a.pdf", "sha256": "x", "quotable": "false"}, "'quotable' must be true or false"),
+    ({"file": "a.pdf", "sha256": "x", "quotable": False}, "'not_quotable_because' is missing"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": "2, 3"}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": [2, 2]}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": [0]}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "pages": 17, "chart_pages": [18]}, "'chart_pages' must be a list"),
+])
+def test_source_list_entries_fail_closed(entry, problem):
+    from rule_format.rulebook import _source_entry_problems
+    assert any(problem in p for p in _source_entry_problems(entry))
+
+
+@pytest.mark.parametrize("value", ["false", 0, None])
+def test_not_quotable_check_fails_closed(ctx, value):
+    ctx.sources["charts.pdf"]["quotable"] = value
+    assert any("isn't quotable yet" in p for p in validate(rulebook(), ctx))
+
+
+def test_source_entry_problems_reach_the_file(tmp_path):
+    j = _jurisdiction(tmp_path, rows=[{"page": 1, "line": 1, "text": "x"}])
+    s = (j / "1_source_documents/sources.yaml").read_text()
+    (j / "1_source_documents/sources.yaml").write_text(s + "    quoteable: false\n")
+    ctx = Context.for_jurisdiction(j)
+    assert any("unknown field 'quoteable'" in p for p in ctx.file_problems["doc.pdf"]) and "doc.pdf" not in ctx.pages
+
+
+DEFINITION = {
+    "term": "REAR YARD",
+    "measures": ["rear_yard"],
+    "sources": [SOURCE],
+    "open_questions": ["Which line is the rear lot line on an irregular lot?"],
+    "drafted_by": "claude",
+    "status": "draft",
+}
+
+
+def test_valid_definitions_and_uses(ctx):
+    assert validate_terms({"rear_yard": DEFINITION}, ctx, "definitions") == []
+    use = {"name": "One-family dwelling, detached", "sources": DEFINITION["sources"],
+           "drafted_by": "claude", "status": "draft"}
+    assert validate_terms({"one_family_detached": use}, ctx, "uses") == []
+
+
+@pytest.mark.parametrize("entries, problem", [
+    ({}, "non-empty mapping"),
+    ({"Rear Yard": DEFINITION}, "lowercase_with_underscores"),
+    ({"rear_yard": DEFINITION | {"measures": ["rear_yrd"]}}, "unknown measure 'rear_yrd'"),
+    ({"rear_yard": DEFINITION | {"says": "Open space behind the house."}}, "unknown field 'says'"),
+    ({"rear_yard": DEFINITION | {"term": ["REAR YARD"]}}, "'term' must be text"),
+    ({"rear_yard": DEFINITION | {"open_questions": "which line?"}}, "'open_questions' must be a list"),
+    ({"rear_yard": DEFINITION | {"colour": "red"}}, "unknown field 'colour'"),
+    ({"rear_yard": DEFINITION | {"sources": [SOURCE | {"quote": "Rear (minimum, % of depth or feet, 30%/"}]}},
+     "not on this page"),
+    ({"rear_yard": DEFINITION | {"status": "approved", "approved_by": "claude",
+                                 "approved_on": datetime.date(2026, 10, 19)}}, "approved_by must be a reviewer"),
+])
+def test_invalid_definitions_are_rejected(ctx, entries, problem):
+    assert any(problem in p for p in validate_terms(entries, ctx, "definitions"))
+
+
+ANSWER = {"question": "Which line is the rear lot line on an irregular lot?", "answer": "The one opposite the street.",
+          "answered_by": "jane", "answered_on": datetime.date(2026, 10, 20)}
+
+
+@pytest.mark.parametrize("answers, problem", [
+    ("the one opposite", "'answers' must be a list"),
+    ([{"question": "q?", "answer": "a"}], "exactly question, answer, answered_by, answered_on"),
+    ([ANSWER | {"answer": "  "}], "must be text"),
+    ([ANSWER | {"question": 3}], "must be text"),
+    ([ANSWER | {"answered_by": "claude"}], "answered_by must be a reviewer"),
+    ([ANSWER | {"answered_on": "2026-10-20x"}], "answered_on must be a date"),
+])
+def test_invalid_answers_are_rejected(ctx, answers, problem):
+    assert any(problem in p for p in validate_terms({"rear_yard": DEFINITION | {"answers": answers}}, ctx, "definitions"))
+
+
+def test_answered_definition_can_be_approved(ctx):
+    fields = TERM_SCHEMAS["definitions"]["approved"]
+    answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"} | {"answers": [ANSWER]}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20),
+                           "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
+    assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
+    reworded = approved | {"answers": [ANSWER | {"answer": "The one at the back."}]}  # an answer is frozen too
+    assert any("changed since it was approved" in p for p in validate_terms({"rear_yard": reworded}, ctx, "definitions"))
+
+
+def test_approved_definition_needs_reapproval_after_an_edit(ctx):
+    fields = TERM_SCHEMAS["definitions"]["approved"]
+    answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
+                           "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
+    assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
+    for edit in ({"term": "REAR YARDS"}, {"measures": ["rear_yard", "lot_depth"]}, {"answers": [ANSWER]},
+                 {"sources": [SOURCE | {"lines": [41, 43], "quote": "10 ft [fn15] " + QUOTE}]}):
+        assert any("changed since it was approved" in p
+                   for p in validate_terms({"rear_yard": approved | edit}, ctx, "definitions"))
+    assert any("changed since it was approved" in p                          # renamed: rules use the key
+               for p in validate_terms({"side_yard": approved}, ctx, "definitions"))
+    reopened = approved | {"open_questions": ["new doubt?"]}                 # a new question blocks approval
+    assert any("open_questions remain" in p for p in validate_terms({"rear_yard": reopened}, ctx, "definitions"))
+
+
+def test_definition_with_open_questions_cannot_be_approved(ctx):
+    approved = DEFINITION | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
+    approved["approved_hash"] = approval_hash(approved | {"id": "rear_yard"}, ctx, TERM_SCHEMAS["definitions"]["approved"])
+    assert any("open_questions remain" in p for p in validate_terms({"rear_yard": approved}, ctx, "definitions"))
+
+
+def test_approved_entry_without_drafter_is_reported_not_crashed(ctx):
+    entry = {k: v for k, v in DEFINITION.items() if k not in ("drafted_by", "open_questions")}
+    entry |= {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
+    assert any("missing 'drafted_by'" in p for p in validate_terms({"rear_yard": entry}, ctx, "definitions"))
+
+
+def test_a_use_decided_by_a_rule_must_cite_its_row(ctx):
+    ctx.use_rows = {"one_family_detached": [SOURCE]}
+    decides = rulebook(check='use == "one_family_detached" and rear_yard >= 20', applies_when=None,
+                       examples=[{"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90}, "expect": "pass"},
+                                 {"given": {"use": "one_family_detached", "rear_yard": 10, "lot_depth": 90}, "expect": "fail"}])
+    assert validate(decides, ctx) == []                                       # its row (lines 42-43) is cited
+    elsewhere = {**SOURCE, "lines": [41, 41], "quote": "10 ft [fn15]"}
+    ctx.use_rows = {"one_family_detached": [elsewhere]}
+    assert any("use 'one_family_detached' is decided here but its row isn't cited" in p
+               for p in validate(decides, ctx))
+    assert validate(rulebook(), ctx) == []                                    # applies_when only scopes the rule
+    flags = rulebook(review_when=[{"when": 'use == "one_family_detached"', "reason": "check by hand"}])
+    assert any("use 'one_family_detached' is decided here" in p for p in validate(flags, ctx))  # review_when decides too
+
+
+@pytest.mark.parametrize("uses", [["one_family_detached"], {"x": {"sources": "p.2"}},
+                                  {"x": {"sources": [{"page": 2, "lines": [9, 9]}]}}, {"x": "y"}])
+def test_malformed_uses_are_left_out_not_crashed(uses):
+    from rule_format.rulebook import _use_rows
+    assert _use_rows(uses) in ({}, {"x": []})
+
+
+@pytest.mark.parametrize("edit", [{"title": "Rear yard"}, {"answers": [ANSWER | {"answer": "The one at the back."}]},
+                                  {"answers": []}])
+def test_approved_rule_needs_reapproval_after_answer_or_title_edit(ctx, edit):
+    answered = copy.deepcopy(RULE) | {"answers": [ANSWER]}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20),
+                           "approved_hash": approval_hash(answered, ctx)}
+    assert validate({"district": "R-1b", "rules": [approved]}, ctx) == []
+    assert any("changed since it was approved" in p
+               for p in validate({"district": "R-1b", "rules": [approved | edit]}, ctx))
+
+
+# Chart cells as sources, numbers traced to sources, yes/no and proposed measures, district names.
+REAR_CELL = {"page": 3, "section": "Yard Dimensions", "row": "Rear (minimum, % of depth or feet, whichever is less)",
+             "column": "R-1B", "value": "25%/ 50 ft [fn16]", "row_lines": [42, 43]}
+CELL_SOURCE = {"file": "charts.pdf", "page": 3,
+               "cell": {"section": "Yard Dimensions", "row": REAR_CELL["row"], "column": "R-1B"}}
+
+
+@pytest.fixture
+def chart_ctx(ctx):
+    ctx.sources["charts.pdf"]["chart_pages"] = [3]
+    ctx.cells = {"charts.pdf": {(3, "Yard Dimensions", REAR_CELL["row"], "R-1B"): REAR_CELL}}
+    ctx.districts = {"R-1b", "R-2a"}
+    ctx.measures |= {"district"}
+    return ctx
+
+
+def test_a_cited_chart_cell_supports_its_numbers(chart_ctx):
+    assert validate(rulebook(sources=[CELL_SOURCE, *NOTES]), chart_ctx) == []
+
+
+@pytest.mark.parametrize("source, problem", [
+    (CELL_SOURCE | {"cell": CELL_SOURCE["cell"] | {"row": "Rear yard"}}, "no cell"),
+    (CELL_SOURCE | {"page": 2}, "isn't one of the chart pages"),
+    (CELL_SOURCE | {"lines": [42, 43]}, "exactly file, page and cell"),
+    (CELL_SOURCE | {"cell": {"row": "Rear"}}, "needs section, row and column"),
+])
+def test_bad_cell_sources_are_rejected(chart_ctx, source, problem):
+    assert any(problem in p for p in validate(rulebook(sources=[source, *NOTES]), chart_ctx))
+
+
+@pytest.mark.parametrize("check, number", [("rear_yard >= max(min(0.3 * lot_depth, 50), 20)", "0.3"),
+                                           ("rear_yard >= max(min(0.25 * lot_depth, 55), 20)", "55")])
+def test_a_number_not_written_in_any_source_is_rejected(ctx, check, number):
+    assert any(f"number {number} in 'check' isn't written" in p for p in validate(rulebook(check=check), ctx))
+
+
+def test_numbers_can_come_from_number_words_and_row_labels():
+    from rule_format.rulebook import source_numbers
+    assert {3.0, 4.0, 5.0} <= source_numbers("First three bed or sleeping rooms; 4-5 bed rooms")
+    assert source_numbers("50 ft [fn16]") == {50.0}                           # no footnote number, no 0.5
+    assert source_numbers("6,000 sf 25% and 10 percent") == {6000.0, 25.0, 0.25, 10.0, 0.1}  # only percents / 100
+    assert source_numbers("two-family dwelling") == set()                     # "two" in a compound isn't a count
+    assert source_numbers("(10) See §325-16.") == set()                       # a note's marker and a section number
+    assert 3.0 not in source_numbers("(3) In each district, the number of additional feet may not exceed 10% of the height")
+    assert source_numbers("as specified in this column and Column 12 [Amended 10-1-2014 by Ord. No. 2014-12]") == set()
+    # references as Chapter 325 writes them (strings from its extracted text)
+    for ref in ("the requirements of § 325-20D(1) are met.", "See § 325-20D(3)(b).", "except as provided in Subsection B(7)",
+                "pursuant to Section 325-16 of this chapter", "in accordance with §§ 325-8 and 325-9",
+                "§ 81-a of the General City Law", "Article 78 of the Civil Practice", "Note: Former Subsection B(9)"):
+        assert source_numbers(ref) == set(), ref
+    assert source_numbers("50% of the lot", percent_as_number=False) == {0.5}   # a typed percent is its fraction
+
+
+def test_no_number_is_left_in_any_reference_in_the_citys_text():
+    """Every '§ ...', 'Section ...', 'Subsection ...' in Chapter 325, up to the next plain word: no number survives."""
+    import json, re
+    from rule_format.rulebook import REPO, source_numbers
+    path = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text/chapter_325_zoning_2026-10.jsonl"
+    left = set()
+    for line in path.read_text().splitlines():
+        text = json.loads(line).get("text", "")
+        for m in re.finditer(r"(?i)(?:§+|\bsub(?:section|paragraph)s?\b|\bsections?\b)\s*[\w.\-()§, ]*?(?=\s+[a-z]{3,}\b|$)", text):
+            ref = re.split(r"(?i)\s+(?:zoning|ithaca)\b", m.group(0))[0]           # page headers: "§ 325-16 ZONING § 325-16"
+            if source_numbers(ref) and not re.search(r"(?i)\((?:january|february|march|april|may|june|july|august|september|october|november|december) ", ref):
+                left.add(ref)
+    assert sorted(left) == []
+
+
+def test_a_cell_from_another_districts_column_is_rejected(chart_ctx):
+    other = {"page": 3, "section": "Yard Dimensions", "row": REAR_CELL["row"], "column": "R-2A",
+             "value": "25%/ 50 ft [fn16]", "row_lines": [42, 43]}
+    chart_ctx.cells["charts.pdf"][(3, "Yard Dimensions", REAR_CELL["row"], "R-2A")] = other
+    foreign = CELL_SOURCE | {"cell": CELL_SOURCE["cell"] | {"column": "R-2A"}}
+    assert any("cell column R-2A isn't district R-1b" in p for p in validate(rulebook(sources=[foreign, *NOTES]), chart_ctx))
+    general = {"district": "general", "rules": [copy.deepcopy(RULE) | {"id": "general.rear_yard", "sources": [CELL_SOURCE, *NOTES]}]}
+    assert any("can't cite one district's cell" in p for p in validate(general, chart_ctx))
+
+
+def test_a_yes_no_measure_can_be_a_test_on_its_own(ctx):
+    ctx.proposed = {"adu_separate_entrance": {"unit": "yes_no", "meaning": "ADU has a separate entrance"}}
+    rule = {"id": "R-1b.adu_entrance", "kind": "rule", "topic": "dimensions", "title": "ADU entrance",
+            "check": "adu_separate_entrance", "sources": [SOURCE],
+            "examples": [{"given": {"adu_separate_entrance": True}, "expect": "pass"},
+                         {"given": {"adu_separate_entrance": False}, "expect": "fail"}],
+            "drafted_by": "claude", "status": "draft"}
+    assert validate({"district": "R-1b", "rules": [rule]}, ctx) == []
+    assert any("wrong kind of value" in p for p in validate({"district": "R-1b", "rules": [
+        rule | {"examples": [{"given": {"adu_separate_entrance": 1}, "expect": "pass"}]}]}, ctx))
+    assert any("only a yes/no measure" in p for p in validate(rulebook(check="rear_yard"), ctx))   # a number isn't a test
+    approved = rule | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20)}
+    approved["approved_hash"] = approval_hash(approved, ctx)
+    assert any("proposed measure 'adu_separate_entrance'" in p
+               for p in validate({"district": "R-1b", "rules": [approved]}, ctx))
+
+
+def test_a_proposed_measure_is_unknown_until_listed(ctx):
+    rule = rulebook(check="rear_yard >= 20 and adu_separate_entrance")
+    assert any("unknown measure 'adu_separate_entrance'" in p for p in validate(rule, ctx))
+
+
+def test_district_names_are_known_text_values(chart_ctx):
+    scoped = rulebook(applies_when='district == "R-1b"', sources=[CELL_SOURCE, *NOTES],
+                      examples=[{"given": {"district": "R-1b", "rear_yard": 25, "lot_depth": 90}, "expect": "pass"},
+                                {"given": {"district": "R-1b", "rear_yard": 21, "lot_depth": 90}, "expect": "fail"},
+                                {"given": {"district": "R-2a", "rear_yard": 0, "lot_depth": 90}, "expect": "not_applicable"}])
+    assert validate(scoped, chart_ctx) == []
+    assert any("unknown district 'R-9z'" in p for p in validate(rulebook(
+        examples=RULE["examples"] + [{"given": {"district": "R-9z"}, "expect": "needs_review"}]), chart_ctx))
+
+
+def test_district_names_are_written_as_the_city_writes_them():
+    from rule_format.rulebook import district_name
+    assert [district_name(c) for c in ("R-1B", "R-3AA", "RU", "R-2C")] == ["R-1b", "R-3aa", "RU", "R-2c"]
+
+
+@pytest.mark.parametrize("applies_when, problem", [
+    ('district == "R-1b" or use == "R-2a"', "unknown use 'R-2a'"),      # a district where a use belongs: dead
+    ('district == "one_family_detached"', "unknown district 'one_family_detached'"),
+    ('use in ["one_family_detached", "R-1b"]', "unknown use 'R-1b'"),
+    ('lot_area > 0 and "R-1b" == "R-1b"', "must be compared with district or use"),
+])
+def test_a_quoted_value_must_fit_the_measure_it_is_compared_with(chart_ctx, applies_when, problem):
+    assert any(problem in p for p in validate(rulebook(sources=[CELL_SOURCE, *NOTES], applies_when=applies_when),
+                                              chart_ctx)), applies_when
+
+
+def test_quoted_values_that_fit_their_measure_pass(chart_ctx):
+    good = 'district == "R-1b" and use in ["one_family_detached"]'
+    assert not any("unknown" in p or "compared with" in p
+                   for p in validate(rulebook(sources=[CELL_SOURCE, *NOTES], applies_when=good), chart_ctx))
+
+
+def test_one_definition_of_a_district_column():
+    """The chart reader, the inspector and the drafter decide 'is this column a district' the same way, so an
+    extra all-caps heading (NOTES, SP) can't become a district in one place and not another."""
+    from document_extraction import charts
+    from rule_format.rulebook import DISTRICT_COLUMN
+    assert charts.DISTRICT is DISTRICT_COLUMN
+    names = ["R-1A", "R-1B", "R-3AA", "RU", "NOTES", "SP", "ADU", "Additional Regulations"]
+    assert [n for n in names if DISTRICT_COLUMN.fullmatch(n)] == ["R-1A", "R-1B", "R-3AA", "RU"]
+
+
+# ---- every number a cited footnote or law quote states is used, or declared not a limit ----------------------
+
+def test_a_number_a_cited_note_states_but_the_formula_drops_is_rejected(ctx):
+    """eval-integrity P1-1: dropping note 16's 20 ft floor from the formula left every check passing."""
+    dropped = rulebook(check="rear_yard >= min(0.25 * lot_depth, 50)")
+    assert any('number 20 in the quote "(16) But not less than 20 ft.' in p for p in validate(dropped, ctx))
+    assert not any("is never used" in p for p in validate(rulebook(), ctx))          # the real rule uses it
+
+
+def test_a_number_that_isnt_a_limit_is_declared_with_why(ctx):
+    sources = [SOURCE, NOTES[0] | {"not_limits": {20: "for this test"}}, NOTES[1]]
+    assert not any("is never used" in p for p in validate(rulebook(check="rear_yard >= min(0.25 * lot_depth, 50)",
+                                                                   sources=sources), ctx))
+    stale = [SOURCE, NOTES[0] | {"not_limits": {30: "not in the quote"}}, NOTES[1]]
+    assert any("not_limits names 30, which its quote doesn't state" in p for p in validate(rulebook(sources=stale), ctx))
+    for bad in ({20: ""}, [20], {"20": "a text key"}):
+        broken = [SOURCE, NOTES[0] | {"not_limits": bad}, NOTES[1]]
+        assert any("not_limits must map each number" in p for p in validate(rulebook(sources=broken), ctx)), bad
+
+
+def test_a_chart_row_listing_every_district_is_not_held_to_it(chart_ctx):
+    """A chart row's quote lists every district's numbers; the rule uses its own column's."""
+    problems = validate(rulebook(check="rear_yard >= max(0.25 * lot_depth, 20)", sources=[SOURCE, *NOTES]), chart_ctx)
+    assert not any("number 50 in the quote" in p for p in problems)
+
+
+def test_a_flag_isnt_held_to_the_numbers_in_its_quote(ctx):
+    """A flag always needs review: the limits its quote states are for the person to apply, so they need no
+    not_limits (R-3a's abutting and loading flags); a rule quoting the same note is still held to them."""
+    flag = rulebook(kind="flag", check=None, review_when=None, examples=None)
+    assert not any("is never used" in p for p in validate(flag, ctx))
+    assert any("number 20 in the quote" in p for p in validate(rulebook(check="rear_yard >= min(0.25 * lot_depth, 50)"), ctx))
 
 
 def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
