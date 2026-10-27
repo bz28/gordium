@@ -1337,12 +1337,12 @@ def implied_for(rules: list, use: str | None, uses: dict) -> dict:
 def _read_for(rules: list, use: str | None, uses: dict) -> set:
     """Every name the district's rules read when they can apply to this use (applies_when not false for it)."""
     from rule_format import formula
-    # every name a condition may read described by its kind (the city's measures, and the stated facts), so the
-    # formula's three-valued logic settles a condition false for this use whatever the rest turns out to be ("use
-    # in [multiple_family] and not conversion" for a one-family house: never asks "conversion"); a name with no
-    # kind still leaves the rule "may apply" (asked: over-asking is safe, missing a question is not)
-    kinds = dict(MEASURE_KINDS, use=set(uses),
-                 **{k: "number" if v[1] == "count" else "boolean" for k, v in logic.STATED_FACTS.items()})
+    # every name described exactly as the checker's own verdict describes it (outcome: the city's measures and the
+    # uses, check_site), so a condition is settled here as it is there: false for this use whatever the rest turns
+    # out to be ("use in [multiple_family] and not conversion" for a one-family house) asks nothing, and a rule the
+    # checker could still find applicable (a name it can't type) is asked (review round 2: typed apart, a row
+    # needed review that the box never asked about)
+    kinds = MEASURE_KINDS | {"use": frozenset(uses)}
     wanted = set()
     for rule in rules:
         if rule.get("applies_when") and use is not None:
