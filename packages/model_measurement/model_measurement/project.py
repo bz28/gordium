@@ -10,7 +10,7 @@ from pathlib import Path
 
 from rule_format.rulebook import load
 
-from .measure import measure
+from .measure import STREAM_SETBACK, measure
 from .read_3dm import read_site
 from .stops import STOPS
 
@@ -27,6 +27,7 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
 # the unrelated people counted with the minor dependent children can't be fewer than without them: the measuring's
 # own words for it (one copy)
 COUNTS_DISAGREE = STOPS["household_counts_disagree"]
+STREAM_DISAGREE = STOPS["stream_facts_disagree"]
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 
 
@@ -56,6 +57,9 @@ def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
     if type(without) is int and type(with_) is int and with_ < without:     # review round 3: said in every district
         out.append((COUNTS_DISAGREE.format(without=without, with_=with_),
                     ("unrelated_persons", "unrelated_persons_with_children")))
+    distance = facts.get("stream_distance")       # PR4 review round 2: both answers asked again, not only the "no"
+    if facts.get("stream_near_lot") is False and _number(distance) and distance < STREAM_SETBACK:
+        out.append((STREAM_DISAGREE.format(distance=distance), ("stream_near_lot", "stream_distance")))
     return out
 
 
