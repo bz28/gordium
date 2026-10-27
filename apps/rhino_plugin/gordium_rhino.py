@@ -3046,12 +3046,10 @@ def show_context(on):
             except ValueError:
                 facts = {}
             draw_context(doc, logic.context_frame(facts, _ui_state(doc)))
-    if on and refetch:                     # (draw_context has said what it drew)
-        return
-    if on:
+    if on and not refetch:                 # (fetched: draw_context has said what it drew)
         doc.Views.Redraw()
         say("Neighbourhood shown (drawing only: the check never measures it).")
-    else:
+    elif not on:
         doc.Views.Redraw()
         say("Neighbourhood hidden." if drawn or loaded else "Neighbourhood off (none drawn in this file).")
 
