@@ -1503,6 +1503,8 @@ rules:
         quote: ONE-FAMILY SEMIDETACHED DWELLING — A building containing not more than two
       still_open:
       - R-3a.abutting_r1#2
+      - R-3aa.abutting_r1#3
+      - R-3b.abutting_r1#2
       strength: strong
       confirm_with: the City zoning office
     - id: cross_reference_points_elsewhere
@@ -1511,7 +1513,9 @@ rules:
       kind: law
       answer: In §325-19E ("Development in R-3 Districts which abut R-1 Districts", added 7-3-2019 by Ord. No.
         2019-12). The two cross-references predate it (§325-8B(9) was added in 2012); §325-9B(1) holds no such conditions.
-      still_open: []
+        Whether §325-19E also reaches R-3aa, which it doesn't name, is still open (R-3aa.abutting_r1#1).
+      still_open:
+      - R-3aa.abutting_r1#1
       sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 50
