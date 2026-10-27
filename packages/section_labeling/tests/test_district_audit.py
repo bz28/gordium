@@ -512,3 +512,16 @@ def test_special_permit_primary_uses_are_flagged_in_every_district(built):
 def test_parked_says_who_parked_it(built):
     head = built.render().split("## The table")[0]
     assert "or the brief that parked it" in head and built.parked["adus"]["decided"].startswith("queue item 10")
+
+
+# Provenance review round 3.
+
+def test_a_chart_quote_is_exactly_its_cells_line(decisions):
+    three = dict(decisions["_multiple_not_permitted"], quote="Two-family dwelling [fn4] - - • • • • • • • Multiple "
+                 "family dwelling [fn4] - - - - - • • • •[fn5] Fraternity, sorority, or group house - -")
+    found = problems(with_piece(decisions, "325-3B:row_house", [{"what": "x", "all": three}]))
+    assert any("the quote isn't the line of the cell it names" in p for p in found)
+
+
+def test_the_mapped_legend_says_at_least_one_rule(built):
+    assert "at least one of these rules covers it only by Gordium's stated mapping" in built.render()

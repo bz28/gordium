@@ -517,7 +517,7 @@ pieces:
         note: (10) points to §325-8A(15), whose 500 sf exemption R-3aa.stories applies to the two-story minimum.
     - quote: "For special conditions on development of property in R-3 that directly abuts R-1"
       lines: [[27, 9, 10]]
-      what: "(9) R-3 land that directly abuts R-1 (§325-19E)"
+      what: "(9) R-3 land that directly abuts R-1 (the law points to §325-9B(1); the conditions are in §325-19E)"
       all:
         status: not_applicable
         why: Applies only to R-3 property next to R-1.
@@ -881,8 +881,8 @@ pieces:
     - what: Industrial performance standards
       all:
         status: not_applicable
-        why: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10
-          and §325-20, never §325-24.
+        why: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to
+          §325-24.
         page: 65
         quote: All uses in districts where reference is made to this section shall conform to performance standards herein
   325-24C: *industrial_standards

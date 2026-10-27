@@ -112,7 +112,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 
 ## The table
 
-✓ = in the rulebook (rule ids; (mapped) = by Gordium's stated mapping, the rules don't cite it); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; (partly ✓ …) = some parts are covered by those rules, the rest not. [R12] = this cell rests on reading R12, listed right after this table with its quote of the law (or, for a mapping, its reason), for a person to check. Each piece's reasons are in the section after that.
+✓ = in the rulebook (rule ids; (mapped) = at least one of these rules covers it only by Gordium's stated mapping, see the reading); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; (partly ✓ …) = some parts are covered by those rules, the rest not. [R12] = this cell rests on reading R12, listed right after this table with its quote of the law (or, for a mapping, its reason), for a person to check. Each piece's reasons are in the section after that.
 
 | Piece | Title | Label | R-1a | R-1b | R-2a | R-2b | R-2c | R-3a | R-3aa | R-3b | RU |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -328,8 +328,8 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R39 | §325-8B: (4) A use allowed by special permit or variance follows the stricter district's regulations | R-3a, R-3aa, R-3b | flag (needs review) by mapping: use. A special-permit use goes to needs review (the use entry), where the stricter regulations are worked out by hand. | “the regulations applying to such use shall be those of whichever district has the stricter regulations” (Ch. 325 p.26 l.23–24) |
 | R40 | §325-8B: (6) Minor children aren't counted as unrelated occupants (R-1 and R-2) | R-3a, R-3aa, R-3b, RU | not applicable: Applies in R-1 and R-2 districts only. | “In R-1 and R-2 Districts, minor dependent children” (Ch. 325 p.26 l.28) |
 | R41 | §325-8B: (7), (8), (10): pointers to the NYS Uniform Code, to Article V and to §325-8A(15) | R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU | not applicable: Pointers with no requirement of their own; each Article V section is its own row in this table, and the Uniform Code is outside Chapter 325. | “All columns established by this section are subject to the supplementary regulations stated in Article V” (Ch. 325 p.27 l.7–8) |
-| R42 | §325-8B: (9) R-3 land that directly abuts R-1 (§325-19E) | R-1a, R-1b, R-2a, R-2b, R-2c, RU | not applicable: Applies only to R-3 property next to R-1. | “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9) |
-| R43 | §325-8B: (9) R-3 land that directly abuts R-1 (§325-19E) | R-3a, R-3aa, R-3b | flag: abutting_r1 | “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9) |
+| R42 | §325-8B: (9) R-3 land that directly abuts R-1 (the law points to §325-9B(1); the conditions are in §325-19E) | R-1a, R-1b, R-2a, R-2b, R-2c, RU | not applicable: Applies only to R-3 property next to R-1. | “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9) |
+| R43 | §325-8B: (9) R-3 land that directly abuts R-1 (the law points to §325-9B(1); the conditions are in §325-19E) | R-3a, R-3aa, R-3b | flag: abutting_r1 | “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9) |
 | R44 | §325-8C: West End/Waterfront, Cherry Street, Market and Newman districts | all 9 districts | not applicable: Applies only in those districts. | “Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, and the Newman Districts” (Ch. 325 p.27 l.16–17) |
 | R45 | §325-8D: CBD districts | all 9 districts | not applicable: Applies only in the CBD districts. | “Additional restrictions in the CBD districts” (Ch. 325 p.28 l.19) |
 | R46 | §325-8E: South Hill Overlay: no second primary structure on a parcel (R-1 and R-2) | R-3a, R-3aa, R-3b, RU | not applicable: Applies to R-1 and R-2 property in the overlay only. | “with a zoning designation of R-1 or R-2” (Ch. 325 p.29 l.32) |
@@ -388,14 +388,14 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R99 | §325-22F: Motels (landscaping) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (§325-8A(2) says the permitted uses are listed). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “Uses which are permitted in each use district are listed” (Ch. 325 p.24 l.15) |
 | R100 | §325-22G: Motels (lighting) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (§325-8A(2) says the permitted uses are listed). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “Uses which are permitted in each use district are listed” (Ch. 325 p.24 l.15) |
 | R101 | §325-22H: Motels (uses) | all 9 districts | not applicable: Not a use the residential chart (p.2) lists for any residential district, so it isn't permitted there (§325-8A(2) says the permitted uses are listed). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “Uses which are permitted in each use district are listed” (Ch. 325 p.24 l.15) |
-| R102 | §325-24B: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
-| R103 | §325-24C: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
-| R104 | §325-24D: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
-| R105 | §325-24E: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
-| R106 | §325-24F: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
-| R107 | §325-24G: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
-| R108 | §325-24H: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
-| R109 | §325-24I: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R102 | §325-24B: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R103 | §325-24C: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R104 | §325-24D: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R105 | §325-24E: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R106 | §325-24F: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R107 | §325-24G: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R108 | §325-24H: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
+| R109 | §325-24I: Industrial performance standards | all 9 districts | not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. | “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17) |
 | R110 | §325-28B: Accessory dwelling units (applicability) | all 9 districts | parked: Accessory dwelling units | “This section applies to all accessory dwelling units (ADUs) within the City of Ithaca” (Ch. 325 p.72 l.4) |
 | R111 | §325-28C: Accessory dwelling unit requirements (one per parcel, size, height, setbacks) | R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b | parked: Accessory dwelling units | “A maximum of one ADU is allowed per parcel” (Ch. 325 p.72 l.8) |
 | R112 | §325-28C: Accessory dwelling unit requirements (one per parcel, size, height, setbacks) | RU | parked: Accessory dwelling units | “A maximum of one ADU is allowed per parcel” (Ch. 325 p.72 l.8) |
@@ -645,7 +645,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 - **(7), (8), (10): pointers to the NYS Uniform Code, to Article V and to §325-8A(15)**
   - R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3b, RU: not applicable: Pointers with no requirement of their own; each Article V section is its own row in this table, and the Uniform Code is outside Chapter 325. The law: “All columns established by this section are subject to the supplementary regulations stated in Article V” (Ch. 325 p.27 l.7–8).
   - R-3aa: in the rulebook: `stories` (cited) Note: (10) points to §325-8A(15), whose 500 sf exemption R-3aa.stories applies to the two-story minimum.
-- **(9) R-3 land that directly abuts R-1 (§325-19E)**
+- **(9) R-3 land that directly abuts R-1 (the law points to §325-9B(1); the conditions are in §325-19E)**
   - R-1a, R-1b, R-2a, R-2b, R-2c, RU: not applicable: Applies only to R-3 property next to R-1. The law: “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9).
   - R-3a, R-3aa, R-3b: flag (needs review): `abutting_r1` (cited) The law: “For special conditions on development of property in R-3 that directly abuts R-1” (Ch. 325 p.27 l.9).
 - **(11) Nonconforming uses and structures follow Article VI**
@@ -969,42 +969,42 @@ Code can't prove that the law's words support a decision; it proves only that th
 ### §325-24B General restrictions (rule, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24C Noise (rule, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24D Vibration (flag, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24E Smoke (rule, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24F Dust, dirt, odor and fumes (flag, pp.65–66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24G Fire and safety (rule, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24H Glare and heat (flag, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-24I Industrial sewage and waste (rule, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart (pp.2, 3, 14) never refers to §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (Ch. 325 p.65 l.16–17).
 
 ### §325-25 Location of accessory structures. (rule, p.66)
 

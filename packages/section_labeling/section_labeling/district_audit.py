@@ -329,7 +329,7 @@ class Audit:
             if dec.get("file") == CHART and not dec.get("cell"):
                 p.append(f"{where}: a chart quote names its `cell` ({{section, row}}), so the district's own cell is shown")
             if dec.get("cell") and dec.get("quote") and (cell := self._cell_record(d, dec)) and \
-                    not {(dec.get("page", 2), n) for n in cell.get("row_lines") or []} <= self._quote_keys(pid, dec):
+                    {(dec.get("page", 2), n) for n in cell.get("row_lines") or []} != self._quote_keys(pid, dec):
                 p.append(f"{where}: the quote isn't the line of the cell it names (row {dec['cell'].get('row')!r})")
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":
                 p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-'")
@@ -611,7 +611,7 @@ class Audit:
                 out.append(f"{k}. **{m['what']}** ({self._sections(m['pieces'])}). {self._where(m['districts'])}; "
                            f"{m['priority']}; {said}. {m['why']}" + (f" Note: {m['note']}" if m["note"] else ""))
         out += ["", "## The table", "",
-                "✓ = in the rulebook (rule ids; (mapped) = by Gordium's stated mapping, the rules don't cite it); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; "
+                "✓ = in the rulebook (rule ids; (mapped) = at least one of these rules covers it only by Gordium's stated mapping, see the reading); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; "
                 "(partly ✓ …) = some parts are covered by those rules, the rest not. [R12] = this cell rests on "
                 "reading R12, listed right after this table with its quote of the law (or, for a mapping, its reason), "
                 "for a person to check. Each piece's reasons are in the section after that.", "",
