@@ -296,7 +296,9 @@ def suggested_facts(doc, zones):
     reads the model."""
     lots, buildings, _ = _sorted_objects(doc)
     lot_data = [{"id": str(o.Id), "area": _area(o.Geometry), "bottom": o.Geometry.GetBoundingBox(True).Min.Z,
-                 "segments": [((a.X, a.Y), (b.X, b.Y)) for a, b in _segments(o.Geometry)]} for o in lots]
+                 "segments": [((a.X, a.Y), (b.X, b.Y)) for a, b in _segments(o.Geometry)],
+                 "segments_ft": [(_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]) for a, b in _segments(o.Geometry)]}
+                for o in lots]                                     # (the street decided in feet: review round 6)
     boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
     building_data = [{"id": str(o.Id), "bottom": b.Min.Z, "volume": b.Diagonal.X * b.Diagonal.Y * b.Diagonal.Z}
                      for o, b in zip(buildings, boxes)]
@@ -513,16 +515,20 @@ def _model_on_screen(o, viewport):
     return (min(p.X for p in pts), min(p.Y for p in pts), max(p.X for p in pts), max(p.Y for p in pts)) if pts else None
 
 
-def _notice_box(o, viewport, taken):
+def _notice_box(o, viewport, taken, old):
     """The "no longer complies" notice, if showing in this view (the active one only, G1): (lines, x, y, w, h),
-    placed off the model and off the boxes in `taken` (logic.notice_spot), and then taken itself."""
+    placed off the model and off the boxes in `taken` (logic.notice_spot), and then taken itself. Never over a
+    model changed since the check it was about (`old`, stale(o)): a verdict outlives its model no more than the
+    rows' marks do (the Rhino job at #28 92cf742: an earlier scene's notice stayed over the next house)."""
     toast = getattr(o, "toast", None)
     active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
-    if not toast or time.time() >= toast[1] or active is None or viewport.Id != active.ActiveViewportID:
+    if not toast or old or time.time() >= toast[1] or active is None or viewport.Id != active.ActiveViewportID:
         return None
-    lines = ["✕ " + line for line in toast[0]]
-    w, h = ui.text_box_size(lines, 13)
-    x, y = logic.notice_spot(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport), taken)
+    placed = logic.notice_place(viewport.Bounds.Width, viewport.Bounds.Height, ["✕ " + line for line in toast[0]],
+                                _model_on_screen(o, viewport), taken)    # compact, in a corner clear of the model
+    if placed is None:                 # no corner clear of the model: never drawn over it (the panel says it)
+        return None
+    lines, (x, y), w, h = placed
     taken.append((x, y, w, h))
     return lines, x, y, w, h
 
@@ -541,6 +547,12 @@ def _in_active_view(e):
     doc = Rhino.RhinoDoc.ActiveDoc
     active = doc.Views.ActiveView if doc is not None else None
     return active is not None and e.Viewport.Id == active.ActiveViewportID
+
+
+def _screen_line(viewport, line):
+    """A model line's two ends on screen: ((x1, y1), (x2, y2))."""
+    a, b = viewport.WorldToClient(line.From), viewport.WorldToClient(line.To)
+    return [[a.X, a.Y], [b.X, b.Y]]
 
 
 def draw_screen(o, e):
@@ -574,9 +586,27 @@ def draw_screen(o, e):
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
+    # what this frame draws where, kept per view (STATE["drawn"]): the in-Rhino checks read the drawing's own
+    # placement, never a copy of it (the Rhino job at 27c8e5d: a claim's own sum disagreed with the screen)
+    drawn = {"size": [e.Viewport.Bounds.Width, e.Viewport.Bounds.Height], "model": _model_on_screen(o, e.Viewport),
+             "taken": [list(t) for t in taken], "lines": on_screen, "labels": [], "notice": None}
+    STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn
     # the notice first (placed off the model and the status box), so no label is drawn under it either
-    notice = _notice_box(o, e.Viewport, taken)
-    for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
+    notice = _notice_box(o, e.Viewport, taken, old)
+    drawn["notice"] = list(notice[1:]) if notice is not None else None
+    keep = list(taken)                       # the status box, the north arrow, the notice: no label ever covers them
+    dims = [tuple(map(tuple, _screen_line(e.Viewport, line))) for line, _, _ in getattr(o, "yard_dims", None) or []] \
+        if plan else []                      # the yards' dimension lines: a moved label keeps off another's
+    drawn["dims"] = dims
+    solids = []                              # each building's footprint and coloured part on screen: never under a
+    for kind, pts in getattr(o, "plan_solids", None) or []:          # label (their outlines, never their boxes)
+        on = [(q.X, q.Y) for q in (e.Viewport.WorldToClient(q) for q in pts)]
+        solids.append(logic.hull(on) if kind == "building" else on)
+    drawn["hard_shapes"], drawn["hard_boxes"] = solids, [list(t) for t in keep]
+    drawn["buildings"] = sum(kind == "building" for kind, _ in getattr(o, "plan_solids", None) or [])
+    # the labels to draw: each yard's (failing first when placed), then each lot edge's length
+    items, colors = [], {}
+    for k, (line, text, status) in enumerate(getattr(o, "yard_dims", None) or []):   # each yard, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
         d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
@@ -585,12 +615,44 @@ def draw_screen(o, e):
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
-            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                        along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
-                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
-        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+            key = ("yard", k, text)
+            items.append({"key": key, "text": text, "line": ((a.X, a.Y), (b.X, b.Y)), "size": 11, "status": status})
+            colors[key] = (color, False)
+    edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []
+    for k, (point, text, edge) in enumerate(edges):
+        a, b = e.Viewport.WorldToClient(edge.From), e.Viewport.WorldToClient(edge.To)
+        key = ("edge", k, text)
+        items.append({"key": key, "text": text, "line": ((a.X, a.Y), (b.X, b.Y)), "size": 11, "status": None})
+        colors[key] = (ui.status_color("complies", dark), True)
+    # placed only once the view is still (logic.place_labels, from _label_tick): never searched in the drawing
+    # loop (the Rhino job at 4bb6d4d: zooming with labels on was 2 fps). The same picture as when they were
+    # placed: drawn there. Moving: carried along with their lines (logic.follow) until the view settles again.
+    vid = str(e.Viewport.Id)
+    sig = (tuple(drawn["size"]), tuple(round(v, 1) for s_ in on_screen for q in s_ for v in q),
+           tuple(round(v, 1) for shp in solids for q in shp for v in q),
+           tuple(tuple(round(v, 1) for v in t) for t in keep), tuple(i["key"] for i in items))
+    cached = (STATE.get("label_cache") or {}).get(vid) or {}
+    settled = cached.get("sig") == sig
+    pending = STATE.get("label_pending") or {}
+    spots = cached.get("spots") or {}
+    if not settled and items and (pending.get("sig") != sig or pending.get("view") != vid):   # moved: wait again
+        carried = {i["key"]: logic.follow(spots[i["key"]], i["line"]) for i in items if i["key"] in spots}
+        STATE["label_pending"] = {"view": vid, "doc": o.doc, "sig": sig, "at": time.time(), "items": items,
+                                  "size": tuple(drawn["size"]), "keep": [tuple(t) for t in keep], "dims": dims,
+                                  "shapes": solids, "lines": obstacles, "carried": carried}
+        _label_timer()
+    shown = [(item, spots[item["key"]]) for item in items if item["key"] in spots]   # never placed: at rest
+    if not settled:                          # moving: only those carried along that keep every HARD rule here and
+        shown = logic.shown_while_moving(    # now, the first placed first; the rest hidden until the view rests
+            [(item, logic.follow(got, item["line"])) for item, got in shown], tuple(drawn["size"]), keep, dims, solids)
+    for item, got in shown:
+        color, edge = colors[item["key"]]
+        (xa, ya), (xb, yb) = item["line"]
+        ui.paint_label(d, ((xa + xb) / 2, (ya + yb) / 2), got, color, dark, edge_leader=edge, line=item["line"])
+        drawn["labels"].append([item["text"], [got["left"], got["top"], got["w"], logic.label_height(
+            len(got["rows"]), got["size"]), got["top"]], len(got["rows"]), [list(q) for q in item["line"]],
+            got["led"], got["size"], got["forced"], got.get("order")])
+    drawn["settled"] = settled or not items
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
@@ -599,6 +661,7 @@ def draw_screen(o, e):
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
+    drawn["complete"] = True                 # every label and the notice really drawn this frame (review round 2)
     if not boxed:
         return
     state = "stale" if old else o.message[0]
@@ -607,6 +670,67 @@ def draw_screen(o, e):
     rows = _status_rows(o, old)
     x, y, _, _ = logic.status_box(e.Viewport.Bounds.Width, rows)
     ui.draw_text_box(d, rows, color, int(x), y, dark, 13)
+
+
+def _icon_zoom():
+    """The display's scaling where Rhino's screen pixels are physical ones (Windows at 150 %: 1.5), for the size of
+    the world-axis icon kept clear; 1 on the Mac (its views count in points: the Rhino job at 8bfabdd) or when
+    Rhino doesn't say."""
+    try:
+        if Rhino.Runtime.HostUtils.RunningOnOSX:
+            return 1.0
+        return min(max(float(Rhino.UI.Dpi.DpiScale()), 1.0), 4.0)
+    except Exception:
+        return 1.0
+
+
+logic.AXIS_ICON_SCALE = _icon_zoom()
+
+
+def _label_timer():
+    """The timer that places the labels once the view has been still for LABEL_SETTLE_S (started on demand)."""
+    timer = STATE.get("label_timer")
+    if timer is None:
+        timer = ef.UITimer()
+        timer.Interval = 0.05
+        timer.Elapsed += logic.guard(logic.current_only(lambda s, e: _label_tick(), _is_current), "place the labels")
+        STATE["label_timer"] = timer
+        LEFTOVERS["label_timer"] = timer.Stop
+    timer.Start()
+
+
+def _label_tick():
+    pending = STATE.get("label_pending")
+    if pending is None:
+        if STATE.get("label_timer"):
+            STATE["label_timer"].Stop()
+        return
+    if time.time() - pending["at"] >= logic.LABEL_SETTLE_S:
+        settle_labels()                      # all at once, in one pass (the Rhino job at 5b46c99: about 70 ms at most,
+        # once, at rest; in budgeted ticks the old places showed meanwhile and then jumped)
+
+
+def settle_labels(budget_s=None):
+    """Place the labels the last frame asked for (logic.LabelRun), a few each call (`budget_s`: one label at least;
+    None: all, for the in-Rhino scripts), never in the drawing loop: Rhino stays responsive between the timer's
+    ticks, and a newer request (the view moved again) starts a new run. Once all are placed: kept for that view
+    and its document redrawn, which then draws them where they were placed. Whether a run finished."""
+    pending = STATE.get("label_pending")
+    if pending is None:
+        return False
+    run = pending.get("run")
+    if run is None:
+        run = pending["run"] = logic.LabelRun(pending["items"], pending["size"], pending["keep"], pending["dims"],
+                                              pending["shapes"], pending["lines"], pending.get("carried"))
+    if not run.step(budget_s):
+        return False
+    STATE.pop("label_pending", None)
+    STATE.setdefault("label_cache", {})[pending["view"]] = {"sig": pending["sig"], "spots": run.spots}
+    doc = Rhino.RhinoDoc.FromRuntimeSerialNumber(pending["doc"]) if pending.get("doc") is not None else None
+    doc = doc or Rhino.RhinoDoc.ActiveDoc      # the document it was placed for (review of 3446e94)
+    if doc is not None:
+        doc.Views.Redraw()
+    return True
 
 
 def _status_rows(o, old):
@@ -1587,6 +1711,43 @@ def _get_point(prompt):
     return Rhino.Input.RhinoGet.GetPoint(prompt, True)
 
 
+def _ask_street_more(question):
+    """True (Yes) or False (No), never a default: Enter asks again, with the reason; Esc cancels (Cancelled: in the
+    start box, Edit site… included, the pick changes nothing and the box comes back; in change_facts, the
+    command-line edit, the whole edit is cancelled, as Esc does at its every prompt). Neither
+    default is safe: kept as street, a stretch that isn't can make the frontage long enough to pass lot width (a
+    40 ft street with a 15 ft side line bent 20° from it read 55'-0", complies; the truth 40'-0" does not); left
+    out, a stretch that is street lets the front yard pass from part of it (street-run review rounds 14 and 15)."""
+    prompt = question
+    while True:
+        go = Rhino.Input.Custom.GetOption()
+        go.SetCommandPrompt(prompt)
+        yes = go.AddOption("Yes")
+        no = go.AddOption("No")
+        go.AcceptNothing(True)
+        got = go.Get()
+        if got == Rhino.Input.GetResult.Option:
+            if go.OptionIndex() == yes:
+                return True
+            if go.OptionIndex() == no:
+                return False
+        elif got != Rhino.Input.GetResult.Nothing:      # Esc, or Rhino ending the prompt (another command,
+            raise Cancelled()                            # closing): never asked again forever (round 16)
+        prompt = logic.STREET_ANSWER_NEEDED + question
+
+
+def _clicked_piece(doc, lot, point):
+    """The piece of the lot outline a click is on: the nearest one, whatever its length, never moved to another
+    line (street-run review round 7: a click on an arc drawn in short chords jumped to the side line). A short
+    piece standing alone (a point drawn twice) is refused by the logic with words to click beside it."""
+    return min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+
+
+def _outline(doc, lot):
+    """The lot outline's pieces, in feet: [[x, y], [x, y]] each, as a click on one is read."""
+    return [[_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]] for a, b in _segments(lot.Geometry)]
+
+
 def _box_pick(doc, what, facts, saved_ui, session):
     """One pick the start box asked for, with the box hidden. Esc or Enter: nothing changes (Esc at any prompt,
     rhino_logic.pick_or_nothing). Every model edit goes through the box's session."""
@@ -1610,40 +1771,66 @@ def _one_pick(doc, what, facts, saved_ui, session):
 
 def _pick_outcome(doc, what, facts, saved_ui, session):
     """What one pick gave, or None (Esc at any prompt, Enter with nothing clicked). Drawn objects go through the
-    session. The street: {"picks": the lot lines clicked, "name": the clicked line's street}; rhino_logic.pick_effect
-    sets the street lines from them (pick_street / street_lines_after_picks, through set_street_lines)."""
+    session. The street: {"lines", "ids": the street lines worked out from the clicks (the whole street a piece is
+    on, rhino_logic.add_street_pick / pick_street, asking at an unclear end), "name": the clicked line's street};
+    rhino_logic.pick_effect sets them (through set_street_lines)."""
     if what == "street":
         lot = _find(doc, facts.get("lot_id") or "")
         if lot is None:
             return None
-        corner = facts.get("corner_lot") is True     # a corner lot: every line on a street, Enter when done
-        picks = []
-        while True:
-            rc, point = _get_point(logic.street_pick_prompt(corner, len(picks)))
+        outline = _outline(doc, lot)
+        try:
+            if facts.get("corner_lot") is True:      # a corner lot: every street clicked, Enter when done
+                picks, runs = [], []
+                names = logic.outline_names(outline, facts.get("street_line"), facts.get("street_ids"))
+                while True:
+                    rc, point = _get_point(logic.street_pick_prompt(True, len(picks)))
+                    if rc == Rhino.Commands.Result.Cancel:
+                        raise Cancelled()            # Esc: nothing changes, the lines clicked so far too
+                    if rc != Rhino.Commands.Result.Success:   # Enter: done
+                        break
+                    a, b = _clicked_piece(doc, lot, point)
+                    line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+                    # the whole street that piece is on, never round a corner; said, and an unclear end asked; only
+                    # a click that kept a street counts as picked (street-run round 12)
+                    grown, said = logic.add_street_pick(runs, outline, line, names, _ask_street_more)
+                    say(logic.so_far(said) if grown != runs else said)
+                    if grown != runs:
+                        picks.append(line)
+                    runs = grown
+                lines, ids = logic.street_lines_of(outline, runs, names, picks)
+                return {"lines": lines, "ids": ids, "name": None} if lines else None   # (every click refused)
+            rc, point = _get_point(logic.street_pick_prompt(False, 0))
             if rc == Rhino.Commands.Result.Cancel:
-                return None                           # Esc: nothing changes, the lines clicked so far too
-            if rc != Rhino.Commands.Result.Success:   # Enter: done
-                break
-            a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
-            picks.append([_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]])
-            if not corner:
-                break
-        if not picks:
+                raise Cancelled()
+            if rc != Rhino.Commands.Result.Success:
+                return None
+            a, b = _clicked_piece(doc, lot, point)
+            picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+            refused = logic.refused_click(_outline(doc, lot), picked)   # (before asking its name: round 9)
+            if refused:
+                say(refused)
+                return None
+            name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
+                                                picked, ids=facts.get("street_ids"))   # the line's own street?
+            if name is None:                                   # else asked, never guessed
+                ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga St")
+                ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")
+                ask.AcceptNothing(True)
+                got = ask.GetLiteralString()
+                if got == Rhino.Input.GetResult.Cancel:
+                    raise Cancelled()
+                name = (ask.StringResult() or "").strip() or None if got == Rhino.Input.GetResult.String else None
+            told = []
+            lines, ids = logic.pick_street(facts.get("street_line"), facts.get("street_ids"), picked, name,
+                                           outline=_outline(doc, lot), ask=_ask_street_more, said=told)
+            say(told[-1]["words"] if told else logic.street_words(name or "This street", lines, ids))
+            if told and told[-1]["refused"]:          # (a point clicked: everything stays as it was)
+                return None
+            return {"lines": lines, "ids": ids, "name": name}
+        except Cancelled:                            # Esc (the bend question, a pick): nothing changes
+            say(logic.ESC_STREET)
             return None
-        if corner:
-            return {"picks": picks, "name": None}     # two streets: unnamed until named
-        picked = picks[0]
-        name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
-                                            picked, ids=facts.get("street_ids"))   # the line's own street?
-        if name is None:                                       # else asked, never guessed
-            ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga St")
-            ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")
-            ask.AcceptNothing(True)
-            got = ask.GetLiteralString()
-            if got == Rhino.Input.GetResult.Cancel:
-                return None                           # Esc: nothing changes
-            name = (ask.StringResult() or "").strip() or None if got == Rhino.Input.GetResult.String else None
-        return {"picks": [picked], "name": name}
     if what == "lot":                            # Use my survey: the surveyed outline
         return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
                      _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
@@ -1967,7 +2154,18 @@ def _undo_redo(sender, e):
     if o is not None:
         _clear(o)
     STATE.pop("lookup_guide", None)
+    _settings_from_file(Rhino.RhinoDoc.ActiveDoc)
     STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())   # re-checked at the next idle (live)
+
+
+def _settings_from_file(doc):
+    """The panel's settings kept in memory, read again from the file after Undo or Redo (a setting undone is put
+    back in the file only; memory only, never the document: round 5, R5-1): Show on-screen labels."""
+    if doc is None:
+        return
+    shown = logic.labels_on(_ui_state(doc))
+    STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
+    ui.set_labels_tick(STATE.get("panel_parts"), shown)
 
 
 def _drawn(doc, facts, state, saved_ui, session=None):
@@ -2118,26 +2316,32 @@ def _change_facts(doc, facts, options):
     _highlight(doc, facts)
     lot = _find(doc, facts.get("lot_id") or "")
     if lot is not None:
-        picked = []
+        picked, runs, outline = [], [], _outline(doc, lot)
         while True:                      # every lot line on a street (both streets on a corner lot)
-            keeps = not picked and logic.street_enter_keeps(facts)
-            prompt = "Click a lot line on the street" + (" (Enter when done)" if picked else
-                                                         " (Enter keeps the blue one)" if keeps else "")
+            keeps = not runs and logic.street_enter_keeps(facts)        # (what was kept, not what was clicked:
+            prompt = "Click a lot line on the street" + (" (Enter when done)" if runs else   # a refused click
+                                                         " (Enter keeps the blue one)" if keeps else "")   # keeps none)
             rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, True)      # Enter: done, keep, or asked again
             _go_on(rc)
             if rc != Rhino.Commands.Result.Success:
-                if picked or keeps:
+                if runs or keeps:
                     break
                 Rhino.RhinoApp.WriteLine("Gordium: this lot has no street line yet; click one (Esc cancels)")
                 continue
-            a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+            a, b = _clicked_piece(doc, lot, point)
             line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
-            if line not in picked:
+            # the whole street that piece is on, never round a corner (unnamed: from the drawing alone); every
+            # click is answered, a refused one too, every time (round 10)
+            grown, said = logic.add_street_pick(runs, outline, line, None, _ask_street_more)
+            say(logic.so_far(said) if grown != runs and facts.get("corner_lot") else said)   # (corner: so far)
+            if grown != runs:
                 picked.append(line)
-            if not facts.get("corner_lot"):
+            runs = grown
+            if not facts.get("corner_lot") and runs:      # (a refused click: asked again)
                 break
-        if picked:
-            logic.set_street_lines(facts, picked)          # unnamed: the lines picked here, never the old names
+        lines, ids = logic.street_lines_of(outline, runs, None, picked) if picked else ([], None)
+        if lines:                         # never the old names; every line an id ("Street 1"…, as said): #18
+            logic.set_street_lines(facts, lines, ids)
         _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
@@ -2183,10 +2387,13 @@ def report_path(doc):
 
 
 def _clear(o):
-    """Nothing from an earlier check is left on screen."""
+    """Nothing from an earlier check is left on screen, its "no longer complies" notice included: every check
+    clears before it draws (a check that finds nothing newly failing leaves no notice of an earlier one), and so
+    does another document, a failed check and new facts."""
+    o.toast = None
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
-    o.plan_lines = []
+    o.plan_lines, o.plan_solids = [], []
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
     o.doc = None
@@ -2243,6 +2450,12 @@ def _draw_plan(doc, o, result, facts):
     pts = o.lot_outline or []
     o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
         [line for b in _buildings(doc) for line in _plan_edges(b.Geometry)]
+    # what no plan label may cover (logic.place_dim_label's HARD rules): each building's footprint (its plan edges'
+    # ends: their hull on screen each frame) and each coloured part's own outline (model space)
+    o.plan_solids = [("building", [q for line in _plan_edges(b.Geometry) for q in (line.From, line.To)])
+                     for b in _buildings(doc)] + \
+        [("coloured", [_model_point(doc, (x, y)) for x, y in e["outline"]]) for e in plan.get("encroach") or []
+         if e.get("outline") and logic.highlight(e.get("status") or "does_not_comply")]
     o.yards_zone = None
     if lot is not None and plan.get("buildable"):
         inner = rg.PolylineCurve([_model_point(doc, p) for p in plan["buildable"] + plan["buildable"][:1]])
@@ -2316,9 +2529,12 @@ def run_check(doc, report=True):
         if not STATE.get("headless"):
             ui.show(panel(), view)
             ui.set_labels_tick(STATE.get("panel_parts"), shown)
+            if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
+                ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
-            say(logic.report_message(path, False, result["report_error"], stale=had_report))
+            first = "✕ " + result["notice"] + " · " if result.get("notice") else ""   # the notice kept in the line
+            say(first + logic.report_message(path, False, result["report_error"], stale=had_report))
         return result
     except Exception as e:
         _clear(o)
@@ -2359,6 +2575,8 @@ def _toast_tick():
     o = STATE.get("overlay")
     if getattr(o, "toast", None) and time.time() >= o.toast[1]:
         _clear_toast()
+    elif not getattr(o, "toast", None) and STATE.get("toast_timer"):    # cleared with a check's results (_clear):
+        STATE["toast_timer"].Stop()                                     # nothing left to time
 
 
 def _clear_toast():
@@ -2511,13 +2729,15 @@ def open_report():
     result = run_check(doc, report=True)          # the check's result stays, even if the file can't be written
     written = result is not None and not result.get("report_error") and os.path.exists(path) and \
         os.path.getmtime(path) != before
+    notice = (result or {}).get("notice")      # the check's notice kept in the one line (review round 1: a view
+    first = "✕ " + notice + " · " if notice else ""   # with no corner clear of the model shows it nowhere else)
     if not written:
         if not (result or {}).get("report_error"):    # a report error: run_check has said it
-            say(logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
-                                     ("the report file wasn't written to " + os.path.dirname(path))))
+            say(first + logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
+                                             ("the report file wasn't written to " + os.path.dirname(path))))
         return
     opened, why = ui.open_target(path)            # os.startfile on Windows, `open` on macOS
-    say(logic.report_message(path, True, opened=opened, open_error=why))
+    say(first + logic.report_message(path, True, opened=opened, open_error=why))
 
 
 def off():
@@ -2777,6 +2997,8 @@ def _release(key, value):
         if form is not None:
             form.Close()
     elif key == "toast_timer":
+        value.Stop()
+    elif key == "label_timer":
         value.Stop()
     elif key == "worker":
         _stop_worker()

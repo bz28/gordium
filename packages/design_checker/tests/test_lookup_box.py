@@ -116,7 +116,7 @@ def test_a_lot_on_two_streets_asks_for_the_front(name):
     p = looked_up(name)
     facts, saved, state = box(p)
     assert p["facts"]["corner_lot"]["value"] == "ask" and facts["corner_lot"] is True
-    assert logic.uncertain(state) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain(state) == logic.CORNER_HINT
     placed = frame({"facts": p["facts"]})
     assert max(pt[1] for seg in placed["street_line"] for pt in seg) < 2.0          # the address street at the bottom
 
