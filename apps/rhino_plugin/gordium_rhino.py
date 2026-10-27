@@ -2046,7 +2046,18 @@ def _undo_redo(sender, e):
     o = STATE.get("overlay")
     if o is not None:
         _clear(o)
+    _settings_from_file(Rhino.RhinoDoc.ActiveDoc)
     STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())   # re-checked at the next idle (live)
+
+
+def _settings_from_file(doc):
+    """The panel's settings kept in memory, read again from the file after Undo or Redo (a setting undone is put
+    back in the file only; memory only, never the document: round 5, R5-1): Show on-screen labels."""
+    if doc is None:
+        return
+    shown = logic.labels_on(_ui_state(doc))
+    STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
+    ui.set_labels_tick(STATE.get("panel_parts"), shown)
 
 
 def hide_massing(hidden):
