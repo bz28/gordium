@@ -216,11 +216,77 @@ def test_tested_on_a_model_comes_from_test_sites():
     assert "R-2a.height" not in tests                            # no R-2 model yet: the table says none
 
 
-def test_the_cli_refuses_to_write_when_a_decision_isnt_backed(monkeypatch, tmp_path, capsys):
+def test_the_cli_refuses_to_write_when_a_decision_isnt_backed(monkeypatch, capsys):
+    written = []
     monkeypatch.setattr(audit, "build", lambda j: (None, ["a problem"]))
-    monkeypatch.setattr(audit, "OUTPUT", "../../../../../" + str(tmp_path / "never.md"))
+    monkeypatch.setattr(cli, "_write_or_check", lambda *a: written.append(a) or True)
     assert cli.main(["audit"]) == 1
-    assert "✗ new_york/ithaca_city: a problem" in capsys.readouterr().out and not (tmp_path / "never.md").exists()
+    assert "✗ new_york/ithaca_city: a problem" in capsys.readouterr().out and written == []
+
+
+# Review round 1 (cold reviewer + 2 sceptics each): every confirmed finding pinned.
+
+def test_rules_or_mapped_on_a_decision_that_isnt_covered_are_refused(decisions):
+    """A `rules` list on not_applicable or missing would silence the check that a citing rule is named."""
+    data = with_piece(decisions, "325-19C", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "quote": "Corner lot transition", "rules": ["front_yard"]}}])
+    found = problems(data)
+    assert any("`rules` only goes with rulebook or flag" in p for p in found)
+    assert any("R-1a.front_yard cited but no decision names it" in p for p in found)
+    data = with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "low", "why": "w",
+                                                                    "mapped": "m"}}])
+    assert any("`mapped` only goes with rulebook or flag" in p for p in problems(data))
+
+
+def test_a_chart_not_applicable_checks_the_districts_own_cell(decisions):
+    """Multiple dwellings are • in R-3a: "not permitted" there is refused; a chart quote without a cell too."""
+    base = decisions["_multiple_not_permitted"]
+    data = with_piece(decisions, "325-3B:row_house", [{"what": "x", "all": base}])
+    found = problems(data)
+    assert any(p.startswith("325-3B:row_house part 1 (R-3a): the chart's R-3a cell") and "'•'" in p for p in found)
+    assert not any("(R-1a): the chart's" in p for p in found)                  # "-" in R-1a: fine
+    no_cell = {k: v for k, v in base.items() if k != "cell"}
+    data = with_piece(decisions, "325-3B:row_house", [{"what": "x", "all": no_cell}])
+    assert any("a chart quote needs `cell`" in p for p in problems(data))
+
+
+def test_the_omission_quote_needs_a_use_on_no_residential_list(decisions):
+    base = {"status": "not_applicable", "why": "w", "page": 26, "quote": "except where otherwise indicated by "
+            "specific prohibition or omission"}
+    assert problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(base, unlisted_use="motel")}])) == []
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": base}]))
+    assert any("needs `unlisted_use`" in p for p in found)
+    for use in ("two-family", "school", "dormitory"):
+        found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(base, unlisted_use=use)}]))
+        assert any("is a residential use" in p for p in found), use
+
+
+def test_a_definition_link_on_a_piece_of_several_parts_needs_mapped(decisions):
+    """`height` reaches §325-8A only through the lot_depth definition (8A(14)); naming it for Columns 8 and 9
+    without saying why is refused."""
+    parts = copy.deepcopy(decisions["pieces"]["325-8A"])
+    i = next(k for k, part in enumerate(parts) if part["what"].startswith("Columns 8 and 9"))
+    parts[i]["all"] = {"status": "rulebook", "rules": ["stories", "height"]}
+    found = problems(with_piece(decisions, "325-8A", parts))
+    assert any("325-8A part" in p and "height don't cite the piece" in p for p in found)
+
+
+def test_loading_for_nonresidential_uses_is_missing_in_every_district(built):
+    """Chart p.14's "Allowed by variance" row has no rule or flag in any district (each rulebook header says so)."""
+    i = next(k for k, w in enumerate(built._parts("325-8A")) if w.startswith("Column 5"))
+    assert {d: built.cells["325-8A"][d][i][1]["status"] for d in built.districts} == {d: "missing" for d in built.districts}
+
+
+def test_compliance_with_district_regulations_is_not_counted_as_covered(built, decisions):
+    assert {built.status("325-7A", d) for d in built.districts} == {"not_applicable"}
+    data = with_piece(decisions, "325-7A", [{"what": "x", "all": {"status": "rulebook", "rules": ["*"], "mapped": "m"}}])
+    assert any("name the rules" in p for p in problems(data))           # "*" matches no rule
+
+
+def test_a_flagged_part_is_never_shown_with_a_check_mark(built):
+    """§325-8B in R-3a: abutting_r1 and lot_size_zero_lot_line are flags, the use part a flag too."""
+    short = built._short("325-8B", "RU")
+    assert "partly flagged: primary_structures" in short and "✓ primary_structures" not in short
 
 
 def test_the_table_is_the_same_whatever_python_hashes_sets_with():

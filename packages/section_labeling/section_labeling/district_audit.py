@@ -42,7 +42,7 @@ from pathlib import Path
 from document_extraction.sections import piece_keys
 from rule_format import formula
 from rule_format.labels import load_pieces
-from rule_format.rulebook import REPO, Context, load, locate, read_jsonl, rulebook_for
+from rule_format.rulebook import REPO, Context, district_name, load, locate, read_jsonl, rulebook_for
 
 DECISIONS = "residential_coverage.yaml"
 OUTPUT = "6_coverage_report/residential_districts.md"
@@ -55,8 +55,10 @@ PRIORITIES = {"high": "a real design rule that should exist; a design can pass t
               "low": "a narrow or cautious gap (a permission not used, a rare case, or a pointer)",
               "operational": "how a property is run or permitted, not what is drawn",
               "other_project": "a different kind of project (not a building on a residential lot)"}
-DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", "page", "piece", "item", "link",
-                   "priority", "note"}
+DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", "page", "piece", "cell",
+                   "unlisted_use", "item", "link", "priority", "note"}
+CHART = "zoning_charts_2026-04.pdf"
+OMISSION = "except where otherwise indicated by specific prohibition or omission"   # §325-8B(3), p.26
 
 
 def _law_rows(j: Path):
@@ -202,7 +204,9 @@ class Audit:
                     self._check(pid, d, decision, f"{where} ({d})")
                     cell[d].append((part["what"], decision))
             for d in self.districts:
-                named = {r for _, dec in cell[d] for r in self._expand(d, dec.get("rules", [])) + list(dec.get("also", []))}
+                named = {r for _, dec in cell[d] for r in (self._expand(d, dec.get("rules", []))
+                                                           if dec.get("status") in ("rulebook", "flag") else [])
+                         + list(dec.get("also") or [])}
                 for rid, cited in self.cites[d].items():
                     if pid in cited and rid.split(".", 1)[1] not in named:
                         self.problems.append(f"{pid} ({d}): {rid} {cited[pid]} but no decision names it "
@@ -231,11 +235,11 @@ class Audit:
         return out
 
     def _expand(self, d: str, rules) -> list[str]:
-        """Rule id suffixes; a trailing * matches every rule with that prefix, and '*' alone the whole rulebook."""
+        """Rule id suffixes; a trailing * matches every rule with that prefix."""
         out = []
         for r in rules or []:
             ids = [i.split(".", 1)[1] for i in self.books[d]]
-            out += ["*"] if r == "*" else [i for i in ids if i.startswith(r[:-1])] if str(r).endswith("*") else [r]
+            out += [i for i in ids if r[:-1] and i.startswith(r[:-1])] if str(r).endswith("*") else [r]
         return out
 
     def _check(self, pid: str, d: str, dec: dict, where: str):
@@ -250,10 +254,8 @@ class Audit:
             if not ids:
                 p.append(f"{where}: name the rules (`rules`)")
             uncited, reviews = [], False
+            several = len((self.data.get("pieces") or {}).get(pid) or []) > 1
             for rid in ids:
-                if rid == "*":                    # the whole rulebook: only ever a mapping
-                    uncited.append(rid)
-                    continue
                 rule = self.books[d].get(f"{d}.{rid}")
                 if rule is None:
                     p.append(f"{where}: {d}.{rid} isn't in the rulebook")
@@ -261,7 +263,10 @@ class Audit:
                 if status == "rulebook" and rule.get("kind") != "rule":
                     p.append(f"{where}: {d}.{rid} is a {rule.get('kind')}, not a rule (status flag?)")
                 reviews |= rule.get("kind") == "flag" or bool(rule.get("review_when"))
-                if pid not in self.cites[d].get(f"{d}.{rid}", {}):
+                how = self.cites[d].get(f"{d}.{rid}", {}).get(pid)
+                # a definition links its whole piece; on a piece of several parts it can't show which part, so it
+                # counts as a citation only with `mapped` saying why (it still has to be named, below)
+                if how is None or (several and how.startswith("via definition")):
                     uncited.append(rid)
             if status == "flag" and ids and not reviews:
                 p.append(f"{where}: none of {', '.join(ids)} ever says needs review (no flag, no review_when)")
@@ -269,6 +274,9 @@ class Audit:
                 p.append(f"{where}: {', '.join(uncited)} don't cite the piece: say why in `mapped`, or name others")
             if dec.get("mapped") and not uncited and ids:
                 p.append(f"{where}: every rule named cites the piece; drop `mapped`")
+        if status not in ("rulebook", "flag"):
+            p += [f"{where}: `{k}` only goes with rulebook or flag (a rule that cites the piece but covers none of "
+                  "it goes in `also`)" for k in ("rules", "mapped") if k in dec]
         for rid in dec.get("also") or []:
             if pid not in self.cites[d].get(f"{d}.{rid}", {}):
                 p.append(f"{where}: `also` names {d}.{rid}, which doesn't cite the piece")
@@ -279,6 +287,13 @@ class Audit:
                 p.append(f"{where}: give the law's own words (`quote`)")
             elif not self._quote_found(pid, dec):
                 p.append(f"{where}: quote not found: {dec['quote']!r}")
+            if dec.get("file") == CHART and not dec.get("cell"):
+                p.append(f"{where}: a chart quote needs `cell` ({{section, row}}), so the district's own cell is checked")
+            if dec.get("cell") and (got := self._cell(d, dec)) != "-":
+                p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-' "
+                         "(not permitted)")
+            if dec.get("quote") == OMISSION or "unlisted_use" in dec:
+                p += self._unlisted_problems(d, dec, where)
         if status == "parked" and dec.get("item") not in self.parked:
             p.append(f"{where}: parked item must be one of {sorted(self.parked)}")
         if status == "open_question":
@@ -290,6 +305,27 @@ class Audit:
                 p.append(f"{where}: {path} has no {heading!r}")
         if status == "missing" and dec.get("priority") not in PRIORITIES:
             p.append(f"{where}: priority must be one of {list(PRIORITIES)}")
+
+    def _cell(self, d: str, dec: dict):
+        """The district's own chart cell for the decision's row (None if the chart reader has no such cell)."""
+        c = dec["cell"]
+        column = next((col for (pg, sec, row, col) in self.ctx.cells.get(CHART, {})
+                       if district_name(col) == d), None)
+        cell = self.ctx.cells.get(CHART, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
+        return None if cell is None else cell.get("value")
+
+    def _unlisted_problems(self, d: str, dec: dict, where: str) -> list[str]:
+        """The omission quote (§325-8B(3)) backs "not applicable" only for a named use that is on no residential
+        list: not a use Gordium accepts (uses.yaml) and named in no district's use rule."""
+        use = str(dec.get("unlisted_use") or "")
+        if not use:
+            return [f"{where}: the omission quote needs `unlisted_use` (the use it is about)"]
+        key = use.lower().replace(" ", "_").replace("-", "_")
+        rule = self.books[d].get(f"{d}.use") or {}
+        text = " ".join(str(rule.get(k, "")) for k in ("check", "applies_when", "title")).lower()
+        if any(key in u or u in key for u in self.ctx.uses) or key in text or use.lower() in text:
+            return [f"{where}: {use!r} is a residential use (uses.yaml or {d}.use), so leaving it out isn't omission"]
+        return []
 
     def _quote_found(self, pid: str, dec: dict) -> bool:
         file = dec.get("file", LAW)
@@ -318,19 +354,20 @@ class Audit:
     def _short(self, pid: str, d: str) -> str:
         parts = self.cells.get(pid, {}).get(d, [])
         worst = self.status(pid, d)
-        ids = list(dict.fromkeys(r for _, dec in parts if dec.get("status") in ("rulebook", "flag")
-                                 for r in self._expand(d, dec.get("rules")) if r != "*"))
-        whole = any("*" in (dec.get("rules") or []) for _, dec in parts)
-        names = (", ".join(ids[:3]) + (f" +{len(ids) - 3} more" if len(ids) > 3 else "")) if ids else (
-            "whole rulebook" if whole else "")
+        def ids(status):
+            found = list(dict.fromkeys(r for _, dec in parts if dec.get("status") == status
+                                       for r in self._expand(d, dec.get("rules"))))
+            return (", ".join(found[:3]) + (f" +{len(found) - 3} more" if len(found) > 3 else "")) if found else ""
+        checked, flagged = ids("rulebook"), ids("flag")
         if worst == "rulebook":
-            return f"✓ {names}"
+            return f"✓ {checked}"
+        also = ([f"partly ✓ {checked}"] if checked else []) + ([f"partly flagged: {flagged}"] if flagged else [])
         if worst == "flag":
-            return f"flag: {names}"
+            return f"flag: {flagged}" + (f" ({also[0]})" if checked else "")
         text = {"missing": "**MISSING**", "open_question": "open question", "parked": "parked: " + ", ".join(
             dict.fromkeys(dec.get("item", "") for _, dec in parts if dec.get("status") == "parked")),
             "not_applicable": "n/a"}[worst]
-        return text + (f" (partly ✓ {names})" if names and worst != "not_applicable" else "")
+        return text + (f" ({'; '.join(also)})" if also and worst != "not_applicable" else "")
 
     def counts(self) -> dict[str, Counter]:
         return {d: Counter(self.status(pid, d) for pid in self.rows) for d in self.districts}
@@ -372,16 +409,17 @@ class Audit:
         """One decision in words. Rule ids without the district, so districts decided alike read as one line."""
         s = dec["status"]
         if s in ("rulebook", "flag"):
-            ids = [r for r in self._expand(d, dec.get("rules")) if r != "*"]
+            ids = self._expand(d, dec.get("rules"))
             how = [f"`{rid}`" + (f" ({cited})" if (cited := self.cites[d].get(f"{d}.{rid}", {}).get(pid))
                                  else " (mapped)") for rid in ids]
-            text = f"{WORDS[s]}: " + ("the whole rulebook" if "*" in (dec.get("rules") or []) else ", ".join(how))
+            text = f"{WORDS[s]}: " + ", ".join(how)
             if dec.get("mapped"):
                 text += f". Gordium's mapping, not a citation: {dec['mapped']}"
         elif s == "not_applicable":
             where = (f"{dec.get('file', LAW)} p.{dec['page']}" if "page" in dec
                      else f"§{dec['piece']}" if dec.get("piece") else "this piece")
-            text = f"not applicable: {dec['why']} The law: “{dec['quote']}” ({where})"
+            cell = f"; the district's own cell in row “{dec['cell']['row']}” is “-”" if dec.get("cell") else ""
+            text = f"not applicable: {dec['why']} The law: “{dec['quote']}” ({where}{cell})"
         elif s == "parked":
             item = self.parked[dec["item"]]
             text = f"parked: {item['name']} ({item['decided']})" + (f". {dec['why']}" if dec.get("why") else "")
@@ -495,7 +533,9 @@ class Audit:
             out += [f"### {d}: {kinds['rule']} rules, {kinds['flag']} flags; {tested} checked on a model", "",
                     "| Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |", "|---|---|---|---|---|"]
             for rid, rule in rules.items():
-                cited = ", ".join(f"§{p}" for p in self.pieces if p in self.cites[d][rid]) or "— (the chart only)"
+                links = self.cites[d][rid]
+                cited = ", ".join(f"§{p}" + (" (via definition)" if links[p].startswith("via definition") else "")
+                                  for p in self.pieces if p in links) or "— (the chart only)"
                 names = sorted(_formula_names(rule))
                 where = lambda n: "model" if n in model else "stated" if n in stated else "**none**"
                 measures = ", ".join(f"{n} ({where(n)})" for n in names) or "—"
