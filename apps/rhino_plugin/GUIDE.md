@@ -76,19 +76,19 @@ review is about. A small notice names a rule an edit has just broken ("Rear yard
 ## 3. Edit and watch
 
 Move a wall, raise the roof, add a garage: the panel and the colours update by themselves: live checking is on after `GordiumStart` and `GordiumCheck`
-(`GordiumLive` turns it off and on again). Undo puts the model and the answers back.
+(`GordiumLive` turns it off and on again). Undo puts the model back (Rhino's own Undo) and Gordium re-checks it.
 
 ## What Gordium asks you in the command line
 
-Questions come in the command line (the line at the top or bottom of Rhino). **Esc** cancels the question and
-changes nothing.
+Questions come in the command line (the line at the top or bottom of Rhino). What **Esc** does is said where it
+differs.
 
-Picking the street side (**Change…** on the start box). Esc or Enter leaves it as it was, unless said below:
+Picking the street side (**Change…** on the start box). On a one-street lot, Esc or Enter leaves it as it was:
 
 - `Click the lot line on the street` on a one-street lot; on a corner lot,
   `Click each lot line on a street (`, then how many are picked, then `); Enter when done`. Click any piece:
-  Gordium takes the whole street it is on.
-- `Which street is this lot line on? (Enter leaves it unnamed)`
+  Gordium takes the whole street it is on. On a corner lot, Esc is the same as Enter: the lines clicked so far are kept.
+- `Which street is this lot line on? (Enter leaves it unnamed)`: Esc here also leaves it unnamed; the line you clicked is kept.
 - When Gordium cannot tell whether the lot line bends along one street or turns a corner it asks a **Yes** or
   **No** question. It needs a real answer: Enter asks again, with
   `Gordium needs a Yes or a No here (Esc: nothing changes)`, because a guess could pass a lot that does not comply.
