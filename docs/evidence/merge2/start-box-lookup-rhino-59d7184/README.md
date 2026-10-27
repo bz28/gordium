@@ -1,0 +1,5 @@
+# #19 start-box-lookup at 59d7184 in Rhino 8 (2026-10-27)
+
+- undo_steps_in_rhino.py: 17 of 33. Every action's 'one step' and 'checked again' pass; every 'undone' and 'nothing else' fails. CONTROL (undo_probe_control.*): two separate undo records written by one rhinocode script are both undone by ONE _Undo, so the script's _Undo cannot separate the architect's earlier edit from the action: this is the harness, not proof of a product bug. A real Ctrl+Z after a button press is left for a human (STATUS: FOR BEN).
+- pass2_in_rhino.py: every step passes except 'scale' claim 7 (see below); claim 10 saves the second street as 'Street 2' (corner.json). close and box pass.
+- 'scale' (labels back when zoomed to the lot): fails with no labels recorded, also at rhino-ui c912159, site-lookup 40ae4fd and check-button 7afad1c; PASSES at demo e760f55 (control). #15's labels moved to a timer that places them once the view is still (gordium_rhino.py), but the script still records label_at calls from the drawing loop: a stale script for #15, to be confirmed. Files: scale.json, pass2_scale_rerun.json.

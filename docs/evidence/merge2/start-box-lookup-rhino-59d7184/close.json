@@ -1,0 +1,33 @@
+{
+ "step": "close",
+ "claims": {
+  "13 after every step, exactly one checker process is Rhino's": {
+   "ok": true,
+   "detail": {
+    "after the runs": [
+     "5872"
+    ],
+    "after stopping": []
+   }
+  },
+  "13 stopped when the script ends: none left": {
+   "ok": true,
+   "detail": {
+    "after the runs": [
+     "5872"
+    ],
+    "after stopping": []
+   }
+  }
+ },
+ "closed": [
+  "None"
+ ],
+ "servers": {
+  "after the runs": [
+   "5872"
+  ],
+  "after stopping": []
+ },
+ "ok": true
+}

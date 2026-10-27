@@ -1,0 +1,11 @@
+{
+ "close": {
+  "13 after every step, exactly one checker process is Rhino's": true,
+  "13 stopped when the script ends: none left": true
+ },
+ "box": {
+  "6 the box was shown with no lot": true,
+  "6 no Use my survey\u2026 or Change\u2026 until a lot exists": true,
+  "11 the box says Front lot line (on the street), what it is, and This is the lot's district": true
+ }
+}

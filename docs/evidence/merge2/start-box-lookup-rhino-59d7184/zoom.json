@@ -1,0 +1,37 @@
+{
+ "step": "zoom",
+ "claims": {
+  "3 Zoom to selects the row's objects": {
+   "ok": true,
+   "detail": {
+    "objects": [
+     "8789db7a-cf2e-4781-a57a-e356acb2109b",
+     "11fb1c99-ff6b-424a-b722-dcf1d344d586",
+     "84b75dac-5cb3-4526-a768-ce9e7fd444ae",
+     "a05d7b07-607b-48a2-9655-5d074b6c9ce7"
+    ],
+    "selected": [
+     "a05d7b07-607b-48a2-9655-5d074b6c9ce7",
+     "84b75dac-5cb3-4526-a768-ce9e7fd444ae",
+     "11fb1c99-ff6b-424a-b722-dcf1d344d586",
+     "8789db7a-cf2e-4781-a57a-e356acb2109b"
+    ]
+   }
+  }
+ },
+ "zoom": {
+  "objects": [
+   "8789db7a-cf2e-4781-a57a-e356acb2109b",
+   "11fb1c99-ff6b-424a-b722-dcf1d344d586",
+   "84b75dac-5cb3-4526-a768-ce9e7fd444ae",
+   "a05d7b07-607b-48a2-9655-5d074b6c9ce7"
+  ],
+  "selected": [
+   "a05d7b07-607b-48a2-9655-5d074b6c9ce7",
+   "84b75dac-5cb3-4526-a768-ce9e7fd444ae",
+   "11fb1c99-ff6b-424a-b722-dcf1d344d586",
+   "8789db7a-cf2e-4781-a57a-e356acb2109b"
+  ]
+ },
+ "ok": true
+}
