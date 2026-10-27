@@ -212,3 +212,9 @@ Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from c
   - It ranks friction points and fixes them in their owning PRs, using the /ui skill. Each fix gets a pin test and an in-Rhino re-run.
   - The review loop repeats (cold reviewer + 1 sceptic per UI finding) until a walkthrough comes back clean, cap 4.
   - It writes a short UX report with screenshots for Ben. Taste calls (e.g. panel vs dialog) go to Ben.
+- 2026-10-27 00:20 (coordinator) Residential coverage gaps (Ben asked). New queue items, in this order, after item 6:
+  - 10 Residential coverage audit (Opus). A generated table: 133 rule pieces × 9 districts → in rulebook? measured? tested on a real model? or why not (parked / open question / flag). It has a staleness test, and it is the checklist for 11–13.
+  - 11 Grade the AI drafts (#21) against the hand answer keys (#20, #24, #30). Code only, no AI spend: list every difference, and fix whichever side is wrong in its own PR.
+  - 12 One real test site per district family (R-1, R-2, R-3/RU), with hand-checked expected results. Only 106 Ithaca Rd exists today.
+  - 13 Merge 3 plan for Ben: #21, #24, #30, the #28–#37 stack and #32/#33, in stack order after merge 2.
+  - Not queued: open legal questions (the #11 doc is waiting on the architects/City; we don't send it), later list (parked), architect sign-off (deferred by Ben).
