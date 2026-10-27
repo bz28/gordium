@@ -1350,6 +1350,7 @@ def lot_source(surveyed, source=None):
     return "your survey" if surveyed else "the tax map (±2 ft, approximate)" + (" · " + source if source else "")
 
 
+NO_STREET_YET = "the street is set when the lot is drawn"
 NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
 # a file with no lot the box can use (Edit site… in an empty file): its own lot, drawn or picked (never the sample)
 LOT_MISSING = "no lot yet: draw it, or pick a closed outline on the Site layer"
@@ -2074,7 +2075,8 @@ def box_rows(state, flat=None):
                   if has_lot else NO_LOT),
          "actions": lot_actions, "tick": None},
         {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
-         "text": (street_name(state) + after) if (state.get("street_name") or has_lot)
+         "text": ((street_name(state) if state.get("street_name") or not after else NO_STREET_YET) + after)
+         if (state.get("street_name") or has_lot)
          else "set from the lot, once there is one",
          "actions": [("street", "Change…", True)] if has_lot and not after else [], "tick": None,   # nothing to change yet: hidden
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
@@ -3198,7 +3200,8 @@ def show_pending_lot(state, facts, saved_ui):
     drawing, and the state comes back as it was. A City guide alone is left as it was (its own flow)."""
     pending = (saved_ui or {}).get("_pending")
     sample_only = not (facts or {}).get("lot_id") or (saved_ui or {}).get("from_sample")
-    if not pending or not sample_only or not lookup_may_replace(facts, saved_ui):
+    if (not pending or not sample_only or not lookup_may_replace(facts, saved_ui)
+            or is_drawn(pending.get("address"), saved_ui)):      # Draw draws nothing new for it: no "after Draw"
         return state
     answer = pending.get("answer") or {}
     got = answer.get("facts") or {}

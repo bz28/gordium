@@ -760,6 +760,17 @@ def test_a_failed_lookup_after_a_found_one_leaves_none_of_its_lot_and_street():
     assert rows["lot"].startswith(logic.lot_size(answer("109_ithaca_rd")["facts"]["lot"]["value"]["area_sf"]))
 
 
+def test_no_after_draw_when_the_address_is_already_drawn_and_draw_would_draw_nothing():
+    """Review round 1: with no lot in the file but drawn_address equal to the looked-up address, Draw draws nothing,
+    so the rows must not promise a lot "after Draw"."""
+    site = Site(lot="looked_up", drawn="96 Ithaca Rd, Ithaca, NY")
+    for k in ("lot_id", "street_line"):
+        site.facts.pop(k)
+    del site.table.objects["lot1"]
+    rows = _rows_of(site.box().look_up(answer("96_ithaca_rd")))
+    assert "after Draw" not in rows["lot"] + rows["street"]
+
+
 def test_buildings_on_a_sublayer_are_asked_about():
     """P2: own_work found only objects on the exact Building layer: a garage on Building::Garage was never asked
     about, and removed at a reset."""
