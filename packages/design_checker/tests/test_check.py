@@ -1308,7 +1308,7 @@ def test_the_panel_columns_fit_a_rhino_sized_panel_and_wrap():
     assert "col.Expand = i == 0" in ui and "ef.DrawableCell()" in ui and "ef.TextBoxCell(" not in ui
     assert int(re.search(r"^ROW_HEIGHT = (\d+)", ui, re.M).group(1)) >= 2 * 16           # two lines
     assert "ft.Wrap = ed.FormattedTextWrapMode.Word" in ui
-    for tick in ("_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)"):
+    for tick in ("_envelope_box(actions)", "_massing_box(actions, parts)", "_labels_box(actions, parts)"):
         assert "row(%s)" % tick in ui and "row(%s, " % tick not in ui, tick     # each in a row of its own
 
 
@@ -4115,3 +4115,21 @@ def test_gordiums_own_street_id_is_never_kept_as_the_streets_name():
     lines = [[[0, 0], [30, 0]], [[30, 0], [60, 0]]]
     assert logic.street_name_after_pick(None, lines, lines[0], ids=["Street 1", "Street 1"]) is None
     assert logic.street_name_after_pick(None, lines, lines[0], ids=["Ithaca Rd", "Ithaca Rd"]) == "Ithaca Rd"
+
+
+def test_every_panel_tick_follows_the_document():
+    """The Rhino job at 540f718: after Cmd+Z of Hide starting house the layer came back but the tick stayed ticked
+    (it had no setter: only a click set it). Every tick box the panel has is set from the document by its own setter
+    (guarded, so setting it is never a click), at every check. Show buildable envelope only is the session's own
+    (never saved in the file, never an undo step)."""
+    import re
+    ui_src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    boxes = re.findall(r"\ndef _(\w+)_box\(actions[^)]*\):\n(?:(?!\ndef ).)*?ef\.CheckBox\(\)", ui_src, re.S)
+    assert "massing" in boxes and "labels" in boxes and "envelope" in boxes
+    run = rhino[rhino.index("def run_check("):].split("\ndef ", 1)[0]
+    for name in set(boxes) - {"envelope"}:
+        body = ui_src[ui_src.index("def _%s_box(" % name):].split("\ndef ", 1)[0]
+        assert 'parts["%s_box"] = box' % name in body and 'if not parts.get("_setting_%s")' % name in body, name
+        assert "def set_%s_tick(parts, " % name in ui_src, name
+        assert "ui.set_%s_tick(" % name in run, name

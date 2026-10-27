@@ -18,7 +18,7 @@ REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_bu
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
         "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
-        "show_context", "_context_on", "check_now", "set_auto_check", "_auto"]
+        "show_context", "_context_on", "check_now", "set_auto_check", "_auto", "_massing_hidden"]
 
 
 class Doc:
@@ -117,6 +117,7 @@ def _plugin(doc, said):
                                 "show": staticmethod(lambda *a, **k: None),
                                 "set_labels_tick": staticmethod(lambda parts, on: None),
                                 "set_context_tick": staticmethod(lambda parts, on: None),
+                                "set_massing_tick": staticmethod(lambda parts, on: None),
                                 "open_target": staticmethod(lambda path: (True, None))}),
           "_box_open": lambda: False, "run_check": lambda doc, report=False: {"report_error": "not in a test"},
           "current_facts": lambda doc: {"lot_id": "lot1", "zone": "R-1b"},
@@ -326,3 +327,24 @@ def test_an_undone_show_neighbourhood_is_read_again_from_the_file():
     doc.Strings.data[("Gordium", "ui")] = json.dumps({"show_context": True})     # what Rhino's Undo put back
     ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
     assert ns["STATE"]["context_by_doc"][1] is True and ticks[-1] is True
+
+
+def test_every_panel_tick_is_read_again_after_undo():
+    """The Rhino job's real-input run at 540f718: Cmd+Z of Hide starting house put the layer back, the tick stayed
+    ticked. After Undo/Redo every tick box the panel has (but the session-only envelope, never in the file) is set
+    again from the document: by source, each set_*_tick is called by _settings_from_file; by behaviour, the massing
+    tick follows its layer."""
+    import re
+    ui_src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ticks = set(re.findall(r"\ndef set_(\w+)_tick\(parts, ", ui_src)) - {"envelope"}
+    settings = SRC[SRC.index("def _settings_from_file("):].split("\ndef ", 1)[0]
+    assert "massing" in ticks and all("ui.set_%s_tick(" % t in settings for t in ticks), (ticks, settings)
+    doc = Doc()
+    ns = _plugin(doc, [])
+    ticks_set = []
+    ns["ui"].set_massing_tick = staticmethod(lambda parts, hidden: ticks_set.append(hidden))
+    ns["_actions"]()["massing"](True)
+    assert doc.Layers[0].IsVisible is False
+    doc.Layers[0]._visible = True                                     # what Rhino's Undo put back
+    ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
+    assert ticks_set[-1] is False
