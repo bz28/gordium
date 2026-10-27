@@ -26,7 +26,21 @@ for d in glob.glob("packages/**/__pycache__", recursive=True) + glob.glob("apps/
     shutil.rmtree(d, ignore_errors=True)
 env = dict(os.environ, PYTHONPATH=os.pathsep.join(sorted(glob.glob("packages/*"))), PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1")
 run = lambda cmd: subprocess.call(cmd, env=env, stdin=subprocess.DEVNULL)
-code = run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", *sys.argv[1:]])
+base = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"]
+# Split across 4 cores when pytest-xdist is installed (2026-10-27 trial on main: 1,055 tests, identical
+# result for every test, 3m17s -> 1m05s). A parallel failure is re-run one at a time before it counts,
+# so a test that only breaks in parallel is reported loudly but neither hidden nor blamed on the code.
+try:
+    import xdist  # noqa: F401
+    par = not sys.argv[1:]
+except ImportError:
+    par = False
+code = run(base + (["-n", "4"] if par else []) + sys.argv[1:])
+if code and par:
+    print("[full_suite] PARALLEL RUN FAILED: re-running one at a time; report both results", flush=True)
+    code = run(base)
+    print(f"[full_suite] one-at-a-time result: {'FAILED' if code else 'passed'}"
+          + ("" if code else " (parallel-only failure: an isolation problem in the tests, report it)"), flush=True)
 if sys.argv[1:]:
     sys.exit(code)
 steps = []

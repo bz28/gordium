@@ -318,3 +318,4 @@ Order: (1) #24 → #30 → #38 (rules line; each carried from main first, suite 
   3. Build the 5 audit gaps before the later list → queue item 15: §325-26 stream setback 20 ft; §325-8B(1) lot area per extra primary building; §325-7B one yard per building; South Hill Overlay; 3–6 unit cap on attached houses in R-3a/R-3aa/R-3b/RU. Opus.
   4. One-family = 1 unit (ADU later): keep.
   5. Do-nothing undo after a start-box Cancel: leave it.
+- 2026-10-27 09:00 (coordinator) full_suite.py now splits pytest across 4 cores when pytest-xdist is installed (installed in .venv, 3.8.0). Trial on main b8288db: 1,055 tests, identical result for every test, 3m17s -> 1m05s; full 7-step run 1m51s. A parallel failure is re-run one at a time before it counts. Running agents pick this up on their next full_suite run.
