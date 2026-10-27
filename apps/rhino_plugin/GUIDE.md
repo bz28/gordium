@@ -50,19 +50,24 @@ From **Edit site…** (and `GordiumFacts`) the same box opens with its last butt
 ## 2. The panel
 
 The panel lists every item, worst news first, each with what your design has, what the rule requires, and the
-margin. Click a row to see it; press **Zoom to** to look at the part of the model it is about.
+margin. The groups are Does not comply, Needs review, Complies, Not checked and "Not checked yet" (rules Gordium
+does not cover yet: check those by hand). **Complies** and "Not checked yet" start folded. Click a row to see it;
+press **Zoom to** to look at the part of the model it is about: it selects those objects and switches to the Top
+view (the Front view for height and stories). It is off when nothing is selected or the results are out of date,
+and says so when nothing is drawn to zoom to.
 
 Buttons along the panel:
 
 - **Edit site…**: reopen the start box to change the facts.
-- **Pick survey lot lines…**: choose your surveyed lot lines in the model.
+- **Pick survey lot lines…**: choose your surveyed lot lines in the model. Shown while the lot is the tax map's.
 - **Main building…** and **Pick the main building…**: when the file holds several buildings, say which one is the
-  house being checked.
-- **Add to check…**: include an object Gordium left out. **Not the ground** / **This is the ground**: correct
-  what Gordium took for the ground.
+  house being checked. **Main building…** is in the header only then.
+- **Add to check…** and **This is the ground**: on the row for an object Gordium left out, to include it or to say
+  it is the ground. **Not the ground** is in the Site facts, when nothing is selected, if Gordium took an object
+  for the ground because you marked it.
 - **Zoning report…**: writes the report in the architects' spreadsheet format, opens it and says where it saved it.
 - **?**: the legend (what the marks and colours mean, and which version of the law was checked).
-- **Retry**: try a check again after a setup problem.
+- **Retry**: shown only when a check failed, to try it again.
 
 Tick boxes:
 
@@ -120,4 +125,6 @@ here when they come back.
 ## What "Needs review" means
 
 Gordium found a fact it could not prove: a tax-map line that might be 2 ft off, ground it has to assume flat, a
-rule it reads two ways. The row says what it needs and gives a button to supply it. Check those by hand until then.
+rule it reads two ways. The row says what it needs. Where it waits for facts you can state (bedrooms, parking...), it has an **Enter** button
+for them; otherwise its hint says what to do (for example **Pick survey lot lines…** in the header). Check those
+by hand until then.
