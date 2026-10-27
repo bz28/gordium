@@ -100,8 +100,7 @@ and doesn't apply with one.
   permitted in any side or rear yard but not in a required front yard" (p.66); §325-7B doesn't stop them, and their
   own distances are checked by `<district>.accessory_buildings`.
 - **A neighbouring lot (B, Gordium's reading to confirm):** a yard is "That part of a lot" (§325-3B YARD, p.20), so
-  this lot's yards serve the buildings on it; a neighbouring building's required yards lie on its own lot. Some other
-  codes add "or on any other lot"; Ithaca's doesn't.
+  this lot's yards serve the buildings on it; a neighbouring building's required yards lie on its own lot.
 
 ## 6. The South Hill Overlay (§325-8E) — A
 
