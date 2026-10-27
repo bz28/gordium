@@ -3201,10 +3201,10 @@ def show_pending_lot(state, facts, saved_ui):
     pending = (saved_ui or {}).get("_pending")
     sample_only = not (facts or {}).get("lot_id") or (saved_ui or {}).get("from_sample")
     if (not pending or not sample_only or not lookup_may_replace(facts, saved_ui)
-            or is_drawn(pending.get("address"), saved_ui)
+            or is_drawn(pending.get("address"), saved_ui)      # Draw draws nothing new for it: no "after Draw"
             or (state.get("lookup") or {}).get("looking")           # another address is being looked up
             or not (same_address(state.get("address") or "", pending.get("address"))      # blank: Draw sets the
-                    or same_address(state.get("address") or "", pending.get("query")))):    # preview aside      # Draw draws nothing new for it: no "after Draw"
+                    or same_address(state.get("address") or "", pending.get("query")))):    # preview aside
         return state
     answer = pending.get("answer") or {}
     got = answer.get("facts") or {}
