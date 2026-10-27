@@ -63,6 +63,7 @@ OMISSION = "except where otherwise indicated by specific prohibition or omission
 # The two sentences that say a use left out of a district's list isn't permitted there: §325-8B(3), all of it (p.26
 # lines 19-21), and §325-8A(2)-(3), "Uses which are permitted in each use district are listed" (p.24 lines 15-18).
 OMISSION_LINES = {(26, 19), (26, 20), (26, 21), (24, 15), (24, 16), (24, 17), (24, 18)}
+USE_SECTIONS = ("Primary Uses", "Accessory Uses")   # chart p.2's sections, where "-" means not permitted
 MULTIPLE_KINDS = (7, (32, 33))   # §325-3B DWELLING, MULTIPLE (5): rooming house; boarding house; ...; row house (p.7)
 
 
@@ -169,7 +170,10 @@ class Audit:
         self.data = (load(j / DECISIONS) or {}) if data is None else data
         self.districts: list[str] = list(self.data.get("districts") or [])
         self.parked: dict = dict(self.data.get("parked") or {})
-        self.scope_from: dict = dict(self.data.get("scope_from") or {})
+        raw = dict(self.data.get("scope_from") or {})
+        # {piece: the piece that sets its scope}; an entry outside its own numbered section says why ({piece, why})
+        self.scope_from: dict = {k: (v.get("piece") if isinstance(v, dict) else v) for k, v in raw.items()}
+        self.scope_why: dict = {k: v.get("why") for k, v in raw.items() if isinstance(v, dict)}
         self.ctx = Context.for_jurisdiction(j)
         self.owner = {k: pid for pid, p in self.pieces.items() for k in piece_keys(p)}
         self.definitions = _definitions(j, self.owner)
@@ -194,9 +198,12 @@ class Audit:
     def _resolve(self):
         self.problems += [f"{DECISIONS}: unknown key {k!r} (reused decisions start with _)" for k in self.data
                           if k not in ("districts", "parked", "pieces", "scope_from") and not str(k).startswith("_")]
+        section = lambda i: (re.match(r"325-\d+(?:\.\d+)?", i or "") or [None])[0]
         for pid, src in self.scope_from.items():
             if pid not in self.pieces or src not in self.pieces:
                 self.problems.append(f"scope_from {pid}: {src}: both must be pieces of the law")
+            elif section(pid) != section(src) and not self.scope_why.get(pid):
+                self.problems.append(f"scope_from {pid}: {src} is in another section; say why ({{piece, why}})")
         self.problems += [f"parked {k}: needs `name` and `decided`" for k, v in self.parked.items()
                           if not (isinstance(v, dict) and v.get("name") and v.get("decided"))]
         given = self.data.get("pieces") or {}
@@ -280,6 +287,7 @@ class Audit:
         return out
 
     def _check(self, pid: str, d: str, dec: dict, where: str, span: set):
+        opening = next(iter(piece_keys(self.pieces[pid])))       # a definition's first line names its scope
         p = self.problems
         status = dec.get("status")
         p += [f"{where}: unknown field {k!r}" for k in sorted(dec.keys() - DECISION_FIELDS)]
@@ -330,13 +338,17 @@ class Audit:
                 p.append(f"{where}: via_piece only goes with a chart `cell`")
             if dec.get("quote") and dec.get("file", LAW) == LAW and (keys := self._quote_keys(pid, dec)):
                 law = keys - {tuple(k) for k in self.header.get("furniture", [])}
-                mine = {pid, self.scope_from.get(pid)}           # the piece itself, or the piece that sets its scope
+                scope = self.scope_from.get(pid)
+                # this part's own lines, the piece's opening line, or the piece that sets its scope
+                ok = lambda k: k in span or k == opening or (scope and self.owner.get(k) == scope)
                 if not law:
                     p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
-                elif not (law & OMISSION_LINES) and not mine & {self.owner.get(k) for k in law}:
-                    p.append(f"{where}: the quote is from another piece of the law "
-                             f"({', '.join(sorted({str(self.owner.get(k)) for k in law}))}), not this piece's own "
+                elif not (law & OMISSION_LINES) and not any(ok(k) for k in law):
+                    p.append(f"{where}: the quote is from another piece or part of the law "
+                             f"({', '.join(sorted({str(self.owner.get(k)) for k in law}))}), not this part's own "
                              "(a piece whose scope another sets names it in `scope_from`)")
+            if dec.get("cell") and (dec.get("page", 2) != 2 or dec["cell"].get("section") not in USE_SECTIONS):
+                p.append(f"{where}: '-' means 'not permitted' only in the use chart (p.2, {' or '.join(USE_SECTIONS)})")
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":
                 p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-' "
                          "(not permitted)")
@@ -547,7 +559,11 @@ class Audit:
             where = (f"{dec.get('file', LAW)} p.{dec['page']}" if "page" in dec
                      else f"§{dec['piece']}" if dec.get("piece") else "this piece")
             cell = f"; the district's own cell in row “{dec['cell']['row']}” is “-”" if dec.get("cell") else ""
-            text = f"not applicable: {dec['why']} The law: “{dec['quote']}” ({where}{cell})"
+            scope = self.scope_from.get(pid)
+            via = (f"; its scope set by §{scope}, Gordium's reading" + (f": {self.scope_why[pid]}" if self.scope_why.get(pid) else "")
+                   if scope and dec.get("file", LAW) == LAW and any(self.owner.get(k) == scope for k in self._quote_keys(pid, dec))
+                   else "")
+            text = f"not applicable: {dec['why']} The law: “{dec['quote']}” ({where}{cell}{via})"
         elif s == "parked":
             item = self.parked[dec["item"]]
             text = f"parked: {item['name']} ({item['decided']})" + (f". {dec['why']}" if dec.get("why") else "")

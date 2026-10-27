@@ -557,7 +557,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 
 - **What a cluster subdivision application must show**
   - R-1a, R-1b, R-2a, R-2b, R-3a, R-3b: **MISSING** (low): An approval process for a subdivision; no flag.
-  - R-2c, R-3aa, RU: not applicable: Cluster subdivisions aren't permitted in this district (§325-11B(1)). The law: “Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts” (chapter_325_zoning_2026-10.pdf p.38)
+  - R-2c, R-3aa, RU: not applicable: Cluster subdivisions aren't permitted in this district (§325-11B(1)). The law: “Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts” (chapter_325_zoning_2026-10.pdf p.38; its scope set by §325-11B, Gordium's reading)
 
 ### §325-12C Establishment and location (flag, p.41)
 
@@ -752,7 +752,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-21A Size requirements (rule, p.63)
 
 - **Loading space size (450 sf), for the uses the district's loading flag lists**
-  - R-1a, R-1b: not applicable: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the next part. The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (§325-21B)
+  - R-1a, R-1b: not applicable: Loading is required for business and industrial uses and multiple dwellings over 25 units (§325-21B); no such use is permitted in R-1 (chart p.2), so R-1 has no loading flag. A use allowed by variance is the next part. The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (§325-21B; its scope set by §325-21B, Gordium's reading)
   - R-2a, R-2b, R-2c: flag (needs review): `loading` (mapped). Gordium's mapping, not a citation: R-2x.loading sends a neighborhood commercial facility to review under §325-21 (its notes).
   - R-3a, R-3aa, R-3b, RU: flag (needs review): `loading` (cited)
 - **Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)**
@@ -827,37 +827,37 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-24C Noise (rule, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
 
 ### §325-24D Vibration (flag, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
 
 ### §325-24E Smoke (rule, p.65)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
 
 ### §325-24F Dust, dirt, odor and fumes (flag, pp.65–66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
 
 ### §325-24G Fire and safety (rule, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
 
 ### §325-24H Glare and heat (flag, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
 
 ### §325-24I Industrial sewage and waste (rule, p.66)
 
 - **Industrial performance standards**
-  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65)
+  - all 9 districts: not applicable: Applies in districts whose regulations refer to §325-24; the residential chart refers to §325-9, §325-10 and §325-20, never §325-24. The law: “All uses in districts where reference is made to this section shall conform to performance standards herein” (chapter_325_zoning_2026-10.pdf p.65; its scope set by §325-24B, Gordium's reading)
 
 ### §325-25 Location of accessory structures. (rule, p.66)
 
@@ -923,17 +923,17 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-29.1E Public view and lighting (rule, p.76)
 
 - **Adult uses**
-  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76)
+  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76; its scope set by §325-29.1D, Gordium's reading)
 
 ### §325-29.1F Sale of alcohol prohibited (rule, p.76)
 
 - **Adult uses**
-  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76)
+  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76; its scope set by §325-29.1D, Gordium's reading)
 
 ### §325-29.1G Site plan review/landscaping (flag, p.76)
 
 - **Adult uses**
-  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76)
+  - all 9 districts: not applicable: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the residential chart. The law: “Adult uses may only be located within the Adult Use Overlay Zone” (chapter_325_zoning_2026-10.pdf p.76; its scope set by §325-29.1D, Gordium's reading)
 
 ### §325-29.2A General note (flag, p.77)
 
@@ -943,12 +943,12 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-29.2B Building setback (rule, p.77)
 
 - **Southwest Area districts (SW-1, SW-2, SW-3)**
-  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (chapter_325_zoning_2026-10.pdf p.77)
+  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (chapter_325_zoning_2026-10.pdf p.77; its scope set by §325-29.2A, Gordium's reading)
 
 ### §325-29.2C Minimum store size (rule, p.77)
 
 - **Southwest Area districts (SW-1, SW-2, SW-3)**
-  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (chapter_325_zoning_2026-10.pdf p.77)
+  - all 9 districts: not applicable: Applies only in the Southwest Area districts. The law: “Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3” (chapter_325_zoning_2026-10.pdf p.77; its scope set by §325-29.2A, Gordium's reading)
 
 ### §325-29.3C It shall be the duty and responsibility of all owners of property in the City of Ithaca to ensure the (rule, pp.77–79)
 
@@ -1138,7 +1138,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-44B Demolition, exterior alteration or enlargement of structures or parking areas or construction of new (flag, pp.126–127)
 
 - **C-SU Zone review**
-  - all 9 districts: not applicable: Applies only in the C-SU Zone. The law: “within the C-SU Zone” (chapter_325_zoning_2026-10.pdf p.126)
+  - all 9 districts: not applicable: Applies only in the C-SU Zone. The law: “within the C-SU Zone” (chapter_325_zoning_2026-10.pdf p.126; its scope set by §325-44A, Gordium's reading)
 
 ### §325-45.1C Applicability (rule, p.128)
 
@@ -1148,7 +1148,7 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-45.1D Design review and approval required (flag, p.128)
 
 - **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128; its scope set by §325-45.1C, Gordium's reading)
 
 ### §325-45.1E Landmarks Preservation Commission (flag, pp.128–129)
 
@@ -1158,27 +1158,27 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-45.2B Definitions and related standards (rule, pp.130–133)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
 
 ### §325-45.2D Maximum Height (in stories) Map (rule, pp.133–134)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
 
 ### §325-45.2E Collegetown Residential (CR-1, CR-2, CR-3) (rule, pp.134–146)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
 
 ### §325-45.2F Collegetown Residential 4 (CR-4) (rule, pp.146–151)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
 
 ### §325-45.2G Mixed Use (MU-1, MU-2) (rule, pp.151–160)
 
 - **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A; its scope set by §325-45.2A, Gordium's reading)
 
 ### §325-45.3B Street-level active uses required (rule, pp.160–161)
 
@@ -1188,37 +1188,37 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 ### §325-45.5A Permitted uses (rule, pp.162–163)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
 
 ### §325-45.5B Off-street parking/loading requirements (rule, p.163)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
 
 ### §325-45.5C Minimum lot size (rule, pp.163–164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
 
 ### §325-45.5D Maximum building height (rule, p.164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
 
 ### §325-45.5E Maximum percentage of lot coverage by buildings: 35% (rule, p.164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
 
 ### §325-45.5F Yard dimensions (rule, p.164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
 
 ### §325-45.5G Minimum building height: none (rule, p.164)
 
 - **Cliff Street Retreat Planned Unit Development District**
-  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162)
+  - all 9 districts: not applicable: Applies only in the Cliff Street Retreat PUD District. The law: “Cliff Street Retreat Planned Unit Development District” (chapter_325_zoning_2026-10.pdf p.162; its scope set by §325-45.4, Gordium's reading: Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates)
 
 ## Every rule in each rulebook: measured? tested on a model?
 

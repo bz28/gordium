@@ -32,7 +32,8 @@ parked:
   adus: {name: "Accessory dwelling units", decided: "queue item 10 brief, 2026-10-27"}
 
 # A piece whose scope another piece sets (its district or use is named there, not in its own words): a "not
-# applicable" quote may come from that piece. Each is the subsection that opens its section or article.
+# applicable" quote may come from that piece, shown in the table as Gordium's reading. The piece must be in the same
+# numbered section, or the entry says why ({piece, why}).
 scope_from:
   325-11C: 325-11B
   325-21A: 325-21B
@@ -55,13 +56,13 @@ scope_from:
   325-45.2E: 325-45.2A
   325-45.2F: 325-45.2A
   325-45.2G: 325-45.2A
-  325-45.5A: 325-45.4
-  325-45.5B: 325-45.4
-  325-45.5C: 325-45.4
-  325-45.5D: 325-45.4
-  325-45.5E: 325-45.4
-  325-45.5F: 325-45.4
-  325-45.5G: 325-45.4
+  325-45.5A: &cliff_scope {piece: 325-45.4, why: "Article X: §325-45.4 names the Cliff Street Retreat PUD District that §325-45.5 regulates"}
+  325-45.5B: *cliff_scope
+  325-45.5C: *cliff_scope
+  325-45.5D: *cliff_scope
+  325-45.5E: *cliff_scope
+  325-45.5F: *cliff_scope
+  325-45.5G: *cliff_scope
 
 # Reused decisions.
 _unlisted_why: &unlisted_why Not a use the residential chart (p.2) lists for any residential district, so it isn't

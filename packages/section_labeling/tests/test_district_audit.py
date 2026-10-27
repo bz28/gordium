@@ -469,7 +469,7 @@ def test_a_via_piece_must_name_this_piece(decisions):
 def test_page_furniture_is_not_the_law(decisions):
     found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
         "status": "not_applicable", "why": "w", "page": 2, "quote": "City of Ithaca"}}]))
-    assert any("from another piece of the law (front_matter)" in p for p in found)    # p.2's text, not this piece
+    assert any("from another piece or part of the law (front_matter)" in p for p in found)    # p.2's text, not this piece
     found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
         "status": "not_applicable", "why": "w", "page": 67, "quote": "City of Ithaca, NY"}}]))
     assert any("only page furniture" in p for p in found)                                # p.67's running header
@@ -489,7 +489,7 @@ def test_a_quote_from_a_neighbouring_numbered_section_is_refused(decisions):
     found = problems(with_piece(decisions, "325-29", [{"what": "x", "all": {
         "status": "not_applicable", "why": "w", "page": 77,
         "quote": "Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3"}}]))
-    assert any("from another piece of the law (325-29.2A)" in p for p in found)
+    assert any("from another piece or part of the law (325-29.2A)" in p for p in found)
 
 
 def test_not_applicable_quotes_only_chapter_325_or_its_chart(decisions):
@@ -509,7 +509,7 @@ def test_not_applicable_quotes_only_chapter_325_or_its_chart(decisions):
 def test_a_sibling_subsections_scope_isnt_this_pieces(decisions, pid, source, quote):
     found = problems(with_piece(decisions, pid, [{"what": "x", "all": {
         "status": "not_applicable", "why": "w", "piece": source, "quote": quote}}]))
-    assert any(f"from another piece of the law ({source})" in p for p in found)
+    assert any(f"from another piece or part of the law ({source})" in p for p in found)
 
 
 def test_a_piece_named_in_scope_from_may_quote_the_piece_that_sets_its_scope(decisions):
@@ -527,3 +527,36 @@ def test_not_applicable_says_it_includes_pointers(built):
     """§325-7A and §325-8B(7)/(8)/(10) apply everywhere but add nothing of their own: the legend says so."""
     head = built.render().split("## The table")[0]
     assert "or it is a pointer with no requirement of its own" in head and "or are pointers" in head
+
+
+
+# Review round 8.
+
+def test_a_quote_from_another_part_of_the_same_piece_is_refused(decisions, built):
+    """§325-8B(6) names R-1 and R-2; it says nothing about note (1)'s lot area in R-3."""
+    parts = copy.deepcopy(decisions["pieces"]["325-8B"])
+    i = part_index(built, "325-8B", "(1)")
+    parts[i]["R-3a, R-3aa, R-3b"] = {"status": "not_applicable", "why": "w",
+                                     "quote": "In R-1 and R-2 Districts, minor dependent children"}
+    found = problems(with_piece(decisions, "325-8B", parts))
+    assert any(p.startswith(f"325-8B part {i + 1} (R-3a): the quote is from another piece or part") for p in found)
+
+
+def test_scope_from_outside_its_section_needs_a_reason(decisions):
+    data = copy.deepcopy(decisions)
+    data["scope_from"]["325-26"] = "325-16D"
+    assert "scope_from 325-26: 325-16D is in another section; say why ({piece, why})" in problems(data)
+
+
+def test_a_not_applicable_by_scope_says_so(built):
+    text = built.render()
+    assert "its scope set by §325-24B, Gordium's reading" in text and "its scope set by §325-45.4" in text
+
+
+def test_a_chart_cell_means_not_permitted_only_in_the_use_chart(decisions):
+    bad = {"status": "not_applicable", "why": "w", "file": "zoning_charts_2026-04.pdf", "page": 3,
+           "quote": "One-family dwelling, detached, zero lot line",
+           "cell": {"section": "Minimum Lot Size [fn3]", "row": "One-family dwelling, detached, zero lot line"}}
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {"status": "missing", "priority": "high",
+                                                                              "why": "w"}, "R-3a": bad}]))
+    assert any("means 'not permitted' only in the use chart" in p for p in found)
