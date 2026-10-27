@@ -316,7 +316,7 @@ def make_panel(actions, host=None):
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
-    layout.Add(row(_envelope_box(actions)))         # each tick its own row: side by side they ran off at 380
+    layout.Add(row(_envelope_box(actions, parts)))         # each tick its own row: side by side they ran off at 380
     layout.Add(row(_massing_box(actions, parts)))
     layout.Add(row(_labels_box(actions, parts)))     # its own row: beside the others it ran off the panel
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
@@ -390,12 +390,30 @@ def set_labels_tick(parts, shown):
         parts["_setting_labels"] = False
 
 
-def _envelope_box(actions):
+def _envelope_box(actions, parts):
+    """Show buildable envelope: on by default, this Rhino session's own setting (never saved in the file): ticked as
+    it is (set_envelope_tick), never left as last clicked on a panel built again."""
     box = ef.CheckBox()
     box.Text = "Show buildable envelope"
     box.Checked = True
-    box.CheckedChanged += logic.guard(lambda s, e: actions["envelope"](bool(box.Checked)), "show or hide the envelope")
+
+    def changed(s, e):
+        if not parts.get("_setting_envelope"):      # set from the session (set_envelope_tick): not a change
+            actions["envelope"](bool(box.Checked))
+    box.CheckedChanged += logic.guard(changed, "show or hide the envelope")
+    parts["envelope_box"] = box
     return box
+
+
+def set_envelope_tick(parts, on):
+    """The tick as the session's envelope setting is."""
+    if parts is None or parts.get("envelope_box") is None:
+        return
+    parts["_setting_envelope"] = True
+    try:
+        parts["envelope_box"].Checked = bool(on)
+    finally:
+        parts["_setting_envelope"] = False
 
 
 def _wrap_width(parts):
