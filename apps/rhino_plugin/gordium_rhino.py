@@ -1498,7 +1498,9 @@ def _box_pick(doc, what, facts, saved_ui):
             names = logic.outline_names(outline, facts.get("street_line"), facts.get("street_ids"))
             while lot is not None:
                 rc, point = _get_point(logic.street_pick_prompt(True, len(picks)))
-                if rc != Rhino.Commands.Result.Success:              # Enter: done (Esc: done too)
+                if rc == Rhino.Commands.Result.Cancel:               # Esc: nothing changes, the clicks so far too
+                    raise Cancelled
+                if rc != Rhino.Commands.Result.Success:              # Enter: done
                     break
                 a, b = _clicked_piece(doc, lot, point)
                 line = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
@@ -1532,6 +1534,8 @@ def _box_pick(doc, what, facts, saved_ui):
                         ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")   # St")
                         ask.AcceptNothing(True)
                         got = ask.GetLiteralString()
+                        if got == Rhino.Input.GetResult.Cancel:      # Esc: nothing changes, the click neither
+                            raise Cancelled
                         name = (ask.StringResult() or "").strip() or None \
                             if got == Rhino.Input.GetResult.String else None
                     told = []

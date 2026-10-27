@@ -3045,7 +3045,7 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
     import copy
     said, clicks = [], []
     lot_obj = type("Lot", (), {"Geometry": None})()
-    result = type("Result", (), {"Success": "ok", "Nothing": "none"})
+    result = type("Result", (), {"Success": "ok", "Nothing": "none", "Cancel": "esc"})
     rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result})})
 
     def esc(question):
@@ -3204,7 +3204,7 @@ def test_the_corner_pick_saves_one_id_per_street_and_the_hint_says_what_the_box_
     o = _ring(site["lot"])
     said = []
     clicks = [("ok", o[3]), ("ok", o[14]), ("none", None)]
-    result = type("Result", (), {"Success": "ok", "Nothing": "none"})
+    result = type("Result", (), {"Success": "ok", "Nothing": "none", "Cancel": "esc"})
     rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result})})
     ns = _plugin_functions(["_box_pick"], Rhino=rhino2, Cancelled=type("Cancelled", (Exception,), {}),
                            _find=lambda doc, i: type("Lot", (), {"Geometry": None})(), _outline=lambda doc, lot: o,
@@ -3217,6 +3217,57 @@ def test_the_corner_pick_saves_one_id_per_street_and_the_hint_says_what_the_box_
     assert said[0].startswith("Street 1: 8 lot-line pieces") and said[1].startswith("Street 2: 2 lot-line pieces")
     assert logic.CORNER_HINT == ("This lot faces two streets: click Change… on Front lot line (on the street), then "
                                  "click once on each street (one click keeps the whole street) and press Enter")
+
+
+def test_esc_at_any_street_prompt_changes_nothing():
+    """The guide's review (Lane C, 2026-10-27): on a corner lot, Esc at the street pick acted as Enter and kept the
+    clicks made so far; Esc at "Which street is this lot line on?" still saved the clicked line. Esc changes
+    nothing, at either prompt, and says so (ESC_STREET); Enter still keeps what was clicked."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import sample_site
+    site = sample_site()
+    o = _ring(site["lot"])
+    said = []
+    cancelled = type("Cancelled", (Exception,), {})
+    result = type("Result", (), {"Success": "ok", "Nothing": "none", "Cancel": "esc"})
+    answers = []
+
+    class GetString:
+        def SetCommandPrompt(self, p):
+            pass
+
+        def AcceptNothing(self, ok):
+            pass
+
+        def GetLiteralString(self):
+            return answers.pop(0)
+
+        def StringResult(self):
+            return "Elm St"
+    get = type("GetResult", (), {"String": "string", "Cancel": "esc", "Nothing": "none"})
+    rhino2 = type("Rhino", (), {"Commands": type("Commands", (), {"Result": result}),
+                                "Input": type("Input", (), {"GetResult": get,
+                                                            "Custom": type("Custom", (), {"GetString": GetString})})})
+    clicks = []
+    ns = _plugin_functions(["_box_pick"], Rhino=rhino2, Cancelled=cancelled,
+                           _find=lambda doc, i: type("Lot", (), {"Geometry": None})(), _outline=lambda doc, lot: o,
+                           _get_point=lambda p: clicks.pop(0), _clicked_piece=lambda doc, lot, point: point,
+                           _feet_point=lambda doc, p: p, _ask_street_more=lambda q: False, say=said.append,
+                           _highlight=lambda doc, f: None)
+    corner = {"lot_id": "l", "corner_lot": True, "street_line": [o[0]], "street_ids": ["Ithaca Rd"]}
+    clicks[:] = [("ok", o[3]), ("esc", None)]                       # a click, then Esc
+    facts, saved = ns["_box_pick"](None, "street", dict(corner), {})
+    assert facts["street_line"] == [o[0]] and facts["street_ids"] == ["Ithaca Rd"] and said[-1] == logic.ESC_STREET
+    clicks[:] = [("ok", o[3]), ("none", None)]                      # the same click, then Enter: kept
+    facts, saved = ns["_box_pick"](None, "street", dict(corner), {})
+    assert len(facts["street_line"]) == 8
+    inside = {"lot_id": "l", "corner_lot": False, "street_line": [o[0]], "street_ids": ["Ithaca Rd"]}
+    clicks[:] = [("ok", o[13])]                                      # a line of no known street: its name asked
+    answers[:] = ["esc"]                                             # Esc at "Which street is this lot line on?"
+    facts, saved = ns["_box_pick"](None, "street", dict(inside), {"street_name": "Ithaca Rd"})
+    assert facts["street_line"] == [o[0]] and facts["street_ids"] == ["Ithaca Rd"] and saved == {"street_name":
+                                                                                                  "Ithaca Rd"}
+    assert said[-1] == logic.ESC_STREET
 
 
 def _plugin_functions(names, **extra):

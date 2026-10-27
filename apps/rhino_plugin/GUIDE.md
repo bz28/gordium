@@ -92,8 +92,8 @@ Picking the street side (**Change…** on the start box). On a one-street lot, E
 
 - `Click the lot line on the street` on a one-street lot; on a corner lot,
   `Click each lot line on a street (`, then how many are picked, then `); Enter when done`. Click any piece:
-  Gordium takes the whole street it is on. On a corner lot, Esc is the same as Enter: the lines clicked so far are kept.
-- `Which street is this lot line on? (Enter leaves it unnamed)`: Esc here also leaves it unnamed; the line you clicked is kept.
+  Gordium takes the whole street it is on. On a corner lot, Enter keeps the lines clicked; Esc changes nothing.
+- `Which street is this lot line on? (Enter leaves it unnamed)`: Esc here changes nothing (the line you clicked isn't kept).
 - When Gordium cannot tell whether the lot line bends along one street or turns a corner it asks a **Yes** or
   **No** question. It needs a real answer: Enter asks again, with
   `Gordium needs a Yes or a No here (Esc: nothing changes)`, because a guess could pass a lot that does not comply.
