@@ -213,7 +213,7 @@ def _is_chart(source: dict, documents: dict) -> bool:
 
 
 def _footnotes(text: str) -> list[str]:
-    return re.findall(r"\[fn(\d+)\]", text) + re.findall(r"^\((\d+)\)", text)
+    return re.findall(r"\[fn(\d+)\]", text) + re.findall(r"^(?:NOTES:\s*)?\((\d+)\)", text)
 
 
 # a chart row in the code's words, by how the chart's row label begins: the same row is cited the same way
@@ -236,11 +236,13 @@ def citation(source: dict, item_name: str, district: str, section_of, documents:
     chart (a footnote line: "…, note 16"); "§325-8A, p.25" for the law."""
     if _is_chart(source, documents):
         quote = " ".join(str(source.get("quote", "")).split())
-        if re.match(r"^\(\d+\)", quote):                  # the footnote itself, at the bottom of the page
+        if re.match(r"^(NOTES:\s*)?\(\d+\)", quote):     # the footnote itself, at the bottom of the page
             return ", ".join(["§325-8", "District Regulations Chart", district] +
                              [f"note {n}" for n in _footnotes(quote)])
-        # a row of the use list (chart p.2) is the Use column whichever rule cites it, so one link has one name
-        uses = source.get("page") == 2 or (source.get("cell") or {}).get("section") == "Primary Uses"
+        # a row of the use list (chart p.2: a use and its marks, • / SP / - per district) is the Use column whichever
+        # rule cites it, so one link has one name; a heading or a note on that page is not (PR2 review round 5)
+        uses = (source.get("cell") or {}).get("section") in ("Primary Uses", "Accessory Uses") or (
+            source.get("page") == 2 and re.search(r"(?:(?:•|SP|-)(?:\[fn[\d,]+\])?\s+){4,}", quote + " ") is not None)
         row = _chart_row((source.get("cell") or {}).get("row") or quote) or ("Use" if uses else item_name)
         return ", ".join(["§325-8", "District Regulations Chart", district, f"{row} column"])
     lines = source.get("lines") or [None]
