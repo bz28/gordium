@@ -116,11 +116,12 @@ def laid_out(listbox):
         scroll = table.EnclosingScrollView
         num = sys.modules["gordium_ui"].native_number          # (Mac native numbers: as the plugin reads them)
         rows = int(num(table.RowCount))
-        last = table.RectOfRow(rows - 1) if rows else None      # where the last row is laid out (painted)
+        rect = sys.modules["gordium_ui"].row_rect          # (Rhino's Mac name: RectForRow(IntPtr))
+        last = rect(table, rows - 1) if rows else None      # where the last row is laid out (painted)
         return {"visible_h": num(scroll.ContentSize.Height), "rows": rows,
                 "rows_bottom": (num(last.Y) + num(last.Height)) if last is not None else 0.0,
-                "pitch": (num(table.RectOfRow(1).Y) - num(table.RectOfRow(0).Y)) if rows >= 2 else
-                         (num(table.RectOfRow(0).Height) if rows else 0.0),
+                "pitch": (num(rect(table, 1).Y) - num(rect(table, 0).Y)) if rows >= 2 else
+                         (num(rect(table, 0).Height) if rows else 0.0),
                 "painted": painted(scroll)}
     except Exception:
         return None
@@ -140,7 +141,7 @@ def painted(view):
         scale = high / max(num(bounds.Height), 1.0)
 
         def rgb(x, y):
-            c = rep.ColorAt(x, y)
+            c = rep.ColorAt(System.IntPtr(int(x)), System.IntPtr(int(y)))  # Mac nint args are IntPtr
             try:
                 return (num(c.RedComponent), num(c.GreenComponent), num(c.BlueComponent))
             except Exception:

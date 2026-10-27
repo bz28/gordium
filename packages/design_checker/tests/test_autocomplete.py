@@ -153,7 +153,7 @@ def test_the_row_pitch_is_read_from_the_table_itself():
     ListBox's ControlObject IS the table; .DocumentView raised and the measured pitch was never used)."""
     fn = part(UI, "def list_row_px(", "def start_box(")
     assert "table = listbox.ControlObject " in fn and "DocumentView" not in fn
-    assert "native_number(table.RectOfRow(1).Y) - native_number(table.RectOfRow(0).Y)" in fn   # (laid-out rows)
+    assert "native_number(row_rect(table, 1).Y) - native_number(row_rect(table, 0).Y)" in fn   # (laid-out rows)
     assert "int(math.ceil(pitch - 1e-6))" in fn       # rounded up: a fractional pitch never leaves a row short
     native = part(UI, "def native_number(", "def list_row_px(")
     assert native.index("return float(value)") < native.index("return float(str(value))")   # through its text too
@@ -217,8 +217,8 @@ def test_the_list_is_sized_from_where_its_rows_are_laid_out():
     """Rows were painted ~16 pt apart while RowHeight + spacing said 24: eight rows left an empty band. The pitch is
     read from the table's own row rectangles."""
     fn = part(UI, "def list_row_px(", "def start_box(")
-    assert "table.RectOfRow(1).Y" in fn and "table.RectOfRow(0).Y" in fn
-    assert fn.index("RectOfRow(1)") < fn.index("else:") < fn.index("RectOfRow(0).Height")
+    assert "row_rect(table, 1).Y" in fn and "row_rect(table, 0).Y" in fn
+    assert fn.index("row_rect(table, 1)") < fn.index("else:") < fn.index("row_rect(table, 0).Height")
     one_row = fn[fn.index("else:"):fn.index("return int(")]
     assert "IntercellSpacing" not in one_row     # a row's rectangle already includes the gap under it (cold review)
 
@@ -247,7 +247,10 @@ def test_the_in_rhino_pixel_scan_finds_the_lowest_text():
     import sys
     import types
     src = (REPO / "apps/rhino_plugin/tests/autocomplete_in_rhino.py").read_text(encoding="utf-8")
-    space = {"sys": sys}
+    class IntPtr(int):       # Python.NET refuses a plain int for a Mac nint argument (Rhino run of c4ad070)
+        pass
+
+    space = {"sys": sys, "System": types.SimpleNamespace(IntPtr=IntPtr)}
     exec(part(src, "def painted(", "PAINTED_GAP_PT ="), space)
     painted = space["painted"]
 
@@ -260,6 +263,8 @@ def test_the_in_rhino_pixel_scan_finds_the_lowest_text():
             self.PixelsWide, self.PixelsHigh, self.ink = 600, high, ink_rows
 
         def ColorAt(self, x, y):
+            if not isinstance(x, IntPtr) or not isinstance(y, IntPtr):
+                raise TypeError("'int' value cannot be converted to System.IntPtr in method NSColor ColorAt")
             border = x == 0 or y == 0 or x == self.PixelsWide - 1 or y == self.PixelsHigh - 1
             return Color(0.0 if border or (y in self.ink and 40 <= x <= 200) else 1.0)
 
@@ -309,3 +314,40 @@ def test_the_found_address_reads_cleanly():
     facts, _ = logic.lookup_choices(found, {}, {})
     assert facts["address"] == "96 Ithaca Road, Ithaca, NY 14850"
     assert logic.same_address(facts["address"], "96 Ithaca Rd, Ithaca, NY")
+
+
+# ---- Rhino run of c4ad070 ------------------------------------------------------------------------------------------
+
+def _mac_list_row_px(rows, pitch):
+    """list_row_px run on a stand-in for Rhino 8's Mac table, which has what the Rhino run listed
+    (docs/evidence/pr-33/rhino-c4ad070/table_methods.json): RowCount, and RectForRow taking an IntPtr (a plain int is
+    refused, as Python.NET refuses it) -- and no RectOfRow."""
+    import math
+    import types
+
+    class IntPtr(int):
+        pass
+
+    class Rect:
+        def __init__(self, y, h):
+            self.Y, self.Height = y, h
+
+    class Table:
+        RowCount = rows
+
+        def RectForRow(self, index):
+            if not isinstance(index, IntPtr):
+                raise TypeError("'int' value cannot be converted to System.IntPtr")
+            return Rect(index * pitch, pitch)
+
+    ns = {"math": math, "logic": logic, "System": types.SimpleNamespace(IntPtr=IntPtr)}
+    exec(part(UI, "def native_number(", "def start_box("), ns)
+    return ns["list_row_px"](types.SimpleNamespace(ControlObject=Table()))
+
+
+def test_the_row_pitch_is_read_through_the_macs_own_row_rectangle():
+    """Rhino's Mac table spells it RectForRow(IntPtr); the plugin called RectOfRow, always failed into the 20 px
+    fallback, and the list (and the box) came out taller than the rows Rhino painted (16 pt apart)."""
+    assert logic.LIST_ROW_PX == 20
+    assert _mac_list_row_px(8, 16) == 16 and _mac_list_row_px(1, 16) == 16 and _mac_list_row_px(3, 17.2) == 18
+    assert ".RectOfRow(" not in UI

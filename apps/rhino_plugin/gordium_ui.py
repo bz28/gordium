@@ -824,6 +824,12 @@ def keep_on_screen(window):
         pass
 
 
+def row_rect(table, index):
+    """Where an NSTableView lays out row `index`. Rhino's Mac binding names this RectForRow and takes an IntPtr
+    (not RectOfRow, which only Cocoa's own spelling has, and not a plain int: Rhino run of c4ad070)."""
+    return table.RectForRow(System.IntPtr(int(index)))
+
+
 def list_row_px(listbox):
     """A list's row pitch in px as Rhino lays it out: on the Mac the ListBox is a table whose row height plus spacing
     is read from it; elsewhere (or if it can't be read) logic.LIST_ROW_PX."""
@@ -832,9 +838,9 @@ def list_row_px(listbox):
         # where the table lays its rows out, not the row height it reports (Rhino run of df08fc0: rows painted about
         # 16 pt apart while RowHeight + spacing said 24, leaving an empty band under eight rows)
         if int(native_number(table.RowCount)) >= 2:
-            pitch = native_number(table.RectOfRow(1).Y) - native_number(table.RectOfRow(0).Y)
+            pitch = native_number(row_rect(table, 1).Y) - native_number(row_rect(table, 0).Y)
         else:
-            pitch = native_number(table.RectOfRow(0).Height)   # a row's rect already includes its spacing
+            pitch = native_number(row_rect(table, 0).Height)   # (see the Rhino run: whether this includes the spacing)
         return int(math.ceil(pitch - 1e-6)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX   # up: never a row short
     except Exception:
         return logic.LIST_ROW_PX
