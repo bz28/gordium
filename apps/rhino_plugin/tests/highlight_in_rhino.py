@@ -55,13 +55,21 @@ def fresh_module():
     return gordium_rhino
 
 
+def draw_now(view):
+    """The view's frame drawn now, at its own size: on the Mac Redraw() only schedules it, and a capture draws it,
+    the plugin's drawing included (the Rhino job at 6361a3f: the draw record read right after Redraw() was empty)."""
+    view.CaptureToBitmap(System.Drawing.Size(view.ActiveViewport.Bounds.Width, view.ActiveViewport.Bounds.Height))
+
+
 def capture(doc, view_name, name):
     view = doc.Views.Find(view_name, False)
     doc.Views.ActiveView = view
     if view_name == "Perspective":
         view.ActiveViewport.ZoomExtents()
     view.Redraw()
-    view.CaptureToBitmap(System.Drawing.Size(1000, 640)).Save(S + "frames/" + name + ".png")
+    draw_now(view)
+    size = System.Drawing.Size(view.ActiveViewport.Bounds.Width, view.ActiveViewport.Bounds.Height)   # as seen
+    view.CaptureToBitmap(size).Save(S + "frames/" + name + ".png")
 
 
 try:
@@ -142,46 +150,97 @@ try:
                  for k in range(grp.Children.Count)]
         west_row = next(c for c in cells if "Side yard, Southwest" in c[0])
         claim("1 the panel's Delta says the same", west_row[3] == "at least 0'-11 1/4\" short", west_row)
-        top_vp = doc.Views.Find("Top", False).ActiveViewport
-        doc.Views.ActiveView = doc.Views.Find("Top", False)
-        model = g._model_on_screen(g.overlay(), top_vp)
+        # what the Top view really drew (gordium_rhino.draw_screen keeps it in STATE["drawn"]): the claims read the
+        # drawing's own placement, never a sum of their own (the Rhino job at 27c8e5d: a claim's own taken boxes
+        # said "no corner clear" while the screen placed the notice correctly)
+        top_view = doc.Views.Find("Top", False)
+        doc.Views.ActiveView = top_view
+        top_vp = top_view.ActiveViewport
+
+        def what_drew(labels_on):
+            g.set_labels(labels_on)
+            g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # never an earlier frame's record
+            top_view.Redraw()
+            draw_now(top_view)
+            g.settle_labels()                         # the labels placed as when the view comes to rest (no idle
+            g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # in a script: the timer can't run)
+            top_view.Redraw()
+            draw_now(top_view)
+            rec = g.STATE.get("drawn", {}).get(str(top_vp.Id))
+            return rec if rec and rec.get("complete") and rec.get("settled") else None   # the whole, settled frame
+
+        def over(box, other):                          # two (x, y, w, h) boxes overlap
+            return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
+                min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
+        message = lambda: str(g.STATE["panel_parts"]["message"].Text) if g.STATE.get("panel_parts") else ""  # noqa
+        held = ["✕ " + t for t in (getattr(g.overlay(), "toast", None) or [[]])[0]]
         for labels_on in (False, True):
-            taken = [g.logic.status_box(top_vp.Bounds.Width, g._status_rows(g.overlay(), False))] if labels_on else []
-            status = list(taken)
-            box = g._notice_box(g.overlay(), top_vp, taken)
-            claim("1b the notice covers neither the model nor the status box (labels %s)" % ("on" if labels_on else "off"),
-                  box is not None and not any(min(box[1] + box[3], a + c) > max(box[1], a) and
-                                              min(box[2] + box[4], b + e) > max(box[2], b)
-                                              for a, b, c, e in [(model[0], model[1], model[2] - model[0],
-                                                                  model[3] - model[1])] + status),
-                  {"notice": box[1:] if box else None, "model": model, "status": status})
-        vp = doc.Views.Find("Top", False).ActiveViewport
-        screen = lambda line: tuple((p.X, p.Y) for p in (vp.WorldToClient(line.From), vp.WorldToClient(line.To)))  # noqa
-        obstacles = [screen(line) for line in g.overlay().plan_lines]
-        taken, placed = [], []
-        every = [(line, text) for line, text, _ in g.overlay().yard_dims] + \
-            [(edge, text) for _, text, edge in g.overlay().edge_labels]
-        for line, text in every:      # every label, in the order the screen draws them (yards, then edge lengths)
-            left, top, w, _, rows = g.ui.label_box(vp, (line.From + line.To) / 2, text, 11, taken,
-                                                   along=(line.From, line.To), obstacles=obstacles)
-            h = 4 + g.ui.LINE_H * len(rows)                   # one line or two (name, then numbers)
-            hits = [o for o in obstacles if g.logic.crosses(o, left, top, w, h)]
-            others = [b for b in placed if left < b[0] + b[2] and b[0] < left + w and top < b[1] + b[3] and b[1] < top + h]
-            placed.append((left, top, w, h))
-            inside = 0 <= left and left + w <= vp.Bounds.Width and 0 <= top and top + h <= vp.Bounds.Height
-            (ax, ay), (bx, by) = screen(line)                 # next to its own line: the gap between them
-            near = min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
-                       for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
-            log.setdefault("labels", []).append((text, round(left), round(top), len(hits), len(others), inside,
-                                                 round(near, 1)))
-            log.setdefault("label_rows", []).append(len(rows))
-        claim("2 no label crosses a dimension, a lot edge or the house, nor covers another label",
-              len(log["labels"]) >= 8 and all(n == 0 and m == 0 for *_, n, m, _, _ in log["labels"]) and
-              len(obstacles) >= 4 + 4 + 4, {"labels": log["labels"], "lines": len(obstacles)})
-        claim("2 every label next to its own line (within 12 px: beside it, or just past its end when it is short)",
-              all(near <= 12 for *_, near in log["labels"]), log["labels"])
-        claim("2 every label on screen", all(i for *_, i, _ in log["labels"]),
-              {"labels": log["labels"], "view": (vp.Bounds.Width, vp.Bounds.Height)})
+            rec = what_drew(labels_on) or {}
+            box, m = rec.get("notice"), rec.get("model")
+            model_box = (m[0], m[1], m[2] - m[0], m[3] - m[1]) if m else None
+            # not drawn only when the placement itself finds no corner for this frame (never just "said in the panel")
+            room = bool(rec and held) and g.logic.notice_place(rec["size"][0], rec["size"][1], held, m,
+                                                                rec.get("taken") or []) is not None
+            claim("1b the notice covers neither the model nor the status box (labels %s): drawn clear of both when a "
+                  "corner has room, else not drawn and said in the panel" % ("on" if labels_on else "off"),
+                  bool(rec) and bool(held) and ((box is not None and not (model_box and over(box, model_box))
+                                                 and not any(over(box, t) for t in rec.get("taken") or []))
+                                                or (box is None and not room and "no longer complies" in message())),
+                  {"notice": box, "room": room, "model": m, "taken": rec.get("taken"), "view": rec.get("size"),
+                   "panel": message()})
+        rec = what_drew(True)                          # every label on, as the architect turns them on
+        lines = [tuple(map(tuple, s_)) for s_ in rec["lines"]]
+        m = rec["model"]
+        hard = [tuple(b_) for b_ in rec.get("hard_boxes") or []]   # the notice, status box, north arrow
+        shapes = [[tuple(q) for q in shp] for shp in rec.get("hard_shapes") or []]   # buildings, coloured parts
+        dims = [tuple(map(tuple, d_)) for d_ in rec.get("dims") or []]
+        view = tuple(rec["size"])
+        broken, forced, covered, too_far = [], [], [], []
+        for k, (text, (left, top, w, h, want), nrows, own, led, size, was_forced, order) in enumerate(rec["labels"]):
+            own = tuple(map(tuple, own))
+            box = (left, top, w, h)
+            why = g.logic.label_breaks_hard(own, box, view, hard, dims, shapes)   # every HARD rule
+            if why:
+                broken.append((text, why))
+            if was_forced:
+                forced.append(text)
+            gap = g.logic.box_gap(own, box)
+            # independently of the placement: is there a spot at full size within one label height of its line that
+            # keeps every HARD rule (a 4 px search)? Then the label must be that near, at full size
+            for rows in ([text], g.logic.label_lines(text)):
+                rw = max(g.logic.label_width(r_, 11) for r_ in rows)
+                rh = g.logic.label_height(len(rows), 11)
+                (xa, ya), (xb, yb) = own
+                others_ = [tuple(b_[1][:4]) for b_ in rec["labels"] if b_[7] < order]   # placed before it only
+                near = any(g.logic.box_gap(own, (x_, y_, rw, rh)) <= rh - 6 and
+                           all(not g.logic.label_breaks_hard(own, (x_ + dx, y_ + dy, rw, rh), view, hard, dims, shapes,
+                                                             others_) for dx in (-3, 0, 3) for dy in (-3, 0, 3))
+                           for y_ in range(int(min(ya, yb) - 2 * rh), int(max(ya, yb) + rh) + 1, 4)
+                           for x_ in range(int(min(xa, xb) - rw - rh), int(max(xa, xb) + rh) + 1, 4))
+                if near and (gap > rh or size < 11):
+                    too_far.append((text, round(gap, 1), size, rows))
+                    break
+            others = [j for j, b_ in enumerate(rec["labels"]) if j != k and over(box, b_[1][:4])]
+            if others:
+                covered.append((text, others))
+            log.setdefault("labels", []).append((text, round(left), round(top), round(gap, 1), bool(led), size,
+                                                 why, bool(was_forced)))
+        g.set_labels(False)
+        # one set of rules (rhino_logic.place_dim_label; the Rhino job at 319dc5d): HARD never broken: on screen, over
+        # no building or coloured part, nor the notice, the status box or the north arrow, on neither its own line nor
+        # another yard's dimension; never forced here (the sample has room)
+        claim("2 every label keeps every HARD rule: on screen, off every building and coloured part, the notice, the "
+              "status box and the north arrow, off its own line and every other yard's dimension",
+              len(log["labels"]) >= 8 and rec.get("buildings", 0) >= 1 and len(shapes) >= rec.get("buildings", 0)
+              and not broken and not forced,
+              {"broken": broken, "forced": forced, "buildings": rec.get("buildings"), "labels": log["labels"],
+               "view": view})
+        claim("2 a label is within one label height of its line at full size whenever a spot there keeps every HARD "
+              "rule (an independent 4 px search), and led to its line whenever it is further than 8 px",
+              not too_far and all(lab[4] == (lab[3] > 8) for lab in log["labels"]),
+              {"too_far": too_far, "labels": log["labels"]})
+        claim("2 no label covers another (a placed label is HARD for the later ones)", not covered,
+              {"covered": covered})
         sources = ((g.STATE.get("last") or {}).get("header") or {}).get("sources") or []
         lot = [t for t in sources if t.startswith("Lot: ")]
         area = items["Lot area"]["proposed"]                    # the row's own figure: the fact must say the same
