@@ -1157,33 +1157,33 @@ Ranked by how much each matters, then gaps no result mentions before ones every 
 
 ### §325-45.2B Definitions and related standards (rule, pp.130–133)
 
-- **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128)
+- **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
 
 ### §325-45.2D Maximum Height (in stories) Map (rule, pp.133–134)
 
-- **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128)
+- **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
 
 ### §325-45.2E Collegetown Residential (CR-1, CR-2, CR-3) (rule, pp.134–146)
 
-- **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128)
+- **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
 
 ### §325-45.2F Collegetown Residential 4 (CR-4) (rule, pp.146–151)
 
-- **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128)
+- **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
 
 ### §325-45.2G Mixed Use (MU-1, MU-2) (rule, pp.151–160)
 
-- **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128)
+- **Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)**
+  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes. The law: “Six zoning districts are established for the Collegetown area” (§325-45.2A)
 
 ### §325-45.3B Street-level active uses required (rule, pp.160–161)
 
-- **Collegetown Area Form Districts**
-  - all 9 districts: not applicable: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2). The law: “within any district of the Collegetown Area Form Districts” (chapter_325_zoning_2026-10.pdf p.128)
+- **MU-2 street-level active uses**
+  - all 9 districts: not applicable: Applies only in the MU-2 District (Collegetown). The law: “Within the MU-2 District” (this piece)
 
 ### §325-45.5A Permitted uses (rule, pp.162–163)
 

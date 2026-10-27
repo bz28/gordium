@@ -1011,12 +1011,20 @@ pieces:
         item: historic_flood
         why: It applies "regardless of the underlying zoning", so in residential districts too; it needs the historic
           district lookup.
-  325-45.2B: *collegetown
-  325-45.2D: *collegetown
-  325-45.2E: *collegetown
-  325-45.2F: *collegetown
-  325-45.2G: *collegetown
-  325-45.3B: *collegetown
+  325-45.2B: &collegetown_2
+    - what: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)
+      all:
+        status: not_applicable
+        why: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes.
+        piece: 325-45.2A
+        quote: Six zoning districts are established for the Collegetown area
+  325-45.2D: *collegetown_2
+  325-45.2E: *collegetown_2
+  325-45.2F: *collegetown_2
+  325-45.2G: *collegetown_2
+  325-45.3B:
+    - what: MU-2 street-level active uses
+      all: {status: not_applicable, why: Applies only in the MU-2 District (Collegetown)., quote: Within the MU-2 District}
 
   325-45.5A: &cliff_street
     - what: Cliff Street Retreat Planned Unit Development District

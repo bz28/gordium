@@ -62,6 +62,9 @@ OMISSION = "except where otherwise indicated by specific prohibition or omission
 # The two sentences that say a use left out of a district's list isn't permitted there: §325-8B(3), all of it (p.26
 # lines 19-21), and §325-8A(2)-(3), "Uses which are permitted in each use district are listed" (p.24 lines 15-18).
 OMISSION_LINES = {(26, 19), (26, 20), (26, 21), (24, 15), (24, 16), (24, 17), (24, 18)}
+# A section whose scope is set by another section of the same article: Article X's §325-45.4 (legislative intent)
+# names the Cliff Street Retreat PUD District that §325-45.5 regulates.
+SAME_ARTICLE = {"325-45.5": {"325-45.4"}}
 MULTIPLE_KINDS = (7, (32, 33))   # §325-3B DWELLING, MULTIPLE (5): rooming house; boarding house; ...; row house (p.7)
 
 
@@ -315,6 +318,8 @@ class Audit:
                 p.append(f"{where}: give the law's own words (`quote`)")
             elif not self._quote_found(pid, dec):
                 p.append(f"{where}: quote not found: {dec['quote']!r}")
+            if dec.get("file", LAW) not in (LAW, CHART):
+                p.append(f"{where}: a 'not applicable' quotes Chapter 325 or its chart, not {dec['file']}")
             if dec.get("file") == CHART and not dec.get("cell"):
                 p.append(f"{where}: a chart quote needs `cell` ({{section, row}}), so the district's own cell is checked")
             if dec.get("cell"):
@@ -323,10 +328,11 @@ class Audit:
                 p.append(f"{where}: via_piece only goes with a chart `cell`")
             if dec.get("quote") and dec.get("file", LAW) == LAW and (keys := self._quote_keys(pid, dec)):
                 law = keys - {tuple(k) for k in self.header.get("furniture", [])}
-                major = lambda i: re.match(r"325-\d+", i or "")[0] if re.match(r"325-\d+", i or "") else None
+                major = lambda i: re.match(r"325-\d+(?:\.\d+)?", i or "")[0] if re.match(r"325-\d+", i or "") else None
+                mine = {major(pid)} | SAME_ARTICLE.get(major(pid), set())
                 if not law:
                     p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
-                elif not (law & OMISSION_LINES) and major(pid) not in {major(self.owner.get(k)) for k in law}:
+                elif not (law & OMISSION_LINES) and not mine & {major(self.owner.get(k)) for k in law}:
                     p.append(f"{where}: the quote is from another section of the law "
                              f"({', '.join(sorted({str(self.owner.get(k)) for k in law}))}), not this piece's own")
             if dec.get("cell") and (got := self._cell(d, dec)) != "-":

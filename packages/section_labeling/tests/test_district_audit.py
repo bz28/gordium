@@ -480,3 +480,20 @@ def test_rooming_units_and_bed_and_breakfasts_in_r1_r2_are_not_claimed_settled(b
         assert {dec["status"] for _, dec in built.cells["325-3B:rooming_unit"][d]} == {"missing"}
         assert built.cells["325-10C"][d][part_index(built, "325-10C", "Bed-and-breakfast")][1]["status"] == "missing"
         assert built.cells["325-9B"][d][part_index(built, "325-9B", "(p) Bed-and-breakfast")][1]["status"] == "missing"
+
+
+# Review round 6.
+
+def test_a_quote_from_a_neighbouring_numbered_section_is_refused(decisions):
+    """§325-29 (landmarks) isn't §325-29.2 (the Southwest districts)."""
+    found = problems(with_piece(decisions, "325-29", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "page": 77,
+        "quote": "Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3"}}]))
+    assert any("from another section of the law (325-29.2A)" in p for p in found)
+
+
+def test_not_applicable_quotes_only_chapter_325_or_its_chart(decisions):
+    found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": {
+        "status": "not_applicable", "why": "w", "file": "ordinance_no_2025-12_southside_form_districts.pdf",
+        "page": 1, "quote": "ORDINANCE"}}]))
+    assert any("quotes Chapter 325 or its chart, not ordinance_no_2025-12" in p for p in found)
