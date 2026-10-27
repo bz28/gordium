@@ -1,0 +1,3 @@
+# #15 rhino-ui at e8c3654 in Rhino 8 (2026-10-27)
+
+pass2 step scale, run twice (f_pass2ru, f_pass2ru2) and at check-button 540f718 (f_pass2cb): claim 7 'the lot's zoom came to rest (its labels placed)' FAILS each time. Detail: the lot's 8 labels are painted ('? Rear yard 27'-5 3/4" to 27'-6 1/8" (approx.)', Front yard, two side yards, edges 75'-10", 101'-1 1/2", 10'-4 1/8", 92'-1 3/8"), the neighbourhood is settled, but the lot's recorded 'settled' is False after the script's two passes (gordium_rhino.py: settled = cached sig == sig). Cause not found: either the label signature differs between the frame before and after settle_labels (product), or the script's two passes don't reach rest. Open question for #15.

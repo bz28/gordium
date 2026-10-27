@@ -1,0 +1,15 @@
+{
+ "open": {
+  "0 the sample's lot is from the tax map": true,
+  "8 the address is there too": true,
+  "8 the sample's Street side reads Ithaca Rd, from the lookup": true
+ },
+ "labels": {
+  "4 the Height limit label is 13 pt": true,
+  "5 every view was drawn": true,
+  "5 the status box once, in the active view": true
+ },
+ "scale": {
+  "7 the lot's zoom came to rest (its labels placed)": false
+ }
+}

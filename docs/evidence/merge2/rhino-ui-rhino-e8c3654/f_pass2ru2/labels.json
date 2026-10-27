@@ -1,0 +1,101 @@
+{
+ "step": "labels",
+ "claims": {
+  "4 the Height limit label is 13 pt": {
+   "ok": true,
+   "detail": [
+    {
+     "view": "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+     "rows": [
+      "Height limit 35'-0\""
+     ],
+     "size": 13
+    },
+    {
+     "view": "16926896-dffc-4a86-acf1-64661a232111",
+     "rows": [
+      "Height limit 35'-0\""
+     ],
+     "size": 13
+    }
+   ]
+  },
+  "5 every view was drawn": {
+   "ok": true,
+   "detail": [
+    "16926896-dffc-4a86-acf1-64661a232111",
+    "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+    "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+    "d1f7eee1-dedb-403c-8460-d77604e8e086"
+   ]
+  },
+  "5 the status box once, in the active view": {
+   "ok": true,
+   "detail": {
+    "views": [
+     "16926896-dffc-4a86-acf1-64661a232111",
+     "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+     "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+     "d1f7eee1-dedb-403c-8460-d77604e8e086"
+    ],
+    "active": "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+    "height": [
+     {
+      "view": "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+      "rows": [
+       "Height limit 35'-0\""
+      ],
+      "size": 13
+     },
+     {
+      "view": "16926896-dffc-4a86-acf1-64661a232111",
+      "rows": [
+       "Height limit 35'-0\""
+      ],
+      "size": 13
+     }
+    ],
+    "status_views": [
+     "c44270f9-f702-4de2-887d-8c2fad8bf5be"
+    ],
+    "status_rows": [
+     "Gordium \u00b7 ? 1 needs review \u00b7 9 comply \u00b7 2 not checked",
+     "Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12'-0\")"
+    ]
+   }
+  }
+ },
+ "draws": {
+  "views": [
+   "16926896-dffc-4a86-acf1-64661a232111",
+   "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+   "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+   "d1f7eee1-dedb-403c-8460-d77604e8e086"
+  ],
+  "active": "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+  "height": [
+   {
+    "view": "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+    "rows": [
+     "Height limit 35'-0\""
+    ],
+    "size": 13
+   },
+   {
+    "view": "16926896-dffc-4a86-acf1-64661a232111",
+    "rows": [
+     "Height limit 35'-0\""
+    ],
+    "size": 13
+   }
+  ],
+  "status_views": [
+   "c44270f9-f702-4de2-887d-8c2fad8bf5be"
+  ],
+  "status_rows": [
+   "Gordium \u00b7 ? 1 needs review \u00b7 9 comply \u00b7 2 not checked",
+   "Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12'-0\")"
+  ]
+ },
+ "ok": true
+}
