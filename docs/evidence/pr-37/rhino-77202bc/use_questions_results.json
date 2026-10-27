@@ -1,0 +1,417 @@
+{
+ "claims": {
+  "1 the Use dropdown lists R-1b's chart uses, permitted first, one-family detached picked, no questions": {
+   "ok": true,
+   "detail": {
+    "labels": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "no lot yet: draw it, or pick a closed outline on the Site layer",
+     "Front lot line (on the street)",
+     "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+     "Confirm the district to continue."
+    ],
+    "drops": [
+     [
+      "R-1b"
+     ],
+     [
+      "One-family dwelling, detached",
+      "Church or related building",
+      "Public park or playground",
+      "Library or fire station",
+      "Cemetery or related building",
+      "Public utility structure except office",
+      "School and related buildings"
+     ],
+     [
+      "Not answered",
+      "No: one street",
+      "Yes: two streets"
+     ]
+    ],
+    "picked": [
+     "R-1b",
+     "One-family dwelling, detached",
+     "Not answered"
+    ]
+   }
+  },
+  "2 school in R-1b: the amber line says not permitted by right, with the chart's page": {
+   "ok": true,
+   "detail": {
+    "labels": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Not permitted by right in R-1b: Marked SP for R-1B on the zoning chart (p.2).",
+     "Lot",
+     "no lot yet: draw it, or pick a closed outline on the Site layer",
+     "Front lot line (on the street)",
+     "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+     "Confirm the district to continue."
+    ],
+    "drops": [
+     [
+      "R-1b"
+     ],
+     [
+      "One-family dwelling, detached",
+      "Church or related building",
+      "Public park or playground",
+      "Library or fire station",
+      "Cemetery or related building",
+      "Public utility structure except office",
+      "School and related buildings"
+     ],
+     [
+      "Not answered",
+      "No: one street",
+      "Yes: two streets"
+     ]
+    ],
+    "picked": [
+     "R-1b",
+     "School and related buildings",
+     "Not answered"
+    ]
+   }
+  },
+  "3 three questions after Use, the conversion dropdown in its own words, 'lots' said at once as not kept": {
+   "ok": true,
+   "detail": {
+    "labels": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Dwelling units",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Rooms let for profit",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Made by converting an existing building, not new construction? (\u00a7325-3B)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "no lot yet: draw it, or pick a closed outline on the Site layer",
+     "Front lot line (on the street)",
+     "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+     "Confirm the district to continue."
+    ],
+    "drops": [
+     [
+      "R-1b",
+      "X"
+     ],
+     [
+      "One-family dwelling, detached",
+      "Multiple family dwelling"
+     ],
+     [
+      "Not answered",
+      "New construction",
+      "Conversion of an existing building"
+     ],
+     [
+      "Not answered",
+      "No: one street",
+      "Yes: two streets"
+     ]
+    ],
+    "picked": [
+     "X",
+     "Multiple family dwelling",
+     "Not answered",
+     "Not answered"
+    ],
+    "after_typing": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Dwelling units",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Rooms let for profit",
+     "Not kept: a whole number, 0 or more. Its rules need review until it is.",
+     "Made by converting an existing building, not new construction? (\u00a7325-3B)",
+     "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+     "Lot",
+     "no lot yet: draw it, or pick a closed outline on the Site layer",
+     "Front lot line (on the street)",
+     "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+     "Confirm the district to continue."
+    ]
+   }
+  },
+  "4 another use with other questions: the box closes to open again with them": {
+   "ok": true,
+   "detail": "pick:refresh"
+  },
+  "5 a saved use R-1b doesn't list stays picked, and the box says its Use row won't comply": {
+   "ok": true,
+   "detail": {
+    "labels": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Two-family dwelling isn't on R-1b's list of uses in the zoning chart: its Use row won't comply.",
+     "Lot",
+     "no lot yet: draw it, or pick a closed outline on the Site layer",
+     "Front lot line (on the street)",
+     "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+     "Confirm the district to continue."
+    ],
+    "drops": [
+     [
+      "R-1b"
+     ],
+     [
+      "One-family dwelling, detached",
+      "Church or related building",
+      "Public park or playground",
+      "Library or fire station",
+      "Cemetery or related building",
+      "Public utility structure except office",
+      "School and related buildings",
+      "Two-family dwelling"
+     ],
+     [
+      "Not answered",
+      "No: one street",
+      "Yes: two streets"
+     ]
+    ],
+    "picked": [
+     "R-1b",
+     "Two-family dwelling",
+     "Not answered"
+    ]
+   }
+  }
+ },
+ "1": {
+  "labels": [
+   "Address",
+   "Zoning district",
+   "entered by you",
+   "Use",
+   "Lot",
+   "no lot yet: draw it, or pick a closed outline on the Site layer",
+   "Front lot line (on the street)",
+   "set from the lot, once there is one",
+   "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+   "Corner lot?",
+   "Not checked yet: overlays (historic, gorge, flood)",
+   "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+   "Confirm the district to continue."
+  ],
+  "drops": [
+   [
+    "R-1b"
+   ],
+   [
+    "One-family dwelling, detached",
+    "Church or related building",
+    "Public park or playground",
+    "Library or fire station",
+    "Cemetery or related building",
+    "Public utility structure except office",
+    "School and related buildings"
+   ],
+   [
+    "Not answered",
+    "No: one street",
+    "Yes: two streets"
+   ]
+  ],
+  "picked": [
+   "R-1b",
+   "One-family dwelling, detached",
+   "Not answered"
+  ]
+ },
+ "2": {
+  "labels": [
+   "Address",
+   "Zoning district",
+   "entered by you",
+   "Use",
+   "Not permitted by right in R-1b: Marked SP for R-1B on the zoning chart (p.2).",
+   "Lot",
+   "no lot yet: draw it, or pick a closed outline on the Site layer",
+   "Front lot line (on the street)",
+   "set from the lot, once there is one",
+   "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+   "Corner lot?",
+   "Not checked yet: overlays (historic, gorge, flood)",
+   "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+   "Confirm the district to continue."
+  ],
+  "drops": [
+   [
+    "R-1b"
+   ],
+   [
+    "One-family dwelling, detached",
+    "Church or related building",
+    "Public park or playground",
+    "Library or fire station",
+    "Cemetery or related building",
+    "Public utility structure except office",
+    "School and related buildings"
+   ],
+   [
+    "Not answered",
+    "No: one street",
+    "Yes: two streets"
+   ]
+  ],
+  "picked": [
+   "R-1b",
+   "School and related buildings",
+   "Not answered"
+  ]
+ },
+ "3": {
+  "labels": [
+   "Address",
+   "Zoning district",
+   "entered by you",
+   "Use",
+   "Dwelling units",
+   "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+   "Rooms let for profit",
+   "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+   "Made by converting an existing building, not new construction? (\u00a7325-3B)",
+   "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+   "Lot",
+   "no lot yet: draw it, or pick a closed outline on the Site layer",
+   "Front lot line (on the street)",
+   "set from the lot, once there is one",
+   "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+   "Corner lot?",
+   "Not checked yet: overlays (historic, gorge, flood)",
+   "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+   "Confirm the district to continue."
+  ],
+  "drops": [
+   [
+    "R-1b",
+    "X"
+   ],
+   [
+    "One-family dwelling, detached",
+    "Multiple family dwelling"
+   ],
+   [
+    "Not answered",
+    "New construction",
+    "Conversion of an existing building"
+   ],
+   [
+    "Not answered",
+    "No: one street",
+    "Yes: two streets"
+   ]
+  ],
+  "picked": [
+   "X",
+   "Multiple family dwelling",
+   "Not answered",
+   "Not answered"
+  ],
+  "after_typing": [
+   "Address",
+   "Zoning district",
+   "entered by you",
+   "Use",
+   "Dwelling units",
+   "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+   "Rooms let for profit",
+   "Not kept: a whole number, 0 or more. Its rules need review until it is.",
+   "Made by converting an existing building, not new construction? (\u00a7325-3B)",
+   "entered by you; left blank, the rules that need it say so (never read as 0 or no)",
+   "Lot",
+   "no lot yet: draw it, or pick a closed outline on the Site layer",
+   "Front lot line (on the street)",
+   "set from the lot, once there is one",
+   "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+   "Corner lot?",
+   "Not checked yet: overlays (historic, gorge, flood)",
+   "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+   "Confirm the district to continue."
+  ]
+ },
+ "4": {
+  "returned": "pick:refresh"
+ },
+ "5": {
+  "labels": [
+   "Address",
+   "Zoning district",
+   "entered by you",
+   "Use",
+   "Two-family dwelling isn't on R-1b's list of uses in the zoning chart: its Use row won't comply.",
+   "Lot",
+   "no lot yet: draw it, or pick a closed outline on the Site layer",
+   "Front lot line (on the street)",
+   "set from the lot, once there is one",
+   "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+   "Corner lot?",
+   "Not checked yet: overlays (historic, gorge, flood)",
+   "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+   "Confirm the district to continue."
+  ],
+  "drops": [
+   [
+    "R-1b"
+   ],
+   [
+    "One-family dwelling, detached",
+    "Church or related building",
+    "Public park or playground",
+    "Library or fire station",
+    "Cemetery or related building",
+    "Public utility structure except office",
+    "School and related buildings",
+    "Two-family dwelling"
+   ],
+   [
+    "Not answered",
+    "No: one street",
+    "Yes: two streets"
+   ]
+  ],
+  "picked": [
+   "R-1b",
+   "Two-family dwelling",
+   "Not answered"
+  ]
+ },
+ "passed": 5,
+ "ok": true
+}
