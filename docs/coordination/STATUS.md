@@ -247,12 +247,12 @@ Scripts cannot press real keys (Eto), so these are the claims left for a person.
 Heads now (each full suite = pytest + all 7 CI steps, all passed):
 | PR | branch | base now | head | suite |
 |---|---|---|---|---|
-| #15 | rhino-ui | main | e8c3654 | 1,393 passed |
-| #16 | site-lookup | rhino-ui | b604a0a | 1,443 passed |
-| #19 | start-box-lookup | site-lookup | 8e9fc22 | 1,563 passed |
-| #23 | context-map | start-box-lookup | e80bb05 | 1,690 passed |
-| #27 | check-button | context-map | 540f718 | 1,761 passed |
-| #26 | re-lookup | start-box-lookup | 5711450 | 1,652 passed |
+| #15 | rhino-ui | main | ff9f36f | 1,396 passed |
+| #16 | site-lookup | rhino-ui | d58d681 | 1,446 passed |
+| #19 | start-box-lookup | site-lookup | 9289672 | 1,567 passed |
+| #23 | context-map | start-box-lookup | a05491d | 1,694 passed |
+| #27 | check-button | context-map | 2c7c875 | 1,765 passed |
+| #26 | re-lookup | start-box-lookup | f3e488d | 1,656 passed |
 | #17 | term-index | rhino-ui | d1ff50c | 1,441 passed |
 | #18 | measurement-2 | term-index | c827907 | 2,166 passed |
 | #20 | answer-keys | measurement-2 | ce98fdc | 1,983 passed (earlier job; not re-run) |
@@ -275,21 +275,28 @@ Not carried, and whether it matters:
 Undo review (step 4): rounds 5 (2 found: 1 fixed, 1 refuted), 6 (2 found: 1 comment fixed, 1 refuted), 7 clean. In-Rhino to run: apps/rhino_plugin/tests/undo_steps_in_rhino.py at 7afad1c (now also Show neighbourhood and Check after every edit).
 - Lane C, merge 2 Rhino runs (2026-10-27; evidence wip/start-box-lookup-rhino-59d7184, wip/re-lookup-rhino-19ed22f, wip/check-button-rhino-7afad1c): (1,4) undo_steps #19 17/33, #27 21/41: "one step" and "checked again" pass everywhere; "undone"/"nothing else" fail everywhere, but a control shows one _Undo from a rhinocode script undoes BOTH of two separate records, so this script cannot tell; real Ctrl+Z after a button press is left for a human; owner #19 (script). (2) pass2 at #19: claim 10 saves "Street 2" and passes; step "scale" claim 7 FAILS at #15 c912159, #16, #19, #27 (passes at demo e760f55): labels now placed by a settle timer (#15), script still records label_at in the draw loop: likely stale script, owner #15, not fixed. (3) re_lookup at #26 19ed22f: 8/9, stops at claim 2 "one Undo puts the sample back exactly": 3 objects missing after Undo (demo e760f55 control 29/30 passes claim 2): PRODUCT BUG candidate, owner #26. (5) demo smoke at #27: 7/7.
 
-On hold until Lane C re-runs (2026-10-27, Lane A): the three Rhino failures at the earlier heads were the scripts, not
-the product (two Opus sceptics each, from the runs' own undo events and code):
-- undo_steps (17/33, 21/41) and re_lookup claim 2 (3 floors missing): one scripted _Undo takes back every record the
-  script wrote outside a command (Lane C's control), so the architect's edit and the sample's own start record went
-  too. Fixed in the scripts: a real _Line command before each step, claims by undo serial, a control that must catch a
-  merged record.
-- pass2 claim 7: the script hooked ui.label_at, which the plugin no longer calls (labels are painted at rest since
-  #15 3446e94); it now reads what the frame painted after settle_labels.
-RE-RUN (Lane C): undo_steps_in_rhino.py at #19 8e9fc22 and #27 540f718; re_lookup_in_rhino.py at #26 5711450;
-pass2_in_rhino.py (step scale) at #15 e8c3654 and #27 540f718. Read out.json "two_in_a_row".
-BY HAND (a person in Rhino, the one real risk left): (1) Enter… then Pick the main building, nothing between,
-Ctrl+Z once: only the main building goes back. (2) _Line, then a panel button, Ctrl+Z once: only the button's change.
-(3) GordiumStart, then Edit site… Look up 96, Draw, Ctrl+Z once: the sample comes back with its house.
-- Lane C, merge 2 Rhino run 2 (2026-10-27; wip/start-box-lookup-rhino-8e9fc22, wip/check-button-rhino-540f718, wip/re-lookup-rhino-5711450, wip/rhino-ui-rhino-e8c3654): undo_steps #19 26/50, #27 32/62; the deliberate-merge control PASSES (caught) and two_in_a_row shows one _Undo taking 3 records; BUT a Gordium-free probe (two plain undo records written by one script, one _Undo in a separate script) also undoes both, so a script cannot test per-record undo: neither proves nor clears the product; real Ctrl+Z after a panel button remains a human check. re_lookup #26 5711450: 10/11, stops at claim 2 for the same reason (not "all pass"). pass2 scale claim 7 still FAILS at #15 e8c3654 (x2) and #27 540f718: 8 labels painted but the lot view never records settled; cause not found (label signature changing, or the script not reaching rest): open for #15. Demo smoke #27 540f718: 7/7.
-- Lane C, REAL input undo check (2026-10-27; wip/check-button-rhino-540f718-real, wip/re-lookup-rhino-5711450-real): real mouse clicks + real Cmd+Z + a typed _Line, state read by a read-only script. (a) one panel action (Hide starting house) + one Cmd+Z: undone, the typed line stays: PASS at #27 540f718. (b) two actions (labels, then Check after every edit) + one Cmd+Z: only the second undone; a second Cmd+Z the first: PASS. (c) #26 5711450: Look up 96 Ithaca Rd, Draw, one Cmd+Z: object ids exactly the sample, address back to 106: PASS. So the scripted undo_steps/re_lookup claim-2 failures are the harness, not the product, for the cases covered (massing, labels, auto_check, re-lookup Draw); survey/enter/main/add/ground/not_ground/context not covered with real input. FOUND, not fixed (panel, #27/#15 to confirm): after Cmd+Z of Hide starting house the layer shows again but the tick stays ticked until the next Check.
+Status 2026-10-27 (Lane A, after Lane C's real-input runs): undo is right with real clicks and Cmd+Z (Lane C:
+wip/check-button-rhino-540f718-real, wip/re-lookup-rhino-5711450-real); the scripted failures were the harness.
+Fixed since (cold reviewer + Opus sceptics, rounds until clean, each fix pinned and revert-checked):
+- Hide starting house tick stayed ticked after Cmd+Z (#15: the box had no setter). Every tick (labels, starting
+  house, envelope; Show neighbourhood #23; Check after every edit #27) is now set from the document by one
+  _sync_ticks: at every check (failed too), whenever the panel is made, on another document, after Undo/Redo.
+- pass2 claim 7: the script read Top's record after CaptureToBitmap(1000x640), which draws Top again at another
+  size (an unsettled frame). It reads the screen's frame first. Not a product loop (a capture costs one extra
+  placement, then it settles).
+RE-RUN (Lane C), scripts at these heads:
+- pass2_in_rhino.py step scale at #15 ff9f36f and #27 2c7c875 (claim 7: rest, every edge, 10'-4 1/8" led).
+- undo_steps_in_rhino.py at #27 2c7c875 (now also claims "only its own record undone" and a control).
+- re_lookup_in_rhino.py at #26 f3e488d.
+REAL INPUT (Lane C, at #27 2c7c875), Cmd+Z once after each, the tick must follow too:
+- Use my survey… (Lot row): one lot outline is used at once; with several, click the surveyed curve on Site.
+- Enter… (a row waiting for a count, e.g. Bedrooms): type a whole number, Enter (Enter alone skips it).
+- Pick the main building…: needs two solids on Building (add a box there first); click one.
+- Add to check…: a solid on the lot not on Building (a box on Default inside the lot); its row lists it.
+- This is the ground / Not the ground: a mesh or surface on the lot under the house shows in that row.
+- Show neighbourhood: untick, Cmd+Z: layers and tick back (on a lot drawn by Look up; elsewhere it says none
+  drawn, still one step).
+- Hide starting house, then Cmd+Z: layer AND tick back. Also: switch to another open file: its own ticks show.
 
 ## FOR BEN: merge 3 (Lane B, 2026-10-27; nothing merged)
 Runs after merge 2. Conflicts below are real trial merges (`git merge --no-commit --no-ff`, then abort): each PR alone onto a scratch main = main + merge 2 in its order (#15 #16 #19 #23 #27 clean; #26 and #17-#22 needed merge 2's own carries, steps 6-7, done in the scratch by a rough union, so gordium_rhino.py / project.py / docs/README.md conflicts may shrink once Lane A's real carries land). "Retarget": set the PR's base to main first (Edit by the title), then Merge (merge commit). xlsx / review.md / reports in a conflict are generated: rebuild (`python -m rule_export`, `section_labeling coverage`, `project_report`), never hand-merged.
