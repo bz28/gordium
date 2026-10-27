@@ -1074,7 +1074,9 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
     assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
     check_code = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert "logic.labels_on(_ui_state(doc))" in check_code and "ui.set_labels_tick(" in check_code
+    sync = rhino[rhino.index("def _sync_ticks("):].split("\ndef ", 1)[0]          # (every tick, at every check)
+    assert "logic.labels_on(_ui_state(doc))" in check_code and "_sync_ticks(doc)" in check_code
+    assert "ui.set_labels_tick(p, logic.labels_on(_ui_state(doc)))" in sync
     assert '"labels": set_labels' in rhino
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert 'box.Text = "Show on-screen labels"' in ui and "box.Checked = False" in ui.split("def _labels_box(")[1]
@@ -1308,7 +1310,7 @@ def test_the_panel_columns_fit_a_rhino_sized_panel_and_wrap():
     assert "col.Expand = i == 0" in ui and "ef.DrawableCell()" in ui and "ef.TextBoxCell(" not in ui
     assert int(re.search(r"^ROW_HEIGHT = (\d+)", ui, re.M).group(1)) >= 2 * 16           # two lines
     assert "ft.Wrap = ed.FormattedTextWrapMode.Word" in ui
-    for tick in ("_envelope_box(actions)", "_massing_box(actions, parts)", "_labels_box(actions, parts)"):
+    for tick in ("_envelope_box(actions, parts)", "_massing_box(actions, parts)", "_labels_box(actions, parts)"):
         assert "row(%s)" % tick in ui and "row(%s, " % tick not in ui, tick     # each in a row of its own
 
 
@@ -4119,17 +4121,34 @@ def test_gordiums_own_street_id_is_never_kept_as_the_streets_name():
 
 def test_every_panel_tick_follows_the_document():
     """The Rhino job at 540f718: after Cmd+Z of Hide starting house the layer came back but the tick stayed ticked
-    (it had no setter: only a click set it). Every tick box the panel has is set from the document by its own setter
-    (guarded, so setting it is never a click), at every check. Show buildable envelope only is the session's own
-    (never saved in the file, never an undo step)."""
+    (it had no setter: only a click set it); the review after: the envelope's tick came back ticked on a panel
+    made again with it off, a failed check's panel showed default ticks, and Hide starting house with no house
+    stayed ticked. Every tick box the panel has is set by its own setter (guarded, so setting it is never a click),
+    all of them in _sync_ticks, which runs at every check (failed ones too) and whenever the panel is made."""
     import re
     ui_src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     boxes = re.findall(r"\ndef _(\w+)_box\(actions[^)]*\):\n(?:(?!\ndef ).)*?ef\.CheckBox\(\)", ui_src, re.S)
-    assert "massing" in boxes and "labels" in boxes and "envelope" in boxes
-    run = rhino[rhino.index("def run_check("):].split("\ndef ", 1)[0]
-    for name in set(boxes) - {"envelope"}:
+    assert {"massing", "labels", "envelope"} <= set(boxes)
+    sync = rhino[rhino.index("def _sync_ticks("):].split("\ndef ", 1)[0]
+    for name in set(boxes):
         body = ui_src[ui_src.index("def _%s_box(" % name):].split("\ndef ", 1)[0]
         assert 'parts["%s_box"] = box' % name in body and 'if not parts.get("_setting_%s")' % name in body, name
         assert "def set_%s_tick(parts, " % name in ui_src, name
-        assert "ui.set_%s_tick(" % name in run, name
+        assert "ui.set_%s_tick(" % name in sync, name
+    run = rhino[rhino.index("def run_check("):].split("\ndef ", 1)[0]
+    made = rhino[rhino.index("def panel("):].split("\ndef ", 1)[0]
+    assert run.count("_sync_ticks(doc)") == 2 and made.count("ui.make_panel(") == made.count("_sync_ticks(doc)") == 2
+
+
+def test_hide_starting_house_with_no_house_is_never_left_ticked():
+    ticks, said = [], []
+    layers = type("Layers", (), {"FindByFullPath": lambda self, path, default: -1})()
+    doc = type("Doc", (), {"Layers": layers})()
+    ui_ = type("UI", (), {"set_massing_tick": staticmethod(lambda parts, hidden: ticks.append(hidden))})
+    ns = _plugin_functions(["hide_massing"], ui=ui_, say=said.append,
+                           Rhino=type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": doc})}))
+    ns["hide_massing"](True)
+    assert ticks == [False] and said and said[0].startswith("There is no starting house")
+
+
