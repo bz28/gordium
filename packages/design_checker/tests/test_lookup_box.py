@@ -1172,10 +1172,13 @@ def test_a_looked_up_district_without_rules_is_never_preselected_or_called_sugge
 def test_a_district_picked_after_a_lookup_without_rules_turns_draw_on():
     """#19 zone review (P1): after an R-2a lookup the dropdown had no change handler, so picking R-1b and ticking
     I confirm never turned Draw on. The pick goes through zone_picked, wired to the dropdown's change."""
-    state = {"zone": None, "district_confirmed": True}
+    state = {"zone": None, "district_confirmed": False}
     assert logic.draw_reason(state) == "Pick the district to continue."
     logic.zone_picked(state, "R-1b", None)
-    assert state["zone"] == "R-1b" and state["zone_source"] == logic.ENTERED and logic.can_draw(state)
+    assert state["zone"] == "R-1b" and state["zone_source"] == logic.ENTERED
+    assert logic.draw_reason(state) == "Confirm the district to continue."
+    state["district_confirmed"] = True                                         # I confirm, for R-1b
+    assert logic.can_draw(state)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "zone.SelectedIndexChanged += logic.guard(zone_changed" in ui and "logic.zone_picked(state" in ui
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")

@@ -269,8 +269,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      stays off for that address, and in a new file by hand is refused, until a live lookup of that same address
      finds the lot, or you close the box. Another address looked up and found can be drawn; by hand stays refused.
    - **Zoning district**: R-1b, R-1a, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b or RU, "entered by you", or after Look up "suggested by Gordium · City of
-     Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
-     lookup, because the City's online map is informational: the district is your statement.
+     Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project, after every
+     lookup and after you pick another district (a tick is for one district), because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
    - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
      near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building

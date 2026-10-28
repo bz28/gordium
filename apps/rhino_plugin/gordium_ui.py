@@ -1218,6 +1218,7 @@ def start_box(state, options, mode):
 
     def zone_changed(s, e):           # a district picked: set at once, so Draw, its reason and the row's source follow
         logic.zone_picked(state, zone.SelectedValue.Text if zone.SelectedValue else None, first_zone)
+        confirm.Checked = bool(state.get("district_confirmed"))     # another district: confirm it again
         draw.Enabled = logic.can_draw(state) and not looking
         reason.Text = logic.box_reason(state)
         if "source" in zone_row:
