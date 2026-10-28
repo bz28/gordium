@@ -1,0 +1,37 @@
+{
+ "step": "side_yard",
+ "claims": {
+  "1 on the tax map: every part at least the requirement plus the 2'-0\" margin, as drawn; now 3'-0\" short": {
+   "ok": true,
+   "detail": {
+    "name": "Side yard, Northeast",
+    "status": "does_not_comply",
+    "hint": "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the northeast side lot line as drawn (10'-0\" required, the lot lines \u00b12'-0\") \u2014 now 7'-0\" at its closest.",
+    "reason": null
+   }
+  },
+  "1 the panel shows it": {
+   "ok": true,
+   "detail": [
+    "\u2715 Side yard, Northeast \u00b7 Does not comply",
+    "7'-0\" proposed, 10'-0\" required as drawn \u00b7 with the tax map's \u00b12'-0\": at least 1'-0\" short",
+    "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the northeast side lot line as drawn (10'-0\" required, the lot lines \u00b12'-0\") \u2014 now 7'-0\" at its closest.",
+    "In the model: red is the part over the yard line whichever way the tax map's lot lines (\u00b12'-0\") really lie (certain); amber is the part that depends on where a survey puts them.",
+    "Measured: 1 group, 3 solids on Gordium::Massing \u00b7 footprint 1,341 sf",
+    "\u201cYard Dimensions \u00b7 Side (one side minimum) \u00b7 R-1B: 10 ft\u201d",
+    "City of Ithaca Zoning Charts (April 2026), p.3, line 38",
+    "\u201cYard Dimensions \u00b7 Side (other side minimum) \u00b7 R-1B: 10 ft\u201d",
+    "City of Ithaca Zoning Charts (April 2026), p.3, line 40",
+    "\u00a7325-8, District Regulations Chart, R-1b, Side yard, one side column; \u00a7325-8, District Regulations Chart, R-1b, Side yard, other side column",
+    "Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with one more decimal."
+   ]
+  }
+ },
+ "row": {
+  "name": "Side yard, Northeast",
+  "status": "does_not_comply",
+  "hint": "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the northeast side lot line as drawn (10'-0\" required, the lot lines \u00b12'-0\") \u2014 now 7'-0\" at its closest.",
+  "reason": null
+ },
+ "ok": true
+}

@@ -1,0 +1,38 @@
+{
+ "layers": [
+  "Gordium::Context",
+  "Gordium::Context::Parcels",
+  "Gordium::Context::Streets",
+  "Gordium::Context::Buildings",
+  "Gordium::Context::Notes"
+ ],
+ "objects": 595,
+ "gordium_locked": true,
+ "own_locks": {
+  "Gordium::Context": false,
+  "Gordium::Context::Parcels": true,
+  "Gordium::Context::Streets": true,
+  "Gordium::Context::Buildings": false,
+  "Gordium::Context::Notes": true
+ },
+ "locks_after_parent_unlocked": {
+  "Gordium::Context": false,
+  "Gordium::Context::Parcels": true,
+  "Gordium::Context::Streets": true,
+  "Gordium::Context::Buildings": false,
+  "Gordium::Context::Notes": true
+ },
+ "expected": {
+  "Gordium::Context": false,
+  "Gordium::Context::Parcels": true,
+  "Gordium::Context::Streets": true,
+  "Gordium::Context::Buildings": false,
+  "Gordium::Context::Notes": true
+ },
+ "ok": true,
+ "said": [
+  "Fetching the neighbourhood (up to 20 s)\u2026",
+  "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014)."
+ ],
+ "done": true
+}

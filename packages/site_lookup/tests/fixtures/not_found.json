@@ -1,0 +1,39 @@
+{
+ "address": "12345 Nowhere Blvd, Ithaca, NY 14850",
+ "captured": "2026-10-20",
+ "answers": [
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "12345 Nowhere Blvd, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": []
+   }
+  },
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "12345 Nowhere Blvd, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": []
+   }
+  }
+ ],
+ "live_status": "not_found"
+}

@@ -269,7 +269,19 @@ try:
     elif step == "corner":
         lot = g._find(doc, g.current_facts(doc).get("lot_id") or "")
         segs = list(g._segments(lot.Geometry))
-        mids = [(s[0] + s[1]) / 2 for s in (segs[0], segs[len(segs) // 2])]      # two different lot lines
+        street0 = [[list(p) for p in line] for line in g.current_facts(doc).get("street_line") or []]
+        on_street = lambda s: any(all(abs(a - b) < 0.05 for a, b in zip(list(g._feet_point(doc, s[0])[:2]) +  # noqa
+                                  list(g._feet_point(doc, s[1])[:2]), line[0] + line[1])) or
+                                  all(abs(a - b) < 0.05 for a, b in zip(list(g._feet_point(doc, s[0])[:2]) +
+                                  list(g._feet_point(doc, s[1])[:2]), line[1] + line[0])) for line in street0)
+        east = max((p for line in street0 for p in line), key=lambda p: p[0])     # Ithaca Rd's east end
+        touches = lambda s: any(abs(g._feet_point(doc, q)[0] - east[0]) < 0.05 and  # noqa
+                                abs(g._feet_point(doc, q)[1] - east[1]) < 0.05 for q in s)
+        first = next(s for s in segs if on_street(s))
+        side = next(s for s in segs if not on_street(s) and touches(s))
+        # one Ithaca Rd piece, then the side street (the Rhino job at 7a16aa6 and 6361a3f: the outline's middle
+        # segment is another Ithaca Rd piece on 106's lot, not the side street)
+        mids = [(s[0] + s[1]) / 2 for s in (first, side)]
         clicks = [(Rhino.Commands.Result.Success, m) for m in mids] + [(Rhino.Commands.Result.Nothing, None)]
         prompts = []
         real = g._get_point
@@ -279,16 +291,39 @@ try:
             return clicks.pop(0)
 
         facts = dict(g.current_facts(doc), corner_lot=True)
+        ithaca = [[list(p) for p in line] for line in facts.get("street_line") or []]     # the sample's 8 pieces
         saved = dict(g._ui_state(doc))
+        asked, real_ask = [], g._ask_street_more
+        said = len(g.STATE.get("said") or [])
         g._get_point = click
-        try:
-            g._box_pick(doc, "street", facts, saved)
+        g._ask_street_more = lambda q: asked.append(q) or False    # the architect's No (see claim 10, third part)
+        try:                                            # (the box's own session: the pick draws nothing)
+            facts, saved = g._box_pick(doc, "street", facts, saved, g.logic.BoxSession(g.RhinoTable(doc)))
         finally:
             g._get_point = real
-        log["corner"] = {"prompts": prompts, "lines": facts.get("street_line"), "name": saved.get("street_name")}
-        claim("10 a corner lot's street side takes every line clicked, Enter when done",
-              len(facts.get("street_line") or []) == 2 and prompts[0].startswith("Click each lot line on a street")
-              and "(2 picked); Enter when done" in prompts[-1], log["corner"])
+            g._ask_street_more = real_ask
+        told = (g.STATE.get("said") or [])[said:]
+        log["corner"] = {"prompts": prompts, "lines": facts.get("street_line"), "ids": facts.get("street_ids"),
+                         "name": saved.get("street_name"), "said": told, "asked": asked}
+        claim("10 a corner lot's street side takes every street clicked, Enter when done",
+              prompts[0].startswith("Click each lot line on a street") and "(2 picked); Enter when done" in prompts[-1],
+              log["corner"])
+
+        def same(p, q):
+            return all(abs(p[i][j] - q[i][j]) < 0.01 for i in (0, 1) for j in (0, 1))
+
+        kept = facts.get("street_line") or []
+        # demo 00c04f1: one click on one of Ithaca Rd's 8 tax-map pieces kept only that 9.8 ft piece (frontage
+        # 9'-9 5/8"); the whole street is kept now, said, and the side street's own 3 pieces, never round a corner
+        claim("10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"",
+              len(ithaca) == 8 and all(any(same(p, q) or same(p, q[::-1]) for q in kept) for p in ithaca)
+              and "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far — Enter when done" in told, log["corner"])
+        # the side street's far corner has a 0.24 ft piece in it, so it is never a sure corner (review round 7):
+        # asked once, and No keeps the street to its own 2 pieces; Ithaca Rd's two corners are sure (not asked)
+        claim("10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner",
+              len(kept) == 10 and "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far — Enter when done" in told and len(asked) == 1
+              and asked[0].startswith("Past there the lot line turns 89° over short pieces, a corner or a bend")
+              and facts.get("street_ids") == ["Ithaca Rd"] * 8 + ["Street 2"] * 2, log["corner"])
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
         state = dict(g._box_state(doc, facts, options, saved, "check"), corner_lot=False)   # the box: No
         after, after_ui = g._apply_box(doc, facts, state, saved)
@@ -357,19 +392,10 @@ try:
         ft = 1.0 / g._scale(doc)
         lot = rg.BoundingBox(o.lot_outline)
         c = lot.Center
-        placed, boxes = [], []
-        put, draw_box = g.ui.label_at, g.ui.draw_text_box
+        boxes = []
+        draw_box = g.ui.draw_text_box
         rows = list(g._status_rows(o, g.stale(o)))
-
-        leaders = []
-
-        def record_label(d, viewport, point, text, *rest, **kw):
-            placed.append(text)
-            if kw.get("leader") and kw.get("along") is not None:   # an edge shorter than its label: led to it
-                a, b = (viewport.WorldToClient(q) for q in kw["along"])
-                if g.logic.needs_leader(((b.X - a.X) ** 2 + (b.Y - a.Y) ** 2) ** 0.5, g.logic.label_width(text, 11)):
-                    leaders.append(text)
-            return put(d, viewport, point, text, *rest, **kw)
+        vid = str(top.ActiveViewportID)
 
         def record_box(d, rows_, *rest):
             boxes.append(list(rows_) == rows)
@@ -385,40 +411,60 @@ try:
             return ok
 
         def drawn(box, name):
+            """The plan labels Top draws at this zoom once it is at rest: the frame's own record (STATE["drawn"], as
+            the plugin painted them with ui.paint_label), after the one pass the timer makes at rest
+            (settle_labels, as redraw_timing_in_rhino.py runs it). (Labels are never drawn while the view moves
+            unless carried: since #15 3446e94/8c81667 a moving frame only asks for them.)"""
             top.ActiveViewport.ZoomBoundingBox(box)
             quiet(g)
-            del placed[:], boxes[:], frames[:], leaders[:]
-            g.ui.label_at, g.ui.draw_text_box, g._here = record_label, record_box, record_here
+            g.ui.draw_text_box, g._here = record_box, record_here
             try:
-                for _ in range(20):                      # until Top has really drawn a frame at this zoom
-                    top.Redraw()
-                    Rhino.RhinoApp.Wait()
-                    if frames:
-                        break
-                    time.sleep(0.1)
+                for at_rest in (False, True):
+                    del boxes[:], frames[:]
+                    g.STATE.get("drawn", {}).pop(vid, None)
+                    for _ in range(20):                  # until Top has really drawn a frame at this zoom
+                        top.Redraw()
+                        Rhino.RhinoApp.Wait()
+                        if frames:
+                            break
+                        time.sleep(0.1)
+                    if not at_rest:
+                        g.settle_labels()                # the timer's one pass at rest
             finally:
-                g.ui.label_at, g.ui.draw_text_box, g._here = put, draw_box, here
+                g.ui.draw_text_box, g._here = draw_box, here
             log.setdefault("frames", {})[name] = len(frames)
+            # the screen's own frame, read before the capture: CaptureToBitmap draws Top again at 1000 x 640, a
+            # different size, so a different placement to wait for (and its record would replace the screen's:
+            # the Rhino job at e8c3654 read that one, all 8 labels carried, "settled" never)
+            rec = dict(g.STATE.get("drawn", {}).get(vid) or {})
             view = top.CaptureToBitmap(System.Drawing.Size(1000, 640))
             view.Save(OUT + name + "_view.png")
-            return list(placed), sum(boxes)
+            labels = rec.get("labels") or []
+            return [lab[0] for lab in labels], sum(boxes), labels, bool(rec.get("settled"))
 
         half = 750 * ft                                  # the 1,500 ft square of #23's neighbourhood capture
         far = rg.BoundingBox(rg.Point3d(c.X - half, c.Y - half, 0), rg.Point3d(c.X + half, c.Y + half, 0))
-        out_labels, out_box = drawn(far, "scale_neighbourhood")
+        out_labels, out_box, _, out_settled = drawn(far, "scale_neighbourhood")
         near = rg.BoundingBox(lot.Min, lot.Max)
         near.Inflate(lot.Diagonal.Length * 0.15)
-        in_labels, in_box = drawn(near, "scale_lot")
-        led = sorted(set(leaders))
+        in_labels, in_box, painted, in_settled = drawn(near, "scale_lot")
         edges = sorted({t for _, t, _ in o.edge_labels})
-        log["scale"] = {"neighbourhood": {"labels": out_labels, "status_box": out_box},
-                        "lot": {"labels": in_labels, "status_box": in_box, "edges": edges, "led": led}}
+
+        def led(lab):                                    # led to its line: placed away from it, or an edge shorter
+            (xa, ya), (xb, yb) = lab[3]                  # than its label (ui.paint_label's own two cases)
+            return bool(lab[4]) or (lab[0] in edges and g.logic.needs_leader(((xb - xa) ** 2 + (yb - ya) ** 2) ** 0.5,
+                                                                            lab[1][2]))
+        leaders = sorted({lab[0] for lab in painted if led(lab)})
+        log["scale"] = {"neighbourhood": {"labels": out_labels, "status_box": out_box, "settled": out_settled},
+                        "lot": {"labels": in_labels, "status_box": in_box, "edges": edges, "led": leaders,
+                                "settled": in_settled}}
+        claim("7 the lot's zoom came to rest (its labels placed)", in_settled, log["scale"])
         claim("7 zoomed out to the 1,500 ft square: no plan labels drawn", out_labels == [], log["scale"])
         claim("7 the status box stays", out_box >= 1 and in_box >= 1, dict(log["scale"], frames=log["frames"]))
         claim("7 zoomed to the lot: every edge's length is back, the yards' too", set(edges) <= set(in_labels)
               and len(set(in_labels) - set(edges)) >= 3, log["scale"])
         claim("7 106's short 10'-4 1/8\" edge keeps its length, led to it", "10'-4 1/8\"" in edges and
-              "10'-4 1/8\"" in led, log["scale"])
+              "10'-4 1/8\"" in leaders, log["scale"])
     elif step == "box":
         A["box_serial"] = None
         empty = TestDocs("pass2box").open("Large Objects - Feet")
@@ -445,7 +491,9 @@ try:
             g.STATE.pop("on_box_shown", None)
             g.STATE["auto_ok"] = True
         log["box"] = seen
-        claim("6 the box was shown with no lot", g.logic.NO_LOT in (seen.get("labels") or []), seen.get("labels"))
+        # the empty file's box (no lot to use): its own wording since #19's start box, LOT_MISSING, never the sample's
+        # NO_LOT (the headless run of the demo, 2026-10-22, found this claim still asking for NO_LOT)
+        claim("6 the box was shown with no lot", g.logic.LOT_MISSING in (seen.get("labels") or []), seen.get("labels"))
         claim("6 no Use my survey… or Change… until a lot exists",
               seen.get("buttons") and "Use my survey…" not in seen["buttons"] and "Change…" not in seen["buttons"],
               seen.get("buttons"))
