@@ -3279,7 +3279,8 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
     w = answer.get("writes") or {}
     undo = [(where, k, before.get(k, MISSING), after.get(k, MISSING))
             for where, before, after in (("facts", before_f, facts), ("saved", before_s, saved_ui))
-            for k in set(before) | set(after) if k not in ("_lookup", "_pending")
+            for k in set(before) | set(after) if k not in ("_lookup", "_pending", "_outside_for")   # (the
+            # session's, never one preview's: set aside, it brought back an address found since: round 16)
             and before.get(k, MISSING) is not after.get(k, MISSING) and before.get(k, MISSING) != after.get(k, MISSING)]
     address = facts.get("address") or answer.get("query")
     saved_ui["_pending"] = {"address": address, "query": answer.get("query"), "answer": answer, "undo": undo}
@@ -3379,12 +3380,12 @@ def choose_by_hand(facts, saved_ui, in_city):
     11: "Ithaca, NY 14850" is also the Town's mail, so an address alone can't prove a City lot). Any looked-up
     preview set aside (its box changes undone; else a found lookup kept the gate on the lookup and the button did
     nothing: start-flow round 3)."""
-    if by_hand_refused(saved_ui) or not in_city:
+    dropped_f, dropped = drop_pending(facts, saved_ui)
+    if by_hand_refused(dropped) or not in_city:    # (asked of the state by hand would leave: round 16)
         return facts, saved_ui
-    facts, saved_ui = drop_pending(facts, saved_ui)
+    facts, saved_ui = dropped_f, dropped
     saved_ui["city_by_hand"] = str(in_city)
-    look = saved_ui.get("_lookup") or {}           # "outside the City" still holds by hand (round 5): kept
-    saved_ui["_lookup"] = look if look.get("status") == "outside_city" else {}
+    saved_ui["_lookup"] = {}                       # ("outside the City" holds in `_outside_for`: by_hand_refused)
     saved_ui["_by_hand"] = True
     return facts, saved_ui
 

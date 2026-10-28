@@ -1977,8 +1977,8 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
         facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
         if (what == "pick:by_hand" and saved_ui.get("_by_hand")     # by hand taken, or a lookup's preview set
-                and (not was_by_hand or had_pending)):              # aside by it (round 15): ticks again (No to
-            ticked = {}                                             # its question changes nothing: round 12)
+                and (not was_by_hand or (had_pending and not saved_ui.get("_pending")))):   # aside by it (round
+            ticked = {}            # 15): ticks again (No or refused changes nothing: rounds 12, 16)
         # (nothing saved until Draw: Cancel leaves the facts, the box's choices and the model as they were)
 
 

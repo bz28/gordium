@@ -1188,7 +1188,7 @@ def test_by_hand_asks_for_the_district_tick_again():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     loop = src[src.index("def _box_loop("):src.index("\n\n\n", src.index("def _box_loop("))]
     reset = loop[loop.index('if (what == "pick:by_hand" and saved_ui.get("_by_hand")'):]
-    assert "(not was_by_hand or had_pending)):" in reset.split("\n", 2)[1]   # round 15: a preview set aside too
+    assert "(not was_by_hand or (had_pending and not saved_ui.get(\"_pending\")))):" in reset.split("\n", 2)[1]
     assert reset.split("\n", 3)[2].strip().startswith("ticked = {}")      # (round 12: only once by hand is taken)
     assert loop.index('was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")') < \
         loop.index("_box_pick(doc, what.split")
@@ -1358,6 +1358,27 @@ def test_round_15_a_saved_lookup_never_lifts_a_live_outside_the_city():
         query="106 Ithaca Rd")
     _, live = logic.lookup_choices({"status": "found", "query": "106 Ithaca Rd"}, {}, used)
     assert live["_outside_for"] == []                                           # a live found one ends it
+
+
+def test_round_16_a_preview_set_aside_never_brings_back_an_outside_address_found_since():
+    opened = logic.box_opened({}, {})
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "12 Main St"}, {}, opened)
+    facts, saved, _ = logic.preview_lookup({"status": "found", "query": "12 Main St", "facts": {}}, {}, saved)
+    assert saved["_outside_for"] == []
+    facts, later, _ = logic.preview_lookup({"status": "not_found", "query": "9 Other St"}, facts, dict(saved))
+    assert later["_outside_for"] == [] and not logic.by_hand_refused(later)
+    _, by_hand = logic.choose_by_hand(facts, dict(saved), "2026-10-27")
+    assert by_hand.get("_by_hand") and logic.draw_blocked({"address": "12 Main St"}, by_hand) == ""
+
+
+def test_round_16_no_or_refused_over_a_preview_changes_nothing():
+    opened = logic.box_opened({}, {})
+    facts, saved, _ = logic.preview_lookup({"status": "found", "query": "106 Ithaca Rd", "facts": {}}, {}, opened)
+    assert saved.get("_pending")
+    assert logic.choose_by_hand(facts, dict(saved), None) == (facts, saved)           # No
+    _, outside = logic.lookup_choices({"status": "outside_city", "query": "5 Foo Rd"}, facts, dict(saved))
+    outside["_pending"] = saved["_pending"]
+    assert logic.choose_by_hand(facts, dict(outside), "2026-10-27") == (facts, outside)   # refused
 
 
 def test_round_9_a_saved_source_never_says_used_live():
