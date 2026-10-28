@@ -1,0 +1,134 @@
+{
+ "claims": {
+  "1 the panel is Rhino's docked panel": {
+   "ok": true,
+   "detail": null
+  },
+  "1 the tick is on a row of its own": {
+   "ok": true,
+   "detail": [
+    "Show neighbourhood"
+   ]
+  },
+  "2 the neighbourhood is drawn and the tick starts on": {
+   "ok": true,
+   "detail": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
+  },
+  "2 unticking through the panel hides every neighbourhood layer": {
+   "ok": true,
+   "detail": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  "5 the tick is kept in the file: a saved copy has it off": {
+   "ok": true,
+   "detail": {
+    "show_context": false,
+    "show_labels": null
+   }
+  },
+  "3 a rebuilt panel starts the tick as last set (off)": {
+   "ok": true,
+   "detail": [
+    false
+   ]
+  },
+  "2 ticking through the panel shows them again": {
+   "ok": true,
+   "detail": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
+  },
+  "4 while a start box is open the tick is off (greyed)": {
+   "ok": true,
+   "detail": {
+    "enabled": false,
+    "said": [
+     "Finish or cancel the open start box first."
+    ],
+    "layers": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   }
+  },
+  "4 and a change to it then does nothing": {
+   "ok": true,
+   "detail": {
+    "enabled": false,
+    "said": [
+     "Finish or cancel the open start box first."
+    ],
+    "layers": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ]
+   }
+  },
+  "4 after the box closes the tick is back on": {
+   "ok": true,
+   "detail": [
+    true
+   ]
+  }
+ },
+ "layers_start": [
+  true,
+  true,
+  true,
+  true,
+  true
+ ],
+ "after_off": [
+  false,
+  false,
+  false,
+  false,
+  false
+ ],
+ "saved_ui": {
+  "show_context": false,
+  "show_labels": null
+ },
+ "after_on": [
+  true,
+  true,
+  true,
+  true,
+  true
+ ],
+ "inside": {
+  "enabled": false,
+  "said": [
+   "Finish or cancel the open start box first."
+  ],
+  "layers": [
+   true,
+   true,
+   true,
+   true,
+   true
+  ]
+ },
+ "ok": true
+}

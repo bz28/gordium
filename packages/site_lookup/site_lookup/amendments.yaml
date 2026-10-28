@@ -1,0 +1,22 @@
+# Zoning changes the City has adopted that its online zoning map may not show yet. A suggestion from that map
+# can be out of date for lots these touch. Kept by hand: add a row when the City adopts a rezoning.
+#   map_shows_since  set by hand, after checking that the online map shows the rezoning, to the map's
+#                    last-edit date at that check. Until it's set, lots the row reaches need review. The map's
+#                    own edit date alone never clears a row: any edit moves it, drawn rezoning or not.
+#   area_epsg2261  [xmin, ymin, xmax, ymax] in EPSG:2261 (US survey feet): a box around every district the
+#                  ordinance's map shows, padded generously. A lot touching it needs review. A row without
+#                  an area makes every lot in the City need review (its boundary isn't known here).
+#   streets        streets the ordinance's text names: a lot on (or facing) one needs review too.
+- ordinance: "2025-12"
+  title: Southside form districts (TR, RT, MD-MU, UMU)
+  adopted: 2025-11-19
+  source: regulations/jurisdictions/new_york/ithaca_city/1_source_documents/ordinance_no_2025-12_southside_form_districts.pdf
+  area_epsg2261: [840150, 885275, 843450, 889100]
+  area_source: >-
+    regulations/jurisdictions/new_york/ithaca_city/1_source_documents/zoning_maps_2026-05.pdf, p.9 "Southside
+    Form District Map" (May 2026). The four form districts lie between N/S Meadow St (west), W State St
+    (north), S Cayuga St and the Residential Transition strip just east of it (east), and about 430 ft south
+    of Park St (south, scaled from the map's bar). Corners from the NYS Geocoder's intersections: W State St &
+    N Meadow St (840453, 888723), W State St & S Cayuga St (842963, 888827), Park St & S Plain St
+    (841753, 886005); then padded 300 ft on every side.
+  streets: [S CAYUGA ST, S ALBANY ST, S TITUS AVE, FAIR ST, W GREEN ST, S MEADOW ST, S GENEVA ST]

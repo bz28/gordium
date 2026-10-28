@@ -19,6 +19,7 @@ import scriptcontext as sc
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close, leftovers  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_report_button") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))   # the repo
@@ -63,7 +64,7 @@ else:
         g = fresh_module()
         doc = docs.open("Large Objects - Feet")
         g.STATE["on_confirm"] = lambda *a: None
-        g.gordium_check()                                    # an empty model: GordiumStart's flow
+        look_up_106(g, g.gordium_check)                                    # an empty model: GordiumStart's flow
         log["start_floors"] = len((g.STATE.get("start") or {}).get("floors") or [])
         path = g.report_path(doc)
         log["report_path"] = path
