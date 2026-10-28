@@ -31,7 +31,7 @@ from model_measurement.measure import measure
 from rule_format.rulebook import REPO, Context
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from test_every_reading import FACTS, LOT, floors  # noqa: E402
+from test_every_reading import FACTS, LOT, floors, prism  # noqa: E402
 
 ALLOWED = {"use": Context.for_jurisdiction(REPO / FACTS["jurisdiction"]).uses}
 WEST, EAST = "west", "east"
@@ -224,17 +224,13 @@ def _designs(seed: int, n: int):
 
 @pytest.mark.parametrize("west, east, ow, oe, small, large", _designs(18, 40))
 def test_surveyed_lot_every_two_side_case_matches_the_law_worked_by_hand(west, east, ow, oe, small, large):
-    """A surveyed lot, the eaves confirmed (one reading of the walls): the eaves row is exactly the law's answer.
-    One allowance, always the cautious way: walls exactly as far from both lines with unequal eaves are read both
-    ways (either side the narrower, two readings no answer names), so where both ways comply the row may still ask
-    for review."""
+    """A surveyed lot, the eaves confirmed (one reading of the walls): the eaves row is exactly the law's answer,
+    walls equally far from both lines included (each side the narrower is a named reading, settled when both ways
+    agree; #18 review: those were held at needs review)."""
     got, facts = measured(west, east, ow, oe)
     want = law(west, east, round(west - ow, 6), round(east - oe, 6), small, large)
     said = verdict(rules(small, large)["yard_projections"], got, facts)
-    if west == east and ow != oe and want == "complies":
-        assert said in (present.COMPLIES, present.REVIEW), (west, east, ow, oe)
-    else:
-        assert said == SAYS[want], (west, east, ow, oe)
+    assert said == SAYS[want], (west, east, ow, oe)
 
 
 SHIFTS = (-2.0, -1.0, 0.0, 1.0, 2.0)
@@ -309,3 +305,55 @@ def test_a_review_reason_is_shown_only_if_it_holds_under_every_reading():
     row = {"Error": "NEEDS REVIEW", "Rule id": rule["id"], "Why it needs review": "as drawn"}
     why = _why(row, {rule["id"]: rule}, got, ALLOWED, facts)["Why"]
     assert "low" not in why.split("; ") and "high" not in why.split("; "), why
+
+
+def test_a_centred_house_with_unequal_eaves_complies_with_r1b():
+    """#18 review (coordinator round): walls 12 ft from both side lines (a house centred on its lot), a flat roof slab
+    reaching 1'-0" past the west wall and 1'-6" past the east. With R-1b's equal minimums which side is the narrower
+    decides nothing: the real R-1b eaves row complies (11'-0" and 10'-6" against 8'-0"), as before the P0 fix.
+    Before this: needs review, asking whether a yard is measured to the wall or to overhangs."""
+    from design_checker.check import check_site
+    from test_every_reading import prism, rect, rows
+    built = floors(12, 30, 48, 70, 2) + [prism(rect(11, 30, 49.5, 70), 20, 21, "roof")]
+    first = measure(site(built), dict(FACTS))
+    facts = dict(FACTS, eaves_confirmed=[{"overhang": c, "value": True, "source": "entered by you",
+                                          "confirmed_by": "the architect", "date": "2026-10-26"}
+                                         for c in first["side_yard_smaller"].get("eave_candidates") or []])
+    got = measure(site(built), facts)
+    assert any(r.get("pairing") == 1 for r in got["side_yard_smaller_eaves"].get("readings") or [])
+    res = check_site(site(built), facts)
+    (row,) = rows(res, "R-1b.yard_projections")
+    assert row["status"] == present.COMPLIES, row
+
+
+def test_equal_walls_fitting_one_way_only_asks_which_side_is_the_narrower():
+    """Walls 12/12, eaves 11 and 7 ft from the lines, 5 and 10 ft minimums: one way fits, the other doesn't (needs
+    review), and the eaves measure says the question is which side is the narrower side yard."""
+    got, facts = measured(12.0, 12.0, 1.0, 5.0)
+    assert verdict(rules(5, 10)["yard_projections"], got, facts) == present.REVIEW
+    assert "which side is the narrower side yard" in got["side_yard_smaller_eaves"]["reason"]
+
+
+def test_the_which_side_question_names_the_line_each_reading_holds_narrower():
+    """#18 round c: a 120 x 60 lot with its street on the west, so its side lines run east-west (y = 0 and y = 60),
+    and a diamond house equally far from both. Each reading's question names the very lot line it reads as the
+    narrower side yard's, never a compass word from the order the lines sort in."""
+    from design_checker.check import named_result
+    lot = [(0, 0), (0, 60), (120, 60), (120, 0)]            # street along x = 0 (the first edge)
+    base = dict(FACTS, street_line=[[[0, 0], [0, 60]]])
+    built = [prism([(40, 12), (60, 30), (25, 48), (10, 30)], 0, 10, "floor 1", floor=10.0),
+             prism([(40, 12), (60, 30), (25, 48), (10, 30)], 10, 20, "floor 2", floor=10.0),
+             prism([(40, 11), (61, 30), (25, 53), (9, 30)], 20, 21, "roof")]
+    first = measure(site(built, lot), base)
+    facts = dict(base, eaves_confirmed=[{"overhang": c, "value": True, "source": "entered by you",
+                                         "confirmed_by": "the architect", "date": "2026-10-26"}
+                                        for c in first["side_yard_smaller"].get("eave_candidates") or []])
+    got = measure(site(built, lot), facts)
+    readings = [r for r in got["side_yard_smaller_eaves"].get("readings") or [] if r.get("pairing") is not None]
+    assert readings, got["side_yard_smaller_eaves"]
+    for r in readings:
+        y = r["points"][0][1]                                # the end of the reading on its lot line
+        line = "2" if abs(y - 60) < 1e-6 else "4" if abs(y) < 1e-6 else None     # the lot's edges 2 and 4
+        assert line and r["named"]["model#narrower"] == f"the side along lot line {line} the narrower side yard", r
+    found = named_result(rules(5, 10)["yard_projections"], got, ALLOWED)
+    assert found is None or "lot line" in found["text"] or found["result"] != "mixed"

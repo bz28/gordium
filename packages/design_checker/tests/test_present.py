@@ -2,6 +2,7 @@
 each test names the spec criterion it pins. Results come from the checker; present can only make one more
 cautious, so most of these check that something is never shown as complying without evidence."""
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -137,6 +138,18 @@ def test_each_item_says_what_was_measured_and_objects_left_out_need_review(surve
     left = i["Objects on the lot not included"]
     assert left["status"] == present.REVIEW and left["objects"] == ["a", "b"] and "Add to check" in left["reason"]
     assert "review" in r["view"]["summary"]
+
+
+def test_a_solid_on_the_neighbourhood_layers_makes_the_check_need_review_and_says_where(surveyed):
+    """PR #23 (review of the editable outlines, P0): a solid on Gordium::Context over the lot is left out like any
+    other; the row says it is on the neighbourhood layers and how to fix it; the check is never "comply"."""
+    r = check(MODEL, surveyed, extras={"not_included": ["ctx"], "context_left_out": ["ctx"]})
+    left = items(r["view"])["Objects on the lot not included"]
+    assert left["status"] == present.REVIEW and left["objects"] == ["ctx"]
+    assert "1 on the neighbourhood layers (Gordium::Context): move it to the Building layer" in left["reason"]
+    assert "review" in r["view"]["summary"]
+    plain = items(check(MODEL, surveyed, extras={"not_included": ["shed"]})["view"])["Objects on the lot not included"]
+    assert "neighbourhood" not in plain["reason"]
 
 
 # ---- C9: never rounded toward compliance -------------------------------------------------------------------------
@@ -1754,3 +1767,25 @@ def test_a_count_of_0_is_rolled_back_by_its_code_and_enter_stays():
     assert said and "fewer than one" in said and "wasn't kept" in said
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert '"group", "needs", "hint", "refused")' in rhino
+
+
+def test_chart_quotes_follow_a_re_extraction_in_the_same_session(tmp_path):
+    """A long Rhino session: the extracted chart text is replaced (re-extraction, same folder, same file names).
+    The next panel quotes the new text, not the one cached under the folder name."""
+    folder = tmp_path / "2_extracted_text"
+    folder.mkdir()
+    f = folder / "c.pdf.cells.jsonl"
+
+    def write(value):
+        f.write_text(json.dumps({"file": "c.pdf"}) + "\n" + json.dumps(
+            {"page": 3, "section": "Minimum Lot Size", "row": "One-family dwelling, detached", "column": "R-1A",
+             "value": value, "row_lines": [10]}) + "\n", encoding="utf-8")
+
+    def quote():
+        source = {"file": "c.pdf", "page": 3, "quote": "x", "lines": [10]}
+        return present._quote(source, tmp_path, {"c.pdf": {"title": "Zoning charts"}}, "R-1A", lambda s: "")["text"]
+
+    write("10,000 sf")
+    assert quote().endswith("R-1A: 10,000 sf")
+    write("12,000 sf")
+    assert quote().endswith("R-1A: 12,000 sf")
