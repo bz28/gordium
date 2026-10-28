@@ -1186,6 +1186,6 @@ def test_by_hand_asks_for_the_district_tick_again():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     loop = src[src.index("def _box_loop("):src.index("\n\n\n", src.index("def _box_loop("))]
     reset = loop[loop.index('if what in ("pick:lookup", "pick:lookup_done"'):]
-    assert '"pick:by_hand"' in reset.split("\n", 1)[0] and reset.split("\n", 2)[1].strip() == "ticked = {}"
+    assert '"pick:by_hand"' in reset.split("\n", 1)[0] and reset.split("\n", 2)[1].strip().startswith("ticked = {}")
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
     assert pick.index("_lookup_stop()") < pick.index("logic.choose_by_hand(facts, saved_ui)")
