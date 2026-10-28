@@ -736,6 +736,7 @@ def test_a_box_default_left_as_it_was_is_never_confirmed_by_you():
     # ticked "I checked this" (the street: CHECKABLE) is the architect's too (review round 1 of panel-wording, P2)
     ticked = logic.fact_sources(_box(corner_lot=False, checked=["street"]), "2026-10-28", confirmed=True)
     assert ticked["street"]["confirmed_by"] == "you" and ticked["use"]["confirmed_by"] is None
+    assert ticked["corner_lot"]["confirmed_by"] == "you"     # on the street's row, ticked with it (round 2, P3)
     lines = present.source_lines(s)
     use = next(x for x in lines if x.startswith("Use: "))
     assert use.endswith(" · suggested by Gordium · default, not changed by you") and "confirmed by you" not in use

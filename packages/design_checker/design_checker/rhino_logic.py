@@ -2658,7 +2658,9 @@ def fact_sources(state, today, confirmed):
 
     def chosen(key):                   # a box default: the architect's only once changed, or ticked "I checked this"
         # (review round 1 of panel-wording, P2: a street ticked as checked read "default, not changed by you")
-        mine = state.get(key + "_source") == ENTERED or key in (state.get("checked") or [])
+        # (the corner answer sits on the street's row, ROW_OF: that row's tick confirms it too; round 2, P3)
+        row = ROW_OF.get(key + "_lot", key) if key == "corner" else key
+        mine = state.get(key + "_source") == ENTERED or row in (state.get("checked") or [])
         return by if mine else None
 
     return {
