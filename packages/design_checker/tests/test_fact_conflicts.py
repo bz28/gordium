@@ -42,6 +42,14 @@ CASES = {
     # §325-26 (#44): no stream within 20 ft of the lot, yet a new structure 10 ft from one
     "stream_facts_disagree": ("one_family_detached", {**HOUSEHOLD, "stream_near_lot": False, "stream_distance": 10},
                               {**HOUSEHOLD, "stream_near_lot": True, "stream_distance": 25}),
+    # R-2c notes 4-6 (#38 review round 1): 2 units of at most 1 occupant can't hold 10; the most in one unit can't be
+    # more than all of them
+    "occupant_counts_disagree": ("one_family_semi_detached",
+                                 {**HOUSEHOLD, "dwelling_units": 2, "occupants": 10, "occupants_most_in_one_unit": 1},
+                                 {**HOUSEHOLD, "dwelling_units": 2, "occupants": 10, "occupants_most_in_one_unit": 5}),
+    "occupant_split_disagree": ("one_family_semi_detached",
+                                {**HOUSEHOLD, "dwelling_units": 2, "occupants": 2, "occupants_most_in_one_unit": 3},
+                                {**HOUSEHOLD, "dwelling_units": 2, "occupants": 2, "occupants_most_in_one_unit": 2}),
 }
 
 
@@ -97,3 +105,44 @@ def test_each_case_would_comply_somewhere_once_the_answers_agree(key):
                      if i.get("rule") in rules and _reads(rules[i["rule"]]) & names and i["status"] == present.COMPLIES]
     assert complies, key
 
+
+
+def test_occupant_counts_that_can_all_be_true_are_no_contradiction():
+    """Review round 2: occupants are every unit's on the lot together (measures.yaml), so an accessory dwelling unit on
+    the lot, or one not ruled out, is one more unit: a house of 2 and an ADU of 2 are 4, at most 2 in one. No unit
+    stated is R-2c's own case ("no dwelling unit stated"). Neither is a contradiction; the plain impossible ones are."""
+    house = {"use": "one_family_detached", "occupants": 4, "occupants_most_in_one_unit": 2}
+    assert fact_conflicts({**house, "accessory_dwelling_unit": True}) == []
+    assert fact_conflicts(house) == []                                       # an ADU not ruled out
+    (why, names), = fact_conflicts({**house, "accessory_dwelling_unit": False})
+    # review round 4: the 1 unit is the use's own (§325-3B), not a count entered: said so, and not offered to re-enter
+    assert why == ("4 occupants on the lot, but 1 dwelling unit (what this use is, §325-3B) with at most 2 in any one "
+                   "can hold only 2, with no accessory dwelling unit on the lot: check the occupant counts and the "
+                   "accessory dwelling unit answer") and names == ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
+    # two-family: two units by the use (§325-3B); 4 occupants with at most 2 in one fits exactly
+    assert fact_conflicts({"use": "two_family", "occupants": 4, "occupants_most_in_one_unit": 2,
+                           "accessory_dwelling_unit": False}) == []
+    assert fact_conflicts({"use": "two_family", "occupants": 5, "occupants_most_in_one_unit": 2,
+                           "accessory_dwelling_unit": False})
+    semi = {"use": "one_family_semi_detached", "occupants": 3, "occupants_most_in_one_unit": 1,
+            "accessory_dwelling_unit": False}
+    assert fact_conflicts({**semi, "dwelling_units": 0}) == []
+    assert fact_conflicts({**semi, "dwelling_units": 3}) == []                # 3 homes of 1: exactly 3
+    assert fact_conflicts({**semi, "dwelling_units": 2})[0][1] == ("occupants", "occupants_most_in_one_unit",
+                                                                   "accessory_dwelling_unit", "dwelling_units")
+
+
+def test_the_no_adu_answer_behind_an_occupant_contradiction_never_lets_r1_occupancy_comply():
+    """Review round 3 (P0): 4 occupants, at most 2 in one, no ADU, in a one-family house can't all be true; the "no
+    ADU" answer may be the wrong one, and R-1's two-unrelated allowance reads it (§325-3B: owner-occupied, and with an
+    ADU on the lot the open question): with it kept, the occupancy row complied."""
+    facts = {**HOUSEHOLD, "unrelated_persons": 2, "unrelated_persons_with_children": 2, "occupants": 4,
+             "occupants_most_in_one_unit": 2}
+    for district in ("R-1a", "R-1b"):
+        row = next(i for i in _items(district, "one_family_detached", facts)
+                   if i.get("rule") == f"{district}.occupancy_one_family")
+        assert row["status"] == present.REVIEW and "accessory dwelling unit answer" in row["reason"], row
+        agreeing = {**facts, "occupants": 2}                         # 2 in one house, no ADU: complies
+        row = next(i for i in _items(district, "one_family_detached", agreeing)
+                   if i.get("rule") == f"{district}.occupancy_one_family")
+        assert row["status"] == present.COMPLIES, row
