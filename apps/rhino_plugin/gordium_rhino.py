@@ -491,7 +491,7 @@ def draw_scene(o, e):
     for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
         d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
     if not old:                              # after the envelope, so its blue never tints them (F5)
-        for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+        for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
             name = logic.highlight(status)
             colour = ui.HIGHLIGHT[name]
             d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
@@ -888,6 +888,41 @@ def _prism(doc, outline, base, top):
     if brep is not None and brep.GetBoundingBox(True).Max.Z < _model_length(doc, top) - 1e-6:
         brep = rg.Extrusion.Create(curve, _model_length(doc, top - base), True).ToBrep()
     return brep
+
+
+def _solids_for(doc, entries):
+    """Each coloured block's building as a solid Rhino can cut, made once per building per check (a Brep copy, an
+    extrusion or SubD converted; None for a mesh or anything else): the blocks of one building share it
+    (independent review of #28, P3)."""
+    out = {}
+    for e in entries:
+        key = e.get("building") or ""
+        if key not in out:
+            found = _find(doc, key)
+            out[key] = _drawable(found.Geometry) if found is not None else None
+    return out
+
+
+def _offending(doc, e, solids=None):
+    """The part of its building inside one coloured block (check.plan: a yard strip from the building's bottom to
+    its top, or what rises above the height limit): Rhino's intersection of the building with the block, so a
+    cantilever over a yard is coloured and not the air under it, a roof's ridge and not the sky over its slopes.
+    The block is cut a hair larger (_proud) so none of its faces lies on the building's own. The block itself when
+    Rhino can't intersect (a mesh, a boolean that fails): never nothing (logic.offending_pieces). `solids`: the
+    buildings made once for the check (_solids_for); without it, this block's own."""
+    solid = (solids if solids is not None else _solids_for(doc, [e])).get(e.get("building") or "")
+    box = solid.GetBoundingBox(True) if solid is not None else None
+    base, top = logic.block_span(e, _feet_length(doc, box.Min.Z) if box is not None and box.IsValid else None,
+                                 _feet_length(doc, box.Max.Z) if box is not None and box.IsValid else None)
+    block = _prism(doc, e["outline"], base, top)       # reaching the real solid's own top (a vault: block_span)
+    if block is None:
+        return []
+    pieces = None
+    if isinstance(solid, rg.Brep) and solid.IsSolid:       # a boolean that raises colours the block, never stops the check
+        pieces = logic.guard(lambda: rg.Brep.CreateBooleanIntersection(
+            solid, _proud(doc, block.DuplicateBrep()), doc.ModelAbsoluteTolerance),
+            "cut the colour to the building's own shape: its whole block is coloured instead")()
+    return logic.offending_pieces(pieces, block)
 
 
 def _actions():
@@ -2639,9 +2674,13 @@ def _draw_plan(doc, o, result, facts):
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
     o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
-    o.encroach = [(_proud(doc, b), status) for b, status in ((_prism(doc, e["outline"], e["base"], e["top"]),
-                                                 e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
-                  if b is not None and logic.highlight(status)]          # coloured from the rule's result only
+    # what is drawn, each piece with its rule and building: the one list draw_scene draws and the in-Rhino checks
+    # read (logic.coloured_info)
+    blocks = plan.get("encroach") or []
+    made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
+    o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
+                  for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
+                  if logic.highlight(status) for piece in _offending(doc, e, made)]
     # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
     pts = o.lot_outline or []
     o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
