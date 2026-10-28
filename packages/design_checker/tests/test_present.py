@@ -1918,3 +1918,20 @@ def test_chart_quotes_follow_a_re_extraction_in_the_same_session(tmp_path):
     assert quote().endswith("R-1A: 10,000 sf")
     write("12,000 sf")
     assert quote().endswith("R-1A: 12,000 sf")
+
+
+def test_a_range_rule_that_complies_shows_the_limit_it_is_nearest():
+    """R-3aa's stories are a range (at least 2, at most 3; chart p.3 note 11). The light run in Rhino (2026-10-28)
+    showed a 3-story house as "3 | 2 required | complies": the first limit, the minimum, beside a count at the
+    maximum. A complying range row shows the limit the design is nearest: 3 stories against 3, 2 against 2, and
+    4 stories still does not comply against 3."""
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    base = {**facts, "lot_surveyed": True, "zone": "R-3aa", "main_building": "f0"}
+    base.pop("stories", None)
+    for n, required, status in ((3, "3", present.COMPLIES), (2, "2", present.COMPLIES),
+                                (4, "3", present.FAILS)):
+        house = [floor(12, 30, 36, 60, z0=8 * i, z1=8 * (i + 1), id=f"f{i}") for i in range(n)]
+        st = items(check_site(_plot(*house, lot_=lot), base)["view"])["Stories"]
+        assert (st["proposed"], st["required"], st["status"]) == (str(n), required, status), st
