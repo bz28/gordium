@@ -1146,6 +1146,7 @@ SUGGEST_DELAY_S = 0.3          # s after the last key before the City's address 
 SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestions unavailable"
 SUGGEST_MIN_CHARS = 4
 SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and press Look up."
+NO_MATCH = "No matching address suggested: type the full address and press Look up."
 CITY_SUFFIX = ", Ithaca, NY"
 
 
@@ -1171,12 +1172,14 @@ def wants_suggestions(text, chosen=None):
 def suggestions_shown(answer, typed):
     """(the list, a quiet note) for a type-ahead answer, or None when it is for something no longer typed (a stale
     answer is dropped). Offline, an error or too slow: no list and the note that suggestions are unavailable (the
-    box still works by typing)."""
+    box still works by typing). None found: a quiet note says so, so the architect can tell the list is working
+    (UX review 2026-10-27: "312 Hudson St" showed nothing at all)."""
     answer = answer or {}
     if answer.get("query") != typed:
         return None
     if answer.get("status") == "ok":
-        return [str(s) for s in answer.get("suggestions") or []], ""
+        found = [str(s) for s in answer.get("suggestions") or []]
+        return found, "" if found else NO_MATCH
     return [], SUGGESTIONS_UNAVAILABLE
 
 
