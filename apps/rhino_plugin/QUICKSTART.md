@@ -239,21 +239,10 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      `GordiumStart`.
 3. **The start box** opens (filled in from your lot, if you drew one). Read it top to bottom:
    - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
-     45 seconds; the box says "Looking up…"). Look up only shows what it found: the address and a suggested zoning
-     district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which
-     draws that lot from the tax map (its street at the bottom of Top view), the street side and whether it's a
-     corner lot, each with where it came from (not the ground: for now it is assumed flat, see **Ground** below).
-     Anything doubtful is amber with the reason: tick **I checked this** once you have, or change it; until then
-     the items that depend on it need review. An address typed and not looked up keeps Draw off ("Press Look up to
-     find … first."); on a lot already drawn, type the lot's own address back, or clear it, and Draw is on again
-     (in a new file Draw needs a lookup that finds the lot, or **Enter the site by hand…**). If the lookup can't
-     help (offline, not found, outside the City of Ithaca), the box says why: correct the address and Look up
-     again, or put back the lot's own address (or clear it) and fill the rest in by hand. Outside the City: Draw
-     stays off for that address, and in a new file by hand is refused, until a live lookup of that same address
-     finds the lot, or you close the box. Another address looked up and found can be drawn; by hand stays refused.
    - **Zoning district**: "entered by you" (R-1b, R-1a and R-3a can be picked), or after Look up "suggested by
-     Gordium · City of Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
-     lookup, because the City's online map is informational: the district is your statement.
+     Gordium · City of Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do,
+     on every new project, after every lookup and after you pick another district (a tick is for one district),
+     because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my

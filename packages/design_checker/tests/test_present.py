@@ -2,6 +2,7 @@
 each test names the spec criterion it pins. Results come from the checker; present can only make one more
 cautious, so most of these check that something is never shown as complying without evidence."""
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -1766,3 +1767,25 @@ def test_a_count_of_0_is_rolled_back_by_its_code_and_enter_stays():
     assert said and "fewer than one" in said and "wasn't kept" in said
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert '"group", "needs", "hint", "refused")' in rhino
+
+
+def test_chart_quotes_follow_a_re_extraction_in_the_same_session(tmp_path):
+    """A long Rhino session: the extracted chart text is replaced (re-extraction, same folder, same file names).
+    The next panel quotes the new text, not the one cached under the folder name."""
+    folder = tmp_path / "2_extracted_text"
+    folder.mkdir()
+    f = folder / "c.pdf.cells.jsonl"
+
+    def write(value):
+        f.write_text(json.dumps({"file": "c.pdf"}) + "\n" + json.dumps(
+            {"page": 3, "section": "Minimum Lot Size", "row": "One-family dwelling, detached", "column": "R-1A",
+             "value": value, "row_lines": [10]}) + "\n", encoding="utf-8")
+
+    def quote():
+        source = {"file": "c.pdf", "page": 3, "quote": "x", "lines": [10]}
+        return present._quote(source, tmp_path, {"c.pdf": {"title": "Zoning charts"}}, "R-1A", lambda s: "")["text"]
+
+    write("10,000 sf")
+    assert quote().endswith("R-1A: 10,000 sf")
+    write("12,000 sf")
+    assert quote().endswith("R-1A: 12,000 sf")

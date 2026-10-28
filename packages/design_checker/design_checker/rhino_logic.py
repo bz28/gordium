@@ -2202,7 +2202,10 @@ def saved_sources(saved_ui, state):
 
 def zone_picked(state, zone, first):
     """The architect picked a district in the box's dropdown: it is set (and theirs, unless it is the one the box
-    opened with), so Draw follows at once (draw_reason)."""
+    opened with), so Draw follows at once (draw_reason). A different district unticks "I confirm": a tick given to
+    one district is never carried to another (never a false pass); the box shows the tick as unticked."""
+    if zone != state.get("zone"):
+        state["district_confirmed"] = False
     state["zone"] = zone
     if zone != first:
         state["zone_source"] = ENTERED
