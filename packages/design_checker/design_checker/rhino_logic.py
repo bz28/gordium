@@ -3316,11 +3316,25 @@ def start_gate(state, saved_ui):
     return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand)
 
 
+BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
+                     "(a City of Ithaca one), or clear it.")
+
+
+def no_guessed_district(saved, suggested):
+    """The suggestions for a file with no site yet (no lot, no address saved): without the first district's guess
+    (Ben, 2026-10-27: the lookup finds it, or the architect picks it). GordiumStart and Edit site… alike (round 5)."""
+    suggested = dict(suggested or {})
+    if not (saved or {}).get("lot_id") and not (saved or {}).get("address") and not suggested.get("lot_id"):
+        suggested["zone"] = None
+    return suggested
+
+
 def choose_by_hand(facts, saved_ui):
     """(facts, saved_ui) once the architect chose "Enter the site by hand": any looked-up preview set aside (its box
     changes undone; else a found lookup kept the gate on the lookup and the button did nothing: start-flow round 3)."""
     facts, saved_ui = drop_pending(facts, saved_ui)
-    saved_ui["_lookup"] = {}
+    look = saved_ui.get("_lookup") or {}           # "outside the City" still holds by hand (round 5): kept
+    saved_ui["_lookup"] = look if look.get("status") == "outside_city" else {}
     saved_ui["_by_hand"] = True
     return facts, saved_ui
 
@@ -3375,7 +3389,13 @@ def storable_lookup(answer):
             "kept_reasons": {}, "street_storable": bool(answer.get("street_storable")),
             "writes": {"lot_ring": w.get("lot_ring"), "guide_ring": None, "street_line": w.get("street_line"),
                        "spots": list(w.get("spots") or []), "frame": w.get("frame"), "snapshot": snap},
-            "checked": date, "address": answer.get("address")}
+            "checked": date, "address": found_address(answer)}
+
+
+def found_address(answer):
+    """The address a lookup found ("106 Ithaca Road, Ithaca, NY, 14850"), or None."""
+    value = (((answer or {}).get("facts") or {}).get("address") or {}).get("value")
+    return value if isinstance(value, str) and value.strip() else None
 
 
 def save_lookup(store, answer, address=None):
@@ -3385,7 +3405,7 @@ def save_lookup(store, answer, address=None):
     if copy is None:
         return dict(store or {})
     out = dict(store or {})
-    for a in (answer.get("query"), address):
+    for a in (answer.get("query"), address, copy.get("address")):     # as typed, and as found
         if lookup_key(a):
             out[lookup_key(a)] = copy
     return out
@@ -3460,7 +3480,12 @@ def address_reason(state):
     known = state.get("known_addresses")
     look = state.get("lookup") or {}
     if state.get("by_hand") and not look.get("looking"):   # the site by hand, in a file that was empty: the address
-        return ""                                          # is the architect's label (no lot of another to mislabel)
+        # is the architect's label (no lot of another to mislabel), but a City of Ithaca one (round 5: another
+        # place, or one the lookup already said is outside the City, was checked under the City's rules)
+        if address and (address_place(address) is not None or (look.get("status") == "outside_city"
+                                                               and same_site_address(address, look.get("query")))):
+            return BY_HAND_CITY_ONLY.format(address=address)
+        return ""
     if known is not None and look.get("looking"):         # a lookup running: Draw off, its own address named
         return WAIT_LOOKUP.format(address=look["looking"])
     if not address or known is None or any(same_site_address(address, k) for k in known):

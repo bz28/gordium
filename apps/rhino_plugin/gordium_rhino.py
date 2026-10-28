@@ -2447,8 +2447,8 @@ def edit_facts():
         saved = {}
     try:                                # one undo step from the box's first model edit (or its Draw) to the facts
         try:
-            facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options,
-                            "check")
+            facts = confirm(doc, logic.with_suggestions(saved, logic.no_guessed_district(
+                saved, suggested_facts(doc, options["zones"]))), options, "check")
         finally:                        # the editing outline and names never stay on screen
             o = overlay()
             o.confirm, o.labels = None, []
@@ -2948,7 +2948,7 @@ def gordium_start():
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     if not _lot_candidates(doc):        # an empty model: an empty box (Ben, 2026-10-27): the site comes from a
         # lookup, or by hand; no district guessed either (the lookup finds it, or the architect picks it)
-        facts = logic.with_suggestions({}, dict(suggested_facts(doc, options["zones"]), zone=None))
+        facts = logic.with_suggestions({}, logic.no_guessed_district({}, suggested_facts(doc, options["zones"])))
     else:                               # the architect's own lot: their saved facts, else the suggestions
         try:
             saved = current_facts(doc)

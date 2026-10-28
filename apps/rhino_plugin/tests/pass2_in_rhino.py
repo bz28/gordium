@@ -2,9 +2,9 @@
 """The architect's review, pass 2 (2026-10-21): items 1-6, in Rhino 8, each claim asserted (the step fails loudly
 otherwise). Run in Rhino, not in CI, one step per run (sc.sticky["gordium_pass2_step"]); a driver captures Rhino's
 own windows by window id after each step (the step writes <temp>/gordium_pass2/ready.json). Steps, in order:
-- "open": Rhino brought to the front; GordiumStart on the sample (106 Ithaca Rd, its lot from the tax map); its
-  Street side reads "Ithaca Rd", the street the lookup found (not the address's, which is there too), sourced to
-  the tax map.
+- "open": Rhino brought to the front; GordiumStart on an empty file, 106 Ithaca Rd typed and looked up (its recorded
+  answers; its lot from the tax map); its Street side reads "Ithaca Road", the street as the lookup named it, with
+  the lookup's source (2026-10-27: no sample prefilled any more).
 - "side_yard" (1): the house moved toward a side lot line until that yard is 3'-0" short as drawn; the row's
   "To comply" says "whatever the survey shows" and gives the move under every reading, the as-drawn one after it.
 - "apply_move" (1): every part of the house at least what it said from that side lot line ("keep every part of the
@@ -192,8 +192,8 @@ try:
         claim("8 the address is there too", bool(state.get("address")), state.get("address"))
         street = next(r for r in g.logic.box_rows(state) if r["key"] == "street")
         log["street"] = {"text": street["text"], "source": state.get("street_source")}
-        claim("8 the sample's Street side reads Ithaca Rd, from the lookup", street["text"] == "Ithaca Rd" and
-              "tax map" in (state.get("street_source") or ""), log["street"])
+        claim("8 106's Street side reads Ithaca Road, from the lookup", street["text"] == "Ithaca Road" and
+              "the line from" in (state.get("street_source") or ""), log["street"])
     elif step == "side_yard":
         side = next(i for n, i in items(g).items() if n.startswith("Side yard") and i.get("points"))
         a, b = (g._model_point(doc, q) for q in side["points"][:2])
@@ -292,6 +292,7 @@ try:
             return clicks.pop(0)
 
         facts = dict(g.current_facts(doc), corner_lot=True)
+        name = g._ui_state(doc).get("street_name") or "Ithaca Road"       # as the lookup named it
         ithaca = [[list(p) for p in line] for line in facts.get("street_line") or []]     # the sample's 8 pieces
         saved = dict(g._ui_state(doc))
         asked, real_ask = [], g._ask_street_more
@@ -318,13 +319,13 @@ try:
         # 9'-9 5/8"); the whole street is kept now, said, and the side street's own 3 pieces, never round a corner
         claim("10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"",
               len(ithaca) == 8 and all(any(same(p, q) or same(p, q[::-1]) for q in kept) for p in ithaca)
-              and "Ithaca Rd: 8 lot-line pieces, 75'-10\" so far — Enter when done" in told, log["corner"])
+              and name + ": 8 lot-line pieces, 75'-10\" so far — Enter when done" in told, log["corner"])
         # the side street's far corner has a 0.24 ft piece in it, so it is never a sure corner (review round 7):
         # asked once, and No keeps the street to its own 2 pieces; Ithaca Rd's two corners are sure (not asked)
         claim("10 the other street is its own 2 pieces (91'-10 3/8\"), and neither runs round a corner",
               len(kept) == 10 and "Street 2: 2 lot-line pieces, 91'-10 3/8\" so far — Enter when done" in told and len(asked) == 1
               and asked[0].startswith("Past there the lot line turns 89° over short pieces, a corner or a bend")
-              and facts.get("street_ids") == ["Ithaca Rd"] * 8 + ["Street 2"] * 2, log["corner"])
+              and facts.get("street_ids") == [name] * 8 + ["Street 2"] * 2, log["corner"])
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
         state = dict(g._box_state(doc, facts, options, saved, "check"), corner_lot=False)   # the box: No
         after, after_ui = g._apply_box(doc, facts, state, saved)

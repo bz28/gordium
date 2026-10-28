@@ -30,7 +30,8 @@ Type a command's name in Rhino's command line.
    `Look up the address first. It finds the lot, zoning district and neighbourhood.`
    To try Gordium, look up 106 Ithaca Rd. With no lookup possible (a lot the maps don't know), press
    **Enter the site by hand…**: you draw the lot, pick the district and the street side, all "entered by you";
-   no neighbourhood is drawn (only a lookup finds one).
+   no neighbourhood is drawn (only a lookup finds one). By hand is for City of Ithaca lots only: an address in
+   another place, or one the lookup said is outside the City, keeps Draw off.
 2. Read each row:
    - **Address**: the project's address. **Look up** asks the City's and the State's maps about that address and fills in what they give (the lot, its district); each row says where its answer came from.
      Each found lookup is also saved on this computer, as far as its sources allow (the lot and its street line;

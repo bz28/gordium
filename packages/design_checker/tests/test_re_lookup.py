@@ -1016,7 +1016,7 @@ def test_the_plugin_opens_new_files_empty_and_gates_every_box():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     start = src[src.index("def gordium_start():"):src.index("def _draw_starting_house(")]
     assert "sample_site" not in start and "from_sample=True" not in start
-    assert 'suggested_facts(doc, options["zones"]), zone=None)' in start    # no district guessed in an empty file
+    assert "logic.no_guessed_district({}, suggested_facts(" in start    # no district guessed in an empty file
     assert "sample" not in logic.NO_LOT
     state = src[src.index("def _box_state(doc"):src.index("\n\n\n", src.index("def _box_state(doc"))]
     assert "logic.start_gate(" in state
@@ -1189,3 +1189,36 @@ def test_by_hand_asks_for_the_district_tick_again():
     assert '"pick:by_hand"' in reset.split("\n", 1)[0] and reset.split("\n", 2)[1].strip().startswith("ticked = {}")
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
     assert pick.index("_lookup_stop()") < pick.index("logic.choose_by_hand(facts, saved_ui)")
+
+
+def test_round_5_by_hand_is_for_city_of_ithaca_lots_only():
+    """By hand skipped the town check, and choose_by_hand wiped an "outside the City" answer: a Lansing lot could be
+    drawn and checked under the City's rules."""
+    opened = logic.box_opened({}, {})
+    lansing = {"address": "106 Ithaca Rd, Lansing, NY"}
+    assert logic.draw_blocked(lansing, dict(opened, _by_hand=True)) == \
+        logic.BY_HAND_CITY_ONLY.format(address=lansing["address"])
+    outside = dict(opened, _lookup={"status": "outside_city", "query": "953 Danby Rd, Ithaca, NY"})
+    _, by_hand = logic.choose_by_hand({}, outside)
+    assert logic.draw_blocked({"address": "953 Danby Rd, Ithaca, NY"}, by_hand) != ""
+    assert logic.draw_blocked({"address": "12 New Lot Ln, Ithaca, NY 14850"}, dict(opened, _by_hand=True)) == ""
+    assert logic.draw_blocked({"address": "12 New Lot Ln"}, by_hand) == ""          # another, City address: fine
+
+
+def test_round_5_a_saved_lookup_is_filed_under_the_address_found_too():
+    found = _found_106()
+    assert logic.found_address(found) == "106 Ithaca Road, Ithaca, NY, 14850"
+    store = logic.save_lookup({}, dict(found, query="106 ithaca"), "106 ithaca")
+    assert logic.saved_offer({"status": "offline"}, store, "106 Ithaca Rd") is not None
+
+
+def test_round_5_no_district_is_guessed_for_a_file_with_no_site_in_edit_site_either():
+    suggested = {"zone": "R-1a", "use": "one_family_detached"}
+    assert logic.no_guessed_district({}, suggested)["zone"] is None
+    assert logic.no_guessed_district({"address": SAMPLE}, suggested)["zone"] == "R-1a"     # a site: as before
+    assert logic.no_guessed_district({}, dict(suggested, lot_id="lot1"))["zone"] == "R-1a"  # a lot drawn: as before
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    edit = src[src.index("def edit_facts("):src.index("\n\n\n", src.index("def edit_facts("))]
+    assert "logic.no_guessed_district(" in edit
+    assert "logic.no_guessed_district({}, suggested_facts(" in src[src.index("def gordium_start("):]
