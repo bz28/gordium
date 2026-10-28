@@ -101,11 +101,11 @@ def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
     assert logic.enter_words(needs) == "Enter dwelling units, rooms let for profit and whether it is a conversion"
     assert [logic.STATED_FACTS[k][1] for k in needs] == ["count", "count", "yes_no"]
     assert logic.needs_of(names, {"dwelling_units": 4, "rooms_let_for_profit": 0, "conversion": False}) == []
-    # the panel asks exactly the row's own list (never a fixed pair), and saves through update_counts
+    # the panel asks exactly the row's own list (never a fixed pair), in its own dialog (test_row_dialog.py)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert 'a["enter"](i["needs"])' in ui and "Enter bedrooms and parking spaces…" not in ui
-    assert "for key in needs:" in rhino and "logic.update_counts(facts, answers)" in rhino
+    assert "logic.row_fields(needs, facts)" in rhino and "logic.row_answers_applied(facts, needs, answers)" in rhino
 
 
 def test_an_interior_rule_that_fails_is_never_hidden(facts):
@@ -789,7 +789,8 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
     assert "_save_ui_state" not in loop                                         # Cancel saves nothing
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
-    assert "sources = fact_sources(doc)" in drawn and "sources.update(" in drawn  # the ground marking is kept
+    assert "sources = logic.sources_kept(fact_sources(doc), out)" in drawn and "sources.update(" in drawn   # the ground
+    assert "ground_marked" not in logic.BOX_ASKS                    # marking is kept (only follow-up answers go)
     # a new file starts empty (Ben, 2026-10-27): no sample lot or its facts put down (test_re_lookup pins the rest)
     assert "from_sample=True" not in rhino.split("def gordium_start(", 1)[1].split("\ndef ", 1)[0]
 
@@ -1979,7 +1980,7 @@ def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the
     assert '"\\n" + logic.STREET_LABEL + " = the highlighted blue line · " +' in rhino
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert ('            if r.get("help"):          # what that row is, in a sentence (the front lot line\'s)\n'
-            '                layout.AddRow(None, row(label(r["help"], size=11)))') in ui
+            '                layout.AddRow(None, row(label(r["help"], size=11, width=560)))') in ui
 
 
 def test_the_envelope_never_uses_a_grade_the_measuring_refused():
@@ -4331,3 +4332,26 @@ def test_the_label_timing_allowance_follows_the_machine_never_below_the_idle_bou
     assert _load(IDLE_UNIT_S / 2) == 1.0 and _load() == 1.0
     assert _load(IDLE_UNIT_S * 3, IDLE_UNIT_S) == pytest.approx(3.0)
     assert 0 < _label_unit() < 1e-3
+
+
+def test_a_rows_button_and_dialog_say_how_many_questions_when_there_are_several():
+    """The architect's review (2026-10-28): the row dialog's button and title were the whole ~25-word list of facts,
+    cut off on the button and in the title bar. Several facts: "Answer 4 questions…" (the dialog lists each; the
+    reason still names them); one: its own words. The dropdowns are one width, lined up; the note under them is a
+    sentence."""
+    from design_checker import rhino_logic as logic
+    four = ["sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit"]
+    assert all(k in logic.STATED_FACTS for k in four)
+    assert logic.answer_words(four) == "Answer %d questions" % len(four)
+    assert logic.answer_words(["stories"]) == logic.enter_words(["stories"]) == "Enter the number of stories"
+    two = ["sleeping_rooms", "parking_spaces"]                      # short enough: its own words
+    assert logic.answer_words(two) == "Enter bedrooms and parking spaces"
+    assert logic.answer_words([]) is None
+    assert logic.row_buttons({"needs": four})[0] == ("Answer %d questions…" % len(four), "enter")
+    assert logic.needs_reason(four).startswith("Needs ") and len(logic.needs_reason(four)) > 40   # still named
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "ui.row_dialog(logic.answer_words(needs)," in rhino
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    dialog = ui[ui.index("def row_dialog("):ui.index("def ", ui.index("def row_dialog(") + 10)]
+    assert "field.Width = logic.ANSWER_WIDTH" in dialog
+    assert logic.FOLLOW_UP_HELP.startswith("Your answers. ") and logic.FOLLOW_UP_HELP.endswith(".")

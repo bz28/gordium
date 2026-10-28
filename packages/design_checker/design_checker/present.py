@@ -34,7 +34,7 @@ ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED]
 NOT_YET = "Not checked yet"
 NOT_YET_WHY = "Not in Gordium yet — coming in a later version. Check this by hand for now: {}"
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
-          ("not_checked", "Not checked"), ("not_covered", NOT_YET)]
+          ("use_details", rhino_logic.USE_DETAILS_TITLE), ("not_checked", "Not checked"), ("not_covered", NOT_YET)]
 
 from model_measurement.project import fact_conflict_rows  # noqa: E402  (lot facts that disagree: shown)
 from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
@@ -1575,24 +1575,35 @@ def _detail_line(proposed, required, margin_t, sign, margin) -> str:
 
 # ---- the whole view --------------------------------------------------------------------------------------
 
+def _building_items(items: list[dict]) -> list[dict]:
+    """The items counted as the building's: not the rules not in Gordium yet, and not the use details still waiting for
+    an answer (their own group, "use_details")."""
+    return [i for i in items if i["group"] != "not_covered" and not i.get("use_detail")]
+
+
 def summary(items: list[dict]) -> str:
     """One line, the same everywhere: every item counted (site rows too), bad news first, no zero counts, never
-    a check mark: "1 does not comply · 2 need review · 7 comply · 3 not checked"."""
-    counted = [i for i in items if i["group"] != "not_covered"]
+    a check mark: "1 does not comply · 2 need review · 7 comply · 3 not checked". The use details still to answer are
+    counted apart, last: "· 5 use details to answer" (not among the problems, and never among the passes)."""
+    counted = _building_items(items)
     parts = []
     for st in ORDER:
         n = sum(1 for i in counted if i["status"] == st)
         if n:
             parts.append(f"{n} {WORDS[st][0 if n == 1 else 1]}")
+    d = sum(1 for i in items if i.get("use_detail"))
+    if d:
+        parts.append(f"{d} use detail{'s' if d != 1 else ''} to answer")
     return " · ".join(parts) or "nothing checked"
 
 
 def state(items: list[dict]) -> str:
-    counted = [i for i in items if i["group"] != "not_covered"]
+    counted = _building_items(items)
     for st in (FAILS, REVIEW):
         if any(i["status"] == st for i in counted):
             return st
-    return COMPLIES
+    # a use detail left unanswered is not a problem with the building, but it is not a pass either: never "complies"
+    return REVIEW if any(i.get("use_detail") for i in items) else COMPLIES
 
 
 from model_measurement.stops import stop as _stop  # noqa: E402
@@ -1798,7 +1809,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "", "required": "", "margin": "",
                       "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
                       "needs": list(needs),               # exactly what its "Enter …" asks for
-                      "hint": rhino_logic.enter_words(needs), "reason": rhino_logic.needs_reason(needs),
+                      "hint": rhino_logic.answer_words(needs), "reason": rhino_logic.needs_reason(needs),
                       "detail": {"line": "", "quotes": [{"text": " ".join(str(s.get("quote", "")).split()),
                                                          "where": cite(s)} for s in rule.get("sources") or []],
                                  "citation": "", "links": [], "calc": None, "scope": "", "precision": "",
@@ -1819,6 +1830,8 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "hint": None, "reason": NOT_YET_WHY.format(g["section"]),
                       "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
+    for i in items:                                  # the use details still to answer: their own group (never a pass)
+        i["use_detail"] = rhino_logic.is_use_detail(i, facts)
     return {"items": items, "summary": summary(items), "state": state(items),
             "header": header(facts, dict(extras, waiting_main=any(
                 PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values()),
@@ -1828,9 +1841,10 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
 
 def grouped(items: list[dict]) -> list[dict]:
     """The panel's groups in order (empty ones left out); site items carry "Site · " in their group label."""
-    by = {"fails": [], "review": [], "complies": [], "not_checked": [], "not_covered": []}
+    by = {"fails": [], "review": [], "complies": [], "use_details": [], "not_checked": [], "not_covered": []}
     for i in items:
-        key = ("not_covered" if i["group"] == "not_covered" else "not_checked" if i["status"] == NOT_CHECKED else
+        key = ("not_covered" if i["group"] == "not_covered" else "use_details" if i.get("use_detail") else
+               "not_checked" if i["status"] == NOT_CHECKED else
                {FAILS: "fails", REVIEW: "review", COMPLIES: "complies"}[i["status"]])
         by[key].append(i["id"])
     return [{"key": k, "title": t, "items": by[k]} for k, t in GROUPS if by[k]]
@@ -1882,7 +1896,8 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
 
 SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Front lot line (on the street)",
                 "corner_lot": "Corner lot", "ground_marked": "Marked as the ground", "starting_house": "Starting house",
-                "ground": "Ground"}
+                "ground": "Ground", "dwelling_units": "Dwelling units", "rooms_let_for_profit": "Rooms let for profit",
+                "conversion": "Conversion of an existing building"}
 
 
 def source_lines(sources: dict) -> list[str]:

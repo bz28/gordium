@@ -1400,38 +1400,56 @@ def set_grade():
 
 
 def enter_rooms(needs):
-    """A row's "Enter …" button: one prompt for each fact it waits for (`needs`, the row's own list), a whole number
-    or yes / no. Enter skips one: it stays unset (never 0 or no), so its rule keeps waiting."""
+    """A row's "Enter …" button: a small dialog (ui.row_dialog) asking only the stated facts it waits for (`needs`,
+    the row's own list, logic.row_fields). OK saves exactly those (logic.row_answers_applied: a blank stays unset,
+    never 0 or no), each "entered by you" with the day (logic.row_sources), as ONE Undo step, then checks again.
+    Cancel, Esc or closing it changes nothing and makes no Undo step. The address, district, use, lot, street side and
+    every other fact are never touched (the facts are read as saved: load_facts, never current_facts, which would
+    drop a lot no longer drawn). A count of stories below the floors drawn is refused by the measuring: said in its
+    words, and nothing is saved."""
     doc = Rhino.RhinoDoc.ActiveDoc
     if not needs:
         say("This row isn't waiting for anything you can enter.")
         return
+    if not logic.allowed("save_facts", _box_open()):     # nothing writes the facts under an open start box
+        say(logic.BOX_BUSY)
+        return
     try:
-        facts = current_facts(doc)
-        answers = {}
-        for key in needs:
-            prompt, kind, _ = logic.STATED_FACTS[key]
-            answers[key] = (_count(prompt, logic.minimum(key)) if kind == "count"
-                            else _square_feet(prompt) if kind in ("area", "length") else _ask_yes_no_or_skip(prompt))
-    except Cancelled:
+        facts = load_facts(doc)
+    except ValueError as e:
+        say(str(e))
+        return
+    if facts is None:
+        say("There are no site facts yet: run GordiumStart (or Edit site…) first.")
+        return
+
+    answers = ui.row_dialog(logic.answer_words(needs), logic.row_fields(needs, facts),    # OK: words keep it open
+                            lambda got: logic.row_problem(facts, needs, got))
+    if answers is None:                 # Cancel, Esc, closed: nothing written, so no Undo step
         say("Cancelled: nothing changed.")
         return
-    try:
-        new = logic.update_counts(facts, answers)
-    except ValueError as e:             # never an exception out of a button: say what was wrong, change nothing
-        say(f"Nothing changed: {e}.")
+    new = logic.row_answers_applied(facts, needs, answers)
+    if new == facts:                    # OK with the answers as they were: nothing to save, no Undo step
+        say("Nothing new entered: nothing changed.")
         return
-    checked = "stories" in answers     # fewer stories than the floors drawn: the measuring refuses it, so a count
-    if checked:                         # is tried first, unrecorded and put back as stored: never a step of nothing
-        refused = _tried(doc, new)
-        if refused:
+    tried = "stories" in needs and new.get("stories") is not None   # the measuring decides if the count can stand:
+    if tried:
+        refused = _tried(doc, new)      # tried first, unrecorded and put back as stored (never an Undo step)
+        if refused:                     # fewer stories than the floors drawn: refused, so nothing is saved
             run_check(doc, report=False)           # the facts as stored, checked again
             say(refused)
             return
-    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):
-        save_facts(doc, new)
-    if not checked:                     # (tried: its check was of these very facts)
+    _save_row(doc, needs, new)
+    if not tried:                       # (tried: its check was of these very facts)
         run_check(doc, report=False)
+
+
+def _save_row(doc, needs, new):
+    """A row dialog's answers, saved as one Undo step: the facts and the sources of exactly the row's facts."""
+    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):   # (serial 0, inside a command: that record holds it)
+        _save_facts(doc, new)
+        sources = logic.row_sources(fact_sources(doc), needs, new, logic.city_day())
+        doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
 
 
 def _tried(doc, facts):
@@ -1441,7 +1459,7 @@ def _tried(doc, facts):
     stored, recording = doc.Strings.GetValue(SECTION, ENTRY), doc.UndoRecordingEnabled
     doc.UndoRecordingEnabled = False
     try:
-        save_facts(doc, facts)
+        _save_facts(doc, facts)        # (enter_rooms refuses under an open box first)
         run_check(doc, report=False)
         return logic.refused_stories((STATE.get("last") or {}).get("items"))
     except Exception:
@@ -1744,6 +1762,14 @@ def _box_state_drawn(doc, facts, options, saved_ui, mode="check"):
             "zone_said": saved_ui.get("_zone_said"),     # the lookup's words, this session only
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
+            # the uses the district's chart lists (permitted first; the use set kept even if not listed), what a pick
+            # not permitted by right means, and the follow-up questions this district's rules need for the use, each
+            # with its saved answer (Ben, 2026-10-25; derived from the rulebook: check.options)
+            "use_choices": logic.district_use_names(options, facts.get("zone"), facts.get("use")),
+            "use_note": logic.use_note(options, facts.get("zone"), facts.get("use")),
+            "follow_ups": logic.follow_up_rows(options, facts.get("zone"), facts.get("use"), facts),
+            "answers": logic.box_answers(options, facts.get("zone"), facts.get("use"), facts),   # the saved facts
+            "options": options,          # for _apply_box and fact_sources: which facts the district and use read
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
             # the street's name only with its street line (a survey outline or a corner answer drops the line:
             # review round 3, F6); this session's lookup words first, then the name saved at the last Draw
@@ -1775,7 +1801,14 @@ def _ft_text(feet):
 
 def _apply_box(doc, facts, state, saved_ui):
     """The facts (what the checker gets) and the box's own choices, from what the box says."""
-    facts, saved_ui = logic.box_facts(facts, saved_ui, state)   # a changed corner answer: the street picked again
+    # only the fields shown change (blank: unset, never 0 or no), and what a use said goes with it (by its source:
+    # the box's own track across picks, from the saved sources when it opens); with the old use still in the facts
+    track = saved_ui.get("_answers") or logic.box_track(facts, fact_sources(doc))
+    facts, track = logic.box_applied(facts, state.get("answers"), state["zone"], state["use"], state.get("options"),
+                                     track)
+    saved_ui = dict(saved_ui, _answers=track)
+    facts, saved_ui = logic.box_facts(facts, saved_ui, state)   # a changed corner answer: the street picked again;
+    # then the address, district, use and survey as the box says
     facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
     for key, value in logic.ground_facts(state, _lot_level(doc, facts)).items():
         if value is None:
@@ -2250,7 +2283,8 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             ticked = {}                                                     # confirmed again)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
-        facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
+        if what != "pick:refresh":           # refresh: another use or district, the box again with its questions
+            facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
         if (what == "pick:by_hand" and saved_ui.get("_by_hand")     # by hand taken, or a lookup's preview set
                 and (not was_by_hand or (had_pending and not saved_ui.get("_pending")))):   # aside by it (round
             ticked = {}            # 15): ticks again (No or refused changes nothing: rounds 12, 16)
@@ -2549,8 +2583,11 @@ def _drawn(doc, facts, state, saved_ui, session=None):
     def save():
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
         _save_ui_state(doc, ui_state)
-        sources = fact_sources(doc)        # what the box doesn't set (the ground marking) is kept
+        sources = logic.sources_kept(fact_sources(doc), out)   # what the box doesn't set is kept (an answer
+        #                                                       kept unshown too; one unset goes with its fact)
         sources.update(logic.fact_sources(state, logic.city_day(), confirmed=True))
+        # every answer typed in this box, shown at Draw or not: entered by you, with its value now
+        sources = logic.typed_sources(sources, ui_state.get("_answers"), out, logic.city_day())
         doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
         return out
 
@@ -2593,47 +2630,11 @@ def _yes_no(prompt, current):
     return bool(rc[1]) if rc[0] == Rhino.Commands.Result.Success else current
 
 
-def _count(prompt, least=0):
-    """A whole number the architect types, `least` or more (the fact's own minimum, rhino_logic.minimum), or None
-    when the prompt is skipped (never a default)."""
-    gi = Rhino.Input.Custom.GetInteger()
-    gi.SetCommandPrompt(prompt + " (Enter to skip)")
-    gi.AcceptNothing(True)
-    gi.SetLowerLimit(least, False)
-    got = gi.Get()
-    _go_on(got)
-    return gi.Number() if got == Rhino.Input.GetResult.Number else None
-
-
-def _square_feet(prompt):
-    """A floor area in square feet (or, for a "length" fact, a distance in feet: the prompt names its unit) the
-    architect types, 0 or more, as typed (never rounded), or None when the prompt is skipped (never a default)."""
-    gn = Rhino.Input.Custom.GetNumber()
-    gn.SetCommandPrompt(prompt + " (Enter to skip)")
-    gn.AcceptNothing(True)
-    gn.SetLowerLimit(0.0, False)
-    got = gn.Get()
-    _go_on(got)
-    return gn.Number() if got == Rhino.Input.GetResult.Number else None
-
-
 def _ask_in_city():
     """The City's date (logic.city_day) when the architect says Yes to logic.IN_CITY_QUESTION, else None (No, or the dialog closed)."""
     got = ef.MessageBox.Show(Rhino.UI.RhinoEtoApp.MainWindow, logic.IN_CITY_QUESTION, "Gordium",
                              ef.MessageBoxButtons.YesNo, ef.MessageBoxType.Question, ef.MessageBoxDefaultButton.No)
     return logic.city_day() if got == ef.DialogResult.Yes else None
-
-
-def _ask_yes_no_or_skip(prompt):
-    """Yes (True) or No (False), or None when the prompt is skipped (never a default; _yes_no keeps a current
-    answer instead)."""
-    go = Rhino.Input.Custom.GetOption()
-    go.SetCommandPrompt(prompt + " (Enter to skip)")
-    yes, no = go.AddOption("Yes"), go.AddOption("No")
-    go.AcceptNothing(True)
-    got = go.Get()
-    _go_on(got)
-    return (go.OptionIndex() == yes) if got == Rhino.Input.GetResult.Option else None
 
 
 def change_facts(doc, facts, options):
