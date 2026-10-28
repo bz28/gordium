@@ -58,7 +58,7 @@ The report (`<model>_gordium_report.xlsx`) is written next to the model by `Gord
 - `packages/design_checker/tests/test_check.py::test_rhino_decisions`: which objects are sent, which facts are
   missing, skipped prompts, feet (the Rhino command's decisions, `design_checker/rhino_logic.py`, run in CI).
 - `packages/design_checker/tests/test_scenarios.py`: the hand-worked scenarios (hand-worked by Claude before Gordium ran, not yet verified by an architect)
-  (`test_data/test_sites/new_york/ithaca_city/scenarios/`), ten designs with the results worked out by hand
+  (`test_data/test_sites/new_york/ithaca_city/scenarios/`), twelve designs with the results worked out by hand
   before Gordium ran; every row matches or is an investigated disagreement, and a "does not comply" is never
   shown as complies.
 - In Rhino 8 (Mac), driven by scripts (run in Rhino, not CI): `tests/ui_flow_in_rhino.py` (from an empty file:

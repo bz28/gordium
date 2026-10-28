@@ -46,7 +46,9 @@ def test_every_field_of_every_format_is_shown_or_left_out_on_purpose():
 SAMPLE = {"review_when": [{"when": "W", "reason": "R"}], "examples": [{"given": {"a": 1}, "expect": "pass"}],
           "open_questions": ["Q"], "answers": [{"question": "Q", "answer": "A"}], "measures": ["M"],
           "sources": [{"file": LAW, "page": 3, "lines": [1, 2], "quote": "W"}], "quotable": False,
-          "revised": [{"from": "rule", "by": "B", "date": "D", "why": "Y"}]}
+          "revised": [{"from": "rule", "by": "B", "date": "D", "why": "Y"}],
+          "research": [{"question": "Q", "searched": ["325-18B"], "why_open": "W"}],
+          "findings": [{"question": "Q", "kind": "law", "answer": "A", "sources": []}]}
 
 
 def test_every_column_shows_the_field_it_names():
@@ -183,7 +185,7 @@ def test_text_is_never_a_formula_and_odd_characters_dont_crash(tmp_path):
 
 def test_the_workbook_lays_out_every_table_with_working_links(data):
     wb = build(data)
-    assert wb.sheetnames == ["Rules", "Definitions", "Uses", "Questions", "Coverage", "Sources"]
+    assert wb.sheetnames == ["Rules", "Definitions", "Uses", "Questions", "Findings", "Coverage", "Sources"]
     for name, t in data.items():
         ws = wb[name]
         assert ws.freeze_panes == "A3" and [c.value for c in ws[2]] == [h for h, _ in t["columns"]]
@@ -301,3 +303,40 @@ def test_an_unverified_chart_cell_says_so_instead_of_a_blank(monkeypatch):
 def test_the_readme_says_how_chart_cells_are_cited():
     readme = (REPO / "packages/rule_export/README.md").read_text(encoding="utf-8")
     assert "section, row and district column" in readme and "(not verified" in readme
+
+
+def _at(t, header):
+    return [h for h, _ in t["columns"]].index(header)
+
+
+def test_related_sections_come_from_the_term_index(data):
+    """A definition lists every section that uses its word; a rule, the requirement sections that use the words
+    it quotes (not its own). The yard definition and the rear-yard rule both reach §325-18B, the eaves rule."""
+    t = data["Definitions"]
+    yard = next(r for r in t["rows"] if r[_at(t, "Id")] == "yard" and r[_at(t, "Related sections")])
+    assert "325-18B" in yard[_at(t, "Related sections")].split(", ")
+    t = data["Rules"]
+    rule = next(r for r in t["rows"] if r[_at(t, "Rule id")] == "R-1b.rear_yard" and r[_at(t, "Related sections")])
+    assert "325-18B" in rule[_at(t, "Related sections")].split(", ")
+    assert "325-8A" not in rule[_at(t, "Related sections")].split(", ")              # its own section
+
+
+def test_an_entry_without_sources_still_shows_its_related_sections(monkeypatch):
+    rule = {"id": "R-1b.x", "title": "Rear yard", "kind": "rule"}
+    monkeypatch.setattr(wbk, "rulebooks", lambda j: [("R-1b.yaml", {"district": "R-1b", "rules": [rule]})])
+    t = tables(ITHACA)["Rules"]
+    assert "325-18B" in t["rows"][0][_at(t, "Related sections")].split(", ")
+
+
+def test_open_questions_show_their_research_and_findings_have_a_tab(data):
+    q = data["Questions"]
+    lot = next(r for r in q["rows"] if r[2] == "lot")
+    assert "325-3B:lot" in lot[_at(q, "Searched")] and "survey" in lot[_at(q, "Why still open")]
+    assert "tax_map_area" in lot[_at(q, "Readings in play")]
+    f = data["Findings"]
+    rows = {r[_at(f, "Finding")]: r for r in f["rows"]}
+    assert rows["yards_to_nearest_part"][_at(f, "Answer")].startswith("The law: ")
+    assert "p.49" in rows["yards_to_nearest_part"][_at(f, "Sources")]
+    assert rows["perpendicular_lot_depth"][_at(f, "Answer")].startswith(
+        "Gordium's reading (city practice) · confirm with the City zoning office")
+    assert len(f["rows"]) == len(f["links"]["Link"])

@@ -11,8 +11,8 @@ from design_checker.check import check_site
 PATHS = scenarios.paths()
 
 
-def test_there_are_ten_scenarios_each_with_working_and_a_citation():
-    assert len(PATHS) == 10
+def test_there_are_twelve_scenarios_each_with_working_and_a_citation():
+    assert len(PATHS) == 12        # ten R-1b designs, one R-1a, one R-3a
     for p in PATHS:
         sc = scenarios.load(p)
         for block in [sc["expected"], (sc.get("then") or {}).get("expected") or {}]:
@@ -57,11 +57,13 @@ def test_a_rule_with_two_ways_to_comply_says_how_each_falls_short_and_both_fixes
     assert h["hint"] == "To comply: lower the building 2'-0\", or make the rear yard 2'-0\" deeper, keeping the other yards."
 
 
-def test_when_the_readings_disagree_the_row_keeps_its_side_and_shows_the_span_in_the_limits_unit():
+def test_an_overhanging_floor_block_is_part_of_the_building_for_yards_and_coverage():
     v = _items("10_one_floor_moved_on_its_own.yaml")
-    assert v["Side yard, East"]["proposed"] == "12'-0\" to 15'-0\""   # still named: the shortest reading's line
+    # the second floor block sticks out 3 ft: a story (yards_to_nearest_part), so the yard is to it, 60 − 48 = 12
+    assert (v["Side yard, East"]["proposed"], v["Side yard, East"]["status"]) == ("12'-0\"", present.COMPLIES)
     assert v["Side yard, East"]["points"]
-    assert v["Lot coverage"]["proposed"] == "16.7% to 18.4%"          # 1,200 and 1,320 of 7,200 sf, rounded up
+    # coverage counts the overhanging floor (the coverage_seen_from_above finding): 1,320 of 7,200 sf, rounded up
+    assert v["Lot coverage"]["proposed"] == "18.4%"
     assert v["Lot coverage"]["required"] == "25%"                    # the limit in the same unit, never sf
 
 
@@ -251,8 +253,7 @@ def test_the_scenarios_are_never_called_an_architects_answer_key():
 
 LESS_CAUTIOUS = [(p, rule) for p in PATHS for rule, d in (scenarios.load(p).get("disagreements") or {}).items()
                  if d.get("direction") == "gordium_less_cautious"]
-NOT_YET = {("09_five_sided_lot", "R-1b.rear_yard"):
-           "PR #18: lot depth under every reading of which lot lines are side lines (the finding's hand reading)"}
+NOT_YET = {}      # 09's rear yard: PR #18 measures every lot-line reading, and 09 now agrees (needs review)
 
 
 @pytest.mark.parametrize("path, rule", [
