@@ -1187,8 +1187,9 @@ def test_by_hand_asks_for_the_district_tick_again():
     from rule_format.rulebook import REPO
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     loop = src[src.index("def _box_loop("):src.index("\n\n\n", src.index("def _box_loop("))]
-    reset = loop[loop.index('if what in ("pick:lookup", "pick:lookup_done"'):]
-    assert '"pick:by_hand"' in reset.split("\n", 1)[0] and reset.split("\n", 2)[1].strip().startswith("ticked = {}")
+    reset = loop[loop.index('if what == "pick:by_hand" and saved_ui.get("_by_hand") and not was_by_hand:'):]
+    assert reset.split("\n", 2)[1].strip().startswith("ticked = {}")      # (round 12: only once by hand is taken)
+    assert loop.index("was_by_hand = saved_ui.get") < loop.index("_box_pick(doc, what.split")
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
     assert pick.index("_lookup_stop()") < pick.index("logic.choose_by_hand(facts, saved_ui, in_city)")
 
@@ -1204,7 +1205,7 @@ def test_round_5_by_hand_is_for_city_of_ithaca_lots_only():
     _, by_hand = logic.choose_by_hand({}, outside, "2026-10-27")
     assert logic.draw_blocked({"address": "953 Danby Rd, Ithaca, NY"}, by_hand) != ""
     assert logic.draw_blocked({"address": "12 New Lot Ln, Ithaca, NY 14850"}, dict(opened, _by_hand=True)) == ""
-    assert logic.draw_blocked({"address": "12 New Lot Ln"}, by_hand) == ""          # another, City address: fine
+    assert logic.draw_blocked({"address": "12 New Lot Ln"}, by_hand) != ""   # round 12: refused, whatever address
 
 
 def test_round_9_by_hand_reads_the_town_of_an_address_typed_without_commas():
@@ -1257,6 +1258,36 @@ def test_round_11_units_a_run_on_zip_and_a_town_after_a_street_with_no_ending():
     for city in ("1 Oak Ave Apt 2", "12 Cascadilla St Unit B Ithaca", "1 Mitchell St Ithaca NY14850",
                  "12 Oak Ave, Apt 2, Ithaca, NY", "100 Dryden Rd", "12 Oak Ave #3"):
         assert logic.draw_blocked({"address": city}, opened) == "", city
+
+
+def test_round_12_outside_the_city_refuses_by_hand_whatever_the_address():
+    """Round 12: after the lookup said outside the City, a Yes then a cleared or retyped address opened Draw."""
+    opened = logic.box_opened({}, {})
+    outside = dict(opened, _lookup={"status": "outside_city", "query": "12 Main St, Lansing"})
+    assert logic.by_hand_refused(outside) == logic.BY_HAND_OUTSIDE.format(query="12 Main St, Lansing")
+    _, saved = logic.choose_by_hand({}, dict(outside), "2026-10-27")
+    assert "_by_hand" not in saved and "city_by_hand" not in saved
+    later = dict(opened, _by_hand=True, city_by_hand="2026-10-27")             # a Yes, then a lookup said outside
+    _, later = logic.lookup_choices({"status": "outside_city", "query": "14 Main St"}, {}, later)
+    assert "city_by_hand" not in later
+    for address in ("", "12 Main St", "14 Main St"):
+        assert logic.draw_blocked({"address": address}, later) == logic.BY_HAND_OUTSIDE.format(query="14 Main St")
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
+    assert "in_city = None if refused else _ask_in_city()" in pick
+
+
+def test_round_12_the_yes_is_shown_and_kept_once_on_the_address_source():
+    state = logic.start_gate({"address": "12 New Lot Ln", "has_lot": True}, {"city_by_hand": "2026-10-27"})
+    assert state["city_by_hand"] == "2026-10-27"                               # shown after the lot is drawn too
+    said = logic.IN_CITY_SAID.format(date="2026-10-27")
+    first = logic.fact_sources(dict(state, address_source=logic.ENTERED), "2026-10-27", True)["address"]["source"]
+    assert first == logic.ENTERED + " · " + said
+    again = logic.fact_sources(dict(state, address_source=first), "2026-10-28", True)["address"]["source"]
+    assert again == first                                                      # read back at the next Draw: once
+    assert logic.fact_sources(dict(state, city_by_hand=None, address_source=logic.ENTERED), "x", True)[
+        "address"]["source"] == logic.ENTERED
 
 
 def test_round_9_a_saved_source_never_says_used_live():

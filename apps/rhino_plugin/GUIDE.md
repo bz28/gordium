@@ -39,7 +39,7 @@ Type a command's name in Rhino's command line.
    - **Address**: the project's address. **Look up** asks the City's and the State's maps about that address and fills in what they give (the lot, its district); each row says where its answer came from.
      Each found lookup is also saved on this computer, as far as its sources allow (the lot and its street line;
      never the district, which the City's map lets Gordium use only live). If a later lookup of the same address
-     can't reach the map services, the box offers **Use the lookup saved on <date>**: its rows say "saved on <date>"
+     can't reach the map services, the box offers **Use the lookup saved on …** (its date): its rows say "saved on <date>"
      and you pick the district again.
    - **Zoning district**: the district and where it came from ("entered by you"); **Change** picks another. Tick **This is the lot's
      district** to confirm it. Nothing is drawn until you do: a district nobody confirmed is never trusted.

@@ -1769,7 +1769,11 @@ def _box_pick(doc, what, facts, saved_ui, session):
 
 def _one_pick(doc, what, facts, saved_ui, session):
     if what == "by_hand":                      # the site by hand (an empty file): the box shows its own rows, once
-        in_city = _ask_in_city()               # the architect says the lot is the City's (an address can't prove it)
+        refused = logic.by_hand_refused(saved_ui)     # the lookup said outside the City: never asked (round 12)
+        if refused:
+            saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, says=refused)
+        # the architect says the lot is the City's (an address can't prove it)
+        in_city = None if refused else _ask_in_city()
         if in_city:
             _lookup_stop()                     # a lookup still running is never used after this
             STATE.pop("lookup_guide", None)
@@ -1967,10 +1971,13 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
                 ticked = {k: v for k, v in ticked.items() if k in GUIDE_KEEPS}
             continue
         # the lookup's answer replaces them; by hand undoes it (a tick given its district never moves to another)
-        if what in ("pick:lookup", "pick:lookup_done", "pick:use_saved", "pick:by_hand"):   # (and the district
-            ticked = {}                                   # must be confirmed again)
+        if what in ("pick:lookup", "pick:lookup_done", "pick:use_saved"):   # (and the district must be
+            ticked = {}                                                     # confirmed again)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
+        was_by_hand = saved_ui.get("_by_hand")
         facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
+        if what == "pick:by_hand" and saved_ui.get("_by_hand") and not was_by_hand:   # by hand taken: ticks
+            ticked = {}                                   # again (No to its question changes nothing: round 12)
         # (nothing saved until Draw: Cancel leaves the facts, the box's choices and the model as they were)
 
 
@@ -2312,7 +2319,7 @@ def _count(prompt):
 
 
 def _ask_in_city():
-    """Today's date when the architect says Yes to logic.IN_CITY_QUESTION, else None (No, or the dialog closed)."""
+    """The City's date (logic.city_day) when the architect says Yes to logic.IN_CITY_QUESTION, else None (No, or the dialog closed)."""
     got = ef.MessageBox.Show(Rhino.UI.RhinoEtoApp.MainWindow, logic.IN_CITY_QUESTION, "Gordium",
                              ef.MessageBoxButtons.YesNo, ef.MessageBoxType.Question, ef.MessageBoxDefaultButton.No)
     return logic.city_day() if got == ef.DialogResult.Yes else None

@@ -2087,8 +2087,9 @@ def box_rows(state, flat=None):
                   lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source")) + after
                   if has_lot else NO_LOT),
          "actions": lot_actions, "tick": None,
-         "help": (BY_HAND_NOTE + (" " + IN_CITY_SAID.format(date=state["city_by_hand"])
-                                  if state.get("city_by_hand") else "")) if state.get("by_hand") else None},
+         "help": " ".join(t for t in (BY_HAND_NOTE if state.get("by_hand") else None,
+                                      IN_CITY_SAID.format(date=state["city_by_hand"])
+                                      if state.get("city_by_hand") else None) if t) or None},
         {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
          "text": FILL_BY_LOOKUP if state.get("needs_lookup") else
          ((street_name(state) if state.get("street_name") or not after else NO_STREET_YET) + after)
@@ -2250,6 +2251,8 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
             "asks": list(payload.get("asks") or []), "matches": list(payload.get("matches") or []),
             "query": payload.get("query")}
     saved_ui["_lookup"] = look
+    if look["status"] == "outside_city":          # the map outranks the architect's earlier Yes (round 12)
+        saved_ui.pop("city_by_hand", None)
     if look["status"] != "found":
         return facts, saved_ui
     got, details = payload.get("facts") or {}, payload.get("details") or {}
@@ -2619,8 +2622,10 @@ def fact_sources(state, today, confirmed):
     def fact(value, source, who=by):
         return {"value": value, "source": source, "confirmed_by": who, "date": today}
 
-    return {
-        "address": fact(state.get("address") or None, state.get("address_source") or ENTERED),
+    city = (" · " + IN_CITY_SAID.format(date=state["city_by_hand"])) if state.get("city_by_hand") else ""
+    return {     # (the architect's Yes, by hand, on the address's source: shown in the panel and report, round 12)
+        "address": fact(state.get("address") or None,     # (an earlier Draw's Yes, read back, never twice)
+                        (state.get("address_source") or ENTERED).split(" · " + IN_CITY_SAID.split(" (")[0])[0] + city),
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
@@ -3315,7 +3320,7 @@ def start_gate(state, saved_ui):
     is written here."""
     saved_ui = saved_ui or {}
     if not saved_ui.get("_opened_empty"):
-        return dict(state, needs_lookup=False, by_hand=False)
+        return dict(state, needs_lookup=False, by_hand=False, city_by_hand=saved_ui.get("city_by_hand"))
     pending = saved_ui.get("_pending") or {}
     # a found lookup supersedes "by hand": its address rule applies again (sceptic 2: by hand let another town's
     # address keep the City's lookup)
@@ -3327,7 +3332,7 @@ def start_gate(state, saved_ui):
                                                        saved_ui.get("_redrawn_for"), saved_ui.get("drawn_address"))
                 if a)
     return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand,
-                city_by_hand=saved_ui.get("city_by_hand") if by_hand else None)
+                city_by_hand=saved_ui.get("city_by_hand"))     # shown whenever kept (round 12: never seen again)
 
 
 BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
@@ -3348,6 +3353,16 @@ IN_CITY_QUESTION = ("Is this lot in the City of Ithaca?\n\nGordium checks City o
                     "or Dryden, which have their own zoning codes. The City's tax map says which.\n\n"
                     "Yes: enter the site by hand as a City of Ithaca lot. No: nothing changes.")
 IN_CITY_SAID = "You said this lot is in the City of Ithaca ({date})."
+BY_HAND_OUTSIDE = ("The lookup said {query} is outside the City of Ithaca, and Gordium checks City of Ithaca lots "
+                   "only: look up a City of Ithaca address.")
+
+
+def by_hand_refused(saved_ui):
+    """Why "Enter the site by hand" is refused before its question is asked: the lookup said outside the City (round
+    12: a Yes, then the address cleared or retyped, opened Draw on that lot). "" when it may be asked."""
+    look = (saved_ui or {}).get("_lookup") or {}
+    return BY_HAND_OUTSIDE.format(query=look.get("query") or "the address") if look.get("status") == "outside_city" \
+        else ""
 
 
 def choose_by_hand(facts, saved_ui, in_city):
@@ -3356,7 +3371,7 @@ def choose_by_hand(facts, saved_ui, in_city):
     11: "Ithaca, NY 14850" is also the Town's mail, so an address alone can't prove a City lot). Any looked-up
     preview set aside (its box changes undone; else a found lookup kept the gate on the lookup and the button did
     nothing: start-flow round 3)."""
-    if not in_city:
+    if by_hand_refused(saved_ui) or not in_city:
         return facts, saved_ui
     facts, saved_ui = drop_pending(facts, saved_ui)
     saved_ui["city_by_hand"] = str(in_city)
@@ -3585,8 +3600,9 @@ def address_reason(state):
     if state.get("by_hand") and not look.get("looking"):   # the site by hand, in a file that was empty: the address
         # is the architect's label (no lot of another to mislabel), but a City of Ithaca one (round 5: another
         # place, or one the lookup already said is outside the City, was checked under the City's rules)
-        if address and (address_place(address) is not None or (look.get("status") == "outside_city"
-                                                               and same_site_address(address, look.get("query")))):
+        if look.get("status") == "outside_city":     # whatever the address now (round 12: cleared or retyped)
+            return BY_HAND_OUTSIDE.format(query=look.get("query") or "the address")
+        if address and address_place(address) is not None:
             return BY_HAND_CITY_ONLY.format(address=address)
         return ""
     if known is not None and look.get("looking"):         # a lookup running: Draw off, its own address named
