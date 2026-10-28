@@ -3492,22 +3492,39 @@ def address_place(address):
     return " ".join(places) or None
 
 
+# Words that end a street's name ("Rd", "Way"), so what follows them is the town: STREET_WORDS both ways and the
+# other endings of the City's streets (round 10: "1 Willard Way NY 14850" read "way" as a town). Never a word that
+# also names a place nearby ("Heights": the Village of Cayuga Heights; "Hill"; "East": East Ithaca, in the Town).
+DIRECTIONS = {"north", "south", "east", "west", "n", "s", "e", "w"}
+STREET_ENDINGS = ((set(STREET_WORDS) | set(STREET_WORDS.values())) - DIRECTIONS    # "East Ithaca" is the Town's
+                  | {"way", "park", "walk", "row", "alley", "aly", "path", "trail", "trl", "ext", "extension", "sq",
+                     "square", "plaza", "loop", "run", "crossing", "pike", "tpke", "turnpike", "rte", "route"})
+STATE_WORDS = ("ny", "new", "york", "usa", "us")
+
+
 def _place_without_commas(address):
-    """address_place for an address typed without commas: the ZIP it ends with and the word before the state or ZIP,
-    when either is not the City of Ithaca's; else None ("106 Ithaca Rd" and "106 Ithaca Rd Ithaca NY 14850" name
-    none). No state or ZIP typed: no town can be told from the street, so None."""
-    words = str(address or "").lower().replace(".", " ").split()
-    zips, tail = [], False
-    while len(words) > 2 and (words[-1] in ("ny", "new", "york", "usa", "us")
-                              or (words[-1][:5].isdigit() and len(words[-1]) in (5, 10))):
-        last = words.pop()
-        tail = True
-        if last[:5].isdigit():
-            zips.insert(0, last[:5])
-    town = words[-1] if tail and len(words) > 2 else None
-    if town and (town in STREET_WORDS or town in STREET_WORDS.values() or town in ITHACA_PLACE or town.isdigit()):
-        town = None
-    places = [w for w in ([town] if town else []) + zips if w not in ITHACA_PLACE]
+    """address_place for an address typed without commas (round 9: "12 Main St Lansing NY 14882" read as the
+    City's). The town is every word after the street's last ending (STREET_ENDINGS), state and the City's own name
+    and ZIP codes aside ("12 Main St Town of Ithaca NY" names "town of": round 10, the Town is not the City; "12 Main
+    St Lansing" names "lansing"). A street with no known ending: the word before a state or ZIP, if one was typed;
+    else None (no town can be told from the street)."""
+    text = " ".join(str(address or "").lower().replace(".", " ").split())
+    text = text.replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    words = text.split()
+    ends = [i for i, w in enumerate(words) if i >= 1 and w in STREET_ENDINGS]
+    if ends:
+        tail = words[ends[-1] + 1:]
+    else:
+        tail, cut = [], len(words)
+        while cut > 2 and (words[cut - 1] in STATE_WORDS or (words[cut - 1][:5].isdigit()
+                                                            and len(words[cut - 1]) in (5, 10))):
+            cut -= 1
+        if cut < len(words) and cut > 2:
+            tail = words[cut - 1:]
+    tail = [w[:5] if w[:5].isdigit() else w for w in tail if w not in STATE_WORDS]
+    tail = [w for w in tail if not (w.isdigit() and len(w) < 5)     # a route's number ("Rte 13"), never a town
+            and w not in ("n", "s", "e", "w", "ne", "nw", "se", "sw")]  # nor a street's "N" ("Aurora St N")
+    places = [w for w in tail if w not in ITHACA_PLACE]
     return " ".join(places) or None
 
 

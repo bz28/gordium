@@ -1218,6 +1218,18 @@ def test_round_9_by_hand_reads_the_town_of_an_address_typed_without_commas():
     assert logic.same_site_address("106 Ithaca Rd Ithaca NY 14850", "106 Ithaca Road, Ithaca, NY, 14850")
 
 
+def test_round_10_the_town_after_the_street_is_read_whatever_the_ending():
+    """Round 10: the Town of Ithaca read as the City, a town with no state typed passed, and "Way" read as a town."""
+    opened = dict(logic.box_opened({}, {}), _by_hand=True)
+    for other in ("12 Main St Town of Ithaca NY", "12 Main St Town of Ithaca NY 14850", "12 Main St Lansing",
+                  "12 Main St East Ithaca NY", "12 Main St Cayuga Heights NY", "12 Main St, Town of Ithaca, NY"):
+        assert logic.draw_blocked({"address": other}, opened) == logic.BY_HAND_CITY_ONLY.format(address=other)
+    for city in ("1 Willard Way NY 14850", "1 Willard Way", "100 Aurora St N", "100 E State St Ithaca",
+                 "10 Rte 13 Ithaca NY", "100 Broadway Ithaca NY"):
+        assert logic.draw_blocked({"address": city}, opened) == "", city
+    assert logic.same_site_address("1 Willard Way NY 14850", "1 Willard Way, Ithaca, NY, 14850")
+
+
 def test_round_9_a_saved_source_never_says_used_live():
     saved = logic.as_saved({"checked": "2026-10-27", "labels": {"street_side": "City of Ithaca roads, used live"}})
     assert saved["labels"]["street_side"] == "City of Ithaca roads" + logic.SAVED_ON.format(date="2026-10-27")
