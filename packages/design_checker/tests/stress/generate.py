@@ -366,6 +366,16 @@ def _add_dormer(d, e):
                        "z0": roof["base"], "z1": z1})
 
 
+def _overhangs(d, e):
+    """The pitched roof's two eaves set to depths of their own: `over` past the p0 end's wall, `over2` past the p1
+    end's (an architect dragging one eave out further than the other). Not in the random sample's WEIGHTS (it keeps
+    its seeds' designs); test_unequal_sides.py draws it."""
+    roofs = [p for p in _roofs(d) if p["kind"] == "roof"]
+    if not roofs:
+        return False
+    roofs[0]["over"], roofs[0]["over2"] = e["over"], e["over2"]
+
+
 def _rotate(d, e):
     fl = _floors(d)
     if not fl:
@@ -490,7 +500,8 @@ def _offset_rect(c, o):
 OPS = {"move_house": _move_house, "move_floor": _move_floor, "stretch": _stretch, "raise_roof": _raise_roof,
        "add_floor": _add_floor, "delete_floor": _delete_floor, "add_accessory": _add_accessory,
        "add_porch": _add_porch, "add_roof": _add_roof, "add_dormer": _add_dormer, "rotate": _rotate,
-       "cross_line": _cross_line, "off_lot": _off_lot, "grade": _grade, "plain_wing": _plain_wing, "floor_wing": _floor_wing, "shift_floor": _shift_floor}
+       "cross_line": _cross_line, "off_lot": _off_lot, "grade": _grade, "plain_wing": _plain_wing, "floor_wing": _floor_wing, "shift_floor": _shift_floor,
+       "overhangs": _overhangs}
 
 
 def apply(design: dict, edit: dict):
@@ -599,7 +610,7 @@ def _prism_faces(outline, z0, z1):
 
 def _gable_faces(p):
     """A gable roof solid (as test_every_reading.roof draws one): level soffit at `base` reaching `over` past the
-    two eave walls, a `fascia` deep vertical edge, slopes up to the ridge over the middle; built in the walls'
+    two eave walls (`over2`, if given, past the p1 end's: the two eaves of different depths), a `fascia` deep vertical edge, slopes up to the ridge over the middle; built in the walls'
     own frame (p0 -> p1 across, p0 -> p3 along the ridge)."""
     p0, p1, _, p3 = p["corners"]
     ux, uy = p1[0] - p0[0], p1[1] - p0[1]
@@ -611,7 +622,8 @@ def _gable_faces(p):
 
     def at(x, y, z):
         return [p0[0] + x * ux + y * vx, p0[1] + x * uy + y * vy, z]
-    xa, xb, xm, base, lo, ridge = -p["over"], w + p["over"], w / 2, p["base"], p["base"] + p["fascia"], p["ridge"]
+    xa, xb, xm, base, lo, ridge = (-p["over"], w + p.get("over2", p["over"]), w / 2, p["base"], p["base"] + p["fascia"],
+                                   p["ridge"])
     y0, y1 = 0.0, dl
     faces = [[(xa, y0, base), (xb, y0, base), (xb, y1, base), (xa, y1, base)],
              [(xa, y0, lo), (xm, y0, ridge), (xm, y1, ridge), (xa, y1, lo)],
