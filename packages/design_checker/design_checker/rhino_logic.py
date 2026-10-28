@@ -2613,7 +2613,10 @@ LOOKUP_INFO = ("found", "set_aside")      # a lookup's own line that only inform
 def lookup_note(state):
     """The plain line under the amber one: what a found (or set-aside) lookup tells, or None."""
     look = state.get("lookup") or {}
-    return look.get("says") if look.get("status") in LOOKUP_INFO else None
+    says = look.get("says") if look.get("status") in LOOKUP_INFO else None
+    # the offline safety net (a saved copy shown: the services didn't answer, pick the district again) asks for
+    # something: it stays on the amber line (review round 1 of this change)
+    return None if says and says.startswith(SAVED_SAYS.split("{")[0]) else says
 
 
 def _question(state):

@@ -1708,6 +1708,9 @@ def test_a_found_lookups_note_is_a_plain_line_never_the_amber_question():
               "corner_lot": None}
     assert logic.lookup_note(looked).startswith("Shown dashed") and "Shown dashed" not in logic.uncertain(looked)
     assert logic.uncertain(looked).startswith("Does this lot face two streets?")
+    saved = {"lookup": {"status": "found", "says": logic.SAVED_SAYS.format(address="106 Ithaca Rd", date="2026-10-20")},
+             "corner_lot": False}                                    # the offline safety net asks: amber
+    assert logic.lookup_note(saved) is None and logic.uncertain(saved) == saved["lookup"]["says"]
     offline = {"lookup": {"status": "offline", "says": logic.LOOKUP_SAYS["offline"]}, "corner_lot": False}
     assert logic.lookup_note(offline) is None and logic.uncertain(offline) == logic.LOOKUP_SAYS["offline"]
     ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
