@@ -91,17 +91,18 @@ try:
     shown = {}
 
     def on_confirm(doc_, facts, text, *box_state):
-        shown["text"] = text
-        lot = g._find(doc_, facts.get("lot_id") or "")
-        box = lot.Geometry.GetBoundingBox(True)
-        box.Inflate(box.Diagonal.Length * 0.15)
-        shown["box"] = box
-        steps.append({"frame": capture(doc_, "01_box", box), "caption": "The prefilled box appears first",
-                      "box_text": text})
+        shown["text"] = text             # Look up only shows what it found: nothing is drawn until Draw (#26)
+        shown["objects_before_draw"] = doc_.Objects.Count
+        steps.append({"frame": capture(doc_, "01_box"), "caption": "The prefilled box appears first",
+                      "box_text": text, "objects_before_draw": doc_.Objects.Count})
 
     g.STATE["on_confirm"] = on_confirm
     look_up_106(g, g.gordium_check)                                   # an empty model: the start flow
-    lot_box = shown["box"]
+    assert shown.get("objects_before_draw") == log["start_objects"], "Look up drew into the model before Draw"
+    lot = g._find(doc, g.load_facts(doc).get("lot_id") or "")
+    assert lot is not None, "Draw drew no lot"
+    lot_box = lot.Geometry.GetBoundingBox(True)
+    lot_box.Inflate(lot_box.Diagonal.Length * 0.15)
     lot_box.Union(rg.Point3d(lot_box.Center.X, lot_box.Center.Y, 40 / g._scale(doc)))
     record(g, doc, "02_building", "OK: the largest legal building appears", lot_box, 0)
     log["start"] = {k: v for k, v in (g.STATE.get("start") or {}).items() if k != "floors"}
