@@ -649,13 +649,14 @@ def test_look_up_and_cancel_lookup_keep_the_ticks_as_the_box_shows_them():
            "corner_source": LIVE, "checked": ["street"]}
     assert logic.ticks_after_pick("pick:lookup_cancel", now) == now        # never the ticks from before Look up
     assert logic.ticks_after_pick("pick:lookup", now) == now               # the box shows the architect's own
-    assert logic.ticks_after_pick("pick:lookup_done", now, "found", False) == {} == \
+    fresh = {"district_confirmed": False}           # replaced: the district confirmed again, never the file's tick
+    assert logic.ticks_after_pick("pick:lookup_done", now, "found", False) == fresh == \
         logic.ticks_after_pick("pick:use_saved", now, "found", False)
     for status in ("not_found", "offline", "outside_city", "timeout", "error", None):    # filled nothing: as shown
         assert logic.ticks_after_pick("pick:lookup_done", now, status, False) == now, status
-        assert logic.ticks_after_pick("pick:lookup_done", now, status, True) == {}, status   # ...unless it moved
+        assert logic.ticks_after_pick("pick:lookup_done", now, status, True) == fresh, status   # unless it moved
     assert logic.ticks_after_pick("pick:use_saved", now, "offline", False) == now        # a saved one refused
-    assert logic.ticks_after_pick("pick:lookup_done", now, "offline") == {}              # (not known: emptied)
+    assert logic.ticks_after_pick("pick:lookup_done", now, "offline") == fresh           # (not known: replaced)
     # what moves the box: a field, the doubts, or an earlier preview put back (round 4: drop_pending)
     pending = {"address": "106 Ithaca Rd"}
     assert not logic.box_moved({"zone": "R-1b"}, {"_pending": pending}, {"zone": "R-1b"}, {"_pending": pending})
@@ -782,3 +783,21 @@ def test_a_second_lookup_that_finds_nothing_never_keeps_a_tick_on_the_district_i
         last = shown[-1]
         assert (last["zone"], last["district_confirmed"]) == ("R-3a", False), (second, last)
         assert last["zone_source"] == logic.ENTERED, (second, last)
+        # the same with R-3a confirmed at an earlier Draw and taken off before the first Look up: never ticked
+        # again from the file when the preview is put back (sceptic of round 4)
+        answers[:] = [looked_up("106_ithaca_rd"), {"status": second, "query": "106 Ithaca Rd"}]
+        shown = _run_box_loop([({"district_confirmed": False}, "pick:lookup"), ({}, "pick:lookup_done"),
+                               ({}, "pick:lookup"), ({}, "pick:lookup_done"), ({}, None)],
+                              box_pick=box_pick, facts={"zone": "R-3a", "address": "1 Other St"},
+                              saved_ui={"zone_source": logic.ENTERED}, confirmed_at_draw="R-3a")
+        assert (shown[-1]["zone"], shown[-1]["district_confirmed"]) == ("R-3a", False), (second, shown[-1])
+        # the district unchanged by the preview (same district): the "suggested" source and the tick given on it
+        # go when the preview is put back (sceptic of round 4)
+        answers[:] = [looked_up("106_ithaca_rd"), {"status": second, "query": "106 Ithaca Rd"}]
+        shown = _run_box_loop([({}, "pick:lookup"), ({}, "pick:lookup_done"),
+                               ({"district_confirmed": True}, "pick:lookup"), ({}, "pick:lookup_done"), ({}, None)],
+                              box_pick=box_pick, facts={"zone": "R-1b", "address": "106 Ithaca Rd"},
+                              saved_ui={"zone_source": logic.ENTERED})
+        assert shown[2]["zone"] == "R-1b" and shown[2]["zone_source"] != logic.ENTERED      # the preview's
+        assert (shown[-1]["district_confirmed"], shown[-1]["zone_source"]) == (False, logic.ENTERED), (second,
+                                                                                                    shown[-1])

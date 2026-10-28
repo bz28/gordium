@@ -2275,10 +2275,11 @@ def ticks_after_pick(what, ticks, answer=None, moved=True):
     own ticks; Draw is off meanwhile) and Cancel lookup. So no tick or source from before Look up is ever brought
     back, onto a district, use, address or corner changed during the lookup ("suggested by Gordium" on a district the
     architect picked) or after they took it off; no tick is kept on a district a lookup's answer put in or back; and
-    a district they took off is never shown ticked again from the file by a lookup that changed nothing (review of
-    #32, 2026-10-28)."""
+    a district they took off is never shown ticked again from the file (review of #32, 2026-10-28): an answer that
+    replaces them leaves the district unconfirmed outright, never the earlier Draw's confirmation again (an earlier
+    preview put back also puts back the file's tick, and the architect may have taken it off: sceptic of round 4)."""
     if what in ("pick:lookup_done", "pick:use_saved") and (answer == "found" or moved):
-        return {}
+        return {"district_confirmed": False}
     return dict(ticks or {})
 
 
