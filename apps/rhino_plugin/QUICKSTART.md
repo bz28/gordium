@@ -362,8 +362,8 @@ usually what fixes it:
 - **Something on the lot isn't measured**: a solid not on the `Building` layer (a shed on Default, an imported
   garage). Lot coverage counts every building on the lot, so it needs review until you **Add to check…**.
 - **It needs a fact the model can't show** (bedrooms, parking spaces, dwelling units, rooms let for profit,
-  whether it is a conversion, the number of stories): its button names exactly those, for example **Enter dwelling
-  units…**. It opens a small window that asks only them (a number, or Not answered / No / Yes). **OK** saves just
+  whether it is a conversion, the number of stories): its button names them when that fits, for example **Enter bedrooms
+  and parking spaces…**, or says how many, for example **Answer 3 questions…**. It opens a small window that asks only them (a number, or Not answered / No / Yes). **OK** saves just
   those answers, each "entered by you" with the date, as one Undo step, and checks again; **Cancel** (or Esc)
   changes nothing. Left blank, a fact stays unanswered and its rule keeps needing review (never read as 0 or no).
   Answers to the start box's questions show there too the next time you open **Edit site…**. A row that needs a
