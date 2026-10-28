@@ -655,3 +655,151 @@ def test_every_fact_on_a_doubtful_lot_is_doubtful(doubt):
     words = "may be the wrong one" if doubt == "along the street" else "largest piece"
     for name in ON_THE_LOT:
         assert f[name]["status"] != "suggested" and words in f[name]["reason"], name
+
+
+# ---- names: how the City's layers write a district or a street (names.yaml, exact tables) -------------------
+# The names below are the ones the live layers gave on 2026-10-27 (names only: no geometry or other attribute).
+
+def test_the_city_maps_r_u_is_the_rulebooks_ru():
+    """614 University Ave: the City's map writes R-U (as §325-4 does); the zoning chart and the rulebook write RU.
+    Before names.yaml the start box found no rulebook for "R-U" and set no district."""
+    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, "R-U")])
+    z = both(r)["zone"]
+    assert z["value"] == "RU" and z["status"] == "suggested"
+    assert "R-U" in z["note"] and "§325-4" in z["note"]
+    assert "R-U" not in json.dumps(r["snapshot"]) and "RU" not in json.dumps(r["snapshot"]["facts"]["zone"])
+
+
+@pytest.mark.parametrize("code", ["B-1a", "CBD-60", "R-1A", "RU ", "R U"])
+def test_a_district_code_gordium_doesnt_know_needs_review(code):
+    """Another district (B-1a, CBD-60, both on the City's map) or a code that only looks like a
+    residential one (R-1A, 'RU ', 'R U'): never matched by likeness, shown as the map gives it, needs review."""
+    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, code)])
+    z = both(r)["zone"]
+    assert z["value"] == code and z["status"] == "needs_review" and "isn't one of the residential districts" in z["reason"]
+
+
+def test_every_residential_district_as_written_is_used_as_is():
+    for code in ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b"]:
+        r, _ = run("106_ithaca_rd", zones=[Fake.square(None, code)])
+        z = both(r)["zone"]
+        assert z["value"] == code and z["status"] == "suggested" and "map writes" not in (z.get("note") or ""), code
+
+
+def test_a_lot_in_r_u_and_another_district_asks_between_ru_and_it():
+    fx = load("106_ithaca_rd")
+    ring = g.open_ring(next(a for a in fx["answers"] if a["source"] == "state_parcels")["body"]["features"][0]["geometry"]["rings"][0])
+    cx = g.centroid(ring)[0]
+    f = Fake(fx, zones=[Fake.square(None, "R-U", 840000, 880000, cx, 890000),
+                        Fake.square(None, "R-3b", cx, 880000, 850000, 890000)])
+    r = lookup(fx["address"], f, NOW)
+    z = both(r)["zone"]
+    assert z["status"] == "ask" and set(z["value"]) == {"RU", "R-3b"}
+
+
+def test_the_residential_districts_are_the_zoning_charts_columns():
+    """names.yaml's residential districts are exactly the chart's residential columns (p.3, in order), written as
+    the rulebooks write them (R-1A's file is R-1a.yaml); every alias names one of them."""
+    from site_lookup.sources import NAMES
+    d = NAMES["districts"]
+    cells = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text/zoning_charts_2026-04.cells.jsonl"
+    page3 = next(r for r in map(json.loads, cells.read_text(encoding="utf-8").splitlines()) if r.get("page") == 3
+                 and "columns" in r)
+    assert [n.upper() for n in d["residential"]] == [c["name"] for c in page3["columns"]][:9]
+    import re
+    assert all(re.fullmatch(r"R-\d[a-z]*|RU", n) for n in d["residential"])      # the rulebooks' spelling
+    assert (REPO / "regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-1b.yaml").is_file()
+    assert all(a["district"] in d["residential"] for a in d["aliases"].values())
+
+
+@pytest.mark.parametrize("first", [True, False])
+def test_an_overlay_drawn_over_a_district_goes_to_the_overlays_and_needs_review(first):
+    """The City's map draws the South Hill Overlay District over R-2a (and others) and returns the two in no set
+    order: whichever comes first, the district is R-2a and the overlay is found (it bars a second primary
+    structure, §325-8E(1)): never R-2a with nothing else said, never SHOD taken for the district."""
+    zones = [Fake.square(None, "R-2a"), Fake.square(None, "SHOD")]
+    r, _ = run("106_ithaca_rd", zones=zones if first else zones[::-1])
+    f = both(r)
+    assert f["zone"]["value"] == "R-2a"
+    assert f["overlays"]["status"] == "needs_review"
+    assert any("South Hill Overlay District (SHOD)" in o for o in f["overlays"]["value"])
+
+
+def test_a_lot_under_an_overlay_only_isnt_on_the_map():
+    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, "SLAUOZ")])
+    f = both(r)
+    assert f["zone"]["value"] is None and f["zone"]["status"] == "needs_review"
+    assert any("(SLAUOZ)" in o for o in f["overlays"]["value"])
+
+
+def test_two_base_districts_drawn_over_each_other_ask():
+    """B-1a and CBD-60 overlap on the City's map: both count, so Gordium asks (and neither is a residential
+    district: needs review too)."""
+    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, "B-1a"), Fake.square(None, "CBD-60")])
+    z = both(r)["zone"]
+    assert z["status"] == "ask" and set(z["value"]) == {"B-1a", "CBD-60"}
+    assert "isn't one of the residential districts" in z["reason"]
+
+
+def test_a_city_road_named_for_two_streets_is_the_addresss_street():
+    """The City's road layer names East State Street "E STATE ST / M.L.K. JR ST": an address on E State St
+    facing it gave "The address is on E STATE ST, but the lot only touches E STATE ST M L K JR ST" (needs review)
+    before names.yaml. Here 106 Ithaca Rd's lot stands in, its road and address renamed."""
+    fx = load("106_ithaca_rd")
+    for a in fx["answers"]:
+        if a["source"] == "geocoder":
+            for c in a["body"]["candidates"]:
+                c["attributes"].update(StPreDir="E", StName="State", StType="St")
+        if a["source"] == "state_streets":
+            for f in a["body"]["features"]:
+                if f["attributes"].get("CompleteStreetName") == "Ithaca Road":
+                    f["attributes"]["CompleteStreetName"] = "E STATE ST / M.L.K. JR ST"
+    r = lookup(fx["address"], Fake(fx), NOW)
+    s = both(r)["street_side"]
+    assert s["value"]["street"] == "E STATE ST" and s["status"] == "suggested", s.get("reason")
+
+
+@pytest.mark.parametrize("raw,street", [("W STATE ST/ M. L. K. JR ST", "W STATE ST"),
+                                        ("W CLINTON ST EB LANE", "W CLINTON ST"), ("N MEADOW ST SB", "N MEADOW ST"),
+                                        ("W BUFFALO ST BRIDGE", "W BUFFALO ST"), ("Ithaca Road", "ITHACA RD")])
+def test_city_road_names_read_as_the_address_writes_them(raw, street):
+    from site_lookup.sources import road_name
+    assert road_name(raw) == street
+
+
+@pytest.mark.parametrize("raw", ["E STATE ST /M.L.K. JR ST", "e state st / m.l.k. jr st", "MLK JR ST"])
+def test_a_road_name_not_in_the_table_is_never_matched_by_likeness(raw):
+    from site_lookup.sources import road_name
+    assert road_name(raw) != "E STATE ST"
+
+
+def test_two_districts_over_the_same_half_of_a_lot_leave_the_other_half_unmapped():
+    """Overlapping polygons are each counted, so their shares add up past what is mapped: here two districts lie
+    over the same west half, and the lot is still only half on the map (needs review), not 'all of it'."""
+    fx = load("106_ithaca_rd")
+    ring = g.open_ring(next(a for a in fx["answers"] if a["source"] == "state_parcels")["body"]["features"][0]["geometry"]["rings"][0])
+    cx = g.centroid(ring)[0]
+    f = Fake(fx, zones=[Fake.square(None, "R-2a", 840000, 880000, cx, 890000),
+                        Fake.square(None, "B-1a", 840000, 880000, cx, 890000)])
+    z = both(lookup(fx["address"], f, NOW))["zone"]
+    assert "of this lot is on the City's zoning map" in z["reason"]
+
+
+def test_the_city_parcels_own_overlay_record_needs_review():
+    """The City's parcel record names its overlays (OverlayZone, e.g. SHOD), not only SecZones: read too, so an
+    overlay the map's polygons miss is still found."""
+    class WithOverlay(Fake):
+        def _state_as_city(self, params):
+            return [dict(f, attributes=dict(f["attributes"], OverlayZone="SHOD")) for f in super()._state_as_city(params)]
+    fx = load("106_ithaca_rd")
+    o = both(lookup(fx["address"], WithOverlay(fx), NOW))["overlays"]
+    assert o["status"] == "needs_review" and "Overlay zones on the parcel: SHOD" in o["value"]
+
+
+def test_overlays_the_zoning_map_couldnt_be_asked_for_need_review():
+    """The zoning map is one of the overlays row's sources (SHOD...): when it doesn't answer, the overlays row says
+    they couldn't be checked (needs review), never 'none found'."""
+    fx = load("106_ithaca_rd")
+    o = both(lookup(fx["address"], Failing(fx, ["city_zoning"]), NOW))["overlays"]
+    assert o["status"] == "needs_review" and any("South Hill Overlay District (SHOD)" in v and "Adult Use Overlay Zone"
+                                                 in v and "couldn't check" in v for v in o["value"])
