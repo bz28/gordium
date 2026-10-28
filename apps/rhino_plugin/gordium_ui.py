@@ -910,6 +910,7 @@ def start_box(state, options, mode):
             note.Text = text
             note.TextColor = eto_status_color("needs_review") if refused else plain
 
+        filling = []                       # non-empty while a quick answer sets several fields: one refresh at the end
         cells = []
         for q in questions:
             if q["choices"] is not None:
@@ -920,7 +921,8 @@ def start_box(state, options, mode):
                 field.SelectedIndex = values.index(q["value"]) + 1 if q["value"] in values else 0
                 field.Width = logic.ABOUT_FIELD_WIDTH
                 if q["key"] in logic.ASKED_AFTER.values():      # another question waits on this one: open it
-                    field.SelectedIndexChanged += logic.guard(lambda s, e: refresh_if_needed(), "answer the question")
+                    field.SelectedIndexChanged += logic.guard(
+                        lambda s, e: None if filling else refresh_if_needed(), "answer the question")
             else:                                  # typed: a number (any other kind is never a yes / no)
                 field = ef.TextBox()
                 field.Width = logic.ABOUT_TYPED_WIDTH
@@ -946,10 +948,14 @@ def start_box(state, options, mode):
                 at = max(picker.SelectedIndex, 0)
                 if at == 0:
                     return
-                for key, value in quick[at - 1][1].items():
-                    kind, field, choices = asked[key]
-                    field.SelectedIndex = [v for _, v in choices].index(value) + 1
-                picker.SelectedIndex = 0      # ready to pick another
+                filling.append(True)
+                try:
+                    for key, value in quick[at - 1][1].items():
+                        kind, field, choices = asked[key]
+                        field.SelectedIndex = [v for _, v in choices].index(value) + 1
+                    picker.SelectedIndex = 0  # ready to pick another
+                finally:
+                    filling.clear()
                 refresh_if_needed()
 
             picker.SelectedIndexChanged += logic.guard(quick_picked, "pick a quick answer")

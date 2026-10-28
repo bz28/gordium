@@ -374,15 +374,16 @@ USE_DETAILS_TITLE = "Use details — answer when you plan the interior"
 BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
 
 
-def is_use_detail(item):
+def is_use_detail(item, facts=None):
     """Whether a panel row is a use detail still waiting to be answered: it needs review, and everything it is waiting
-    on (its "needs") is a deferred fact. Only then: a row waiting on anything else too, one with no named need, and any
-    row that has been decided (complies, fails) stays among the building's rows, so an answer that fails counts as a
-    failure and a question left open never reads as a pass."""
+    on (its "needs") is a deferred fact that is still blank in `facts`. Only then: a row waiting on anything else too,
+    one with no named need, a row about facts that disagree (they are filled in), and any row that has been decided
+    (complies, fails) stays among the building's rows, so an answer that fails counts as a failure and a question left
+    open never reads as a pass."""
     needs = item.get("needs") or []
-    return item.get("status") == "needs_review" and bool(needs) and all(k in DEFERRED_FACTS for k in needs)
-
-
+    return (item.get("status") == "needs_review" and bool(needs) and all(k in DEFERRED_FACTS for k in needs)
+            and all((facts or {}).get(k) is None for k in needs)
+            and not str(item.get("id") or "").startswith("facts.conflict"))
 
 
 def answered_in_box(needs):
@@ -583,6 +584,9 @@ def answers_applied(facts, answers, zone, use, options):
     asked = follow_up_keys(options, zone, use, answers or {})
     given = {k: v for k, v in (answers or {}).items() if k in asked and v is not None}
     out = {k: v for k, v in (facts or {}).items() if k not in BOX_ASKS}
+    read = (((options or {}).get("follow_ups") or {}).get(zone) or {}).get(use)
+    if read is not None:           # a use detail answered for another district or use never stays behind (it would
+        out = {k: v for k, v in out.items() if k not in DEFERRED_FACTS or k in read}   # decide this one's rules)
     out.update(implied_by(options, zone, use))
     return update_counts(out, given), sorted(given)
 
@@ -606,7 +610,8 @@ def parse_answer(kind, text, key=None):
             return False
         raise ValueError("answer yes or no")
     if kind in ("area", "length"):
-        if not re.fullmatch(r"(\d[\d,]*(\.\d+)?|\.\d+)", text, re.ASCII):
+        # commas only as thousands separators (1,200): "2,5" is not 25 (a European decimal comma is refused, not misread)
+        if not re.fullmatch(r"((\d+|\d{1,3}(,\d{3})+)(\.\d+)?|\.\d+)", text, re.ASCII):
             raise ValueError("a number of " + ("square feet" if kind == "area" else "feet") + ", 0 or more")
         number = float(text.replace(",", ""))
         return int(number) if number == int(number) else number

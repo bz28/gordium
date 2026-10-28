@@ -168,6 +168,9 @@ def test_use_details_unanswered_are_their_own_collapsed_group_and_never_a_pass()
     assert f"{len(details)} use detail" in v["summary"] and "to answer" in v["summary"]
     assert v["summary"].count("need review") + v["summary"].count("needs review") == (1 if building_review else 0)
     assert v["state"] != present.COMPLIES, "a question left open is never a pass"
+    # with every building row decided, the use details alone still hold the state at needs review
+    only = [dict(i, status=present.COMPLIES) for i in v["items"] if not i.get("use_detail")] + details
+    assert present.state(only) == present.REVIEW and present.summary(only).endswith("to answer")
 
 
 def test_only_use_details_left_is_still_not_a_pass():
@@ -184,12 +187,8 @@ def test_an_answered_use_detail_leaves_the_group_and_counts_like_any_row():
     something besides use details stays among the building's rows."""
     failing = _view(unrelated_persons=5, owner_occupied=False, accessory_dwelling_unit=False,
                     functional_family_unit=False)
-    assert any(i["status"] == present.FAILS and not i.get("use_detail") for i in failing["items"]
-               if "unrelated" in i["name"].lower() or "occupan" in i["name"].lower() or "famil" in i["name"].lower())
+    assert [i["status"] for i in failing["items"] if i.get("rule") == "R-1b.occupancy_one_family"] == [present.FAILS]
     assert "does not comply" in failing["summary"]
-    for i in _view()["items"]:
-        if i["status"] == present.REVIEW and not i.get("use_detail"):
-            assert not i.get("needs") or not all(k in logic.DEFERRED_FACTS for k in i["needs"]), i["id"]
     mixed = {"status": present.REVIEW, "needs": ["unrelated_persons", "stream_near_lot"]}
     assert not logic.is_use_detail(mixed)
     assert not logic.is_use_detail({"status": present.REVIEW, "needs": []})
@@ -228,3 +227,52 @@ def test_floor_areas_are_typed_square_feet_not_a_yes_no():
     assert logic.parse_answer("area", "500.4") == 500.4          # never rounded down to the 500 sq ft limit
     assert logic.parse_answer("area", "  ") is None
     assert logic.update_counts({}, {"home_occupation_area": 500.4})["home_occupation_area"] == 500.4
+
+
+# ---- review round 1 (two Opus sceptics + a cold reviewer): pins that fail on revert ---------------------------------
+
+def test_a_use_detail_answered_for_another_district_or_use_never_stays_behind(options):
+    """Sceptic 2: deferred facts left the box, so answers_applied kept them for ever; an R-1b household answer would
+    decide an R-3b rule. Now only the ones the new district's and use's rules read are kept."""
+    facts = {"unrelated_persons": 3, "occupants": 4, "home_occupation": False}
+    kept, _ = logic.answers_applied(facts, {}, "R-1b", "one_family_detached", options)
+    assert kept == {"unrelated_persons": 3, "home_occupation": False}      # R-1b reads these two, not occupants
+    r2c, _ = logic.answers_applied(facts, {}, "R-2c", "one_family_detached", options)
+    assert r2c == facts                                                      # R-2c reads all three
+    r3b, _ = logic.answers_applied(facts, {}, "R-3b", "one_family_detached", options)
+    assert "unrelated_persons" not in r3b and "occupants" not in r3b and r3b == {"home_occupation": False}
+
+
+def test_facts_that_disagree_are_not_filed_as_use_details_to_answer():
+    """Sceptic 1: both counts are filled in but disagree; the rows are the architect's contradiction to fix now, not a
+    question to answer later."""
+    v = _view("R-3a", unrelated_persons=3, unrelated_persons_with_children=2, functional_family_unit=False,
+              home_occupation=False)
+    conflict = [i for i in v["items"] if i["id"].startswith("facts.conflict")]
+    assert conflict and all(i["status"] == present.REVIEW and not i["use_detail"] for i in conflict)
+    assert all(not i["use_detail"] for i in v["items"] if i.get("rule") == "R-3a.occupancy_one_family")
+    assert "needs review" in v["summary"] or "need review" in v["summary"]
+    row = {"status": present.REVIEW, "needs": ["unrelated_persons"], "id": "x"}
+    assert logic.is_use_detail(row, {}) and not logic.is_use_detail(row, {"unrelated_persons": 2})
+    assert not logic.is_use_detail(dict(row, id="facts.conflict#1"), {})
+
+
+def test_a_comma_is_a_thousands_separator_only():
+    """A European decimal comma ('2,5' ft) must not become 25 (a false pass against 20 ft)."""
+    for bad in ("2,5", "1,2,3", "1,0", ",5", "12,34"):
+        with pytest.raises(ValueError):
+            logic.parse_answer("length", bad)
+    assert logic.parse_answer("area", "1,200") == 1200 and logic.parse_answer("area", "1,200.5") == 1200.5
+    assert logic.parse_answer("length", ".5") == 0.5
+
+
+def test_a_quick_answer_sets_all_its_fields_before_the_box_refreshes():
+    """Cold review: picking 'No stream, not in South Hill' while the stream said Yes refreshed the box after the first
+    field and lost the second. The fields' own refresh is held back while a quick answer fills, then one refresh."""
+    from rule_format.rulebook import REPO
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    box = ui[ui.index("def about_section("):ui.index("    layout = ef.DynamicLayout()\n    layout.Spacing")]
+    assert "None if filling else refresh_if_needed()" in box
+    fill = box[box.index("def quick_picked"):]
+    assert fill.index("filling.append(True)") < fill.index("field.SelectedIndex") < fill.index("filling.clear()") \
+        < fill.index("refresh_if_needed()")

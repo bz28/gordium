@@ -1744,7 +1744,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
     for i in items:                                  # the use details still to answer: their own group (never a pass)
-        i["use_detail"] = rhino_logic.is_use_detail(i)
+        i["use_detail"] = rhino_logic.is_use_detail(i, facts)
     return {"items": items, "summary": summary(items), "state": state(items),
             "header": header(facts, dict(extras, waiting_main=any(
                 PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values()),
