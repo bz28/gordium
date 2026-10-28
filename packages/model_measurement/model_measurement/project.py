@@ -18,6 +18,8 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
                "dwelling_units", "rooms_let_for_profit", "conversion", "occupants",
                "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district",
+               "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
+               "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "unsettled", "ground_assumed", "ground_fall", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
@@ -36,9 +38,15 @@ def _point(p) -> bool:
 
 def fact_conflicts(facts: dict) -> list[str]:
     """Lot facts that are each well formed but disagree with each other. Not a refusal (the check runs; the rows they
-    decide need review): the panel shows each one, so the architect can correct the count. The measuring sets every
-    fact in each aside with the same reason (measure.fact_conflicts: one list)."""
-    return [message for message, _ in measure_conflicts(facts)]
+    decide need review): the panel shows each one, so the architect can correct the count."""
+    return [message for message, _ in fact_conflict_rows(facts)]
+
+
+def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
+    """fact_conflicts, each with the facts to correct it (the panel's "Enter …" button asks those). The measuring sets
+    each of those facts aside with the same reason (measure.fact_conflicts: one list). The use is set aside too when it
+    is one of the answers, but it is changed in the start box (Edit site…), not by the Enter button."""
+    return [(why, tuple(n for n in names if n != "use")) for why, names in measure_conflicts(facts)]
 
 
 def fact_problems(facts: dict) -> list[str]:
@@ -51,13 +59,18 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("plan_north_deg must be a number (degrees the plan is turned from true north)")
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
-    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants"):
+    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants",
+              "unrelated_persons", "unrelated_persons_with_children"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
+    for k in ("home_occupation_area", "home_occupation_unit_area"):               # square feet, never rounded
+        if facts.get(k) is not None and not (_number(facts[k]) and facts[k] >= 0):
+            problems.append(f"{k} must be a number of square feet, 0 or more")
     for k in ("occupants_most_in_one_unit", "attached_units_in_building"):      # at least one, by definition
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
             problems.append(f"{k} must be a whole number, 1 or more")
-    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district"):
+    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district",
+              "owner_occupied", "functional_family_unit", "home_occupation", "accessory_dwelling_unit"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")

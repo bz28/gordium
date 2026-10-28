@@ -40,11 +40,18 @@ MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear:
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count",
           "dwelling_units": "count", "rooms_let_for_profit": "count", "conversion": "yes_no",
           "occupants": "count", "occupants_most_in_one_unit": "count",
-          "attached_units_in_building": "count", "abuts_r1_district": "yes_no"}
+          "attached_units_in_building": "count", "abuts_r1_district": "yes_no",
+          "unrelated_persons": "count", "unrelated_persons_with_children": "count", "owner_occupied": "yes_no",
+          "functional_family_unit": "yes_no", "home_occupation": "yes_no", "home_occupation_area": "sf",
+          "home_occupation_unit_area": "sf", "accessory_dwelling_unit": "yes_no"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
        "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
        "occupants": "no_occupants", "occupants_most_in_one_unit": "no_occupant_split",
-       "attached_units_in_building": "no_building_units", "abuts_r1_district": "no_abuts_r1"}
+       "attached_units_in_building": "no_building_units", "abuts_r1_district": "no_abuts_r1",
+       "unrelated_persons": "no_household", "unrelated_persons_with_children": "no_household",
+       "owner_occupied": "no_household", "functional_family_unit": "no_household",
+       "home_occupation": "no_home_occupation", "home_occupation_area": "no_home_occupation",
+       "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_household"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",
@@ -1769,18 +1776,55 @@ def pick_main(buildings: list[dict], facts: dict) -> tuple:
     return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
+# the dwelling units a use itself says (§325-3B: a one-family dwelling is a dwelling unit; a two-family dwelling holds two)
+IMPLIED_UNITS = {"one_family_detached": 1, "two_family": 2}
+
+
 def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
     """Stated facts each well formed but contradicting each other: (the reason, the facts in it). Every fact in one is
     set aside with that reason (_set_aside_conflicts), so no row reading it can comply on facts that contradict each
-    other (R-2c's three-to-six units row complied beside the "Lot facts disagree" row); the panel also shows each one
-    as a "Lot facts disagree" row with the button to re-enter them (project.fact_conflicts)."""
+    other (#38: R-1b's occupancy row complied on two unrelated-people counts that disagreed, because only the count
+    R-3 and RU read was set aside); the panel also shows each one as a "Lot facts disagree" row with the button to
+    re-enter them (project.fact_conflict_rows)."""
     out = []
     here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
     if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
-        # the use is one of the answers too (not an attached house, the counts don't clash), so it is set aside with
-        # them and the rows that read it need review
+        # the use is one of the answers too (review round 4: not an attached house, the counts don't clash), so it is
+        # set aside with them and the rows that read it need review (R-2c.use complied beside the clash)
         out.append((stop("attached_counts_disagree", here=here, building=building),
                     ("dwelling_units", "attached_units_in_building", "use")))
+    # the unrelated people counted with minor dependent children can't be fewer than without them: a mistyped pair,
+    # and which count is wrong can't be told (review round 2 set aside only the one R-3 and RU read)
+    without, with_ = facts.get("unrelated_persons"), facts.get("unrelated_persons_with_children")
+    if type(without) is int and type(with_) is int and with_ < without:
+        out.append((stop("household_counts_disagree", without=without, with_=with_),
+                    ("unrelated_persons", "unrelated_persons_with_children")))
+    # the occupants of every unit on the lot together, and the most in any one unit (R-2c notes 4-6): the most in one
+    # unit can't be more than all of them, and the units can't hold more than units x the most in one (#38 review
+    # round 1: 2 units, 10 occupants, at most 1 in a unit read as "both units lived in" and complied on 7,200 sf)
+    total, most = facts.get("occupants"), facts.get("occupants_most_in_one_unit")
+    if type(total) is int and type(most) is int:
+        stated = facts.get("dwelling_units")
+        units = stated if type(stated) is int else IMPLIED_UNITS.get(facts.get("use"))
+        # an accessory dwelling unit on the lot (or not said) is one more unit whose occupants count too (review round 2:
+        # a house of 2 and an ADU of 2 are 4 occupants, at most 2 in one): no ceiling then. No unit at all is the
+        # rules' own case (R-2c: "no dwelling unit stated"), not this one.
+        if most > total:
+            out.append((stop("occupant_split_disagree", most=most, occupants=total),
+                        ("occupants", "occupants_most_in_one_unit")))
+        elif units and facts.get("accessory_dwelling_unit") is False and total > units * most:
+            # "no ADU" is one of the answers that can't all be true (review round 3: R-1b's occupancy rule reads it and
+            # complied on it), so it is set aside too; the units only when stated (else the use's own, §325-3B)
+            said = type(stated) is int          # the units entered, or the use's own count (review round 4: say which)
+            out.append((stop("occupant_counts_disagree", occupants=total, units=units,
+                             unit_words=("dwelling unit" if units == 1 else "dwelling units") + (
+                                 "" if said else " (what this use is, §325-3B)"),
+                             most=most, held=units * most,
+                             check="the occupant counts, the dwelling units" if said else "the use, the occupant counts"),
+                        # the use's own count is an answer too (review round 4: R-1a.use complied on a one-family house
+                        # whose counts fit only a two-family one), so then the use is set aside with them
+                        ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
+                        + (("dwelling_units",) if said else ("use",))))
     return out
 
 
@@ -1790,7 +1834,11 @@ def _set_aside_conflicts(out: dict, facts: dict) -> None:
     for why, names in fact_conflicts(facts):
         for name in names:
             before = out.get(name) or {}
-            reason = why if before.get("value") is not None or not before.get("reason") else before["reason"] + "; " + why
+            # the use is changed in the start box, not by an "Enter …" button: the row that reads it says where
+            # (R-2c lists every use's rows as needs review, and the use row didn't say how to fix it)
+            pointer = stop("change_use_in_start_box")
+            why_here = why + "; " + pointer if name == "use" and pointer not in (before.get("reason") or "") else why
+            reason = why_here if before.get("value") is not None or not before.get("reason") else before["reason"] + "; " + why_here
             out[name] = _record(name, STATED[name], reason=reason)
 
 

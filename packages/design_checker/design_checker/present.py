@@ -36,7 +36,7 @@ NOT_YET_WHY = "Not in Gordium yet — coming in a later version. Check this by h
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
           ("not_checked", "Not checked"), ("not_covered", NOT_YET)]
 
-from model_measurement.project import fact_conflicts  # noqa: E402  (lot facts that disagree: shown)
+from model_measurement.project import fact_conflict_rows  # noqa: E402  (lot facts that disagree: shown)
 from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
@@ -153,8 +153,7 @@ def _compares(check: str) -> list[ast.Compare]:
     return sorted(out, key=lambda n: (n.lineno, n.col_offset))
 
 
-# The stated facts a "Lot facts disagree" row offers to re-enter (r2 round 6): the two counts that disagree.
-CONFLICT_NEEDS = ("dwelling_units", "attached_units_in_building")
+# A "Lot facts disagree" row offers to re-enter the counts that disagree (r2 round 6): project.fact_conflict_rows.
 
 
 def could_settle(rule: dict, values: dict, key: str) -> bool:
@@ -764,6 +763,39 @@ def _holding_way(check: str, values: dict) -> list | None:
     return None
 
 
+def _law_limit_way(check: str, values: dict, node):
+    """For a rule whose ways to comply are each one limit on the same measure plus conditions only (R-1's occupancy:
+    "unrelated_persons <= 1 or unrelated_persons <= 2 and owner_occupied and not accessory_dwelling_unit"), the limit
+    the law sets here: the loosest of the ways whose conditions hold as stated (item 12: an owner-occupied R-1a house
+    showed "1 required" where §325-3B allows 2). None for any other rule (a way with limits on other measures, e.g.
+    the §325-16C height bonus raising the yards, keeps the row's own numbers)."""
+    body = formula.parse(check).body
+    if node is None or not (isinstance(body, ast.BoolOp) and isinstance(body.op, ast.Or)):
+        return None
+    m, op = node.left.id, type(node.ops[0])
+    if op not in (ast.LtE, ast.Lt, ast.GtE, ast.Gt):
+        return None
+    best, best_limit = None, None
+    for alt in body.values:
+        parts = alt.values if isinstance(alt, ast.BoolOp) and isinstance(alt.op, ast.And) else [alt]
+        limits = [p for p in parts if isinstance(p, ast.Compare)]
+        others = [p for p in parts if not isinstance(p, ast.Compare)]
+        if len(limits) != 1 or any(isinstance(n, ast.Compare) for p in others for n in ast.walk(p)):
+            return None
+        c = limits[0]
+        if not (len(c.ops) == 1 and isinstance(c.left, ast.Name) and c.left.id == m and type(c.ops[0]) is op):
+            return None
+        if any(_evaluate(ast.unparse(p), values) is not True for p in others):
+            continue                                   # this way's conditions don't hold (or aren't said)
+        limit = _evaluate(ast.unparse(c.comparators[0]), values)
+        if not isinstance(limit, (int, float)) or isinstance(limit, bool):
+            continue
+        looser = best_limit is None or (limit > best_limit if op in (ast.LtE, ast.Lt) else limit < best_limit)
+        if looser:
+            best, best_limit = c, limit
+    return best
+
+
 def _worst_reading(node, measured: dict, values: dict):
     """(worst reading, required) as text when the comparison fails under one of the measurement's readings."""
     m = node.left.id
@@ -1118,6 +1150,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             if way:
                 node = next((c for c in way if c.left.id == node.left.id), node)
                 raised = [c for c in way if c.left.id != node.left.id]
+        if node is not None and not splits and not raised and check:
+            node = _law_limit_way(check, values, node) or node     # the limit the law sets here (owner-occupied: 2)
         numbers = _numbers(node, values, measured, label) if node is not None else (None, None, None, "", "")
         proposed, required, margin_t, margin = (*_display(*numbers),) if node is not None else ("—", "—", "", None)
         if name == "Use":
@@ -1706,12 +1740,12 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     for i in items:                                  # measured from an assumed main building: said on the row
         if (measured.get(i.get("measure")) or {}).get("main_assumed"):
             i["note"] = "; ".join(n for n in (i.get("note"), ASSUMED_MAIN_NOTE) if n)
-    for k, conflict in enumerate(fact_conflicts(facts)):     # facts that disagree (r2 round 5): said, not hidden
+    for k, (conflict, needs) in enumerate(fact_conflict_rows(facts)):   # facts that disagree (r2 round 5): said
         items.append({"id": f"facts.conflict#{k + 1}", "rule": None, "name": "Lot facts disagree", "group": "site",
                       "status": REVIEW, "mark": MARK[REVIEW], "proposed": "", "required": "", "margin": "", "sign": "",
                       "zoom": None, "measure": None, "objects": [], "points": None,
                       # the same "Enter …" button as a row waiting on these counts, to correct either one
-                      "hint": rhino_logic.enter_words(CONFLICT_NEEDS), "reason": conflict, "needs": list(CONFLICT_NEEDS),
+                      "hint": rhino_logic.enter_words(needs), "reason": conflict, "needs": list(needs),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     if left_out:
