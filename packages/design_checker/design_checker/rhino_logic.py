@@ -7,6 +7,7 @@ import datetime as _dt
 import json
 import math
 import queue
+import re
 import threading
 
 LAYERS = {"lot": "Site", "building": "Building"}
@@ -2085,7 +2086,9 @@ def box_rows(state, flat=None):
          "text": (FILL_BY_LOOKUP if state.get("needs_lookup") else LOT_MISSING if state.get("lot_missing") else
                   lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source")) + after
                   if has_lot else NO_LOT),
-         "actions": lot_actions, "tick": None, "help": BY_HAND_NOTE if state.get("by_hand") else None},
+         "actions": lot_actions, "tick": None,
+         "help": (BY_HAND_NOTE + (" " + IN_CITY_SAID.format(date=state["city_by_hand"])
+                                  if state.get("city_by_hand") else "")) if state.get("by_hand") else None},
         {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
          "text": FILL_BY_LOOKUP if state.get("needs_lookup") else
          ((street_name(state) if state.get("street_name") or not after else NO_STREET_YET) + after)
@@ -2944,6 +2947,7 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         facts.pop(k, None)
     set_street_lines(facts, None)                # the old lot's street lines and their names go with it
     saved_ui.update(from_sample=False, replaceable_lot=None, lookup_frame=None, ground_kind="flat", lookup_spots=[])
+    saved_ui.pop("city_by_hand", None)           # the looked-up lot replaces the one said by hand to be the City's
     guide = None
     if w.get("lot_ring"):
         lot_id = table.add_lot(w["lot_ring"], "Lot · " + (facts.get("address") or "looked up"))
@@ -3322,7 +3326,8 @@ def start_gate(state, saved_ui):
                                                        # open to draw the lot over it (sceptic 2, finding 1)
                                                        saved_ui.get("_redrawn_for"), saved_ui.get("drawn_address"))
                 if a)
-    return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand)
+    return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand,
+                city_by_hand=saved_ui.get("city_by_hand") if by_hand else None)
 
 
 BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
@@ -3338,10 +3343,23 @@ def no_guessed_district(saved, suggested):
     return suggested
 
 
-def choose_by_hand(facts, saved_ui):
-    """(facts, saved_ui) once the architect chose "Enter the site by hand": any looked-up preview set aside (its box
-    changes undone; else a found lookup kept the gate on the lookup and the button did nothing: start-flow round 3)."""
+IN_CITY_QUESTION = ("Is this lot in the City of Ithaca?\n\nGordium checks City of Ithaca lots only. An address "
+                    "that reads \"Ithaca, NY 14850\" may instead be in the Town of Ithaca, Cayuga Heights, Lansing "
+                    "or Dryden, which have their own zoning codes. The City's tax map says which.\n\n"
+                    "Yes: enter the site by hand as a City of Ithaca lot. No: nothing changes.")
+IN_CITY_SAID = "You said this lot is in the City of Ithaca ({date})."
+
+
+def choose_by_hand(facts, saved_ui, in_city):
+    """(facts, saved_ui) once the architect chose "Enter the site by hand" and answered IN_CITY_QUESTION: `in_city`
+    is the date they said Yes (kept in the file as theirs, `city_by_hand`), else nothing changes (start-flow round
+    11: "Ithaca, NY 14850" is also the Town's mail, so an address alone can't prove a City lot). Any looked-up
+    preview set aside (its box changes undone; else a found lookup kept the gate on the lookup and the button did
+    nothing: start-flow round 3)."""
+    if not in_city:
+        return facts, saved_ui
     facts, saved_ui = drop_pending(facts, saved_ui)
+    saved_ui["city_by_hand"] = str(in_city)
     look = saved_ui.get("_lookup") or {}           # "outside the City" still holds by hand (round 5): kept
     saved_ui["_lookup"] = look if look.get("status") == "outside_city" else {}
     saved_ui["_by_hand"] = True
@@ -3483,8 +3501,7 @@ def address_place(address):
     if "," not in str(address or ""):
         return _place_without_commas(address)
     tail = str(address or "").split(",", 1)[1:]
-    text = (tail[0] if tail else "").lower().replace(",", " ").replace(".", "")
-    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    text = " ".join(_address_tokens((tail[0] if tail else "").replace(",", " ")))
     text = text.replace("united states of america", "").replace("united states", "")
     words = [w for w in text.split() if w not in ("ny", "new", "york", "usa", "us")]
     words = [w[:5] if w[:5].isdigit() else w for w in words]
@@ -3500,6 +3517,30 @@ STREET_ENDINGS = ((set(STREET_WORDS) | set(STREET_WORDS.values())) - DIRECTIONS 
                   | {"way", "park", "walk", "row", "alley", "aly", "path", "trail", "trl", "ext", "extension", "sq",
                      "square", "plaza", "loop", "run", "crossing", "pike", "tpke", "turnpike", "rte", "route"})
 STATE_WORDS = ("ny", "new", "york", "usa", "us")
+UNIT_WORDS = {"apt", "apartment", "unit", "#", "ste", "suite", "fl", "floor", "rm", "room"}
+# Places around the City that share its "Ithaca" mail and ZIPs, read as a town even after a street with no known
+# ending ("1 Snyder Hill Dryden": round 11); "town" and "village" too ("Town of Ithaca"). By hand, the architect also
+# says the lot is in the City (IN_CITY_QUESTION): an address alone can't prove it.
+NEARBY_PLACES = {"town", "village", "lansing", "dryden", "danby", "enfield", "newfield", "caroline", "ulysses",
+                 "groton", "trumansburg", "freeville", "varna", "etna", "slaterville", "brooktondale", "cayuga"}
+
+
+def _address_tokens(text):
+    """An address's words for reading its town: lower case, "." dropped ("N.Y."), "#" apart, "NY14850" as
+    "ny 14850", the City's own name as "ithaca", and a unit and its number dropped ("Apt 2", "Unit B": round 11,
+    read as a town)."""
+    text = str(text or "").lower().replace(".", "").replace("#", " # ")
+    text = re.sub(r"\bny(\d{5})", r"ny \1", text)
+    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    words, out = text.split(), []
+    i = 0
+    while i < len(words):
+        if words[i] in UNIT_WORDS:
+            i += 2
+            continue
+        out.append(words[i])
+        i += 1
+    return out
 
 
 def _place_without_commas(address):
@@ -3507,10 +3548,8 @@ def _place_without_commas(address):
     City's). The town is every word after the street's last ending (STREET_ENDINGS), state and the City's own name
     and ZIP codes aside ("12 Main St Town of Ithaca NY" names "town of": round 10, the Town is not the City; "12 Main
     St Lansing" names "lansing"). A street with no known ending: the word before a state or ZIP, if one was typed;
-    else None (no town can be told from the street)."""
-    text = " ".join(str(address or "").lower().replace(".", " ").split())
-    text = text.replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
-    words = text.split()
+    else a place nearby named anywhere after the street's first word (NEARBY_PLACES); else None."""
+    words = _address_tokens(address)
     ends = [i for i, w in enumerate(words) if i >= 1 and w in STREET_ENDINGS]
     if ends:
         tail = words[ends[-1] + 1:]
@@ -3521,6 +3560,8 @@ def _place_without_commas(address):
             cut -= 1
         if cut < len(words) and cut > 2:
             tail = words[cut - 1:]
+        elif cut == len(words):              # nothing typed after the street but, perhaps, a place nearby
+            tail = [w for w in words[2:] if w in NEARBY_PLACES]
     tail = [w[:5] if w[:5].isdigit() else w for w in tail if w not in STATE_WORDS]
     tail = [w for w in tail if not (w.isdigit() and len(w) < 5)     # a route's number ("Rte 13"), never a town
             and w not in ("n", "s", "e", "w", "ne", "nw", "se", "sw")]  # nor a street's "N" ("Aurora St N")

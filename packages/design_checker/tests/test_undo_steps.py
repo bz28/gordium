@@ -223,6 +223,8 @@ def test_the_boxs_own_drawing_is_in_its_step_from_the_first_line():
     assert "_draw_lot(doc, session.table._changing)" in pick and "session.table._changing)" in pick.split(
         "_place_spots(", 1)[1]
     done = SRC[SRC.index("def _lookup_done("):].split("\ndef ", 1)[0]
+    done += SRC[SRC.index("def _show_answer("):].split("\ndef ", 1)[0]    # (its answer shown: the start flow)
+    assert "_show_answer(doc, answer, facts, saved_ui)" in done
     # (#26: the lookup only previews, the model changed at Draw, inside the box's step; never a table of its own)
     assert ("apply_lookup(session.table," in done or "preview_lookup(" in done) and "RhinoTable(doc)" not in done
 

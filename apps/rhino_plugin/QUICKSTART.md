@@ -233,7 +233,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    - On an empty file the start box opens empty and **Draw** stays off until an address is looked up. To try
      Gordium, look up 106 Ithaca Rd: the State tax map's lot (7,033 sf, its front curving along Ithaca Road),
      placed with the street along the bottom of Top view, the lot behind it. A lot the maps don't know:
-     **Enter the site by hand…** (you draw the lot and pick the district and street side; no neighbourhood).
+     **Enter the site by hand…** (you say the lot is in the City of Ithaca, draw the lot and pick the district and
+     street side; no neighbourhood).
    - To use your own lot instead, first draw it as one closed polyline on a layer named `Site`, then run
      `GordiumStart`.
 3. **The start box** opens (filled in from your lot, if you drew one). Read it top to bottom:

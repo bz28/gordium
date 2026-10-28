@@ -1768,10 +1768,12 @@ def _box_pick(doc, what, facts, saved_ui, session):
 
 
 def _one_pick(doc, what, facts, saved_ui, session):
-    if what == "by_hand":                      # the site by hand (an empty file): the box shows its own rows
-        _lookup_stop()                         # a lookup still running is never used after this
-        facts, saved_ui = logic.choose_by_hand(facts, saved_ui)
-        STATE.pop("lookup_guide", None)
+    if what == "by_hand":                      # the site by hand (an empty file): the box shows its own rows, once
+        in_city = _ask_in_city()               # the architect says the lot is the City's (an address can't prove it)
+        if in_city:
+            _lookup_stop()                     # a lookup still running is never used after this
+            STATE.pop("lookup_guide", None)
+        facts, saved_ui = logic.choose_by_hand(facts, saved_ui, in_city)
     elif what == "lookup":
         saved_ui = _lookup_start(facts, saved_ui)
     elif what == "lookup_done":
@@ -2307,6 +2309,13 @@ def _count(prompt):
     got = gi.Get()
     _go_on(got)
     return gi.Number() if got == Rhino.Input.GetResult.Number else None
+
+
+def _ask_in_city():
+    """Today's date when the architect says Yes to logic.IN_CITY_QUESTION, else None (No, or the dialog closed)."""
+    got = ef.MessageBox.Show(Rhino.UI.RhinoEtoApp.MainWindow, logic.IN_CITY_QUESTION, "Gordium",
+                             ef.MessageBoxButtons.YesNo, ef.MessageBoxType.Question, ef.MessageBoxDefaultButton.No)
+    return logic.city_day() if got == ef.DialogResult.Yes else None
 
 
 def _ask_yes_no_or_skip(prompt):
