@@ -1,0 +1,294 @@
+{
+ "claims": {
+  "the start box has no Ground row (flat ground assumed)": {
+   "ok": true,
+   "detail": [
+    "address",
+    "zone",
+    "use",
+    "lot",
+    "street"
+   ]
+  },
+  "while the box is open, the panel's controls are off (when the panel is already there)": {
+   "ok": true,
+   "detail": {
+    "keys": [
+     "address",
+     "zone",
+     "use",
+     "lot",
+     "street"
+    ],
+    "greyed": null,
+    "box_open": true
+   }
+  },
+  "the lookup's lot: the tax map, with its turn from north": {
+   "ok": true,
+   "detail": {
+    "address": "106 Ithaca Rd, Ithaca, NY 14850",
+    "zone": "R-1b",
+    "lot_surveyed": false,
+    "plan_north_deg": 306.3799,
+    "ground_assumed": "flat",
+    "grade_elevation": 0.0,
+    "corner_lot": false
+   }
+  },
+  "side yards by true compass, as the lookup places the lot": {
+   "ok": true,
+   "detail": [
+    "Use",
+    "Lot area",
+    "Lot width",
+    "Stories",
+    "Building height",
+    "Lot coverage",
+    "Front yard",
+    "Side yard, Northeast",
+    "Side yard, Southwest",
+    "Rear yard",
+    "Parking \u00b7 needs input",
+    "Overlays \u00b7 not in this release",
+    "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+    "\u00a7325-18 Projections into yards (porches, decks, eaves)",
+    "\u00a7325-19C Corner lots",
+    "\u00a7325-25 Accessory structures (garages, sheds)",
+    "\u00a7325-28 Accessory dwelling units"
+   ]
+  },
+  "the panel is Rhino's docked panel, shown": {
+   "ok": true,
+   "detail": {
+    "docked_host": true,
+    "placed": "floating",
+    "visible": true
+   }
+  },
+  "flat ground said in the header": {
+   "ok": true,
+   "detail": "Ground: assumed flat (elevation 0'-0\")"
+  },
+  "every Delta in words, never kinder than its row": {
+   "ok": true,
+   "detail": {
+    "bad": [],
+    "rows": [
+     [
+      "Lot area",
+      "complies",
+      "at least 357 sf to spare"
+     ],
+     [
+      "Lot width",
+      "complies",
+      "at least 21'-10\" to spare"
+     ],
+     [
+      "Stories",
+      "complies",
+      "at limit"
+     ],
+     [
+      "Building height",
+      "complies",
+      "at limit"
+     ],
+     [
+      "Lot coverage",
+      "complies",
+      "at least 3.9% to spare"
+     ],
+     [
+      "Front yard",
+      "complies",
+      "at least 0'-0 3/4\" to spare"
+     ],
+     [
+      "Side yard, Northeast",
+      "complies",
+      "at least 15'-4 1/4\" to spare"
+     ],
+     [
+      "Side yard, Southwest",
+      "complies",
+      "at least 0'-0 5/8\" to spare"
+     ],
+     [
+      "Rear yard",
+      "needs_review",
+      "up to 0'-11 1/4\" short"
+     ]
+    ]
+   }
+  }
+ },
+ "box": {
+  "keys": [
+   "address",
+   "zone",
+   "use",
+   "lot",
+   "street"
+  ],
+  "greyed": null,
+  "box_open": true
+ },
+ "facts": {
+  "address": "106 Ithaca Rd, Ithaca, NY 14850",
+  "zone": "R-1b",
+  "lot_surveyed": false,
+  "plan_north_deg": 306.3799,
+  "ground_assumed": "flat",
+  "grade_elevation": 0.0,
+  "corner_lot": false
+ },
+ "items": [
+  [
+   "Use",
+   "complies",
+   "One-family dwelling, detached",
+   "",
+   "none"
+  ],
+  [
+   "Lot area",
+   "complies",
+   "7,033 sf",
+   "at least 357 sf to spare",
+   "none"
+  ],
+  [
+   "Lot width",
+   "complies",
+   "75'-10\"",
+   "at least 21'-10\" to spare",
+   "none"
+  ],
+  [
+   "Stories",
+   "complies",
+   "3",
+   "at limit",
+   "none"
+  ],
+  [
+   "Building height",
+   "complies",
+   "35'-0\"",
+   "at limit",
+   "none"
+  ],
+  [
+   "Lot coverage",
+   "complies",
+   "19.1%",
+   "at least 3.9% to spare",
+   "none"
+  ],
+  [
+   "Front yard",
+   "complies",
+   "27'-0 3/4\"",
+   "at least 0'-0 3/4\" to spare",
+   "none"
+  ],
+  [
+   "Side yard, Northeast",
+   "complies",
+   "27'-4 1/4\"",
+   "at least 15'-4 1/4\" to spare",
+   "none"
+  ],
+  [
+   "Side yard, Southwest",
+   "complies",
+   "12'-0 5/8\"",
+   "at least 0'-0 5/8\" to spare",
+   "none"
+  ],
+  [
+   "Rear yard",
+   "needs_review",
+   "27'-5 3/4\" to 27'-6 1/8\"",
+   "up to 0'-11 1/4\" short",
+   "amber"
+  ],
+  [
+   "Parking \u00b7 needs input",
+   "not_checked",
+   "",
+   null,
+   null
+  ],
+  [
+   "Overlays \u00b7 not in this release",
+   "not_checked",
+   "",
+   null,
+   null
+  ],
+  [
+   "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+   "not_checked",
+   "",
+   null,
+   null
+  ],
+  [
+   "\u00a7325-18 Projections into yards (porches, decks, eaves)",
+   "not_checked",
+   "",
+   null,
+   null
+  ],
+  [
+   "\u00a7325-19C Corner lots",
+   "not_checked",
+   "",
+   null,
+   null
+  ],
+  [
+   "\u00a7325-25 Accessory structures (garages, sheds)",
+   "not_checked",
+   "",
+   null,
+   null
+  ],
+  [
+   "\u00a7325-28 Accessory dwelling units",
+   "not_checked",
+   "",
+   null,
+   null
+  ]
+ ],
+ "panel": {
+  "docked_host": true,
+  "placed": "floating",
+  "visible": true
+ },
+ "header": {
+  "place": "106 Ithaca Rd, Ithaca, NY 14850 \u00b7 R-1b \u00b7 One-family dwelling, detached",
+  "code": "Ch. 325 as amended through Ord. No. 2026-02 (May 6, 2026; PUDs only) \u00b7 District Regulations Chart, April 2026",
+  "draft": "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+  "lot": "Lot lines: tax map, approximate (\u00b12'-0\")",
+  "grade": "Ground: assumed flat (elevation 0'-0\")",
+  "actions": [
+   "Pick survey lot lines\u2026"
+  ],
+  "sources": [
+   "Address: 106 Ithaca Rd, Ithaca, NY 14850 \u00b7 suggested by Gordium \u00b7 NYS Geocoder \u00b7 confirmed by you, 2026-10-21",
+   "Zoning district: R-1b \u00b7 suggested by Gordium \u00b7 City of Ithaca zoning map, used live \u00b7 confirmed by you, 2026-10-21",
+   "Use: One-family dwelling, detached \u00b7 suggested by Gordium \u00b7 confirmed by you, 2026-10-21",
+   "Lot: 7,033 sf \u00b7 the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public \u00b7 confirmed by you, 2026-10-21",
+   "Street side: the highlighted line \u00b7 suggested by Gordium \u00b7 City of Ithaca roads, used live \u00b7 confirmed by you, 2026-10-21",
+   "Corner lot: no, one street \u00b7 suggested by Gordium \u00b7 City of Ithaca roads, used live \u00b7 confirmed by you, 2026-10-21",
+   "Starting house: as first drawn, it keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey for the full area. \u00b7 suggested by Gordium \u00b7 not confirmed",
+   "Ground: assumed flat \u00b7 suggested by Gordium \u00b7 USGS 3DEP elevation \u00b7 confirmed by you, 2026-10-21"
+  ]
+ },
+ "ok": true
+}

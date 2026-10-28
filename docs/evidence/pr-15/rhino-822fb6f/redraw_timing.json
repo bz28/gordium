@@ -1,0 +1,88 @@
+{
+ "head": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_822fb6f",
+ "labels_off": {
+  "top_zoom": {
+   "frames": 40,
+   "median_ms": 8.4,
+   "max_ms": 20.0,
+   "mean_ms": 9.4
+  },
+  "perspective_orbit": {
+   "frames": 40,
+   "median_ms": 8.6,
+   "max_ms": 14.7,
+   "mean_ms": 9.5
+  }
+ },
+ "labels_on": {
+  "top_zoom": {
+   "frames": 40,
+   "median_ms": 8.5,
+   "max_ms": 34.1,
+   "mean_ms": 9.8
+  },
+  "perspective_orbit": {
+   "frames": 40,
+   "median_ms": 8.7,
+   "max_ms": 12.1,
+   "mean_ms": 9.2
+  }
+ },
+ "stops": [
+  {
+   "ticks": 8,
+   "slowest_tick_ms": 208.06,
+   "total_ms": 396.1,
+   "settled": true
+  },
+  {
+   "ticks": 8,
+   "slowest_tick_ms": 128.96,
+   "total_ms": 414.6,
+   "settled": true
+  },
+  {
+   "ticks": 7,
+   "slowest_tick_ms": 257.35,
+   "total_ms": 1012.2,
+   "settled": true
+  },
+  {
+   "ticks": 9,
+   "slowest_tick_ms": 308.66,
+   "total_ms": 1291.4,
+   "settled": true
+  },
+  {
+   "ticks": 7,
+   "slowest_tick_ms": 260.52,
+   "total_ms": 1017.2,
+   "settled": true
+  },
+  {
+   "ticks": 8,
+   "slowest_tick_ms": 130.08,
+   "total_ms": 413.2,
+   "settled": true
+  },
+  {
+   "ticks": 8,
+   "slowest_tick_ms": 209.04,
+   "total_ms": 400.6,
+   "settled": true
+  },
+  {
+   "ticks": 7,
+   "slowest_tick_ms": 44.31,
+   "total_ms": 208.2,
+   "settled": true
+  }
+ ],
+ "slowest_tick_ms": 308.66,
+ "label_step_s": 0.012,
+ "view_px": [
+  657,
+  668
+ ],
+ "done": true
+}

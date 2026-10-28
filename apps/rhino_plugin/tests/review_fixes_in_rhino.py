@@ -30,6 +30,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close, leftovers  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_review") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -88,7 +89,7 @@ try:
         g = fresh_module()
         doc = TestDocs("review").open("Large Objects - Feet")
         g.STATE["on_confirm"] = lambda *a: None
-        g.gordium_check()
+        look_up_106(g, g.gordium_check)
         for _ in range(20):
             Rhino.RhinoApp.Wait()
             time.sleep(0.1)

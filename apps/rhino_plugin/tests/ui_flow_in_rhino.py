@@ -22,6 +22,7 @@ import scriptcontext as sc
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 import System
 
 S = os.path.join(tempfile.gettempdir(), "gordium_ui_flow") + "/"
@@ -117,7 +118,7 @@ try:
                       "frames": [capture(doc_, "01_box", box)], "box": shown["state"]})
 
     g.STATE["on_confirm"] = on_confirm
-    g.gordium_check()                                   # an empty model: the start flow
+    look_up_106(g, g.gordium_check)                                   # an empty model: the start flow
     lot_box = shown["box"]
     lot_box.Union(rg.Point3d(lot_box.Center.X, lot_box.Center.Y, 40 / g._scale(doc)))
     record(g, doc, "02_building", "OK: the site, the envelope and the largest legal building", lot_box, 0)

@@ -1,0 +1,121 @@
+{
+ "step": "button",
+ "claims": {
+  "2 the button comes right after the reason": {
+   "ok": true,
+   "detail": {
+    "reason": 1,
+    "button": 3,
+    "between": []
+   }
+  },
+  "2 its words aren't repeated as text": {
+   "ok": true,
+   "detail": [
+    [
+     "Label",
+     "\u2013 Parking \u00b7 needs input \u00b7 Not checked"
+    ],
+    [
+     "Label",
+     "Needs bedrooms and parking spaces, which the model doesn't show"
+    ],
+    [
+     "StackLayout",
+     null
+    ],
+    [
+     "Button",
+     "Enter bedrooms and parking spaces\u2026"
+    ],
+    [
+     "Label",
+     "\u201cFirst three bed or sleeping rooms per dwelling 1 space per dwelling unit\u201d"
+    ],
+    [
+     "Label",
+     "City of Ithaca Zoning Charts (April 2026), p.14, lines 9\u201310"
+    ],
+    [
+     "Label",
+     "\u201c4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit\u201d"
+    ],
+    [
+     "Label",
+     "City of Ithaca Zoning Charts (April 2026), p.14, line 12"
+    ],
+    [
+     "Label",
+     "\u201cEach additional bed or sleeping room + 1 space per room\u201d"
+    ],
+    [
+     "Label",
+     "City of Ithaca Zoning Charts (April 2026), p.14, line 13"
+    ]
+   ]
+  },
+  "2 the button is on screen without scrolling": {
+   "ok": true,
+   "detail": {
+    "scroll_top": 514.0,
+    "scroll_height": 160,
+    "button_top": 546.0,
+    "button_height": 20
+   }
+  }
+ },
+ "detail": [
+  [
+   "Label",
+   "\u2013 Parking \u00b7 needs input \u00b7 Not checked"
+  ],
+  [
+   "Label",
+   "Needs bedrooms and parking spaces, which the model doesn't show"
+  ],
+  [
+   "StackLayout",
+   null
+  ],
+  [
+   "Button",
+   "Enter bedrooms and parking spaces\u2026"
+  ],
+  [
+   "Label",
+   "\u201cFirst three bed or sleeping rooms per dwelling 1 space per dwelling unit\u201d"
+  ],
+  [
+   "Label",
+   "City of Ithaca Zoning Charts (April 2026), p.14, lines 9\u201310"
+  ],
+  [
+   "Label",
+   "\u201c4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit\u201d"
+  ],
+  [
+   "Label",
+   "City of Ithaca Zoning Charts (April 2026), p.14, line 12"
+  ],
+  [
+   "Label",
+   "\u201cEach additional bed or sleeping room + 1 space per room\u201d"
+  ],
+  [
+   "Label",
+   "City of Ithaca Zoning Charts (April 2026), p.14, line 13"
+  ]
+ ],
+ "row": {
+  "name": "Parking \u00b7 needs input",
+  "hint": "Enter bedrooms and parking spaces",
+  "button": "Enter bedrooms and parking spaces\u2026"
+ },
+ "screen": {
+  "scroll_top": 514.0,
+  "scroll_height": 160,
+  "button_top": 546.0,
+  "button_height": 20
+ },
+ "ok": true
+}
