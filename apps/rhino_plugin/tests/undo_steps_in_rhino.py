@@ -7,7 +7,7 @@ GordiumStart's flow on the sample (106 Ithaca Rd) in a fresh copy of the feet te
 Building layer (so there is a main building to pick) and a box on Default (something to add to the check). Then, for
 each panel action that changes the file, outside any command (as the panel's buttons run):
   a. the architect's own edit first: one curve drawn with Rhino's _Line command (its own undo record, as in Rhino);
-  b. the action, through the panel's own gate (g._actions()), its prompts answered by stand-ins;
+  b. the action, through the panel's own gate (g._actions()), its pick and the row's dialog answered by stand-ins;
   c. claim "<action>: one step": exactly one undo record ended during the action, and the file changed (its name,
      logic.UNDO_WORDS[action], is what Edit > Undo shows: read by eye, RhinoCommon can't read a record's name back);
   d. one Rhino _Undo;
@@ -22,7 +22,10 @@ edit on: the setting saved, one step).
 Then, observed only (out.json "two_in_a_row", not a claim): two panel changes in a row with no command between and
 one _Undo, which records it takes back. Last, the control: an edit and an action deliberately in one record; its
 claim passes only if one _Undo takes the edit back too (so the claims above can tell a merged step from a good one).
-Writes <temp>/gordium_undo_steps/out.json ("done": true at the end); the command line says which claims fail."""
+Writes <temp>/gordium_undo_steps/out.json ("done": true at the end); the command line says which claims fail.
+Run from Rhino's own Run Python Script (or by a person), not through rhinocode: a script rhinocode runs is itself
+inside a command, and Rhino then ignores its _Undo (2026-10-28: every "undone" list empty, the "undone", "only its
+own record" and "checked again" claims all failing, while every "one step" and "nothing else" claim passed)."""
 import json
 import os
 import sys
@@ -144,8 +147,7 @@ def main():
     try:
         claim("outside any command", not Rhino.Commands.Command.InCommand())
         g._pick = lambda doc, prompt, objs, kind, *a: str(objs[-1].Id)
-        g._count = lambda prompt: 2
-        g._ask_yes_no_or_skip = lambda prompt: True
+        g.ui.row_dialog = lambda title, fields, check: {f["key"]: "2" for f in fields}   # the row's dialog: 2, OK
         doc = TestDocs("undo_steps").__enter__().open("Large Objects - Feet")
         look_up_106(g, g.gordium_check)                                       # the sample, as GordiumStart draws it
         building = doc.Layers.FindByFullPath("Building", -1)
