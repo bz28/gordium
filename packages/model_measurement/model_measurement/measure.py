@@ -39,10 +39,12 @@ FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per fo
 MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count",
           "dwelling_units": "count", "rooms_let_for_profit": "count", "conversion": "yes_no",
-          "abuts_r1_district": "yes_no"}
+          "occupants": "count", "occupants_most_in_one_unit": "count",
+          "attached_units_in_building": "count", "abuts_r1_district": "yes_no"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
        "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
-       "abuts_r1_district": "no_abuts_r1"}
+       "occupants": "no_occupants", "occupants_most_in_one_unit": "no_occupant_split",
+       "attached_units_in_building": "no_building_units", "abuts_r1_district": "no_abuts_r1"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",
@@ -1718,6 +1720,7 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
             for name, unit in STATED.items():           # what the architect stated still stands
                 if facts.get(name) is not None:
                     out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")
+            _set_aside_conflicts(out, facts)
             if facts.get("zone"):
                 out["district"] = _record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
     finally:
@@ -1766,12 +1769,38 @@ def pick_main(buildings: list[dict], facts: dict) -> tuple:
     return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
+def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
+    """Stated facts each well formed but contradicting each other: (the reason, the facts in it). Every fact in one is
+    set aside with that reason (_set_aside_conflicts), so no row reading it can comply on facts that contradict each
+    other (R-2c's three-to-six units row complied beside the "Lot facts disagree" row); the panel also shows each one
+    as a "Lot facts disagree" row with the button to re-enter them (project.fact_conflicts)."""
+    out = []
+    here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
+    if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
+        # the use is one of the answers too (not an attached house, the counts don't clash), so it is set aside with
+        # them and the rows that read it need review
+        out.append((stop("attached_counts_disagree", here=here, building=building),
+                    ("dwelling_units", "attached_units_in_building", "use")))
+    return out
+
+
+def _set_aside_conflicts(out: dict, facts: dict) -> None:
+    """Every stated fact in a contradiction (fact_conflicts) is set aside with the contradiction as its reason: the
+    rules that read it need review, saying so, and never comply on it."""
+    for why, names in fact_conflicts(facts):
+        for name in names:
+            before = out.get(name) or {}
+            reason = why if before.get("value") is not None or not before.get("reason") else before["reason"] + "; " + why
+            out[name] = _record(name, STATED[name], reason=reason)
+
+
 def _measure(site: dict, facts: dict) -> dict[str, dict]:
     out = {}
     for name, unit in STATED.items():
         v = facts.get(name)
         out[name] = (_record(name, unit, v, "stated by the architect (not measured from the model)")
                      if v is not None else _record(name, unit, reason=stop(ASK[name])))
+    _set_aside_conflicts(out, facts)
     # the lot's zoning district is the zone the architect stated (the facts' "zone")
     out["district"] = (_record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
                        if facts.get("zone") else _record("district", "text", reason=stop("no_district")))
