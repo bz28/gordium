@@ -22,7 +22,9 @@ import yaml
 
 from . import geometry as g
 from .http import Offline, ServiceError
-from .sources import ENDPOINTS, Fetcher, normalize_street
+from .sources import ENDPOINTS, NAMES, Fetcher, district, normalize_street
+
+OVERLAYS = NAMES["districts"]["overlays"]      # zoning-map codes that are overlays, not districts (exact)
 
 AMENDMENTS = yaml.safe_load((Path(__file__).parent / "amendments.yaml").read_text(encoding="utf-8"))
 CITY_SWIS = "500700"                     # the City of Ithaca (the Town of Ithaca has its own code and SWIS)
@@ -219,9 +221,9 @@ def _lookup(address: str, f: Fetcher, today: str, result: dict, say=lambda text:
     _ground(f, ring, origin, today, facts, lot)
     # ---- 5. zoning suggestion and overlays (live, never stored) --------------------------------------------
     say(STEPS["zoning"])
-    _zoning(f, ring, c["street"], facts, asks, today, city_parcel, lot)
+    map_overlays = _zoning(f, ring, c["street"], facts, asks, today, city_parcel, lot)
     say(STEPS["overlays"])
-    _overlays(f, ring, city_parcel, ENDPOINTS["city_zoning"], today, facts, lot)
+    _overlays(f, ring, city_parcel, ENDPOINTS["city_zoning"], today, facts, lot, map_overlays or ())
 
 
 def _distinct(cands: list[dict]) -> list[dict]:
@@ -343,8 +345,9 @@ def _ground(f: Fetcher, ring, origin, today: str, facts: dict, lot: dict | None 
 
 
 def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, today: str, city_parcel,
-            lot: dict | None = None) -> None:
-    """The zone suggestion (the overlays are looked for after it, by _lookup, whatever this finds)."""
+            lot: dict | None = None) -> list[str]:
+    """The zone suggestion. Returns the overlays the zoning map draws on the lot (or that it couldn't check), which
+    _lookup hands to _overlays after it, whatever this finds."""
     src = ENDPOINTS["city_zoning"]
     try:
         polys = f.zoning_near(ring)
@@ -352,25 +355,45 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     except (Offline, ServiceError):
         facts["zone"] = fact(None, src["name"], src["url"], today, "needs_review",
                              "Couldn't reach the City's zoning map: choose the district.", key="city_zoning", lot=lot)
-        return
+        return ["Overlays on the City's zoning map (" + "; ".join(_overlay_name(c) for c in OVERLAYS)
+                + "): couldn't check"]
     samples = g.grid_inside(ring)
+    # every polygon under each point counts, never only the first: the map draws overlays (SHOD...) on top of the
+    # base districts, and the service returns them in no set order (review of lookup-names, round 1)
     counts: dict[str, int] = {}
+    over: dict[str, int] = {}
+    on_map = 0
     for p in samples:
-        z = next((z["zone"] for z in polys if g.inside_any(p, z["rings"])), None)
-        if z:
+        here = {z["zone"] for z in polys if g.inside_any(p, z["rings"])}
+        base = {district(c)[0] for c in here if c not in OVERLAYS}
+        for c in here & set(OVERLAYS):
+            over[c] = over.get(c, 0) + 1
+        for z in base:
             counts[z] = counts.get(z, 0) + 1
+        on_map += bool(base)
     shares = {z: n / len(samples) for z, n in counts.items()} if samples else {}
     zones = sorted((z for z, s in shares.items() if s >= ZONE_SHARE_MIN), key=lambda z: -shares[z])
+    map_overlays = [f"{_overlay_name(c)} on the City's zoning map"
+                    for c in sorted(over) if samples and over[c] / len(samples) >= ZONE_SHARE_MIN]
     when = edited.isoformat() if edited else "unknown"
     source = f"{src['name']}, last edited {when}: a suggestion to confirm"
-    covered = sum(shares.values())
+    covered = on_map / len(samples) if samples else 0.0
     if not zones:
         facts["zone"] = fact(None, source, src["url"], today, "needs_review",
                              "This lot isn't on the City's zoning map: choose the district.", key="city_zoning", lot=lot)
-        return
+        return map_overlays
     z = facts["zone"] = fact(zones[0] if len(zones) == 1 else zones, source, src["url"], today, key="city_zoning", lot=lot)
     if covered < 0.9:
         escalate(z, "needs_review", f"Only {covered:.0%} of this lot is on the City's zoning map: check the district.")
+    codes = {c for c in (p["zone"] for p in polys) if district(c)[0] in zones}   # the map's own codes for them
+    renamed = sorted(c for c in codes if district(c)[1] == "alias")
+    if renamed:
+        z["note"] = " ".join(f"The City's map writes {c}, used as {district(c)[0]}: "
+                             + " ".join(NAMES["districts"]["aliases"][c]["why"].split()) for c in renamed)
+    unknown = [c for c in zones if district(c)[1] == "unknown"]
+    if unknown:
+        escalate(z, "needs_review", f"The City's zoning map gives {' and '.join(unknown)}, which isn't one of the "
+                                    "residential districts Gordium knows by name: choose the district.")
     if len(zones) > 1:
         asks.append(f"This lot is in {' and '.join(zones)}: pick the zone that applies.")
         escalate(z, "ask", asks[-1])
@@ -391,7 +414,14 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
         else:
             notes.append(line + "; this lot is outside the area it rezoned.")
     if notes:
-        z["note"] = " ".join(notes)
+        z["note"] = " ".join(([z["note"]] if z.get("note") else []) + notes)
+    return map_overlays
+
+
+def _overlay_name(code: str) -> str:
+    """An overlay as the architect reads it: its name from names.yaml, then the map's code ('Adult Use Overlay
+    Zone (Adult Us)')."""
+    return f"{OVERLAYS[code].split(':')[0].strip()} ({code})"
 
 
 def _date(v) -> dt.date | None:
@@ -411,10 +441,12 @@ def _amendment_reaches(a: dict, ring, streets: set) -> str:
     return f"rezoned {', '.join(hit)}" if hit else ""
 
 
-def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict, lot: dict | None = None) -> None:
-    """Historic districts, gorge protection, secondary zones and landmark flags on the parcel. Not checked in
-    this release, so any found (or any that couldn't be looked for) needs review."""
-    found: list[str] = []
+def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict, lot: dict | None = None,
+              map_overlays=()) -> None:
+    """Historic districts, gorge protection, secondary zones and landmark flags on the parcel, and the overlays the
+    zoning map draws on it (names.yaml). Not checked in this release, so any found (or any that couldn't be looked
+    for) needs review."""
+    found: list[str] = list(map_overlays)
     for key, field, label in (("historic_districts", "DISTRICT", "Historic district"),
                               ("gorge_zones", "ZONE", "Gorge protection zone")):
         try:
@@ -422,11 +454,13 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict,
         except (Offline, ServiceError):
             found.append(f"{label}: couldn't check")
     if not city_parcel:
-        found.append("Historic property, landmarks review and secondary zones on the parcel: couldn't check "
+        found.append("Historic property, landmarks review, secondary and overlay zones on the parcel: couldn't check "
                      "(the City's parcel layer didn't answer for this lot)")
     else:
         if city_parcel.get("secondary_zones"):
             found.append(f"Secondary zones on the parcel: {city_parcel['secondary_zones']}")
+        if city_parcel.get("overlay_zones"):   # the parcel's own record of an overlay (SHOD...), beside the map's
+            found.append(f"Overlay zones on the parcel: {city_parcel['overlay_zones']}")
         if str(city_parcel.get("historic_property") or "").upper() == "YES":
             found.append("Historic property")
         if str(city_parcel.get("landmarks_review") or "").upper() == "YES":
@@ -434,7 +468,7 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict,
     facts["overlays"] = fact(found, "City of Ithaca overlay maps (live)", src["url"], today,
                              "needs_review" if found else "suggested",
                              "Overlays aren't checked in this release: check these by hand." if found else "",
-                             key=("historic_districts", "gorge_zones", "city_parcels"), lot=lot)
+                             key=("historic_districts", "gorge_zones", "city_parcels", "city_zoning"), lot=lot)
 
 
 USED_LIVE = "(used live, not stored)"
