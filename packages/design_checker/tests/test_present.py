@@ -582,10 +582,12 @@ def test_the_colour_comes_from_the_result_only():
         == ["red", "amber", None, None, None]
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     scene = src.split("def draw_scene(", 1)[1].split("\ndef ", 1)[0]
-    coloured = src.split("def _draw_coloured(", 1)[1].split("\ndef ", 1)[0]      # each part drawn by it, red last
+    # each part drawn in draw_scene's one loop, the red after the amber (merged with depth-lines, whose see-through
+    # fills are pinned in the scene itself: test_depth)
+    coloured = scene[scene.index("for g, status, _ in rest + red:"):]
     assert "name = logic.highlight(status)" in coloured and "colour = ui.HIGHLIGHT[name]" in coloured
     # drawn after the translucent envelope, so its blue never tints them (seen muddy in Rhino, 2026-10-21)
-    assert scene.index("o.envelope, Rhino.Display.DisplayMaterial") < scene.index("_draw_coloured(")
+    assert scene.index("o.envelope, Rhino.Display.DisplayMaterial") < scene.index("for g, status, _ in rest + red:")
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "FromArgb(215, 38, 61)" in ui and "FromArgb(242, 169, 0)" in ui      # #D7263D, #F2A900
 
