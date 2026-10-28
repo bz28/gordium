@@ -136,13 +136,19 @@ def _view(zone, use, lot_w=130, lot_d=240, **facts):
     ("R-3aa", "two_family", "R-3aa.footprint_block_front"),
     ("R-3aa", "multiple_family", "R-3aa.footprint_block_front"),
     ("RU", "two_family", "RU.green_space"),
-    ("RU", "two_family", "RU.primary_structures"),
 ])
 def test_what_gordium_cant_measure_is_a_review_row_on_every_design(zone, use, rule, facts):
     """Chart notes no measure covers (R-3aa note 2; RU p.3 note 13, p.2 note 3) are shown on the panel as needs
     review, with the note to check by hand, whatever the use and whatever is stated: never a pass, never left off."""
     items = _view(zone, use, **facts)
     assert items[rule]["status"] == present.REVIEW, items[rule]
+
+
+@pytest.mark.parametrize("facts", [{}, {"conversion": False}, {"conversion": True}])
+def test_rus_primary_structures_are_counted_one_house_complies(facts):
+    """RU p.2 note 3 (queue item 15): Gordium now counts the primary buildings (one house drawn, nothing standing
+    apart: one), so one primary structure complies on any RU lot instead of always needing review."""
+    assert _view("RU", "two_family", **facts)["RU.primary_structures"]["status"] == present.COMPLIES
 
 
 @pytest.mark.parametrize("facts", [{}, {"conversion": False}])

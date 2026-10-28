@@ -54,6 +54,14 @@ def test_a_plain_rectangular_lot():
                          "attached_units_in_building": None,
                          # stated by the architect (§325-19E, R-3a.abutting_r1): not given here
                          "abuts_r1_district": None,
+                         # stated by the architect (§325-3B's dwellings, home occupations): not given here
+                         "unrelated_persons": None, "unrelated_persons_with_children": None, "owner_occupied": None,
+                         "functional_family_unit": None, "home_occupation": None, "home_occupation_area": None,
+                         "home_occupation_unit_area": None, "accessory_dwelling_unit": None,
+                         # one building, nothing standing apart: one primary building, read from the drawing; whether
+                         # every primary building holds the lot's use is stated (not given here)
+                         "primary_buildings": 1, "primary_buildings_same_use": None,
+                         "south_hill_overlay": None, "stream_near_lot": None, "stream_distance": None,
                          # a flat roof: nothing sticks out, the yards to the eaves are the yards
                          "front_yard_eaves": 25.0, "side_yard_smaller_eaves": 10.0, "side_yard_larger_eaves": 15.0,
                          "rear_yard_eaves": 35.0,
@@ -935,7 +943,11 @@ def test_a_fourth_floor_block_sharing_an_id_never_lets_the_stories_comply():
     assert m["stories"]["value"] is None and "share the id floor 2" in m["stories"]["reason"]
     lot_only = {"lot_area", "lot_width", "lot_depth", "district", "use", "sleeping_rooms", "parking_spaces",
                 "dwelling_units", "rooms_let_for_profit", "conversion", "occupants",
-                "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district"}
+                "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district",
+                "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
+                "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
+                "primary_buildings_same_use", "south_hill_overlay",
+                "stream_near_lot", "stream_distance"}
     read_from_buildings = [k for k in m if k not in lot_only]
     assert read_from_buildings and all(m[k]["value"] is None and "share the id" in (m[k]["reason"] or "")
                                        for k in read_from_buildings), {k: m[k]["value"] for k in read_from_buildings}

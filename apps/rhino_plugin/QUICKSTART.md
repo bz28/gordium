@@ -257,6 +257,14 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      on every new project, after every lookup and after you pick another district (a tick is for one district),
      because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
+   - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
+     near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building
+     holds. Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
+     assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
+     its full wording. Answers are saved with the project; change them in Edit site… .
+     Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
+     panel's collapsed **Use details — answer when you plan the interior** group (still needs review, not counted among
+     the building's problems, never a pass), each with its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
      survey…** to pick your surveyed outline instead.
@@ -275,10 +283,24 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 4. **Draw.** You see:
    - the lot's property line with each edge's length (in Top view);
    - the buildable envelope, see-through blue: the space every yard and the height limit leave;
-   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
-     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
-     lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
-     on a survey it goes to the limits;
+   - on a locked layer **Gordium::Envelope**, real curves to snap to (Osnap): the buildable outline at ground
+     level and each yard's required line in full. On a tax-map lot (any lot not marked as from a survey) the
+     outline 2'-0" in from every lot line is solid and everything as drawn dashed; where nothing is left 2'-0" in,
+     only the dashed one. Gordium replaces them at every check (never measured; Undo never stops on them); untick
+     **Show buildable envelope** to hide them;
+   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, each floor on its
+     own sublayer `Gordium::Massing::Floor 1`, `Floor 2`, `Floor 3` (a `Gordium::Massing::Roof` sublayer is made for
+     your roof). **Hide starting house** in the panel hides it (it is still checked). On a lot from the tax map it
+     keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off; on a survey it goes to the
+     limits. The panel says why it is that size, for example "Largest house that complies even if the tax-map lines
+     are 2'-0" off; limited by lot coverage 25%. Use my survey… for the full size.". Where the district lets the
+     two side yards differ (R-2b: one side 10 ft, the other 5 ft), the starting house takes the 10 ft yard on one
+     side only: the side that gives the larger house, else the left as seen from the street. The note says which,
+     for example "Side yards: 10'-0" on the left (west), 5'-0" on the right (east), seen from the street."; under the
+     panel's Starting house fact, **Switch side yards** redraws it with the sides swapped (one Undo step; proven by
+     the checker first, and never over a house you have moved or edited). The blue envelope and every check stay
+     cautious: the envelope keeps the larger side yard on both sides;
+   - on a tax-map lot the blue envelope is the cautious one: every lot line 2'-0" nearer;
    - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing, all kept in the file:
      the neighbouring tax parcels and the street centerlines in grey on locked `Gordium::Context` layers; the
      neighbouring building footprints as outlines (no heights) on the unlocked `Gordium::Context::Buildings` layer,
@@ -295,9 +317,21 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    after you stop (kept with the file). After a check:
    - when something newly stops complying, a short note appears bottom left ("✕ Rear yard no longer complies ·
      29'-6" proposed · 30'-0" required · −0'-6""). It goes by itself;
-   - only the part of the building inside a required yard, or above the height limit, turns red. The rest stays
-     neutral;
-   - in Top view each yard is drawn as measured, marked ✓ ? or ✕.
+   - only the offending part of the building is coloured: the part inside a required yard, or above the height
+     limit. Red where it fails under every reading; amber where it fails only under some (for example within the
+     tax map's 2'-0" of a lot line). The rest stays neutral;
+   - in Top view each yard is dimensioned as a drawing is: square to its lot line from the wall facing it, red
+     where it fails, amber where it needs review, complying ones neutral grey; it shows its number only, on its
+     line or just past its end (✕ or ? before it when something is wrong; the yard's name and what it needs are in
+     the panel); when the nearest part is not the ground-floor wall the number says what it is measured to, e.g.
+     "22'-0" (to 2nd-floor overhang)" (the number itself and its result are unchanged); the required line is dashed
+     across it, tagged "min 10'-0"" where the yard fails or needs review;
+     what is wrong is placed first and every number stays in view; in the Front
+     and Right views the height is dimensioned up from the grade plane, the limit faint. Zoomed out to the
+     neighbourhood the dimensions give way.
+   - in Top view Gordium's lines (the lot line, the envelope's outline, the dimensions) are drawn over everything,
+     so none is lost under a roof; in Perspective and the elevations they hide behind your solids, as Rhino's own
+     lines do.
 6. **Read the panel.** Click any row. The bottom half shows the city's exact words, the examiner-style citation
    ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was
    measured and worked out, and what to change ("To comply: move the building 0'-6" farther from that lot
@@ -336,6 +370,13 @@ usually what fixes it:
   because only the zoning office can settle it.
 - **Something on the lot isn't measured**: a solid not on the `Building` layer (a shed on Default, an imported
   garage). Lot coverage counts every building on the lot, so it needs review until you **Add to check…**.
+- **It needs a fact the model can't show** (bedrooms, parking spaces, dwelling units, rooms let for profit,
+  whether it is a conversion, the number of stories): its button names them when that fits, for example **Enter bedrooms
+  and parking spaces…**, or says how many, for example **Answer 3 questions…**. It opens a small window that asks only them (a number, or Not answered / No / Yes). **OK** saves just
+  those answers, each "entered by you" with the date, as one Undo step, and checks again; **Cancel** (or Esc)
+  changes nothing. Left blank, a fact stays unanswered and its rule keeps needing review (never read as 0 or no).
+  Answers to the start box's questions show there too the next time you open **Edit site…**. A row that needs a
+  site fact (the lot, the district, the street side, Corner lot?) has an **Edit site…** button instead.
 
 "– not checked" means Gordium doesn't check it yet (parking needs bedroom and parking counts; overlays come in a
 later release). "Not checked yet" lists the code sections not in Gordium yet (coming in a later version): check
