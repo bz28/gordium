@@ -134,7 +134,9 @@ def _plugin(doc, said):
           # the context layers and a fetched neighbourhood, written as _context_visible and draw_context write them
           "_context_visible": lambda doc, on: setattr(doc.Layers[0], "IsVisible", on) or True,
           "_context_record": lambda doc: None, "sync_context": lambda doc, facts: None,
-          "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}")}
+          "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}"),
+          # (#34: the envelope's snap curves shown or hidden in every open document; nothing written in this one)
+          "_envelope_everywhere": lambda: None}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     exec(SRC[SRC.index("class RhinoTable:"):].split("\ndef ", 1)[0], ns)      # noqa: S102

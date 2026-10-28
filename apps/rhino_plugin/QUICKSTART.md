@@ -275,6 +275,11 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 4. **Draw.** You see:
    - the lot's property line with each edge's length (in Top view);
    - the buildable envelope, see-through blue: the space every yard and the height limit leave;
+   - on a locked layer **Gordium::Envelope**, real curves to snap to (Osnap): the buildable outline at ground
+     level and each yard's required line in full. On a tax-map lot (any lot not marked as from a survey) the
+     outline 2'-0" in from every lot line is solid and everything as drawn dashed; where nothing is left 2'-0" in,
+     only the dashed one. Gordium replaces them at every check (never measured; Undo never stops on them); untick
+     **Show buildable envelope** to hide them;
    - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
      `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
      lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
