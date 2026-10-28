@@ -371,29 +371,75 @@ def box_needs_refresh(options, shown, now):
     return layout(*shown) != layout(*now)
 
 
-def answers_applied(facts, answers, zone, use, options):
-    """The facts after the box, which changes only what it shows (Rhino run, 2026-10-28, P0: a Use or district
-    picked and picked back blanked every answer): each fact asked for this district and use (follow_up_keys) whose
-    field was shown (a key in `answers`, None when blank) is set from its answer, or unset when the field is blank or
-    refused (its rules need review, never 0 or no); one asked but not yet shown (the box opens again laid out for a
-    new use: box_needs_refresh) stays as stored, and is shown then with its value; what the use
-    itself says for the facts its rules read (implied_by) is set. Every other answer stays as stored: never read
-    unshown, as any fact this district's rules read for this use is asked (and shown with its value).
-    `facts` hold the use the box opened with (facts["use"]): what that use itself said (implied_facts: a two-family's
-    2 units) goes when the new use doesn't say it, so it is never read as an architect's count (a two-family's 2
-    units checked as a multiple dwelling's). Returns (facts, the keys the architect answered)."""
-    asked = follow_up_keys(options, zone, use)
+def answers_applied(facts, answers, zone, use, options, track=None):
+    """The facts after the box (box_applied) and the keys the architect answered in it with a value. `track`: what
+    the box knows this session (box_track); without it, from the facts alone."""
+    out, after = box_applied(facts, answers, zone, use, options, track if track is not None else box_track(facts))
+    shown = [k for k in (answers or {}) if k in BOX_ASKS and k not in after["said"]]
+    return out, sorted(k for k in shown if out.get(k) is not None)
+
+
+def box_track(facts, sources=None):
+    """What the box carries across its picks (session only, saved_ui["_answers"]): "said", the facts whose stored
+    value the use itself said (their saved source is IMPLIED_SOURCE; with no sources, those equal to what the facts'
+    use says: implied_facts); "held", an architect's answer set aside while a use says that fact instead; "typed", the
+    facts the architect answered in the box this session (each saved "entered by you" at Draw: typed_sources)."""
+    facts = facts or {}
+    if sources is None:
+        said = [k for k, v in implied_facts(facts.get("use")).items()
+                if k in BOX_ASKS and facts.get(k) == v and type(facts.get(k)) is type(v)]
+    else:
+        said = [k for k in BOX_ASKS if facts.get(k) is not None
+                and ((sources or {}).get(k) or {}).get("source") == IMPLIED_SOURCE]
+    return {"said": said, "held": {}, "typed": []}
+
+
+def box_applied(facts, answers, zone, use, options, track):
+    """The facts after the box, which changes only what it shows (Rhino runs, 2026-10-28, P0s: a Use or district
+    picked and picked back blanked every answer, or brought back an older one). Returns (facts, track).
+    1. Each field the box showed (a BOX_ASKS key in `answers`, laid out for the use the box opened with: None when
+       blank) is set from its answer, or unset when blank or refused (its rules need review, never 0 or no), whatever
+       the use picked now: what was typed is never dropped nor replaced by an older answer.
+    2. A fact the old use said (track "said": by its source, never by its value) goes when the new use doesn't say
+       it, and the architect's own answer set aside for it ("held") comes back: a two-family's 2 units are never read
+       as a multiple dwelling's count, and a semi-detached pair's typed 2 survives a look at two-family.
+    3. What the new use says for the facts its rules read (implied_by) is set; an architect's answer there is held.
+    Every other fact stays as stored, never read unshown: any fact this district's rules read for this use is asked
+    (follow_up_keys) and shown with its value when the box opens laid out for it (box_needs_refresh)."""
     now = implied_by(options, zone, use)
     out = dict(facts or {})
-    for k, v in implied_facts(out.get("use")).items():      # said by the use before, not by this one: goes
-        if k in BOX_ASKS and k not in now and k in out and out[k] == v and type(out[k]) is type(v):
-            out.pop(k)
-    shown = [k for k in asked if k in (answers or {})]
-    for k in shown:                                          # each shown field: its answer, or unset
+    said, held = list((track or {}).get("said") or []), dict((track or {}).get("held") or {})
+    typed = list((track or {}).get("typed") or [])
+    given = {}
+    for k, v in (answers or {}).items():
+        if k not in BOX_ASKS:
+            continue
         out.pop(k, None)
-    out.update(now)
-    given = {k: answers[k] for k in shown if answers[k] is not None}
-    return update_counts(out, given), sorted(given)
+        held.pop(k, None)
+        said = [x for x in said if x != k]
+        typed = typed + [k] if k not in typed else typed
+        if v is not None:
+            given[k] = v
+    out = update_counts(out, given)
+    for k in [k for k in said if k not in now]:
+        out.pop(k, None)
+        said.remove(k)
+        if k in held:
+            out[k] = held.pop(k)
+    for k, v in now.items():
+        if k not in said and out.get(k) is not None:
+            held[k] = out[k]
+        out[k] = v
+        said = said + [k] if k not in said else said
+    return out, {"said": said, "held": held, "typed": typed}
+
+
+def typed_sources(sources, track, facts, day):
+    """The sources after Draw for the facts the architect answered in the box this session (track "typed"), shown
+    or not by then: each set "entered by you" with its value now, each unset with no source (row_sources); what a
+    use says keeps the use's (fact_sources)."""
+    return row_sources(sources, [k for k in (track or {}).get("typed") or [] if k not in (track or {}).get("said", [])],
+                       facts, day)
 
 
 def implied_by(options, zone, use):

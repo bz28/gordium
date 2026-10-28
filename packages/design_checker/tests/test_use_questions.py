@@ -135,7 +135,7 @@ def test_an_answer_for_another_use_or_district_never_stays_behind():
     # now two-family: its own 2 units (the definition), never the 5 typed for the multiple dwelling
     two, answered = logic.answers_applied(dict(five, use="two_family"), {"dwelling_units": 5, "conversion": True},
                                           "X", "two_family", opts)
-    assert two["dwelling_units"] == 2 and answered == []
+    assert two["dwelling_units"] == 2 and answered == ["conversion"]
     # the conversion answer stays stored (P0, 2026-10-28: the box changes only what it shows), never read unshown:
     # no rule of X reads it for a two-family, so it isn't asked
     assert two["conversion"] is True and "conversion" not in logic.follow_up_keys(opts, "X", "two_family")
@@ -197,7 +197,8 @@ def test_the_box_rows_answers_and_their_source():
     assert any(line.startswith("Dwelling units: 5 · entered by you") for line in lines), lines
     two = logic.fact_sources(dict(state, use="two_family"), "2026-10-26", True)
     assert two["dwelling_units"] == {"value": 2, "source": logic.IMPLIED_SOURCE, "confirmed_by": "you",
-                                     "date": "2026-10-26"} and "conversion" not in two
+                                     "date": "2026-10-26"}          # the use's, never the 5 shown before
+    assert two["conversion"]["source"] == logic.ENTERED              # a field shown: the architect's, kept
     # an earlier answer's source never outlives its fact; one kept (not shown for this use) keeps its source
     saved = {"zone": {"value": "X"}, "dwelling_units": {"value": 5}, "conversion": {"value": "no"},
              "ground_marked": {"value": "1 object"}}
@@ -232,7 +233,7 @@ def test_an_unanswered_fact_says_what_it_needs_and_its_button_opens_its_own_dial
     assert "logic.answers_note(" in ui_box and "note.Text = text" in ui_box     # a refused entry is said at once
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     apply_ = rhino[rhino.index("def _apply_box("):rhino.index("def _place_spots(")]
-    assert 'logic.answers_applied(facts, state.get("answers"), state["zone"], state["use"], state.get("options"))' \
+    assert 'logic.box_applied(facts, state.get("answers"), state["zone"], state["use"], state.get("options"),' \
         in apply_
     state = rhino[rhino.index("def _box_state("):rhino.index("def _ft_text(")]
     assert '"follow_ups": logic.follow_up_rows(options, facts.get("zone"), facts.get("use"), facts)' in state

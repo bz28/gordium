@@ -293,7 +293,7 @@ def test_answers_survive_a_use_picked_and_picked_back():
     facts = _box(facts, "X", "multiple_family")           # Check: kept
     assert (facts["dwelling_units"], facts["rooms_let_for_profit"], facts["conversion"]) == (5, 2, True)
     rhino = RHINO[RHINO.index("def _apply_box("):RHINO.index("def _place_spots(")]
-    assert rhino.index("logic.answers_applied(facts,") < rhino.index('use=state["use"]')   # the old use, first
+    assert rhino.index("logic.box_applied(facts,") < rhino.index('use=state["use"]')   # the old use, first
 
 
 def test_answers_survive_a_district_picked_and_picked_back():
@@ -320,8 +320,8 @@ def test_a_shown_field_left_blank_still_unsets_its_fact():
 
 
 def test_the_box_changes_only_the_fields_it_shows_and_what_the_uses_say():
-    """Property: whatever is stored and answered, a key the new district and use don't show (or a field not laid
-    out yet) is unchanged, except what the old or new use itself says (implied)."""
+    """Property: whatever is stored, shown and picked, each field shown is its answer (blank: unset) unless the
+    new use says that fact; a fact the old use said goes unless the new use says it; every other key is unchanged."""
     rng = random.Random(1028)
     zones, uses = ["X", "Y", "Z"], ["multiple_family", "two_family", "church", "one_family_detached", None]
     for _ in range(3000):
@@ -331,17 +331,86 @@ def test_the_box_changes_only_the_fields_it_shows_and_what_the_uses_say():
             if rng.random() < 0.5:
                 facts[k] = rng.choice([True, False]) if logic.STATED_FACTS[k][1] == "yes_no" else rng.randint(0, 6)
         zone, use = rng.choice(zones), rng.choice(uses)
-        asked = logic.follow_up_keys(BOX, zone, use)
         answers = {k: rng.choice([None, False, True] if logic.STATED_FACTS[k][1] == "yes_no" else [None, 0, 3])
-                   for k in asked + STATED if rng.random() < 0.5}           # a field shown (None: left blank)
+                   for k in STATED if rng.random() < 0.5}                 # a field shown (None: left blank)
+        said = [k for k in logic.BOX_ASKS if k in facts and rng.random() < 0.3]   # by their saved source
         before = json.loads(json.dumps(facts))
-        out, _ = logic.answers_applied(facts, answers, zone, use, BOX)
+        out, track = logic.box_applied(facts, answers, zone, use, BOX, {"said": said, "held": {}, "typed": []})
         assert facts == before
-        implied = set(logic.implied_facts(before.get("use"))) | set(logic.implied_by(BOX, zone, use))
+        now = logic.implied_by(BOX, zone, use)
         for k in set(before) | set(out):
-            if (k in asked and k in answers) or k in implied:
-                continue
-            assert out.get(k) == before.get(k), (k, before, answers, zone, use)
-        for k in asked:
-            if k in answers and k not in implied:
+            if k in now:
+                assert out[k] == now[k] and k in track["said"]
+            elif k in answers and k in logic.BOX_ASKS:
                 assert out.get(k) == answers[k]                            # shown: its answer, blank unset
+            elif k in said:
+                assert k not in out                                        # the old use's: gone
+            else:
+                assert out.get(k) == before.get(k), (k, before, answers, zone, use)
+
+
+def test_reviewed_flows_typed_answers_survive_and_never_revert():
+    """Cold review of 719f2a5e (F1, F2): typed in the fields, then a Use the district asks nothing for, and back."""
+    # F1: a new project, answers typed, Use church and back: every answer as typed
+    g = dict(SITE, zone="X", use="multiple_family")
+    t = logic.box_track(g, {})
+    g, t = logic.box_applied(g, {"dwelling_units": 5, "rooms_let_for_profit": 2, "conversion": True}, "X", "church",
+                             BOX, t)
+    g = dict(g, use="church")
+    g, t = logic.box_applied(g, logic.box_answers(BOX, "X", "church", g), "X", "multiple_family", BOX, t)
+    assert logic.box_answers(BOX, "X", "multiple_family", dict(g, use="multiple_family")) == {
+        "dwelling_units": 5, "rooms_let_for_profit": 2, "conversion": True}
+    # F1: 5 saved at an earlier Draw, 9 typed (the real count), church and back: 9, never the older 5 (a false pass)
+    f = dict(SITE, zone="X", use="multiple_family", dwelling_units=5)
+    t = logic.box_track(f, {"dwelling_units": {"value": 5, "source": logic.ENTERED}})
+    f, t = logic.box_applied(f, {"dwelling_units": 9, "rooms_let_for_profit": None, "conversion": None}, "X",
+                             "church", BOX, t)
+    f, t = logic.box_applied(dict(f, use="church"), {}, "X", "multiple_family", BOX, t)
+    assert f["dwelling_units"] == 9
+    # F2: a semi-detached pair typed as 2 units, a look at two-family (its own 2), and back: the typed 2 kept
+    opts = {"follow_ups": {"X": {"one_family_attached": ["dwelling_units"], "two_family": []}},
+            "implied": {"X": {"two_family": {"dwelling_units": 2}}}}
+    h = {"zone": "X", "use": "one_family_attached"}
+    t = logic.box_track(h, {})
+    h, t = logic.box_applied(h, {"dwelling_units": 2}, "X", "two_family", opts, t)
+    assert h["dwelling_units"] == 2 and t["said"] == ["dwelling_units"] and t["held"] == {"dwelling_units": 2}
+    h, t = logic.box_applied(dict(h, use="two_family"), {}, "X", "one_family_attached", opts, t)
+    assert h["dwelling_units"] == 2 and t["said"] == []
+    # the same with 6 typed: two-family says 2 (never the 6), and back gives the 6
+    h = {"zone": "X", "use": "one_family_attached"}
+    h, t = logic.box_applied(h, {"dwelling_units": 6}, "X", "two_family", opts, logic.box_track(h, {}))
+    assert h["dwelling_units"] == 2
+    h, t = logic.box_applied(dict(h, use="two_family"), {}, "X", "one_family_attached", opts, t)
+    assert h["dwelling_units"] == 6
+    # a value the use said, known by its saved source (a Draw as two-family), goes under a use that doesn't say it
+    k = {"zone": "X", "use": "two_family", "dwelling_units": 2}
+    k, _ = logic.box_applied(k, {}, "X", "one_family_attached", opts,
+                             logic.box_track(k, {"dwelling_units": {"value": 2, "source": logic.IMPLIED_SOURCE}}))
+    assert "dwelling_units" not in k
+    # by its source, never its value: an architect's 2 (entered by you, kept while two-family, whose rules here
+    # don't read units) is theirs, so a multiple dwelling shows it, never blanked as if two-family had said it
+    y = {"follow_ups": {"Y": {"multiple_family": ["dwelling_units"], "two_family": []}}, "implied": {"Y": {}}}
+    m = {"zone": "Y", "use": "two_family", "dwelling_units": 2}
+    m, _ = logic.box_applied(m, {}, "Y", "multiple_family", y,
+                             logic.box_track(m, {"dwelling_units": {"value": 2, "source": logic.ENTERED}}))
+    assert m["dwelling_units"] == 2
+
+
+def test_every_answer_typed_in_the_box_is_saved_as_yours_at_draw():
+    """Cold review F3: an answer typed this session, then left unshown by a Use the district asks nothing for, is
+    saved "entered by you" with its value now (never an older source's value, never none)."""
+    saved = {"conversion": {"value": "no", "source": logic.ENTERED, "confirmed_by": "you", "date": "2026-10-01"},
+             "zone": {"value": "X"}}
+    f = {"zone": "X", "use": "multiple_family", "conversion": False}
+    f, t = logic.box_applied(f, {"conversion": True, "rooms_let_for_profit": 3}, "X", "church", BOX,
+                             logic.box_track(f, saved))
+    out = logic.sources_kept(saved, f)
+    out.update(logic.fact_sources({"zone": "X", "use": "church", "options": BOX, "answers": {}}, "2026-10-28", True))
+    out = logic.typed_sources(out, t, f, "2026-10-28")
+    assert out["conversion"] == {"value": "yes", "source": logic.ENTERED, "confirmed_by": "you", "date": "2026-10-28"}
+    assert out["rooms_let_for_profit"]["value"] == 3 and out["rooms_let_for_profit"]["source"] == logic.ENTERED
+    drawn = RHINO[RHINO.index("def _drawn("):RHINO.index("def hide_massing(")]
+    assert 'logic.typed_sources(sources, ui_state.get("_answers"), out, logic.city_day())' in drawn
+    apply_ = RHINO[RHINO.index("def _apply_box("):RHINO.index("def _place_spots(")]
+    assert 'saved_ui.get("_answers") or logic.box_track(facts, fact_sources(doc))' in apply_
+    assert "saved_ui = dict(saved_ui, _answers=track)" in apply_
