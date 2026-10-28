@@ -10,8 +10,8 @@ python -m design_checker serve                            # for Rhino: one JSON 
 ```
 
 Requests to the worker: `check` (a model and its lot facts), `start` (the largest legal starting building for
-the lot in a model, `envelope_builder.start`), `sample_site` (106 Ithaca Rd's lot and facts, prefilled for
-GordiumStart), `options` (zones and uses), `facts` (what's wrong with saved lot facts).
+the lot in a model, `envelope_builder.start`), `sample_site` (106 Ithaca Rd's lot and facts, as files
+drawn from the sample before 2026-10-27 have them; GordiumStart no longer prefills it: a new file starts empty), `options` (zones and uses), `facts` (what's wrong with saved lot facts).
 
 What it adds for the Rhino command, never changing a result:
 - **summary:** one line for the viewport corner: "All 10 rules pass", or "9 pass · 1 fail" with what fails and
@@ -31,6 +31,13 @@ What it adds for the Rhino command, never changing a result:
   "Complies" when nothing fails and every open question about how the law reads passes whichever way it is
   answered. A rule that passes only with the lot as drawn (no survey yet) stays amber, needs review: a missing
   survey is a missing fact, so it never shows as complying.
+- **Unknown:** a NEEDS REVIEW rule waiting on values that aren't measured or given at all (the height, with no
+  ground given) fails whatever they are when each missing number is provably truest at 0 (`formula.truth_direction`:
+  only +, −, max/min and positive multiples of it, compared with < ≤ > ≥), each missing yes/no is tried both ways,
+  and the rule fails under every one of those settings (`check.fails_whatever`; run before a rule waiting on an
+  interior fact is set aside, so a proven fail is never hidden). The eaves rule
+  is one: front eaves ≥ 25 + max(height − 35, 0) − 2 is at least 23 ft at any height, so eaves 15 ft back don't
+  comply. Never the other way: a missing number never makes a rule comply (24 ft stays needs review).
 
 The worker stays running, so a re-check after an edit doesn't pay for starting Python again. A bad request gets a
 plain error answer; the worker keeps serving.

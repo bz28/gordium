@@ -28,6 +28,7 @@ from rule_format.rulebook import (MEASURES_FILE, REPO, VOCABULARY_FILE, Context,
                                   locate, outcome, source_numbers, validate)
 from section_labeling.budget import worst_case
 from section_labeling.labeler import PRICES, cost, find_quote, numbered, sha
+from section_labeling.term_index import related as related_pieces
 
 from .chart_values import FOOTNOTE, NOT_APPLICABLE, footnotes, section_refs
 from .templates import (CHART_FILE, fill_template, formula_slots, number_places, template_problems,
@@ -238,14 +239,26 @@ def unit_message(unit: dict, context: dict) -> str:
     if context.get("unfound"):
         parts.append("It also points to these sections, which match no section of the law it was given (don't draft "
                      "from them; a person checks them): " + ", ".join(context["unfound"]))
+    if context.get("related"):
+        parts.append("Related sections (the term index lists them for words this text uses). Background only, for "
+                     "what the words mean and what else applies: each sets its own rules, so don't draft or quote "
+                     "from them here; if this text's rule depends on one, say so in open_questions:\n" + "\n\n".join(
+                         f"[piece {p['id']}] {p['title']}\n{p['text']}" for p in context["related"]))
+    if context.get("related_dropped"):
+        parts.append("More related sections, left out for length: " + ", ".join(context["related_dropped"]))
     if context["definitions"]:
         parts.append("Definitions used (for meaning; quote them only if a rule rests on them):\n" + "\n".join(
             f"- {d}" for d in context["definitions"]))
     return "\n\n".join(parts)
 
 
+RELATED_LIMIT = 12_000      # characters of related sections (by the term index) shown as background
+
+
 def gather_context(unit: dict, law: dict, chart: dict, definitions: dict) -> dict:
-    """Footnotes, sections and definitions the unit's text points to. law: {file, pieces, rows};
+    """Footnotes, sections and definitions the unit's text points to, and (law["terms"], the term index) the
+    related sections that use the same words, as background only: never quotable, never a source of numbers.
+    law: {file, pieces, rows, terms?};
     chart: {notes: {page: {n: note}}}. A reference to §325-29 takes 325-29 and its lettered subsections
     (325-29A, 325-29B ...), never 325-29.1, a section of its own. The sections stop at 20,000 characters;
     whatever doesn't fit is named in "dropped" (and in the message), never left out silently. A reference that
@@ -272,7 +285,22 @@ def gather_context(unit: dict, law: dict, chart: dict, definitions: dict) -> dic
     lower = text.lower()
     defs = [f"{v['term']}: " + " ".join(_sentences(s["quote"]) for s in v["sources"])
             for v in definitions.values() if v["term"].split("(")[0].strip().lower() in lower]
-    return {"notes": notes, "pieces": pieces, "dropped": dropped, "unfound": unfound, "definitions": defs}
+    related, related_dropped, size = [], [], 0
+    seen = {unit.get("piece")} | {p["id"] for p in pieces} | set(dropped)
+    # Only sections that set requirements (labeled rule or flag: law["requires"]) are worth the space; the most
+    # relevant first, so the limit cuts the least relevant (definitions are given separately, above).
+    candidates = {pid: piece_text(law["rows"], law["pieces"][pid])
+                  for pid in (related_pieces(law["terms"], text) if law.get("terms") else [])
+                  if pid in law["pieces"] and pid not in seen and pid in law.get("requires", law["pieces"])}
+    for pid in related_pieces(law["terms"], text, candidates) if candidates else []:
+        body = candidates[pid]
+        if size + len(body) > RELATED_LIMIT:
+            related_dropped.append(pid)
+            continue
+        related.append({"id": pid, "title": law["pieces"][pid]["title"], "text": body})
+        size += len(body)
+    return {"notes": notes, "pieces": pieces, "dropped": dropped, "unfound": unfound, "definitions": defs,
+            "related": related, "related_dropped": related_dropped}
 
 
 def _within(lines: list[int], span: list[int]) -> bool:

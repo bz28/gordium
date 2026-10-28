@@ -25,6 +25,7 @@ import scriptcontext as sc
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close, leftovers  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_pr19") + "/"
 READY = os.path.join(tempfile.gettempdir(), "gordium_windows", "ready.json")
@@ -63,7 +64,7 @@ try:
         docs = TestDocs("pr19").__enter__()
         doc = docs.open("Large Objects - Feet")
         g.STATE["on_confirm"] = lambda *a: None
-        g.gordium_check()                                 # the sample, its starting house; live mode on
+        look_up_106(g, g.gordium_check)                                 # the sample, its starting house; live mode on
         parts = g.STATE.get("panel_parts")
         claim("a starting house and a panel", parts is not None and len(g._buildings(doc)) == 3)
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
@@ -133,7 +134,7 @@ try:
         # across documents would call the edit covered and skip it)
         other = docs.open("Large Objects - Feet")
         g.STATE["on_confirm"] = lambda *a: None
-        g.gordium_check()                                 # a checked house in the one now in front
+        look_up_106(g, g.gordium_check)                                 # a checked house in the one now in front
         front = Rhino.RhinoDoc.ActiveDoc
         claim("5 the new document is in front", front.RuntimeSerialNumber == other.RuntimeSerialNumber)
         g.STATE["dirty"] = time.time()                   # an edit after the front document's last check

@@ -13,18 +13,16 @@ Sub's (and Mid's) IsLocked and own lock (GetPersistentLocking) after every step.
    recorded own lock survives the top being locked again.)
 4. relock: the top locked, Sub given its own lock (locked if it isn't, then SetPersistentLocking(True), as Gordium's
    _set_own_lock does), the top unlocked (Sub locked?), then
-   locked and unlocked again: does locking a parent clear a recorded own lock? (The fake's two readings, "keeps" and
-   "resets".)
+   locked and unlocked again: does locking a parent clear a recorded own lock? (At 994012d: no, it is kept.)
 5. nested_is_locked, nested_relock: cases 1 and 4 with Mid between the top and Sub.
-6. layer_command, nested_layer_command (last: they type a command): Sub locked by IsLocked; the top locked and
-   unlocked by Rhino's own -_Layer command, as the architect does it from the command line: does the command record
-   Sub's own lock, where RhinoCommon's IsLocked on the top doesn't (case 1)? If it does, a neighbourhood drawn while
-   "Gordium" is unlocked keeps Parcels, Streets and Notes locked when the architect locks and unlocks "Gordium" by
-   the command; if not, they come out unlocked (plain Rhino, as Grade in case 1). The Layers panel's lock icon is
-   not probed here (it may take another route): check it by hand.
-   BEFORE RUNNING: type `-_Layer`, `_Lock`, a layer's name and Enter by hand once, and check the command has ended
-   (if it asks for more, change the macro in command() to match, or the script waits at the command line). out.json
-   is written after every case, with "case" naming the one under way, so a stuck command loses nothing before it.
+5b. mid_relock: Gordium's own route (gordium_rhino._lock_context): Sub locked, Mid locked for a moment, Sub given
+   its own lock
+   (locked if it isn't, then SetPersistentLocking(True)), Mid unlocked; then the top locked and unlocked: is Sub's
+   own lock, recorded under Mid, kept through the top's lock and unlock?
+6. Manual only, never in a scripted run (CASES leaves them out: a scripted -_Layer waits at the command line):
+   MANUAL_CASES, layer_command and nested_layer_command, Sub locked by IsLocked, the top locked and unlocked by
+   Rhino's own -_Layer command typed by a person. Run at 994012d: cases 1-5 (lock_probe_994012d.json); the manual
+   ones not run.
 Writes <temp>/gordium_lock_probe/out.json ("done": true at the end); closes its document."""
 import json
 import os
@@ -40,7 +38,8 @@ from test_docs_in_rhino import TestDocs, close  # noqa: E402
 S = os.path.join(tempfile.gettempdir(), "gordium_lock_probe") + "/"
 os.makedirs(S, exist_ok=True)
 CASES = ("is_locked", "persistent_then_is_locked", "persistent_alone", "relock", "nested_is_locked", "nested_relock",
-         "layer_command", "nested_layer_command")
+         "mid_relock")
+MANUAL_CASES = ("layer_command", "nested_layer_command")     # a person types -_Layer: never in a scripted run
 out, doc = {"done": False}, None
 
 
@@ -78,7 +77,7 @@ def lock_top(top, name, locked, by_command):
 def probe(case):
     name = "LockProbe_" + case
     top = layer(name)
-    mid = layer("Mid", top) if case.startswith("nested") else None
+    mid = layer("Mid", top) if case.startswith(("nested", "mid")) else None
     sub = layer("Sub", mid if mid is not None else top)
     by_command = case.endswith("layer_command")
     rows = []
@@ -90,7 +89,16 @@ def probe(case):
     elif case == "persistent_alone":
         doc.Layers[sub].SetPersistentLocking(True)
     rows.append(["sub set", state(sub, mid)])
-    if case.endswith("relock"):
+    if case == "mid_relock":
+        doc.Layers[sub].IsLocked = True             # as _lock_context's first pass, then the moment's lock
+        doc.Layers[mid].IsLocked = True
+        if not doc.Layers[sub].IsLocked:
+            doc.Layers[sub].IsLocked = True
+        doc.Layers[sub].SetPersistentLocking(True)
+        rows.append(["mid locked, sub's own lock set", state(sub, mid)])
+        doc.Layers[mid].IsLocked = False
+        rows.append(["mid unlocked", state(sub, mid)])
+    if case in ("relock", "nested_relock"):
         doc.Layers[top].IsLocked = True
         if not doc.Layers[sub].IsLocked:        # as Gordium's _set_own_lock gives a layer its own lock
             doc.Layers[sub].IsLocked = True
