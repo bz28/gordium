@@ -294,7 +294,7 @@ def test_the_wait_window_closes_when_the_job_is_done_or_cancelled():
     assert "lookup_cancel" in part(RHINO, "def _one_pick(", "def _pick_outcome(")
     loop = part(RHINO, "def _box_loop(", "# ---- the address lookup")
     assert 'before_lookup, before_fields, ticked = ticked, logic.lookup_fields(state), {}' in loop
-    assert 'ticked = logic.ticks_after_cancel(before_lookup, before_fields, state, lookup_shown)' in loop
+    assert 'ticked = logic.ticks_after_cancel(before_lookup, before_fields, state, touched)' in loop
 
 
 # ---- Rhino run of aea73b8 (#32) and a3eb1d7 (#33): a frozen wait window, and Draw again after a Cancel ------------
@@ -642,42 +642,46 @@ def test_cancel_lookup_restores_a_tick_only_for_a_field_unchanged_since_look_up(
     """The district, use, address and corner answer stay usable while a lookup runs. Cancel lookup put back every
     tick and source from before Look up, so a district ticked on R-1b and changed to R-3a during the lookup came
     back ticked on R-3a with the lookup's "suggested" source: Draw on for a district never confirmed, and a false
-    source saved into the file. Each comes back only if its own field is unchanged and the architect left the tick
-    as the box first showed it during the lookup; otherwise the box's now (a tick they took off stays off)."""
+    source saved into the file. Each comes back only if its own field is unchanged and the architect never changed
+    that tick while the lookup ran; otherwise the box's now (a tick they took off stays off)."""
     before = {"district_confirmed": True, "zone_source": LIVE, "use_source": LIVE, "address_source": LIVE,
               "corner_source": LIVE, "checked": ["lot", "street"]}
     fields = logic.lookup_fields({"zone": "R-1b", "use": "one_family", "address": "106 Ithaca Rd", "corner_lot": False,
                                   "doubts": {"lot": "a", "street": "b"}})
-    # the box while the lookup runs (a new project): the district unticked (only a Draw saves it), the rest as before
-    shown = dict(before, district_confirmed=False)
     same = {"zone": "R-1b", "district_confirmed": False, "zone_source": LIVE, "use": "one_family", "use_source": LIVE,
             "address": "106 Ithaca Rd", "address_source": LIVE, "corner_lot": False, "corner_source": LIVE,
             "checked": ["lot", "street"], "doubts": {"lot": "a", "street": "b"}}
-    assert logic.ticks_after_cancel(before, fields, same, shown) == before   # nothing changed: as before Look up
+    assert logic.ticks_after_cancel(before, fields, same, set()) == before   # nothing changed: as before Look up
     now = {"zone": "R-3a", "district_confirmed": False, "zone_source": logic.ENTERED, "use": "two_family",
            "use_source": logic.ENTERED, "address": "200 Elm St", "address_source": logic.ENTERED, "corner_lot": True,
            "corner_source": logic.ENTERED, "checked": ["lot"], "doubts": {"lot": "a", "street": "c"}}
-    assert logic.ticks_after_cancel(before, fields, now, shown) == {
+    assert logic.ticks_after_cancel(before, fields, now, {"zone_source", "use_source", "address_source",
+                                                          "corner_source", ("checked", "street")}) == {
         "district_confirmed": False, "zone_source": logic.ENTERED, "use_source": logic.ENTERED,
         "address_source": logic.ENTERED, "corner_source": logic.ENTERED,
-        "checked": ["lot"]}       # the lot's doubt as it was and its tick as shown: back; the street's doubt changed
+        "checked": ["lot"]}       # the lot's doubt as it was and its tick untouched: back; the street's doubt changed
     # only the district changed: only its tick and source are the box's now
-    assert logic.ticks_after_cancel(before, fields, dict(same, zone="R-3a", zone_source=logic.ENTERED), shown) == \
-        dict(before, district_confirmed=False, zone_source=logic.ENTERED)
+    assert logic.ticks_after_cancel(before, fields, dict(same, zone="R-3a", zone_source=logic.ENTERED),
+                                    {"zone_source"}) == dict(before, district_confirmed=False, zone_source=logic.ENTERED)
+    # the district changed even with no tick touched: never the old district's tick or source (field check alone)
+    assert logic.ticks_after_cancel(before, fields, dict(same, zone="R-3a"), set())["district_confirmed"] is False
     # a district ticked during the lookup on the new district is the architect's own (the box's now)
     assert logic.ticks_after_cancel(before, fields, dict(same, zone="R-3a", district_confirmed=True,
-                                                         zone_source=logic.ENTERED), shown)["district_confirmed"]
+                                                         zone_source=logic.ENTERED),
+                                    {"district_confirmed", "zone_source"})["district_confirmed"]
     # "I checked this" taken off during the lookup, its doubt unchanged: stays off (review round 1, claim 1: the
     # doubt counted as settled though the architect had withdrawn the tick)
-    assert logic.ticks_after_cancel(before, fields, dict(same, checked=["street"]), shown)["checked"] == ["street"]
-    assert logic.ticks_after_cancel(before, fields, dict(same, checked=[]), shown)["checked"] == []
-    # Edit site…: the box shows the district confirmed at an earlier Draw while the lookup runs; unticked by the
-    # architect, it stays unticked (claim 3)
-    edit_shown = dict(before)
-    assert logic.ticks_after_cancel(before, fields, dict(same, district_confirmed=False),
-                                    edit_shown)["district_confirmed"] is False
-    # no Look up recorded, or nothing known of what the box showed: nothing from before is put back
-    assert logic.ticks_after_cancel({}, {}, now) == {k: now[k] for k in before}
+    off = logic.ticks_touched({"checked": ["lot", "street"]}, {"checked": ["street"]})
+    assert off == {("checked", "lot")}
+    assert logic.ticks_after_cancel(before, fields, dict(same, checked=["street"]), off)["checked"] == ["street"]
+    # a district tick changed during the lookup, even changed back, is the architect's as they left it (round 2):
+    # ticked in one showing, taken off in the next
+    touched = logic.ticks_touched({"district_confirmed": False}, {"district_confirmed": True}) | \
+        logic.ticks_touched({"district_confirmed": True}, {"district_confirmed": False})
+    assert touched == {"district_confirmed"}
+    assert logic.ticks_after_cancel(before, fields, same, touched)["district_confirmed"] is False
+    # no Look up recorded, or nothing known of what changed: nothing from before is put back
+    assert logic.ticks_after_cancel({}, {}, now, set()) == {k: now[k] for k in before}
     assert logic.ticks_after_cancel(before, fields, same) == {k: same[k] for k in before}
 
 
@@ -740,6 +744,11 @@ def test_the_box_loop_after_cancel_lookup_never_ticks_a_district_changed_meanwhi
     # ...and left ticked, it is as before
     shown = _run_box_loop([({}, "pick:lookup"), ({}, "pick:lookup_cancel"), ({}, None)], confirmed_at_draw="R-1b")
     assert shown[-1]["district_confirmed"] is True
+    # GordiumStart: R-1b ticked, Look up (shown unticked), ticked during it, a street pick, taken off, Cancel lookup:
+    # stays off, as the architect left it (review round 2)
+    shown = _run_box_loop([({"district_confirmed": True}, "pick:lookup"), ({"district_confirmed": True}, "pick:street"),
+                           ({"district_confirmed": False}, "pick:lookup_cancel"), ({}, None)])
+    assert [s["district_confirmed"] for s in shown] == [False, False, True, False]
 
 def test_r2_a_report_not_written_after_a_file_switch_is_said_with_one_full_stop():
     said = logic.outdated_report_message("/x/r.xlsx", logic.NOT_IN_FRONT, True)
