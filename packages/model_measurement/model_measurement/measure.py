@@ -1719,7 +1719,7 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
             for name, unit in STATED.items():           # what the architect stated still stands
                 if facts.get(name) is not None:
                     out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")
-            _counts_disagree(out, facts)
+            _set_aside_conflicts(out, facts)
             if facts.get("zone"):
                 out["district"] = _record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
     finally:
@@ -1768,15 +1768,34 @@ def pick_main(buildings: list[dict], facts: dict) -> tuple:
     return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
-def _counts_disagree(out: dict, facts: dict) -> None:
-    """The unrelated people counted with minor dependent children can't be fewer than without them (review round 2):
-    a pair like that is a mistyped count, so the count R-3 and RU read is set aside with the reason (needs review),
-    never used to pass."""
+def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
+    """Stated facts each well formed but contradicting each other: (the reason, the facts in it). Every fact in one is
+    set aside with that reason (_set_aside_conflicts), so no row reading it can comply on facts that contradict each
+    other (#38: R-1b's occupancy row complied on two unrelated-people counts that disagreed, because only the count
+    R-3 and RU read was set aside); the panel also shows each one as a "Lot facts disagree" row with the button to
+    re-enter them (project.fact_conflict_rows)."""
+    out = []
+    here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
+    if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
+        out.append((stop("attached_counts_disagree", here=here, building=building),
+                    ("dwelling_units", "attached_units_in_building")))
+    # the unrelated people counted with minor dependent children can't be fewer than without them: a mistyped pair,
+    # and which count is wrong can't be told (review round 2 set aside only the one R-3 and RU read)
     without, with_ = facts.get("unrelated_persons"), facts.get("unrelated_persons_with_children")
     if type(without) is int and type(with_) is int and with_ < without:
-        out["unrelated_persons_with_children"] = _record(
-            "unrelated_persons_with_children", STATED["unrelated_persons_with_children"],
-            reason=stop("household_counts_disagree", without=without, with_=with_))
+        out.append((stop("household_counts_disagree", without=without, with_=with_),
+                    ("unrelated_persons", "unrelated_persons_with_children")))
+    return out
+
+
+def _set_aside_conflicts(out: dict, facts: dict) -> None:
+    """Every stated fact in a contradiction (fact_conflicts) is set aside with the contradiction as its reason: the
+    rules that read it need review, saying so, and never comply on it."""
+    for why, names in fact_conflicts(facts):
+        for name in names:
+            before = out.get(name) or {}
+            reason = why if before.get("value") is not None or not before.get("reason") else before["reason"] + "; " + why
+            out[name] = _record(name, STATED[name], reason=reason)
 
 
 def _measure(site: dict, facts: dict) -> dict[str, dict]:
@@ -1785,7 +1804,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         v = facts.get(name)
         out[name] = (_record(name, unit, v, "stated by the architect (not measured from the model)")
                      if v is not None else _record(name, unit, reason=stop(ASK[name])))
-    _counts_disagree(out, facts)
+    _set_aside_conflicts(out, facts)
     # the lot's zoning district is the zone the architect stated (the facts' "zone")
     out["district"] = (_record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
                        if facts.get("zone") else _record("district", "text", reason=stop("no_district")))
