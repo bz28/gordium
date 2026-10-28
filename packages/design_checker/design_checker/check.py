@@ -98,21 +98,59 @@ def _n(x) -> str:
     return f"{x:,.2f}".rstrip("0").rstrip(".") if isinstance(x, float) else f"{x:,}"
 
 
-def _why(row: dict, rules: dict, measured: dict) -> dict:
+def _why(row: dict, rules: dict, measured: dict, allowed: dict | None = None, facts: dict | None = None) -> dict:
     """The row, plus "Why": for a NEEDS REVIEW row whose measurements are missing, why each is missing (the
     measuring's own reason: "a building isn't on the lot (is it part of this design?)", "enter bedrooms / parking spaces"), else the
-    report's reason."""
+    report's reason. A rule's own review_when that holds under every reading of THE reading set (with `allowed`)
+    comes first, and the readings of a measurement then change nothing, so their question is left out: the rule's
+    own question, never one that changes nothing (#20 review round 1: an eaves row asking which side is the 10 ft one
+    said instead to ask the City how a pitched roof's height is taken, though every height reading gave the same
+    answer)."""
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
         rule = rules[row["Rule id"]]
         values = {k: m.get("value") for k, m in measured.items()}
+        own = _review_reasons(rule, measured, allowed, facts) if allowed is not None else []
         for name in sorted(set().union(*(formula.names(rule[k]) for k in ("applies_when", "check") if rule.get(k)))):
+            if own and (measured.get(name) or {}).get("readings"):
+                continue                # needs review under every one of its readings: it changes nothing
             reason = (measured.get(name) or {}).get("reason")
             if name in logic.OPTIONAL and not present.could_settle(rule, values, name):
                 continue        # an optional fact that can't change this row isn't why it needs review (r2 round 2)
             if (measured.get(name) or {}).get("value") is None and reason and reason not in reasons:
                 reasons.append(reason)
+        reasons = own + reasons
     return {**row, "Why": "; ".join(reasons) or row["Why it needs review"]}
+
+
+def _review_reasons(rule: dict, measured: dict, allowed: dict, facts: dict | None) -> list[str]:
+    """The reasons of a rule's review_when entries that hold under every reading of THE reading set (a needs-review
+    the rule itself asks for, whatever the open measurements turn out to be), in the rule's order."""
+    from rule_format.rulebook import _condition
+    entries = rule.get("review_when") or []
+    if not entries:
+        return []
+    names = reading_set.rule_names(rule)
+    values = {k: m["value"] for k, m in measured.items()}
+    every = reading_set.combos(names, values, measured, facts)
+    if not every:
+        return []
+    kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
+    out = None
+    for trial, _ in every:
+        if outcome(rule, trial, allowed) != "needs_review":
+            return []
+        held = []
+        for r in entries:
+            try:
+                if _condition(r["when"], trial, kinds):
+                    held.append(" ".join(str(r.get("reason") or "").split()))
+            except Exception:                   # a condition that can't be read under this reading
+                pass
+        out = list(dict.fromkeys(h for h in held if h)) if out is None else [h for h in out if h in held]
+        if not out:                             # none holds under every reading: the readings' own questions
+            return []
+    return out or []
 
 
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn
@@ -121,7 +159,8 @@ MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked
 
 MODEL_WORDS = {"model#eave": {"eave": "what reaches past the walls an eave",
                                "not_eave": "what reaches past the walls not an eave"},
-               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"}}
+               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"},
+               "model#narrower": {}}          # its readings say their own line: "the side along lot line 3 …"
 EAVE_YARD_WORDS = {"front_yard": "front yard", "side_yard_smaller": "side yard", "side_yard_larger": "side yard",
                  "rear_yard": "rear yard"}
 
@@ -705,8 +744,8 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
-    every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
     allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
+    every = [_why(dict(zip(COLUMNS, r)), by_id, measured, allowed, facts) for r in t["output"]]
     waiting = [r for r in every if waits_on_interior(r, by_id[r["Rule id"]], measured, allowed)]
     for r in waiting:                   # exactly which stated facts each one waits for (its "Enter …" asks those)
         r["needs"] = logic.needs_of(reading_set.rule_names(by_id[r["Rule id"]]), {k: m.get("value") for k, m in measured.items()})
@@ -805,6 +844,9 @@ def _ring(polygon) -> list:
     return [list(p) for p in polygon.simplify(0.001).exterior.coords[:-1]]
 
 
+SHORTEST_LABELLED_EDGE = 1.0          # ft: lot edges shorter than this get no length label in plan
+
+
 def hole_free(region) -> list:
     """A region as pieces without holes (each drawn by its outline alone): a polygon with a hole is cut in two
     by the vertical line through the hole's middle, again until none is left (review round 2: strips all round
@@ -887,7 +929,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
 
     lot = site.get("lot") or {}
     edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
-             for r, length in edge_runs(lot.get("edges") or []) if length >= 1.0]
+             for r, length in edge_runs(lot.get("edges") or [])
+             if length >= SHORTEST_LABELLED_EDGE]   # a tax-map sliver (0'-1 5/8"): no label, it only clutters
     yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
               (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
               (" (approx.)" if i.get("approx") else "")}

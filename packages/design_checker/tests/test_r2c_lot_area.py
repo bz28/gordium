@@ -170,11 +170,12 @@ def test_more_units_on_the_lot_than_in_the_building_is_never_a_pass_and_the_pane
     items = _r2c("one_family_attached", 60, 100, "R-2c.lot_area_one_family_attached", dwelling_units=4, occupants=1,
                  attached_units_in_building=3)
     assert [i["status"] for i in items] == [present.REVIEW], items
-    assert "More units on this lot than in the attached building" in (items[0]["reason"] or ""), items
+    # both counts (and the use) are set aside, so the row says the counts disagree (the rule's own reason can't be reached)
+    assert "4 dwelling units on this lot but 3 in the attached building" in (items[0]["reason"] or ""), items
     note = _r2c("one_family_attached", 60, 100, None, dwelling_units=4, occupants=1, attached_units_in_building=3)
     assert [i["reason"] for i in note if str(i["id"]).startswith("facts.conflict")] == [
         "4 dwelling units on this lot but 3 in the attached building: part of another building may be on this lot, "
-        "or one of the counts is off"]
+        "or one of the counts or the use is off"]
     # round 6: the row offers the same "Enter …" button for the two counts, not a hint with nothing behind it
     conflict = next(i for i in note if str(i["id"]).startswith("facts.conflict"))
     assert conflict["needs"] == ["dwelling_units", "attached_units_in_building"], conflict

@@ -10,15 +10,16 @@ writes one summary used everywhere (D3).
 """
 
 import ast
-import functools
+import hashlib
 import math
 import re
+import threading
 import urllib.parse
 from pathlib import Path
 
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, load, outcome, read_jsonl
+from rule_format.rulebook import MEASURE_KINDS, REPO, _jsonl_rows, load, outcome
 
 from design_checker import reading_set, rhino_logic
 
@@ -251,9 +252,74 @@ def combined(citations: list[str]) -> str:
     return "; ".join(dict.fromkeys(rest + [f"District Regulations Chart, {n}" for n in notes]))
 
 
+LINK_WORDS = 5        # the search's least length; longer only where another line on the page begins alike
+
+
+_LIST_NUMBER = r"\((?:\d+|[a-z]|[ivx]+)\)"
+
+
+def _searchable(text: str) -> list[str]:
+    """The words a PDF viewer's search finds in one run. The PDF stores a footnote marker ([fn4] is a superscript
+    digit) and a list number ("(1) ONE-FAMILY DETACHED DWELLING" on chapter 325 p.7, "HOME OCCUPATION — (1) A" on
+    p.12) apart from the words around them, so a search across one lands nowhere: leading markers are left out, and
+    the search stops before the next one."""
+    text = re.sub(r"^(?:\s*(?:\[fn\w*\]|" + _LIST_NUMBER + r"))+", "", text)
+    return re.split(r"\[fn|\s" + _LIST_NUMBER + r"(?=\s)", text)[0].split()
+
+
+def _unique_start(words: list[str], page: list[list[str]]) -> str:
+    """The first LINK_WORDS words, more if another line of the page begins with them too ("One-family dwelling,
+    detached, zero lot line - -" begins a row of both chart p.3 sections), so the search lands on this one."""
+    n = LINK_WORDS
+    while n < len(words) and sum(line[:n] == words[:n] for line in page) > 1:
+        n += 1
+    return " ".join(words[:n])
+
+
+def _page_lines(j: Path, file: str) -> dict:
+    """{(page, line): text} of one document's extracted text (2_extracted_text/<file stem>.jsonl). Kept by the
+    file's content (its SHA-256), as _chart_cells is, never by folder name: after a re-extraction in a long Rhino
+    session the next citation link searches the new text, not the old. Display only."""
+    path = j / "2_extracted_text" / (Path(file).stem + ".jsonl")
+    data = path.read_bytes() if path.exists() else b""
+    key = (str(path), hashlib.sha256(data).digest())
+    with _LINES_LOCK:
+        found = _LINES.get(key)
+    if found is None:
+        found = {(r["page"], r["line"]): r["text"] for r in _jsonl_rows(data) if "line" in r}
+        with _LINES_LOCK:
+            _LINES[key] = found
+            while len(_LINES) > 16:
+                _LINES.pop(next(iter(_LINES)))
+    return found
+
+
+_LINES: dict = {}                            # (file path, SHA-256 of its bytes) -> its {(page, line): text}
+_LINES_LOCK = threading.Lock()
+
+
+def anchor_text(source: dict, j: Path) -> str:
+    """The words a source points at on its page: its quote; for a chart cell, its row's own line, the one of the
+    cell's row lines that begins with the row label (a label alone, "One-family dwelling, detached", is a row of
+    both the lot-size and the lot-width sections of chart p.3; a cell's first row line can be a neighbouring cell's
+    wrapped words, which the PDF doesn't hold in that order); else the label."""
+    if source.get("quote"):
+        return str(source["quote"])
+    want = source.get("cell") or {}
+    label = " ".join(str(want.get("row") or "").split())
+    cell = next((c for c in _chart_cells(j) if c.get("file") == source.get("file") and c.get("page") == source.get("page")
+                 and c.get("section") == want.get("section") and " ".join(str(c.get("row", "")).split()) == label), None)
+    lines = _page_lines(j, source.get("file") or "")
+    own = [lines.get((source.get("page"), n)) or "" for n in (cell or {}).get("row_lines") or []]
+    return next((t for t in own if label and " ".join(t.split()).startswith(label)), label)
+
+
 def link(source: dict, j: Path, documents: dict) -> str:
-    """The page, plus the first words of the quote to find on it, so two sections never share a link."""
-    words = " ".join(str(source.get("quote") or (source.get("cell") or {}).get("row") or "").split()[:5])
+    """The page, plus the first words of what the source points at on it (anchor_text), so two sections never
+    share a link."""
+    words = _unique_start(_searchable(anchor_text(source, j)),
+                          [_searchable(t) for (pg, _), t in _page_lines(j, source.get("file") or "").items()
+                           if pg == source.get("page")])
     base = page_link(j, documents, source["file"], source.get("page"))
     return base + ("&search=" + urllib.parse.quote(f'"{words}"') if words else "")
 
@@ -292,6 +358,18 @@ def _fails_whatever_part(expr: str, values: dict, unknown: dict) -> bool:
     numbers = [n for n in unknown["names"] if MEASURE_KINDS.get(n) == "number" and n in formula.names(expr)]
     return all(formula.truth_direction(expr, n) == -1 for n in numbers) and all(
         _evaluate(expr, dict(values, **s)) is False for s in unknown["settings"])
+
+
+def _fails_every_reading(expr: str, values: dict, measured: dict, facts: dict) -> bool:
+    """One limit of a rule that fails under every reading of THE reading set (reading_set.combos): a measurement it
+    reads that has readings and no value (a pitched roof's height) leaves it unknown as drawn, yet it fails whichever
+    reading is taken (#20 review round 1: the eaves rows named the front yard, which passed, for a side eave that
+    failed, because every limit holds the height bonus)."""
+    names = formula.names(expr)
+    if not any(values.get(n) is None and (measured.get(n) or {}).get("readings") for n in names):
+        return False
+    every = reading_set.combos(names, values, measured, facts)
+    return bool(every) and all(_evaluate(expr, trial) is False for trial, _ in every)
 
 
 FACT_WORDS = {"sleeping_rooms": "bedrooms", "parking_spaces": "parking spaces"}   # interior facts, as asked
@@ -951,7 +1029,35 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
         unknown = row.get("Unknown")        # not measured: a limit that fails at every value they could take
         primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False
-                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)), primary)
+                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)
+                        or _fails_every_reading(ast.unparse(c), values, measured, facts)), primary)
+    elif (_status(row) == REVIEW and rule.get("review_when") and isinstance(body, ast.BoolOp)
+          and isinstance(body.op, ast.And) and all(isinstance(v, ast.Compare) for v in body.values)):
+        # a several-limit rule held back by its own review_when (its reason is the row's): name the limit that
+        # review is about, the measure it holds below a limit (the which-side eaves review: that side's eave),
+        # never simply the first limit (#18: "Eaves into front yard" for a side eave's question)
+        why_text = " ".join(str(row.get("Why") or "").split())
+        said = {" ".join(w.split()) for w in str(row.get("Why") or "").split("; ")}
+        at_least = {c.left.id for c in compares if isinstance(c.ops[0], (ast.GtE, ast.Gt))}
+        about = []                      # (measure, the limit the review holds it below), in the rule's order
+        for r in rule["review_when"]:
+            reason = " ".join(str(r.get("reason") or "").split())
+            # the row's reason is this one: a whole entry of it, or (a reason with "; " of its own) all of it in it
+            if reason and (reason in said or len(reason) > 40 and reason in why_text):
+                # each measure the review holds below a limit, where that holds as drawn (or can't be told), on a
+                # measure the rule asks to be at least something: that limit is what the review is about
+                about += [n for n in ast.walk(formula.parse(r["when"]).body)
+                          if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.left, ast.Name)
+                          and isinstance(n.ops[0], (ast.Lt, ast.LtE)) and n.left.id in at_least
+                          and _evaluate(ast.unparse(n), values) is not False]
+        failing = next((c for c in compares if _fails_every_reading(ast.unparse(c), values, measured, facts)), None)
+        if failing is not None:         # a limit failing under every reading is named first (#18 round 4)
+            primary = failing
+        elif about:
+            # the limit the question is about, as a requirement: "at least" the review's own limit (the side that
+            # may be the 10 ft one: 7'-0" against 8'-0", never against the 5 ft side's 3'-0" it already meets)
+            n = about[0]
+            primary = ast.Compare(left=n.left, ops=[ast.GtE()], comparators=n.comparators)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
@@ -1130,7 +1236,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 lo, hi = min(got), max(got)
                 required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
                             f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
-                limit_q = list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
+                # the same limit under every reading: it depends on none of them (#20 review round 1)
+                limit_q = [] if hi - lo < 1e-9 else list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
                 rest = list(dict.fromkeys(q for n in sorted(every - set(open_)) if values.get(n) is None
                                           and (measured.get(n) or {}).get("readings")
                                           for q in _questions_of(measured[n]) if q not in limit_q))
@@ -1324,16 +1431,31 @@ def _side_name(measure: str, measured: dict, plan_north_deg: float = 0.0, side_l
     return "Side yard, " + ("narrower" if measure == "side_yard_smaller" else "wider")
 
 
-@functools.lru_cache(maxsize=8)
 def _chart_cells(j: Path) -> tuple:
     """Every chart cell the extraction read (2_extracted_text/*.cells.jsonl): file, page, section, row, column,
-    value, lines."""
-    out = []
-    for f in sorted((j / "2_extracted_text").glob("*.cells.jsonl")):
-        rows = read_jsonl(f)                 # the first row names the file; then a page's columns, then each cell
-        name = rows[0].get("file") if rows else None
-        out += [dict(r, file=name) for r in rows[1:] if "column" in r and "value" in r]
-    return tuple(out)
+    value, lines. Kept by the files' content (their SHA-256), the way rule_format.rulebook keeps rulebooks, never
+    by folder name: after a re-extraction in a long Rhino session the next panel shows the new text, not the
+    old. Display only (the checker's cells come from rule_format.rulebook)."""
+    files = [(f.name, f.read_bytes()) for f in sorted((j / "2_extracted_text").glob("*.cells.jsonl"))]
+    key = tuple((name, hashlib.sha256(data).digest()) for name, data in files)
+    with _CELLS_LOCK:
+        found = _CELLS.get(key)
+    if found is None:
+        out = []
+        for _, data in files:
+            rows = _jsonl_rows(data)         # the first row names the file; then a page's columns, then each cell
+            name = rows[0].get("file") if rows else None
+            out += [dict(r, file=name) for r in rows[1:] if "column" in r and "value" in r]
+        found = tuple(out)
+        with _CELLS_LOCK:
+            _CELLS[key] = found
+            while len(_CELLS) > 8:
+                _CELLS.pop(next(iter(_CELLS)))
+    return found
+
+
+_CELLS: dict = {}                            # (file name, SHA-256 of its bytes) per file -> the cells read from them
+_CELLS_LOCK = threading.Lock()
 
 
 def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict | None:
@@ -1413,6 +1535,9 @@ ASSUMED_MAIN = "Main building: the starting house (assumed) · change it with Ma
 
 
 BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_height", "stories")
+# (model_measurement's own lists: a yard added there is never left out here)
+from model_measurement.measure import ACCESSORY_YARDS, EAVE_YARDS  # noqa: E402
+LEFT_OUT_ACCESSORY = ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply")
 
 
 def _raise_yards(items, measured, values, facts):
@@ -1454,12 +1579,14 @@ def _raise_yards(items, measured, values, facts):
         i.pop("_raises", None)
 
 
-def _cautious_for_left_out(items, left_out, touching):
+def _cautious_for_left_out(items, left_out, touching, rules_by_id=None):
     """Solids on the lot that aren't measured can change a result that looks like it complies (never a false
     pass): lot coverage counts every building on the lot, principal and accessory (§325-8A), so it needs review
     whenever one is left out; one touching the building may be part of it (a porch or deck counts in the yards,
-    §325-18A), so then the yards, height and stories need review too. `touching` is the ids of the left-out solids
-    that touch the measured buildings; not given, any of them might."""
+    §325-18A), so then the yards (to the walls and to the eaves), height and stories need review too. Any of them
+    may itself be an accessory building (§325-25), so the accessory buildings' count and distances need review
+    whenever one is left out. An item counts by every measurement its rule's formula reads, not only its own.
+    `touching` is the ids of the left-out solids that touch the measured buildings; not given, any of them might."""
     if not left_out:
         return
     n = len(left_out)
@@ -1468,14 +1595,63 @@ def _cautious_for_left_out(items, left_out, touching):
     for i in items:
         if i["status"] != COMPLIES:
             continue
-        if i.get("measure") == "building_area":
+        reads = _formula_names(i, rules_by_id) | ({i.get("measure")} - {None})
+        if "building_area" in reads:
             why = f"Complies for the buildings measured; {some}, and lot coverage counts every building on the lot"
-        elif i.get("measure") in BUILDING_MEASURES and near:
+        elif reads & set(LEFT_OUT_ACCESSORY):
+            why = f"Complies for the buildings measured; {some}, and one may be an accessory building (§325-25)"
+        elif reads & set(BUILDING_MEASURES + EAVE_YARDS) and near:
             why = (f"Complies for the buildings measured; {len(near)} object{'s' if len(near) != 1 else ''} "
                    "touching the building isn't measured (a porch or deck is part of the building, §325-18A)")
         else:
             continue
         i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=why + " · Add to check…")
+
+
+# What each looked-up fact decides (facts["unsettled"]): every measurement worked out from it. The lot outline decides
+# the lot's area, width and depth and every yard; the street side decides which line is the front, so the yards and
+# the lot's width and depth; the ground decides height and stories. An item needs review when ANY name in its rule's
+# formula is one of them, not only its own measurement: the height bonus (§325-16C) complies through the yards and
+# the lot depth (review round 1 of PR #19: it stayed "complies" on a doubtful lot).
+# Every measurement worked out from the lot lines is model_measurement's own list (LOT_LINE_MEASURES: the main
+# yards, their eaves and the accessory buildings' yards): one list, so a yard added there is never left out here
+# (the merge of #18 onto main left the accessory yards out: accessory_buildings stayed "complies" on a doubtful lot).
+from model_measurement.measure import LOT_LINE_MEASURES  # noqa: E402
+UNSETTLED_DECIDES = {
+    "lot": ("lot_area",) + LOT_LINE_MEASURES,
+    "street": LOT_LINE_MEASURES,
+    "ground": ("building_height", "stories"),
+}
+UNSETTLED_NAMES = {"lot": "lot outline", "street": "street side", "ground": "ground levels"}
+
+
+def _formula_names(item, rules_by_id):
+    """Every measurement the item's rule reads (its formula), else its own measurement."""
+    rule = (rules_by_id or {}).get(item.get("rule")) or {}
+    try:
+        return set(formula.names(rule["check"])) if rule.get("check") else {item.get("measure")} - {None}
+    except Exception:                            # a formula that can't be read: its own measurement, at least
+        return {item.get("measure")} - {None}
+
+
+def _cautious_for_unsettled(items, unsettled, rules_by_id=None):
+    """A looked-up fact found doubtful, not yet confirmed or changed by the architect: every item whose rule reads a
+    measurement worked out from it needs review (coordinator, 2026-10-20: never a false pass)."""
+    for key, why in (unsettled or {}).items():
+        decides = set(UNSETTLED_DECIDES.get(key) or ())
+        for i in items:
+            if i["status"] != COMPLIES or not (_formula_names(i, rules_by_id) & decides):
+                continue
+            i.update(status=REVIEW, mark=MARK[REVIEW], hint="Edit site…",
+                     reason=f"Complies on the looked-up {UNSETTLED_NAMES[key]}, which needs review: {why} · "
+                            "confirm it (I checked this) or change it in Edit site…")
+
+
+def _on_context(extras):
+    """The left-out objects on the neighbourhood's layers (PR #23: its footprints are editable), said on the row."""
+    k = len((extras or {}).get("context_left_out") or [])
+    return (f" · {k} on the neighbourhood layers (Gordium::Context): move {'them' if k != 1 else 'it'} to the "
+            "Building layer if part of your design") if k else ""
 
 
 def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction=None) -> dict:
@@ -1499,7 +1675,8 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                             use_names)
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
-    _cautious_for_left_out(items, left_out, extras.get("touching"))
+    _cautious_for_left_out(items, left_out, extras.get("touching"), rules_by_id)
+    _cautious_for_unsettled(items, facts.get("unsettled"), rules_by_id)
     for i in items:                                  # THE guard: never above the checker's verdict (round 3)
         checker = i.pop("_checker", None)
         if checker is not None and RANK[i["status"]] > RANK[checker]:
@@ -1535,7 +1712,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "points": None, "hint": "Add to check…",
                       "ground_like": [o for o in extras.get("ground_like") or [] if o in left_out],
                       "reason": f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t "
-                                "measured (not on the Building layer) · Add to check…" + (
+                                "measured (not on the Building layer) · Add to check…" + _on_context(extras) + (
                                     f" (" + str(len(extras.get("ground_like") or [])) + " looks like the ground: if it is, "
                                     "This is the ground)" if extras.get("ground_like") else ""),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
@@ -1593,6 +1770,9 @@ def grade_label(facts: dict) -> str:
     elevation 0'-0"", or "not set"."""
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
     if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
+        if facts.get("ground_fall"):                          # a lookup found the ground: say plainly how it falls
+            return (f"assumed flat (the looked-up ground falls about {facts['ground_fall']:g} ft across the lot; "
+                    "height is checked as if flat)")
         return f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)})"   # the team's words
     points = facts.get("grade_points") or []
     if points:
