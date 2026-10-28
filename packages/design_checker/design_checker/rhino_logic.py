@@ -2245,6 +2245,43 @@ def lookup_answer(text, query=None):
     return {"status": "error", "query": query, "detail": "the lookup printed no answer"}
 
 
+# each tick or source the start box keeps across picks, and the box field it is about (Cancel lookup, below)
+TICK_FIELDS = (("district_confirmed", "zone"), ("zone_source", "zone"), ("use_source", "use"),
+               ("address_source", "address"), ("corner_source", "corner_lot"))
+
+
+def lookup_fields(state):
+    """What the start box's ticks and sources are about, as the box says it when Look up is pressed: kept with the
+    ticks, so Cancel lookup can tell which of them still belong to what the box shows (ticks_after_cancel)."""
+    return {"zone": state.get("zone"), "use": state.get("use"), "address": state.get("address"),
+            "corner_lot": state.get("corner_lot"), "doubts": dict(state.get("doubts") or {})}
+
+
+def ticks_after_cancel(before_ticks, before_fields, state):
+    """The start box's ticks and sources after Cancel lookup. The box and its dropdowns stay usable while a lookup
+    runs, so the architect may have changed the district, the use, the address or the corner answer meanwhile. Each
+    tick or source as it was when Look up was pressed (`before_ticks`, with `before_fields` from lookup_fields) comes
+    back only if its field is unchanged since (`state`: the box as it is at Cancel lookup); otherwise the box's own
+    now. A district tick given to one district never moves to another: "This is the lot's district" ticked on R-1b
+    and the district changed to R-3a during the lookup leaves R-3a's tick as the box shows it (unticked unless the
+    architect ticked it there), so Draw stays off until R-3a itself is confirmed (never a false pass: the rules
+    checked would be R-3a's), and its source stays "entered by you", never the lookup's suggestion. "I checked this"
+    comes back for a doubt only if that doubt is as it was. (Review of #32, 2026-10-28.)"""
+    before_ticks, before_fields = before_ticks or {}, before_fields or {}
+    out = {}
+    for tick, field in TICK_FIELDS:
+        same = field in before_fields and before_fields[field] == state.get(field)
+        source = before_ticks if same else state
+        if tick in source:
+            out[tick] = source[tick]
+    if "checked" in before_ticks or "checked" in state:
+        was, now = before_fields.get("doubts"), state.get("doubts") or {}
+        then, shown = set(before_ticks.get("checked") or []), set(state.get("checked") or [])
+        out["checked"] = sorted(k for k in then | shown
+                                if k in (then if was is not None and was.get(k) == now.get(k) else shown))
+    return out
+
+
 def lookup_cancelled(saved_ui, before):
     """The box's choices after Cancel lookup: as they were before Look up was pressed (`before`: the lookup line
     then, None for none), saying it was cancelled. Nothing else changes: the lookup only ever fills the box when its

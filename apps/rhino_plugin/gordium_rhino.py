@@ -2159,7 +2159,8 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         facts, saved_ui, go, state = _draw_prepare(doc, facts, state, saved_ui, session, mode, options)
         return _drawn(doc, facts, state, saved_ui, session, mode) if go and state is not None else None
     ticked = {}                       # this box session's ticks and changed sources, kept across picks
-    before_lookup = {}                # ...as they were when the running lookup started (Cancel lookup)
+    before_lookup = {}                # ...as they were when the running lookup started (Cancel lookup),
+    before_fields = {}                # and what they were about then (the district, use, address, corner, doubts)
     while True:
         state = dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)
         state["_on_shown"] = STATE.get("on_box_shown")     # the dialog capture in the in-Rhino test
@@ -2185,11 +2186,12 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         # the lookup's answer replaces them (and the district must be confirmed again); by hand undoes it (a tick
         # given its district never moves to another)
         if what == "pick:lookup":
-            before_lookup, ticked = ticked, {}
+            before_lookup, before_fields, ticked = ticked, logic.lookup_fields(state), {}
         elif what in ("pick:lookup_done", "pick:use_saved"):
             ticked = {}
-        elif what == "pick:lookup_cancel":                # cancelled: the box as it was before Look up, ticks too
-            ticked = before_lookup
+        elif what == "pick:lookup_cancel":    # cancelled: the ticks as before Look up, each only if what it is
+            ticked = logic.ticks_after_cancel(before_lookup, before_fields, state)   # about is unchanged (never
+            #                                   a district's tick moved to another district changed meanwhile)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
         facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)

@@ -293,7 +293,8 @@ def test_the_wait_window_closes_when_the_job_is_done_or_cancelled():
     assert 'status["label"].Text = progress()' in box
     assert "lookup_cancel" in part(RHINO, "def _one_pick(", "def _pick_outcome(")
     loop = part(RHINO, "def _box_loop(", "# ---- the address lookup")
-    assert 'before_lookup, ticked = ticked, {}' in loop and 'ticked = before_lookup' in loop
+    assert 'before_lookup, before_fields, ticked = ticked, logic.lookup_fields(state), {}' in loop
+    assert 'ticked = logic.ticks_after_cancel(before_lookup, before_fields, state)' in loop
 
 
 # ---- Rhino run of aea73b8 (#32) and a3eb1d7 (#33): a frozen wait window, and Draw again after a Cancel ------------
@@ -630,6 +631,87 @@ def test_r2_every_command_that_opens_a_box_ends_its_undo_step_before_the_check()
     start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
     assert "_end_undo(doc)" in start[start.index("    finally:"):]
 
+
+
+# ---- review of #32's Cancel lookup (2026-10-28): a district tick never moves to a district changed meanwhile ------
+
+LIVE = "suggested by Gordium · City zoning map, used live"
+
+
+def test_cancel_lookup_restores_a_tick_only_for_a_field_unchanged_since_look_up():
+    """The district, use, address and corner answer stay usable while a lookup runs. Cancel lookup put back every
+    tick and source from before Look up, so a district ticked on R-1b and changed to R-3a during the lookup came
+    back ticked on R-3a with the lookup's "suggested" source: Draw on for a district never confirmed, and a false
+    source saved into the file. Each comes back only if its own field is unchanged; otherwise the box's now."""
+    before = {"district_confirmed": True, "zone_source": LIVE, "use_source": LIVE, "address_source": LIVE,
+              "corner_source": LIVE, "checked": ["lot", "street"]}
+    fields = logic.lookup_fields({"zone": "R-1b", "use": "one_family", "address": "106 Ithaca Rd", "corner_lot": False,
+                                  "doubts": {"lot": "a", "street": "b"}})
+    now = {"zone": "R-3a", "district_confirmed": False, "zone_source": logic.ENTERED, "use": "two_family",
+           "use_source": logic.ENTERED, "address": "200 Elm St", "address_source": logic.ENTERED, "corner_lot": True,
+           "corner_source": logic.ENTERED, "checked": [], "doubts": {"lot": "a", "street": "c"}}
+    got = logic.ticks_after_cancel(before, fields, now)
+    assert got == {"district_confirmed": False, "zone_source": logic.ENTERED, "use_source": logic.ENTERED,
+                   "address_source": logic.ENTERED, "corner_source": logic.ENTERED,
+                   "checked": ["lot"]}           # the lot's doubt as it was: its tick back; the street's changed
+    same = dict(now, zone="R-1b", use="one_family", address="106 Ithaca Rd", corner_lot=False,
+                doubts={"lot": "a", "street": "b"})
+    assert logic.ticks_after_cancel(before, fields, same) == before          # nothing changed: as before Look up
+    # only the district changed: only its tick and source are the box's now
+    assert logic.ticks_after_cancel(before, fields, dict(same, zone="R-3a", district_confirmed=False,
+                                                         zone_source=logic.ENTERED)) == dict(
+        before, district_confirmed=False, zone_source=logic.ENTERED)
+    # a district ticked during the lookup on the new district is the architect's own (the box's now)
+    assert logic.ticks_after_cancel(before, fields, dict(same, zone="R-3a", district_confirmed=True,
+                                                         zone_source=logic.ENTERED))["district_confirmed"] is True
+    # no Look up recorded: nothing from before is put back
+    assert logic.ticks_after_cancel({}, {}, now) == {k: now[k] for k in before}
+
+
+def _run_box_loop(script):
+    """gordium_rhino._box_loop itself, run with the box replaced by `script`: one (change, what) per showing of the
+    box, `change` applied to what the box shows as the architect would (ui.start_box's keep()). Returns each state
+    the box was shown with."""
+    import ast
+    tree = ast.parse(RHINO)
+    fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_box_loop")
+    shown, steps = [], list(script)
+
+    def start_box(state, options, mode):
+        shown.append(dict(state))
+        change, what = steps.pop(0)
+        state.update(change)
+        return what
+
+    def box_state(doc, facts, options, saved_ui, mode):     # the box as the file and the session's choices say it
+        return {"zone": facts["zone"], "district_confirmed": False, "zone_source": saved_ui.get("zone_source", LIVE),
+                "use": "one_family", "use_source": LIVE, "address": "106 Ithaca Rd", "address_source": LIVE,
+                "corner_lot": False, "corner_source": LIVE, "checked": [], "doubts": {}}
+
+    def apply_box(doc, facts, state, saved_ui):
+        return dict(facts, zone=state["zone"]), logic.saved_sources(saved_ui, state)
+
+    ns = {"STATE": {}, "logic": logic, "GUIDE_KEEPS": (), "ui": type("UI", (), {"start_box": staticmethod(start_box)}),
+          "_box_state": box_state, "_apply_box": apply_box,
+          "_box_pick": lambda doc, what, facts, saved_ui, session: (facts, saved_ui)}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), "gordium_rhino.py", "exec"), ns)
+    assert ns["_box_loop"](None, {"zone": "R-1b"}, {}, "check", {}, None) is None
+    return shown
+
+
+def test_the_box_loop_after_cancel_lookup_never_ticks_a_district_changed_meanwhile():
+    """The reviewer's case, through the box loop itself: R-1b ticked, Look up, the district changed to R-3a while it
+    runs (the box shows it unticked, entered by you), Cancel lookup. The box then showed R-3a ticked, "suggested by
+    Gordium · City zoning map, used live", and Draw on."""
+    shown = _run_box_loop([({"district_confirmed": True}, "pick:lookup"),
+                           ({"zone": "R-3a", "district_confirmed": False, "zone_source": logic.ENTERED},
+                            "pick:lookup_cancel"),
+                           ({}, None)])
+    after = shown[-1]
+    assert (after["zone"], after["district_confirmed"], after["zone_source"]) == ("R-3a", False, logic.ENTERED)
+    # the district unchanged: Cancel lookup gives the tick back, as before Look up
+    shown = _run_box_loop([({"district_confirmed": True}, "pick:lookup"), ({}, "pick:lookup_cancel"), ({}, None)])
+    assert shown[1]["district_confirmed"] is False and shown[-1]["district_confirmed"] is True
 
 def test_r2_a_report_not_written_after_a_file_switch_is_said_with_one_full_stop():
     said = logic.outdated_report_message("/x/r.xlsx", logic.NOT_IN_FRONT, True)
