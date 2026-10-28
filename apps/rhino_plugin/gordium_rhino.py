@@ -3427,6 +3427,9 @@ def switch_side_yards():
     as one Undo step. The new house is proven by the checker like the first (a house that would break a rule is
     never drawn: the old one stays and the panel says why); a house the architect has changed is never redrawn."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every file closed: say what to do, touch nothing
+        say(logic.NO_DOCUMENT)
+        return None
     found = _start_floors(doc)
     plan = logic.switch_plan([(text, box, volume, locked) for _, text, box, volume, locked in found], tolerance=_feet_length(
         doc, doc.ModelAbsoluteTolerance) + 0.01)
