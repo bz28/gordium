@@ -124,7 +124,7 @@ def _plugin(doc, said):
           "current_facts": lambda doc: {"lot_id": "lot1", "zone": "R-1b"},
           "_lot_candidates": lambda doc: [type("L", (), {"Id": "lot1"})(), type("L", (), {"Id": "lot2"})()],
           "_buildings": lambda doc: [obj(), obj()], "_pick": lambda doc, prompt, objs, kind, *a: "lot2"
-          if kind == "Lot" else "b2", "_count": lambda prompt: 2, "_ask_yes_no_or_skip": lambda prompt: True,
+          if kind == "Lot" else "b2", "_count": lambda prompt, least=0: 2, "_ask_yes_no_or_skip": lambda prompt: True,
           "_layer": lambda doc, name: 0, "_find": lambda doc, i: obj(), "report_path": lambda doc: "/nowhere.xlsx",
           "time": __import__("time"), "_clear": lambda o: None, "JURISDICTION": "ithaca",
           "ask": lambda request: {"zones": []}, "suggested_facts": lambda doc, zones: {},
@@ -188,7 +188,7 @@ def test_a_refused_count_leaves_the_file_as_it_was_and_no_undo_step():
     assert doc.records == [] and doc.outside == [] and doc.UndoRecordingEnabled
     assert doc.Strings.data[("Gordium", "lot_facts")] == stored and checks == [2, 3]
     assert said == ["1 story. The count wasn't kept."]
-    ns["_count"] = lambda prompt: 4                                       # a count it keeps: one step, one check
+    ns["_count"] = lambda prompt, least=0: 4                                      # a count it keeps: one step, one check
     checks.clear()
     ns["_actions"]()["enter"](["stories"])
     assert doc.records == [logic.UNDO_WORDS["enter"]] and doc.outside == [] and checks == [4]
