@@ -339,7 +339,8 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
         facts["zone"] = fact(None, src["name"], src["url"], today, "needs_review",
                              "Couldn't reach the City's zoning map: choose the district.", key="city_zoning", lot=lot)
         _overlays(f, ring, city_parcel, src, today, facts, lot,
-                  ["Overlays on the City's zoning map (" + ", ".join(OVERLAYS) + "): couldn't check"])
+                  ["Overlays on the City's zoning map (" + "; ".join(_overlay_name(c) for c in OVERLAYS)
+                   + "): couldn't check"])
         return
     samples = g.grid_inside(ring)
     # every polygon under each point counts, never only the first: the map draws overlays (SHOD...) on top of the
@@ -357,7 +358,7 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
         on_map += bool(base)
     shares = {z: n / len(samples) for z, n in counts.items()} if samples else {}
     zones = sorted((z for z, s in shares.items() if s >= ZONE_SHARE_MIN), key=lambda z: -shares[z])
-    map_overlays = [f"{OVERLAYS[c].split(':')[0].strip()} ({c}) on the City's zoning map"
+    map_overlays = [f"{_overlay_name(c)} on the City's zoning map"
                     for c in sorted(over) if samples and over[c] / len(samples) >= ZONE_SHARE_MIN]
     when = edited.isoformat() if edited else "unknown"
     source = f"{src['name']}, last edited {when}: a suggestion to confirm"
@@ -401,6 +402,12 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     if notes:
         z["note"] = " ".join(([z["note"]] if z.get("note") else []) + notes)
     _overlays(f, ring, city_parcel, src, today, facts, lot, map_overlays)
+
+
+def _overlay_name(code: str) -> str:
+    """An overlay as the architect reads it: its name from names.yaml, then the map's code ('Adult Use Overlay
+    Zone (Adult Us)')."""
+    return f"{OVERLAYS[code].split(':')[0].strip()} ({code})"
 
 
 def _date(v) -> dt.date | None:
