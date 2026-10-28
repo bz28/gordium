@@ -151,6 +151,8 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     notes += env["notes"]
     if not env["outline"]:
         notes.append("no buildable area to start from")
+        if any("leave no room" in n for n in env["notes"]):     # the yards close the lot: the architect draws one
+            notes.append(CANT)
         return out
     if env["height"] is None or env["base"] is None:
         notes.append("no height limit or ground level: the building's height can't be set")

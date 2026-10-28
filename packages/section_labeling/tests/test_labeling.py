@@ -595,9 +595,9 @@ def test_first_full_run_is_the_earliest_not_the_largest():
 
 def test_methods_doc_says_where_the_category_definitions_labels_came_from():
     """methods.md says the three category-vs-limit definitions are Haiku's first-full-run answers (their
-    review corrections undone), each with an open question. Worked out from the records: the sentence is
-    there exactly when every one of them is unrevised, matches a first-full-run answer word for word, and has
-    an open question; and the doc never says they come from review revisions."""
+    review corrections undone), each settled by research as a category. Worked out from the records: the
+    sentence is there exactly when every one of them is unrevised, matches a first-full-run answer word for
+    word, and has the category finding; and the doc never says they come from review revisions."""
     from rule_format.rulebook import REPO
     labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
     calls = [c for c in cli.run_records(ITHACA) if c.get("answer")]
@@ -607,8 +607,9 @@ def test_methods_doc_says_where_the_category_definitions_labels_came_from():
                    and {k: json.loads(c["answer"]).get(k) for k in ("label", "reason")}
                    == {"label": labels[pid]["label"], "reason": labels[pid]["reason"]} for c in calls)
     pieces = ("325-3B:kitchen", "325-3B:adult_day_care_home", "325-3B:bed_and_breakfast_inn")
-    holds = all(not labels[pid].get("revised") and labels[pid].get("open_questions") and first_run_answer(pid)
-                for pid in pieces)
+    def category(pid):
+        return any(f["id"].endswith("_is_a_category") for f in labels[pid].get("findings", []))
+    holds = all(not labels[pid].get("revised") and category(pid) and first_run_answer(pid) for pid in pieces)
     doc = (REPO / "docs/methods.md").read_text(encoding="utf-8")
     assert ("Haiku's answers from the first full run" in doc) == holds
     assert "come from recorded review revisions" not in doc

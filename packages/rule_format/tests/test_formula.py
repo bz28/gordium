@@ -194,6 +194,32 @@ def test_a_margin_at_the_limit_is_zero_exactly_where_the_comparison_complies():
             evaluate("rear_yard >= 0.2 * lot_depth", {"rear_yard": at, "lot_depth": n}, KINDS)
 
 
+@pytest.mark.parametrize("text, direction", [
+    # the eaves rule: the requirement only grows with the height (the §325-16C bonus), so it is truest at h = 0
+    ("front_yard_eaves >= 25 + max(building_height - 35, 0) - 2", -1),
+    ("front_yard_eaves >= 25 + max(building_height - 35, 0) - 2 and rear_yard_eaves >= 3", -1),
+    ("building_height <= 35", -1),
+    ("building_height >= 40", 1),
+    ("not building_height <= 35", 1),
+    ("2 * building_height > front_yard", 1),
+    ("front_yard >= building_height / 2", -1),
+    ("front_yard >= 25", 0),                                      # doesn't use it
+    # not proven: equality, a product of two measures, an if-else, two directions at once, a chain
+    ("building_height == 30", None),
+    ("front_yard >= building_height * lot_depth", None),
+    ("front_yard >= (10 if building_height > 35 else 5)", None),
+    ("building_height <= 35 and building_height >= 20", None),
+    ("20 <= building_height <= 35", None),
+    ("front_yard >= 0 * building_height", None),
+    ("front_yard >= -1 * building_height", None),
+])
+def test_how_a_conditions_truth_moves_as_a_measure_grows(text, direction):
+    """Review round 12 (decided 2026-10-21): a rule that fails for every value an unmeasured number could take
+    does not comply; that rests on this proof from the formula's structure, never on sampling."""
+    from rule_format.formula import truth_direction
+    assert truth_direction(text, "building_height") == direction
+
+
 def test_a_number_used_as_true_false_is_refused_by_its_type_whatever_its_value():
     for value in (50, None):
         with pytest.raises(EvaluationError, match=r"'not' needs a true/false test"):

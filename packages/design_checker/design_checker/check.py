@@ -11,12 +11,14 @@ show in red, the envelope and the plan.
 """
 
 import ast
+import itertools
 import math
 import os
 import re
 import tempfile
 from pathlib import Path
 
+import shapely
 import yaml
 
 from design_checker import present, reading_set
@@ -96,21 +98,164 @@ def _n(x) -> str:
     return f"{x:,.2f}".rstrip("0").rstrip(".") if isinstance(x, float) else f"{x:,}"
 
 
-def _why(row: dict, rules: dict, measured: dict) -> dict:
+def _why(row: dict, rules: dict, measured: dict, allowed: dict | None = None, facts: dict | None = None) -> dict:
     """The row, plus "Why": for a NEEDS REVIEW row whose measurements are missing, why each is missing (the
-    measuring's own reason: "a building isn't inside the lot", "enter bedrooms / parking spaces"), else the
-    report's reason."""
+    measuring's own reason: "a building isn't on the lot (is it part of this design?)", "enter bedrooms / parking spaces"), else the
+    report's reason. A rule's own review_when that holds under every reading of THE reading set (with `allowed`)
+    comes first, and the readings of a measurement then change nothing, so their question is left out: the rule's
+    own question, never one that changes nothing (#20 review round 1: an eaves row asking which side is the 10 ft one
+    said instead to ask the City how a pitched roof's height is taken, though every height reading gave the same
+    answer)."""
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
         rule = rules[row["Rule id"]]
+        own = _review_reasons(rule, measured, allowed, facts) if allowed is not None else []
         for name in sorted(set().union(*(formula.names(rule[k]) for k in ("applies_when", "check") if rule.get(k)))):
+            if own and (measured.get(name) or {}).get("readings"):
+                continue                # needs review under every one of its readings: it changes nothing
             reason = (measured.get(name) or {}).get("reason")
             if (measured.get(name) or {}).get("value") is None and reason and reason not in reasons:
                 reasons.append(reason)
+        reasons = own + reasons
     return {**row, "Why": "; ".join(reasons) or row["Why it needs review"]}
 
 
+def _review_reasons(rule: dict, measured: dict, allowed: dict, facts: dict | None) -> list[str]:
+    """The reasons of a rule's review_when entries that hold under every reading of THE reading set (a needs-review
+    the rule itself asks for, whatever the open measurements turn out to be), in the rule's order."""
+    from rule_format.rulebook import _condition
+    entries = rule.get("review_when") or []
+    if not entries:
+        return []
+    names = reading_set.rule_names(rule)
+    values = {k: m["value"] for k, m in measured.items()}
+    every = reading_set.combos(names, values, measured, facts)
+    if not every:
+        return []
+    kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
+    out = None
+    for trial, _ in every:
+        if outcome(rule, trial, allowed) != "needs_review":
+            return []
+        held = []
+        for r in entries:
+            try:
+                if _condition(r["when"], trial, kinds):
+                    held.append(" ".join(str(r.get("reason") or "").split()))
+            except Exception:                   # a condition that can't be read under this reading
+                pass
+        out = list(dict.fromkeys(h for h in held if h)) if out is None else [h for h in out if h in held]
+        if not out:                             # none holds under every reading: the readings' own questions
+            return []
+    return out or []
+
+
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn
+MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked out (stays a plain NEEDS REVIEW)
+
+
+MODEL_WORDS = {"model#eave": {"eave": "what reaches past the walls an eave",
+                               "not_eave": "what reaches past the walls not an eave"},
+               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"},
+               "model#narrower": {}}          # its readings say their own line: "the side along lot line 3 …"
+EAVE_YARD_WORDS = {"front_yard": "front yard", "side_yard_smaller": "side yard", "side_yard_larger": "side yard",
+                 "rear_yard": "rear yard"}
+
+
+def _reading_words(tag: str, rid: str) -> str:
+    for model, words in MODEL_WORDS.items():          # measure.EAVE (per solid for the height), measure.PROJ
+        if tag == model or tag.startswith(model + ":"):
+            return words.get(rid, rid)
+    return rid.replace("_", " ")
+
+
+def _eave_text(found: dict, measured: dict) -> str | None:
+    """For a row that needs review only because something might be an eave: what to confirm, in plain words
+    ("confirm the part reaching 1'-6" past the walls toward the front yard is an eave (§325-18B allows up to 2 ft
+    into a required yard)"), or None when the eave question isn't what decides it."""
+    tags = found["tags"]
+    if not any(t == "model#eave" or t.startswith("model#eave:") for t in tags) or found["result"] != "mixed":
+        return None
+    if any(MODEL_WORDS["model#eave"]["eave"] in w for w in found["fails_under"]):
+        return None                         # it fails even with the overhang an eave: not just a confirmation
+    reach = []
+    for yard in dict.fromkeys(EAVE_YARD_WORDS.values()):
+        # each reading read with the overhang an eave, against the same reading (the same lot lines, the same
+        # other answers) with it not, to the same lot line: the most it reaches, over every reading, never one
+        # reading picked by the order the readings came in (stress F7), never the narrower side yard under one
+        # reading against the other side's under another (review round 15: the two side yards are paired by line)
+        pairs = {}
+        for name in (n for n, y in EAVE_YARD_WORDS.items() if y == yard):
+            for r in (measured.get(name) or {}).get("readings") or []:
+                side = (r.get("named") or {}).get("model#eave")
+                if side in ("eave", "not_eave") and r.get("value") is not None:
+                    rest = tuple(sorted((t, v) for t, v in r["named"].items() if t != "model#eave"))
+                    words = "; ".join(w for w in r["reading"].split("; ")
+                                      if not w.startswith("what reaches past the walls"))
+                    line = tuple(r["line"]) if r.get("line") is not None else name
+                    pairs.setdefault((rest, words, line), {})[side] = r["value"]
+        gaps = [p["eave"] - p["not_eave"] for p in pairs.values() if "eave" in p and "not_eave" in p]
+        if gaps and max(gaps) > 1e-6:
+            reach.append(f"{present.feet_inches(max(gaps), 'up')} past the walls toward the {yard}")
+    where = ("the part reaching " + "; ".join(dict.fromkeys(reach))) if reach else "what the roof reaches past the walls"
+    return (f"it complies only if {where} is an eave (§325-18B allows eaves up to 2 ft into a required yard). "
+            "Gordium will ask you to confirm it in the panel in the next release; until then this stays needs review")
+
+
+def readings_of(rule: dict, measured: dict, allowed: dict) -> dict | None:
+    """Every combination of the readings a rule's open measurements have, and the rule's outcome under each:
+    {"result": "pass" | "fail" | "mixed", "named": every reading is one research lists (by question), "tags",
+    "fails_under" / "passes_under": the named readings each way, "combos": the values of each combination}.
+    None when a measurement has no reading, or there are too many.
+
+    Readings research lists are combined question by question: one answer to an open question holds for the
+    whole design (a garage's roof and the house's are read with the same eave). Any other reading (a jog as a
+    side or a rear line, a solid that may be a deck) varies on its own, which covers every real combination."""
+    names = set()
+    for key in ("applies_when", "check"):
+        if rule.get(key):
+            names |= formula.names(rule[key])
+    for r in rule.get("review_when") or []:
+        names |= formula.names(r["when"])
+    open_ = sorted(n for n in names if (measured.get(n) or {}).get("value") is None)
+    readings = {n: (measured.get(n) or {}).get("readings") or [] for n in open_}
+    if not open_ or any(not readings[n] for n in open_):
+        return None
+    tags = sorted({t for n in open_ for r in readings[n] for t in r.get("named") or {}})
+    ids = [sorted({r["named"][t] for n in open_ for r in readings[n] if t in (r.get("named") or {})}) for t in tags]
+    if math.prod(len(i) for i in ids) > MAX_COMBINATIONS:
+        return None
+    values = {k: m["value"] for k, m in measured.items()}
+    named, combos, fails, passes, got, total = bool(tags), [], [], [], set(), 0
+    for picked in itertools.product(*ids):
+        answer = dict(zip(tags, picked))
+        choices = []
+        for n in open_:
+            fits = list(dict.fromkeys(r["value"] for r in readings[n]
+                                      if all(answer.get(t) == v for t, v in (r.get("named") or {}).items())))
+            if not fits:
+                return None
+            # named: under each answer the measurement has one value (readings that differ only in other ways but
+            # give the same number leave nothing else open)
+            named &= len(fits) == 1 and all(r.get("named") for r in readings[n])
+            choices.append(fits)
+        total += math.prod(len(c) for c in choices)
+        if total > MAX_COMBINATIONS:
+            return None
+        here = set()
+        for combo in itertools.product(*choices):
+            trial = {**values, **dict(zip(open_, combo))}
+            here.add(outcome(rule, trial, allowed))
+            combos.append(trial)
+        got |= here
+        words = ", ".join(_reading_words(t, v) for t, v in answer.items())
+        if "fail" in here or "needs_review" in here:
+            fails.append(words)
+        if here == {"pass"}:
+            passes.append(words)
+    result = "pass" if got == {"pass"} else "fail" if got == {"fail"} else "mixed"
+    return {"result": result, "named": named, "tags": tags, "fails_under": fails, "passes_under": passes,
+            "combos": combos, "open": open_}
 
 
 def every_reading(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> tuple[str, str] | None:
@@ -136,6 +281,99 @@ def every_reading(rule: dict, measured: dict, allowed: dict, facts: dict | None 
     return got.pop(), (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
                        f"{word} under every reading" +
                        (" and with the lot as drawn (confirm the survey)" if survey else ""))
+
+
+def fails_whatever(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> dict | None:
+    """The every-reading rule for values that aren't measured or given at all (decided 2026-10-21): a rule that
+    fails for every value they could take does not comply. Returns {"names": the unknown measurements, "settings":
+    the values it was proven under}, or None.
+
+    Proven, never sampled. Each unknown number (no value, no readings) is one the rule's check is provably truest
+    at when it is 0 (formula.truth_direction -1: only +, -, max/min and positive multiples of it, compared with
+    < <= > >=; the §325-16C height bonus is one): it is taken at 0 (measures are never negative). Each unknown
+    yes/no fact is tried both ways. None of them is in the rule's applies_when or review_when. The rule fails
+    under every one of those settings: then it fails whatever they are. Any other unknown (a text, a number not
+    proven), or a pass under any setting, and it is None. Never the other way: missing data never makes a rule
+    comply (principle 4)."""
+    if rule.get("kind") != "rule" or not rule.get("check"):
+        return None
+    side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
+    for r in rule.get("review_when") or []:
+        side |= formula.names(r["when"])
+    names = reading_set.rule_names(rule)
+    unknown = sorted(n for n in names if (measured.get(n) or {}).get("value") is None
+                     and not (measured.get(n) or {}).get("readings"))
+    if not unknown or any(n in side for n in unknown):
+        return None
+    numbers = [n for n in unknown if MEASURE_KINDS.get(n) == "number"]
+    yes_no = [n for n in unknown if MEASURE_KINDS.get(n) == "boolean"]
+    if len(numbers) + len(yes_no) != len(unknown) or any(
+            formula.truth_direction(rule["check"], n) != -1 for n in numbers):
+        return None
+    values = {k: m["value"] for k, m in measured.items()}
+    settings = [{**{n: 0 for n in numbers}, **dict(zip(yes_no, ways))}
+                for ways in itertools.product((False, True), repeat=len(yes_no))]
+    # the rest over THE reading set (each reading of what has readings; on a tax-map lot the lines' slack and the
+    # lot area's low and high): it fails whatever the unknown values are only if it fails under every one of them
+    every = reading_set.combos(names - set(unknown), values, measured, facts)
+    if every is None:
+        return None
+    trials = [t for t, _ in every] or [values]
+    if all(outcome(rule, {**t, **s}, allowed) == "fail" for t in trials for s in settings):
+        return {"names": unknown, "settings": settings}
+    return None
+
+
+def waits_on_interior(row: dict, rule: dict, measured: dict, allowed: dict) -> bool:
+    """Whether a row goes in its own group, "not checked yet: interior": it needs review only because a fact about
+    the inside of the building (INTERIOR) isn't given, and it isn't already proven to fail whatever that fact is
+    (fails_whatever, run first: nothing that fails is ever hidden; #20 review round 2)."""
+    names = formula.names(rule["check"]) if rule.get("check") else set()      # a flag has no check
+    return (row["Error"] == "NEEDS REVIEW"
+            and any((measured.get(n) or {}).get("value") is None for n in names & INTERIOR)
+            and not fails_whatever(rule, measured, allowed))
+
+
+def crossing(rule: dict, measured: dict) -> str | None:
+    """"The main building crosses the side lot line" when a building this rule measures stands partly off the lot
+    (its measurements' `crossings`, each building its own): the rule does not comply whatever the readings or
+    answers. None otherwise."""
+    names = set()
+    for key in ("applies_when", "check"):
+        if rule.get(key):
+            names |= formula.names(rule[key])
+    found = {}
+    for n in sorted(names):
+        for c in (measured.get(n) or {}).get("crossings") or []:
+            found.setdefault(c["who"], set()).update(c["lines"])
+    if not found:
+        return None
+    def where(lines):
+        if not lines:                                   # past a corner, or a line that can't be named
+            return "it reaches past the lot line"
+        return f"it crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
+    text = "; ".join(f"{who} is not entirely on the lot ({where(lines)})" for who, lines in found.items())
+    return text[:1].upper() + text[1:]
+
+
+def named_result(rule: dict, measured: dict, allowed: dict) -> dict | None:
+    """The "every reading" rule for open questions research has named readings for: when every reading a
+    rule's open measurements have is one of those (nothing else unknown: no survey waiting, no model question),
+    the rule complies if it passes under all of them, does not comply if it fails under all of them, and needs
+    review otherwise, naming the readings it fails under. {"result", "text", "tags", "fails_under",
+    "passes_under", "combos"}, or None when it doesn't apply (the row keeps the plain rule)."""
+    found = readings_of(rule, measured, allowed)
+    if found is None or not found["named"]:
+        return None
+    every = "; ".join(found["passes_under"] + [w for w in found["fails_under"] if w not in found["passes_under"]])
+    text = {"pass": f"complies under every reading of the open question ({every})",
+            "fail": f"does not comply under any reading of the open question ({every})",
+            "mixed": (f"does not comply if the open question is answered {' or '.join(found['fails_under'])}; "
+                      f"complies if {' or '.join(found['passes_under']) or 'none'}")}[found["result"]]
+    if found["result"] == "pass" and all(t.startswith("model#") for t in found["tags"]):
+        text = "complies to the full outline, whatever reaches past the walls is"    # eaves don't matter here
+    text = _eave_text(found, measured) or text
+    return {**found, "text": text}
 
 
 def turns_on(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> list[str] | None:
@@ -168,6 +406,16 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
     if not every:                                   # a value unknown, or too many: as drawn, never kinder
         got = outcome(rule, values, allowed)
         lot = names & (reading_set.LOT_LENGTHS | {SURVEY})
+        if got == "needs_review" and every is not None and fails_whatever(rule, measured, allowed, facts):
+            return present.FAILS                    # fails whatever the values not measured are (decided 2026-10-21)
+        if got == "fail" and tax and lot:
+            # fails as drawn with a value unknown: on the tax map it fails only if it fails with the lines off
+            # either way too, over what is known (the unknown values stay unknown: a fail here doesn't need them,
+            # as a 45 ft house is over the most the height bonus allows whatever its yards: stress F13)
+            known = {n for n in names if values.get(n) is not None or (measured.get(n) or {}).get("readings")}
+            rest = reading_set.combos(known, values, measured, facts)
+            if rest and all(outcome(rule, trial, allowed) == "fail" for trial, _ in rest):
+                return present.FAILS
         return present.FAILS if got == "fail" and not (tax and lot) else \
             present.COMPLIES if got == "pass" and not (tax and lot) else present.REVIEW
     got = {outcome(rule, trial, allowed) for trial, _ in every}
@@ -176,6 +424,12 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
     turns = turns_on(rule, measured, allowed, facts)
     open_ = (set(turns) if turns is not None else {n for n in names if values.get(n) is None}) - \
         ({SURVEY} if tax else set())
+    if got == {"pass"} and open_:
+        # every reading research lists for the open questions (named, kind: reading): complies only if it passes
+        # under all of them, and nothing else is open (PR 18's every-reading rule)
+        named = named_result(rule, measured, allowed)
+        if named and named["result"] == "pass" and set(named["open"]) >= open_:
+            return present.COMPLIES
     return present.COMPLIES if got == {"pass"} and not open_ else present.REVIEW
 
 
@@ -251,6 +505,8 @@ def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict
         if advice is None or by_id.get(i.get("rule")) is None:
             i["hint"] = None
             continue
+        if advice.get("crossing"):       # a building partly off the lot: "move it back onto the lot" is the one
+            continue                     # advice, a fact no measured change can simulate (kept as said: PR 18)
         before = before or statuses({})
 
         def holds(part):
@@ -305,7 +561,7 @@ def verdict(rule: dict, measured: dict, allowed: dict) -> str:
     got = outcome(rule, {k: m["value"] for k, m in measured.items()}, allowed)
     if got == "needs_review":
         found = every_reading(rule, measured, allowed)
-        if found and found[0] == "fail":
+        if found and found[0] == "fail" or fails_whatever(rule, measured, allowed):
             return "fail"
     return got
 
@@ -321,9 +577,14 @@ def summary(rows: list[dict]) -> dict:
     law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
     missing fact, not a reading, so it is never shown as complying."""
-    fails = [r for r in rows if r.get("Fails") or r["Error"] == "FAIL"]
-    review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails]
-    passes = [r for r in rows if r["Error"] == "PASS"]
+    # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
+    # whatever its named readings say (review round 20); a row without a verdict, by its outcome
+    def verdict_of(r):
+        return r.get("Verdict") or (present.FAILS if r.get("Fails") or r["Error"] == "FAIL" else
+                                    present.COMPLIES if r["Error"] == "PASS" else present.REVIEW)
+    fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
+    review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
+    passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
@@ -335,7 +596,8 @@ def summary(rows: list[dict]) -> dict:
                 "lines": [", ".join(names) + ": " + why for why, names in waiting.items()]}
     lines = [r.get("Line") or (_amount(r) if r["Error"] == "FAIL" else f"{short(r['Requirement'])}: {r['Provisional']}")
              for r in fails]
-    lines += [f"{short(r['Requirement'])}: {r.get('Provisional') or r['Why']}" for r in review]
+    lines += [f"{short(r['Requirement'])}: {r.get('Provisional') or (r.get('Named') or {}).get('text') or r['Why']}"
+              for r in review]
     counts = f"{len(passes)} pass" + (f" · {len(fails)} fail" if fails else "") + (
         f" · {len(review)} need review" if review else "")
     return {"state": "fail" if fails else "review", "text": counts, "lines": lines}
@@ -412,6 +674,9 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     title(ws, f"GORDIUM | {view['summary']}")
     lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + ([h["main"]] if h.get("main") else []) + \
         (h.get("sources") or [])   # where each fact came from
+    note = next((i["detail"]["outline"] for i in view["items"] if (i.get("detail") or {}).get("outline")), None)
+    if note:                            # the lot lines read from a cleaned outline: said once, with the lot (PR 18)
+        lines.append("Lot lines: " + note)
     for n, text in enumerate(lines, start=2):
         ws.cell(row=n, column=1, value=text)
     by_id = {i["id"]: i for i in view["items"]}
@@ -490,34 +755,49 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
-    every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
-    def checks(rule):                   # a flag has no check
-        return formula.names(rule["check"]) if rule.get("check") else set()
-
-    waiting = [r for r in every if r["Error"] == "NEEDS REVIEW" and any(
-        (measured.get(n) or {}).get("value") is None for n in checks(by_id[r["Rule id"]]) & INTERIOR)]
+    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
+    every = [_why(dict(zip(COLUMNS, r)), by_id, measured, allowed, facts) for r in t["output"]]
+    waiting = [r for r in every if waits_on_interior(r, by_id[r["Rule id"]], measured, allowed)]
     for r in waiting:                   # exactly which stated facts each one waits for (its "Enter …" asks those)
         r["needs"] = logic.needs_of(reading_set.rule_names(by_id[r["Rule id"]]), {k: m.get("value") for k, m in measured.items()})
     rows = [{**r, "Line": _amount(r, by_id[r["Rule id"]], measured)} if r["Error"] == "FAIL" else r
             for r in every if r not in waiting]
     for r in rows:
         r["Short"] = short(r["Requirement"])
-    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
     for r in rows:
         found = every_reading(by_id[r["Rule id"]], measured, allowed, facts) if r["Error"] == "NEEDS REVIEW" else None
+        review = r["Error"] == "NEEDS REVIEW"
+        # every reading research lists (its words: what to confirm), and values not measured under which the rule
+        # fails whatever they are: what the row's line says (the verdict itself is row_verdict's)
+        r["Named"] = named_result(by_id[r["Rule id"]], measured, allowed) if review else None
+        r["Unknown"] = fails_whatever(by_id[r["Rule id"]], measured, allowed, facts) if review and not found else None
         r["Provisional"] = found[1] if found else None
+        # the readings it was worked out under (their values, the open measurements): the panel's tax-map best and
+        # worst cases run over each of them, as for a row decided over named readings (review round 14)
+        r["Readings"] = readings_of(by_id[r["Rule id"]], measured, allowed) if review else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
         rule = by_id[r["Rule id"]]
         r["Verdict"] = row_verdict(rule, measured, allowed, facts)          # the ONE decision (round 3)
         r["Sides"] = {m: row_verdict(rule, measured, allowed, facts, check=c) for m, c in side_checks(rule).items()}
         r["Side provisional"] = {m: (every_reading(dict(rule, check=c), measured, allowed, facts) or (None, None))[1]
                                  for m, c in side_checks(rule).items()}      # each side's words, as a row's
+        # each side's readings research lists (its words: what to confirm, the eave to mark), as a row's Named
+        r["Side named"] = {m: named_result(dict(rule, check=c), measured, allowed) for m, c in side_checks(rule).items()}
         r["Side turns on"] = {m: turns_on(dict(rule, check=c), measured, allowed, facts)
                               for m, c in side_checks(rule).items()}
         r["Fails"] = r["Verdict"] == present.FAILS                          # fails whichever way it goes
         r["Turns on"] = turns_on(rule, measured, allowed, facts)            # the open questions its result needs
+        if r["Fails"] and r["Named"] and not r.get("Line"):
+            r["Line"] = f"{short(r['Requirement'])}: {r['Named']['text']}"
+        if r["Fails"] and r["Unknown"] and not r.get("Line"):
+            gone = [plain_name(n) for n in r["Unknown"]["names"]]
+            r["Line"] = (f"{short(r['Requirement'])}: does not comply whatever the {' and the '.join(gone)} "
+                         f"{'is' if len(gone) == 1 else 'are'}")
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
+        r["Crossing"] = crossing(by_id[r["Rule id"]], measured)
+        if r["Crossing"]:            # a building on the neighbour's land: no reading or answer can clear it
+            r["Fails"], r["Line"] = True, f"{short(r['Requirement'])}: {r['Crossing']}"
     lot_id = (site.get("lot") or {}).get("id")
     red = sorted({o for r in rows if r["Fails"]
                   for name in formula.names(by_id[r["Rule id"]]["check"]) for o in measured.get(name, {}).get("objects", [])
@@ -534,12 +814,26 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             _report(t, v, report_path)
         except OSError as e:
             report_error = f"{e.strerror or e} ({report_path})"
-    env = envelope(site, _envelope_facts(site, facts), measured, rules)
+    # one guard for the whole check (review round 21): geometry the measuring couldn't work out draws nothing
+    # from it (no envelope, no overlays), and a geometry failure here does the same, never a crash
+    geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
+    try:
+        env = envelope(site, _envelope_facts(site, facts), measured, rules) if not geo else None
+    except shapely.errors.GEOSException as e:
+        geo = f"the drawing's geometry couldn't be worked out ({str(e).split(':')[0][:80]})"
+        env = None
+    if env is None:
+        env = {"outline": None, "holes": [], "base": None, "top": None, "yards": {}, "height": None,
+               "coverage": None, "notes": [geo] if geo else []}
+    try:
+        drawn = plan(site, env, v, measured, facts, overlays=not geo)
+    except shapely.errors.GEOSException:
+        drawn = plan(site, env, v, measured, facts, overlays=False)
     # the notice (spec G): the items that don't comply now and did at the last check the command sent ("before")
     statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
-            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": plan(site, env, v, measured, facts),
+            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": drawn,
             "report_error": report_error,
             "statuses": statuses, "notice": notice_text}
 
@@ -637,14 +931,13 @@ def _yard_lines(lot, measure: str, point):
     return lot.line(hit) if hit else None
 
 
-def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None) -> dict:
+def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None, overlays: bool = True) -> dict:
     """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
     its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
     or the part above the height limit (spec F2, F4, F5). The building itself stays neutral.
     Each yard's red and amber are its own row's (present.settle: from the row's readings, after every status
     change), never another yard's: red where its wall is short under every reading, amber under some."""
-    from model_measurement.measure import Lot, _projection
-    from shapely.ops import unary_union
+    from model_measurement.measure import Lot, _projection, union as unary_union
 
     lot = site.get("lot") or {}
     edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
@@ -655,7 +948,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
               (" (approx.)" if i.get("approx") else "")}
              for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
     encroach = []
-    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")]
+    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")] if overlays else []
     footprint = unary_union(plans) if plans else None
     tops = [p[2] for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
@@ -822,6 +1115,9 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
         drawing = {**drawing, "grade_is": "finished"}
     say(STEPS["largest"])
     measured = measure(site, drawing)
+    geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
+    if geo:                             # nothing drawn from geometry the measuring couldn't work out
+        return {"floors": [], "notes": [geo], "preview": None}
     out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer)
     if existing and out.get("floors"):
         out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "

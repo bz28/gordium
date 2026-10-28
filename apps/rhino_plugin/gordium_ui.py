@@ -807,7 +807,8 @@ def show_detail(parts):
     words = logic.hint_text(i.get("hint"), [b.Text for b in buttons])
     if words:
         d.AddRow(_wide(words, size=12))
-    for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
+    for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),
+                 det.get("outline")):           # how the lot lines were read from a cleaned outline (PR 18)
         if text:
             d.AddRow(_wide(text, size=12))
     for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by

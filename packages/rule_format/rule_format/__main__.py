@@ -15,8 +15,8 @@ import sys
 from pathlib import Path
 
 from .labels import load_pieces, validate_labels
-from .rulebook import (REPO, Context, jurisdictions, load, locate, not_quotable, rulebook_file_problems, rulebook_paths,
-                       term_file_problems, utf8_console)
+from .rulebook import (REPO, Context, finding_conflicts, jurisdictions, load, locate, not_quotable, research_entries,
+                       rulebook_file_problems, rulebook_paths, term_file_problems, utf8_console)
 
 
 def main() -> int:
@@ -59,6 +59,13 @@ def main() -> int:
             for problem in problems:
                 print(f"    {problem}")
             failed += bool(problems)
+        try:                                              # across files: a question is settled or open, not both
+            conflicts = finding_conflicts(research_entries(jurisdiction))
+        except Exception as e:  # report and keep going
+            conflicts = [f"validator error ({type(e).__name__}: {e})"]
+        for problem in conflicts:
+            print(f"✗ {place}: {problem}")
+        failed += bool(conflicts)
     print(f"{checked} files checked, {failed} with problems")
     return 1 if failed else 0
 

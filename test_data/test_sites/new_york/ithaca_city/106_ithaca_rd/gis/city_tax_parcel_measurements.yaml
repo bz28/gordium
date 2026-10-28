@@ -1,0 +1,27 @@
+# Facts we measured from the City of Ithaca's tax parcel outline of 106 Ithaca Rd. The City's data itself is not
+# stored here, as a precaution until the City's GIS Program is asked for permission: this layer's terms ask only
+# for the statement below (https://www.arcgis.com/sharing/rest/content/items/87c2aae68e0b405d8b9dcb7a0cc9cf06?f=json), but the City's zoning layer, from the same GIS Program, says its data
+# "may not be reproduced or redistributed without the express written consent of the originator"
+# (https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/info/itemInfo?f=json). See README.md.
+# Anyone can re-download it from `url` and check it is the same data by its `sha256`, then re-measure.
+#
+# The City's layer asks that products derived from it carry this statement:
+#   "Data contained in this product was amended by the GIS Program, City of Ithaca, NY from a file created by
+#   Tompkins County Assessment Office. The originators do not warrant the accuracy or completeness of the
+#   information portrayed by the data."
+
+source: City of Ithaca Tax_Parcels (layer item 87c2aae68e0b405d8b9dcb7a0cc9cf06), parcel 500700-84.-2-6
+url: "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Tax_Parcels/FeatureServer/0/query?where=SWISPRINTK%3D%27500700-84.-2-6%27&outSR=2261&outFields=SWISPRINTK,LOCADDR,ZONING,CALCACRES&returnGeometry=true&f=json"
+fetched: 2026-10-20
+sha256: a2527a5fffa94395fc19d2279ef3ee05e225c94e7a9c0e730431f1ec1b0f3c05   # of the raw response, kept outside the repo
+units: feet (NAD83 / New York Central, EPSG 2261)
+# How measured: area by the shoelace formula on the outline; consecutive edges within 8 degrees of each other
+# joined into one side (so the curved front, drawn as 8 short edges, is one side). The same method the tests
+# use on the County outline (packages/rule_export/tests/test_questions_doc.py, _sides).
+area_sf: 7033.7
+sides_ft:                      # in the order the outline runs
+  front: {length: 75.83, edges: 8}           # along Ithaca Rd, a curve
+  long_side: {length: 101.13, edges: 1}
+  jog: {length: 10.35, edges: 2}
+  rear: {length: 69.51, edges: 1}
+  side_toward_104: {length: 92.12, edges: 3}
