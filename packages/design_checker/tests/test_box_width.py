@@ -186,7 +186,7 @@ def box_width(layout, nested=False):
     the columns: the demo 7 Rhino run, 2026-10-28, measured #45's "About this project" grid, added as a one-cell row,
     widening the first column to a 1,162 pt box this model had passed). A layout inside a cell has the padding and
     spacing it sets itself."""
-    columns, spanning = {}, 0          # (spanning: none since 2026-10-28, kept 0)
+    columns = {}
     for cells in layout.rows:
         for i, cell in enumerate(cells):
             columns[i] = max(columns.get(i, 0), width(cell))
@@ -194,7 +194,7 @@ def box_width(layout, nested=False):
     pad = pad.args[0] if pad is not None and pad.args else PADDING
     spacing = layout.__dict__.get("Spacing")
     spacing = spacing.args[0] if spacing is not None and spacing.args else SPACING
-    return max(2 * pad + sum(columns.values()) + spacing * max(len(columns) - 1, 0), 2 * pad + spanning), layout
+    return 2 * pad + sum(columns.values()) + spacing * max(len(columns) - 1, 0), layout
 
 
 def texts(layout):
@@ -401,4 +401,18 @@ def test_the_height_model_counts_each_question_row(ui):
                                                     for c in cells)]
     assert about and type(about[0][0]).__name__ == "Label", "the section's title sits in the first column, beside it"
     section = about[0][1]
+    quick = 1 if logic.quick_answers([q["key"] for q in questions]) else 0
+    assert len(section.rows) == len(questions) + quick and all(len(r) == 2 for r in section.rows), section.rows
     assert box_height(section) >= len(questions) * CONTROL_PX, (box_height(section), len(questions))
+
+
+def test_a_one_cell_row_widens_the_first_column(ui):
+    """Eto on the Mac: a one-cell row sits in the first column and widens it (the demo 7 Rhino run, 2026-10-28: #45's
+    About grid, a one-cell row, made a 1,162 pt box). The model must count it, or a wide one-cell row passes."""
+    gordium_ui, _ = ui
+    wide, narrow = _DynamicLayout(), _DynamicLayout()
+    cell = gordium_ui.ef.Label()
+    cell.Text = "x" * 200                                         # ~1,200 px of text, no wrap width
+    wide.AddRow(cell)
+    narrow.AddRow(gordium_ui.ef.Label(), gordium_ui.ef.Label())
+    assert box_width(wide)[0] >= width(cell) > box_width(narrow)[0]

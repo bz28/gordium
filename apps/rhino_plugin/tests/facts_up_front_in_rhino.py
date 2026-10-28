@@ -105,7 +105,8 @@ def drop_with(found, item):
 def open_box(g, doc, options, facts, act=None, mode="start", ready=False):
     """The real start box on these facts; `act(dialog, found, seen)` runs once it is shown (the box then closes by
     itself unless `act` closed it). Returns (what the box returned, what was seen, the state the box kept). `ready`:
-    the district confirmed and a lot there, as the architect has them before Draw (Draw is off until then: #32, #49)."""
+    the district confirmed and a lot there, as the architect has them before Draw (Draw is off until then: #32, #49).
+    It stands in for them: 6a / 6b test which answers Draw keeps, not Draw's gating (CI: test_lookup_box.py)."""
     seen = {}
     state = g._box_state(doc, dict(facts, jurisdiction=g.JURISDICTION), options, {}, mode)
     if ready:
@@ -146,8 +147,9 @@ try:
              "Functional family unit", "Home business", "Business floor area (sq ft)", "Distance to it (ft)"]
     _, seen, _ = open_box(g, doc, options, r1b)
     log["1"] = seen
-    answer_drops = [(d, p) for d, p in zip(seen["drops"], seen["picked"])   # About's (not Corner lot?, also blank)
-                    if d and d[0] == not_answered and not any("street" in t for t in d[1:])]
+    corner_words = g.logic.CORNER_CHOICES[1:]                   # Corner lot?'s own choices (it starts blank too)
+    answer_drops = [(d, p) for d, p in zip(seen["drops"], seen["picked"])   # About's (not Corner lot?)
+                    if d and d[0] == not_answered and d[1:] != corner_words]
     claim("1 'About this project' with Quick answers and exactly the two envelope questions, all on Not answered",
           seen["labels"].count("About this project") == 1 and "Quick answers" in seen["labels"]
           and all(t in seen["labels"] for t in envelope_qs) and not any(t in seen["labels"] for t in later)
