@@ -338,7 +338,8 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     except (Offline, ServiceError):
         facts["zone"] = fact(None, src["name"], src["url"], today, "needs_review",
                              "Couldn't reach the City's zoning map: choose the district.", key="city_zoning", lot=lot)
-        _overlays(f, ring, city_parcel, src, today, facts, lot)
+        _overlays(f, ring, city_parcel, src, today, facts, lot,
+                  ["Overlays on the City's zoning map (" + ", ".join(OVERLAYS) + "): couldn't check"])
         return
     samples = g.grid_inside(ring)
     # every polygon under each point counts, never only the first: the map draws overlays (SHOD...) on top of the
@@ -432,7 +433,7 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict,
         except (Offline, ServiceError):
             found.append(f"{label}: couldn't check")
     if not city_parcel:
-        found.append("Historic property, landmarks review and secondary zones on the parcel: couldn't check "
+        found.append("Historic property, landmarks review, secondary and overlay zones on the parcel: couldn't check "
                      "(the City's parcel layer didn't answer for this lot)")
     else:
         if city_parcel.get("secondary_zones"):

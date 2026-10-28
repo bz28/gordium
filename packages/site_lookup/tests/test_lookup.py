@@ -794,3 +794,11 @@ def test_the_city_parcels_own_overlay_record_needs_review():
     fx = load("106_ithaca_rd")
     o = both(lookup(fx["address"], WithOverlay(fx), NOW))["overlays"]
     assert o["status"] == "needs_review" and "Overlay zones on the parcel: SHOD" in o["value"]
+
+
+def test_overlays_the_zoning_map_couldnt_be_asked_for_need_review():
+    """The zoning map is one of the overlays row's sources (SHOD...): when it doesn't answer, the overlays row says
+    they couldn't be checked (needs review), never 'none found'."""
+    fx = load("106_ithaca_rd")
+    o = both(lookup(fx["address"], Failing(fx, ["city_zoning"]), NOW))["overlays"]
+    assert o["status"] == "needs_review" and any("SHOD" in v and "couldn't check" in v for v in o["value"])
