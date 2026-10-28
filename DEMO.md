@@ -37,12 +37,33 @@ cd $HOME\Documents\gordium
 git pull
 ```
 
-No install step this time (2026-10-27): no new Python packages and no new parts of Gordium since the last update,
+No install step this time (2026-10-28): no new Python packages and no new parts of Gordium since the last update,
 and the commands are the same, so neither `pip install` nor `install.py` is needed.
 
 Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
 
-## What's new (2026-10-27)
+## What's new (2026-10-28)
+
+Everything in the 2026-10-27 preview below, plus:
+
+- **Start from an empty file.** `GordiumStart` opens an empty start box. Type the address (after 4 letters a list
+  offers City of Ithaca addresses) and press **Look up**, or **Enter the site by hand…**. The lot it finds is only
+  shown, dashed: nothing is drawn in your model until **Draw**.
+- **The district is yours to confirm.** Tick **This is the lot's district** before Draw. Picking another district
+  unticks it, so a tick always belongs to the district shown.
+- **About this project.** The start box asks the facts that shape the building's outline: a stream or inlet near
+  the lot, and the South Hill Overlay. Each starts on **Not answered**; Gordium never assumes. **Quick answers**
+  fills both in one click.
+- **Use details are answered later.** Who lives there and a home business sit in the panel's collapsed **Use
+  details** group. Each row's **Enter…** button opens a small window that asks only what that row needs.
+- **Every panel change is one Undo step**, and Undo takes back only that change, never your own earlier edit.
+- **A window says what Gordium is doing**, with the seconds so far. A check, the starting house and the zoning
+  report have **Cancel**; a lookup has **Cancel lookup**. Cancel changes nothing.
+- **New rules in all nine districts:** the 20 ft setback from a stream or inlet (§325-26), the South Hill Overlay
+  (§325-8E, R-1 and R-2), homes per attached building (R-3a, R-3aa, R-3b, RU) and more than one main building on a
+  lot. Each one needs review until you answer what it needs.
+
+## What was new on 2026-10-27
 
 Everything in the 2026-10-26 preview below, plus:
 
@@ -163,8 +184,11 @@ Everything in the 2026-10-21 evening preview, plus:
 - **Keyboard check wanted:** at the street question press Enter (asks again) and Esc (nothing changes) and tell Ben.
 - **Corner lots get no starting house** (which yard is the front is still an open question for the architects):
   after a lookup of a corner lot, draw your building yourself.
-- **Not yet re-checked inside Rhino after today's changes.** Ben's test Rhino will run the scripted checks before
-  he tells you to update; if something looks wrong, take a screenshot and send it to Ben.
+- **Checked inside Rhino on a Mac, not yet on Windows** (2026-10-28: start flow, Undo, the start box's questions,
+  progress and Cancel). If something looks wrong, take a screenshot and send it to Ben.
+- **With "Check after every edit" on, a check you cancel may start again right away**, and the model's own
+  Gordium layers can be redrawn while a lookup box is open. Neither can show a pass (the panel says cancelled or out
+  of date); being looked at.
 - **Windows:** please confirm that no black console window appears and that Task Manager shows only one
   `python` checker while Rhino is open.
 - **Ground is taken as flat** at the lot's level (the panel says so).
