@@ -1,0 +1,36 @@
+{
+ "claims": {
+  "1 Check first beside Edit site\u2026, and Check after every edit unticked": {
+   "ok": true,
+   "detail": {
+    "buttons": [
+     "Check",
+     "Edit site\u2026",
+     "Pick survey lot lines\u2026"
+    ],
+    "auto": false
+   }
+  },
+  "2 an edit, then idle: no check ran": {
+   "ok": true,
+   "detail": 0
+  },
+  "2 the header says press Check and the rows are greyed": {
+   "ok": false,
+   "detail": {
+    "header": [
+     "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+     "1 needs review \u00b7 9 comply \u00b7 2 not checked",
+     "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+     "Lot lines: tax map, approximate (\u00b12'-0\")",
+     "Ground: assumed flat (elevation 0'-0\")",
+     "Check",
+     "Edit site\u2026",
+     "Pick survey lot lines\u2026"
+    ],
+    "stale": false
+   }
+  }
+ },
+ "trace": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_ea88c18/apps/rhino_plugin/tests/check_button_in_rhino.py\", line 109, in <module>\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_ea88c18/apps/rhino_plugin/tests/check_button_in_rhino.py\", line 36, in claim\nAssertionError: 2 the header says press Check and the rows are greyed: {'header': ['106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached', '1 needs review \u00b7 9 comply \u00b7 2 not checked', 'Draft rulebook \u00b7 not yet reviewed by a licensed professional', 'Lot lines: tax map, approximate (\u00b12\\'-0\")', 'Ground: assumed flat (elevation 0\\'-0\")', 'Check', 'Edit site\u2026', 'Pick survey lot lines\u2026'], 'stale': False}\n"
+}
