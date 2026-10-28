@@ -1032,6 +1032,7 @@ def start_box(state, options, mode):
         layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
     amber = label("", eto_status_color("needs_review"), size=12, width=560)   # following the answers; wraps
+    note = label(logic.lookup_note(state) or "", size=11)             # what a found lookup tells: plain, not amber
 
     def refresh_amber(*_):
         state["corner_lot"] = [None, False, True][max(corner.SelectedIndex, 0)]
@@ -1041,6 +1042,7 @@ def start_box(state, options, mode):
     refresh_amber()
     corner.SelectedIndexChanged += logic.guard(refresh_amber, "answer the corner lot")
     layout.AddRow(None, row(amber))
+    layout.AddRow(None, row(note))
     layout.AddRow(None, row(reason))
     layout.AddRow(None, row(cancel, draw))
     dialog.Content = layout
