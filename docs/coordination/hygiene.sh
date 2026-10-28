@@ -11,3 +11,7 @@ for p in $(pgrep -f "pytest -q"); do
   echo "pid $p  age $et  workers $w  folder $cwd$flag"
 done
 pgrep -x caffeinate >/dev/null && echo "caffeinate: on" || echo "caffeinate: OFF"
+# Agents: minutes since each background agent's transcript last changed. A "running" agent quiet for over 30 min is stalled.
+T=/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/tasks
+now=$(date +%s); for f in $T/a*.output(N); do m=$(( (now - $(stat -f %m $f)) / 60 )); (( m < 720 )) && echo "agent $(basename $f .output | cut -c1-8): quiet ${m} min"; done
+echo "disk: $(df -h / | tail -1 | awk '{print $4}') free; scratch $(du -sh ${T%/tasks}/scratchpad 2>/dev/null | cut -f1); worktrees $(git -C /Users/benzhao/Documents/Gordium worktree list | wc -l | tr -d ' ')"
