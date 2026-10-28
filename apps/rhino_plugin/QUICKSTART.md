@@ -387,7 +387,7 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 4. **Undo, then pull the rear wall 17 ft back** (Cmd+Shift+click the back face, Gumball 17). Lot coverage 27.8%
    against 25%: **does not comply**, even on the largest lot the tax map allows.
 5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply**,
-   −4'-0" short (the height doesn't depend on the lot lines). Only the part above 35'-0" turns red.
+   4'-0" over (the height doesn't depend on the lot lines). Only the part above 35'-0" turns red.
 6. **Undo, then move the southwest wall 3 ft out** (Cmd+Shift+click the face on your left, seen from the street).
    Side yard, Southwest 9'-0 5/8": **needs review**, up to 2'-11 3/8" short (it complies if the tax map's line is out
    the lucky way). **Move it 5 ft out instead:** 7'-0 5/8": **does not comply**, at least 0'-11 1/4" short (rounded
@@ -403,10 +403,11 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 10. **The height bonus** (§325-16C: a taller house if every yard is larger): raise the roof 3 ft (38'-0"), move the
     house 3 ft back, and pull each side wall 3 ft in. On this lot Building height **needs review**: the bonus needs
     the rear yard larger too, and which lines are the rear lot line is the open question above.
-11. **Delta in words, true however the lot lines lie:** after test 2 the Front yard row reads "at least 5'-0 5/8" to
-    spare"; in test 6 the Southwest side yard reads "up to 2'-11 3/8" short" (3 ft out: it may comply) and "at least
-    0'-11 1/4" short" (5 ft out: the red strip). The same in the report and the note. With a survey it reads the
-    margin itself: after test 2, "+7'-0 5/8" to spare".
+11. **Delta in words, true however the lot lines lie:** after test 2 the Front yard row reads "≥ +5'-0 5/8""
+    (at least that much to spare); in test 6 the Southwest side yard reads "up to 2'-11 3/8" short" (3 ft out: it
+    may comply) and "at least 0'-11 1/4" short" (5 ft out: the red strip). A maximum passed says "over" instead
+    of "short" (test 5's "4'-0" over"). The same in the report and the note. With a survey it reads the margin
+    itself: after test 2, "+7'-0 5/8"".
 12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
     an open question for a corner lot).
 13. **A survey:** with a surveyed lot, a new starting house goes exactly to the limits: 39'-10" × 41'-4", its southwest

@@ -149,7 +149,7 @@ try:
         cells = [[str(v) for v in grp.Children[k].Values] for grp in g.STATE["panel_parts"].get("groups") or []
                  for k in range(grp.Children.Count)]
         west_row = next(c for c in cells if "Side yard, Southwest" in c[0])
-        claim("1 the panel's Delta says the same", west_row[3] == "at least 0'-11 1/4\" short", west_row)
+        claim("1 the panel's Delta says the same", west_row[3] == g.logic.cell_text("at least 0'-11 1/4\" short"), west_row)
         # what the Top view really drew (gordium_rhino.draw_screen keeps it in STATE["drawn"]): the claims read the
         # drawing's own placement, never a sum of their own (the Rhino job at 27c8e5d: a claim's own taken boxes
         # said "no corner clear" while the screen placed the notice correctly)

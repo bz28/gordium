@@ -24,6 +24,8 @@ PANEL_WIDTH = 400          # as wide as Rhino's own panels (architect's review, 
 # the first column, which hid a column of its own.
 COLUMNS = [("Item", 120), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 86)]   # Item takes the rest
 ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" short" wraps instead of being cut off
+#                           (Eto's tree grid has one height for every row: a third line would cost rows in view, so
+#                           the values are made to fit two instead: logic.cell_text)
 DETAIL_MIN_HEIGHT = 160   # the selected item's detail never shorter: its name and reason on up to four lines (17 px
 #                           each) and two rows of buttons (20 px, measured on the Mac) in full without scrolling (the
 #                           Rhino job at 7a16aa6: with the list a fixed 380 px and a taller header, the detail was 51 px
@@ -521,9 +523,11 @@ def show(parts, view, stale=False, error=None, checking=False):
         for item_id in g["items"]:
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
+            # the values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)
             values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
-                      "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else ""),   # the name says it
-                      "" if stale_row else i["required"], "" if stale_row else (i.get("delta") or "")]
+                      "—" if stale_row else logic.cell_text(i["proposed"] if i["status"] != "not_checked" else ""),
+                      "" if stale_row else logic.cell_text(i["required"]),
+                      "" if stale_row else logic.cell_text(i.get("delta") or "")]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
             ci.Values = System.Array[System.Object](values)

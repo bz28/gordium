@@ -6,7 +6,7 @@ not in CI. From a fresh document: GordiumStart on the sample, then:
 - labels off by default (item 1): the document's setting is off and the panel's tick unticked; a failing yard (the
   house moved 5 ft to the left, QUICKSTART test 6's failing yard) still has its shortfall label; ticking turns the labels on, saved in the document;
 - the panel (items 2, 3): no code-edition line in its header (it is in the legend's text), the column is "Delta" and
-  its cells say "to spare" / "short".
+  its cells say "+…" (to spare) / "short" / "over".
 Captures: Top view with labels off (the failing shortfall only) and on; the panel. Writes <temp>/gordium_mvp/out.json
 and frames/*.png; closes its document. Phase "close" (sc.sticky["gordium_mvp_phase"]) closes it if a run left it."""
 import json
@@ -110,7 +110,7 @@ try:
         claim("2 the legend names it", ("Checked against: " + head["code"]) in g.logic.legend_text(head["code"]))
         claim("3 the column is Delta", [c.HeaderText for c in parts["tree"].Columns][3] == "Delta",
               [c.HeaderText for c in parts["tree"].Columns])
-        claim("3 Delta in words", any(r[3].endswith(" to spare") for r in rows), [r[3] for r in rows])
+        claim("3 Delta in words", any(r[3].startswith(("+", "≥ +")) for r in rows), [r[3] for r in rows])
         # a failing yard: the house 5 ft to the left (the left side yard short under every reading); labels off
         ft = 1.0 / g._scale(doc)
         for o in g._buildings(doc):

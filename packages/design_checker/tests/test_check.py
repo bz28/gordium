@@ -1109,20 +1109,39 @@ def test_the_code_edition_line_is_in_the_legend_and_the_report_not_the_panel(fac
     assert '"legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code"))' in rhino
 
 
+def test_the_lists_values_fit_two_lines_of_a_narrow_column():
+    """Architect's review (2026-10-28): at the panel's own width the Proposed "34'-11 7/8" to 36'-3 3/8"" and the
+    Delta "at least 0'-5 1/4" if confirmed" were cut off ("…if confir…"). Eto's tree grid has one row height for
+    every row, so the cells keep two lines and the values are made to fit them: each fraction one character, a
+    range one value per line; the words otherwise the same (the detail and the report keep "7/8")."""
+    from design_checker import rhino_logic as logic
+    assert logic.cell_text("34'-11 7/8\" to 36'-3 3/8\"") == "34'-11⅞\"–\n36'-3⅜\""
+    assert logic.cell_text("24'-1 7/8\" to 32'-10\"") == "24'-1⅞\"–\n32'-10\""
+    assert logic.cell_text("5,934 sf to 6,570 sf") == "5,934 sf–\n6,570 sf"
+    assert logic.cell_text("≥ +0'-5 1/4\" if confirmed") == "≥ +0'-5¼\" if confirmed"
+    assert logic.cell_text("up to 2'-11 1/8\" short") == "up to 2'-11⅛\" short"    # "up to": words, not a range
+    for same in ("25'-0\"", "3", "25%", "at limit", "—", ""):
+        assert logic.cell_text(same) == same
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rows = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
+    assert rows.count("logic.cell_text(") == 3                    # Proposed, Required and Delta; never the name
+
+
 def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
     """Coordinator refinement (c): the sign unmistakable beside the colour, in the panel and the report; the value
     itself (and the answer key's) unchanged."""
     import openpyxl
     from design_checker import rhino_logic as logic
-    assert present.delta_words(present.COMPLIES, (2.0, 2.0), "ft", False) == "+2'-0\" to spare"
+    assert present.delta_words(present.COMPLIES, (2.0, 2.0), "ft", False) == "+2'-0\""     # "+": to spare
     assert present.delta_words(present.FAILS, (-1 - 1 / 3, -1 - 1 / 3), "ft", False) == "−1'-4\" short"
     assert present.delta_words(present.COMPLIES, (0.0, 0.0), "ft", False) == "at limit"
     got = check(MODEL, facts, tmp_path / "r.xlsx")
     margins = [i["margin"] for i in got["view"]["items"] if i["margin"]]
-    assert margins and not any(m.endswith(("to spare", "short")) for m in margins)        # the data as it was
+    assert margins and not any(m.endswith(("short", "over")) for m in margins)            # the data as it was
     cells = [c for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
-    assert any(c.endswith(" to spare") for c in cells)
+    deltas = {i["delta"] for i in got["view"]["items"] if i.get("delta")}
+    assert deltas and deltas <= set(cells)                            # the report's Delta: the panel's words
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert '(i.get("delta") or "")' in ui and "delta_text" not in ui          # settle's words only (round 2)
 

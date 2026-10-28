@@ -133,7 +133,7 @@ try:
             claim("%d: every row of buttons and ticks fits the panel" % width, not wide, wide)
             delta = [str(grp.Children[k].Values[3]) for grp in p["groups"] for k in range(grp.Children.Count)]
             log["w%d" % width]["deltas"] = sorted(set(d for d in delta if d))
-        claim("the long Delta words are among them", "at least 0'-11 1/4\" short" in log["w380"]["deltas"],
+        claim("the long Delta words are among them", g.logic.cell_text("at least 0'-11 1/4\" short") in log["w380"]["deltas"],
               log["w380"]["deltas"])
         sc.sticky["gordium_width_forms"] = forms
         log["ok"] = all(c["ok"] for c in log["claims"].values())

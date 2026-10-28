@@ -149,7 +149,8 @@ def legend_text(code=None):
             "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
             "measured distance. Red marks only the part of the building inside a required yard or above the height "
             "limit. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
-            "Delta: how far over or under each limit (+ to spare, − short).\n\n"
+            "Delta: how far over or under each limit (+ to spare, ≥ + at least that much to spare, − short of a "
+            "minimum, over past a maximum).\n\n"
             "In the model: RED is the part of the building that does not comply (under every reading); AMBER is the "
             "part a rule that needs review is about (for example inside the 2'-0\" tax-map caution zone of a yard). "
             "The buildable envelope is only a see-through guide: colours come from the rules' results.")
@@ -157,6 +158,20 @@ def legend_text(code=None):
 
 
 COLUMN_DELTA = "Delta"          # the panel's and the report's column for how far over or under (was "Margin")
+
+# eighths of an inch as one character each, in the panel's narrow cells only (the detail and the report keep "7/8")
+CELL_FRACTIONS = {"1/8": "⅛", "1/4": "¼", "3/8": "⅜", "1/2": "½", "5/8": "⅝", "3/4": "¾", "7/8": "⅞"}
+
+
+def cell_text(text):
+    """A Proposed, Required or Delta value as the panel's list draws it, in its two lines of a narrow column (the
+    architect's review, 2026-10-28: "34'-11 7/8" to 36'-3 3/8"" and "at least 0'-5 1/4" if confirmed" were cut
+    off; the panel is not made wider). The same words, shorter: each fraction of an inch one character ("34'-11⅞"")
+    and a range one value per line ("34'-11⅞"–" then "36'-3⅜""), so a line never breaks inside a number. The
+    selected item's detail below the list shows the words whole, as everywhere else."""
+    import re
+    text = re.sub(r'(\d) ([1357]/8|1/4|1/2|3/4)"', lambda m: m.group(1) + CELL_FRACTIONS[m.group(2)] + '"', text or "")
+    return re.sub(r'(["%]|\d sf) to (?=[\d+−])', "\\1–\n", text)        # after a value, before the next
 
 
 def missing(facts):

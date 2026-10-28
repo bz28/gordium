@@ -2,6 +2,7 @@
 each test names the spec criterion it pins. Results come from the checker; present can only make one more
 cautious, so most of these check that something is never shown as complying without evidence."""
 
+import ast
 import json
 import re
 import sys
@@ -335,13 +336,14 @@ def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
     yards need 10 ft, the tax map ±2 ft on each lot length the rule reads):
     - West wall 7 ft from the line: the yard is really 5 to 9 ft, so 1 to 5 ft short: "at least 1'-0" short"
       (the red part), never "−3'-0" short";
-    - 11 ft: really 9 to 13: "up to 1'-0" short" (amber, no red); 16 ft: really 14 to 18: "at least 4'-0" to spare";
+    - 11 ft: really 9 to 13: "up to 1'-0" short" (amber, no red); 16 ft: really 14 to 18: at least 4'-0" to
+      spare, "≥ +4'-0"";
     - the same walls on a survey: the margin itself."""
     from design_checker.check import check_site
     tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
     words = {x: items(check_site(_plot(box(x, 30, 35, 65)), tax)["view"])["Side yard, West"] for x in (7, 11, 16)}
     assert [(words[x]["delta"], words[x]["approx"]) for x in (7, 11, 16)] == [
-        ("at least 1'-0\" short", True), ("up to 1'-0\" short", True), ("at least 4'-0\" to spare", True)]
+        ("at least 1'-0\" short", True), ("up to 1'-0\" short", True), ("≥ +4'-0\"", True)]
     assert words[7]["margin"] == "−3'-0\"" and words[7]["status"] == present.FAILS     # as drawn, unchanged
     assert "as drawn" in words[7]["detail"]["line"] and "at least 1'-0\" short" in words[7]["detail"]["line"]
     survey = items(check_site(_plot(box(7, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])["Side yard, West"]
@@ -363,22 +365,40 @@ def test_delta_words_never_overstate():
     assert present.delta_words(R, (-3.25, 1.75), "ft", True) == "up to 3'-3\" short"
     assert present.delta_words(R, (-3.25 + 1 / 200, 1.75), "ft", True) == "up to 3'-3\" short"    # rounded up
     assert present.delta_words(C, (0.0, 4.0), "ft", True) == "at the limit at worst"
-    assert present.delta_words(C, (5.0, 9.0), "ft", True) == "at least 5'-0\" to spare"
-    assert present.delta_words(C, (7.0, 7.0), "ft", False) == "+7'-0\" to spare"            # one reading: the margin
+    assert present.delta_words(C, (5.0, 9.0), "ft", True) == "≥ +5'-0\""                   # at least that, to spare
+    assert present.delta_words(C, (7.0, 7.0), "ft", False) == "+7'-0\""                     # one reading: the margin
     assert present.delta_words(F, (-1.25, -1.25), "ft", False) == "−1'-3\" short"
     assert present.delta_words(C, None, "ft", False) == ""
-    # never kinder than the status: room on a row that needs review is "if confirmed", never "to spare"
+    # never kinder than the status: room on a row that needs review is "if confirmed", never a bare "+"
     assert present.delta_words(R, (7.0, 7.0), "ft", False) == "+7'-0\" if confirmed"
-    assert present.delta_words(R, (5.0, 9.0), "ft", True) == "at least 5'-0\" if confirmed"
+    assert present.delta_words(R, (5.0, 9.0), "ft", True) == "≥ +5'-0\" if confirmed"
     # round 2: the certain words ("at least … short") only on a row that fails; one in review says to see why
     assert present.delta_words(R, (-5.0, -1.0), "ft", True) == "at least 1'-0\" short; see why"
     assert present.delta_words(R, (-1.0, -1.0), "ft", False) == "−1'-0\" short; see why"
-    assert "to spare" not in present.delta_words(F, (1.0, 2.0), "ft", False)
+    assert present.delta_words(F, (1.0, 1.0), "ft", False) == "+1'-0\" here; see why"     # room, yet it fails
     # every unit: lot area in sf, coverage in % (round 1: "+570 sf to spare" on a lot area that needs review)
     assert present.delta_words(R, (-66.2, 570.4), "sf", True) == "up to 67 sf short"
     assert present.delta_words(F, (-1000.0, -384.6), "sf", True) == "at least 384 sf short"
-    assert present.delta_words(C, (0.937, 6.2), "%", True) == "at least 0.93% to spare"
+    assert present.delta_words(C, (0.937, 6.2), "%", True) == "≥ +0.93%"
     assert present.delta_words(F, (-6.2, -0.004), "%", True) == "less than 0.01% short"
+
+
+def test_a_maximum_passed_says_over_and_a_minimum_not_met_says_short():
+    """Architect's review (2026-10-28): One-family occupancy (at most 1 family, 3 drawn) read "−2 short; see why"
+    while its detail said "over by 2". A most (≤, <) passed reads "2 over", with its units ("1'-6" over", "120 sf
+    over"), in every form; a least not met keeps "short" and its "−"."""
+    C, R, F = present.COMPLIES, present.REVIEW, present.FAILS
+    assert present.delta_words(R, (-2.0, -2.0), "count", False, maximum=True) == "2 over; see why"
+    assert present.delta_words(F, (-1.5, -1.5), "ft", False, maximum=True) == "1'-6\" over"
+    assert present.delta_words(F, (-120.0, -120.0), "sf", False, maximum=True) == "120 sf over"
+    assert present.delta_words(F, (-5.0, -1.0), "ft", True, maximum=True) == "at least 1'-0\" over"
+    assert present.delta_words(R, (-3.25, 1.75), "ft", True, maximum=True) == "up to 3'-3\" over"
+    assert present.delta_words(F, (-6.2, -0.004), "%", True, maximum=True) == "less than 0.01% over"
+    assert present.delta_words(C, (7.0, 7.0), "ft", False, maximum=True) == "+7'-0\""     # room reads the same
+    assert present.delta_words(F, (-1.5, -1.5), "ft", False) == "−1'-6\" short"            # a minimum: unchanged
+    # which it is comes from the rule's own comparison: building height is a most, a yard a least
+    assert present._is_maximum(ast.parse("building_height <= 35", mode="eval").body)
+    assert not present._is_maximum(ast.parse("rear_yard >= 25", mode="eval").body)
 
 
 def test_on_the_tax_map_red_is_over_under_every_reading_and_amber_is_the_rest_of_the_doubt():
@@ -553,7 +573,8 @@ def test_lot_area_and_coverage_deltas_use_the_tax_map_lot_area_like_their_verdic
     assert area["delta"] == "up to " + present._area(6000 - tol["low"], "up") + " short"     # never "to spare"
     cov = v["Lot coverage"]
     assert cov["approx"] and cov["status"] == present.FAILS and cov["delta"].startswith("at least ")
-    assert cov["delta"] != cov["margin"] + " short"                   # the certain shortfall, not the as-drawn one
+    assert cov["delta"].endswith(" over")                             # coverage is a most: past it is "over"
+    assert cov["delta"] != cov["margin"].lstrip("−") + " over"        # the certain excess, not the as-drawn one
 
 
 def test_the_height_row_is_never_marked_tax_map_approximate(tax_map):
@@ -561,7 +582,7 @@ def test_the_height_row_is_never_marked_tax_map_approximate(tax_map):
     margin, and it is not "(approx.)"."""
     r = tax_map
     h = items(r["view"])["Building height"]
-    assert h["approx"] is False and h["delta"] in ("at limit", h["margin"] + " to spare", h["margin"] + " short")
+    assert h["approx"] is False and h["delta"] in ("at limit", h["margin"], h["margin"].lstrip("−") + " over")
     assert "tax map" not in h["detail"]["line"]
 
 
@@ -602,15 +623,17 @@ def test_red_is_only_for_a_yard_that_fails_never_one_that_needs_review():
 
 def _shown_agrees(i):
     """The invariants between a row's status, the Delta the architect sees (settle's words, the only ones) and its
-    colour: "to spare" only on a row that complies; the certain words ("at least … short", "less than … short", a
-    survey's "−… short") only on a row that fails, and on a yard always with red; a row that complies never says
-    "short"; red only on a row that fails."""
+    colour: a bare room ("+2'-0"", "≥ +3'-0"": to spare) only on a row that complies; the certain words ("at least
+    … short", "less than … over", a survey's "−… short" or "… over") only on a row that fails, and on a yard always
+    with red; a row that complies never says "short" or "over"; red only on a row that fails."""
     d, st = i.get("delta") or "", i["status"]
-    certain = d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))
-    assert "to spare" not in d or st == present.COMPLIES, (i["name"], st, d)
+    certain = (d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))) or (
+        d.endswith(" over") and not d.startswith("up to "))
+    bare_room = d.startswith(("+", "≥ +")) and not d.endswith((" if confirmed", " here; see why"))
+    assert not bare_room or st == present.COMPLIES, (i["name"], st, d)
     assert not certain or st == present.FAILS, (i["name"], st, d)
     assert not (certain and i["measure"] in present.YARD_MEASURES) or i["colour"] == "red", (i["name"], i["colour"], d)
-    assert st != present.COMPLIES or "short" not in d, (i["name"], st, d)
+    assert st != present.COMPLIES or not d.endswith((" short", " over")), (i["name"], st, d)
     assert i["colour"] != "red" or st == present.FAILS, (i["name"], st)
     assert i["colour"] == "none" or i["measure"] in present.YARD_MEASURES, i["name"]
 
@@ -743,7 +766,7 @@ def test_a_side_yard_that_complies_only_under_every_reading_of_an_open_question_
     side = items(r["view"])["Side yard, Northeast"]
     assert side["status"] == present.REVIEW and (side["reason"] or "").startswith("Complies under every reading, but it depends on"), (
         side["status"], side["reason"])
-    assert "if confirmed" in side["delta"] and "to spare" not in side["delta"]
+    assert side["delta"].endswith(" if confirmed")                      # never a bare "+", which is to spare
     _never_above_the_checker(r)
 
 
