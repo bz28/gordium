@@ -2,6 +2,7 @@
 The cache must never change an answer: never stale (a changed file is read again), never shared (a caller that
 edits what it got can't change what the next caller gets), errors never kept, and it must be what makes the
 second read fast."""
+import json
 import os
 import time
 
@@ -160,3 +161,51 @@ def test_reading_a_rulebook_again_is_much_faster_than_parsing_it():
         load(path)
     again = (time.perf_counter() - t) / 5
     assert again < parse / 3, (again, parse)                # ~50x in practice; 3x leaves room for a busy machine
+
+
+def blank():
+    return Context(measures=set(), uses=set(), topics=set(), sources={})
+
+
+@pytest.mark.parametrize("loader,suffix", [("_load_extracted", ".jsonl"), ("_load_cells", ".cells.jsonl")])
+def test_a_stale_file_with_a_broken_row_is_still_re_extract_never_a_crash(tmp_path, loader, suffix):
+    """Review round 1: the version in the header is checked before any row is read, as before the cache."""
+    f = tmp_path / f"doc{suffix}"
+    f.write_text(json.dumps({"file": "doc.pdf", "sha256": "a" * 64}) + "\n"
+                 + json.dumps({"page": "not a number", "columns": [{"no": "name"}], "value": 1}) + "\n", encoding="utf-8")
+    ctx = blank()
+    getattr(ctx, loader)("doc.pdf", "b" * 64, f)
+    assert "different version" in ctx.problems[0] and not ctx.pages and not ctx.cells
+    with pytest.raises((KeyError, ValueError)):                       # the right version, broken: still loud
+        getattr(blank(), loader)("doc.pdf", "a" * 64, f)
+
+
+def test_extracted_text_and_chart_cells_match_a_reading_without_the_cache():
+    """Context's pages and cells against the same files read straight from disk the way the code did before the
+    cache (read_jsonl, then the same loops written out here), for every document of every jurisdiction."""
+    from rule_format.rulebook import DISTRICT_COLUMN, district_name, read_jsonl, tokenize
+    checked = 0
+    for j in jurisdictions():
+        ctx = Context.for_jurisdiction(j)
+        for name, entry in ctx.sources.items():
+            stem = os.path.splitext(name)[0]
+            text, cells_file = j / "2_extracted_text" / f"{stem}.jsonl", j / "2_extracted_text" / f"{stem}.cells.jsonl"
+            if name in ctx.file_problems:
+                continue
+            if text.exists():
+                rows = read_jsonl(text)
+                pages = {}
+                for row in rows[1:]:
+                    pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
+                assert ctx.pages[name] == pages
+                checked += 1
+            if entry.get("chart_pages") and cells_file.exists():
+                rows, cells, districts = read_jsonl(cells_file), {}, set()
+                for r in rows[1:]:
+                    if "columns" in r:
+                        districts |= {district_name(c["name"]) for c in r["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])}
+                    elif "value" in r and not r.get("heading"):
+                        cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
+                assert ctx.cells[name] == cells and districts <= ctx.districts
+                checked += 1
+    assert checked

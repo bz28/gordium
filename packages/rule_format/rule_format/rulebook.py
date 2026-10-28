@@ -244,10 +244,11 @@ class Context:
     def _load_cells(self, name, sha, path):
         """Chart cells read by the chart reader (document_extraction/charts.py). Only cells it read with
         certainty are in the file; unresolved parts of a table can never be cited."""
-        read_from, cells, districts = _kept("cells", Path(path).read_bytes(), _cells_of)
-        if read_from != sha:
+        found = _kept(f"cells {sha}", Path(path).read_bytes(), lambda data: _cells_of(data, sha))
+        if found is None:
             self._problem(name, f"{path.name} was read from a different version; re-extract")
             return
+        cells, districts = found
         self.districts |= districts
         self.cells[name] = cells
 
@@ -255,37 +256,38 @@ class Context:
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
         The header ties it to the PDF version; CI re-extracts the text from the PDF (python -m
         document_extraction --check) and requires an exact match, so this file can't be edited by hand."""
-        read_from, pages = _kept("extracted", Path(path).read_bytes(), _pages_of)
-        if read_from != sha:
+        pages = _kept(f"extracted {sha}", Path(path).read_bytes(), lambda data: _pages_of(data, sha))
+        if pages is None:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
         self.pages[name] = pages
 
 
-def _cells_of(data: bytes) -> tuple:
-    """A .cells.jsonl file's bytes -> (the PDF fingerprint its header names, or None; its cells; its districts)."""
+def _cells_of(data: bytes, sha: str) -> tuple | None:
+    """A .cells.jsonl file's bytes -> (its cells, its districts), or None when its header names another PDF
+    version than `sha` (checked before any row is read, so a stale file is always "re-extract", never a crash)."""
     rows = _jsonl_rows(data)
-    if not rows:
-        return None, {}, set()
+    if not rows or rows[0].get("sha256") != sha:
+        return None
     cells, districts = {}, set()
     for r in rows[1:]:
         if "columns" in r:
             districts |= {district_name(c["name"]) for c in r["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])}
         elif "value" in r and not r.get("heading"):
             cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
-    return rows[0].get("sha256"), cells, districts
+    return cells, districts
 
 
-def _pages_of(data: bytes) -> tuple:
-    """An extracted-text .jsonl file's bytes -> (the PDF fingerprint its header names, or None; page -> line ->
-    the line's words)."""
+def _pages_of(data: bytes, sha: str) -> dict | None:
+    """An extracted-text .jsonl file's bytes -> page -> line -> the line's words, or None when its header names
+    another PDF version than `sha` (checked before any row is read, as for _cells_of)."""
     rows = _jsonl_rows(data)
-    if not rows:
-        return None, {}
+    if not rows or rows[0].get("sha256") != sha:
+        return None
     pages: dict[int, dict[int, list[str]]] = {}
     for row in rows[1:]:
         pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
-    return rows[0].get("sha256"), pages
+    return pages
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
