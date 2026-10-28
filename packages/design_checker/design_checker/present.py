@@ -1552,10 +1552,13 @@ def _cautious_for_left_out(items, left_out, touching):
 # the lot's width and depth; the ground decides height and stories. An item needs review when ANY name in its rule's
 # formula is one of them, not only its own measurement: the height bonus (§325-16C) complies through the yards and
 # the lot depth (review round 1 of PR #19: it stayed "complies" on a doubtful lot).
-YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
+# Every measurement worked out from the lot lines is model_measurement's own list (LOT_LINE_MEASURES: the main
+# yards, their eaves and the accessory buildings' yards): one list, so a yard added there is never left out here
+# (the merge of #18 onto main left the accessory yards out: accessory_buildings stayed "complies" on a doubtful lot).
+from model_measurement.measure import LOT_LINE_MEASURES  # noqa: E402
 UNSETTLED_DECIDES = {
-    "lot": ("lot_area", "lot_width", "lot_depth") + YARDS,
-    "street": ("lot_width", "lot_depth") + YARDS,
+    "lot": ("lot_area",) + LOT_LINE_MEASURES,
+    "street": LOT_LINE_MEASURES,
     "ground": ("building_height", "stories"),
 }
 UNSETTLED_NAMES = {"lot": "lot outline", "street": "street side", "ground": "ground levels"}
