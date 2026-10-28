@@ -1769,7 +1769,7 @@ def _box_pick(doc, what, facts, saved_ui, session):
 
 def _one_pick(doc, what, facts, saved_ui, session):
     if what == "by_hand":                      # the site by hand (an empty file): the box shows its own rows, once
-        refused = logic.by_hand_refused(saved_ui)     # the lookup said outside the City: never asked (round 12)
+        refused = logic.by_hand_refused(saved_ui)     # the lookup said outside the City: refused, not asked
         if refused:
             saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, says=refused)
         # the architect says the lot is the City's (an address can't prove it)

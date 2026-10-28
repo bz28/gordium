@@ -1201,7 +1201,7 @@ def test_round_5_by_hand_is_for_city_of_ithaca_lots_only():
     lansing = {"address": "106 Ithaca Rd, Lansing, NY"}
     assert logic.draw_blocked(lansing, dict(opened, _by_hand=True)) == \
         logic.BY_HAND_CITY_ONLY.format(address=lansing["address"])
-    outside = dict(opened, _lookup={"status": "outside_city", "query": "953 Danby Rd, Ithaca, NY"})
+    _, outside = logic.lookup_choices({"status": "outside_city", "query": "953 Danby Rd, Ithaca, NY"}, {}, opened)
     _, by_hand = logic.choose_by_hand({}, outside, "2026-10-27")
     assert logic.draw_blocked({"address": "953 Danby Rd, Ithaca, NY"}, by_hand) != ""
     assert logic.draw_blocked({"address": "12 New Lot Ln, Ithaca, NY 14850"}, dict(opened, _by_hand=True)) == ""
@@ -1263,13 +1263,12 @@ def test_round_11_units_a_run_on_zip_and_a_town_after_a_street_with_no_ending():
 def test_round_12_outside_the_city_refuses_by_hand_whatever_the_address():
     """Round 12: after the lookup said outside the City, a Yes then a cleared or retyped address opened Draw."""
     opened = logic.box_opened({}, {})
-    outside = dict(opened, _lookup={"status": "outside_city", "query": "12 Main St, Lansing"})
+    _, outside = logic.lookup_choices({"status": "outside_city", "query": "12 Main St, Lansing"}, {}, opened)
     assert logic.by_hand_refused(outside) == logic.BY_HAND_OUTSIDE.format(query="12 Main St, Lansing")
     _, saved = logic.choose_by_hand({}, dict(outside), "2026-10-27")
     assert "_by_hand" not in saved and "city_by_hand" not in saved
     later = dict(opened, _by_hand=True, city_by_hand="2026-10-27")             # a Yes, then a lookup said outside
     _, later = logic.lookup_choices({"status": "outside_city", "query": "14 Main St"}, {}, later)
-    assert "city_by_hand" not in later
     for address in ("", "12 Main St", "14 Main St"):
         assert logic.draw_blocked({"address": address}, later) == logic.BY_HAND_OUTSIDE.format(query="14 Main St")
     from rule_format.rulebook import REPO
@@ -1288,6 +1287,38 @@ def test_round_12_the_yes_is_shown_and_kept_once_on_the_address_source():
     assert again == first                                                      # read back at the next Draw: once
     assert logic.fact_sources(dict(state, city_by_hand=None, address_source=logic.ENTERED), "x", True)[
         "address"]["source"] == logic.ENTERED
+
+
+def test_round_13_outside_the_city_outlives_a_later_lookup_that_finds_nothing():
+    """Round 13: outside the City, then an offline or not-found lookup, and by hand opened Draw on that lot."""
+    opened = logic.box_opened({}, {})
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "100 Snyder Hill Rd"}, {}, opened)
+    for then in ("offline", "not_found", "error", "multiple"):
+        _, later = logic.lookup_choices({"status": then, "query": "100 Snyder Hill Rd"}, {}, dict(saved))
+        assert logic.by_hand_refused(later)
+        _, tried = logic.choose_by_hand({}, dict(later), "2026-10-27")
+        assert "_by_hand" not in tried
+    _, found = logic.lookup_choices({"status": "found", "query": "106 Ithaca Rd"}, {}, dict(saved))
+    assert not logic.by_hand_refused(found)                                     # a found lookup ends it
+
+
+def test_round_13_a_drawn_lot_the_lookup_says_is_outside_is_not_drawn_again():
+    """Round 13: a by-hand lot (its Yes kept), reopened and looked up outside the City: Draw went on."""
+    facts = {"lot_id": "L", "address": "100 Snyder Hill Rd, Ithaca, NY 14850"}
+    opened = logic.box_opened({"city_by_hand": "2026-10-27"}, facts)
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": facts["address"]}, facts, opened)
+    assert saved["city_by_hand"] == "2026-10-27"                               # the Yes kept, as said
+    assert logic.draw_blocked({"address": facts["address"]}, saved) == logic.BY_HAND_OUTSIDE.format(
+        query=facts["address"])
+
+
+def test_round_13_parts_of_a_lot_units_and_the_county_are_not_towns():
+    opened = dict(logic.box_opened({}, {}), _by_hand=True)
+    for city in ("101 N Aurora St Rear", "10 Cayuga St Bldg 2", "100 Cornell St 2nd Fl", "10 Cayuga St B",
+                 "1 Esty St 1/2", "10 Cayuga St - Ithaca", "10 Brindley St Lower",
+                 "10 Cayuga St Ithaca Tompkins County NY", "10 Cayuga St, Ithaca, Tompkins County, NY"):
+        assert logic.draw_blocked({"address": city}, opened) == "", city
+    assert logic.address_place("12 Main St Lansing NY 14882") == "lansing 14882"
 
 
 def test_round_9_a_saved_source_never_says_used_live():

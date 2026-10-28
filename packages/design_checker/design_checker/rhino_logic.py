@@ -2087,9 +2087,8 @@ def box_rows(state, flat=None):
                   lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source")) + after
                   if has_lot else NO_LOT),
          "actions": lot_actions, "tick": None,
-         "help": " ".join(t for t in (BY_HAND_NOTE if state.get("by_hand") else None,
-                                      IN_CITY_SAID.format(date=state["city_by_hand"])
-                                      if state.get("city_by_hand") else None) if t) or None},
+         "help": (BY_HAND_NOTE + (" " + IN_CITY_SAID.format(date=state["city_by_hand"])
+                                  if state.get("city_by_hand") else "")) if state.get("by_hand") else None},
         {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
          "text": FILL_BY_LOOKUP if state.get("needs_lookup") else
          ((street_name(state) if state.get("street_name") or not after else NO_STREET_YET) + after)
@@ -2251,8 +2250,10 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
             "asks": list(payload.get("asks") or []), "matches": list(payload.get("matches") or []),
             "query": payload.get("query")}
     saved_ui["_lookup"] = look
-    if look["status"] == "outside_city":          # the map outranks the architect's earlier Yes (round 12)
-        saved_ui.pop("city_by_hand", None)
+    if look["status"] == "outside_city":          # the map's "outside the City" holds for this box session, through
+        saved_ui["_outside_for"] = look["query"] or facts.get("address") or "the address"   # any later lookup
+    elif look["status"] == "found":               # that doesn't find a lot (round 13: offline undid it); a found
+        saved_ui.pop("_outside_for", None)        # one ends it
     if look["status"] != "found":
         return facts, saved_ui
     got, details = payload.get("facts") or {}, payload.get("details") or {}
@@ -3320,7 +3321,8 @@ def start_gate(state, saved_ui):
     is written here."""
     saved_ui = saved_ui or {}
     if not saved_ui.get("_opened_empty"):
-        return dict(state, needs_lookup=False, by_hand=False, city_by_hand=saved_ui.get("city_by_hand"))
+        return dict(state, needs_lookup=False, by_hand=False, city_by_hand=saved_ui.get("city_by_hand"),
+                    outside_for=saved_ui.get("_outside_for"))
     pending = saved_ui.get("_pending") or {}
     # a found lookup supersedes "by hand": its address rule applies again (sceptic 2: by hand let another town's
     # address keep the City's lookup)
@@ -3332,7 +3334,7 @@ def start_gate(state, saved_ui):
                                                        saved_ui.get("_redrawn_for"), saved_ui.get("drawn_address"))
                 if a)
     return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand,
-                city_by_hand=saved_ui.get("city_by_hand"))     # shown whenever kept (round 12: never seen again)
+                city_by_hand=saved_ui.get("city_by_hand"), outside_for=saved_ui.get("_outside_for"))     # shown whenever kept (round 12: never seen again)
 
 
 BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
@@ -3354,15 +3356,14 @@ IN_CITY_QUESTION = ("Is this lot in the City of Ithaca?\n\nGordium checks City o
                     "Yes: enter the site by hand as a City of Ithaca lot. No: nothing changes.")
 IN_CITY_SAID = "You said this lot is in the City of Ithaca ({date})."
 BY_HAND_OUTSIDE = ("The lookup said {query} is outside the City of Ithaca, and Gordium checks City of Ithaca lots "
-                   "only: look up a City of Ithaca address.")
+                   "only: look up a City of Ithaca address, or close this box.")
 
 
 def by_hand_refused(saved_ui):
     """Why "Enter the site by hand" is refused before its question is asked: the lookup said outside the City (round
     12: a Yes, then the address cleared or retyped, opened Draw on that lot). "" when it may be asked."""
-    look = (saved_ui or {}).get("_lookup") or {}
-    return BY_HAND_OUTSIDE.format(query=look.get("query") or "the address") if look.get("status") == "outside_city" \
-        else ""
+    outside = (saved_ui or {}).get("_outside_for")     # (kept through later lookups: round 13)
+    return BY_HAND_OUTSIDE.format(query=outside) if outside else ""
 
 
 def choose_by_hand(facts, saved_ui, in_city):
@@ -3518,8 +3519,8 @@ def address_place(address):
     tail = str(address or "").split(",", 1)[1:]
     text = " ".join(_address_tokens((tail[0] if tail else "").replace(",", " ")))
     text = text.replace("united states of america", "").replace("united states", "")
-    words = [w for w in text.split() if w not in ("ny", "new", "york", "usa", "us")]
-    words = [w[:5] if w[:5].isdigit() else w for w in words]
+    words = [w for w in text.split() if w not in STATE_WORDS]
+    words = [w[:5] if w[:5].isdigit() else w for w in words if _may_be_place(w)]
     places = [w for w in words if w not in ITHACA_PLACE]
     return " ".join(places) or None
 
@@ -3531,8 +3532,9 @@ DIRECTIONS = {"north", "south", "east", "west", "n", "s", "e", "w"}
 STREET_ENDINGS = ((set(STREET_WORDS) | set(STREET_WORDS.values())) - DIRECTIONS    # "East Ithaca" is the Town's
                   | {"way", "park", "walk", "row", "alley", "aly", "path", "trail", "trl", "ext", "extension", "sq",
                      "square", "plaza", "loop", "run", "crossing", "pike", "tpke", "turnpike", "rte", "route"})
-STATE_WORDS = ("ny", "new", "york", "usa", "us")
-UNIT_WORDS = {"apt", "apartment", "unit", "#", "ste", "suite", "fl", "floor", "rm", "room"}
+STATE_WORDS = ("ny", "new", "york", "usa", "us", "tompkins", "county")
+UNIT_WORDS = {"apt", "apartment", "unit", "#", "ste", "suite", "fl", "floor", "rm", "room", "bldg", "building"}
+NOT_A_PLACE = {"rear", "front", "lower", "upper", "-", "&"}    # a part of a lot or house ("101 N Aurora St Rear")
 # Places around the City that share its "Ithaca" mail and ZIPs, read as a town even after a street with no known
 # ending ("1 Snyder Hill Dryden": round 11); "town" and "village" too ("Town of Ithaca"). By hand, the architect also
 # says the lot is in the City (IN_CITY_QUESTION): an address alone can't prove it.
@@ -3558,6 +3560,13 @@ def _address_tokens(text):
     return out
 
 
+def _may_be_place(word):
+    """Whether a word after the street may name a town: never a route's number ("Rte 13"), a letter ("St N", "St B":
+    round 13), "1/2", "2nd", punctuation, a part of a lot or house (NOT_A_PLACE) or a direction ("NE"). A ZIP may."""
+    return not ((word.isdigit() and len(word) < 5) or len(word) < 2 or word in NOT_A_PLACE
+                or word in ("ne", "nw", "se", "sw") or re.fullmatch(r"\d*/\d*|\d+(st|nd|rd|th)|\W+", word))
+
+
 def _place_without_commas(address):
     """address_place for an address typed without commas (round 9: "12 Main St Lansing NY 14882" read as the
     City's). The town is every word after the street's last ending (STREET_ENDINGS), state and the City's own name
@@ -3578,8 +3587,7 @@ def _place_without_commas(address):
         elif cut == len(words):              # nothing typed after the street but, perhaps, a place nearby
             tail = [w for w in words[2:] if w in NEARBY_PLACES]
     tail = [w[:5] if w[:5].isdigit() else w for w in tail if w not in STATE_WORDS]
-    tail = [w for w in tail if not (w.isdigit() and len(w) < 5)     # a route's number ("Rte 13"), never a town
-            and w not in ("n", "s", "e", "w", "ne", "nw", "se", "sw")]  # nor a street's "N" ("Aurora St N")
+    tail = [w for w in tail if _may_be_place(w)]
     places = [w for w in tail if w not in ITHACA_PLACE]
     return " ".join(places) or None
 
@@ -3600,13 +3608,16 @@ def address_reason(state):
     if state.get("by_hand") and not look.get("looking"):   # the site by hand, in a file that was empty: the address
         # is the architect's label (no lot of another to mislabel), but a City of Ithaca one (round 5: another
         # place, or one the lookup already said is outside the City, was checked under the City's rules)
-        if look.get("status") == "outside_city":     # whatever the address now (round 12: cleared or retyped)
-            return BY_HAND_OUTSIDE.format(query=look.get("query") or "the address")
+        if state.get("outside_for"):                 # whatever the address now (round 12: cleared or retyped)
+            return BY_HAND_OUTSIDE.format(query=state["outside_for"])
         if address and address_place(address) is not None:
             return BY_HAND_CITY_ONLY.format(address=address)
         return ""
     if known is not None and look.get("looking"):         # a lookup running: Draw off, its own address named
         return WAIT_LOOKUP.format(address=look["looking"])
+    if address and state.get("outside_for") and same_site_address(address, state["outside_for"]):
+        return BY_HAND_OUTSIDE.format(query=state["outside_for"])   # the lot's own address too (round 13: a drawn
+        #   lot the lookup now says is outside the City was drawn again and checked under the City's rules)
     if not address or known is None or any(same_site_address(address, k) for k in known):
         return ""
     status = look.get("status")
