@@ -43,7 +43,7 @@ A2 [code] **Rows, in this order** (`rhino_logic.box_rows`, tested in CI):
    - (with the lookup) not found or offline → manual entry.
 9. **[Cancel] [Draw]**.
 
-A3 [code] **"I confirm" is unticked on every new project.** On an existing project it is ticked only if the same district was confirmed at an earlier Draw. **Draw is enabled only when it is ticked**, with "Confirm the district to continue." beside it (`rhino_logic.district_confirmed`, `can_draw`).
+A3 [code] **"I confirm" is unticked on every new project.** On an existing project it is ticked only if the same district was confirmed at an earlier Draw. Picking another district in the box unticks it (`rhino_logic.zone_picked`): a tick is never carried to a district it wasn't given. **Draw is enabled only when it is ticked**, with "Confirm the district to continue." beside it (`rhino_logic.district_confirmed`, `can_draw`).
 
 A4 [code] **No regrading near the house.** Ticked, the ground shown counts as the finished grade, and height is checked normally. Unticked, with only the existing ground, height and stories need review (C5). Ground set with "I'll regrade" is finished ground (`rhino_logic.ground_facts`).
 
