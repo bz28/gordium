@@ -29,6 +29,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_no_freeze") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -147,7 +148,7 @@ try:
     # 6 (review round 1): a reload that KEEPS the plugin's state, with live mode and the drawing on
     doc = TestDocs("nofreeze").__enter__().open("Large Objects - Feet")
     g = load_the_bad_way()
-    g.gordium_check()                                    # GordiumStart: live mode on, the drawing, the panel
+    look_up_106(g, g.gordium_check)                                    # GordiumStart: live mode on, the drawing, the panel
     first_overlay = g.STATE["overlay"]
     west = lambda m: {i["name"]: i for i in (m.STATE.get("last") or {}).get("items", [])}["Side yard, Southwest"]  # noqa
     before = west(g)["proposed"]
@@ -167,7 +168,11 @@ try:
     for o in g._buildings(doc):
         doc.Objects.Transform(o.Id, Rhino.Geometry.Transform.Translation(-1 * ft, 0, 0), True)
     claim("6 an edit is noticed by the new copy's live hook", g.STATE.get("dirty") is not None)
-    g.STATE["dirty"] = time.time() - 2 * g.IDLE_SECONDS  # as if Rhino went idle after the edit
+    # as if Rhino went idle after the edit: the edit and the check before it both moved back in time, the check
+    # still before the edit (live mode skips a re-check when a check finished after the edit, PR #19)
+    g.STATE["dirty"] = time.time() - 2 * g.IDLE_SECONDS
+    for serial in list((g.STATE.get("checked_at") or {})):
+        g.STATE["checked_at"][serial] = g.STATE["dirty"] - 1.0
     g._idle(None, None)
     claim("6 and re-checked", (before, west(g)["proposed"]) == ("12'-0 5/8\"", "11'-0 5/8\""),
           (before, west(g)["proposed"]))

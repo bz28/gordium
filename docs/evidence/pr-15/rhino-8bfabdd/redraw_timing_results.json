@@ -1,0 +1,283 @@
+{
+ "head": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_8bfabdd",
+ "claims": {
+  "1 a moving frame's label work at most 16 ms (median, labels on less off)": {
+   "ok": true,
+   "detail": {
+    "extra_ms": 0.5,
+    "on": {
+     "top_zoom": {
+      "frames": 40,
+      "median_ms": 10.9,
+      "max_ms": 18.2
+     },
+     "perspective_orbit": {
+      "frames": 40,
+      "median_ms": 10.8,
+      "max_ms": 20.1
+     }
+    },
+    "off": {
+     "top_zoom": {
+      "frames": 40,
+      "median_ms": 10.4,
+      "max_ms": 24.6
+     },
+     "perspective_orbit": {
+      "frames": 40,
+      "median_ms": 10.6,
+      "max_ms": 30.3
+     }
+    }
+   }
+  },
+  "2 no label drawn while the view moves breaks a HARD rule": {
+   "ok": true,
+   "detail": {
+    "labels_checked": 87,
+    "broken": []
+   }
+  },
+  "2b no label drawn while the view moves is plainly wrong (edge, icon, boxes, labels)": {
+   "ok": true,
+   "detail": {
+    "labels_checked": 87,
+    "wrong": []
+   }
+  },
+  "3 every stop placed in ONE pass of at most 80 ms (placing)": {
+   "ok": false,
+   "detail": [
+    {
+     "one_pass": true,
+     "place_ms": 22.2,
+     "settle_with_redraw_ms": 23.5,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 72.1,
+     "settle_with_redraw_ms": 73.4,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 87.5,
+     "settle_with_redraw_ms": 86.4,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 74.8,
+     "settle_with_redraw_ms": 73.4,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 80.7,
+     "settle_with_redraw_ms": 81.4,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 67.6,
+     "settle_with_redraw_ms": 67.6,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 21.0,
+     "settle_with_redraw_ms": 21.0,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 9.0,
+     "settle_with_redraw_ms": 8.9,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    }
+   ]
+  },
+  "4 the frame after the pass is settled, its labels keeping every HARD rule": {
+   "ok": true,
+   "detail": [
+    {
+     "one_pass": true,
+     "place_ms": 22.2,
+     "settle_with_redraw_ms": 23.5,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 72.1,
+     "settle_with_redraw_ms": 73.4,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 87.5,
+     "settle_with_redraw_ms": 86.4,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 74.8,
+     "settle_with_redraw_ms": 73.4,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 80.7,
+     "settle_with_redraw_ms": 81.4,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 67.6,
+     "settle_with_redraw_ms": 67.6,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 21.0,
+     "settle_with_redraw_ms": 21.0,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    },
+    {
+     "one_pass": true,
+     "place_ms": 9.0,
+     "settle_with_redraw_ms": 8.9,
+     "settled": true,
+     "labels": 9,
+     "broken_at_rest": []
+    }
+   ]
+  }
+ },
+ "labels_off": {
+  "top_zoom": {
+   "frames": 40,
+   "median_ms": 10.4,
+   "max_ms": 24.6
+  },
+  "perspective_orbit": {
+   "frames": 40,
+   "median_ms": 10.6,
+   "max_ms": 30.3
+  }
+ },
+ "labels_on": {
+  "top_zoom": {
+   "frames": 40,
+   "median_ms": 10.9,
+   "max_ms": 18.2
+  },
+  "perspective_orbit": {
+   "frames": 40,
+   "median_ms": 10.8,
+   "max_ms": 20.1
+  }
+ },
+ "stops": [
+  {
+   "one_pass": true,
+   "place_ms": 22.2,
+   "settle_with_redraw_ms": 23.5,
+   "settled": true,
+   "labels": 9,
+   "broken_at_rest": []
+  },
+  {
+   "one_pass": true,
+   "place_ms": 72.1,
+   "settle_with_redraw_ms": 73.4,
+   "settled": true,
+   "labels": 9,
+   "broken_at_rest": []
+  },
+  {
+   "one_pass": true,
+   "place_ms": 87.5,
+   "settle_with_redraw_ms": 86.4,
+   "settled": true,
+   "labels": 9,
+   "broken_at_rest": []
+  },
+  {
+   "one_pass": true,
+   "place_ms": 74.8,
+   "settle_with_redraw_ms": 73.4,
+   "settled": true,
+   "labels": 9,
+   "broken_at_rest": []
+  },
+  {
+   "one_pass": true,
+   "place_ms": 80.7,
+   "settle_with_redraw_ms": 81.4,
+   "settled": true,
+   "labels": 9,
+   "broken_at_rest": []
+  },
+  {
+   "one_pass": true,
+   "place_ms": 67.6,
+   "settle_with_redraw_ms": 67.6,
+   "settled": true,
+   "labels": 9,
+   "broken_at_rest": []
+  },
+  {
+   "one_pass": true,
+   "place_ms": 21.0,
+   "settle_with_redraw_ms": 21.0,
+   "settled": true,
+   "labels": 9,
+   "broken_at_rest": []
+  },
+  {
+   "one_pass": true,
+   "place_ms": 9.0,
+   "settle_with_redraw_ms": 8.9,
+   "settled": true,
+   "labels": 9,
+   "broken_at_rest": []
+  }
+ ],
+ "view_px": [
+  657,
+  668
+ ],
+ "label_settle_s": 0.08,
+ "done": true
+}

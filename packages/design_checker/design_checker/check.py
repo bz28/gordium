@@ -159,7 +159,8 @@ MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked
 
 MODEL_WORDS = {"model#eave": {"eave": "what reaches past the walls an eave",
                                "not_eave": "what reaches past the walls not an eave"},
-               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"}}
+               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"},
+               "model#narrower": {}}          # its readings say their own line: "the side along lot line 3 …"
 EAVE_YARD_WORDS = {"front_yard": "front yard", "side_yard_smaller": "side yard", "side_yard_larger": "side yard",
                  "rear_yard": "rear yard"}
 
@@ -843,6 +844,9 @@ def _ring(polygon) -> list:
     return [list(p) for p in polygon.simplify(0.001).exterior.coords[:-1]]
 
 
+SHORTEST_LABELLED_EDGE = 1.0          # ft: lot edges shorter than this get no length label in plan
+
+
 def hole_free(region) -> list:
     """A region as pieces without holes (each drawn by its outline alone): a polygon with a hole is cut in two
     by the vertical line through the hole's middle, again until none is left (review round 2: strips all round
@@ -925,7 +929,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
 
     lot = site.get("lot") or {}
     edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
-             for r, length in edge_runs(lot.get("edges") or []) if length >= 1.0]
+             for r, length in edge_runs(lot.get("edges") or [])
+             if length >= SHORTEST_LABELLED_EDGE]   # a tax-map sliver (0'-1 5/8"): no label, it only clutters
     yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
               (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
               (" (approx.)" if i.get("approx") else "")}
