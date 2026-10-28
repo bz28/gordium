@@ -255,11 +255,26 @@ def _unique_start(words: list[str], page: list[list[str]]) -> str:
     return " ".join(words[:n])
 
 
-@functools.lru_cache(maxsize=16)
 def _page_lines(j: Path, file: str) -> dict:
-    """{(page, line): text} of one document's extracted text (2_extracted_text/<file stem>.jsonl)."""
+    """{(page, line): text} of one document's extracted text (2_extracted_text/<file stem>.jsonl). Kept by the
+    file's content (its SHA-256), as _chart_cells is, never by folder name: after a re-extraction in a long Rhino
+    session the next citation link searches the new text, not the old. Display only."""
     path = j / "2_extracted_text" / (Path(file).stem + ".jsonl")
-    return {(r["page"], r["line"]): r["text"] for r in (read_jsonl(path) if path.exists() else []) if "line" in r}
+    data = path.read_bytes() if path.exists() else b""
+    key = (str(path), hashlib.sha256(data).digest())
+    with _LINES_LOCK:
+        found = _LINES.get(key)
+    if found is None:
+        found = {(r["page"], r["line"]): r["text"] for r in _jsonl_rows(data) if "line" in r}
+        with _LINES_LOCK:
+            _LINES[key] = found
+            while len(_LINES) > 16:
+                _LINES.pop(next(iter(_LINES)))
+    return found
+
+
+_LINES: dict = {}                            # (file path, SHA-256 of its bytes) -> its {(page, line): text}
+_LINES_LOCK = threading.Lock()
 
 
 def anchor_text(source: dict, j: Path) -> str:
