@@ -2258,9 +2258,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
 
     live, keep = {}, {}
     for name, d in details.items():          # every doubtful or asked fact's reason, by row; reasons add up
-        if d.get("status") in ("needs_review", "ask") and d.get("reason"):
+        # (a doubt without its reason is still a doubt: a saved lookup keeps the status but not a reason worked out
+        # from a source that may not be kept; dropped, the saved lot was more certain than the live one: a false
+        # pass, start-flow round 7)
+        if d.get("status") in ("needs_review", "ask"):
             row = ROW_OF.get(name, name)
-            live[row] = _merged(live.get(row), d["reason"])
+            live[row] = _merged(live.get(row), d.get("reason") or DOUBT_KEPT)
             keep[row] = _merged(keep.get(row), kept.get(name) or DOUBT_KEPT)
     found_overlays = value("overlays") or []
     if found_overlays:                       # what was found, by name, not only that something was
@@ -3388,11 +3391,14 @@ def storable_lookup(answer):
     date = answer.get("checked") or str(snap.get("fetched") or "")[:10] or None
     if not date:
         return None
-    return {"status": "found", "query": answer.get("query"), "message": "", "asks": [], "matches": [],
-            "facts": facts, "details": {k: v for k, v in (snap.get("details") or {}).items() if k in facts},
+    return {"status": "found", "query": answer.get("query"), "message": "", "asks": [], "matches": [], "facts": facts,
+            # every doubt the lookup had, by its status (the snapshot's details are within every source's policy),
+            # even for a fact whose value isn't kept (the street side, the corner): never more certain than live
+            "details": {k: v for k, v in (snap.get("details") or {}).items() if k != "zone"},
             "labels": {k: v for k, v in (answer.get("labels") or {}).items()     # (the service names only; the
                        if k in facts or (k == "street_side" and w.get("street_line"))},   # street line's, with it)
-            "kept_reasons": {}, "street_storable": bool(answer.get("street_storable")),
+            "kept_reasons": {k: v for k, v in (answer.get("kept_reasons") or {}).items() if k != "zone"},
+            "street_storable": bool(answer.get("street_storable")),
             "writes": {"lot_ring": w.get("lot_ring"), "guide_ring": None, "street_line": w.get("street_line"),
                        "spots": list(w.get("spots") or []), "frame": w.get("frame"), "snapshot": snap},
             "checked": date, "address": found_address(answer)}

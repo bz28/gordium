@@ -1246,3 +1246,45 @@ def test_round_6_a_stale_use_saved_button_says_why_it_did_nothing():
     from rule_format.rulebook import REPO
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert 'logic.saved_refused(saved_ui.get("_lookup"), offered_for, facts.get("address"))' in src
+
+
+def test_round_7_a_saved_lookup_is_never_more_certain_than_the_live_one():
+    """P0, a false pass (round 7, cold reviewer + 2 sceptics): the State and County placed 106 Ithaca Rd 200 ft
+    apart, so the live lookup keeps the lot and street in doubt (their rows NEEDS REVIEW). The saved copy kept the
+    statuses but not the reason (the County's, not keepable), and a doubt needed a reason: offline the lot came back
+    certain, and Lot width, Front yard and Building height COMPLIED once the corner was answered."""
+    from test_lookup_box import T, looked_up
+
+    class Table:
+        n = 0
+
+        def add_lot(self, ring, name):
+            Table.n += 1
+            return "lot%d" % Table.n
+
+        def add_spot(self, p):
+            return "s"
+
+        def ground_points(self):
+            return []
+
+    class Session:
+        def hold(self, x):
+            pass
+
+        def add(self, x):
+            pass
+
+    fx = T.load("106_ithaca_rd")
+    pt = next(a for a in fx["answers"] if a["source"] == "geocoder")["body"]["candidates"][0]["location"]
+    live = looked_up("106_ithaca_rd", county=(pt["x"] + 200, pt["y"]))
+    store = logic.save_lookup({}, dict(live, checked="2026-10-27"), "106 Ithaca Rd")
+    saved = logic.use_saved(logic.saved_offer({"status": "offline"}, store, "106 Ithaca Rd"), "106 Ithaca Rd",
+                            "106 Ithaca Rd")
+    unsettled = {}
+    for tag, answer in (("live", live), ("saved", saved)):
+        f0, s0, _ = logic.preview_lookup(answer, {"address": "106 Ithaca Rd"}, logic.box_opened({}, {}), ZONES)
+        _, s, _ = logic.apply_lookup(Table(), Session(), s0["_pending"]["answer"], f0, s0, ZONES)
+        unsettled[tag] = set(logic.unsettled(s))
+    assert unsettled["live"] >= {"lot", "street"}
+    assert unsettled["saved"] >= unsettled["live"]
