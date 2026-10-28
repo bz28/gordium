@@ -245,7 +245,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      corner lot, each with where it came from (not the ground: for now it is assumed flat, see **Ground** below).
      Anything doubtful is amber with the reason: tick **I checked this** once you have, or change it; until then
      the items that depend on it need review. An address typed and not looked up keeps Draw off ("Press Look up to
-     find … first."); type the lot's own address back, or clear it, and Draw is on again. If the lookup can't
+     find … first."); on a lot already drawn, type the lot's own address back, or clear it, and Draw is on again
+     (in a new file Draw needs a lookup that finds the lot, or **Enter the site by hand…**). If the lookup can't
      help (offline, not found, outside the City of Ithaca), the box says why: correct the address and Look up
      again, or put back the lot's own address (or clear it) and fill the rest in by hand. Outside the City: Draw
      stays off for that address, and in a new file by hand is refused, until a live lookup of that same address
