@@ -131,6 +131,21 @@ def red_last(coloured):
     return rest, [c for c in coloured or [] if highlight(c[1]) == "red"]
 
 
+def newly_failing(before, view):
+    """The row to bring into view after a re-check: the first, in the panel's order, that does not comply now and
+    did not at the check before (`before`: {item id: status} then, None on a document's first check). None when
+    nothing newly fails, so a re-check that changes nothing for the worse never moves the list (the architect's
+    review, 2026-10-28: after an edit the newly failing row was out of sight below the rows that need review)."""
+    if before is None or not view:
+        return None
+    status = {i["id"]: i["status"] for i in view.get("items") or []}
+    for g in view.get("groups") or []:
+        for item_id in g.get("items") or []:
+            if status.get(item_id) == "does_not_comply" and before.get(item_id) != "does_not_comply":
+                return item_id
+    return None
+
+
 def labels_on(ui_state):
     """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
     unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the

@@ -2509,7 +2509,7 @@ def run_check(doc, report=True):
         shown = logic.labels_on(_ui_state(doc))       # this document's Show on-screen labels
         STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
         if not STATE.get("headless"):
-            ui.show(panel(), view)
+            ui.show(panel(), view, select=logic.newly_failing(extras["before"], view))   # brought into view
             _sync_ticks(doc)
             if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
                 ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)

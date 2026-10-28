@@ -4206,3 +4206,33 @@ def test_red_is_drawn_last_over_amber_and_everything_else():
     # after it only the red's own three draws: its parts, and the failing solid's outline (a mesh or a brep)
     assert [scene[k:k + 20] for k in draws if k > last_red] == [
         "_draw_coloured(d, g,", "d.DrawMeshWires(g, u", "d.DrawBrepWires(g, u"]
+
+
+def test_a_recheck_brings_the_newly_failing_row_into_view(facts):
+    """Architect's review (2026-10-28): after an edit made the front yard fail, its row was out of sight below the
+    rows that need review. The first row (in the panel's order) that does not comply now and did not before is
+    selected and scrolled to; nothing newly failing (or a first check) leaves the list where it was."""
+    from design_checker import rhino_logic as logic
+    view = {"items": [{"id": "a", "status": "needs_review"}, {"id": "b", "status": "does_not_comply"},
+                      {"id": "c", "status": "does_not_comply"}, {"id": "d", "status": "complies"}],
+            "groups": [{"key": "fails", "items": ["c", "b"]}, {"key": "review", "items": ["a"]},
+                       {"key": "complies", "items": ["d"]}]}
+    assert logic.newly_failing({"a": "needs_review", "b": "complies", "c": "complies"}, view) == "c"   # panel order
+    assert logic.newly_failing({"c": "does_not_comply", "b": "needs_review"}, view) == "b"   # c failed already
+    assert logic.newly_failing({"b": "does_not_comply", "c": "does_not_comply"}, view) is None     # none new
+    assert logic.newly_failing(None, view) is None                                               # a first check
+    # the real checker's view: the same items the notice names (present.notice), first in the panel's order
+    got = check(MODEL, facts)["view"]
+    before = {i["id"]: ("complies" if i["status"] == "does_not_comply" else i["status"]) for i in got["items"]}
+    failing = [i for g in got["groups"] for i in g["items"]
+               if {x["id"]: x["status"] for x in got["items"]}[i] == "does_not_comply"]
+    assert logic.newly_failing(before, got) == (failing[0] if failing else None)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'ui.show(panel(), view, select=logic.newly_failing(extras["before"], view))' in rhino
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    body = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
+    assert 'if select in by_id:' in body and 'parts["selected"] = select' in body \
+        and 'parts["expanded"]["group:" + g["key"]] = True' in body
+    # selected and scrolled to, its group opened BEFORE the list is built from parts["expanded"]
+    assert body.index('parts["expanded"]["group:" + g["key"]] = True') < body.index("gi.Expanded = parts[")
+    assert ".Focus()" not in ui                                       # never takes the keyboard from the viewport

@@ -489,11 +489,13 @@ def _wrap_width(parts):
     return max(240, width - 48) if width > 0 else None
 
 
-def show(parts, view, stale=False, error=None, checking=False):
+def show(parts, view, stale=False, error=None, checking=False, select=None):
     """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet) or a
     check that couldn't run: rows keep their names but show no mark and "—", Zoom to is off (H1, H2, H5). The
     selection and which groups are open are kept by item id across refreshes (D8); the list shows its first group's
-    heading whole at the top, scrolled only as far as the selected row needs (the Rhino job at 6361a3f)."""
+    heading whole at the top, scrolled only as far as the selected row needs (the Rhino job at 6361a3f). `select`:
+    a row to select and scroll to instead, its group opened (a re-check's newly failing row: logic.newly_failing).
+    Selecting a row in code never takes the keyboard from the Rhino viewport (no Focus())."""
     global WRAP_AT
     WRAP_AT = _wrap_width(parts) if DOCKED else None
     tree = parts["tree"]
@@ -511,6 +513,11 @@ def show(parts, view, stale=False, error=None, checking=False):
         parts["expanded"][g.Tag] = g.Expanded
     by_id = {i["id"]: i for i in view["items"]}
     parts["by_id"] = by_id
+    if select in by_id:                      # the newly failing row: selected, its group open, scrolled to below
+        parts["selected"] = select
+        for g in view["groups"]:
+            if select in g["items"]:
+                parts["expanded"]["group:" + g["key"]] = True
     store = ef.TreeGridItemCollection()
     selected_item = None
     parts["groups"] = []
