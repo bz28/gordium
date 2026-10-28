@@ -1774,6 +1774,10 @@ def _one_pick(doc, what, facts, saved_ui, session):
         saved_ui = _lookup_start(facts, saved_ui)
     elif what == "lookup_done":
         facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
+    elif what == "use_saved":                  # offline: the lookup saved on this computer, marked with its date
+        offer = saved_ui.pop("_saved_answer", None)
+        if offer:
+            facts, saved_ui = _show_answer(doc, logic.as_saved(offer, facts.get("address")), facts, saved_ui)
     else:                                      # the pick's outcome only; rhino_logic.pick_effect decides the rest
         facts, saved_ui = logic.pick_effect(what, _pick_outcome(doc, what, facts, saved_ui, session), facts, saved_ui)
     _highlight(doc, facts)
@@ -1954,7 +1958,7 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             elif drawn_state is not state:            # after the reset (the guide): its lot rows are the model's
                 ticked = {k: v for k, v in ticked.items() if k in GUIDE_KEEPS}
             continue
-        if what in ("pick:lookup", "pick:lookup_done"):   # the lookup's answer replaces them (and the district
+        if what in ("pick:lookup", "pick:lookup_done", "pick:use_saved"):   # the lookup's answer replaces them (and the district
             ticked = {}                                   # must be confirmed again)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
@@ -2047,7 +2051,44 @@ def _lookup_done(doc, facts, saved_ui, session):
     changes; its lot is shown dashed on screen while the box is open (gone on Cancel), and Draw draws it
     (_draw_prepare). The views framed on it."""
     answer = _lookup_poll() or {"status": "error"}
+    asked = (STATE.get("lookup") or {}).get("query") or facts.get("address")
     _lookup_stop()
+    offer = logic.guard(_saved_lookup, "keep or find a saved lookup")(answer, asked)
+    facts, saved_ui = _show_answer(doc, answer, facts, saved_ui)
+    saved_ui.pop("_saved_answer", None)         # an earlier offer never outlives the next lookup
+    if offer:                                   # offline: the box offers the lookup saved on this computer
+        saved_ui = dict(saved_ui, _saved_answer=offer)
+        saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, saved_offer=offer.get("checked"))
+    return facts, saved_ui
+
+
+def _saved_lookups_path():
+    """The lookups saved on this computer (the offline safety net), beside Gordium's other per-user files."""
+    return STATE.get("saved_lookups_path") or os.path.join(os.path.expanduser("~"), ".gordium", "saved_lookups.json")
+
+
+def _saved_lookup(answer, asked):
+    """A found answer saved (rhino_logic.save_lookup: only what its sources allow); for a failed one, the saved
+    lookup of the same address to offer, or None."""
+    path = _saved_lookups_path()
+    try:
+        with open(path, encoding="utf-8") as f:
+            store = json.load(f)
+    except Exception:
+        store = {}
+    if (answer or {}).get("status") == "found":
+        new = logic.save_lookup(store, answer, asked)
+        if new != store:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path + ".tmp", "w", encoding="utf-8") as f:
+                json.dump(new, f)
+            os.replace(path + ".tmp", path)
+        return None
+    return logic.saved_offer(answer, store, asked)
+
+
+def _show_answer(doc, answer, facts, saved_ui):
+    """An answer into the box only: its lot shown dashed, the views framed on it."""
     facts, saved_ui, preview = logic.preview_lookup(answer, facts, saved_ui, STATE.get("zones") or [])
     STATE.pop("lookup_guide", None)
     if preview:

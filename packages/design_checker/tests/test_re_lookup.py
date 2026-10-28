@@ -1039,3 +1039,81 @@ def test_draw_draws_nothing_on_an_empty_file_without_a_found_lookup_whatever_way
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     prep = src[src.index("def _draw_prepare("):src.index("    facts, saved_ui = _apply_box(", src.index("def _draw_prepare("))]
     assert "unlooked = logic.draw_blocked(state, saved_ui)" in prep and "return facts, saved_ui, False, state" in prep
+
+
+# ---- the offline safety net: the lookup saved on this computer (Ben, 2026-10-27) ----
+
+def _found_106():
+    from site_lookup.lookup import lookup
+    from test_lookup_box import T
+    from design_checker.lookup_box import box_payload
+    fx = T.load("106_ithaca_rd")
+    return box_payload(lookup(fx["address"], T.Fake(fx), T.NOW), T.NOW)
+
+
+def test_a_found_lookup_is_saved_only_as_far_as_its_sources_allow_and_never_with_the_district():
+    import json
+    found = _found_106()
+    assert found["status"] == "found" and found["writes"]["lot_ring"] and found["facts"]["zone"]["value"]
+    store = logic.save_lookup({}, found, "106 Ithaca Rd")
+    copy = store[logic.lookup_key("106 Ithaca Rd")]
+    assert "zone" not in copy["facts"]                                # the City's zoning map: used live, never kept
+    assert logic.USED_LIVE not in json.dumps(copy["facts"])           # nor any value a source forbids keeping
+    district = found["facts"]["zone"]["value"]                        # (the snapshot kept only its marker)
+    assert copy["writes"]["snapshot"]["facts"]["zone"]["value"] == logic.USED_LIVE
+    assert json.dumps(district) not in json.dumps({k: v for k, v in copy.items() if k != "writes"})
+    assert copy["facts"]["lot"]["value"]["area_sf"] == found["facts"]["lot"]["value"]["area_sf"]
+    assert copy["writes"]["lot_ring"] == found["writes"]["lot_ring"] and copy["writes"]["guide_ring"] is None
+    assert copy["checked"] == found["checked"]
+    json.dumps(store)                                                  # a plain file
+    # a failure, a guide only (the City's outline: never kept) and a saved copy itself are never saved
+    for answer in ({"status": "offline"}, dict(found, writes=dict(found["writes"], lot_ring=None)),
+                   logic.as_saved(copy, "106 Ithaca Rd")):
+        assert logic.save_lookup({}, answer, "106 Ithaca Rd") == {}
+
+
+def test_only_a_lookup_that_couldnt_reach_the_services_offers_the_saved_one_for_the_same_address():
+    store = logic.save_lookup({}, _found_106(), "106 Ithaca Rd")
+    for status in ("offline", "error", "timeout"):
+        assert logic.saved_offer({"status": status}, store, "106 ithaca road, Ithaca NY") is not None, status
+    for status in ("not_found", "outside_city", "multiple", "found"):   # an answer is an answer: never replaced
+        assert logic.saved_offer({"status": status}, store, "106 Ithaca Rd") is None, status
+    assert logic.saved_offer({"status": "offline"}, store, "96 Ithaca Rd") is None       # another address
+    assert logic.saved_offer({"status": "offline"}, store, "") is None
+
+
+def test_the_saved_lookup_is_marked_with_its_date_and_the_district_is_picked_again():
+    found = _found_106()
+    copy = logic.save_lookup({}, found, "106 Ithaca Rd")[logic.lookup_key("106 Ithaca Rd")]
+    date = copy["checked"]
+    # offline: the box says so and offers it (the Address row's button)
+    facts, saved, _ = logic.preview_lookup({"status": "offline", "query": "106 Ithaca Rd"}, {"address": "106 Ithaca Rd"},
+                                           logic.box_opened({}, {}), ZONES)
+    saved["_lookup"] = dict(saved["_lookup"], saved_offer=date)
+    rows = {r["key"]: r for r in logic.box_rows({"address": "106 Ithaca Rd", "lookup": saved["_lookup"]})}
+    assert ("use_saved", "Use the lookup saved on " + date, True) in rows["address"]["actions"]
+    # used: shown like a lookup, every label and the line marked with the date; no district suggested
+    facts, saved, ring = logic.preview_lookup(logic.as_saved(copy, "106 Ithaca Rd"), facts, saved, ZONES)
+    assert ring == found["writes"]["lot_ring"]
+    assert saved["_lookup"]["says"] == logic.SAVED_SAYS.format(address=facts.get("address") or "106 Ithaca Rd",
+                                                               date=date)
+    assert "saved on " + date in saved["_lookup"]["says"] and "pick the district again" in saved["_lookup"]["says"]
+    assert not facts.get("zone")
+    labels = saved["_pending"]["answer"]["labels"]
+    assert labels and all(v.endswith(" · saved on " + date) for v in labels.values())
+    gate = logic.start_gate({"address": "106 Ithaca Rd"}, saved)
+    assert not gate["needs_lookup"]                                  # it opens Draw's gate…
+    assert logic.draw_reason(dict(gate, zone=None, district_confirmed=False, has_lot=True)) == \
+        "Pick the district to continue."                             # …but the district is the architect's to pick
+
+
+def test_the_plugin_saves_found_lookups_and_offers_the_saved_one_only_when_offline():
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    done = src[src.index("def _lookup_done("):src.index("def _saved_lookups_path(")]
+    assert "_saved_lookup, " in done and "saved_offer=offer.get(\"checked\")" in done
+    saved = src[src.index("def _saved_lookup("):src.index("def _show_answer(")]
+    assert "logic.save_lookup(store, answer, asked)" in saved and "logic.saved_offer(answer, store, asked)" in saved
+    pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
+    assert 'logic.as_saved(offer, facts.get("address"))' in pick
+    assert '"pick:use_saved"' in src                                  # the ticks go, as for any lookup

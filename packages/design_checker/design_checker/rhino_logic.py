@@ -2070,7 +2070,9 @@ def box_rows(state, flat=None):
         lot_actions = [("by_hand", BY_HAND + "…", True)]
     rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
-         "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))],
+         "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))]
+         + ([("use_saved", USE_SAVED.format(date=look["saved_offer"]), True)]
+            if look.get("saved_offer") and not look.get("looking") else []),
          "tick": None, "matches": look.get("matches") or [],
          "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
         {"key": "zone", "label": "Zoning district", "text": zone_row_text(state),
@@ -3262,6 +3264,8 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
     elif not is_drawn(address, saved_ui):
         saved_ui["_lookup"]["says"] = (GUIDE_PREVIEW if not w.get("lot_ring") and w.get("guide_ring") else
                                        PREVIEW_SAYS.format(address=address))
+    if answer.get("saved_on"):                   # the offline safety net: said, whatever else the line said
+        saved_ui["_lookup"]["says"] = SAVED_SAYS.format(address=address, date=answer["saved_on"])
     return facts, saved_ui, w.get("lot_ring") or w.get("guide_ring")
 
 
@@ -3315,6 +3319,77 @@ def draw_blocked(state, saved_ui):
     state = dict(state, known_addresses=known_addresses(saved_ui), lookup=saved_ui.get("_lookup") or {})
     gated = start_gate(state, saved_ui)
     return address_reason(gated) or (LOOK_UP_FIRST_SITE if gated["needs_lookup"] else "")
+
+
+# The offline safety net (Ben, 2026-10-27): each found lookup is saved on this computer, only as far as its sources
+# allow keeping it (site_lookup's snapshot, endpoints.yaml `store`): the lot and its street line from the State's
+# tax parcels, never the district (the City's zoning map is used live, never stored), so the district is picked
+# again. When a later lookup of the same address can't reach the map services, the box offers the saved one.
+LOOKUP_FAILED = ("offline", "error", "timeout")          # the services didn't answer (never "not found" or "outside")
+USE_SAVED = "Use the lookup saved on {date}"
+SAVED_SAYS = ("The map services didn't answer. Shown: the lookup of {address} saved on {date} (the lot and its street "
+              "line only: pick the district again).")
+SAVED_ON = " · saved on {date}"
+USED_LIVE = "(used live, not stored)"                     # site_lookup.lookup.USED_LIVE: a value never stored
+
+
+def lookup_key(address):
+    """The key a saved lookup is filed under: the address's own words (address_words), "" for none."""
+    return " ".join(address_words(address))
+
+
+def storable_lookup(answer):
+    """The copy of a found lookup that may be saved, or None (nothing worth saving: no lot curve the sources allow
+    keeping). Only the snapshot's facts (each already within its source's policy) with a value that was kept, the
+    lot curve, its street line and placement, the spot grades (writes: all `raw`), its date and query. Never the
+    district (used live), nor the City's guide."""
+    answer = answer or {}
+    w = answer.get("writes") or {}
+    if answer.get("status") != "found" or not w.get("lot_ring") or answer.get("saved_on"):
+        return None
+    snap = w.get("snapshot") or {}
+    facts = {k: v for k, v in (snap.get("facts") or {}).items()
+             if isinstance(v, dict) and v.get("value") not in (None, USED_LIVE) and k != "zone"}
+    if not facts.get("lot"):
+        return None
+    date = answer.get("checked") or str(snap.get("fetched") or "")[:10] or None
+    if not date:
+        return None
+    return {"status": "found", "query": answer.get("query"), "message": "", "asks": [], "matches": [],
+            "facts": facts, "details": {k: v for k, v in (snap.get("details") or {}).items() if k in facts},
+            "labels": {k: v for k, v in (answer.get("labels") or {}).items() if k in facts},
+            "kept_reasons": {}, "street_storable": bool(answer.get("street_storable")),
+            "writes": {"lot_ring": w.get("lot_ring"), "guide_ring": None, "street_line": w.get("street_line"),
+                       "spots": list(w.get("spots") or []), "frame": w.get("frame"), "snapshot": snap},
+            "checked": date, "address": answer.get("address")}
+
+
+def save_lookup(store, answer, address=None):
+    """The saved lookups (a dict: key -> storable copy) with this answer added under the address typed and the one
+    found; unchanged when nothing may be saved."""
+    copy = storable_lookup(answer)
+    if copy is None:
+        return dict(store or {})
+    out = dict(store or {})
+    for a in (answer.get("query"), address):
+        if lookup_key(a):
+            out[lookup_key(a)] = copy
+    return out
+
+
+def saved_offer(answer, store, address):
+    """The saved lookup to offer for `address` when this lookup failed to reach the services, else None."""
+    if (answer or {}).get("status") not in LOOKUP_FAILED or not lookup_key(address):
+        return None
+    return (store or {}).get(lookup_key(address))
+
+
+def as_saved(copy, address):
+    """A saved lookup as an answer the box shows like any other, marked: its date on the line the box says, and on
+    every source label ("NYS Tax Parcels Public · saved on 2026-10-27"), so the rows and what Draw saves say so."""
+    date = copy.get("checked")
+    return dict(copy, saved_on=date, query=address or copy.get("query"),
+                labels={k: v + SAVED_ON.format(date=date) for k, v in (copy.get("labels") or {}).items()})
 
 
 def known_addresses(saved_ui):
