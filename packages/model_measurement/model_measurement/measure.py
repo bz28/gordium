@@ -1805,8 +1805,12 @@ def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
         elif units and facts.get("accessory_dwelling_unit") is False and total > units * most:
             # "no ADU" is one of the answers that can't all be true (review round 3: R-1b's occupancy rule reads it and
             # complied on it), so it is set aside too; the units only when stated (else the use's own, §325-3B)
+            said = type(stated) is int          # the units entered, or the use's own count (review round 4: say which)
             out.append((stop("occupant_counts_disagree", occupants=total, units=units,
-                             unit_words="dwelling unit" if units == 1 else "dwelling units", most=most, held=units * most),
+                             unit_words=("dwelling unit" if units == 1 else "dwelling units") + (
+                                 "" if said else " (what this use is, §325-3B)"),
+                             most=most, held=units * most,
+                             check="the occupant counts, the dwelling units" if said else "the occupant counts"),
                         ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
                         + (("dwelling_units",) if type(stated) is int else ())))
     return out

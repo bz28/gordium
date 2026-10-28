@@ -112,9 +112,10 @@ def test_occupant_counts_that_can_all_be_true_are_no_contradiction():
     assert fact_conflicts({**house, "accessory_dwelling_unit": True}) == []
     assert fact_conflicts(house) == []                                       # an ADU not ruled out
     (why, names), = fact_conflicts({**house, "accessory_dwelling_unit": False})
-    assert why == ("4 occupants on the lot, but 1 dwelling unit with at most 2 in any one can hold only 2, with no "
-                   "accessory dwelling unit on the lot: check the occupant counts, the dwelling units and the accessory "
-                   "dwelling unit answer") and names == ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
+    # review round 4: the 1 unit is the use's own (§325-3B), not a count entered: said so, and not offered to re-enter
+    assert why == ("4 occupants on the lot, but 1 dwelling unit (what this use is, §325-3B) with at most 2 in any one "
+                   "can hold only 2, with no accessory dwelling unit on the lot: check the occupant counts and the "
+                   "accessory dwelling unit answer") and names == ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
     # two-family: two units by the use (§325-3B); 4 occupants with at most 2 in one fits exactly
     assert fact_conflicts({"use": "two_family", "occupants": 4, "occupants_most_in_one_unit": 2,
                            "accessory_dwelling_unit": False}) == []
