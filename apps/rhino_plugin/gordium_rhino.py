@@ -468,57 +468,139 @@ def stale(o):
 
 
 def draw_scene(o, e):
-    if not _here(o, e):
-        return
-    d = e.Display
-    dark = ui.viewport_dark()
-    old = stale(o)
-    for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
-        if isinstance(g, rg.Mesh):
-            d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
-        else:
-            d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
-    if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
-        d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
-    if o.envelope is not None:               # see-through, drawn after the solids so they show through it
-        d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
-        # its outline only, the top dashed (the height limit): its faces' edges and isocurves banded the
-        # elevations (the architect's review, 2026-10-21)
-        bottom, top = getattr(o, "envelope_lines", None) or (None, None)
-        if bottom is not None:
-            d.DrawPolyline(bottom, BLUE, 1)
-            d.DrawPatternedPolyline(top, BLUE, ui.DASHED, 2, False)
-    for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
-        d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
-    if not old:                              # after the envelope, so its blue never tints them (F5)
-        for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
-            name = logic.highlight(status)
-            colour = ui.HIGHLIGHT[name]
-            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
-            d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
-    for pt in getattr(o, "grade_points", None) or []:           # spot grades
-        d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
-    if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
-        pts = o.lot_outline
-        d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
-    context = STATE.get("context_guides") or {}
-    if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
-            and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
-        for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
-            d.DrawPolyline(line, CONTEXT_GUIDE, 1)
-    guide = STATE.get("lookup_guide")
-    if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
-        d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
-    if o.confirm is not None:
-        lot, lines, main = o.confirm
-        if lot is not None:
-            d.DrawCurve(lot, GREEN, 4)
-        for line in lines:
-            d.DrawLine(line, BLUE, 7)
-        if isinstance(main, rg.Brep):
-            d.DrawBrepWires(main, BLUE, 3)
-        elif isinstance(main, rg.Mesh):
-            d.DrawMeshWires(main, BLUE, 3)
+    """The model-space drawing. Whatever happens in it (a step that raises is caught by the conduit's guard), depth
+    testing and depth writing are back on at the end (Rhino's own setting for this pass; review round 1 of
+    depth-lines, F3)."""
+    try:
+        if not _here(o, e):
+            return
+        d = e.Display
+        dark = ui.viewport_dark()
+        old = stale(o)
+        # Gordium's lines: over everything in plan, depth-tested (hidden behind solids) in every other view
+        on_top = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+        for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
+            if isinstance(g, rg.Mesh):
+                d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
+            else:
+                d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+        # the see-through fills never hide what is behind them: they write no depth, so a line behind the envelope or
+        # a coloured part still shows (review round 1 of depth-lines, F2); the solids in front still hide them
+        _see_through(d, True)
+        if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
+            d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
+        if o.envelope is not None:               # see-through, drawn after the solids so they show through it
+            d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
+        _see_through(d, False)
+        if o.envelope is not None:
+            # its outline only, the top dashed (the height limit): its faces' edges and isocurves banded the
+            # elevations (the architect's review, 2026-10-21)
+            bottom, top = getattr(o, "envelope_lines", None) or (None, None)
+            if bottom is not None:
+                _on_top(d, on_top)
+                d.DrawPolyline(bottom, BLUE, 1)
+                d.DrawPatternedPolyline(top, BLUE, ui.DASHED, 2, False)
+                _on_top(d, False)
+        _on_top(d, on_top)
+        for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
+            d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
+        _on_top(d, False)
+        if not old:                              # after the envelope, so its blue never tints them (F5)
+            for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+                name = logic.highlight(status)
+                colour = ui.HIGHLIGHT[name]
+                _see_through(d, True)
+                d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+                _see_through(d, False)
+                d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
+        for pt in getattr(o, "grade_points", None) or []:           # spot grades
+            d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
+        _on_top(d, on_top)
+        if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
+            pts = o.lot_outline
+            d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
+        if not on_top:                                   # the dimensions, in the model: hidden behind the solids
+            _scene_dims(o, e, d, dark, old)
+        context = STATE.get("context_guides") or {}
+        if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
+                and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
+            for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
+                d.DrawPolyline(line, CONTEXT_GUIDE, 1)
+        guide = STATE.get("lookup_guide")
+        if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
+            d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
+        _on_top(d, False)                                # depth testing back as Rhino set it, for what follows
+        if o.confirm is not None:
+            lot, lines, main = o.confirm
+            if lot is not None:
+                d.DrawCurve(lot, GREEN, 4)
+            for line in lines:
+                d.DrawLine(line, BLUE, 7)
+            if isinstance(main, rg.Brep):
+                d.DrawBrepWires(main, BLUE, 3)
+            elif isinstance(main, rg.Mesh):
+                d.DrawMeshWires(main, BLUE, 3)
+    finally:
+        _on_top(e.Display, False)
+        _see_through(e.Display, False)
+
+
+def _see_through(d, on):
+    """A see-through fill (on): drawn depth-tested but writing no depth, so it never hides what lies behind it."""
+    d.EnableDepthWriting(not on)
+
+
+def _on_top(d, on):
+    """Draw what follows over everything (on) or depth-tested as Rhino draws the model (off: the default, and
+    always where a drawing step ends)."""
+    d.EnableDepthTesting(not on)
+
+
+def _zoomed_in(o, viewport):
+    """Whether the lot is at working zoom on screen (logic.labels_shown): judged from the lot's edges, which a lot
+    with arcs has too, else its outline (review round 3, F5)."""
+    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]
+    return logic.labels_shown(_screen_size(viewport, lot_points or getattr(o, "lot_outline", None)))
+
+
+def _model_dimension(d, doc, line, color):
+    """A dimension drawn in the model (depth-tested): its line and its ticks (logic.model_ticks, 1 ft long), each
+    on the same thin halo as on screen (_dimension), so it reads over the red and amber off plan too."""
+    a, b = line.From, line.To
+    strokes = [line] + [rg.Line(rg.Point3d(*p), rg.Point3d(*q))
+                        for p, q in logic.model_ticks((a.X, a.Y, a.Z), (b.X, b.Y, b.Z), _model_length(doc, 1.0))]
+    halo = ui.halo(ui.viewport_dark())
+    # the halo writes no depth, so the line drawn over it at the same depth is never hidden by it (round 4 of
+    # depth-lines: a halo writing depth first could hide its own coloured line); the solids still hide both
+    _see_through(d, True)
+    for stroke in strokes:
+        d.DrawLine(stroke, halo, 2 + 2 * logic.HALO_PX)
+    _see_through(d, False)
+    for stroke in strokes:
+        d.DrawLine(stroke, color, 2)
+
+
+def _scene_dims(o, e, d, dark, old):
+    """The dimensions in a view that isn't plan (perspective, elevations), in the model so that the solids in
+    front of them hide them, in the plan's colours (logic.dim_rgb: complying grey): each yard's with its dashed
+    required line (not in an elevation, where they would lie on the ground line), and in an elevation the height's
+    with its faint limit. Their numbers stay on screen (draw_screen; off plan the height's only). Nothing zoomed
+    out to the neighbourhood."""
+    zoomed_in = _zoomed_in(o, e.Viewport)
+    elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+    if logic.dims_shown(zoomed_in, elevation):
+        for line, _ in getattr(o, "yard_required", None) or []:
+            _required(d, line, dark)                     # dashed grey, as in plan (review of the merge, F2)
+        for line, _, status in getattr(o, "yard_dims", None) or []:
+            _model_dimension(d, e.RhinoDoc, line, ui.dim_color("complies" if old else status, dark))
+    height = getattr(o, "height_dim", None)
+    if height is not None and elevation and zoomed_in:
+        line, _, status, limit = height
+        _model_dimension(d, e.RhinoDoc, line, ui.dim_color("complies" if old else status, dark))
+        if limit is not None:                        # the limit, faint, across it (seen in Front and Right alike)
+            k = _model_length(e.RhinoDoc, 1.5)
+            d.DrawLine(rg.Line(limit + rg.Vector3d(-k, k, 0), limit + rg.Vector3d(k, -k, 0)),
+                       ui.faint(ui.status_color("complies" if old else status, dark)), 1)
 
 
 def _model_on_screen(o, viewport):
@@ -612,8 +694,7 @@ def draw_screen(o, e):
     obstacles = on_screen if plan else []
     # zoomed out to the neighbourhood (the lot under LABEL_MIN_LOT_PX on screen), the lot's plan labels give way
     # (judged from the lot's edges, which a lot with arcs has too, else its outline: review round 3, F5)
-    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]
-    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, lot_points or getattr(o, "lot_outline", None)))
+    zoomed_in = _zoomed_in(o, e.Viewport)
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
@@ -628,6 +709,8 @@ def draw_screen(o, e):
     keep = list(taken)                       # the status box, the north arrow, the notice: no label ever covers them
     elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
+    # the lines on screen (over everything) in plan only; elsewhere draw_scene draws them depth-tested
+    flat = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     yard_dims = (getattr(o, "yard_dims", None) or []) if shown else []
     options = getattr(o, "yard_options", None) or {}
     chosen = {k: (options.get(k) or [(line, [])])[0] for k, (line, _, _) in enumerate(yard_dims)}  # its best position
@@ -653,9 +736,10 @@ def draw_screen(o, e):
         color = ui.dim_color("complies" if old else status, dark)
         best, required = chosen[k]
         tags = [] if old else (getattr(o, "yard_tags", None) or {}).get(k) or []
-        for r in required:
-            _required(d, r, dark)                       # dashed grey; its "min" tag is a label (below)
-        _dimension(d, e.Viewport, best, color)
+        if flat:                                    # off plan, draw_scene draws them in the model (depth-tested)
+            for r in required:
+                _required(d, r, dark)                   # dashed grey; its "min" tag is a label (below)
+            _dimension(d, e.Viewport, best, color)
         number = numbers.get(k) or text
         if old:
             number = number.split(" ", 1)[1] if number[:1] in ("?", "✕", "✓") else number
@@ -673,11 +757,6 @@ def draw_screen(o, e):
     if height is not None:                   # the height, dimensioned up from the grade plane
         line, text, status, limit = height
         color = ui.dim_color("complies" if old else status, dark)
-        _dimension(d, e.Viewport, line, color)
-        if limit is not None:                                # the limit: faint, across the dimension
-            q = e.Viewport.WorldToClient(limit)
-            d.Draw2dLine(System.Drawing.PointF(q.X - 14, q.Y), System.Drawing.PointF(q.X + 14, q.Y),
-                         ui.faint(ui.status_color("complies" if old else status, dark)), 1)
         number = getattr(o, "height_number", None) or text
         if old:
             number = number.split(" ", 1)[1] if number[:1] in ("?", "✕", "✓") else number
@@ -2742,15 +2821,18 @@ def _draw_plan(doc, o, result, facts):
     o.edge_labels = [(_model_point(doc, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), e["length"],
                       rg.Line(_model_point(doc, a), _model_point(doc, b)))         # the edge: labelled beside it
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
-    o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
+    # at the lot's own level, a hair above it: off plan they are depth-tested, and at z 0 a lot drawn higher (or the
+    # ground under it) hid them (review round 1 of depth-lines, F1)
+    z = logic.dim_level(_lot_level(doc, facts))
+    o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], z), _model_point(doc, y["points"][1], z)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
-    o.yard_required = [(rg.Line(_model_point(doc, r[0], 0.1), _model_point(doc, r[1], 0.1)), y["status"])
+    o.yard_required = [(rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z)), y["status"])
                        for y in plan.get("yards") or [] if y.get("points") for r in y.get("required_lines") or []]
     # each yard's dimension where check.plan puts it best (its first position: the one placer moves the number, never
     # the line; review of 86c01ea, F5), with its required lines; the "min" tags; the buildings' outline
-    o.yard_options = {k: [(rg.Line(_model_point(doc, c["points"][0], 0.1), _model_point(doc, c["points"][1], 0.1)),
-                           [rg.Line(_model_point(doc, r[0], 0.1), _model_point(doc, r[1], 0.1))
+    o.yard_options = {k: [(rg.Line(_model_point(doc, c["points"][0], z), _model_point(doc, c["points"][1], z)),
+                           [rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z))
                             for r in c.get("required_lines") or []])
                           for c in (y.get("candidates") or [])[:1]]
                       for k, y in enumerate(y for y in plan.get("yards") or [] if y.get("points"))}
@@ -3707,7 +3789,6 @@ def frame_site(doc, facts):
         for i in picked:
             doc.Objects.Select(i)
     doc.Views.Redraw()
-
 
 
 def _release(key, value):

@@ -307,6 +307,9 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      what is wrong is placed first and every number stays in view; in the Front
      and Right views the height is dimensioned up from the grade plane, the limit faint. Zoomed out to the
      neighbourhood the dimensions give way.
+   - in Top view Gordium's lines (the lot line, the envelope's outline, the dimensions) are drawn over everything,
+     so none is lost under a roof; in Perspective and the elevations they hide behind your solids, as Rhino's own
+     lines do.
 6. **Read the panel.** Click any row. The bottom half shows the city's exact words, the examiner-style citation
    ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was
    measured and worked out, and what to change ("To comply: move the building 0'-6" farther from that lot

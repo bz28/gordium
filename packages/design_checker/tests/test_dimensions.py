@@ -94,7 +94,7 @@ def test_the_plugin_draws_the_dimensions_by_these_rules():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     screen = src[src.index("def draw_screen("):src.index("def _status_rows(")]
     assert "shown = logic.dims_shown(zoomed_in, elevation)" in screen
-    assert "if shown else []" in screen and screen.count("_dimension(d, e.Viewport,") == 2   # yards, height
+    assert "if shown else []" in screen and screen.count("_dimension(d, e.Viewport,") == 1    # yards: plan; height: draw_scene
     assert 'height = getattr(o, "height_dim", None) if elevation and zoomed_in else None' in screen
     assert "logic.dim_ticks(" in src[src.index("def _dimension("):src.index("def draw_screen(")]
 
