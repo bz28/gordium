@@ -27,6 +27,7 @@ from fractions import Fraction
 from functools import lru_cache
 
 MAX_LENGTH = 500
+NAMES_KEPT = 4096          # formula texts whose measure names are kept (a city has a few hundred)
 FUNCTIONS = {"min": min, "max": max}
 AT_LIMIT_ABSOLUTE = Fraction(1, 10 ** 6)       # two numbers this close count as equal (ft, sq ft, counts)
 AT_LIMIT_RELATIVE = Fraction(1, 10 ** 9)       # ... or this close relative to the larger, for big numbers
@@ -244,10 +245,20 @@ def bare_name(text: str) -> str | None:
 
 
 def names(text: str) -> set[str]:
-    """Measure names used in a formula (function names excluded)."""
+    """Measure names used in a formula (function names excluded). A new set every call, so a caller may change
+    what it got; the walk over the formula is done once per formula text (_names)."""
+    return set(_names(text))
+
+
+@lru_cache(maxsize=NAMES_KEPT)
+def _names(text: str) -> frozenset[str]:
+    """names, worked out once per formula text. Safe to keep: the answer depends on the text alone (parse is the
+    same for the same text), and a frozenset can't be changed by anyone. A formula that doesn't parse raises every
+    time (lru_cache never keeps an error). A check, and the start dialog's questions for every district and use, ask
+    it tens of thousands of times for a few hundred formulas: each was a full walk of the formula's tree."""
     tree = parse(text)
     called = {n.func.id for n in ast.walk(tree) if isinstance(n, ast.Call)}
-    return {n.id for n in ast.walk(tree) if isinstance(n, ast.Name)} - called
+    return frozenset(n.id for n in ast.walk(tree) if isinstance(n, ast.Name)) - called
 
 
 def strings(text: str) -> set[str]:
