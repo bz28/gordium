@@ -1157,14 +1157,19 @@ def test_the_lists_values_fit_two_lines_of_a_narrow_column():
 
 def test_the_use_row_names_the_use_in_its_item_cell(facts, tmp_path):
     """Rhino walk at 380 px (2026-10-28): the use row's Proposed showed "One- / family d…": no use's name fits the
-    64 px Proposed column. Option A (coordinator, 2026-10-28): the Item cell names the use, whole (no "(site)": it
-    fits two lines at 400 px only without), and Proposed says "stated"; the detail heads with the same name; with
-    no use stated the row stays "Use (site)" and "—". The report unchanged."""
+    64 px Proposed column. Option A (coordinator, 2026-10-28): the Item cell names the use ("Use: …"; no "(site)":
+    it fits two lines at 400 px only without), and Proposed says "stated"; the detail heads with the same text, so
+    a name the list ends "…" is whole there; with no use stated the row stays "Use (site)" and "—". The report
+    unchanged (review round 1: "Use" kept, the note and a use not permitted pinned)."""
     from design_checker import rhino_logic as logic
     got = check(MODEL, facts, tmp_path / "r.xlsx")
     use = next(i for i in got["view"]["items"] if i["name"] == "Use")
     assert use["proposed"] == "One-family dwelling, detached" and use["group"] == "site"
-    assert logic.list_cells(use) == ("One-family dwelling, detached", "stated")
+    assert logic.list_cells(use) == ("Use: One-family dwelling, detached", "stated")
+    assert logic.list_cells(dict(use, note="as entered")) == ("Use: One-family dwelling, detached · as entered",
+                                                              "stated")
+    fails = dict(use, proposed="Two-family dwelling", status=present.FAILS, required="not permitted")
+    assert logic.list_cells(fails) == ("Use: Two-family dwelling", "stated")   # Required says "not permitted"
     for unset in ("—", None, ""):
         assert logic.list_cells(dict(use, proposed=unset)) == ("Use (site)", unset)
     other = next(i for i in got["view"]["items"] if i["name"] == "Lot area")
