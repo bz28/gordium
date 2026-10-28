@@ -375,7 +375,9 @@ def test_delta_words_never_overstate():
     # round 2: the certain words ("at least … short") only on a row that fails; one in review says to see why
     assert present.delta_words(R, (-5.0, -1.0), "ft", True) == "at least 1'-0\" short; see why"
     assert present.delta_words(R, (-1.0, -1.0), "ft", False) == "−1'-0\" short; see why"
-    assert present.delta_words(F, (1.0, 1.0), "ft", False) == "+1'-0\" here; see why"     # room, yet it fails
+    # room, yet it fails: never the "+" of a row that complies (panel-wording review round 1, P3)
+    assert present.delta_words(F, (1.0, 1.0), "ft", False) == "1'-0\" room here; see why"
+    assert present.delta_words(F, (2.0, 5.0), "ft", True) == "at least 2'-0\" room here; see why"
     # every unit: lot area in sf, coverage in % (round 1: "+570 sf to spare" on a lot area that needs review)
     assert present.delta_words(R, (-66.2, 570.4), "sf", True) == "up to 67 sf short"
     assert present.delta_words(F, (-1000.0, -384.6), "sf", True) == "at least 384 sf short"
@@ -630,7 +632,7 @@ def _shown_agrees(i):
     d, st = i.get("delta") or "", i["status"]
     certain = (d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))) or (
         d.endswith(" over") and not d.startswith("up to "))
-    bare_room = d.startswith(("+", "≥ +")) and not d.endswith((" if confirmed", " here; see why"))
+    bare_room = d.startswith(("+", "≥ +")) and not d.endswith(" if confirmed")
     assert not bare_room or st == present.COMPLIES, (i["name"], st, d)
     assert not certain or st == present.FAILS, (i["name"], st, d)
     assert not (certain and i["measure"] in present.YARD_MEASURES) or i["colour"] == "red", (i["name"], i["colour"], d)

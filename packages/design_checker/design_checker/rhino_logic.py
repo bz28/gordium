@@ -2656,8 +2656,10 @@ def fact_sources(state, today, confirmed):
     def fact(value, source, who=by):
         return {"value": value, "source": source, "confirmed_by": who, "date": today}
 
-    def chosen(key):                   # a box default: the architect's only once changed
-        return by if state.get(key + "_source") == ENTERED else None
+    def chosen(key):                   # a box default: the architect's only once changed, or ticked "I checked this"
+        # (review round 1 of panel-wording, P2: a street ticked as checked read "default, not changed by you")
+        mine = state.get(key + "_source") == ENTERED or key in (state.get("checked") or [])
+        return by if mine else None
 
     return {
         "address": fact(state.get("address") or None, state.get("address_source") or ENTERED),

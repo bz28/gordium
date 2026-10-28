@@ -744,8 +744,13 @@ def delta_words(status: str, span, unit: str, approx: bool, maximum: bool = Fals
         return "up to " + _amount(max(-low, least), unit, "up") + gap
     if _rounds_to_nothing(low, unit):
         return "at limit" if one else "at the limit at worst"
-    room = margin_text(low, unit) if one else "≥ +" + _amount(low, unit, "down")
-    return room + {COMPLIES: "", REVIEW: " if confirmed"}.get(status, " here; see why")
+    if status in (COMPLIES, REVIEW):
+        room = margin_text(low, unit) if one else "≥ +" + _amount(low, unit, "down")
+        return room + (" if confirmed" if status == REVIEW else "")
+    # a row that fails another way: its room here, never with the "+" of a row that complies (review round 1 of
+    # panel-wording, P3: "+2'-0" here; see why" under a ✕)
+    room = margin_text(low, unit).lstrip("+") if one else "at least " + _amount(low, unit, "down")
+    return room + " room here; see why"
 
 
 def _worst_case(expr: str, values: dict, names: set, measured: dict, facts: dict) -> dict | None:
