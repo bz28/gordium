@@ -2104,8 +2104,7 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
     (Cancel: back to the box). When the answer had only the City's outline, the box stays open after the reset,
     the guide shown, for Draw my lot… (go False; Cancel still puts everything back). The same address: as it is."""
     table = RhinoTable(doc)
-    unlooked = logic.address_reason(dict(state, known_addresses=logic.known_addresses(saved_ui),
-                                         lookup=saved_ui.get("_lookup") or {}))
+    unlooked = logic.draw_blocked(state, saved_ui)        # (an empty file: a found lookup, or the site by hand)
     if unlooked:                                          # Draw is off in the box; any other way in says why
         say(unlooked)
         return facts, saved_ui, False, state

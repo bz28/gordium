@@ -147,7 +147,7 @@ class Box:
         question: back to the box), "open" (the City's guide: the box stays open for Draw my lot…), or "drawn"
         (saved, the session committed, the starting house drawn again when it was cleared)."""
         state = self.shown()
-        reason = logic.address_reason(state)
+        reason = logic.draw_blocked(state, self.saved)
         if reason:                                 # Draw is off (the plugin's _draw_prepare says why on any way in)
             self.said.append(reason)
             return "off"
@@ -637,7 +637,7 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     closes the undo step on any way out, errors included; RhinoTable.buildings is the checker's own buildings."""
     rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     prep = rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
-    steps = ("unlooked = logic.address_reason(dict(state, known_addresses=logic.known_addresses(saved_ui),",
+    steps = ("unlooked = logic.draw_blocked(state, saved_ui)",
              "if unlooked:                                          # Draw is off in the box; any other way in",
              "say(unlooked)\n        return facts, saved_ui, False, state",
              "facts, saved_ui = _apply_box(doc, facts, state, saved_ui)",
@@ -1021,3 +1021,21 @@ def test_the_plugin_opens_new_files_empty_and_gates_every_box():
     state = src[src.index("def _box_state(doc"):src.index("\n\n\n", src.index("def _box_state(doc"))]
     assert "logic.start_gate(" in state
     assert 'if what == "by_hand":' in src and "_by_hand=True" in src
+
+
+def test_draw_draws_nothing_on_an_empty_file_without_a_found_lookup_whatever_way_it_is_pressed():
+    """The scripted way in ticks the district and draws without the box's Draw button (_box_loop's auto path):
+    _draw_prepare asks draw_blocked, so it too never draws a site the architect didn't choose."""
+    opened = logic.box_opened({}, {})
+    state = {"address": "", "zone": "R-1b", "district_confirmed": True, "lot_missing": True}
+    assert logic.draw_blocked(state, opened) == logic.LOOK_UP_FIRST_SITE
+    assert logic.draw_blocked(dict(state, address="106 Ithaca Rd"), opened).startswith("Press Look up")
+    found = dict(opened, _pending={"address": "106 Ithaca Rd, Ithaca, NY", "query": "106 Ithaca Rd"})
+    assert logic.draw_blocked(dict(state, address="106 Ithaca Rd"), found) == ""
+    assert logic.draw_blocked(state, dict(opened, _by_hand=True)) == ""
+    drawn = logic.box_opened({"drawn_address": SAMPLE}, {"lot_id": "lot1", "address": SAMPLE})
+    assert logic.draw_blocked(dict(state, address=SAMPLE), drawn) == ""          # a drawn file: as before
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    prep = src[src.index("def _draw_prepare("):src.index("    facts, saved_ui = _apply_box(", src.index("def _draw_prepare("))]
+    assert "unlooked = logic.draw_blocked(state, saved_ui)" in prep and "return facts, saved_ui, False, state" in prep

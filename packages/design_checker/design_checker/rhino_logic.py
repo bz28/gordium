@@ -3307,6 +3307,16 @@ def start_gate(state, saved_ui):
     return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand)
 
 
+def draw_blocked(state, saved_ui):
+    """Why Draw must draw nothing, whatever way it was pressed (the box, where Draw is off then, or a scripted run
+    that ticks and draws): an address typed but not looked up (address_reason), or a file that opened empty with
+    no found lookup of the address and no "Enter the site by hand" (start_gate). "" when Draw may go on."""
+    saved_ui = saved_ui or {}
+    state = dict(state, known_addresses=known_addresses(saved_ui), lookup=saved_ui.get("_lookup") or {})
+    gated = start_gate(state, saved_ui)
+    return address_reason(gated) or (LOOK_UP_FIRST_SITE if gated["needs_lookup"] else "")
+
+
 def known_addresses(saved_ui):
     """The addresses Draw takes as they are, never as a new one to look up: the lot's own when the box opened, the
     one drawn, and the one last looked up and found (as found and as typed)."""
