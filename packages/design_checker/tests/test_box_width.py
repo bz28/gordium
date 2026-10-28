@@ -408,11 +408,21 @@ def test_the_height_model_counts_each_question_row(ui):
 
 def test_a_one_cell_row_widens_the_first_column(ui):
     """Eto on the Mac: a one-cell row sits in the first column and widens it (the demo 7 Rhino run, 2026-10-28: #45's
-    About grid, a one-cell row, made a 1,162 pt box). The model must count it, or a wide one-cell row passes."""
+    About grid, a one-cell row, made a 1,162 pt box). Beside a two-cell row, the box is then the one-cell row's width
+    PLUS the second column's: a model that spread the one-cell row across the columns would give only the wider of the
+    two (round 2 of the review: a lone one-cell row can't tell the two models apart)."""
     gordium_ui, _ = ui
-    wide, narrow = _DynamicLayout(), _DynamicLayout()
-    cell = gordium_ui.ef.Label()
-    cell.Text = "x" * 200                                         # ~1,200 px of text, no wrap width
-    wide.AddRow(cell)
-    narrow.AddRow(gordium_ui.ef.Label(), gordium_ui.ef.Label())
-    assert box_width(wide)[0] >= width(cell) > box_width(narrow)[0]
+
+    def text(n):
+        c = gordium_ui.ef.Label()
+        c.Text = "x" * n
+        return c
+
+    wide, small, second = text(130), text(5), text(50)       # ~780 px, ~30 px, ~300 px at size 13
+    layout = _DynamicLayout()
+    layout.AddRow(wide)
+    layout.AddRow(small, second)
+    eto = 2 * PADDING + width(wide) + SPACING + width(second)
+    spread = max(2 * PADDING + width(small) + SPACING + width(second), 2 * PADDING + width(wide))
+    assert spread < eto
+    assert box_width(layout)[0] == eto, (box_width(layout)[0], eto, spread)
