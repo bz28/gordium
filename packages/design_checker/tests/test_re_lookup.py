@@ -1298,8 +1298,8 @@ def test_round_13_outside_the_city_outlives_a_later_lookup_that_finds_nothing():
         assert logic.by_hand_refused(later)
         _, tried = logic.choose_by_hand({}, dict(later), "2026-10-27")
         assert "_by_hand" not in tried
-    _, found = logic.lookup_choices({"status": "found", "query": "106 Ithaca Rd"}, {}, dict(saved))
-    assert not logic.by_hand_refused(found)                                     # a found lookup ends it
+    _, found = logic.lookup_choices({"status": "found", "query": "100 Snyder Hill Rd"}, {}, dict(saved))
+    assert not logic.by_hand_refused(found)                     # a found lookup of that address ends it (round 14)
 
 
 def test_round_13_a_drawn_lot_the_lookup_says_is_outside_is_not_drawn_again():
@@ -1319,6 +1319,31 @@ def test_round_13_parts_of_a_lot_units_and_the_county_are_not_towns():
                  "10 Cayuga St Ithaca Tompkins County NY", "10 Cayuga St, Ithaca, Tompkins County, NY"):
         assert logic.draw_blocked({"address": city}, opened) == "", city
     assert logic.address_place("12 Main St Lansing NY 14882") == "lansing 14882"
+
+
+def test_round_14_the_lots_own_address_said_outside_blocks_draw_whatever_is_typed():
+    facts = {"lot_id": "L", "address": "106 Ithaca Rd"}
+    opened = logic.box_opened({}, facts)
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "106 Ithaca Rd"}, facts, opened)
+    for typed in ("", "106 Ithaca Rd", "106 Ithaca Rd, Ithaca, NY, 14850"):
+        assert logic.draw_blocked({"address": typed}, saved) == logic.BY_HAND_OUTSIDE.format(query="106 Ithaca Rd")
+
+
+def test_round_14_a_found_lookup_of_another_address_keeps_outside_the_city():
+    opened = logic.box_opened({}, {})
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "5 Foo Rd"}, {}, opened)
+    _, saved = logic.lookup_choices({"status": "found", "query": "106 Ithaca Rd"}, {}, saved)
+    assert saved["_outside_for"] == ["5 Foo Rd"] and logic.by_hand_refused(saved)
+    assert logic.draw_blocked({"address": "5 Foo Rd"}, saved) == logic.BY_HAND_OUTSIDE.format(query="5 Foo Rd")
+    _, saved = logic.lookup_choices({"status": "found", "query": "5 Foo Rd"}, {}, saved)   # found: that one ends
+    assert saved["_outside_for"] == [] and not logic.by_hand_refused(saved)
+
+
+def test_round_14_the_old_lots_yes_is_never_on_the_lot_drawn_in_its_place():
+    shown = {"city_by_hand": "2026-10-01", "address": "12 Old Ln", "address_source": logic.ENTERED}
+    fresh = {"address": "106 Ithaca Rd", "address_source": "City geocoder"}
+    state = logic.after_reset_state(shown, fresh)
+    assert logic.fact_sources(state, "2026-10-27", True)["address"]["source"] == "City geocoder"
 
 
 def test_round_9_a_saved_source_never_says_used_live():

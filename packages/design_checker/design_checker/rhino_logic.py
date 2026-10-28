@@ -2250,10 +2250,14 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
             "asks": list(payload.get("asks") or []), "matches": list(payload.get("matches") or []),
             "query": payload.get("query")}
     saved_ui["_lookup"] = look
-    if look["status"] == "outside_city":          # the map's "outside the City" holds for this box session, through
-        saved_ui["_outside_for"] = look["query"] or facts.get("address") or "the address"   # any later lookup
-    elif look["status"] == "found":               # that doesn't find a lot (round 13: offline undid it); a found
-        saved_ui.pop("_outside_for", None)        # one ends it
+    # the map's "outside the City" holds for this box session, each address said (round 14: one slot, cleared by
+    # a found lookup of another address), through any later lookup that finds no lot (round 13: offline undid it);
+    # a found lookup of that same address ends it for that address only
+    outside = [a for a in saved_ui.get("_outside_for") or []
+               if not (look["status"] == "found" and same_site_address(a, look["query"] or ""))]
+    if look["status"] == "outside_city":
+        outside.append(look["query"] or facts.get("address") or "the address")
+    saved_ui["_outside_for"] = outside
     if look["status"] != "found":
         return facts, saved_ui
     got, details = payload.get("facts") or {}, payload.get("details") or {}
@@ -3322,7 +3326,7 @@ def start_gate(state, saved_ui):
     saved_ui = saved_ui or {}
     if not saved_ui.get("_opened_empty"):
         return dict(state, needs_lookup=False, by_hand=False, city_by_hand=saved_ui.get("city_by_hand"),
-                    outside_for=saved_ui.get("_outside_for"))
+                    outside_for=saved_ui.get("_outside_for") or [])
     pending = saved_ui.get("_pending") or {}
     # a found lookup supersedes "by hand": its address rule applies again (sceptic 2: by hand let another town's
     # address keep the City's lookup)
@@ -3334,7 +3338,8 @@ def start_gate(state, saved_ui):
                                                        saved_ui.get("_redrawn_for"), saved_ui.get("drawn_address"))
                 if a)
     return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand,
-                city_by_hand=saved_ui.get("city_by_hand"), outside_for=saved_ui.get("_outside_for"))     # shown whenever kept (round 12: never seen again)
+                city_by_hand=saved_ui.get("city_by_hand"),      # shown whenever kept (round 12: never seen again)
+                outside_for=saved_ui.get("_outside_for") or [])
 
 
 BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
@@ -3362,8 +3367,8 @@ BY_HAND_OUTSIDE = ("The lookup said {query} is outside the City of Ithaca, and G
 def by_hand_refused(saved_ui):
     """Why "Enter the site by hand" is refused before its question is asked: the lookup said outside the City (round
     12: a Yes, then the address cleared or retyped, opened Draw on that lot). "" when it may be asked."""
-    outside = (saved_ui or {}).get("_outside_for")     # (kept through later lookups: round 13)
-    return BY_HAND_OUTSIDE.format(query=outside) if outside else ""
+    outside = (saved_ui or {}).get("_outside_for") or []     # (kept through later lookups: rounds 13, 14)
+    return BY_HAND_OUTSIDE.format(query=outside[-1]) if outside else ""
 
 
 def choose_by_hand(facts, saved_ui, in_city):
@@ -3609,14 +3614,16 @@ def address_reason(state):
         # is the architect's label (no lot of another to mislabel), but a City of Ithaca one (round 5: another
         # place, or one the lookup already said is outside the City, was checked under the City's rules)
         if state.get("outside_for"):                 # whatever the address now (round 12: cleared or retyped)
-            return BY_HAND_OUTSIDE.format(query=state["outside_for"])
+            return BY_HAND_OUTSIDE.format(query=state["outside_for"][-1])
         if address and address_place(address) is not None:
             return BY_HAND_CITY_ONLY.format(address=address)
         return ""
     if known is not None and look.get("looking"):         # a lookup running: Draw off, its own address named
         return WAIT_LOOKUP.format(address=look["looking"])
-    if address and state.get("outside_for") and same_site_address(address, state["outside_for"]):
-        return BY_HAND_OUTSIDE.format(query=state["outside_for"])   # the lot's own address too (round 13: a drawn
+    said = next((o for o in state.get("outside_for") or [] for a in [address] + list(known or [])
+                 if a and same_site_address(a, o)), None)   # the address typed, or the lot's own whatever is typed
+    if said:                                                 # (round 14: cleared, Draw went on)
+        return BY_HAND_OUTSIDE.format(query=said)   # the lot's own address too (round 13: a drawn
         #   lot the lookup now says is outside the City was drawn again and checked under the City's rules)
     if not address or known is None or any(same_site_address(address, k) for k in known):
         return ""
@@ -3732,7 +3739,8 @@ BOX_CHOSEN_UI = ("address_source", "zone_source", "_zone_said", "_reconfirm", "_
 # what of the box's state the reset redraws (the rest is the architect's choices in the box): after_reset_state
 RESET_STATE_KEYS = ("has_lot", "lot_missing", "lot_area", "lot_surveyed", "lot_source", "street_name",
                     "street_name_saved", "street_source", "corner_lot", "corner_source", "ground", "ground_fall",
-                    "lookup", "live", "doubts", "checked", "address", "address_source", "after_draw")
+                    "lookup", "live", "doubts", "checked", "address", "address_source", "after_draw",
+                    "city_by_hand")    # (the old lot's Yes never on the lot drawn in its place: start-flow round 14)
 
 
 def after_reset_state(shown, fresh):
