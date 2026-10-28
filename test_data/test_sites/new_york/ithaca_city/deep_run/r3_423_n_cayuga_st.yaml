@@ -1,0 +1,100 @@
+title: "R-3aa, 423 N Cayuga St: a two-story house at the front and side-yard limits on a real 52.5 ft lot"
+what: >-
+  The real tax lot at 423 North Cayuga Street (parcel 500700-49.-1-26, NYS Tax Parcels Public, looked up
+  2026-10-27; zone R-3aa on the City's zoning map, checked live that day), turned so its street line (N Cayuga St,
+  the 52.5 ft line) runs from (0, 0) along +x. Five corners: the rear has a small jog (a 37.8 ft and a 14.5 ft line).
+  Treated as surveyed, on flat ground at elevation 0. A one-family house 30 × 60 ft, two 11 ft stories (R-3aa's
+  two-story minimum), exactly 10 ft from the street (the minimum) and about 5 ft from the west side line. Every
+  applicable R-3aa rule is worked out by hand from Chapter 325 and the charts.
+district: R-3aa
+use: one_family_detached
+lot:
+  points: [[0.0, 0.0], [52.5, 0.0], [51.15, 151.44], [13.35, 151.49], [-1.16, 151.51]]
+  surveyed: true
+buildings:
+  - id: house
+    outline: [[5, 10], [35, 10], [35, 70], [5, 70]]
+    base: 0
+    floors: [11, 11]
+grade: {elevation: 0}
+stated:
+  sleeping_rooms: 3
+  parking_spaces: 1
+  unrelated_persons: 1
+  unrelated_persons_with_children: 1
+  owner_occupied: true
+  accessory_dwelling_unit: false
+  functional_family_unit: false
+  home_occupation: false
+expected:
+  R-3aa.use:
+    status: complies
+    working: "a one-family dwelling, detached: marked • for R-3AA"
+    cites: "§325-8A(2); chart p.2, One-family dwelling, detached, R-3AA •"
+  R-3aa.lot_area_one_family_detached:
+    status: complies
+    values: {row: [7937.99, 5000]}       # [proposed, required] worked by hand
+    working: "shoelace area = 7,938.0 sf ≥ 5,000 sf"
+    cites: "chart p.3, Minimum Lot Size, One-family dwelling, detached, R-3AA 5,000 sf"
+  R-3aa.lot_width_one_family_detached:
+    status: complies
+    values: {row: [52.5, 50]}       # [proposed, required] worked by hand
+    working: "frontage on N Cayuga St = 52.5 ft ≥ 50 ft"
+    cites: "§325-8A(7); chart p.3, Minimum Lot Width, One-family dwelling, detached, R-3AA 50 ft"
+  R-3aa.stories:
+    status: complies
+    values: {row: [2, 2]}       # [proposed, required] worked by hand: the binding limit is the 2-story minimum
+    at_limit: true
+    working: "2 floor blocks = 2 stories: at least 2 and at most 3 (R-3aa's '3/2')"
+    cites: "chart p.3, Number of stories, R-3AA 3/2, note 11 (maximum, then minimum)"
+  R-3aa.height:
+    status: complies
+    values: {row: [22.0, 35]}       # [proposed, required] worked by hand
+    working: "11 + 11 = 22 ft ≤ 35 ft"
+    cites: "§325-3B HEIGHT OF BUILDING; chart p.3, Height in feet, R-3AA 35 ft"
+  R-3aa.lot_coverage:
+    status: complies
+    values: {row: [22.68, 35]}       # [proposed, required] worked by hand
+    working: "30 × 60 = 1,800 sf ≤ 35% × 7,938.0 = 2,778.3 sf"
+    cites: "§325-8A(10); chart p.3, Percent of lot area, R-3AA 35%"
+  R-3aa.footprint_block_front:
+    status: needs_review
+    working: "a new primary structure's footprint may be at most 120% of the average on the whole block front: it needs the neighbours' footprints, which a person works out (a flag)"
+    cites: "chart p.3, note 2"
+  R-3aa.front_yard:
+    status: complies
+    values: {row: [10.0, 10]}       # [proposed, required] worked by hand
+    at_limit: true
+    working: "street line y = 0 to the house front y = 10: 10.0 ft ≥ 10 ft, exactly at the limit"
+    cites: "chart p.3, Front (minimum), R-3AA 10 ft"
+  R-3aa.side_yards:
+    status: complies
+    values: {east: [16.88, 10], west: [5.08, 5]}       # [proposed, required] worked by hand
+    working: >-
+      west line (0,0)–(−1.16,151.51), nearest corner (5,10): 5.08 ft; east line (52.5,0)–(51.15,151.44), nearest
+      corner (35,70): 16.88 ft; one side ≥ 10 (16.88) and the other ≥ 5 (5.08)
+    cites: "§325-8A(12)-(13); chart p.3, Side, R-3AA 10 ft one side, 5 ft other side"
+  R-3aa.rear_yard:
+    status: complies
+    values: {row: [81.46, 37.87]}       # [proposed, required] worked by hand
+    working: >-
+      lot depth = average of the side lines (151.514 + 151.446) ÷ 2 = 151.48 ft; 25% = 37.87 ft (under the 50 ft cap,
+      over the 20 ft floor); the nearest rear line (the 37.8 ft line at y ≈ 151.44–151.49) to the house back y = 70:
+      81.46 ft ≥ 37.87 ft. However the jog's 14.5 ft line is read (rear or side), the rear yard is over 81 ft and the
+      most any reading can require is the 50 ft cap: complies under every reading
+    cites: "§325-8A(14)(a)-(b); chart p.3, Rear, R-3AA 25% / 50 ft, note 16"
+  R-3aa.yard_projections:
+    status: complies
+    values: {row: [10.0, 8]}       # [proposed, required] worked by hand
+    working: "no eaves (a flat-roofed box): the outermost yards equal the yards above; the tightest is the front: 10.0 ft ≥ 10 − 2 = 8 ft (§325-18B's 2 ft allowance)"
+    cites: "§325-18B"
+  R-3aa.parking_one_family:
+    status: complies
+    values: {row: [1, 1]}       # [proposed, required] worked by hand
+    working: "3 bedrooms → 1 space (first three bed or sleeping rooms per dwelling unit); 1 provided ≥ 1"
+    cites: "chart p.14, Minimum Parking Requirement, Residential, R-3AA"
+  R-3aa.occupancy_one_family:
+    status: complies
+    values: {row: [1, 2]}       # [unrelated people, R-3's limit] worked by hand
+    working: "a family and one unrelated person (children counted: §325-8B(6) excludes minors only in R-1 and R-2): not more than two unrelated individuals in R-3"
+    cites: "§325-3B DWELLING, ONE-FAMILY (p.7): In the R-2 and R-3 Zones, ... not more than two unrelated individuals; §325-8B(6)"
