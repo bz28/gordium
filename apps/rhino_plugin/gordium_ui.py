@@ -1022,7 +1022,9 @@ def start_box(state, options, mode):
         # its title in the box's first column and its questions in the second, as every other row: a one-cell row
         # is NOT spread across the columns by Eto on the Mac: it sits in the first and widens it (the demo 7 Rhino run,
         # 2026-10-28: the grid there made the box 1,162 pt wide)
-        layout.AddRow(label("About this project", bold=True), grid)
+        title = label("About this project", bold=True)
+        title.VerticalAlignment = ef.VerticalAlignment.Top     # level with its first question, never centred beside
+        layout.AddRow(title, grid)                              # the whole grid (the architect's review, 2026-10-28)
         layout.AddRow(None, note)
 
     layout = ef.DynamicLayout()
