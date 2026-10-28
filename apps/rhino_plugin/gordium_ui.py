@@ -948,7 +948,8 @@ def start_box(state, options, mode):
     refresh_amber()
     corner.SelectedIndexChanged += logic.guard(refresh_amber, "answer the corner lot")
     layout.AddRow(None, row(amber))
-    layout.AddRow(None, row(note))
+    if note.Text:                     # nothing found to tell: no empty line in the box (it made the box taller)
+        layout.AddRow(None, row(note))
     layout.AddRow(None, row(reason))
     layout.AddRow(None, row(cancel, draw))
     dialog.Content = layout
