@@ -3116,6 +3116,109 @@ def storable_ui(saved_ui):
     return {k: v for k, v in (saved_ui or {}).items() if not str(k).startswith("_")}
 
 
+STILL_SHOWN = "The lot shown is still {address}'s: nothing in the model changed."
+NOTHING_CHANGED = "Nothing in the model changed."
+
+
+def still_shown(saved_ui):
+    """After a lookup that found no lot: which lot the model still shows (the one drawn, else the lot's own address
+    when the box opened), so the architect never wonders whether the old lot is the new address's."""
+    saved_ui = saved_ui or {}
+    address = saved_ui.get("drawn_address") or saved_ui.get("_box_address")
+    return STILL_SHOWN.format(address=address.split(",")[0].strip()) if address else NOTHING_CHANGED
+
+
+# ---- address type-ahead (site_lookup.suggest, in lookup_box's own short process; the box shows the list) ----------
+SUGGEST_DELAY_S = 0.3          # s after the last key before the City's address layer is asked
+SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestions unavailable"
+SUGGEST_MIN_CHARS = 4
+SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and press Look up."
+NO_MATCH = "No matching address suggested: type the full address and press Look up."
+CITY_SUFFIX = ", Ithaca, NY"
+
+
+BOX_TEXT_WIDTH = 560           # px: the start box's long lines wrap here (one unbroken amber line stretched the box
+                               # across the screen: Rhino run of #33 a3eb1d7)
+LIST_ROW_PX, LIST_PAD_PX = 20, 2   # (2: the frame's border, so a row's text sits centred, not high: Rhino run of ee8f2ce)
+
+
+def list_height(rows, row_px=LIST_ROW_PX):
+    """The suggestion list's height in px: as tall as its rows (1 to 8) at `row_px` each (the pitch Rhino lays its
+    rows out at, read from the list where it can be), never rows of empty space (Rhino run of a3eb1d7: one suggestion
+    sat above five empty rows)."""
+    return max(1, min(int(rows or 0), 8)) * int(row_px) + LIST_PAD_PX
+
+
+def wants_suggestions(text, chosen=None):
+    """Whether to ask for suggestions for what is typed: at least SUGGEST_MIN_CHARS characters, and not the
+    suggestion just picked (picking one never opens the list again)."""
+    text = str(text or "")
+    return len(text.lstrip()) >= SUGGEST_MIN_CHARS and text != chosen
+
+
+HINT_NOTE_PX = 20          # the quiet note's one line (size 10) and its row spacing
+
+
+def hint_rows_px(list_shown, list_px, note):
+    """How much taller the start box is while its suggestion rows show: the list (and its spacing) and the note's
+    line, each only while shown (review round 1: an offline note showed with nothing added, pushing Draw down)."""
+    return ((list_px + 6) if list_shown else 0) + (HINT_NOTE_PX if note else 0)
+
+
+def hint_rows_shown(list_shown, note):
+    """Whether the start box's suggestion rows (the type-ahead list and its quiet note) take any room: only while
+    one of them has something to show (the architect's review, 2026-10-28: an empty gap under Address)."""
+    return bool(list_shown) or bool(note)
+
+
+def suggestions_shown(answer, typed):
+    """(the list, a quiet note) for a type-ahead answer, or None when it is for something no longer typed (a stale
+    answer is dropped). Offline, an error or too slow: no list and the note that suggestions are unavailable (the
+    box still works by typing). None found: a quiet note says so, so the architect can tell the list is working
+    (UX review 2026-10-27: "312 Hudson St" showed nothing at all)."""
+    answer = answer or {}
+    if answer.get("query") != typed:
+        return None
+    if answer.get("status") == "ok":
+        found = [str(s) for s in answer.get("suggestions") or []]
+        return found, "" if found else NO_MATCH
+    return [], SUGGESTIONS_UNAVAILABLE
+
+
+def list_step(index, count, key):
+    """The list's selection after Down or Up in the address box (none selected: -1). Stays within the list."""
+    if count <= 0:
+        return -1
+    if key == "down":
+        return min(index + 1, count - 1)
+    if key == "up":
+        return max(index - 1, 0)
+    return index
+
+
+def with_city(address):
+    """The address as the lookup is asked for it: ", Ithaca, NY" added when no town or ZIP is typed (Ben, 2026-10-21:
+    "106 Ithaca Rd" is the City's). Only when the address plainly ends with its street ("106 Ithaca Rd", "120 North
+    Cayuga Street"): anything after the street type ("106 Ithaca Rd Dryden", "12 Main St Cayuga Heights", a ZIP)
+    may be another town and is kept as typed, so another town stays another town (review round 1), and anything
+    after a comma is kept as typed too."""
+    text = " ".join(str(address or "").split())
+    if not text or "," in text:
+        return text
+    words = text.lower().replace(".", " ").split()
+    street_types = {w for k, v in STREET_WORDS.items() if k not in ("north", "south", "east", "west") for w in (k, v)}
+    if len(words) >= 3 and words[0][:1].isdigit() and words[-1] in street_types:
+        return text + CITY_SUFFIX
+    return text
+
+
+def clean_address(text):
+    """An address as the architect reads it: the geocoder's "96 Ithaca Road, Ithaca, NY, 14850" as "96 Ithaca Road,
+    Ithaca, NY 14850" (no comma before the ZIP; Rhino run of #33 df08fc0). Anything else as it is."""
+    import re
+    return re.sub(r",\s*(\d{5}(?:-\d{4})?)\s*$", r" \1", str(text or "").strip())
+
+
 def lookup_says(payload):
     """The line for a lookup that didn't find the site (None when it did)."""
     status = (payload or {}).get("status")
@@ -3177,6 +3280,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         outside.append(look["query"] or facts.get("address") or "the address")
     saved_ui["_outside_for"] = outside
     if look["status"] != "found":
+        look["says"] = " ".join(t for t in (look["says"], still_shown(saved_ui)) if t)
         return facts, saved_ui
     got, details = payload.get("facts") or {}, payload.get("details") or {}
     labels, kept = payload.get("labels") or {}, payload.get("kept_reasons") or {}
@@ -3200,7 +3304,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     if found_overlays:                       # what was found, by name, not only that something was
         live["overlays"] = _merged("Found on this lot: " + "; ".join(found_overlays) + ".", live.get("overlays") or "")
     if value("address"):
-        facts["address"] = value("address")
+        facts["address"] = clean_address(value("address"))
         saved_ui["address_source"] = SUGGESTED + " · " + label("address", "address")
     zone = value("zone")
     names = {z.lower(): z for z in zones} if zones else {}
@@ -3452,6 +3556,18 @@ def draw_reason(state):
     if state.get("lot_missing"):
         return "Draw or pick the lot to continue."
     return ""
+
+
+def box_reason(state):
+    """The box's own reason line under Draw: draw_reason's, except when it would only repeat the amber line a lookup
+    that found no lot already shows (what happened, what to do, the lot still shown): said once (Rhino run of #33
+    ee8f2ce: the no-lot state said it twice)."""
+    reason = draw_reason(state)
+    look = state.get("lookup") or {}
+    if reason and look.get("says") and look.get("status") in LOOKUP_SAYS and reason == address_reason(state) \
+            and same_site_address(state.get("address"), look.get("query")):    # (that lookup's address, not another)
+        return ""
+    return reason
 
 
 def can_draw(state):

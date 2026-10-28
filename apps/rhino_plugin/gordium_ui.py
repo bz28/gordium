@@ -8,6 +8,7 @@ whole session (gordium_rhino.Overlay explains), so the panel and the dialog are 
 functions, and an update to this file takes effect at once."""
 
 import System
+import math
 import os
 
 import Eto.Drawing as ed
@@ -958,6 +959,49 @@ def legend(code=None):
 
 # ---- the start box (A1–A13) ----------------------------------------------------------------------------------
 
+def native_number(value):
+    """A Mac native number (NFloat, nint) as a Python float: directly, or through its text where the bridge won't
+    convert it (as review_fixes_in_rhino.py reads a window number: int(str(...)))."""
+    try:
+        return float(value)
+    except Exception:
+        return float(str(value))
+
+
+def keep_on_screen(window):
+    """A window grown downwards moved up as far as needed to stay within its screen's working area. Never raises."""
+    try:
+        area = window.Screen.WorkingArea
+        bottom = window.Location.Y + window.Height
+        if bottom > area.Bottom:
+            window.Location = ed.Point(int(window.Location.X), int(max(area.Top, area.Bottom - window.Height)))
+    except Exception:
+        pass
+
+
+def row_rect(table, index):
+    """Where an NSTableView lays out row `index`. Rhino's Mac binding names this RectForRow and takes an IntPtr
+    (not RectOfRow, which only Cocoa's own spelling has, and not a plain int: Rhino run of c4ad070)."""
+    return table.RectForRow(System.IntPtr(int(index)))
+
+
+def list_row_px(listbox):
+    """A list's row pitch in px as Rhino lays it out: on the Mac the ListBox is a table whose row height plus spacing
+    is read from it; elsewhere (or if it can't be read) logic.LIST_ROW_PX."""
+    try:
+        table = listbox.ControlObject      # Eto.macOS: the NSTableView itself (its NSScrollView is the handler's own)
+        # where the table lays its rows out, not the row height it reports (Rhino run of df08fc0: rows painted about
+        # 16 pt apart while RowHeight + spacing said 24, leaving an empty band under eight rows)
+        if int(native_number(table.RowCount)) >= 2:
+            pitch = native_number(row_rect(table, 1).Y) - native_number(row_rect(table, 0).Y)
+        else:
+            pitch = native_number(row_rect(table, 0).Height) + native_number(table.IntercellSpacing.Height)   # (a row's own rect
+            #   leaves out the gap under it; two rows' Y difference above already has it)
+        return int(math.ceil(pitch - 1e-6)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX   # up: never a row short
+    except Exception:
+        return logic.LIST_ROW_PX
+
+
 def start_box(state, options, mode):
     """The start box (spec A, as approved 2026-10-20). What it shows is rhino_logic.box_rows (tested in CI); this
     only draws it: Address, Zoning district (with its source and "I confirm", unticked on a new project), Use,
@@ -1043,11 +1087,113 @@ def start_box(state, options, mode):
 
     draw = button(state.get("_draw_label") or ("Draw" if mode == "start" else "Check"),   # as what it does
                   lambda: (keep(), done("draw")))
-    reason = label(logic.draw_reason(state), size=11, width=560)   # wraps at the box's width
+    reason = label(logic.box_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)   # wraps at the box's width
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
 
+    # type-ahead: the City's addresses starting like the one typed (logic.wants_suggestions, ~0.3 s after the last
+    # key), in a list under it; Down/Up move in it, Enter or a click picks, Esc closes it; a stale answer is dropped
+    # (logic.suggestions_shown) and an earlier request stopped; offline or slow: a quiet note, typing still works
+    suggester = state.get("_suggest") if not looking else None
+    hints = {"items": [], "chosen": None}
+    hint_list = ef.ListBox()
+    hint_list.Width, hint_list.Height = 300, logic.list_height(1)
+    hint_list.Visible = False
+    hint_note = label("", size=10)
+    hint_note.Visible = False
+    hint_rows = ef.StackLayout()      # the list and its note as one row, hidden while both are empty: no gap under
+    hint_rows.Orientation = ef.Orientation.Vertical       # Address (the architect's review, 2026-10-28)
+    hint_rows.Items.Add(ef.StackLayoutItem(hint_list))
+    hint_rows.Items.Add(ef.StackLayoutItem(hint_note))
+    hint_rows.Visible = False
+
+    def show_hint_rows():
+        hint_note.Visible = bool(hint_note.Text)
+        hint_rows.Visible = logic.hint_rows_shown(hint_list.Visible, hint_note.Text)
+    wait_keys = ef.UITimer()
+    wait_keys.Interval = logic.SUGGEST_DELAY_S
+    wait_answer = ef.UITimer()
+    wait_answer.Interval = 0.1
+
+    grown = {"px": 0}                 # how much taller the box is for the list now showing
+
+    def fit_box():
+        """The box grows by the list's height while it shows (and back when it goes), kept on screen, so Cancel and
+        Draw never go off its bottom (Rhino run of ee8f2ce: the box kept its height and pushed them off)."""
+        want = logic.hint_rows_px(hint_list.Visible, hint_list.Height, hint_note.Text)   # the note's line too
+        delta = want - grown["px"]
+        if delta:
+            size = dialog.ClientSize
+            dialog.ClientSize = ed.Size(size.Width, size.Height + delta)
+            grown["px"] = want
+            keep_on_screen(dialog)
+
+    def hide_hints():
+        hints["items"] = []
+        hint_list.Items.Clear()
+        hint_list.Visible = False
+        show_hint_rows()
+        fit_box()
+
+    def pick_hint(index):
+        if 0 <= index < len(hints["items"]):
+            hints["chosen"] = hints["items"][index]
+            hide_hints()
+            address.Text = hints["chosen"]            # (TextChanged: Draw and its reason follow; no new list)
+            address.Focus()
+
+    def ask_hints(s, e):
+        wait_keys.Stop()
+        if suggester is None:
+            return
+        if not logic.wants_suggestions(address.Text, hints["chosen"]):
+            suggester["stop"]()
+            wait_answer.Stop()
+            hint_note.Text = ""
+            hide_hints()                             # (after the note is cleared: the rows fold away)
+            return
+        suggester["start"](address.Text)            # (stops one still running: its answer would be stale)
+        wait_answer.Start()
+
+    def got_hints(s, e):
+        answer = suggester["poll"]() if suggester is not None else None
+        if answer is None:
+            return
+        wait_answer.Stop()
+        shown = logic.suggestions_shown(answer, address.Text)
+        if shown is None:                            # for something no longer typed
+            return
+        items, note = shown
+        hint_note.Text = note
+        hide_hints()
+        hints["items"] = items
+        for item in items:
+            hint_list.Items.Add(item)
+        hint_list.Height = logic.list_height(len(items), list_row_px(hint_list))   # as tall as its rows, no empty rows
+        hint_list.Visible = bool(items)
+        show_hint_rows()
+        fit_box()
+
+    wait_keys.Elapsed += logic.guard(ask_hints, "ask for address suggestions")
+    wait_answer.Elapsed += logic.guard(got_hints, "show address suggestions")
+    hint_list.Tag = pick_hint                       # (the in-Rhino test picks through the list's own pick)
+    hint_list.MouseUp += logic.guard(lambda s, e: pick_hint(hint_list.SelectedIndex), "pick a suggested address")
+    hint_list.Activated += logic.guard(lambda s, e: pick_hint(hint_list.SelectedIndex), "pick a suggested address")
+
     def enter_looks_up(s, e):          # Enter in the address: Look up (not Draw, the box's default button)
+        if hint_list.Visible and e.Key in (ef.Keys.Down, ef.Keys.Up):         # move in the list, keys stay here
+            e.Handled = True
+            hint_list.SelectedIndex = logic.list_step(hint_list.SelectedIndex, len(hints["items"]),
+                                                      "down" if e.Key == ef.Keys.Down else "up")
+            return
+        if hint_list.Visible and e.Key == ef.Keys.Escape:                       # close the list, not the box
+            e.Handled = True
+            hide_hints()
+            return
+        if e.Key == ef.Keys.Enter and hint_list.Visible and hint_list.SelectedIndex >= 0:
+            e.Handled = True                                                    # Enter picks; Enter again: Look up
+            pick_hint(hint_list.SelectedIndex)
+            return
         if e.Key == ef.Keys.Enter and not looking:
             e.Handled = True
             pick("lookup")
@@ -1057,7 +1203,13 @@ def start_box(state, options, mode):
     def address_typed(s, e):           # Draw off for an address not looked up, on again when the known one is back
         state["address"] = address.Text
         draw.Enabled = logic.can_draw(state) and not looking
-        reason.Text = logic.draw_reason(state)
+        reason.Text = logic.box_reason(state)
+        if suggester is not None:      # the list waits for a pause in the typing
+            if address.Text != hints["chosen"]:     # typed on: the list was for older typing, so it goes (round 2)
+                hint_list.SelectedIndex = -1   # and Enter looks up what is typed, never an older pick (round 1)
+                hide_hints()
+            wait_keys.Stop()
+            wait_keys.Start()
 
     address.TextChanged += logic.guard(address_typed, "follow the address typed")
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
@@ -1068,7 +1220,7 @@ def start_box(state, options, mode):
         if buffer is not None:
             state["design_buffer"] = buffer.Text
         draw.Enabled = logic.can_draw(state) and not looking
-        reason.Text = logic.draw_reason(state)
+        reason.Text = logic.box_reason(state)
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
 
@@ -1078,7 +1230,7 @@ def start_box(state, options, mode):
         logic.zone_picked(state, zone.SelectedValue.Text if zone.SelectedValue else None, first_zone)
         confirm.Checked = bool(state.get("district_confirmed"))     # another district: confirm it again
         draw.Enabled = logic.can_draw(state) and not looking
-        reason.Text = logic.draw_reason(state)
+        reason.Text = logic.box_reason(state)
         if "source" in zone_row:
             zone_row["source"].Text = logic.zone_row_text(state).split(" · ", 1)[-1]
         refresh_if_needed()
@@ -1181,6 +1333,8 @@ def start_box(state, options, mode):
         key, title = r["key"], label(r["label"], bold=True)
         if key == "address":
             layout.AddRow(title, row(address, *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+            if suggester is not None:      # the type-ahead list (hidden until there is one) and its quiet note
+                layout.AddRow(None, hint_rows)
             if r.get("matches"):           # several places match: pick one, then Look up again
                 matches = ef.DropDown()
                 matches.Items.Add("Which address?")
@@ -1238,7 +1392,7 @@ def start_box(state, options, mode):
                                label("kept back from every limit by the starting house", size=11))
         layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
-    amber = label("", eto_status_color("needs_review"), size=12, width=560)   # following the answers; wraps
+    amber = label("", eto_status_color("needs_review"), size=12, width=logic.BOX_TEXT_WIDTH)   # wraps at the box
     note = label(logic.lookup_note(state) or "", size=11)             # what a found lookup tells: plain, not amber
 
     def refresh_amber(*_):
@@ -1276,6 +1430,14 @@ def start_box(state, options, mode):
         timer.Elapsed += logic.guard(tick, "wait for the address lookup")
         dialog.Shown += logic.guard(lambda s, e: timer.Start(), "start waiting for the lookup")
         dialog.Closed += logic.guard(lambda s, e: timer.Stop(), "stop waiting for the lookup")
+
+    def closed(s, e):                  # the type-ahead stops with the box
+        wait_keys.Stop()
+        wait_answer.Stop()
+        if suggester is not None:
+            suggester["stop"]()
+
+    dialog.Closed += logic.guard(closed, "stop the address suggestions")
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen.get("what")
 

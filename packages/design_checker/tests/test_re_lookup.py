@@ -626,7 +626,7 @@ def test_the_box_turns_draw_off_and_on_as_the_address_is_typed():
     typed = ui[ui.index("    def address_typed(s, e):"):ui.index('address.TextChanged += logic.guard(address_typed')]
     assert 'state["address"] = address.Text' in typed
     assert "draw.Enabled = logic.can_draw(state) and not looking" in typed and \
-        "reason.Text = logic.draw_reason(state)" in typed
+        "reason.Text = logic.box_reason(state)" in typed   # (draw_reason, said once: #33)
     rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "saved_ui = logic.box_opened(_ui_state(doc), facts)" in rhino[rhino.index("def _confirm("):]
     assert '"known_addresses": logic.known_addresses(saved_ui),' in rhino[rhino.index("def _box_state("):]

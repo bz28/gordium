@@ -194,7 +194,8 @@ def test_several_matches_are_offered_under_the_address():
     facts, saved, state = box(p)
     rows = {r["key"]: r for r in logic.box_rows(state)}
     assert rows["address"]["matches"] == ["10 N Aurora St", "10 S Aurora St"]
-    assert logic.uncertain(state).endswith("Pick one under Address, then Look up again.")
+    # what to do, then that the model is as it was (the box says so after every lookup that found no lot)
+    assert logic.uncertain(state).endswith("Pick one under Address, then Look up again. " + logic.NOTHING_CHANGED)
 
 
 def test_looking_up_shows_its_state_and_keeps_draw_off():
@@ -1341,6 +1342,21 @@ def test_the_address_streets_name_is_kept_through_draw():
     assert logic.address_street("106 Ithaca Road, Ithaca", "ITHACA") is None          # never a part of a name
     assert logic.address_street("106 West Ithaca Road", "ITHACA RD") is None
     assert logic.address_street(None, "ITHACA RD") is None
+
+
+def test_the_suggestion_rows_take_no_room_while_empty():
+    """The architect's review (2026-10-28, item 16): an empty gap under Address, the hidden type-ahead list and its
+    empty note still taking their rows. They are one row now, shown only while the list or the note has something."""
+    assert logic.hint_rows_shown(False, "") is False and logic.hint_rows_shown(False, None) is False
+    assert logic.hint_rows_shown(True, "") is True and logic.hint_rows_shown(False, "Suggestions are offline") is True
+    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "layout.AddRow(None, hint_rows)" in ui and "row(hint_list)" not in ui and "row(hint_note)" not in ui
+    assert "hint_rows.Visible = False" in ui and "hint_rows.Visible = logic.hint_rows_shown(" in ui
+    # the box grows by what shows, the note's line too (review round 1: offline, the note pushed Draw down)
+    assert logic.hint_rows_px(False, 40, "") == 0 and logic.hint_rows_px(True, 40, "") == 46
+    assert logic.hint_rows_px(False, 40, "Suggestions are offline") == logic.HINT_NOTE_PX
+    assert logic.hint_rows_px(True, 40, "x") == 46 + logic.HINT_NOTE_PX
+    assert "want = logic.hint_rows_px(hint_list.Visible, hint_list.Height, hint_note.Text)" in ui
 
 
 def test_zoom_to_turns_on_as_a_row_is_picked_and_says_why_when_off():
