@@ -44,7 +44,7 @@ import scriptcontext as sc
 import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import TestDocs, close, look_up_106  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
@@ -170,7 +170,7 @@ def main():
         docs = TestDocs("progress_cancel").__enter__()
         g = fresh_module()
         doc = docs.open("Large Objects - Feet")
-        g.gordium_check()                                  # an empty file: the sample and its house, real checker
+        look_up_106(g, g.gordium_check)                    # an empty file: 106 Ithaca Rd looked up, its house, real checker
         g.live(False)
         claim("0 the sample is drawn and checked", g.STATE.get("last", {}).get("summary") is not None,
               g.STATE.get("last"))
@@ -269,22 +269,23 @@ def main():
         empty, empty_strings = objects(doc2), strings(g, doc2)    # before GordiumStart: an empty file
         g.STATE["on_confirm"] = lambda d, facts, text, state: seen.update(objects=objects(d), strings=strings(g, d))
         w = Watch(g, cancel_at=1.0)
-        got = g.gordium_start()
+        got = look_up_106(g, g.gordium_start)
         w.stop()
         g.STATE.pop("on_confirm", None)
         claim("4 the work cancelled was the starting house's", w.cancelled == ["Slow test: waiting…"], w.cancelled)
         now = objects(doc2)
-        # the sample lot GordiumStart put down before its box is taken back too (Rhino run of aea73b8: left behind,
-        # the next GordiumStart took it for the architect's lot and drew no house)
-        claim("4 Cancel during Draw: nothing drawn, the model as before GordiumStart (the sample taken back)",
-              got is None and now == empty and seen.get("objects") and now != seen.get("objects"),
+        # nothing is put down before Draw (re-lookup, #26: the looked-up lot is only shown while the box is open), so
+        # the model at the box is the empty file, and a Draw cancelled leaves it so (the Rhino run of aea73b8 once found
+        # a lot left behind, which the next GordiumStart took for the architect's and drew no house on)
+        claim("4 Cancel during Draw: nothing drawn, the model as before GordiumStart",
+              got is None and now == empty and seen.get("objects") == empty,
               {"now": now, "before": empty, "at_box": seen.get("objects")})
         claim("4 Cancel during Draw: the file's strings as before GordiumStart", strings(g, doc2) == empty_strings,
               {"now": strings(g, doc2), "before": empty_strings})
         claim("4 Gordium said Draw was cancelled", g.logic.DRAW_CANCELLED in (g.STATE.get("said") or []),
               (g.STATE.get("said") or [])[-3:])
         slow(g, False)
-        g.gordium_start()
+        look_up_106(g, g.gordium_start)
         drawn = objects(doc2)
         claim("4 Draw again (nothing cancelled) draws the starting house", [p for p in drawn.values() if "Massing" in p],
               {"drawn": len(drawn)})
@@ -388,7 +389,7 @@ def main():
         g.STATE["auto_ok"] = True
         g.live(False)
         doc3 = docs.open("Large Objects - Feet")
-        g.gordium_start()                                  # the sample, 106 Ithaca Rd, with its house
+        look_up_106(g, g.gordium_start)                    # 106 Ithaca Rd looked up, with its house
 
         def edit_site_to(address, fixture):
             g.STATE.update(box_picks=["lookup"], box_overrides={"address": address}, lookup_fixture=fixture)
