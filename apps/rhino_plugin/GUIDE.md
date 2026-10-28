@@ -130,7 +130,9 @@ The next two are asked only when the **Ground** row is on (see "Not shown in thi
   `Click the finished ground you'll grade to, at each wall (Enter when done)`
 
 A row's **Enter** button (for example "Enter bedrooms and parking spaces") asks the facts that row waits for, one
-at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, `Stories of the whole building`, and
+at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, `Occupants on this lot`,
+`Most occupants in any one dwelling unit (optional: how they are split)`, `Dwelling units in the whole attached
+building`, `Stories of the whole building`, and
 `Made by converting an existing building, not new construction? (§325-3B)`. Each ends with `(Enter to skip)`:
 skipping leaves the fact unset, so its rule keeps waiting (never 0 or No).
 
