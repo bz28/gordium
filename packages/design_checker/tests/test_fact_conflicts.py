@@ -178,3 +178,18 @@ def test_the_attached_counts_clash_sets_the_use_aside_too(district):
     row = next(i for i in _items(district, use, facts) if i.get("rule") == f"{district}.use")
     assert row["status"] == present.REVIEW and "or the use is off" in (row.get("reason") or ""), row
     assert not any("or the use is off" in (i.get("reason") or "") for i in _items(district, use, agreeing))
+
+
+@pytest.mark.parametrize("district", ["R-2c", "R-3a", "RU"])
+def test_the_use_row_set_aside_points_to_edit_site_in_the_start_box(district):
+    """When contradictory answers set the use itself aside, the use row is still needs review (unchanged) and now says
+    where to fix it: the start box's "Edit site…" button, since the use has no "Enter …" button. A contradiction
+    that leaves the use alone (the unrelated-people counts) adds no such pointer."""
+    use, facts, agreeing = CASES["attached_counts_disagree"]
+    row = next(i for i in _items(district, use, facts) if i.get("rule") == f"{district}.use")
+    assert row["status"] == present.REVIEW, row
+    assert "Edit site…" in (row.get("reason") or "") and "start box" in row["reason"], row
+    assert (row["reason"] or "").count("Edit site…") == 1, row
+    other_use, other, _ = CASES["household_counts_disagree"]
+    assert not any("Edit site…" in (i.get("reason") or "") for i in _items(district, other_use, other)
+                   if i.get("rule") == f"{district}.use")
