@@ -944,7 +944,8 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
     assert 'STATE["redraw_house"] =' in rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
     confirm = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
     assert confirm.index("gate.enter()") < confirm.index('STATE.pop("redraw_house", None)') < \
-        confirm.index("return _confirm(doc, facts, options, mode)")       # cleared as the box opens, before its Draw
+        confirm.index("result = _confirm(doc, facts, options, mode)")     # cleared as the box opens, before its Draw
+    # (main's confirm() keeps _confirm's result for its changed-after-box bookkeeping: merge 2 of #26)
     check = rhino[rhino.index("def gordium_check("):rhino.index("# ---- GordiumStart")]
     assert check.index("facts = confirm(") < check.index('STATE.pop("redraw_house", None)') < \
         check.index("if facts is None:")                                    # GordiumCheck: dropped with its box
