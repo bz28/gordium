@@ -696,3 +696,14 @@ def test_a_one_sided_overhang_is_named_by_how_far_it_reaches_wherever_the_house_
     reasons = [i["reason"] or "" for i in got if i["status"] == present.REVIEW]
     assert reasons and all("3'-0\" past the walls toward the side yard" in t for t in reasons), reasons
     assert not any("1'-6\"" in (i["reason"] or "") for i in got), got
+
+
+@pytest.mark.parametrize("key", ["lot", "street"])
+def test_a_doubtful_looked_up_lot_makes_the_accessory_building_rule_need_review(key):
+    """A frame shed well clear of every line complies; on a looked-up lot or street side the architect hasn't
+    confirmed, its distances are measured from lines that may be wrong, so it needs review (merge of #18 onto
+    main: the accessory yards were left off the unsettled list and it stayed "complies")."""
+    b = floors(15, 30, 45, 70, 2) + [prism(rect(20, 90, 30, 100), 0, 10, "shed")]
+    kw = dict(accessory_buildings=["shed"], accessory_frame=True)
+    assert status(run(b, **kw), "R-1b.accessory_buildings") == "complies"
+    assert status(run(b, **kw, unsettled={key: "This may be the wrong lot."}), "R-1b.accessory_buildings") == "needs_review"
