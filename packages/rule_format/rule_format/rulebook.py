@@ -715,7 +715,7 @@ def _parses(text: str) -> bool:
 
 
 def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> list[str]:
-    p = open_question_problems(entry) + research_problems(entry, ctx) + _answer_problems(entry.get("answers", []), ctx)
+    p = open_question_problems(entry) + research_problems(entry, ctx) + _answer_problems(entry.get("answers", []), ctx, entry)
     if entry.get("status") not in STATUSES:
         p.append(f"status must be one of {STATUSES}")
     if not entry.get("drafted_by"):
@@ -903,14 +903,35 @@ TERM_SCHEMAS = {
 APPROVAL_FIELDS = {"drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
 
 
-def _answer_problems(answers, ctx: Context) -> list[str]:
-    """Architects' answers to open questions: [{question, answer, answered_by, answered_on}]."""
+def _pickable(entry: dict, question) -> set:
+    """What an answer to `question` may pick: that question's research readings' ids, or the id of the finding
+    that answers that same question (never a finding about another question)."""
+    ids = {f.get("id") for f in entry.get("findings") or [] if isinstance(f, dict) and f.get("question") == question}
+    for x in entry.get("research") or []:
+        if isinstance(x, dict) and x.get("question") == question:
+            ids |= {g.get("id") for g in x.get("readings") or [] if isinstance(g, dict)}
+    return ids - {None}
+
+
+def _answer_problems(answers, ctx: Context, entry: dict | None = None) -> list[str]:
+    """Architects' (or the City's) answers to open questions: [{question, answer, answered_by, answered_on,
+    reading?}]. `reading` is the id of the reading the answer picks (one of the question's research readings,
+    or a finding's id it confirms): the measuring code then measures only that reading
+    (model_measurement/interpretations.py). An answer outranks Gordium's reading. The question stays listed
+    with its research (and its readings) until the entry is approved, so `reading` is checked against them."""
+    entry = entry if isinstance(entry, dict) else {}
     if not (isinstance(answers, list) and all(isinstance(a, dict) for a in answers)):
         return ["'answers' must be a list of {question, answer, answered_by, answered_on}"]
     p = []
     for a in answers:
-        if a.keys() != {"question", "answer", "answered_by", "answered_on"}:
-            p.append("each answer needs exactly question, answer, answered_by, answered_on")
+        if a.keys() - {"reading"} != {"question", "answer", "answered_by", "answered_on"}:
+            p.append("each answer needs exactly question, answer, answered_by, answered_on (and reading, if any)")
+        elif "reading" in a and not (isinstance(a["reading"], str) and SLUG.fullmatch(a["reading"])):
+            p.append("an answer's 'reading' names the reading (or finding) it picks, by its id "
+                     "(lowercase_with_underscores), so the measuring code follows it")
+        elif "reading" in a and a["reading"] not in _pickable(entry, a.get("question")):
+            p.append(f"an answer's 'reading' {a['reading']!r} isn't one of its question's research readings or one of "
+                     "this entry's findings")
         elif not all(isinstance(a[k], str) and a[k].strip() for k in ("question", "answer", "answered_by")):
             p.append("an answer's question, answer and answered_by must be text")
         elif a["answered_by"] not in ctx.reviewers:
