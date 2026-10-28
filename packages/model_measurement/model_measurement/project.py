@@ -10,6 +10,7 @@ from pathlib import Path
 
 from rule_format.rulebook import load
 
+from .measure import fact_conflicts as measure_conflicts
 from .measure import measure
 from .read_3dm import read_site
 
@@ -32,13 +33,9 @@ def _point(p) -> bool:
 
 def fact_conflicts(facts: dict) -> list[str]:
     """Lot facts that are each well formed but disagree with each other. Not a refusal (the check runs; the rows they
-    decide need review): the panel shows each one, so the architect can correct the count."""
-    out = []
-    here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
-    if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
-        out.append(f"{here} dwelling units on this lot but {building} in the attached building: part of another "
-                   "building may be on this lot, or one of the counts is off")
-    return out
+    decide need review): the panel shows each one, so the architect can correct the count. The measuring sets every
+    fact in each aside with the same reason (measure.fact_conflicts: one list)."""
+    return [message for message, _ in measure_conflicts(facts)]
 
 
 def fact_problems(facts: dict) -> list[str]:
