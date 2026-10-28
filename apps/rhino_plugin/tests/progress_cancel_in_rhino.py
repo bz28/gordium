@@ -291,7 +291,9 @@ def main():
               {"drawn": len(drawn)})
 
         # 5. live mode: a background re-check, cancelled from the panel
-        g.gordium_check()                                  # the sample again, checked; live on
+        g._actions()["auto_check"](True)                  # Check after every edit (off by default since the Check
+        #                                                    button, Ben 2026-10-21): on first, as the architect has it
+        g.gordium_check()                                  # the sample again, checked (that covers the setting); live on
         g.live(True)
         slow(g, True)
         g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
@@ -327,6 +329,8 @@ def main():
         slow(g, False)
 
         # 7. the real start box: the lookup's live line and Cancel lookup
+        g._actions()["auto_check"](False)                 # steps 5-6 done: no re-check of their edits redrawing the
+        pump_until(lambda: g.STATE.get("live_check") is None and not g.STATE.get("running"), SLOW + 10)   # model here
         g.STATE["auto_ok"] = False
         g.STATE.update(lookup_fixture="96_ithaca_rd", lookup_slow=1)
         model = objects(doc2)
