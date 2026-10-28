@@ -10,15 +10,16 @@ writes one summary used everywhere (D3).
 """
 
 import ast
-import functools
+import hashlib
 import math
 import re
+import threading
 import urllib.parse
 from pathlib import Path
 
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, load, read_jsonl
+from rule_format.rulebook import MEASURE_KINDS, REPO, _jsonl_rows, load
 
 from design_checker import reading_set, rhino_logic
 
@@ -1169,16 +1170,31 @@ def _side_name(measure: str, measured: dict, plan_north_deg: float = 0.0, side_l
     return "Side yard, " + ("narrower" if measure == "side_yard_smaller" else "wider")
 
 
-@functools.lru_cache(maxsize=8)
 def _chart_cells(j: Path) -> tuple:
     """Every chart cell the extraction read (2_extracted_text/*.cells.jsonl): file, page, section, row, column,
-    value, lines."""
-    out = []
-    for f in sorted((j / "2_extracted_text").glob("*.cells.jsonl")):
-        rows = read_jsonl(f)                 # the first row names the file; then a page's columns, then each cell
-        name = rows[0].get("file") if rows else None
-        out += [dict(r, file=name) for r in rows[1:] if "column" in r and "value" in r]
-    return tuple(out)
+    value, lines. Kept by the files' content (their SHA-256), the way rule_format.rulebook keeps rulebooks, never
+    by folder name: after a re-extraction in a long Rhino session the next panel shows the new text, not the
+    old. Display only (the checker's cells come from rule_format.rulebook)."""
+    files = [(f.name, f.read_bytes()) for f in sorted((j / "2_extracted_text").glob("*.cells.jsonl"))]
+    key = tuple((name, hashlib.sha256(data).digest()) for name, data in files)
+    with _CELLS_LOCK:
+        found = _CELLS.get(key)
+    if found is None:
+        out = []
+        for _, data in files:
+            rows = _jsonl_rows(data)         # the first row names the file; then a page's columns, then each cell
+            name = rows[0].get("file") if rows else None
+            out += [dict(r, file=name) for r in rows[1:] if "column" in r and "value" in r]
+        found = tuple(out)
+        with _CELLS_LOCK:
+            _CELLS[key] = found
+            while len(_CELLS) > 8:
+                _CELLS.pop(next(iter(_CELLS)))
+    return found
+
+
+_CELLS: dict = {}                            # (file name, SHA-256 of its bytes) per file -> the cells read from them
+_CELLS_LOCK = threading.Lock()
 
 
 def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict | None:
