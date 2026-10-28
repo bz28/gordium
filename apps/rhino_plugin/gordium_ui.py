@@ -1066,7 +1066,7 @@ def start_box(state, options, mode):
     def fit_box():
         """The box grows by the list's height while it shows (and back when it goes), kept on screen, so Cancel and
         Draw never go off its bottom (Rhino run of ee8f2ce: the box kept its height and pushed them off)."""
-        want = (hint_list.Height + 6) if hint_list.Visible else 0
+        want = logic.hint_rows_px(hint_list.Visible, hint_list.Height, hint_note.Text)   # the note's line too
         delta = want - grown["px"]
         if delta:
             size = dialog.ClientSize

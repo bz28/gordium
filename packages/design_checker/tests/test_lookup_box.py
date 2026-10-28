@@ -1352,3 +1352,8 @@ def test_the_suggestion_rows_take_no_room_while_empty():
     ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "layout.AddRow(None, hint_rows)" in ui and "row(hint_list)" not in ui and "row(hint_note)" not in ui
     assert "hint_rows.Visible = False" in ui and "hint_rows.Visible = logic.hint_rows_shown(" in ui
+    # the box grows by what shows, the note's line too (review round 1: offline, the note pushed Draw down)
+    assert logic.hint_rows_px(False, 40, "") == 0 and logic.hint_rows_px(True, 40, "") == 46
+    assert logic.hint_rows_px(False, 40, "Suggestions are offline") == logic.HINT_NOTE_PX
+    assert logic.hint_rows_px(True, 40, "x") == 46 + logic.HINT_NOTE_PX
+    assert "want = logic.hint_rows_px(hint_list.Visible, hint_list.Height, hint_note.Text)" in ui

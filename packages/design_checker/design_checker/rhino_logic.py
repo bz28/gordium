@@ -2372,6 +2372,15 @@ def wants_suggestions(text, chosen=None):
     return len(text.lstrip()) >= SUGGEST_MIN_CHARS and text != chosen
 
 
+HINT_NOTE_PX = 20          # the quiet note's one line (size 10) and its row spacing
+
+
+def hint_rows_px(list_shown, list_px, note):
+    """How much taller the start box is while its suggestion rows show: the list (and its spacing) and the note's
+    line, each only while shown (review round 1: an offline note showed with nothing added, pushing Draw down)."""
+    return ((list_px + 6) if list_shown else 0) + (HINT_NOTE_PX if note else 0)
+
+
 def hint_rows_shown(list_shown, note):
     """Whether the start box's suggestion rows (the type-ahead list and its quiet note) take any room: only while
     one of them has something to show (the architect's review, 2026-10-28: an empty gap under Address)."""
