@@ -526,6 +526,11 @@ def _feet_length(doc, model):
     return model * _scale(doc)
 
 
+def _feet_volume(doc, model_volume):
+    """A volume in the model's units cubed, in cubic feet."""
+    return model_volume * _scale(doc) ** 3
+
+
 def _feet_area(doc, model_area):
     """An area in the model's units squared, in square feet."""
     return model_area * _scale(doc) ** 2
@@ -599,57 +604,139 @@ def stale(o):
 
 
 def draw_scene(o, e):
-    if not _here(o, e):
-        return
-    d = e.Display
-    dark = ui.viewport_dark()
-    old = stale(o)
-    for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
-        if isinstance(g, rg.Mesh):
-            d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
-        else:
-            d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
-    if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
-        d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
-    if o.envelope is not None:               # see-through, drawn after the solids so they show through it
-        d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
-        # its outline only, the top dashed (the height limit): its faces' edges and isocurves banded the
-        # elevations (the architect's review, 2026-10-21)
-        bottom, top = getattr(o, "envelope_lines", None) or (None, None)
-        if bottom is not None:
-            d.DrawPolyline(bottom, BLUE, 1)
-            d.DrawPatternedPolyline(top, BLUE, ui.DASHED, 2, False)
-    for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
-        d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
-    if not old:                              # after the envelope, so its blue never tints them (F5)
-        for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
-            name = logic.highlight(status)
-            colour = ui.HIGHLIGHT[name]
-            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
-            d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
-    for pt in getattr(o, "grade_points", None) or []:           # spot grades
-        d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
-    if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
-        pts = o.lot_outline
-        d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
-    context = STATE.get("context_guides") or {}
-    if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
-            and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
-        for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
-            d.DrawPolyline(line, CONTEXT_GUIDE, 1)
-    guide = STATE.get("lookup_guide")
-    if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
-        d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
-    if o.confirm is not None:
-        lot, lines, main = o.confirm
-        if lot is not None:
-            d.DrawCurve(lot, GREEN, 4)
-        for line in lines:
-            d.DrawLine(line, BLUE, 7)
-        if isinstance(main, rg.Brep):
-            d.DrawBrepWires(main, BLUE, 3)
-        elif isinstance(main, rg.Mesh):
-            d.DrawMeshWires(main, BLUE, 3)
+    """The model-space drawing. Whatever happens in it (a step that raises is caught by the conduit's guard), depth
+    testing and depth writing are back on at the end (Rhino's own setting for this pass; review round 1 of
+    depth-lines, F3)."""
+    try:
+        if not _here(o, e):
+            return
+        d = e.Display
+        dark = ui.viewport_dark()
+        old = stale(o)
+        # Gordium's lines: over everything in plan, depth-tested (hidden behind solids) in every other view
+        on_top = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+        for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
+            if isinstance(g, rg.Mesh):
+                d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
+            else:
+                d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+        # the see-through fills never hide what is behind them: they write no depth, so a line behind the envelope or
+        # a coloured part still shows (review round 1 of depth-lines, F2); the solids in front still hide them
+        _see_through(d, True)
+        if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
+            d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
+        if o.envelope is not None:               # see-through, drawn after the solids so they show through it
+            d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
+        _see_through(d, False)
+        if o.envelope is not None:
+            # its outline only, the top dashed (the height limit): its faces' edges and isocurves banded the
+            # elevations (the architect's review, 2026-10-21)
+            bottom, top = getattr(o, "envelope_lines", None) or (None, None)
+            if bottom is not None:
+                _on_top(d, on_top)
+                d.DrawPolyline(bottom, BLUE, 1)
+                d.DrawPatternedPolyline(top, BLUE, ui.DASHED, 2, False)
+                _on_top(d, False)
+        _on_top(d, on_top)
+        for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
+            d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
+        _on_top(d, False)
+        if not old:                              # after the envelope, so its blue never tints them (F5)
+            for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+                name = logic.highlight(status)
+                colour = ui.HIGHLIGHT[name]
+                _see_through(d, True)
+                d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+                _see_through(d, False)
+                d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
+        for pt in getattr(o, "grade_points", None) or []:           # spot grades
+            d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
+        _on_top(d, on_top)
+        if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
+            pts = o.lot_outline
+            d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
+        if not on_top:                                   # the dimensions, in the model: hidden behind the solids
+            _scene_dims(o, e, d, dark, old)
+        context = STATE.get("context_guides") or {}
+        if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
+                and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
+            for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
+                d.DrawPolyline(line, CONTEXT_GUIDE, 1)
+        guide = STATE.get("lookup_guide")
+        if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
+            d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
+        _on_top(d, False)                                # depth testing back as Rhino set it, for what follows
+        if o.confirm is not None:
+            lot, lines, main = o.confirm
+            if lot is not None:
+                d.DrawCurve(lot, GREEN, 4)
+            for line in lines:
+                d.DrawLine(line, BLUE, 7)
+            if isinstance(main, rg.Brep):
+                d.DrawBrepWires(main, BLUE, 3)
+            elif isinstance(main, rg.Mesh):
+                d.DrawMeshWires(main, BLUE, 3)
+    finally:
+        _on_top(e.Display, False)
+        _see_through(e.Display, False)
+
+
+def _see_through(d, on):
+    """A see-through fill (on): drawn depth-tested but writing no depth, so it never hides what lies behind it."""
+    d.EnableDepthWriting(not on)
+
+
+def _on_top(d, on):
+    """Draw what follows over everything (on) or depth-tested as Rhino draws the model (off: the default, and
+    always where a drawing step ends)."""
+    d.EnableDepthTesting(not on)
+
+
+def _zoomed_in(o, viewport):
+    """Whether the lot is at working zoom on screen (logic.labels_shown): judged from the lot's edges, which a lot
+    with arcs has too, else its outline (review round 3, F5)."""
+    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]
+    return logic.labels_shown(_screen_size(viewport, lot_points or getattr(o, "lot_outline", None)))
+
+
+def _model_dimension(d, doc, line, color):
+    """A dimension drawn in the model (depth-tested): its line and its ticks (logic.model_ticks, 1 ft long), each
+    on the same thin halo as on screen (_dimension), so it reads over the red and amber off plan too."""
+    a, b = line.From, line.To
+    strokes = [line] + [rg.Line(rg.Point3d(*p), rg.Point3d(*q))
+                        for p, q in logic.model_ticks((a.X, a.Y, a.Z), (b.X, b.Y, b.Z), _model_length(doc, 1.0))]
+    halo = ui.halo(ui.viewport_dark())
+    # the halo writes no depth, so the line drawn over it at the same depth is never hidden by it (round 4 of
+    # depth-lines: a halo writing depth first could hide its own coloured line); the solids still hide both
+    _see_through(d, True)
+    for stroke in strokes:
+        d.DrawLine(stroke, halo, 2 + 2 * logic.HALO_PX)
+    _see_through(d, False)
+    for stroke in strokes:
+        d.DrawLine(stroke, color, 2)
+
+
+def _scene_dims(o, e, d, dark, old):
+    """The dimensions in a view that isn't plan (perspective, elevations), in the model so that the solids in
+    front of them hide them, in the plan's colours (logic.dim_rgb: complying grey): each yard's with its dashed
+    required line (not in an elevation, where they would lie on the ground line), and in an elevation the height's
+    with its faint limit. Their numbers stay on screen (draw_screen; off plan the height's only). Nothing zoomed
+    out to the neighbourhood."""
+    zoomed_in = _zoomed_in(o, e.Viewport)
+    elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+    if logic.dims_shown(zoomed_in, elevation):
+        for line, _ in getattr(o, "yard_required", None) or []:
+            _required(d, line, dark)                     # dashed grey, as in plan (review of the merge, F2)
+        for line, _, status in getattr(o, "yard_dims", None) or []:
+            _model_dimension(d, e.RhinoDoc, line, ui.dim_color("complies" if old else status, dark))
+    height = getattr(o, "height_dim", None)
+    if height is not None and elevation and zoomed_in:
+        line, _, status, limit = height
+        _model_dimension(d, e.RhinoDoc, line, ui.dim_color("complies" if old else status, dark))
+        if limit is not None:                        # the limit, faint, across it (seen in Front and Right alike)
+            k = _model_length(e.RhinoDoc, 1.5)
+            d.DrawLine(rg.Line(limit + rg.Vector3d(-k, k, 0), limit + rg.Vector3d(k, -k, 0)),
+                       ui.faint(ui.status_color("complies" if old else status, dark)), 1)
 
 
 def _model_on_screen(o, viewport):
@@ -698,6 +785,25 @@ def _screen_line(viewport, line):
     return [[a.X, a.Y], [b.X, b.Y]]
 
 
+def _dimension(d, viewport, line, color):
+    """A drawing-style dimension on screen: its line and an architectural tick at 45° across each end, each on a
+    thin halo (dark on a light viewport, light on a dark one) so it reads over the red and amber it often crosses
+    (the failing yard's dimension, the one that matters most: Rhino check of #29). Drawn on screen after the model
+    (DrawForeground), so always above the highlight."""
+    a, b = viewport.WorldToClient(line.From), viewport.WorldToClient(line.To)
+    strokes = [((a.X, a.Y), (b.X, b.Y))] + logic.dim_ticks((a.X, a.Y), (b.X, b.Y))
+    halo = ui.halo(ui.viewport_dark())
+    for ink, width in ((halo, 2 + 2 * logic.HALO_PX), (color, 2)):          # the halo under, the line over it
+        for (x0, y0), (x1, y1) in strokes:
+            d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), ink, width)
+
+
+def _required(d, line, dark):
+    """A yard's required line: a clear dashed mid-grey across its dimension (Rhino check of #29: the faint line
+    barely registered). Its "min" tag is a plan label, placed with the rest (logic.place_dim_label)."""
+    d.DrawPatternedLine(line.From, line.To, ui.required_color(dark), ui.DASHED, 2)
+
+
 def draw_screen(o, e):
     if not _here(o, e):
         return
@@ -724,8 +830,7 @@ def draw_screen(o, e):
     obstacles = on_screen if plan else []
     # zoomed out to the neighbourhood (the lot under LABEL_MIN_LOT_PX on screen), the lot's plan labels give way
     # (judged from the lot's edges, which a lot with arcs has too, else its outline: review round 3, F5)
-    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]
-    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, lot_points or getattr(o, "lot_outline", None)))
+    zoomed_in = _zoomed_in(o, e.Viewport)
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
@@ -738,28 +843,64 @@ def draw_screen(o, e):
     notice = _notice_box(o, e.Viewport, taken, old)
     drawn["notice"] = list(notice[1:]) if notice is not None else None
     keep = list(taken)                       # the status box, the north arrow, the notice: no label ever covers them
-    dims = [tuple(map(tuple, _screen_line(e.Viewport, line))) for line, _, _ in getattr(o, "yard_dims", None) or []] \
-        if plan else []                      # the yards' dimension lines: a moved label keeps off another's
-    drawn["dims"] = dims
+    elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+    shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
+    # the lines on screen (over everything) in plan only; elsewhere draw_scene draws them depth-tested
+    flat = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+    yard_dims = (getattr(o, "yard_dims", None) or []) if shown else []
+    options = getattr(o, "yard_options", None) or {}
+    chosen = {k: (options.get(k) or [(line, [])])[0] for k, (line, _, _) in enumerate(yard_dims)}  # its best position
+    height = getattr(o, "height_dim", None) if elevation and zoomed_in else None
+    dims = [tuple(map(tuple, _screen_line(e.Viewport, c))) for c, _ in chosen.values()] if plan else []
+    if height is not None:
+        dims.append(tuple(map(tuple, _screen_line(e.Viewport, height[0]))))
+    drawn["dims"] = dims                     # the dimension lines: a label keeps off another's (HARD)
     solids = []                              # each building's footprint and coloured part on screen: never under a
     for kind, pts in getattr(o, "plan_solids", None) or []:          # label (their outlines, never their boxes)
         on = [(q.X, q.Y) for q in (e.Viewport.WorldToClient(q) for q in pts)]
         solids.append(logic.hull(on) if kind == "building" else on)
     drawn["hard_shapes"], drawn["hard_boxes"] = solids, [list(t) for t in keep]
     drawn["buildings"] = sum(kind == "building" for kind, _ in getattr(o, "plan_solids", None) or [])
-    # the labels to draw: each yard's (failing first when placed), then each lot edge's length
+    # the labels to draw, all placed by the one placer (logic.place_dim_label, through LabelRun: failing first, then
+    # in review, then complying, the edges' lengths last; rhino-ui's rules, the Rhino job at #29 fc6fbd6): each
+    # yard's number only (the drawing's way), a failing or in-review yard's "min" tag at its required line, the
+    # height's number in an elevation, each lot edge's length
     items, colors = [], {}
-    for k, (line, text, status) in enumerate(getattr(o, "yard_dims", None) or []):   # each yard, status-marked (F4)
-        color = ui.status_color("complies" if old else status, dark)
-        a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
-        d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
-        for p in (a, b):                     # tick ends
-            d.Draw2dLine(System.Drawing.PointF(p.X - 5, p.Y + 5), System.Drawing.PointF(p.X + 5, p.Y - 5), color, 2)
+    numbers = getattr(o, "yard_numbers", None) or {}
+    o.placed = {}
+    for k, (line, text, status) in enumerate(yard_dims):
+        color = ui.dim_color("complies" if old else status, dark)
+        best, required = chosen[k]
+        tags = [] if old else (getattr(o, "yard_tags", None) or {}).get(k) or []
+        if flat:                                    # off plan, draw_scene draws them in the model (depth-tested)
+            for r in required:
+                _required(d, r, dark)                   # dashed grey; its "min" tag is a label (below)
+            _dimension(d, e.Viewport, best, color)
+        number = numbers.get(k) or text
         if old:
-            text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
+            number = number.split(" ", 1)[1] if number[:1] in ("?", "✕", "✓") else number
+        o.placed[k] = (0, None, None, best, required, number)
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
-            key = ("yard", k, text)
-            items.append({"key": key, "text": text, "line": ((a.X, a.Y), (b.X, b.Y)), "size": 11, "status": status})
+            key = ("yard", k, number)
+            items.append({"key": key, "text": number, "line": tuple(map(tuple, _screen_line(e.Viewport, best))),
+                          "size": 11, "status": status})
+            colors[key] = (color, False)
+            for j, (r, tag) in enumerate(zip(required, tags)):
+                key = ("tag", k, j, tag)
+                items.append({"key": key, "text": tag, "line": tuple(map(tuple, _screen_line(e.Viewport, r))),
+                              "size": logic.TAG_SIZE, "status": status})
+                colors[key] = (ui.required_color(dark), False)
+    if height is not None:                   # the height, dimensioned up from the grade plane
+        line, text, status, limit = height
+        color = ui.dim_color("complies" if old else status, dark)
+        number = getattr(o, "height_number", None) or text
+        if old:
+            number = number.split(" ", 1)[1] if number[:1] in ("?", "✕", "✓") else number
+        o.placed["height"] = (0, None, None, line, [], number)
+        if logic.yard_label_shown(labels, status):
+            key = ("height", number)
+            items.append({"key": key, "text": number, "line": tuple(map(tuple, _screen_line(e.Viewport, line))),
+                          "size": 11, "status": status})
             colors[key] = (color, False)
     edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []
     for k, (point, text, edge) in enumerate(edges):
@@ -798,9 +939,20 @@ def draw_screen(o, e):
     drawn["settled"] = settled or not items
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
-        corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
-        left = min(corners, key=lambda p: p.X)       # the height limit, labelled at its left end in an elevation
-        ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 30, dark, 13)
+        ends = [e.Viewport.WorldToClient(p) for p in limit[0]]
+        line_ = ((min(ends, key=lambda p: p.X).X, min(ends, key=lambda p: p.X).Y),
+                 (max(ends, key=lambda p: p.X).X, max(ends, key=lambda p: p.X).Y))
+        corners = [e.Viewport.WorldToClient(p) for p in (getattr(o, "house_box", None) or [])]
+        house = (min(q.X for q in corners), min(q.Y for q in corners), max(q.X for q in corners),
+                 max(q.Y for q in corners)) if corners else None
+        w, h = ui.text_box_size([limit[1]], 13)
+        view = (e.Viewport.Bounds.Width, e.Viewport.Bounds.Height)
+        placed_boxes = [tuple(lb[1][:4]) for lb in drawn["labels"]]
+        spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken + placed_boxes)   # past the line's
+        if spot is not None:                           # end, off the building and its colours (#28 at fc0b023)
+            o.placed["limit"] = spot + (w, h)
+            taken.append(spot + (w, h))
+            ui.draw_text_box(d, [limit[1]], BLUE, int(spot[0]), int(spot[1]), dark, 13)
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
@@ -1021,6 +1173,41 @@ def _prism(doc, outline, base, top):
     return brep
 
 
+def _solids_for(doc, entries):
+    """Each coloured block's building as a solid Rhino can cut, made once per building per check (a Brep copy, an
+    extrusion or SubD converted; None for a mesh or anything else): the blocks of one building share it
+    (independent review of #28, P3)."""
+    out = {}
+    for e in entries:
+        key = e.get("building") or ""
+        if key not in out:
+            found = _find(doc, key)
+            out[key] = _drawable(found.Geometry) if found is not None else None
+    return out
+
+
+def _offending(doc, e, solids=None):
+    """The part of its building inside one coloured block (check.plan: a yard strip from the building's bottom to
+    its top, or what rises above the height limit): Rhino's intersection of the building with the block, so a
+    cantilever over a yard is coloured and not the air under it, a roof's ridge and not the sky over its slopes.
+    The block is cut a hair larger (_proud) so none of its faces lies on the building's own. The block itself when
+    Rhino can't intersect (a mesh, a boolean that fails): never nothing (logic.offending_pieces). `solids`: the
+    buildings made once for the check (_solids_for); without it, this block's own."""
+    solid = (solids if solids is not None else _solids_for(doc, [e])).get(e.get("building") or "")
+    box = solid.GetBoundingBox(True) if solid is not None else None
+    base, top = logic.block_span(e, _feet_length(doc, box.Min.Z) if box is not None and box.IsValid else None,
+                                 _feet_length(doc, box.Max.Z) if box is not None and box.IsValid else None)
+    block = _prism(doc, e["outline"], base, top)       # reaching the real solid's own top (a vault: block_span)
+    if block is None:
+        return []
+    pieces = None
+    if isinstance(solid, rg.Brep) and solid.IsSolid:       # a boolean that raises colours the block, never stops the check
+        pieces = logic.guard(lambda: rg.Brep.CreateBooleanIntersection(
+            solid, _proud(doc, block.DuplicateBrep()), doc.ModelAbsoluteTolerance),
+            "cut the colour to the building's own shape: its whole block is coloured instead")()
+    return logic.offending_pieces(pieces, block)
+
+
 def _actions():
     """What the panel's buttons do (gordium_ui.make_panel): each one gated, so while a start box is open none of them
     touches the model (rhino_logic.gate_actions)."""
@@ -1033,7 +1220,7 @@ def PANEL_ACTIONS():
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check,
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
-            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
+            "massing": hide_massing, "switch_sides": switch_side_yards, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
             "context": show_context, "check": check_now, "auto_check": set_auto_check}
 
 
@@ -1232,7 +1419,15 @@ def check_now():
 
 def set_envelope(on):
     STATE["envelope_on"] = bool(on)
+    _envelope_everywhere()
     run_check(Rhino.RhinoDoc.ActiveDoc, report=False)
+
+
+def _envelope_everywhere():
+    """The Envelope layer shown or hidden in every open document at once, a start box open or not (the check that
+    follows may not run then: review of feature 4, F11)."""
+    for d in Rhino.RhinoDoc.OpenDocuments() or []:
+        logic.guard(lambda d=d: _show_envelope_layer(d), "show or hide the curves to snap to")()
 
 
 def _ui_state(doc):
@@ -1337,33 +1532,56 @@ def set_grade():
 
 
 def enter_rooms(needs):
-    """A row's "Enter …" button: one prompt for each fact it waits for (`needs`, the row's own list), a whole number
-    or yes / no. Enter skips one: it stays unset (never 0 or no), so its rule keeps waiting."""
+    """A row's "Enter …" button: a small dialog (ui.row_dialog) asking only the stated facts it waits for (`needs`,
+    the row's own list, logic.row_fields). OK saves exactly those (logic.row_answers_applied: a blank stays unset,
+    never 0 or no), each "entered by you" with the day (logic.row_sources), as ONE Undo step, then checks again.
+    Cancel, Esc or closing it changes nothing and makes no Undo step. The address, district, use, lot, street side and
+    every other fact are never touched (the facts are read as saved: load_facts, never current_facts, which would
+    drop a lot no longer drawn). A count of stories below the floors drawn is refused by the measuring: said in its
+    words, and nothing is saved."""
     doc = Rhino.RhinoDoc.ActiveDoc
     if not needs:
         say("This row isn't waiting for anything you can enter.")
         return
+    if not logic.allowed("save_facts", _box_open()):     # nothing writes the facts under an open start box
+        say(logic.BOX_BUSY)
+        return
     try:
-        facts = current_facts(doc)
-        answers = {}
-        for key in needs:
-            prompt, kind, _ = logic.STATED_FACTS[key]
-            answers[key] = _count(prompt) if kind == "count" else _ask_yes_no_or_skip(prompt)
-    except Cancelled:
+        facts = load_facts(doc)
+    except ValueError as e:
+        say(str(e))
+        return
+    if facts is None:
+        say("There are no site facts yet: run GordiumStart (or Edit site…) first.")
+        return
+
+    answers = ui.row_dialog(logic.answer_words(needs), logic.row_fields(needs, facts),    # OK: words keep it open
+                            lambda got: logic.row_problem(facts, needs, got))
+    if answers is None:                 # Cancel, Esc, closed: nothing written, so no Undo step
         say("Cancelled: nothing changed.")
         return
-    new = logic.update_counts(facts, answers)
-    checked = "stories" in answers     # fewer stories than the floors drawn: the measuring refuses it, so a count
-    if checked:                         # is tried first, unrecorded and put back as stored: never a step of nothing
-        refused = _tried(doc, new)
-        if refused:
+    new = logic.row_answers_applied(facts, needs, answers)
+    if new == facts:                    # OK with the answers as they were: nothing to save, no Undo step
+        say("Nothing new entered: nothing changed.")
+        return
+    tried = "stories" in needs and new.get("stories") is not None   # the measuring decides if the count can stand:
+    if tried:
+        refused = _tried(doc, new)      # tried first, unrecorded and put back as stored (never an Undo step)
+        if refused:                     # fewer stories than the floors drawn: refused, so nothing is saved
             run_check(doc, report=False)           # the facts as stored, checked again
             say(refused)
             return
-    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):
-        save_facts(doc, new)
-    if not checked:                     # (tried: its check was of these very facts)
+    _save_row(doc, needs, new)
+    if not tried:                       # (tried: its check was of these very facts)
         run_check(doc, report=False)
+
+
+def _save_row(doc, needs, new):
+    """A row dialog's answers, saved as one Undo step: the facts and the sources of exactly the row's facts."""
+    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):   # (serial 0, inside a command: that record holds it)
+        _save_facts(doc, new)
+        sources = logic.row_sources(fact_sources(doc), needs, new, logic.city_day())
+        doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
 
 
 def _tried(doc, facts):
@@ -1373,7 +1591,7 @@ def _tried(doc, facts):
     stored, recording = doc.Strings.GetValue(SECTION, ENTRY), doc.UndoRecordingEnabled
     doc.UndoRecordingEnabled = False
     try:
-        save_facts(doc, facts)
+        _save_facts(doc, facts)        # (enter_rooms refuses under an open box first)
         run_check(doc, report=False)
         return logic.refused_stories((STATE.get("last") or {}).get("items"))
     except Exception:
@@ -1566,7 +1784,8 @@ def _extras(doc, facts):
     lot left out, the use's name."""
     buildings = _buildings(doc)
     groups = {i for o in buildings for i in (o.Attributes.GetGroupList() or [])}
-    layers = sorted({doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings})
+    layers = sorted({logic.MASSING if logic.on_layer(path, logic.MASSING) else path   # its floors' sublayers said
+                     for path in (doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings)})   # once (F3)
     left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
@@ -1675,6 +1894,14 @@ def _box_state_drawn(doc, facts, options, saved_ui, mode="check"):
             "zone_said": saved_ui.get("_zone_said"),     # the lookup's words, this session only
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
+            # the uses the district's chart lists (permitted first; the use set kept even if not listed), what a pick
+            # not permitted by right means, and the follow-up questions this district's rules need for the use, each
+            # with its saved answer (Ben, 2026-10-25; derived from the rulebook: check.options)
+            "use_choices": logic.district_use_names(options, facts.get("zone"), facts.get("use")),
+            "use_note": logic.use_note(options, facts.get("zone"), facts.get("use")),
+            "follow_ups": logic.follow_up_rows(options, facts.get("zone"), facts.get("use"), facts),
+            "answers": logic.box_answers(options, facts.get("zone"), facts.get("use"), facts),   # the saved facts
+            "options": options,          # for _apply_box and fact_sources: which facts the district and use read
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
             # the street's name only with its street line (a survey outline or a corner answer drops the line:
             # review round 3, F6); this session's lookup words first, then the name saved at the last Draw
@@ -1708,7 +1935,14 @@ def _ft_text(feet):
 
 def _apply_box(doc, facts, state, saved_ui):
     """The facts (what the checker gets) and the box's own choices, from what the box says."""
-    facts, saved_ui = logic.box_facts(facts, saved_ui, state)   # a changed corner answer: the street picked again
+    # only the fields shown change (blank: unset, never 0 or no), and what a use said goes with it (by its source:
+    # the box's own track across picks, from the saved sources when it opens); with the old use still in the facts
+    track = saved_ui.get("_answers") or logic.box_track(facts, fact_sources(doc))
+    facts, track = logic.box_applied(facts, state.get("answers"), state["zone"], state["use"], state.get("options"),
+                                     track)
+    saved_ui = dict(saved_ui, _answers=track)
+    facts, saved_ui = logic.box_facts(facts, saved_ui, state)   # a changed corner answer: the street picked again;
+    # then the address, district, use and survey as the box says
     facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
     for key, value in logic.ground_facts(state, _lot_level(doc, facts)).items():
         if value is None:
@@ -2187,7 +2421,8 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
         facts_before, ui_before = facts, saved_ui
-        facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
+        if what != "pick:refresh":           # refresh: another use or district, the box again with its questions
+            facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
         # a lookup's answer replaces them (the district must be confirmed again) unless it filled and moved nothing;
         # Look up and Cancel lookup keep them as the box shows them, never the ticks from before Look up brought
         # back (rhino_logic.ticks_after_pick); by hand undoes them (a tick given its district never moves to another)
@@ -2587,8 +2822,11 @@ def _drawn(doc, facts, state, saved_ui, session=None, mode=None):
             # it again after, so the commit and the house are in a step of Gordium's)
             STATE["start_plan"] = planned or _plan_house(doc, out, ui_state)
         _save_ui_state(doc, ui_state)
-        sources = fact_sources(doc)        # what the box doesn't set (the ground marking) is kept
+        sources = logic.sources_kept(fact_sources(doc), out)   # what the box doesn't set is kept (an answer
+        #                                                       kept unshown too; one unset goes with its fact)
         sources.update(logic.fact_sources(state, logic.city_day(), confirmed=True))
+        # every answer typed in this box, shown at Draw or not: entered by you, with its value now
+        sources = logic.typed_sources(sources, ui_state.get("_answers"), out, logic.city_day())
         doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
         return out
 
@@ -2606,7 +2844,14 @@ def hide_massing(hidden):
         say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
         return
     with logic.undo_step(doc, logic.UNDO_WORDS["massing"]):
-        doc.Layers[index].IsVisible = not hidden
+        touched = logic.outermost_first([(i, layer.FullPath) for i, layer in enumerate(doc.Layers)
+                                         if not layer.IsDeleted and logic.on_layer(layer.FullPath, logic.MASSING)])
+        locks = [(i, _own_lock(doc, doc.Layers[i])) for i in touched]   # (a parent's IsVisible passes its lock down)
+        for layer in touched:
+            doc.Layers[layer].IsVisible = not hidden     # the parent and each floor's sublayer, each set (review of
+            #                                              feature 5, F2: never left to what the parent passes down)
+        for i, own in locks:                             # each layer's own lock as it was (the architect edits them)
+            _set_own_lock(doc, doc.Layers[i], own)
     doc.Views.Redraw()
 
 
@@ -2826,6 +3071,8 @@ def _clear(o):
     o.toast = None
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
+    o.yard_required, o.height_dim, o.yard_options, o.yard_tags, o.footprint, o.placed = [], None, {}, {}, [], {}
+    o.yard_numbers, o.house_box, o.height_number = {}, [], None
     o.plan_lines, o.plan_solids = [], []
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
@@ -2874,14 +3121,46 @@ def _draw_plan(doc, o, result, facts):
     o.edge_labels = [(_model_point(doc, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), e["length"],
                       rg.Line(_model_point(doc, a), _model_point(doc, b)))         # the edge: labelled beside it
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
-    o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
+    # at the lot's own level, a hair above it: off plan they are depth-tested, and at z 0 a lot drawn higher (or the
+    # ground under it) hid them (review round 1 of depth-lines, F1)
+    z = logic.dim_level(_lot_level(doc, facts))
+    o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], z), _model_point(doc, y["points"][1], z)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
-    o.encroach = [(_proud(doc, b), status) for b, status in ((_prism(doc, e["outline"], e["base"], e["top"]),
-                                                 e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
-                  if b is not None and logic.highlight(status)]          # coloured from the rule's result only
+    # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
+    o.yard_required = [(rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z)), y["status"])
+                       for y in plan.get("yards") or [] if y.get("points") for r in y.get("required_lines") or []]
+    # each yard's dimension where check.plan puts it best (its first position: the one placer moves the number, never
+    # the line; review of 86c01ea, F5), with its required lines; the "min" tags; the buildings' outline
+    o.yard_options = {k: [(rg.Line(_model_point(doc, c["points"][0], z), _model_point(doc, c["points"][1], z)),
+                           [rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z))
+                            for r in c.get("required_lines") or []])
+                          for c in (y.get("candidates") or [])[:1]]
+                      for k, y in enumerate(y for y in plan.get("yards") or [] if y.get("points"))}
+    o.yard_tags = {k: y.get("required_tags") or [] for k, y in enumerate(y for y in plan.get("yards") or []
+                                                                           if y.get("points"))}
+    o.footprint = [[_model_point(doc, p, 0.1) for p in ring] for ring in plan.get("footprint") or []]
+    o.yard_numbers = {k: y.get("number") for k, y in enumerate(y for y in plan.get("yards") or [] if y.get("points"))}
+    o.height_number = (plan.get("height") or {}).get("number")
+    box = rg.BoundingBox.Empty
+    for b in _buildings(doc):
+        box.Union(b.Geometry.GetBoundingBox(True))
+    o.house_box = list(box.GetCorners()) if box.IsValid else []
+    h = plan.get("height")
+    o.height_dim = (rg.Line(_model_point(doc, h["at"], h["base"]), _model_point(doc, h["at"], h["top"])), h["label"],
+                    h["status"], _model_point(doc, h["at"], h["limit"]) if h.get("limit") is not None else None) \
+        if h else None
+    # what is drawn, each piece with its rule and building: the one list draw_scene draws and the in-Rhino checks
+    # read (logic.coloured_info)
+    blocks = plan.get("encroach") or []
+    made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
+    o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
+                  for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
+                  if logic.highlight(status) for piece in _offending(doc, e, made)]
     # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
     pts = o.lot_outline or []
-    o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
+    # (the faint required lines too: a yard's words never cover one, review round 1, F3)
+    o.plan_lines = [line for line, _, _ in o.yard_dims] + [line for line, _ in o.yard_required] + \
+        [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
         [line for b in _buildings(doc) for line in _plan_edges(b.Geometry)]
     # what no plan label may cover (logic.place_dim_label's HARD rules): each building's footprint (its plan edges'
     # ends: their hull on screen each frame) and each coloured part's own outline (model space)
@@ -2972,11 +3251,21 @@ def _check_apply(doc, o, begun, result):
     second = [head["draft"].split(" · ")[0]] + [t for t in (head["lot"], head["grade"])
                                                  if "approximate" in t or "not set" in t or "existing" in t]
     o.message = (view["state"], view["summary"], [" · ".join(second)])
-    env = _envelope_brep(doc, _drawn_envelope(doc, facts, result.get("envelope"))) \
-        if STATE.get("envelope_on", True) else None
+    # on a tax-map lot the cautious envelope, every lot line 2'-0" nearer (logic.envelope_outlines)
+    outlines = logic.envelope_outlines(result.get("envelope"), result.get("plan"))
+    shown = _drawn_envelope(doc, facts, dict(result.get("envelope") or {}, outline=outlines[0])) if outlines \
+        else None
+    env = None
+    if STATE.get("envelope_on", True) and shown:
+        pieces = [_envelope_brep(doc, dict(shown, outline=ring)) for ring in outlines]
+        pieces = [b for b in pieces if b is not None]
+        if pieces:
+            env = pieces[0]
+            for b in pieces[1:]:
+                env.Append(b)
     o.envelope = env
     o.box = env.GetBoundingBox(True) if env else rg.BoundingBox.Empty
-    drawn = _drawn_envelope(doc, facts, result.get("envelope")) if env is not None else None
+    drawn = shown if env is not None else None
     o.envelope_lines = _envelope_lines(doc, drawn) if drawn else None
     o.height_limit = (o.envelope_lines[1], logic.height_limit_text((result.get("envelope") or {}).get("top"),
                                                                    _ft_text(drawn["top"] - drawn["base"]))) \
@@ -2984,6 +3273,8 @@ def _check_apply(doc, o, begun, result):
     o.north = _north(doc, facts)
     o.unmeasured = _unmeasured_outlines(doc, extras.get("not_included"))
     _draw_plan(doc, o, result, sent)
+    logic.guard(lambda: _envelope_curves(doc, result.get("plan"), sent),   # the curves to snap to, redrawn
+                "draw the curves to snap to")()        # (never measured; a failure never stops the check: F9)
     STATE["statuses_by_doc"][doc.RuntimeSerialNumber] = result["statuses"]
     STATE["last"] = {"summary": result["summary"], "view_summary": view["summary"], "state": view["state"],
                      "rows": [{k: r.get(k) for k in ("Requirement", "Table limit", "Proposed", "Units",
@@ -3018,9 +3309,10 @@ def _check_apply(doc, o, begun, result):
     return result
 
 
-def _check_failed(doc, o, e):
+def _check_failed(doc, o, e, facts=None):
     """A check that couldn't run: nothing of an earlier result stays shown, and the panel says why, with Retry."""
     _clear(o)
+    logic.guard(lambda: _envelope_curves(doc, None, facts), "clear the curves to snap to")()   # no edit (F1)
     o.doc = doc.RuntimeSerialNumber
     o.message = ("needs_review", "⚠ Check could not run", [str(e)[:120]])
     STATE["last"] = {"error": str(e), "at": time.time()}
@@ -3334,6 +3626,7 @@ def toggle_live():
 def toggle_envelope():
     STATE["envelope_on"] = not STATE.get("envelope_on", True)
     ui.set_envelope_tick(STATE.get("panel_parts"), STATE["envelope_on"])
+    _envelope_everywhere()
     run_check(Rhino.RhinoDoc.ActiveDoc, report=False)
 
 
@@ -3490,9 +3783,11 @@ def _add_lot(doc, sample):
     return doc.Objects.AddCurve(curve, attrs)
 
 
-def add_floors(doc, start):
-    """The starting building: one solid per story, stacked, as one group on Gordium::Massing (so a Move moves the
-    house), named Floor 1, 2… None, with nothing added, if a floor isn't a box Rhino can make."""
+def add_floors(doc, start, floor_to_floor=None, design_buffer=0.0):
+    """The starting building: one solid per story, stacked, as one group (so a Move moves the house), each on its own
+    sublayer Gordium::Massing::Floor 1, 2… (named Floor 1, 2…), with Gordium::Massing::Roof made for the roof, each
+    carrying how it was drawn (logic.start_tag: what Switch side yards reads). None, with nothing added, if a floor
+    isn't a box Rhino can make."""
     breps = []
     for floor in start["floors"]:
         corners = [_model_point(doc, (x, y), z) for z in (floor["base"], floor["top"]) for x, y in floor["outline"]]
@@ -3501,12 +3796,14 @@ def add_floors(doc, start):
         return None                     # nothing added: the caller says so
     group = doc.Groups.Add("Gordium starting building")
     ids = []
-    for i, (floor, brep) in enumerate(zip(start["floors"], breps)):
+    _layer(doc, logic.MASSING_ROOF)          # the roof's sublayer, ready for the architect's roof (the starting house
+    for i, (floor, brep) in enumerate(zip(start["floors"], breps)):   # is flat-topped: its top floor's top)
         a = Rhino.DocObjects.ObjectAttributes()
-        a.LayerIndex = _layer(doc, logic.MASSING)
+        a.LayerIndex = _layer(doc, logic.massing_floor(i + 1))      # each floor on its own sublayer (Ben, 2026-10-21)
         a.Name = "Floor " + str(i + 1)
         # one story, at the height drawn: what makes it count as a story (a stretched block no longer does)
         a.SetUserString(logic.FLOOR_KEY, str(i + 1) + ";" + repr(floor["top"] - floor["base"]))
+        a.SetUserString(logic.START_KEY, logic.start_tag(start, i, floor_to_floor, design_buffer))
         a.AddToGroup(group)
         ids.append(doc.Objects.AddBrep(brep, a))
     return ids
@@ -3723,7 +4020,8 @@ def _draw_starting_house(doc, facts):
                                  "(run GordiumStart again in " + _doc_name(doc) + ")")
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
-    if add_floors(doc, start) is None:
+    ids = add_floors(doc, start, request["floor_to_floor"], request["design_buffer"])
+    if ids is None:
         Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; " + logic.draw_one_hint(_auto(doc)))
         live(True)
         documents(True)
@@ -3740,8 +4038,100 @@ def _draw_starting_house(doc, facts):
     documents(True)
     frame_site(doc, facts)
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
-                             logic.MASSING)
+                             logic.MASSING + "::Floor 1…" + str(len(start["floors"])))
     return result
+
+
+def _start_floors(doc):
+    """The starting house's floor blocks in the model (each carrying logic.START_KEY), with their bounding boxes in
+    feet, their volumes in cubic feet (None when not a solid Rhino can measure: then never redrawn) and whether each
+    is locked or hidden, itself or by its layer (then never redrawn: Rhino deletes neither, and the architect's lock
+    and Hide starting house are kept; review round 3)."""
+    found = []
+    settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+    settings.HiddenObjects = True                # every floor, whatever its state (a hidden one is refused, said so)
+    settings.LockedObjects = True
+    for o in doc.Objects.GetObjectList(settings):
+        text = o.Attributes.GetUserString(logic.START_KEY) if not o.IsDeleted else None
+        if text:
+            b = o.Geometry.GetBoundingBox(True)
+            props = rg.VolumeMassProperties.Compute(o.Geometry) if isinstance(o.Geometry, rg.Brep) else None
+            volume = _feet_volume(doc, props.Volume) if props is not None else None    # (a notch changes it)
+            layer = doc.Layers[o.Attributes.LayerIndex]       # (a locked or hidden parent too: IsLocked, IsVisible)
+            locked = bool(o.IsLocked or o.IsHidden or o.IsReference or layer.IsLocked or not layer.IsVisible)
+            found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume, locked))
+    return found
+
+
+def switch_side_yards():
+    """Switch side yards (the panel, under the Starting house site fact): where the district lets the two side yards
+    differ (R-2b: one 10 ft, the other 5 ft), the starting house is redrawn with the larger one on the other side,
+    as one Undo step. The new house is proven by the checker like the first (a house that would break a rule is
+    never drawn: the old one stays and the panel says why); a house the architect has changed is never redrawn."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every file closed: say what to do, touch nothing
+        say(logic.NO_DOCUMENT)
+        return None
+    found = _start_floors(doc)
+    plan = logic.switch_plan([(text, box, volume, locked) for _, text, box, volume, locked in found], tolerance=_feet_length(
+        doc, doc.ModelAbsoluteTolerance) + 0.01)
+    if plan.get("refused"):
+        say(plan["refused"])
+        return None
+    try:
+        facts = current_facts(doc)
+    except ValueError as e:
+        say("The site facts can't be read, so the starting house isn't redrawn: " + str(e))
+        return None
+    path = os.path.join(tempfile.gettempdir(), "gordium_switch_" + str(doc.RuntimeSerialNumber) + ".3dm")
+    export(doc, path)                   # (the checker leaves the model's buildings out when it draws a new house)
+    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
+                 "floor_to_floor": plan["floor_to_floor"], "design_buffer": plan["design_buffer"],
+                 "larger_side": plan["larger_side"]})
+    split = start.get("side_split") or {}
+    if not start.get("floors") or split.get("larger_side") != plan["larger_side"]:
+        why = "; ".join(start.get("notes") or []) or "no house could be drawn that way"
+        say("The larger side yard can't go on the " + plan["larger_side"] + " (" + why + "): the starting house is "
+            "kept as it was.")
+        return None
+    record = doc.BeginUndoRecord("Gordium: " + logic.SWITCH_LABEL.lower())
+    STATE["switch_record"] = record              # 0 inside a running command (its own Undo step): for the tests
+    try:                                # the new house first: if it can't be drawn, the old one is untouched
+        ids = add_floors(doc, start, plan["floor_to_floor"], plan["design_buffer"])
+        if ids is None:
+            say("The switched starting house couldn't be drawn; the old one is kept.")
+            return None
+        gone = []
+        for o, _, _, _, _ in found:
+            if not doc.Objects.Delete(o, True):
+                break
+            gone.append(o)
+        kept = len(found) - len(gone)
+        if kept:                        # never two houses: the new one goes again, the old one stays whole (round 2,
+            for o in gone:              # F1; round 4: the floors already deleted come back)
+                doc.Objects.Undelete(o)
+            for i in ids:
+                new = doc.Objects.FindId(i)
+                if new is not None:
+                    doc.Objects.Delete(new, True, True)
+            say("The old starting house couldn't be removed (" + str(kept) + " floors), so it is kept as it was.")
+            return None
+        fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())
+        if fact:
+            _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
+    finally:
+        doc.EndUndoRecord(record)
+    doc.Views.Redraw()
+    result = run_check(doc, report=False)
+    say("Starting house redrawn. " + (_said_sides(start) or ""))
+    return result
+
+
+def _said_sides(start):
+    """The new house's side yards, as its note says them ("Side yards: 10'-0" on the right (east), …")."""
+    note = start.get("margin_note") or ""
+    at = note.find(logic.SIDE_YARDS_SAID)
+    return note[at:] if at >= 0 else None
 
 
 # ---- the context map: the neighbourhood around a looked-up lot (design_checker.context_box) ---------------------
@@ -3754,6 +4144,89 @@ def _draw_starting_house(doc, facts):
 
 CONTEXT_GREYS = {"Parcels": (150, 150, 150), "Streets": (120, 120, 120), "Buildings": (135, 135, 135),
                  "Notes": (110, 110, 110)}
+
+
+ENVELOPE_BLUE = (29, 95, 138)
+
+
+def _envelope_curves(doc, plan, facts):
+    """The buildable outline and each yard's required line as real curves on a locked Gordium::Envelope layer, for
+    the architect to snap to (Osnap; Ben, 2026-10-21): on a tax-map lot the cautious outline solid and the outline
+    as drawn dashed (logic.envelope_curves). Each is tagged Gordium's (ENVELOPE_KEY), never measured
+    (logic.classify), and replaced at every check: the old ones deleted first whatever the layer's state (hidden,
+    locked, or under a locked "Gordium": deleted ignoring those modes; review of feature 4, F1), and the new ones
+    drawn only once none is left, so they never pile up. None of it is recorded for Undo, inside a command too
+    (GordiumCheck's Undo step never stops on them: F6). The layer shown only with "Show buildable envelope".
+    `plan` None: only the old ones go (no layer made for that: a failed check in a file Gordium never drew in
+    leaves no Gordium layers). How many old ones could not be deleted (0: all replaced; else the layer hidden and
+    the architect told, so stale curves never pass for current ones). Replacing them is no edit of the model: the
+    "model changed" mark (STATE["dirty"], set by live mode's hooks on every add and delete) is left as it was
+    (UX review 2026-10-27: after any check but the first, its own redraw greyed the results it had just shown;
+    review of feature 4, round 4, F1: a failed check's clearing did the same)."""
+    if plan is None and doc.Layers.FindByFullPath(logic.ENVELOPE, -1) < 0:
+        return 0
+    dirty = STATE.get("dirty")
+    was = doc.UndoRecordingEnabled
+    doc.UndoRecordingEnabled = False             # the layer too: an Undo never removes it from under the curves
+    try:                                         # (review of dd44f1b, F1)
+        index = _layer(doc, logic.ENVELOPE)
+        layer = doc.Layers[index]
+        if layer.Color.ToArgb() == System.Drawing.Color.Black.ToArgb():          # a new layer: Gordium's blue
+            layer.Color = System.Drawing.Color.FromArgb(*ENVELOPE_BLUE)
+        for old in _envelope_objects(doc, index):
+            doc.Objects.Delete(old, True, True)        # quiet, ignoring hidden and locked
+        left = len(_envelope_objects(doc, index))
+        if left:                                   # never a second set over the first, nor stale ones shown as
+            layer.IsVisible = False                # current (review of dd44f1b, F2)
+            say("the curves to snap to couldn't be replaced (" + str(left) + " left); hidden until the "
+                "next check")
+            return left
+        z = _lot_level(doc, facts or {})
+        dashed = doc.Linetypes.Find("Dashed")
+        for c in logic.envelope_curves(plan):
+            pts = [_model_point(doc, p, z) for p in c["points"]]
+            if c["closed"]:
+                pts.append(pts[0])
+            if len(pts) < 2:
+                continue
+            attrs = Rhino.DocObjects.ObjectAttributes()
+            attrs.LayerIndex = index
+            attrs.Name = "Gordium: " + c["what"]
+            attrs.SetUserString(logic.ENVELOPE_KEY, c["what"])
+            if c["dashed"] and dashed >= 0:
+                attrs.LinetypeSource = Rhino.DocObjects.ObjectLinetypeSource.LinetypeFromObject
+                attrs.LinetypeIndex = dashed
+            doc.Objects.AddPolyline(pts, attrs)
+        _show_envelope_layer(doc)
+        return 0
+    finally:
+        doc.UndoRecordingEnabled = was
+        STATE["dirty"] = dirty
+
+
+def _envelope_objects(doc, index):
+    """Gordium's curves on its Envelope layer (tagged ENVELOPE_KEY), whatever the layer's state."""
+    settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+    settings.HiddenObjects = True
+    settings.LockedObjects = True
+    settings.LayerIndexFilter = index
+    return [o for o in doc.Objects.GetObjectList(settings) if o.Attributes.GetUserString(logic.ENVELOPE_KEY)]
+
+
+def _show_envelope_layer(doc):
+    """The Envelope layer shown with "Show buildable envelope", hidden without it, and locked (its own lock: under a
+    locked "Gordium" too); not recorded for Undo."""
+    index = doc.Layers.FindByFullPath(logic.ENVELOPE, -1)
+    if index < 0:
+        return
+    layer = doc.Layers[index]
+    was = doc.UndoRecordingEnabled
+    doc.UndoRecordingEnabled = False
+    try:
+        layer.IsVisible = bool(STATE.get("envelope_on", True))
+        _set_own_lock(doc, layer, True)
+    finally:
+        doc.UndoRecordingEnabled = was
 
 
 def _context_layer(doc, name):
@@ -4174,7 +4647,6 @@ def frame_site(doc, facts):
         for i in picked:
             doc.Objects.Select(i)
     doc.Views.Redraw()
-
 
 
 def _release(key, value):

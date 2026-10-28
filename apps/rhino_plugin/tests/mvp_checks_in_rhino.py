@@ -121,12 +121,15 @@ try:
         rear = next(r for r in rows if "Side yard, Southwest" in r[0])
         claim("3 a shortfall says short", rear[3].endswith(" short"), rear)
         o = g.overlay()
-        failing = [t for _, t, st in o.yard_dims if st == "does_not_comply"]
-        claim("1 labels off: a failing yard's shortfall still labelled",
-              failing and all(g.logic.yard_label_shown(False, "does_not_comply") for _ in failing) and
-              "needs" in failing[0], failing)
-        claim("1 labels off: the others not", not g.logic.yard_label_shown(False, "complies"))
+        # (the drawing shows a failing yard's number with its ✕; what it needs is the panel's and the notice's).
+        # Top drawn last first: o.placed is the last view's (capture redraws Top)
         capture(doc, "1_labels_off_failing_shortfall_only")
+        failing = [pl[5] for j, pl in (getattr(o, "placed", None) or {}).items()
+                   if isinstance(j, int) and pl[5] and o.yard_dims[j][2] == "does_not_comply"]
+        claim("1 labels off: a failing yard's number still shown, with its ✕",
+              failing and all(g.logic.yard_label_shown(False, "does_not_comply") for _ in failing) and
+              failing[0].startswith("✕ "), failing)
+        claim("1 labels off: the others not", not g.logic.yard_label_shown(False, "complies"))
         g.set_labels(True)                                   # the panel's tick
         ui_state = g._ui_state(doc)
         claim("1 the tick turns them on, saved in the document",

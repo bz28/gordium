@@ -6,7 +6,8 @@
 Requests (one JSON object per line): {"id": 1, "cmd": "check", "model": "<.3dm>", "facts": {...}, "report":
 "<.xlsx or null>"}, {"id": 2, "cmd": "options", "jurisdiction": "regulations/jurisdictions/..."}, {"id": 3, "cmd": "facts",
 "facts": {...}} (what's wrong with saved lot facts: the same check as a facts file), {"id": 4, "cmd": "start",
-"model": "<.3dm with the lot>", "facts": {...}} (the largest legal starting building, as stacked floors), {"id": 5, "cmd": "sample_site"} (the
+"model": "<.3dm with the lot>", "facts": {...}, "larger_side": null} (the largest legal starting building, as stacked floors;
+"larger_side": "left" or "right" puts a zone's larger side yard there), {"id": 5, "cmd": "sample_site"} (the
 106 Ithaca Rd lot and facts GordiumStart offers). Answers:
 {"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. A request with "progress": true
 also gets {"id": 1, "step": "Measuring the building…"} lines before its answer, one as each stage starts (the
@@ -35,7 +36,7 @@ def answer(request: dict, step=None) -> dict:
                            request.get("building_problems"), request.get("extras"), step=step)
         elif request.get("cmd") == "start":
             result = start(Path(request["model"]), request["facts"], request.get("floor_to_floor"),
-                           request.get("design_buffer") or 0.0, step=step)
+                           request.get("design_buffer") or 0.0, request.get("larger_side"), step=step)
         elif request.get("cmd") == "sample_site":
             result = sample_site()
         elif request.get("cmd") == "facts":
