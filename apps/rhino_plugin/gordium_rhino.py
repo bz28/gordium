@@ -3190,7 +3190,9 @@ def _idle(sender, e):
     if logic.should_check_front(STATE.get("check_front"), busy, _box_open()):
         STATE["check_front"] = False
         if front is not None and front.Strings.GetValue(SECTION, ENTRY):   # it has lot facts: checked once, in the
-            _check_live(front)                                             # background (#32: Rhino never waits)
+            STATE["dirty"] = None                      # background (#32: Rhino never waits); it reads the model now,
+            _check_live(front)                         # so it covers every edit before it, as the re-check below
+            #                                            does: a Cancel stays cancelled (demo 7 Rhino run, 2026-10-28)
     elif logic.should_recheck(t, time.time(), busy, _box_open(), IDLE_SECONDS, last_at, auto=_auto(front)):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc

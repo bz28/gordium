@@ -801,3 +801,34 @@ def test_a_second_lookup_that_finds_nothing_never_keeps_a_tick_on_the_district_i
         assert shown[2]["zone"] == "R-1b" and shown[2]["zone_source"] != logic.ENTERED      # the preview's
         assert (shown[-1]["district_confirmed"], shown[-1]["zone_source"]) == (False, logic.ENTERED), (second,
                                                                                                     shown[-1])
+
+
+def test_a_background_check_of_the_file_in_front_covers_the_edits_before_it_so_cancel_stays_cancelled():
+    """Demo 7 Rhino run (2026-10-28, progress_cancel claim 5): with Check after every edit on, an edit, then the
+    background check of the file come to the front (check_front) read the model, edit included; Cancel; and at the
+    next idle a second check started at once, because the edit still counted as unchecked. A check that reads the model
+    covers every edit made before it, as live mode's own re-check does (it clears the mark as it starts): Cancel then
+    stays cancelled until the next edit (and the panel says so: never a result shown as current)."""
+    import importlib.util
+    import pathlib
+    spec = importlib.util.spec_from_file_location("_test_check_harness", pathlib.Path(__file__).with_name("test_check.py"))
+    harness = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(harness)
+    _plugin_functions = harness._plugin_functions
+    started = []
+    front = type("Doc", (), {"RuntimeSerialNumber": 7,
+                             "Strings": type("S", (), {"GetValue": staticmethod(lambda section, key: "{}")})()})()
+    ns = _plugin_functions(["_idle"], _box_open=lambda: False, _auto=lambda doc: True, IDLE_SECONDS=0.5,
+                           SECTION="gordium", ENTRY="lot_facts", _redraw=lambda: None,
+                           _check_live=lambda doc: started.append(doc))
+    ns["Rhino"].RhinoDoc.ActiveDoc = front
+    now = ns["time"].time()
+    ns["STATE"].update(check_front=True, dirty=now - 2.0)      # the file came to the front; an edit since
+    ns["_idle"](None, None)
+    assert started == [front]                                   # the file in front checked, the edit with it
+    ns["STATE"]["running"] = False                              # ... and that check cancelled (nothing running)
+    ns["_idle"](None, None)
+    assert started == [front], "Cancel was undone: a second check started for an edit the first one had read"
+    ns["STATE"]["dirty"] = ns["time"].time() - 1.0              # a new edit: checked again, as live mode does
+    ns["_idle"](None, None)
+    assert started == [front, front]
