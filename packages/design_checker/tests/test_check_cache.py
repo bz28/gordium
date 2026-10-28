@@ -1,5 +1,7 @@
-"""The checker gives exactly the same answer whether the rule files come fresh from disk or from the cache
-(rule_format.rulebook._kept), in every district that has a rulebook, and a second check is much faster."""
+"""The checker gives exactly the same answer on a first check (every rule file parsed) and on the next ones
+(every rule file from the cache, rule_format.rulebook._kept), in every district that has a rulebook, and the next
+checks are faster. That the cache reads each file exactly as the code did before it is pinned file by file in
+rule_format/tests/test_kept.py (against yaml.load and the old loops, no cache involved)."""
 import json
 import sys
 import time
@@ -29,7 +31,7 @@ def answer(result) -> str:
 
 
 @pytest.mark.parametrize("city,zone", districts())
-def test_every_district_checks_the_same_with_and_without_the_cache(city, zone):
+def test_every_district_checks_the_same_on_a_first_check_and_from_the_cache(city, zone):
     for surveyed in (True, False):
         facts = {**FACTS, "jurisdiction": city, "zone": zone, "lot_surveyed": surveyed}
         for house in HOUSES:
@@ -44,7 +46,7 @@ def test_there_is_a_district_to_check():
     assert districts()
 
 
-def test_a_rule_edited_in_one_check_never_reaches_the_next(monkeypatch):
+def test_a_rule_edited_in_one_check_never_reaches_the_next():
     """A caller that edits the rules it was given (here: every check turned to True) can't make the next check
     pass: the cache hands out copies."""
     city, zone = districts()[0]

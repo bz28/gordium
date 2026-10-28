@@ -125,7 +125,6 @@ def test_a_jurisdictions_context_is_the_same_cold_and_warm_and_its_own_copy():
             continue
         page = next(iter(warm.pages[name]))
         warm.pages[name][page].clear()                      # a caller wipes a page: quotes would stop matching
-        warm.uses.clear()
         third = Context.for_jurisdiction(j)
         assert third == cold and third.pages[name][page]
 
