@@ -2397,7 +2397,6 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         facts, saved_ui, go, state = _draw_prepare(doc, facts, state, saved_ui, session, mode, options)
         return _drawn(doc, facts, state, saved_ui, session, mode) if go and state is not None else None
     ticked = {}                       # this box session's ticks and changed sources, kept across picks
-    before_lookup = {}                # ...as they were when the running lookup started (Cancel lookup)
     while True:
         state = dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)
         state["_on_shown"] = STATE.get("on_box_shown")     # the dialog capture in the in-Rhino test
@@ -2406,8 +2405,7 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         what = ui.start_box(state, options, mode)
         if what is None:
             return None                      # rolled back by run_box: the model as it was
-        ticked = {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
-                                        "corner_source", "checked") if k in state}   # (saved only at Draw)
+        ticked = logic.box_ticks(state)      # (saved only at Draw)
         if what == "draw":
             facts, saved_ui, go, drawn_state = _draw_prepare(doc, facts, state, saved_ui, session, mode, options)
             if go:
@@ -2420,18 +2418,16 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             elif drawn_state is not state:            # after the reset (the guide): its lot rows are the model's
                 ticked = {k: v for k, v in ticked.items() if k in GUIDE_KEEPS}
             continue
-        # the lookup's answer replaces them (and the district must be confirmed again); by hand undoes it (a tick
-        # given its district never moves to another)
-        if what == "pick:lookup":
-            before_lookup, ticked = ticked, {}
-        elif what in ("pick:lookup_done", "pick:use_saved"):
-            ticked = {}
-        elif what == "pick:lookup_cancel":                # cancelled: the box as it was before Look up, ticks too
-            ticked = before_lookup
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
+        facts_before, ui_before = facts, saved_ui
         if what != "pick:refresh":           # refresh: another use or district, the box again with its questions
             facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
+        # a lookup's answer replaces them (the district must be confirmed again) unless it filled and moved nothing;
+        # Look up and Cancel lookup keep them as the box shows them, never the ticks from before Look up brought
+        # back (rhino_logic.ticks_after_pick); by hand undoes them (a tick given its district never moves to another)
+        ticked = logic.ticks_after_pick(what, ticked, (saved_ui.get("_lookup") or {}).get("status"),
+                                        logic.box_moved(facts_before, ui_before, facts, saved_ui))
         if (what == "pick:by_hand" and saved_ui.get("_by_hand")     # by hand taken, or a lookup's preview set
                 and (not was_by_hand or (had_pending and not saved_ui.get("_pending")))):   # aside by it (round
             ticked = {}            # 15): ticks again (No or refused changes nothing: rounds 12, 16)
@@ -3711,7 +3707,7 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-        try:
+        try:                            # the box's undo step ends with the facts saved
             try:
                 facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
             finally:                    # GordiumCheck never draws a starting house: its box's flag goes with it

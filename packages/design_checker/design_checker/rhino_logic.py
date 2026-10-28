@@ -3015,6 +3015,44 @@ def lookup_answer(text, query=None):
     return {"status": "error", "query": query, "detail": "the lookup printed no answer"}
 
 
+def box_ticks(state):
+    """The ticks and sources the start box keeps across picks, as `state` has them (_box_loop's `ticked`)."""
+    return {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
+                                  "corner_source", "checked") if k in state}
+
+
+BOX_FIELDS = ("zone", "address", "use", "corner_lot")     # what the box's ticks and sources are about
+
+
+def box_moved(facts_before, ui_before, facts_after, ui_after):
+    """Whether a pick changed what the start box's ticks and sources are about: the district, address, use or corner
+    answer, the doubts "I checked this" settles, or an earlier lookup's preview put back (drop_pending: its district,
+    sources and address go back to what they were before it)."""
+    facts_before, facts_after = facts_before or {}, facts_after or {}
+    ui_before, ui_after = ui_before or {}, ui_after or {}
+    return (any(facts_before.get(k) != facts_after.get(k) for k in BOX_FIELDS)
+            or (ui_before.get("doubts") or {}) != (ui_after.get("doubts") or {})
+            or (ui_before.get("_pending") is not None and ui_after.get("_pending") is not ui_before.get("_pending")))
+
+
+def ticks_after_pick(what, ticks, answer=None, moved=True):
+    """The start box's ticks and sources kept after a pick (_box_loop's `ticked`; `ticks`: box_ticks of the box as
+    the architect left it; `answer`: the status of a lookup answer the pick put in the box, None for none; `moved`:
+    box_moved for this pick). A lookup's answer (or a saved one used) replaces them, so the district must be confirmed
+    again, unless it filled nothing and moved nothing (not found, offline, outside the City, too slow, a saved one
+    refused, with no earlier preview put back): then the box is as the architect left it, and so are its ticks.
+    Everything else keeps them exactly as the box shows them: Look up (while it runs the box shows the architect's
+    own ticks; Draw is off meanwhile) and Cancel lookup. So no tick or source from before Look up is ever brought
+    back, onto a district, use, address or corner changed during the lookup ("suggested by Gordium" on a district the
+    architect picked) or after they took it off; no tick is kept on a district a lookup's answer put in or back; and
+    a district they took off is never shown ticked again from the file (review of #32, 2026-10-28): an answer that
+    replaces them leaves the district unconfirmed outright, never the earlier Draw's confirmation again (an earlier
+    preview put back also puts back the file's tick, and the architect may have taken it off: sceptic of round 4)."""
+    if what in ("pick:lookup_done", "pick:use_saved") and (answer == "found" or moved):
+        return {"district_confirmed": False}
+    return dict(ticks or {})
+
+
 def lookup_cancelled(saved_ui, before):
     """The box's choices after Cancel lookup: as they were before Look up was pressed (`before`: the lookup line
     then, None for none), saying it was cancelled. Nothing else changes: the lookup only ever fills the box when its
@@ -3075,6 +3113,7 @@ SUGGEST_DELAY_S = 0.3          # s after the last key before the City's address 
 SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestions unavailable"
 SUGGEST_MIN_CHARS = 4
 SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and press Look up."
+NO_MATCH = "No matching address suggested: type the full address and press Look up."
 CITY_SUFFIX = ", Ithaca, NY"
 
 
@@ -3100,12 +3139,14 @@ def wants_suggestions(text, chosen=None):
 def suggestions_shown(answer, typed):
     """(the list, a quiet note) for a type-ahead answer, or None when it is for something no longer typed (a stale
     answer is dropped). Offline, an error or too slow: no list and the note that suggestions are unavailable (the
-    box still works by typing)."""
+    box still works by typing). None found: a quiet note says so, so the architect can tell the list is working
+    (UX review 2026-10-27: "312 Hudson St" showed nothing at all)."""
     answer = answer or {}
     if answer.get("query") != typed:
         return None
     if answer.get("status") == "ok":
-        return [str(s) for s in answer.get("suggestions") or []], ""
+        found = [str(s) for s in answer.get("suggestions") or []]
+        return found, "" if found else NO_MATCH
     return [], SUGGESTIONS_UNAVAILABLE
 
 

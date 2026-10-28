@@ -33,7 +33,10 @@ def test_a_stale_answer_is_dropped_and_offline_is_said_quietly():
     for status in ("offline", "error", "timeout"):
         assert logic.suggestions_shown({"status": status, "query": "106 Itha"}, "106 Itha") == \
             ([], logic.SUGGESTIONS_UNAVAILABLE)
-    assert logic.suggestions_shown({"status": "ok", "query": "999 N", "suggestions": []}, "999 N") == ([], "")
+    # none found: no list, and a quiet note that says so (UX review 2026-10-27: silence looked broken)
+    assert logic.suggestions_shown({"status": "ok", "query": "999 N", "suggestions": []}, "999 N") == \
+        ([], logic.NO_MATCH)
+    assert "Look up" in logic.NO_MATCH and logic.NO_MATCH != logic.SUGGESTIONS_UNAVAILABLE
     assert "type the full address and press Look up" in logic.SUGGESTIONS_UNAVAILABLE
 
 
