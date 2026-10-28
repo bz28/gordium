@@ -1288,3 +1288,16 @@ def test_round_7_a_saved_lookup_is_never_more_certain_than_the_live_one():
         unsettled[tag] = set(logic.unsettled(s))
     assert unsettled["live"] >= {"lot", "street"}
     assert unsettled["saved"] >= unsettled["live"]
+
+
+def test_round_8_a_saved_lookups_district_and_overlay_lines_say_what_happened():
+    """Offline the zone row said the City map "gave no district for this lot" (it was never asked) and ran on into
+    an overlay doubt that didn't say it was about overlays."""
+    from test_lookup_box import looked_up
+    live = looked_up("106_ithaca_rd", historic=("East Hill",))
+    copy = logic.save_lookup({}, dict(live, checked="2026-10-27"), "106 Ithaca Rd")[logic.lookup_key("106 Ithaca Rd")]
+    facts, saved, _ = logic.preview_lookup(logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Rd"),
+                                           {"address": "106 Ithaca Rd"}, logic.box_opened({}, {}), ZONES)
+    assert saved["_live"]["zone"] == logic.SAVED_NO_DISTRICT
+    assert saved["_live"]["overlays"] == logic.OVERLAYS_NOT_KEPT
+    assert logic.NO_DISTRICT.endswith(".")

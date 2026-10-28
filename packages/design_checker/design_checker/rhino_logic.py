@@ -2118,7 +2118,9 @@ def box_rows(state, flat=None):
 NO_RULES = "The City map says {zone}; Gordium doesn't have {zone}'s rules yet: pick a district only if you know it applies."
 
 
-NO_DISTRICT = "The City zoning map gave no district for this lot: pick one"
+NO_DISTRICT = "The City zoning map gave no district for this lot: pick one."
+SAVED_NO_DISTRICT = "A saved lookup never keeps the district (the City's map is used live only): pick it."
+OVERLAYS_NOT_KEPT = "Overlays may apply here (a saved lookup can't keep them): check them by hand."
 
 
 def city_day(now=None):
@@ -2263,7 +2265,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         # pass, start-flow round 7)
         if d.get("status") in ("needs_review", "ask"):
             row = ROW_OF.get(name, name)
-            live[row] = _merged(live.get(row), d.get("reason") or DOUBT_KEPT)
+            live[row] = _merged(live.get(row), d.get("reason") or (OVERLAYS_NOT_KEPT if row == "overlays" else DOUBT_KEPT))
             keep[row] = _merged(keep.get(row), kept.get(name) or DOUBT_KEPT)
     found_overlays = value("overlays") or []
     if found_overlays:                       # what was found, by name, not only that something was
@@ -2287,7 +2289,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         facts.pop("zone", None)
         for key in ("zone_source", "_zones_found", "_zone_said"):
             saved_ui.pop(key, None)
-        live["zone"] = _merged(live.get("zone"), NO_DISTRICT)
+        live["zone"] = _merged(live.get("zone"), SAVED_NO_DISTRICT if payload.get("saved_on") else NO_DISTRICT)
     if unknown:
         # the City map names a district Gordium has no rules for (alone or beside one it has): never another
         # district preselected or called suggested in its place; none is set until the architect picks one. With
