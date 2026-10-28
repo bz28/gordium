@@ -567,8 +567,9 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
             # the values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)
-            values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
-                      "—" if stale_row else logic.cell_text(i["proposed"] if i["status"] != "not_checked" else ""),
+            name, proposed = logic.list_cells(i)          # the use row: the use's own name as its Item
+            values = [("" if stale_row else i["mark"] + "  ") + name,
+                      "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
                       "" if stale_row else logic.cell_text(i["required"]),
                       "" if stale_row else logic.cell_text(i.get("delta") or "")]
             ci = ef.TreeGridItem()
@@ -827,7 +828,7 @@ def show_detail(parts):
         return
     det = i["detail"]
     words = logic.status_words(i)
-    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.row_name(i) + " · " + words,   # the row's own name, whole
+    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.list_cells(i)[0] + " · " + words,   # the row's own name, whole
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))

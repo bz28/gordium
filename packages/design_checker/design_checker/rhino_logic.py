@@ -163,6 +163,23 @@ def row_name(item):
     return name + (" · " + item["note"] if item.get("note") else "")
 
 
+USE_STATED = "stated"
+
+
+def list_cells(item):
+    """A row's Item and Proposed text in the panel's list, and its name heading the detail. The use row names the
+    use itself, "Use: One-family dwelling, detached", with "stated" under Proposed: no use's name fits the 64 px
+    Proposed column ("One-family" alone takes two lines), and the Item cell has the room (coordinator, 2026-10-28,
+    option A: the whole name, no made-up short forms). "Use:" keeps what the row is about; "(site)" is left off:
+    measured in Rhino, "Use: One-family dwelling, detached" fits two lines of the Item cell at the panel's 400 px
+    only without it. A longer name ("…, semi-detached"), or any at 380 px, ends "…" in the list like every long
+    Item; the detail, headed with this same text, has it whole. With no use stated, "Use (site)" and its "—"."""
+    proposed = item.get("proposed")
+    if item.get("name") == "Use" and proposed and proposed != "—":
+        return "Use: " + proposed + (" · " + item["note"] if item.get("note") else ""), USE_STATED
+    return row_name(item), proposed
+
+
 def dock_host(hosts, serial):
     """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
     document's number); a panel made without one (key 0) serves when the front document has none."""
