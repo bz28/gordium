@@ -248,8 +248,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      find … first."); type the lot's own address back, or clear it, and Draw is on again. If the lookup can't
      help (offline, not found, outside the City of Ithaca), the box says why: correct the address and Look up
      again, or put back the lot's own address (or clear it) and fill the rest in by hand. Outside the City: Draw
-     stays off for that address (and, in a new file, by hand is refused) until a City address is looked up and
-     found, or you close the box.
+     stays off for that address, and in a new file by hand is refused, until a live lookup of that same address
+     finds the lot, or you close the box. Another address looked up and found can be drawn; by hand stays refused.
    - **Zoning district**: "entered by you", or after Look up "suggested by Gordium · City of Ithaca zoning map,
      used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
      lookup, because the City's online map is informational: the district is your statement.
