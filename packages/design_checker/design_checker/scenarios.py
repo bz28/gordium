@@ -4,11 +4,13 @@ Gordium; a disagreement is investigated (a code fix, or a question for the archi
 
     python -m design_checker.scenarios               the table: scenario · expected · Gordium · match
     python -m design_checker.scenarios dump <yaml>   the scenario as JSON (lot, solids, facts), for the Rhino test
+    python -m design_checker.scenarios --sites       the same table for the deep-run sites (real lots, deep_run/)
 
 A scenario is built the way an architect draws it in Rhino: the lot as one closed outline, the street along its
 first edge, each story its own floor block (marked with the height it was drawn, as GordiumStart marks them),
 solids that aren't on the Building layer left out of the site and listed as not included."""
 
+import re
 import json
 import sys
 from pathlib import Path
@@ -19,14 +21,16 @@ from design_checker import present
 from rule_format.rulebook import REPO, utf8_console
 
 FOLDER = REPO / "test_data/test_sites/new_york/ithaca_city/scenarios"
+# real City of Ithaca lots, one full design per district family, every rule worked out by hand (queue item 12)
+SITES = REPO / "test_data/test_sites/new_york/ithaca_city/deep_run"
 JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
 # the most cautious status a rule's rows give is the rule's status
 CAUTION = {present.FAILS: 3, present.REVIEW: 2, present.NOT_CHECKED: 1, present.COMPLIES: 0}
 TOUCH = 0.1                     # ft: a left-out solid this close to the building may be part of it
 
 
-def paths() -> list[Path]:
-    return sorted(FOLDER.glob("*.yaml"))
+def paths(folder: Path = FOLDER) -> list[Path]:
+    return sorted(Path(folder).glob("*.yaml"))
 
 
 def load(path) -> dict:
@@ -57,7 +61,8 @@ def solids(scenario: dict, moved: bool = False) -> dict:
             outline = [[x + dx + fx, y + dy + fy] for x, y in b["outline"]]
             out["buildings"].append({"id": f"{b['id']}_floor{k + 1}" if b.get("floors") else b["id"],
                                      "outline": outline, "base": z, "top": z + h,
-                                     "floor": h if b.get("floors") else None, "name": f"Floor {k + 1}"})
+                                     "floor": h if b.get("floors") else None, "building": b["id"],
+                                     "name": f"Floor {k + 1}" if b.get("floors") else b["id"]})
             z += h
     for o in scenario.get("others") or []:
         out["others"].append({"id": o["id"], "outline": [[x + dx, y + dy] for x, y in o["outline"]],
@@ -76,6 +81,7 @@ def facts(scenario: dict) -> dict:
         out.update(ground_is_flat=True, grade_elevation=grade["elevation"])
     elif grade.get("points"):
         out.update(grade_from="spot", grade_points=[list(p) for p in grade["points"]])
+    out.update(scenario.get("stated") or {})      # what the architect states (bedrooms, who lives there, ...)
     return out
 
 
@@ -101,6 +107,46 @@ def rule_rows(view: dict, key: str) -> list[dict]:
     return [i for i in view["items"] if i.get("rule") == key or i.get("id") == key]
 
 
+_FT_IN = re.compile(r"^(-?)(\d+)'-(\d+)(?: (\d+)/(\d+))?\"$")
+
+
+def number(shown: str | None, field: str = "proposed") -> tuple[float, float] | None:
+    """A displayed value as (number, how far the display may be from the true value): feet-inches to 1/8 in, square
+    feet to the whole foot, a measured percent to one step of its places, 0.01 at 2 places (near a limit) and 0.1
+    otherwise (Gordium rounds it toward caution to 1 or 2 places and drops trailing zeros, so 18.95% can show as
+    19%), a required percent (the law's own figure) and counts exactly. A minus
+    sign belongs to the whole length (-0'-6" is -0.5 ft). None when it isn't a number."""
+    t = (shown or "").strip()
+    m = _FT_IN.match(t)
+    if m:
+        ft, inch = int(m[2]), int(m[3]) + (int(m[4]) / int(m[5]) if m[4] else 0)
+        return (-1 if m[1] else 1) * (ft + inch / 12), 0.125 / 12
+    if t.endswith(" sf"):
+        return float(t[:-3].replace(",", "")), 1.0
+    if t.endswith("%"):
+        places = len(t[:-1].partition(".")[2])
+        return float(t[:-1]), (0.0 if field == "required" else 0.01 if places >= 2 else 0.1)
+    return (float(t), 0.0) if re.fullmatch(r"\d+", t) else None
+
+
+def values_problems(rows: list[dict], values: dict) -> list[str]:
+    """Hand-worked numbers per row ({row: [proposed, required]}, the row named by the part of its id after '#', or
+    'row' for a rule with one row), compared with what Gordium shows: they must agree within the display's rounding
+    plus 0.01 (the hand values are written to two decimals)."""
+    problems = []
+    by = {(i.get("id") or "").partition("#")[2] or "row": i for i in rows}
+    for name, want in values.items():
+        row = by.get(name)
+        if row is None:
+            problems.append(f"no {name} row")
+            continue
+        for field, hand in zip(("proposed", "required"), want):
+            got = number(row.get(field), field)
+            if got is None or abs(got[0] - hand) > got[1] + 0.01:
+                problems.append(f"{name} {field} {row.get(field)!r}, worked by hand {hand}")
+    return problems
+
+
 def compare(view: dict, plan: dict | None, expected: dict, expected_plan: dict | None = None) -> list[dict]:
     """One row per expected rule: {rule, expected, gordium, match, why}. A rule's status is the most cautious of
     its rows. `match` needs the status and every detail written down (at limit, margin, proposed, required, the
@@ -121,6 +167,8 @@ def compare(view: dict, plan: dict | None, expected: dict, expected_plan: dict |
         for field in ("margin", "proposed", "required"):
             if field in want and worst.get(field) != want[field]:
                 problems.append(f"{field} {worst.get(field)!r}, expected {want[field]!r}")
+        if want.get("values"):
+            problems += values_problems(rows, want["values"])
         if want.get("reason_has") and not any(want["reason_has"].lower() in (i.get("reason") or "").lower() for i in rows):
             problems.append("reason: " + "; ".join(i.get("reason") or "" for i in rows)[:160])
         out.append({"rule": key, "expected": want["status"], "gordium": got, "match": not problems,
@@ -193,7 +241,10 @@ def main(argv):
         print(json.dumps({"scenario": sc, "solids": solids(sc), "moved": solids(sc, True) if sc.get("then") else None,
                           "facts": facts(sc)}))
         return 0
-    every = {p.stem: load(p) for p in paths()}
+    folder = FOLDER
+    if argv[:1] == ["--sites"]:                 # the deep-run sites instead of the scenarios
+        folder, argv = SITES, argv[1:]
+    every = {p.stem: load(p) for p in paths(folder)}
     trace = None
     if argv[:1] == ["rhino"]:               # the Rhino run's views, judged by the same comparison
         ran = json.loads(Path(argv[1]).read_text(encoding="utf-8"))

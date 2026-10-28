@@ -1,0 +1,285 @@
+{
+ "query": "206 Floral Ave, Ithaca, NY 14850",
+ "status": "found",
+ "facts": {
+  "address": {
+   "value": "206 Floral Avenue, Ithaca, NY, 14850",
+   "source": "suggested by Gordium",
+   "confirmed_by": null,
+   "date": "2026-10-27"
+  },
+  "parcel": {
+   "value": "500700-57.-3-4",
+   "source": "suggested by Gordium",
+   "confirmed_by": null,
+   "date": "2026-10-27"
+  },
+  "lot": {
+   "value": {
+    "outline_ft": [
+     [
+      45.9,
+      -3.46
+     ],
+     [
+      25.56,
+      -49.15
+     ],
+     [
+      -48.43,
+      6.04
+     ],
+     [
+      -39.84,
+      19.44
+     ],
+     [
+      -22.62,
+      47.77
+     ]
+    ],
+    "area_sf": 4335.8,
+    "edge_lengths_ft": [
+     50.01,
+     92.3,
+     15.91,
+     33.16,
+     85.55
+    ],
+    "origin_epsg2261_us_survey_ft": [
+     838225.47,
+     888866.53
+    ],
+    "tolerance_ft": 2.0
+   },
+   "source": "from tax map",
+   "confirmed_by": null,
+   "date": "2026-10-27"
+  },
+  "street_side": {
+   "value": "(used live, not stored)",
+   "source": "suggested by Gordium",
+   "confirmed_by": null,
+   "date": "2026-10-27"
+  },
+  "corner_lot": {
+   "value": "(used live, not stored)",
+   "source": "suggested by Gordium",
+   "confirmed_by": null,
+   "date": "2026-10-27"
+  },
+  "ground": {
+   "value": {
+    "points": [
+     {
+      "x": 45.9,
+      "y": -3.46,
+      "ft": 400.35
+     },
+     {
+      "x": 25.56,
+      "y": -49.15,
+      "ft": 397.88
+     },
+     {
+      "x": -48.43,
+      "y": 6.04,
+      "ft": 427.25
+     },
+     {
+      "x": -39.84,
+      "y": 19.44,
+      "ft": 426.13
+     },
+     {
+      "x": -22.62,
+      "y": 47.77,
+      "ft": 426.3
+     },
+     {
+      "x": -0.0,
+      "y": -0.0,
+      "ft": 404.96
+     }
+    ],
+    "min_ft": 397.88,
+    "max_ft": 427.25,
+    "kind": "existing"
+   },
+   "source": "suggested by Gordium",
+   "confirmed_by": null,
+   "date": "2026-10-27"
+  },
+  "zone": {
+   "value": "(used live, not stored)",
+   "source": "suggested by Gordium",
+   "confirmed_by": null,
+   "date": "2026-10-27"
+  },
+  "overlays": {
+   "value": "(used live, not stored)",
+   "source": "suggested by Gordium",
+   "confirmed_by": null,
+   "date": "2026-10-27"
+  }
+ },
+ "details": {
+  "address": {
+   "status": "suggested",
+   "source_url": "https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates",
+   "source_keys": [
+    "geocoder"
+   ],
+   "source_detail": "NYS Geocoder (address points)"
+  },
+  "parcel": {
+   "status": "suggested",
+   "source_url": "https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query",
+   "source_keys": [
+    "state_parcels"
+   ],
+   "source_detail": "NYS Tax Parcels Public"
+  },
+  "lot": {
+   "status": "suggested",
+   "source_url": "https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query",
+   "source_keys": [
+    "state_parcels"
+   ],
+   "source_detail": "NYS Tax Parcels Public (tax map, approximate ±2 ft)",
+   "note": "outline_ft: international feet from the centroid (EPSG:2261 US survey feet × 1.0000020). Terms: https://gis.ny.gov/parcels"
+  },
+  "street_side": {
+   "status": "suggested",
+   "source_url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query",
+   "source_keys": [
+    "city_roads",
+    "state_parcels"
+   ],
+   "source_detail": "City of Ithaca roads (centerlines with right-of-way width) + NYS Tax Parcels Public"
+  },
+  "corner_lot": {
+   "status": "suggested",
+   "source_url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query",
+   "source_keys": [
+    "city_roads",
+    "state_parcels"
+   ],
+   "source_detail": "City of Ithaca roads (centerlines with right-of-way width) + NYS Tax Parcels Public"
+  },
+  "ground": {
+   "status": "suggested",
+   "source_url": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples",
+   "source_keys": [
+    "elevation",
+    "state_parcels"
+   ],
+   "source_detail": "USGS 3DEP elevation (1 m where available; here the 2020 LiDAR) · today's ground (existing), an estimate",
+   "note": "Elevations in feet above NAVD88. Finished ground after construction is set in the start box."
+  },
+  "zone": {
+   "status": "suggested",
+   "source_url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query",
+   "source_keys": [
+    "city_zoning",
+    "state_parcels"
+   ],
+   "source_detail": "City of Ithaca zoning map (online, informational) + NYS Tax Parcels Public"
+  },
+  "overlays": {
+   "status": "suggested",
+   "source_url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query",
+   "source_keys": [
+    "historic_districts",
+    "gorge_zones",
+    "city_parcels",
+    "state_parcels"
+   ],
+   "source_detail": "City of Ithaca historic districts + City of Ithaca gorge protection zones + City of Ithaca tax parcels + NYS Tax Parcels Public"
+  }
+ },
+ "sources": [
+  {
+   "source": "geocoder",
+   "name": "NYS Geocoder (address points)",
+   "url": "https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "b74f881b037cbe13d335c688a250e5ff36c5e615e0eeb96c54ed894c6b6c5c4f",
+   "store": "raw"
+  },
+  {
+   "source": "address_points",
+   "name": "Tompkins County address points (TCAddress)",
+   "url": "https://services.arcgis.com/oJbAAWNInLrxvF0A/arcgis/rest/services/TCAddress/FeatureServer/0/query",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "09af98bcd63f4270eb93b0e40f67ca963037769b662cfa898aafa46d0d4faa44",
+   "store": "none"
+  },
+  {
+   "source": "state_parcels",
+   "name": "NYS Tax Parcels Public",
+   "url": "https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "e3f42be34d1925568ecf664f0ff5c5746d8fec45b54bd613ce2b441b64405b0f",
+   "store": "raw"
+  },
+  {
+   "source": "city_parcels",
+   "name": "City of Ithaca tax parcels",
+   "url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Tax_Parcels/FeatureServer/0/query",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "267784d59554533635e5536abda7be4e446c331b10242f3440a40d3cf21b06f5",
+   "store": "derived"
+  },
+  {
+   "source": "city_roads",
+   "name": "City of Ithaca roads (centerlines with right-of-way width)",
+   "url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "12660db047d11198b83a7f2f6693392626d2b19342004e4fb6a613f71cb15630",
+   "store": "none"
+  },
+  {
+   "source": "elevation",
+   "name": "USGS 3DEP elevation (1 m where available; here the 2020 LiDAR)",
+   "url": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "ae848911f5e86c0925772bcec44bffaaa1485e83929146077236732d057f0e5d",
+   "store": "raw"
+  },
+  {
+   "source": "city_zoning",
+   "name": "City of Ithaca zoning map (online, informational)",
+   "url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "1fe5b16a920a09d546dcf18f7ef433ec3d18e586b91d0db4c7c110ff3130af58",
+   "store": "none"
+  },
+  {
+   "source": "city_zoning",
+   "name": "City of Ithaca zoning map (online, informational)",
+   "url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "95661a8ad78f890f83b6e2683a5be4a909f3da71defed1c0f187eeb2b39848a4",
+   "store": "none"
+  },
+  {
+   "source": "historic_districts",
+   "name": "City of Ithaca historic districts",
+   "url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Historic_Districts/FeatureServer/0/query",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "1fc423ae159c0a6192968e2e21dcdcc14f433100443c8a90144534292b03c808",
+   "store": "none"
+  },
+  {
+   "source": "gorge_zones",
+   "name": "City of Ithaca gorge protection zones",
+   "url": "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Gorge_Protection_Zones/FeatureServer/0/query",
+   "fetched": "2026-10-27T10:56:55.832811+00:00",
+   "sha256": "1fc423ae159c0a6192968e2e21dcdcc14f433100443c8a90144534292b03c808",
+   "store": "none"
+  }
+ ],
+ "fetched": "2026-10-27T10:56:55.832811+00:00",
+ "fingerprint": "58d45f87d815bbf9b2e5133dc7a1528172c403811ba2e639bfffd1d817630ca1"
+}
