@@ -1096,7 +1096,8 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
     assert "if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw and "    if not boxed:\n        return" in draw
     assert "if plan and labels and zoomed_in else []" in draw                                   # lot-edge labels: only when on
-    assert "d.Draw2dLine(System.Drawing.PointF(a.X, a.Y)" in draw.split("yard_label_shown")[0]   # lines regardless
+    assert "\n        _dimension(d, e.Viewport, best, color)\n" in draw         # lines regardless (not under the
+    # labels' condition: drawn with no words when they are off; the words are the one placer's, place_dim_label)
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
     assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
     check_code = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
@@ -1116,9 +1117,10 @@ def test_with_labels_off_a_failing_yards_shortfall_still_shows():
     assert logic.yard_label_shown(False, "does_not_comply") and logic.yard_label_shown(True, "complies")
     assert not logic.yard_label_shown(False, "complies") and not logic.yard_label_shown(False, "needs_review")
     items = [{"points": [[0, 0], [0, 21.17]], "status": "does_not_comply", "mark": "✕", "name": "Rear yard",
-              "proposed": "21'-2\"", "required": "22'-6\"", "measure": "rear_yard", "reason": ""},
+              "proposed": "21'-2\"", "required": "22'-6\"", "measure": "rear_yard", "reason": "", "limit_ft": 22.5},
              {"points": [[0, 0], [12, 0]], "status": "complies", "mark": "✓", "name": "Side yard, West",
-              "proposed": "12'-0\"", "required": "10'-0\"", "measure": "side_yard_smaller", "reason": ""}]
+              "proposed": "12'-0\"", "required": "10'-0\"", "measure": "side_yard_smaller", "reason": "",
+              "limit_ft": 10.0}]
     got = plan({"lot": {"edges": []}, "buildings": []}, {"outline": [], "holes": []}, {"items": items}, {})
     labels = [y["label"] for y in got["yards"]]
     assert "✕ Rear yard 21'-2\", needs 22'-6\"" in labels and "✓ Side yard, West 12'-0\"" in labels
@@ -1737,7 +1739,9 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
         < zoom.index("        o.Select(True)")
     # 4 and 5
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
-    assert "ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 30, dark, 13)" in rhino
+    # the height limit's label: past its line's end, off the building (Rhino check of #28 at fc0b023; #29)
+    assert "ui.draw_text_box(d, [limit[1]], BLUE, int(spot[0]), int(spot[1]), dark, 13)" in rhino
+    assert "spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken + placed_boxes)" in rhino
     assert "    boxed = bool(o.message and labels and _in_active_view(e))" in draw
     assert draw.index("    boxed = ") < draw.index("    if boxed:\n        taken.append(logic.status_box(") \
         < draw.index("    if not boxed:\n        return")         # nor its room kept clear in the other views

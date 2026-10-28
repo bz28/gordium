@@ -187,8 +187,13 @@ def legend_text(code=None):
     """The legend ("?"): the marks, what the plan shows, the precision, and which version of the law was checked
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
-            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
-            "measured distance. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard "
+            "dimensioned square to its lot line from the wall facing it, as a drawing is: red where it fails, amber "
+            "where it needs review, complying ones neutral grey (colour only what's wrong); its number only, on its "
+            "line (✕ or ? before it when wrong; its name and what it needs are in the panel), the required line "
+            "dashed across it, tagged \"min\" where the yard fails or needs review; in the elevations the height, "
+            "dimensioned up from the grade plane, with the limit faint. Values are measured to 1/8 in. and never "
+            "rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
@@ -579,6 +584,142 @@ LABEL_MIN_LOT_PX = 120      # a lot smaller than this on screen (zoomed out to t
 def label_width(text, size):
     """A one-line label's width on screen, pixels (its text and its backing box's margins)."""
     return len(text) * size * 0.58 + 14
+
+
+DIM_TICK_PX = 10        # a dimension's architectural tick: this long on screen, at 45° to its line
+HALO_PX = 1           # a dimension's halo: this many pixels each side of its line
+FAINT_ALPHA = 110       # the required line, faint: the status colour at this opacity (of 255)
+
+
+# a yard's dimension and its label, placed on screen as a drawing would (Rhino checks of #29, 2026-10-25)
+DIM_RGB = {"complies": ((92, 96, 100), (176, 180, 184)),          # (light viewport, dark viewport): neutral grey,
+           "needs_review": ((138, 88, 0), (233, 180, 76)),          # amber, red: colour only what's wrong
+           "does_not_comply": ((184, 55, 31), (240, 122, 112))}
+REQUIRED_RGB = ((96, 96, 96), (190, 190, 190))     # the required line: a clear dashed grey, with its "min" tag
+# (darker on a light viewport, lighter on a dark one than the first version: Rhino check of #29 at f6642a9)
+DIM_LABEL_H_PX = 18     # a dimension's label: its height on screen
+DIM_LABEL_GAP_PX = 4    # and its gap from the dimension line (and past the line's outer end)
+
+
+def dim_rgb(status, dark):
+    """A dimension's colour (r, g, b): red fails, amber needs review, a neutral dark grey (light on a dark viewport)
+    complies: drafting's convention, and Ben's "colour only what's wrong"."""
+    return DIM_RGB.get(status, DIM_RGB["complies"])[1 if dark else 0]
+
+
+def rect_quad(box):
+    """An (x, y, w, h) screen box as its four corners."""
+    x, y, w, h = box
+    return [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+
+
+def _segments_cross(p, q, r, s_):
+    def side(a, b, c):
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    d1, d2, d3, d4 = side(r, s_, p), side(r, s_, q), side(p, q, r), side(p, q, s_)
+    return (d1 > 0) != (d2 > 0) and (d3 > 0) != (d4 > 0)
+
+
+def _point_in(pt, poly):
+    x, y = pt
+    hit = False
+    for k in range(len(poly)):
+        (x0, y0), (x1, y1) = poly[k - 1], poly[k]
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            hit = not hit
+    return hit
+
+
+def shapes_hit(a, b):
+    """Whether two screen polygons (lists of corners) overlap: an edge of one crosses the other's, or one lies
+    inside the other."""
+    for k in range(len(a)):
+        for j in range(len(b)):
+            if _segments_cross(a[k - 1], a[k], b[j - 1], b[j]):
+                return True
+    return bool(a and b) and (_point_in(a[0], b) or _point_in(b[0], a))
+
+
+def _along(a, b):
+    n = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+    return ((b[0] - a[0]) / n, (b[1] - a[1]) / n), n
+
+
+def _point_segment(p, a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = dx * dx + dy * dy
+    t = 0.0 if n <= 1e-12 else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / n))
+    return ((p[0] - a[0] - t * dx) ** 2 + (p[1] - a[1] - t * dy) ** 2) ** 0.5
+
+
+TAG_SIZE = 11            # a "min" tag's text size (readable at the default zoom: Rhino check of #29 at f6642a9)
+VIEW_MARGIN_PX = 3      # every number and tag stays this far inside the view
+
+
+def dim_number(mark, proposed, status):
+    """What a dimension shows on the drawing, as a drawing does: its number only, "✕ " or "? " before it when the
+    yard fails or needs review (colour says the rest). Its name, what it needs and "(approx.)" are the panel's and
+    the notice's (Rhino checks of #29: a long label never fit a plan)."""
+    return (mark + " " if status in ("does_not_comply", "needs_review") and mark else "") + proposed
+
+
+def inside_view(shape, view, margin=VIEW_MARGIN_PX):
+    """Whether a screen polygon lies wholly inside the view (w, h), `margin` px in. True without a view."""
+    if not view:
+        return True
+    return all(margin <= x <= view[0] - margin and margin <= y <= view[1] - margin for x, y in shape)
+
+
+PRIORITY = {"does_not_comply": 0, "needs_review": 1}      # what is wrong placed first: it gets the clear spots
+
+
+#                                        (0.7 × 11 px ≈ 8 px: the smallest that still reads)
+
+
+#                        of #29 at 5891efc: the rear number touched an edge length)
+
+
+def limit_label_spot(line, house, w, h=18, view=None, gap=8, taken=()):
+    """Where an elevation's "Height limit 35'-0"" label goes (screen): past an end of the limit line, outside the
+    building's extent (`house`: its box on screen, x0, y0, x1, y1), centred on the line's height, in view; the
+    left end first, and the end whose spot covers nothing drawn (`taken`, boxes: the height's number, the status
+    box, the notice) before one that does. It never covers the coloured parts (Rhino check of #28 at fc0b023).
+    (x, y) of its top left, or None when neither end has room in view."""
+    (ax, ay), (bx, by) = sorted(line)
+    spots = [(min(ax, house[0] if house else ax) - gap - w, ay - h / 2),
+             (max(bx, house[2] if house else bx) + gap, by - h / 2)]
+    shown = [(x, y) for x, y in spots if inside_view(rect_quad((x, y, w, h)), view)]
+    for x, y in shown:
+        if not any(shapes_hit(rect_quad((x, y, w, h)), rect_quad(t)) for t in taken):
+            return x, y
+    return shown[0] if shown else None
+
+
+def _bbox(shape):
+    xs, ys = [p[0] for p in shape], [p[1] for p in shape]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def dim_ticks(a, b, size=DIM_TICK_PX):
+    """A drawing-style dimension's two end ticks on screen: at each end of the line a to b, a short slash at 45°
+    to the line (as an architect draws one, whichever way the line runs), `size` pixels long. [] for a line of no
+    length on screen (seen end on)."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = (dx * dx + dy * dy) ** 0.5
+    if n < 1e-9:
+        return []
+    ux, uy = dx / n, dy / n
+    sx, sy = (ux - uy) * 0.5 ** 0.5 * size / 2, (uy + ux) * 0.5 ** 0.5 * size / 2   # the line turned 45°
+    return [((p[0] - sx, p[1] - sy), (p[0] + sx, p[1] + sy)) for p in (a, b)]
+
+
+def dims_shown(zoomed_in, elevation=False):
+    """Whether a yard's dimension (its line, ticks, faint required line) is drawn at all: only at working zoom
+    (zoomed out to the neighbourhood every dimension gives way with the labels, labels_shown), and never in an
+    elevation (Front, Right…), where every yard's line would lie flat on the ground line. Its words also follow
+    Show on-screen labels (yard_label_shown) and show in plan only. The height's dimension is the other way round:
+    elevations only."""
+    return bool(zoomed_in) and not elevation
 
 
 def labels_shown(lot_px):
@@ -2161,7 +2302,6 @@ def street_verdict(lines, ids=None):
     return _street_lines().street_verdict(lines, ids)
 
 
-
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None, review (an amber line) or None, check ("I checked this", ticked) or None}.
@@ -2621,7 +2761,6 @@ def after_ground_pick(saved_ui, what, placed):
     saved_ui["ground_kind"] = what
     saved_ui.pop("ground_source", None)
     return saved_ui
-
 
 
 def parse_feet(text):
