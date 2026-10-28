@@ -2492,6 +2492,15 @@ def can_switch(source_line):
     return bool(source_line) and source_line.startswith("Starting house") and SIDE_YARDS_SAID in source_line
 
 
+def _start_record(text):
+    """One floor's START_KEY record (start_tag), or None when it can't be read (one record, not a JSON-lines file)."""
+    try:
+        tag = json.loads(text)
+    except (TypeError, ValueError):
+        return None
+    return tag if isinstance(tag, dict) and {"outline", "base", "top"} <= set(tag) else None
+
+
 def switch_plan(found, tolerance=0.01):
     """What Switch side yards does with the starting house's floor blocks found in the model, each (its START_KEY
     text, its bounding box in feet: (x0, y0, z0), (x1, y1, z1), its volume in cubic feet or None, and whether it is
@@ -2505,9 +2514,8 @@ def switch_plan(found, tolerance=0.01):
         return {"refused": "The starting house is locked or hidden (itself or its layer), so it isn't redrawn. "
                            "Unlock and show it, then press " + SWITCH_LABEL + " again."}
     for text, (low, high), volume, *_ in found:
-        try:
-            tag = json.loads(text)
-        except (TypeError, ValueError):
+        tag = _start_record(text)
+        if tag is None:
             return {"refused": "The starting house's record can't be read, so it isn't redrawn."}
         xs, ys = [p[0] for p in tag["outline"]], [p[1] for p in tag["outline"]]
         want = (min(xs), min(ys), tag["base"]), (max(xs), max(ys), tag["top"])

@@ -390,6 +390,11 @@ def _feet_length(doc, model):
     return model * _scale(doc)
 
 
+def _feet_volume(doc, model_volume):
+    """A volume in the model's units cubed, in cubic feet."""
+    return model_volume * _scale(doc) ** 3
+
+
 def _feet_area(doc, model_area):
     """An area in the model's units squared, in square feet."""
     return model_area * _scale(doc) ** 2
@@ -3024,7 +3029,7 @@ def _start_floors(doc):
         if text:
             b = o.Geometry.GetBoundingBox(True)
             props = rg.VolumeMassProperties.Compute(o.Geometry) if isinstance(o.Geometry, rg.Brep) else None
-            volume = props.Volume * _scale(doc) ** 3 if props is not None else None    # (a notch changes it)
+            volume = _feet_volume(doc, props.Volume) if props is not None else None    # (a notch changes it)
             layer = doc.Layers[o.Attributes.LayerIndex]       # (a locked or hidden parent too: IsLocked, IsVisible)
             locked = bool(o.IsLocked or o.IsHidden or o.IsReference or layer.IsLocked or not layer.IsVisible)
             found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume, locked))
