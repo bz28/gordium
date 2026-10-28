@@ -202,7 +202,7 @@ def test_details_quote_the_chart_cells_verbatim(tax_map):
 
 def test_groups_come_in_order_and_include_what_isnt_checked(tax_map):
     keys = [g["key"] for g in tax_map["view"]["groups"]]
-    assert keys == sorted(keys, key=["fails", "review", "complies", "not_checked", "not_covered"].index)
+    assert keys == sorted(keys, key=["fails", "review", "complies", "use_details", "not_checked", "not_covered"].index)
     names = [i["name"] for i in tax_map["view"]["items"]]
     assert any(n.startswith("Overlays") for n in names) and any("§325-17B" in n for n in names)
 

@@ -317,6 +317,7 @@ def make_panel(actions, host=None, context_on=True):
         if isinstance(tag, str) and tag.startswith("group:"):
             return                           # section headers aren't selectable (D5)
         parts["selected"] = tag
+        set_zoom(parts)                      # on as soon as a row is picked (never waiting for the next redraw)
         show_detail(parts)
 
     tree.SelectedItemChanged += logic.guard(selected, "show the selected item")
@@ -552,7 +553,7 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
         gi.Tag = "group:" + g["key"]
         title = ("Site · " if g["key"] == "complies" and all(by_id[i]["group"] == "site" for i in g["items"]) else "")
         gi.Values = System.Array[System.Object]([title + g["title"] + " · " + str(len(g["items"])), "", "", ""])
-        gi.Expanded = parts["expanded"].get(gi.Tag, g["key"] not in ("complies", "not_covered"))
+        gi.Expanded = parts["expanded"].get(gi.Tag, g["key"] not in ("complies", "not_covered", "use_details"))
         for item_id in g["items"]:
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
@@ -582,7 +583,7 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
                         _scroll_to(tree, k + 1 + c, k + 2 + c)    # the selected row just into view
                 k += gi.Children.Count
             k += 1
-    parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]
+    set_zoom(parts)
     show_detail(parts)
 
 
@@ -771,6 +772,15 @@ def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
         logic.guard(form.Close, "close the progress window")()
 
 
+def set_zoom(parts):
+    """Zoom to on or off for the panel as it is now, its tooltip saying why when off (logic.zoom_state)."""
+    b = parts.get("zoom_button")
+    if b is None:
+        return
+    b.Enabled, b.ToolTip = logic.zoom_state(parts.get("selected") in (parts.get("by_id") or {}),
+                                            parts.get("stale"), parts.get("box_open"))
+
+
 def set_box_open(parts, is_open):
     """While a start box is open, the panel's buttons that would open another (or change the site under it) are off."""
     if parts is None:
@@ -783,7 +793,7 @@ def set_box_open(parts, is_open):
     for c in list(parts.get("box_buttons") or []) + list(parts.get("greyed") or []):   # all but the legend
         c.Enabled = others
     if parts.get("zoom_button") is not None:
-        parts["zoom_button"].Enabled = zoom
+        set_zoom(parts)                      # (logic.zoom_state agrees with `zoom`: off while a box is open)
 
 
 def show_detail(parts):
@@ -802,6 +812,8 @@ def show_detail(parts):
                 d.AddRow(_wide(s, size=11))
                 if s.startswith("Marked as the ground"):   # the architect's word, so it can be taken back
                     d.AddRow(row(button("Not the ground", a["not_ground"])))
+                if logic.can_switch(s):             # one larger side yard: put it on the other side (one Undo)
+                    d.AddRow(row(button(logic.SWITCH_LABEL, a["switch_sides"])))
         d.Create()
         return
     det = i["detail"]
@@ -816,10 +828,11 @@ def show_detail(parts):
     # what to do about it, right under the reason: a button where there is one (never its words twice, nor the
     # button scrolled out of sight below the measuring notes: the architect's review), else the hint's words
     buttons = []
-    if i.get("needs") and logic.answered_in_box(i["needs"]):     # answered in the box, not a pop-up (Ben)
-        buttons.append(button("Tell Gordium in Edit site…", a["edit_site"]))
-    elif i.get("needs"):                  # exactly the stated facts this row waits for, asked in turn
-        buttons.append(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"])))
+    for words, what in logic.row_buttons(i):     # its own small dialog for the stated facts it waits on; Edit site…
+        if what == "enter":                      # where a site fact is missing (logic.row_buttons)
+            buttons.append(button(words, lambda: a["enter"](i["needs"])))
+        else:
+            buttons.append(button(words, a["edit_site"]))
     if i.get("hint") == "Pick the main building…":
         buttons.append(button("Pick the main building…", a["main"]))
     if i["id"] == "scope.not_included":
@@ -1025,8 +1038,19 @@ def start_box(state, options, mode):
         use.Items.Add(n)
     ids = [k for k, _ in names]
     use.SelectedIndex = ids.index(state.get("use")) if state.get("use") in ids else 0
-    laid_out = (state.get("zone"), names[use.SelectedIndex][0] if names else None)   # what the Use rows show
-    asked = {}                        # each follow-up question's field (the facts this district's rules need)
+    laid_out = (state.get("zone"), names[use.SelectedIndex][0] if names else None,
+                logic.gate_of(state.get("answers")))      # what the Use rows and "About this project" show
+    asked = {}                        # each follow-up question's (kind, field, choices): the facts the rules need
+
+    def answer_of(key):               # what a question's field says now: its value, or None (blank / not a number)
+        kind, field, choices = asked[key]
+        if choices is not None:       # a one-click dropdown: "Not answered" first, then the choices in order
+            at = max(field.SelectedIndex, 0)
+            return choices[at - 1][1] if at > 0 else None
+        try:
+            return logic.parse_answer(kind, field.Text, key)
+        except ValueError:
+            return None
     regrade = ef.CheckBox()
     regrade.Checked = bool(state.get("no_regrading"))
     corner = ef.DropDown()                # Corner lot? never guessed: "Not answered" until the architect says
@@ -1052,12 +1076,8 @@ def start_box(state, options, mode):
         if use.SelectedIndex != first["use"]:
             state["use_source"] = logic.ENTERED
         answers = dict(state.get("answers") or {})
-        for key, (kind, field) in asked.items():       # a blank stays unanswered (its rules: NEEDS REVIEW)
-            text = ["", "no", "yes"][max(field.SelectedIndex, 0)] if kind == "yes_no" else field.Text
-            try:
-                answers[key] = logic.parse_answer(kind, text)
-            except ValueError:
-                answers[key] = None
+        for key in asked:                              # a blank stays unanswered (its rules: NEEDS REVIEW)
+            answers[key] = answer_of(key)
         state["answers"] = answers
         if corner.SelectedIndex != first["corner"]:
             state["corner_source"] = logic.ENTERED
@@ -1206,8 +1226,9 @@ def start_box(state, options, mode):
 
     def refresh_if_needed():          # another use or district: its own uses, note and questions, so the box opens
         z = zone.SelectedValue.Text if zone.SelectedValue else None       # again with them (rhino_logic decides;
+        gate = logic.gate_of({k: answer_of(k) for k in logic.ASKED_AFTER.values() if k in asked})
         if not looking and logic.box_needs_refresh(                       # a lookup's answer opens it again anyway)
-                options, laid_out, (z, names[use.SelectedIndex][0] if names else None)):
+                options, laid_out, (z, names[use.SelectedIndex][0] if names else None, gate)):
             pick("refresh")
 
     zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
@@ -1221,6 +1242,75 @@ def start_box(state, options, mode):
 
     def fit(text, room, **kw):        # a label that wraps at `room` px when its text is wider (logic.text_wider)
         return label(text, width=room if logic.text_wider(text, kw.get("size"), room) else None, **kw)
+
+    def about_section(layout, questions):
+        """"About this project": the facts only the architect knows that this district's rules need for the use
+        (rhino_logic.follow_up_rows, from the rulebook), compact: a quick-answers dropdown, then two questions a row,
+        each a one-click dropdown (or, for a number, a field) that starts on "Not answered". The full question is its
+        hover text. The box stays laptop-sized (logic.ABOUT_*; pinned in test_box_width.py)."""
+        note = label(logic.FOLLOW_UP_HELP, size=11, width=logic.ABOUT_NOTE_WIDTH)
+
+        def typed(s, e, plain=note.TextColor):    # an entry that isn't an answer: said at once, never kept
+            text, refused = logic.answers_note([(k, kind, f.Text) for k, (kind, f, ch) in asked.items()
+                                                if ch is None])
+            note.Text = text
+            note.TextColor = eto_status_color("needs_review") if refused else plain
+
+        filling = []                       # non-empty while a quick answer sets several fields: one refresh at the end
+        cells = []
+        for q in questions:
+            if q["choices"] is not None:
+                field = ef.DropDown()
+                for t in [logic.NOT_ANSWERED] + [w for w, _ in q["choices"]]:
+                    field.Items.Add(t)
+                values = [v for _, v in q["choices"]]
+                field.SelectedIndex = values.index(q["value"]) + 1 if q["value"] in values else 0
+                field.Width = logic.ABOUT_FIELD_WIDTH
+                if q["key"] in logic.ASKED_AFTER.values():      # another question waits on this one: open it
+                    field.SelectedIndexChanged += logic.guard(
+                        lambda s, e: None if filling else refresh_if_needed(), "answer the question")
+            else:                                  # typed: a number (any other kind is never a yes / no)
+                field = ef.TextBox()
+                field.Width = logic.ABOUT_TYPED_WIDTH
+                field.Text = "" if q["value"] is None else str(q["value"])
+                field.TextChanged += logic.guard(typed, "type the answer")
+            field.ToolTip = q["label"]
+            asked[q["key"]] = (q["kind"], field, q["choices"])
+            name = label(q["short"], size=12, width=logic.ABOUT_LABEL_WIDTH)
+            name.ToolTip = q["label"]
+            cells += [name, field]
+        grid = ef.DynamicLayout()
+        grid.Padding = ed.Padding(0)
+        grid.Spacing = ed.Size(8, 4)
+        quick = logic.quick_answers([q["key"] for q in questions])
+        if quick:                          # several answers in one click; the fields it fills stay editable
+            picker = ef.DropDown()
+            for t in [logic.QUICK_HINT] + [w for w, _ in quick]:
+                picker.Items.Add(t)
+            picker.SelectedIndex = 0
+            picker.Width = logic.ABOUT_QUICK_WIDTH
+
+            def quick_picked(s, e):
+                at = max(picker.SelectedIndex, 0)
+                if at == 0:
+                    return
+                filling.append(True)
+                try:
+                    for key, value in quick[at - 1][1].items():
+                        kind, field, choices = asked[key]
+                        field.SelectedIndex = [v for _, v in choices].index(value) + 1
+                    picker.SelectedIndex = 0  # ready to pick another
+                finally:
+                    filling.clear()
+                refresh_if_needed()
+
+            picker.SelectedIndexChanged += logic.guard(quick_picked, "pick a quick answer")
+            grid.AddRow(label("Quick answers", size=12, width=logic.ABOUT_LABEL_WIDTH), picker)
+        for k in range(0, len(cells), 4):
+            grid.AddRow(*cells[k:k + 4])
+        layout.AddRow(label("About this project", bold=True))
+        layout.AddRow(grid)
+        layout.AddRow(note)
 
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
@@ -1257,31 +1347,8 @@ def start_box(state, options, mode):
                 layout.AddRow(None, row(label(state["use_note"], eto_status_color("needs_review"), size=11,
                                               width=560)))
             questions = state.get("follow_ups") or []     # what this district's rules need for the use
-            # each question's words wrap beside its answer, and one note under them all (logic.QUESTION_WIDTH: the
-            # box stays laptop-sized with the longest questions)
-            note = label(logic.FOLLOW_UP_HELP, size=11, width=560)
-
-            def typed(s, e, plain=note.TextColor):    # an entry that isn't an answer: said at once, never kept
-                text, refused = logic.answers_note([(k, kind, f.Text) for k, (kind, f) in asked.items()
-                                                    if kind != "yes_no"])
-                note.Text = text
-                note.TextColor = eto_status_color("needs_review") if refused else plain
-
-            for q in questions:
-                if q["kind"] == "yes_no":
-                    field = ef.DropDown()
-                    for t in (logic.NOT_ANSWERED,) + logic.yes_no_words(q["key"]):
-                        field.Items.Add(t)
-                    field.SelectedIndex = {None: 0, False: 1, True: 2}[q["value"]]
-                else:                        # typed: a count (any other kind is typed too, never a yes / no)
-                    field = ef.TextBox()
-                    field.Width = 60
-                    field.Text = "" if q["value"] is None else str(q["value"])
-                    field.TextChanged += logic.guard(typed, "type the answer")
-                asked[q["key"]] = (q["kind"], field)
-                layout.AddRow(None, row(label(q["label"], size=12, width=logic.QUESTION_WIDTH), field))
             if questions:
-                layout.AddRow(None, row(note))
+                about_section(layout, questions)
         elif key == "ground":
             layout.AddRow(title, row(fit(r["text"], 560, size=12)))          # left aligned, as the others
             layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
@@ -1356,6 +1423,57 @@ def start_box(state, options, mode):
     dialog.Closed += logic.guard(closed, "stop the address suggestions")
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen.get("what")
+
+
+def row_dialog(title, fields, check):
+    """A row's own small dialog (logic.row_fields): one line per stated fact the row waits on, a count typed or a
+    yes / no picked ("Not answered" first), and [Cancel] [OK]. OK calls `check(answers)` (answers: key -> text, "yes",
+    "no" or "" for blank): words back keep the dialog open with them shown; None closes it. Returns the answers on
+    OK, or None (Cancel, Esc, closed: the caller changes nothing)."""
+    dialog = ef.Dialog[bool]()
+    dialog.Title = title
+    dialog.Padding = ed.Padding(14)
+    dialog.Resizable = False
+    layout = ef.DynamicLayout()
+    layout.Spacing = ed.Size(8, 8)
+    asked, chosen = {}, {}
+    for q in fields:
+        if q["kind"] == "yes_no":
+            field = ef.DropDown()
+            for t in (logic.NOT_ANSWERED,) + logic.yes_no_words(q["key"]):
+                field.Items.Add(t)
+            field.SelectedIndex = logic.row_choice(q["value"])
+        else:                                  # a count: typed, blank when not answered (never 0)
+            field = ef.TextBox()
+            field.Width = 60
+            field.Text = "" if q["value"] is None else str(q["value"])
+        asked[q["key"]] = (q["kind"], field)
+        layout.AddRow(row(label(q["label"], size=12, width=logic.QUESTION_WIDTH), field))
+    note = label(logic.FOLLOW_UP_HELP, size=11, width=logic.QUESTION_WIDTH + 80)
+    layout.AddRow(row(note))
+
+    def answers():
+        return {k: logic.row_choice_text(f.SelectedIndex) if kind == "yes_no" else f.Text
+                for k, (kind, f) in asked.items()}
+
+    def ok():
+        got = answers()
+        problem = check(got)
+        if problem:                            # not an answer: said, and the dialog stays open (nothing saved)
+            note.Text = problem
+            note.TextColor = eto_status_color("needs_review")
+            return
+        chosen["answers"] = got
+        dialog.Close(True)
+
+    done = button("OK", ok)
+    cancel = button("Cancel", lambda: dialog.Close(False))
+    layout.AddRow(row(cancel, done))
+    dialog.Content = layout
+    dialog.DefaultButton = done
+    dialog.AbortButton = cancel
+    dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
+    return chosen.get("answers")
 
 
 # ---- the viewport (F, G) -------------------------------------------------------------------------------------

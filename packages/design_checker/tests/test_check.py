@@ -23,8 +23,10 @@ def facts():
     return load_facts(SITE / "spreadsheet_design_model_facts.yaml")
 
 
-# the rules waiting on who lives there and on a home occupation (§325-3B): the sample's facts don't say
-WAITING_ON_THE_HOUSEHOLD = ["R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family"]
+# the rules waiting on who lives there and on a home occupation (§325-3B), and on whether a stream or inlet is near
+# the lot (§325-26): the sample's facts don't say
+WAITING_ON_THE_HOUSEHOLD = ["R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family",
+                            "R-1b.stream_setback"]
 
 
 def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp_path):
@@ -35,11 +37,13 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 10
     assert errors["R-1b.yard_projections"] == "PASS"
     s = result["summary"]
-    # who lives there and a home occupation aren't in their spreadsheet: those three rules wait (never a pass)
-    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 3 need review"
+    # who lives there, a home occupation and a stream near the lot aren't in their spreadsheet: those four rules wait
+    # (never a pass)
+    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 4 need review"
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
-    assert len(s["lines"]) == 4 and all("enter who lives" in x or "home occupation" in x for x in s["lines"][1:])
+    assert len(s["lines"]) == 5 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
+                                        in x for x in s["lines"][1:])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 
@@ -65,7 +69,7 @@ def test_needs_review_rows_say_why_in_the_measuring_words(facts):
     parking = next(r for r in result["interior"] if r["Rule id"] == "R-1b.parking_one_family")
     assert parking["Error"] == "NEEDS REVIEW" and parking["Why"] == "enter bedrooms / parking spaces"
     assert all(r["Rule id"] != "R-1b.parking_one_family" for r in result["rows"])
-    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 3 need review")
+    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 4 need review")
     assert sorted(r["Rule id"] for r in result["rows"] if r["Error"] == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
 
 
@@ -97,11 +101,11 @@ def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
     assert logic.enter_words(needs) == "Enter dwelling units, rooms let for profit and whether it is a conversion"
     assert [logic.STATED_FACTS[k][1] for k in needs] == ["count", "count", "yes_no"]
     assert logic.needs_of(names, {"dwelling_units": 4, "rooms_let_for_profit": 0, "conversion": False}) == []
-    # the panel asks exactly the row's own list (never a fixed pair), and saves through update_counts
+    # the panel asks exactly the row's own list (never a fixed pair), in its own dialog (test_row_dialog.py)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert 'a["enter"](i["needs"])' in ui and "Enter bedrooms and parking spaces…" not in ui
-    assert "for key in needs:" in rhino and "logic.update_counts(facts, answers)" in rhino
+    assert "logic.row_fields(needs, facts)" in rhino and "logic.row_answers_applied(facts, needs, answers)" in rhino
 
 
 def test_an_interior_rule_that_fails_is_never_hidden(facts):
@@ -146,7 +150,7 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 3 need review"
+    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 4 need review"
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 
@@ -785,18 +789,19 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
     assert "_save_ui_state" not in loop                                         # Cancel saves nothing
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
-    assert "sources = logic.sources_kept(fact_sources(doc))" in drawn and "sources.update(" in drawn   # the ground
+    assert "sources = logic.sources_kept(fact_sources(doc), out)" in drawn and "sources.update(" in drawn   # the ground
     assert "ground_marked" not in logic.BOX_ASKS                    # marking is kept (only follow-up answers go)
     # a new file starts empty (Ben, 2026-10-27): no sample lot or its facts put down (test_re_lookup pins the rest)
     assert "from_sample=True" not in rhino.split("def gordium_start(", 1)[1].split("\ndef ", 1)[0]
 
 
 def test_units_are_converted_in_one_place_both_ways():
-    """Gordium works in feet; the Rhino side converts at five helpers and nowhere else (a mm template showed why the
+    """Gordium works in feet; the Rhino side converts at its helpers and nowhere else (a mm template showed why the
     edge must be one place: there the start had to be checked line by line)."""
     import re
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_facts_in_feet")
+    helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_feet_volume",
+               "_facts_in_feet")
     outside = []
     for chunk in re.split(r"\n(?=def )", rhino):
         name = re.match(r"def (\w+)", chunk)
@@ -878,7 +883,7 @@ def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
     body = rhino[rhino.index("def gordium_start"):]
     # round 8: cleared before any way out (a start that draws nothing keeps no earlier start's margin)
     assert body.index('_set_source(doc, "starting_house", None, None)') < body.index('if not start.get("floors")') \
-        < body.index("add_floors(doc, start)") < body.index("logic.starting_house_fact(")
+        < body.index("add_floors(doc, start, ") < body.index("logic.starting_house_fact(")
 
 
 def test_a_design_buffer_is_read_or_draw_stays_off():

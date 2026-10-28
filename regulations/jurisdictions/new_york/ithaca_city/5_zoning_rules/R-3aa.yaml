@@ -25,7 +25,7 @@
 # Draft (approval deferred, decided 2026-10-19). Not covered yet, as in R-3a (later rules or flags): ornamental
 # parapets and cornices above the height limit (§325-16B), accessory uses and structures (p.2), accessory dwelling
 # units (§325-28), height exceptions for chimneys and
-# similar (§325-16A, applied when measuring height), more than one main building on a lot (§325-8B(1)), the loading
+# similar (§325-16A, applied when measuring height), the loading
 # rule for nonresidential uses ("Allowed by variance", p.14). R-3aa is
 # not one of the districts §325-11B(1) allows cluster subdivisions in. Parking is written as in R-3a and stays "not
 # checked yet: interior". Parts of R-3aa were rezoned to the Southside form districts by Ord. No. 2025-12
@@ -423,6 +423,55 @@ rules:
     drafted_by: claude
     status: draft
 
+  - id: R-3aa.attached_units_per_building
+    kind: rule
+    topic: dimensions
+    title: "Attached building: three to six dwelling units (§325-3B)"
+    applies_when: use == "one_family_attached"
+    check: attached_units_in_building >= 3 and attached_units_in_building <= 6
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 8
+        lines: [11, 14]
+        quote: "(4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of which shares one or more party walls or structural elements with the other one-family dwellings in the building and which has direct exterior access from the ground floor. A maximum of six one-family dwelling units may be attached to form a single building."
+        not_limits: {1: "\"one or more party walls\": how the units are joined, not a count of units"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [32, 33]
+        quote: "(5) Rooming house; boarding house; cooperative household; fraternity, sorority, or group house; row house, townhouse, or garden apartment housing as defined in this section."
+    examples:
+      - given: {use: one_family_attached, attached_units_in_building: 3}
+        expect: pass
+        note: the fewest
+      - given: {use: one_family_attached, attached_units_in_building: 6}
+        expect: pass
+        note: the most
+      - given: {use: one_family_attached, attached_units_in_building: 2}
+        expect: fail
+        note: two units joined are a semi-detached building, not an attached one
+      - given: {use: one_family_attached, attached_units_in_building: 7}
+        expect: fail
+        note: past the definition's six
+      - given: {use: one_family_attached, attached_units_in_building: 8, dwelling_units: 2}
+        expect: fail
+        note: two units on this lot of a row of eight; the cap is on the whole building, every lot it stands on
+      - given: {use: one_family_attached}
+        expect: needs_review
+        note: the building's units not given
+      - given: {use: two_family, attached_units_in_building: 2}
+        expect: not_applicable
+    notes: >-
+      Counted over the whole building, every lot it stands on together (attached_units_in_building), not the units on
+      this lot (dwelling_units): a row house on its own lot is one unit of a building of three to six. Gordium's
+      massing model shows the building on this lot only, so the architect states the count. A building of seven or
+      more joined one-family dwelling units is past the definition's maximum ("A maximum of six"), so it does not
+      comply as this use. Whether such a row may instead be built as a multiple dwelling (§325-3B MULTIPLE DWELLING
+      (5): row house, townhouse) is not settled by the code: the definitions point both ways, as in the architects'
+      question §5.6; Gordium doesn't decide it, and doesn't check a row house's own limits (§325-3B ROW HOUSE) yet.
+      Two joined units are a one-family semi-detached dwelling (§325-3B (3)).
+    drafted_by: claude
+    status: draft
+
   - id: R-3aa.lot_area_multiple_family
     kind: rule
     topic: dimensions
@@ -609,6 +658,342 @@ rules:
       adult day care home, neighborhood commercial facility, nursing home, hospital, bed-and-breakfast inn (and a
       dormitory, which fails R-3aa.use). The zero-lot-line house has its own row ("-" in R-3AA): see
       R-3aa.lot_size_zero_lot_line.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_area_each_primary_building
+    kind: rule
+    topic: dimensions
+    title: "Each further primary building needs its own lot area (§325-8B(1))"
+    applies_when: primary_buildings >= 2
+    check: lot_area >= primary_buildings * (5000 if use == "one_family_detached" else 5000 if use == "one_family_semi_detached" else 5000 if use == "two_family" else 25000 if use == "fraternity_sorority_group_house" else 6000)
+    review_when:
+      - when: primary_buildings >= 2 and not primary_buildings_same_use
+        reason: >-
+          Not every primary building on the lot is stated to hold the lot's use: each building needs its own
+          use's lot area, added together (§325-8B(1)); check by hand.
+      - when: primary_buildings >= 2 and use in ["one_family_attached", "multiple_family", "dormitory", "nursing_home", "one_family_detached_zero_lot_line"]
+        reason: >-
+          This use's lot area grows with the units, rooms or occupants in each building (or is itself open,
+          or a flag), and how they are split between the buildings isn't known: check by hand, each
+          building's own lot area added together (§325-8B(1)).
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [11, 16]
+        quote: "(1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use districts, each square-footage requirement applies separately to the initial permitted primary use and to each additional permitted primary use located in a separate building on the property in question (e.g., in R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and an additional area of 3,000 square feet is required for each additional one-family house or two-family house on the property)."
+        not_limits: {1: "(1): the paragraph's number", 3000: "R-2b's figure, the code's own example"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 17
+        lines: [39, 40]
+        quote: "PRIMARY STRUCTURE — A single structure (located on a parcel) containing a use permitted in the zoning district in which it is located."
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [9, 9]
+        quote: "One-family dwelling, detached [fn4] • • • • • • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [10, 10]
+        quote: "One-family dwelling, detached, zero lot line [fn4] - - - - SP SP SP SP -"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [11, 11]
+        quote: "One-family dwelling, semi-detached [fn4] - - • • • • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [12, 12]
+        quote: "One-family dwelling, attached [fn4] - - - - SP • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [13, 13]
+        quote: "Two-family dwelling [fn4] - - • • • • • • •"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [14, 14]
+        quote: "Multiple family dwelling [fn4] - - - - - • • • •[fn5]"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [15, 15]
+        quote: "Fraternity, sorority, or group house - - - - - • • • •[fn5]"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [16, 16]
+        quote: "Dormitory - - - - - • - • •[fn5]"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [26, 26]
+        quote: "Nursing, convalescent or rest home - - - - - • • • -"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [48, 48]
+        quote: "(3) See §325-8(B)(1)."
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, detached", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [10, 10]
+        quote: "One-family dwelling, detached 10,000 sf 6,000 sf 5,000 sf 3,000 sf 2,500 sf [fn4] 5,000 sf 5,000 sf 3,000 sf 10,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, semi-detached", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [12, 12]
+        quote: "One-family dwelling, semi-detached - - 5,000 sf 3,000 sf 2,000 sf [fn5] 5,000 sf 5,000 sf 3,000 sf 15,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Two-family dwelling", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [15, 15]
+        quote: "Two-family dwelling - - 5,000 sf 3,000 sf 2,000 sf [fn5] 5,000 sf 5,000 sf 3,000 sf 15,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Fraternity, sorority, or group house", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [18, 18]
+        quote: "Fraternity, sorority, or group house 25,000 sf 25,000 sf 25,000 sf 30,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Other use", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [19, 19]
+        quote: "Other use 10,000 sf 7,500 sf 6,000 sf 4,000 sf 4,000 sf 6,000 sf 6,000 sf 4,000 sf 30,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: "Primary Uses", row: "Dormitory", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: "Primary Uses", row: "Nursing, convalescent or rest home", column: R-3AA}
+    examples:
+      - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 10000}
+        expect: pass
+        note: "two primary buildings need 2 x 5,000 sf"
+      - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 9999}
+        expect: fail
+        note: "enough for one building, not two"
+      - given: {use: one_family_detached, primary_buildings: 1, lot_area: 5000}
+        expect: not_applicable
+        note: "one primary building: the use's own lot-area rule decides"
+      - given: {use: one_family_detached, primary_buildings: 3, primary_buildings_same_use: true, lot_area: 15000}
+        expect: pass
+      - given: {use: one_family_detached, primary_buildings: 3, primary_buildings_same_use: true, lot_area: 14999}
+        expect: fail
+      - given: {use: one_family_detached, primary_buildings: 2, primary_buildings_same_use: false, lot_area: 500000}
+        expect: needs_review
+        note: "another building holds another use: its own figure, added by hand"
+      - given: {use: one_family_detached, primary_buildings: 2, lot_area: 500000}
+        expect: needs_review
+        note: "whether every building holds this use not said"
+      - given: {use: one_family_detached, lot_area: 500000}
+        expect: needs_review
+        note: "the primary buildings not counted"
+      - given: {use: one_family_semi_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 10000}
+        expect: pass
+      - given: {use: one_family_semi_detached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 9999}
+        expect: fail
+      - given: {use: two_family, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 10000}
+        expect: pass
+      - given: {use: two_family, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 9999}
+        expect: fail
+      - given: {use: fraternity_sorority_group_house, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 50000}
+        expect: pass
+      - given: {use: fraternity_sorority_group_house, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 49999}
+        expect: fail
+      - given: {use: church, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 12000}
+        expect: pass
+        note: "Other use"
+      - given: {use: church, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 11999}
+        expect: fail
+      - given: {use: one_family_attached, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+      - given: {use: multiple_family, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+      - given: {use: dormitory, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+      - given: {use: nursing_home, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line, primary_buildings: 2, primary_buildings_same_use: true, lot_area: 1000000}
+        expect: needs_review
+    notes: >-
+      §325-8B(1): every residential district's lot-size figure applies again to each further primary use in a separate
+      building on the lot (the code's own example: in R-2b, 3,000 sf for a house and 3,000 sf more for each further
+      house). With one primary building this rule doesn't apply: the use's own lot-area rule (R-3aa.lot_area_*) checks
+      it. With two or more, the lot needs the figure once per building, when every building holds the lot's use
+      (primary_buildings_same_use); otherwise each building's own figure, added by hand. Gordium counts the primary
+      buildings from the drawing where it can (one building, or none standing apart that could hold a home); a
+      building standing apart that could (a large garage, a second house) is read both ways until the architect states
+      the count. An accessory building (a garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary
+      building.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.yards_not_shared
+    kind: flag
+    topic: dimensions
+    title: "A yard required for one building can't count for another (§325-7B)"
+    applies_when: primary_buildings > 1
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [8, 10]
+        quote: "B. Use of yard for another building. No part of a yard or other open space about any building required for the purposes of complying with the provisions of this chapter shall be included as a part of a yard or other open space similarly required for another building."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 14
+        lines: [37, 39]
+        quote: "LOT, BUILDING — A parcel of land occupied or to be occupied by one or more buildings and any accessory buildings, together with such open spaces as are required under the provisions of this chapter,"
+    examples:
+      - given: {primary_buildings: 1}
+        expect: not_applicable
+        note: one primary building on the lot; nothing on it to share a yard with
+      - given: {primary_buildings: 2}
+        expect: needs_review
+        note: two primary buildings; how their yards are divided is the open question
+      - given: {}
+        expect: needs_review
+        note: the primary buildings not counted
+    open_questions:
+    - '§325-7B: "No part of a yard or other open space about any building required for the purposes of complying with the provisions of this chapter shall be included as a part of a yard or other open space similarly required for another building." With two or more primary buildings on one lot, how are their yards kept apart: is each building''s yard measured from it to the lot lines, with no building standing in another''s required yard; or must the space between two buildings also be at least the yards each needs on the sides facing each other, added together?'
+    research:
+    - question: '§325-7B: "No part of a yard or other open space about any building required for the purposes of complying with the provisions of this chapter shall be included as a part of a yard or other open space similarly required for another building." With two or more primary buildings on one lot, how are their yards kept apart: is each building''s yard measured from it to the lot lines, with no building standing in another''s required yard; or must the space between two buildings also be at least the yards each needs on the sides facing each other, added together?'
+      searched:
+      - 325-7B
+      - 325-3B:yard
+      - 325-3B:front_yard
+      - 325-3B:side_yard
+      - 325-3B:rear_yard
+      - 325-3B:lot_building
+      - 325-3B:primary_structure
+      - 325-8B
+      - 325-25A
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 20
+        lines: [35, 36]
+        quote: An open space extending from the front yard to the rear yard between any building and the side lot line
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 20
+        lines: [31, 31]
+        quote: An open space extending the full width of the lot between a main building
+      why_open: >-
+        The code defines every yard between a building and a lot line (§325-3B YARD (1) to (3)), never between two
+        buildings on one lot, and §325-7B says only that one building's required yard can't be another's, not where
+        one ends and the next begins. No City interpretation or Board of Zoning Appeals decision was found
+        (searched 2026-10-27); other New York codes with the same clause (Yonkers, East Rockaway) don't spell it out
+        either. Gordium measures the yards from the main building only, so with two or more primary buildings this
+        needs review either way.
+      readings:
+      - id: to_lot_lines
+        reading: each primary building's yards measured from it to the lot lines, and no building inside another's required yard
+      - id: sum_between
+        reading: also, the space between two primary buildings at least the yards each needs on the facing sides, added together
+      report: docs/research/2026-10-27_audit_gaps.md §5
+    findings:
+    - id: accessory_buildings_may_stand_in_yards
+      question: Does §325-7B stop an accessory building (a garage, a shed) standing in the main building's side or rear yard?
+      kind: law
+      answer: 'No: accessory structures "shall be exempt from side yard requirements" and "are permitted in any side or rear yard but not in a required front yard" (§325-25, §325-25A); their own distances are checked by the accessory-building rule.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [35, 35]
+        quote: shall be exempt from side yard requirements contained in the District Regulations Chart
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [37, 38]
+        quote: Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard
+      still_open: []
+      report: docs/research/2026-10-27_audit_gaps.md §5
+    - id: yards_on_this_lot
+      question: Does §325-7B reach a building on a neighbouring lot (a lot split off from one whose building needed the land as its yard)?
+      kind: reading
+      answer: 'Gordium reads it within one lot: a yard is "That part of a lot" (§325-3B YARD), so this lot''s yards serve the buildings on it, and a neighbouring building''s required yards lie on its own lot, where its own rules check them.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 20
+        lines: [28, 28]
+        quote: YARD — That part of a lot not occupied by the principal building or structure
+      strength: strong
+      confirm_with: the architects
+      still_open: []
+      report: docs/research/2026-10-27_audit_gaps.md §5
+    notes: >-
+      With one primary building on the lot (garages, sheds and an accessory dwelling unit are accessory buildings,
+      not primary ones) nothing on the lot can share its yards: not applicable. With two or more, this needs review
+      until the open question is answered: check by hand that no building stands in another's required yard, and
+      how the space between them is divided. The primary buildings are counted as for §325-8B(1)
+      (primary_buildings).
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.stream_setback
+    kind: rule
+    topic: dimensions
+    title: "New structures at least 20 ft from an inlet wall or stream bank (§325-26)"
+    check: not stream_near_lot or stream_distance >= 20
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [15, 19]
+        quote: "No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities. (See illustration below.) Properties located within the Cherry Street District, the Market District, the Newman District, and the West End/Waterfront District are exempt from this requirement."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 19
+        lines: [19, 20]
+        quote: "STRUCTURE — Anything constructed or erected on the ground or which is attached to another structure or building. Structures shall not include patios or terraces."
+    examples:
+      - given: {stream_near_lot: false}
+        expect: pass
+        note: nothing within 20 ft of the lot, so no structure on it can be nearer
+      - given: {stream_near_lot: true, stream_distance: 20}
+        expect: pass
+        note: at the limit ("nearer than 20 feet" is what's barred)
+      - given: {stream_near_lot: true, stream_distance: 19.9}
+        expect: fail
+      - given: {stream_near_lot: true}
+        expect: needs_review
+        note: a stream or inlet near the lot, the distance not given
+      - given: {stream_distance: 35}
+        expect: pass
+        note: the nearest new structure is 35 ft from it, whatever else is said
+      - given: {stream_distance: 12}
+        expect: needs_review
+        note: whether a stream or inlet is near the lot not said
+      - given: {}
+        expect: needs_review
+        note: nothing said about streams, never a pass
+    findings:
+    - id: stream_setback_measured_level
+      question: How is §325-26's 20 ft measured?
+      kind: law
+      answer: 'Across, level, from the new structure to the point where the average water level meets the bank (or the inlet wall): the section''s own illustration (p.67 of the PDF, below the text; read from the page, research §7) draws "20'' MIN" as a horizontal dimension from the structure''s face to the bank at "AVERAGE LEVEL", between the high-water and low-water lines; the text says the distance is "measured at an average water level".'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [15, 16]
+        quote: No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level
+      report: docs/research/2026-10-27_audit_gaps.md §7
+    - id: stream_setback_every_structure
+      question: Which structures does §325-26 reach?
+      kind: law
+      answer: 'Every new structure: "Anything constructed or erected on the ground or which is attached to another structure or building", so a garage, a deck, a shed or a fence as well as the house; patios and terraces are not structures. Its exception is for structures "directly connected with marine or public or commercial recreation activities".'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 19
+        lines: [19, 20]
+        quote: STRUCTURE — Anything constructed or erected on the ground or which is attached to another structure or building. Structures shall not include patios or terraces.
+      report: docs/research/2026-10-27_audit_gaps.md §7
+    notes: >-
+      Gordium's model doesn't show the water, so the architect states whether any inlet wall or stream bank (at average
+      water level) is within 20 ft of the lot (stream_near_lot) and, if so, the least distance from any new structure
+      to it (stream_distance, measured across, level, as the section's illustration shows). Both blank by default: a
+      blank needs review, never a pass. An addition counts as new construction (Gordium asks the cautious way). Not
+      applied: the exception for structures "directly connected with marine or public or commercial recreation
+      activities" (a dock or boathouse): Gordium shows such a structure nearer than 20 ft as not complying; ask the
+      zoning office. The districts exempted by name (Cherry Street, Market, Newman, West End/Waterfront) aren't
+      residential districts.
     drafted_by: claude
     status: draft
 

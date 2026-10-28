@@ -88,8 +88,11 @@ Buttons along the panel:
 - **Retry**: shown only when a check failed, to try it again.
 - **Check again**: shown after you stopped a check (Esc, or Cancel beside "Checking…"). Nothing in the model
   changed, and nothing is shown as checked until you press it.
-- **Tell Gordium in Edit site…**: on a row that waits for something you answer in the start box (for example how
-  many dwelling units): it opens the start box. Until you answer, the row needs review.
+- **Enter …** (for example "Enter dwelling units…"): on a row that waits for facts only you know, it opens a small
+  window asking just those. **OK** saves them, each "entered by you" with the day, as one Undo step, and checks
+  again; **Cancel** or Esc changes nothing. A blank answer leaves the fact unset, so the row keeps needing review
+  (never 0 or No). A row that waits for a site fact (the lot, district, street side, corner lot) has
+  **Edit site…** instead.
 
 Tick boxes:
 
@@ -133,13 +136,14 @@ The next two are asked only when the **Ground** row is on (see "Not shown in thi
 - `Click a spot grade at a wall (Enter when done)` and
   `Click the finished ground you'll grade to, at each wall (Enter when done)`
 
-A row's **Enter** button (for example "Enter bedrooms and parking spaces") asks the facts that row waits for, one
-at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, `Stories of the whole building`, and
+A row's **Enter …** button (for example "Enter bedrooms and parking spaces…") asks the facts that row waits for, all
+in one small window: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let for profit`, `Stories of the whole building`, and
 `Made by converting an existing building, not new construction? (§325-3B)`, and the household and home occupation
 questions, such as `Most occupants in any one dwelling unit (optional: how they are split)` and
-`Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?` (the start box asks the same ones under
-**Use** when the district's rules need them). Each ends with `(Enter to skip)`:
-skipping leaves the fact unset, so its rule keeps waiting (never 0 or No).
+`Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?`, and the lot's own questions, such as
+`Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?` (the start box asks the lot's
+questions under **About this project** when the district's rules need them). Left blank (or **Not answered**), a
+fact stays unset, so its rule keeps waiting (never 0 or No).
 
 ## Not shown in this version
 

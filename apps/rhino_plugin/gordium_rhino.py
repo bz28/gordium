@@ -526,6 +526,11 @@ def _feet_length(doc, model):
     return model * _scale(doc)
 
 
+def _feet_volume(doc, model_volume):
+    """A volume in the model's units cubed, in cubic feet."""
+    return model_volume * _scale(doc) ** 3
+
+
 def _feet_area(doc, model_area):
     """An area in the model's units squared, in square feet."""
     return model_area * _scale(doc) ** 2
@@ -1215,7 +1220,7 @@ def PANEL_ACTIONS():
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check,
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
-            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
+            "massing": hide_massing, "switch_sides": switch_side_yards, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
             "context": show_context, "check": check_now, "auto_check": set_auto_check}
 
 
@@ -1527,38 +1532,56 @@ def set_grade():
 
 
 def enter_rooms(needs):
-    """A row's "Enter …" button: one prompt for each fact it waits for (`needs`, the row's own list), a whole number
-    or yes / no. Enter skips one: it stays unset (never 0 or no), so its rule keeps waiting."""
+    """A row's "Enter …" button: a small dialog (ui.row_dialog) asking only the stated facts it waits for (`needs`,
+    the row's own list, logic.row_fields). OK saves exactly those (logic.row_answers_applied: a blank stays unset,
+    never 0 or no), each "entered by you" with the day (logic.row_sources), as ONE Undo step, then checks again.
+    Cancel, Esc or closing it changes nothing and makes no Undo step. The address, district, use, lot, street side and
+    every other fact are never touched (the facts are read as saved: load_facts, never current_facts, which would
+    drop a lot no longer drawn). A count of stories below the floors drawn is refused by the measuring: said in its
+    words, and nothing is saved."""
     doc = Rhino.RhinoDoc.ActiveDoc
     if not needs:
         say("This row isn't waiting for anything you can enter.")
         return
+    if not logic.allowed("save_facts", _box_open()):     # nothing writes the facts under an open start box
+        say(logic.BOX_BUSY)
+        return
     try:
-        facts = current_facts(doc)
-        answers = {}
-        for key in needs:
-            prompt, kind, _ = logic.STATED_FACTS[key]
-            answers[key] = (_count(prompt, logic.minimum(key)) if kind == "count"
-                            else _square_feet(prompt) if kind == "area" else _ask_yes_no_or_skip(prompt))
-    except Cancelled:
+        facts = load_facts(doc)
+    except ValueError as e:
+        say(str(e))
+        return
+    if facts is None:
+        say("There are no site facts yet: run GordiumStart (or Edit site…) first.")
+        return
+
+    answers = ui.row_dialog(logic.enter_words(needs), logic.row_fields(needs, facts),     # OK: words keep it open
+                            lambda got: logic.row_problem(facts, needs, got))
+    if answers is None:                 # Cancel, Esc, closed: nothing written, so no Undo step
         say("Cancelled: nothing changed.")
         return
-    try:
-        new = logic.update_counts(facts, answers)
-    except ValueError as e:             # never an exception out of a button: say what was wrong, change nothing
-        say(f"Nothing changed: {e}.")
+    new = logic.row_answers_applied(facts, needs, answers)
+    if new == facts:                    # OK with the answers as they were: nothing to save, no Undo step
+        say("Nothing new entered: nothing changed.")
         return
-    checked = "stories" in answers     # fewer stories than the floors drawn: the measuring refuses it, so a count
-    if checked:                         # is tried first, unrecorded and put back as stored: never a step of nothing
-        refused = _tried(doc, new)
-        if refused:
+    tried = "stories" in needs and new.get("stories") is not None   # the measuring decides if the count can stand:
+    if tried:
+        refused = _tried(doc, new)      # tried first, unrecorded and put back as stored (never an Undo step)
+        if refused:                     # fewer stories than the floors drawn: refused, so nothing is saved
             run_check(doc, report=False)           # the facts as stored, checked again
             say(refused)
             return
-    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):
-        save_facts(doc, new)
-    if not checked:                     # (tried: its check was of these very facts)
+    _save_row(doc, needs, new)
+    if not tried:                       # (tried: its check was of these very facts)
         run_check(doc, report=False)
+
+
+def _save_row(doc, needs, new):
+    """A row dialog's answers, saved as one Undo step: the facts and the sources of exactly the row's facts."""
+    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):   # (serial 0, inside a command: that record holds it)
+        _save_facts(doc, new)
+        sources = logic.row_sources(fact_sources(doc), needs, new, logic.city_day())
+        doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
 
 
 def _tried(doc, facts):
@@ -1568,7 +1591,7 @@ def _tried(doc, facts):
     stored, recording = doc.Strings.GetValue(SECTION, ENTRY), doc.UndoRecordingEnabled
     doc.UndoRecordingEnabled = False
     try:
-        save_facts(doc, facts)
+        _save_facts(doc, facts)        # (enter_rooms refuses under an open box first)
         run_check(doc, report=False)
         return logic.refused_stories((STATE.get("last") or {}).get("items"))
     except Exception:
@@ -1877,7 +1900,7 @@ def _box_state_drawn(doc, facts, options, saved_ui, mode="check"):
             "use_choices": logic.district_use_names(options, facts.get("zone"), facts.get("use")),
             "use_note": logic.use_note(options, facts.get("zone"), facts.get("use")),
             "follow_ups": logic.follow_up_rows(options, facts.get("zone"), facts.get("use"), facts),
-            "answers": {k: facts.get(k) for k in logic.follow_up_keys(options, facts.get("zone"), facts.get("use"))},
+            "answers": logic.box_answers(options, facts.get("zone"), facts.get("use"), facts),   # the saved facts
             "options": options,          # for _apply_box and fact_sources: which facts the district and use read
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
             # the street's name only with its street line (a survey outline or a corner answer drops the line:
@@ -1912,9 +1935,14 @@ def _ft_text(feet):
 
 def _apply_box(doc, facts, state, saved_ui):
     """The facts (what the checker gets) and the box's own choices, from what the box says."""
-    facts, saved_ui = logic.box_facts(facts, saved_ui, state)   # a changed corner answer: the street picked again
-    facts, _ = logic.answers_applied(facts, state.get("answers"), state["zone"], state["use"],   # blank: unset,
-                                     state.get("options"))                                     # never 0 or no
+    # only the fields shown change (blank: unset, never 0 or no), and what a use said goes with it (by its source:
+    # the box's own track across picks, from the saved sources when it opens); with the old use still in the facts
+    track = saved_ui.get("_answers") or logic.box_track(facts, fact_sources(doc))
+    facts, track = logic.box_applied(facts, state.get("answers"), state["zone"], state["use"], state.get("options"),
+                                     track)
+    saved_ui = dict(saved_ui, _answers=track)
+    facts, saved_ui = logic.box_facts(facts, saved_ui, state)   # a changed corner answer: the street picked again;
+    # then the address, district, use and survey as the box says
     facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
     for key, value in logic.ground_facts(state, _lot_level(doc, facts)).items():
         if value is None:
@@ -2798,8 +2826,11 @@ def _drawn(doc, facts, state, saved_ui, session=None, mode=None):
             # it again after, so the commit and the house are in a step of Gordium's)
             STATE["start_plan"] = planned or _plan_house(doc, out, ui_state)
         _save_ui_state(doc, ui_state)
-        sources = logic.sources_kept(fact_sources(doc))   # what the box doesn't set (the ground marking) is kept
+        sources = logic.sources_kept(fact_sources(doc), out)   # what the box doesn't set is kept (an answer
+        #                                                       kept unshown too; one unset goes with its fact)
         sources.update(logic.fact_sources(state, logic.city_day(), confirmed=True))
+        # every answer typed in this box, shown at Draw or not: entered by you, with its value now
+        sources = logic.typed_sources(sources, ui_state.get("_answers"), out, logic.city_day())
         doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
         return out
 
@@ -2842,47 +2873,11 @@ def _yes_no(prompt, current):
     return bool(rc[1]) if rc[0] == Rhino.Commands.Result.Success else current
 
 
-def _count(prompt, least=0):
-    """A whole number the architect types, `least` or more (the fact's own minimum, rhino_logic.minimum), or None
-    when the prompt is skipped (never a default)."""
-    gi = Rhino.Input.Custom.GetInteger()
-    gi.SetCommandPrompt(prompt + " (Enter to skip)")
-    gi.AcceptNothing(True)
-    gi.SetLowerLimit(least, False)
-    got = gi.Get()
-    _go_on(got)
-    return gi.Number() if got == Rhino.Input.GetResult.Number else None
-
-
-def _square_feet(prompt):
-    """A floor area in square feet the architect types, 0 or more, as typed (never rounded), or None when the prompt
-    is skipped (never a default)."""
-    gn = Rhino.Input.Custom.GetNumber()
-    gn.SetCommandPrompt(prompt + " (Enter to skip)")
-    gn.AcceptNothing(True)
-    gn.SetLowerLimit(0.0, False)
-    got = gn.Get()
-    _go_on(got)
-    return gn.Number() if got == Rhino.Input.GetResult.Number else None
-
-
 def _ask_in_city():
     """The City's date (logic.city_day) when the architect says Yes to logic.IN_CITY_QUESTION, else None (No, or the dialog closed)."""
     got = ef.MessageBox.Show(Rhino.UI.RhinoEtoApp.MainWindow, logic.IN_CITY_QUESTION, "Gordium",
                              ef.MessageBoxButtons.YesNo, ef.MessageBoxType.Question, ef.MessageBoxDefaultButton.No)
     return logic.city_day() if got == ef.DialogResult.Yes else None
-
-
-def _ask_yes_no_or_skip(prompt):
-    """Yes (True) or No (False), or None when the prompt is skipped (never a default; _yes_no keeps a current
-    answer instead)."""
-    go = Rhino.Input.Custom.GetOption()
-    go.SetCommandPrompt(prompt + " (Enter to skip)")
-    yes, no = go.AddOption("Yes"), go.AddOption("No")
-    go.AcceptNothing(True)
-    got = go.Get()
-    _go_on(got)
-    return (go.OptionIndex() == yes) if got == Rhino.Input.GetResult.Option else None
 
 
 def change_facts(doc, facts, options):
@@ -3767,10 +3762,11 @@ def _add_lot(doc, sample):
     return doc.Objects.AddCurve(curve, attrs)
 
 
-def add_floors(doc, start):
+def add_floors(doc, start, floor_to_floor=None, design_buffer=0.0):
     """The starting building: one solid per story, stacked, as one group (so a Move moves the house), each on its own
-    sublayer Gordium::Massing::Floor 1, 2… (named Floor 1, 2…), with Gordium::Massing::Roof made for the roof. None,
-    with nothing added, if a floor isn't a box Rhino can make."""
+    sublayer Gordium::Massing::Floor 1, 2… (named Floor 1, 2…), with Gordium::Massing::Roof made for the roof, each
+    carrying how it was drawn (logic.start_tag: what Switch side yards reads). None, with nothing added, if a floor
+    isn't a box Rhino can make."""
     breps = []
     for floor in start["floors"]:
         corners = [_model_point(doc, (x, y), z) for z in (floor["base"], floor["top"]) for x, y in floor["outline"]]
@@ -3786,6 +3782,7 @@ def add_floors(doc, start):
         a.Name = "Floor " + str(i + 1)
         # one story, at the height drawn: what makes it count as a story (a stretched block no longer does)
         a.SetUserString(logic.FLOOR_KEY, str(i + 1) + ";" + repr(floor["top"] - floor["base"]))
+        a.SetUserString(logic.START_KEY, logic.start_tag(start, i, floor_to_floor, design_buffer))
         a.AddToGroup(group)
         ids.append(doc.Objects.AddBrep(brep, a))
     return ids
@@ -4002,7 +3999,7 @@ def _draw_starting_house(doc, facts):
                                  "(run GordiumStart again in " + _doc_name(doc) + ")")
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
-    ids = add_floors(doc, start)
+    ids = add_floors(doc, start, request["floor_to_floor"], request["design_buffer"])
     if ids is None:
         Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; " + logic.draw_one_hint(_auto(doc)))
         live(True)
@@ -4022,6 +4019,95 @@ def _draw_starting_house(doc, facts):
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
                              logic.MASSING + "::Floor 1…" + str(len(start["floors"])))
     return result
+
+
+def _start_floors(doc):
+    """The starting house's floor blocks in the model (each carrying logic.START_KEY), with their bounding boxes in
+    feet, their volumes in cubic feet (None when not a solid Rhino can measure: then never redrawn) and whether each
+    is locked or hidden, itself or by its layer (then never redrawn: Rhino deletes neither, and the architect's lock
+    and Hide starting house are kept; review round 3)."""
+    found = []
+    settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+    settings.HiddenObjects = True                # every floor, whatever its state (a hidden one is refused, said so)
+    settings.LockedObjects = True
+    for o in doc.Objects.GetObjectList(settings):
+        text = o.Attributes.GetUserString(logic.START_KEY) if not o.IsDeleted else None
+        if text:
+            b = o.Geometry.GetBoundingBox(True)
+            props = rg.VolumeMassProperties.Compute(o.Geometry) if isinstance(o.Geometry, rg.Brep) else None
+            volume = _feet_volume(doc, props.Volume) if props is not None else None    # (a notch changes it)
+            layer = doc.Layers[o.Attributes.LayerIndex]       # (a locked or hidden parent too: IsLocked, IsVisible)
+            locked = bool(o.IsLocked or o.IsHidden or o.IsReference or layer.IsLocked or not layer.IsVisible)
+            found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume, locked))
+    return found
+
+
+def switch_side_yards():
+    """Switch side yards (the panel, under the Starting house site fact): where the district lets the two side yards
+    differ (R-2b: one 10 ft, the other 5 ft), the starting house is redrawn with the larger one on the other side,
+    as one Undo step. The new house is proven by the checker like the first (a house that would break a rule is
+    never drawn: the old one stays and the panel says why); a house the architect has changed is never redrawn."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    found = _start_floors(doc)
+    plan = logic.switch_plan([(text, box, volume, locked) for _, text, box, volume, locked in found], tolerance=_feet_length(
+        doc, doc.ModelAbsoluteTolerance) + 0.01)
+    if plan.get("refused"):
+        say(plan["refused"])
+        return None
+    try:
+        facts = current_facts(doc)
+    except ValueError as e:
+        say("The site facts can't be read, so the starting house isn't redrawn: " + str(e))
+        return None
+    path = os.path.join(tempfile.gettempdir(), "gordium_switch_" + str(doc.RuntimeSerialNumber) + ".3dm")
+    export(doc, path)                   # (the checker leaves the model's buildings out when it draws a new house)
+    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
+                 "floor_to_floor": plan["floor_to_floor"], "design_buffer": plan["design_buffer"],
+                 "larger_side": plan["larger_side"]})
+    split = start.get("side_split") or {}
+    if not start.get("floors") or split.get("larger_side") != plan["larger_side"]:
+        why = "; ".join(start.get("notes") or []) or "no house could be drawn that way"
+        say("The larger side yard can't go on the " + plan["larger_side"] + " (" + why + "): the starting house is "
+            "kept as it was.")
+        return None
+    record = doc.BeginUndoRecord("Gordium: " + logic.SWITCH_LABEL.lower())
+    STATE["switch_record"] = record              # 0 inside a running command (its own Undo step): for the tests
+    try:                                # the new house first: if it can't be drawn, the old one is untouched
+        ids = add_floors(doc, start, plan["floor_to_floor"], plan["design_buffer"])
+        if ids is None:
+            say("The switched starting house couldn't be drawn; the old one is kept.")
+            return None
+        gone = []
+        for o, _, _, _, _ in found:
+            if not doc.Objects.Delete(o, True):
+                break
+            gone.append(o)
+        kept = len(found) - len(gone)
+        if kept:                        # never two houses: the new one goes again, the old one stays whole (round 2,
+            for o in gone:              # F1; round 4: the floors already deleted come back)
+                doc.Objects.Undelete(o)
+            for i in ids:
+                new = doc.Objects.FindId(i)
+                if new is not None:
+                    doc.Objects.Delete(new, True, True)
+            say("The old starting house couldn't be removed (" + str(kept) + " floors), so it is kept as it was.")
+            return None
+        fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())
+        if fact:
+            _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
+    finally:
+        doc.EndUndoRecord(record)
+    doc.Views.Redraw()
+    result = run_check(doc, report=False)
+    say("Starting house redrawn. " + (_said_sides(start) or ""))
+    return result
+
+
+def _said_sides(start):
+    """The new house's side yards, as its note says them ("Side yards: 10'-0" on the right (east), …")."""
+    note = start.get("margin_note") or ""
+    at = note.find(logic.SIDE_YARDS_SAID)
+    return note[at:] if at >= 0 else None
 
 
 # ---- the context map: the neighbourhood around a looked-up lot (design_checker.context_box) ---------------------

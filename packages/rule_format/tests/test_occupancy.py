@@ -141,9 +141,12 @@ def test_the_r3_and_ru_count_is_asked_on_its_own_and_a_mistyped_pair_is_set_asid
     facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-3a",
              "use": "one_family_detached", "unrelated_persons": 3, "unrelated_persons_with_children": 1}
     m = measure(site, facts)
-    assert m["unrelated_persons_with_children"]["value"] is None
+    # both counts are set aside (#38 item-14 finding: only this one was, so R-1 and R-2 read the other and complied)
+    assert m["unrelated_persons_with_children"]["value"] is None and m["unrelated_persons"]["value"] is None
+    assert m["unrelated_persons"]["reason"] == m["unrelated_persons_with_children"]["reason"]
     values = {k: v["value"] for k, v in m.items()}
     assert outcome(rule("R-3a", "occupancy_one_family"), values, USES) == "needs_review"
+    assert outcome(rule("R-1b", "occupancy_one_family"), values, USES) == "needs_review"
     assert "included (1) is lower than the count without them (3)" in m["unrelated_persons_with_children"]["reason"]
     ok = measure(site, {**facts, "unrelated_persons_with_children": 3})
     assert ok["unrelated_persons_with_children"]["value"] == 3
@@ -159,7 +162,7 @@ def test_the_r3_and_ru_count_is_asked_on_its_own_and_a_mistyped_pair_is_set_asid
         g = measure(site, facts)
     finally:
         measure_mod._measure = real
-    assert g["unrelated_persons"]["value"] == 3 and g["unrelated_persons_with_children"]["value"] is None
+    assert g["unrelated_persons"]["value"] is None and g["unrelated_persons_with_children"]["value"] is None
     # and the panel says it in every district, with the button to correct both counts
     from model_measurement.project import fact_conflict_rows
     assert fact_conflict_rows(facts) == [(
@@ -195,7 +198,10 @@ def test_a_floor_area_is_kept_as_typed_never_rounded():
     size = rule("R-1b", "home_occupation_size")
     assert outcome(size, {"use": "one_family_detached", "home_occupation": True, **facts}, USES) == "fail"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert '_square_feet(prompt) if kind == "area"' in rhino and "def _square_feet(prompt):" in rhino and "Rhino.Input.Custom.GetNumber()" in rhino
+    # the row's own dialog (rhino_logic.row_fields / row_answers_applied) types it, kept as typed
+    assert "logic.row_fields(needs, facts)" in rhino and "logic.row_answers_applied(facts, needs, answers)" in rhino
+    assert logic.row_answers_applied({}, ["home_occupation_area"], {"home_occupation_area": "500.4"}) == {
+        "home_occupation_area": 500.4}
 
 
 def test_the_owner_question_is_about_the_house_and_an_adu_on_the_lot_needs_review():
