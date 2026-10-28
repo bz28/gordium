@@ -1157,14 +1157,14 @@ def test_the_lists_values_fit_two_lines_of_a_narrow_column():
 
 def test_the_use_row_names_the_use_in_its_item_cell(facts, tmp_path):
     """Rhino walk at 380 px (2026-10-28): the use row's Proposed showed "One- / family d…": no use's name fits the
-    64 px Proposed column. Option A (coordinator, 2026-10-28): the Item cell names the use, whole, and Proposed
-    says "stated"; with no use stated the row stays "Use (site)" and "—". The detail and the report unchanged."""
+    64 px Proposed column. Option A (coordinator, 2026-10-28): the Item cell names the use, whole (no "(site)": it
+    fits two lines at 400 px only without), and Proposed says "stated"; the detail heads with the same name; with
+    no use stated the row stays "Use (site)" and "—". The report unchanged."""
     from design_checker import rhino_logic as logic
     got = check(MODEL, facts, tmp_path / "r.xlsx")
     use = next(i for i in got["view"]["items"] if i["name"] == "Use")
     assert use["proposed"] == "One-family dwelling, detached" and use["group"] == "site"
-    assert logic.list_cells(use) == ("One-family dwelling, detached (site)", "stated")
-    assert logic.row_name(use) == "Use (site)"                          # the detail's heading keeps the row's name
+    assert logic.list_cells(use) == ("One-family dwelling, detached", "stated")
     for unset in ("—", None, ""):
         assert logic.list_cells(dict(use, proposed=unset)) == ("Use (site)", unset)
     other = next(i for i in got["view"]["items"] if i["name"] == "Lot area")
@@ -1172,6 +1172,8 @@ def test_the_use_row_names_the_use_in_its_item_cell(facts, tmp_path):
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     rows = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
     assert "logic.list_cells(i)" in rows and "logic.row_name(i)" not in rows
+    detail = ui[ui.index("def show_detail("):]
+    assert "logic.list_cells(i)[0] + \" · \" + words" in detail    # the detail heads with the list's name, whole
 
 
 def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
@@ -1217,7 +1219,7 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     rows = {i["name"]: i for i in got["view"]["items"]}
     for name in ("Building height", "Stories"):
         assert rows[name]["status"] == present.COMPLIES and rows[name]["note"] == "assuming flat ground"
-        assert logic.row_name(rows[name]) == name + " · assuming flat ground"
+        assert logic.row_name(rows[name]) == logic.list_cells(rows[name])[0] == name + " · assuming flat ground"
     assert "assumed" in got["view"]["header"]["grade"]
     text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
                     for row in ws.iter_rows(values_only=True) for c in row if c)
@@ -1229,7 +1231,7 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     row = next(r for r in sheet.iter_rows(values_only=True) if r[item] == "Stories · assuming flat ground")
     assert not row[why]
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert "logic.row_name(i)" in ui
+    assert "logic.list_cells(i)" in ui
 
 
 # ---- the plugin and the worker stay in step (audit P1-1) -----------------------------------------------------

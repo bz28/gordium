@@ -646,7 +646,7 @@ def show_detail(parts):
         return
     det = i["detail"]
     words = logic.status_words(i)
-    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.row_name(i) + " · " + words,   # the row's own name, whole
+    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.list_cells(i)[0] + " · " + words,   # the row's own name, whole
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))

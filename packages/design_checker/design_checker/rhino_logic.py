@@ -105,13 +105,15 @@ USE_STATED = "stated"
 
 
 def list_cells(item):
-    """A row's Item and Proposed text in the panel's list. The use row names the use itself in the Item cell
-    ("One-family dwelling, detached (site)") with "stated" under Proposed: a use's name never fits the Proposed
-    column (64 px: "One-family" alone takes two lines at 380 px), and the Item cell has the room (coordinator,
-    2026-10-28, option A: the whole name, no made-up short forms). With no use stated, "Use (site)" and its "—"."""
+    """A row's Item and Proposed text in the panel's list, and its name heading the detail. The use row names the
+    use itself ("One-family dwelling, detached") with "stated" under Proposed: no use's name fits the 64 px Proposed
+    column ("One-family" alone takes two lines), and the Item cell has the room (coordinator, 2026-10-28, option A:
+    the whole name, no made-up short forms). No "(site)" on it: measured in Rhino, "One-family dwelling, detached"
+    fits two lines of the Item cell at the panel's 400 px only without it (at 380 the cell ends "detach…" and the
+    detail, headed with the same name, has it whole). With no use stated, "Use (site)" and its "—"."""
     proposed = item.get("proposed")
     if item.get("name") == "Use" and proposed and proposed != "—":
-        return row_name(dict(item, name=proposed)), USE_STATED
+        return proposed + (" · " + item["note"] if item.get("note") else ""), USE_STATED
     return row_name(item), proposed
 
 
