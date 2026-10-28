@@ -251,7 +251,7 @@ Scripts cannot press real keys (Eto), so these are the claims left for a person.
 | 2 | #26 | re-lookup | b6d6f88d | 1,896 passed, all 7 | includes the start flow (9da07289). Merge conflicts in confirm() and _draw_starting_house kept both sides; the redraw pin now matches main's `result = _confirm(...)`. Review clean |
 | 3 | #17 | term-index | 1c0ca872 | 1,821 passed, all 7 | review: methods §6 now cites §18 (main's site lookup took §17) |
 | 4 | #18 | measurement-2 | ee498dc4 | 2,550 passed, 6 other CI steps passed | **2 false-pass fixes**, each pinned by a test that fails on revert: (a) an unconfirmed looked-up lot or street now makes the accessory-building rule need review (merge review, 2 sceptics); (b) a solid left out of the measuring now makes the accessory-building and eaves rules need review. The one 'failure' was the known slow test_present …tax_map_and_on_a_survey (worker killed); alone it passed in 337 s |
-| 5 | #20 | answer-keys | 6dcfcc66 | 2,673 passed, 6 other CI steps passed | the same slow test; alone it passed in 420 s |
+| 5 | #20 | answer-keys | 2ba74f42 (was 6dcfcc66) | 2,845 passed, all 7 (at 3188dd60; 2ba74f42 adds QUICKSTART text only) | **changed 2026-10-28 by the merge lane**, see the note under merge 3 |
 | 6 | #22 | stress-tests | b19f383d | 2,634 passed, all 7 | |
 To-dos (#18, neither a false pass): with no accessory building labelled, its rule is left out silently; the separate "objects not included" row still needs review. The eave-yard part of fix (b) is not pinned on its own. The slow test's to-do belongs to the demo builder.
 
@@ -309,7 +309,75 @@ REAL INPUT (Lane C, at #27 2c7c875), Cmd+Z once after each, the tick must follow
   drawn, still one step).
 - Hide starting house, then Cmd+Z: layer AND tick back. Also: switch to another open file: its own ticks show.
 
-## FOR BEN: merge 3 (Lane B, 2026-10-27; nothing merged)
+## FOR BEN: merge 3 (merge lane, updated 2026-10-28; nothing merged; the older table below is history)
+**Merge 2 needed one fix first (#20 answer-keys, now 2ba74f42).** Merging the six merge-2 heads onto today's main in
+Ben's order showed two problems, both in #20:
+1. QUICKSTART conflicted with #26. Fixed by merging re-lookup 9eb789fc and main into answer-keys.
+2. present.py would not load. #20's citation-link cache used `functools`, and #50 (on main) had removed that import.
+   Every test that loads the panel would have failed on main after merge 2. Fixed: the cache is now keyed by the
+   file's content, as #50 does for chart cells. Pinned by a test that fails on revert.
+Suite at 3188dd60: 2,845 passed, all 7 CI steps. Rehearsal: main + #48 → #26 (9eb789fc) → #17 → #18 → #20 → #22
+now merges with no conflicts. **Merge 2's order and other heads are unchanged.** #26 is 9eb789fc (the Rhino lane's
+corner fix).
+
+**Merge 3: every PR below has merge 2 merged in** (a new merge commit, never a force-push). Each merges into main with
+no conflicts once merge 2 is in. To retarget a PR: when its base PR is merged, set its base to main (Edit by the
+title), then Merge (merge commit).
+
+| step | PR | branch | head | full suite (pytest + 7 CI steps) | state |
+|---|---|---|---|---|---|
+| A1 | #28 | highlight-offending | fb9ef6dc | (covered by #37's) | pushed |
+| A2 | #29 | drawing-dims | d0f6c791 | (covered by #37's) | pushed |
+| A3 | #31 | depth-lines | 864897fc | (covered by #37's) | pushed |
+| A4 | #34 | osnap-curves | 6a46ce54 | (covered by #37's) | pushed |
+| A5 | #35 | massing-floors | 6e9cac34 | (covered by #37's) | pushed |
+| A6 | #37 | use-questions | a1d454ab | 3,055 passed, all 7 (at 60f10deb; later commits are QUICKSTART/GUIDE text) | pushed |
+| B1 | #32 | progress-cancel | 5c449c2a | (covered by #33's) | pushed |
+| B2 | #33 | address-autocomplete | e79325ea | 3,011 passed, all 7 | pushed |
+| C1–C8 | #24 → #30 → #38 → #41 → #42 → #43 → #44 → #45 | r2-hand … facts-up-front | local carries, not pushed | #45 local carry: 3,494 passed, all 7 | waiting for the Rhino lane's fixes on these branches (R-2c envelope, R-3aa range row); then merged in, suite, push |
+| C-side | #39 coverage-audit (on #30), #46 test-sites (on #38) | | local | running | same |
+| D | #47 lookup-names, #51 no-document-start, #52 faster-start | | unchanged | (their own suites) | merge cleanly onto merge 2; targeted tests on the merge pass (#47 432, #51 201, #52 553) |
+| — | #21 drafting-stage1, #40 draft-rule-by-rule | | unchanged | — | **not carried**: see the decision below |
+
+Order for Ben (after merge 2):
+1. **UI stack:** #28 → #29 → #31 → #34 → #35 → #37. Each one is retargeted to main after the one below it merges.
+   #28's base is check-button, which is already merged, so retarget #28 first.
+2. **#32 → #33.** Retarget #32 to main, since #26 is merged in merge 2.
+3. **Rules line:** #24 → #30 → #38 → #41 → #42 → #43 → #44 → #45.
+   - #24's base is answer-keys, so retarget #24 after #20 merges.
+   - #45 holds #37, so merge it after both #44 and #37.
+4. **Reports** (generated tables and evals; they pass once a round finds no wrong content):
+   - #39 after #30;
+   - #46 after #38;
+   - #47 at any time.
+5. **Independent of the others:** #51 and #52 (each based on main).
+
+Conflict resolutions (all kept both sides' intent; one cold Opus review of the UI and #32/#33 resolutions found no P0 or P1):
+- check.plan / check.start: main's `overlays` switch and geometry-error stop, with #28's per-building colouring, #29's
+  dimensions, #34's snap outlines and #35's larger side yard.
+- enter_rooms: #37's row dialog with main's tried-first story count, in one undo step (as the demo resolved it).
+- MERGE BUG fixed in #37: #26 and #37 each defined `NOT_ANSWERED` and `_listed`. #26's are now
+  `LOOKUP_NOT_ANSWERED` and `_joined`. This is the demo's own fix, now on the PR, and it is pinned.
+- Tests changed with merge 2 in:
+  - #29's overhang numbers carry no "? ": both readings comply under #18's every-reading rule.
+  - The undo and side-yard test harnesses learn #34's, #35's and #37's new functions.
+  - #35's R-2b stand-in gets R-2b's eaves rule.
+  - GUIDE names #24's, #38's and #43's prompts and #37's dialog (main's guide test asks for every prompt).
+- #45 also gets demo's test_area_answers.py, which the STATUS note asked #45 to carry.
+- P2 to-dos (match the demo, not changed):
+  - the row dialog's Undo reads "Gordium: enter the row's facts", not the row's own words;
+  - `_count` and `_ask_yes_no_or_skip` are now unused in #37.
+
+**Decision for Ben: #21 and #40.**
+- #21 (AI-drafted zones, off by default) conflicts with merge 2 in the start box's district code: its "preselect the
+  drafted zone" logic against main's new empty start box. It also conflicts in present.py, rhino_logic.py,
+  pyproject.toml and the rules xlsx. That is a rules-and-start-box carry needing its own review round (2 Opus
+  sceptics).
+- #40 (the eval report) holds #21 and r3-hand, so it can't merge before #21.
+- Recommendation: leave #21 and #40 out of merge 3 and carry them as their own job afterwards, or close #21 if
+  drafted zones stay off. Ben to say which.
+
+### Earlier merge-3 notes (Lane B, 2026-10-27; history)
 Runs after merge 2. Conflicts below are real trial merges (`git merge --no-commit --no-ff`, then abort): each PR alone onto a scratch main = main + merge 2 in its order (#15 #16 #19 #23 #27 clean; #26 and #17-#22 needed merge 2's own carries, steps 6-7, done in the scratch by a rough union, so gordium_rhino.py / project.py / docs/README.md conflicts may shrink once Lane A's real carries land). "Retarget": set the PR's base to main first (Edit by the title), then Merge (merge commit). xlsx / review.md / reports in a conflict are generated: rebuild (`python -m rule_export`, `section_labeling coverage`, `project_report`), never hand-merged.
 
 | PR | branch (base now) | head | last full suite | conflicts onto merged main | waiting on |
