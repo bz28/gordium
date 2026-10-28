@@ -243,8 +243,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      this** once you have, or change it; until then the items that depend on it need review. If the lookup
      can't help (offline, not found, outside the City of Ithaca), the box says why and you fill it in by hand.
    - **Zoning district**: "entered by you", or after Look up "suggested by Gordium · City of Ithaca zoning map,
-     used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
-     lookup, because the City's online map is informational: the district is your statement.
+     used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project, after every
+     lookup and after you pick another district (a tick is for one district), because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
