@@ -701,6 +701,63 @@ def _dim_label(i: dict) -> str:
             (" (approx.)" if i.get("approx") else ""))
 
 
+ORDINALS = {1: "1st", 2: "2nd", 3: "3rd"}
+ON_WALL_FT = 0.01                    # a closest point this near the ground floor's outline is on its wall
+
+
+def measured_to(points: list, solids: list, footprint) -> str:
+    """What a yard's dimension is measured to, when it is not the ground-floor wall: "2nd-floor overhang", or
+    "a part above the ground floor" when no floor level names it (a bay, eaves, a sloped underside). "" for the
+    ground-floor wall (today's plain label) and whenever it can't be told. Labelling only: the yard is measured "from
+    the ground upward", to its least distance (§325-3 Yard), so the number and its pass or fail never change.
+    `points`: the yard's measured closest points (one on the building seen from above, one on the lot line);
+    `solids`: (building, its projection) pairs; the ground floor is every horizontal face at the lowest level."""
+    from shapely.geometry import Point, Polygon
+    from shapely.ops import unary_union
+    if not points or len(points) < 2 or footprint is None or footprint.is_empty or not solids:
+        return ""
+    from shapely.geometry import LineString
+    ends = [Point(p[:2]) for p in points]
+    house = min(ends, key=lambda q: footprint.boundary.distance(q))
+    lot_end = ends[1] if house is ends[0] else ends[0]
+    dx, dy = house.x - lot_end.x, house.y - lot_end.y
+    length = (dx * dx + dy * dy) ** 0.5
+    if length < 1e-9:
+        return ""
+    far = 1e4 / length               # the lot line here: square to the dimension through its lot end
+    line = LineString([(lot_end.x - dy * far, lot_end.y + dx * far), (lot_end.x + dy * far, lot_end.y - dx * far)])
+    flats = []                       # (z, outline) of every horizontal face
+    for b, _ in solids:
+        for f in b["faces"]:
+            zs = [p[2] for p in f["points"]]
+            if len(zs) >= 3 and max(zs) - min(zs) < 1e-6:
+                poly = Polygon([tuple(p[:2]) for p in f["points"]]).buffer(0)
+                if poly.area > 1e-9:
+                    flats.append((zs[0], poly))
+    if not flats:
+        return ""
+    bottom = min(z for z, _ in flats)
+    ground = unary_union([poly for z, poly in flats if z - bottom < 1e-6])
+    if ground.is_empty or ground.distance(line) - length <= ON_WALL_FT:
+        return ""                   # the ground floor's wall is as near: today's plain label
+    levels = sorted({round(min(p[2] for f in b["faces"] for p in f["points"]), 4) for b, _ in solids})
+    starts = sorted(z for z, poly in flats if z - bottom >= 1e-6 and poly.boundary.distance(house) <= ON_WALL_FT)
+    if starts and len(levels) > 1 and round(starts[0], 4) in levels:
+        n = levels.index(round(starts[0], 4)) + 1
+        return f"{ORDINALS.get(n, str(n) + 'th')}-floor overhang"
+    return "a part above the ground floor"
+
+
+def number_to(number: str, proposed: str, what: str) -> str:
+    """The drawn number with what it is measured to (measured_to), the number itself unchanged: "22'-0\" (to 2nd-floor
+    overhang)"; a range (the yard read two ways, the open question of walls or overhangs) names its nearer end, the
+    one measured to the overhang: "? 27'-0\" (to 2nd-floor overhang) to 30'-0\"". `what` "": `number` as it is."""
+    if not what or proposed not in number:
+        return number
+    low, sep, high = proposed.partition(" to ")
+    return number.replace(proposed, low + f" (to {what})" + (sep + high if sep else ""))
+
+
 def required_lines(points: list, item: dict, edges: list) -> tuple[list, str | None]:
     """The yard's required line(s) across its dimension, and why there is none: one at its limit (`limit_ft`), or,
     when the limit depends on an open measurement (the lot depth, on the tax map), one at each end of its range
@@ -936,7 +993,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                       "label": _dim_label(i) + (f" · no required line: {why}" if why else ""),
                       "required_lines": candidates[0]["required_lines"], "required_why": why,
                       # on the drawing: its number only, the "min" tags only where it fails or needs review
-                      "number": logic.dim_number(i["mark"], i["proposed"], i["status"]),
+                      "number": number_to(logic.dim_number(i["mark"], i["proposed"], i["status"]), i["proposed"],
+                                          measured_to(i["points"], solids, footprint)),
                       "required_tags": required_tags(i) if i["status"] in (present.FAILS, present.REVIEW) else [],
                       "candidates": candidates})
     encroach = []

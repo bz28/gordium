@@ -290,7 +290,9 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    - in Top view each yard is dimensioned as a drawing is: square to its lot line from the wall facing it, red
      where it fails, amber where it needs review, complying ones neutral grey; it shows its number only, on its
      line or just past its end (✕ or ? before it when something is wrong; the yard's name and what it needs are in
-     the panel); the required line is dashed across it, tagged "min 10'-0"" where the yard fails or needs review;
+     the panel); when the nearest part is not the ground-floor wall the number says what it is measured to, e.g.
+     "22'-0" (to 2nd-floor overhang)" (the number itself and its result are unchanged); the required line is dashed
+     across it, tagged "min 10'-0"" where the yard fails or needs review;
      what is wrong is placed first and every number stays in view; in the Front
      and Right views the height is dimensioned up from the grade plane, the limit faint. Zoomed out to the
      neighbourhood the dimensions give way.
