@@ -72,7 +72,7 @@ def lot_area(doc, g):
 
 def front_distance(doc, g, facts):
     """The house's least distance to the street line in plan, from its own vertices (independent of the panel)."""
-    pts = [rg.Point3d(v.Location.X, v.Location.Y, 0) for o in massing(doc, g) for v in o.Geometry.Vertices]
+    pts = plan_points(doc, g)
     return min(ln.DistanceTo(p, True) for ln in street_lines(facts) for p in pts) if pts else None
 
 
@@ -85,8 +85,22 @@ def row_for(items, rule):
 
 
 def massing(doc, g):
-    layer = doc.Layers.FindByFullPath(g.LAYERS["building"], -1)
-    return [o for o in doc.Objects if o.Attributes.LayerIndex == layer and o.ObjectType == Rhino.DocObjects.ObjectType.Brep]
+    """The building objects, chosen as the plugin chooses them (g._buildings): GordiumStart draws the starting house
+    on Gordium::Massing (per-floor sublayers on the demo branch), not on the Building layer."""
+    return list(g._buildings(doc))
+
+
+def plan_points(doc, g):
+    """Every vertex of the building objects, flattened to plan (Breps, extrusions and meshes)."""
+    pts = []
+    for o in massing(doc, g):
+        geo = o.Geometry
+        if isinstance(geo, rg.Extrusion):
+            geo = geo.ToBrep()
+        verts = [v.Location for v in geo.Vertices] if isinstance(geo, rg.Brep) else \
+            [rg.Point3d(v) for v in geo.Vertices] if isinstance(geo, rg.Mesh) else []
+        pts += [rg.Point3d(p.X, p.Y, 0) for p in verts]
+    return pts
 
 
 def street_lines(facts):
@@ -97,7 +111,7 @@ def toward_street(doc, g, facts):
     """The unit vector from the house's nearest vertex to its nearest point on any street line: square to that line
     when the nearest point is inside it, so moving by d cuts the front yard by d (on a street of several lines another
     one can become nearer; the claim on the measured distance after the move catches that)."""
-    pts = [rg.Point3d(v.Location.X, v.Location.Y, 0) for o in massing(doc, g) for v in o.Geometry.Vertices]
+    pts = plan_points(doc, g)
     p, near = min(((p, ln.ClosestPoint(p, True)) for ln in street_lines(facts) for p in pts),
                   key=lambda pq: pq[0].DistanceTo(pq[1]))
     v = near - p
@@ -165,7 +179,7 @@ def one_site(g, docs, district, site):
                 i for i in after if i["status"] == "does_not_comply" and i.get("rule") != nudge["rule"]],
                 [(i.get("rule"), i["status"]) for i in after if i["status"] == "does_not_comply"])
         else:
-            claim("the house is on the Building layer (to work out the nudge)", False, front)
+            claim("the starting house is found among the building objects (to work out the nudge)", False, front)
         view = doc.Views.Find("Top", False) or doc.Views.ActiveView
         bmp = view.CaptureToBitmap(System.Drawing.Size(1000, 640))
         if bmp is not None:

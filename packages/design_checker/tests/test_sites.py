@@ -208,6 +208,10 @@ def test_the_light_run_nudge_claims_its_distance_and_numbers():
     exec(compile(ast.Module([fn], []), "feet", "exec"), ns)
     assert ns["feet"]("22'-0 1/8\"") == 22 + 0.125 / 12 and ns["feet"]("25'-0\"") == 25 and ns["feet"]("—") is None
     assert ns["feet"]("-0'-6\"") == -0.5
+    # the house is found as the plugin finds building objects (GordiumStart draws it on Gordium::Massing, not on
+    # the Building layer), or the nudge never runs
+    massing = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "massing")
+    assert "g._buildings(doc)" in ast.get_source_segment(src, massing)
     assert 'abs(now - nudge["proposed_ft"]) <= 0.1' in src
     assert 'abs(a - nudge["proposed_ft"])' in src and 'abs(b - nudge["required_ft"])' in src
 
