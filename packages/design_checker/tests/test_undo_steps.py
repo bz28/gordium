@@ -18,7 +18,8 @@ REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_bu
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
         "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
-        "show_context", "_context_on", "check_now", "set_auto_check", "_auto", "_massing_hidden", "_sync_ticks"]
+        "show_context", "_context_on", "check_now", "set_auto_check", "_auto", "_massing_hidden", "_sync_ticks",
+        "switch_side_yards"]
 
 
 class Doc:
@@ -26,6 +27,7 @@ class Doc:
 
     RuntimeSerialNumber = 1
     UndoRecordingEnabled = True
+    ModelAbsoluteTolerance = 0.001
 
     def __init__(self):
         self.open, self.records, self.outside, self.unrecorded = [], [], [], []
@@ -47,6 +49,8 @@ class Doc:
 
         class Layer:
             _visible = True
+            IsDeleted = False                                 # (#35's hide_massing walks every Massing layer)
+            FullPath = logic.MASSING
 
             @property
             def IsVisible(self):
@@ -63,6 +67,9 @@ class Doc:
 
             def __getitem__(self, i):
                 return layer
+
+            def __iter__(self):
+                return iter([layer])
 
         class Objects:
             def ModifyAttributes(self, o, attrs, quiet):
@@ -136,7 +143,11 @@ def _plugin(doc, said):
           "_context_record": lambda doc: None, "sync_context": lambda doc, facts: None,
           "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}"),
           # (#34: the envelope's snap curves shown or hidden in every open document; nothing written in this one)
-          "_envelope_everywhere": lambda: None}
+          "_envelope_everywhere": lambda: None,
+          # Switch side yards (#35): no starting house here, so refused and nothing written; its own one Undo step is
+          # pinned in test_side_yards. (#35's layer locks: each layer's own lock as it was)
+          "_start_floors": lambda doc: [], "_feet_length": lambda doc, x: x,
+          "_own_lock": lambda doc, layer: False, "_set_own_lock": lambda doc, layer, own: None}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     exec(SRC[SRC.index("class RhinoTable:"):].split("\ndef ", 1)[0], ns)      # noqa: S102
@@ -153,7 +164,9 @@ CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": (
          # Show neighbourhood (#23): the tick saved, the context layers shown, a neighbourhood fetched and drawn
          "context": ((True,), True),
          # Check (#27): a check, nothing written; Check after every edit: the setting saved in the file
-         "check": ((), False), "auto_check": ((False,), True)}
+         "check": ((), False), "auto_check": ((False,), True),
+         # Switch side yards (#35): refused with no starting house (its real step: test_side_yards)
+         "switch_sides": ((), False)}
 
 
 def test_the_guard_covers_every_panel_action():
