@@ -1770,6 +1770,10 @@ def pick_main(buildings: list[dict], facts: dict) -> tuple:
     return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
+# the dwelling units a use itself says (§325-3B: a one-family dwelling is a dwelling unit; a two-family dwelling holds two)
+IMPLIED_UNITS = {"one_family_detached": 1, "two_family": 2}
+
+
 def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
     """Stated facts each well formed but contradicting each other: (the reason, the facts in it). Every fact in one is
     set aside with that reason (_set_aside_conflicts), so no row reading it can comply on facts that contradict each
@@ -1787,6 +1791,30 @@ def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
     if type(without) is int and type(with_) is int and with_ < without:
         out.append((stop("household_counts_disagree", without=without, with_=with_),
                     ("unrelated_persons", "unrelated_persons_with_children")))
+    # the occupants of every unit on the lot together, and the most in any one unit (R-2c notes 4-6): the most in one
+    # unit can't be more than all of them, and the units can't hold more than units x the most in one (#38 review
+    # round 1: 2 units, 10 occupants, at most 1 in a unit read as "both units lived in" and complied on 7,200 sf)
+    total, most = facts.get("occupants"), facts.get("occupants_most_in_one_unit")
+    if type(total) is int and type(most) is int:
+        stated = facts.get("dwelling_units")
+        units = stated if type(stated) is int else IMPLIED_UNITS.get(facts.get("use"))
+        # an accessory dwelling unit on the lot (or not said) is one more unit whose occupants count too (review round 2:
+        # a house of 2 and an ADU of 2 are 4 occupants, at most 2 in one): no ceiling then. No unit at all is the
+        # rules' own case (R-2c: "no dwelling unit stated"), not this one.
+        if most > total:
+            out.append((stop("occupant_split_disagree", most=most, occupants=total),
+                        ("occupants", "occupants_most_in_one_unit")))
+        elif units and facts.get("accessory_dwelling_unit") is False and total > units * most:
+            # "no ADU" is one of the answers that can't all be true (review round 3: R-1b's occupancy rule reads it and
+            # complied on it), so it is set aside too; the units only when stated (else the use's own, §325-3B)
+            said = type(stated) is int          # the units entered, or the use's own count (review round 4: say which)
+            out.append((stop("occupant_counts_disagree", occupants=total, units=units,
+                             unit_words=("dwelling unit" if units == 1 else "dwelling units") + (
+                                 "" if said else " (what this use is, §325-3B)"),
+                             most=most, held=units * most,
+                             check="the occupant counts, the dwelling units" if said else "the occupant counts"),
+                        ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
+                        + (("dwelling_units",) if type(stated) is int else ())))
     return out
 
 
