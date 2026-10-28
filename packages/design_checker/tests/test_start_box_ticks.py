@@ -55,6 +55,10 @@ class Thing:
     def __call__(self, *args, **kwargs):
         return Thing(*args, **kwargs)
 
+    def __iadd__(self, fn):                     # any other event (`x.MouseUp += f`): kept, never fired
+        self.__dict__.setdefault("handlers", []).append(fn)
+        return self
+
     def __getitem__(self, _):
         return Thing
 
