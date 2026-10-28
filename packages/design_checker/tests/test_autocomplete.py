@@ -181,7 +181,7 @@ def test_the_list_is_as_tall_as_its_rows_and_long_lines_wrap():
 def test_the_box_grows_with_the_list_so_its_buttons_stay_on_screen():
     box = part(UI, "def start_box(", "\ndef ")
     fit = part(box, "def fit_box(", "def hide_hints(")
-    assert "want = (hint_list.Height + 6) if hint_list.Visible else 0" in fit
+    assert "want = logic.hint_rows_px(hint_list.Visible, hint_list.Height, hint_note.Text)" in fit   # the note too
     assert "dialog.ClientSize = ed.Size(size.Width, size.Height + delta)" in fit and "keep_on_screen(dialog)" in fit
     hide = part(box, "def hide_hints(", "def pick_hint(")
     assert hide.index("hint_list.Visible = False") < hide.index("fit_box()")
