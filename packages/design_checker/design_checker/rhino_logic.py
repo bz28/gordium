@@ -3746,6 +3746,7 @@ def drop_pending(facts, saved_ui):
     # survey..., Draw my lot...) dropped them, and its street is asked again (review round 4 of the corner fix, F1:
     # the old lot's street line came back on a survey lot, off its outline)
     same_lot = (facts.get("lot_id") or None) == (pending.get("lot_id") or None)
+    corner_was = facts.get("corner_lot")
     for where, key, old, new in pending.get("undo") or []:
         target = facts if where == "facts" else saved_ui
         # the Corner lot? answer shown for the previewed lot, or given for it, was that lot's: never the drawn lot's
@@ -3757,7 +3758,10 @@ def drop_pending(facts, saved_ui):
                 target.pop(key, None)
             else:
                 target[key] = old
-    return facts, saved_ui
+    if not same_lot and facts.get("corner_lot") != corner_was:   # that lot's lines were picked under the answer
+        set_street_lines(facts, None)            # set aside: asked again on it, as when an answer flips
+        saved_ui.pop("street_name", None)        # (corner_answered; round 5 of the corner fix: a survey lot kept
+    return facts, saved_ui                       # two lines under the drawn lot's No)
 
 
 def box_opened(saved_ui, facts):

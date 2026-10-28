@@ -1665,3 +1665,34 @@ def test_review_r4_a_lot_picked_during_a_preview_never_gets_the_old_lots_street_
     assert box.facts["lot_id"] == "lot2" and not box.facts.get("street_line")
     box.draw()
     assert site.facts.get("lot_id") == "lot2" and not site.facts.get("street_line")
+    # round 5 (P2): streets picked on that survey lot under the preview's answer, then the preview set aside: the
+    # drawn lot's answer comes back, so those lines go (asked again), never a lot answered No with two streets'
+    # lines, nor Yes with one; under the same answer they stay
+    two = {"lines": [[[0, 0], [50, 0]], [[50, 0], [50, 100]]], "ids": ["A St", "B St"], "name": None}
+    for site, preview, picked, drawn_corner in (
+            (Site(lot="looked_up", drawn=OTHER), "96_ithaca_rd", two, False),
+            (_drawn_corner_lot(), "106_ithaca_rd", {"lines": one, "ids": ["A St"], "name": None}, True)):
+        site.saved.update(replaceable_lot=site.facts["lot_id"], from_sample=False)
+        site.table.objects["lot2"] = {"layer": "Site", "kind": "lot", "area": 5000.0}
+        box = site.box().look_up(answer(preview))
+        box._apply()
+        assert box.facts["corner_lot"] is not drawn_corner
+        box.facts, box.saved = logic.pick_effect("lot", "lot2", box.facts, box.saved)
+        box._apply()
+        box.facts, box.saved = logic.pick_effect("street", picked, box.facts, box.saved)
+        assert box.facts["street_line"] == picked["lines"]
+        assert box.type_address(OTHER).draw() == "box-again"
+        box.draw()
+        assert site.facts["lot_id"] == "lot2" and site.facts["corner_lot"] is drawn_corner
+        assert not site.facts.get("street_line"), (drawn_corner, site.facts.get("street_line"))
+    site = Site(lot="looked_up", drawn=OTHER)                  # the same answer (106 looks up No, as drawn): kept
+    site.table.objects["lot2"] = {"layer": "Site", "kind": "lot", "area": 5000.0}
+    box = site.box().look_up(answer("106_ithaca_rd"))
+    box._apply()
+    box.facts, box.saved = logic.pick_effect("lot", "lot2", box.facts, box.saved)
+    box._apply()
+    box.facts, box.saved = logic.pick_effect("street", {"lines": one, "ids": ["A St"], "name": None}, box.facts,
+                                             box.saved)
+    assert box.type_address(OTHER).draw() == "box-again"
+    box.draw()
+    assert site.facts["lot_id"] == "lot2" and site.facts["corner_lot"] is False and site.facts["street_line"] == one
