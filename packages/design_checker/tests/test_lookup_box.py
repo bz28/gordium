@@ -170,7 +170,8 @@ def test_an_unsettled_lot_makes_every_item_measured_from_it_need_review_never_co
 # ---- what can't be filled in: the box keeps working and says why ---------------------------------------------
 
 @pytest.mark.parametrize("name, kw, says", [
-    ("106_ithaca_rd", {"offline": True}, "Couldn't reach the map services (offline?): enter the site by hand."),
+    ("106_ithaca_rd", {"offline": True}, "Couldn't reach the map services (offline?): Look up again later, or put "
+                                         "back the lot's own address (or clear it)"),
     ("not_found", {}, "No City of Ithaca address found for"),
     ("953_danby_rd_town", {}, "not the City of Ithaca"),
 ])
@@ -193,13 +194,14 @@ def test_several_matches_are_offered_under_the_address():
     facts, saved, state = box(p)
     rows = {r["key"]: r for r in logic.box_rows(state)}
     assert rows["address"]["matches"] == ["10 N Aurora St", "10 S Aurora St"]
-    assert logic.uncertain(state).endswith("Pick one under Address, then Look up again.")
+    # what to do, then that the model is as it was (the box says so after every lookup that found no lot)
+    assert logic.uncertain(state).endswith("Pick one under Address, then Look up again. " + logic.NOTHING_CHANGED)
 
 
 def test_looking_up_shows_its_state_and_keeps_draw_off():
     rows = {r["key"]: r for r in logic.box_rows({"lookup": {"looking": "106 Ithaca Rd"}})}
-    assert rows["address"]["actions"] == [("lookup", "Looking up…", False)]
-    assert rows["address"]["status"] == "Looking up 106 Ithaca Rd… (up to 45 s)"
+    assert rows["address"]["actions"] == [("lookup_cancel", "Cancel lookup", True)]    # the button stops it
+    assert rows["address"]["status"] == "Looking up 106 Ithaca Rd · Starting the lookup…  ●○○  0 s (stops at 45 s)"
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "draw.Enabled = logic.can_draw(state) and not looking" in ui and 'done("pick:lookup_done")' in ui
 
@@ -221,13 +223,20 @@ def test_only_what_each_source_allows_is_written_into_the_model():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
     assert 'answer["facts"]' not in body and "answer.get(\"facts\")" not in body     # geometry only from writes
-    assert 'STATE["lookup_guide"]' in body and "logic.apply_lookup(session.table, session" in body and "AddCurve" not in body
+    # Look up previews (logic.preview_lookup: nothing in the model); Draw writes through logic.apply_reset, which
+    # draws by apply_lookup (Ben, 2026-10-21: re-lookup)
+    assert 'STATE["lookup_guide"]' in body and "logic.preview_lookup(answer, facts, saved_ui" in body and \
+        "logic.apply_reset(table, session, facts, saved_ui, choice" in body and "AddCurve" not in body
 
 
 def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
     assert main(["106 Ithaca Rd, Ithaca, NY 14850", "--fixture", "106_ithaca_rd"]) == 0
     out = capsys.readouterr().out.strip().splitlines()
-    assert len(out) == 1 and json.loads(out[0])["status"] == "found"
+    # a progress line as each stage starts, then the answer, always last
+    assert [json.loads(line) for line in out[:-1]] == [{"step": t} for t in (
+        "Finding the address…", "Finding the tax parcel…", "Finding which lot lines face a street…",
+        "Reading the ground elevations…", "Reading the City zoning map…", "Checking the historic and gorge maps…")]
+    assert json.loads(out[-1])["status"] == "found" and logic.lookup_answer("\n".join(out))["status"] == "found"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert '"-m", "design_checker.lookup_box", address' in rhino and "logic.LOOKUP_LIMIT_S" in rhino
     assert "_lookup_kill(run)" in rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
@@ -493,7 +502,7 @@ def test_p3_the_lookups_files_are_closed_one_time_limit_and_no_silent_failure():
     poll = rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
     assert poll.count("_lookup_files_done(run)") == 2 and "_lookup_files_done(run)" in \
         rhino[rhino.index("def _lookup_stop("):rhino.index("def _lookup_done(")]
-    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(frame_site, "frame the looked-up lot")' in rhino
+    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(_frame_points, "frame the looked-up lot")' in rhino
     assert "frame_site_box" not in rhino
     assert "LOOKUP_LIMIT_S = " not in (REPO / "packages/design_checker/design_checker/lookup_box.py").read_text(
         encoding="utf-8")
@@ -566,7 +575,10 @@ class FakeTable:
         return "new%d" % self.n
 
     def add_lot(self, ring, name):
-        return self._new("Site", "lot")
+        i = self._new("Site", "lot")
+        if ring:
+            self.objects[i]["area"] = area([list(p) for p in ring])
+        return i
 
     def add_spot(self, p):
         return self._new("Gordium::Grade", "point")
@@ -574,6 +586,17 @@ class FakeTable:
     def ground_points(self):
         return [i for i, o in self.objects.items() if o["kind"] == "point"
                 and o["layer"] in ("Gordium::Grade", "Gordium::Grade::Finished")]
+
+    def massing(self):                       # the starting house's floors (Gordium::Massing and its sublayers)
+        return [i for i, o in self.objects.items() if logic.on_layer(o["layer"], logic.MASSING)]
+
+    def buildings(self):                     # the architect's buildings, as the plugin's RhinoTable finds them
+        kinds = {"brep": "Brep", "lot": "PolylineCurve", "point": "Point"}
+        return logic.own_buildings((i, o["layer"], o.get("type") or kinds.get(o["kind"], o["kind"]), o.get("holds"))
+                                   for i, o in self.objects.items())
+
+    def fingerprint(self, ids):
+        return repr(sorted((i, self.objects[i].get("geom")) for i in ids))
 
     def snapshot(self):
         return {i: (o["layer"], o["kind"]) for i, o in self.objects.items()}, sorted(self.layers), self.views
@@ -877,7 +900,7 @@ def test_while_a_start_box_is_open_no_panel_action_does_anything_but_say_so():
     names = re.findall(r'"(\w+)": ', body)
     assert {"enter", "add", "ground", "not_ground", "retry", "edit_site", "survey", "grade", "report", "envelope",
             "massing", "zoom"} <= set(names)
-    assert "return logic.gate_actions(PANEL_ACTIONS(), _box_open, say)" in rhino
+    assert "logic.busy_actions(logic.gate_actions(PANEL_ACTIONS(), _box_open, say)," in rhino   # (and busy: #32)
     calls, said, box = [], [], {"open": True}
     gated = logic.gate_actions({n: (lambda *a, n=n: calls.append(n)) for n in names}, lambda: box["open"], said.append)
     for n in names:
@@ -903,8 +926,15 @@ def test_live_mode_never_rechecks_under_an_open_start_box():
     assert not logic.should_recheck(None, 11.0, False, False, wait)       # nothing changed
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     idle = rhino[rhino.index("def _idle("):rhino.index("def documents(")]
-    assert 'logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS,' in idle
-    assert idle.index("should_recheck") < idle.index('STATE["dirty"] = None')   # the pending edit kept until then
+    assert 'busy = STATE.get("running") or STATE.get("asking") is not None' in idle    # a check, or any answer
+    assert 'logic.should_recheck(t, time.time(), busy, _box_open(), IDLE_SECONDS,' in idle
+    # the pending edit kept until a check starts, never under an open box: each place _idle clears it comes after the
+    # test that a check can start now (no box open, nothing running): the file come to the front, or the re-check
+    clears = [i for i in range(len(idle)) if idle.startswith('STATE["dirty"] = None', i)]
+    assert len(clears) == 2, clears
+    assert idle.index("should_check_front") < clears[0] < idle.index("should_recheck") < clears[1]
+    assert idle.index("_check_live(front)") > clears[0] and idle.index("_check_live(doc)") > clears[1]
+    assert not logic.should_check_front(True, False, True)                # a box open: the file in front waits too
     check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
     assert 'if STATE.get("running") or not logic.allowed("check", _box_open()):\n        return None' in check
     save = rhino[rhino.index("def save_facts("):rhino.index("def _save_facts(")]
@@ -943,7 +973,7 @@ def test_closing_the_box_works_out_each_panel_control_from_the_panel_as_it_is_no
     assert "_was_enabled" not in body and "saved" not in body                # nothing remembered by position
     assert 'zoom_ok = parts.get("selected") in (parts.get("by_id") or {}) and not parts.get("stale")' in body
     show = ui[ui.index("def show("):ui.index("def _header(")]
-    assert 'parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]' in show   # same rule
+    assert "set_zoom(parts)" in show and "set_zoom(parts)" in body                  # same rule (logic.zoom_state)
 
 
 def test_a_box_that_edited_is_checked_once_not_twice():
@@ -966,10 +996,13 @@ def test_switching_documents_with_a_pending_edit_still_rechecks_the_one_in_front
     assert logic.should_recheck(10.0, 13.0, False, False, 0.5, logic.last_check_at(checked_at, "doc B"))
     assert not logic.should_recheck(10.0, 13.0, False, False, 0.5, logic.last_check_at(checked_at, "doc A"))
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()' in check
-    assert check.index('"envelope": result.get("envelope"), "at": time.time()}') < check.index('"checked_at"') < \
-        check.index("except Exception")                  # only after a completed check, never on an error
+    apply = rhino[rhino.index("def _check_apply("):rhino.index("def _check_failed(")]
+    # a completed check only (never an error or a Cancel), dated when it READ the model: an edit made while a
+    # background re-check ran is newer, so it is checked again
+    assert 'STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = begun["at"]' in apply
+    assert apply.index('"envelope": result.get("envelope"), "at": time.time()}') < apply.index('"checked_at"')
+    others = rhino[rhino.index("def _check_failed("):rhino.index("def _check_live(")]
+    assert '"checked_at"' not in others
     new_doc = rhino.index("def _new_document(")
     assert '"checked_at"' not in rhino[new_doc:rhino.index("\ndef ", new_doc + 10)]
 
@@ -1309,3 +1342,33 @@ def test_the_address_streets_name_is_kept_through_draw():
     assert logic.address_street("106 Ithaca Road, Ithaca", "ITHACA") is None          # never a part of a name
     assert logic.address_street("106 West Ithaca Road", "ITHACA RD") is None
     assert logic.address_street(None, "ITHACA RD") is None
+
+
+def test_the_suggestion_rows_take_no_room_while_empty():
+    """The architect's review (2026-10-28, item 16): an empty gap under Address, the hidden type-ahead list and its
+    empty note still taking their rows. They are one row now, shown only while the list or the note has something."""
+    assert logic.hint_rows_shown(False, "") is False and logic.hint_rows_shown(False, None) is False
+    assert logic.hint_rows_shown(True, "") is True and logic.hint_rows_shown(False, "Suggestions are offline") is True
+    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "layout.AddRow(None, hint_rows)" in ui and "row(hint_list)" not in ui and "row(hint_note)" not in ui
+    assert "hint_rows.Visible = False" in ui and "hint_rows.Visible = logic.hint_rows_shown(" in ui
+    # the box grows by what shows, the note's line too (review round 1: offline, the note pushed Draw down)
+    assert logic.hint_rows_px(False, 40, "") == 0 and logic.hint_rows_px(True, 40, "") == 46
+    assert logic.hint_rows_px(False, 40, "Suggestions are offline") == logic.HINT_NOTE_PX
+    assert logic.hint_rows_px(True, 40, "x") == 46 + logic.HINT_NOTE_PX
+    assert "want = logic.hint_rows_px(hint_list.Visible, hint_list.Height, hint_note.Text)" in ui
+
+
+def test_zoom_to_turns_on_as_a_row_is_picked_and_says_why_when_off():
+    """UX review 2026-10-27: picking a needs-review row left Zoom to greyed until the panel next redrew (the selection
+    never touched it), with nothing saying why."""
+    assert logic.zoom_state(True, False, False) == (True, "Zoom to the selected item (or double-click its row).")
+    assert logic.zoom_state(False, False, False) == (False, "Select a row to zoom to it.")
+    assert logic.zoom_state(True, True, False) == (False, "Out of date: press Check, then zoom.")
+    assert logic.zoom_state(True, False, True)[0] is False and "start box" in logic.zoom_state(True, False, True)[1]
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    picked = ui[ui.index("    def selected(sender, e):"):ui.index("tree.SelectedItemChanged")]
+    assert picked.index("set_zoom(parts)") < picked.index("show_detail(parts)")
+    setter = ui[ui.index("def set_zoom(parts):"):ui.index("def set_box_open(")]
+    assert "b.Enabled, b.ToolTip = logic.zoom_state(" in setter
+    assert ui.count('parts["zoom_button"].Enabled =') == 0              # one place decides it

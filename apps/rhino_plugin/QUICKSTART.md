@@ -2,8 +2,9 @@
 
 For an architect who has just opened Rhino. About 10 minutes the first time, then 1 minute per project.
 
-Gordium checks your massing against the City of Ithaca zoning rules (R-1b, one-family houses, for now) while
-you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
+Gordium checks your massing against the City of Ithaca zoning rules (the residential districts R-1a, R-1b, R-2a, R-2b,
+R-2c, R-3a, R-3aa, R-3b and RU, for now;
+the sample project below is an R-1b one-family house) while you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
 **Contents:** [Set up (once)](#what-you-need-once) · [Your first project](#your-first-project-step-by-step) ·
@@ -230,22 +231,56 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 
 1. **New file.** File → New, a template in **feet** (any units work; feet is easiest to read).
 2. **Type `GordiumStart`** and press Enter.
-   - On an empty file Gordium draws its sample lot, 106 Ithaca Rd as the State tax map draws it (7,033 sf, its
-     front curving along Ithaca Road), so you can try it at once. It is placed as an address lookup places it: the
-     street along the bottom of Top view, the lot behind it.
+   - On an empty file the start box opens empty and **Draw** stays off until an address is looked up. To try
+     Gordium, look up 106 Ithaca Rd: the State tax map's lot (7,033 sf, its front curving along Ithaca Road),
+     placed with the street along the bottom of Top view, the lot behind it. A lot the maps don't know:
+     **Enter the site by hand…** (you say the lot is in the City of Ithaca, draw the lot and pick the district and
+     street side; no neighbourhood).
    - To use your own lot instead, first draw it as one closed polyline on a layer named `Site`, then run
      `GordiumStart`.
-3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
-   - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
-     45 seconds; the box says "Looking up…"). It fills in the lot from the tax map (drawn with its street at the
-     bottom of Top view), the street side, whether it's a corner lot, and a suggested zoning district, each with
-     where it came from (not the ground: for now it is assumed flat, see **Ground** below). Anything doubtful is amber with the reason: tick **I checked
-     this** once you have, or change it; until then the items that depend on it need review. If the lookup
-     can't help (offline, not found, outside the City of Ithaca), the box says why and you fill it in by hand.
-   - **Zoning district**: "entered by you", or after Look up "suggested by Gordium · City of Ithaca zoning map,
-     used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project, after every
-     lookup and after you pick another district (a tick is for one district), because the City's online map is informational: the district is your statement.
+   Whenever Gordium takes more than a moment, a small window says what it is doing, with the seconds so far: Rhino
+   keeps drawing meanwhile. A check, the starting house and the zoning report have **Cancel** (starting the
+   checker and reading the lot facts have none: they are quick once it runs); **Esc** stops it too while that
+   window is in front (anywhere else in Rhino, Esc keeps its usual meaning). Cancel stops the
+   work and changes nothing: a **Draw** cancelled while Gordium works out the starting house draws nothing (the
+   model is as it was before the box); once it is drawn, Cancel stops only the check that follows. A cancelled
+   check leaves the panel saying "Check cancelled" (press **Check again**); a cancelled report leaves the file as it
+   was. Live re-checks after an edit run in the background: the panel says "Checking…" with what it is doing and
+   its own **Cancel**.
+3. **The start box** opens (filled in from your lot, if you drew one). Read it top to bottom:
+   - **Address**: type it and press **Look up** (or Enter). After 4 characters and a short pause, a list under the
+     box offers the City of Ithaca addresses that start that way (the City's own address list, asked live, never
+     kept; Town of Ithaca addresses never appear): **Down**/**Up** and **Enter**, or a click, picks one; **Esc**
+     closes the list. Offline, it quietly says "Suggestions unavailable" and typing works as before. No town
+     typed? Look up asks for the address in the City ("106 Ithaca Rd" becomes "106 Ithaca Rd, Ithaca, NY"). If a
+     lookup finds no lot, the box says so and that the lot shown is still the one you had. Gordium asks the public map services (it takes up to
+     45 seconds; the box says what it is doing as it goes, "Looking up … · Reading the City zoning map…", with a
+     moving mark and the seconds so far, and **Cancel lookup** stops it: nothing it would have filled in
+     changes, and your ticks stay as you left them). Look up only shows what it found: the address and a suggested zoning
+     district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which
+     draws that lot from the tax map (its street at the bottom of Top view), the street side and whether it's a
+     corner lot, each with where it came from (not the ground: for now it is assumed flat, see **Ground** below).
+     Anything doubtful is amber with the reason: tick **I checked this** once you have, or change it; until then
+     the items that depend on it need review. An address typed and not looked up keeps Draw off ("Press Look up to
+     find … first."); on a lot already drawn, type the lot's own address back, or clear it, and Draw is on again
+     (in a new file Draw needs a lookup that finds the lot, or **Enter the site by hand…**). If the lookup can't
+     help (offline, not found, outside the City of Ithaca), the box says why: correct the address and Look up
+     again, or put back the lot's own address (or clear it) and fill the rest in by hand. Outside the City: Draw
+     stays off for that address, and in a new file by hand is refused, until a live lookup of that same address
+     finds the lot, or you close the box. Another address looked up and found can be drawn; by hand stays refused.
+   - **Zoning district**: "entered by you" (R-1b, R-1a, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b and RU can be picked),
+     or after Look up "suggested by Gordium · City of Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do,
+     on every new project, after every lookup and after you pick another district (a tick is for one district),
+     because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
+   - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
+     near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building
+     holds. Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
+     assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
+     its full wording. Answers are saved with the project; change them in Edit site… .
+     Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
+     panel's collapsed **Use details — answer when you plan the interior** group (still needs review, not counted among
+     the building's problems, never a pass), each with its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
      survey…** to pick your surveyed outline instead.
@@ -264,10 +299,24 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 4. **Draw.** You see:
    - the lot's property line with each edge's length (in Top view);
    - the buildable envelope, see-through blue: the space every yard and the height limit leave;
-   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
-     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
-     lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
-     on a survey it goes to the limits;
+   - on a locked layer **Gordium::Envelope**, real curves to snap to (Osnap): the buildable outline at ground
+     level and each yard's required line in full. On a tax-map lot (any lot not marked as from a survey) the
+     outline 2'-0" in from every lot line is solid and everything as drawn dashed; where nothing is left 2'-0" in,
+     only the dashed one. Gordium replaces them at every check (never measured; Undo never stops on them); untick
+     **Show buildable envelope** to hide them;
+   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, each floor on its
+     own sublayer `Gordium::Massing::Floor 1`, `Floor 2`, `Floor 3` (a `Gordium::Massing::Roof` sublayer is made for
+     your roof). **Hide starting house** in the panel hides it (it is still checked). On a lot from the tax map it
+     keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off; on a survey it goes to the
+     limits. The panel says why it is that size, for example "Largest house that complies even if the tax-map lines
+     are 2'-0" off; limited by lot coverage 25%. Use my survey… for the full size.". Where the district lets the
+     two side yards differ (R-2b: one side 10 ft, the other 5 ft), the starting house takes the 10 ft yard on one
+     side only: the side that gives the larger house, else the left as seen from the street. The note says which,
+     for example "Side yards: 10'-0" on the left (west), 5'-0" on the right (east), seen from the street."; under the
+     panel's Starting house fact, **Switch side yards** redraws it with the sides swapped (one Undo step; proven by
+     the checker first, and never over a house you have moved or edited). The blue envelope and every check stay
+     cautious: the envelope keeps the larger side yard on both sides;
+   - on a tax-map lot the blue envelope is the cautious one: every lot line 2'-0" nearer;
    - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing, all kept in the file:
      the neighbouring tax parcels and the street centerlines in grey on locked `Gordium::Context` layers; the
      neighbouring building footprints as outlines (no heights) on the unlocked `Gordium::Context::Buildings` layer,
@@ -284,9 +333,21 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    after you stop (kept with the file). After a check:
    - when something newly stops complying, a short note appears bottom left ("✕ Rear yard no longer complies ·
      29'-6" proposed · 30'-0" required · −0'-6""). It goes by itself;
-   - only the part of the building inside a required yard, or above the height limit, turns red. The rest stays
-     neutral;
-   - in Top view each yard is drawn as measured, marked ✓ ? or ✕.
+   - only the offending part of the building is coloured: the part inside a required yard, or above the height
+     limit. Red where it fails under every reading; amber where it fails only under some (for example within the
+     tax map's 2'-0" of a lot line). The rest stays neutral;
+   - in Top view each yard is dimensioned as a drawing is: square to its lot line from the wall facing it, red
+     where it fails, amber where it needs review, complying ones neutral grey; it shows its number only, on its
+     line or just past its end (✕ or ? before it when something is wrong; the yard's name and what it needs are in
+     the panel); when the nearest part is not the ground-floor wall the number says what it is measured to, e.g.
+     "22'-0" (to 2nd-floor overhang)" (the number itself and its result are unchanged); the required line is dashed
+     across it, tagged "min 10'-0"" where the yard fails or needs review;
+     what is wrong is placed first and every number stays in view; in the Front
+     and Right views the height is dimensioned up from the grade plane, the limit faint. Zoomed out to the
+     neighbourhood the dimensions give way.
+   - in Top view Gordium's lines (the lot line, the envelope's outline, the dimensions) are drawn over everything,
+     so none is lost under a roof; in Perspective and the elevations they hide behind your solids, as Rhino's own
+     lines do.
 6. **Read the panel.** Click any row. The bottom half shows the city's exact words, the examiner-style citation
    ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, and what to
    change ("To comply: move the building 0'-6" farther from that lot line."). **How it's worked out** (closed at
@@ -307,7 +368,7 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 | `GordiumFacts` | Open the start box again to change the site facts (the panel's **Edit site…** does the same). |
 | `GordiumOff` | Stop Gordium and clear its drawing. Nothing in your model is changed. |
 
-Gordium never changes your model, except for what you ask: the starting building and the sample lot. Everything
+Gordium never changes your model, except for what you ask: the starting building and a looked-up lot. Everything
 else (the envelope, the red, the labels, the status box) is drawn on top and disappears with `GordiumOff`.
 
 ## What "needs review" means
@@ -325,6 +386,13 @@ usually what fixes it:
   because only the zoning office can settle it.
 - **Something on the lot isn't measured**: a solid not on the `Building` layer (a shed on Default, an imported
   garage). Lot coverage counts every building on the lot, so it needs review until you **Add to check…**.
+- **It needs a fact the model can't show** (bedrooms, parking spaces, dwelling units, rooms let for profit,
+  whether it is a conversion, the number of stories): its button names them when that fits, for example **Enter bedrooms
+  and parking spaces…**, or says how many, for example **Answer 3 questions…**. It opens a small window that asks only them (a number, or Not answered / No / Yes). **OK** saves just
+  those answers, each "entered by you" with the date, as one Undo step, and checks again; **Cancel** (or Esc)
+  changes nothing. Left blank, a fact stays unanswered and its rule keeps needing review (never read as 0 or no).
+  Answers to the start box's questions show there too the next time you open **Edit site…**. A row that needs a
+  site fact (the lot, the district, the street side, Corner lot?) has an **Edit site…** button instead.
 
 "– not checked" means Gordium doesn't check it yet (parking needs bedroom and parking counts; overlays come in a
 later release). "Not checked yet" lists the code sections not in Gordium yet (coming in a later version): check
@@ -347,9 +415,9 @@ so the guide and Gordium can't drift apart.
 - **Undo:** Cmd+Z.
 - **Draw a box:** `Box`, then two corners and a height.
 
-### The starting house on the sample lot
+### The starting house at 106 Ithaca Rd
 
-The sample lot is 106 Ithaca Rd as the State tax map draws it (parcel 84.-2-6): 7,033 sf, 75'-10" wide along
+Looked up, 106 Ithaca Rd is the lot as the State tax map draws it (parcel 84.-2-6): 7,033 sf, 75'-10" wide along
 Ithaca Road (its front is a gentle curve) and about 101 ft deep, with a short jog at the back. In Top view the
 street is along the bottom (the lot faces south-east); "back" below means away from the street (up in Top view).
 The side yards are named by compass, as on a site plan: the southwest one is on your left as you face the lot from

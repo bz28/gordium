@@ -7,17 +7,25 @@ import datetime as _dt
 import json
 import math
 import queue
+import re
 import threading
+import time
 
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
 FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew: "<story>;<height drawn, ft>"
 MASSING = "Gordium::Massing"            # where GordiumStart draws the starting building: building objects too
+MASSING_ROOF = MASSING + "::Roof"       # its roof's sublayer (the architect's own roof goes there too): a building
 SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
                 "Leader", "LinearDimension", "AngularDimension", "RadialDimension", "OrdinateDimension")
 # the grade isn't required: without one the check runs and height and stories need review until it's set (spec C3)
 REQUIRED = ("jurisdiction", "zone", "use", "street_line", "lot_surveyed")   # corner lot unanswered: the yards wait (C)
+
+
+def massing_floor(n):
+    """The sublayer of the starting house's floor n (1 up): Gordium::Massing::Floor 1, … (Ben, 2026-10-21)."""
+    return MASSING + "::Floor " + str(int(n))
 
 
 def on_layer(full_path, layer):
@@ -26,6 +34,8 @@ def on_layer(full_path, layer):
 
 
 CONTEXT = "Gordium::Context"            # the context map (neighbouring parcels, streets, notes): drawing only
+ENVELOPE = "Gordium::Envelope"          # the curves the architect snaps to (the buildable outline, the yard lines)
+ENVELOPE_KEY = "gordium_envelope"       # on each of those curves: what it is (Gordium's own, redrawn each check)
 CONTEXT_KEY = "gordium_context"         # on each context object: the endpoints.yaml source it was drawn from
 HOLDING_LAYER = "Gordium::Replaced (Cancel restores)"   # objects a start box replaced, until Draw (BoxSession)
 HELD_FROM = "gordium_held_from"                          # on each held object: the layer it came from
@@ -51,6 +61,46 @@ class BoxGate:
         self.open = False
 
 
+def envelope_outlines(env, plan):
+    """The buildable outline(s) the blue envelope is drawn on (feet): on a tax-map lot the cautious one, every lot
+    line 2'-0" nearer (each piece of it; none where nothing is left: the as-drawn outline is then only the dashed
+    curve on Gordium::Envelope), so the envelope shows where a building complies however the tax map's lines lie
+    (Ben, 2026-10-21: "cautious envelope on tax-map lots"); on a survey the outline as drawn. Largest first, by the
+    shoelace area (_ring_area): plain Python, because Rhino's own Python runs this module and has no shapely (every
+    check in Rhino failed "No module named 'shapely'")."""
+    outline = (env or {}).get("outline")
+    if not outline:
+        return []
+    plan = plan or {}
+    cautious = plan.get("buildable_cautious")
+    if not plan.get("lot_from_tax_map") or cautious is None:
+        return [outline]
+    rings = [cautious] if cautious and isinstance(cautious[0][0], (int, float)) else list(cautious)
+    return sorted(rings, key=lambda r: -abs(_ring_area(r)))
+
+
+def envelope_curves(plan):
+    """The curves drawn on Gordium::Envelope for the architect to snap to (Osnap), from check.plan, in feet: each
+    {"points" [[x, y], ...], "closed", "dashed", "what"}. The buildable outline (on a tax-map lot the cautious one,
+    every lot line 2'-0" nearer, solid; the outline as drawn dashed) and each yard's required line in full (dashed
+    on a tax-map lot: it is as drawn). Never measured (classify); redrawn at every check."""
+    plan = plan or {}
+    tax = bool(plan.get("lot_from_tax_map"))        # dashed whenever the lot is the tax map's, whatever is left 2'-0"
+    cautious, drawn = plan.get("buildable_cautious") or [], plan.get("buildable")   # in (review of feature 4, F3)
+    if cautious and isinstance(cautious[0][0], (int, float)):       # (one ring)
+        cautious = [cautious]
+    out = []
+    for ring in cautious if tax else []:
+        out.append({"points": ring, "closed": True, "dashed": False, "what": "buildable outline (cautious)"})
+    if drawn:
+        out.append({"points": drawn, "closed": True, "dashed": tax,
+                    "what": "buildable outline" + (" (as drawn, tax map)" if tax else "")})
+    for y in plan.get("yard_lines") or []:
+        out.append({"points": y["points"], "closed": False, "dashed": tax,
+                    "what": "required line: " + (y.get("name") or y.get("measure") or "yard")})
+    return out
+
+
 def classify(full_path, kind, holds_building=False):
     """What the Rhino command does with one object, from its layer's full path and its geometry's type name:
     "lot" (a curve on the lot layer: a possible lot outline), "building" (a solid or mesh on the building layer),
@@ -61,6 +111,8 @@ def classify(full_path, kind, holds_building=False):
         return None
     if on_layer(full_path, CONTEXT):                 # the neighbourhood drawn for context: never measured or sent
         return None
+    if on_layer(full_path, ENVELOPE) and kind.endswith("Curve"):   # the curves to snap to: Gordium's, never
+        return None                                  # measured (anything else there is judged as anywhere: F7)
     if on_layer(full_path, MASSING):
         full_path = LAYERS["building"]
     if kind.startswith("InstanceReference") and (on_layer(full_path, LAYERS["building"]) or holds_building):
@@ -74,6 +126,16 @@ def classify(full_path, kind, holds_building=False):
     if kind in DRAWING_AIDS or kind.endswith("Curve") or kind.endswith("Dimension"):
         return None
     return "a " + kind + " on the Building layer can't be measured yet (explode it or turn it into a solid)"
+
+
+def own_buildings(objects):
+    """The ids of the architect's buildings among `objects` ((id, layer full path, geometry type name, whether it is
+    a block holding a building)), as the checker sees them (classify): solids on Building and its sublayers, and
+    everything there it can't measure (a block, a surface: each a problem the check names), and a block holding a
+    building wherever it is placed; never the starting house (Gordium::Massing) or what a start box holds. What a
+    reset asks about and clears (re-lookup review round 2: blocks and surfaces on Building were left behind)."""
+    return [i for i, layer, kind, holds in objects
+            if not on_layer(layer, MASSING) and classify(layer, kind, holds) not in (None, "lot")]
 
 
 def panel_header(head):
@@ -166,10 +228,40 @@ def detail_parts(det):
     working, equals, result = rest.partition(" = ")
     plain = head + ": " + result if equals and head in ("Required", "Allowed") else calc
     quotes = [q for q in det.get("quotes") or [] if q.get("text")]
-    return {"notes": [t for t in (det.get("at_limit"), det.get("colours"), plain) if t],
+    return {"notes": [t for t in (det.get("at_limit"), det.get("colours"), plain, det.get("outline")) if t],
             "quotes": [q for q in quotes if not q.get("chart")],
             "worked": [t for t in (calc if plain != calc else None, det.get("scope"), det.get("precision")) if t],
             "worked_quotes": [q for q in quotes if q.get("chart")]}
+
+
+def coloured_info(entry):
+    """What a coloured piece is, kept with it in the drawn list: why (yard or height), the row it is for (its
+    measure and name) and its building, from the plan's block (check.plan). The in-Rhino checks read exactly the
+    list that is drawn, so a claim can't mistake the rear yard's strip for the side yard's (Rhino check of #28)."""
+    return {k: entry.get(k) for k in ("why", "measure", "row", "building")}
+
+
+def block_span(entry, solid_bottom=None, solid_top=None):
+    """The heights (feet) a coloured block is cut from in Rhino: the checker's (check.plan), reaching to the real
+    solid's own top (and, for a yard strip, its own bottom) when Rhino's solid goes further. The checker measures
+    only the faces it can read (a curved vault is left out: its height needs review), so its top can be the wall
+    tops, while the vault above them is just as much over the limit (the Rhino check of #28 at fc0b023: only the
+    band from 35 to 36 ft was coloured, under a vault to 42 ft). A height block always starts at the limit."""
+    base, top = entry["base"], entry["top"]
+    if solid_top is not None:
+        top = max(top, solid_top)
+    if solid_bottom is not None and entry.get("why") != "height":
+        base = min(base, solid_bottom)
+    return base, top
+
+
+def offending_pieces(pieces, block):
+    """What a coloured block draws: the building's own part inside it (Rhino's boolean intersection, `pieces`), or
+    the block itself when the intersection gave nothing (it failed, or the building is a mesh or a solid Rhino
+    can't cut; a block instance is never measured: it is a setup problem, "explode it"), so a failing part is never
+    left uncoloured because a boolean failed."""
+    kept = [p for p in pieces or [] if p is not None]
+    return kept or [block]
 
 
 def labels_on(ui_state):
@@ -196,14 +288,23 @@ def legend_text(code=None):
     """The legend ("?"): the marks, what the plan shows, the precision, and which version of the law was checked
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
-            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
-            "measured distance. Red marks only the part of the building inside a required yard or above the height "
-            "limit. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard "
+            "dimensioned square to its lot line from the wall facing it, as a drawing is: red where it fails, amber "
+            "where it needs review, complying ones neutral grey (colour only what's wrong); its number only, on its "
+            "line (✕ or ? before it when wrong; its name and what it needs are in the panel), the required line "
+            "dashed across it, tagged \"min\" where the yard fails or needs review; in the elevations the height, "
+            "dimensioned up from the grade plane, with the limit faint. In plan these lines are drawn over "
+            "everything; in every other view they hide behind the solids in front of them, as the model's own lines "
+            "do. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, ≥ + at least that much to spare, − short of a "
             "minimum, over past a maximum).\n\n"
-            "In the model: RED is the part of the building that does not comply (under every reading); AMBER is the "
-            "part a rule that needs review is about (for example inside the 2'-0\" tax-map caution zone of a yard). "
-            "The buildable envelope is only a see-through guide: colours come from the rules' results.")
+            "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
+            "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
+            "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
+            "block isn't measured until it is exploded). RED: it "
+            "fails there under every reading. AMBER: it fails there under some readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
+            "Nothing where it complies. The buildable envelope is only a see-through guide: colours come from the "
+            "rules' results.")
     return text + ("\n\nChecked against: " + code if code else "")
 
 
@@ -247,14 +348,78 @@ def with_suggestions(saved, suggested):
 STATED_FACTS = {
     "sleeping_rooms": ("Bedrooms", "count", "bedrooms"),
     "parking_spaces": ("Off-street parking spaces", "count", "parking spaces"),
-    "dwelling_units": ("Dwelling units", "count", "dwelling units"),
+    "dwelling_units": ("Dwelling units on this lot (a semi-detached or attached building split along its party walls: "
+                       "this lot's units only)", "count", "dwelling units"),
     "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
     "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
                    "whether it is a conversion"),
+    "occupants": ("Occupants on this lot, all dwelling units together (§325-3B OCCUPANT: in R-2c, every person with the "
+                  "right to occupy, living there yet or not)", "count", "occupants"),
+    "occupants_most_in_one_unit": ("Most occupants in any one dwelling unit (optional: how they are split)", "count",
+                                   "the most occupants in one unit"),
+    "attached_units_in_building": ("Dwelling units in the whole attached building, every lot it stands on (§325-3B: "
+                                   "three to six)", "count", "the units in the whole building"),
+    "abuts_r1_district": ("Is any R-1a or R-1b land touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it? (§325-19E)",
+                          "yes_no", "whether the lot abuts R-1 land"),
+    # who lives there (§325-3B's one-family and two-family dwellings) and a home occupation: blank until said, so
+    # the rules that read them need review (never 0 or no)
+    "unrelated_persons": ("Most people in any one dwelling unit not related by blood, marriage or adoption to its "
+                          "household's family (minor dependent children in a parent's or relative's care left out)",
+                          "count", "unrelated people per unit"),
+    # asked alone in R-3 and RU, so it says the whole count itself (review round 2: "the same count" pointed at a
+    # question never asked there)
+    "unrelated_persons_with_children": ("Most people in any one dwelling unit not related by blood, marriage or adoption "
+                                        "to its household's family, minor dependent children counted too", "count",
+                                        "unrelated people per unit, children counted"),
+    # the house itself, not only an accessory dwelling unit on the lot; with an ADU on the lot the allowance needs
+    # review (the owner-and-ADU open question, #38 review)
+    "owner_occupied": ("Does the owner (§325-3B OWNER) live in the one-family dwelling itself (not only in an "
+                       "accessory dwelling unit on the lot)?", "yes_no", "whether the owner lives there"),
+    "accessory_dwelling_unit": ("Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?", "yes_no",
+                                "whether an ADU is on the lot"),
+    "functional_family_unit": ("Is the household to be shown to the City to be a functional family unit (§325-3B)?",
+                               "yes_no", "whether the household is a functional family unit"),
+    "home_occupation": ("Is a home occupation planned (§325-3B: a business, studio or office run by a resident)?",
+                        "yes_no", "whether a home occupation is planned"),
+    # floor areas in square feet, any number 0 or more (never rounded: 500.4 sq ft typed as 500 would pass the
+    # 500 sq ft limit; review round 1)
+    "home_occupation_area": ("Home occupation's indoor floor area, accessory buildings included (sq ft)", "area",
+                             "the home occupation's floor area"),
+    "home_occupation_unit_area": ("Floor area of the dwelling unit it is in (sq ft)", "area",
+                                  "its dwelling unit's floor area"),
+    # how many primary buildings the lot holds (§325-8B(1), §325-7B, §325-8E): read from the drawing where it can
+    # be (one building, or none standing apart that could hold a home); asked where it can't
+    "primary_buildings": ("Primary buildings on the lot, the main one included: each separate building holding a home "
+                          "or other primary use, not a garage, shed or accessory dwelling unit (§325-8B(1))", "count",
+                          "the primary buildings on the lot"),
+    "primary_buildings_same_use": ("Does every primary building on the lot hold the use entered for the lot?",
+                                   "yes_no", "whether every primary building holds the lot's use"),
+    # a stream or inlet near the lot (§325-26): the model doesn't show the water; the distance in feet as typed
+    # (never rounded: 19.96 ft typed as 20 would pass)
+    "stream_near_lot": ("Is any inlet wall, or the bank of an inlet channel or stream (at average water level), within "
+                        "20 ft of the lot? (§325-26)", "yes_no", "whether a stream or inlet is within 20 ft of the lot"),
+    "stream_distance": ("Least horizontal distance from any new structure (house, addition, garage, deck, fence; not a "
+                        "patio) to that wall or bank, at average water level (ft)", "length",
+                        "the distance from the stream"),
+    "south_hill_overlay": ("Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?", "yes_no",
+                           "whether the lot is in the South Hill Overlay"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
+# The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
+# at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
+# accept what the check refuses (#r2 review round 2).
+MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1}
+# Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit
+# is 1 to occupants): asked only where some value in that range would change the row (present.could_settle).
+OPTIONAL = {"occupants_most_in_one_unit": "occupants"}
+
+
+def minimum(key):
+    return MINIMUM.get(key, 0)
+
+
 STORIES_ASKED = ("enter the number of stories", "enter the count")      # the measuring's own words when it waits for the count
 
 
@@ -274,9 +439,386 @@ def refused_stories(items):
     return (i_said[0].upper() + i_said[1:] if i_said else "The count") + ". The count wasn't kept."
 
 
-def needs_of(names, values):
-    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
-    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None]
+INTERIOR_FACTS = ("sleeping_rooms", "parking_spaces")    # inside the building (on hold): never asked in the box
+# Read from the drawing (the main building is one; solids standing apart that could hold a home are readings), so the
+# box never asks them up front: the panel's Enter flow still does, where the drawing can't say (measure._primary_buildings)
+DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
+# Use details (Ben, 2026-10-27: ask up front only what an architect knows at the start and what shapes the exterior or the
+# envelope): who lives there, rooms let for profit (a use detail, the coordinator for Ben, 2026-10-27; the number of homes
+# and new-or-converted stay up front), and a home business. Not asked in the start box; answered later, when the interior is planned,
+# with the panel's Enter flow. Their rules never pass while unanswered (they stay "needs review"); the panel lists them
+# in their own collapsed group, apart from the building's problems (is_use_detail). Ben will settle the exact questions
+# later, so this tuple is the one place that moves them: a fact added here leaves the start box and joins that group.
+DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occupants", "occupants_most_in_one_unit",
+                  "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
+                  "home_occupation", "home_occupation_area", "home_occupation_unit_area", "rooms_let_for_profit")
+# Facts the measuring checks against each other (a count with the children counted can't be smaller than the count
+# without: model_measurement.project.fact_conflict_rows): kept or dropped together, so a contradiction is never hidden
+# by dropping half of it.
+CHECKED_TOGETHER = (("unrelated_persons", "unrelated_persons_with_children"),)
+USE_DETAILS_TITLE = "Use details — answer when you plan the interior"
+BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
+
+
+def is_use_detail(item, facts=None):
+    """Whether a panel row is a use detail still waiting to be answered: it needs review, and everything it is waiting
+    on (its "needs") is a deferred fact that is still blank in `facts`. Only then: a row waiting on anything else too,
+    one with no named need, a row about facts that disagree (they are filled in), and any row that has been decided
+    (complies, fails) stays among the building's rows, so an answer that fails counts as a failure and a question left
+    open never reads as a pass."""
+    needs = item.get("needs") or []
+    return (item.get("status") == "needs_review" and bool(needs) and all(k in DEFERRED_FACTS for k in needs)
+            and all((facts or {}).get(k) is None for k in needs)
+            and not str(item.get("id") or "").startswith("facts.conflict"))
+
+
+# What a use itself says about a fact, from the City's own definitions, so it is never asked (Ben, 2026-10-25):
+# §325-3 "DWELLING, ONE-FAMILY — A dwelling unit…" (chapter p.7) and "DWELLING, TWO-FAMILY — A building containing two
+# dwelling units…" (p.9). Exactly these uses: a semi-detached or attached one-family dwelling is one unit of a
+# building the rules count as a whole (R-3a's note 7 reads the row's dwelling units), so its count is asked, never
+# taken as 1 (a row of six would pass a lot sized for three).
+IMPLIED_BY_USE = {"one_family_detached": {"dwelling_units": 1}, "two_family": {"dwelling_units": 2}}
+IMPLIED_SOURCE = "said by the use (City definition, §325-3)"
+
+
+def implied_facts(use):
+    """What the use itself says (IMPLIED_BY_USE), for this use only: never a prefix or a guess."""
+    return dict(IMPLIED_BY_USE.get(use) or {})
+
+
+# A fact that only matters once another is "yes": its rules are gated by it (a stream's distance by "a stream is within
+# 20 ft", the home occupation's floor areas by "a home occupation is planned"), so it is asked only after that answer.
+# Until then the rules say they need the first answer, never the second.
+ASKED_AFTER = {"home_occupation_area": "home_occupation", "home_occupation_unit_area": "home_occupation",
+               "stream_distance": "stream_near_lot"}
+
+
+def follow_up_keys(options, zone, use, answers=None):
+    """The facts the box asks after Use for this district and use (options["follow_ups"], from the rulebook). With
+    `answers` (the facts as entered so far), a fact in ASKED_AFTER is asked only when the one it waits on is yes;
+    without them, every fact the rules read."""
+    keys = [k for k in (((options or {}).get("follow_ups") or {}).get(zone) or {}).get(use) or [] if k in BOX_ASKS]
+    if answers is None:
+        return keys
+    return [k for k in keys if k not in ASKED_AFTER or answers.get(ASKED_AFTER[k]) is True]
+
+
+def gate_of(answers):
+    """The answers that decide which follow-up questions are asked (the ones ASKED_AFTER names): what the box compares
+    to know it must open again."""
+    return {p: (answers or {}).get(p) is True for p in sorted(set(ASKED_AFTER.values()))}
+
+
+# What each question is called in the box's compact "About this project" section (the full question is its hover text
+# and the panel's Enter prompt), and the one-click answers it offers after "Not answered". A yes / no question offers
+# its two answers in the architect's words; a count with a small range offers the numbers. Never a default: the
+# dropdown starts on "Not answered" and the rules that read the fact say so (NEVER a false pass).
+ABOUT_LABELS = {
+    "unrelated_persons": "Unrelated people in one home",
+    "unrelated_persons_with_children": "Unrelated people in one home",
+    "occupants": "Occupants on the lot",
+    "occupants_most_in_one_unit": "Most occupants in one unit",
+    "rooms_let_for_profit": "Rooms let for profit",
+    "dwelling_units": "Homes on this lot",
+    "attached_units_in_building": "Homes in the attached building",
+    "owner_occupied": "Owner lives in the house",
+    "accessory_dwelling_unit": "Accessory dwelling unit",
+    "functional_family_unit": "Functional family unit",
+    "home_occupation": "Home business",
+    "home_occupation_area": "Business floor area (sq ft)",
+    "home_occupation_unit_area": "Its home's floor area (sq ft)",
+    "stream_near_lot": "Stream or inlet",
+    "stream_distance": "Distance to it (ft)",
+    "south_hill_overlay": "South Hill Overlay",
+    "abuts_r1_district": "Next to R-1 land",
+    "conversion": "New or converted",
+}
+ABOUT_WORDS = {            # (the "no" answer, the "yes" answer)
+    "owner_occupied": ("Owner lives elsewhere", "Owner lives in the house"),
+    "accessory_dwelling_unit": ("No ADU on the lot", "ADU on the lot"),
+    "functional_family_unit": ("Not relying on one", "Will show it to the City"),
+    "home_occupation": ("No home business", "Home business planned"),
+    "stream_near_lot": ("No stream within 20 ft", "Stream or inlet within 20 ft"),
+    "south_hill_overlay": ("Not in the South Hill Overlay", "In the South Hill Overlay"),
+    "abuts_r1_district": ("No R-1 land touches it", "R-1 land touches or faces it"),
+}
+ABOUT_COUNTS = {            # a count's one-click numbers (a typed number is not offered here: the panel's Enter flow)
+    "unrelated_persons": [("0 (one family)", 0)] + [(str(n), n) for n in range(1, 7)],
+    "unrelated_persons_with_children": [("0 (one family)", 0)] + [(str(n), n) for n in range(1, 7)],
+    "rooms_let_for_profit": [("None", 0)] + [(str(n), n) for n in range(1, 7)],
+    "attached_units_in_building": [(str(n), n) for n in range(2, 9)],
+    "dwelling_units": [(str(n), n) for n in range(1, 9)],
+}
+# Several answers in one click (shown only when the district and use ask at least one of them; it fills the others
+# that are asked and leaves the rest as they were). Each is a statement the architect makes by picking it.
+QUICK_ANSWERS = (
+    ("1 family, no roomers", {"unrelated_persons": 0, "unrelated_persons_with_children": 0, "rooms_let_for_profit": 0,
+                              "functional_family_unit": False}),
+    ("Owner lives there, no ADU", {"owner_occupied": True, "accessory_dwelling_unit": False}),
+    ("No home business", {"home_occupation": False}),
+    ("No stream, not in South Hill", {"stream_near_lot": False, "south_hill_overlay": False}),
+)
+
+
+ABOUT_LABEL_WIDTH, ABOUT_FIELD_WIDTH, ABOUT_TYPED_WIDTH, ABOUT_QUICK_WIDTH = 190, 215, 100, 215   # px
+ABOUT_NOTE_WIDTH = 560
+QUICK_HINT = "Pick to fill several answers…"
+
+
+def about_label(key):
+    return ABOUT_LABELS.get(key) or STATED_FACTS[key][2][:1].upper() + STATED_FACTS[key][2][1:]
+
+
+def choices_for(key, kind, value=None):
+    """The one-click answers a question offers, [(words, value)], or None when it is typed (areas, distances, the
+    counts without a small range). A value already set that the list lacks (typed in the panel) stays among them."""
+    if kind == "yes_no":
+        no, yes = yes_no_words(key)
+        return [(no, False), (yes, True)]
+    listed = ABOUT_COUNTS.get(key)
+    if listed is None:
+        return None
+    if value is not None and value not in [v for _, v in listed]:
+        listed = listed + [(str(value), value)]
+    return list(listed)
+
+
+def quick_answers(keys):
+    """The one-click answers for several questions at once: [(words, {fact: value})], each only with the facts that are
+    asked (`keys`), and only when it fills at least one."""
+    out = []
+    for words, sets in QUICK_ANSWERS:
+        mine = {k: v for k, v in sets.items() if k in keys}
+        if mine:
+            out.append((words, mine))
+    return out
+
+
+def follow_up_rows(options, zone, use, facts):
+    """The box's questions after Use: the facts the district's rules need for this use (follow_up_keys), each
+    {"key", "label" (the full question), "short" (its name in the compact section), "kind" (count / yes_no / area /
+    length), "value" (as entered, or None), "choices" (its one-click answers, or None when typed)}; none when the
+    district has no such rule or the use says them."""
+    return [{"key": k, "label": STATED_FACTS[k][0], "short": about_label(k), "kind": STATED_FACTS[k][1],
+             "value": (facts or {}).get(k), "choices": choices_for(k, STATED_FACTS[k][1], (facts or {}).get(k))}
+            for k in follow_up_keys(options, zone, use, facts or {})]
+
+
+# The words a yes / no question's dropdown offers after "Not answered": (the "no" answer, the "yes" answer)
+YES_NO_WORDS = {"conversion": ("New construction", "Conversion of an existing building")}
+NOT_ANSWERED = "Not answered"
+FOLLOW_UP_HELP = ("Your answers. Leave one blank and the rules that need it say needs review (never read as 0 "
+                  "or No).")      # a sentence, never a fragment (the architect's review, 2026-10-28)
+
+
+def yes_no_words(key):
+    return YES_NO_WORDS.get(key) or ABOUT_WORDS.get(key) or ("No", "Yes")
+
+
+def _listed(options, zone):
+    return ((options or {}).get("district_uses") or {}).get(zone) or []
+
+
+def use_note(options, zone, use):
+    """What the box says under Use when the pick isn't permitted by right in the district: the chart's own words
+    (a special permit), or, for a use the district's chart doesn't list at all, that its Use row won't comply.
+    None when it is permitted (or the district lists no uses)."""
+    listed = _listed(options, zone)
+    for u in listed:
+        if u["id"] == use:
+            return u.get("note")
+    if listed and use:
+        name = ((options or {}).get("uses") or {}).get(use, use)
+        return f"{name} isn't on {zone}'s list of uses in the zoning chart: its Use row won't comply."
+    return None
+
+
+def district_use_names(options, zone, current=None):
+    """The Use dropdown's choices for the district: [(id, name)], permitted first, as the chart lists them; every
+    city use when the district has none listed. The use already set stays among them even when the district doesn't
+    list it (last), so opening the box never changes it unasked (use_note says why it won't comply)."""
+    names = (options or {}).get("uses") or {}
+    out = [(u["id"], u["name"]) for u in _listed(options, zone)] or list(names.items())
+    if current and current not in [k for k, _ in out]:
+        out.append((current, names.get(current, current)))
+    return out
+
+
+def box_needs_refresh(options, shown, now):
+    """Whether the box must open again after a pick in its Use or district dropdown, or in a question another waits on
+    (a stream's yes opens its distance): `shown` and `now` are (zone, use) or (zone, use, gate_of(answers)) as laid
+    out and as picked. Again when the uses offered, the note under Use or the questions after it differ (their fields
+    are laid out once); never for a pick that changes none of them."""
+    def layout(zone, use, gate=None):
+        asked = None if gate is None else {p: True for p, yes in gate.items() if yes}
+        return district_use_names(options, zone, use), use_note(options, zone, use), \
+            follow_up_keys(options, zone, use, asked)
+    return layout(*shown) != layout(*now)
+
+
+def answers_applied(facts, answers, zone, use, options, track=None):
+    """The facts after the box (box_applied) and the keys the architect answered in it with a value. `track`: what
+    the box knows this session (box_track); without it, from the facts alone."""
+    out, after = box_applied(facts, answers, zone, use, options, track if track is not None else box_track(facts))
+    shown = [k for k in (answers or {}) if k in BOX_ASKS and k not in after["said"]]
+    return out, sorted(k for k in shown if out.get(k) is not None)
+
+
+def box_track(facts, sources=None):
+    """What the box carries across its picks (session only, saved_ui["_answers"]): "said", the facts whose stored
+    value the use itself said (their saved source is IMPLIED_SOURCE; with no sources, those equal to what the facts'
+    use says: implied_facts); "held", an architect's answer set aside while a use says that fact instead; "typed", the
+    facts the architect answered in the box this session (each saved "entered by you" at Draw: typed_sources)."""
+    facts = facts or {}
+    if sources is None:
+        said = [k for k, v in implied_facts(facts.get("use")).items()
+                if k in BOX_ASKS and facts.get(k) == v and type(facts.get(k)) is type(v)]
+    else:
+        said = [k for k in BOX_ASKS if facts.get(k) is not None
+                and ((sources or {}).get(k) or {}).get("source") == IMPLIED_SOURCE]
+    return {"said": said, "held": {}, "typed": []}
+
+
+def box_applied(facts, answers, zone, use, options, track):
+    """The facts after the box, which changes only what it shows (Rhino runs, 2026-10-28, P0s: a Use or district
+    picked and picked back blanked every answer, or brought back an older one). Returns (facts, track).
+    1. Each field the box showed (a BOX_ASKS key in `answers`, laid out for the use the box opened with: None when
+       blank) is set from its answer, or unset when blank or refused (its rules need review, never 0 or no), whatever
+       the use picked now: what was typed is never dropped nor replaced by an older answer.
+    2. A fact the old use said (track "said": by its source, never by its value) goes when the new use doesn't say
+       it, and the architect's own answer set aside for it ("held") comes back: a two-family's 2 units are never read
+       as a multiple dwelling's count, and a semi-detached pair's typed 2 survives a look at two-family.
+    3. What the new use says for the facts its rules read (implied_by) is set; an architect's answer there is held.
+    4. A fact asked only after another's yes (ASKED_AFTER) goes when that question is answered no in the box: it no
+       longer applies (a blank keeps it: nothing contradicts it, and its rule needs review either way).
+    Every other fact stays as stored, never read unshown: any fact this district's rules read for this use is asked
+    (follow_up_keys) and shown with its value when the box opens laid out for it (box_needs_refresh). A fact asked
+    only after another's yes (ASKED_AFTER: a stream's distance) is read only by rules gated by that yes. The use
+    details (DEFERRED_FACTS, answered in the panel's row dialog, never in the box) stay as stored whatever the use or
+    district: where the new use's rules don't read one it decides nothing, and where they do it is the architect's
+    answer, shown in its row; so the facts checked together (CHECKED_TOGETHER) always stay together, and a
+    contradiction between them is never hidden by dropping half of it."""
+    now = implied_by(options, zone, use)
+    out = dict(facts or {})
+    said, held = list((track or {}).get("said") or []), dict((track or {}).get("held") or {})
+    typed = list((track or {}).get("typed") or [])
+    given = {}
+    for k, v in (answers or {}).items():
+        if k not in BOX_ASKS:
+            continue
+        out.pop(k, None)
+        held.pop(k, None)
+        said = [x for x in said if x != k]
+        typed = typed + [k] if k not in typed else typed
+        if v is not None:
+            given[k] = v
+    out = update_counts(out, given)
+    for k, gate in ASKED_AFTER.items():   # "no" said in the box to the question it waits on: moot, so it goes (#45: a
+        if given.get(gate) is False:      # stream's old 5 ft beside a new "no stream within 20 ft" would make the
+            out.pop(k, None)              # facts disagree)
+    for k in [k for k in said if k not in now]:
+        out.pop(k, None)
+        said.remove(k)
+        if k in held:
+            out[k] = held.pop(k)
+    for k, v in now.items():
+        if k not in said and out.get(k) is not None:
+            held[k] = out[k]
+        out[k] = v
+        said = said + [k] if k not in said else said
+    return out, {"said": said, "held": held, "typed": typed}
+
+
+def typed_sources(sources, track, facts, day):
+    """The sources after Draw for the facts the architect answered in the box this session (track "typed"), shown
+    or not by then: each set "entered by you" with its value now, each unset with no source (row_sources); what a
+    use says keeps the use's (fact_sources)."""
+    return row_sources(sources, [k for k in (track or {}).get("typed") or [] if k not in (track or {}).get("said", [])],
+                       facts, day)
+
+
+def implied_by(options, zone, use):
+    """What the use says for the facts this district's rules read (options["implied"]): never asked."""
+    return dict((((options or {}).get("implied") or {}).get(zone) or {}).get(use) or {})
+
+
+def parse_answer(kind, text, key=None):
+    """A follow-up field's text as the fact's value: a whole number (count: `key`'s least, 0 unless MINIMUM says
+    more), a number of square feet or feet (area, length: 0 or more, as typed, never rounded), yes / no (yes_no);
+    blank: None (unanswered: its rules stay NEEDS REVIEW, never 0 or no); anything else raises ValueError."""
+    text = (text or "").strip().lower()
+    if not text:
+        return None
+    if kind == "yes_no":
+        if text in ("yes", "y"):
+            return True
+        if text in ("no", "n"):
+            return False
+        raise ValueError("answer yes or no")
+    if kind in ("area", "length"):
+        # commas only as thousands separators (1,200): "2,5" is not 25 (a European decimal comma is refused, not misread)
+        if not re.fullmatch(r"((\d+|\d{1,3}(,\d{3})+)(\.\d+)?|\.\d+)", text, re.ASCII):
+            raise ValueError("a number of " + ("square feet" if kind == "area" else "feet") + ", 0 or more")
+        number = float(text.replace(",", ""))
+        return int(number) if number == int(number) else number
+    least = minimum(key) if key else 0
+    if not (text.isascii() and text.isdigit()) or int(text) < least:
+        raise ValueError(f"a whole number, {least} or more")
+    return int(text)
+
+
+def answer_problem(kind, text, key=None):
+    """What the box says beside a follow-up field whose text isn't an answer (None when it is, or is blank): the
+    entry is not kept, so the rules that need it say so (never read as 0)."""
+    try:
+        parse_answer(kind, text, key)
+    except ValueError as e:
+        return f"Not kept: {e}. Its rules need review until it is."
+    return None
+
+
+# The box's questions after Use, each as its words wrapped at QUESTION_WIDTH with its answer beside them, and one note
+# under them all: the start box stays laptop-sized (≤ ~900 px wide) with the longest questions (#38's household ones
+# ran ~1,200 px on one line and pushed the box to 1,560-2,020 px: Rhino run of demo 2c0a5c0). Pinned in
+# test_box_width.py, which lays the real box out and bounds its width.
+QUESTION_WIDTH = 360
+ANSWER_WIDTH = 300     # every answer dropdown in a row's dialog one width, lined up ("Conversion of an existing
+                       # building" fits; the architect's review, 2026-10-28)
+
+
+TEXT_PX = 6.0      # px a character at size 12, a little over the system font's (~5.5 measured in Rhino): errs wide
+
+
+def text_wider(text, size, px):
+    """Whether `text` at `size` (13 when not set) runs wider than `px` on one line (by TEXT_PX), so its label wraps."""
+    return len(text or "") * TEXT_PX * (size or 13) / 12 > px
+
+
+def answers_note(entries):
+    """The note under the box's questions, for `entries` [(key, kind, text)] in the order asked: FOLLOW_UP_HELP, or
+    every entry not kept, each named by its fact ("Rooms let for profit: Not kept: …"), so each is said at once and
+    never read as 0. Returns (text, refused)."""
+    said = []
+    for key, kind, text in entries:
+        try:
+            parse_answer(kind, text, key)
+        except ValueError as e:
+            said.append((STATED_FACTS[key][2] if key in STATED_FACTS else key.replace("_", " "), str(e)))
+    if not said:
+        return FOLLOW_UP_HELP, False
+    if len(said) == 1:
+        name, why = said[0]
+        return f"{name[0].upper() + name[1:]}: Not kept: {why}. Its rules need review until it is.", True
+    listed = ", ".join(f"{name} ({why})" for name, why in said)
+    return f"Not kept: {listed}. Their rules need review until they are.", True
+
+
+def needs_of(names, values, settles=None):
+    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked; never the
+    stories count (asked only where the measuring asks for it: stories_needed). An optional one (OPTIONAL) only where
+    `settles(key)` says entering it could change the row."""
+    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None
+            and (k not in OPTIONAL or (settles is not None and settles(k)))]
 
 
 def _and(words):
@@ -288,24 +830,146 @@ def enter_words(needs):
     return "Enter " + _and([STATED_FACTS[k][2] for k in needs]) if needs else None
 
 
+def answer_words(needs):
+    """The words on a row's button and its dialog's title: the facts' own words while they fit a button ("Enter
+    bedrooms and parking spaces"); longer, how many ("Answer 4 questions"): the whole list ran to ~25 words and was
+    cut off on the button and in the title bar (the architect's review, 2026-10-28). The dialog lists each question
+    and the row's reason still names them."""
+    if not needs:
+        return None
+    words = enter_words(needs)
+    return words if len(needs) == 1 or len(words) <= BUTTON_WORDS else "Answer %d questions" % len(needs)
+
+
+BUTTON_WORDS = 40       # characters a row's button holds at the panel's width (380-460 px) without being cut off
+
+
 def needs_reason(needs):
-    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show"."""
-    return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show" if needs else None
+    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show" (its button,
+    enter_words, asks exactly those in a small dialog: row_fields)."""
+    if not needs:
+        return None
+    return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show"
+
+
+# ---- a row's own dialog (coordinator, 2026-10-28, agreed with Ben): the row's "Enter …" button asks only the
+# stated facts that row waits for (its `needs`), in a small modal dialog; OK saves exactly those, each "entered by
+# you" with the day, as one Undo step, and checks again; Cancel, Esc or closing it changes nothing. It never touches
+# the address, the lookup, the district, the use, the lot, the street side or any other fact: those stay in the
+# start box (Edit site…), whose follow-up questions read the same facts, so an answer given here shows there.
+
+SITE_HINT = "Edit site…"            # a row whose missing fact comes from the site (present.py's hint for it)
+SITE_ASKS = ("Corner lot?",)        # the start box's own question a measuring's reason names (stops.py)
+
+
+def row_fields(needs, facts):
+    """The dialog's questions for a row waiting on `needs`, in the row's order: each {"key", "label", "kind"
+    (count / yes_no), "value" (as saved, or None)}. Only stated facts (STATED_FACTS): never a site fact."""
+    return [{"key": k, "label": STATED_FACTS[k][0], "kind": STATED_FACTS[k][1], "value": (facts or {}).get(k)}
+            for k in needs or [] if k in STATED_FACTS]
+
+
+def row_choice(value):
+    """A yes / no question's dropdown index for a saved value: Not answered (0), the no answer (1), the yes (2)."""
+    return {None: 0, False: 1, True: 2}[value]
+
+
+def row_choice_text(index):
+    """A yes / no dropdown's pick as parse_answer reads it: Not answered is blank (never no)."""
+    return {1: "no", 2: "yes"}.get(index, "")
+
+
+def row_answers_applied(facts, needs, answers):
+    """The facts after OK in a row's dialog: each key in `needs` set from its answer (`answers`: key -> the text
+    typed, or "yes" / "no" / "" from a dropdown: row_choice_text); a blank (or missing) answer leaves that fact unset,
+    so its rules need review (never 0 or no). Every other key is exactly as it was. Any entry that isn't an answer
+    raises ValueError with words for the dialog, and nothing changes."""
+    out = dict(facts or {})
+    bad = []
+    for k in [k for k in needs or [] if k in STATED_FACTS]:
+        try:
+            value = parse_answer(STATED_FACTS[k][1], (answers or {}).get(k), k)
+        except ValueError as e:
+            bad.append(f"{STATED_FACTS[k][0]}: {e}")
+            continue
+        if value is None:
+            out.pop(k, None)
+        else:
+            out[k] = value
+    if bad:
+        raise ValueError("Not saved. " + "; ".join(bad) + ". Correct it, or leave it blank (it then needs review).")
+    return out
+
+
+def row_problem(facts, needs, answers):
+    """What the row's dialog says at OK when an entry isn't an answer (row_answers_applied's words; it stays open
+    and nothing is saved), or None when OK may close it."""
+    try:
+        row_answers_applied(facts, needs, answers)
+    except ValueError as e:
+        return str(e)
+    return None
+
+
+def row_sources(sources, needs, facts, day):
+    """The saved sources after OK in a row's dialog: each fact in `needs` that is set, "entered by you" on `day`;
+    one left blank, none (an unset fact has no source). Every other source is exactly as it was."""
+    out = dict(sources or {})
+    for k in [k for k in needs or [] if k in STATED_FACTS]:
+        v = (facts or {}).get(k)
+        if v is None:
+            out.pop(k, None)
+        else:
+            out[k] = {"value": {True: "yes", False: "no"}.get(v, v) if isinstance(v, bool) else v,
+                      "source": ENTERED, "confirmed_by": "you", "date": day}
+    return out
+
+
+def site_row(item):
+    """Whether a row waits on a site fact (address, lot, district, street side, corner lot): only the start box
+    gives those, so the row keeps its Edit site… button."""
+    item = item or {}
+    return item.get("hint") == SITE_HINT or any(q in (item.get("reason") or "") for q in SITE_ASKS)
+
+
+def row_buttons(item):
+    """A row's buttons, as (words, action): its own dialog for the stated facts it waits on ("Enter dwelling
+    units…", action "enter"), then, where a site fact is missing too, Edit site… ("edit_site") as the second."""
+    out = []
+    if (item or {}).get("needs"):
+        out.append((answer_words(item["needs"]) + "…", "enter"))
+    if site_row(item):
+        out.append((SITE_HINT, "edit_site"))
+    return out
+
+
+def box_answers(options, zone, use, facts):
+    """What the start box's follow-up questions show as answered: read from the saved facts themselves (the box
+    keeps no copy of its own), so an answer given in a row's dialog shows in the box and Draw sets it again."""
+    return {k: (facts or {}).get(k) for k in follow_up_keys(options, zone, use)}
 
 
 def update_counts(facts, answers):
     """Bedrooms, parking spaces, stories, dwelling units and rooms let for profit (whole numbers, 0 or more) and
-    whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt
+    whether the building is a conversion and whether the lot abuts R-1 land (yes / no) from the Lot facts prompts. An answer of None means the prompt
     was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
-    for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit"):
+    counts = list(dict.fromkeys(["stories"] + [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "count"]))
+    for key in counts:
         if answers.get(key) is not None:
             n = int(answers[key])
-            if n < 0 or n != answers[key]:
-                raise ValueError(f"{key} must be a whole number, 0 or more")
+            if n < minimum(key) or n != answers[key]:
+                raise ValueError(f"{key} must be a whole number, {minimum(key)} or more")
             out[key] = n
-    if answers.get("conversion") is not None:
-        out["conversion"] = bool(answers["conversion"])
+    for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind in ("area", "length")]:
+        if answers.get(key) is not None:
+            a = answers[key]
+            if type(a) not in (int, float) or not math.isfinite(a) or a < 0:
+                raise ValueError(f"{key} must be a number of {'square feet' if STATED_FACTS[key][1] == 'area' else 'feet'}, 0 or more")
+            out[key] = a
+    for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "yes_no"]:
+        if answers.get(key) is not None:
+            out[key] = bool(answers[key])
     return out
 
 
@@ -525,6 +1189,142 @@ LABEL_MIN_LOT_PX = 120      # a lot smaller than this on screen (zoomed out to t
 def label_width(text, size):
     """A one-line label's width on screen, pixels (its text and its backing box's margins)."""
     return len(text) * size * 0.58 + 14
+
+
+DIM_TICK_PX = 10        # a dimension's architectural tick: this long on screen, at 45° to its line
+HALO_PX = 1           # a dimension's halo: this many pixels each side of its line
+FAINT_ALPHA = 110       # the required line, faint: the status colour at this opacity (of 255)
+
+
+# a yard's dimension and its label, placed on screen as a drawing would (Rhino checks of #29, 2026-10-25)
+DIM_RGB = {"complies": ((92, 96, 100), (176, 180, 184)),          # (light viewport, dark viewport): neutral grey,
+           "needs_review": ((138, 88, 0), (233, 180, 76)),          # amber, red: colour only what's wrong
+           "does_not_comply": ((184, 55, 31), (240, 122, 112))}
+REQUIRED_RGB = ((96, 96, 96), (190, 190, 190))     # the required line: a clear dashed grey, with its "min" tag
+# (darker on a light viewport, lighter on a dark one than the first version: Rhino check of #29 at f6642a9)
+DIM_LABEL_H_PX = 18     # a dimension's label: its height on screen
+DIM_LABEL_GAP_PX = 4    # and its gap from the dimension line (and past the line's outer end)
+
+
+def dim_rgb(status, dark):
+    """A dimension's colour (r, g, b): red fails, amber needs review, a neutral dark grey (light on a dark viewport)
+    complies: drafting's convention, and Ben's "colour only what's wrong"."""
+    return DIM_RGB.get(status, DIM_RGB["complies"])[1 if dark else 0]
+
+
+def rect_quad(box):
+    """An (x, y, w, h) screen box as its four corners."""
+    x, y, w, h = box
+    return [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+
+
+def _segments_cross(p, q, r, s_):
+    def side(a, b, c):
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    d1, d2, d3, d4 = side(r, s_, p), side(r, s_, q), side(p, q, r), side(p, q, s_)
+    return (d1 > 0) != (d2 > 0) and (d3 > 0) != (d4 > 0)
+
+
+def _point_in(pt, poly):
+    x, y = pt
+    hit = False
+    for k in range(len(poly)):
+        (x0, y0), (x1, y1) = poly[k - 1], poly[k]
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            hit = not hit
+    return hit
+
+
+def shapes_hit(a, b):
+    """Whether two screen polygons (lists of corners) overlap: an edge of one crosses the other's, or one lies
+    inside the other."""
+    for k in range(len(a)):
+        for j in range(len(b)):
+            if _segments_cross(a[k - 1], a[k], b[j - 1], b[j]):
+                return True
+    return bool(a and b) and (_point_in(a[0], b) or _point_in(b[0], a))
+
+
+def _along(a, b):
+    n = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+    return ((b[0] - a[0]) / n, (b[1] - a[1]) / n), n
+
+
+def _point_segment(p, a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = dx * dx + dy * dy
+    t = 0.0 if n <= 1e-12 else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / n))
+    return ((p[0] - a[0] - t * dx) ** 2 + (p[1] - a[1] - t * dy) ** 2) ** 0.5
+
+
+TAG_SIZE = 11            # a "min" tag's text size (readable at the default zoom: Rhino check of #29 at f6642a9)
+VIEW_MARGIN_PX = 3      # every number and tag stays this far inside the view
+
+
+def dim_number(mark, proposed, status):
+    """What a dimension shows on the drawing, as a drawing does: its number only, "✕ " or "? " before it when the
+    yard fails or needs review (colour says the rest). Its name, what it needs and "(approx.)" are the panel's and
+    the notice's (Rhino checks of #29: a long label never fit a plan)."""
+    return (mark + " " if status in ("does_not_comply", "needs_review") and mark else "") + proposed
+
+
+def inside_view(shape, view, margin=VIEW_MARGIN_PX):
+    """Whether a screen polygon lies wholly inside the view (w, h), `margin` px in. True without a view."""
+    if not view:
+        return True
+    return all(margin <= x <= view[0] - margin and margin <= y <= view[1] - margin for x, y in shape)
+
+
+PRIORITY = {"does_not_comply": 0, "needs_review": 1}      # what is wrong placed first: it gets the clear spots
+
+
+#                                        (0.7 × 11 px ≈ 8 px: the smallest that still reads)
+
+
+#                        of #29 at 5891efc: the rear number touched an edge length)
+
+
+def limit_label_spot(line, house, w, h=18, view=None, gap=8, taken=()):
+    """Where an elevation's "Height limit 35'-0"" label goes (screen): past an end of the limit line, outside the
+    building's extent (`house`: its box on screen, x0, y0, x1, y1), centred on the line's height, in view; the
+    left end first, and the end whose spot covers nothing drawn (`taken`, boxes: the height's number, the status
+    box, the notice) before one that does. It never covers the coloured parts (Rhino check of #28 at fc0b023).
+    (x, y) of its top left, or None when neither end has room in view."""
+    (ax, ay), (bx, by) = sorted(line)
+    spots = [(min(ax, house[0] if house else ax) - gap - w, ay - h / 2),
+             (max(bx, house[2] if house else bx) + gap, by - h / 2)]
+    shown = [(x, y) for x, y in spots if inside_view(rect_quad((x, y, w, h)), view)]
+    for x, y in shown:
+        if not any(shapes_hit(rect_quad((x, y, w, h)), rect_quad(t)) for t in taken):
+            return x, y
+    return shown[0] if shown else None
+
+
+def _bbox(shape):
+    xs, ys = [p[0] for p in shape], [p[1] for p in shape]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def dim_ticks(a, b, size=DIM_TICK_PX):
+    """A drawing-style dimension's two end ticks on screen: at each end of the line a to b, a short slash at 45°
+    to the line (as an architect draws one, whichever way the line runs), `size` pixels long. [] for a line of no
+    length on screen (seen end on)."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = (dx * dx + dy * dy) ** 0.5
+    if n < 1e-9:
+        return []
+    ux, uy = dx / n, dy / n
+    sx, sy = (ux - uy) * 0.5 ** 0.5 * size / 2, (uy + ux) * 0.5 ** 0.5 * size / 2   # the line turned 45°
+    return [((p[0] - sx, p[1] - sy), (p[0] + sx, p[1] + sy)) for p in (a, b)]
+
+
+def dims_shown(zoomed_in, elevation=False):
+    """Whether a yard's dimension (its line, ticks, faint required line) is drawn at all: only at working zoom
+    (zoomed out to the neighbourhood every dimension gives way with the labels, labels_shown), and never in an
+    elevation (Front, Right…), where every yard's line would lie flat on the ground line. Its words also follow
+    Show on-screen labels (yard_label_shown) and show in plan only. The height's dimension is the other way round:
+    elevations only."""
+    return bool(zoomed_in) and not elevation
 
 
 def labels_shown(lot_px):
@@ -1416,7 +2216,14 @@ def lot_source(surveyed, source=None):
     return "your survey" if surveyed else "the tax map (±2 ft, approximate)" + (" · " + source if source else "")
 
 
-NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+NO_STREET_YET = "the street is set when the lot is drawn"
+# a new, empty file (Ben, 2026-10-27): no sample prefilled; the site comes from a lookup, or by hand
+FILL_BY_LOOKUP = "Look up an address to fill these in"
+LOOK_UP_FIRST_SITE = "Look up the address first. It finds the lot, zoning district and neighbourhood."
+BY_HAND = "Enter the site by hand"
+BY_HAND_NOTE = ("Entered by hand: draw the lot, pick the district and the street side. No neighbourhood is drawn "
+                "(only a lookup finds one).")
+NO_LOT = "no lot yet: draw it on the Site layer, or look up the address"
 # a file with no lot the box can use (Edit site… in an empty file): its own lot, drawn or picked (never the sample)
 LOT_MISSING = "no lot yet: draw it, or pick a closed outline on the Site layer"
 
@@ -2100,7 +2907,6 @@ def street_verdict(lines, ids=None):
     return _street_lines().street_verdict(lines, ids)
 
 
-
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None, review (an amber line) or None, check ("I checked this", ticked) or None}.
@@ -2121,26 +2927,39 @@ def box_rows(state, flat=None):
         return {"review": "? " + why if why else None,
                 "check": ("I checked this", key in checked) if key in CHECKABLE and key in doubts else None}
 
-    lot_actions = [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot else []
-    if look.get("guide") or state.get("lot_missing"):
+    after = AFTER_DRAW if state.get("after_draw") else ""     # the looked-up lot, not drawn yet (show_pending_lot)
+    lot_actions = [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot and not after else []
+    if (look.get("guide") or state.get("lot_missing")) and not state.get("needs_lookup"):
         lot_actions.insert(0, ("draw_lot", "Draw my lot…", True))
+    if state.get("needs_lookup"):                 # an empty file: the lookup fills the rows, or the site by hand
+        lot_actions = [("by_hand", BY_HAND + "…", True)]
     rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
-         "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))],
+         # while it runs, the button stops it (the box as it was before Look up: lookup_cancelled)
+         "actions": [("lookup_cancel", CANCEL_LOOKUP, True) if look.get("looking") else ("lookup", "Look up", True)]
+         + ([("use_saved", USE_SAVED.format(date=look["saved_offer"]), True)]
+            if look.get("saved_offer") and not look.get("looking")
+            and same_site_address(state.get("address") or "", look.get("saved_for") or "") else []),
+         # (an address retyped since the offer: no button, as pressing it would do nothing: round 6)
          "tick": None, "matches": look.get("matches") or [],
-         "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
+         "status": lookup_status(look["looking"], None, 0.0) if look.get("looking") else None},
         {"key": "zone", "label": "Zoning district", "text": zone_row_text(state),
          "actions": [("zone", "Change", True)], "tick": (ZONE_TICK, bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot",
-         "text": (LOT_MISSING if state.get("lot_missing") else
-                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))
+         "text": (FILL_BY_LOOKUP if state.get("needs_lookup") else LOT_MISSING if state.get("lot_missing") else
+                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source")) + after
                   if has_lot else NO_LOT),
-         "actions": lot_actions, "tick": None},
+         "actions": lot_actions, "tick": None,
+         "help": (BY_HAND_NOTE + (" " + IN_CITY_SAID.format(date=state["city_by_hand"])
+                                  if state.get("city_by_hand") else "")) if state.get("by_hand") else None},
         {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
-         "text": street_name(state) if (state.get("street_name") or has_lot) else "set from the lot, once there is one",
-         "actions": [("street", "Change…", True)] if has_lot else [], "tick": None,   # nothing to change yet: hidden
+         "text": FILL_BY_LOOKUP if state.get("needs_lookup") else
+         ((street_name(state) if state.get("street_name") or not after else NO_STREET_YET) + after)
+         if (state.get("street_name") or has_lot)
+         else "set from the lot, once there is one",
+         "actions": [("street", "Change…", True)] if has_lot and not after else [], "tick": None,   # nothing to change yet: hidden
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],
@@ -2167,7 +2986,9 @@ def box_rows(state, flat=None):
 NO_RULES = "The City map says {zone}; Gordium doesn't have {zone}'s rules yet: pick a district only if you know it applies."
 
 
-NO_DISTRICT = "The City zoning map gave no district for this lot: pick one"
+NO_DISTRICT = "The City zoning map gave no district for this lot: pick one."
+SAVED_NO_DISTRICT = "A saved lookup never keeps the district (the City's map is used live only): pick it."
+OVERLAYS_NOT_KEPT = "Overlays may apply here (a saved lookup can't keep them): check them by hand."
 
 
 def city_day(now=None):
@@ -2222,6 +3043,11 @@ def saved_sources(saved_ui, state):
         saved_ui["zone_source"] = state["zone_source"]
     elif not state.get("zone"):
         saved_ui.pop("zone_source", None)
+    # the architect's own answers stay theirs once the box has them, whatever the box's ticks do next (a Draw that
+    # stopped, a lookup started, a pick: re-lookup review round 2, the use saved under the sample's source)
+    for key in ("address_source", "use_source", "corner_source"):
+        if state.get(key) == ENTERED:
+            saved_ui[key] = ENTERED
     return saved_ui
 
 
@@ -2237,14 +3063,108 @@ def zone_picked(state, zone, first):
     return state
 LOOKUP_LIMIT_S = 45                               # the whole lookup; the box says so, the Rhino side stops it then
 LOOKING = "Looking up {}… (up to %d s)" % LOOKUP_LIMIT_S
+CANCEL_LOOKUP = "Cancel lookup"
+LOOKUP_CANCELLED = "Look up of {address} cancelled: nothing changed."
+LOOKUP_FIRST_STEP = "Starting the lookup…"
+
+
+def lookup_status(address, step, elapsed, limit=LOOKUP_LIMIT_S):
+    """The box's live line while a lookup runs: which address, what it is doing now (the lookup's own latest step),
+    a moving mark and the seconds so far, and when it stops by itself."""
+    return "Looking up %s · %s  %s" % (address, step or LOOKUP_FIRST_STEP, progress_line(elapsed, limit))
+
+
+def lookup_step(text):
+    """The lookup's latest step from what it has printed so far ({"step": ...} lines), or None."""
+    latest = None
+    for line in str(text or "").splitlines():
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and isinstance(d.get("step"), str) and "status" not in d:
+            latest = d["step"]
+    return latest
+
+
+def lookup_answer(text, query=None):
+    """The lookup's answer: its last line that is one ({"status": ...}); a run that printed none (stopped, crashed)
+    is an error the box can say, never an answer made up from a progress line."""
+    for line in reversed(str(text or "").strip().splitlines()):
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and "status" in d:
+            return d
+    return {"status": "error", "query": query, "detail": "the lookup printed no answer"}
+
+
+def box_ticks(state):
+    """The ticks and sources the start box keeps across picks, as `state` has them (_box_loop's `ticked`)."""
+    return {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
+                                  "corner_source", "checked") if k in state}
+
+
+BOX_FIELDS = ("zone", "address", "use", "corner_lot")     # what the box's ticks and sources are about
+
+
+def box_moved(facts_before, ui_before, facts_after, ui_after):
+    """Whether a pick changed what the start box's ticks and sources are about: the district, address, use or corner
+    answer, the doubts "I checked this" settles, or an earlier lookup's preview put back (drop_pending: its district,
+    sources and address go back to what they were before it)."""
+    facts_before, facts_after = facts_before or {}, facts_after or {}
+    ui_before, ui_after = ui_before or {}, ui_after or {}
+    return (any(facts_before.get(k) != facts_after.get(k) for k in BOX_FIELDS)
+            or (ui_before.get("doubts") or {}) != (ui_after.get("doubts") or {})
+            or (ui_before.get("_pending") is not None and ui_after.get("_pending") is not ui_before.get("_pending")))
+
+
+def ticks_after_pick(what, ticks, answer=None, moved=True):
+    """The start box's ticks and sources kept after a pick (_box_loop's `ticked`; `ticks`: box_ticks of the box as
+    the architect left it; `answer`: the status of a lookup answer the pick put in the box, None for none; `moved`:
+    box_moved for this pick). A lookup's answer (or a saved one used) replaces them, so the district must be confirmed
+    again, unless it filled nothing and moved nothing (not found, offline, outside the City, too slow, a saved one
+    refused, with no earlier preview put back): then the box is as the architect left it, and so are its ticks.
+    Everything else keeps them exactly as the box shows them: Look up (while it runs the box shows the architect's
+    own ticks; Draw is off meanwhile) and Cancel lookup. So no tick or source from before Look up is ever brought
+    back, onto a district, use, address or corner changed during the lookup ("suggested by Gordium" on a district the
+    architect picked) or after they took it off; no tick is kept on a district a lookup's answer put in or back; and
+    a district they took off is never shown ticked again from the file (review of #32, 2026-10-28): an answer that
+    replaces them leaves the district unconfirmed outright, never the earlier Draw's confirmation again (an earlier
+    preview put back also puts back the file's tick, and the architect may have taken it off: sceptic of round 4)."""
+    if what in ("pick:lookup_done", "pick:use_saved") and (answer == "found" or moved):
+        return {"district_confirmed": False}
+    return dict(ticks or {})
+
+
+def lookup_cancelled(saved_ui, before):
+    """The box's choices after Cancel lookup: as they were before Look up was pressed (`before`: the lookup line
+    then, None for none), saying it was cancelled. Nothing else changes: the lookup only ever fills the box when its
+    answer is in."""
+    saved_ui = dict(saved_ui or {})
+    address = ((saved_ui.get("_lookup") or {}).get("looking")) or "the address"
+    restored = dict(before or {})
+    restored.pop("looking", None)
+    earlier = (before or {}).get("says") or ""
+    if (before or {}).get("cancelled"):            # the line before was an earlier Cancel's: said once, not again
+        earlier = (before or {}).get("said_before") or ""
+    restored.update(says=" ".join(t for t in (LOOKUP_CANCELLED.format(address=address), earlier) if t),
+                    cancelled=True, said_before=earlier)
+    saved_ui["_lookup"] = restored
+    return saved_ui
 CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
 DOUBT_KEPT = "The lookup found this doubtful (its reason came from a source that can't be kept): check it."
 LOOKUP_SAYS = {                                   # the box's line when a lookup couldn't fill it in
-    "not_found": "No City of Ithaca address found for {query}: check the spelling, or draw the lot.",
+    "not_found": "No City of Ithaca address found for {query}: check the spelling and Look up again, or put back "
+                 "the lot's own address (or clear it) and draw the lot.",
     "outside_city": "{message}",
-    "offline": "Couldn't reach the map services (offline?): enter the site by hand.",
-    "error": "A map service answered with an error: enter the site by hand.",
-    "timeout": "The lookup took too long: enter the site by hand, or try again.",
+    "offline": "Couldn't reach the map services (offline?): Look up again later, or put back the lot's own address "
+               "(or clear it) and enter the site by hand.",
+    "error": "A map service answered with an error: Look up again, or put back the lot's own address (or clear it) "
+             "and enter the site by hand.",
+    "timeout": "The lookup took too long: try Look up again, or put back the lot's own address (or clear it) and "
+               "enter the site by hand.",
     "multiple": "{message} Pick one under Address, then Look up again.",
 }
 ROW_OF = {"address": "lot", "parcel": "lot", "lot": "lot", "street_side": "street", "corner_lot": "street",
@@ -2259,6 +3179,109 @@ def storable_ui(saved_ui):
     """What of the box's choices may be written into the .3dm: never a session key ("_…": the lookup's live wording,
     the City's zones and street name, its asks)."""
     return {k: v for k, v in (saved_ui or {}).items() if not str(k).startswith("_")}
+
+
+STILL_SHOWN = "The lot shown is still {address}'s: nothing in the model changed."
+NOTHING_CHANGED = "Nothing in the model changed."
+
+
+def still_shown(saved_ui):
+    """After a lookup that found no lot: which lot the model still shows (the one drawn, else the lot's own address
+    when the box opened), so the architect never wonders whether the old lot is the new address's."""
+    saved_ui = saved_ui or {}
+    address = saved_ui.get("drawn_address") or saved_ui.get("_box_address")
+    return STILL_SHOWN.format(address=address.split(",")[0].strip()) if address else NOTHING_CHANGED
+
+
+# ---- address type-ahead (site_lookup.suggest, in lookup_box's own short process; the box shows the list) ----------
+SUGGEST_DELAY_S = 0.3          # s after the last key before the City's address layer is asked
+SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestions unavailable"
+SUGGEST_MIN_CHARS = 4
+SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and press Look up."
+NO_MATCH = "No matching address suggested: type the full address and press Look up."
+CITY_SUFFIX = ", Ithaca, NY"
+
+
+BOX_TEXT_WIDTH = 560           # px: the start box's long lines wrap here (one unbroken amber line stretched the box
+                               # across the screen: Rhino run of #33 a3eb1d7)
+LIST_ROW_PX, LIST_PAD_PX = 20, 2   # (2: the frame's border, so a row's text sits centred, not high: Rhino run of ee8f2ce)
+
+
+def list_height(rows, row_px=LIST_ROW_PX):
+    """The suggestion list's height in px: as tall as its rows (1 to 8) at `row_px` each (the pitch Rhino lays its
+    rows out at, read from the list where it can be), never rows of empty space (Rhino run of a3eb1d7: one suggestion
+    sat above five empty rows)."""
+    return max(1, min(int(rows or 0), 8)) * int(row_px) + LIST_PAD_PX
+
+
+def wants_suggestions(text, chosen=None):
+    """Whether to ask for suggestions for what is typed: at least SUGGEST_MIN_CHARS characters, and not the
+    suggestion just picked (picking one never opens the list again)."""
+    text = str(text or "")
+    return len(text.lstrip()) >= SUGGEST_MIN_CHARS and text != chosen
+
+
+HINT_NOTE_PX = 20          # the quiet note's one line (size 10) and its row spacing
+
+
+def hint_rows_px(list_shown, list_px, note):
+    """How much taller the start box is while its suggestion rows show: the list (and its spacing) and the note's
+    line, each only while shown (review round 1: an offline note showed with nothing added, pushing Draw down)."""
+    return ((list_px + 6) if list_shown else 0) + (HINT_NOTE_PX if note else 0)
+
+
+def hint_rows_shown(list_shown, note):
+    """Whether the start box's suggestion rows (the type-ahead list and its quiet note) take any room: only while
+    one of them has something to show (the architect's review, 2026-10-28: an empty gap under Address)."""
+    return bool(list_shown) or bool(note)
+
+
+def suggestions_shown(answer, typed):
+    """(the list, a quiet note) for a type-ahead answer, or None when it is for something no longer typed (a stale
+    answer is dropped). Offline, an error or too slow: no list and the note that suggestions are unavailable (the
+    box still works by typing). None found: a quiet note says so, so the architect can tell the list is working
+    (UX review 2026-10-27: "312 Hudson St" showed nothing at all)."""
+    answer = answer or {}
+    if answer.get("query") != typed:
+        return None
+    if answer.get("status") == "ok":
+        found = [str(s) for s in answer.get("suggestions") or []]
+        return found, "" if found else NO_MATCH
+    return [], SUGGESTIONS_UNAVAILABLE
+
+
+def list_step(index, count, key):
+    """The list's selection after Down or Up in the address box (none selected: -1). Stays within the list."""
+    if count <= 0:
+        return -1
+    if key == "down":
+        return min(index + 1, count - 1)
+    if key == "up":
+        return max(index - 1, 0)
+    return index
+
+
+def with_city(address):
+    """The address as the lookup is asked for it: ", Ithaca, NY" added when no town or ZIP is typed (Ben, 2026-10-21:
+    "106 Ithaca Rd" is the City's). Only when the address plainly ends with its street ("106 Ithaca Rd", "120 North
+    Cayuga Street"): anything after the street type ("106 Ithaca Rd Dryden", "12 Main St Cayuga Heights", a ZIP)
+    may be another town and is kept as typed, so another town stays another town (review round 1), and anything
+    after a comma is kept as typed too."""
+    text = " ".join(str(address or "").split())
+    if not text or "," in text:
+        return text
+    words = text.lower().replace(".", " ").split()
+    street_types = {w for k, v in STREET_WORDS.items() if k not in ("north", "south", "east", "west") for w in (k, v)}
+    if len(words) >= 3 and words[0][:1].isdigit() and words[-1] in street_types:
+        return text + CITY_SUFFIX
+    return text
+
+
+def clean_address(text):
+    """An address as the architect reads it: the geocoder's "96 Ithaca Road, Ithaca, NY, 14850" as "96 Ithaca Road,
+    Ithaca, NY 14850" (no comma before the ZIP; Rhino run of #33 df08fc0). Anything else as it is."""
+    import re
+    return re.sub(r",\s*(\d{5}(?:-\d{4})?)\s*$", r" \1", str(text or "").strip())
 
 
 def lookup_says(payload):
@@ -2277,6 +3300,29 @@ def lookup_may_replace(facts, saved_ui):
     return not lot or lot == (saved_ui or {}).get("replaceable_lot")
 
 
+def looked_up_corner(payload, facts, saved_ui):
+    """(facts, saved_ui) with a found lookup's Corner lot? answer: No where it found one street (road widths known),
+    Yes where it found two or more, else unanswered (asked, never guessed; its old source goes too), credited to the
+    street service. The one reading the box's preview (preview_lookup: shown for the architect to keep or change)
+    and Draw's reset (lookup_choices) both use, so the box shows the answer Draw saves (UX walkthrough 2026-10-28:
+    the box said "Not answered" while Draw saved the lookup's "no" as "confirmed by you")."""
+    got, labels = (payload or {}).get("facts") or {}, (payload or {}).get("labels") or {}
+    corner = (got.get("corner_lot") or {}).get("value")
+    streets = ((got.get("street_side") or {}).get("value") or {}).get("streets") or {}
+    facts, saved_ui = dict(facts or {}), dict(saved_ui or {})
+    if corner == "no":
+        facts["corner_lot"] = False
+    elif corner == "yes" or (corner == "ask" and len(streets) > 1):
+        facts["corner_lot"] = True               # it faces two streets (the box asks which line is the front)
+    else:
+        facts.pop("corner_lot", None)            # unknown: asked, never guessed
+    if corner:
+        saved_ui["corner_source"] = SUGGESTED + " · " + (labels.get("corner_lot") or SOURCE_OF["street"])
+    else:
+        saved_ui.pop("corner_source", None)
+    return facts, saved_ui
+
+
 def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     """(facts, saved_ui) after a lookup, as a pick returns them. Each found fact a suggestion with its own service's
     name, never confirmed (the district must be ticked again: "_reconfirm"). The lot, street side and ground (and
@@ -2288,7 +3334,18 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
             "asks": list(payload.get("asks") or []), "matches": list(payload.get("matches") or []),
             "query": payload.get("query")}
     saved_ui["_lookup"] = look
+    # the map's "outside the City" holds for this box session, each address said (round 14: one slot, cleared by
+    # a found lookup of another address), through any later lookup that finds no lot (round 13: offline undid it);
+    # a found lookup of that same address ends it for that address only
+    # (a live one only: a copy saved earlier never outranks the City map's newer answer: round 15)
+    outside = [a for a in saved_ui.get("_outside_for") or []
+               if not (look["status"] == "found" and not payload.get("saved_on")
+                       and same_site_address(a, look["query"] or ""))]
+    if look["status"] == "outside_city":
+        outside.append(look["query"] or facts.get("address") or "the address")
+    saved_ui["_outside_for"] = outside
     if look["status"] != "found":
+        look["says"] = " ".join(t for t in (look["says"], still_shown(saved_ui)) if t)
         return facts, saved_ui
     got, details = payload.get("facts") or {}, payload.get("details") or {}
     labels, kept = payload.get("labels") or {}, payload.get("kept_reasons") or {}
@@ -2301,15 +3358,18 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
 
     live, keep = {}, {}
     for name, d in details.items():          # every doubtful or asked fact's reason, by row; reasons add up
-        if d.get("status") in ("needs_review", "ask") and d.get("reason"):
+        # (a doubt without its reason is still a doubt: a saved lookup keeps the status but not a reason worked out
+        # from a source that may not be kept; dropped, the saved lot was more certain than the live one: a false
+        # pass, start-flow round 7)
+        if d.get("status") in ("needs_review", "ask"):
             row = ROW_OF.get(name, name)
-            live[row] = _merged(live.get(row), d["reason"])
+            live[row] = _merged(live.get(row), d.get("reason") or (OVERLAYS_NOT_KEPT if row == "overlays" else DOUBT_KEPT))
             keep[row] = _merged(keep.get(row), kept.get(name) or DOUBT_KEPT)
     found_overlays = value("overlays") or []
     if found_overlays:                       # what was found, by name, not only that something was
         live["overlays"] = _merged("Found on this lot: " + "; ".join(found_overlays) + ".", live.get("overlays") or "")
     if value("address"):
-        facts["address"] = value("address")
+        facts["address"] = clean_address(value("address"))
         saved_ui["address_source"] = SUGGESTED + " · " + label("address", "address")
     zone = value("zone")
     names = {z.lower(): z for z in zones} if zones else {}
@@ -2327,7 +3387,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         facts.pop("zone", None)
         for key in ("zone_source", "_zones_found", "_zone_said"):
             saved_ui.pop(key, None)
-        live["zone"] = _merged(live.get("zone"), NO_DISTRICT)
+        live["zone"] = _merged(live.get("zone"), SAVED_NO_DISTRICT if payload.get("saved_on") else NO_DISTRICT)
     if unknown:
         # the City map names a district Gordium has no rules for (alone or beside one it has): never another
         # district preselected or called suggested in its place; none is set until the architect picks one. With
@@ -2375,20 +3435,13 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     else:                                        # the replaced lot's street name goes with its street lines (the
         saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street), and so
         saved_ui.pop("_street_name", None)       # does its source: the street side's own, or none (headless check)
-        if side and draws_line:
+        # (a saved lookup keeps the line, not the street side's value, used live: its source still says where the
+        # line came from and when it was saved: start-flow round 6)
+        if (side or payload.get("saved_on")) and draws_line:
             saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
         else:
             saved_ui.pop("street_source", None)
-    corner = value("corner_lot")
-    streets = side.get("streets") or {}
-    if corner == "no":
-        facts["corner_lot"] = False
-    elif corner == "yes" or (corner == "ask" and len(streets) > 1):
-        facts["corner_lot"] = True               # it faces two streets (the box asks which line is the front)
-    else:
-        facts.pop("corner_lot", None)            # unknown: asked, never guessed
-    if corner:
-        saved_ui["corner_source"] = SUGGESTED + " · " + label("corner_lot", "street")
+    facts, saved_ui = looked_up_corner(payload, facts, saved_ui)
     lot = value("lot") or {}
     writes = payload.get("writes") or {}
     if lot:
@@ -2510,7 +3563,6 @@ def after_ground_pick(saved_ui, what, placed):
     return saved_ui
 
 
-
 def parse_feet(text):
     """A length the architect typed, in feet: 11'-8", 1' 6", 6", 6 in, 1.5, 1.5 ft, 2' -> feet; empty -> 0.0;
     anything it can't read -> None, never a silent 0."""
@@ -2555,6 +3607,11 @@ BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""
 
 def draw_reason(state):
     """Why Draw is off, in one line; "" when it is on."""
+    unlooked = address_reason(state)
+    if unlooked:
+        return unlooked
+    if state.get("needs_lookup"):                 # an empty file: a found lookup first, or the site by hand
+        return LOOK_UP_FIRST_SITE
     if not state.get("zone"):
         return "Pick the district to continue."
     if not state.get("district_confirmed"):
@@ -2566,10 +3623,97 @@ def draw_reason(state):
     return ""
 
 
+def box_reason(state):
+    """The box's own reason line under Draw: draw_reason's, except when it would only repeat the amber line a lookup
+    that found no lot already shows (what happened, what to do, the lot still shown): said once (Rhino run of #33
+    ee8f2ce: the no-lot state said it twice)."""
+    reason = draw_reason(state)
+    look = state.get("lookup") or {}
+    if reason and look.get("says") and look.get("status") in LOOKUP_SAYS and reason == address_reason(state) \
+            and same_site_address(state.get("address"), look.get("query")):    # (that lookup's address, not another)
+        return ""
+    return reason
+
+
 def can_draw(state):
-    """Draw is on only once the district is confirmed (a looked-up district is only a suggestion), the design
-    buffer, if typed, can be read, and there is a lot."""
+    """Draw is on only once the address typed is one already found (address_reason), the district is confirmed (a
+    looked-up district is only a suggestion), the design buffer, if typed, can be read, and there is a lot."""
     return draw_reason(state) == ""
+
+
+START_KEY = "gordium:start"          # on each floor block GordiumStart drew: how it was drawn (start_tag), for Switch
+SWITCH_LABEL = "Switch side yards"
+SIDE_YARDS_SAID = "Side yards: "       # how the starting house's note names the larger side yard's side (check.side_words)
+
+
+def start_tag(start, story, floor_to_floor, design_buffer):
+    """What a floor block of the starting house carries (START_KEY), so Switch side yards can redraw the house as it
+    was asked for and tell whether it is still as drawn: its floor (outline, base, top, in feet), where the larger
+    side yard is ("left" or "right", seen from the street; None when the zone's side yards are the same), and the
+    floor-to-floor height and design buffer it was drawn with."""
+    floor = start["floors"][story]
+    split = start.get("side_split") or {}
+    ring = floor["outline"]
+    area = abs(sum(ring[i - 1][0] * ring[i][1] - ring[i][0] * ring[i - 1][1] for i in range(len(ring)))) / 2
+    return json.dumps({"volume": area * (floor["top"] - floor["base"]), "story": story, "stories": len(start["floors"]), "outline": floor["outline"],
+                       "base": floor["base"], "top": floor["top"], "larger_side": split.get("larger_side"), "floor_to_floor": floor_to_floor,
+                       "design_buffer": design_buffer or 0.0})
+
+
+def can_switch(source_line):
+    """The panel's Switch side yards button goes under the Starting house site fact when the house has one larger
+    side yard (its note says which side)."""
+    return bool(source_line) and source_line.startswith("Starting house") and SIDE_YARDS_SAID in source_line
+
+
+def _start_record(text):
+    """One floor's START_KEY record (start_tag), or None when it can't be read (one record, not a JSON-lines file)."""
+    try:
+        tag = json.loads(text)
+    except (TypeError, ValueError):
+        return None
+    return tag if isinstance(tag, dict) and {"outline", "base", "top"} <= set(tag) else None
+
+
+def switch_plan(found, tolerance=0.01):
+    """What Switch side yards does with the starting house's floor blocks found in the model, each (its START_KEY
+    text, its bounding box in feet: (x0, y0, z0), (x1, y1, z1), its volume in cubic feet or None, and whether it is
+    locked or hidden, itself or by its layer): {"larger_side": the other side, "floor_to_floor",
+    "design_buffer"} to redraw it, or {"refused": why} when there is nothing to switch, or the house is no longer as
+    Gordium drew it (moved, stretched, a floor deleted): the architect's edits are never thrown away."""
+    if not found:
+        return {"refused": "There is no starting house in this file to switch (GordiumStart draws one)."}
+    tags = []
+    if any(len(f) > 3 and f[3] for f in found):     # the architect's lock is kept: nothing deleted from under it
+        return {"refused": "The starting house is locked or hidden (itself or its layer), so it isn't redrawn. "
+                           "Unlock and show it, then press " + SWITCH_LABEL + " again."}
+    for text, (low, high), volume, *_ in found:
+        tag = _start_record(text)
+        if tag is None:
+            return {"refused": "The starting house's record can't be read, so it isn't redrawn."}
+        xs, ys = [p[0] for p in tag["outline"]], [p[1] for p in tag["outline"]]
+        want = (min(xs), min(ys), tag["base"]), (max(xs), max(ys), tag["top"])
+        same_box = all(abs(a - b) <= tolerance for a, b in zip(want[0] + want[1], tuple(low) + tuple(high)))
+        # the same box but a different solid (a notch, a chamfered corner): changed too (review round 1, F5b)
+        same_solid = volume is not None and tag.get("volume") is not None and \
+            abs(volume - tag["volume"]) <= 1e-6 * tag["volume"] + 1e-4   # a box measures exactly (round 2, F2)
+        if not (same_box and same_solid):
+            return {"refused": "The starting house has changed since Gordium drew it, so it isn't redrawn (your "
+                               "edits are kept). Delete it and run GordiumStart for a new one."}
+        tags.append(tag)
+    if sorted(t.get("story", -1) for t in tags) != list(range(tags[0].get("stories") or 0)):
+        return {"refused": "The starting house has changed since Gordium drew it (a floor is missing or added), so "
+                           "it isn't redrawn (your edits are kept). Delete it and run GordiumStart for a new one."}
+    sides = {t.get("larger_side") for t in tags}
+    inputs = {(t.get("floor_to_floor"), t.get("design_buffer")) for t in tags}
+    if len(sides) != 1 or len(inputs) != 1:
+        return {"refused": "The starting house's floors weren't drawn together, so it isn't redrawn."}
+    side = sides.pop()
+    if side not in ("left", "right"):
+        return {"refused": "This district's side yards are the same on both sides: there is nothing to switch."}
+    floor_to_floor, buffer = inputs.pop()
+    return {"larger_side": "right" if side == "left" else "left", "floor_to_floor": floor_to_floor,
+            "design_buffer": buffer or 0.0}
 
 
 def starting_house_fact(note, today):
@@ -2580,7 +3724,8 @@ def starting_house_fact(note, today):
     # the panel puts "Starting house: " in front, and it describes the house as Gordium drew it (the architect
     # may since have moved or replaced it), so it says so
     said = note[len("Starting house: "):] if note.startswith("Starting house: ") else \
-        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else note
+        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else \
+        "the l" + note[1:] if note.startswith("Largest house") else note
     return {"value": "as first drawn, " + said, "source": SUGGESTED, "confirmed_by": None, "date": today}
 
 
@@ -2591,10 +3736,27 @@ CORNER_HINT = ("This lot faces two streets: click Change… on " + STREET_LABEL 
 
 
 def uncertain(state):
-    """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
-    says = (state.get("lookup") or {}).get("says")
+    """The one amber line for a case the box can't settle by itself, with what to do; None when there's none. A
+    lookup that went wrong (not found, offline…) says so here; what a found lookup only tells (the lot shown dashed,
+    nothing drawn until Draw) is lookup_note's plain line, never amber (the architect's review, 2026-10-28: the
+    question and the information read as one warning)."""
+    says = None if lookup_note(state) else (state.get("lookup") or {}).get("says")
     question = _question(state)
     return " · ".join(t for t in (question, says) if t) or None     # never one instead of the other
+
+
+LOOKUP_INFO = ("found", "set_aside")      # a lookup's own line that only informs: shown plain
+
+
+def lookup_note(state):
+    """The plain line under the amber one: what a found (or set-aside) lookup tells, or None."""
+    look = state.get("lookup") or {}
+    says = look.get("says") if look.get("status") in LOOKUP_INFO else None
+    # the offline safety net (a saved copy shown: the services didn't answer, pick the district again) asks for
+    # something: it stays on the amber line (review round 1 of this change)
+    # and so does the guide-only note (the State's tax map didn't answer: draw your lot over the guide; round 2)
+    asks = says and (says.startswith(SAVED_SAYS.split("{")[0]) or says == GUIDE_PREVIEW)
+    return None if asks else says
 
 
 def _question(state):
@@ -2663,11 +3825,16 @@ def fact_sources(state, today, confirmed):
         mine = state.get(key + "_source") == ENTERED or row in (state.get("checked") or [])
         return by if mine else None
 
-    return {
-        "address": fact(state.get("address") or None, state.get("address_source") or ENTERED),
+    city = (" · " + IN_CITY_SAID.format(date=state["city_by_hand"])) if state.get("city_by_hand") else ""
+    return {     # (the architect's Yes, by hand, on the address's source: shown in the panel and report, round 12)
+        "address": fact(state.get("address") or None,     # (an earlier Draw's Yes, read back, never twice)
+                        (state.get("address_source") or ENTERED).split(" · " + IN_CITY_SAID.split(" (")[0])[0] + city),
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED, chosen("use")),
+        # the follow-up answers (Ben, 2026-10-25): each saved as entered by you, and what the use itself says,
+        # shown in the panel and the report (exactly the facts answers_applied sends the checker)
+        **follow_up_sources(state, fact),
         # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
         "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"), state.get("lot_source"))),
         # the street's name only when it may be kept (the City's roads may not: "street_name_saved" then None, and
@@ -2685,6 +3852,26 @@ def fact_sources(state, today, confirmed):
                         "as drawn" if kind == "flat" else ground.get("source") or
                         ("picked by you" if kind == "terrain" else "placed by you"))),
     }
+
+
+def follow_up_sources(state, fact):
+    """The sources of the facts the box sets after Use (answers_applied's): each answer to a question asked,
+    "entered by you", and each fact the use says, IMPLIED_SOURCE. An answer kept but not asked keeps its saved
+    source (sources_kept)."""
+    zone, use, options = state.get("zone"), state.get("use"), state.get("options")
+    facts, answered = answers_applied({}, state.get("answers"), zone, use, options)
+    return {k: fact({True: "yes", False: "no"}.get(v, v), ENTERED if k in answered else IMPLIED_SOURCE)
+            for k, v in facts.items()}
+
+
+def sources_kept(saved, facts):
+    """The saved sources Draw keeps before adding the box's own (fact_sources): of the facts the box can ask (BOX_ASKS)
+    and the use details (DEFERRED_FACTS, answered in the panel's row dialog, which saves their "entered by you":
+    row_sources), only those still set in `facts` (the facts after Draw: an answer kept, unshown, keeps its source);
+    a fact Draw unset or dropped (a blank, what the old use said) loses its source with it. Those Draw asks or the use
+    says are given their source again by fact_sources."""
+    return {k: v for k, v in (saved or {}).items()
+            if k not in BOX_ASKS + DEFERRED_FACTS or (facts or {}).get(k) is not None}
 
 
 def district_confirmed(mode, zone_fact, zone):
@@ -2721,7 +3908,7 @@ def shorten(text, most):
 def building_name(layer, name, grouped):
     """What the panel calls a building: the starting house Gordium drew (its floors grouped on the massing layer),
     else the object's name, else its layer ("a solid on Building")."""
-    if layer == MASSING:
+    if on_layer(layer, MASSING):                     # its floors and roof each on its own sublayer
         return "the starting house"
     if name:
         return name + (" (and its group)" if grouped else "")
@@ -2760,6 +3947,38 @@ def is_plan_view(parallel, direction_z, tolerance=0.99):
     down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
     up on the ground line)."""
     return bool(parallel) and direction_z <= -tolerance
+
+
+DIM_LIFT_FT = 0.1       # the yard dimensions stand this far above the lot's level (never in it, never under it)
+
+
+def dim_level(lot_level_ft):
+    """The height (feet) the yard dimensions are drawn at: just above the lot's own level (its outline's lowest
+    point), so the ground and a lot drawn above z 0 never hide them where they are depth-tested; 0 + lift
+    without a lot."""
+    return (lot_level_ft or 0.0) + DIM_LIFT_FT
+
+
+def lines_on_top(parallel, direction_z):
+    """Whether Gordium's lines (the lot line, the envelope's outline, the dimensions, the neighbourhood) are drawn
+    over everything in this view: in plan yes, so a line under the roof (the buildable outline, a dimension to the
+    wall) stays visible; in every other view (perspective, the elevations, shaded or not) no: depth-tested, hidden
+    behind the solids in front of them, as the model's own lines are (Ben, 2026-10-21)."""
+    return is_plan_view(parallel, direction_z)
+
+
+def model_ticks(a, b, size):
+    """A dimension's end ticks in the model (drawn depth-tested with it): for a level line, at each end a slash at
+    45° to it in plan (dim_ticks on x and y), at that end's own height; for an upright one (the height), a slash
+    leaning 45° across x, y and z, so it shows in the Front and the Right views alike. `size` in model units.
+    Each tick is a pair of (x, y, z)."""
+    if ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5 > 1e-9:
+        return [((p0[0], p0[1], end[2]), (p1[0], p1[1], end[2]))
+                for (p0, p1), end in zip(dim_ticks(a[:2], b[:2], size), (a, b))]
+    if abs(b[2] - a[2]) < 1e-9:
+        return []
+    s = size / 2 / 3 ** 0.5                  # a slash of length `size` along (1, -1, 1)
+    return [((p[0] - s, p[1] + s, p[2] - s), (p[0] + s, p[1] - s, p[2] + s)) for p in (a, b)]
 
 
 # ---- the start box as one transaction (review rounds 1-2 of PR #19) ----------------------------------------------
@@ -2920,6 +4139,19 @@ def controls_enabled(box_open, zoom_ok):
     return (not box_open, (not box_open) and bool(zoom_ok))
 
 
+def zoom_state(selected_ok, stale, box_open):
+    """(Zoom to on or off, its tooltip saying why when off): on only for a selected, current item with no start box
+    open. Worked out every time the selection, the results or the box change (UX review 2026-10-27: selecting a row
+    left it greyed until the panel next redrew, with nothing saying why)."""
+    if box_open:
+        return False, "Close the start box first."
+    if not selected_ok:
+        return False, "Select a row to zoom to it."
+    if stale:
+        return False, "Out of date: press Check, then zoom."
+    return True, "Zoom to the selected item (or double-click its row)."
+
+
 def last_check_at(checked_at, document):
     """When the last completed check of THIS document finished (None: none yet). Never a placeholder's time, and
     never another document's (verification round 4: switching documents dropped the pending re-check)."""
@@ -2979,10 +4211,50 @@ def gate_actions(actions, box_open, say, open_ok=("legend",)):
         def run(*args, **kwargs):
             if box_open() and name not in open_ok:
                 say(BOX_BUSY)
-                return None
+                return REFUSED              # (a checkbox puts its tick back: gordium_ui._tick)
             return fn(*args, **kwargs)
         return run
     return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+WORKING = "Gordium is working (its window says on what): wait for it, or press Cancel there."
+
+
+REFUSED = object()        # what a gated panel action returns when it did nothing (its checkbox puts its tick back)
+
+
+def busy_actions(actions, busy, say, open_ok=("legend",)):
+    """The panel's actions, each saying WORKING instead while Gordium waits for an answer (busy()): the wait window is
+    a plain one while Rhino keeps answering, so a button pressed meanwhile must never start a second piece of work
+    on top of it (another check, a start box). `open_ok`: the ones that only show something. A refused action
+    returns REFUSED, so a checkbox that called it shows its setting as it still is (independent review of #32)."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if busy() and name not in open_ok:
+                say(WORKING)
+                return REFUSED
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+class NotInFront(Exception):
+    """Another file came to the front while Gordium read this one's facts (Rhino runs during the checker's wait):
+    whatever was about to prompt or save stops (gordium_rhino.current_facts)."""
+
+
+def front_actions(actions, say):
+    """The panel's actions, each saying why (NotInFront's words) and doing nothing more when the file it was
+    reading is no longer the one in front."""
+    def guarded(fn):
+        def run(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except NotInFront as e:
+                say(str(e))
+                return REFUSED
+        return run
+    return {name: guarded(fn) for name, fn in actions.items()}
 
 
 def recovery_message(removed, back):
@@ -3042,6 +4314,7 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         facts.pop(k, None)
     set_street_lines(facts, None)                # the old lot's street lines and their names go with it
     saved_ui.update(from_sample=False, replaceable_lot=None, lookup_frame=None, ground_kind="flat", lookup_spots=[])
+    saved_ui.pop("city_by_hand", None)           # the looked-up lot replaces the one said by hand to be the City's
     guide = None
     if w.get("lot_ring"):
         lot_id = table.add_lot(w["lot_ring"], "Lot · " + (facts.get("address") or "looked up"))
@@ -3061,6 +4334,162 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         guide = w["guide_ring"]
     saved_ui["lookup_snapshot"] = w.get("snapshot")
     return facts, saved_ui, guide
+
+
+# ---- long work: a line that says what Gordium is doing, and a Cancel that stops it --------------------------------
+# The checker's and the lookup's work runs in their own processes; the plugin waits for them on a Job's thread,
+# never on Rhino's, so Rhino keeps drawing and answering while they work (a slow one shows a small window after
+# WAIT_WINDOW_S with the current step, the seconds so far and Cancel). Cancel stops the process: its answer is never
+# used, so nothing it would have changed changes.
+
+class WorkCancelled(Exception):
+    """The architect pressed Cancel while Gordium worked: the work was stopped and nothing it would have changed was
+    changed."""
+
+
+WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (no flash on a quick check)
+SPINNER = ("●○○", "○●○", "○○●")
+SPIN_S = 0.3               # s per frame of the moving mark
+CANCELLING = "Cancelling…"
+STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint, while it has the keyboard (Esc reaches it)
+STOP_HINT_CLICK = "Click Cancel to stop"   # ... and while it hasn't: never a promise Esc can't keep
+FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
+              "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
+              "sample_site": "Loading the sample lot…"}
+CHECK_CANCELLED = "Check cancelled"
+CHECK_CANCELLED_NOTE = ("Nothing in the model changed. Nothing is shown as checked until the next check: press "
+                        "Check again.")
+DRAW_CANCELLED = ("Draw cancelled: nothing was drawn, and the model is as it was before the box opened (Draw again "
+                  "when you're ready).")
+REPORT_CANCELLED = "Zoning report cancelled: the report file wasn't changed."
+REPORT_CANCELLED_LATE = ("Zoning report cancelled as it finished: the new report had already been saved to {path} "
+                         "(not opened).")
+
+
+def report_cancelled(path, changed):
+    """What Zoning report… says when its check was cancelled: the file as it was, or (Cancel pressed in the moment
+    after the checker moved the new report in) that it was saved anyway."""
+    return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
+SETTLING = "Finishing the check that is running…"
+CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
+                   "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
+                   "panel) for a report of the model now.")
+NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
+                "command again in the file you want.")
+def outdated_report_message(path, report_error, had_report):
+    """What a check whose model changed while it ran says of its report: written, but of the model as it was; or,
+    when the checker couldn't write it, that it wasn't written and why (never that it was: independent review of
+    #32)."""
+    if report_error:                     # (its own full stop dropped: report_message adds one)
+        return report_message(path, False, str(report_error).rstrip(". "), stale=bool(had_report))
+    return REPORT_OUTDATED.format(path=path)
+
+
+HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
+                  "Gordium will check it.")
+DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
+                 "is as it was: Draw again.")
+
+
+class ModelChanged(WorkCancelled):
+    """The model was edited (or another document came to the front) while Gordium worked out something to draw for
+    it: nothing is drawn; `said` is what the architect is told."""
+    said = DRAW_OUTDATED
+
+
+def progress_line(elapsed, limit=None):
+    """The moving mark and the seconds so far ("○●○  7 s"), with when the work stops by itself if it has a limit.
+    The mark is worked out from the time, so it moves at the same pace whoever draws it."""
+    elapsed = max(0.0, float(elapsed or 0))
+    text = "%s  %d s" % (SPINNER[int(elapsed / SPIN_S) % len(SPINNER)], int(elapsed))
+    return text + (" (stops at %d s)" % limit if limit else "")
+
+
+class Job:
+    """One piece of long work on its own thread, never Rhino's: work(step) returns the result; step(text) says what
+    it is doing now. Rhino's thread only reads it (done, step, elapsed()), waits a moment for it (wait), and may
+    cancel it: `stop` (run on the caller's thread) stops the process doing the work, and from then on the work's
+    result is never used (outcome() says "cancelled" even if an answer still arrives)."""
+
+    def __init__(self, work, step, stop=None, clock=time.monotonic):
+        self.step, self.done, self.cancelled = step, False, False
+        self.result = self.error = None
+        self._stop, self._clock = stop, clock
+        self.started = clock()
+        self._thread = threading.Thread(target=self._run, args=(work,), daemon=True, name="gordium-job")
+        self._thread.start()
+
+    def say(self, text):
+        if text and not self.cancelled:
+            self.step = text
+
+    def _run(self, work):
+        try:
+            self.result = work(self.say)
+        except BaseException as e:            # noqa: BLE001  (kept for the caller, on its own thread)
+            self.error = e
+        finally:
+            self.done = True
+
+    def elapsed(self):
+        return self._clock() - self.started
+
+    def finished(self):
+        """Nothing more to wait for: the work is done, or it was cancelled (its answer is dropped)."""
+        return self.done or self.cancelled
+
+    def wait(self, timeout):
+        """Wait at most `timeout` s for the work; whether there is nothing more to wait for."""
+        self._thread.join(timeout)
+        return self.finished()
+
+    def cancellable(self):
+        return self._stop is not None and not self.finished()
+
+    def cancel(self):
+        """Stop the work (once; never after it is done; never work with no way to stop it, whose thread would go on
+        reading the checker's answers: review round 2): True when it was stopped."""
+        if not self.cancellable():
+            return False
+        self.cancelled = True
+        self.step = CANCELLING
+        if self._stop is not None:
+            self._stop()
+        return True
+
+    def outcome(self):
+        """("cancelled", None), ("error", the exception) or ("done", the result)."""
+        if self.cancelled:
+            return "cancelled", None
+        if self.error is not None:
+            return "error", self.error
+        return "done", self.result
+
+
+def plans_house(mode, redraw, caller_draws):
+    """Whether Draw works out a starting house before the box commits: GordiumStart's box always draws one; another
+    box only when its Draw reset the site (`redraw`) AND its caller draws the house after (`caller_draws`: Edit
+    site…). GordiumCheck's box never draws one, so it never asks for one (review round 1: a "start" request for
+    nothing, and its Cancel escaped the command)."""
+    return mode == "start" or bool(redraw and caller_draws)
+
+
+def result_stale(dirty_at, shown_at, now, after, rechecking):
+    """Whether the result on screen is out of date, so nothing is drawn as complying or not (F7, H1): the model
+    changed more than `after` s ago and no check has finished since, or a background re-check is running (live mode
+    clears the pending edit when it starts one, and the result on screen is of the model before that edit: review
+    round 1, P1, a false pass shown while the re-check ran)."""
+    if rechecking:
+        return True
+    return bool(dirty_at and now - dirty_at >= after and (shown_at or 0) < dirty_at)
+
+
+def checked_while_still(begun_at, dirty_at):
+    """Whether a check that read the model at `begun_at` still shows the model: no edit since (`dirty_at`, the last
+    edit not yet re-checked, None for none). A live re-check runs while the architect may keep editing; its result
+    is shown only if nothing changed after it read the model, else it is dropped and the model checked again."""
+    return not dirty_at or dirty_at < begun_at
 
 
 # ---- the context map (design_checker.context_box): the neighbourhood around a looked-up lot ---------------------
@@ -3456,14 +4885,15 @@ def _write_lines(stream, sends, process=None):
         pass
 
 
-def exchange(sends, lines, request, limit):
-    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for)."""
+def exchange(sends, lines, request, limit, on_step=None):
+    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for); each progress
+    line before it goes to `on_step`."""
     sends.put(json.dumps(request) + "\n")
-    return answer_for(lines, request["id"], limit)
+    return answer_for(lines, request["id"], limit, on_step)
 
 
 HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",
-           "worker", "worker_sends", "worker_lines")
+           "worker", "worker_sends", "worker_lines", "live_timer", "live_check")
 
 
 def sweep(leftovers, state=None, release=None):
@@ -3502,26 +4932,33 @@ def current_only(fn, is_current):
     return run
 
 
-def answer_for(lines, request_id, limit):
+def answer_for(lines, request_id, limit, on_step=None, clock=time.monotonic):
     """The checker's answer to request `request_id`, from `lines` (a queue the plugin's reader thread fills with
-    every line the checker writes, then None when it stops); None if it stopped. Raises CheckerOutOfStep when no
-    line comes within `limit` seconds, when the line isn't an answer, or when it is another request's answer:
-    then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever showing
-    an earlier check's result as this one's."""
-    try:
-        line = lines.get(timeout=limit)
-    except queue.Empty:
-        raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
-    if line is None:
-        return None
-    try:
-        answer = json.loads(line)
-    except ValueError:
-        answer = None
-    if not isinstance(answer, dict) or answer.get("id") != request_id:
-        raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
-                               "nothing from it is shown")
-    return answer
+    every line the checker writes, then None when it stops); None if it stopped. This request's progress lines
+    ({"id", "step"}, sent before its answer) go to `on_step`. Raises CheckerOutOfStep when the answer doesn't come
+    within `limit` seconds of asking (progress lines don't extend it), when a line isn't this request's, or isn't
+    an answer: then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever
+    showing an earlier check's result as this one's."""
+    deadline = clock() + limit
+    while True:
+        try:
+            line = lines.get(timeout=max(0.0, deadline - clock()))
+        except queue.Empty:
+            raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
+        if line is None:
+            return None
+        try:
+            answer = json.loads(line)
+        except ValueError:
+            answer = None
+        if not isinstance(answer, dict) or answer.get("id") != request_id:
+            raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
+                                   "nothing from it is shown")
+        if "step" in answer and "ok" not in answer:      # a progress line: what it is doing now
+            if on_step is not None:
+                on_step(str(answer["step"]))
+            continue
+        return answer
 
 
 # ---- processes started from Rhino: never a console window (Windows) -----------------------------------------------
@@ -3604,3 +5041,687 @@ class ServerBook:
         """A new checker of this Rhino: its earlier ones stopped, this one recorded (another Rhino's untouched)."""
         self.stop_all(keep={"pid": pid, "start": self.started_at(pid), "owner": self.me["pid"],
                             "owner_start": self.me["start"]})
+
+
+# ---- re-lookup on a drawn site (Ben, 2026-10-21): Look up previews, Draw resets ------------------------------------
+# Look up only fills the box: the answer is kept as a preview (its lot shown dashed on screen, no objects), nothing in
+# the model changes. Draw with an address other than the one drawn starts clean: everything Gordium drew is cleared
+# (the lot it drew, the starting house as Gordium drew it, the lookup's spot grades) and the new lot and starting
+# house drawn, in one undo step. The architect's own work (a lot they drew, picked or surveyed; an edited starting
+# house; buildings they drew) is never removed without asking once. A new address is a new site (Ben, 2026-10-25):
+# its lot replaces the one in the model whichever they answer, their own lot too; "Keep my building" keeps only their
+# buildings, checked on the new lot. The same address and Draw: no reset.
+
+KEEP_MINE = "keep"
+START_FRESH = "fresh"
+LOOK_UP_FIRST = "Press Look up to find {address} first."
+NOT_FOUND_YET = "No lot found for {address} (the line above says why): correct the address and press Look up, or {back}."
+LOOKUP_NOT_ANSWERED = "The lookup of {address} didn't finish (the line above says why): press Look up again, or {back}."
+PICK_A_MATCH = "Pick one of the matches under Address, then press Look up."
+WAIT_LOOKUP = "Looking up {address}: Draw once the answer is in."
+GUIDE_PREVIEW = ("The State's tax map didn't answer; the City's outline is shown as a dashed guide only (it can't be "
+                 "kept). Draw clears what Gordium drew for the old address; then Draw my lot… over the guide.")
+CITY_TAIL = {"ithaca", "ny", "new", "york", "usa"}
+
+
+def address_words(address):
+    """An address's own words for comparing: the part before the first comma (the city, state and ZIP after it set
+    aside, and a trailing "Ithaca NY 14850" typed without commas), lower case, the usual abbreviations alike
+    (Road = Rd, West = W: STREET_WORDS). "106 Ithaca Rd" keeps its street's name: only the tail is the city's."""
+    words = [STREET_WORDS.get(w, w) for w in str(address or "").split(",", 1)[0].lower().replace(".", " ").split()]
+    while len(words) > 2 and (words[-1] in CITY_TAIL or (words[-1][:5].isdigit() and len(words[-1]) in (5, 10))):
+        words.pop()
+    return words
+
+
+def same_address(a, b):
+    """Two addresses the same lot's, as typed or found (address_words): case, commas, spaces, the city/state tail
+    and "Rd"/"Road" aside. Nothing is the same as an empty address."""
+    words = address_words(a)
+    return bool(words) and words == address_words(b)
+
+
+MISSING = object()
+AFTER_DRAW = " · after Draw"       # on a row that describes the looked-up lot, which Draw has yet to draw
+
+
+def show_pending_lot(state, facts, saved_ui):
+    """The box's state with the Lot and Front lot line rows describing the looked-up lot (marked "after Draw")
+    when nothing of the architect's or Gordium's is drawn yet: no lot, or only the sample's stand-in (Ben,
+    2026-10-27: the rows kept saying the sample's 7,033 sf and Ithaca Rd). Display only: no fact is written
+    before Draw. Once a lot is drawn (Gordium's from a lookup, or the architect's own) the rows describe the
+    drawing, and the state comes back as it was. A City guide alone is left as it was (its own flow)."""
+    pending = (saved_ui or {}).get("_pending")
+    sample_only = not (facts or {}).get("lot_id") or (saved_ui or {}).get("from_sample")
+    if (not pending or not sample_only or not lookup_may_replace(facts, saved_ui)
+            or is_drawn(pending.get("address"), saved_ui)      # Draw draws nothing new for it: no "after Draw"
+            or (state.get("lookup") or {}).get("looking")           # another address is being looked up
+            or not (same_address(state.get("address") or "", pending.get("address"))      # blank: Draw sets the
+                    or same_address(state.get("address") or "", pending.get("query")))):    # preview aside
+        return state
+    answer = pending.get("answer") or {}
+    got = answer.get("facts") or {}
+    w = answer.get("writes") or {}
+    lot = (got.get("lot") or {}).get("value") or {}
+    if not (lot and w.get("lot_ring")):                      # the City's guide only: no lot of it is drawn (its
+        return state                                         # own flow: Draw clears, then the architect draws)
+    side = (got.get("street_side") or {}).get("value") or {}
+    street = None
+    if side.get("street") and w.get("street_line"):
+        street = address_street(pending.get("address"), side["street"]) or side["street"].title()
+    label = (answer.get("labels") or {}).get("lot") or SOURCE_OF["lot"]
+    return dict(state, has_lot=True, lot_missing=False, lot_area=lot.get("area_sf"), lot_surveyed=False,
+                lot_source=label, street_name=street, after_draw=True)
+
+
+PREVIEW_SAYS = ("Shown dashed: {address}'s lot. Nothing in the model changes until Draw, which replaces what Gordium "
+                "drew with this lot and a new starting house.")
+SET_ASIDE = "The lookup of {address} was set aside (the address was changed): Look up to preview another address."
+
+
+def preview_lookup(answer, facts, saved_ui, zones=()):
+    """(facts, saved_ui, preview ring or None) after a lookup's answer. Look up only fills the box (Ben): the
+    address and the district (a suggestion, ticked again), nothing else, so the lot, street and corner rows keep
+    saying what is drawn; the rest of the answer waits in `_pending` for Draw (apply_reset), its lot shown dashed
+    (the ring returned). An earlier preview's box changes are undone first (drop_pending), so a failed lookup or a
+    new one never leaves another address's district behind (re-lookup review round 1)."""
+    facts, saved_ui = drop_pending(facts, saved_ui)
+    before_f, before_s = dict(facts), dict(saved_ui)
+    replaces = lookup_may_replace(facts, saved_ui)
+    facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=False)
+    if (answer or {}).get("status") != "found":
+        return facts, saved_ui, None
+    # the Corner lot? answer Draw will save, shown now for the architect to keep or change (it is an answer, not
+    # something drawn; Draw keeps the box's: apply_reset). Only for a new lot: the address already drawn is drawn
+    # again by nothing, so its own answer stays (review round 1 of this fix, F1: a re-lookup of the drawn address
+    # put the lookup's "no" over the architect's Yes on a corner lot)
+    new_lot = not is_drawn(facts.get("address") or answer.get("query"), saved_ui)
+    if new_lot:
+        facts, saved_ui = looked_up_corner(answer, facts, saved_ui)
+    w = answer.get("writes") or {}
+    undo = [(where, k, before.get(k, MISSING), after.get(k, MISSING))
+            for where, before, after in (("facts", before_f, facts), ("saved", before_s, saved_ui))
+            for k in set(before) | set(after) if k not in ("_lookup", "_pending", "_outside_for")   # (the
+            # session's, never one preview's: set aside, it brought back an address found since: round 16)
+            and before.get(k, MISSING) is not after.get(k, MISSING) and before.get(k, MISSING) != after.get(k, MISSING)]
+    if new_lot:                                  # the corner answer always goes back with the preview (drop_pending),
+        undo += [(where, k, before.get(k, MISSING), after.get(k, MISSING))   # changed by it or not
+                 for where, k in (("facts", "corner_lot"), ("saved", "corner_source")) + PREVIEW_STREET
+                 for before, after in [(before_f, facts) if where == "facts" else (before_s, saved_ui)]
+                 if not any(u[0] == where and u[1] == k for u in undo)]
+    address = facts.get("address") or answer.get("query")
+    saved_ui["_pending"] = {"address": address, "query": answer.get("query"), "answer": answer, "undo": undo,
+                            "lot_id": facts.get("lot_id")}   # the drawn lot the street lines go back to (drop_pending)
+    if not replaces:
+        saved_ui["_lookup"]["says"] = ("Your own lot is kept until you press Draw: the lookup filled in the address "
+                                       "and the district.")
+    elif not is_drawn(address, saved_ui):
+        saved_ui["_lookup"]["says"] = (GUIDE_PREVIEW if not w.get("lot_ring") and w.get("guide_ring") else
+                                       PREVIEW_SAYS.format(address=address))
+    if answer.get("saved_on"):                   # the offline safety net: said, whatever else the line said
+        saved_ui["_lookup"]["says"] = SAVED_SAYS.format(address=address, date=answer["saved_on"])
+    return facts, saved_ui, w.get("lot_ring") or w.get("guide_ring")
+
+
+PREVIEW_ANSWERS = ("corner_lot", "corner_source")      # answered for the previewed lot: put back when it is dropped
+# the drawn lot's street lines, put back with them: lines picked while another lot was previewed (under its corner
+# answer, or under one changed after the pick) never stay on the drawn lot (rounds 2 and 3 of the corner fix: a
+# lot answered No kept two streets' lines; one answered Yes kept one)
+PREVIEW_STREET = (("facts", "street_line"), ("facts", "street_ids"), ("saved", "street_name"),
+                  ("saved", "_street_name"), ("saved", "street_source"))
+
+
+def previews_new_lot(saved_ui):
+    """Whether the box shows a looked-up lot that Draw will draw (a lookup pending, not of the address drawn)."""
+    pending = (saved_ui or {}).get("_pending")
+    return bool(pending) and not is_drawn(pending.get("address"), saved_ui)
+
+
+def drop_pending(facts, saved_ui):
+    """(facts, saved_ui) with the pending preview gone and the box changes it made undone, each only while it is as
+    the preview left it (an architect's later change stays)."""
+    facts, saved_ui = dict(facts or {}), dict(saved_ui or {})
+    pending = saved_ui.pop("_pending", None) or {}
+    def same(a, b):                    # None and no value are the same (the box writes "no district" as None)
+        return (MISSING if a is None else a) == (MISSING if b is None else b)
+
+    # the street lines go back only onto the lot they were drawn on: a lot picked during the preview (Use my
+    # survey..., Draw my lot...) dropped them, and its street is asked again (review round 4 of the corner fix, F1:
+    # the old lot's street line came back on a survey lot, off its outline)
+    same_lot = (facts.get("lot_id") or None) == (pending.get("lot_id") or None)
+    corner_was = facts.get("corner_lot")
+    for where, key, old, new in pending.get("undo") or []:
+        target = facts if where == "facts" else saved_ui
+        # the Corner lot? answer shown for the previewed lot, or given for it, was that lot's: never the drawn lot's
+        # (review round 1 of the corner fix, F2: a No given for the preview stayed on a drawn corner lot), and the
+        # drawn lot's street lines as they were (PREVIEW_STREET)
+        street = same_lot and (where, key) in PREVIEW_STREET
+        if key in PREVIEW_ANSWERS or street or same(target.get(key, MISSING), new):
+            if old is MISSING:
+                target.pop(key, None)
+            else:
+                target[key] = old
+    if not same_lot and facts.get("corner_lot") != corner_was:   # that lot's lines were picked under the answer
+        set_street_lines(facts, None)            # set aside: asked again on it, as when an answer flips
+        saved_ui.pop("street_name", None)        # (corner_answered; round 5 of the corner fix: a survey lot kept
+    return facts, saved_ui                       # two lines under the drawn lot's No)
+
+
+def box_opened(saved_ui, facts):
+    """The box's choices as a box opens over `facts`: the address the lot had then kept for this session
+    (`_box_address`, never saved), so typing it back is never a new address (Ben, 2026-10-25)."""
+    return dict(saved_ui or {}, _box_address=(facts or {}).get("address"),   # (a new file: no lot and no address
+                _opened_empty=not (facts or {}).get("lot_id") and not (facts or {}).get("address"))   # yet)
+
+
+def start_gate(state, saved_ui):
+    """The box's state with the empty-file rule (Ben, 2026-10-27): a box opened on a file with no lot (a new project)
+    starts empty, and Draw stays off until a lookup of the address typed is found (`needs_lookup`), or the architect
+    chose to enter the site by hand (`by_hand`: they draw the lot, pick the district and the street side, all theirs;
+    no neighbourhood). A file with a lot drawn when the box opened is as before. Display and gating only: no fact
+    is written here."""
+    saved_ui = saved_ui or {}
+    if not saved_ui.get("_opened_empty"):
+        return dict(state, needs_lookup=False, by_hand=False, city_by_hand=saved_ui.get("city_by_hand"),
+                    outside_for=saved_ui.get("_outside_for") or [])
+    pending = saved_ui.get("_pending") or {}
+    # a found lookup supersedes "by hand": its address rule applies again (sceptic 2: by hand let another town's
+    # address keep the City's lookup)
+    by_hand = bool(saved_ui.get("_by_hand")) and not pending
+    address = state.get("address") or ""
+    found = any(same_site_address(address, a) for a in (pending.get("address"), pending.get("query"),
+                                                       # the City's outline only: cleared for it, the box kept
+                                                       # open to draw the lot over it (sceptic 2, finding 1)
+                                                       saved_ui.get("_redrawn_for"), saved_ui.get("drawn_address"))
+                if a)
+    return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand,
+                city_by_hand=saved_ui.get("city_by_hand"),      # shown whenever kept (round 12: never seen again)
+                outside_for=saved_ui.get("_outside_for") or [])
+
+
+BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
+                     "(a City of Ithaca one), or clear it.")
+
+
+def no_guessed_district(saved, suggested):
+    """The suggestions for a file with no site yet (no lot, no address saved): without the first district's guess
+    (Ben, 2026-10-27: the lookup finds it, or the architect picks it). GordiumStart and Edit site… alike (round 5)."""
+    suggested = dict(suggested or {})
+    if not (saved or {}).get("lot_id") and not (saved or {}).get("address") and not suggested.get("lot_id"):
+        suggested["zone"] = None
+    return suggested
+
+
+IN_CITY_QUESTION = ("Is this lot in the City of Ithaca?\n\nGordium checks City of Ithaca lots only. An address "
+                    "that reads \"Ithaca, NY 14850\" may instead be in the Town of Ithaca, Cayuga Heights, Lansing "
+                    "or Dryden, which have their own zoning codes. The City's tax map says which.\n\n"
+                    "Yes: enter the site by hand as a City of Ithaca lot. No: nothing changes.")
+IN_CITY_SAID = "You said this lot is in the City of Ithaca ({date})."
+BY_HAND_OUTSIDE = ("The lookup said {query} is outside the City of Ithaca, and Gordium checks City of Ithaca lots "
+                   "only: look up a City of Ithaca address, or close this box.")
+
+
+def by_hand_refused(saved_ui):
+    """Why "Enter the site by hand" is refused before its question is asked: the lookup said outside the City (round
+    12: a Yes, then the address cleared or retyped, opened Draw on that lot). "" when it may be asked."""
+    outside = (saved_ui or {}).get("_outside_for") or []     # (kept through later lookups: rounds 13, 14)
+    return BY_HAND_OUTSIDE.format(query=outside[-1]) if outside else ""
+
+
+def choose_by_hand(facts, saved_ui, in_city):
+    """(facts, saved_ui) once the architect chose "Enter the site by hand" and answered IN_CITY_QUESTION: `in_city`
+    is the date they said Yes (kept in the file as theirs, `city_by_hand`), else nothing changes (start-flow round
+    11: "Ithaca, NY 14850" is also the Town's mail, so an address alone can't prove a City lot). Any looked-up
+    preview set aside (its box changes undone; else a found lookup kept the gate on the lookup and the button did
+    nothing: start-flow round 3)."""
+    dropped_f, dropped = drop_pending(facts, saved_ui)
+    if by_hand_refused(dropped) or not in_city:    # (asked of the state by hand would leave: round 16)
+        return facts, saved_ui
+    facts, saved_ui = dropped_f, dropped
+    saved_ui["city_by_hand"] = str(in_city)
+    saved_ui["_lookup"] = {}                       # ("outside the City" holds in `_outside_for`: by_hand_refused)
+    saved_ui["_by_hand"] = True
+    return facts, saved_ui
+
+
+def draw_blocked(state, saved_ui):
+    """Why Draw must draw nothing, whatever way it was pressed (the box, where Draw is off then, or a scripted run
+    that ticks and draws): an address typed but not looked up (address_reason), or a file that opened empty with
+    no found lookup of the address and no "Enter the site by hand" (start_gate). "" when Draw may go on."""
+    saved_ui = saved_ui or {}
+    state = dict(state, known_addresses=known_addresses(saved_ui), lookup=saved_ui.get("_lookup") or {})
+    gated = start_gate(state, saved_ui)
+    return address_reason(gated) or (LOOK_UP_FIRST_SITE if gated["needs_lookup"] else "")
+
+
+# The offline safety net (Ben, 2026-10-27): each found lookup is saved on this computer, only as far as its sources
+# allow keeping it (site_lookup's snapshot, endpoints.yaml `store`): the lot and its street line from the State's
+# tax parcels, never the district (the City's zoning map is used live, never stored), so the district is picked
+# again. When a later lookup of the same address can't reach the map services, the box offers the saved one.
+LOOKUP_FAILED = ("offline", "error", "timeout")          # the services didn't answer (never "not found" or "outside")
+USE_SAVED = "Use the lookup saved on {date}"
+SAVED_SAYS = ("The map services didn't answer. Shown: the lookup of {address} saved on {date} (the lot and its street "
+              "line only: pick the district again).")
+SAVED_ON = " · saved on {date}"
+SAVED_NOT_THIS = "The saved lookup is {saved_for}'s, not {address}'s: press Look up to find {address}."
+USED_LIVE = "(used live, not stored)"                     # site_lookup.lookup.USED_LIVE: a value never stored
+
+
+def lookup_key(address):
+    """The key a saved lookup is filed under: the address's own words (address_words), "" for none."""
+    return " ".join(address_words(address))
+
+
+def storable_lookup(answer):
+    """The copy of a found lookup that may be saved, or None (nothing worth saving: no lot curve the sources allow
+    keeping). Only the snapshot's facts (each already within its source's policy) with a value that was kept, the
+    lot curve, its street line and placement, the spot grades (writes: all `raw`), its date and query. Never the
+    district (used live), nor the City's guide."""
+    answer = answer or {}
+    w = answer.get("writes") or {}
+    if answer.get("status") != "found" or not w.get("lot_ring") or answer.get("saved_on"):
+        return None
+    snap = w.get("snapshot") or {}
+    facts = {k: v for k, v in (snap.get("facts") or {}).items()
+             if isinstance(v, dict) and v.get("value") not in (None, USED_LIVE) and k != "zone"}
+    if not facts.get("lot"):
+        return None
+    date = answer.get("checked") or str(snap.get("fetched") or "")[:10] or None
+    if not date:
+        return None
+    return {"status": "found", "query": answer.get("query"), "message": "", "asks": [], "matches": [], "facts": facts,
+            # every doubt the lookup had, by its status (the snapshot's details are within every source's policy),
+            # even for a fact whose value isn't kept (the street side, the corner): never more certain than live
+            "details": {k: v for k, v in (snap.get("details") or {}).items() if k != "zone"},
+            "labels": {k: v for k, v in (answer.get("labels") or {}).items()     # (the service names only; the
+                       if k in facts or (k == "street_side" and w.get("street_line"))},   # street line's, with it)
+            "kept_reasons": {k: v for k, v in (answer.get("kept_reasons") or {}).items() if k != "zone"},
+            "street_storable": bool(answer.get("street_storable")),
+            "writes": {"lot_ring": w.get("lot_ring"), "guide_ring": None, "street_line": w.get("street_line"),
+                       "spots": list(w.get("spots") or []), "frame": w.get("frame"), "snapshot": snap},
+            "checked": date, "address": found_address(answer)}
+
+
+def found_address(answer):
+    """The address a lookup found ("106 Ithaca Road, Ithaca, NY, 14850"), or None."""
+    value = (((answer or {}).get("facts") or {}).get("address") or {}).get("value")
+    return value if isinstance(value, str) and value.strip() else None
+
+
+def save_lookup(store, answer, address=None):
+    """The saved lookups (a dict: key -> storable copy) with this answer added under the address typed and the one
+    found; unchanged when nothing may be saved."""
+    copy = storable_lookup(answer)
+    if copy is None:
+        return dict(store or {})
+    out = dict(store or {})
+    for a in (answer.get("query"), address, copy.get("address")):     # as typed, and as found
+        if lookup_key(a):
+            out[lookup_key(a)] = copy
+    return out
+
+
+def saved_offer(answer, store, address):
+    """The saved lookup to offer for `address` when this lookup failed to reach the services, else None. Only the
+    same site's: the key is the street address alone, so the town is checked too (same_site_address: "106 Ithaca
+    Rd, Lansing" never gets the City's 106; start-flow sceptic 1, finding 2)."""
+    if (answer or {}).get("status") not in LOOKUP_FAILED or not lookup_key(address):
+        return None
+    copy = (store or {}).get(lookup_key(address))
+    if not copy or not any(same_site_address(address, a) for a in (copy.get("query"), copy.get("address")) if a):
+        return None
+    return copy
+
+
+def use_saved(offer, offered_for, typed):
+    """The saved lookup as the box's answer, only while the address typed is still the one it was offered for
+    (start-flow sceptic 1, finding 1: retyped, it went in under the new address, as if that had been looked up);
+    else None (the offer is dropped)."""
+    if not offer or not same_site_address(typed or "", offered_for or ""):
+        return None
+    return as_saved(offer)
+
+
+def saved_refused(look, offered_for, typed):
+    """The lookup line once "Use the lookup saved on …" was pressed for an address retyped since (the button was
+    still on screen: the box's rows aren't rebuilt while typing): the offer gone, and why."""
+    return dict(look or {}, saved_offer=None,
+                says=SAVED_NOT_THIS.format(saved_for=offered_for or "another address", address=typed or "the address"))
+
+
+def as_saved(copy):
+    """A saved lookup as an answer the box shows like any other, marked: its date on the line the box says, and on
+    every source label ("NYS Tax Parcels Public · saved on 2026-10-27"), so the rows and what Draw saves say so.
+    Its own query, never the address typed now. A source's ", used live" goes: what was saved is not live (round 9:
+    "City of Ithaca roads, used live · saved on <date>")."""
+    date = copy.get("checked")
+    return dict(copy, saved_on=date, labels={k: v.replace(", used live", "") + SAVED_ON.format(date=date)
+                                             for k, v in (copy.get("labels") or {}).items()})
+
+
+def known_addresses(saved_ui):
+    """The addresses Draw takes as they are, never as a new one to look up: the lot's own when the box opened, the
+    one drawn, and the one last looked up and found (as found and as typed)."""
+    saved_ui = saved_ui or {}
+    pending = saved_ui.get("_pending") or {}
+    return [a for a in (saved_ui.get("_box_address"), saved_ui.get("drawn_address"), pending.get("address"),
+                        pending.get("query")) if a]
+
+
+ITHACA_PLACE = {"ithaca", "14850", "14851", "14852", "14853"}
+
+
+def address_place(address):
+    """The town or ZIP an address names after its first comma, as words (state and country aside), or None when it
+    names none; the City's own name and ZIP codes count as none (the lot is in the City of Ithaca). Typed without
+    commas, the tail after the street: a ZIP at the end, and the one word before a state or ZIP ("12 Main St Lansing
+    NY 14882" names "lansing 14882": start-flow review round 9, it read as the City's), a street word never a town."""
+    if "," not in str(address or ""):
+        return _place_without_commas(address)
+    tail = str(address or "").split(",", 1)[1:]
+    text = " ".join(_address_tokens((tail[0] if tail else "").replace(",", " ")))
+    text = text.replace("united states of america", "").replace("united states", "")
+    words = [w for w in text.split() if w not in STATE_WORDS]
+    words = [w[:5] if w[:5].isdigit() else w for w in words if _may_be_place(w)]
+    places = [w for w in words if w not in ITHACA_PLACE]
+    return " ".join(places) or None
+
+
+# Words that end a street's name ("Rd", "Way"), so what follows them is the town: STREET_WORDS both ways and the
+# other endings of the City's streets (round 10: "1 Willard Way NY 14850" read "way" as a town). Never a word that
+# also names a place nearby ("Heights": the Village of Cayuga Heights; "Hill"; "East": East Ithaca, in the Town).
+DIRECTIONS = {"north", "south", "east", "west", "n", "s", "e", "w"}
+STREET_ENDINGS = ((set(STREET_WORDS) | set(STREET_WORDS.values())) - DIRECTIONS    # "East Ithaca" is the Town's
+                  | {"way", "park", "walk", "row", "alley", "aly", "path", "trail", "trl", "ext", "extension", "sq",
+                     "square", "plaza", "loop", "run", "crossing", "pike", "tpke", "turnpike", "rte", "route"})
+STATE_WORDS = ("ny", "new", "york", "usa", "us", "tompkins", "county")
+UNIT_WORDS = {"apt", "apartment", "unit", "#", "ste", "suite", "fl", "floor", "rm", "room", "bldg", "building"}
+NOT_A_PLACE = {"rear", "front", "lower", "upper", "-", "&"}    # a part of a lot or house ("101 N Aurora St Rear")
+# Places around the City that share its "Ithaca" mail and ZIPs, read as a town even after a street with no known
+# ending ("1 Snyder Hill Dryden": round 11); "town" and "village" too ("Town of Ithaca"). By hand, the architect also
+# says the lot is in the City (IN_CITY_QUESTION): an address alone can't prove it.
+NEARBY_PLACES = {"town", "village", "lansing", "dryden", "danby", "enfield", "newfield", "caroline", "ulysses",
+                 "groton", "trumansburg", "freeville", "varna", "etna", "slaterville", "brooktondale", "cayuga"}
+
+
+def _address_tokens(text):
+    """An address's words for reading its town: lower case, "." dropped ("N.Y."), "#" apart, "NY14850" as
+    "ny 14850", the City's own name as "ithaca", and a unit and its number dropped ("Apt 2", "Unit B": round 11,
+    read as a town)."""
+    text = str(text or "").lower().replace(".", "").replace("#", " # ")
+    text = re.sub(r"\bny(\d{5})", r"ny \1", text)
+    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    words, out = text.split(), []
+    i = 0
+    while i < len(words):
+        if words[i] in UNIT_WORDS:
+            i += 2
+            continue
+        out.append(words[i])
+        i += 1
+    return out
+
+
+def _may_be_place(word):
+    """Whether a word after the street may name a town: never a route's number ("Rte 13"), a letter ("St N", "St B":
+    round 13), "1/2", "2nd", punctuation, a part of a lot or house (NOT_A_PLACE) or a direction ("NE"). A ZIP may."""
+    return not ((word.isdigit() and len(word) < 5) or len(word) < 2 or word in NOT_A_PLACE
+                or word in ("ne", "nw", "se", "sw") or re.fullmatch(r"\d*/\d*|\d+(st|nd|rd|th)|\W+", word))
+
+
+def _place_without_commas(address):
+    """address_place for an address typed without commas (round 9: "12 Main St Lansing NY 14882" read as the
+    City's). The town is every word after the street's last ending (STREET_ENDINGS), state and the City's own name
+    and ZIP codes aside ("12 Main St Town of Ithaca NY" names "town of": round 10, the Town is not the City; "12 Main
+    St Lansing" names "lansing"). A street with no known ending: the word before a state or ZIP, if one was typed;
+    else a place nearby named anywhere after the street's first word (NEARBY_PLACES); else None."""
+    words = _address_tokens(address)
+    ends = [i for i, w in enumerate(words) if i >= 1 and w in STREET_ENDINGS]
+    if ends:
+        tail = words[ends[-1] + 1:]
+    else:
+        tail, cut = [], len(words)
+        while cut > 2 and (words[cut - 1] in STATE_WORDS or (words[cut - 1][:5].isdigit()
+                                                            and len(words[cut - 1]) in (5, 10))):
+            cut -= 1
+        if cut < len(words) and cut > 2:
+            tail = words[cut - 1:]
+        elif cut == len(words):              # nothing typed after the street but, perhaps, a place nearby
+            tail = [w for w in words[2:] if w in NEARBY_PLACES]
+    tail = [w[:5] if w[:5].isdigit() else w for w in tail if w not in STATE_WORDS]
+    tail = [w for w in tail if _may_be_place(w)]
+    places = [w for w in tail if w not in ITHACA_PLACE]
+    return " ".join(places) or None
+
+
+def same_site_address(a, b):
+    """same_address, and not another town's (the Draw gate, review round 2 of the typed-address rule: "106 Ithaca
+    Rd, Dryden" was taken for the lot's own "106 Ithaca Rd, Ithaca")."""
+    return same_address(a, b) and address_place(a) == address_place(b)
+
+
+def address_reason(state):
+    """Why Draw is off because of the address (Ben, 2026-10-25): an address typed that is neither the lot's own nor
+    the one last looked up and found must be looked up first, so a new address never ends up as a label on the old
+    lot. "" when the address is blank or known (`known_addresses`, in the box's state; absent: no address rule)."""
+    address = (state.get("address") or "").strip()
+    known = state.get("known_addresses")
+    look = state.get("lookup") or {}
+    if state.get("by_hand") and not look.get("looking"):   # the site by hand, in a file that was empty: the address
+        # is the architect's label (no lot of another to mislabel), but a City of Ithaca one (round 5: another
+        # place, or one the lookup already said is outside the City, was checked under the City's rules)
+        if state.get("outside_for"):                 # whatever the address now (round 12: cleared or retyped)
+            return BY_HAND_OUTSIDE.format(query=state["outside_for"][-1])
+        if address and address_place(address) is not None:
+            return BY_HAND_CITY_ONLY.format(address=address)
+        return ""
+    if known is not None and look.get("looking"):         # a lookup running: Draw off, its own address named
+        return WAIT_LOOKUP.format(address=look["looking"])
+    said = next((o for o in state.get("outside_for") or [] for a in [address] + list(known or [])
+                 if a and same_site_address(a, o)), None)   # the address typed, or the lot's own whatever is typed
+    if said:                                                 # (round 14: cleared, Draw went on)
+        return BY_HAND_OUTSIDE.format(query=said)   # the lot's own address too (round 13: a drawn
+        #   lot the lookup now says is outside the City was drawn again and checked under the City's rules)
+    if not address or known is None or any(same_site_address(address, k) for k in known):
+        return ""
+    status = look.get("status")
+    if status in LOOKUP_SAYS and same_site_address(address, look.get("query")):    # looked up, no lot came back
+        if status == "multiple":
+            return PICK_A_MATCH
+        back = ("put back " + known[0].split(",")[0]) if known else "clear the address"   # blank: Draw without one
+        return (LOOKUP_NOT_ANSWERED if status in ("offline", "error", "timeout") else NOT_FOUND_YET).format(
+            address=address, back=back)
+    return LOOK_UP_FIRST.format(address=address)
+
+
+def settle_pending(facts, saved_ui, address):
+    """At Draw: the preview stays only while the box's address is still the one looked up (typed or found); an
+    address typed since drops it, its box changes undone (re-lookup review round 1: the preview was drawn under the
+    typed address)."""
+    pending = (saved_ui or {}).get("_pending")
+    if pending and not (same_site_address(address, pending.get("address"))
+                        or same_site_address(address, pending.get("query"))):   # another town's: dropped too
+        facts, saved_ui = drop_pending(facts, saved_ui)
+        # its line goes with it: the box never says another address's lot is shown or will be drawn (round 3)
+        saved_ui["_lookup"] = {"status": "set_aside", "query": pending.get("query"), "asks": [], "matches": [],
+                               "says": SET_ASIDE.format(address=pending.get("address") or pending.get("query"))}
+        return facts, saved_ui
+    return dict(facts or {}), dict(saved_ui or {})
+
+
+OWN_LOTS = ("your surveyed lot", "the lot you drew", "your lot")
+
+
+def own_work(table, facts, saved_ui):
+    """What of the architect's own a reset would remove, in words (empty: everything drawn is Gordium's): a lot they
+    drew, picked or surveyed (named as theirs: OWN_LOTS); the starting house if it was edited since Gordium drew it
+    (or Gordium has no record of drawing it: never assumed to be its own); buildings they drew."""
+    out = []
+    facts, saved_ui = facts or {}, saved_ui or {}
+    lot = facts.get("lot_id")
+    if lot and lot != saved_ui.get("replaceable_lot"):
+        out.append(OWN_LOTS[0] if facts.get("lot_surveyed") else
+                   OWN_LOTS[1] if saved_ui.get("lot_source") == "drawn by you" else OWN_LOTS[2])
+    house = table.massing()
+    if house and table.fingerprint(house) != saved_ui.get("house_fingerprint"):
+        out.append("your changes to the starting house")
+    if table.buildings():
+        out.append("the buildings you drew")
+    return out
+
+
+def is_drawn(address, saved_ui):
+    """Whether `address` is the one a lookup drew in this file (its lot, placed on the map): then Draw draws nothing
+    new for it. A drawn sample counts too (coordinator, 2026-10-27, Ben's P0): Look up then Check in Edit site on a
+    file drawn from the sample started fresh, redrawing the lot and the house over the architect's work. New files
+    no longer start from the sample (start_gate): 106 Ithaca Rd is looked up like any address."""
+    drawn = (saved_ui or {}).get("drawn_address")
+    return drawn is not None and same_address(address, drawn)
+
+
+def reset_plan(facts, saved_ui, mine):
+    """At Draw: "none" (no answer pending, or the same address as the one drawn: nothing is redrawn), "redraw" (a new
+    address over what Gordium drew: cleared and drawn again, no question) or "ask" (the architect's own work, `mine`,
+    would be lost: asked once)."""
+    pending = (saved_ui or {}).get("_pending")
+    if not pending:
+        return "none"
+    if is_drawn(pending.get("address"), saved_ui):
+        return "none"
+    return "ask" if mine else "redraw"
+
+
+def draw_decision(table, facts, saved_ui):
+    """What Draw does first, as gordium_rhino._draw_prepare acts on it once the address is known (address_reason
+    keeps Draw off before): (plan, mine). plan: reset_plan's "none" / "redraw" / "ask"; `mine`: what of the
+    architect's would go."""
+    mine = own_work(table, facts, saved_ui or {})
+    return reset_plan(facts, saved_ui or {}, mine), mine
+
+
+def reset_question(address, mine, answer=None):
+    """The one question when the architect's own work would go: (the question, Start fresh, Keep my building or
+    None). A new address is a new site (Ben, 2026-10-25): its lot replaces the one in the model whichever they
+    answer, their own lot too (a lot they surveyed, drew or picked), so the question and the Keep answer both say
+    so; only their buildings can be kept, checked on the new address's lot. Keeping is offered only when there is a
+    building of theirs (their lot alone: Start fresh or Cancel). `answer`: the lookup's, pending; when it had only
+    the City's outline (no lot the State's tax map gives), the new lot is the one they draw over it."""
+    place = str(address or "").split(",", 1)[0].strip() or "this address"
+    lot = [m for m in mine if m in OWN_LOTS]
+    building = [m for m in mine if m not in OWN_LOTS]
+    w = (answer or {}).get("writes") or {}
+    by = (" (you draw " + place + "'s lot over the City's outline)" if not w.get("lot_ring") and w.get("guide_ring")
+          else " by " + place + "'s lot")
+    said = []
+    if building:
+        listed = _joined(building)
+        said.append(listed[0].upper() + listed[1:] + " will be removed.")
+    if lot:
+        said.append(lot[0][0].upper() + lot[0][1:] + " will be replaced" + by + ".")
+    keep = "Keep my building and check it on " + place + "'s lot"
+    if lot:
+        keep += " (" + lot[0] + " will be replaced)"
+    return ("Start fresh for " + place + "? " + " ".join(said),
+            ("Start fresh", START_FRESH),
+            (keep, KEEP_MINE) if building else None)
+
+
+def _joined(items):
+    """'a', 'a and b', 'a, b and c' (named apart from use-questions' _listed(options, zone), #37)."""
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+BOX_CHOSEN_FACTS = ("address", "zone", "use")
+BOX_CHOSEN_UI = ("address_source", "zone_source", "_zone_said", "_reconfirm", "_zones_found", "use_source")
+# what of the box's state the reset redraws (the rest is the architect's choices in the box): after_reset_state
+RESET_STATE_KEYS = ("has_lot", "lot_missing", "lot_area", "lot_surveyed", "lot_source", "street_name",
+                    "street_name_saved", "street_source", "corner_lot", "corner_source", "ground", "ground_fall",
+                    "lookup", "live", "doubts", "checked", "address", "address_source", "after_draw",
+                    "city_by_hand")    # (the old lot's Yes never on the lot drawn in its place: start-flow round 14)
+
+
+def after_reset_state(shown, fresh):
+    """The box's state to save at Draw after a reset: the architect's choices as the box showed them (`shown`: the
+    district and its tick, the use, the design buffer, no regrading), the lot, street side, corner and ground as
+    the reset drew them (`fresh`, rebuilt from the model): never the old lot's size, survey or corner answer saved
+    over the new lot (re-lookup review round 1, P0). The address too: apply_reset kept the box's, or the address as
+    found for a loose query typed back (typed-address rule, review round 2)."""
+    return dict(shown, **{k: fresh.get(k) for k in RESET_STATE_KEYS})
+
+
+def box_facts(facts, saved_ui, state):
+    """(facts, saved_ui) with the box's own answers in them: a changed corner answer (corner_answered), the
+    address, district, use and whether the lot is a survey. The pure part of gordium_rhino._apply_box."""
+    if previews_new_lot(saved_ui):       # the answer is the previewed lot's: the drawn lot's street lines stay (its
+        facts = dict(facts, corner_lot=state.get("corner_lot"))    # own come with it at Draw: apply_reset)
+        if facts["corner_lot"] is None:
+            facts.pop("corner_lot")
+    else:
+        facts, saved_ui = corner_answered(facts, saved_ui, state.get("corner_lot"))
+    facts = dict(facts, address=state.get("address") or None, zone=state.get("zone"), use=state.get("use"),
+                 lot_surveyed=bool(state.get("lot_surveyed")))
+    if not facts.get("address"):
+        facts.pop("address")
+    return facts, saved_ui
+
+
+def apply_reset(table, session, facts, saved_ui, choice, zones=()):
+    """(facts, saved_ui, redraw_house, guide) at Draw: the pending answer drawn for good through the session (one
+    Cancel, one undo), by apply_lookup itself (only what each source allows is written; the lot drawn and its spot
+    grades held), the lot drawn now replaceable whoever drew it (they chose: own_work asked). A new address is a new
+    site (Ben, 2026-10-25): the lot is replaced whichever they answer, their own lot too. Unless they keep their
+    building (`choice` KEEP_MINE), the starting house and every building on the lot are held too. `redraw_house`:
+    the starting house is to be drawn again for the new lot. `guide`: the City's outline when that is all the
+    answer had (no lot drawn: the architect draws it over the guide, the box still open, then Draw)."""
+    pending = (saved_ui or {}).get("_pending") or {}
+    saved_ui = dict(saved_ui, replaceable_lot=(facts or {}).get("lot_id"))
+    saved_ui.pop("_pending", None)
+    keep = choice == KEEP_MINE
+    if not keep:
+        for old in list(table.massing()) + list(table.buildings()):
+            session.hold(old)
+    # the box's own choices stay as the architect left them (the district they ticked, the use, the address); the
+    # lookup's answer fills only the lot, the street side, the corner and the ground (review round 1)
+    chosen_f = {k: facts.get(k, MISSING) for k in BOX_CHOSEN_FACTS}
+    chosen_s = {k: saved_ui.get(k, MISSING) for k in BOX_CHOSEN_UI}
+    # the box's Corner lot? answer: the lookup's, shown since its preview (preview_lookup), or the architect's
+    # change of it, which is theirs and is kept (UX walkthrough 2026-10-28, P0: "Yes: two streets" picked after
+    # Look up was saved as the lookup's "no", so a corner lot's second street had a side yard's limit)
+    corner, corner_source = facts.get("corner_lot"), saved_ui.get("corner_source")
+    facts, saved_ui, guide = apply_lookup(table, session, pending.get("answer") or {}, facts, saved_ui, zones)
+    if facts.get("corner_lot") != corner:       # changed in the box: theirs (its street lines picked again)
+        facts, saved_ui = corner_answered(facts, saved_ui, corner)
+        saved_ui["corner_source"] = corner_source or ENTERED
+    found_source = saved_ui.get("address_source")          # the lookup's, for the address as found
+    for target, chosen in ((facts, chosen_f), (saved_ui, chosen_s)):
+        for k, v in chosen.items():
+            if v is MISSING:
+                target.pop(k, None)
+            else:
+                target[k] = v
+    # the lot is the new address's now: the address the box opened with is no longer this lot's (typed back, it is
+    # a new address, to be looked up: review round 1 of the typed-address rule, P1)
+    saved_ui.update(drawn_address=pending.get("address"), house_fingerprint=None, _box_address=pending.get("address"))
+    if (pending.get("address") and same_address(facts.get("address"), pending.get("query"))
+            and not same_address(facts.get("address"), pending.get("address"))):
+        facts["address"] = pending["address"]   # the address as found, never a loose query typed back (round 2),
+        if found_source:                        # with the lookup's source: value and source agree (round 3)
+            saved_ui["address_source"] = found_source
+    if not keep:
+        saved_ui["_redrawn_for"] = pending.get("address")     # Draw now draws (the box's button says so)
+    return facts, saved_ui, not keep, guide
+
+
+def draw_button(mode, saved_ui):
+    """The box's last button, as what it does: "Draw" when pressing it draws (a new project; a new address that
+    will be drawn, or was just cleared for), "Check" when it only checks what is there."""
+    if mode == "start" or (saved_ui or {}).get("_redrawn_for"):
+        return "Draw"
+    pending = (saved_ui or {}).get("_pending")
+    return "Draw" if pending and not is_drawn(pending.get("address"), saved_ui) else "Check"
+
+
+START_HAS_BUILDING = ("This model already has a building. To start over on another address, use Edit site… in the "
+                      "Gordium panel: Look up the new address and press Draw (the lot and starting house are drawn "
+                      "again for it). To check the building you have, use GordiumCheck.")

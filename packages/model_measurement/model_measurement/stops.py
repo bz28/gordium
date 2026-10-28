@@ -35,8 +35,19 @@ STOPS = {
                   "architects",
     # corner lots (§325-19C)
     "corner_unknown": "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no",
-    "corner_lot": "a corner lot: which yards are front, side and rear yards, and which street's frontage is the lot "
-                  "width (§325-19C), are open questions for the architects",
+    "corner_one_street": "a corner lot, but the street lot lines given are all on one street: pick the lot lines on "
+                         "both streets",
+    "street_ids_needed": "which street lot lines are on which street isn't recorded: pick the street side so Gordium "
+                         "knows which lines are which street (a corner lot's lot width is the frontage on one street, "
+                         "§325-8A col. 7)",
+    "street_lines_split": "the street lot lines recorded on one street aren't next to each other, or one lot line's "
+                          "pieces are recorded on two streets: pick the street side again, one click on each street",
+    "address_not_a_street": "the address street given isn't one run of the street lot lines on one street: pick the "
+                            "lot line(s) on the street the address is on again",
+    "rear_on_street": "the lot line opposite the address street is on a street too (a through lot, §325-8A(14)(d)): "
+                      "which yards are rear and front is an open question for the architects",
+    "no_side_line": "every side lot line is on a street (a lot on three streets): which yard is a side yard is an "
+                    "open question for the architects",
     # side and rear lot lines
     "lines_unclear": "the side and rear lot lines can't be told apart (more than {limit} lot lines could be either: "
                      "too many readings to list)",
@@ -88,11 +99,43 @@ STOPS = {
     "basement_story": "a floor block below the ground: whether a basement or cellar counts as a story (§325-3) isn't "
                       "measured yet: an open question for the architects",
     "no_rooms": "enter bedrooms / parking spaces",
+    "no_units": "enter the dwelling units, the rooms let for profit, and whether it is a conversion",
+    "no_occupants": "enter the occupants (§325-3B OCCUPANT: in R-2c, every person with the right to occupy)",
+    "no_building_units": "enter the dwelling units in the whole attached building, every lot it stands on",
+    "no_occupant_split": "optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that "
+                         "depends on how the occupants are split)",
+    "no_household": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, "
+                    "whether the household is a functional family unit, whether an accessory dwelling unit is on the "
+                    "lot (§325-3B)",
+    "attached_counts_disagree": "{here} dwelling units on this lot but {building} in the attached building: part of "
+                                "another building may be on this lot, or one of the counts or the use is off",
+    "occupant_split_disagree": "the most occupants in one dwelling unit ({most}) is more than the occupants of every "
+                               "unit on the lot together ({occupants}): check both counts",
+    "occupant_counts_disagree": "{occupants} occupants on the lot, but {units} {unit_words} with at most {most} in any one "
+                                "can hold only {held}, with no accessory dwelling unit on the lot: check {check} and "
+                                "the accessory dwelling unit answer",
+    "change_use_in_start_box": "change the use with Edit site… in the start box",
+    "household_counts_disagree": "the count of unrelated people with minor dependent children included ({with_}) is "
+                                 "lower than the count without them ({without}): check both counts",
+    "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
+                          "unit's (§325-3B HOME OCCUPATION)",
+    "no_primary_buildings": "enter the primary buildings on the lot (each separate building holding a home or other "
+                            "permitted primary use, the main one included; not a garage, shed or accessory dwelling "
+                            "unit) and whether every one holds the use entered (§325-8B(1))",
+    "no_stream": "say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if "
+                 "so, how far the nearest new structure is from it (§325-26)",
+    "stream_facts_disagree": "no stream or inlet is said to be within 20 ft of the lot, but a new structure is said to be "
+                             "{distance} ft from one: check both answers",
+    "no_south_hill": "say whether the lot is in the South Hill Overlay District (§325-8E, on the City's zoning map)",
+    "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",
+    "geometry_error": "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines "
+                      "for faces meeting at slivers",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
     "no_main_building": "more than one building: pick the main building",
+    "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't inside the lot: {what}",
     "open_solid": "a building isn't a closed solid: {what}",
     "open_mesh": "a building mesh isn't closed",
@@ -101,7 +144,13 @@ STOPS = {
     "single_precision": "a building mesh's points may be single precision, too coarse this far from the origin to "
                         "measure to 0.01 ft (move it nearer the origin, or turn it into a solid)",
     "not_a_solid": "{kind} on the {layer} layer can't be measured yet (explode it or turn it into a solid)",
+    # what research settled and what is still open, read from the city's files (interpretations.py)
+    "law_missing": "the city's files no longer have {what} (answered without naming the reading, or removed): the "
+                   "measuring can't follow it",
+    "reading_unknown": "a reading research lists ({reading}, {entry}) has no measuring code yet",
     # the height
+    "eave_unclear": "no roof plane of the pitched roof's highest section lies over the walls: the wall plate can't "
+                    "be found",
     "no_roof": "the roof's shape can't be read (no faces open to the sky)",
     "other_height": "another solid's height can't be read: {reason}",
     "too_many_roofs": "too many solids with open roof questions to list every reading: pick the main building's "

@@ -67,7 +67,9 @@ def solids(scenario: dict, moved: bool = False) -> dict:
 
 def facts(scenario: dict) -> dict:
     pts = scenario["lot"]["points"]
-    out = {"jurisdiction": JURISDICTION, "zone": "R-1b", "use": "one_family_detached", "corner_lot": False,
+    # the district and use the architect states (an R-1b house unless the scenario says otherwise)
+    out = {"jurisdiction": JURISDICTION, "zone": scenario.get("district", "R-1b"),
+           "use": scenario.get("use", "one_family_detached"), "corner_lot": False,
            "street_line": [[list(pts[0]), list(pts[1])]], "lot_surveyed": scenario["lot"]["surveyed"]}
     grade = scenario.get("grade") or {}
     if "elevation" in grade:
@@ -124,13 +126,27 @@ def compare(view: dict, plan: dict | None, expected: dict, expected_plan: dict |
         out.append({"rule": key, "expected": want["status"], "gordium": got, "match": not problems,
                     "why": "; ".join(problems), "reason": worst.get("reason") or ""})
     if expected_plan and plan is not None:
-        got = plan.get("encroach") or []
+        got = regions(plan.get("encroach") or [])
         ok = len(got) == expected_plan.get("encroach", len(got)) and (
             "encroach_why" not in expected_plan or sorted(e["why"] for e in got) == sorted(expected_plan["encroach_why"]))
         out.append({"rule": "red in the viewport", "expected": f"{expected_plan.get('encroach')} "
                     f"{'/'.join(expected_plan.get('encroach_why') or [])}".strip(),
                     "gordium": f"{len(got)} {'/'.join(e['why'] for e in got)}".strip(), "match": ok, "why": "",
                     "reason": ""})
+    return out
+
+
+def regions(encroach: list[dict]) -> list[dict]:
+    """The coloured regions as the plan shows them: the blocks of one reason and colour that touch, joined (the
+    blocks are cut per building, so a two-floor house's one strip is two blocks, one per floor). Each: {why,
+    status}."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    out = []
+    for why, status in sorted({(e["why"], e["status"]) for e in encroach}):
+        joined = unary_union([Polygon(e["outline"]).buffer(1e-6) for e in encroach
+                              if (e["why"], e["status"]) == (why, status)])
+        out += [{"why": why, "status": status}] * len(getattr(joined, "geoms", [joined]))
     return out
 
 

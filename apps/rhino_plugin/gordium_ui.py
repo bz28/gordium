@@ -8,6 +8,7 @@ whole session (gordium_rhino.Overlay explains), so the panel and the dialog are 
 functions, and an update to this file takes effect at once."""
 
 import System
+import math
 import os
 
 import Eto.Drawing as ed
@@ -47,6 +48,28 @@ HIGHLIGHT = {"red": System.Drawing.Color.FromArgb(215, 38, 61), "amber": System.
 HIGHLIGHT_TRANSPARENCY = 0.45
 HIGHLIGHT_EDGE = {"red": 3, "amber": 1}
 HIGHLIGHT_PROUD_FT = 0.02    # each block stands this far proud of the house, so their shared faces never fight
+
+
+def dim_color(status, dark):
+    """A dimension's colour (logic.dim_rgb): red fails, amber needs review, neutral grey complies."""
+    r, g, b = logic.dim_rgb(status, dark)
+    return System.Drawing.Color.FromArgb(r, g, b)
+
+
+def required_color(dark):
+    """A yard's required line and its "min" tag: clear mid-grey (logic.REQUIRED_RGB)."""
+    r, g, b = logic.REQUIRED_RGB[1 if dark else 0]
+    return System.Drawing.Color.FromArgb(r, g, b)
+
+
+def halo(dark):
+    """The thin halo under a dimension: near-black on a light viewport, near-white on a dark one."""
+    return System.Drawing.Color.FromArgb(220, 245, 245, 245) if dark else System.Drawing.Color.FromArgb(220, 25, 25, 25)
+
+
+def faint(color):
+    """A colour at the required line's faint opacity (logic.FAINT_ALPHA)."""
+    return System.Drawing.Color.FromArgb(logic.FAINT_ALPHA, color.R, color.G, color.B)
 
 
 def viewport_dark():
@@ -296,6 +319,7 @@ def make_panel(actions, host=None, context_on=True):
         if isinstance(tag, str) and tag.startswith("group:"):
             return                           # section headers aren't selectable (D5)
         parts["selected"] = tag
+        set_zoom(parts)                      # on as soon as a row is picked (never waiting for the next redraw)
         show_detail(parts)
 
     tree.SelectedItemChanged += logic.guard(selected, "show the selected item")
@@ -341,6 +365,25 @@ def say(parts, text):
         parts["message"].Text = text or ""
 
 
+def _tick(box, action, where, skip=lambda: False):
+    """A checkbox that calls `action(ticked)`; if the action was refused (logic.REFUSED: Gordium is working, or its
+    file is no longer in front), the tick goes back, so the panel always shows the setting as it is (independent
+    review of #32). `skip()`: a change made by Gordium itself (set_labels_tick), not the architect's."""
+    putting_back = {"on": False}
+
+    def changed(s, e):
+        if putting_back["on"] or skip():
+            return
+        if action(bool(box.Checked)) is logic.REFUSED:
+            putting_back["on"] = True
+            try:
+                box.Checked = not box.Checked
+            finally:
+                putting_back["on"] = False
+
+    box.CheckedChanged += logic.guard(changed, where)
+
+
 def _massing_box(actions, parts):
     """Hide starting house: the Gordium::Massing layer off. Hidden, it is still checked (a hidden building still
     counts, as everywhere in Gordium): only drawing it is turned off. Ticked as the document's layer is
@@ -348,11 +391,8 @@ def _massing_box(actions, parts):
     box = ef.CheckBox()
     box.Text = "Hide starting house"
     box.Checked = False
-
-    def changed(s, e):
-        if not parts.get("_setting_massing"):       # set from the document (set_massing_tick): not a change
-            actions["massing"](bool(box.Checked))
-    box.CheckedChanged += logic.guard(changed, "hide the starting house")
+    # (set from the document by set_massing_tick: not the architect's change)
+    _tick(box, actions["massing"], "hide the starting house", skip=lambda: parts.get("_setting_massing"))
     parts["massing_box"] = box
     return box
 
@@ -435,11 +475,8 @@ def _labels_box(actions, parts):
     box.Text = "Show on-screen labels"
     box.Checked = False
 
-    def changed(s, e):
-        if not parts.get("_setting_labels"):        # set from the document (set_labels_tick): not a change
-            actions["labels"](bool(box.Checked))
-
-    box.CheckedChanged += logic.guard(changed, "show or hide the on-screen labels")
+    # (set from the document by set_labels_tick: not the architect's change)
+    _tick(box, actions["labels"], "show or hide the on-screen labels", skip=lambda: parts.get("_setting_labels"))
     parts["labels_box"] = box
     return box
 
@@ -461,11 +498,8 @@ def _envelope_box(actions, parts):
     box = ef.CheckBox()
     box.Text = "Show buildable envelope"
     box.Checked = True
-
-    def changed(s, e):
-        if not parts.get("_setting_envelope"):      # set from the session (set_envelope_tick): not a change
-            actions["envelope"](bool(box.Checked))
-    box.CheckedChanged += logic.guard(changed, "show or hide the envelope")
+    # (set from the session by set_envelope_tick: not the architect's change)
+    _tick(box, actions["envelope"], "show or hide the envelope", skip=lambda: parts.get("_setting_envelope"))
     parts["envelope_box"] = box
     return box
 
@@ -489,21 +523,23 @@ def _wrap_width(parts):
     return max(240, width - 48) if width > 0 else None
 
 
-def show(parts, view, stale=False, error=None, checking=False, select=None):
-    """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet) or a
-    check that couldn't run: rows keep their names but show no mark and "—", Zoom to is off (H1, H2, H5). The
-    selection and which groups are open are kept by item id across refreshes (D8); the list shows its first group's
-    heading whole at the top, scrolled only as far as the selected row needs (the Rhino job at 6361a3f). `select`:
-    a row to select and scroll to instead, its group opened (a re-check's newly failing row: logic.newly_failing).
-    Selecting a row in code never takes the keyboard from the Rhino viewport (no Focus())."""
+def show(parts, view, stale=False, error=None, checking=False, job=None, cancelled=False, select=None):
+    """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet: the
+    header says a check is on its way, or to press Check), a check running (`checking`; `job`: its live line and
+    Cancel under "Checking…"), cancelled, or one that couldn't run: rows keep their names but show no mark and "—",
+    Zoom to is off (H1, H2, H5). The selection and which groups are open are kept by item id across refreshes (D8);
+    the list shows its first group's heading whole at the top, scrolled only as far as the selected row needs (the
+    Rhino job at 6361a3f). `select`: a row to select and scroll to instead, its group opened (a re-check's newly
+    failing row: logic.newly_failing). Selecting a row in code never takes the keyboard from the Rhino viewport (no
+    Focus())."""
     global WRAP_AT
     WRAP_AT = _wrap_width(parts) if DOCKED else None
     tree = parts["tree"]
-    parts["stale"] = stale or error is not None or checking
+    parts["stale"] = stale or error is not None or checking or cancelled or job is not None
     if view is not None:
         parts["view"] = view
     view = parts["view"]
-    _header(parts, view, error, checking or stale)
+    _header(parts, view, error, checking or stale or job is not None, job, cancelled, checking)
     if view is None:
         tree.DataStore = ef.TreeGridItemCollection()
         parts["by_id"], parts["groups"] = {}, []
@@ -526,7 +562,7 @@ def show(parts, view, stale=False, error=None, checking=False, select=None):
         gi.Tag = "group:" + g["key"]
         title = ("Site · " if g["key"] == "complies" and all(by_id[i]["group"] == "site" for i in g["items"]) else "")
         gi.Values = System.Array[System.Object]([title + g["title"] + " · " + str(len(g["items"])), "", "", ""])
-        gi.Expanded = parts["expanded"].get(gi.Tag, g["key"] not in ("complies", "not_covered"))
+        gi.Expanded = parts["expanded"].get(gi.Tag, g["key"] not in ("complies", "not_covered", "use_details"))
         for item_id in g["items"]:
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
@@ -558,7 +594,7 @@ def show(parts, view, stale=False, error=None, checking=False, select=None):
                         _scroll_to(tree, k + 1 + c, k + 2 + c)    # the selected row just into view
                 k += gi.Children.Count
             k += 1
-    parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]
+    set_zoom(parts)
     show_detail(parts)
 
 
@@ -574,17 +610,27 @@ def _scroll_to(tree, row, rows):
             pass
 
 
-def _header(parts, view, error, out_of_date):
+def _header(parts, view, error, out_of_date, job=None, cancelled=False, checking=False):
     h = parts["header"]
     h.Clear()
     a = parts["actions"]
     head = (view or {}).get("header") or {}
     lines = logic.panel_header(head)
+    parts["progress_label"], parts["progress_job"] = None, job
     h.AddRow(_wide(lines["above"][0], bold=True, size=13))
     if error is not None:
         h.AddRow(row(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
                      button("Retry", a["retry"])))
         h.AddRow(_wide(error, size=11))
+    elif cancelled:                        # nothing shown as checked until the next check
+        h.AddRow(row(_wide(logic.CHECK_CANCELLED, eto_status_color("needs_review"), bold=True, size=15),
+                     button("Check again", a["retry"])))
+        h.AddRow(_wide(logic.CHECK_CANCELLED_NOTE, size=11))
+    elif out_of_date and (checking or job is not None):   # a check running: what it is doing, the seconds, Cancel
+        h.AddRow(_wide("Checking…", bold=True, size=15))
+        if job is not None:
+            parts["progress_label"] = label(progress_text(job), size=11, width=PANEL_WIDTH - 140)
+            h.AddRow(row(parts["progress_label"], button("Cancel", job.cancel)))
     elif out_of_date:                      # greyed rows below; a check on its way, or press Check
         h.AddRow(_wide(logic.out_of_date_line(parts.get("auto_check"), parts.get("checked_before", True)), bold=True,
                        size=15))
@@ -610,6 +656,140 @@ def _header(parts, view, error, out_of_date):
     h.Create()
 
 
+def progress_text(job, limit=None):
+    """A running job's line: what it is doing now, then the moving mark and the seconds so far."""
+    return (job.step or "Working…") + "  " + logic.progress_line(job.elapsed(), limit)
+
+
+def show_progress(parts, job):
+    """The panel's live line under "Checking…", moved on (the timer that waits for the job calls this)."""
+    lab = (parts or {}).get("progress_label")
+    if lab is not None:
+        lab.Text = progress_text(job)
+
+
+def follow(parts, job):
+    """The panel follows a running check: "Checking…" with this job's live line and Cancel (laid out once, on the
+    first tick), then the line moved on at each tick (review round 1: a check the architect started never showed it)."""
+    if parts is None:
+        return
+    if parts.get("progress_job") is not job or parts.get("progress_label") is None:
+        show(parts, None, checking=True, job=job)
+    show_progress(parts, job)
+
+
+WAIT_SHOWN = None          # the in-Rhino test's hook: called with the wait window's labels each time they are set
+
+
+def take_keyboard(form):
+    """The wait window made the key window, so Esc reaches it: Eto's own Focus, and on the Mac the window's own
+    makeKeyAndOrderFront (Rhino run of 65c07d7: Eto reported no focus after BringToFront and Focus). Never raises."""
+    for step in (lambda: form.BringToFront(), lambda: form.Focus(),
+                 lambda: form.ControlObject.MakeKeyAndOrderFront(form.ControlObject)):
+        try:
+            step()
+        except Exception:
+            pass
+
+
+def has_keyboard(form):
+    """Whether the window has the keyboard (Esc reaches it): Eto's HasFocus, or on the Mac the window being the key
+    window. False when neither can be read."""
+    try:
+        if form.HasFocus:
+            return True
+    except Exception:
+        pass
+    try:
+        return bool(form.ControlObject.IsKeyWindow)
+    except Exception:
+        return False
+
+
+def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
+    """Wait for a job (logic.Job) without ever blocking Rhino: work done within logic.WAIT_WINDOW_S shows nothing;
+    longer, a small window says what Gordium is doing (the job's own step, a moving mark, the seconds so far) with
+    Cancel when `cancellable` (Esc too, with this window in front: logic.STOP_HINT says so). The window is a plain one, not modal, and this loop itself keeps it current
+    while it lets Rhino run (Rhino.RhinoApp.Wait: Rhino draws and answers between passes). Nothing here depends on a
+    modal session or a timer: on the Mac a wait window's timer never ran and a closed dialog stayed painted when a
+    modal was ended from a timer and another opened (Rhino runs of #32 aea73b8 and #33 a3eb1d7: frozen "0 s"). The
+    window closes as soon as the job is done or cancelled; its own close button cancels the work, or (not
+    cancellable) is refused until it is done. `on_tick(job)` runs at each pass too (the panel's live line). While it
+    waits, the panel's buttons say Gordium is busy (gordium_rhino._actions); live mode starts no check (asking).
+    Headless (the scripted tests): just waits."""
+    if job.wait(logic.WAIT_WINDOW_S if not headless else 0):
+        return
+    if headless:
+        while not job.wait(0.2):
+            pass
+        return
+    form = ef.Form()
+    form.Title = "Gordium"
+    form.Padding = ed.Padding(16)
+    form.Resizable = form.Minimizable = form.Maximizable = False
+    form.Topmost = True
+    step = label(job.step, bold=True, size=13, width=380)
+    line = label(logic.progress_line(job.elapsed(), limit), size=11, width=380)
+    layout = ef.DynamicLayout()
+    layout.Spacing = ed.Size(8, 8)
+    layout.AddRow(step)
+    layout.AddRow(line)
+    state = {"done": False}
+
+    def cancel():
+        if job.cancel():
+            step.Text = logic.CANCELLING
+        if stop is not None:
+            stop.Enabled = False
+
+    stop = button("Cancel", cancel) if cancellable else None
+    hint = label(logic.STOP_HINT_CLICK, size=11)   # "Esc or Cancel" only once the window has the keyboard
+    if stop is not None:                  # (Esc stops it only here: elsewhere in Rhino Esc keeps its own meaning)
+        layout.AddRow(row(stop, hint))
+
+    def key(s, e):                        # Esc, with this window in front: Cancel
+        if e.Key == ef.Keys.Escape and cancellable:
+            e.Handled = True
+            cancel()
+
+    def closing(s, e):                    # the window's own close button: Cancel, or keep waiting
+        if not state["done"]:
+            if cancellable:
+                cancel()
+            e.Cancel = not job.finished()
+
+    form.Content = layout
+    form.KeyDown += logic.guard(key, "cancel with Esc")
+    form.Closing += logic.guard(closing, "close the progress window")
+    # Esc cancels only with this window in front (or Cancel clicked): an Esc elsewhere in Rhino keeps Rhino's own
+    # meaning (end a command, clear a selection) and never silently cancels a check or a Draw (coordinator, 2026-10-26)
+    form.Show()
+    take_keyboard(form)
+    try:
+        while not job.finished():
+            Rhino.RhinoApp.Wait()          # Rhino draws and answers (the panel, the viewports) between passes
+            step.Text = job.step or ""
+            line.Text = logic.progress_line(job.elapsed(), limit)
+            focused = has_keyboard(form)   # Esc is promised only while it works (Rhino run of 65c07d7)
+            if cancellable:
+                hint.Text = logic.STOP_HINT if focused else logic.STOP_HINT_CLICK
+            if WAIT_SHOWN is not None:
+                WAIT_SHOWN(step.Text, line.Text, focused, hint.Text)
+            if on_tick is not None:
+                logic.guard(on_tick, "show what Gordium is doing")(job)
+            job.wait(0.05)
+    finally:
+        state["done"] = True
+        logic.guard(form.Close, "close the progress window")()
+def set_zoom(parts):
+    """Zoom to on or off for the panel as it is now, its tooltip saying why when off (logic.zoom_state)."""
+    b = parts.get("zoom_button")
+    if b is None:
+        return
+    b.Enabled, b.ToolTip = logic.zoom_state(parts.get("selected") in (parts.get("by_id") or {}),
+                                            parts.get("stale"), parts.get("box_open"))
+
+
 def set_box_open(parts, is_open):
     """While a start box is open, the panel's buttons that would open another (or change the site under it) are off."""
     if parts is None:
@@ -622,7 +802,7 @@ def set_box_open(parts, is_open):
     for c in list(parts.get("box_buttons") or []) + list(parts.get("greyed") or []):   # all but the legend
         c.Enabled = others
     if parts.get("zoom_button") is not None:
-        parts["zoom_button"].Enabled = zoom
+        set_zoom(parts)                      # (logic.zoom_state agrees with `zoom`: off while a box is open)
 
 
 def show_detail(parts):
@@ -641,6 +821,8 @@ def show_detail(parts):
                 d.AddRow(_wide(s, size=11))
                 if s.startswith("Marked as the ground"):   # the architect's word, so it can be taken back
                     d.AddRow(row(button("Not the ground", a["not_ground"])))
+                if logic.can_switch(s):             # one larger side yard: put it on the other side (one Undo)
+                    d.AddRow(row(button(logic.SWITCH_LABEL, a["switch_sides"])))
         d.Create()
         return
     det = i["detail"]
@@ -655,8 +837,11 @@ def show_detail(parts):
     # what to do about it, right under the reason: a button where there is one (never its words twice, nor the
     # button scrolled out of sight below the measuring notes: the architect's review), else the hint's words
     buttons = []
-    if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn
-        buttons.append(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"])))
+    for words, what in logic.row_buttons(i):     # its own small dialog for the stated facts it waits on; Edit site…
+        if what == "enter":                      # where a site fact is missing (logic.row_buttons)
+            buttons.append(button(words, lambda: a["enter"](i["needs"])))
+        else:
+            buttons.append(button(words, a["edit_site"]))
     if i.get("hint") == "Pick the main building…":
         buttons.append(button("Pick the main building…", a["main"]))
     if i["id"] == "scope.not_included":
@@ -802,6 +987,49 @@ def legend(code=None):
 
 # ---- the start box (A1–A13) ----------------------------------------------------------------------------------
 
+def native_number(value):
+    """A Mac native number (NFloat, nint) as a Python float: directly, or through its text where the bridge won't
+    convert it (as review_fixes_in_rhino.py reads a window number: int(str(...)))."""
+    try:
+        return float(value)
+    except Exception:
+        return float(str(value))
+
+
+def keep_on_screen(window):
+    """A window grown downwards moved up as far as needed to stay within its screen's working area. Never raises."""
+    try:
+        area = window.Screen.WorkingArea
+        bottom = window.Location.Y + window.Height
+        if bottom > area.Bottom:
+            window.Location = ed.Point(int(window.Location.X), int(max(area.Top, area.Bottom - window.Height)))
+    except Exception:
+        pass
+
+
+def row_rect(table, index):
+    """Where an NSTableView lays out row `index`. Rhino's Mac binding names this RectForRow and takes an IntPtr
+    (not RectOfRow, which only Cocoa's own spelling has, and not a plain int: Rhino run of c4ad070)."""
+    return table.RectForRow(System.IntPtr(int(index)))
+
+
+def list_row_px(listbox):
+    """A list's row pitch in px as Rhino lays it out: on the Mac the ListBox is a table whose row height plus spacing
+    is read from it; elsewhere (or if it can't be read) logic.LIST_ROW_PX."""
+    try:
+        table = listbox.ControlObject      # Eto.macOS: the NSTableView itself (its NSScrollView is the handler's own)
+        # where the table lays its rows out, not the row height it reports (Rhino run of df08fc0: rows painted about
+        # 16 pt apart while RowHeight + spacing said 24, leaving an empty band under eight rows)
+        if int(native_number(table.RowCount)) >= 2:
+            pitch = native_number(row_rect(table, 1).Y) - native_number(row_rect(table, 0).Y)
+        else:
+            pitch = native_number(row_rect(table, 0).Height) + native_number(table.IntercellSpacing.Height)   # (a row's own rect
+            #   leaves out the gap under it; two rows' Y difference above already has it)
+        return int(math.ceil(pitch - 1e-6)) if 10 <= pitch <= 60 else logic.LIST_ROW_PX   # up: never a row short
+    except Exception:
+        return logic.LIST_ROW_PX
+
+
 def start_box(state, options, mode):
     """The start box (spec A, as approved 2026-10-20). What it shows is rhino_logic.box_rows (tested in CI); this
     only draws it: Address, Zoning district (with its source and "I confirm", unticked on a new project), Use,
@@ -830,10 +1058,25 @@ def start_box(state, options, mode):
     confirm = ef.CheckBox()
     confirm.Checked = bool(state.get("district_confirmed"))
     use = ef.DropDown()
-    names = list(options["uses"].items())
+    # the district's chart's uses, permitted first, and the use set even if not listed (never changed unasked)
+    names = list(state.get("use_choices") or logic.district_use_names(options, state.get("zone"), state.get("use")))
     for _, n in names:
         use.Items.Add(n)
-    use.SelectedIndex = max(0, [k for k, _ in names].index(state.get("use")) if state.get("use") in options["uses"] else 0)
+    ids = [k for k, _ in names]
+    use.SelectedIndex = ids.index(state.get("use")) if state.get("use") in ids else 0
+    laid_out = (state.get("zone"), names[use.SelectedIndex][0] if names else None,
+                logic.gate_of(state.get("answers")))      # what the Use rows and "About this project" show
+    asked = {}                        # each follow-up question's (kind, field, choices): the facts the rules need
+
+    def answer_of(key):               # what a question's field says now: its value, or None (blank / not a number)
+        kind, field, choices = asked[key]
+        if choices is not None:       # a one-click dropdown: "Not answered" first, then the choices in order
+            at = max(field.SelectedIndex, 0)
+            return choices[at - 1][1] if at > 0 else None
+        try:
+            return logic.parse_answer(kind, field.Text, key)
+        except ValueError:
+            return None
     regrade = ef.CheckBox()
     regrade.Checked = bool(state.get("no_regrading"))
     corner = ef.DropDown()                # Corner lot? never guessed: "Not answered" until the architect says
@@ -858,6 +1101,10 @@ def start_box(state, options, mode):
             state["address_source"] = logic.ENTERED
         if use.SelectedIndex != first["use"]:
             state["use_source"] = logic.ENTERED
+        answers = dict(state.get("answers") or {})
+        for key in asked:                              # a blank stays unanswered (its rules: NEEDS REVIEW)
+            answers[key] = answer_of(key)
+        state["answers"] = answers
         if corner.SelectedIndex != first["corner"]:
             state["corner_source"] = logic.ENTERED
 
@@ -866,17 +1113,133 @@ def start_box(state, options, mode):
         keep()
         done("pick:" + what)
 
-    draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
-    reason = label(logic.draw_reason(state), size=11)
+    draw = button(state.get("_draw_label") or ("Draw" if mode == "start" else "Check"),   # as what it does
+                  lambda: (keep(), done("draw")))
+    reason = label(logic.box_reason(state), size=11, width=logic.BOX_TEXT_WIDTH)   # wraps at the box's width
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
 
+    # type-ahead: the City's addresses starting like the one typed (logic.wants_suggestions, ~0.3 s after the last
+    # key), in a list under it; Down/Up move in it, Enter or a click picks, Esc closes it; a stale answer is dropped
+    # (logic.suggestions_shown) and an earlier request stopped; offline or slow: a quiet note, typing still works
+    suggester = state.get("_suggest") if not looking else None
+    hints = {"items": [], "chosen": None}
+    hint_list = ef.ListBox()
+    hint_list.Width, hint_list.Height = 300, logic.list_height(1)
+    hint_list.Visible = False
+    hint_note = label("", size=10)
+    hint_note.Visible = False
+    hint_rows = ef.StackLayout()      # the list and its note as one row, hidden while both are empty: no gap under
+    hint_rows.Orientation = ef.Orientation.Vertical       # Address (the architect's review, 2026-10-28)
+    hint_rows.Items.Add(ef.StackLayoutItem(hint_list))
+    hint_rows.Items.Add(ef.StackLayoutItem(hint_note))
+    hint_rows.Visible = False
+
+    def show_hint_rows():
+        hint_note.Visible = bool(hint_note.Text)
+        hint_rows.Visible = logic.hint_rows_shown(hint_list.Visible, hint_note.Text)
+    wait_keys = ef.UITimer()
+    wait_keys.Interval = logic.SUGGEST_DELAY_S
+    wait_answer = ef.UITimer()
+    wait_answer.Interval = 0.1
+
+    grown = {"px": 0}                 # how much taller the box is for the list now showing
+
+    def fit_box():
+        """The box grows by the list's height while it shows (and back when it goes), kept on screen, so Cancel and
+        Draw never go off its bottom (Rhino run of ee8f2ce: the box kept its height and pushed them off)."""
+        want = logic.hint_rows_px(hint_list.Visible, hint_list.Height, hint_note.Text)   # the note's line too
+        delta = want - grown["px"]
+        if delta:
+            size = dialog.ClientSize
+            dialog.ClientSize = ed.Size(size.Width, size.Height + delta)
+            grown["px"] = want
+            keep_on_screen(dialog)
+
+    def hide_hints():
+        hints["items"] = []
+        hint_list.Items.Clear()
+        hint_list.Visible = False
+        show_hint_rows()
+        fit_box()
+
+    def pick_hint(index):
+        if 0 <= index < len(hints["items"]):
+            hints["chosen"] = hints["items"][index]
+            hide_hints()
+            address.Text = hints["chosen"]            # (TextChanged: Draw and its reason follow; no new list)
+            address.Focus()
+
+    def ask_hints(s, e):
+        wait_keys.Stop()
+        if suggester is None:
+            return
+        if not logic.wants_suggestions(address.Text, hints["chosen"]):
+            suggester["stop"]()
+            wait_answer.Stop()
+            hint_note.Text = ""
+            hide_hints()                             # (after the note is cleared: the rows fold away)
+            return
+        suggester["start"](address.Text)            # (stops one still running: its answer would be stale)
+        wait_answer.Start()
+
+    def got_hints(s, e):
+        answer = suggester["poll"]() if suggester is not None else None
+        if answer is None:
+            return
+        wait_answer.Stop()
+        shown = logic.suggestions_shown(answer, address.Text)
+        if shown is None:                            # for something no longer typed
+            return
+        items, note = shown
+        hint_note.Text = note
+        hide_hints()
+        hints["items"] = items
+        for item in items:
+            hint_list.Items.Add(item)
+        hint_list.Height = logic.list_height(len(items), list_row_px(hint_list))   # as tall as its rows, no empty rows
+        hint_list.Visible = bool(items)
+        show_hint_rows()
+        fit_box()
+
+    wait_keys.Elapsed += logic.guard(ask_hints, "ask for address suggestions")
+    wait_answer.Elapsed += logic.guard(got_hints, "show address suggestions")
+    hint_list.Tag = pick_hint                       # (the in-Rhino test picks through the list's own pick)
+    hint_list.MouseUp += logic.guard(lambda s, e: pick_hint(hint_list.SelectedIndex), "pick a suggested address")
+    hint_list.Activated += logic.guard(lambda s, e: pick_hint(hint_list.SelectedIndex), "pick a suggested address")
+
     def enter_looks_up(s, e):          # Enter in the address: Look up (not Draw, the box's default button)
+        if hint_list.Visible and e.Key in (ef.Keys.Down, ef.Keys.Up):         # move in the list, keys stay here
+            e.Handled = True
+            hint_list.SelectedIndex = logic.list_step(hint_list.SelectedIndex, len(hints["items"]),
+                                                      "down" if e.Key == ef.Keys.Down else "up")
+            return
+        if hint_list.Visible and e.Key == ef.Keys.Escape:                       # close the list, not the box
+            e.Handled = True
+            hide_hints()
+            return
+        if e.Key == ef.Keys.Enter and hint_list.Visible and hint_list.SelectedIndex >= 0:
+            e.Handled = True                                                    # Enter picks; Enter again: Look up
+            pick_hint(hint_list.SelectedIndex)
+            return
         if e.Key == ef.Keys.Enter and not looking:
             e.Handled = True
             pick("lookup")
 
     address.KeyDown += logic.guard(enter_looks_up, "look up the address")
+
+    def address_typed(s, e):           # Draw off for an address not looked up, on again when the known one is back
+        state["address"] = address.Text
+        draw.Enabled = logic.can_draw(state) and not looking
+        reason.Text = logic.box_reason(state)
+        if suggester is not None:      # the list waits for a pause in the typing
+            if address.Text != hints["chosen"]:     # typed on: the list was for older typing, so it goes (round 2)
+                hint_list.SelectedIndex = -1   # and Enter looks up what is typed, never an older pick (round 1)
+                hide_hints()
+            wait_keys.Stop()
+            wait_keys.Start()
+
+    address.TextChanged += logic.guard(address_typed, "follow the address typed")
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
     buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None   # (Advanced: off with flat ground)
 
@@ -885,7 +1248,7 @@ def start_box(state, options, mode):
         if buffer is not None:
             state["design_buffer"] = buffer.Text
         draw.Enabled = logic.can_draw(state) and not looking
-        reason.Text = logic.draw_reason(state)
+        reason.Text = logic.box_reason(state)
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
 
@@ -895,18 +1258,111 @@ def start_box(state, options, mode):
         logic.zone_picked(state, zone.SelectedValue.Text if zone.SelectedValue else None, first_zone)
         confirm.Checked = bool(state.get("district_confirmed"))     # another district: confirm it again
         draw.Enabled = logic.can_draw(state) and not looking
-        reason.Text = logic.draw_reason(state)
+        reason.Text = logic.box_reason(state)
         if "source" in zone_row:
             zone_row["source"].Text = logic.zone_row_text(state).split(" · ", 1)[-1]
+        refresh_if_needed()
+
+    def refresh_if_needed():          # another use or district: its own uses, note and questions, so the box opens
+        z = zone.SelectedValue.Text if zone.SelectedValue else None       # again with them (rhino_logic decides;
+        gate = logic.gate_of({k: answer_of(k) for k in logic.ASKED_AFTER.values() if k in asked})
+        if not looking and logic.box_needs_refresh(                       # a lookup's answer opens it again anyway)
+                options, laid_out, (z, names[use.SelectedIndex][0] if names else None, gate)):
+            pick("refresh")
 
     zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
+
+    def use_changed(s, e):
+        refresh_if_needed()
+
+    use.SelectedIndexChanged += logic.guard(use_changed, "pick the use")
     cancel = button("Cancel", lambda: done(None))
+    status = {}                       # the running lookup's live line, once laid out
+
+    def fit(text, room, **kw):        # a label that wraps at `room` px when its text is wider (logic.text_wider)
+        return label(text, width=room if logic.text_wider(text, kw.get("size"), room) else None, **kw)
+
+    def about_section(layout, questions):
+        """"About this project": the facts only the architect knows that this district's rules need for the use
+        (rhino_logic.follow_up_rows, from the rulebook), compact: a quick-answers dropdown, then one question a row,
+        each a one-click dropdown (or, for a number, a field) that starts on "Not answered". The full question is its
+        hover text. The box stays laptop-sized (logic.ABOUT_*; pinned in test_box_width.py)."""
+        note = label(logic.FOLLOW_UP_HELP, size=11, width=logic.ABOUT_NOTE_WIDTH)
+
+        def typed(s, e, plain=note.TextColor):    # an entry that isn't an answer: said at once, never kept
+            text, refused = logic.answers_note([(k, kind, f.Text) for k, (kind, f, ch) in asked.items()
+                                                if ch is None])
+            note.Text = text
+            note.TextColor = eto_status_color("needs_review") if refused else plain
+
+        filling = []                       # non-empty while a quick answer sets several fields: one refresh at the end
+        cells = []
+        for q in questions:
+            if q["choices"] is not None:
+                field = ef.DropDown()
+                for t in [logic.NOT_ANSWERED] + [w for w, _ in q["choices"]]:
+                    field.Items.Add(t)
+                values = [v for _, v in q["choices"]]
+                field.SelectedIndex = values.index(q["value"]) + 1 if q["value"] in values else 0
+                field.Width = logic.ABOUT_FIELD_WIDTH
+                if q["key"] in logic.ASKED_AFTER.values():      # another question waits on this one: open it
+                    field.SelectedIndexChanged += logic.guard(
+                        lambda s, e: None if filling else refresh_if_needed(), "answer the question")
+            else:                                  # typed: a number (any other kind is never a yes / no)
+                field = ef.TextBox()
+                field.Width = logic.ABOUT_TYPED_WIDTH
+                field.Text = "" if q["value"] is None else str(q["value"])
+                field.TextChanged += logic.guard(typed, "type the answer")
+            field.ToolTip = q["label"]
+            asked[q["key"]] = (q["kind"], field, q["choices"])
+            name = label(q["short"], size=12, width=logic.ABOUT_LABEL_WIDTH)
+            name.ToolTip = q["label"]
+            cells += [name, field]
+        grid = ef.DynamicLayout()
+        grid.Padding = ed.Padding(0)
+        grid.Spacing = ed.Size(8, 4)
+        quick = logic.quick_answers([q["key"] for q in questions])
+        if quick:                          # several answers in one click; the fields it fills stay editable
+            picker = ef.DropDown()
+            for t in [logic.QUICK_HINT] + [w for w, _ in quick]:
+                picker.Items.Add(t)
+            picker.SelectedIndex = 0
+            picker.Width = logic.ABOUT_QUICK_WIDTH
+
+            def quick_picked(s, e):
+                at = max(picker.SelectedIndex, 0)
+                if at == 0:
+                    return
+                filling.append(True)
+                try:
+                    for key, value in quick[at - 1][1].items():
+                        kind, field, choices = asked[key]
+                        field.SelectedIndex = [v for _, v in choices].index(value) + 1
+                    picker.SelectedIndex = 0  # ready to pick another
+                finally:
+                    filling.clear()
+                refresh_if_needed()
+
+            picker.SelectedIndexChanged += logic.guard(quick_picked, "pick a quick answer")
+            grid.AddRow(label("Quick answers", size=12, width=logic.ABOUT_LABEL_WIDTH), picker)
+        for k in range(0, len(cells), 2):     # one question a row: the second column stays laptop-sized
+            grid.AddRow(*cells[k:k + 2])
+        # its title in the box's first column and its questions in the second, as every other row: a one-cell row
+        # is NOT spread across the columns by Eto on the Mac: it sits in the first and widens it (the demo 7 Rhino run,
+        # 2026-10-28: the grid there made the box 1,162 pt wide)
+        title = label("About this project", bold=True)
+        title.VerticalAlignment = ef.VerticalAlignment.Top     # level with its first question, never centred beside
+        layout.AddRow(title, grid)                              # the whole grid (the architect's review, 2026-10-28)
+        layout.AddRow(None, note)
+
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
     for r in logic.box_rows(state):
         key, title = r["key"], label(r["label"], bold=True)
         if key == "address":
             layout.AddRow(title, row(address, *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+            if suggester is not None:      # the type-ahead list (hidden until there is one) and its quiet note
+                layout.AddRow(None, hint_rows)
             if r.get("matches"):           # several places match: pick one, then Look up again
                 matches = ef.DropDown()
                 matches.Items.Add("Which address?")
@@ -920,26 +1376,33 @@ def start_box(state, options, mode):
 
                 matches.SelectedIndexChanged += logic.guard(matched, "pick the address")
                 layout.AddRow(None, row(matches))
-            if r.get("status"):            # Looking up 106 Ithaca Rd… (the box stays usable; Cancel works)
-                layout.AddRow(None, row(label(r["status"], size=11)))
+            if r.get("status"):            # Looking up 106 Ithaca Rd · Finding the address…  ○●○  3 s (live;
+                status["label"] = label(r["status"], size=11, width=560)   # Cancel lookup stops it)
+                layout.AddRow(None, row(status["label"]))
         elif key == "zone":
             confirm.Text = r["tick"][0]
-            zone_row["source"] = label(r["text"].split(" · ", 1)[-1], size=11)
+            zone_row["source"] = fit(r["text"].split(" · ", 1)[-1], 260, size=11)
             layout.AddRow(title, row(zone, zone_row["source"], confirm))
         elif key == "use":
             layout.AddRow(title, use)
+            if state.get("use_note"):  # a pick the chart doesn't permit by right: said, with the chart's page
+                layout.AddRow(None, row(label(state["use_note"], eto_status_color("needs_review"), size=11,
+                                              width=560)))
+            questions = state.get("follow_ups") or []     # what this district's rules need for the use
+            if questions:
+                about_section(layout, questions)
         elif key == "ground":
-            layout.AddRow(title, row(label(r["text"], size=12)))          # left aligned, as the others
+            layout.AddRow(title, row(fit(r["text"], 560, size=12)))          # left aligned, as the others
             layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             regrade.Text = r["tick"][0]
             layout.AddRow(None, regrade)
         else:                          # lot, street side: what it is, and the one way to change it
-            layout.AddRow(title, row(label(r["text"], size=12),
+            layout.AddRow(title, row(fit(r["text"], 360, size=12),
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             if r.get("help"):          # what that row is, in a sentence (the front lot line's)
-                layout.AddRow(None, row(label(r["help"], size=11)))
+                layout.AddRow(None, row(label(r["help"], size=11, width=560)))
             if r.get("choice"):        # the street side's question: Corner lot?
-                layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
+                layout.AddRow(None, row(fit(r["choice"][0], 300, size=12), corner))
         if r.get("review"):            # a looked-up fact found doubtful: why, in amber, and I checked this
             layout.AddRow(None, row(label(r["review"], eto_status_color("needs_review"), size=11, width=560)))
         if r.get("check"):
@@ -957,7 +1420,8 @@ def start_box(state, options, mode):
                                label("kept back from every limit by the starting house", size=11))
         layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
-    amber = label("", eto_status_color("needs_review"), size=12)    # one line, following the answers given
+    amber = label("", eto_status_color("needs_review"), size=12, width=logic.BOX_TEXT_WIDTH)   # wraps at the box
+    note = label(logic.lookup_note(state) or "", size=11)             # what a found lookup tells: plain, not amber
 
     def refresh_amber(*_):
         state["corner_lot"] = [None, False, True][max(corner.SelectedIndex, 0)]
@@ -967,6 +1431,7 @@ def start_box(state, options, mode):
     refresh_amber()
     corner.SelectedIndexChanged += logic.guard(refresh_amber, "answer the corner lot")
     layout.AddRow(None, row(amber))
+    layout.AddRow(None, row(note))
     layout.AddRow(None, row(reason))
     layout.AddRow(None, row(cancel, draw))
     dialog.Content = layout
@@ -976,21 +1441,84 @@ def start_box(state, options, mode):
     if shown is not None:
         dialog.Shown += logic.guard(lambda s, e: shown(dialog), "run the start box hook")
     poll = state.get("_poll")                 # a lookup running in its own process: the box closes itself when it
-    if looking and poll is not None:          # answers (or the time runs out), and opens again filled in
+    progress = state.get("_progress")         # answers (or the time runs out), and opens again filled in; until
+    if looking and poll is not None:          # then its line says what it is doing, live
         timer = ef.UITimer()
-        timer.Interval = 0.5
+        timer.Interval = 0.25
 
         def tick(s, e):
             if poll() is not None:
                 timer.Stop()
                 keep()
                 done("pick:lookup_done")
+            elif progress is not None and status.get("label") is not None:
+                status["label"].Text = progress()
 
         timer.Elapsed += logic.guard(tick, "wait for the address lookup")
         dialog.Shown += logic.guard(lambda s, e: timer.Start(), "start waiting for the lookup")
         dialog.Closed += logic.guard(lambda s, e: timer.Stop(), "stop waiting for the lookup")
+
+    def closed(s, e):                  # the type-ahead stops with the box
+        wait_keys.Stop()
+        wait_answer.Stop()
+        if suggester is not None:
+            suggester["stop"]()
+
+    dialog.Closed += logic.guard(closed, "stop the address suggestions")
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen.get("what")
+
+
+def row_dialog(title, fields, check):
+    """A row's own small dialog (logic.row_fields): one line per stated fact the row waits on, a count typed or a
+    yes / no picked ("Not answered" first), and [Cancel] [OK]. OK calls `check(answers)` (answers: key -> text, "yes",
+    "no" or "" for blank): words back keep the dialog open with them shown; None closes it. Returns the answers on
+    OK, or None (Cancel, Esc, closed: the caller changes nothing)."""
+    dialog = ef.Dialog[bool]()
+    dialog.Title = title
+    dialog.Padding = ed.Padding(14)
+    dialog.Resizable = False
+    layout = ef.DynamicLayout()
+    layout.Spacing = ed.Size(8, 8)
+    asked, chosen = {}, {}
+    for q in fields:
+        if q["kind"] == "yes_no":
+            field = ef.DropDown()
+            for t in (logic.NOT_ANSWERED,) + logic.yes_no_words(q["key"]):
+                field.Items.Add(t)
+            field.SelectedIndex = logic.row_choice(q["value"])
+            field.Width = logic.ANSWER_WIDTH           # every dropdown the same width: lined up
+        else:                                  # a count: typed, blank when not answered (never 0)
+            field = ef.TextBox()
+            field.Width = 60
+            field.Text = "" if q["value"] is None else str(q["value"])
+        asked[q["key"]] = (q["kind"], field)
+        layout.AddRow(row(label(q["label"], size=12, width=logic.QUESTION_WIDTH), field))
+    note = label(logic.FOLLOW_UP_HELP, size=11, width=logic.QUESTION_WIDTH + 80)
+    layout.AddRow(row(note))
+
+    def answers():
+        return {k: logic.row_choice_text(f.SelectedIndex) if kind == "yes_no" else f.Text
+                for k, (kind, f) in asked.items()}
+
+    def ok():
+        got = answers()
+        problem = check(got)
+        if problem:                            # not an answer: said, and the dialog stays open (nothing saved)
+            note.Text = problem
+            note.TextColor = eto_status_color("needs_review")
+            return
+        chosen["answers"] = got
+        dialog.Close(True)
+
+    done = button("OK", ok)
+    cancel = button("Cancel", lambda: dialog.Close(False))
+    layout.AddRow(row(cancel, done))
+    dialog.Content = layout
+    dialog.DefaultButton = done
+    dialog.AbortButton = cancel
+    dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
+    return chosen.get("answers")
 
 
 # ---- the viewport (F, G) -------------------------------------------------------------------------------------

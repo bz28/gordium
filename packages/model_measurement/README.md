@@ -16,6 +16,8 @@ format report from it.
 
 - **The model.** The lot is the closed outline on the `Site` layer; buildings are the solids or closed meshes
   on the `Building` layer (the layers the architects already use). Any units; everything is converted to feet.
+  The model is the whole lot: every building on it, existing ones to stay included, is drawn on the `Building`
+  layer, since lot coverage, the count of primary buildings and every rule reading them see only what is drawn.
 - **Lot facts**: what a model can't show, stated by the architect. In Rhino they are asked once (prefilled)
   and saved in the file; on disk they sit next to the model as `<model>_facts.yaml`:
 
@@ -23,14 +25,29 @@ format report from it.
   |---|---|
   | `zone`, `jurisdiction`, `use` | pick the rules |
   | `street_line` | **every** lot line on a street, each by its two ends (on a corner lot: both streets and any curve between them); front, side and rear all follow from it |
-  | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review". On a corner lot, the lot width, lot depth and every yard are left for the architects: which yards are front, side and rear, and which frontage is the width, are open questions (and a drawing can't show whether both streets were given) |
+  | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review". On a corner lot every yard facing a street is a front yard (§325-19C, the law), the rear yard is opposite the street the address is on (§325-8A(14)(d)), and the one side yard left is checked against Column 13 (Gordium's reading, City practice) |
+  | `street_ids` | one per `street_line`, in the same order: the street that lot line is on (the street's name, or Gordium's own "Street 1", "Street 2"… for a street nobody named), recorded by the Rhino street pick or the lookup. On a corner lot it is the only way Gordium knows which lines are which street (never guessed from where the lines turn): missing for any street line, saved for other lines, or one street's lines not next to each other, and the lot width, lot depth and every yard from the street lines say "needs review" and ask for the street pick |
+  | `address_street_line` | on a corner lot: the lot line(s) on the street the lot's address is on (it decides which yard is the rear yard); any of that street's lines means the whole street (its `street_ids`). Not given, each street is read as it, and the yards it changes need review |
+  | `accessory_buildings` | the ids of the solids that are accessory buildings (a garage, a shed). A solid standing apart from the main building that isn't listed could be a freestanding deck (part of the building, §325-18A), so both are read. Listing them also picks the main building (the one left) |
+  | `accessory_frame` | yes or no: the accessory buildings are frame. Frame ones keep §325-25C's distances by law; for others it is an open question (325-25C#1), read every way |
+  | `eaves_confirmed` | a lot fact for one overhang (the panel will ask for it in a later release): [{overhang (its fingerprint, from the check), value: true, source, confirmed_by, date}]. Without it, a yard that meets its minimum only to the walls needs review; a later edit to the overhang asks again |
   | `grade_elevation` | the ground level heights are measured from (a flat site) |
   | `ground_is_flat` | yes or no. Sloped ground needs the ground levels around the walls (the grade plane), not measured yet: without a yes, height, building area and the yards say "needs review" |
   | `lot_surveyed` | yes or no: the lot outline is from a survey. A drawn lot (from a map) isn't: without a yes, the lot area, and so lot size and coverage, say "needs review" (the drawn area is listed as a reading) |
   | `lot_id`, `main_building` | only when there is more than one candidate |
+  | `primary_buildings`, `primary_buildings_same_use` | how many primary buildings stand on the lot, the main one included (§325-3B PRIMARY STRUCTURE), and whether every one holds the lot's use (§325-8B(1): each needs its own lot area). The count is read from the drawing where it can be: one building, or every solid standing apart from the main building touching it, listed in `accessory_buildings`, or too small or low to hold a home (`_could_be_principal`): 1. Otherwise two readings, every one an accessory building (1) / every one that could hold a home a primary building (1 more each), until the count is stated |
   | `stories`, `sleeping_rooms`, `parking_spaces` | not drawn in a massing model; the rules that need them say "needs review" until they're entered |
 
 ## How each number is found
+
+**Which drawn lines form each lot line (decided 2026-10-21, review round 20).** A drawn outline's pieces are grouped
+into lot lines by cleaning it within its own accuracy: a corner goes when leaving it out moves the outline by no
+more than 0.01 ft on a survey, 0.25 ft on the tax map (pieces in line, slivers). A corner where the street meets
+the other lines, or at a curved line, always stays. The cleaned outline only decides which drawn pieces form each
+line (street, side, rear; the readings of which are which), so it can only drop readings the drawing's noise made.
+Every distance is still measured to the pieces drawn, never to a chord across them, and the lot area is the
+outline drawn. Lines are named by the architect's own numbering ("line 10 to 11" for two drawn pieces read as
+one), and each lot-line measurement says the outline was cleaned (its `from` text and the panel's detail).
 
 | Measure | How | The city's words (4_term_definitions/definitions.yaml) |
 |---|---|---|
@@ -40,11 +57,47 @@ format report from it.
 | Front yard | least distance from the street lot line to the main building | front_yard: "the least distance between the front lot line and the front of such main building" |
 | Side yards | least distance from each side lot line to the building; the nearer is `side_yard_smaller` | side_yard: "from the nearest point of the side lot line to the nearest part of" |
 | Rear yard | least distance from the rear lot line to the main building | rear_yard: "the least distance between the rear lot line and the rear of such main building" |
-| Building area | ground area of every building on the lot | building_area: "the total area … of the principal building and all accessory buildings" |
-| Height | ground level to the highest level of a flat or mansard roof (its highest section is level, or within a drainage slope of level: under 1/2 inch per foot) | height_of_building: "to the highest level of a flat or mansard roof" |
+| Building area | every building on the lot seen from above, principal and accessory (garages count), porches, decks and cantilevered floors included (findings coverage_seen_from_above, garages_count); eaves: every reading of building_area's open question | building_area: "the total area … of the principal building and all accessory buildings" |
+| Height | ground level to the highest level of a flat or mansard roof (its highest section is level, or within a drainage slope of level: under 1/2 inch per foot); a pitched roof midway between eave and ridge of its highest section (finding pitched_roof_midpoint), with the eave read every way height_of_building's open question lists: the underside of the lowest eave, the top of the wall plate, the drip edge | height_of_building: "to the highest level of a flat or mansard roof or to the average height of a pitched … roof" |
+| Yards to the eaves (`front_yard_eaves`, …) | the same yards measured to the building seen from above, eaves included, for §325-18B (eaves may project up to 2 ft into a required yard) | yard_projections: "shall not project more than two feet into any required yard" |
+| Accessory buildings | how many solids stand apart from the main building; their least distance from the street lot line(s), a side lot line and the rear lot line; whether §325-25C's distances apply (`accessory_distances_apply`: frame, by law; otherwise every reading of 325-25C#1) | side_yard: accessory_structures_follow_325_25 |
 
-Side and rear lot lines follow from the street: lines next to the street lines and about square to them
-(60° or more) are side lines; lines not next to them and about parallel (30° or less) are rear lines.
+The yards are measured to the nearest part of the building with its eaves left out (the finding yards_to_nearest_part:
+§325-3 YARD, §325-18A): cantilevered floors, porches, decks and steps count (a solid touching the main building is
+part of it: steps by Gordium's reading steps_count). Every yard and lot coverage is measured to the full
+outline: everything the building's solids cover, seen from above. Gordium never decides from the shape that
+something is an eave (a gable volume, a mansard story or a knee wall can look just like one). `_eave_candidate`, the
+one helper the height, the yards and coverage share, only suggests what might be eaves: what a pitched roof reaches
+past the walls under it. Where there is such a candidate, each yard is also read to the walls (the `model#eave`
+reading: eave / not_eave): if the full outline meets the requirement, that is the result; if only the walls do, the
+item needs review and asks whether the part reaching that far past the walls is an eave (§325-18B lets eaves
+reach up to 2 ft into a required yard; `R-1b.yard_projections` checks that). The answer is a lot fact,
+`eaves_confirmed`: [{overhang, value: true, source, confirmed_by, date}], naming the candidate's fingerprint
+(`eave_candidates` on the yard, height and coverage records, and in each item's detail). The panel will ask for it
+in a later release; until then such an item stays needs review. The fingerprint is a sha256 over the ids of the
+solids whose faces make the overhang, every vertex of those solids (to 0.01 ft) and the overhang's outline (to 0.01
+ft): any edit to those solids (a deeper fascia, a knee wall, another solid swapped in) gives a new one, and the
+question is asked again; the same model gives the same one. The height's eave
+readings follow the same rule (unconfirmed, each is also read with the roof edge as the eave). Anything that sticks
+out past the walls at the ground and is neither one of Gordium's floor blocks nor a candidate eave is also read to
+the walls at the ground (`model#projection`: it may be a bay window or other projection).
+
+## What research settled, and what is still open (`interpretations.py`)
+
+The measuring follows the city's own files, never a copy in the code: an open question with `readings` by id (in
+`definitions.yaml`, a rule or a section label) is measured under every reading it lists, each reading named
+(`named: {"height_of_building#1": "wall_plate"}`), so the checker can say complies only if all pass, does not
+comply only if all fail, and needs review otherwise, naming the readings it fails under. A finding of kind `law`
+is applied as the law; kind `reading` is applied and carried in the measurement's `basis`, shown as "Gordium's
+reading · confirm with …". An answer from the architects or the City (`answers`, with `reading: <id>`) outranks
+both: only that reading is measured. The code finds a question by its entry and the ids of the readings it can
+measure, so a renumbered question is still found; a question or finding the files no longer have stops the
+measurement.
+
+Side and rear lot lines follow from the street, every way the geometry allows (no angle decides it): walking out
+from each end of the street lines, the lines run on as that side lot line for one or more lines, and the rear lot
+line is what is left. The line at each end of the street touches the street, so it is a side line, never the rear;
+a reading with no rear line isn't one. More than 6 lines that could be either: too many to list (needs review).
 
 ## Never a guess
 
@@ -56,9 +109,13 @@ listed, and the reason names the open question for the architects, so the checke
 |---|---|---|
 | A lot line that is neither clearly side nor rear (a jog) | the line as a side line / as a rear line | lot_depth: "which lines count" |
 | A curved street line | along the curve / straight across | lot_width |
-| Something sticking out above the ground floor (an overhang, eaves) | measured to the building seen from above / to its walls at ground level | building_area, yard_projections |
-| More than one solid on the Building layer | every yard to the main building / to any solid (a porch or deck drawn as its own solid is part of the building, §325-18A; an accessory building may follow other rules) | yard_projections, §325-25 |
-| A pitched roof | midway between eave and ridge / to the ridge | height_of_building: "average height" |
+| Something below the roof sticking out past the walls at the ground (an upper floor, a bay window) | to the building / to its walls at ground level | yard_projections (bay windows) |
+| A solid standing apart from the main building, not listed in `accessory_buildings` | every yard to the main building (an accessory building, §325-25) / with it as a freestanding deck (§325-18A) | §325-25, §325-18A |
+| The same solid, if it could hold a home (enclosed, a story tall, a habitable room's floor area), for the count of primary buildings (`primary_buildings`) | every one an accessory building / every one a primary building; a rule the count could change needs review until the architect states it | not a question: the architect states the count |
+| A pitched roof | midway between eave and ridge, the eave at the underside of the lowest eave / the top of the wall plate / the drip edge (named readings) | height_of_building#1 |
+| Eaves, for lot coverage | left out / the part beyond 2 ft counted / counted in full (named readings) | building_area#1 |
+| A corner lot whose address street isn't given | each street read as the address street (the rear yard is opposite it) | §325-8A(14)(d) |
+| A corner lot's lot width | each street's frontage | lot_width |
 | A roof with a level part and sloped sides at its top | a mansard, to its highest level / a pitched or hip roof, to its average height | height_of_building: "flat or mansard" vs "pitched, gabled, hip" |
 | Something above the main roof (a parapet, chimney, bulkhead, or a higher part of the building) | leaving it out (the roof read as usual) / to its top; whether it counts is the question (§325-3 leaves out bulkheads and chimneys) | height_of_building |
 | More than one solid, for the height | the main building alone / with every other solid as part of it | §325-25 |
@@ -92,10 +149,22 @@ Every reason the code gives today comes from the table:
   the lot facts are still read and checked);
   "every lot line is on a street: which yards are front, side and rear is an open question for the architects".
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
-  lot yes or no"; "a corner lot: which yards are front, side and rear yards, and which street's frontage is the
-  lot width (§325-19C), are open questions for the architects".
-- **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 4 lot lines could be
-  either: too many readings to list)"; "no reading of the lot lines gives two side lot lines and a rear lot line
+  lot yes or no"; "a corner lot, but the street lot lines given are all on one street: pick the lot lines on both
+  streets"; "which street lot lines are on which street isn't recorded: pick the street side so Gordium knows which
+  lines are which street (a corner lot's lot width is the frontage on one street, §325-8A col. 7)"; "the street lot
+  lines recorded on one street aren't next to each other, or one lot line's pieces are recorded on two streets: pick
+  the street side again, one click on each street"; "the address street given isn't one run of the street lot lines
+  on one street: pick the lot line(s) on the street the address is on again"; "the lot line opposite the address street is on a street
+  too (a through lot, §325-8A(14)(d)): which yards are rear and front is an open question for the architects";
+  "every side lot line is on a street (a lot on three streets): which yard is a side yard is an open question for
+  the architects".
+- **What research settled** (`interpretations.py`): "the city's files no longer have that finding (answered
+  without naming the reading, or removed): the measuring can't follow it" (any finding or open question the code
+  follows, named in the reason); "a reading research lists (a_reading, an_entry) has no measuring code yet".
+- **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 6 lot lines could be
+  either: too many readings to list)" (the lot depth and the side and rear yards wait, on a corner lot whatever
+  the other address streets give; the frontage and the front yards don't depend on those lines and are still
+  measured); "no reading of the lot lines gives two side lot lines and a rear lot line
   (a triangular lot, for one): an open question for the architects".
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
@@ -123,7 +192,7 @@ Every reason the code gives today comes from the table:
   finished ground" (height and stories).
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
   are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
-  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces".
+  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces"; "enter the dwelling units, the rooms let for profit, and whether it is a conversion" (R-3a chart note 7: the lot size grows with them); "enter the occupants (§325-3B OCCUPANT: in R-2c, every person with the right to occupy)" (R-2c chart notes 4-6: the lot size grows with them); "enter the dwelling units in the whole attached building, every lot it stands on" (R-2c: §325-3B's three to six); "optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that depends on how the occupants are split)"; "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)" (R-3a.abutting_r1: no, and the stricter limits don't apply); "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)" (the occupancy rules of §325-3B's one-family and two-family dwellings); "say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (§325-3B HOME OCCUPATION)" (the home-occupation rules); "enter the primary buildings on the lot (each separate building holding a home or other permitted primary use, the main one included; not a garage, shed or accessory dwelling unit) and whether every one holds the use entered (§325-8B(1))" (a second building that could hold a home: §325-8B(1)'s lot area for each, §325-7B, the South Hill Overlay); "say whether the lot is in the South Hill Overlay District (§325-8E, on the City's zoning map)" (R-1 and R-2 with two or more primary buildings); "say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if so, how far the nearest new structure is from it (§325-26)" (the stream setback, every residential district); "no stream or inlet is said to be within 20 ft of the lot, but a new structure is said to be {distance} ft from one: check both answers" (the two stream answers contradict each other: both are set aside); "the count of unrelated people with minor dependent children included ({with_}) is lower than the count without them ({without}): check both counts" and "{here} dwelling units on this lot but {building} in the attached building: part of another building may be on this lot, or one of the counts or the use is off" and "the most occupants in one dwelling unit ({most}) is more than the occupants of every unit on the lot together ({occupants}): check both counts" and "change the use with Edit site… in the start box" (added after a contradiction that sets the use aside: the use has no "Enter …" button) and "{occupants} occupants on the lot, but {units} {unit_words} with at most {most} in any one can hold only {held}, with no accessory dwelling unit on the lot: check {check} and the accessory dwelling unit answer" (facts that contradict each other: every fact in the pair is set aside, so no rule reading either one complies; the panel also shows a "Lot facts disagree" row to re-enter them).
 - **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
   Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
   roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
@@ -159,14 +228,15 @@ Every reason the code gives today comes from the table:
   the main building, assumed: every measurement from it carries `main_assumed`, and every other building that
   could be a principal one (enclosed, at least 7 ft tall and 70 sf: NYS Residential Code R305.1, R304.1) is also
   read as if it were the main one, so the assumption never passes what a pick wouldn't); "a building object has
-  nothing to measure (no faces): check it on the Building layer"; "a
-  building isn't inside the lot: {what}" (which one; the yards wait only if it is the main building); "a building isn't a closed solid: {what}" (which object: its Rhino name, else its id; the rows waiting on it point at it, so Zoom to finds it); "a building mesh isn't closed"; "a building
+  nothing to measure (no faces): check it on the Building layer"; "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid: {what}" (which object: its Rhino name, else its id; every row waiting on it points at it, so Zoom to finds it, and a building wholly off the lot is still named beside it); "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it
   into a solid)" (the same for a surface or anything else that isn't a solid or mesh: it is reported, never left
   out, since leaving it out would undercount coverage).
-- **The height:** "the roof's shape can't be read (no faces open to the sky)"; "another solid's height can't be
+- **Accessory buildings:** "no accessory building on the lot (every solid is the main building or touches it)".
+- **The height:** "no roof plane of the pitched roof's highest section lies over the walls: the wall plate can't
+  be found"; "the roof's shape can't be read (no faces open to the sky)"; "another solid's height can't be
   read: …"; "too many solids with open roof questions to list every reading: pick the main building's parts, or
   ask the architects" (more than 200 combinations of readings).
 

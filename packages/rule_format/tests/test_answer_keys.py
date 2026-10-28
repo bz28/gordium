@@ -56,5 +56,15 @@ def test_our_results_match_theirs_on_every_row(site):
 def test_rules_they_dont_cover_dont_apply_or_pass(site):
     design, _, results = site
     others = {i: r for i, r in results.items() if i not in design["compare"].values()}
+    # their house has no eaves (the yards to the eaves are the yards); the spreadsheet doesn't say whether there
+    # is an accessory building, who lives in the house or whether a home occupation is planned, so those rules
+    # wait for them (never a pass); nor how many primary buildings stand on the lot (§325-8B(1), queue item 15), so
+    # the lot area for each, the shared-yards and South Hill rows wait for the count; nor
+    # whether a stream or inlet is near the lot (§325-26), so that row waits too
     assert others == {"R-1b.lot_area_other_use": "not_applicable", "R-1b.lot_width_other_use": "not_applicable",
-                      "R-1b.parking_other_uses": "not_applicable"}
+                      "R-1b.parking_other_uses": "not_applicable", "R-1b.yard_projections": "pass",
+                      "R-1b.accessory_buildings": "needs_review", "R-1b.occupancy_one_family": "needs_review",
+                      "R-1b.home_occupation_size": "needs_review", "R-1b.home_occupation": "needs_review",
+                      "R-1b.lot_area_each_primary_building": "needs_review",
+                      "R-1b.yards_not_shared": "needs_review", "R-1b.south_hill_overlay": "needs_review",
+                      "R-1b.stream_setback": "needs_review"}

@@ -12,6 +12,7 @@ import yaml
 from . import geometry as g
 
 ENDPOINTS = yaml.safe_load((Path(__file__).parent / "endpoints.yaml").read_text(encoding="utf-8"))
+NAMES = yaml.safe_load((Path(__file__).parent / "names.yaml").read_text(encoding="utf-8"))   # exact tables, by hand
 SR = 2261                                   # NAD83 / New York Central, US survey feet
 M_TO_FT = 1 / 0.3048                        # elevations: metres to international feet
 
@@ -19,6 +20,25 @@ _SUFFIX = {"STREET": "ST", "ROAD": "RD", "AVENUE": "AVE", "PLACE": "PL", "LANE":
            "COURT": "CT", "BOULEVARD": "BLVD", "TERRACE": "TER", "CIRCLE": "CIR", "PARKWAY": "PKWY",
            "HIGHWAY": "HWY", "SQUARE": "SQ", "ALLEY": "ALY", "TRAIL": "TRL"}
 _DIR = {"NORTH": "N", "SOUTH": "S", "EAST": "E", "WEST": "W"}
+
+
+def road_name(name: str) -> str:
+    """A City road's name as an address on it is written: names.yaml's exact table first ('E STATE ST / M.L.K. JR
+    ST' -> 'E STATE ST'; a divided street's 'W CLINTON ST EB LANE' -> 'W CLINTON ST'), then normalize_street. A
+    name not in the table is matched character for character, never by likeness."""
+    return normalize_street(NAMES["roads"].get(name or "", name or ""))
+
+
+def district(code: str | None) -> tuple[str | None, str]:
+    """(the district as Gordium's rulebooks write it, how it was matched) for a City zoning-map code: 'district'
+    when it is one of the residential districts as written, 'alias' when names.yaml's exact table renames it
+    (R-U -> RU), 'unknown' otherwise (shown as the map gives it; the zone then needs review)."""
+    d = NAMES["districts"]
+    if code in d["residential"]:
+        return code, "district"
+    if code in d["aliases"]:
+        return d["aliases"][code]["district"], "alias"
+    return code, "unknown"
 
 
 def normalize_street(name: str) -> str:
@@ -78,13 +98,14 @@ class Fetcher:
 
     def city_parcels_at(self, p) -> list[dict]:
         body = self._ask("city_parcels", {**self._point_query(p),
-                                          "outFields": "SWISPRINTK,SWIS,MUNI,LOCADDR,SecZones,HISTPROP,ILPCREVIEW"})
+                                          "outFields": "SWISPRINTK,SWIS,MUNI,LOCADDR,SecZones,OverlayZone,HISTPROP,ILPCREVIEW"})
         out = []
         for f in body.get("features", []):
             a = f["attributes"]
             out.append({"id": a.get("SWISPRINTK"), "swis": str(a.get("SWIS") or ""), "muni": a.get("MUNI") or "",
                         "address": a.get("LOCADDR") or "", "rings": [g.open_ring(r) for r in f["geometry"]["rings"]],
-                        "secondary_zones": a.get("SecZones"), "historic_property": a.get("HISTPROP"),
+                        "secondary_zones": a.get("SecZones"), "overlay_zones": a.get("OverlayZone"),
+                        "historic_property": a.get("HISTPROP"),
                         "landmarks_review": a.get("ILPCREVIEW"), "source": "city_parcels"})
         return out
 
@@ -111,7 +132,7 @@ class Fetcher:
 
     def city_roads_near(self, ring, pad: float = 150.0) -> list[dict]:
         body = self._ask("city_roads", {**self._envelope(ring, pad), "outFields": "NAME,ROW_WIDTH"})
-        return [{"name": normalize_street(f["attributes"].get("NAME") or ""), "row_ft": f["attributes"].get("ROW_WIDTH"),
+        return [{"name": road_name(f["attributes"].get("NAME") or ""), "row_ft": f["attributes"].get("ROW_WIDTH"),
                  "paths": [[tuple(p[:2]) for p in path] for path in f["geometry"]["paths"]], "source": "city_roads"}
                 for f in body.get("features", []) if f.get("geometry")]
 

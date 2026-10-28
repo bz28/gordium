@@ -2,7 +2,8 @@
 """The start box as one transaction, with the address lookup, in Rhino 8 (review round 1 of PR #19). Run in Rhino,
 not in CI. Phases, by sc.sticky["gordium_txn_phase"]:
 - "run" (default): a fresh document with the sample lot, as GordiumStart makes it. Look up A (106 Ithaca Rd,
-  recorded answers): the lot and 14 spot grades drawn, the sample lot taken out. Cancel: the model exactly as before
+  recorded answers): nothing drawn by Look up itself (re-lookup); at Draw's reset the lot and 14 spot grades drawn,
+  the sample lot taken out. Cancel: the model exactly as before
   (same objects, same ids). Look up B (109 Ithaca Rd): only B's 6 spot grades. Then a lookup whose State parcels
   didn't answer (the City's outline as a guide only): no lot curve written, Draw off, "Draw my lot…" offered.
   Captures of each step (Top view); the box session is kept for the next phases.
@@ -72,7 +73,13 @@ def look_up(g, doc, session, facts, saved_ui, address, fixture, edit=None):
         time.sleep(0.2)
     if edit is not None:                       # a service down, as the recorded answers can't say
         g.STATE["lookup"]["answer"] = edit(copy.deepcopy(g.STATE["lookup"]["answer"]))
-    return g._lookup_done(doc, facts, saved_ui, session)
+    before = objects(doc)
+    facts, saved_ui = g._lookup_done(doc, facts, saved_ui, session)
+    log.setdefault("look_up_previews_only", []).append(objects(doc) == before)   # re-lookup: Look up draws nothing
+    # Draw's reset (re-lookup, Ben 2026-10-21): what the lookup may write goes into the model, in this session
+    facts, saved_ui, _, _ = g.logic.apply_reset(g.RhinoTable(doc), session, facts, saved_ui, g.logic.START_FRESH,
+                                                g.STATE.get("zones") or [])
+    return facts, saved_ui
 
 
 def city_parcels_only(answer):
@@ -92,7 +99,8 @@ try:
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
         g.STATE["zones"] = options["zones"]
         sample = g.ask({"cmd": "sample_site"})
-        sample_lot = str(g._add_lot(doc, sample))       # as GordiumStart does on an empty file
+        sample_lot = str(g._add_lot(doc, sample))       # a file drawn from the sample before 2026-10-27 (GordiumStart
+        # no longer draws it: a new file starts empty); such files keep working, so this still tests the transaction
         g._save_ui_state(doc, dict(g._ui_state(doc), from_sample=True, replaceable_lot=sample_lot))
         facts = dict(sample["facts"], address=sample["address"], lot_id=sample_lot)
         saved_ui = g._ui_state(doc)
@@ -159,7 +167,7 @@ try:
                      log["after_A"]["lots"] == 1 and log["after_B"]["spot_grades"] == 6 and
                      log["after_B_cancel"]["objects_same"] and log["after_crash_recovery"]["objects_same"] and
                      log["guide"]["lot_id"] is None and
-                     log["guide"]["guide_shown"])
+                     log["guide"]["guide_shown"] and all(log["look_up_previews_only"]))
         assert log["ok"], "the box is not one transaction in Rhino: " + json.dumps(log, default=str)[:600]
     elif phase == "box":
         g = sys.modules["gordium_rhino"]

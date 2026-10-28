@@ -23,6 +23,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close, leftovers  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_mvp") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -84,7 +85,7 @@ try:
         def on_confirm(doc_, facts, text, state):
             seen["rows"] = [r["key"] for r in g.logic.box_rows(state)]
         g.STATE["on_confirm"] = on_confirm
-        g.gordium_check()                                    # GordiumStart's flow on the sample
+        look_up_106(g, g.gordium_check)                                    # GordiumStart's flow on the sample
         claim("5 no Ground row in the start box", "ground" not in seen.get("rows", []) and "lot" in seen["rows"],
               seen.get("rows"))
         facts = g.current_facts(doc)
@@ -120,12 +121,15 @@ try:
         rear = next(r for r in rows if "Side yard, Southwest" in r[0])
         claim("3 a shortfall says short", rear[3].endswith(" short"), rear)
         o = g.overlay()
-        failing = [t for _, t, st in o.yard_dims if st == "does_not_comply"]
-        claim("1 labels off: a failing yard's shortfall still labelled",
-              failing and all(g.logic.yard_label_shown(False, "does_not_comply") for _ in failing) and
-              "needs" in failing[0], failing)
-        claim("1 labels off: the others not", not g.logic.yard_label_shown(False, "complies"))
+        # (the drawing shows a failing yard's number with its ✕; what it needs is the panel's and the notice's).
+        # Top drawn last first: o.placed is the last view's (capture redraws Top)
         capture(doc, "1_labels_off_failing_shortfall_only")
+        failing = [pl[5] for j, pl in (getattr(o, "placed", None) or {}).items()
+                   if isinstance(j, int) and pl[5] and o.yard_dims[j][2] == "does_not_comply"]
+        claim("1 labels off: a failing yard's number still shown, with its ✕",
+              failing and all(g.logic.yard_label_shown(False, "does_not_comply") for _ in failing) and
+              failing[0].startswith("✕ "), failing)
+        claim("1 labels off: the others not", not g.logic.yard_label_shown(False, "complies"))
         g.set_labels(True)                                   # the panel's tick
         ui_state = g._ui_state(doc)
         claim("1 the tick turns them on, saved in the document",

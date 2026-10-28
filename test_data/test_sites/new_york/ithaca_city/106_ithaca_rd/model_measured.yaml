@@ -18,7 +18,7 @@ measurements:
     from: 'measured from model.3dm: the length of the lot line(s) on the street (frontage) (along the street line)'
   lot_depth:
     value: null
-    from: 'not measured: the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth) [readings: line 4 as a side lot line = 100.06; line 4 as a rear lot line = 94.82]'
+    from: 'not measured: the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth) [readings: line 3 as a rear lot line, line 4 as a rear lot line = 94.82; line 3 as a rear lot line, line 4 as a side lot line = 100.06; line 3 as a side lot line, line 4 as a rear lot line = 128.69]'
   building_area:
     value: null
     from: 'not measured: a building isn''t inside the lot: the building'
@@ -46,3 +46,90 @@ measurements:
   parking_spaces:
     value: 1
     from: stated by the architect (not measured from the model) (lot facts)
+  dwelling_units:
+    value: null
+    from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
+  rooms_let_for_profit:
+    value: null
+    from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
+  conversion:
+    value: null
+    from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
+  occupants:
+    value: null
+    from: 'not measured: enter the occupants (§325-3B OCCUPANT: in R-2c, every person with the right to occupy)'
+  occupants_most_in_one_unit:
+    value: null
+    from: 'not measured: optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that depends on how the occupants are split)'
+  attached_units_in_building:
+    value: null
+    from: 'not measured: enter the dwelling units in the whole attached building, every lot it stands on'
+  abuts_r1_district:
+    value: null
+    from: 'not measured: say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)'
+  unrelated_persons:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+  unrelated_persons_with_children:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+  owner_occupied:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+  accessory_dwelling_unit:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+  functional_family_unit:
+    value: null
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+  home_occupation:
+    value: null
+    from: 'not measured: say whether a home occupation is planned and, if so, its floor area and its dwelling unit''s (§325-3B HOME OCCUPATION)'
+  home_occupation_area:
+    value: null
+    from: 'not measured: say whether a home occupation is planned and, if so, its floor area and its dwelling unit''s (§325-3B HOME OCCUPATION)'
+  home_occupation_unit_area:
+    value: null
+    from: 'not measured: say whether a home occupation is planned and, if so, its floor area and its dwelling unit''s (§325-3B HOME OCCUPATION)'
+  primary_buildings:
+    value: 1
+    from: 'measured from model.3dm: the main building only: every other solid touches it, is listed as an accessory building, or is too small or low to hold a habitable room'
+  stream_near_lot:
+    value: null
+    from: 'not measured: say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if so, how far the nearest new structure is from it (§325-26)'
+  stream_distance:
+    value: null
+    from: 'not measured: say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if so, how far the nearest new structure is from it (§325-26)'
+  south_hill_overlay:
+    value: null
+    from: 'not measured: say whether the lot is in the South Hill Overlay District (§325-8E, on the City''s zoning map)'
+  primary_buildings_same_use:
+    value: null
+    from: 'not measured: enter the primary buildings on the lot (each separate building holding a home or other permitted primary use, the main one included; not a garage, shed or accessory dwelling unit) and whether every one holds the use entered (§325-8B(1))'
+  front_yard_eaves:
+    value: null
+    from: 'not measured: a building isn''t inside the lot: the building'
+  side_yard_smaller_eaves:
+    value: null
+    from: 'not measured: a building isn''t inside the lot: the building'
+  side_yard_larger_eaves:
+    value: null
+    from: 'not measured: a building isn''t inside the lot: the building'
+  rear_yard_eaves:
+    value: null
+    from: 'not measured: a building isn''t inside the lot: the building'
+  accessory_buildings:
+    value: 0
+    from: 'measured from model.3dm: the solids on the Building layer standing apart from the main building (§325-25)'
+  accessory_front_yard:
+    value: null
+    from: 'not measured: a building isn''t inside the lot: the building'
+  accessory_side_yard:
+    value: null
+    from: 'not measured: a building isn''t inside the lot: the building'
+  accessory_rear_yard:
+    value: null
+    from: 'not measured: a building isn''t inside the lot: the building'
+  accessory_distances_apply:
+    value: null
+    from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'
