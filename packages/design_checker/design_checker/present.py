@@ -1809,7 +1809,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "", "required": "", "margin": "",
                       "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
                       "needs": list(needs),               # exactly what its "Enter …" asks for
-                      "hint": rhino_logic.enter_words(needs), "reason": rhino_logic.needs_reason(needs),
+                      "hint": rhino_logic.answer_words(needs), "reason": rhino_logic.needs_reason(needs),
                       "detail": {"line": "", "quotes": [{"text": " ".join(str(s.get("quote", "")).split()),
                                                          "where": cite(s)} for s in rule.get("sources") or []],
                                  "citation": "", "links": [], "calc": None, "scope": "", "precision": "",

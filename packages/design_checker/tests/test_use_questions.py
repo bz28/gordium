@@ -231,7 +231,7 @@ def test_an_unanswered_fact_says_what_it_needs_and_its_button_opens_its_own_dial
         "Needs bedrooms and parking spaces, which the model doesn't show")
     assert logic.needs_reason([]) is None
     assert logic.row_buttons({"needs": ["dwelling_units", "conversion"]}) == [
-        ("Enter dwelling units and whether it is a conversion…", "enter")]
+        ("Answer 2 questions…", "enter")]           # too long for a button: how many (answer_words)
     assert logic.row_buttons({"needs": ["sleeping_rooms", "parking_spaces"]}) == [
         ("Enter bedrooms and parking spaces…", "enter")]
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")

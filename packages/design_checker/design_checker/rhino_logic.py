@@ -541,7 +541,8 @@ def follow_up_rows(options, zone, use, facts):
 # The words a yes / no question's dropdown offers after "Not answered": (the "no" answer, the "yes" answer)
 YES_NO_WORDS = {"conversion": ("New construction", "Conversion of an existing building")}
 NOT_ANSWERED = "Not answered"
-FOLLOW_UP_HELP = "entered by you; left blank, the rules that need it say so (never read as 0 or no)"
+FOLLOW_UP_HELP = ("Your answers. Leave one blank and the rules that need it say needs review (never read as 0 "
+                  "or No).")      # a sentence, never a fragment (the architect's review, 2026-10-28)
 
 
 def yes_no_words(key):
@@ -715,6 +716,8 @@ def answer_problem(kind, text, key=None):
 # ran ~1,200 px on one line and pushed the box to 1,560-2,020 px: Rhino run of demo 2c0a5c0). Pinned in
 # test_box_width.py, which lays the real box out and bounds its width.
 QUESTION_WIDTH = 360
+ANSWER_WIDTH = 300     # every answer dropdown in a row's dialog one width, lined up ("Conversion of an existing
+                       # building" fits; the architect's review, 2026-10-28)
 
 
 TEXT_PX = 6.0      # px a character at size 12, a little over the system font's (~5.5 measured in Rhino): errs wide
@@ -759,6 +762,20 @@ def _and(words):
 def enter_words(needs):
     """The button's words for a row waiting on `needs`: "Enter bedrooms and parking spaces"."""
     return "Enter " + _and([STATED_FACTS[k][2] for k in needs]) if needs else None
+
+
+def answer_words(needs):
+    """The words on a row's button and its dialog's title: the facts' own words while they fit a button ("Enter
+    bedrooms and parking spaces"); longer, how many ("Answer 4 questions"): the whole list ran to ~25 words and was
+    cut off on the button and in the title bar (the architect's review, 2026-10-28). The dialog lists each question
+    and the row's reason still names them."""
+    if not needs:
+        return None
+    words = enter_words(needs)
+    return words if len(needs) == 1 or len(words) <= BUTTON_WORDS else "Answer %d questions" % len(needs)
+
+
+BUTTON_WORDS = 40       # characters a row's button holds at the panel's width (380-460 px) without being cut off
 
 
 def needs_reason(needs):
@@ -854,7 +871,7 @@ def row_buttons(item):
     units…", action "enter"), then, where a site fact is missing too, Edit site… ("edit_site") as the second."""
     out = []
     if (item or {}).get("needs"):
-        out.append((enter_words(item["needs"]) + "…", "enter"))
+        out.append((answer_words(item["needs"]) + "…", "enter"))
     if site_row(item):
         out.append((SITE_HINT, "edit_site"))
     return out

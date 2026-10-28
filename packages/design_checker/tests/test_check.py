@@ -4332,3 +4332,26 @@ def test_the_label_timing_allowance_follows_the_machine_never_below_the_idle_bou
     assert _load(IDLE_UNIT_S / 2) == 1.0 and _load() == 1.0
     assert _load(IDLE_UNIT_S * 3, IDLE_UNIT_S) == pytest.approx(3.0)
     assert 0 < _label_unit() < 1e-3
+
+
+def test_a_rows_button_and_dialog_say_how_many_questions_when_there_are_several():
+    """The architect's review (2026-10-28): the row dialog's button and title were the whole ~25-word list of facts,
+    cut off on the button and in the title bar. Several facts: "Answer 4 questions…" (the dialog lists each; the
+    reason still names them); one: its own words. The dropdowns are one width, lined up; the note under them is a
+    sentence."""
+    from design_checker import rhino_logic as logic
+    four = ["sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit"]
+    assert all(k in logic.STATED_FACTS for k in four)
+    assert logic.answer_words(four) == "Answer %d questions" % len(four)
+    assert logic.answer_words(["stories"]) == logic.enter_words(["stories"]) == "Enter the number of stories"
+    two = ["sleeping_rooms", "parking_spaces"]                      # short enough: its own words
+    assert logic.answer_words(two) == "Enter bedrooms and parking spaces"
+    assert logic.answer_words([]) is None
+    assert logic.row_buttons({"needs": four})[0] == ("Answer %d questions…" % len(four), "enter")
+    assert logic.needs_reason(four).startswith("Needs ") and len(logic.needs_reason(four)) > 40   # still named
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "ui.row_dialog(logic.answer_words(needs)," in rhino
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    dialog = ui[ui.index("def row_dialog("):ui.index("def ", ui.index("def row_dialog(") + 10)]
+    assert "field.Width = logic.ANSWER_WIDTH" in dialog
+    assert logic.FOLLOW_UP_HELP.startswith("Your answers. ") and logic.FOLLOW_UP_HELP.endswith(".")
