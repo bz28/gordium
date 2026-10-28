@@ -99,6 +99,13 @@ expected:
       or boarders" a multiple dwelling, not permitted in R-2. Whether unrelated housemates are roomers or boarders
       the law doesn't say: a person decides (first worked as complies; changed on reading (3), before comparing)
     cites: "§325-3B DWELLING, TWO-FAMILY (p.9); §325-3B DWELLING, MULTIPLE OR MULTIPLE RESIDENCE (3) (p.7)"
+  R-2b.stream_setback:
+    status: needs_review
+    working: >-
+      §325-26: no new structure nearer than 20 ft to an inlet wall or a stream bank (at average water level), in every
+      district. This site states nothing about a stream or inlet near the lot (no stream_near_lot, no stream_distance),
+      and the model can't show one, so it can't be settled: needs review until the architect says (never assumed)
+    cites: "§325-26 (chapter p.67); §325-3B STRUCTURE (p.19)"
 then:
   move: [-1.5, 0]
   expected:

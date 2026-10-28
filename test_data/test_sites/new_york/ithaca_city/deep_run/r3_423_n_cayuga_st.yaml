@@ -98,3 +98,10 @@ expected:
     values: {row: [1, 2]}       # [unrelated people, R-3's limit] worked by hand
     working: "a family and one unrelated person (children counted: §325-8B(6) excludes minors only in R-1 and R-2): not more than two unrelated individuals in R-3"
     cites: "§325-3B DWELLING, ONE-FAMILY (p.7): In the R-2 and R-3 Zones, ... not more than two unrelated individuals; §325-8B(6)"
+  R-3aa.stream_setback:
+    status: needs_review
+    working: >-
+      §325-26: no new structure nearer than 20 ft to an inlet wall or a stream bank (at average water level), in every
+      district. This site states nothing about a stream or inlet near the lot (no stream_near_lot, no stream_distance),
+      and the model can't show one, so it can't be settled: needs review until the architect says (never assumed)
+    cites: "§325-26 (chapter p.67); §325-3B STRUCTURE (p.19)"
