@@ -169,8 +169,11 @@ def test_every_measured_row_has_its_numbers_worked_by_hand(path):
         s, f, extras = scenarios.site(sc, moved)
         view = check_site(s, f, extras=extras)["view"]
         for i in view["items"]:
+            # R-1a's occupancy row shows the rule's first limit (1 unrelated person), which this design meets; the
+            # law's limit for an owner-occupied R-1 house is 2 (§325-3B DWELLING, ONE-FAMILY), so a hand-worked
+            # [1, 2] can't be compared with the display: its count is checked through the status only
             if i.get("rule") in expected and scenarios.number(i.get("proposed")) and \
-                    i["rule"] not in ("R-2b.occupancy_two_family", "R-3aa.occupancy_one_family", "R-1a.occupancy_one_family"):
+                    i["rule"] != "R-1a.occupancy_one_family":
                 name = (i.get("id") or "").partition("#")[2] or "row"
                 assert name in (expected[i["rule"]].get("values") or {}), (path.stem, moved, i["id"])
 
@@ -189,7 +192,8 @@ def test_a_house_off_by_feet_on_a_wide_margin_is_caught():
 
 def test_displayed_values_read_back_as_numbers():
     assert scenarios.number("29'-11 5/8\"") == (29 + 11.625 / 12, 0.125 / 12)
-    assert scenarios.number("12,990 sf") == (12990.0, 1.0) and scenarios.number("18.8%") == (18.8, 0.05)
+    assert scenarios.number("12,990 sf") == (12990.0, 1.0) and scenarios.number("18.8%") == (18.8, 0.1)
+    assert scenarios.number("-0'-6\"") == (-0.5, 0.125 / 12) and scenarios.number("-1'-6\"")[0] == -1.5
     assert scenarios.number("3") == (3.0, 0.0) and scenarios.number("—") is None
 
 
@@ -203,5 +207,14 @@ def test_the_light_run_nudge_claims_its_distance_and_numbers():
     ns = {}
     exec(compile(ast.Module([fn], []), "feet", "exec"), ns)
     assert ns["feet"]("22'-0 1/8\"") == 22 + 0.125 / 12 and ns["feet"]("25'-0\"") == 25 and ns["feet"]("—") is None
+    assert ns["feet"]("-0'-6\"") == -0.5
     assert 'abs(now - nudge["proposed_ft"]) <= 0.1' in src
     assert 'abs(a - nudge["proposed_ft"])' in src and 'abs(b - nudge["required_ft"])' in src
+
+
+def test_a_percent_rounded_up_one_step_still_matches():
+    """Gordium rounds a proposed percent up (cautious): 18.71% shows as 18.8%, which must still match 18.71."""
+    rows = [{"id": "X.lot_coverage", "proposed": "18.8%", "required": "20%"}]
+    assert scenarios.values_problems(rows, {"row": [18.71, 20]}) == []
+    assert scenarios.values_problems(rows, {"row": [18.6, 20]})            # two steps off is a mismatch
+    assert scenarios.number("19.95%") == (19.95, 0.01) and scenarios.number("20%") == (20.0, 0.0)

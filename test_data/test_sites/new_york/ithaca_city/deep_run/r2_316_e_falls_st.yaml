@@ -91,6 +91,7 @@ expected:
     cites: "chart p.14, Minimum Parking Requirement, Residential, R-2B (first three bed or sleeping rooms per dwelling unit: 1 space per dwelling unit)"
   R-2b.occupancy_two_family:
     status: needs_review
+    values: {row: [2, 2]}       # [most unrelated people in either unit, R-2's limit per unit] worked by hand
     working: >-
       each unit's own limit is met: the most unrelated people in either unit is 2, and R-2 allows "not more than two
       unrelated individuals" per unit. But with two unrelated people in each unit the building can hold four, and

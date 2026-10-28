@@ -107,21 +107,24 @@ def rule_rows(view: dict, key: str) -> list[dict]:
     return [i for i in view["items"] if i.get("rule") == key or i.get("id") == key]
 
 
-_FT_IN = re.compile(r"^(-?\d+)'-(\d+)(?: (\d+)/(\d+))?\"$")
+_FT_IN = re.compile(r"^(-?)(\d+)'-(\d+)(?: (\d+)/(\d+))?\"$")
 
 
 def number(shown: str | None) -> tuple[float, float] | None:
     """A displayed value as (number, how far the display may be from the true value): feet-inches to 1/8 in, square
-    feet to the whole foot, percents to one decimal, counts exactly. None when it isn't a number."""
+    feet to the whole foot, a percent with decimals to one step of its places (Gordium rounds it toward caution, so
+    up or down), a whole percent (the law's own figure) and counts exactly. A minus sign belongs to the whole length
+    (-0'-6" is -0.5 ft). None when it isn't a number."""
     t = (shown or "").strip()
     m = _FT_IN.match(t)
     if m:
-        ft, inch = int(m[1]), int(m[2]) + (int(m[3]) / int(m[4]) if m[3] else 0)
-        return ft + inch / 12, 0.125 / 12
+        ft, inch = int(m[2]), int(m[3]) + (int(m[4]) / int(m[5]) if m[4] else 0)
+        return (-1 if m[1] else 1) * (ft + inch / 12), 0.125 / 12
     if t.endswith(" sf"):
         return float(t[:-3].replace(",", "")), 1.0
     if t.endswith("%"):
-        return float(t[:-1]), 0.05
+        places = len(t[:-1].partition(".")[2])
+        return float(t[:-1]), (10.0 ** -places if places else 0.0)  # a step of the places shown; whole = exact
     return (float(t), 0.0) if re.fullmatch(r"\d+", t) else None
 
 

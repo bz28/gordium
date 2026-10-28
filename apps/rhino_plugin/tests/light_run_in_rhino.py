@@ -106,12 +106,13 @@ def toward_street(doc, g, facts):
 
 
 def feet(shown):
-    """A displayed length (12'-3 1/8") in feet, or None."""
+    """A displayed length (12'-3 1/8") in feet, or None; a minus sign belongs to the whole length (-0'-6" = -0.5)."""
     import re
-    m = re.match(r"^(-?\d+)'-(\d+)(?: (\d+)/(\d+))?\"$", (shown or "").strip())
+    m = re.match(r"^(-?)(\d+)'-(\d+)(?: (\d+)/(\d+))?\"$", (shown or "").strip())
     if not m:
         return None
-    return int(m.group(1)) + (int(m.group(2)) + (int(m.group(3)) / float(m.group(4)) if m.group(3) else 0)) / 12.0
+    ft = int(m.group(2)) + (int(m.group(3)) + (int(m.group(4)) / float(m.group(5)) if m.group(4) else 0)) / 12.0
+    return -ft if m.group(1) else ft
 
 
 def one_site(g, docs, district, site):

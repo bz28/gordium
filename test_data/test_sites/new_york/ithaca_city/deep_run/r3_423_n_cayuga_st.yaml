@@ -95,5 +95,6 @@ expected:
     cites: "chart p.14, Minimum Parking Requirement, Residential, R-3AA"
   R-3aa.occupancy_one_family:
     status: complies
+    values: {row: [1, 2]}       # [unrelated people, R-3's limit] worked by hand
     working: "a family and one unrelated person (children counted: §325-8B(6) excludes minors only in R-1 and R-2): not more than two unrelated individuals in R-3"
     cites: "§325-3B DWELLING, ONE-FAMILY (p.7): In the R-2 and R-3 Zones, ... not more than two unrelated individuals; §325-8B(6)"
