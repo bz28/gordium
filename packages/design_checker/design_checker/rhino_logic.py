@@ -391,12 +391,6 @@ def is_use_detail(item, facts=None):
             and not str(item.get("id") or "").startswith("facts.conflict"))
 
 
-def answered_in_box(needs):
-    """Whether a row's missing facts are all ones the box asks (its button then opens the box, Edit site…, to answer
-    them there: Ben, 2026-10-25, "a link to answer in the box, not a pop-up")."""
-    return bool(needs) and all(k in BOX_ASKS for k in needs)
-
-
 # What a use itself says about a fact, from the City's own definitions, so it is never asked (Ben, 2026-10-25):
 # §325-3 "DWELLING, ONE-FAMILY — A dwelling unit…" (chapter p.7) and "DWELLING, TWO-FAMILY — A building containing two
 # dwelling units…" (p.9). Exactly these uses: a semi-detached or attached one-family dwelling is one unit of a
@@ -580,21 +574,85 @@ def box_needs_refresh(options, shown, now):
     return layout(*shown) != layout(*now)
 
 
-def answers_applied(facts, answers, zone, use, options):
-    """The facts after the box: every fact the box can ask (BOX_ASKS) is set only from what this district's rules
-    need for this use: the architect's answer to each question asked (a blank or a refused entry: unset, so its
-    rules need review, never 0 or no), and what the use itself says for the facts its rules read (implied_by).
-    Anything else goes: an answer given for another use or district never stays behind (a multiple dwelling's 5
-    units checked as a two-family's). Returns (facts, the keys the architect answered)."""
-    asked = follow_up_keys(options, zone, use, answers or {})
-    given = {k: v for k, v in (answers or {}).items() if k in asked and v is not None}
-    out = {k: v for k, v in (facts or {}).items() if k not in BOX_ASKS}
-    read = (((options or {}).get("follow_ups") or {}).get(zone) or {}).get(use)
-    if read is not None:           # a use detail answered for another district or use never stays behind (it would
-        keep = set(read) | {b for pair in CHECKED_TOGETHER if set(pair) & set(read) for b in pair}
-        out = {k: v for k, v in out.items() if k not in DEFERRED_FACTS or k in keep}   # decide this one's rules)
-    out.update(implied_by(options, zone, use))
-    return update_counts(out, given), sorted(given)
+def answers_applied(facts, answers, zone, use, options, track=None):
+    """The facts after the box (box_applied) and the keys the architect answered in it with a value. `track`: what
+    the box knows this session (box_track); without it, from the facts alone."""
+    out, after = box_applied(facts, answers, zone, use, options, track if track is not None else box_track(facts))
+    shown = [k for k in (answers or {}) if k in BOX_ASKS and k not in after["said"]]
+    return out, sorted(k for k in shown if out.get(k) is not None)
+
+
+def box_track(facts, sources=None):
+    """What the box carries across its picks (session only, saved_ui["_answers"]): "said", the facts whose stored
+    value the use itself said (their saved source is IMPLIED_SOURCE; with no sources, those equal to what the facts'
+    use says: implied_facts); "held", an architect's answer set aside while a use says that fact instead; "typed", the
+    facts the architect answered in the box this session (each saved "entered by you" at Draw: typed_sources)."""
+    facts = facts or {}
+    if sources is None:
+        said = [k for k, v in implied_facts(facts.get("use")).items()
+                if k in BOX_ASKS and facts.get(k) == v and type(facts.get(k)) is type(v)]
+    else:
+        said = [k for k in BOX_ASKS if facts.get(k) is not None
+                and ((sources or {}).get(k) or {}).get("source") == IMPLIED_SOURCE]
+    return {"said": said, "held": {}, "typed": []}
+
+
+def box_applied(facts, answers, zone, use, options, track):
+    """The facts after the box, which changes only what it shows (Rhino runs, 2026-10-28, P0s: a Use or district
+    picked and picked back blanked every answer, or brought back an older one). Returns (facts, track).
+    1. Each field the box showed (a BOX_ASKS key in `answers`, laid out for the use the box opened with: None when
+       blank) is set from its answer, or unset when blank or refused (its rules need review, never 0 or no), whatever
+       the use picked now: what was typed is never dropped nor replaced by an older answer.
+    2. A fact the old use said (track "said": by its source, never by its value) goes when the new use doesn't say
+       it, and the architect's own answer set aside for it ("held") comes back: a two-family's 2 units are never read
+       as a multiple dwelling's count, and a semi-detached pair's typed 2 survives a look at two-family.
+    3. What the new use says for the facts its rules read (implied_by) is set; an architect's answer there is held.
+    4. A fact asked only after another's yes (ASKED_AFTER) goes when that question is answered no in the box: it no
+       longer applies (a blank keeps it: nothing contradicts it, and its rule needs review either way).
+    Every other fact stays as stored, never read unshown: any fact this district's rules read for this use is asked
+    (follow_up_keys) and shown with its value when the box opens laid out for it (box_needs_refresh). A fact asked
+    only after another's yes (ASKED_AFTER: a stream's distance) is read only by rules gated by that yes. The use
+    details (DEFERRED_FACTS, answered in the panel's row dialog, never in the box) stay as stored whatever the use or
+    district: where the new use's rules don't read one it decides nothing, and where they do it is the architect's
+    answer, shown in its row; so the facts checked together (CHECKED_TOGETHER) always stay together, and a
+    contradiction between them is never hidden by dropping half of it."""
+    now = implied_by(options, zone, use)
+    out = dict(facts or {})
+    said, held = list((track or {}).get("said") or []), dict((track or {}).get("held") or {})
+    typed = list((track or {}).get("typed") or [])
+    given = {}
+    for k, v in (answers or {}).items():
+        if k not in BOX_ASKS:
+            continue
+        out.pop(k, None)
+        held.pop(k, None)
+        said = [x for x in said if x != k]
+        typed = typed + [k] if k not in typed else typed
+        if v is not None:
+            given[k] = v
+    out = update_counts(out, given)
+    for k, gate in ASKED_AFTER.items():   # "no" said in the box to the question it waits on: moot, so it goes (#45: a
+        if given.get(gate) is False:      # stream's old 5 ft beside a new "no stream within 20 ft" would make the
+            out.pop(k, None)              # facts disagree)
+    for k in [k for k in said if k not in now]:
+        out.pop(k, None)
+        said.remove(k)
+        if k in held:
+            out[k] = held.pop(k)
+    for k, v in now.items():
+        if k not in said and out.get(k) is not None:
+            held[k] = out[k]
+        out[k] = v
+        said = said + [k] if k not in said else said
+    return out, {"said": said, "held": held, "typed": typed}
+
+
+def typed_sources(sources, track, facts, day):
+    """The sources after Draw for the facts the architect answered in the box this session (track "typed"), shown
+    or not by then: each set "entered by you" with its value now, each unset with no source (row_sources); what a
+    use says keeps the use's (fact_sources)."""
+    return row_sources(sources, [k for k in (track or {}).get("typed") or [] if k not in (track or {}).get("said", [])],
+                       facts, day)
 
 
 def implied_by(options, zone, use):
@@ -689,15 +747,108 @@ def enter_words(needs):
 
 
 def needs_reason(needs):
-    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show". Facts the start
-    box asks (answered_in_box) say where to answer them (Ben, 2026-10-25: in the box, not a pop-up): "Tell Gordium
-    the dwelling units (Edit site…): the model doesn't show them"."""
+    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show" (its button,
+    enter_words, asks exactly those in a small dialog: row_fields)."""
     if not needs:
         return None
-    if answered_in_box(needs):
-        return "Tell Gordium the " + _and([STATED_FACTS[k][2] for k in needs]) + " (Edit site…): the model doesn't " \
-            "show them"
     return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show"
+
+
+# ---- a row's own dialog (coordinator, 2026-10-28, agreed with Ben): the row's "Enter …" button asks only the
+# stated facts that row waits for (its `needs`), in a small modal dialog; OK saves exactly those, each "entered by
+# you" with the day, as one Undo step, and checks again; Cancel, Esc or closing it changes nothing. It never touches
+# the address, the lookup, the district, the use, the lot, the street side or any other fact: those stay in the
+# start box (Edit site…), whose follow-up questions read the same facts, so an answer given here shows there.
+
+SITE_HINT = "Edit site…"            # a row whose missing fact comes from the site (present.py's hint for it)
+SITE_ASKS = ("Corner lot?",)        # the start box's own question a measuring's reason names (stops.py)
+
+
+def row_fields(needs, facts):
+    """The dialog's questions for a row waiting on `needs`, in the row's order: each {"key", "label", "kind"
+    (count / yes_no), "value" (as saved, or None)}. Only stated facts (STATED_FACTS): never a site fact."""
+    return [{"key": k, "label": STATED_FACTS[k][0], "kind": STATED_FACTS[k][1], "value": (facts or {}).get(k)}
+            for k in needs or [] if k in STATED_FACTS]
+
+
+def row_choice(value):
+    """A yes / no question's dropdown index for a saved value: Not answered (0), the no answer (1), the yes (2)."""
+    return {None: 0, False: 1, True: 2}[value]
+
+
+def row_choice_text(index):
+    """A yes / no dropdown's pick as parse_answer reads it: Not answered is blank (never no)."""
+    return {1: "no", 2: "yes"}.get(index, "")
+
+
+def row_answers_applied(facts, needs, answers):
+    """The facts after OK in a row's dialog: each key in `needs` set from its answer (`answers`: key -> the text
+    typed, or "yes" / "no" / "" from a dropdown: row_choice_text); a blank (or missing) answer leaves that fact unset,
+    so its rules need review (never 0 or no). Every other key is exactly as it was. Any entry that isn't an answer
+    raises ValueError with words for the dialog, and nothing changes."""
+    out = dict(facts or {})
+    bad = []
+    for k in [k for k in needs or [] if k in STATED_FACTS]:
+        try:
+            value = parse_answer(STATED_FACTS[k][1], (answers or {}).get(k), k)
+        except ValueError as e:
+            bad.append(f"{STATED_FACTS[k][0]}: {e}")
+            continue
+        if value is None:
+            out.pop(k, None)
+        else:
+            out[k] = value
+    if bad:
+        raise ValueError("Not saved. " + "; ".join(bad) + ". Correct it, or leave it blank (it then needs review).")
+    return out
+
+
+def row_problem(facts, needs, answers):
+    """What the row's dialog says at OK when an entry isn't an answer (row_answers_applied's words; it stays open
+    and nothing is saved), or None when OK may close it."""
+    try:
+        row_answers_applied(facts, needs, answers)
+    except ValueError as e:
+        return str(e)
+    return None
+
+
+def row_sources(sources, needs, facts, day):
+    """The saved sources after OK in a row's dialog: each fact in `needs` that is set, "entered by you" on `day`;
+    one left blank, none (an unset fact has no source). Every other source is exactly as it was."""
+    out = dict(sources or {})
+    for k in [k for k in needs or [] if k in STATED_FACTS]:
+        v = (facts or {}).get(k)
+        if v is None:
+            out.pop(k, None)
+        else:
+            out[k] = {"value": {True: "yes", False: "no"}.get(v, v) if isinstance(v, bool) else v,
+                      "source": ENTERED, "confirmed_by": "you", "date": day}
+    return out
+
+
+def site_row(item):
+    """Whether a row waits on a site fact (address, lot, district, street side, corner lot): only the start box
+    gives those, so the row keeps its Edit site… button."""
+    item = item or {}
+    return item.get("hint") == SITE_HINT or any(q in (item.get("reason") or "") for q in SITE_ASKS)
+
+
+def row_buttons(item):
+    """A row's buttons, as (words, action): its own dialog for the stated facts it waits on ("Enter dwelling
+    units…", action "enter"), then, where a site fact is missing too, Edit site… ("edit_site") as the second."""
+    out = []
+    if (item or {}).get("needs"):
+        out.append((enter_words(item["needs"]) + "…", "enter"))
+    if site_row(item):
+        out.append((SITE_HINT, "edit_site"))
+    return out
+
+
+def box_answers(options, zone, use, facts):
+    """What the start box's follow-up questions show as answered: read from the saved facts themselves (the box
+    keeps no copy of its own), so an answer given in a row's dialog shows in the box and Draw sets it again."""
+    return {k: (facts or {}).get(k) for k in follow_up_keys(options, zone, use)}
 
 
 def update_counts(facts, answers):
@@ -2864,6 +3015,81 @@ def can_draw(state):
     return draw_reason(state) == ""
 
 
+START_KEY = "gordium:start"          # on each floor block GordiumStart drew: how it was drawn (start_tag), for Switch
+SWITCH_LABEL = "Switch side yards"
+SIDE_YARDS_SAID = "Side yards: "       # how the starting house's note names the larger side yard's side (check.side_words)
+
+
+def start_tag(start, story, floor_to_floor, design_buffer):
+    """What a floor block of the starting house carries (START_KEY), so Switch side yards can redraw the house as it
+    was asked for and tell whether it is still as drawn: its floor (outline, base, top, in feet), where the larger
+    side yard is ("left" or "right", seen from the street; None when the zone's side yards are the same), and the
+    floor-to-floor height and design buffer it was drawn with."""
+    floor = start["floors"][story]
+    split = start.get("side_split") or {}
+    ring = floor["outline"]
+    area = abs(sum(ring[i - 1][0] * ring[i][1] - ring[i][0] * ring[i - 1][1] for i in range(len(ring)))) / 2
+    return json.dumps({"volume": area * (floor["top"] - floor["base"]), "story": story, "stories": len(start["floors"]), "outline": floor["outline"],
+                       "base": floor["base"], "top": floor["top"], "larger_side": split.get("larger_side"), "floor_to_floor": floor_to_floor,
+                       "design_buffer": design_buffer or 0.0})
+
+
+def can_switch(source_line):
+    """The panel's Switch side yards button goes under the Starting house site fact when the house has one larger
+    side yard (its note says which side)."""
+    return bool(source_line) and source_line.startswith("Starting house") and SIDE_YARDS_SAID in source_line
+
+
+def _start_record(text):
+    """One floor's START_KEY record (start_tag), or None when it can't be read (one record, not a JSON-lines file)."""
+    try:
+        tag = json.loads(text)
+    except (TypeError, ValueError):
+        return None
+    return tag if isinstance(tag, dict) and {"outline", "base", "top"} <= set(tag) else None
+
+
+def switch_plan(found, tolerance=0.01):
+    """What Switch side yards does with the starting house's floor blocks found in the model, each (its START_KEY
+    text, its bounding box in feet: (x0, y0, z0), (x1, y1, z1), its volume in cubic feet or None, and whether it is
+    locked or hidden, itself or by its layer): {"larger_side": the other side, "floor_to_floor",
+    "design_buffer"} to redraw it, or {"refused": why} when there is nothing to switch, or the house is no longer as
+    Gordium drew it (moved, stretched, a floor deleted): the architect's edits are never thrown away."""
+    if not found:
+        return {"refused": "There is no starting house in this file to switch (GordiumStart draws one)."}
+    tags = []
+    if any(len(f) > 3 and f[3] for f in found):     # the architect's lock is kept: nothing deleted from under it
+        return {"refused": "The starting house is locked or hidden (itself or its layer), so it isn't redrawn. "
+                           "Unlock and show it, then press " + SWITCH_LABEL + " again."}
+    for text, (low, high), volume, *_ in found:
+        tag = _start_record(text)
+        if tag is None:
+            return {"refused": "The starting house's record can't be read, so it isn't redrawn."}
+        xs, ys = [p[0] for p in tag["outline"]], [p[1] for p in tag["outline"]]
+        want = (min(xs), min(ys), tag["base"]), (max(xs), max(ys), tag["top"])
+        same_box = all(abs(a - b) <= tolerance for a, b in zip(want[0] + want[1], tuple(low) + tuple(high)))
+        # the same box but a different solid (a notch, a chamfered corner): changed too (review round 1, F5b)
+        same_solid = volume is not None and tag.get("volume") is not None and \
+            abs(volume - tag["volume"]) <= 1e-6 * tag["volume"] + 1e-4   # a box measures exactly (round 2, F2)
+        if not (same_box and same_solid):
+            return {"refused": "The starting house has changed since Gordium drew it, so it isn't redrawn (your "
+                               "edits are kept). Delete it and run GordiumStart for a new one."}
+        tags.append(tag)
+    if sorted(t.get("story", -1) for t in tags) != list(range(tags[0].get("stories") or 0)):
+        return {"refused": "The starting house has changed since Gordium drew it (a floor is missing or added), so "
+                           "it isn't redrawn (your edits are kept). Delete it and run GordiumStart for a new one."}
+    sides = {t.get("larger_side") for t in tags}
+    inputs = {(t.get("floor_to_floor"), t.get("design_buffer")) for t in tags}
+    if len(sides) != 1 or len(inputs) != 1:
+        return {"refused": "The starting house's floors weren't drawn together, so it isn't redrawn."}
+    side = sides.pop()
+    if side not in ("left", "right"):
+        return {"refused": "This district's side yards are the same on both sides: there is nothing to switch."}
+    floor_to_floor, buffer = inputs.pop()
+    return {"larger_side": "right" if side == "left" else "left", "floor_to_floor": floor_to_floor,
+            "design_buffer": buffer or 0.0}
+
+
 def starting_house_fact(note, today):
     """The site fact for how far the starting house keeps back from the limits: Gordium's own figure, so never
     "confirmed by you" (the architect didn't confirm it). None when no house was drawn (`note` None)."""
@@ -2963,19 +3189,22 @@ def fact_sources(state, today, confirmed):
 
 def follow_up_sources(state, fact):
     """The sources of the facts the box sets after Use (answers_applied's): each answer to a question asked,
-    "entered by you", and each fact the use says, IMPLIED_SOURCE."""
+    "entered by you", and each fact the use says, IMPLIED_SOURCE. An answer kept but not asked keeps its saved
+    source (sources_kept)."""
     zone, use, options = state.get("zone"), state.get("use"), state.get("options")
     facts, answered = answers_applied({}, state.get("answers"), zone, use, options)
     return {k: fact({True: "yes", False: "no"}.get(v, v), ENTERED if k in answered else IMPLIED_SOURCE)
             for k, v in facts.items()}
 
 
-def sources_kept(saved):
-    """The saved sources Draw keeps before adding the box's own: never an earlier follow-up answer (a fact the box
-    asks), which Draw sets again or drops with its fact (fact_sources), nor a use detail's (DEFERRED_FACTS: a rooms
-    let for profit answered in the box before it became one keeps its value, but its "entered by you" line would go
-    stale or outlive its fact, since the panel's Enter flow, which answers it now, sets no source)."""
-    return {k: v for k, v in (saved or {}).items() if k not in BOX_ASKS + DEFERRED_FACTS}
+def sources_kept(saved, facts):
+    """The saved sources Draw keeps before adding the box's own (fact_sources): of the facts the box can ask (BOX_ASKS)
+    and the use details (DEFERRED_FACTS, answered in the panel's row dialog, which saves their "entered by you":
+    row_sources), only those still set in `facts` (the facts after Draw: an answer kept, unshown, keeps its source);
+    a fact Draw unset or dropped (a blank, what the old use said) loses its source with it. Those Draw asks or the use
+    says are given their source again by fact_sources."""
+    return {k: v for k, v in (saved or {}).items()
+            if k not in BOX_ASKS + DEFERRED_FACTS or (facts or {}).get(k) is not None}
 
 
 def district_confirmed(mode, zone_fact, zone):
@@ -3241,6 +3470,19 @@ def controls_enabled(box_open, zoom_ok):
     between, after a document switch: verification round 4 of PR #19). Zoom to also needs a selected, current item
     (`zoom_ok`, as gordium_ui.show decides it)."""
     return (not box_open, (not box_open) and bool(zoom_ok))
+
+
+def zoom_state(selected_ok, stale, box_open):
+    """(Zoom to on or off, its tooltip saying why when off): on only for a selected, current item with no start box
+    open. Worked out every time the selection, the results or the box change (UX review 2026-10-27: selecting a row
+    left it greyed until the panel next redrew, with nothing saying why)."""
+    if box_open:
+        return False, "Close the start box first."
+    if not selected_ok:
+        return False, "Select a row to zoom to it."
+    if stale:
+        return False, "Out of date: press Check, then zoom."
+    return True, "Zoom to the selected item (or double-click its row)."
 
 
 def last_check_at(checked_at, document):

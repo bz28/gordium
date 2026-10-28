@@ -44,7 +44,18 @@ S = os.path.join(tempfile.gettempdir(), "gordium_offending") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 os.makedirs(S + "frames", exist_ok=True)
 log = {"claims": {}}
-SIDE = "Side yard, Southwest"          # the sample's left side yard, seen from the street
+# the sample's left side yard, seen from the street: found by what it measures, the narrower side yard. Its row is
+# named "Side yard, Southwest", or "Side yard, narrower" where the readings differ on which side is narrower (#18's
+# readings of 106 do with the cantilever); a script looking for one name missed the other (demo 2c0a5c0 run).
+SIDE_MEASURE = "side_yard_smaller"
+
+
+def side_row(g, items):
+    """The left side yard's row name and item: the row of the pieces drawn for the narrower side yard (else the row
+    named for the southwest side, as before #18)."""
+    rows = [info.get("row") for _, _, info in g.overlay().encroach if info.get("measure") == SIDE_MEASURE]
+    name = next((r for r in rows if r in items), "Side yard, Southwest")
+    return name, items.get(name) or {}
 
 
 def claim(name, ok, detail=None):
@@ -155,7 +166,8 @@ try:
     out = 6 * k
     items = scene("1", [(x0, z0), (x1, z0), (x1, z0 + 20 * k), (x0 - out, z0 + 20 * k), (x0 - out, z0 + 10 * k),
                         (x0, z0 + 10 * k)])
-    side = items.get(SIDE) or {}
+    SIDE, side = side_row(g, items)
+    log["1"]["side_row"] = SIDE
     claim("1 the left side yard needs review (to the wall it complies, to the cantilever not)",
           side.get("status") == "needs_review", side)
     mine = {s for _, s, info in g.overlay().encroach if info.get("row") == SIDE}
@@ -174,7 +186,8 @@ try:
     out = 4 * k
     items = scene("2", [(x0, z0), (x1, z0), (x1, z0 + 20 * k), (x0 - out, z0 + 20 * k), (x0 - out, z0 + 10 * k),
                         (x0, z0 + 10 * k)], dx=-5 * k)
-    side = items.get(SIDE) or {}
+    SIDE, side = side_row(g, items)
+    log["2"]["side_row"] = SIDE
     claim("2 the left side yard does not comply", side.get("status") == "does_not_comply", side)
     mine = {s for _, s, info in g.overlay().encroach if info.get("row") == SIDE}
     claim("2 red and amber both drawn for it", mine == {"does_not_comply", "needs_review"}, sorted(mine))

@@ -231,19 +231,19 @@ def test_floor_areas_are_typed_square_feet_not_a_yes_no():
 
 # ---- review round 1 (two Opus sceptics + a cold reviewer): pins that fail on revert ---------------------------------
 
-def test_a_use_detail_answered_for_another_district_or_use_never_stays_behind(options):
-    """Sceptic 2: deferred facts left the box, so answers_applied kept them for ever; an R-1b household answer would
-    decide an R-3b rule. Now only the ones the new district's and use's rules read are kept."""
+def test_a_use_detail_stays_as_answered_whatever_the_district_or_use(options):
+    """Use details are facts about the building (who lives there, a home business), the same whatever district or use
+    is picked; the box never shows them, so it never changes them (coordinator, 2026-10-28: no answer is ever lost on a
+    Use or district pick and back). Where the new district's rules don't read one, it decides nothing (#45's drop of
+    those lost the answer and protected no row); where they do, it is the architect's own answer, shown with its
+    source. The counts checked together stay together, so a contradiction is never hidden by dropping half of it."""
     facts = {"unrelated_persons": 3, "occupants": 4, "home_occupation": False}
-    kept, _ = logic.answers_applied(facts, {}, "R-1b", "one_family_detached", options)
-    assert kept == {"unrelated_persons": 3, "home_occupation": False}      # R-1b reads these two, not occupants
-    r2c, _ = logic.answers_applied(facts, {}, "R-2c", "one_family_detached", options)
-    assert r2c == facts                                                      # R-2c reads all three
-    r3b, _ = logic.answers_applied(facts, {}, "R-3b", "one_family_detached", options)
-    # (occupants is not read in R-3b; unrelated_persons stays only as the partner of the count R-3b does read)
-    assert "occupants" not in r3b and r3b == {"unrelated_persons": 3, "home_occupation": False}
-    r3b_two, _ = logic.answers_applied({"occupants": 4}, {}, "R-3b", "one_family_detached", options)
-    assert r3b_two == {}
+    for zone in ("R-1b", "R-2c", "R-3b"):
+        kept, _ = logic.answers_applied(facts, {}, zone, "one_family_detached", options)
+        assert kept == facts, zone
+    there, _ = logic.answers_applied(facts, {}, "R-3b", "one_family_detached", options)
+    back, _ = logic.answers_applied(there, {}, "R-1b", "one_family_detached", options)
+    assert back == facts
 
 
 def test_facts_that_disagree_are_not_filed_as_use_details_to_answer():

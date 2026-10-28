@@ -997,6 +997,63 @@ def _dim_label(i: dict) -> str:
             (" (approx.)" if i.get("approx") else ""))
 
 
+ORDINALS = {1: "1st", 2: "2nd", 3: "3rd"}
+ON_WALL_FT = 0.01                    # a closest point this near the ground floor's outline is on its wall
+
+
+def measured_to(points: list, solids: list, footprint) -> str:
+    """What a yard's dimension is measured to, when it is not the ground-floor wall: "2nd-floor overhang", or
+    "a part above the ground floor" when no floor level names it (a bay, eaves, a sloped underside). "" for the
+    ground-floor wall (today's plain label) and whenever it can't be told. Labelling only: the yard is measured "from
+    the ground upward", to its least distance (§325-3 Yard), so the number and its pass or fail never change.
+    `points`: the yard's measured closest points (one on the building seen from above, one on the lot line);
+    `solids`: (building, its projection) pairs; the ground floor is every horizontal face at the lowest level."""
+    from shapely.geometry import Point, Polygon
+    from shapely.ops import unary_union
+    if not points or len(points) < 2 or footprint is None or footprint.is_empty or not solids:
+        return ""
+    from shapely.geometry import LineString
+    ends = [Point(p[:2]) for p in points]
+    house = min(ends, key=lambda q: footprint.boundary.distance(q))
+    lot_end = ends[1] if house is ends[0] else ends[0]
+    dx, dy = house.x - lot_end.x, house.y - lot_end.y
+    length = (dx * dx + dy * dy) ** 0.5
+    if length < 1e-9:
+        return ""
+    far = 1e4 / length               # the lot line here: square to the dimension through its lot end
+    line = LineString([(lot_end.x - dy * far, lot_end.y + dx * far), (lot_end.x + dy * far, lot_end.y - dx * far)])
+    flats = []                       # (z, outline) of every horizontal face
+    for b, _ in solids:
+        for f in b["faces"]:
+            zs = [p[2] for p in f["points"]]
+            if len(zs) >= 3 and max(zs) - min(zs) < 1e-6:
+                poly = Polygon([tuple(p[:2]) for p in f["points"]]).buffer(0)
+                if poly.area > 1e-9:
+                    flats.append((zs[0], poly))
+    if not flats:
+        return ""
+    bottom = min(z for z, _ in flats)
+    ground = unary_union([poly for z, poly in flats if z - bottom < 1e-6])
+    if ground.is_empty or ground.distance(line) - length <= ON_WALL_FT:
+        return ""                   # the ground floor's wall is as near: today's plain label
+    levels = sorted({round(min(p[2] for f in b["faces"] for p in f["points"]), 4) for b, _ in solids})
+    starts = sorted(z for z, poly in flats if z - bottom >= 1e-6 and poly.boundary.distance(house) <= ON_WALL_FT)
+    if starts and len(levels) > 1 and round(starts[0], 4) in levels:
+        n = levels.index(round(starts[0], 4)) + 1
+        return f"{ORDINALS.get(n, str(n) + 'th')}-floor overhang"
+    return "a part above the ground floor"
+
+
+def number_to(number: str, proposed: str, what: str) -> str:
+    """The drawn number with what it is measured to (measured_to), the number itself unchanged: "22'-0\" (to 2nd-floor
+    overhang)"; a range (the yard read two ways, the open question of walls or overhangs) names its nearer end, the
+    one measured to the overhang: "? 27'-0\" (to 2nd-floor overhang) to 30'-0\"". `what` "": `number` as it is."""
+    if not what or proposed not in number:
+        return number
+    low, sep, high = proposed.partition(" to ")
+    return number.replace(proposed, low + f" (to {what})" + (sep + high if sep else ""))
+
+
 def required_lines(points: list, item: dict, edges: list) -> tuple[list, str | None]:
     """The yard's required line(s) across its dimension, and why there is none: one at its limit (`limit_ft`), or,
     when the limit depends on an open measurement (the lot depth, on the tax map), one at each end of its range
@@ -1295,7 +1352,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                       "label": _dim_label(i) + (f" · no required line: {why}" if why else ""),
                       "required_lines": candidates[0]["required_lines"], "required_why": why,
                       # on the drawing: its number only, the "min" tags only where it fails or needs review
-                      "number": logic.dim_number(i["mark"], i["proposed"], i["status"]),
+                      "number": number_to(logic.dim_number(i["mark"], i["proposed"], i["status"]), i["proposed"],
+                                          measured_to(i["points"], solids, footprint)),
                       "required_tags": required_tags(i) if i["status"] in (present.FAILS, present.REVIEW) else [],
                       "candidates": candidates})
     encroach = []
@@ -1413,10 +1471,29 @@ def limit_words(out, lot_area):
     if out.get("limited_by") == "coverage" and out.get("coverage_allowed") and lot_area:
         return "lot coverage " + present._pct(out["coverage_allowed"] / lot_area * 100, "down", 2)
     yards = out.get("yards") or {}
+    split = out.get("side_split")
+    sides = ("sides " + ft(split["larger"]) + " and " + ft(split["smaller"])) if split else \
+        ("sides " + ft(yards.get("side", 0)))
     if yards:
-        return ("the yards (front " + ft(yards.get("front", 0)) + ", sides " + ft(yards.get("side", 0)) + ", rear " +
-                ft(yards.get("rear", 0)) + ")")
+        return "the yards (front " + ft(yards.get("front", 0)) + ", " + sides + ", rear " + ft(yards.get("rear", 0)) + ")"
     return "the yards"
+
+
+def side_words(split, plan_north_deg=0.0):
+    """Which side the larger side yard is on, in the architect's words, seen from the street, each side with its
+    true compass point: 'Side yards: 10'-0" on the left (north), 5'-0" on the right (south), seen from the street.'
+    None when the two side yards are the same (no choice was made)."""
+    if not split:
+        return None
+    ft = lambda v: present.feet_inches(v, "up")                    # noqa: E731 (a minimum: up, as the panel)
+
+    def named(side):
+        where = present.compass(*split[side + "_toward"], plan_north_deg or 0.0)
+        return f"{ft(split[side])} on the {side}" + (f" ({where.lower()})" if where else "")
+
+    first = split["larger_side"]
+    second = "right" if first == "left" else "left"
+    return f"Side yards: {named(first)}, {named(second)}, seen from the street."
 
 
 def margin_note(keep, buffer, tax, proven, limit="the yards"):
@@ -1442,12 +1519,14 @@ def margin_note(keep, buffer, tax, proven, limit="the yards"):
 LOT_ONLY = {"lot_area", "lot_width", "lot_depth"}   # items about the lot itself, whatever the house
 
 
-def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer):
+def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer, larger_side=None):
     """The starting house, kept back from the limits so that it complies even at the tax-map worst case (Ben,
     2026-10-20): on a lot not from a survey, every yard line moves in by the tax-map tolerance and coverage is sized
     for the smallest lot the tax map allows; on a survey it goes to the limits. A design buffer (ft) is added on top
     of either. Proven, not assumed: the house is checked with the panel's own worst case, and if any item would still
-    need review from the tolerance (a rear yard minimum also grows with the lot depth) it steps back 3 in. more."""
+    need review from the tolerance (a rear yard minimum also grows with the lot depth) it steps back 3 in. more.
+    `larger_side`: where the larger side yard goes ("left" or "right", seen from the street; None: Gordium's choice),
+    kept on the side first chosen while it steps back."""
     from envelope_builder.start import floor_solids
     tax = not drawing.get("lot_surveyed")
     buffer = max(design_buffer or 0.0, 0.0)
@@ -1456,7 +1535,9 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     drawn = next((r["value"] for r in (measured.get("lot_area") or {}).get("readings") or []), None)
     scale = tol["low"] / drawn if tax and tol and drawn else 1.0
     out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
-                                 coverage_scale=scale)
+                                 coverage_scale=scale, larger_side=larger_side)
+    first = out.get("side_split")
+    side = first["larger_side"] if first else larger_side
     proven = not tax
     for _ in range(12):
         if not tax or not out.get("floors"):
@@ -1468,7 +1549,9 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
             break
         keep += 0.25
         out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
-                                     coverage_scale=scale)
+                                     coverage_scale=scale, larger_side=side)
+    if first and out.get("side_split"):          # Gordium's choice stays its choice while it steps back
+        out["side_split"]["asked"] = first["asked"]
     out["kept_back"] = keep
     if out.get("coverage_allowed") and scale:      # the rule's own allowance on the lot as drawn; what it was sized to
         out["coverage_target"] = out["coverage_allowed"]
@@ -1476,12 +1559,16 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     lot_area = (measured.get("lot_area") or {}).get("value") or drawn   # what the allowance is a share of
     out["margin_note"] = margin_note(keep, buffer, tax, proven, limit_words(out, lot_area)) \
         if out.get("floors") else None
+    sides = side_words(out.get("side_split"), drawing.get("plan_north_deg")) if out["margin_note"] else None
+    if sides:                                    # which side the larger side yard is on (Switch side yards swaps)
+        out["margin_note"] += " " + sides
     if out["margin_note"]:                        # said always: what the house is and what limits it (Ben's
         out["notes"].append(out["margin_note"])   # "reassure in place")
     return out
 
 
-def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0) -> dict:
+def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0,
+          larger_side: str | None = None) -> dict:
     """The largest legal starting building for the lot in a model (its buildings, if any, left out): stacked
     floor blocks, one per story, from the zone's rules (envelope_builder.start). With no grade set, it is drawn
     standing at the lot's own level (and said so): the check then says height and stories need review until the
@@ -1519,7 +1606,7 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
     if geo:                             # nothing drawn from geometry the measuring couldn't work out
         return {"floors": [], "notes": [geo], "preview": None}
-    out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer)
+    out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer, larger_side)
     if existing and out.get("floors"):
         out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "
                             "No regrading near the house (or set the finished ground)")

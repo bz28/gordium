@@ -131,9 +131,9 @@ def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_
 
 def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], uses=None,
                            floor_to_floor: float | None = None, keep_back: float = 0.0,
-                           coverage_scale: float = 1.0, verdict=None) -> dict:
+                           coverage_scale: float = 1.0, verdict=None, larger_side: str | None = None) -> dict:
     """{"floors": [{"outline": [[x, y], ...], "base": z, "top": z}, ...], "stories", "height", "area",
-    "coverage_allowed", "notes"}: the starting building, or no floors and the notes that say why.
+    "coverage_allowed", "side_split", "notes"}: the starting building, or no floors and the notes that say why.
 
     The guarantee, on any lot shape: the building returned has been measured and checked against every rule (each
     passes or needs review), or no building is returned and the notes say "Gordium can't generate..." (`CANT`).
@@ -141,14 +141,91 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     every yard line that much further in (the tax-map tolerance, a design buffer); `coverage_scale` scales the
     coverage allowed (below 1: sized for the smallest lot the tax map allows). `verdict`: the checker's own result
     for one rule (design_checker.check.verdict, which also counts a rule that fails under every reading); the
-    checker passes it, since this package can't import the checker."""
-    out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": [],
-           "limited_by": None, "yards": None}
-    notes = out["notes"]
+    checker passes it, since this package can't import the checker.
+
+    Unequal side yards (R-2b: one 5 ft, the other 10 ft): the house takes the larger yard on one side only, the
+    side that gives the larger house; on a tie the left as seen from the street (on a corner lot, once the envelope
+    draws corner lots, §325-19C: the side away from the side street, _tie_side). `larger_side` ("left" or "right") asks for that side instead (Switch side yards). Each
+    house is proven like any other; one that would break a rule is never returned: the other side is tried (unless
+    asked for), then the larger yard on both sides, as the envelope draws it. `side_split` says which was drawn:
+    {"larger_side", "larger", "smaller", "left", "right", "left_toward", "right_toward", "asked"} (each side's
+    yard; the plan direction, x and y, from the house towards each side line), or None."""
     sized, drawn = _as_drawn(measured)       # coverage on a lot not yet surveyed: from the lot as drawn (said below)
     # the rectangle's sides lie on straight yard lines, so the exact region is used (no rounding margin): the yards
     # come out at their limits, 25'-0" and 10'-0", not a hair over
     env = envelope(site, facts, sized, rules, margin=0.0)
+    args = (site, facts, sized, drawn, rules, uses, floor_to_floor, keep_back, coverage_scale, verdict)
+    split = env.get("side_split")
+    lot = Lot(site, facts) if split and env["outline"] else None
+    if lot is None or lot.problems or lot.street_problem or not lot.readings():
+        return _building(env, *args)
+    angle, origin = _frame(lot)
+    x = {i: affinity.rotate(LineString(e), -angle, origin=origin, use_radians=True).centroid.x
+         for i, e in enumerate(lot.edges)}
+    ways = {}
+    for side in ("left", "right") if larger_side is None else (larger_side,):
+        other = {"left": "right", "right": "left"}[side]
+        sides = {side: split["larger"], other: split["smaller"], "x": x}
+        ways[side] = _building(envelope(site, facts, sized, rules, margin=0.0, sides=sides), *args, prove=False)
+    if larger_side is None:              # the larger house first; a tie: away from the street (a corner), else left
+        tie = _tie_side(lot, facts, angle, origin)
+        order = sorted(ways, key=lambda k: (-round(ways[k]["area"] or 0.0, 2), k != tie))
+    else:
+        order = [larger_side]
+    tried = []
+    for side in order:
+        out = ways[side]
+        if not out["floors"]:
+            continue
+        failing = _failing(site, facts, out["floors"], rules, uses, verdict)
+        if not failing:
+            back = (math.cos(angle), math.sin(angle))          # the street's direction: from the left to the right
+            out["side_split"] = {"larger_side": side, "larger": split["larger"], "smaller": split["smaller"],
+                                 "left": split["larger"] if side == "left" else split["smaller"],
+                                 "right": split["smaller"] if side == "left" else split["larger"],
+                                 "left_toward": [-back[0], -back[1]], "right_toward": [back[0], back[1]],
+                                 "asked": larger_side is not None}
+            if tried:
+                out["notes"].append("; ".join(tried))
+            return out
+        tried.append(f"the larger side yard on the {side} would break {', '.join(failing)}")
+    out = _building(env, *args)          # the larger yard on both sides, as the envelope draws it
+    if tried:
+        out["notes"].append("side yards kept at the larger on both sides: " + "; ".join(tried))
+    return out
+
+
+def _tie_side(lot: Lot, facts: dict, angle: float, origin) -> str:
+    """Where the larger side yard goes when either side gives as large a house: on a corner lot, the side whose
+    side lines lie farther from a street line (away from the side street); else the left, seen from the street.
+    (Corner lots get no envelope yet, so today only the left is reached; this is ready for when they do.)"""
+    if facts.get("corner_lot") is not True:
+        return "left"
+    streets = [LineString(line) for line in facts.get("street_line") or [] if len(line) >= 2]
+    reading = (lot.readings() or [None])[0]
+    if not streets or reading is None:
+        return "left"
+    _, a, b, _ = reading
+
+    def x(group):
+        return sum(affinity.rotate(LineString(lot.edges[i]), -angle, origin=origin, use_radians=True).centroid.x
+                   for i in group) / len(group)
+
+    def away(group):                     # how far its side lines' middles are from the nearest street line
+        return min(min(s.distance(LineString(lot.edges[i]).interpolate(0.5, normalized=True)) for s in streets)
+                   for i in group)
+
+    left, right = (a, b) if x(a) <= x(b) else (b, a)
+    return "right" if away(right) > away(left) + 1e-6 else "left"
+
+
+def _building(env: dict, site: dict, facts: dict, sized: dict, drawn: bool, rules: list[dict], uses,
+              floor_to_floor, keep_back: float, coverage_scale: float, verdict, prove: bool = True) -> dict:
+    """The starting building inside one buildable area (`env`): proven with the checker's rules unless `prove` is
+    False (the caller proves it)."""
+    out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": [],
+           "limited_by": None, "yards": None, "side_split": None}
+    notes = out["notes"]
     notes += env["notes"]
     if not env["outline"]:
         notes.append("no buildable area to start from")
@@ -218,7 +295,7 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     out["floors"] = [{"outline": ring, "base": base + i * story, "top": top if i == stories - 1 else base + (i + 1) * story}
                      for i in range(stories)]
     out.update(stories=stories, height=top - base, area=outline.area, coverage_allowed=allowed)
-    failing = _failing(site, facts, out["floors"], rules, uses, verdict)
+    failing = _failing(site, facts, out["floors"], rules, uses, verdict) if prove else []
     if failing:                          # never a wrong building: it is proven with the checker's own rules first
         notes.append(f"{CANT} (the rectangle found would break: {', '.join(failing)})")
         out.update(floors=[], stories=None, height=None, area=None)
