@@ -114,8 +114,11 @@ def _worst(limit: str, op, measured: dict):
         return None
     got = []
     for combo in itertools.product(*choices):
+        values = dict(zip(names, combo))
+        # the use is a name, typed as the checker types it: without it a limit that depends on the use (R-2c's side
+        # yards and coverage) was never worked out, and R-2c got no starting house (light run, 2026-10-28)
         try:
-            got.append(formula.evaluate(limit, dict(zip(names, combo)), MEASURE_KINDS))
+            got.append(formula.evaluate(limit, values, MEASURE_KINDS | {"use": frozenset([values.get("use")])}))
         except (formula.EvaluationError, formula.MissingMeasure, ArithmeticError):
             return None
     return max(got) if op in MINIMUM else min(got)
