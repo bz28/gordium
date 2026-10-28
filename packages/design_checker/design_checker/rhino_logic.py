@@ -2251,17 +2251,33 @@ def box_ticks(state):
                                   "corner_source", "checked") if k in state}
 
 
-def ticks_after_pick(what, ticks, answer=None):
+BOX_FIELDS = ("zone", "address", "use", "corner_lot")     # what the box's ticks and sources are about
+
+
+def box_moved(facts_before, ui_before, facts_after, ui_after):
+    """Whether a pick changed what the start box's ticks and sources are about: the district, address, use or corner
+    answer, the doubts "I checked this" settles, or an earlier lookup's preview put back (drop_pending: its district,
+    sources and address go back to what they were before it)."""
+    facts_before, facts_after = facts_before or {}, facts_after or {}
+    ui_before, ui_after = ui_before or {}, ui_after or {}
+    return (any(facts_before.get(k) != facts_after.get(k) for k in BOX_FIELDS)
+            or (ui_before.get("doubts") or {}) != (ui_after.get("doubts") or {})
+            or (ui_before.get("_pending") is not None and ui_after.get("_pending") is not ui_before.get("_pending")))
+
+
+def ticks_after_pick(what, ticks, answer=None, moved=True):
     """The start box's ticks and sources kept after a pick (_box_loop's `ticked`; `ticks`: box_ticks of the box as
-    the architect left it; `answer`: the status of a lookup answer the pick put in the box, None for none). An answer
-    that filled the box ("found": a lookup's, or a saved one used) replaces them, so the district must be confirmed
-    again. Everything else keeps them exactly as the box shows them: Look up (while it runs the box shows the
-    architect's own ticks; Draw is off meanwhile), Cancel lookup, and an answer that filled nothing (not found,
-    offline, outside the City, too slow, a saved one refused), which changes nothing in the box. So no tick or
-    source from before Look up is ever brought back, onto a district, use, address or corner changed during the
-    lookup ("suggested by Gordium" on a district the architect picked) or after they took it off; and a district
-    they took off is never shown ticked again from the file (review of #32, 2026-10-28)."""
-    if what in ("pick:lookup_done", "pick:use_saved") and answer == "found":
+    the architect left it; `answer`: the status of a lookup answer the pick put in the box, None for none; `moved`:
+    box_moved for this pick). A lookup's answer (or a saved one used) replaces them, so the district must be confirmed
+    again, unless it filled nothing and moved nothing (not found, offline, outside the City, too slow, a saved one
+    refused, with no earlier preview put back): then the box is as the architect left it, and so are its ticks.
+    Everything else keeps them exactly as the box shows them: Look up (while it runs the box shows the architect's
+    own ticks; Draw is off meanwhile) and Cancel lookup. So no tick or source from before Look up is ever brought
+    back, onto a district, use, address or corner changed during the lookup ("suggested by Gordium" on a district the
+    architect picked) or after they took it off; no tick is kept on a district a lookup's answer put in or back; and
+    a district they took off is never shown ticked again from the file by a lookup that changed nothing (review of
+    #32, 2026-10-28)."""
+    if what in ("pick:lookup_done", "pick:use_saved") and (answer == "found" or moved):
         return {}
     return dict(ticks or {})
 

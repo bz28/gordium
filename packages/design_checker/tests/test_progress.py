@@ -293,7 +293,8 @@ def test_the_wait_window_closes_when_the_job_is_done_or_cancelled():
     assert 'status["label"].Text = progress()' in box
     assert "lookup_cancel" in part(RHINO, "def _one_pick(", "def _pick_outcome(")
     loop = part(RHINO, "def _box_loop(", "# ---- the address lookup")
-    assert 'ticked = logic.ticks_after_pick(what, ticked, (saved_ui.get("_lookup") or {}).get("status"))' in loop
+    assert 'ticked = logic.ticks_after_pick(what, ticked, (saved_ui.get("_lookup") or {}).get("status"),' in loop
+    assert "logic.box_moved(facts_before, ui_before, facts, saved_ui))" in loop
     assert "before_lookup" not in loop
 
 
@@ -648,16 +649,24 @@ def test_look_up_and_cancel_lookup_keep_the_ticks_as_the_box_shows_them():
            "corner_source": LIVE, "checked": ["street"]}
     assert logic.ticks_after_pick("pick:lookup_cancel", now) == now        # never the ticks from before Look up
     assert logic.ticks_after_pick("pick:lookup", now) == now               # the box shows the architect's own
-    assert logic.ticks_after_pick("pick:lookup_done", now, "found") == {} == \
-        logic.ticks_after_pick("pick:use_saved", now, "found")
+    assert logic.ticks_after_pick("pick:lookup_done", now, "found", False) == {} == \
+        logic.ticks_after_pick("pick:use_saved", now, "found", False)
     for status in ("not_found", "offline", "outside_city", "timeout", "error", None):    # filled nothing: as shown
-        assert logic.ticks_after_pick("pick:lookup_done", now, status) == now, status
-    assert logic.ticks_after_pick("pick:use_saved", now, "offline") == now               # a saved one refused
+        assert logic.ticks_after_pick("pick:lookup_done", now, status, False) == now, status
+        assert logic.ticks_after_pick("pick:lookup_done", now, status, True) == {}, status   # ...unless it moved
+    assert logic.ticks_after_pick("pick:use_saved", now, "offline", False) == now        # a saved one refused
+    assert logic.ticks_after_pick("pick:lookup_done", now, "offline") == {}              # (not known: emptied)
+    # what moves the box: a field, the doubts, or an earlier preview put back (round 4: drop_pending)
+    pending = {"address": "106 Ithaca Rd"}
+    assert not logic.box_moved({"zone": "R-1b"}, {"_pending": pending}, {"zone": "R-1b"}, {"_pending": pending})
+    assert logic.box_moved({"zone": "R-1b"}, {}, {"zone": "R-3a"}, {})
+    assert logic.box_moved({}, {"doubts": {"lot": "a"}}, {}, {})
+    assert logic.box_moved({}, {"_pending": pending}, {}, {})
     assert logic.ticks_after_pick("pick:street", now) == now and logic.ticks_after_pick("pick:lookup", None) == {}
     assert logic.box_ticks(dict(now, zone="R-3a", _draw_label="Draw")) == now
 
 
-def _run_box_loop(script, confirmed_at_draw=None, answer="found"):
+def _run_box_loop(script, confirmed_at_draw=None, answer="found", box_pick=None, facts=None, saved_ui=None):
     """gordium_rhino._box_loop itself, run with the box replaced by `script`: one (change, what) per showing of the
     box, `change` applied to what the box shows as the architect would (ui.start_box's keep()). Returns each state
     the box was shown with."""
@@ -686,11 +695,11 @@ def _run_box_loop(script, confirmed_at_draw=None, answer="found"):
 
     ns = {"STATE": {}, "logic": logic, "GUIDE_KEEPS": (), "ui": type("UI", (), {"start_box": staticmethod(start_box)}),
           "_box_state": box_state, "_apply_box": apply_box,
-          "_box_pick": lambda doc, what, facts, saved_ui, session: (
+          "_box_pick": box_pick or (lambda doc, what, facts, saved_ui, session: (
               (facts, dict(saved_ui, _lookup={"status": answer}, **({"_reconfirm": True} if answer == "found" else {})))
-              if what == "lookup_done" else (facts, saved_ui))}
+              if what == "lookup_done" else (facts, saved_ui)))}
     exec(compile(ast.Module(body=[fn], type_ignores=[]), "gordium_rhino.py", "exec"), ns)
-    assert ns["_box_loop"](None, {"zone": "R-1b"}, {}, "check", {}, None) is None
+    assert ns["_box_loop"](None, facts or {"zone": "R-1b"}, {}, "check", saved_ui or {}, None) is None
     return shown
 
 
@@ -746,3 +755,30 @@ def test_the_box_loop_after_cancel_lookup_never_ticks_a_district_changed_meanwhi
 def test_r2_a_report_not_written_after_a_file_switch_is_said_with_one_full_stop():
     said = logic.outdated_report_message("/x/r.xlsx", logic.NOT_IN_FRONT, True)
     assert ".." not in said and said.startswith("Zoning report not saved")
+
+
+def test_a_second_lookup_that_finds_nothing_never_keeps_a_tick_on_the_district_it_puts_back(monkeypatch):
+    """Review round 4 of #32 (P0): Edit site… on R-3a (entered by you); Look up finds 106 Ithaca Rd and suggests
+    R-1b; the architect ticks it; a second Look up answers offline (or not found, or too slow). That answer puts the
+    first preview back (drop_pending: R-3a, entered by you), and the kept ticks landed on it: R-3a ticked "suggested
+    by Gordium · City zoning map", Draw on. A lookup's answer that moved the box empties the ticks."""
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parent))
+    from test_lookup_box import ZONES, looked_up
+    for second in ("offline", "not_found", "timeout"):
+        answers = [looked_up("106_ithaca_rd"), {"status": second, "query": "106 Ithaca Rd"}]
+
+        def box_pick(doc, what, facts, saved_ui, session):
+            if what == "lookup":
+                return facts, dict(saved_ui, _lookup={"looking": "106 Ithaca Rd"})
+            if what == "lookup_done":
+                facts, saved_ui, _ = logic.preview_lookup(answers.pop(0), facts, saved_ui, ZONES)
+            return facts, saved_ui
+
+        shown = _run_box_loop([({}, "pick:lookup"), ({}, "pick:lookup_done"),
+                               ({"district_confirmed": True}, "pick:lookup"), ({}, "pick:lookup_done"), ({}, None)],
+                              box_pick=box_pick, facts={"zone": "R-3a", "address": "1 Other St"},
+                              saved_ui={"zone_source": logic.ENTERED})
+        assert shown[2]["zone"] == "R-1b" and shown[3]["district_confirmed"] is True        # ticked on R-1b
+        last = shown[-1]
+        assert (last["zone"], last["district_confirmed"]) == ("R-3a", False), (second, last)
+        assert last["zone_source"] == logic.ENTERED, (second, last)
