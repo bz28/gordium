@@ -2676,10 +2676,27 @@ CORNER_HINT = ("This lot faces two streets: click Change… on " + STREET_LABEL 
 
 
 def uncertain(state):
-    """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
-    says = (state.get("lookup") or {}).get("says")
+    """The one amber line for a case the box can't settle by itself, with what to do; None when there's none. A
+    lookup that went wrong (not found, offline…) says so here; what a found lookup only tells (the lot shown dashed,
+    nothing drawn until Draw) is lookup_note's plain line, never amber (the architect's review, 2026-10-28: the
+    question and the information read as one warning)."""
+    says = None if lookup_note(state) else (state.get("lookup") or {}).get("says")
     question = _question(state)
     return " · ".join(t for t in (question, says) if t) or None     # never one instead of the other
+
+
+LOOKUP_INFO = ("found", "set_aside")      # a lookup's own line that only informs: shown plain
+
+
+def lookup_note(state):
+    """The plain line under the amber one: what a found (or set-aside) lookup tells, or None."""
+    look = state.get("lookup") or {}
+    says = look.get("says") if look.get("status") in LOOKUP_INFO else None
+    # the offline safety net (a saved copy shown: the services didn't answer, pick the district again) asks for
+    # something: it stays on the amber line (review round 1 of this change)
+    # and so does the guide-only note (the State's tax map didn't answer: draw your lot over the guide; round 2)
+    asks = says and (says.startswith(SAVED_SAYS.split("{")[0]) or says == GUIDE_PREVIEW)
+    return None if asks else says
 
 
 def _question(state):
