@@ -43,8 +43,9 @@ def fact_conflicts(facts: dict) -> list[str]:
 
 def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
     """fact_conflicts, each with the facts to correct it (the panel's "Enter …" button asks those). The measuring sets
-    each of those facts aside with the same reason (measure.fact_conflicts: one list)."""
-    return measure_conflicts(facts)
+    each of those facts aside with the same reason (measure.fact_conflicts: one list). The use is set aside too when it
+    is one of the answers, but it is changed in the start box (Edit site…), not by the Enter button."""
+    return [(why, tuple(n for n in names if n != "use")) for why, names in measure_conflicts(facts)]
 
 
 def fact_problems(facts: dict) -> list[str]:

@@ -90,7 +90,8 @@ def test_no_row_reading_contradicting_facts_complies(district, key):
             assert why in (i.get("reason") or ""), (rid, i.get("reason"))
     # the "Lot facts disagree" row is still there, offering to re-enter both answers
     rows = [i for i in _items(district, use, facts) if str(i["id"]).startswith("facts.conflict")]
-    assert any(r["reason"] == why and r["needs"] == list(names) for r in rows), rows
+    # (the use, when it is one of the answers, is set aside too but changed in the start box, not by this button)
+    assert any(r["reason"] == why and r["needs"] == [n for n in names if n != "use"] for r in rows), rows
 
 
 @pytest.mark.parametrize("key", sorted(CASES))
@@ -117,8 +118,10 @@ def test_occupant_counts_that_can_all_be_true_are_no_contradiction():
     (why, names), = fact_conflicts({**house, "accessory_dwelling_unit": False})
     # review round 4: the 1 unit is the use's own (§325-3B), not a count entered: said so, and not offered to re-enter
     assert why == ("4 occupants on the lot, but 1 dwelling unit (what this use is, §325-3B) with at most 2 in any one "
-                   "can hold only 2, with no accessory dwelling unit on the lot: check the occupant counts and the "
-                   "accessory dwelling unit answer") and names == ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
+                   "can hold only 2, with no accessory dwelling unit on the lot: check the use, the occupant counts and "
+                   "the accessory dwelling unit answer")
+    # review round 4 (P0): the use's own count is an answer too, so the use is set aside with them (R-1a.use complied)
+    assert names == ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit", "use")
     # two-family: two units by the use (§325-3B); 4 occupants with at most 2 in one fits exactly
     assert fact_conflicts({"use": "two_family", "occupants": 4, "occupants_most_in_one_unit": 2,
                            "accessory_dwelling_unit": False}) == []
@@ -146,3 +149,32 @@ def test_the_no_adu_answer_behind_an_occupant_contradiction_never_lets_r1_occupa
         row = next(i for i in _items(district, "one_family_detached", agreeing)
                    if i.get("rule") == f"{district}.occupancy_one_family")
         assert row["status"] == present.COMPLIES, row
+
+
+@pytest.mark.parametrize("district, use, occupants", [("R-1a", "one_family_detached", 4), ("R-2a", "two_family", 5)])
+def test_when_the_units_are_the_uses_own_the_use_is_set_aside_with_the_counts(district, use, occupants):
+    """Review round 4 (P0): with no units entered, the count is the use's own (§325-3B: one-family 1, two-family 2), so the
+    use is one of the answers that can't all be true (4 occupants of at most 2 fit a two-family house, not a one-family
+    one): R-1a.use and the rows that apply by the use complied beside the "Lot facts disagree" row. Now no row reading
+    the use complies, the use row says why, and with the counts agreeing (2 in one) the use row complies."""
+    facts = {**HOUSEHOLD, "occupants": occupants, "occupants_most_in_one_unit": 2}
+    rules = {r["id"]: r for r in load(rulebook_for(ITHACA, district))["rules"]}
+    items = [i for i in _items(district, use, facts) if i.get("rule") in rules]
+    reading = [i for i in items if "use" in _reads(rules[i["rule"]])]
+    assert reading and all(i["status"] != present.COMPLIES for i in reading), [
+        (i["rule"], i["status"]) for i in reading if i["status"] == present.COMPLIES]
+    row = next(i for i in items if i["rule"] == f"{district}.use")
+    assert "check the use, the occupant counts" in (row.get("reason") or ""), row
+    fine = next(i for i in _items(district, use, {**facts, "occupants": 2}) if i.get("rule") == f"{district}.use")
+    assert fine["status"] == present.COMPLIES, fine
+
+
+@pytest.mark.parametrize("district", ["R-2c", "R-3a", "RU"])
+def test_the_attached_counts_clash_sets_the_use_aside_too(district):
+    """Review round 4 (P1): 4 units on this lot but 3 in the attached building clash only for an attached house, so the
+    use is one of the answers: the use row needs review saying so (it complied); with the counts agreeing, no row carries
+    the clash."""
+    use, facts, agreeing = CASES["attached_counts_disagree"]
+    row = next(i for i in _items(district, use, facts) if i.get("rule") == f"{district}.use")
+    assert row["status"] == present.REVIEW and "or the use is off" in (row.get("reason") or ""), row
+    assert not any("or the use is off" in (i.get("reason") or "") for i in _items(district, use, agreeing))
