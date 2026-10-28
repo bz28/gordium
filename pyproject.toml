@@ -16,7 +16,8 @@ dependencies = ["pyyaml>=6", "pdfplumber==0.11.10", "pdfminer.six==20260107", "s
                 "rhino3dm==8.35.0"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "openpyxl==3.1.5"]   # openpyxl reads the architects' spreadsheets and writes the rules workbook
+dev = ["pytest>=8", "openpyxl==3.1.5",   # openpyxl reads the architects' spreadsheets and writes the rules workbook
+       "rhino3dm==8.35.0"]               # reads the architects' Rhino models in tests, without Rhino
 # Only for writing the rules workbook outside the dev setup.
 export = ["openpyxl==3.1.5"]
 # Only for running the AI labeling and rule-drafting scripts on your own machine (never in CI; tests use

@@ -43,7 +43,7 @@ A2 [code] **Rows, in this order** (`rhino_logic.box_rows`, tested in CI):
    - (with the lookup) not found or offline → manual entry.
 9. **[Cancel] [Draw]**.
 
-A3 [code] **"I confirm" is unticked on every new project.** On an existing project it is ticked only if the same district was confirmed at an earlier Draw. **Draw is enabled only when it is ticked**, with "Confirm the district to continue." beside it (`rhino_logic.district_confirmed`, `can_draw`).
+A3 [code] **"I confirm" is unticked on every new project.** On an existing project it is ticked only if the same district was confirmed at an earlier Draw. Picking another district in the box unticks it (`rhino_logic.zone_picked`): a tick is never carried to a district it wasn't given. **Draw is enabled only when it is ticked**, with "Confirm the district to continue." beside it (`rhino_logic.district_confirmed`, `can_draw`).
 
 A4 [code] **No regrading near the house.** Ticked, the ground shown counts as the finished grade, and height is checked normally. Unticked, with only the existing ground, height and stories need review (C5). Ground set with "I'll regrade" is finished ground (`rhino_logic.ground_facts`).
 
@@ -86,7 +86,7 @@ B6 [rhino] **Command line.** GordiumStart prints one line: "created 1 group (3 f
 
 ## C. Measurement honesty (needs-review triggers)
 
-C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gives needs review, never complies.
+C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gives needs review, never complies — unless the rule provably fails at every value the missing number could take (`check.fails_whatever`): then does not comply ([decision](../decisions/2026-10-21_fails_whatever_the_missing_number.md)). Missing data never complies.
 
 C2 [code] **Tax-map tolerance** of ±2'-0".
 - Each lot-dependent value is evaluated at the worst case, with every lot line up to 2'-0" the unlucky way (Ben, 2026-10-21): a yard (to one line) ±2'-0", a lot width or depth (between two lines) ±4'-0", and areas and percentages from the outline offset 2'-0" (73' × 90' → 69' × 86' = 5,934 sf at the smallest). One definition: `model_measurement.measure.TAX_MAP_SLACK` and `tax_map_lot_area`, used by the measurement, the checker and the starting house.
@@ -100,7 +100,7 @@ C4 [both] **Grade recomputed after every footprint change** from the terrain, or
 
 C5 [code] **"Existing grade" selected** → Height and Stories need review: "Measured from existing grade; code uses finished grade".
 
-C6 [code] **Roof not flat** → Height needs review: "Roof not flat; this roof's height rule isn't checked in this release".
+C6 [code] **Pitched and mansard roofs** (PR #18) → the height is measured as §325-3 defines it for each (a pitched roof: midway between eave and ridge; a mansard: its highest level) under every reading of which eave counts; it complies only if it complies under every reading, does not comply only if it fails under every one, and otherwise needs review naming the readings.
 
 C7 [code] **Height** follows §325-3 verbatim. It is measured from the grade plane (the average of finished ground level at the exterior walls, per the GRADE PLANE definition) to the highest level of a flat roof. Where roof sections vary, the highest section counts.
 

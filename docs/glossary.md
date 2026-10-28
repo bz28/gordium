@@ -19,7 +19,7 @@ Other documents link here the first time they use a term. The legal meaning of z
 | <a id="lot-coverage"></a>**Lot coverage** | The share of the lot covered by buildings, seen from above. Example: 1,600 sf of house on an 8,000 sf lot is 20% |
 | <a id="grade"></a>**Grade** | The ground level around a building. Building height is measured from it |
 | <a id="envelope"></a>**Envelope (buildable envelope)** | The largest space a building may fill: the lot shrunk by every required yard, up to the height limit. Gordium draws it see-through in blue |
-| <a id="eave"></a>**Eave** | The edge of a roof that overhangs the wall below. Ithaca allows eaves up to 2 ft into a yard (§325-18B) |
+| <a id="eave"></a>**Eave** | The edge of a roof that overhangs the wall below. Ithaca allows eaves up to 2 ft into a yard (§325-18B); see [the eaves decision](decisions/2026-10-21_eaves_need_confirmation.md) |
 | <a id="variance"></a>**Variance** | Permission from the Board of Zoning Appeals (BZA) to break a zoning rule on one lot |
 | <a id="bza"></a>**BZA** | The City's Board of Zoning Appeals: rules on variances and on appeals of the Zoning Administrator's interpretations |
 
