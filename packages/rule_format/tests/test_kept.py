@@ -77,7 +77,7 @@ def test_what_a_caller_gets_is_its_own_copy_at_every_level(tmp_path):
     assert third["rules"][0]["sources"][0] is not again["rules"][0]["sources"][0]
 
 
-def test_a_real_rulebook_edited_by_a_caller_never_reaches_the_next(tmp_path):
+def test_a_real_rulebook_edited_by_a_caller_never_reaches_the_next():
     path = next(p for p in every_yaml() if p.parent.name == "5_zoning_rules")
     got = load(path)
     for rule in got["rules"]:
@@ -186,6 +186,7 @@ def test_extracted_text_and_chart_cells_match_a_reading_without_the_cache():
     checked = 0
     for j in jurisdictions():
         ctx = Context.for_jurisdiction(j)
+        every_district = set()
         for name, entry in ctx.sources.items():
             stem = os.path.splitext(name)[0]
             text, cells_file = j / "2_extracted_text" / f"{stem}.jsonl", j / "2_extracted_text" / f"{stem}.cells.jsonl"
@@ -205,6 +206,8 @@ def test_extracted_text_and_chart_cells_match_a_reading_without_the_cache():
                         districts |= {district_name(c["name"]) for c in r["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])}
                     elif "value" in r and not r.get("heading"):
                         cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
-                assert ctx.cells[name] == cells and districts <= ctx.districts
+                assert ctx.cells[name] == cells
+                every_district |= districts
                 checked += 1
+        assert ctx.districts == every_district          # none missing, none from elsewhere
     assert checked
