@@ -47,7 +47,7 @@ A3 [code] **"I confirm" is unticked on every new project.** On an existing proje
 
 A4 [code] **No regrading near the house.** Ticked, the ground shown counts as the finished grade, and height is checked normally. Unticked, with only the existing ground, height and stories need review (C5). Ground set with "I'll regrade" is finished ground (`rhino_logic.ground_facts`).
 
-A5 [code] **Every fact has a source.** Each fact the box sets is saved as {value, source, confirmed_by, date} in the .3dm (`Gordium / fact_sources`). A Change records the source "entered by you". The checker never reads the sources, only the values. The panel shows them (Site facts, when no row is selected), and the report's Check tab lists them (`rhino_logic.fact_sources`, `present.source_lines`).
+A5 [code] **Every fact has a source.** Each fact the box sets is saved as {value, source, confirmed_by, date} in the .3dm (`Gordium / fact_sources`). A Change records the source "entered by you". A box default left as it was (the use, the street, the corner lot) is confirmed by no one, shown "default, not changed by you": pressing Draw is not saying yes to a dropdown never opened (2026-10-28). Ticking the street row's "I checked this" confirms the street and the corner answer shown on it. The checker never reads the sources, only the values. The panel shows them (Site facts, when no row is selected), and the report's Check tab lists them (`rhino_logic.fact_sources`, `present.source_lines`).
 
 A6 [rhino] **Removed from the box:**
 - existing building, roof, floor-to-floor, the "Ground is" select, and the massing radio;
@@ -141,7 +141,7 @@ D3 [code] **Summary rule.** One function produces the summary used by the panel,
 
 D4 [both] **Columns.**
 - Mark | Item | Proposed | Req. ≥/≤ | Delta (renamed from Margin, MVP list 2026-10-20).
-- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Deltas read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
+- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Deltas read like "+11'-7"" (to spare), "≥ +3'-0"" (at least that, over the tax map's readings), "−2'-6" short" (a minimum not met), "1'-6" over" or "2 over" (a maximum passed), "at limit", "+0.06%", kept short so they fit the Delta column in two lines (2026-10-28). Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns. The use row names the use in its Item cell ("✓ Use: One-family dwelling, detached | stated | permitted"), and its detail is headed with the same text: no use's name fits the Proposed column at the panel's width (2026-10-28). A longer name, or any at 380 px, ends "…" in the list like every long Item, and is whole in the detail. With no use stated it reads "Use (site)" with "—".
 - The value columns are sized to their content and never truncated; only Item truncates. Minimum panel width 320.
 
 D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not checked yet (the rules not in Gordium yet). Section headers aren't selectable.
@@ -176,6 +176,8 @@ E1 [code] **Contents.** Each detail shows:
 - the calculation;
 - a "to comply" hint where one exists;
 - the precision sentence (C9).
+
+Plain words come first (2026-10-28, `rhino_logic.detail_parts`): the calculation's result ("Required: 24'-1 7/8" to 32'-10 1/8""), the law's words and the footnotes, the citation and its links are in view; the formula with its values, the measured scope, the chart's own cell ("R-1B: 25%/ 50 ft [fn16]") and the precision sentence sit under **How it's worked out**, closed until the architect opens it. Nothing is dropped.
 
 E2 [code] **Citation format,** as an examiner writes it: "§325-8, District Regulations Chart, R-1b, Rear yard column, note 16" and "§325-8A(14)". The PDF page appears only as the link target. One format on every surface, the report included.
 

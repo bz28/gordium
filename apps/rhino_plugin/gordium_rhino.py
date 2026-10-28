@@ -615,11 +615,8 @@ def draw_scene(o, e):
         old = stale(o)
         # Gordium's lines: over everything in plan, depth-tested (hidden behind solids) in every other view
         on_top = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
-        for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
-            if isinstance(g, rg.Mesh):
-                d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
-            else:
-                d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+        # red (does not comply) is drawn last, below: over the amber and everything else (logic.red_last)
+        rest, red = logic.red_last(getattr(o, "encroach", None) or [])
         # the see-through fills never hide what is behind them: they write no depth, so a line behind the envelope or
         # a coloured part still shows (review round 1 of depth-lines, F2); the solids in front still hide them
         _see_through(d, True)
@@ -642,7 +639,9 @@ def draw_scene(o, e):
             d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
         _on_top(d, False)
         if not old:                              # after the envelope, so its blue never tints them (F5)
-            for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+            # only the part over: amber review, then red (does not comply) over it, so no amber strip ever covers
+            # a failing part (logic.red_last; the architect's review, 2026-10-28: the eaves over the failing wall)
+            for g, status, _ in rest + red:
                 name = logic.highlight(status)
                 colour = ui.HIGHLIGHT[name]
                 _see_through(d, True)
@@ -676,6 +675,12 @@ def draw_scene(o, e):
                 d.DrawBrepWires(main, BLUE, 3)
             elif isinstance(main, rg.Mesh):
                 d.DrawMeshWires(main, BLUE, 3)
+        # last of all, the outline of a failing solid the plan can't show a part of: nothing drawn after it covers it
+        for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
+            if isinstance(g, rg.Mesh):
+                d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
+            else:
+                d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
     finally:
         _on_top(e.Display, False)
         _see_through(e.Display, False)
@@ -3309,7 +3314,7 @@ def _check_apply(doc, o, begun, result):
     shown = logic.labels_on(_ui_state(doc))       # this document's Show on-screen labels
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
     if not STATE.get("headless"):
-        ui.show(panel(), view)
+        ui.show(panel(), view, select=logic.newly_failing(extras["before"], view))   # brought into view
         _sync_ticks(doc)
         if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
             ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)

@@ -163,6 +163,23 @@ def row_name(item):
     return name + (" · " + item["note"] if item.get("note") else "")
 
 
+USE_STATED = "stated"
+
+
+def list_cells(item):
+    """A row's Item and Proposed text in the panel's list, and its name heading the detail. The use row names the
+    use itself, "Use: One-family dwelling, detached", with "stated" under Proposed: no use's name fits the 64 px
+    Proposed column ("One-family" alone takes two lines), and the Item cell has the room (coordinator, 2026-10-28,
+    option A: the whole name, no made-up short forms). "Use:" keeps what the row is about; "(site)" is left off:
+    measured in Rhino, "Use: One-family dwelling, detached" fits two lines of the Item cell at the panel's 400 px
+    only without it. A longer name ("…, semi-detached"), or any at 380 px, ends "…" in the list like every long
+    Item; the detail, headed with this same text, has it whole. With no use stated, "Use (site)" and its "—"."""
+    proposed = item.get("proposed")
+    if item.get("name") == "Use" and proposed and proposed != "—":
+        return "Use: " + proposed + (" · " + item["note"] if item.get("note") else ""), USE_STATED
+    return row_name(item), proposed
+
+
 def dock_host(hosts, serial):
     """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
     document's number); a panel made without one (key 0) serves when the front document has none."""
@@ -182,6 +199,56 @@ def highlight(status):
     """The colour a part of the model is shaded, from its rule's result only (never from the envelope): red for
     does not comply (under every reading), amber for needs review, nothing for complies or anything else."""
     return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
+
+
+def red_last(coloured):
+    """The coloured parts, (shape, status) each, split into (the rest, the red): the red (does not comply) is drawn
+    after everything else, so nothing covers it. In Top view a needs-review amber strip (the eaves) lay over the
+    failing red wall below it and hid the one thing that certainly has to change (the architect's review,
+    2026-10-28)."""
+    rest = [c for c in coloured or [] if highlight(c[1]) != "red"]
+    return rest, [c for c in coloured or [] if highlight(c[1]) == "red"]
+
+
+def newly_failing(before, view):
+    """The row to bring into view after a re-check: the first, in the panel's order, that does not comply now and
+    did not at the check before (`before`: {item id: status} then, None on a document's first check). None when
+    nothing newly fails, so a re-check that changes nothing for the worse never moves the list (the architect's
+    review, 2026-10-28: after an edit the newly failing row was out of sight below the rows that need review)."""
+    if before is None or not view:
+        return None
+    status = {i["id"]: i["status"] for i in view.get("items") or []}
+    for g in view.get("groups") or []:
+        for item_id in g.get("items") or []:
+            if status.get(item_id) == "does_not_comply" and before.get(item_id) != "does_not_comply":
+                return item_id
+    return None
+
+
+WORKED_OUT = "How it's worked out"
+
+
+def detail_parts(det):
+    """The selected item's detail, split for the panel (the architect's review, 2026-10-28: the formula
+    "max(min(25% × lot depth —, 50), 20)", the measuring notes and the chart's shorthand "R-1B: 25%/ 50 ft [fn16]"
+    read as jargon). Plain words first, in view: the notes, the result of the working ("Required: 24'-1 7/8" to
+    32'-10 1/8"") and the law's own words. Behind WORKED_OUT, collapsed until opened: the formula with the values
+    written in, what was measured, the chart's own cell and the precision rule. Nothing is dropped: every quote,
+    with where it is from, is in one or the other, and the citation and its links stay in view.
+      notes          texts shown in view (at the limit, the colours, the plain result)
+      quotes         the law's words and the chart's footnotes, in view
+      worked         texts behind the toggle (the whole working, what was measured, the precision)
+      worked_quotes  the chart's own cells, behind the toggle"""
+    det = det or {}
+    calc = det.get("calc") or ""
+    head, _, rest = calc.partition(": ")
+    working, equals, result = rest.partition(" = ")
+    plain = head + ": " + result if equals and head in ("Required", "Allowed") else calc
+    quotes = [q for q in det.get("quotes") or [] if q.get("text")]
+    return {"notes": [t for t in (det.get("at_limit"), det.get("colours"), plain, det.get("outline")) if t],
+            "quotes": [q for q in quotes if not q.get("chart")],
+            "worked": [t for t in (calc if plain != calc else None, det.get("scope"), det.get("precision")) if t],
+            "worked_quotes": [q for q in quotes if q.get("chart")]}
 
 
 def coloured_info(entry):
@@ -246,7 +313,8 @@ def legend_text(code=None):
             "dimensioned up from the grade plane, with the limit faint. In plan these lines are drawn over "
             "everything; in every other view they hide behind the solids in front of them, as the model's own lines "
             "do. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
-            "Delta: how far over or under each limit (+ to spare, − short).\n\n"
+            "Delta: how far over or under each limit (+ to spare, ≥ + at least that much to spare, − short of a "
+            "minimum, over past a maximum).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
             "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
@@ -258,6 +326,20 @@ def legend_text(code=None):
 
 
 COLUMN_DELTA = "Delta"          # the panel's and the report's column for how far over or under (was "Margin")
+
+# eighths of an inch as one character each, in the panel's narrow cells only (the detail and the report keep "7/8")
+CELL_FRACTIONS = {"1/8": "⅛", "1/4": "¼", "3/8": "⅜", "1/2": "½", "5/8": "⅝", "3/4": "¾", "7/8": "⅞"}
+
+
+def cell_text(text):
+    """A Proposed, Required or Delta value as the panel's list draws it, in its two lines of a narrow column (the
+    architect's review, 2026-10-28: "34'-11 7/8" to 36'-3 3/8"" and "at least 0'-5 1/4" if confirmed" were cut
+    off; the panel is not made wider). The same words, shorter: each fraction of an inch one character ("34'-11⅞"")
+    and a range one value per line ("34'-11⅞"–" then "36'-3⅜""), so a line never breaks inside a number. The
+    selected item's detail below the list shows the words whole, as everywhere else."""
+    import re
+    text = re.sub(r'(\d) ([1357]/8|1/4|1/2|3/4)"', lambda m: m.group(1) + CELL_FRACTIONS[m.group(2)] + '"', text or "")
+    return re.sub(r'(["%]|\d sf) to (?=[\d+−])', "\\1–\n", text)        # after a value, before the next
 
 
 def missing(facts):
@@ -3734,9 +3816,18 @@ def ground_facts(state, lot_level, flat=None):
     return out
 
 
+# the box's own choices that Gordium fills in (the use, the street, the corner lot): the architect's word only once
+# changed (their source then ENTERED); left as they were, never "confirmed by you" (fact_sources, source_lines)
+BOX_DEFAULTS = ("use", "street", "corner_lot")
+UNTOUCHED = "default, not changed by you"
+
+
 def fact_sources(state, today, confirmed):
     """Every fact the box set, as {value, source, confirmed_by, date}: saved in the .3dm beside the facts and
-    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick)."""
+    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick).
+    A box default the architect left as it was (BOX_DEFAULTS) is confirmed by no one: pressing Draw is not saying
+    yes to a dropdown never opened (the architect's review, 2026-10-28: "Use: One-family dwelling, detached ·
+    suggested by Gordium · confirmed by you" for a use never changed)."""
     by = "you" if confirmed else None
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
@@ -3744,13 +3835,20 @@ def fact_sources(state, today, confirmed):
     def fact(value, source, who=by):
         return {"value": value, "source": source, "confirmed_by": who, "date": today}
 
+    def chosen(key):                   # a box default: the architect's only once changed, or ticked "I checked this"
+        # (review round 1 of panel-wording, P2: a street ticked as checked read "default, not changed by you")
+        # (the corner answer sits on the street's row, ROW_OF: that row's tick confirms it too; round 2, P3)
+        row = ROW_OF.get(key + "_lot", key) if key == "corner" else key
+        mine = state.get(key + "_source") == ENTERED or row in (state.get("checked") or [])
+        return by if mine else None
+
     city = (" · " + IN_CITY_SAID.format(date=state["city_by_hand"])) if state.get("city_by_hand") else ""
     return {     # (the architect's Yes, by hand, on the address's source: shown in the panel and report, round 12)
         "address": fact(state.get("address") or None,     # (an earlier Draw's Yes, read back, never twice)
                         (state.get("address_source") or ENTERED).split(" · " + IN_CITY_SAID.split(" (")[0])[0] + city),
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
-        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
+        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED, chosen("use")),
         # the follow-up answers (Ben, 2026-10-25): each saved as entered by you, and what the use itself says,
         # shown in the panel and the report (exactly the facts answers_applied sends the checker)
         **follow_up_sources(state, fact),
@@ -3760,9 +3858,9 @@ def fact_sources(state, today, confirmed):
         # the address's street, a kept fact, says it instead)
         "street": fact(street_name({**state, "street_name": state.get("street_name_saved")})
                        if "street_name_saved" in state else street_name(state),
-                       state.get("street_source") or SUGGESTED),
+                       state.get("street_source") or SUGGESTED, chosen("street")),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
-                           state.get("corner_source") or SUGGESTED),
+                           state.get("corner_source") or SUGGESTED, chosen("corner")),
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
         "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
                         "lot; height is checked as if flat)" if state.get("ground_fall") else ""),

@@ -25,6 +25,8 @@ PANEL_WIDTH = 400          # as wide as Rhino's own panels (architect's review, 
 # the first column, which hid a column of its own.
 COLUMNS = [("Item", 120), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 86)]   # Item takes the rest
 ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" short" wraps instead of being cut off
+#                           (Eto's tree grid has one height for every row: a third line would cost rows in view, so
+#                           the values are made to fit two instead: logic.cell_text)
 DETAIL_MIN_HEIGHT = 160   # the selected item's detail never shorter: its name and reason on up to four lines (17 px
 #                           each) and two rows of buttons (20 px, measured on the Mac) in full without scrolling (the
 #                           Rhino job at 7a16aa6: with the list a fixed 380 px and a taller header, the detail was 51 px
@@ -521,13 +523,15 @@ def _wrap_width(parts):
     return max(240, width - 48) if width > 0 else None
 
 
-def show(parts, view, stale=False, error=None, checking=False, job=None, cancelled=False):
+def show(parts, view, stale=False, error=None, checking=False, job=None, cancelled=False, select=None):
     """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet: the
     header says a check is on its way, or to press Check), a check running (`checking`; `job`: its live line and
     Cancel under "Checking…"), cancelled, or one that couldn't run: rows keep their names but show no mark and "—",
     Zoom to is off (H1, H2, H5). The selection and which groups are open are kept by item id across refreshes (D8);
     the list shows its first group's heading whole at the top, scrolled only as far as the selected row needs (the
-    Rhino job at 6361a3f)."""
+    Rhino job at 6361a3f). `select`: a row to select and scroll to instead, its group opened (a re-check's newly
+    failing row: logic.newly_failing). Selecting a row in code never takes the keyboard from the Rhino viewport (no
+    Focus())."""
     global WRAP_AT
     WRAP_AT = _wrap_width(parts) if DOCKED else None
     tree = parts["tree"]
@@ -545,6 +549,11 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
         parts["expanded"][g.Tag] = g.Expanded
     by_id = {i["id"]: i for i in view["items"]}
     parts["by_id"] = by_id
+    if select in by_id:                      # the newly failing row: selected, its group open, scrolled to below
+        parts["selected"] = select
+        for g in view["groups"]:
+            if select in g["items"]:
+                parts["expanded"]["group:" + g["key"]] = True
     store = ef.TreeGridItemCollection()
     selected_item = None
     parts["groups"] = []
@@ -557,9 +566,12 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
         for item_id in g["items"]:
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
-            values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
-                      "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else ""),   # the name says it
-                      "" if stale_row else i["required"], "" if stale_row else (i.get("delta") or "")]
+            # the values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)
+            name, proposed = logic.list_cells(i)          # the use row: the use's own name as its Item
+            values = [("" if stale_row else i["mark"] + "  ") + name,
+                      "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
+                      "" if stale_row else logic.cell_text(i["required"]),
+                      "" if stale_row else logic.cell_text(i.get("delta") or "")]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
             ci.Values = System.Array[System.Object](values)
@@ -816,7 +828,7 @@ def show_detail(parts):
         return
     det = i["detail"]
     words = logic.status_words(i)
-    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.row_name(i) + " · " + words,   # the row's own name, whole
+    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.list_cells(i)[0] + " · " + words,   # the row's own name, whole
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
@@ -842,10 +854,9 @@ def show_detail(parts):
     words = logic.hint_text(i.get("hint"), [b.Text for b in buttons])
     if words:
         d.AddRow(_wide(words, size=12))
-    for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),
-                 det.get("outline")):           # how the lot lines were read from a cleaned outline (PR 18)
-        if text:
-            d.AddRow(_wide(text, size=12))
+    split = logic.detail_parts(det)         # plain words in view; the formula and the chart's shorthand behind a toggle
+    for text in split["notes"]:
+        d.AddRow(_wide(text, size=12))
     for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by
         d.AddRow(_wide(t["term"], bold=True, size=12))
         d.AddRow(_wide("“" + t["text"] + "”", size=11))
@@ -857,11 +868,8 @@ def show_detail(parts):
         d.AddRow(_section(det["diagram"]))
     if det.get("zoom_note"):
         d.AddRow(_wide(det["zoom_note"], size=11))
-    for q in det.get("quotes") or []:
-        if q.get("text"):
-            d.AddRow(_wide("“" + q["text"] + "”", size=12))
-            if q.get("where"):
-                d.AddRow(_wide(q["where"], size=11))
+    for q in split["quotes"]:
+        _quote_rows(d, q)
     if det.get("citation"):
         d.AddRow(_wide(det["citation"], size=11))
     for c in det.get("cited") or []:
@@ -872,10 +880,31 @@ def show_detail(parts):
         url = c["link"]
         link.Click += logic.guard(lambda s, e, u=url: Rhino.UI.Dialogs.ShowMessage(u, "Gordium") if not _open(u) else None, "open the link")
         d.AddRow(link)
-    if det.get("precision"):
-        d.AddRow(_wide(det["precision"], size=11))
+    if split["worked"] or split["worked_quotes"]:       # How it's worked out: collapsed until opened, then kept open
+        toggle = ef.LinkButton()
+        toggle.Text = ("▾ " if parts.get("worked_out") else "▸ ") + logic.WORKED_OUT
+        toggle.Click += logic.guard(lambda s, e: _toggle_worked_out(parts), "show how it's worked out")
+        d.AddRow(toggle)
+        if parts.get("worked_out"):
+            for text in split["worked"]:
+                d.AddRow(_wide(text, size=11))
+            for q in split["worked_quotes"]:              # the chart's own cell, with where it is from
+                _quote_rows(d, q)
     d.Add(None)
     d.Create()
+
+
+def _quote_rows(d, q):
+    """One quote of the code's words, and where it is from."""
+    d.AddRow(_wide("“" + q["text"] + "”", size=12))
+    if q.get("where"):
+        d.AddRow(_wide(q["where"], size=11))
+
+
+def _toggle_worked_out(parts):
+    """Open or close How it's worked out (the panel remembers it while it is open, for every row)."""
+    parts["worked_out"] = not parts.get("worked_out")
+    show_detail(parts)
 
 
 def _section(dg):
