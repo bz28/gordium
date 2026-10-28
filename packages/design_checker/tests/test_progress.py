@@ -749,6 +749,15 @@ def test_the_box_loop_after_cancel_lookup_never_ticks_a_district_changed_meanwhi
     shown = _run_box_loop([({"district_confirmed": True}, "pick:lookup"), ({"district_confirmed": True}, "pick:street"),
                            ({"district_confirmed": False}, "pick:lookup_cancel"), ({}, None)])
     assert [s["district_confirmed"] for s in shown] == [False, False, True, False]
+    # ...the same with the Cancel in a later showing of its own: every showing's changes count, not only the last's
+    shown = _run_box_loop([({"district_confirmed": True}, "pick:lookup"), ({"district_confirmed": True}, "pick:street"),
+                           ({"district_confirmed": False}, "pick:street"), ({}, "pick:lookup_cancel"), ({}, None)])
+    assert [s["district_confirmed"] for s in shown] == [False, False, True, False, False]
+    # a second Look up starts afresh: what was touched during the first lookup never counts against the second
+    shown = _run_box_loop([({"district_confirmed": True}, "pick:lookup"), ({"district_confirmed": True},
+                                                                           "pick:lookup_cancel"),
+                           ({}, "pick:lookup"), ({}, "pick:lookup_cancel"), ({}, None)])
+    assert [s["district_confirmed"] for s in shown] == [False, False, True, False, True]
 
 def test_r2_a_report_not_written_after_a_file_switch_is_said_with_one_full_stop():
     said = logic.outdated_report_message("/x/r.xlsx", logic.NOT_IN_FRONT, True)
