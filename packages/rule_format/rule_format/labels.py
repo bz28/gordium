@@ -30,9 +30,10 @@ from .rulebook import (APPROVAL_FIELDS, VOCABULARY_FILE, Context, _approval_prob
                        _source_problems, load, read_jsonl)
 
 # A reviewer's doubt goes in open_questions (blocks approval); the architect's answer in answers, as for rules.
-LABEL_FIELDS = {"label", "topic", "reason", "sources", "piece_sha256", "run", "notes", "open_questions", "answers",
+LABEL_FIELDS = {"label", "topic", "reason", "sources", "piece_sha256", "run", "notes", "open_questions", "research", "findings",
+                "answers",
                 "revised"}
-LABEL_APPROVED = ("id", "label", "topic", "reason", "sources", "piece_sha256", "answers", "revised")
+LABEL_APPROVED = ("id", "label", "topic", "reason", "sources", "piece_sha256", "findings", "answers", "revised")
 LABEL_KINDS = tuple(load(VOCABULARY_FILE)["label_kinds"])
 
 
