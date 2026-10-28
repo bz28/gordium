@@ -1974,10 +1974,11 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         if what in ("pick:lookup", "pick:lookup_done", "pick:use_saved"):   # (and the district must be
             ticked = {}                                                     # confirmed again)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
-        was_by_hand = saved_ui.get("_by_hand")
+        was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
         facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
-        if what == "pick:by_hand" and saved_ui.get("_by_hand") and not was_by_hand:   # by hand taken: ticks
-            ticked = {}                                   # again (No to its question changes nothing: round 12)
+        if (what == "pick:by_hand" and saved_ui.get("_by_hand")     # by hand taken, or a lookup's preview set
+                and (not was_by_hand or had_pending)):              # aside by it (round 15): ticks again (No to
+            ticked = {}                                             # its question changes nothing: round 12)
         # (nothing saved until Draw: Cancel leaves the facts, the box's choices and the model as they were)
 
 

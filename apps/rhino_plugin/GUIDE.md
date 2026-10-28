@@ -35,8 +35,9 @@ Type a command's name in Rhino's command line.
    its neighbours, so the address alone can't prove it); **No** changes nothing, and **Yes** is kept in the file
    with its date as yours. An address that names another place after the street (`12 Main St, Lansing` or
    `12 Main St Town of Ithaca NY`) still keeps Draw off. Once a lookup has said an address is outside the City,
-   by hand is refused (not asked) until the box is closed, and Draw stays off for that address, and for a lot
-   whose own address it is, whatever the box's address says; a lookup that finds that address ends it.
+   by hand is refused (not asked) and Draw stays off for that address, and for a lot whose own address it is,
+   whatever the box's address says, even after another address is found. A live lookup that finds that same address
+   ends it (a saved one doesn't), and so does closing the box.
 2. Read each row:
    - **Address**: the project's address. **Look up** asks the City's and the State's maps about that address and fills in what they give (the lot, its district); each row says where its answer came from.
      Each found lookup is also saved on this computer, as far as its sources allow (the lot and its street line;

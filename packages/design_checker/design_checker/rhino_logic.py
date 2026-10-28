@@ -2253,8 +2253,10 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     # the map's "outside the City" holds for this box session, each address said (round 14: one slot, cleared by
     # a found lookup of another address), through any later lookup that finds no lot (round 13: offline undid it);
     # a found lookup of that same address ends it for that address only
+    # (a live one only: a copy saved earlier never outranks the City map's newer answer: round 15)
     outside = [a for a in saved_ui.get("_outside_for") or []
-               if not (look["status"] == "found" and same_site_address(a, look["query"] or ""))]
+               if not (look["status"] == "found" and not payload.get("saved_on")
+                       and same_site_address(a, look["query"] or ""))]
     if look["status"] == "outside_city":
         outside.append(look["query"] or facts.get("address") or "the address")
     saved_ui["_outside_for"] = outside

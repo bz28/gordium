@@ -1187,9 +1187,11 @@ def test_by_hand_asks_for_the_district_tick_again():
     from rule_format.rulebook import REPO
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     loop = src[src.index("def _box_loop("):src.index("\n\n\n", src.index("def _box_loop("))]
-    reset = loop[loop.index('if what == "pick:by_hand" and saved_ui.get("_by_hand") and not was_by_hand:'):]
-    assert reset.split("\n", 2)[1].strip().startswith("ticked = {}")      # (round 12: only once by hand is taken)
-    assert loop.index("was_by_hand = saved_ui.get") < loop.index("_box_pick(doc, what.split")
+    reset = loop[loop.index('if (what == "pick:by_hand" and saved_ui.get("_by_hand")'):]
+    assert "(not was_by_hand or had_pending)):" in reset.split("\n", 2)[1]   # round 15: a preview set aside too
+    assert reset.split("\n", 3)[2].strip().startswith("ticked = {}")      # (round 12: only once by hand is taken)
+    assert loop.index('was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")') < \
+        loop.index("_box_pick(doc, what.split")
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
     assert pick.index("_lookup_stop()") < pick.index("logic.choose_by_hand(facts, saved_ui, in_city)")
 
@@ -1344,6 +1346,18 @@ def test_round_14_the_old_lots_yes_is_never_on_the_lot_drawn_in_its_place():
     fresh = {"address": "106 Ithaca Rd", "address_source": "City geocoder"}
     state = logic.after_reset_state(shown, fresh)
     assert logic.fact_sources(state, "2026-10-27", True)["address"]["source"] == "City geocoder"
+
+
+def test_round_15_a_saved_lookup_never_lifts_a_live_outside_the_city():
+    opened = logic.box_opened({}, {})
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "106 Ithaca Rd"}, {}, opened)
+    copy = logic.as_saved({"status": "found", "query": "106 Ithaca Rd", "checked": "2026-10-20", "labels": {}})
+    _, used = logic.lookup_choices(copy, {}, saved)
+    assert used["_outside_for"] == ["106 Ithaca Rd"]
+    assert logic.draw_blocked({"address": "106 Ithaca Rd"}, used) == logic.BY_HAND_OUTSIDE.format(
+        query="106 Ithaca Rd")
+    _, live = logic.lookup_choices({"status": "found", "query": "106 Ithaca Rd"}, {}, used)
+    assert live["_outside_for"] == []                                           # a live found one ends it
 
 
 def test_round_9_a_saved_source_never_says_used_live():
