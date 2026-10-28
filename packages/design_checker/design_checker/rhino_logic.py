@@ -4300,7 +4300,7 @@ KEEP_MINE = "keep"
 START_FRESH = "fresh"
 LOOK_UP_FIRST = "Press Look up to find {address} first."
 NOT_FOUND_YET = "No lot found for {address} (the line above says why): correct the address and press Look up, or {back}."
-NOT_ANSWERED = "The lookup of {address} didn't finish (the line above says why): press Look up again, or {back}."
+LOOKUP_NOT_ANSWERED = "The lookup of {address} didn't finish (the line above says why): press Look up again, or {back}."
 PICK_A_MATCH = "Pick one of the matches under Address, then press Look up."
 WAIT_LOOKUP = "Looking up {address}: Draw once the answer is in."
 GUIDE_PREVIEW = ("The State's tax map didn't answer; the City's outline is shown as a dashed guide only (it can't be "
@@ -4773,7 +4773,7 @@ def address_reason(state):
         if status == "multiple":
             return PICK_A_MATCH
         back = ("put back " + known[0].split(",")[0]) if known else "clear the address"   # blank: Draw without one
-        return (NOT_ANSWERED if status in ("offline", "error", "timeout") else NOT_FOUND_YET).format(
+        return (LOOKUP_NOT_ANSWERED if status in ("offline", "error", "timeout") else NOT_FOUND_YET).format(
             address=address, back=back)
     return LOOK_UP_FIRST.format(address=address)
 
@@ -4858,7 +4858,7 @@ def reset_question(address, mine, answer=None):
           else " by " + place + "'s lot")
     said = []
     if building:
-        listed = _listed(building)
+        listed = _joined(building)
         said.append(listed[0].upper() + listed[1:] + " will be removed.")
     if lot:
         said.append(lot[0][0].upper() + lot[0][1:] + " will be replaced" + by + ".")
@@ -4870,7 +4870,8 @@ def reset_question(address, mine, answer=None):
             (keep, KEEP_MINE) if building else None)
 
 
-def _listed(items):
+def _joined(items):
+    """'a', 'a and b', 'a, b and c' (named apart from use-questions' _listed(options, zone), #37)."""
     items = list(items)
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
 

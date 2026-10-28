@@ -279,3 +279,17 @@ def test_the_box_reopens_with_the_pick_it_was_laid_out_for():
     box = ui[ui.index("def start_box("):ui.index("def text_box_size(")]
     assert "                options, laid_out, (z, names[use.SelectedIndex][0]" in box
     assert len(re.findall(r"^\s+laid_out = ", box, re.M)) == 1
+
+
+def test_rhino_logic_names_each_thing_once():
+    """#26 and #37 each defined NOT_ANSWERED and _listed in rhino_logic: merged, the later one won, so the yes / no
+    dropdown's first entry read "The lookup of {address} didn't finish…" and the Use list raised (found in the demo
+    build; here in #37's merge-3 carry). Every top-level name is defined once."""
+    import ast
+    import collections
+    tree = ast.parse((REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8"))
+    names = [n.name for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
+    names += [t.id for n in tree.body if isinstance(n, ast.Assign) for t in n.targets if isinstance(t, ast.Name)]
+    assert [n for n, k in collections.Counter(names).items() if k > 1] == []
+    assert logic.NOT_ANSWERED == "Not answered"
+    assert logic._listed({"district_uses": {"R-1b": [1]}}, "R-1b") == [1] and logic._joined(["a", "b"]) == "a and b"
