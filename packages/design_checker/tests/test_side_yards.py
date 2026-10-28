@@ -22,7 +22,12 @@ ITHACA = "regulations/jurisdictions/new_york/ithaca_city"
 R2B = {"R-1b.side_yards": "side_yard_smaller >= 5 and side_yard_larger >= 10",
        "R-1b.front_yard": "front_yard >= 10", "R-1b.lot_coverage": "building_area <= 0.35 * lot_area",
        "R-1b.lot_width_one_family_detached": "lot_width >= 35",
-       "R-1b.lot_area_one_family_detached": "lot_area >= 3000"}
+       "R-1b.lot_area_one_family_detached": "lot_area >= 3000",
+       # R-2b's own eaves rule (R-2b.yaml, §325-18B), as the stack below this one added R-1b's (its yards less 2 ft)
+       "R-1b.yard_projections": "front_yard_eaves >= 10 + max(building_height - 35, 0) - 2 and side_yard_smaller_eaves "
+                                ">= 5 + max(building_height - 35, 0) - 2 and side_yard_larger_eaves >= 10 + "
+                                "max(building_height - 35, 0) - 2 and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), "
+                                "20) + max(building_height - 35, 0) - 2"}
 FACTS = {"jurisdiction": ITHACA, "zone": "R-1b", "use": "one_family_detached", "corner_lot": False,
          "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0, "street_line": [[[0, 0], [35, 0]]]}
 
