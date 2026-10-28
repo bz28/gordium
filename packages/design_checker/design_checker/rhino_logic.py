@@ -2250,6 +2250,29 @@ def lookup_may_replace(facts, saved_ui):
     return not lot or lot == (saved_ui or {}).get("replaceable_lot")
 
 
+def looked_up_corner(payload, facts, saved_ui):
+    """(facts, saved_ui) with a found lookup's Corner lot? answer: No where it found one street (road widths known),
+    Yes where it found two or more, else unanswered (asked, never guessed; its old source goes too), credited to the
+    street service. The one reading the box's preview (preview_lookup: shown for the architect to keep or change)
+    and Draw's reset (lookup_choices) both use, so the box shows the answer Draw saves (UX walkthrough 2026-10-28:
+    the box said "Not answered" while Draw saved the lookup's "no" as "confirmed by you")."""
+    got, labels = (payload or {}).get("facts") or {}, (payload or {}).get("labels") or {}
+    corner = (got.get("corner_lot") or {}).get("value")
+    streets = ((got.get("street_side") or {}).get("value") or {}).get("streets") or {}
+    facts, saved_ui = dict(facts or {}), dict(saved_ui or {})
+    if corner == "no":
+        facts["corner_lot"] = False
+    elif corner == "yes" or (corner == "ask" and len(streets) > 1):
+        facts["corner_lot"] = True               # it faces two streets (the box asks which line is the front)
+    else:
+        facts.pop("corner_lot", None)            # unknown: asked, never guessed
+    if corner:
+        saved_ui["corner_source"] = SUGGESTED + " · " + (labels.get("corner_lot") or SOURCE_OF["street"])
+    else:
+        saved_ui.pop("corner_source", None)
+    return facts, saved_ui
+
+
 def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     """(facts, saved_ui) after a lookup, as a pick returns them. Each found fact a suggestion with its own service's
     name, never confirmed (the district must be ticked again: "_reconfirm"). The lot, street side and ground (and
@@ -2367,16 +2390,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
             saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
         else:
             saved_ui.pop("street_source", None)
-    corner = value("corner_lot")
-    streets = side.get("streets") or {}
-    if corner == "no":
-        facts["corner_lot"] = False
-    elif corner == "yes" or (corner == "ask" and len(streets) > 1):
-        facts["corner_lot"] = True               # it faces two streets (the box asks which line is the front)
-    else:
-        facts.pop("corner_lot", None)            # unknown: asked, never guessed
-    if corner:
-        saved_ui["corner_source"] = SUGGESTED + " · " + label("corner_lot", "street")
+    facts, saved_ui = looked_up_corner(payload, facts, saved_ui)
     lot = value("lot") or {}
     writes = payload.get("writes") or {}
     if lot:
@@ -3674,14 +3688,27 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
     facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=False)
     if (answer or {}).get("status") != "found":
         return facts, saved_ui, None
+    # the Corner lot? answer Draw will save, shown now for the architect to keep or change (it is an answer, not
+    # something drawn; Draw keeps the box's: apply_reset). Only for a new lot: the address already drawn is drawn
+    # again by nothing, so its own answer stays (review round 1 of this fix, F1: a re-lookup of the drawn address
+    # put the lookup's "no" over the architect's Yes on a corner lot)
+    new_lot = not is_drawn(facts.get("address") or answer.get("query"), saved_ui)
+    if new_lot:
+        facts, saved_ui = looked_up_corner(answer, facts, saved_ui)
     w = answer.get("writes") or {}
     undo = [(where, k, before.get(k, MISSING), after.get(k, MISSING))
             for where, before, after in (("facts", before_f, facts), ("saved", before_s, saved_ui))
             for k in set(before) | set(after) if k not in ("_lookup", "_pending", "_outside_for")   # (the
             # session's, never one preview's: set aside, it brought back an address found since: round 16)
             and before.get(k, MISSING) is not after.get(k, MISSING) and before.get(k, MISSING) != after.get(k, MISSING)]
+    if new_lot:                                  # the corner answer always goes back with the preview (drop_pending),
+        undo += [(where, k, before.get(k, MISSING), after.get(k, MISSING))   # changed by it or not
+                 for where, k in (("facts", "corner_lot"), ("saved", "corner_source")) + PREVIEW_STREET
+                 for before, after in [(before_f, facts) if where == "facts" else (before_s, saved_ui)]
+                 if not any(u[0] == where and u[1] == k for u in undo)]
     address = facts.get("address") or answer.get("query")
-    saved_ui["_pending"] = {"address": address, "query": answer.get("query"), "answer": answer, "undo": undo}
+    saved_ui["_pending"] = {"address": address, "query": answer.get("query"), "answer": answer, "undo": undo,
+                            "lot_id": facts.get("lot_id")}   # the drawn lot the street lines go back to (drop_pending)
     if not replaces:
         saved_ui["_lookup"]["says"] = ("Your own lot is kept until you press Draw: the lookup filled in the address "
                                        "and the district.")
@@ -3693,6 +3720,20 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
     return facts, saved_ui, w.get("lot_ring") or w.get("guide_ring")
 
 
+PREVIEW_ANSWERS = ("corner_lot", "corner_source")      # answered for the previewed lot: put back when it is dropped
+# the drawn lot's street lines, put back with them: lines picked while another lot was previewed (under its corner
+# answer, or under one changed after the pick) never stay on the drawn lot (rounds 2 and 3 of the corner fix: a
+# lot answered No kept two streets' lines; one answered Yes kept one)
+PREVIEW_STREET = (("facts", "street_line"), ("facts", "street_ids"), ("saved", "street_name"),
+                  ("saved", "_street_name"), ("saved", "street_source"))
+
+
+def previews_new_lot(saved_ui):
+    """Whether the box shows a looked-up lot that Draw will draw (a lookup pending, not of the address drawn)."""
+    pending = (saved_ui or {}).get("_pending")
+    return bool(pending) and not is_drawn(pending.get("address"), saved_ui)
+
+
 def drop_pending(facts, saved_ui):
     """(facts, saved_ui) with the pending preview gone and the box changes it made undone, each only while it is as
     the preview left it (an architect's later change stays)."""
@@ -3701,9 +3742,17 @@ def drop_pending(facts, saved_ui):
     def same(a, b):                    # None and no value are the same (the box writes "no district" as None)
         return (MISSING if a is None else a) == (MISSING if b is None else b)
 
+    # the street lines go back only onto the lot they were drawn on: a lot picked during the preview (Use my
+    # survey..., Draw my lot...) dropped them, and its street is asked again (review round 4 of the corner fix, F1:
+    # the old lot's street line came back on a survey lot, off its outline)
+    same_lot = (facts.get("lot_id") or None) == (pending.get("lot_id") or None)
     for where, key, old, new in pending.get("undo") or []:
         target = facts if where == "facts" else saved_ui
-        if same(target.get(key, MISSING), new):
+        # the Corner lot? answer shown for the previewed lot, or given for it, was that lot's: never the drawn lot's
+        # (review round 1 of the corner fix, F2: a No given for the preview stayed on a drawn corner lot), and the
+        # drawn lot's street lines as they were (PREVIEW_STREET)
+        street = same_lot and (where, key) in PREVIEW_STREET
+        if key in PREVIEW_ANSWERS or street or same(target.get(key, MISSING), new):
             if old is MISSING:
                 target.pop(key, None)
             else:
@@ -4156,7 +4205,12 @@ def after_reset_state(shown, fresh):
 def box_facts(facts, saved_ui, state):
     """(facts, saved_ui) with the box's own answers in them: a changed corner answer (corner_answered), the
     address, district, use and whether the lot is a survey. The pure part of gordium_rhino._apply_box."""
-    facts, saved_ui = corner_answered(facts, saved_ui, state.get("corner_lot"))
+    if previews_new_lot(saved_ui):       # the answer is the previewed lot's: the drawn lot's street lines stay (its
+        facts = dict(facts, corner_lot=state.get("corner_lot"))    # own come with it at Draw: apply_reset)
+        if facts["corner_lot"] is None:
+            facts.pop("corner_lot")
+    else:
+        facts, saved_ui = corner_answered(facts, saved_ui, state.get("corner_lot"))
     facts = dict(facts, address=state.get("address") or None, zone=state.get("zone"), use=state.get("use"),
                  lot_surveyed=bool(state.get("lot_surveyed")))
     if not facts.get("address"):
@@ -4183,7 +4237,14 @@ def apply_reset(table, session, facts, saved_ui, choice, zones=()):
     # lookup's answer fills only the lot, the street side, the corner and the ground (review round 1)
     chosen_f = {k: facts.get(k, MISSING) for k in BOX_CHOSEN_FACTS}
     chosen_s = {k: saved_ui.get(k, MISSING) for k in BOX_CHOSEN_UI}
+    # the box's Corner lot? answer: the lookup's, shown since its preview (preview_lookup), or the architect's
+    # change of it, which is theirs and is kept (UX walkthrough 2026-10-28, P0: "Yes: two streets" picked after
+    # Look up was saved as the lookup's "no", so a corner lot's second street had a side yard's limit)
+    corner, corner_source = facts.get("corner_lot"), saved_ui.get("corner_source")
     facts, saved_ui, guide = apply_lookup(table, session, pending.get("answer") or {}, facts, saved_ui, zones)
+    if facts.get("corner_lot") != corner:       # changed in the box: theirs (its street lines picked again)
+        facts, saved_ui = corner_answered(facts, saved_ui, corner)
+        saved_ui["corner_source"] = corner_source or ENTERED
     found_source = saved_ui.get("address_source")          # the lookup's, for the address as found
     for target, chosen in ((facts, chosen_f), (saved_ui, chosen_s)):
         for k, v in chosen.items():

@@ -218,8 +218,11 @@ def test_look_up_previews_only_and_cancel_leaves_the_file_as_it_was():
     assert box.preview and box.saved["_pending"]["answer"]["status"] == "found"
     assert box.facts["lot_id"] == "lot1" and box.button() == "Draw"
     assert "_pending" not in logic.storable_ui(box.saved)       # a preview is never written into the file
-    for key in ("lot_id", "lot_surveyed", "corner_lot", "street_line"):   # its rows still say what is drawn
+    for key in ("lot_id", "lot_surveyed", "street_line"):   # its rows still say what is drawn
         assert box.facts.get(key) == site.facts.get(key), key
+    # ...but Corner lot? (an answer, not a drawing) shows the lookup's, the one Draw saves (UX walkthrough
+    # 2026-10-28): 96 Ithaca Rd's lookup found two streets
+    assert box.facts.get("corner_lot") is True and site.facts["corner_lot"] is False
     box.cancel()
     assert site.state() == before
 
@@ -1481,3 +1484,184 @@ def test_round_8_a_saved_lookups_district_and_overlay_lines_say_what_happened():
     assert saved["_live"]["zone"] == logic.SAVED_NO_DISTRICT
     assert saved["_live"]["overlays"] == logic.OVERLAYS_NOT_KEPT
     assert logic.NO_DISTRICT.endswith(".")
+
+
+# ---- UX walkthrough 2026-10-28: the Corner lot? answer the box shows is the one Draw saves ---------------------
+
+OTHER = "200 Elm St, Ithaca, NY"           # a drawn lot that is not the address looked up: Draw draws the new one
+
+
+def test_after_look_up_the_box_shows_the_lookups_corner_answer_and_no_longer_asks_it():
+    """Rhino, demo baadaa38: after Look up the box still said "Corner lot? Not answered" and asked "Does this lot
+    face two streets?", while Draw then saved the lookup's "no" as "confirmed by you". The box shows the answer
+    Draw will save, credited to the street service, for the architect to keep or change."""
+    for name, expected in (("106_ithaca_rd", False), ("96_ithaca_rd", True)):
+        box = Site(drawn=OTHER).box().look_up(answer(name))
+        shown = box.shown()
+        assert shown["corner_lot"] is expected, name
+        assert shown["corner_source"].startswith(logic.SUGGESTED + " · "), name
+        assert "Does this lot face two streets?" not in (logic.uncertain(shown) or ""), name
+
+
+def test_p0_a_corner_answer_changed_after_look_up_is_the_one_draw_saves():
+    """P0, a false pass (Rhino, demo baadaa38, 2026-10-28): Look up 106 Ithaca Rd (one street found), Corner lot? =
+    Yes, Draw: the lookup's "no" was saved ("confirmed by you"), so a corner lot's second street was held to a side
+    yard's limit instead of a front yard's. The architect's answer is kept, and the street lines are picked again
+    (a corner lot's streets: corner_answered)."""
+    site = Site(drawn=OTHER)
+    box = site.box().look_up(answer("106_ithaca_rd"))
+    box.typed.update(corner_lot=True, corner_source=logic.ENTERED)
+    assert box.draw() == "drawn"
+    assert site.facts["corner_lot"] is True and not site.facts.get("street_line")
+    assert site.sources["corner_lot"]["value"] == "yes, two streets"
+    assert site.sources["corner_lot"]["source"] == logic.ENTERED
+    # the other way: two streets found, the architect says one (theirs to say: entered by them)
+    site = Site(drawn=OTHER)
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    box.typed.update(corner_lot=False, corner_source=logic.ENTERED)
+    assert box.draw() == "drawn" and site.facts["corner_lot"] is False
+    assert site.sources["corner_lot"]["source"] == logic.ENTERED
+    # put back to Not answered on purpose: saved unanswered (the yards wait for it), never the lookup's "no"
+    site = Site(drawn=OTHER)
+    box = site.box().look_up(answer("106_ithaca_rd"))
+    box.typed.update(corner_lot=None, corner_source=logic.ENTERED)
+    assert box.draw() == "drawn" and site.facts.get("corner_lot") is None
+    # left as the lookup showed it: the lookup's answer and source, as before
+    site = Site(drawn=OTHER)
+    assert site.box().look_up(answer("106_ithaca_rd")).draw() == "drawn"
+    assert site.facts["corner_lot"] is False and site.facts.get("street_line")
+    assert site.sources["corner_lot"]["source"].startswith(logic.SUGGESTED + " · ")
+
+
+def test_an_answer_given_before_look_up_never_rides_onto_the_new_lot():
+    """Re-lookup review round 1 (P0) still holds: the drawn lot's corner answer, even one the architect changed in
+    this box before pressing Look up, is replaced by the new lot's shown answer when the lookup comes back."""
+    site = Site(drawn=OTHER)                                    # drawn: not a corner lot
+    box = site.box()
+    box.typed.update(corner_lot=False, corner_source=logic.ENTERED)
+    box.look_up(answer("96_ithaca_rd"))                         # two streets found
+    assert box.shown()["corner_lot"] is True
+    assert box.draw() == "drawn" and site.facts["corner_lot"] is True
+
+
+def test_a_dropped_preview_puts_the_drawn_lots_corner_answer_back():
+    site = Site(drawn=OTHER)
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.facts["corner_lot"] is True
+    assert box.type_address(OTHER).draw() == "box-again"        # the drawn address typed back: preview set aside
+    assert box.facts["corner_lot"] is False and box.saved.get("corner_source") == site.saved.get("corner_source")
+
+
+def test_p0_in_an_empty_file_too_the_corner_answer_after_look_up_is_kept():
+    """The Rhino run's own path: a new, empty file (no lot), Look up, Corner lot? = Yes, Draw."""
+    facts, saved, _ = logic.preview_lookup(answer("106_ithaca_rd"), {"address": "106 Ithaca Rd"},
+                                           logic.box_opened({}, {}), ZONES)
+    assert facts["corner_lot"] is False                          # shown: the lookup's one street
+    state = {"address": facts["address"], "zone": facts.get("zone"), "use": "one_family_detached",
+             "corner_lot": True, "corner_source": logic.ENTERED}
+    facts, saved = logic.box_facts(facts, saved, state)
+    saved = logic.saved_sources(saved, state)
+    table = FakeTable({})
+    facts, saved, _, _ = logic.apply_reset(table, logic.BoxSession(table), facts, saved, logic.START_FRESH, ZONES)
+    assert facts["corner_lot"] is True and saved["corner_source"] == logic.ENTERED
+
+
+def _drawn_corner_lot(address=OTHER):
+    """A drawn corner lot the architect answered Yes for, both streets picked."""
+    site = Site(drawn=address)
+    site.facts.update(corner_lot=True, street_line=[[[0, 0], [60, 0]], [[60, 0], [60, 100]]])
+    site.saved["corner_source"] = logic.ENTERED
+    return site
+
+
+def test_review_f1_a_re_lookup_of_the_drawn_address_keeps_the_architects_corner_answer():
+    """Review round 1 of the corner fix, F1 (P0): looking up the address already drawn draws nothing new (reset_plan
+    "none"), so the lookup's corner answer must not be shown or saved over the architect's Yes on that lot."""
+    a = answer("106_ithaca_rd")                               # the lookup finds one street
+    site = _drawn_corner_lot(a["facts"]["address"]["value"])
+    box = site.box().look_up(a)
+    assert box.shown()["corner_lot"] is True and box.shown()["corner_source"] == logic.ENTERED
+    assert box.draw() == "drawn"
+    assert site.facts["corner_lot"] is True and len(site.facts["street_line"]) == 2
+    assert site.sources["corner_lot"]["source"] == logic.ENTERED
+
+
+def test_review_f2_an_answer_given_for_a_dropped_preview_never_stays_on_the_drawn_lot():
+    """Review round 1 of the corner fix, F2 (P1): No picked while 96 Ithaca Rd's lot was previewed, then the drawn
+    address typed back (the preview set aside): the drawn corner lot keeps its own Yes and both its streets."""
+    site = _drawn_corner_lot()
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    box.typed.update(corner_lot=False, corner_source=logic.ENTERED)
+    box._apply()                                              # e.g. a pick while the preview shows
+    assert len(box.facts["street_line"]) == 2                 # the drawn lot's streets untouched meanwhile
+    assert box.type_address(OTHER).draw() == "box-again"
+    assert box.facts["corner_lot"] is True and box.saved["corner_source"] == logic.ENTERED
+    assert box.draw() == "drawn"
+    assert site.facts["corner_lot"] is True and len(site.facts["street_line"]) == 2
+    # the same when the preview's answer equals the drawn lot's (nothing for the preview's undo to record)
+    p = answer("96_ithaca_rd")                                # two streets: Yes, as drawn
+    site = _drawn_corner_lot()
+    box = site.box().look_up(p)
+    assert box.shown()["corner_lot"] is True
+    box.typed.update(corner_lot=False, corner_source=logic.ENTERED)
+    box._apply()
+    assert box.type_address(OTHER).draw() == "box-again" and box.facts["corner_lot"] is True
+
+
+def test_review_r2_street_lines_picked_under_a_dropped_previews_answer_go_back_with_it():
+    """Review round 2 of the corner fix, F1 (P2): a drawn lot that is not a corner lot; 96 Ithaca Rd looked up (two
+    streets: shown Yes); Change… on the drawn lot's Front lot line picks two streets under that Yes; the drawn
+    address typed back: the drawn lot gets its No back, and its one street line with it (never a lot answered No
+    with two streets' lines). A pick under the drawn lot's own answer is kept."""
+    one = [[[0, 0], [60, 0]]]
+    two = {"lines": [[[0, 0], [60, 0]], [[60, 0], [60, 100]]], "ids": ["Street 1", "Street 2"], "name": None}
+    site = Site(drawn=OTHER)
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    box._apply()                                              # Change… on the Front lot line: _apply_box, then
+    assert box.facts["corner_lot"] is True                    # the pick, in corner mode
+    box.facts, box.saved = logic.pick_effect("street", two, box.facts, box.saved)
+    assert box.type_address(OTHER).draw() == "box-again"
+    assert box.facts["corner_lot"] is False and box.facts["street_line"] == one
+    assert box.draw() == "drawn" and site.facts["corner_lot"] is False and site.facts["street_line"] == one
+    # round 3 (P2): two streets picked under the preview's Yes, then the answer set to No before the preview is set
+    # aside (No = the drawn lot's No): the drawn lot still gets its own one line back
+    site = Site(drawn=OTHER)
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    box._apply()
+    box.facts, box.saved = logic.pick_effect("street", two, box.facts, box.saved)
+    box.typed.update(corner_lot=False, corner_source=logic.ENTERED)
+    box._apply()
+    assert box.type_address(OTHER).draw() == "box-again" and box.facts["street_line"] == one
+    assert box.draw() == "drawn" and site.facts["corner_lot"] is False and site.facts["street_line"] == one
+    # round 3 (P3), the mirror: a drawn corner lot (Yes, two lines); 106 previewed (No); one street picked, Yes set:
+    # the drawn lot gets both its lines back
+    site = _drawn_corner_lot()
+    both = site.facts["street_line"]
+    box = site.box().look_up(answer("106_ithaca_rd"))
+    box._apply()
+    box.facts, box.saved = logic.pick_effect("street", {"lines": one, "ids": ["Street 1"], "name": None}, box.facts,
+                                             box.saved)
+    box.typed.update(corner_lot=True, corner_source=logic.ENTERED)
+    box._apply()
+    assert box.type_address(OTHER).draw() == "box-again"
+    assert box.facts["corner_lot"] is True and box.facts["street_line"] == both
+
+
+def test_review_r4_a_lot_picked_during_a_preview_never_gets_the_old_lots_street_line():
+    """Review round 4 of the corner fix, F1 (P1): a drawn lot (not the sample) with one street line; 96 Ithaca Rd
+    looked up; Use my survey… picks another lot during the preview (its street lines dropped: asked again on it);
+    the drawn address typed back and Draw: the survey lot keeps no street line (never the old lot's, off its
+    outline, where the front yard and lot width would be measured from the wrong edge). With the lot unchanged the
+    drawn lot's own line still comes back (round 3)."""
+    one = [[[0, 0], [60, 0]]]
+    site = Site(lot="looked_up", drawn=OTHER)
+    site.table.objects["lot2"] = {"layer": "Site", "kind": "lot", "area": 5000.0}
+    assert site.facts["street_line"] == one
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    box._apply()
+    box.facts, box.saved = logic.pick_effect("lot", "lot2", box.facts, box.saved)     # Use my survey…
+    assert box.facts["lot_id"] == "lot2" and not box.facts.get("street_line")
+    assert box.type_address(OTHER).draw() == "box-again"
+    assert box.facts["lot_id"] == "lot2" and not box.facts.get("street_line")
+    box.draw()
+    assert site.facts.get("lot_id") == "lot2" and not site.facts.get("street_line")
