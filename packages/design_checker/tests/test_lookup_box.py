@@ -927,7 +927,13 @@ def test_live_mode_never_rechecks_under_an_open_start_box():
     idle = rhino[rhino.index("def _idle("):rhino.index("def documents(")]
     assert 'busy = STATE.get("running") or STATE.get("asking") is not None' in idle    # a check, or any answer
     assert 'logic.should_recheck(t, time.time(), busy, _box_open(), IDLE_SECONDS,' in idle
-    assert idle.index("should_recheck") < idle.index('STATE["dirty"] = None')   # the pending edit kept until then
+    # the pending edit kept until a check starts, never under an open box: each place _idle clears it comes after the
+    # test that a check can start now (no box open, nothing running): the file come to the front, or the re-check
+    clears = [i for i in range(len(idle)) if idle.startswith('STATE["dirty"] = None', i)]
+    assert len(clears) == 2, clears
+    assert idle.index("should_check_front") < clears[0] < idle.index("should_recheck") < clears[1]
+    assert idle.index("_check_live(front)") > clears[0] and idle.index("_check_live(doc)") > clears[1]
+    assert not logic.should_check_front(True, False, True)                # a box open: the file in front waits too
     check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
     assert 'if STATE.get("running") or not logic.allowed("check", _box_open()):\n        return None' in check
     save = rhino[rhino.index("def save_facts("):rhino.index("def _save_facts(")]
