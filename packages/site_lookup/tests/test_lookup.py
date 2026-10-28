@@ -655,3 +655,83 @@ def test_every_fact_on_a_doubtful_lot_is_doubtful(doubt):
     words = "may be the wrong one" if doubt == "along the street" else "largest piece"
     for name in ON_THE_LOT:
         assert f[name]["status"] != "suggested" and words in f[name]["reason"], name
+
+
+# ---- names: how the City's layers write a district or a street (names.yaml, exact tables) -------------------
+# The names below are the ones the live layers gave on 2026-10-27 (names only: no geometry or other attribute).
+
+def test_the_city_maps_r_u_is_the_rulebooks_ru():
+    """614 University Ave: the City's map writes R-U (as §325-4 does); the zoning chart and the rulebook write RU.
+    Before names.yaml the start box found no rulebook for "R-U" and set no district."""
+    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, "R-U")])
+    z = both(r)["zone"]
+    assert z["value"] == "RU" and z["status"] == "suggested"
+    assert "R-U" in z["note"] and "§325-4" in z["note"]
+    assert "R-U" not in json.dumps(r["snapshot"]) and "RU" not in json.dumps(r["snapshot"]["facts"]["zone"])
+
+
+@pytest.mark.parametrize("code", ["B-1a", "CBD-60", "SHOD", "R-1A", "RU ", "R U"])
+def test_a_district_code_gordium_doesnt_know_needs_review(code):
+    """Another district (B-1a, CBD-60, the SHOD overlay, all on the City's map) or a code that only looks like a
+    residential one (R-1A, 'RU ', 'R U'): never matched by likeness, shown as the map gives it, needs review."""
+    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, code)])
+    z = both(r)["zone"]
+    assert z["value"] == code and z["status"] == "needs_review" and "isn't one of the residential districts" in z["reason"]
+
+
+def test_every_residential_district_as_written_is_used_as_is():
+    for code in ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b"]:
+        r, _ = run("106_ithaca_rd", zones=[Fake.square(None, code)])
+        z = both(r)["zone"]
+        assert z["value"] == code and z["status"] == "suggested" and "map writes" not in (z.get("note") or ""), code
+
+
+def test_a_lot_in_r_u_and_another_district_asks_between_ru_and_it():
+    fx = load("106_ithaca_rd")
+    ring = g.open_ring(next(a for a in fx["answers"] if a["source"] == "state_parcels")["body"]["features"][0]["geometry"]["rings"][0])
+    cx = g.centroid(ring)[0]
+    f = Fake(fx, zones=[Fake.square(None, "R-U", 840000, 880000, cx, 890000),
+                        Fake.square(None, "R-3b", cx, 880000, 850000, 890000)])
+    r = lookup(fx["address"], f, NOW)
+    z = both(r)["zone"]
+    assert z["status"] == "ask" and set(z["value"]) == {"RU", "R-3b"}
+
+
+def test_the_names_tables_name_only_districts_gordium_has():
+    from site_lookup.sources import NAMES
+    d = NAMES["districts"]
+    assert all(a["district"] in d["residential"] for a in d["aliases"].values())
+    for name in d["residential"]:          # each one a rulebook file name (the R-1b rulebook is on main)
+        assert name.replace("-", "").isalnum()
+
+
+def test_a_city_road_named_for_two_streets_is_the_addresss_street():
+    """The City's road layer names East State Street "E STATE ST / M.L.K. JR ST": an address on E State St
+    facing it gave "The address is on E STATE ST, but the lot only touches E STATE ST M L K JR ST" (needs review)
+    before names.yaml. Here 106 Ithaca Rd's lot stands in, its road and address renamed."""
+    fx = load("106_ithaca_rd")
+    for a in fx["answers"]:
+        if a["source"] == "geocoder":
+            for c in a["body"]["candidates"]:
+                c["attributes"].update(StPreDir="E", StName="State", StType="St")
+        if a["source"] == "state_streets":
+            for f in a["body"]["features"]:
+                if f["attributes"].get("CompleteStreetName") == "Ithaca Road":
+                    f["attributes"]["CompleteStreetName"] = "E STATE ST / M.L.K. JR ST"
+    r = lookup(fx["address"], Fake(fx), NOW)
+    s = both(r)["street_side"]
+    assert s["value"]["street"] == "E STATE ST" and s["status"] == "suggested", s.get("reason")
+
+
+@pytest.mark.parametrize("raw,street", [("W STATE ST/ M. L. K. JR ST", "W STATE ST"),
+                                        ("W CLINTON ST EB LANE", "W CLINTON ST"), ("N MEADOW ST SB", "N MEADOW ST"),
+                                        ("W BUFFALO ST BRIDGE", "W BUFFALO ST"), ("Ithaca Road", "ITHACA RD")])
+def test_city_road_names_read_as_the_address_writes_them(raw, street):
+    from site_lookup.sources import road_name
+    assert road_name(raw) == street
+
+
+@pytest.mark.parametrize("raw", ["E STATE ST /M.L.K. JR ST", "e state st / m.l.k. jr st", "MLK JR ST"])
+def test_a_road_name_not_in_the_table_is_never_matched_by_likeness(raw):
+    from site_lookup.sources import road_name
+    assert road_name(raw) != "E STATE ST"

@@ -22,7 +22,7 @@ import yaml
 
 from . import geometry as g
 from .http import Offline, ServiceError
-from .sources import ENDPOINTS, Fetcher, normalize_street
+from .sources import ENDPOINTS, NAMES, Fetcher, district, normalize_street
 
 AMENDMENTS = yaml.safe_load((Path(__file__).parent / "amendments.yaml").read_text(encoding="utf-8"))
 CITY_SWIS = "500700"                     # the City of Ithaca (the Town of Ithaca has its own code and SWIS)
@@ -341,7 +341,7 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     samples = g.grid_inside(ring)
     counts: dict[str, int] = {}
     for p in samples:
-        z = next((z["zone"] for z in polys if g.inside_any(p, z["rings"])), None)
+        z = next((district(z["zone"])[0] for z in polys if g.inside_any(p, z["rings"])), None)
         if z:
             counts[z] = counts.get(z, 0) + 1
     shares = {z: n / len(samples) for z, n in counts.items()} if samples else {}
@@ -357,6 +357,15 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     z = facts["zone"] = fact(zones[0] if len(zones) == 1 else zones, source, src["url"], today, key="city_zoning", lot=lot)
     if covered < 0.9:
         escalate(z, "needs_review", f"Only {covered:.0%} of this lot is on the City's zoning map: check the district.")
+    codes = {c for c in (p["zone"] for p in polys) if district(c)[0] in zones}   # the map's own codes for them
+    renamed = sorted(c for c in codes if district(c)[1] == "alias")
+    if renamed:
+        z["note"] = " ".join(f"The City's map writes {c}, used as {district(c)[0]}: "
+                             + " ".join(NAMES["districts"]["aliases"][c]["why"].split()) for c in renamed)
+    unknown = [c for c in zones if district(c)[1] == "unknown"]
+    if unknown:
+        escalate(z, "needs_review", f"The City's zoning map gives {' and '.join(unknown)}, which isn't one of the "
+                                    "residential districts Gordium knows by name: choose the district.")
     if len(zones) > 1:
         asks.append(f"This lot is in {' and '.join(zones)}: pick the zone that applies.")
         escalate(z, "ask", asks[-1])
@@ -377,7 +386,7 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
         else:
             notes.append(line + "; this lot is outside the area it rezoned.")
     if notes:
-        z["note"] = " ".join(notes)
+        z["note"] = " ".join(([z["note"]] if z.get("note") else []) + notes)
     _overlays(f, ring, city_parcel, src, today, facts, lot)
 
 

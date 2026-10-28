@@ -1,0 +1,43 @@
+# How the City's live layers write a district or a street, matched to how Gordium writes it. Exact tables only,
+# kept by hand: a name is matched character for character, never by likeness. Each entry is a name only (no
+# geometry, no other attribute of the City's layers, which may not be stored); each says where it was seen.
+
+districts:
+  # The residential districts as the zoning chart's columns, and Gordium's rulebook files, write them
+  # (5_zoning_rules/<district>.yaml; chart p.3). A City zoning-map code that is one of these, or an alias below, is
+  # used as that district; any other code (another district, or a code Gordium doesn't know) is shown as the map
+  # gives it and needs review.
+  residential: [R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU]
+  aliases:
+    R-U:
+      district: RU
+      why: >-
+        §325-4 lists the district as "R-U Residential" (Chapter 325, p.22 line 20), and the City's zoning map writes
+        R-U (614 University Ave, looked up 2026-10-27); the zoning chart's column, and Gordium's rulebook, write RU.
+
+roads:
+  # The City's road layer (NAME) → the street as an address on it is written, before Gordium's usual
+  # abbreviation (sources.normalize_street). Seen in the layer's names on 2026-10-27. A name not listed is used as
+  # the layer writes it: an address on a street the lot "doesn't touch" then needs review, as before.
+  # State Street is also Martin Luther King Jr Street; its addresses are written on State St (an address written
+  # on Martin Luther King Jr St still needs review).
+  "E STATE ST / M.L.K. JR ST": E STATE ST
+  "W STATE ST/ M. L. K. JR ST": W STATE ST
+  "W STATE ST/ M. L. K. JR ST BRIDGE": W STATE ST
+  "W BUFFALO ST BRIDGE": W BUFFALO ST
+  # One direction of a divided street: the same street
+  "CAMPUS RD NB LANE": CAMPUS RD
+  "CAMPUS RD SB LANE": CAMPUS RD
+  "DRYDEN RD EB LANE": DRYDEN RD
+  "KLINE RD NB LANE": KLINE RD
+  "KLINE RD SB LANE": KLINE RD
+  "N MEADOW ST NB": N MEADOW ST
+  "N MEADOW ST SB": N MEADOW ST
+  "OAK AVE EB LANE": OAK AVE
+  "OAK AVE WB LANE": OAK AVE
+  "S AURORA ST EB LANE": S AURORA ST
+  "S AURORA ST WB LANE": S AURORA ST
+  "UNIVERSITY AVE EB LANE": UNIVERSITY AVE
+  "W CLINTON ST EB LANE": W CLINTON ST
+  "W CLINTON ST WB LANE": W CLINTON ST
+  "WEST AVE WB LANE": WEST AVE
