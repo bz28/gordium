@@ -2180,13 +2180,14 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             elif drawn_state is not state:            # after the reset (the guide): its lot rows are the model's
                 ticked = {k: v for k, v in ticked.items() if k in GUIDE_KEEPS}
             continue
-        # the lookup's answer replaces them (and the district must be confirmed again); Look up and Cancel lookup
-        # keep them as the box shows them, never the ticks from before Look up brought back (rhino_logic.
-        # ticks_after_pick); by hand undoes them (a tick given its district never moves to another)
-        ticked = logic.ticks_after_pick(what, ticked)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
         facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
+        # a lookup's answer that filled the box replaces them (the district must be confirmed again); Look up,
+        # Cancel lookup and an answer that filled nothing keep them as the box shows them, never the ticks from
+        # before Look up brought back (rhino_logic.ticks_after_pick); by hand undoes them (a tick given its district
+        # never moves to another)
+        ticked = logic.ticks_after_pick(what, ticked, (saved_ui.get("_lookup") or {}).get("status"))
         if (what == "pick:by_hand" and saved_ui.get("_by_hand")     # by hand taken, or a lookup's preview set
                 and (not was_by_hand or (had_pending and not saved_ui.get("_pending")))):   # aside by it (round
             ticked = {}            # 15): ticks again (No or refused changes nothing: rounds 12, 16)

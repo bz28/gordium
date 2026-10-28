@@ -293,7 +293,8 @@ def test_the_wait_window_closes_when_the_job_is_done_or_cancelled():
     assert 'status["label"].Text = progress()' in box
     assert "lookup_cancel" in part(RHINO, "def _one_pick(", "def _pick_outcome(")
     loop = part(RHINO, "def _box_loop(", "# ---- the address lookup")
-    assert "ticked = logic.ticks_after_pick(what, ticked)" in loop and "before_lookup" not in loop
+    assert 'ticked = logic.ticks_after_pick(what, ticked, (saved_ui.get("_lookup") or {}).get("status"))' in loop
+    assert "before_lookup" not in loop
 
 
 # ---- Rhino run of aea73b8 (#32) and a3eb1d7 (#33): a frozen wait window, and Draw again after a Cancel ------------
@@ -647,12 +648,16 @@ def test_look_up_and_cancel_lookup_keep_the_ticks_as_the_box_shows_them():
            "corner_source": LIVE, "checked": ["street"]}
     assert logic.ticks_after_pick("pick:lookup_cancel", now) == now        # never the ticks from before Look up
     assert logic.ticks_after_pick("pick:lookup", now) == now               # the box shows the architect's own
-    assert logic.ticks_after_pick("pick:lookup_done", now) == {} == logic.ticks_after_pick("pick:use_saved", now)
+    assert logic.ticks_after_pick("pick:lookup_done", now, "found") == {} == \
+        logic.ticks_after_pick("pick:use_saved", now, "found")
+    for status in ("not_found", "offline", "outside_city", "timeout", "error", None):    # filled nothing: as shown
+        assert logic.ticks_after_pick("pick:lookup_done", now, status) == now, status
+    assert logic.ticks_after_pick("pick:use_saved", now, "offline") == now               # a saved one refused
     assert logic.ticks_after_pick("pick:street", now) == now and logic.ticks_after_pick("pick:lookup", None) == {}
     assert logic.box_ticks(dict(now, zone="R-3a", _draw_label="Draw")) == now
 
 
-def _run_box_loop(script, confirmed_at_draw=None):
+def _run_box_loop(script, confirmed_at_draw=None, answer="found"):
     """gordium_rhino._box_loop itself, run with the box replaced by `script`: one (change, what) per showing of the
     box, `change` applied to what the box shows as the architect would (ui.start_box's keep()). Returns each state
     the box was shown with."""
@@ -669,7 +674,8 @@ def _run_box_loop(script, confirmed_at_draw=None):
 
     def box_state(doc, facts, options, saved_ui, mode):     # the box as the file and the session's choices say it
         return {"zone": facts["zone"], "zone_source": saved_ui.get("zone_source", LIVE),
-                "district_confirmed": facts["zone"] == confirmed_at_draw,     # (_box_state: a Draw's, unchanged)
+                "district_confirmed": facts["zone"] == confirmed_at_draw     # (_box_state: a Draw's, unchanged,
+                and not saved_ui.get("_reconfirm"),                          # unless a lookup filled the box)
                 "use": "one_family", "use_source": LIVE, "address": "106 Ithaca Rd", "address_source": LIVE,
                 "corner_lot": False, "corner_source": LIVE, "checked": list(saved_ui.get("checked") or []),
                 "doubts": {"lot": "The tax map's outline may be off."}}
@@ -680,7 +686,9 @@ def _run_box_loop(script, confirmed_at_draw=None):
 
     ns = {"STATE": {}, "logic": logic, "GUIDE_KEEPS": (), "ui": type("UI", (), {"start_box": staticmethod(start_box)}),
           "_box_state": box_state, "_apply_box": apply_box,
-          "_box_pick": lambda doc, what, facts, saved_ui, session: (facts, saved_ui)}
+          "_box_pick": lambda doc, what, facts, saved_ui, session: (
+              (facts, dict(saved_ui, _lookup={"status": answer}, **({"_reconfirm": True} if answer == "found" else {})))
+              if what == "lookup_done" else (facts, saved_ui))}
     exec(compile(ast.Module(body=[fn], type_ignores=[]), "gordium_rhino.py", "exec"), ns)
     assert ns["_box_loop"](None, {"zone": "R-1b"}, {}, "check", {}, None) is None
     return shown
@@ -724,9 +732,15 @@ def test_the_box_loop_after_cancel_lookup_never_ticks_a_district_changed_meanwhi
                           confirmed_at_draw="R-1b")
     assert [(s["zone"], s["district_confirmed"]) for s in shown] == [("R-1b", True), ("R-1b", False),
                                                                     ("R-3a", False)]
-    # a lookup's answer replaces them: the district confirmed again
+    # a lookup's answer that filled the box replaces them: the district confirmed again
     shown = _run_box_loop([({"district_confirmed": True}, "pick:lookup"), ({}, "pick:lookup_done"), ({}, None)])
     assert shown[-1]["district_confirmed"] is False
+    # Edit site…: taken off, Look up, and the lookup finds nothing (offline, not found, too slow): the box is as the
+    # architect left it, never the earlier Draw's tick shown again (review round 3's sceptics)
+    for status in ("offline", "not_found", "timeout"):
+        shown = _run_box_loop([({"district_confirmed": False}, "pick:lookup"), ({}, "pick:lookup_done"), ({}, None)],
+                              confirmed_at_draw="R-1b", answer=status)
+        assert [s["district_confirmed"] for s in shown] == [True, False, False], status
 
 
 def test_r2_a_report_not_written_after_a_file_switch_is_said_with_one_full_stop():

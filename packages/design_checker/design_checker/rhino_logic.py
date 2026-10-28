@@ -2251,15 +2251,19 @@ def box_ticks(state):
                                   "corner_source", "checked") if k in state}
 
 
-def ticks_after_pick(what, ticks):
+def ticks_after_pick(what, ticks, answer=None):
     """The start box's ticks and sources kept after a pick (_box_loop's `ticked`; `ticks`: box_ticks of the box as
-    the architect left it). A lookup's answer (found, or a saved one used) replaces them, so the district must be
-    confirmed again. Look up and Cancel lookup keep them exactly as the box shows them: while a lookup runs the box
-    shows the architect's own ticks (Draw is off meanwhile), and Cancel lookup leaves each as they left it. So no
-    tick or source from before Look up is ever brought back, onto a district, use, address or corner changed during
-    the lookup ("suggested by Gordium" on a district the architect picked) or after they took it off; and a district
-    they took off before Look up is never shown ticked again from the file (review of #32, 2026-10-28)."""
-    return {} if what in ("pick:lookup_done", "pick:use_saved") else dict(ticks or {})
+    the architect left it; `answer`: the status of a lookup answer the pick put in the box, None for none). An answer
+    that filled the box ("found": a lookup's, or a saved one used) replaces them, so the district must be confirmed
+    again. Everything else keeps them exactly as the box shows them: Look up (while it runs the box shows the
+    architect's own ticks; Draw is off meanwhile), Cancel lookup, and an answer that filled nothing (not found,
+    offline, outside the City, too slow, a saved one refused), which changes nothing in the box. So no tick or
+    source from before Look up is ever brought back, onto a district, use, address or corner changed during the
+    lookup ("suggested by Gordium" on a district the architect picked) or after they took it off; and a district
+    they took off is never shown ticked again from the file (review of #32, 2026-10-28)."""
+    if what in ("pick:lookup_done", "pick:use_saved") and answer == "found":
+        return {}
+    return dict(ticks or {})
 
 
 def lookup_cancelled(saved_ui, before):
