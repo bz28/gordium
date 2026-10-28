@@ -316,6 +316,7 @@ def make_panel(actions, host=None, context_on=True):
         if isinstance(tag, str) and tag.startswith("group:"):
             return                           # section headers aren't selectable (D5)
         parts["selected"] = tag
+        set_zoom(parts)                      # on as soon as a row is picked (never waiting for the next redraw)
         show_detail(parts)
 
     tree.SelectedItemChanged += logic.guard(selected, "show the selected item")
@@ -534,7 +535,7 @@ def show(parts, view, stale=False, error=None, checking=False):
                         _scroll_to(tree, k + 1 + c, k + 2 + c)    # the selected row just into view
                 k += gi.Children.Count
             k += 1
-    parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]
+    set_zoom(parts)
     show_detail(parts)
 
 
@@ -586,6 +587,15 @@ def _header(parts, view, error, out_of_date):
     h.Create()
 
 
+def set_zoom(parts):
+    """Zoom to on or off for the panel as it is now, its tooltip saying why when off (logic.zoom_state)."""
+    b = parts.get("zoom_button")
+    if b is None:
+        return
+    b.Enabled, b.ToolTip = logic.zoom_state(parts.get("selected") in (parts.get("by_id") or {}),
+                                            parts.get("stale"), parts.get("box_open"))
+
+
 def set_box_open(parts, is_open):
     """While a start box is open, the panel's buttons that would open another (or change the site under it) are off."""
     if parts is None:
@@ -598,7 +608,7 @@ def set_box_open(parts, is_open):
     for c in list(parts.get("box_buttons") or []) + list(parts.get("greyed") or []):   # all but the legend
         c.Enabled = others
     if parts.get("zoom_button") is not None:
-        parts["zoom_button"].Enabled = zoom
+        set_zoom(parts)                      # (logic.zoom_state agrees with `zoom`: off while a box is open)
 
 
 def show_detail(parts):

@@ -2801,6 +2801,19 @@ def controls_enabled(box_open, zoom_ok):
     return (not box_open, (not box_open) and bool(zoom_ok))
 
 
+def zoom_state(selected_ok, stale, box_open):
+    """(Zoom to on or off, its tooltip saying why when off): on only for a selected, current item with no start box
+    open. Worked out every time the selection, the results or the box change (UX review 2026-10-27: selecting a row
+    left it greyed until the panel next redrew, with nothing saying why)."""
+    if box_open:
+        return False, "Close the start box first."
+    if not selected_ok:
+        return False, "Select a row to zoom to it."
+    if stale:
+        return False, "Out of date: press Check, then zoom."
+    return True, "Zoom to the selected item (or double-click its row)."
+
+
 def last_check_at(checked_at, document):
     """When the last completed check of THIS document finished (None: none yet). Never a placeholder's time, and
     never another document's (verification round 4: switching documents dropped the pending re-check)."""

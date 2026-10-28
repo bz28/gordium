@@ -602,3 +602,37 @@ def test_every_yard_gets_its_snap_line_a_lot_depth_limit_both_ends_and_curved_li
     assert line.length > 50 and min(p[1] for p in front["points"]) < -4         # follows the bulge, in full
     span = dict(item, limit_ft=None, limit_span_ft=[5, 8])
     assert sorted(y["limit_ft"] for y in full_yard_lines(shape, lot, [span])) == [5, 8]
+
+
+def _numbers(*buildings):
+    from design_checker.check import check_site
+    return None, check_site(_plot(*buildings), {**FACTS, "jurisdiction": CITY})
+
+
+def test_a_yard_measured_to_an_upper_floor_overhang_says_so_and_the_wall_keeps_the_plain_number():
+    """Ben, 2026-10-27: when a yard's closest point is not the ground-floor wall (an upper floor's overhang), its drawn
+    number says what it is measured to. Labelling only: the yard is measured from the ground upward to its least
+    distance (§325-3 Yard), so the number and its pass or fail never change. A ground-floor wall: today's label."""
+    plain = [y["number"] for y in _numbers(box(10, 25, 35, 65))[1]["plan"]["yards"]]
+    assert plain == ['25\'-0"', '15\'-0"', '10\'-0"', '35\'-0"']                    # no words added
+    over = [y["number"] for y in _numbers(box(10, 30, 35, 65, 0, 10, "g"), box(10, 27, 35, 65, 10, 20, "u"))[1]["plan"]["yards"]]
+    assert over[0] == '? 27\'-0" (to 2nd-floor overhang) to 30\'-0"'   # the nearer reading is the overhang's
+    assert over[1:] == ['15\'-0"', '10\'-0"', '35\'-0"']               # walls flush with the floor below: plain
+    third = [y["number"] for y in _numbers(box(12, 30, 35, 65, 0, 10, "g"), box(12, 30, 35, 65, 10, 20, "m"),
+                                           box(10, 30, 35, 65, 20, 30, "u"))[1]["plan"]["yards"]]
+    assert third[2] == '? 10\'-0" (to 3rd-floor overhang) to 12\'-0"' and third[0] == '30\'-0"'
+
+
+def test_naming_what_a_yard_is_measured_to_never_changes_its_number_or_its_result(monkeypatch):
+    from design_checker import check
+    parts = (box(10, 30, 35, 65, 0, 10, "g"), box(10, 27, 35, 65, 10, 20, "u"))
+    _, named = _numbers(*parts)
+    monkeypatch.setattr(check, "measured_to", lambda *a, **k: "")
+    _, plain = _numbers(*parts)
+    for a, b in zip(named["plan"]["yards"], plain["plan"]["yards"]):
+        assert a["number"].replace(" (to 2nd-floor overhang)", "") == b["number"]
+        assert (a["status"], a["label"], a["points"]) == (b["status"], b["label"], b["points"])
+    assert [(i.get("proposed"), i["status"]) for i in named["view"]["items"]] == \
+        [(i.get("proposed"), i["status"]) for i in plain["view"]["items"]]
+    assert check.number_to('25\'-0"', '25\'-0"', "") == '25\'-0"'
+    assert check.number_to('✕ 8\'-0"', '8\'-0"', "2nd-floor overhang") == '✕ 8\'-0" (to 2nd-floor overhang)'
