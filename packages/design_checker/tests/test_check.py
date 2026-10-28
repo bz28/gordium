@@ -4327,8 +4327,8 @@ def test_a_rows_button_and_dialog_say_how_many_questions_when_there_are_several(
     reason still names them); one: its own words. The dropdowns are one width, lined up; the note under them is a
     sentence."""
     from design_checker import rhino_logic as logic
-    four = ["unrelated_occupants", "owner_occupied", "accessory_dwelling_unit", "functional_family_unit"]
-    four = [k for k in four if k in logic.STATED_FACTS] or list(logic.STATED_FACTS)[:4]
+    four = ["sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit"]
+    assert all(k in logic.STATED_FACTS for k in four)
     assert logic.answer_words(four) == "Answer %d questions" % len(four)
     assert logic.answer_words(["stories"]) == logic.enter_words(["stories"]) == "Enter the number of stories"
     two = ["sleeping_rooms", "parking_spaces"]                      # short enough: its own words
