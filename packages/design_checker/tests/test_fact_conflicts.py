@@ -169,9 +169,9 @@ def test_when_the_units_are_the_uses_own_the_use_is_set_aside_with_the_counts(di
 @pytest.mark.parametrize("district", ["R-2c", "R-3a", "RU"])
 def test_the_attached_counts_clash_sets_the_use_aside_too(district):
     """Review round 4 (P1): 4 units on this lot but 3 in the attached building clash only for an attached house, so the
-    use is one of the answers: the use row needs review (it complied), and complies once the counts agree."""
+    use is one of the answers: the use row needs review saying so (it complied); with the counts agreeing, no row carries
+    the clash."""
     use, facts, agreeing = CASES["attached_counts_disagree"]
     row = next(i for i in _items(district, use, facts) if i.get("rule") == f"{district}.use")
     assert row["status"] == present.REVIEW and "or the use is off" in (row.get("reason") or ""), row
-    fine = next(i for i in _items(district, use, agreeing) if i.get("rule") == f"{district}.use")
-    assert fine["status"] == present.COMPLIES, fine
+    assert not any("or the use is off" in (i.get("reason") or "") for i in _items(district, use, agreeing))
