@@ -1781,8 +1781,10 @@ def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
     out = []
     here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
     if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
+        # the use is one of the answers too (review round 4: not an attached house, the counts don't clash), so it is
+        # set aside with them and the rows that read it need review (R-2c.use complied beside the clash)
         out.append((stop("attached_counts_disagree", here=here, building=building),
-                    ("dwelling_units", "attached_units_in_building")))
+                    ("dwelling_units", "attached_units_in_building", "use")))
     # the unrelated people counted with minor dependent children can't be fewer than without them: a mistyped pair,
     # and which count is wrong can't be told (review round 2 set aside only the one R-3 and RU read)
     without, with_ = facts.get("unrelated_persons"), facts.get("unrelated_persons_with_children")
@@ -1810,9 +1812,11 @@ def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
                              unit_words=("dwelling unit" if units == 1 else "dwelling units") + (
                                  "" if said else " (what this use is, §325-3B)"),
                              most=most, held=units * most,
-                             check="the occupant counts, the dwelling units" if said else "the occupant counts"),
+                             check="the occupant counts, the dwelling units" if said else "the use, the occupant counts"),
+                        # the use's own count is an answer too (review round 4: R-1a.use complied on a one-family house
+                        # whose counts fit only a two-family one), so then the use is set aside with them
                         ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
-                        + (("dwelling_units",) if type(stated) is int else ())))
+                        + (("dwelling_units",) if said else ("use",))))
     return out
 
 
