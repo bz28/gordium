@@ -1768,6 +1768,10 @@ def pick_main(buildings: list[dict], facts: dict) -> tuple:
     return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
+# the dwelling units a use itself says (§325-3B: a one-family dwelling is a dwelling unit; a two-family dwelling holds two)
+IMPLIED_UNITS = {"one_family_detached": 1, "two_family": 2}
+
+
 def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
     """Stated facts each well formed but contradicting each other: (the reason, the facts in it). Every fact in one is
     set aside with that reason (_set_aside_conflicts), so no row reading it can comply on facts that contradict each
@@ -1785,6 +1789,19 @@ def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
     if type(without) is int and type(with_) is int and with_ < without:
         out.append((stop("household_counts_disagree", without=without, with_=with_),
                     ("unrelated_persons", "unrelated_persons_with_children")))
+    # the occupants of every unit on the lot together, and the most in any one unit (R-2c notes 4-6): the most in one
+    # unit can't be more than all of them, and the units can't hold more than units x the most in one (#38 review
+    # round 1: 2 units, 10 occupants, at most 1 in a unit read as "both units lived in" and complied on 7,200 sf)
+    total, most = facts.get("occupants"), facts.get("occupants_most_in_one_unit")
+    if type(total) is int and type(most) is int:
+        stated = facts.get("dwelling_units")
+        units = stated if type(stated) is int else IMPLIED_UNITS.get(facts.get("use"))
+        if most > total:
+            out.append((stop("occupant_split_disagree", most=most, occupants=total),
+                        ("occupants", "occupants_most_in_one_unit")))
+        elif units is not None and total > units * most:
+            out.append((stop("occupant_counts_disagree", occupants=total, units=units, most=most, held=units * most),
+                        ("occupants", "occupants_most_in_one_unit") + (("dwelling_units",) if type(stated) is int else ())))
     return out
 
 

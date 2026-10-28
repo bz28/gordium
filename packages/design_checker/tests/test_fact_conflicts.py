@@ -39,6 +39,14 @@ CASES = {
                                   "dwelling_units": 4, "attached_units_in_building": 3, "occupants": 1},
                                  {**HOUSEHOLD, "unrelated_persons": 0, "unrelated_persons_with_children": 0,
                                   "dwelling_units": 3, "attached_units_in_building": 3, "occupants": 1}),
+    # R-2c notes 4-6 (#38 review round 1): 2 units of at most 1 occupant can't hold 10; the most in one unit can't be
+    # more than all of them
+    "occupant_counts_disagree": ("one_family_semi_detached",
+                                 {**HOUSEHOLD, "dwelling_units": 2, "occupants": 10, "occupants_most_in_one_unit": 1},
+                                 {**HOUSEHOLD, "dwelling_units": 2, "occupants": 10, "occupants_most_in_one_unit": 5}),
+    "occupant_split_disagree": ("one_family_semi_detached",
+                                {**HOUSEHOLD, "dwelling_units": 2, "occupants": 2, "occupants_most_in_one_unit": 3},
+                                {**HOUSEHOLD, "dwelling_units": 2, "occupants": 2, "occupants_most_in_one_unit": 2}),
 }
 
 
