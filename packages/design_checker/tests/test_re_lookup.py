@@ -1116,7 +1116,8 @@ def test_the_plugin_saves_found_lookups_and_offers_the_saved_one_only_when_offli
     saved = src[src.index("def _saved_lookup("):src.index("def _show_answer(")]
     assert "logic.save_lookup(store, answer, asked)" in saved and "logic.saved_offer(answer, store, asked)" in saved
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
-    assert 'logic.use_saved(saved_ui.pop("_saved_answer", None), saved_ui.pop("_saved_for", None),' in pick
+    assert 'logic.guard(logic.use_saved, "use the saved lookup")(' in pick
+    assert 'not STATE.get("lookup_fixture")' in saved and "readable" in saved and "os.getpid()" in saved
     assert '"pick:use_saved"' in src                                  # the ticks go, as for any lookup
 
 
@@ -1145,3 +1146,22 @@ def test_edit_site_on_a_drawn_file_whose_lot_is_gone_is_not_a_new_file():
     assert not state["needs_lookup"]
     rows = {r["key"]: r for r in logic.box_rows(state)}
     assert "draw_lot" in [a for a, _, _ in rows["lot"]["actions"]]
+
+
+def test_sceptic_2_an_outline_only_lookup_and_by_hand_never_skip_the_address_rule():
+    """(1) A new file whose lookup found only the City's outline: Draw cleared for it and kept the box open to draw
+    the lot over it; the gate shut again (the preview gone) and offered only "by hand". (2) By hand, then a lookup
+    of the City's 106 found, then "106 Ithaca Rd, Lansing" typed: Draw went on with the City's lot."""
+    opened = logic.box_opened({}, {})
+    after_reset = dict(opened, _redrawn_for="106 Ithaca Road, Ithaca, NY, 14850",
+                       drawn_address="106 Ithaca Road, Ithaca, NY, 14850")
+    state = logic.start_gate({"address": "106 Ithaca Road, Ithaca, NY, 14850", "lot_missing": True}, after_reset)
+    assert not state["needs_lookup"]
+    assert "draw_lot" in [a for a, _, _ in {r["key"]: r for r in logic.box_rows(state)}["lot"]["actions"]]
+    pending = {"address": "106 Ithaca Road, Ithaca, NY, 14850", "query": "106 Ithaca Rd, Ithaca, NY 14850"}
+    by_hand = dict(opened, _by_hand=True, _pending=pending)
+    lansing = {"address": "106 Ithaca Rd, Lansing, NY", "zone": "R-1b", "district_confirmed": True,
+               "lot_missing": False, "has_lot": True}
+    assert logic.draw_blocked(lansing, by_hand) != ""
+    facts, saved = logic.settle_pending({"address": lansing["address"]}, by_hand, lansing["address"])
+    assert saved.get("_pending") is None                                    # another town's: the preview dropped

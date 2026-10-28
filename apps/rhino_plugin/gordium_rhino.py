@@ -1775,8 +1775,8 @@ def _one_pick(doc, what, facts, saved_ui, session):
     elif what == "lookup_done":
         facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
     elif what == "use_saved":                  # offline: the lookup saved on this computer, marked with its date
-        answer = logic.use_saved(saved_ui.pop("_saved_answer", None), saved_ui.pop("_saved_for", None),
-                                 facts.get("address"))
+        answer = logic.guard(logic.use_saved, "use the saved lookup")(
+            saved_ui.pop("_saved_answer", None), saved_ui.pop("_saved_for", None), facts.get("address"))
         if answer:                             # (the address retyped since: the offer is dropped, nothing shown)
             facts, saved_ui = _show_answer(doc, answer, facts, saved_ui)
         else:
@@ -2075,18 +2075,23 @@ def _saved_lookup(answer, asked):
     """A found answer saved (rhino_logic.save_lookup: only what its sources allow); for a failed one, the saved
     lookup of the same address to offer, or None."""
     path = _saved_lookups_path()
+    readable = True
     try:
         with open(path, encoding="utf-8") as f:
             store = json.load(f)
-    except Exception:
+    except FileNotFoundError:
         store = {}
+    except Exception:                           # unreadable: offered nothing, and never overwritten (its other
+        store, readable = {}, False             # saved lookups are kept)
     if (answer or {}).get("status") == "found":
         new = logic.save_lookup(store, answer, asked)
-        if new != store:
+        # recorded answers (the in-Rhino tests) are never saved as the architect's lookups
+        if new != store and readable and not STATE.get("lookup_fixture"):
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path + ".tmp", "w", encoding="utf-8") as f:
+            tmp = "%s.%d.%d.tmp" % (path, os.getpid(), int(time.time() * 1000))   # two Rhinos never share one
+            with open(tmp, "w", encoding="utf-8") as f:
                 json.dump(new, f)
-            os.replace(path + ".tmp", path)
+            os.replace(tmp, path)
         return None
     return logic.saved_offer(answer, store, asked)
 

@@ -3303,11 +3303,16 @@ def start_gate(state, saved_ui):
     saved_ui = saved_ui or {}
     if not saved_ui.get("_opened_empty"):
         return dict(state, needs_lookup=False, by_hand=False)
-    by_hand = bool(saved_ui.get("_by_hand"))
     pending = saved_ui.get("_pending") or {}
+    # a found lookup supersedes "by hand": its address rule applies again (sceptic 2: by hand let another town's
+    # address keep the City's lookup)
+    by_hand = bool(saved_ui.get("_by_hand")) and not pending
     address = state.get("address") or ""
-    found = bool(pending) and (same_address(address, pending.get("address") or "")
-                               or same_address(address, pending.get("query") or ""))
+    found = any(same_site_address(address, a) for a in (pending.get("address"), pending.get("query"),
+                                                       # the City's outline only: cleared for it, the box kept
+                                                       # open to draw the lot over it (sceptic 2, finding 1)
+                                                       saved_ui.get("_redrawn_for"), saved_ui.get("drawn_address"))
+                if a)
     return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand)
 
 
@@ -3466,7 +3471,8 @@ def settle_pending(facts, saved_ui, address):
     address typed since drops it, its box changes undone (re-lookup review round 1: the preview was drawn under the
     typed address)."""
     pending = (saved_ui or {}).get("_pending")
-    if pending and not (same_address(address, pending.get("address")) or same_address(address, pending.get("query"))):
+    if pending and not (same_site_address(address, pending.get("address"))
+                        or same_site_address(address, pending.get("query"))):   # another town's: dropped too
         facts, saved_ui = drop_pending(facts, saved_ui)
         # its line goes with it: the box never says another address's lot is shown or will be drawn (round 3)
         saved_ui["_lookup"] = {"status": "set_aside", "query": pending.get("query"), "asks": [], "matches": [],
