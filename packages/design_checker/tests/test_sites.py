@@ -228,3 +228,16 @@ def test_a_percent_rounded_up_one_step_still_matches():
     assert scenarios.values_problems(near, {"row": [25.015, 25]}) == []
     assert scenarios.values_problems(near, {"row": [24.95, 25]})
     assert scenarios.values_problems([{"id": "X", "proposed": "24.95%", "required": "25%"}], {"row": [25.01, 25]})
+
+
+def test_the_light_run_finds_rows_by_the_id_the_plugin_keeps():
+    """The plugin's STATE["last"] items keep "id" but not "rule" (gordium_rhino.py, STATE["last"]): the light run's
+    row lookup must work from the id, or the nudge's row is never found."""
+    import ast
+    src = (REPO / "apps/rhino_plugin/tests/light_run_in_rhino.py").read_text(encoding="utf-8")
+    fns = [n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name in ("row_for", "rule_of")]
+    ns = {}
+    exec(compile(ast.Module(fns, []), "rows", "exec"), ns)
+    items = [{"id": "R-1a.front_yard", "status": "does_not_comply"}, {"id": "R-1a.side_yards#east", "status": "complies"}]
+    assert ns["row_for"](items, "R-1a.front_yard") == items[:1]
+    assert ns["row_for"](items, "R-1a.side_yards") == items[1:]

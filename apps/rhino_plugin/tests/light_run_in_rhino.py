@@ -81,7 +81,13 @@ def rows(g):
 
 
 def row_for(items, rule):
-    return [i for i in items if i.get("rule") == rule]
+    return [i for i in items if rule_of(i) == rule]
+
+
+def rule_of(item):
+    """A row's rule id. The plugin's STATE["last"] items keep "id" (the rule id, plus "#<label>" when a rule is split
+    into rows, e.g. side_yards#east) but not "rule", so the rule is read from the id."""
+    return (item.get("rule") or item.get("id") or "").partition("#")[0] or None
 
 
 def massing(doc, g):
@@ -145,7 +151,7 @@ def one_site(g, docs, district, site):
         claim("zone", facts.get("zone") == site["zone"]["expect"], facts.get("zone"))
         claim("corner lot: no", facts.get("corner_lot") is False, facts.get("corner_lot"))
         items = rows(g)
-        out["drawn"] = [(i.get("rule"), i["name"], i["status"], i.get("proposed"), i.get("required"), i.get("reason"))
+        out["drawn"] = [(rule_of(i), i["name"], i["status"], i.get("proposed"), i.get("required"), i.get("reason"))
                         for i in items]
         drawn_area = lot_area(doc, g)
         # drawn_area_sf: the area of the outline as stored (corners to 0.01 ft), which is what Rhino draws; the
@@ -166,7 +172,7 @@ def one_site(g, docs, district, site):
                 doc.Objects.Transform(o.Id, move, True)
             g.run_check(doc, report=False)
             after = rows(g)
-            out["nudged"] = [(i.get("rule"), i["name"], i["status"], i.get("proposed"), i.get("required")) for i in after]
+            out["nudged"] = [(rule_of(i), i["name"], i["status"], i.get("proposed"), i.get("required")) for i in after]
             out["front_after_measured_here"] = now = front_distance(doc, g, facts)
             hit = row_for(after, nudge["rule"])
             claim("the house now stands proposed_ft from the street (measured here, to 0.1 ft)",
@@ -176,8 +182,8 @@ def one_site(g, docs, district, site):
                 a is not None and b is not None and abs(a - nudge["proposed_ft"]) <= 0.1 + 0.125 / 12
                 and abs(b - nudge["required_ft"]) <= 0.125 / 12 for a, b in shown), shown)
             claim("the nudge fails exactly its rule", hit and hit[0]["status"] == "does_not_comply" and not [
-                i for i in after if i["status"] == "does_not_comply" and i.get("rule") != nudge["rule"]],
-                [(i.get("rule"), i["status"]) for i in after if i["status"] == "does_not_comply"])
+                i for i in after if i["status"] == "does_not_comply" and rule_of(i) != nudge["rule"]],
+                [(rule_of(i), i["status"]) for i in after if i["status"] == "does_not_comply"])
         else:
             claim("the starting house is found among the building objects (to work out the nudge)", False, front)
         view = doc.Views.Find("Top", False) or doc.Views.ActiveView
