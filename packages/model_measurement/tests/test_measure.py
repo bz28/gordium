@@ -134,7 +134,7 @@ def test_a_corner_lot_has_a_front_yard_on_each_street_and_its_rear_opposite_the_
     lot lines are x = 0 and x = 50, but x = 50 is a street (a front yard), so one side yard is left: 10 (checked
     against Column 13: both side measures are it). Lot depth = the side lot lines (100 + 100) / 2 = 100."""
     facts = {**FACTS, "corner_lot": True, "street_line": [[[0, 0], [50, 0]], [[50, 0], [50, 100]]],
-             "address_street_line": [[[0, 0], [50, 0]]]}
+             "street_ids": ["South St", "East St"], "address_street_line": [[[0, 0], [50, 0]]]}
     m = measure(site(), facts)
     assert (m["front_yard"]["value"], m["rear_yard"]["value"]) == (15.0, 35.0)
     assert (m["side_yard_smaller"]["value"], m["side_yard_larger"]["value"]) == (10.0, 10.0)
@@ -294,7 +294,8 @@ def test_a_corner_lot_with_a_rounded_corner_measures_the_front_to_every_street_l
     # the house 10..35 x 25..65: 25 from y = 0, 15 from x = 50, farther from the curve (§325-19C: each yard
     # facing a street is a front yard)
     corner, street = rounded_corner_lot()
-    m = measure(site(corner), {**FACTS, "corner_lot": True, "street_line": street})
+    m = measure(site(corner), {**FACTS, "corner_lot": True, "street_line": street,
+                               "street_ids": ["South St", "South St", "East St"]})     # the curve on the south street
     assert m["front_yard"]["value"] == 15.0
     # which street the address is on isn't given: the rear yard is read with each end of the street lines as it
     assert m["rear_yard"]["value"] is None and "address street" in m["rear_yard"]["reason"]
@@ -332,7 +333,7 @@ def test_whether_it_is_a_corner_lot_is_stated_never_guessed():
 def test_a_corner_lot_with_only_one_street_given_measures_no_yard():
     # one street that bends 11.5 degrees is given; the second street (x = 99) isn't: nothing is measured to it
     bend = lot([(0, 0), (50, 0), (99, 10), (99, 110), (0, 100)])
-    m = measure(site(bend, box(30, 40, 97, 80)), {**FACTS, "corner_lot": True,
+    m = measure(site(bend, box(30, 40, 97, 80)), {**FACTS, "corner_lot": True, "street_ids": ["A St", "A St"],
                                                    "street_line": [[[0, 0], [50, 0]], [[50, 0], [99, 10]]]})
     for name in ("front_yard", "lot_width", "rear_yard", "accessory_front_yard"):
         assert m[name]["value"] is None and m[name]["reason"].startswith("a corner lot, but"), name
@@ -896,14 +897,15 @@ def test_a_corner_lot_address_with_too_many_lines_stops_the_whole_reading():
     be listed. Those readings can't be dropped while the other addresses give theirs: the lot depth stops."""
     pts = [(0, 0), (50, 0), (60, 10), (60, 100), (50, 110), (40, 100), (30, 110), (20, 100), (10, 110), (0, 100)]
     street = [[[0, 0], [50, 0]], [[50, 0], [60, 10]], [[60, 10], [60, 100]]]
-    m = measure(site(lot(pts), box(15, 30, 40, 70)), {**FACTS, "corner_lot": True, "street_line": street})
+    m = measure(site(lot(pts), box(15, 30, 40, 70)), {**FACTS, "corner_lot": True, "street_line": street,
+                                                       "street_ids": ["South St", "South St", "East St"]})
     assert m["lot_depth"]["value"] is None and m["lot_depth"]["readings"] == []
     assert "too many readings to list" in m["lot_depth"]["reason"]
     # round 10, P2: only what depends on the side and rear lines waits. The house (x 15-40, y 30-70) is 30 ft from
-    # the south street, 20 ft from the east one (x = 60): front yard 20 ft. Each address's frontage is measured:
-    # south 50, chamfer + east 14.14 + 90 = 104.14, south + chamfer 64.14, east 90
+    # the south street, 20 ft from the east one (x = 60): front yard 20 ft. Each street's frontage is measured, the
+    # cut corner on the street it is recorded on (the south): 50 + 14.14 = 64.14, and the east street's 90
     assert m["front_yard"]["value"] == 20.0 and m["front_yard_eaves"]["value"] == 20.0
-    assert sorted(r["value"] for r in m["lot_width"]["readings"]) == [50.0, 64.142136, 90.0, 104.142136]
+    assert sorted(r["value"] for r in m["lot_width"]["readings"]) == [64.142136, 90.0]
     for name in ("rear_yard", "side_yard_smaller", "side_yard_larger"):
         assert m[name]["value"] is None and "too many readings to list" in m[name]["reason"], name
 
@@ -1670,6 +1672,7 @@ def test_a_corner_lot_whose_address_street_is_drawn_in_pieces_is_still_read(surv
     street = [[[0, 0], [30, 0]], [[30, 0], [60, 0]], [[60, 0], [60, 120]]]
     m = measure(site(lot(pts), box(10, 25, 40, 65)),
                 {**FACTS, "corner_lot": True, "street_line": street, "lot_surveyed": surveyed,
+                 "street_ids": ["South St", "South St", "East St"],
                  "address_street_line": [[[0, 0], [30, 0]], [[30, 0], [60, 0]]]})
     assert m["front_yard"]["value"] == 20.0 and m["side_yard_smaller"]["value"] == 10.0, (
         m["front_yard"], m["side_yard_smaller"])

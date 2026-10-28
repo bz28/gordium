@@ -20,6 +20,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close, leftovers  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_dock") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -63,7 +64,7 @@ try:
     if phase == "run":
         g = load()
         doc = TestDocs("dock").__enter__().open("Large Objects - Feet")
-        g.gordium_check()                                    # GordiumStart's flow on the sample
+        look_up_106(g, g.gordium_check)                                    # GordiumStart's flow on the sample
         dock = System.Guid(g.DOCK_ID)
         p = g.STATE["panel_parts"]
         host = p["form"].host

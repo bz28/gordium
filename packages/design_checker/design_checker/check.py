@@ -159,7 +159,8 @@ MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked
 
 MODEL_WORDS = {"model#eave": {"eave": "what reaches past the walls an eave",
                                "not_eave": "what reaches past the walls not an eave"},
-               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"}}
+               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"},
+               "model#narrower": {}}          # its readings say their own line: "the side along lot line 3 …"
 EAVE_YARD_WORDS = {"front_yard": "front yard", "side_yard_smaller": "side yard", "side_yard_larger": "side yard",
                  "rear_yard": "rear yard"}
 
@@ -1335,7 +1336,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
              if length >= SHORTEST_LABELLED_EDGE]   # a tax-map sliver (0'-1 5/8"): no label, it only clutters
     solids = [(b, _projection(b)) for b in site.get("buildings") or [] if b.get("faces")] if overlays else []
     footprint = unary_union([p for _, p in solids]) if solids else None
-    shape = Lot(site, facts or {}) if lot.get("edges") and facts and facts.get("street_line") else None
+    shape = Lot(site, facts or {}) if overlays and lot.get("edges") and facts and facts.get("street_line") else None
     yards = []
     for i in v["items"]:
         if not (i.get("points") and i.get("measure") in YARD_MEASURES):

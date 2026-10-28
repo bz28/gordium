@@ -10,15 +10,16 @@ writes one summary used everywhere (D3).
 """
 
 import ast
-import functools
+import hashlib
 import math
 import re
+import threading
 import urllib.parse
 from pathlib import Path
 
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, load, outcome, read_jsonl
+from rule_format.rulebook import MEASURE_KINDS, REPO, _jsonl_rows, load, outcome
 
 from design_checker import reading_set, rhino_logic
 
@@ -288,11 +289,26 @@ def _unique_start(words: list[str], page: list[list[str]]) -> str:
     return " ".join(words[:n])
 
 
-@functools.lru_cache(maxsize=16)
 def _page_lines(j: Path, file: str) -> dict:
-    """{(page, line): text} of one document's extracted text (2_extracted_text/<file stem>.jsonl)."""
+    """{(page, line): text} of one document's extracted text (2_extracted_text/<file stem>.jsonl). Kept by the
+    file's content (its SHA-256), as _chart_cells is, never by folder name: after a re-extraction in a long Rhino
+    session the next citation link searches the new text, not the old. Display only."""
     path = j / "2_extracted_text" / (Path(file).stem + ".jsonl")
-    return {(r["page"], r["line"]): r["text"] for r in (read_jsonl(path) if path.exists() else []) if "line" in r}
+    data = path.read_bytes() if path.exists() else b""
+    key = (str(path), hashlib.sha256(data).digest())
+    with _LINES_LOCK:
+        found = _LINES.get(key)
+    if found is None:
+        found = {(r["page"], r["line"]): r["text"] for r in _jsonl_rows(data) if "line" in r}
+        with _LINES_LOCK:
+            _LINES[key] = found
+            while len(_LINES) > 16:
+                _LINES.pop(next(iter(_LINES)))
+    return found
+
+
+_LINES: dict = {}                            # (file path, SHA-256 of its bytes) -> its {(page, line): text}
+_LINES_LOCK = threading.Lock()
 
 
 def anchor_text(source: dict, j: Path) -> str:
@@ -1474,16 +1490,31 @@ def _side_name(measure: str, measured: dict, plan_north_deg: float = 0.0, side_l
     return "Side yard, " + ("narrower" if measure == "side_yard_smaller" else "wider")
 
 
-@functools.lru_cache(maxsize=8)
 def _chart_cells(j: Path) -> tuple:
     """Every chart cell the extraction read (2_extracted_text/*.cells.jsonl): file, page, section, row, column,
-    value, lines."""
-    out = []
-    for f in sorted((j / "2_extracted_text").glob("*.cells.jsonl")):
-        rows = read_jsonl(f)                 # the first row names the file; then a page's columns, then each cell
-        name = rows[0].get("file") if rows else None
-        out += [dict(r, file=name) for r in rows[1:] if "column" in r and "value" in r]
-    return tuple(out)
+    value, lines. Kept by the files' content (their SHA-256), the way rule_format.rulebook keeps rulebooks, never
+    by folder name: after a re-extraction in a long Rhino session the next panel shows the new text, not the
+    old. Display only (the checker's cells come from rule_format.rulebook)."""
+    files = [(f.name, f.read_bytes()) for f in sorted((j / "2_extracted_text").glob("*.cells.jsonl"))]
+    key = tuple((name, hashlib.sha256(data).digest()) for name, data in files)
+    with _CELLS_LOCK:
+        found = _CELLS.get(key)
+    if found is None:
+        out = []
+        for _, data in files:
+            rows = _jsonl_rows(data)         # the first row names the file; then a page's columns, then each cell
+            name = rows[0].get("file") if rows else None
+            out += [dict(r, file=name) for r in rows[1:] if "column" in r and "value" in r]
+        found = tuple(out)
+        with _CELLS_LOCK:
+            _CELLS[key] = found
+            while len(_CELLS) > 8:
+                _CELLS.pop(next(iter(_CELLS)))
+    return found
+
+
+_CELLS: dict = {}                            # (file name, SHA-256 of its bytes) per file -> the cells read from them
+_CELLS_LOCK = threading.Lock()
 
 
 def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict | None:
@@ -1574,6 +1605,9 @@ ASSUMED_MAIN = "Main building: the starting house (assumed) · change it with Ma
 
 
 BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_height", "stories")
+# (model_measurement's own lists: a yard added there is never left out here)
+from model_measurement.measure import ACCESSORY_YARDS, EAVE_YARDS  # noqa: E402
+LEFT_OUT_ACCESSORY = ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply")
 
 
 def _raise_yards(items, measured, values, facts):
@@ -1617,12 +1651,14 @@ def _raise_yards(items, measured, values, facts):
         i.pop("_raises", None)
 
 
-def _cautious_for_left_out(items, left_out, touching):
+def _cautious_for_left_out(items, left_out, touching, rules_by_id=None):
     """Solids on the lot that aren't measured can change a result that looks like it complies (never a false
     pass): lot coverage counts every building on the lot, principal and accessory (§325-8A), so it needs review
     whenever one is left out; one touching the building may be part of it (a porch or deck counts in the yards,
-    §325-18A), so then the yards, height and stories need review too. `touching` is the ids of the left-out solids
-    that touch the measured buildings; not given, any of them might."""
+    §325-18A), so then the yards (to the walls and to the eaves), height and stories need review too. Any of them
+    may itself be an accessory building (§325-25), so the accessory buildings' count and distances need review
+    whenever one is left out. An item counts by every measurement its rule's formula reads, not only its own.
+    `touching` is the ids of the left-out solids that touch the measured buildings; not given, any of them might."""
     if not left_out:
         return
     n = len(left_out)
@@ -1631,9 +1667,12 @@ def _cautious_for_left_out(items, left_out, touching):
     for i in items:
         if i["status"] != COMPLIES:
             continue
-        if i.get("measure") == "building_area":
+        reads = _formula_names(i, rules_by_id) | ({i.get("measure")} - {None})
+        if "building_area" in reads:
             why = f"Complies for the buildings measured; {some}, and lot coverage counts every building on the lot"
-        elif i.get("measure") in BUILDING_MEASURES and near:
+        elif reads & set(LEFT_OUT_ACCESSORY):
+            why = f"Complies for the buildings measured; {some}, and one may be an accessory building (§325-25)"
+        elif reads & set(BUILDING_MEASURES + EAVE_YARDS) and near:
             why = (f"Complies for the buildings measured; {len(near)} object{'s' if len(near) != 1 else ''} "
                    "touching the building isn't measured (a porch or deck is part of the building, §325-18A)")
         else:
@@ -1646,10 +1685,13 @@ def _cautious_for_left_out(items, left_out, touching):
 # the lot's width and depth; the ground decides height and stories. An item needs review when ANY name in its rule's
 # formula is one of them, not only its own measurement: the height bonus (§325-16C) complies through the yards and
 # the lot depth (review round 1 of PR #19: it stayed "complies" on a doubtful lot).
-YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
+# Every measurement worked out from the lot lines is model_measurement's own list (LOT_LINE_MEASURES: the main
+# yards, their eaves and the accessory buildings' yards): one list, so a yard added there is never left out here
+# (the merge of #18 onto main left the accessory yards out: accessory_buildings stayed "complies" on a doubtful lot).
+from model_measurement.measure import LOT_LINE_MEASURES  # noqa: E402
 UNSETTLED_DECIDES = {
-    "lot": ("lot_area", "lot_width", "lot_depth") + YARDS,
-    "street": ("lot_width", "lot_depth") + YARDS,
+    "lot": ("lot_area",) + LOT_LINE_MEASURES,
+    "street": LOT_LINE_MEASURES,
     "ground": ("building_height", "stories"),
 }
 UNSETTLED_NAMES = {"lot": "lot outline", "street": "street side", "ground": "ground levels"}
@@ -1705,7 +1747,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                             use_names)
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
-    _cautious_for_left_out(items, left_out, extras.get("touching"))
+    _cautious_for_left_out(items, left_out, extras.get("touching"), rules_by_id)
     _cautious_for_unsettled(items, facts.get("unsettled"), rules_by_id)
     for i in items:                                  # THE guard: never above the checker's verdict (round 3)
         checker = i.pop("_checker", None)
