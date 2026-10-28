@@ -61,7 +61,7 @@ Everything in the 2026-10-27 preview below, plus:
   report have **Cancel**; a lookup has **Cancel lookup**. Cancel changes nothing.
 - **New rules in all nine districts:** the 20 ft setback from a stream or inlet (§325-26), the South Hill Overlay
   (§325-8E, R-1 and R-2), homes per attached building (R-3a, R-3aa, R-3b, RU) and more than one main building on a
-  lot. Each one needs review until you answer what it needs.
+  lot. Each says **needs review** until Gordium has what it needs (from your model or your answers).
 
 ## What was new on 2026-10-27
 
