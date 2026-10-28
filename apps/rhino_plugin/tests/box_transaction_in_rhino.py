@@ -99,7 +99,8 @@ try:
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
         g.STATE["zones"] = options["zones"]
         sample = g.ask({"cmd": "sample_site"})
-        sample_lot = str(g._add_lot(doc, sample))       # as GordiumStart does on an empty file
+        sample_lot = str(g._add_lot(doc, sample))       # a file drawn from the sample before 2026-10-27 (GordiumStart
+        # no longer draws it: a new file starts empty); such files keep working, so this still tests the transaction
         g._save_ui_state(doc, dict(g._ui_state(doc), from_sample=True, replaceable_lot=sample_lot))
         facts = dict(sample["facts"], address=sample["address"], lot_id=sample_lot)
         saved_ui = g._ui_state(doc)

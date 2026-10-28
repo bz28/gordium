@@ -7,6 +7,7 @@ import datetime as _dt
 import json
 import math
 import queue
+import re
 import threading
 import time
 
@@ -1826,7 +1827,14 @@ def lot_source(surveyed, source=None):
     return "your survey" if surveyed else "the tax map (±2 ft, approximate)" + (" · " + source if source else "")
 
 
-NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+NO_STREET_YET = "the street is set when the lot is drawn"
+# a new, empty file (Ben, 2026-10-27): no sample prefilled; the site comes from a lookup, or by hand
+FILL_BY_LOOKUP = "Look up an address to fill these in"
+LOOK_UP_FIRST_SITE = "Look up the address first. It finds the lot, zoning district and neighbourhood."
+BY_HAND = "Enter the site by hand"
+BY_HAND_NOTE = ("Entered by hand: draw the lot, pick the district and the street side. No neighbourhood is drawn "
+                "(only a lookup finds one).")
+NO_LOT = "no lot yet: draw it on the Site layer, or look up the address"
 # a file with no lot the box can use (Edit site… in an empty file): its own lot, drawn or picked (never the sample)
 LOT_MISSING = "no lot yet: draw it, or pick a closed outline on the Site layer"
 
@@ -2530,13 +2538,20 @@ def box_rows(state, flat=None):
         return {"review": "? " + why if why else None,
                 "check": ("I checked this", key in checked) if key in CHECKABLE and key in doubts else None}
 
-    lot_actions = [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot else []
-    if look.get("guide") or state.get("lot_missing"):
+    after = AFTER_DRAW if state.get("after_draw") else ""     # the looked-up lot, not drawn yet (show_pending_lot)
+    lot_actions = [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot and not after else []
+    if (look.get("guide") or state.get("lot_missing")) and not state.get("needs_lookup"):
         lot_actions.insert(0, ("draw_lot", "Draw my lot…", True))
+    if state.get("needs_lookup"):                 # an empty file: the lookup fills the rows, or the site by hand
+        lot_actions = [("by_hand", BY_HAND + "…", True)]
     rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
          # while it runs, the button stops it (the box as it was before Look up: lookup_cancelled)
-         "actions": [("lookup_cancel", CANCEL_LOOKUP, True) if look.get("looking") else ("lookup", "Look up", True)],
+         "actions": [("lookup_cancel", CANCEL_LOOKUP, True) if look.get("looking") else ("lookup", "Look up", True)]
+         + ([("use_saved", USE_SAVED.format(date=look["saved_offer"]), True)]
+            if look.get("saved_offer") and not look.get("looking")
+            and same_site_address(state.get("address") or "", look.get("saved_for") or "") else []),
+         # (an address retyped since the offer: no button, as pressing it would do nothing: round 6)
          "tick": None, "matches": look.get("matches") or [],
          "status": lookup_status(look["looking"], None, 0.0) if look.get("looking") else None},
         {"key": "zone", "label": "Zoning district", "text": zone_row_text(state),
@@ -2544,13 +2559,18 @@ def box_rows(state, flat=None):
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot",
-         "text": (LOT_MISSING if state.get("lot_missing") else
-                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))
+         "text": (FILL_BY_LOOKUP if state.get("needs_lookup") else LOT_MISSING if state.get("lot_missing") else
+                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source")) + after
                   if has_lot else NO_LOT),
-         "actions": lot_actions, "tick": None},
+         "actions": lot_actions, "tick": None,
+         "help": (BY_HAND_NOTE + (" " + IN_CITY_SAID.format(date=state["city_by_hand"])
+                                  if state.get("city_by_hand") else "")) if state.get("by_hand") else None},
         {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
-         "text": street_name(state) if (state.get("street_name") or has_lot) else "set from the lot, once there is one",
-         "actions": [("street", "Change…", True)] if has_lot else [], "tick": None,   # nothing to change yet: hidden
+         "text": FILL_BY_LOOKUP if state.get("needs_lookup") else
+         ((street_name(state) if state.get("street_name") or not after else NO_STREET_YET) + after)
+         if (state.get("street_name") or has_lot)
+         else "set from the lot, once there is one",
+         "actions": [("street", "Change…", True)] if has_lot and not after else [], "tick": None,   # nothing to change yet: hidden
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],
@@ -2577,7 +2597,9 @@ def box_rows(state, flat=None):
 NO_RULES = "The City map says {zone}; Gordium doesn't have {zone}'s rules yet: pick a district only if you know it applies."
 
 
-NO_DISTRICT = "The City zoning map gave no district for this lot: pick one"
+NO_DISTRICT = "The City zoning map gave no district for this lot: pick one."
+SAVED_NO_DISTRICT = "A saved lookup never keeps the district (the City's map is used live only): pick it."
+OVERLAYS_NOT_KEPT = "Overlays may apply here (a saved lookup can't keep them): check them by hand."
 
 
 def city_day(now=None):
@@ -2841,7 +2863,17 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
             "asks": list(payload.get("asks") or []), "matches": list(payload.get("matches") or []),
             "query": payload.get("query")}
     saved_ui["_lookup"] = look
-    if look["status"] != "found":                # what is on screen is still the lot it was (Ben, 2026-10-21)
+    # the map's "outside the City" holds for this box session, each address said (round 14: one slot, cleared by
+    # a found lookup of another address), through any later lookup that finds no lot (round 13: offline undid it);
+    # a found lookup of that same address ends it for that address only
+    # (a live one only: a copy saved earlier never outranks the City map's newer answer: round 15)
+    outside = [a for a in saved_ui.get("_outside_for") or []
+               if not (look["status"] == "found" and not payload.get("saved_on")
+                       and same_site_address(a, look["query"] or ""))]
+    if look["status"] == "outside_city":
+        outside.append(look["query"] or facts.get("address") or "the address")
+    saved_ui["_outside_for"] = outside
+    if look["status"] != "found":
         look["says"] = " ".join(t for t in (look["says"], still_shown(saved_ui)) if t)
         return facts, saved_ui
     got, details = payload.get("facts") or {}, payload.get("details") or {}
@@ -2855,9 +2887,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
 
     live, keep = {}, {}
     for name, d in details.items():          # every doubtful or asked fact's reason, by row; reasons add up
-        if d.get("status") in ("needs_review", "ask") and d.get("reason"):
+        # (a doubt without its reason is still a doubt: a saved lookup keeps the status but not a reason worked out
+        # from a source that may not be kept; dropped, the saved lot was more certain than the live one: a false
+        # pass, start-flow round 7)
+        if d.get("status") in ("needs_review", "ask"):
             row = ROW_OF.get(name, name)
-            live[row] = _merged(live.get(row), d["reason"])
+            live[row] = _merged(live.get(row), d.get("reason") or (OVERLAYS_NOT_KEPT if row == "overlays" else DOUBT_KEPT))
             keep[row] = _merged(keep.get(row), kept.get(name) or DOUBT_KEPT)
     found_overlays = value("overlays") or []
     if found_overlays:                       # what was found, by name, not only that something was
@@ -2881,7 +2916,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         facts.pop("zone", None)
         for key in ("zone_source", "_zones_found", "_zone_said"):
             saved_ui.pop(key, None)
-        live["zone"] = _merged(live.get("zone"), NO_DISTRICT)
+        live["zone"] = _merged(live.get("zone"), SAVED_NO_DISTRICT if payload.get("saved_on") else NO_DISTRICT)
     if unknown:
         # the City map names a district Gordium has no rules for (alone or beside one it has): never another
         # district preselected or called suggested in its place; none is set until the architect picks one. With
@@ -2929,7 +2964,9 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     else:                                        # the replaced lot's street name goes with its street lines (the
         saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street), and so
         saved_ui.pop("_street_name", None)       # does its source: the street side's own, or none (headless check)
-        if side and draws_line:
+        # (a saved lookup keeps the line, not the street side's value, used live: its source still says where the
+        # line came from and when it was saved: start-flow round 6)
+        if (side or payload.get("saved_on")) and draws_line:
             saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
         else:
             saved_ui.pop("street_source", None)
@@ -3111,6 +3148,8 @@ def draw_reason(state):
     unlooked = address_reason(state)
     if unlooked:
         return unlooked
+    if state.get("needs_lookup"):                 # an empty file: a found lookup first, or the site by hand
+        return LOOK_UP_FIRST_SITE
     if not state.get("zone"):
         return "Pick the district to continue."
     if not state.get("district_confirmed"):
@@ -3216,8 +3255,10 @@ def fact_sources(state, today, confirmed):
     def fact(value, source, who=by):
         return {"value": value, "source": source, "confirmed_by": who, "date": today}
 
-    return {
-        "address": fact(state.get("address") or None, state.get("address_source") or ENTERED),
+    city = (" · " + IN_CITY_SAID.format(date=state["city_by_hand"])) if state.get("city_by_hand") else ""
+    return {     # (the architect's Yes, by hand, on the address's source: shown in the panel and report, round 12)
+        "address": fact(state.get("address") or None,     # (an earlier Draw's Yes, read back, never twice)
+                        (state.get("address_source") or ENTERED).split(" · " + IN_CITY_SAID.split(" (")[0])[0] + city),
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
@@ -3685,6 +3726,7 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         facts.pop(k, None)
     set_street_lines(facts, None)                # the old lot's street lines and their names go with it
     saved_ui.update(from_sample=False, replaceable_lot=None, lookup_frame=None, ground_kind="flat", lookup_spots=[])
+    saved_ui.pop("city_by_hand", None)           # the looked-up lot replaces the one said by hand to be the City's
     guide = None
     if w.get("lot_ring"):
         lot_id = table.add_lot(w["lot_ring"], "Lot · " + (facts.get("address") or "looked up"))
@@ -4451,6 +4493,38 @@ def same_address(a, b):
 
 
 MISSING = object()
+AFTER_DRAW = " · after Draw"       # on a row that describes the looked-up lot, which Draw has yet to draw
+
+
+def show_pending_lot(state, facts, saved_ui):
+    """The box's state with the Lot and Front lot line rows describing the looked-up lot (marked "after Draw")
+    when nothing of the architect's or Gordium's is drawn yet: no lot, or only the sample's stand-in (Ben,
+    2026-10-27: the rows kept saying the sample's 7,033 sf and Ithaca Rd). Display only: no fact is written
+    before Draw. Once a lot is drawn (Gordium's from a lookup, or the architect's own) the rows describe the
+    drawing, and the state comes back as it was. A City guide alone is left as it was (its own flow)."""
+    pending = (saved_ui or {}).get("_pending")
+    sample_only = not (facts or {}).get("lot_id") or (saved_ui or {}).get("from_sample")
+    if (not pending or not sample_only or not lookup_may_replace(facts, saved_ui)
+            or is_drawn(pending.get("address"), saved_ui)      # Draw draws nothing new for it: no "after Draw"
+            or (state.get("lookup") or {}).get("looking")           # another address is being looked up
+            or not (same_address(state.get("address") or "", pending.get("address"))      # blank: Draw sets the
+                    or same_address(state.get("address") or "", pending.get("query")))):    # preview aside
+        return state
+    answer = pending.get("answer") or {}
+    got = answer.get("facts") or {}
+    w = answer.get("writes") or {}
+    lot = (got.get("lot") or {}).get("value") or {}
+    if not (lot and w.get("lot_ring")):                      # the City's guide only: no lot of it is drawn (its
+        return state                                         # own flow: Draw clears, then the architect draws)
+    side = (got.get("street_side") or {}).get("value") or {}
+    street = None
+    if side.get("street") and w.get("street_line"):
+        street = address_street(pending.get("address"), side["street"]) or side["street"].title()
+    label = (answer.get("labels") or {}).get("lot") or SOURCE_OF["lot"]
+    return dict(state, has_lot=True, lot_missing=False, lot_area=lot.get("area_sf"), lot_surveyed=False,
+                lot_source=label, street_name=street, after_draw=True)
+
+
 PREVIEW_SAYS = ("Shown dashed: {address}'s lot. Nothing in the model changes until Draw, which replaces what Gordium "
                 "drew with this lot and a new starting house.")
 SET_ASIDE = "The lookup of {address} was set aside (the address was changed): Look up to preview another address."
@@ -4471,7 +4545,8 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
     w = answer.get("writes") or {}
     undo = [(where, k, before.get(k, MISSING), after.get(k, MISSING))
             for where, before, after in (("facts", before_f, facts), ("saved", before_s, saved_ui))
-            for k in set(before) | set(after) if k not in ("_lookup", "_pending")
+            for k in set(before) | set(after) if k not in ("_lookup", "_pending", "_outside_for")   # (the
+            # session's, never one preview's: set aside, it brought back an address found since: round 16)
             and before.get(k, MISSING) is not after.get(k, MISSING) and before.get(k, MISSING) != after.get(k, MISSING)]
     address = facts.get("address") or answer.get("query")
     saved_ui["_pending"] = {"address": address, "query": answer.get("query"), "answer": answer, "undo": undo}
@@ -4481,6 +4556,8 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
     elif not is_drawn(address, saved_ui):
         saved_ui["_lookup"]["says"] = (GUIDE_PREVIEW if not w.get("lot_ring") and w.get("guide_ring") else
                                        PREVIEW_SAYS.format(address=address))
+    if answer.get("saved_on"):                   # the offline safety net: said, whatever else the line said
+        saved_ui["_lookup"]["says"] = SAVED_SAYS.format(address=address, date=answer["saved_on"])
     return facts, saved_ui, w.get("lot_ring") or w.get("guide_ring")
 
 
@@ -4505,7 +4582,193 @@ def drop_pending(facts, saved_ui):
 def box_opened(saved_ui, facts):
     """The box's choices as a box opens over `facts`: the address the lot had then kept for this session
     (`_box_address`, never saved), so typing it back is never a new address (Ben, 2026-10-25)."""
-    return dict(saved_ui or {}, _box_address=(facts or {}).get("address"))
+    return dict(saved_ui or {}, _box_address=(facts or {}).get("address"),   # (a new file: no lot and no address
+                _opened_empty=not (facts or {}).get("lot_id") and not (facts or {}).get("address"))   # yet)
+
+
+def start_gate(state, saved_ui):
+    """The box's state with the empty-file rule (Ben, 2026-10-27): a box opened on a file with no lot (a new project)
+    starts empty, and Draw stays off until a lookup of the address typed is found (`needs_lookup`), or the architect
+    chose to enter the site by hand (`by_hand`: they draw the lot, pick the district and the street side, all theirs;
+    no neighbourhood). A file with a lot drawn when the box opened is as before. Display and gating only: no fact
+    is written here."""
+    saved_ui = saved_ui or {}
+    if not saved_ui.get("_opened_empty"):
+        return dict(state, needs_lookup=False, by_hand=False, city_by_hand=saved_ui.get("city_by_hand"),
+                    outside_for=saved_ui.get("_outside_for") or [])
+    pending = saved_ui.get("_pending") or {}
+    # a found lookup supersedes "by hand": its address rule applies again (sceptic 2: by hand let another town's
+    # address keep the City's lookup)
+    by_hand = bool(saved_ui.get("_by_hand")) and not pending
+    address = state.get("address") or ""
+    found = any(same_site_address(address, a) for a in (pending.get("address"), pending.get("query"),
+                                                       # the City's outline only: cleared for it, the box kept
+                                                       # open to draw the lot over it (sceptic 2, finding 1)
+                                                       saved_ui.get("_redrawn_for"), saved_ui.get("drawn_address"))
+                if a)
+    return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand,
+                city_by_hand=saved_ui.get("city_by_hand"),      # shown whenever kept (round 12: never seen again)
+                outside_for=saved_ui.get("_outside_for") or [])
+
+
+BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
+                     "(a City of Ithaca one), or clear it.")
+
+
+def no_guessed_district(saved, suggested):
+    """The suggestions for a file with no site yet (no lot, no address saved): without the first district's guess
+    (Ben, 2026-10-27: the lookup finds it, or the architect picks it). GordiumStart and Edit site… alike (round 5)."""
+    suggested = dict(suggested or {})
+    if not (saved or {}).get("lot_id") and not (saved or {}).get("address") and not suggested.get("lot_id"):
+        suggested["zone"] = None
+    return suggested
+
+
+IN_CITY_QUESTION = ("Is this lot in the City of Ithaca?\n\nGordium checks City of Ithaca lots only. An address "
+                    "that reads \"Ithaca, NY 14850\" may instead be in the Town of Ithaca, Cayuga Heights, Lansing "
+                    "or Dryden, which have their own zoning codes. The City's tax map says which.\n\n"
+                    "Yes: enter the site by hand as a City of Ithaca lot. No: nothing changes.")
+IN_CITY_SAID = "You said this lot is in the City of Ithaca ({date})."
+BY_HAND_OUTSIDE = ("The lookup said {query} is outside the City of Ithaca, and Gordium checks City of Ithaca lots "
+                   "only: look up a City of Ithaca address, or close this box.")
+
+
+def by_hand_refused(saved_ui):
+    """Why "Enter the site by hand" is refused before its question is asked: the lookup said outside the City (round
+    12: a Yes, then the address cleared or retyped, opened Draw on that lot). "" when it may be asked."""
+    outside = (saved_ui or {}).get("_outside_for") or []     # (kept through later lookups: rounds 13, 14)
+    return BY_HAND_OUTSIDE.format(query=outside[-1]) if outside else ""
+
+
+def choose_by_hand(facts, saved_ui, in_city):
+    """(facts, saved_ui) once the architect chose "Enter the site by hand" and answered IN_CITY_QUESTION: `in_city`
+    is the date they said Yes (kept in the file as theirs, `city_by_hand`), else nothing changes (start-flow round
+    11: "Ithaca, NY 14850" is also the Town's mail, so an address alone can't prove a City lot). Any looked-up
+    preview set aside (its box changes undone; else a found lookup kept the gate on the lookup and the button did
+    nothing: start-flow round 3)."""
+    dropped_f, dropped = drop_pending(facts, saved_ui)
+    if by_hand_refused(dropped) or not in_city:    # (asked of the state by hand would leave: round 16)
+        return facts, saved_ui
+    facts, saved_ui = dropped_f, dropped
+    saved_ui["city_by_hand"] = str(in_city)
+    saved_ui["_lookup"] = {}                       # ("outside the City" holds in `_outside_for`: by_hand_refused)
+    saved_ui["_by_hand"] = True
+    return facts, saved_ui
+
+
+def draw_blocked(state, saved_ui):
+    """Why Draw must draw nothing, whatever way it was pressed (the box, where Draw is off then, or a scripted run
+    that ticks and draws): an address typed but not looked up (address_reason), or a file that opened empty with
+    no found lookup of the address and no "Enter the site by hand" (start_gate). "" when Draw may go on."""
+    saved_ui = saved_ui or {}
+    state = dict(state, known_addresses=known_addresses(saved_ui), lookup=saved_ui.get("_lookup") or {})
+    gated = start_gate(state, saved_ui)
+    return address_reason(gated) or (LOOK_UP_FIRST_SITE if gated["needs_lookup"] else "")
+
+
+# The offline safety net (Ben, 2026-10-27): each found lookup is saved on this computer, only as far as its sources
+# allow keeping it (site_lookup's snapshot, endpoints.yaml `store`): the lot and its street line from the State's
+# tax parcels, never the district (the City's zoning map is used live, never stored), so the district is picked
+# again. When a later lookup of the same address can't reach the map services, the box offers the saved one.
+LOOKUP_FAILED = ("offline", "error", "timeout")          # the services didn't answer (never "not found" or "outside")
+USE_SAVED = "Use the lookup saved on {date}"
+SAVED_SAYS = ("The map services didn't answer. Shown: the lookup of {address} saved on {date} (the lot and its street "
+              "line only: pick the district again).")
+SAVED_ON = " · saved on {date}"
+SAVED_NOT_THIS = "The saved lookup is {saved_for}'s, not {address}'s: press Look up to find {address}."
+USED_LIVE = "(used live, not stored)"                     # site_lookup.lookup.USED_LIVE: a value never stored
+
+
+def lookup_key(address):
+    """The key a saved lookup is filed under: the address's own words (address_words), "" for none."""
+    return " ".join(address_words(address))
+
+
+def storable_lookup(answer):
+    """The copy of a found lookup that may be saved, or None (nothing worth saving: no lot curve the sources allow
+    keeping). Only the snapshot's facts (each already within its source's policy) with a value that was kept, the
+    lot curve, its street line and placement, the spot grades (writes: all `raw`), its date and query. Never the
+    district (used live), nor the City's guide."""
+    answer = answer or {}
+    w = answer.get("writes") or {}
+    if answer.get("status") != "found" or not w.get("lot_ring") or answer.get("saved_on"):
+        return None
+    snap = w.get("snapshot") or {}
+    facts = {k: v for k, v in (snap.get("facts") or {}).items()
+             if isinstance(v, dict) and v.get("value") not in (None, USED_LIVE) and k != "zone"}
+    if not facts.get("lot"):
+        return None
+    date = answer.get("checked") or str(snap.get("fetched") or "")[:10] or None
+    if not date:
+        return None
+    return {"status": "found", "query": answer.get("query"), "message": "", "asks": [], "matches": [], "facts": facts,
+            # every doubt the lookup had, by its status (the snapshot's details are within every source's policy),
+            # even for a fact whose value isn't kept (the street side, the corner): never more certain than live
+            "details": {k: v for k, v in (snap.get("details") or {}).items() if k != "zone"},
+            "labels": {k: v for k, v in (answer.get("labels") or {}).items()     # (the service names only; the
+                       if k in facts or (k == "street_side" and w.get("street_line"))},   # street line's, with it)
+            "kept_reasons": {k: v for k, v in (answer.get("kept_reasons") or {}).items() if k != "zone"},
+            "street_storable": bool(answer.get("street_storable")),
+            "writes": {"lot_ring": w.get("lot_ring"), "guide_ring": None, "street_line": w.get("street_line"),
+                       "spots": list(w.get("spots") or []), "frame": w.get("frame"), "snapshot": snap},
+            "checked": date, "address": found_address(answer)}
+
+
+def found_address(answer):
+    """The address a lookup found ("106 Ithaca Road, Ithaca, NY, 14850"), or None."""
+    value = (((answer or {}).get("facts") or {}).get("address") or {}).get("value")
+    return value if isinstance(value, str) and value.strip() else None
+
+
+def save_lookup(store, answer, address=None):
+    """The saved lookups (a dict: key -> storable copy) with this answer added under the address typed and the one
+    found; unchanged when nothing may be saved."""
+    copy = storable_lookup(answer)
+    if copy is None:
+        return dict(store or {})
+    out = dict(store or {})
+    for a in (answer.get("query"), address, copy.get("address")):     # as typed, and as found
+        if lookup_key(a):
+            out[lookup_key(a)] = copy
+    return out
+
+
+def saved_offer(answer, store, address):
+    """The saved lookup to offer for `address` when this lookup failed to reach the services, else None. Only the
+    same site's: the key is the street address alone, so the town is checked too (same_site_address: "106 Ithaca
+    Rd, Lansing" never gets the City's 106; start-flow sceptic 1, finding 2)."""
+    if (answer or {}).get("status") not in LOOKUP_FAILED or not lookup_key(address):
+        return None
+    copy = (store or {}).get(lookup_key(address))
+    if not copy or not any(same_site_address(address, a) for a in (copy.get("query"), copy.get("address")) if a):
+        return None
+    return copy
+
+
+def use_saved(offer, offered_for, typed):
+    """The saved lookup as the box's answer, only while the address typed is still the one it was offered for
+    (start-flow sceptic 1, finding 1: retyped, it went in under the new address, as if that had been looked up);
+    else None (the offer is dropped)."""
+    if not offer or not same_site_address(typed or "", offered_for or ""):
+        return None
+    return as_saved(offer)
+
+
+def saved_refused(look, offered_for, typed):
+    """The lookup line once "Use the lookup saved on …" was pressed for an address retyped since (the button was
+    still on screen: the box's rows aren't rebuilt while typing): the offer gone, and why."""
+    return dict(look or {}, saved_offer=None,
+                says=SAVED_NOT_THIS.format(saved_for=offered_for or "another address", address=typed or "the address"))
+
+
+def as_saved(copy):
+    """A saved lookup as an answer the box shows like any other, marked: its date on the line the box says, and on
+    every source label ("NYS Tax Parcels Public · saved on 2026-10-27"), so the rows and what Draw saves say so.
+    Its own query, never the address typed now. A source's ", used live" goes: what was saved is not live (round 9:
+    "City of Ithaca roads, used live · saved on <date>")."""
+    date = copy.get("checked")
+    return dict(copy, saved_on=date, labels={k: v.replace(", used live", "") + SAVED_ON.format(date=date)
+                                             for k, v in (copy.get("labels") or {}).items()})
 
 
 def known_addresses(saved_ui):
@@ -4522,14 +4785,84 @@ ITHACA_PLACE = {"ithaca", "14850", "14851", "14852", "14853"}
 
 def address_place(address):
     """The town or ZIP an address names after its first comma, as words (state and country aside), or None when it
-    names none; the City's own name and ZIP codes count as none (the lot is in the City of Ithaca)."""
-    tail = str(address or "").split(",", 1)[1:] if "," in str(address or "") else []
-    text = (tail[0] if tail else "").lower().replace(",", " ").replace(".", "")
-    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    names none; the City's own name and ZIP codes count as none (the lot is in the City of Ithaca). Typed without
+    commas, the tail after the street: a ZIP at the end, and the one word before a state or ZIP ("12 Main St Lansing
+    NY 14882" names "lansing 14882": start-flow review round 9, it read as the City's), a street word never a town."""
+    if "," not in str(address or ""):
+        return _place_without_commas(address)
+    tail = str(address or "").split(",", 1)[1:]
+    text = " ".join(_address_tokens((tail[0] if tail else "").replace(",", " ")))
     text = text.replace("united states of america", "").replace("united states", "")
-    words = [w for w in text.split() if w not in ("ny", "new", "york", "usa", "us")]
-    words = [w[:5] if w[:5].isdigit() else w for w in words]
+    words = [w for w in text.split() if w not in STATE_WORDS]
+    words = [w[:5] if w[:5].isdigit() else w for w in words if _may_be_place(w)]
     places = [w for w in words if w not in ITHACA_PLACE]
+    return " ".join(places) or None
+
+
+# Words that end a street's name ("Rd", "Way"), so what follows them is the town: STREET_WORDS both ways and the
+# other endings of the City's streets (round 10: "1 Willard Way NY 14850" read "way" as a town). Never a word that
+# also names a place nearby ("Heights": the Village of Cayuga Heights; "Hill"; "East": East Ithaca, in the Town).
+DIRECTIONS = {"north", "south", "east", "west", "n", "s", "e", "w"}
+STREET_ENDINGS = ((set(STREET_WORDS) | set(STREET_WORDS.values())) - DIRECTIONS    # "East Ithaca" is the Town's
+                  | {"way", "park", "walk", "row", "alley", "aly", "path", "trail", "trl", "ext", "extension", "sq",
+                     "square", "plaza", "loop", "run", "crossing", "pike", "tpke", "turnpike", "rte", "route"})
+STATE_WORDS = ("ny", "new", "york", "usa", "us", "tompkins", "county")
+UNIT_WORDS = {"apt", "apartment", "unit", "#", "ste", "suite", "fl", "floor", "rm", "room", "bldg", "building"}
+NOT_A_PLACE = {"rear", "front", "lower", "upper", "-", "&"}    # a part of a lot or house ("101 N Aurora St Rear")
+# Places around the City that share its "Ithaca" mail and ZIPs, read as a town even after a street with no known
+# ending ("1 Snyder Hill Dryden": round 11); "town" and "village" too ("Town of Ithaca"). By hand, the architect also
+# says the lot is in the City (IN_CITY_QUESTION): an address alone can't prove it.
+NEARBY_PLACES = {"town", "village", "lansing", "dryden", "danby", "enfield", "newfield", "caroline", "ulysses",
+                 "groton", "trumansburg", "freeville", "varna", "etna", "slaterville", "brooktondale", "cayuga"}
+
+
+def _address_tokens(text):
+    """An address's words for reading its town: lower case, "." dropped ("N.Y."), "#" apart, "NY14850" as
+    "ny 14850", the City's own name as "ithaca", and a unit and its number dropped ("Apt 2", "Unit B": round 11,
+    read as a town)."""
+    text = str(text or "").lower().replace(".", "").replace("#", " # ")
+    text = re.sub(r"\bny(\d{5})", r"ny \1", text)
+    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    words, out = text.split(), []
+    i = 0
+    while i < len(words):
+        if words[i] in UNIT_WORDS:
+            i += 2
+            continue
+        out.append(words[i])
+        i += 1
+    return out
+
+
+def _may_be_place(word):
+    """Whether a word after the street may name a town: never a route's number ("Rte 13"), a letter ("St N", "St B":
+    round 13), "1/2", "2nd", punctuation, a part of a lot or house (NOT_A_PLACE) or a direction ("NE"). A ZIP may."""
+    return not ((word.isdigit() and len(word) < 5) or len(word) < 2 or word in NOT_A_PLACE
+                or word in ("ne", "nw", "se", "sw") or re.fullmatch(r"\d*/\d*|\d+(st|nd|rd|th)|\W+", word))
+
+
+def _place_without_commas(address):
+    """address_place for an address typed without commas (round 9: "12 Main St Lansing NY 14882" read as the
+    City's). The town is every word after the street's last ending (STREET_ENDINGS), state and the City's own name
+    and ZIP codes aside ("12 Main St Town of Ithaca NY" names "town of": round 10, the Town is not the City; "12 Main
+    St Lansing" names "lansing"). A street with no known ending: the word before a state or ZIP, if one was typed;
+    else a place nearby named anywhere after the street's first word (NEARBY_PLACES); else None."""
+    words = _address_tokens(address)
+    ends = [i for i, w in enumerate(words) if i >= 1 and w in STREET_ENDINGS]
+    if ends:
+        tail = words[ends[-1] + 1:]
+    else:
+        tail, cut = [], len(words)
+        while cut > 2 and (words[cut - 1] in STATE_WORDS or (words[cut - 1][:5].isdigit()
+                                                            and len(words[cut - 1]) in (5, 10))):
+            cut -= 1
+        if cut < len(words) and cut > 2:
+            tail = words[cut - 1:]
+        elif cut == len(words):              # nothing typed after the street but, perhaps, a place nearby
+            tail = [w for w in words[2:] if w in NEARBY_PLACES]
+    tail = [w[:5] if w[:5].isdigit() else w for w in tail if w not in STATE_WORDS]
+    tail = [w for w in tail if _may_be_place(w)]
+    places = [w for w in tail if w not in ITHACA_PLACE]
     return " ".join(places) or None
 
 
@@ -4546,8 +4879,21 @@ def address_reason(state):
     address = (state.get("address") or "").strip()
     known = state.get("known_addresses")
     look = state.get("lookup") or {}
+    if state.get("by_hand") and not look.get("looking"):   # the site by hand, in a file that was empty: the address
+        # is the architect's label (no lot of another to mislabel), but a City of Ithaca one (round 5: another
+        # place, or one the lookup already said is outside the City, was checked under the City's rules)
+        if state.get("outside_for"):                 # whatever the address now (round 12: cleared or retyped)
+            return BY_HAND_OUTSIDE.format(query=state["outside_for"][-1])
+        if address and address_place(address) is not None:
+            return BY_HAND_CITY_ONLY.format(address=address)
+        return ""
     if known is not None and look.get("looking"):         # a lookup running: Draw off, its own address named
         return WAIT_LOOKUP.format(address=look["looking"])
+    said = next((o for o in state.get("outside_for") or [] for a in [address] + list(known or [])
+                 if a and same_site_address(a, o)), None)   # the address typed, or the lot's own whatever is typed
+    if said:                                                 # (round 14: cleared, Draw went on)
+        return BY_HAND_OUTSIDE.format(query=said)   # the lot's own address too (round 13: a drawn
+        #   lot the lookup now says is outside the City was drawn again and checked under the City's rules)
     if not address or known is None or any(same_site_address(address, k) for k in known):
         return ""
     status = look.get("status")
@@ -4565,7 +4911,8 @@ def settle_pending(facts, saved_ui, address):
     address typed since drops it, its box changes undone (re-lookup review round 1: the preview was drawn under the
     typed address)."""
     pending = (saved_ui or {}).get("_pending")
-    if pending and not (same_address(address, pending.get("address")) or same_address(address, pending.get("query"))):
+    if pending and not (same_site_address(address, pending.get("address"))
+                        or same_site_address(address, pending.get("query"))):   # another town's: dropped too
         facts, saved_ui = drop_pending(facts, saved_ui)
         # its line goes with it: the box never says another address's lot is shown or will be drawn (round 3)
         saved_ui["_lookup"] = {"status": "set_aside", "query": pending.get("query"), "asks": [], "matches": [],
@@ -4597,10 +4944,11 @@ def own_work(table, facts, saved_ui):
 
 def is_drawn(address, saved_ui):
     """Whether `address` is the one a lookup drew in this file (its lot, placed on the map): then Draw draws nothing
-    new for it. Never the sample's: looking up 106 Ithaca Rd over the sample draws the looked-up lot in its place,
-    placed on the map, so its neighbourhood can be drawn (#23 never draws one around the sample)."""
+    new for it. A drawn sample counts too (coordinator, 2026-10-27, Ben's P0): Look up then Check in Edit site on a
+    file drawn from the sample started fresh, redrawing the lot and the house over the architect's work. New files
+    no longer start from the sample (start_gate): 106 Ithaca Rd is looked up like any address."""
     drawn = (saved_ui or {}).get("drawn_address")
-    return drawn is not None and not (saved_ui or {}).get("from_sample") and same_address(address, drawn)
+    return drawn is not None and same_address(address, drawn)
 
 
 def reset_plan(facts, saved_ui, mine):
@@ -4661,7 +5009,8 @@ BOX_CHOSEN_UI = ("address_source", "zone_source", "_zone_said", "_reconfirm", "_
 # what of the box's state the reset redraws (the rest is the architect's choices in the box): after_reset_state
 RESET_STATE_KEYS = ("has_lot", "lot_missing", "lot_area", "lot_surveyed", "lot_source", "street_name",
                     "street_name_saved", "street_source", "corner_lot", "corner_source", "ground", "ground_fall",
-                    "lookup", "live", "doubts", "checked", "address", "address_source")
+                    "lookup", "live", "doubts", "checked", "address", "address_source", "after_draw",
+                    "city_by_hand")    # (the old lot's Yes never on the lot drawn in its place: start-flow round 14)
 
 
 def after_reset_state(shown, fresh):

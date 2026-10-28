@@ -25,15 +25,33 @@ Type a command's name in Rhino's command line.
 
 ## 1. Start a project
 
-1. Open an empty Rhino file (any unit; Gordium converts) and type `GordiumStart`. The **start box** opens, filled in with the
-   sample project (106 Ithaca Rd, district R-1b, one-family house).
+1. Open an empty Rhino file (any unit; Gordium converts) and type `GordiumStart`. The **start box** opens empty: the
+   lot rows say `Look up an address to fill these in`, and **Draw** stays off with
+   `Look up the address first. It finds the lot, zoning district and neighbourhood.`
+   To try Gordium, look up 106 Ithaca Rd. With no lookup possible (a lot the maps don't know), press
+   **Enter the site by hand…**: you draw the lot, pick the district and the street side, all "entered by you";
+   no neighbourhood is drawn (only a lookup finds one). By hand is for City of Ithaca lots only. Gordium first asks
+   **Is this lot in the City of Ithaca?** ("Ithaca, NY 14850" is also the mail address of the Town of Ithaca and
+   its neighbours, so the address alone can't prove it); **No** changes nothing, and **Yes** is kept in the file
+   with its date as yours. An address that names another place after the street (`12 Main St, Lansing` or
+   `12 Main St Town of Ithaca NY`) still keeps Draw off. Once a lookup has said an address is outside the City,
+   by hand is refused (not asked) and Draw stays off for that address, and for a lot whose own address it is,
+   whatever the box's address says, even after another address is found. A live lookup that finds that same address
+   ends it (a saved one doesn't), and so does closing the box.
 2. Read each row:
    - **Address**: the project's address. **Look up** asks the City's and the State's maps about that address and fills in what they give (the lot, its district); each row says where its answer came from.
+     Each found lookup is also saved on this computer, as far as its sources allow (the lot and its street line;
+     never the district, which the City's map lets Gordium use only live). If a later lookup of the same address
+     can't reach the map services, the box offers **Use the lookup saved on …** (its date): its rows say "saved on <date>"
+     and you pick the district again.
    - **Zoning district**: the district and where it came from ("entered by you"); **Change** picks another. Tick **This is the lot's
      district** to confirm it. Nothing is drawn until you do: a district nobody confirmed is never trusted.
    - **Use**: the kind of building (one-family dwelling, detached, for now). **Change** picks another.
    - **Lot**: the lot's area and where it came from. **Use my survey…** replaces the tax-map lot with your own
      surveyed lot lines (tax-map lines can be about 2 ft off; Gordium says so and keeps its answers safe).
+     In a new file, after **Look up** finds an address, this row and the street row below show the *found* lot's
+     area and street marked `· after Draw` (nothing is drawn until you press Draw; a failed or new lookup never
+     leaves another address's numbers behind). Once a lot is drawn, they describe the drawing.
    - **Front lot line (on the street)**: which lot line is on the street; Gordium measures the front yard from it.
      **Change…** lets you click it. **Corner lot?** is never guessed: **Not answered**, **No: one street** or
      **Yes: two streets**.
@@ -45,7 +63,7 @@ Type a command's name in Rhino's command line.
 uses that lot's facts). If the model already has a building, Gordium says (in a message and on the command line)
 `This model already has a building. To start over on another address, use Edit site… in the Gordium panel: Look up the new address and press Draw (the lot and starting house are drawn again for it). To check the building you have, use GordiumCheck.`
 From **Edit site…** (and `GordiumFacts`) the same box opens with its last button reading **Check** instead of **Draw**: it re-checks with the changed facts; a new address looked up there is drawn clean (Gordium asks once before removing anything you drew).
-**Cancel** closes the box without drawing the house. On a new file the sample lot has already been drawn on the Site layer, and stays; the command line says nothing was started.
+**Cancel** closes the box without drawing anything new; the command line says nothing was started.
 
 ## 2. The panel
 

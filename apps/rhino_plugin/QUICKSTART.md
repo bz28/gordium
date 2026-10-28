@@ -231,9 +231,11 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 
 1. **New file.** File → New, a template in **feet** (any units work; feet is easiest to read).
 2. **Type `GordiumStart`** and press Enter.
-   - On an empty file Gordium draws its sample lot, 106 Ithaca Rd as the State tax map draws it (7,033 sf, its
-     front curving along Ithaca Road), so you can try it at once. It is placed as an address lookup places it: the
-     street along the bottom of Top view, the lot behind it.
+   - On an empty file the start box opens empty and **Draw** stays off until an address is looked up. To try
+     Gordium, look up 106 Ithaca Rd: the State tax map's lot (7,033 sf, its front curving along Ithaca Road),
+     placed with the street along the bottom of Top view, the lot behind it. A lot the maps don't know:
+     **Enter the site by hand…** (you say the lot is in the City of Ithaca, draw the lot and pick the district and
+     street side; no neighbourhood).
    - To use your own lot instead, first draw it as one closed polyline on a layer named `Site`, then run
      `GordiumStart`.
    Whenever Gordium takes more than a moment, a small window says what it is doing, with the seconds so far: Rhino
@@ -245,7 +247,7 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    check leaves the panel saying "Check cancelled" (press **Check again**); a cancelled report leaves the file as it
    was. Live re-checks after an edit run in the background: the panel says "Checking…" with what it is doing and
    its own **Cancel**.
-3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
+3. **The start box** opens (filled in from your lot, if you drew one). Read it top to bottom:
    - **Address**: type it and press **Look up** (or Enter). After 4 characters and a short pause, a list under the
      box offers the City of Ithaca addresses that start that way (the City's own address list, asked live, never
      kept; Town of Ithaca addresses never appear): **Down**/**Up** and **Enter**, or a click, picks one; **Esc**
@@ -261,7 +263,9 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      the items that depend on it need review. An address typed and not looked up keeps Draw off ("Press Look up to
      find … first."); type the lot's own address back, or clear it, and Draw is on again. If the lookup can't
      help (offline, not found, outside the City of Ithaca), the box says why: correct the address and Look up
-     again, or put back the lot's own address (or clear it) and fill the rest in by hand.
+     again, or put back the lot's own address (or clear it) and fill the rest in by hand. Outside the City: Draw
+     stays off for that address, and in a new file by hand is refused, until a live lookup of that same address
+     finds the lot, or you close the box. Another address looked up and found can be drawn; by hand stays refused.
    - **Zoning district**: R-1b, R-1a, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b or RU, "entered by you", or after Look up "suggested by Gordium · City of
      Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
      lookup, because the City's online map is informational: the district is your statement.
@@ -345,7 +349,7 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 | `GordiumFacts` | Open the start box again to change the site facts (the panel's **Edit site…** does the same). |
 | `GordiumOff` | Stop Gordium and clear its drawing. Nothing in your model is changed. |
 
-Gordium never changes your model, except for what you ask: the starting building and the sample lot. Everything
+Gordium never changes your model, except for what you ask: the starting building and a looked-up lot. Everything
 else (the envelope, the red, the labels, the status box) is drawn on top and disappears with `GordiumOff`.
 
 ## What "needs review" means
@@ -385,9 +389,9 @@ so the guide and Gordium can't drift apart.
 - **Undo:** Cmd+Z.
 - **Draw a box:** `Box`, then two corners and a height.
 
-### The starting house on the sample lot
+### The starting house at 106 Ithaca Rd
 
-The sample lot is 106 Ithaca Rd as the State tax map draws it (parcel 84.-2-6): 7,033 sf, 75'-10" wide along
+Looked up, 106 Ithaca Rd is the lot as the State tax map draws it (parcel 84.-2-6): 7,033 sf, 75'-10" wide along
 Ithaca Road (its front is a gentle curve) and about 101 ft deep, with a short jog at the back. In Top view the
 street is along the bottom (the lot faces south-east); "back" below means away from the street (up in Top view).
 The side yards are named by compass, as on a site plan: the southwest one is on your left as you face the lot from

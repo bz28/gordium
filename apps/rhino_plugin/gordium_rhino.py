@@ -1834,6 +1834,13 @@ def _lot_level(doc, facts):
 
 
 def _box_state(doc, facts, options, saved_ui, mode="check"):
+    """The box's state: what is drawn, except that in a file with nothing drawn yet a found lookup's lot and street
+    are shown (marked "after Draw": rhino_logic.show_pending_lot, tested in CI)."""
+    return logic.start_gate(logic.show_pending_lot(_box_state_drawn(doc, facts, options, saved_ui, mode), facts,
+                                                  saved_ui), saved_ui)
+
+
+def _box_state_drawn(doc, facts, options, saved_ui, mode="check"):
     """The start box's state from the facts, their saved sources and the box's own choices (rhino_logic.box_rows
     turns it into rows). "I confirm" is unticked on every new project: only a district confirmed at an earlier
     Draw, and unchanged since, stays ticked."""
@@ -2162,7 +2169,17 @@ def _box_pick(doc, what, facts, saved_ui, session):
 
 
 def _one_pick(doc, what, facts, saved_ui, session):
-    if what == "lookup":                       # no town typed: the City's ("106 Ithaca Rd, Ithaca, NY")
+    if what == "by_hand":                      # the site by hand (an empty file): the box shows its own rows, once
+        refused = logic.by_hand_refused(saved_ui)     # the lookup said outside the City: refused, not asked
+        if refused:
+            saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, says=refused)
+        # the architect says the lot is the City's (an address can't prove it)
+        in_city = None if refused else _ask_in_city()
+        if in_city:
+            _lookup_stop()                     # a lookup still running is never used after this
+            STATE.pop("lookup_guide", None)
+        facts, saved_ui = logic.choose_by_hand(facts, saved_ui, in_city)
+    elif what == "lookup":                     # no town typed: the City's ("106 Ithaca Rd, Ithaca, NY")
         if facts.get("address"):
             facts["address"] = logic.with_city(facts["address"])
         saved_ui = _lookup_start(facts, saved_ui)
@@ -2170,6 +2187,14 @@ def _one_pick(doc, what, facts, saved_ui, session):
         saved_ui = _lookup_cancel(saved_ui)
     elif what == "lookup_done":
         facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
+    elif what == "use_saved":                  # offline: the lookup saved on this computer, marked with its date
+        offered_for = saved_ui.pop("_saved_for", None)
+        answer = logic.guard(logic.use_saved, "use the saved lookup")(
+            saved_ui.pop("_saved_answer", None), offered_for, facts.get("address"))
+        if answer:
+            facts, saved_ui = _show_answer(doc, answer, facts, saved_ui)
+        else:                                  # the address retyped since: the offer dropped, and said (round 6)
+            saved_ui["_lookup"] = logic.saved_refused(saved_ui.get("_lookup"), offered_for, facts.get("address"))
     else:                                      # the pick's outcome only; rhino_logic.pick_effect decides the rest
         facts, saved_ui = logic.pick_effect(what, _pick_outcome(doc, what, facts, saved_ui, session), facts, saved_ui)
     _highlight(doc, facts)
@@ -2367,15 +2392,21 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             elif drawn_state is not state:            # after the reset (the guide): its lot rows are the model's
                 ticked = {k: v for k, v in ticked.items() if k in GUIDE_KEEPS}
             continue
-        if what == "pick:lookup":                         # the lookup's answer replaces them (and the district
-            before_lookup, ticked = ticked, {}            # must be confirmed again)
-        elif what == "pick:lookup_done":
+        # the lookup's answer replaces them (and the district must be confirmed again); by hand undoes it (a tick
+        # given its district never moves to another)
+        if what == "pick:lookup":
+            before_lookup, ticked = ticked, {}
+        elif what in ("pick:lookup_done", "pick:use_saved"):
             ticked = {}
         elif what == "pick:lookup_cancel":                # cancelled: the box as it was before Look up, ticks too
             ticked = before_lookup
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
+        was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
         if what != "pick:refresh":           # refresh: another use or district, the box again with its questions
             facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
+        if (what == "pick:by_hand" and saved_ui.get("_by_hand")     # by hand taken, or a lookup's preview set
+                and (not was_by_hand or (had_pending and not saved_ui.get("_pending")))):   # aside by it (round
+            ticked = {}            # 15): ticks again (No or refused changes nothing: rounds 12, 16)
         # (nothing saved until Draw: Cancel leaves the facts, the box's choices and the model as they were)
 
 
@@ -2547,7 +2578,50 @@ def _lookup_done(doc, facts, saved_ui, session):
     changes; its lot is shown dashed on screen while the box is open (gone on Cancel), and Draw draws it
     (_draw_prepare). The views framed on it."""
     answer = _lookup_poll() or {"status": "error"}
+    asked = (STATE.get("lookup") or {}).get("query") or facts.get("address")
     _lookup_stop()
+    offer = logic.guard(_saved_lookup, "keep or find a saved lookup")(answer, asked)
+    facts, saved_ui = _show_answer(doc, answer, facts, saved_ui)
+    saved_ui.pop("_saved_answer", None)         # an earlier offer never outlives the next lookup
+    saved_ui.pop("_saved_for", None)
+    if offer:                                   # offline: the box offers the lookup saved on this computer
+        saved_ui = dict(saved_ui, _saved_answer=offer, _saved_for=asked)
+        saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, saved_offer=offer.get("checked"), saved_for=asked)
+    return facts, saved_ui
+
+
+def _saved_lookups_path():
+    """The lookups saved on this computer (the offline safety net), beside Gordium's other per-user files."""
+    return STATE.get("saved_lookups_path") or os.path.join(os.path.expanduser("~"), ".gordium", "saved_lookups.json")
+
+
+def _saved_lookup(answer, asked):
+    """A found answer saved (rhino_logic.save_lookup: only what its sources allow); for a failed one, the saved
+    lookup of the same address to offer, or None."""
+    path = _saved_lookups_path()
+    readable = True
+    try:
+        with open(path, encoding="utf-8") as f:
+            store = json.load(f)
+    except FileNotFoundError:
+        store = {}
+    except Exception:                           # unreadable: offered nothing, and never overwritten (its other
+        store, readable = {}, False             # saved lookups are kept)
+    if (answer or {}).get("status") == "found":
+        new = logic.save_lookup(store, answer, asked)
+        # recorded answers (the in-Rhino tests) are never saved as the architect's lookups
+        if new != store and readable and not STATE.get("lookup_fixture"):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            tmp = "%s.%d.%d.tmp" % (path, os.getpid(), int(time.time() * 1000))   # two Rhinos never share one
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(new, f)
+            os.replace(tmp, path)
+        return None
+    return logic.saved_offer(answer, store, asked)
+
+
+def _show_answer(doc, answer, facts, saved_ui):
+    """An answer into the box only: its lot shown dashed, the views framed on it."""
     facts, saved_ui, preview = logic.preview_lookup(answer, facts, saved_ui, STATE.get("zones") or [])
     STATE.pop("lookup_guide", None)
     if preview:
@@ -2604,8 +2678,7 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
     (Cancel: back to the box). When the answer had only the City's outline, the box stays open after the reset,
     the guide shown, for Draw my lot… (go False; Cancel still puts everything back). The same address: as it is."""
     table = RhinoTable(doc)
-    unlooked = logic.address_reason(dict(state, known_addresses=logic.known_addresses(saved_ui),
-                                         lookup=saved_ui.get("_lookup") or {}))
+    unlooked = logic.draw_blocked(state, saved_ui)        # (an empty file: a found lookup, or the site by hand)
     if unlooked:                                          # Draw is off in the box; any other way in says why
         say(unlooked)
         return facts, saved_ui, False, state
@@ -2793,6 +2866,13 @@ def _square_feet(prompt):
     return gn.Number() if got == Rhino.Input.GetResult.Number else None
 
 
+def _ask_in_city():
+    """The City's date (logic.city_day) when the architect says Yes to logic.IN_CITY_QUESTION, else None (No, or the dialog closed)."""
+    got = ef.MessageBox.Show(Rhino.UI.RhinoEtoApp.MainWindow, logic.IN_CITY_QUESTION, "Gordium",
+                             ef.MessageBoxButtons.YesNo, ef.MessageBoxType.Question, ef.MessageBoxDefaultButton.No)
+    return logic.city_day() if got == ef.DialogResult.Yes else None
+
+
 def _ask_yes_no_or_skip(prompt):
     """Yes (True) or No (False), or None when the prompt is skipped (never a default; _yes_no keeps a current
     answer instead)."""
@@ -2941,8 +3021,8 @@ def edit_facts():
     STATE.pop("redraw_house", None)     # only this box's own Draw sets it (GordiumCheck's box left it set: round 2)
     try:                                # one undo step from the box's first model edit (or its Draw) to the facts
         try:
-            facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options,
-                            "check")
+            facts = confirm(doc, logic.with_suggestions(saved, logic.no_guessed_district(
+                saved, suggested_facts(doc, options["zones"]))), options, "check")
         finally:                        # the editing outline and names never stay on screen
             o = overlay()
             o.confirm, o.labels = None, []
@@ -3721,7 +3801,6 @@ def gordium_start():
     # what the checker gives first (Rhino runs while it is asked: ui.wait), then every read of the model, so nothing
     # read can change under a wait (review of 0702d50: a building drawn during the wait got a house beside it)
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
-    sample = ask({"cmd": "sample_site"})
     doc = Rhino.RhinoDoc.ActiveDoc
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if _buildings(doc):
@@ -3731,22 +3810,10 @@ def gordium_start():
             ef.MessageBox.Show(Rhino.UI.RhinoEtoApp.MainWindow, logic.START_HAS_BUILDING, "Gordium",
                                ef.MessageBoxButtons.OK, ef.MessageBoxType.Information)
         return None
-    put_down = None                     # the sample this run puts down before its box: taken back unless drawn on
-    if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
-        put_down = (doc.Strings.GetValue(SECTION, UI_ENTRY), set(RhinoTable(doc).layer_names()))
-        sample_lot = str(_add_lot(doc, sample))
-        if sample_lot == str(System.Guid.Empty):   # Rhino couldn't add it: said, never a box on a lot that isn't there
-            say("The sample lot couldn't be drawn in this file: draw your lot on the Site layer, then GordiumStart.")
-            return None
-        put_down = (sample_lot,) + put_down
-        # its facts are the sample project's; a lookup may replace its lot (never one the architect drew or picked)
-        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True, replaceable_lot=sample_lot,
-                                 street_name=sample.get("street_name"),     # its street, as the lookup named it
-                                 street_source=sample.get("street_source"),
-                                 drawn_address=sample["address"]))   # what is drawn: a lookup of another redraws
-        facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
-                                       suggested_facts(doc, options["zones"]))
-        facts["lot_id"] = sample_lot    # the sample's own lot (never whichever lot happens to come first)
+    put_down = None                     # (the sample lot is no longer put down: an empty file gets an empty box)
+    if not _lot_candidates(doc):        # an empty model: an empty box (Ben, 2026-10-27): the site comes from a
+        # lookup, or by hand; no district guessed either (the lookup finds it, or the architect picks it)
+        facts = logic.with_suggestions({}, logic.no_guessed_district({}, suggested_facts(doc, options["zones"])))
     else:                               # the architect's own lot: their saved facts, else the suggestions
         try:
             saved = current_facts(doc)

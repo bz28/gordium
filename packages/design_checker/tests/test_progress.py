@@ -341,11 +341,13 @@ def test_no_check_starts_while_a_start_box_is_open():
     assert edit.index("_end_undo(doc)") < edit.index("run_check(doc, report=False)")   # after the box, never in it
 
 
-def test_a_cancelled_gordiumstart_takes_back_the_sample_it_put_down():
+def test_a_cancelled_gordiumstart_leaves_nothing_behind():
     """Rhino run of aea73b8: after a cancelled Draw, GordiumStart again drew no house: the sample lot put down before
-    the box (outside the box's session) stayed, with no facts, and was taken for the architect's own lot."""
+    the box (outside the box's session) stayed, with no facts, and was taken for the architect's own lot. Since the
+    start flow (Ben, 2026-10-27) an empty file gets an empty box and nothing is put down before it; the take-back stays
+    for anything that is."""
     start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
-    assert start.index("put_down = (doc.Strings.GetValue(SECTION, UI_ENTRY)") < start.index("_add_lot(doc, sample)")
+    assert "_add_lot(doc, sample)" not in start and "sample_site" not in start
     assert start.index("drawn = True") < start.index("save_facts(doc, facts)")
     fin = start[start.index("    finally:"):]
     assert "if put_down is not None and not drawn:" in fin and "_take_back_sample" in fin
@@ -494,9 +496,9 @@ def test_commands_ask_the_checker_before_they_read_the_model():
     """Review of 0702d50: Rhino runs during a wait, so whatever a command read of the model before one may be out of
     date after it (a building drawn meanwhile got a starting house beside it; another file came to the front)."""
     start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
-    assert start.index('ask({"cmd": "options"') < start.index('ask({"cmd": "sample_site"})') < \
-        start.index("doc = Rhino.RhinoDoc.ActiveDoc") < start.index("if _buildings(doc):")
-    assert start.count("ask(") == 2 and 'facts["lot_id"] = sample_lot' in start
+    assert start.index('ask({"cmd": "options"') < start.index("doc = Rhino.RhinoDoc.ActiveDoc") < \
+        start.index("if _buildings(doc):")
+    assert start.count("ask(") == 1            # (an empty file no longer asks for the sample: the start flow)
     own = start[start.index("    else:                               # the architect's own lot"):start.index("drawn = False")]
     assert own.index("current_facts(doc)") < own.index("except logic.NotInFront:") < own.index("if _buildings(doc):")
     for fn, end in (("def gordium_check(", "def _layer("), ("def edit_facts(", "def report_path(")):
@@ -512,8 +514,6 @@ def test_the_saved_facts_are_matched_to_the_model_as_it_is_after_their_wait():
     then dropped stale ids against the list from before the wait."""
     facts = part(RHINO, "def current_facts(", "def save_facts(")
     assert facts.index("load_facts(doc)") < facts.index("_sorted_objects(doc)") < facts.index("logic.drop_stale(")
-    start = part(RHINO, "def gordium_start(", "def _take_back_sample(")
-    assert start.index("System.Guid.Empty") < start.index('facts["lot_id"] = sample_lot')
 
 
 

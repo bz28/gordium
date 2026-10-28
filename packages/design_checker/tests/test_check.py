@@ -787,7 +787,8 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
     assert "sources = logic.sources_kept(fact_sources(doc))" in drawn and "sources.update(" in drawn   # the ground
     assert "ground_marked" not in logic.BOX_ASKS                    # marking is kept (only follow-up answers go)
-    assert "from_sample=True" in rhino.split("def gordium_start(", 1)[1]
+    # a new file starts empty (Ben, 2026-10-27): no sample lot or its facts put down (test_re_lookup pins the rest)
+    assert "from_sample=True" not in rhino.split("def gordium_start(", 1)[1].split("\ndef ", 1)[0]
 
 
 def test_units_are_converted_in_one_place_both_ways():
@@ -1827,7 +1828,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     assert pick.index('name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),') \
         < pick.index("ask.GetLiteralString()") < pick.index('return {"lines": lines, "ids": ids, "name": name}')
     assert "RhinoGet.GetString(" not in pick        # a space would end it: "Cayuga St" saved as "Cayuga" (R3)
-    assert 'street_name=sample.get("street_name"),' in rhino
+    assert 'street_name=sample.get("street_name"),' not in rhino     # no sample start any more (Ben, 2026-10-27)
     # the name only with its street line (round 3, F6), and the whole street kept when one of its lines is picked
     state_src = rhino[rhino.index("def _box_state("):rhino.index("def _ft_text(")]
     assert '"street_name": (saved_ui.get("_street_name") or saved_ui.get("street_name") or facts.get("street_name"))\n' \

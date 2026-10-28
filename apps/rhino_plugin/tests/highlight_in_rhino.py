@@ -22,6 +22,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close, leftovers  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_highlight") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -76,7 +77,7 @@ try:
     if phase == "run":
         g = fresh_module()
         doc = TestDocs("highlight").__enter__().open("Large Objects - Feet")
-        g.gordium_check()                                    # GordiumStart's flow on the sample
+        look_up_106(g, g.gordium_check)                                    # GordiumStart's flow on the sample
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
         claim("the sample is 106's tax-map lot, the left side yard 12'-0 5/8\" of 10'-0\"",
               items["Side yard, Southwest"]["proposed"] == "12'-0 5/8\"" and items["Side yard, Southwest"]["required"] == "10'-0\"",
