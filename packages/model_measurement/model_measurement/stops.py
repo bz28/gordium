@@ -102,6 +102,8 @@ STOPS = {
     "no_household": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, "
                     "whether the household is a functional family unit, whether an accessory dwelling unit is on the "
                     "lot (§325-3B)",
+    "attached_counts_disagree": "{here} dwelling units on this lot but {building} in the attached building: part of "
+                                "another building may be on this lot, or one of the counts is off",
     "household_counts_disagree": "the count of unrelated people with minor dependent children included ({with_}) is "
                                  "lower than the count without them ({without}): check both counts",
     "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
