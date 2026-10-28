@@ -127,15 +127,12 @@ def _plugin(doc, said):
                                 "set_massing_tick": staticmethod(lambda parts, on: None),
                                 "set_envelope_tick": staticmethod(lambda parts, on: None),
                                 "open_target": staticmethod(lambda path: (True, None)),
-                                # a row's dialog (Enter …): OK with each count ns["_answer"], each yes / no "yes"
+                                # a row's dialog (Enter …, #37): OK with each count ns["_answer"], each yes / no "yes"
                                 "row_dialog": staticmethod(lambda title, fields, check: {
                                     f["key"]: "yes" if f["kind"] == "yes_no" else str(ns["_answer"])
                                     for f in fields})}),
           "load_facts": lambda doc: json.loads(doc.Strings.GetValue("Gordium", "lot_facts")
                                                or '{"lot_id": "lot1", "zone": "R-1b"}'),
-          # Switch side yards (massing-floors): no starting house here, so refused and nothing written; its own one
-          # Undo step is pinned in test_side_yards
-          "_start_floors": lambda doc: [], "_feet_length": lambda doc, x: x,
           "_box_open": lambda: False, "run_check": lambda doc, report=False: {"report_error": "not in a test"},
           "current_facts": lambda doc: {"lot_id": "lot1", "zone": "R-1b"},
           "_lot_candidates": lambda doc: [type("L", (), {"Id": "lot1"})(), type("L", (), {"Id": "lot2"})()],
@@ -151,9 +148,13 @@ def _plugin(doc, said):
           "_context_visible": lambda doc, on: setattr(doc.Layers[0], "IsVisible", on) or True,
           "_context_record": lambda doc: None, "sync_context": lambda doc, facts: None,
           "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}"),
-          # (the demo build: #34's envelope in every document, #35's layer locks, #32's running re-check finished)
-          "_envelope_everywhere": lambda: None, "_own_lock": lambda doc, layer: False,
-          "_set_own_lock": lambda doc, layer, own: None, "_settle_live": lambda: None}
+          "_settle_live": lambda: None,                      # (#32: a running re-check finished)
+          # (#34: the envelope's snap curves shown or hidden in every open document; nothing written in this one)
+          "_envelope_everywhere": lambda: None,
+          # Switch side yards (#35): no starting house here, so refused and nothing written; its own one Undo step is
+          # pinned in test_side_yards. (#35's layer locks: each layer's own lock as it was)
+          "_start_floors": lambda doc: [], "_feet_length": lambda doc, x: x,
+          "_own_lock": lambda doc, layer: False, "_set_own_lock": lambda doc, layer, own: None}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     exec(SRC[SRC.index("class RhinoTable:"):].split("\ndef ", 1)[0], ns)      # noqa: S102
@@ -171,7 +172,7 @@ CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": (
          "context": ((True,), True),
          # Check (#27): a check, nothing written; Check after every edit: the setting saved in the file
          "check": ((), False), "auto_check": ((False,), True),
-         # Switch side yards (massing-floors): refused with no starting house (its real step: test_side_yards)
+         # Switch side yards (#35): refused with no starting house (its real step: test_side_yards)
          "switch_sides": ((), False)}
 
 
@@ -209,7 +210,7 @@ def test_a_refused_count_leaves_the_file_as_it_was_and_no_undo_step():
     assert doc.records == [] and doc.outside == [] and doc.UndoRecordingEnabled
     assert doc.Strings.data[("Gordium", "lot_facts")] == stored and checks == [2, 3]
     assert said == ["1 story. The count wasn't kept."]
-    ns["_answer"] = 4                                                              # a count it keeps: one step, one check
+    ns["_answer"] = 4                                                      # a count it keeps: one step, one check
     checks.clear()
     ns["_actions"]()["enter"](["stories"])
     assert doc.records == [logic.UNDO_WORDS["enter"]] and doc.outside == [] and checks == [4]
@@ -310,6 +311,14 @@ def test_the_plugin_still_compiles():
     compile(SRC, "gordium_rhino.py", "exec")
 
 
+def test_a_new_addresss_reset_goes_in_the_boxs_own_step():
+    """#26 with #19's one step per box: a reset to a new address began a record of its own, ending the box's step
+    (Draw my lot or spot grades placed before it): two steps for one box. It begins one only if none is held."""
+    prepare = SRC[SRC.index("def _draw_prepare("):].split("\ndef ", 1)[0]
+    assert '    if not STATE.get("undo"):' in prepare and prepare.index('if not STATE.get("undo")') < prepare.index(
+        '_begin_undo(doc, "Gordium: start fresh for "')
+
+
 def test_an_undone_check_after_every_edit_is_read_again_from_the_file():
     """Carry review C1: Ctrl+Z on "Gordium: check after every edit" put the file's setting back, but the plugin kept
     its own copy (auto_by_doc): checks after edits (or none) as the undone setting said, the tick too, until the file
@@ -323,14 +332,6 @@ def test_an_undone_check_after_every_edit_is_read_again_from_the_file():
     doc.Strings.data[("Gordium", "ui")] = json.dumps({"auto_check": True})     # what Rhino's Undo put back
     ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
     assert ns["_auto"](doc) is True and ticks[-1] is True
-
-
-def test_a_new_addresss_reset_goes_in_the_boxs_own_step():
-    """#26 with #19's one step per box: a reset to a new address began a record of its own, ending the box's step
-    (Draw my lot or spot grades placed before it): two steps for one box. It begins one only if none is held."""
-    prepare = SRC[SRC.index("def _draw_prepare("):].split("\ndef ", 1)[0]
-    assert '    if not STATE.get("undo"):' in prepare and prepare.index('if not STATE.get("undo")') < prepare.index(
-        '_begin_undo(doc, "Gordium: start fresh for "')
 
 
 def test_an_undone_setting_is_read_again_from_the_file():

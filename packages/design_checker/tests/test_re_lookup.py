@@ -949,7 +949,6 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
     confirm = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
     assert confirm.index("gate.enter()") < confirm.index('STATE.pop("redraw_house", None)') < \
         confirm.index("result = _confirm(doc, facts, options, mode)")     # cleared as the box opens, before its Draw
-    # (main's confirm() keeps _confirm's result for its changed-after-box bookkeeping: merge 2 of #26)
     check = rhino[rhino.index("def gordium_check("):rhino.index("# ---- GordiumStart")]
     assert check.index("facts = confirm(") < check.index('STATE.pop("redraw_house", None)') < \
         check.index("if facts is None:")                                    # GordiumCheck: dropped with its box
@@ -1720,3 +1719,6 @@ def test_a_found_lookups_note_is_a_plain_line_never_the_amber_question():
     assert logic.lookup_note(offline) is None and logic.uncertain(offline) == logic.LOOKUP_SAYS["offline"]
     ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert 'note = label(logic.lookup_note(state) or "", size=11)' in ui and "layout.AddRow(None, row(note))" in ui
+    # laid out only when there is a note: an empty label still takes a line (the start box ran 12 px past a laptop's
+    # height with every question open: the merge-3 suite's test_box_width)
+    assert "    if note.Text:" in ui and ui.index("    if note.Text:") < ui.index("layout.AddRow(None, row(note))")

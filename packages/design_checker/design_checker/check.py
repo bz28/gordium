@@ -1349,7 +1349,6 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
     edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
              for r, length in edge_runs(lot.get("edges") or [])
              if length >= SHORTEST_LABELLED_EDGE]   # a tax-map sliver (0'-1 5/8"): no label, it only clutters
-    # overlays False (a geometry error in the check): nothing drawn from the geometry, no footprint, no lot shape
     solids = [(b, _projection(b)) for b in site.get("buildings") or [] if b.get("faces")] if overlays else []
     footprint = unary_union([p for _, p in solids]) if solids else None
     shape = Lot(site, facts or {}) if overlays and lot.get("edges") and facts and facts.get("street_line") else None

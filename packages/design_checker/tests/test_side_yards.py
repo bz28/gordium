@@ -219,3 +219,23 @@ def test_switch_in_rhino_is_one_undo_step_and_draws_before_it_deletes():
         < body.index("doc.EndUndoRecord(record)")
     assert "o.IsReference" in rhino[rhino.index("def _start_floors"):rhino.index("def switch_side_yards")]
     assert "a.SetUserString(logic.START_KEY, logic.start_tag(start, i, floor_to_floor, design_buffer))" in rhino
+
+
+def test_switch_side_yards_with_no_document_open_says_what_to_do():
+    """Every file closed (Rhino.RhinoDoc.ActiveDoc is None): Switch side yards said nothing and crashed on the first
+    use of the document. It says "Open a Rhino model first." and touches nothing, as every other command does (#51)."""
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    said = []
+
+    def touched(*args, **kwargs):
+        raise AssertionError("the plugin touched the model or the checker with no document open")
+    ns = {"Rhino": SimpleNamespace(RhinoDoc=SimpleNamespace(ActiveDoc=None),
+                                   RhinoApp=SimpleNamespace(WriteLine=said.append)),
+          "logic": logic, "STATE": {}, "ui": MagicMock(), "_start_floors": touched, "ask": touched,
+          "current_facts": touched, "export": touched}
+    for name in ("say", "switch_side_yards"):
+        exec(src[src.index("def %s(" % name):].split("\ndef ", 1)[0], ns)      # noqa: S102
+    assert ns["switch_side_yards"]() is None
+    assert said == ["Gordium: " + logic.NO_DOCUMENT]

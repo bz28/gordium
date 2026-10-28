@@ -231,7 +231,7 @@ def test_an_unanswered_fact_says_what_it_needs_and_its_button_opens_its_own_dial
         "Needs bedrooms and parking spaces, which the model doesn't show")
     assert logic.needs_reason([]) is None
     assert logic.row_buttons({"needs": ["dwelling_units", "conversion"]}) == [
-        ("Enter dwelling units and whether it is a conversion…", "enter")]
+        ("Answer 2 questions…", "enter")]           # too long for a button: how many (answer_words)
     assert logic.row_buttons({"needs": ["sleeping_rooms", "parking_spaces"]}) == [
         ("Enter bedrooms and parking spaces…", "enter")]
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
@@ -296,9 +296,9 @@ def test_the_box_reopens_with_the_pick_it_was_laid_out_for():
 
 
 def test_rhino_logic_names_each_thing_once():
-    """The demo build merged #26 and #37, which each defined NOT_ANSWERED and _listed in rhino_logic: the later one
-    won, so the yes / no dropdown's first entry read "The lookup of {address} didn't finish…" and the Use list
-    raised. Every top-level name is defined once."""
+    """#26 and #37 each defined NOT_ANSWERED and _listed in rhino_logic: merged, the later one won, so the yes / no
+    dropdown's first entry read "The lookup of {address} didn't finish…" and the Use list raised (found in the demo
+    build; here in #37's merge-3 carry). Every top-level name is defined once."""
     import ast
     import collections
     tree = ast.parse((REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8"))
@@ -306,3 +306,4 @@ def test_rhino_logic_names_each_thing_once():
     names += [t.id for n in tree.body if isinstance(n, ast.Assign) for t in n.targets if isinstance(t, ast.Name)]
     assert [n for n, k in collections.Counter(names).items() if k > 1] == []
     assert logic.NOT_ANSWERED == "Not answered"
+    assert logic._listed({"district_uses": {"R-1b": [1]}}, "R-1b") == [1] and logic._joined(["a", "b"]) == "a and b"

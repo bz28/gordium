@@ -274,8 +274,9 @@ def test_a_quick_answer_sets_all_its_fields_before_the_box_refreshes():
     field and lost the second. The fields' own refresh is held back while a quick answer fills, then one refresh."""
     from rule_format.rulebook import REPO
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    start = ui.index("def about_section(")      # (to the box's own layout after it: the wait window has one too)
+    start = ui.index("def about_section(")             # (its own end: the box's layout after it, not an earlier one)
     box = ui[start:ui.index("    layout = ef.DynamicLayout()\n    layout.Spacing", start)]
+    assert box                                          # never an empty slice that no assertion below could catch
     assert "None if filling else refresh_if_needed()" in box
     fill = box[box.index("def quick_picked"):]
     assert fill.index("filling.append(True)") < fill.index("field.SelectedIndex") < fill.index("filling.clear()") \
@@ -316,3 +317,13 @@ def test_rooms_let_for_profit_is_a_use_detail_and_the_units_and_conversion_stay_
     done = next(i for i in _view("R-3a", "one_family_attached", dwelling_units=3, conversion=False,
                                  attached_units_in_building=3, rooms_let_for_profit=0)["items"] if i["rule"] == rid)
     assert done["status"] == present.COMPLIES and not done["use_detail"], done
+
+
+def test_the_about_title_sits_level_with_its_first_question():
+    """The architect's review (2026-10-28, item 16): "About this project" sat centred beside its whole grid, below
+    "Quick answers". It is top-aligned now, level with the first question (checked in Rhino 8: the looked-up box)."""
+    from pathlib import Path
+    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    at = ui.index('title = label("About this project", bold=True)')
+    assert "title.VerticalAlignment = ef.VerticalAlignment.Top" in ui[at:at + 200]
+    assert "layout.AddRow(title, grid)" in ui[at:at + 400]

@@ -209,7 +209,7 @@ def test_cancel_changes_nothing_and_makes_no_undo_step():
     asked = []
     ns = _plugin(doc, lambda title, fields, check: asked.append((title, fields)) or None)   # Cancel / Esc / closed
     ns["enter_rooms"](["dwelling_units", "conversion"])
-    assert asked[0][0] == "Enter dwelling units and whether it is a conversion"
+    assert asked[0][0] == "Answer 2 questions"          # the facts' own words are too long for it (answer_words)
     assert [f["key"] for f in asked[0][1]] == ["dwelling_units", "conversion"]
     assert doc.log == [] and doc.records == 0                          # nothing written, no Undo record
     assert doc.facts() == SITE and doc.sources() == SOURCES and ns["checks"] == []

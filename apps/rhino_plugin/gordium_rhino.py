@@ -615,11 +615,8 @@ def draw_scene(o, e):
         old = stale(o)
         # Gordium's lines: over everything in plan, depth-tested (hidden behind solids) in every other view
         on_top = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
-        for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
-            if isinstance(g, rg.Mesh):
-                d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
-            else:
-                d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+        # red (does not comply) is drawn last, below: over the amber and everything else (logic.red_last)
+        rest, red = logic.red_last(getattr(o, "encroach", None) or [])
         # the see-through fills never hide what is behind them: they write no depth, so a line behind the envelope or
         # a coloured part still shows (review round 1 of depth-lines, F2); the solids in front still hide them
         _see_through(d, True)
@@ -642,7 +639,9 @@ def draw_scene(o, e):
             d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
         _on_top(d, False)
         if not old:                              # after the envelope, so its blue never tints them (F5)
-            for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+            # only the part over: amber review, then red (does not comply) over it, so no amber strip ever covers
+            # a failing part (logic.red_last; the architect's review, 2026-10-28: the eaves over the failing wall)
+            for g, status, _ in rest + red:
                 name = logic.highlight(status)
                 colour = ui.HIGHLIGHT[name]
                 _see_through(d, True)
@@ -676,6 +675,12 @@ def draw_scene(o, e):
                 d.DrawBrepWires(main, BLUE, 3)
             elif isinstance(main, rg.Mesh):
                 d.DrawMeshWires(main, BLUE, 3)
+        # last of all, the outline of a failing solid the plan can't show a part of: nothing drawn after it covers it
+        for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
+            if isinstance(g, rg.Mesh):
+                d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
+            else:
+                d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
     finally:
         _on_top(e.Display, False)
         _see_through(e.Display, False)
@@ -1335,6 +1340,9 @@ def show_panel(p, result, facts, error=None):
 def zoom_to(item):
     """Frame the selected item: yards in Top, height and stories in a front elevation (D9)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not item:
         say("Zoom to: select an item in the list first.")
         return
@@ -1446,6 +1454,9 @@ def pick_survey():
     """Pick survey lot lines…: the lot outline the architect says is from a survey (a closed curve on the Site
     layer); lot size and coverage no longer wait for one."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     try:
         facts = current_facts(doc)
         lots = _lot_candidates(doc)
@@ -1540,6 +1551,9 @@ def enter_rooms(needs):
     drop a lot no longer drawn). A count of stories below the floors drawn is refused by the measuring: said in its
     words, and nothing is saved."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not needs:
         say("This row isn't waiting for anything you can enter.")
         return
@@ -1555,7 +1569,7 @@ def enter_rooms(needs):
         say("There are no site facts yet: run GordiumStart (or Edit site…) first.")
         return
 
-    answers = ui.row_dialog(logic.enter_words(needs), logic.row_fields(needs, facts),     # OK: words keep it open
+    answers = ui.row_dialog(logic.answer_words(needs), logic.row_fields(needs, facts),    # OK: words keep it open
                             lambda got: logic.row_problem(facts, needs, got))
     if answers is None:                 # Cancel, Esc, closed: nothing written, so no Undo step
         say("Cancelled: nothing changed.")
@@ -1614,6 +1628,9 @@ def pick_main_building():
     """Pick the main building… (the panel): with several buildings, the one the yards, height and stories are
     measured to. Click it, or choose one; Enter keeps it."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     facts = current_facts(doc)
     buildings = _buildings(doc)
     if len(buildings) < 2:
@@ -1638,6 +1655,9 @@ def add_to_check(ids):
     """Add to check…: objects on the lot that aren't measured go on the Building layer, so every rule measures
     them."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not ids:
         say("Nothing selected to add to the check: pick the objects in the row first.")
         return
@@ -1743,6 +1763,9 @@ def this_is_the_ground(ids):
     file with who said it and when (a site fact, shown in the panel and the report, with "Not the ground" to undo
     it); then the check runs again without them."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not ids:
         say("Nothing selected to mark as the ground: pick the objects in the row first.")
         return
@@ -1759,6 +1782,9 @@ def this_is_the_ground(ids):
 def not_the_ground():
     """Undo "This is the ground": every object marked so is checked again (counted as left out until added)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     with logic.undo_step(doc, logic.UNDO_WORDS["not_ground"]):
         state = _ui_state(doc)
         state.pop("ground_ids", None)
@@ -2838,6 +2864,9 @@ def _drawn(doc, facts, state, saved_ui, session=None, mode=None):
 def hide_massing(hidden):
     """Hide starting house: the Gordium::Massing layer off (still checked: only its drawing is turned off)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     index = doc.Layers.FindByFullPath(logic.MASSING, -1)
     if index < 0:
         ui.set_massing_tick(STATE.get("panel_parts"), False)    # nothing hidden: never left ticked
@@ -2998,8 +3027,14 @@ def edit_facts():
     if STATE.get("asking") is not None:   # Gordium is working (Rhino runs during its wait): a command
         say(logic.WORKING)                # typed meanwhile waits its turn, never a second piece of work
         return None
+    if Rhino.RhinoDoc.ActiveDoc is None:  # every document closed: say what to do, never crash (nor ask the checker)
+        say(logic.NO_DOCUMENT)
+        return None
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})   # (asked first: the model is read after it)
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     try:
         saved = current_facts(doc)
     except logic.NotInFront:            # another file came to the front while the facts were read
@@ -3161,6 +3196,9 @@ def run_check(doc, report=True):
     process and Rhino keeps drawing while it does (ask); the panel says "Checking…" with what it is doing, and a
     slow check shows a small window with Cancel: cancelled, nothing in the model changes and nothing is shown as
     checked (_check_cancelled). A live re-check still running is finished first (_settle_live)."""
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     _settle_live()
     if STATE.get("running") or not logic.allowed("check", _box_open()):
         return None
@@ -3276,7 +3314,7 @@ def _check_apply(doc, o, begun, result):
     shown = logic.labels_on(_ui_state(doc))       # this document's Show on-screen labels
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
     if not STATE.get("headless"):
-        ui.show(panel(), view)
+        ui.show(panel(), view, select=logic.newly_failing(extras["before"], view))   # brought into view
         _sync_ticks(doc)
         if result.get("notice"):        # the panel says it too: a view with no corner clear of the model never
             ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
@@ -3595,6 +3633,9 @@ def toggle_live():
     results grey out until checked): turning the edit hooks off would leave old marks showing as current after an
     edit (review round 2 of the Check button)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not STATE.get("live"):
         live(True)
     set_auto_check(not _auto(doc))
@@ -3696,8 +3737,14 @@ def gordium_check():
     if STATE.get("asking") is not None:   # Gordium is working (Rhino runs during its wait): a command
         say(logic.WORKING)                # typed meanwhile waits its turn, never a second piece of work
         return None
+    if Rhino.RhinoDoc.ActiveDoc is None:  # every document closed: say what to do, never crash (nor ask the checker)
+        say(logic.NO_DOCUMENT)
+        return None
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})   # (asked first: the model is read after it)
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if not _buildings(doc) and not _lot_candidates(doc):    # an empty model: a new project starts here
         return gordium_start()
@@ -3793,10 +3840,16 @@ def gordium_start():
     if STATE.get("asking") is not None:   # Gordium is working (Rhino runs during its wait): a command
         say(logic.WORKING)                # typed meanwhile waits its turn, never a second piece of work
         return None
+    if Rhino.RhinoDoc.ActiveDoc is None:  # every document closed: say what to do, never crash (nor ask the checker)
+        say(logic.NO_DOCUMENT)
+        return None
     # what the checker gives first (Rhino runs while it is asked: ui.wait), then every read of the model, so nothing
     # read can change under a wait (review of 0702d50: a building drawn during the wait got a house beside it)
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if _buildings(doc):
         Rhino.RhinoApp.WriteLine("Gordium: " + logic.START_HAS_BUILDING)
@@ -4046,6 +4099,9 @@ def switch_side_yards():
     as one Undo step. The new house is proven by the checker like the first (a house that would break a rule is
     never drawn: the old one stays and the panel says why); a house the architect has changed is never redrawn."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every file closed: say what to do, touch nothing
+        say(logic.NO_DOCUMENT)
+        return None
     found = _start_floors(doc)
     plan = logic.switch_plan([(text, box, volume, locked) for _, text, box, volume, locked in found], tolerance=_feet_length(
         doc, doc.ModelAbsoluteTolerance) + 0.01)

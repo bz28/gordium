@@ -903,33 +903,41 @@ def readings(node, expr: str, values: dict, measured: dict, facts: dict) -> list
     return out
 
 
-def delta_words(status: str, span, unit: str, approx: bool) -> str:
+def delta_words(status: str, span, unit: str, approx: bool, maximum: bool = False) -> str:
     """The Delta, in words, everywhere it is shown (the panel, the notice, the report), from the row's margin over
-    every reading (`span`: lowest, highest) and its final status. On one reading (a survey) the margin itself
-    ("+2'-0" to spare", "−1'-4" short"); over several, what is true whichever is right: "at least 1'-0" short"
-    (short under every one: the red part), "up to 2'-9" short" (short under some: amber), "at least 3'-0" to
-    spare". Never overstated ("at least" rounds down, "up to" up) and never kinder than the status: "to spare"
-    only on a row that complies; a row that needs review for another reason says its room "if confirmed"."""
+    every reading (`span`: lowest, highest) and its final status. Short, to fit the panel's narrow Delta column in
+    two lines (the architect's review, 2026-10-28: "at least 0'-5 1/4" if confirmed" was cut off). On one reading
+    (a survey) the margin itself: "+2'-0"" to spare, "−1'-4" short" under a minimum, "1'-6" over" past a maximum
+    (`maximum`: the rule is a most, ≤ or <); over several, what is true whichever is right: "at least 1'-0" short"
+    (short under every one: the red part), "up to 2'-9" over" (under some: amber), "≥ +3'-0"" to spare. Never
+    overstated ("at least" and "≥" round down, "up to" up) and never kinder than the status: a bare "+" only on a
+    row that complies; a row that needs review for another reason says its room "if confirmed"."""
     if span is None:
         return ""
     low, high = span
     least = LEAST.get(unit, 0)
     one = not approx and low == high
-    if high < 0:                       # short under every reading
+    gap = " over" if maximum else " short"
+    if high < 0:                       # short (or over) under every reading
         if one:
-            words = margin_text(high, unit) + " short"
+            words = (margin_text(high, unit).lstrip("−") if maximum else margin_text(high, unit)) + gap
         elif _rounds_to_nothing(-high, unit):
-            words = "less than " + _amount(least, unit, "up") + " short"     # never "at least 0'-0" short"
+            words = "less than " + _amount(least, unit, "up") + gap     # never "at least 0'-0" short"
         else:
-            words = "at least " + _amount(-high, unit, "down") + " short"
+            words = "at least " + _amount(-high, unit, "down") + gap
         # the certain words only on a row that fails; one in review (it may comply another way) says to see why
         return words if status == FAILS else words + "; see why"
-    if low < 0:                        # short under some
-        return "up to " + _amount(max(-low, least), unit, "up") + " short"
+    if low < 0:                        # short (or over) under some
+        return "up to " + _amount(max(-low, least), unit, "up") + gap
     if _rounds_to_nothing(low, unit):
         return "at limit" if one else "at the limit at worst"
-    room = margin_text(low, unit) if one else "at least " + _amount(low, unit, "down")
-    return room + {COMPLIES: " to spare", REVIEW: " if confirmed"}.get(status, " here, but it does not comply")
+    if status in (COMPLIES, REVIEW):
+        room = margin_text(low, unit) if one else "≥ +" + _amount(low, unit, "down")
+        return room + (" if confirmed" if status == REVIEW else "")
+    # a row that fails another way: its room here, never with the "+" of a row that complies (review round 1 of
+    # panel-wording, P3: "+2'-0" here; see why" under a ✕)
+    room = margin_text(low, unit).lstrip("+") if one else "at least " + _amount(low, unit, "down")
+    return room + " room here; see why"
 
 
 def _worst_case(expr: str, values: dict, names: set, measured: dict, facts: dict) -> dict | None:
@@ -940,6 +948,11 @@ def _worst_case(expr: str, values: dict, names: set, measured: dict, facts: dict
     if not every:
         return dict(values)
     return next((trial for trial, _ in every if _evaluate(expr, trial) is not True), None)
+
+
+def _is_maximum(node) -> bool:
+    """Whether a comparison sets a most (`measure <= limit`, `<`): past it the Delta says "over", not "short"."""
+    return isinstance(node.ops[0], (ast.LtE, ast.Lt))
 
 
 YARD_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
@@ -984,7 +997,7 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
         if not rs:                       # no reading set (a value unknown): the margin as drawn, if it has one
             margin, unit = _margin_of(node, values, measured)
             if margin is not None:
-                i["delta"] = delta_words(i["status"], (margin, margin), unit, False)
+                i["delta"] = delta_words(i["status"], (margin, margin), unit, False, _is_maximum(node))
             continue
         span, unit = (min(r["margin"] for r in rs), max(r["margin"] for r in rs)), rs[0]["unit"]
         reads = formula.names(ast.unparse(node)) | formula.names(expr or "")
@@ -996,7 +1009,7 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
             # ever more cautious: the checker alone decides a row complies or fails)
             i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
                 f"Complies as drawn, but not under every reading of {_which(lot, open_)} · Pick survey lot lines…"))
-        i.update(delta=delta_words(i["status"], span, unit, approx), approx=approx)
+        i.update(delta=delta_words(i["status"], span, unit, approx, _is_maximum(node)), approx=approx)
         body = ast.parse(expr or ast.unparse(node), mode="eval").body
         one_way = not isinstance(body, ast.BoolOp) or (i.get("_raised") and isinstance(body.op, ast.And))
         if (i.get("_advice") or {}).get("crossing"):     # partly off the lot: its one advice, move it back (PR 18)
@@ -1551,8 +1564,12 @@ def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict 
         if cell is not None and str(cell.get("value") or "").strip():   # a heading row has no value: its own words
             section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
             row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])
-            return {"text": f"{section} · {row} · {cell['column']}: {cell['value']}", "where": cite(source)}
-    return {"text": text or _cell_words(source), "where": cite(source)}
+            return {"text": f"{section} · {row} · {cell['column']}: {cell['value']}", "where": cite(source),
+                    "chart": True}
+    # "chart": the chart's own shorthand ("R-1B: 25%/ 50 ft [fn16]"), which the panel keeps under "How it's worked
+    # out" (its footnotes, "(16) But not less than 20 ft.", and the law's words are plain and stay in view)
+    return {"text": text or _cell_words(source), "where": cite(source),
+            "chart": _is_chart(source, documents) and not re.match(r"^\(\d+\)", text)}
 
 
 def _cell_words(source: dict) -> str:
@@ -1809,7 +1826,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "", "required": "", "margin": "",
                       "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
                       "needs": list(needs),               # exactly what its "Enter …" asks for
-                      "hint": rhino_logic.enter_words(needs), "reason": rhino_logic.needs_reason(needs),
+                      "hint": rhino_logic.answer_words(needs), "reason": rhino_logic.needs_reason(needs),
                       "detail": {"line": "", "quotes": [{"text": " ".join(str(s.get("quote", "")).split()),
                                                          "where": cite(s)} for s in rule.get("sources") or []],
                                  "citation": "", "links": [], "calc": None, "scope": "", "precision": "",
@@ -1902,13 +1919,17 @@ SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "
 
 def source_lines(sources: dict) -> list[str]:
     """Each site fact with where it came from, as the panel and the report show it: "Zoning district: R-1b ·
-    entered by you · confirmed by you, 2026-10-20". The checker never reads these: only the facts' values."""
+    entered by you · confirmed by you, 2026-10-20"; a box default left as it was, "Use: One-family dwelling,
+    detached · suggested by Gordium · default, not changed by you". The checker never reads these: only the facts'
+    values."""
     out = []
     for key, name in SOURCE_NAMES.items():
         s = sources.get(key)
         if not s or s.get("value") in (None, ""):
             continue
-        who = f"confirmed by {s['confirmed_by']}, {s.get('date')}" if s.get("confirmed_by") else "not confirmed"
+        who = (f"confirmed by {s['confirmed_by']}, {s.get('date')}" if s.get("confirmed_by") else
+               rhino_logic.UNTOUCHED if key in rhino_logic.BOX_DEFAULTS and s.get("source") != rhino_logic.ENTERED
+               else "not confirmed")
         out.append(f"{name}: {s['value']} · {s.get('source') or 'not known'} · {who}")
     return out
 

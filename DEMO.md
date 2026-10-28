@@ -42,7 +42,33 @@ and the commands are the same, so neither `pip install` nor `install.py` is need
 
 Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
 
-## What's new (2026-10-28)
+## What's new (2026-10-28, evening)
+
+Everything in the morning's preview below, plus:
+
+- **Faster.** Gordium is ready sooner after Rhino opens, and each check comes back quicker: the rules are read once
+  and kept, and a formula is worked out once instead of at every check. The answers are the same.
+- **No file open? It says so.** With every Rhino file closed, `GordiumStart`, `GordiumCheck` and every panel button
+  say "Open a Rhino model first." instead of failing. Nothing is touched.
+- **Red is never hidden.** A part that does not comply is drawn over any amber part, so in Top view an amber eaves
+  strip no longer covers the failing wall under it.
+- **After an edit, the row that newly fails is brought into view** and selected, with its group opened.
+- **The detail reads plainly first.** The result ("Required: 24'-1 7/8" to 32'-10 1/8"") and the law's words come
+  first. The formula, what was measured and the chart's own cell are under **How it's worked out**, closed until
+  you open it. Nothing is dropped, and the citation and its links stay in view.
+- **Shorter Delta words.** A maximum you pass reads "over", and "≥ +" means at least that much to spare.
+- **"I checked this" means confirmed by you.** On the street's row it confirms the street and its corner answer.
+  A box default you left as it was is never saved as confirmed by you.
+- **The use row names the use** ("Use: One-family dwelling, detached"). Before, its name was cut off ("One- /
+  family d…").
+- **A row waiting on several facts says "Answer 4 questions…"** on its button and in its window's title. Before,
+  the whole list of facts was cut off. The window's dropdowns line up.
+- **Smaller fixes in the start box:**
+  - a found lookup's note ("Shown dashed: …") is a plain line under the amber question, not part of it;
+  - the hidden address suggestions no longer leave a gap under Address;
+  - the **About this project** and **Quick answers** labels sit at the top of their rows.
+
+## What was new on 2026-10-28, morning
 
 Everything in the 2026-10-27 preview below, plus:
 

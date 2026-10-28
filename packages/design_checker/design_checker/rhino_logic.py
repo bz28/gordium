@@ -163,6 +163,23 @@ def row_name(item):
     return name + (" · " + item["note"] if item.get("note") else "")
 
 
+USE_STATED = "stated"
+
+
+def list_cells(item):
+    """A row's Item and Proposed text in the panel's list, and its name heading the detail. The use row names the
+    use itself, "Use: One-family dwelling, detached", with "stated" under Proposed: no use's name fits the 64 px
+    Proposed column ("One-family" alone takes two lines), and the Item cell has the room (coordinator, 2026-10-28,
+    option A: the whole name, no made-up short forms). "Use:" keeps what the row is about; "(site)" is left off:
+    measured in Rhino, "Use: One-family dwelling, detached" fits two lines of the Item cell at the panel's 400 px
+    only without it. A longer name ("…, semi-detached"), or any at 380 px, ends "…" in the list like every long
+    Item; the detail, headed with this same text, has it whole. With no use stated, "Use (site)" and its "—"."""
+    proposed = item.get("proposed")
+    if item.get("name") == "Use" and proposed and proposed != "—":
+        return "Use: " + proposed + (" · " + item["note"] if item.get("note") else ""), USE_STATED
+    return row_name(item), proposed
+
+
 def dock_host(hosts, serial):
     """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
     document's number); a panel made without one (key 0) serves when the front document has none."""
@@ -182,6 +199,56 @@ def highlight(status):
     """The colour a part of the model is shaded, from its rule's result only (never from the envelope): red for
     does not comply (under every reading), amber for needs review, nothing for complies or anything else."""
     return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
+
+
+def red_last(coloured):
+    """The coloured parts, (shape, status) each, split into (the rest, the red): the red (does not comply) is drawn
+    after everything else, so nothing covers it. In Top view a needs-review amber strip (the eaves) lay over the
+    failing red wall below it and hid the one thing that certainly has to change (the architect's review,
+    2026-10-28)."""
+    rest = [c for c in coloured or [] if highlight(c[1]) != "red"]
+    return rest, [c for c in coloured or [] if highlight(c[1]) == "red"]
+
+
+def newly_failing(before, view):
+    """The row to bring into view after a re-check: the first, in the panel's order, that does not comply now and
+    did not at the check before (`before`: {item id: status} then, None on a document's first check). None when
+    nothing newly fails, so a re-check that changes nothing for the worse never moves the list (the architect's
+    review, 2026-10-28: after an edit the newly failing row was out of sight below the rows that need review)."""
+    if before is None or not view:
+        return None
+    status = {i["id"]: i["status"] for i in view.get("items") or []}
+    for g in view.get("groups") or []:
+        for item_id in g.get("items") or []:
+            if status.get(item_id) == "does_not_comply" and before.get(item_id) != "does_not_comply":
+                return item_id
+    return None
+
+
+WORKED_OUT = "How it's worked out"
+
+
+def detail_parts(det):
+    """The selected item's detail, split for the panel (the architect's review, 2026-10-28: the formula
+    "max(min(25% × lot depth —, 50), 20)", the measuring notes and the chart's shorthand "R-1B: 25%/ 50 ft [fn16]"
+    read as jargon). Plain words first, in view: the notes, the result of the working ("Required: 24'-1 7/8" to
+    32'-10 1/8"") and the law's own words. Behind WORKED_OUT, collapsed until opened: the formula with the values
+    written in, what was measured, the chart's own cell and the precision rule. Nothing is dropped: every quote,
+    with where it is from, is in one or the other, and the citation and its links stay in view.
+      notes          texts shown in view (at the limit, the colours, the plain result)
+      quotes         the law's words and the chart's footnotes, in view
+      worked         texts behind the toggle (the whole working, what was measured, the precision)
+      worked_quotes  the chart's own cells, behind the toggle"""
+    det = det or {}
+    calc = det.get("calc") or ""
+    head, _, rest = calc.partition(": ")
+    working, equals, result = rest.partition(" = ")
+    plain = head + ": " + result if equals and head in ("Required", "Allowed") else calc
+    quotes = [q for q in det.get("quotes") or [] if q.get("text")]
+    return {"notes": [t for t in (det.get("at_limit"), det.get("colours"), plain, det.get("outline")) if t],
+            "quotes": [q for q in quotes if not q.get("chart")],
+            "worked": [t for t in (calc if plain != calc else None, det.get("scope"), det.get("precision")) if t],
+            "worked_quotes": [q for q in quotes if q.get("chart")]}
 
 
 def coloured_info(entry):
@@ -246,7 +313,8 @@ def legend_text(code=None):
             "dimensioned up from the grade plane, with the limit faint. In plan these lines are drawn over "
             "everything; in every other view they hide behind the solids in front of them, as the model's own lines "
             "do. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
-            "Delta: how far over or under each limit (+ to spare, − short).\n\n"
+            "Delta: how far over or under each limit (+ to spare, ≥ + at least that much to spare, − short of a "
+            "minimum, over past a maximum).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
             "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
@@ -258,6 +326,20 @@ def legend_text(code=None):
 
 
 COLUMN_DELTA = "Delta"          # the panel's and the report's column for how far over or under (was "Margin")
+
+# eighths of an inch as one character each, in the panel's narrow cells only (the detail and the report keep "7/8")
+CELL_FRACTIONS = {"1/8": "⅛", "1/4": "¼", "3/8": "⅜", "1/2": "½", "5/8": "⅝", "3/4": "¾", "7/8": "⅞"}
+
+
+def cell_text(text):
+    """A Proposed, Required or Delta value as the panel's list draws it, in its two lines of a narrow column (the
+    architect's review, 2026-10-28: "34'-11 7/8" to 36'-3 3/8"" and "at least 0'-5 1/4" if confirmed" were cut
+    off; the panel is not made wider). The same words, shorter: each fraction of an inch one character ("34'-11⅞"")
+    and a range one value per line ("34'-11⅞"–" then "36'-3⅜""), so a line never breaks inside a number. The
+    selected item's detail below the list shows the words whole, as everywhere else."""
+    import re
+    text = re.sub(r'(\d) ([1357]/8|1/4|1/2|3/4)"', lambda m: m.group(1) + CELL_FRACTIONS[m.group(2)] + '"', text or "")
+    return re.sub(r'(["%]|\d sf) to (?=[\d+−])', "\\1–\n", text)        # after a value, before the next
 
 
 def missing(facts):
@@ -542,7 +624,8 @@ def follow_up_rows(options, zone, use, facts):
 # The words a yes / no question's dropdown offers after "Not answered": (the "no" answer, the "yes" answer)
 YES_NO_WORDS = {"conversion": ("New construction", "Conversion of an existing building")}
 NOT_ANSWERED = "Not answered"
-FOLLOW_UP_HELP = "entered by you; left blank, the rules that need it say so (never read as 0 or no)"
+FOLLOW_UP_HELP = ("Your answers. Leave one blank and the rules that need it say needs review (never read as 0 "
+                  "or No).")      # a sentence, never a fragment (the architect's review, 2026-10-28)
 
 
 def yes_no_words(key):
@@ -716,6 +799,8 @@ def answer_problem(kind, text, key=None):
 # ran ~1,200 px on one line and pushed the box to 1,560-2,020 px: Rhino run of demo 2c0a5c0). Pinned in
 # test_box_width.py, which lays the real box out and bounds its width.
 QUESTION_WIDTH = 360
+ANSWER_WIDTH = 300     # every answer dropdown in a row's dialog one width, lined up ("Conversion of an existing
+                       # building" fits; the architect's review, 2026-10-28)
 
 
 TEXT_PX = 6.0      # px a character at size 12, a little over the system font's (~5.5 measured in Rhino): errs wide
@@ -760,6 +845,20 @@ def _and(words):
 def enter_words(needs):
     """The button's words for a row waiting on `needs`: "Enter bedrooms and parking spaces"."""
     return "Enter " + _and([STATED_FACTS[k][2] for k in needs]) if needs else None
+
+
+def answer_words(needs):
+    """The words on a row's button and its dialog's title: the facts' own words while they fit a button ("Enter
+    bedrooms and parking spaces"); longer, how many ("Answer 4 questions"): the whole list ran to ~25 words and was
+    cut off on the button and in the title bar (the architect's review, 2026-10-28). The dialog lists each question
+    and the row's reason still names them."""
+    if not needs:
+        return None
+    words = enter_words(needs)
+    return words if len(needs) == 1 or len(words) <= BUTTON_WORDS else "Answer %d questions" % len(needs)
+
+
+BUTTON_WORDS = 40       # characters a row's button holds at the panel's width (380-460 px) without being cut off
 
 
 def needs_reason(needs):
@@ -855,7 +954,7 @@ def row_buttons(item):
     units…", action "enter"), then, where a site fact is missing too, Edit site… ("edit_site") as the second."""
     out = []
     if (item or {}).get("needs"):
-        out.append((enter_words(item["needs"]) + "…", "enter"))
+        out.append((answer_words(item["needs"]) + "…", "enter"))
     if site_row(item):
         out.append((SITE_HINT, "edit_site"))
     return out
@@ -3139,6 +3238,21 @@ def wants_suggestions(text, chosen=None):
     return len(text.lstrip()) >= SUGGEST_MIN_CHARS and text != chosen
 
 
+HINT_NOTE_PX = 20          # the quiet note's one line (size 10) and its row spacing
+
+
+def hint_rows_px(list_shown, list_px, note):
+    """How much taller the start box is while its suggestion rows show: the list (and its spacing) and the note's
+    line, each only while shown (review round 1: an offline note showed with nothing added, pushing Draw down)."""
+    return ((list_px + 6) if list_shown else 0) + (HINT_NOTE_PX if note else 0)
+
+
+def hint_rows_shown(list_shown, note):
+    """Whether the start box's suggestion rows (the type-ahead list and its quiet note) take any room: only while
+    one of them has something to show (the architect's review, 2026-10-28: an empty gap under Address)."""
+    return bool(list_shown) or bool(note)
+
+
 def suggestions_shown(answer, typed):
     """(the list, a quiet note) for a type-ahead answer, or None when it is for something no longer typed (a stale
     answer is dropped). Offline, an error or too slow: no list and the note that suggestions are unavailable (the
@@ -3702,9 +3816,18 @@ def ground_facts(state, lot_level, flat=None):
     return out
 
 
+# the box's own choices that Gordium fills in (the use, the street, the corner lot): the architect's word only once
+# changed (their source then ENTERED); left as they were, never "confirmed by you" (fact_sources, source_lines)
+BOX_DEFAULTS = ("use", "street", "corner_lot")
+UNTOUCHED = "default, not changed by you"
+
+
 def fact_sources(state, today, confirmed):
     """Every fact the box set, as {value, source, confirmed_by, date}: saved in the .3dm beside the facts and
-    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick)."""
+    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick).
+    A box default the architect left as it was (BOX_DEFAULTS) is confirmed by no one: pressing Draw is not saying
+    yes to a dropdown never opened (the architect's review, 2026-10-28: "Use: One-family dwelling, detached ·
+    suggested by Gordium · confirmed by you" for a use never changed)."""
     by = "you" if confirmed else None
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
@@ -3712,13 +3835,20 @@ def fact_sources(state, today, confirmed):
     def fact(value, source, who=by):
         return {"value": value, "source": source, "confirmed_by": who, "date": today}
 
+    def chosen(key):                   # a box default: the architect's only once changed, or ticked "I checked this"
+        # (review round 1 of panel-wording, P2: a street ticked as checked read "default, not changed by you")
+        # (the corner answer sits on the street's row, ROW_OF: that row's tick confirms it too; round 2, P3)
+        row = ROW_OF.get(key + "_lot", key) if key == "corner" else key
+        mine = state.get(key + "_source") == ENTERED or row in (state.get("checked") or [])
+        return by if mine else None
+
     city = (" · " + IN_CITY_SAID.format(date=state["city_by_hand"])) if state.get("city_by_hand") else ""
     return {     # (the architect's Yes, by hand, on the address's source: shown in the panel and report, round 12)
         "address": fact(state.get("address") or None,     # (an earlier Draw's Yes, read back, never twice)
                         (state.get("address_source") or ENTERED).split(" · " + IN_CITY_SAID.split(" (")[0])[0] + city),
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
-        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
+        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED, chosen("use")),
         # the follow-up answers (Ben, 2026-10-25): each saved as entered by you, and what the use itself says,
         # shown in the panel and the report (exactly the facts answers_applied sends the checker)
         **follow_up_sources(state, fact),
@@ -3728,9 +3858,9 @@ def fact_sources(state, today, confirmed):
         # the address's street, a kept fact, says it instead)
         "street": fact(street_name({**state, "street_name": state.get("street_name_saved")})
                        if "street_name_saved" in state else street_name(state),
-                       state.get("street_source") or SUGGESTED),
+                       state.get("street_source") or SUGGESTED, chosen("street")),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
-                           state.get("corner_source") or SUGGESTED),
+                           state.get("corner_source") or SUGGESTED, chosen("corner")),
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
         "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
                         "lot; height is checked as if flat)" if state.get("ground_fall") else ""),
@@ -4223,6 +4353,162 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
     return facts, saved_ui, guide
 
 
+# ---- long work: a line that says what Gordium is doing, and a Cancel that stops it --------------------------------
+# The checker's and the lookup's work runs in their own processes; the plugin waits for them on a Job's thread,
+# never on Rhino's, so Rhino keeps drawing and answering while they work (a slow one shows a small window after
+# WAIT_WINDOW_S with the current step, the seconds so far and Cancel). Cancel stops the process: its answer is never
+# used, so nothing it would have changed changes.
+
+class WorkCancelled(Exception):
+    """The architect pressed Cancel while Gordium worked: the work was stopped and nothing it would have changed was
+    changed."""
+
+
+WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (no flash on a quick check)
+SPINNER = ("●○○", "○●○", "○○●")
+SPIN_S = 0.3               # s per frame of the moving mark
+CANCELLING = "Cancelling…"
+STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint, while it has the keyboard (Esc reaches it)
+STOP_HINT_CLICK = "Click Cancel to stop"   # ... and while it hasn't: never a promise Esc can't keep
+FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
+              "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
+              "sample_site": "Loading the sample lot…"}
+CHECK_CANCELLED = "Check cancelled"
+CHECK_CANCELLED_NOTE = ("Nothing in the model changed. Nothing is shown as checked until the next check: press "
+                        "Check again.")
+DRAW_CANCELLED = ("Draw cancelled: nothing was drawn, and the model is as it was before the box opened (Draw again "
+                  "when you're ready).")
+REPORT_CANCELLED = "Zoning report cancelled: the report file wasn't changed."
+REPORT_CANCELLED_LATE = ("Zoning report cancelled as it finished: the new report had already been saved to {path} "
+                         "(not opened).")
+
+
+def report_cancelled(path, changed):
+    """What Zoning report… says when its check was cancelled: the file as it was, or (Cancel pressed in the moment
+    after the checker moved the new report in) that it was saved anyway."""
+    return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
+SETTLING = "Finishing the check that is running…"
+CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
+                   "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
+                   "panel) for a report of the model now.")
+NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
+                "command again in the file you want.")
+def outdated_report_message(path, report_error, had_report):
+    """What a check whose model changed while it ran says of its report: written, but of the model as it was; or,
+    when the checker couldn't write it, that it wasn't written and why (never that it was: independent review of
+    #32)."""
+    if report_error:                     # (its own full stop dropped: report_message adds one)
+        return report_message(path, False, str(report_error).rstrip(". "), stale=bool(had_report))
+    return REPORT_OUTDATED.format(path=path)
+
+
+HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
+                  "Gordium will check it.")
+DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
+                 "is as it was: Draw again.")
+
+
+class ModelChanged(WorkCancelled):
+    """The model was edited (or another document came to the front) while Gordium worked out something to draw for
+    it: nothing is drawn; `said` is what the architect is told."""
+    said = DRAW_OUTDATED
+
+
+def progress_line(elapsed, limit=None):
+    """The moving mark and the seconds so far ("○●○  7 s"), with when the work stops by itself if it has a limit.
+    The mark is worked out from the time, so it moves at the same pace whoever draws it."""
+    elapsed = max(0.0, float(elapsed or 0))
+    text = "%s  %d s" % (SPINNER[int(elapsed / SPIN_S) % len(SPINNER)], int(elapsed))
+    return text + (" (stops at %d s)" % limit if limit else "")
+
+
+class Job:
+    """One piece of long work on its own thread, never Rhino's: work(step) returns the result; step(text) says what
+    it is doing now. Rhino's thread only reads it (done, step, elapsed()), waits a moment for it (wait), and may
+    cancel it: `stop` (run on the caller's thread) stops the process doing the work, and from then on the work's
+    result is never used (outcome() says "cancelled" even if an answer still arrives)."""
+
+    def __init__(self, work, step, stop=None, clock=time.monotonic):
+        self.step, self.done, self.cancelled = step, False, False
+        self.result = self.error = None
+        self._stop, self._clock = stop, clock
+        self.started = clock()
+        self._thread = threading.Thread(target=self._run, args=(work,), daemon=True, name="gordium-job")
+        self._thread.start()
+
+    def say(self, text):
+        if text and not self.cancelled:
+            self.step = text
+
+    def _run(self, work):
+        try:
+            self.result = work(self.say)
+        except BaseException as e:            # noqa: BLE001  (kept for the caller, on its own thread)
+            self.error = e
+        finally:
+            self.done = True
+
+    def elapsed(self):
+        return self._clock() - self.started
+
+    def finished(self):
+        """Nothing more to wait for: the work is done, or it was cancelled (its answer is dropped)."""
+        return self.done or self.cancelled
+
+    def wait(self, timeout):
+        """Wait at most `timeout` s for the work; whether there is nothing more to wait for."""
+        self._thread.join(timeout)
+        return self.finished()
+
+    def cancellable(self):
+        return self._stop is not None and not self.finished()
+
+    def cancel(self):
+        """Stop the work (once; never after it is done; never work with no way to stop it, whose thread would go on
+        reading the checker's answers: review round 2): True when it was stopped."""
+        if not self.cancellable():
+            return False
+        self.cancelled = True
+        self.step = CANCELLING
+        if self._stop is not None:
+            self._stop()
+        return True
+
+    def outcome(self):
+        """("cancelled", None), ("error", the exception) or ("done", the result)."""
+        if self.cancelled:
+            return "cancelled", None
+        if self.error is not None:
+            return "error", self.error
+        return "done", self.result
+
+
+def plans_house(mode, redraw, caller_draws):
+    """Whether Draw works out a starting house before the box commits: GordiumStart's box always draws one; another
+    box only when its Draw reset the site (`redraw`) AND its caller draws the house after (`caller_draws`: Edit
+    site…). GordiumCheck's box never draws one, so it never asks for one (review round 1: a "start" request for
+    nothing, and its Cancel escaped the command)."""
+    return mode == "start" or bool(redraw and caller_draws)
+
+
+def result_stale(dirty_at, shown_at, now, after, rechecking):
+    """Whether the result on screen is out of date, so nothing is drawn as complying or not (F7, H1): the model
+    changed more than `after` s ago and no check has finished since, or a background re-check is running (live mode
+    clears the pending edit when it starts one, and the result on screen is of the model before that edit: review
+    round 1, P1, a false pass shown while the re-check ran)."""
+    if rechecking:
+        return True
+    return bool(dirty_at and now - dirty_at >= after and (shown_at or 0) < dirty_at)
+
+
+def checked_while_still(begun_at, dirty_at):
+    """Whether a check that read the model at `begun_at` still shows the model: no edit since (`dirty_at`, the last
+    edit not yet re-checked, None for none). A live re-check runs while the architect may keep editing; its result
+    is shown only if nothing changed after it read the model, else it is dropped and the model checked again."""
+    return not dirty_at or dirty_at < begun_at
+
+
 # ---- the context map (design_checker.context_box): the neighbourhood around a looked-up lot ---------------------
 CONTEXT_LIMIT_S = 20                    # the whole fetch (three map requests, about 1 s); the Rhino side stops it then
 CONTEXT_ENTRY = "context"               # the document string holding the context's snapshot (records, never data)
@@ -4557,160 +4843,6 @@ def context_says(payload):
         said += ", %d buildings (footprints %s%s)" % (n["buildings"], "from " + dates if dates else "of unknown date",
                                                        "" if is_stored(layer) else ", shown only")
     return "Neighbourhood drawn: " + said + "." + (" " + payload["message"] if payload.get("message") else "")
-# ---- long work: a line that says what Gordium is doing, and a Cancel that stops it --------------------------------
-# The checker's and the lookup's work runs in their own processes; the plugin waits for them on a Job's thread,
-# never on Rhino's, so Rhino keeps drawing and answering while they work (a slow one shows a small window after
-# WAIT_WINDOW_S with the current step, the seconds so far and Cancel). Cancel stops the process: its answer is never
-# used, so nothing it would have changed changes.
-
-class WorkCancelled(Exception):
-    """The architect pressed Cancel while Gordium worked: the work was stopped and nothing it would have changed was
-    changed."""
-
-
-WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (no flash on a quick check)
-SPINNER = ("●○○", "○●○", "○○●")
-SPIN_S = 0.3               # s per frame of the moving mark
-CANCELLING = "Cancelling…"
-STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint, while it has the keyboard (Esc reaches it)
-STOP_HINT_CLICK = "Click Cancel to stop"   # ... and while it hasn't: never a promise Esc can't keep
-FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
-              "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
-              "sample_site": "Loading the sample lot…"}
-CHECK_CANCELLED = "Check cancelled"
-CHECK_CANCELLED_NOTE = ("Nothing in the model changed. Nothing is shown as checked until the next check: press "
-                        "Check again.")
-DRAW_CANCELLED = ("Draw cancelled: nothing was drawn, and the model is as it was before the box opened (Draw again "
-                  "when you're ready).")
-REPORT_CANCELLED = "Zoning report cancelled: the report file wasn't changed."
-REPORT_CANCELLED_LATE = ("Zoning report cancelled as it finished: the new report had already been saved to {path} "
-                         "(not opened).")
-
-
-def report_cancelled(path, changed):
-    """What Zoning report… says when its check was cancelled: the file as it was, or (Cancel pressed in the moment
-    after the checker moved the new report in) that it was saved anyway."""
-    return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
-SETTLING = "Finishing the check that is running…"
-CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
-REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
-                   "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
-                   "panel) for a report of the model now.")
-NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
-                "command again in the file you want.")
-def outdated_report_message(path, report_error, had_report):
-    """What a check whose model changed while it ran says of its report: written, but of the model as it was; or,
-    when the checker couldn't write it, that it wasn't written and why (never that it was: independent review of
-    #32)."""
-    if report_error:                     # (its own full stop dropped: report_message adds one)
-        return report_message(path, False, str(report_error).rstrip(". "), stale=bool(had_report))
-    return REPORT_OUTDATED.format(path=path)
-
-
-HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
-                  "Gordium will check it.")
-DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
-                 "is as it was: Draw again.")
-
-
-class ModelChanged(WorkCancelled):
-    """The model was edited (or another document came to the front) while Gordium worked out something to draw for
-    it: nothing is drawn; `said` is what the architect is told."""
-    said = DRAW_OUTDATED
-
-
-def progress_line(elapsed, limit=None):
-    """The moving mark and the seconds so far ("○●○  7 s"), with when the work stops by itself if it has a limit.
-    The mark is worked out from the time, so it moves at the same pace whoever draws it."""
-    elapsed = max(0.0, float(elapsed or 0))
-    text = "%s  %d s" % (SPINNER[int(elapsed / SPIN_S) % len(SPINNER)], int(elapsed))
-    return text + (" (stops at %d s)" % limit if limit else "")
-
-
-class Job:
-    """One piece of long work on its own thread, never Rhino's: work(step) returns the result; step(text) says what
-    it is doing now. Rhino's thread only reads it (done, step, elapsed()), waits a moment for it (wait), and may
-    cancel it: `stop` (run on the caller's thread) stops the process doing the work, and from then on the work's
-    result is never used (outcome() says "cancelled" even if an answer still arrives)."""
-
-    def __init__(self, work, step, stop=None, clock=time.monotonic):
-        self.step, self.done, self.cancelled = step, False, False
-        self.result = self.error = None
-        self._stop, self._clock = stop, clock
-        self.started = clock()
-        self._thread = threading.Thread(target=self._run, args=(work,), daemon=True, name="gordium-job")
-        self._thread.start()
-
-    def say(self, text):
-        if text and not self.cancelled:
-            self.step = text
-
-    def _run(self, work):
-        try:
-            self.result = work(self.say)
-        except BaseException as e:            # noqa: BLE001  (kept for the caller, on its own thread)
-            self.error = e
-        finally:
-            self.done = True
-
-    def elapsed(self):
-        return self._clock() - self.started
-
-    def finished(self):
-        """Nothing more to wait for: the work is done, or it was cancelled (its answer is dropped)."""
-        return self.done or self.cancelled
-
-    def wait(self, timeout):
-        """Wait at most `timeout` s for the work; whether there is nothing more to wait for."""
-        self._thread.join(timeout)
-        return self.finished()
-
-    def cancellable(self):
-        return self._stop is not None and not self.finished()
-
-    def cancel(self):
-        """Stop the work (once; never after it is done; never work with no way to stop it, whose thread would go on
-        reading the checker's answers: review round 2): True when it was stopped."""
-        if not self.cancellable():
-            return False
-        self.cancelled = True
-        self.step = CANCELLING
-        if self._stop is not None:
-            self._stop()
-        return True
-
-    def outcome(self):
-        """("cancelled", None), ("error", the exception) or ("done", the result)."""
-        if self.cancelled:
-            return "cancelled", None
-        if self.error is not None:
-            return "error", self.error
-        return "done", self.result
-
-
-def plans_house(mode, redraw, caller_draws):
-    """Whether Draw works out a starting house before the box commits: GordiumStart's box always draws one; another
-    box only when its Draw reset the site (`redraw`) AND its caller draws the house after (`caller_draws`: Edit
-    site…). GordiumCheck's box never draws one, so it never asks for one (review round 1: a "start" request for
-    nothing, and its Cancel escaped the command)."""
-    return mode == "start" or bool(redraw and caller_draws)
-
-
-def result_stale(dirty_at, shown_at, now, after, rechecking):
-    """Whether the result on screen is out of date, so nothing is drawn as complying or not (F7, H1): the model
-    changed more than `after` s ago and no check has finished since, or a background re-check is running (live mode
-    clears the pending edit when it starts one, and the result on screen is of the model before that edit: review
-    round 1, P1, a false pass shown while the re-check ran)."""
-    if rechecking:
-        return True
-    return bool(dirty_at and now - dirty_at >= after and (shown_at or 0) < dirty_at)
-
-
-def checked_while_still(begun_at, dirty_at):
-    """Whether a check that read the model at `begun_at` still shows the model: no edit since (`dirty_at`, the last
-    edit not yet re-checked, None for none). A live re-check runs while the architect may keep editing; its result
-    is shown only if nothing changed after it read the model, else it is dropped and the model checked again."""
-    return not dirty_at or dirty_at < begun_at
 
 
 ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
@@ -4941,7 +5073,6 @@ KEEP_MINE = "keep"
 START_FRESH = "fresh"
 LOOK_UP_FIRST = "Press Look up to find {address} first."
 NOT_FOUND_YET = "No lot found for {address} (the line above says why): correct the address and press Look up, or {back}."
-# (#26's; named apart from #37's NOT_ANSWERED, the yes / no dropdown's first word: the demo build)
 LOOKUP_NOT_ANSWERED = "The lookup of {address} didn't finish (the line above says why): press Look up again, or {back}."
 PICK_A_MATCH = "Pick one of the matches under Address, then press Look up."
 WAIT_LOOKUP = "Looking up {address}: Draw once the answer is in."
