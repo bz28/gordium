@@ -261,3 +261,87 @@ def test_ok_with_nothing_new_makes_no_undo_step():
     ns = _plugin(doc, lambda title, fields, check: {"dwelling_units": "4"})
     ns["enter_rooms"](["dwelling_units"])
     assert doc.log == [] and doc.records == 0 and ns["said"] == ["Nothing new entered: nothing changed."]
+
+
+# ---- the box changes only what it shows (Rhino run, 2026-10-28, P0: answers given, Use changed to church and
+# back, every answer came back blank and Check saved them unset; the same on any district change) ---------------
+
+BOX = {"follow_ups": {"X": {"multiple_family": ["dwelling_units", "rooms_let_for_profit", "conversion"],
+                            "two_family": ["rooms_let_for_profit", "conversion"], "church": []},
+                      "Y": {"multiple_family": [], "two_family": []}},
+       "implied": {"X": {"two_family": {"dwelling_units": 2}, "multiple_family": {}, "church": {}},
+                   "Y": {"two_family": {"dwelling_units": 2}, "multiple_family": {}}}}
+
+
+def _box(facts, zone, use, typed=None):
+    """One pass of the box as the plugin runs it: the fields laid out for the facts' own district and use
+    (_box_state: box_answers), what is typed in them, then the pick of `zone` and `use` (_apply_box: the answers
+    applied while the facts still hold the old use, then the new district and use set)."""
+    shown = dict(logic.box_answers(BOX, facts.get("zone"), facts.get("use"), facts), **(typed or {}))
+    out, _ = logic.answers_applied(facts, shown, zone, use, BOX)
+    return dict(out, zone=zone, use=use)
+
+
+def test_answers_survive_a_use_picked_and_picked_back():
+    facts = _box(dict(SITE, zone="X", use="multiple_family"), "X", "multiple_family",
+                 {"dwelling_units": 5, "rooms_let_for_profit": 2, "conversion": True})          # answered, Check
+    assert (facts["dwelling_units"], facts["rooms_let_for_profit"], facts["conversion"]) == (5, 2, True)
+    facts = _box(facts, "X", "church")                    # Use: church (asks none of them)
+    facts = _box(facts, "X", "multiple_family")           # and back
+    assert logic.box_answers(BOX, "X", "multiple_family", facts) == {
+        "dwelling_units": 5, "rooms_let_for_profit": 2, "conversion": True}                  # shown again
+    facts = _box(facts, "X", "multiple_family")           # Check: kept
+    assert (facts["dwelling_units"], facts["rooms_let_for_profit"], facts["conversion"]) == (5, 2, True)
+    rhino = RHINO[RHINO.index("def _apply_box("):RHINO.index("def _place_spots(")]
+    assert rhino.index("logic.answers_applied(facts,") < rhino.index('use=state["use"]')   # the old use, first
+
+
+def test_answers_survive_a_district_picked_and_picked_back():
+    facts = _box(dict(SITE, zone="X", use="multiple_family"), "X", "multiple_family",
+                 {"dwelling_units": 5, "rooms_let_for_profit": 0, "conversion": False})
+    facts = _box(_box(facts, "Y", "multiple_family"), "X", "multiple_family")
+    assert (facts["dwelling_units"], facts["rooms_let_for_profit"], facts["conversion"]) == (5, 0, False)
+
+
+def test_what_a_use_said_goes_when_the_use_changes():
+    facts = _box(dict(SITE, zone="X", use="multiple_family"), "X", "two_family")
+    assert facts["dwelling_units"] == 2                                   # the two-family's own (§325-3)
+    facts = _box(facts, "X", "multiple_family")
+    assert "dwelling_units" not in facts                                  # never read as an architect's count
+    assert logic.box_answers(BOX, "X", "multiple_family", facts)["dwelling_units"] is None   # asked, blank
+    facts = _box(dict(SITE, zone="Y", use="two_family"), "X", "church")   # also when the district changes it
+    assert "dwelling_units" not in facts
+
+
+def test_a_shown_field_left_blank_still_unsets_its_fact():
+    facts = dict(SITE, zone="X", use="multiple_family", dwelling_units=5, conversion=True)
+    facts = _box(facts, "X", "multiple_family", {"dwelling_units": None})
+    assert "dwelling_units" not in facts and facts["conversion"] is True
+
+
+def test_the_box_changes_only_the_fields_it_shows_and_what_the_uses_say():
+    """Property: whatever is stored and answered, a key the new district and use don't show (or a field not laid
+    out yet) is unchanged, except what the old or new use itself says (implied)."""
+    rng = random.Random(1028)
+    zones, uses = ["X", "Y", "Z"], ["multiple_family", "two_family", "church", "one_family_detached", None]
+    for _ in range(3000):
+        facts = {k: v for k, v in SITE.items() if rng.random() < 0.7}
+        facts["use"] = rng.choice(uses)
+        for k in STATED:
+            if rng.random() < 0.5:
+                facts[k] = rng.choice([True, False]) if logic.STATED_FACTS[k][1] == "yes_no" else rng.randint(0, 6)
+        zone, use = rng.choice(zones), rng.choice(uses)
+        asked = logic.follow_up_keys(BOX, zone, use)
+        answers = {k: rng.choice([None, False, True] if logic.STATED_FACTS[k][1] == "yes_no" else [None, 0, 3])
+                   for k in asked + STATED if rng.random() < 0.5}           # a field shown (None: left blank)
+        before = json.loads(json.dumps(facts))
+        out, _ = logic.answers_applied(facts, answers, zone, use, BOX)
+        assert facts == before
+        implied = set(logic.implied_facts(before.get("use"))) | set(logic.implied_by(BOX, zone, use))
+        for k in set(before) | set(out):
+            if (k in asked and k in answers) or k in implied:
+                continue
+            assert out.get(k) == before.get(k), (k, before, answers, zone, use)
+        for k in asked:
+            if k in answers and k not in implied:
+                assert out.get(k) == answers[k]                            # shown: its answer, blank unset

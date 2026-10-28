@@ -372,15 +372,27 @@ def box_needs_refresh(options, shown, now):
 
 
 def answers_applied(facts, answers, zone, use, options):
-    """The facts after the box: every fact the box can ask (BOX_ASKS) is set only from what this district's rules
-    need for this use: the architect's answer to each question asked (a blank or a refused entry: unset, so its
-    rules need review, never 0 or no), and what the use itself says for the facts its rules read (implied_by).
-    Anything else goes: an answer given for another use or district never stays behind (a multiple dwelling's 5
-    units checked as a two-family's). Returns (facts, the keys the architect answered)."""
+    """The facts after the box, which changes only what it shows (Rhino run, 2026-10-28, P0: a Use or district
+    picked and picked back blanked every answer): each fact asked for this district and use (follow_up_keys) whose
+    field was shown (a key in `answers`, None when blank) is set from its answer, or unset when the field is blank or
+    refused (its rules need review, never 0 or no); one asked but not yet shown (the box opens again laid out for a
+    new use: box_needs_refresh) stays as stored, and is shown then with its value; what the use
+    itself says for the facts its rules read (implied_by) is set. Every other answer stays as stored: never read
+    unshown, as any fact this district's rules read for this use is asked (and shown with its value).
+    `facts` hold the use the box opened with (facts["use"]): what that use itself said (implied_facts: a two-family's
+    2 units) goes when the new use doesn't say it, so it is never read as an architect's count (a two-family's 2
+    units checked as a multiple dwelling's). Returns (facts, the keys the architect answered)."""
     asked = follow_up_keys(options, zone, use)
-    given = {k: v for k, v in (answers or {}).items() if k in asked and v is not None}
-    out = {k: v for k, v in (facts or {}).items() if k not in BOX_ASKS}
-    out.update(implied_by(options, zone, use))
+    now = implied_by(options, zone, use)
+    out = dict(facts or {})
+    for k, v in implied_facts(out.get("use")).items():      # said by the use before, not by this one: goes
+        if k in BOX_ASKS and k not in now and k in out and out[k] == v and type(out[k]) is type(v):
+            out.pop(k)
+    shown = [k for k in asked if k in (answers or {})]
+    for k in shown:                                          # each shown field: its answer, or unset
+        out.pop(k, None)
+    out.update(now)
+    given = {k: answers[k] for k in shown if answers[k] is not None}
     return update_counts(out, given), sorted(given)
 
 
@@ -2899,17 +2911,20 @@ def fact_sources(state, today, confirmed):
 
 def follow_up_sources(state, fact):
     """The sources of the facts the box sets after Use (answers_applied's): each answer to a question asked,
-    "entered by you", and each fact the use says, IMPLIED_SOURCE."""
+    "entered by you", and each fact the use says, IMPLIED_SOURCE. An answer kept but not asked keeps its saved
+    source (sources_kept)."""
     zone, use, options = state.get("zone"), state.get("use"), state.get("options")
     facts, answered = answers_applied({}, state.get("answers"), zone, use, options)
     return {k: fact({True: "yes", False: "no"}.get(v, v), ENTERED if k in answered else IMPLIED_SOURCE)
             for k, v in facts.items()}
 
 
-def sources_kept(saved):
-    """The saved sources Draw keeps before adding the box's own: never an earlier follow-up answer (a fact the box
-    asks), which Draw sets again or drops with its fact (fact_sources)."""
-    return {k: v for k, v in (saved or {}).items() if k not in BOX_ASKS}
+def sources_kept(saved, facts):
+    """The saved sources Draw keeps before adding the box's own (fact_sources): of the facts the box can ask
+    (BOX_ASKS), only those still set in `facts` (the facts after Draw: an answer kept, unshown, keeps its "entered
+    by you"); a fact Draw unset or dropped (a blank, what the old use said) loses its source with it. Those Draw
+    asks or the use says are given their source again by fact_sources."""
+    return {k: v for k, v in (saved or {}).items() if k not in BOX_ASKS or (facts or {}).get(k) is not None}
 
 
 def district_confirmed(mode, zone_fact, zone):

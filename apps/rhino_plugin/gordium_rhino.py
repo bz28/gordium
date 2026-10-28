@@ -1744,10 +1744,11 @@ def _ft_text(feet):
 def _apply_box(doc, facts, state, saved_ui):
     """The facts (what the checker gets) and the box's own choices, from what the box says."""
     facts, saved_ui = logic.corner_answered(facts, saved_ui, state.get("corner_lot"))   # a changed answer: the
-    facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],  # street picked again
+    # street picked again; the answers first, while the facts still hold the use the box opened with (what that use
+    # said goes with it); only the fields shown change (blank: unset, never 0 or no)
+    facts, _ = logic.answers_applied(facts, state.get("answers"), state["zone"], state["use"], state.get("options"))
+    facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],
                  lot_surveyed=bool(state.get("lot_surveyed")))
-    facts, _ = logic.answers_applied(facts, state.get("answers"), state["zone"], state["use"],   # blank: unset,
-                                     state.get("options"))                                     # never 0 or no
     if not facts.get("address"):
         facts.pop("address")
     facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
@@ -2251,7 +2252,8 @@ def _drawn(doc, facts, state, saved_ui, session=None):
     def save():
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
         _save_ui_state(doc, ui_state)
-        sources = logic.sources_kept(fact_sources(doc))   # what the box doesn't set (the ground marking) is kept
+        sources = logic.sources_kept(fact_sources(doc), out)   # what the box doesn't set is kept (an answer
+        #                                                       kept unshown too; one unset goes with its fact)
         sources.update(logic.fact_sources(state, logic.city_day(), confirmed=True))
         doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
         return out
