@@ -17,8 +17,8 @@ SRC = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
 REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_building", "add_to_check",
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
-        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file", "_massing_hidden",
-        "_sync_ticks"]
+        "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
+        "show_context", "_context_on", "check_now", "set_auto_check", "_auto", "_massing_hidden", "_sync_ticks"]
 
 
 class Doc:
@@ -111,8 +111,12 @@ def _plugin(doc, said):
           "LAYERS": logic.LAYERS, "Cancelled": logic.Cancelled,
           "Rhino": type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": doc}),
                                       "DocObjects": type("DO", (), {"ObjectType": type("OT", (), {"Curve": 4})})}),
+          "live": lambda on: None,
           "ui": type("UI", (), {"legend": staticmethod(lambda code: None),
+                                "set_auto_tick": staticmethod(lambda parts, on: None),
+                                "show": staticmethod(lambda *a, **k: None),
                                 "set_labels_tick": staticmethod(lambda parts, on: None),
+                                "set_context_tick": staticmethod(lambda parts, on: None),
                                 "set_massing_tick": staticmethod(lambda parts, on: None),
                                 "set_envelope_tick": staticmethod(lambda parts, on: None),
                                 "open_target": staticmethod(lambda path: (True, None))}),
@@ -126,7 +130,11 @@ def _plugin(doc, said):
           "ask": lambda request: {"zones": []}, "suggested_facts": lambda doc, zones: {},
           "overlay": lambda: type("O", (), {})(), "_apply_box": lambda doc, facts, state, saved_ui: (facts, {}),
           # the start box: the architect presses Draw (the plugin's own _drawn), with the facts it was given
-          "confirm": lambda doc, facts, options, mode="check": ns["_drawn"](doc, facts, {}, {})}
+          "confirm": lambda doc, facts, options, mode="check": ns["_drawn"](doc, facts, {}, {}),
+          # the context layers and a fetched neighbourhood, written as _context_visible and draw_context write them
+          "_context_visible": lambda doc, on: setattr(doc.Layers[0], "IsVisible", on) or True,
+          "_context_record": lambda doc: None, "sync_context": lambda doc, facts: None,
+          "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}")}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     exec(SRC[SRC.index("class RhinoTable:"):].split("\ndef ", 1)[0], ns)      # noqa: S102
@@ -139,7 +147,11 @@ CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": (
          "zoom": ((None,), False), "report": ((), False), "envelope": ((True,), False), "legend": ((), False),
          "retry": ((), False),
          # the start box (Edit site…, Set grade…): its Draw and the facts saved after it closes, one step
-         "edit_site": ((), True), "grade": ((), True)}
+         "edit_site": ((), True), "grade": ((), True),
+         # Show neighbourhood (#23): the tick saved, the context layers shown, a neighbourhood fetched and drawn
+         "context": ((True,), True),
+         # Check (#27): a check, nothing written; Check after every edit: the setting saved in the file
+         "check": ((), False), "auto_check": ((False,), True)}
 
 
 def test_the_guard_covers_every_panel_action():
@@ -285,6 +297,21 @@ def test_a_new_addresss_reset_goes_in_the_boxs_own_step():
         '_begin_undo(doc, "Gordium: start fresh for "')
 
 
+def test_an_undone_check_after_every_edit_is_read_again_from_the_file():
+    """Carry review C1: Ctrl+Z on "Gordium: check after every edit" put the file's setting back, but the plugin kept
+    its own copy (auto_by_doc): checks after edits (or none) as the undone setting said, the tick too, until the file
+    was reopened. After Undo/Redo the setting is read again from the file, and the tick follows it."""
+    doc = Doc()
+    ns = _plugin(doc, [])
+    ticks = []
+    ns["ui"].set_auto_tick = staticmethod(lambda parts, on: ticks.append(on))
+    ns["_actions"]()["auto_check"](False)
+    assert ns["_auto"](doc) is False
+    doc.Strings.data[("Gordium", "ui")] = json.dumps({"auto_check": True})     # what Rhino's Undo put back
+    ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
+    assert ns["_auto"](doc) is True and ticks[-1] is True
+
+
 def test_an_undone_setting_is_read_again_from_the_file():
     """Round 5, R5-1: Ctrl+Z on Show on-screen labels put the file's setting back but the plugin kept its own copy
     (labels_by_doc) and the tick, until the next check. After Undo/Redo both follow the file."""
@@ -297,6 +324,21 @@ def test_an_undone_setting_is_read_again_from_the_file():
     doc.Strings.data[("Gordium", "ui")] = json.dumps({"show_labels": False})     # what Rhino's Undo put back
     ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
     assert ns["STATE"]["labels_by_doc"][1] is False and ticks[-1] is False
+
+
+def test_an_undone_show_neighbourhood_is_read_again_from_the_file():
+    """Round 5, R5-1 (#23's part): Ctrl+Z on "Gordium: show or hide the neighbourhood" put the file's setting back,
+    but the plugin kept its own copy (context_by_doc: the live footprints drawn by it) and the tick, until the next
+    check. After Undo/Redo both follow the file."""
+    doc = Doc()
+    ns = _plugin(doc, [])
+    ticks = []
+    ns["ui"].set_context_tick = staticmethod(lambda parts, on: ticks.append(on))
+    ns["_actions"]()["context"](False)
+    assert ns["STATE"]["context_by_doc"][1] is False
+    doc.Strings.data[("Gordium", "ui")] = json.dumps({"show_context": True})     # what Rhino's Undo put back
+    ns["_undo_redo"](None, type("E", (), {"IsEndUndo": True, "IsEndRedo": False})())
+    assert ns["STATE"]["context_by_doc"][1] is True and ticks[-1] is True
 
 
 def test_every_panel_tick_is_read_again_after_undo():

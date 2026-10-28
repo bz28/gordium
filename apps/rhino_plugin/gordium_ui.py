@@ -252,7 +252,7 @@ def _cell_painter(parts, index):
     return paint
 
 
-def make_panel(actions, host=None):
+def make_panel(actions, host=None, context_on=True):
     """The Gordium panel: a header, the item list (a TreeGridView), a splitter, the selected item's detail, and a
     footer. `actions` maps names to functions (zoom, report, envelope, edit_site, survey, grade, enter, add,
     retry). In `host` (a DockHost: a docked Rhino panel), or a floating window when there is none. Returns a dict
@@ -311,7 +311,8 @@ def make_panel(actions, host=None):
     footer = row(button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control
-    ticks = [row(_envelope_box(actions, parts)), row(_massing_box(actions, parts)), row(_labels_box(actions, parts))]
+    ticks = [row(_auto_box(actions, parts)), row(_envelope_box(actions, parts)), row(_massing_box(actions, parts)),
+             row(_labels_box(actions, parts)), row(_context_box(actions, parts, context_on))]
     # while a start box is open these are off; the legend ("?") is not among them: it only shows something
     parts["greyed"] = [tree, detail_scroll, *ticks, footer.Items[0].Control, footer.Items[1].Control]
     layout = ef.DynamicLayout()
@@ -352,6 +353,66 @@ def _massing_box(actions, parts):
     box.CheckedChanged += logic.guard(changed, "hide the starting house")
     parts["massing_box"] = box
     return box
+
+
+def _context_box(actions, parts, on=True):
+    """Show neighbourhood: the context map (parcels, streets and footprints 1500 ft around a looked-up lot) on or
+    off. Drawing only: the check never measures it. Starts as this document has it (saved in the file, like Show
+    on-screen labels), set before the handler is attached so building the panel never fetches anything."""
+    box = ef.CheckBox()
+    box.Text = "Show neighbourhood"
+    box.ToolTip = "The parcels, streets and building footprints within 750 ft of the lot (drawing only, never checked)"
+    box.Checked = bool(on)
+
+    def changed(s, e):
+        if not parts.get("_setting_context"):       # set from the document (set_context_tick): not a change
+            actions["context"](bool(box.Checked))
+
+    box.CheckedChanged += logic.guard(changed, "show or hide the neighbourhood")
+    parts["context_box"] = box
+    return box
+
+
+def set_context_tick(parts, shown):
+    """The Show neighbourhood tick as this document has it."""
+    if parts is None or parts.get("context_box") is None:
+        return
+    parts["_setting_context"] = True
+    try:
+        parts["context_box"].Checked = bool(shown)
+    finally:
+        parts["_setting_context"] = False
+
+
+def _auto_box(actions, parts):
+    """Check after every edit: off by default (the Check button checks; Ben, 2026-10-21), remembered in the
+    document; set from the document (set_auto_tick) before any change counts."""
+    box = ef.CheckBox()
+    box.Text = logic.AUTO_CHECK_LABEL
+    box.ToolTip = logic.AUTO_CHECK_TIP
+    box.Checked = False
+
+    def changed(s, e):
+        if not parts.get("_setting_auto"):          # set from the document: not a change
+            actions["auto_check"](bool(box.Checked))
+
+    box.CheckedChanged += logic.guard(changed, "turn checking after every edit on or off")
+    parts["auto_box"] = box
+    return box
+
+
+def set_auto_tick(parts, on):
+    """The Check after every edit tick as this document has it (and what the header says while out of date)."""
+    if parts is None:
+        return
+    parts["auto_check"] = bool(on)
+    if parts.get("auto_box") is None:
+        return
+    parts["_setting_auto"] = True
+    try:
+        parts["auto_box"].Checked = bool(on)
+    finally:
+        parts["_setting_auto"] = False
 
 
 def set_massing_tick(parts, hidden):
@@ -513,8 +574,9 @@ def _header(parts, view, error, out_of_date):
         h.AddRow(row(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
                      button("Retry", a["retry"])))
         h.AddRow(_wide(error, size=11))
-    elif out_of_date:
-        h.AddRow(_wide("Checking…", bold=True, size=15))
+    elif out_of_date:                      # greyed rows below; a check on its way, or press Check
+        h.AddRow(_wide(logic.out_of_date_line(parts.get("auto_check"), parts.get("checked_before", True)), bold=True,
+                       size=15))
     else:
         h.AddRow(_wide((view or {}).get("summary") or "No check yet", bold=True, size=15))
     draft, lot, grade = lines["below"]
@@ -523,7 +585,7 @@ def _header(parts, view, error, out_of_date):
     h.AddRow(_wide(grade, size=11))        # button beside a long line ran off the panel
     if head.get("main"):                   # several buildings: which is measured, and a way to change it
         h.AddRow(_wide(head["main"], size=11))
-    buttons = [button("Edit site…", a["edit_site"])]
+    buttons = [button("Check", a["check"]), button("Edit site…", a["edit_site"])]
     if head.get("main"):
         buttons.append(button("Main building…", a["main"]))
     if "Pick survey lot lines…" in (head.get("actions") or []):

@@ -91,6 +91,7 @@ Tick boxes:
 
 - **Hide starting house**: hides the starting house's layers. Hidden, it is still checked.
 - **Show on-screen labels**: labels each yard and lot edge in the model, off by default.
+- **Show neighbourhood**: the parcels, streets and building footprints around a looked-up lot, on by default. A drawing only: the check never measures it.
 - **Show buildable envelope**: shows or hides the blue envelope.
 
 In the model, **red** is the part of the building that does not comply; **amber** is the part a rule that needs
