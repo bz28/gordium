@@ -132,9 +132,9 @@ def plan(part) -> Polygon:
     if part["kind"] == "roof":
         p0, p1, p2, p3 = part["corners"]
         ux, uy, _ = _unit(p0, p1)
-        o = part["over"]
-        return Polygon([(p0[0] - o * ux, p0[1] - o * uy), (p1[0] + o * ux, p1[1] + o * uy),
-                        (p2[0] + o * ux, p2[1] + o * uy), (p3[0] - o * ux, p3[1] - o * uy)])
+        o, o2 = part["over"], part.get("over2", part["over"])        # each eave its own depth
+        return Polygon([(p0[0] - o * ux, p0[1] - o * uy), (p1[0] + o2 * ux, p1[1] + o2 * uy),
+                        (p2[0] + o2 * ux, p2[1] + o2 * uy), (p3[0] - o * ux, p3[1] - o * uy)])
     return Polygon(part["outline"])
 
 
@@ -147,11 +147,13 @@ def roof_heights(part):
     if part["kind"] == "mansard":
         return part["z1"], part["z1"], part["z1"]
     _, _, width = _unit(part["corners"][0], part["corners"][1])
-    base, ridge, over = part["base"], part["ridge"], part["over"]
+    base, ridge = part["base"], part["ridge"]
     edge = base + part["fascia"]
-    run = width / 2 + over
-    plate = edge + over * (ridge - edge) / run if run > 0 else edge
-    return ridge, (min(base, edge, plate) + ridge) / 2, (max(base, edge, plate) + ridge) / 2
+    plates = []
+    for over in (part["over"], part.get("over2", part["over"])):        # each eave (they may differ in depth)
+        run = width / 2 + over
+        plates.append(edge + over * (ridge - edge) / run if run > 0 else edge)
+    return ridge, (min(base, edge, *plates) + ridge) / 2, (max(base, edge, *plates) + ridge) / 2
 
 
 def _dist(shape, segments):
@@ -325,6 +327,76 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
             "stories_typed_short": stories_typed_short, "stories_basement": stories_basement,
             "where": {"main": _where(full, lot_poly), **{",".join(p["id"] for p in g): _where(_union(g), lot_poly)
                                                          for g in detached}}}
+
+
+# ---- two side minimums that differ (R-3a, R-2b: 10 ft one side, 5 ft the other) ----------------------------------
+# R-1b's two side minimums are equal, so which side carries which never matters for it, and the side yards above
+# are one number (the nearer side). That is why this oracle missed #21 review round 22's P0 (the eaves side yards
+# sorted narrower-first apart from the walls). For a district whose two minimums differ, each side keeps its own
+# numbers here: its walls and its eaves, to its own lot line.
+
+def side_worlds(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE, eaves_confirmed=False, critical=()):
+    """Every way the two side yards can be, each side to its own lot line(s): [({side: to the walls}, {side: to the
+    eaves})]. Two readings of what reaches past the walls (an eave: the yard to the walls, the eave yard to the full
+    outline; not an eave: both to the full outline), and on a tax-map lot with `tolerance` each side line up to
+    tolerance_ft off either way (its walls' and its eaves' yards moving together). None when the design isn't one
+    this covers (not two side lines, or a building apart from the main one). `eaves_confirmed`: the architect has
+    said what reaches past the walls is an eave (only the first reading). `critical`: the distances where the rule
+    turns (a side able to carry the larger minimum; an eave at a limit): each side's shifts include the ones that
+    put its walls or its eaves exactly there, and a hair short of it, so a world between the sampled shifts is never
+    missed (#22 review round 1: walls 9.25 ft on the tax map reach 10 ft at +0.75, where the eave fails)."""
+    lot = design["lot"]
+    main, detached = main_and_detached(design)
+    if len(lot["sides"]) != 2 or detached or lot.get("unsure") or lot.get("corner"):
+        return None
+    full = _union(main)
+    walls = _union([p for p in main if p["kind"] not in ROOF_KINDS | {"dormer"}])
+    if walls.is_empty or any(p["kind"] == "dormer" for p in main):
+        return None
+    names = sorted(lot["sides"])
+    tol = tolerance_ft if tolerance and not lot["surveyed"] else 0.0
+    out = []
+    for to_walls in (walls,) if eaves_confirmed else (walls, full):     # what reaches past the walls an eave, or not
+        w = {n: _dist(to_walls, lot["sides"][n]) for n in names}
+        e = {n: _dist(full, lot["sides"][n]) for n in names}
+        shifts = {}
+        for n in names:
+            at = {-tol, -tol / 2, 0.0, tol / 2, tol}
+            if tol:
+                for c in critical:
+                    for v in (w[n], e[n]):
+                        at |= {x for x in (c - v, c - v - 1e-4) if -tol <= x <= tol}
+            shifts[n] = sorted(at)
+        a, b = names
+        for da in shifts[a]:
+            for db in shifts[b]:
+                d = {a: da, b: db}
+                out.append(({n: w[n] + d[n] for n in names}, {n: e[n] + d[n] for n in names}))
+    return out
+
+
+def unequal_sides_eaves(walls: dict, eaves: dict, small: float, large: float) -> str:
+    """§325-18B with two side minimums that differ, in one world: PASS, FAIL or UNDECIDED. A side can carry the
+    larger minimum only if its walls are at least that far from its line; if both can, or neither, either side may.
+    Each way, every eave is at most 2 ft into its own side's required yard. PASS if every way passes, FAIL if none
+    does, else UNDECIDED (which side is meant is the architect's)."""
+    sides = sorted(walls)
+    ways = [s for s in sides if walls[s] >= large - EPS]
+    if len(ways) != 1:
+        ways = sides
+    ok = [all(eaves[s] >= (large if s == big else small) - 2 - EPS for s in sides) for big in ways]
+    return PASS if all(ok) else FAIL if not any(ok) else UNDECIDED
+
+
+def unequal_sides_verdict(design, small: float, large: float, tolerance=False, eaves_confirmed=False) -> str | None:
+    """The eaves rule for two side minimums that differ over every world (side_worlds): PASS only if it passes in
+    every one, FAIL only if it fails in every one, else UNDECIDED. None when side_worlds doesn't cover the design."""
+    worlds = side_worlds(design, tolerance, eaves_confirmed=eaves_confirmed,
+                         critical=(large, large - 2, small - 2))
+    if worlds is None:
+        return None
+    got = {unequal_sides_eaves(w, e, small, large) for w, e in worlds}
+    return got.pop() if len(got) == 1 else UNDECIDED
 
 
 def _world(m, k):

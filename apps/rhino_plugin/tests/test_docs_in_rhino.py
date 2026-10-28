@@ -87,3 +87,26 @@ class TestDocs:
             except Exception:
                 pass
         return False
+
+
+SAMPLE_ADDRESS = "106 Ithaca Rd, Ithaca, NY 14850"
+
+
+def look_up_106(g, start):
+    """The start flow on an empty file as the architect does it now (Ben, 2026-10-27: no sample prefilled): type
+    106 Ithaca Rd and press Look up (its recorded answers, no live call), then the scripted box ticks and draws.
+    `start` (g.gordium_check or g.gordium_start) runs with these picks; the script's own picks come after, and
+    its settings are put back after."""
+    keys = ("box_picks", "box_overrides", "lookup_fixture")
+    kept = {k: g.STATE.get(k) for k in keys}
+    g.STATE.update(box_picks=["lookup"] + list(kept["box_picks"] or []),
+                   box_overrides=dict({"address": SAMPLE_ADDRESS}, **(kept["box_overrides"] or {})),
+                   lookup_fixture=kept["lookup_fixture"] or "106_ithaca_rd")
+    try:
+        return start()
+    finally:
+        for k in keys:
+            if kept[k] is None:
+                g.STATE.pop(k, None)
+            else:
+                g.STATE[k] = kept[k]

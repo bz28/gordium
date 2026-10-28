@@ -13,6 +13,8 @@ even one rounded into several short pieces) are an open question, never measured
 import math
 
 TURN_LIMIT_DEG = 30.0       # street lines turning more than this in all, their street unknown: one street or two?
+NOISE_FT = 0.05             # a stretch of lot line shorter than this (0.6 in) has no direction of its own: a corner
+                            # point drawn twice, or float noise, never reads as a turn (street-run review round 5)
 
 
 def _near(p, q, tolerance):
@@ -46,7 +48,16 @@ def heading_change(lines, tolerance=0.5):
     points = chain(lines, tolerance)
     if points is None:
         return None
-    steps = [(b[0] - a[0], b[1] - a[1]) for a, b in zip(points, points[1:]) if math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-9]
+    # the direction is read over stretches of at least NOISE_FT (a 0.005 ft piece pointing anywhere read a
+    # straight street as turning 53°); a turn between longer stretches is still all there
+    ends, anchor = [], points[0]
+    for p in points[1:]:
+        if math.hypot(p[0] - anchor[0], p[1] - anchor[1]) >= NOISE_FT:
+            ends.append((anchor, p))
+            anchor = p
+    if anchor != points[-1]:                    # what is left at the end goes on the last stretch
+        ends = ends[:-1] + [(ends[-1][0], points[-1])] if ends else [(points[0], points[-1])]
+    steps = [(b[0] - a[0], b[1] - a[1]) for a, b in ends if math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-9]
     run, low, high = 0.0, 0.0, 0.0
     for u, v in zip(steps, steps[1:]):
         turn = math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]))
@@ -71,12 +82,22 @@ def street_verdict(lines, ids=None, tolerance=0.5):
     named = {_norm(i) for i in ids or [] if i}
     if len(named) > 1:
         return "two", None
-    if named and len([i for i in ids if i]) == len(lines or []):
+    # one street by a real name; Gordium's own "Street N" (a run the architect picked, nobody named) only keeps
+    # streets apart, never vouches for one: its lines are still read from the drawing (a curved edge's swing
+    # counts here; the box only saw its ends: street ids review, D1)
+    if named and len([i for i in ids if i]) == len(lines or []) and not any(generated_id(i) for i in ids if i):
         return "one", None
     turn = heading_change(lines, tolerance)
     if turn is None or turn > TURN_LIMIT_DEG:
         return "unsure", turn
     return "one", turn
+
+
+def generated_id(name):
+    """Whether a street id is Gordium's own ("Street 1", "Street 2"... given to a run nobody named), not a name, by
+    the one comparison street_verdict uses (case, dots and spaces ignored: "street 2." too)."""
+    import re
+    return isinstance(name, str) and re.fullmatch(r"street \d+", _norm(name)) is not None
 
 
 def same_street(a, b):

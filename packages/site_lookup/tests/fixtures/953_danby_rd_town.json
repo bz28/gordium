@@ -1,0 +1,732 @@
+{
+ "address": "953 Danby Rd, Ithaca, NY 14850",
+ "captured": "2026-10-20",
+ "answers": [
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "953 Danby Rd, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": [
+     {
+      "address": "953 Danby Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 842688.213420024,
+       "y": 882490.1915980408
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842405.1599512843,
+       "ymin": 882125.5115257615,
+       "xmax": 842971.2583089382,
+       "ymax": 882854.8749147296
+      }
+     },
+     {
+      "address": "953 Danby Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 842688.213420024,
+       "y": 882490.1915980408
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842405.1599512843,
+       "ymin": 882125.5115257615,
+       "xmax": 842971.2583089382,
+       "ymax": 882854.8749147296
+      }
+     },
+     {
+      "address": "953 Danby Road, South Hill, NY, 14850",
+      "location": {
+       "x": 842688.213420024,
+       "y": 882490.1915980408
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "South Hill",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842405.1599512843,
+       "ymin": 882125.5115257615,
+       "xmax": 842971.2583089382,
+       "ymax": 882854.8749147296
+      }
+     },
+     {
+      "address": "953 Danby Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 842458.4278018227,
+       "y": 882387.3350069618
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842175.3696436263,
+       "ymin": 882022.6576602041,
+       "xmax": 842741.477380305,
+       "ymax": 882752.0155980953
+      }
+     },
+     {
+      "address": "953 Danby Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 842458.4278018227,
+       "y": 882387.3350069618
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842175.3696436263,
+       "ymin": 882022.6576602041,
+       "xmax": 842741.477380305,
+       "ymax": 882752.0155980953
+      }
+     },
+     {
+      "address": "953 Danby Road, South Hill, NY, 14850",
+      "location": {
+       "x": 842458.4278018227,
+       "y": 882387.3350069618
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "South Hill",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842175.3696436263,
+       "ymin": 882022.6576602041,
+       "xmax": 842741.477380305,
+       "ymax": 882752.0155980953
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_parcels",
+   "params": {
+    "geometry": "{\"x\": 842688.213420024, \"y\": 882490.1915980408}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "SWIS,PRINT_KEY,MUNI_NAME,CITYTOWN_NAME,PARCEL_ADDR"
+   },
+   "body": {
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "SWIS",
+      "alias": "SWIS",
+      "type": "esriFieldTypeString",
+      "length": 10
+     },
+     {
+      "name": "PRINT_KEY",
+      "alias": "PRINT_KEY",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "MUNI_NAME",
+      "alias": "MUNI_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "CITYTOWN_NAME",
+      "alias": "CITYTOWN_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "PARCEL_ADDR",
+      "alias": "PARCEL_ADDR",
+      "type": "esriFieldTypeString",
+      "length": 255
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "SWIS": "503089",
+       "PRINT_KEY": "41.-1-30.2",
+       "MUNI_NAME": "Ithaca, Town",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "953 Danby Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          842683.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882485.1915980408
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "SWIS": "503089",
+       "PRINT_KEY": "41.-1-30.2/993",
+       "MUNI_NAME": "Ithaca, Town",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "953 Danby Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          842683.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882485.1915980408
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "SWIS": "503089",
+       "PRINT_KEY": "41.-1-30.2/991",
+       "MUNI_NAME": "Ithaca, Town",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "953 Danby Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          842683.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882485.1915980408
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "SWIS": "503089",
+       "PRINT_KEY": "41.-1-30.2/992",
+       "MUNI_NAME": "Ithaca, Town",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "953 Danby Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          842683.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882485.1915980408
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "953 Danby Rd, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": [
+     {
+      "address": "953 Danby Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 842688.213420024,
+       "y": 882490.1915980408
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842405.1599512843,
+       "ymin": 882125.5115257615,
+       "xmax": 842971.2583089382,
+       "ymax": 882854.8749147296
+      }
+     },
+     {
+      "address": "953 Danby Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 842688.213420024,
+       "y": 882490.1915980408
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842405.1599512843,
+       "ymin": 882125.5115257615,
+       "xmax": 842971.2583089382,
+       "ymax": 882854.8749147296
+      }
+     },
+     {
+      "address": "953 Danby Road, South Hill, NY, 14850",
+      "location": {
+       "x": 842688.213420024,
+       "y": 882490.1915980408
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "South Hill",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842405.1599512843,
+       "ymin": 882125.5115257615,
+       "xmax": 842971.2583089382,
+       "ymax": 882854.8749147296
+      }
+     },
+     {
+      "address": "953 Danby Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 842458.4278018227,
+       "y": 882387.3350069618
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842175.3696436263,
+       "ymin": 882022.6576602041,
+       "xmax": 842741.477380305,
+       "ymax": 882752.0155980953
+      }
+     },
+     {
+      "address": "953 Danby Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 842458.4278018227,
+       "y": 882387.3350069618
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842175.3696436263,
+       "ymin": 882022.6576602041,
+       "xmax": 842741.477380305,
+       "ymax": 882752.0155980953
+      }
+     },
+     {
+      "address": "953 Danby Road, South Hill, NY, 14850",
+      "location": {
+       "x": 842458.4278018227,
+       "y": 882387.3350069618
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "953",
+       "StPreDir": "",
+       "StName": "Danby",
+       "StType": "Road",
+       "City": "South Hill",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 842175.3696436263,
+       "ymin": 882022.6576602041,
+       "xmax": 842741.477380305,
+       "ymax": 882752.0155980953
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_parcels",
+   "params": {
+    "geometry": "{\"x\": 842688.213420024, \"y\": 882490.1915980408}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "SWIS,PRINT_KEY,MUNI_NAME,CITYTOWN_NAME,PARCEL_ADDR"
+   },
+   "body": {
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "SWIS",
+      "alias": "SWIS",
+      "type": "esriFieldTypeString",
+      "length": 10
+     },
+     {
+      "name": "PRINT_KEY",
+      "alias": "PRINT_KEY",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "MUNI_NAME",
+      "alias": "MUNI_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "CITYTOWN_NAME",
+      "alias": "CITYTOWN_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "PARCEL_ADDR",
+      "alias": "PARCEL_ADDR",
+      "type": "esriFieldTypeString",
+      "length": 255
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "SWIS": "503089",
+       "PRINT_KEY": "41.-1-30.2",
+       "MUNI_NAME": "Ithaca, Town",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "953 Danby Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          842683.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882485.1915980408
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "SWIS": "503089",
+       "PRINT_KEY": "41.-1-30.2/993",
+       "MUNI_NAME": "Ithaca, Town",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "953 Danby Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          842683.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882485.1915980408
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "SWIS": "503089",
+       "PRINT_KEY": "41.-1-30.2/991",
+       "MUNI_NAME": "Ithaca, Town",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "953 Danby Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          842683.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882485.1915980408
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "SWIS": "503089",
+       "PRINT_KEY": "41.-1-30.2/992",
+       "MUNI_NAME": "Ithaca, Town",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "953 Danby Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          842683.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882485.1915980408
+         ],
+         [
+          842693.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882495.1915980408
+         ],
+         [
+          842683.213420024,
+          882485.1915980408
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "live_status": "outside_city",
+ "trimmed": "state_parcels outlines replaced by 10 ft squares at the address point (only SWIS is tested)"
+}

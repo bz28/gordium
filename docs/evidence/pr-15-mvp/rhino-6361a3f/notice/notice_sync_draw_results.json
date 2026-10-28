@@ -1,0 +1,233 @@
+{
+ "claims": {
+  "1 moved 5 ft left and checked: the notice says the side yard no longer complies, drawn compact and clear of the model in the framed Top view": {
+   "ok": true,
+   "detail": {
+    "held": [
+     "Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ],
+    "drawn": true,
+    "stale": false,
+    "box": [
+     12,
+     34,
+     341.8,
+     76
+    ],
+    "model": [
+     158.27456532680648,
+     110.36363636363632,
+     497.7254346731935,
+     557.6363636363636
+    ],
+    "view": [
+     656,
+     668
+    ],
+    "room": true,
+    "complete": true
+   }
+  },
+  "1b zoomed in tight: the notice is compact and covers none of the model, or isn't drawn (the panel says it)": {
+   "ok": true,
+   "detail": {
+    "notice": null,
+    "model": [
+     -92.4825138114179,
+     -558.3882500856344,
+     1158.6511012455396,
+     1090.1505952165394
+    ],
+    "view": [
+     656,
+     668
+    ],
+    "panel": "\u2715 Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+   }
+  },
+  "2 moved back and checked: no notice left of the earlier model": {
+   "ok": true,
+   "detail": {
+    "held": null,
+    "drawn": false,
+    "stale": false,
+    "box": null,
+    "model": [
+     158.27456532680648,
+     110.36363636363632,
+     497.7254346731935,
+     557.6363636363636
+    ],
+    "view": [
+     656,
+     668
+    ],
+    "room": false,
+    "complete": true
+   }
+  },
+  "3 the model changed since the check: the notice isn't drawn over it": {
+   "ok": true,
+   "detail": {
+    "held": null,
+    "drawn": false,
+    "stale": true,
+    "box": null,
+    "model": [
+     158.27456532680648,
+     110.36363636363632,
+     497.7254346731935,
+     557.6363636363636
+    ],
+    "view": [
+     656,
+     668
+    ],
+    "room": false,
+    "complete": true,
+    "before_edit": {
+     "held": [
+      "Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+     ],
+     "drawn": true,
+     "stale": false,
+     "box": [
+      12,
+      34,
+      341.8,
+      76
+     ],
+     "model": [
+      158.27456532680648,
+      110.36363636363632,
+      497.7254346731935,
+      557.6363636363636
+     ],
+     "view": [
+      656,
+      668
+     ],
+     "room": true,
+     "complete": true
+    }
+   }
+  },
+  "4 another document in front: no notice left": {
+   "ok": true,
+   "detail": {
+    "held": null,
+    "held_before": [
+     "Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   }
+  }
+ },
+ "1": {
+  "held": [
+   "Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+  ],
+  "drawn": true,
+  "stale": false,
+  "box": [
+   12,
+   34,
+   341.8,
+   76
+  ],
+  "model": [
+   158.27456532680648,
+   110.36363636363632,
+   497.7254346731935,
+   557.6363636363636
+  ],
+  "view": [
+   656,
+   668
+  ],
+  "room": true,
+  "complete": true
+ },
+ "1b": {
+  "notice": null,
+  "model": [
+   -92.4825138114179,
+   -558.3882500856344,
+   1158.6511012455396,
+   1090.1505952165394
+  ],
+  "view": [
+   656,
+   668
+  ],
+  "panel": "\u2715 Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+ },
+ "2": {
+  "held": null,
+  "drawn": false,
+  "stale": false,
+  "box": null,
+  "model": [
+   158.27456532680648,
+   110.36363636363632,
+   497.7254346731935,
+   557.6363636363636
+  ],
+  "view": [
+   656,
+   668
+  ],
+  "room": false,
+  "complete": true
+ },
+ "3": {
+  "held": null,
+  "drawn": false,
+  "stale": true,
+  "box": null,
+  "model": [
+   158.27456532680648,
+   110.36363636363632,
+   497.7254346731935,
+   557.6363636363636
+  ],
+  "view": [
+   656,
+   668
+  ],
+  "room": false,
+  "complete": true,
+  "before_edit": {
+   "held": [
+    "Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+   ],
+   "drawn": true,
+   "stale": false,
+   "box": [
+    12,
+    34,
+    341.8,
+    76
+   ],
+   "model": [
+    158.27456532680648,
+    110.36363636363632,
+    497.7254346731935,
+    557.6363636363636
+   ],
+   "view": [
+    656,
+    668
+   ],
+   "room": true,
+   "complete": true
+  }
+ },
+ "4": {
+  "held": null,
+  "held_before": [
+   "Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+  ]
+ },
+ "ok": true,
+ "done": true
+}

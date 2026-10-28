@@ -1,0 +1,233 @@
+{
+ "done": true,
+ "is_locked": [
+  [
+   "sub set",
+   {
+    "sub_locked": true,
+    "sub_own": false
+   }
+  ],
+  [
+   "top locked",
+   {
+    "sub_locked": true,
+    "sub_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": true
+   }
+  ],
+  [
+   "top unlocked",
+   {
+    "sub_locked": false,
+    "sub_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": false
+   }
+  ]
+ ],
+ "persistent_then_is_locked": [
+  [
+   "sub set",
+   {
+    "sub_locked": true,
+    "sub_own": false
+   }
+  ],
+  [
+   "top locked",
+   {
+    "sub_locked": true,
+    "sub_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": true
+   }
+  ],
+  [
+   "top unlocked",
+   {
+    "sub_locked": false,
+    "sub_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": false
+   }
+  ]
+ ],
+ "persistent_alone": [
+  [
+   "sub set",
+   {
+    "sub_locked": false,
+    "sub_own": false
+   }
+  ],
+  [
+   "top locked",
+   {
+    "sub_locked": true,
+    "sub_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": true
+   }
+  ],
+  [
+   "top unlocked",
+   {
+    "sub_locked": false,
+    "sub_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": false
+   }
+  ]
+ ],
+ "relock": [
+  [
+   "sub set",
+   {
+    "sub_locked": false,
+    "sub_own": false
+   }
+  ],
+  [
+   "top locked, sub's own lock set",
+   {
+    "sub_locked": true,
+    "sub_own": true
+   }
+  ],
+  [
+   "top unlocked",
+   {
+    "sub_locked": true,
+    "sub_own": true
+   }
+  ],
+  [
+   "top locked",
+   {
+    "sub_locked": true,
+    "sub_own": true
+   },
+   {
+    "ran": true,
+    "top_locked": true
+   }
+  ],
+  [
+   "top unlocked",
+   {
+    "sub_locked": true,
+    "sub_own": true
+   },
+   {
+    "ran": true,
+    "top_locked": false
+   }
+  ]
+ ],
+ "nested_is_locked": [
+  [
+   "sub set",
+   {
+    "sub_locked": true,
+    "sub_own": false,
+    "mid_locked": false,
+    "mid_own": false
+   }
+  ],
+  [
+   "top locked",
+   {
+    "sub_locked": true,
+    "sub_own": false,
+    "mid_locked": true,
+    "mid_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": true
+   }
+  ],
+  [
+   "top unlocked",
+   {
+    "sub_locked": false,
+    "sub_own": false,
+    "mid_locked": false,
+    "mid_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": false
+   }
+  ]
+ ],
+ "nested_relock": [
+  [
+   "sub set",
+   {
+    "sub_locked": false,
+    "sub_own": false,
+    "mid_locked": false,
+    "mid_own": false
+   }
+  ],
+  [
+   "top locked, sub's own lock set",
+   {
+    "sub_locked": true,
+    "sub_own": true,
+    "mid_locked": true,
+    "mid_own": false
+   }
+  ],
+  [
+   "top unlocked",
+   {
+    "sub_locked": true,
+    "sub_own": true,
+    "mid_locked": false,
+    "mid_own": false
+   }
+  ],
+  [
+   "top locked",
+   {
+    "sub_locked": true,
+    "sub_own": true,
+    "mid_locked": true,
+    "mid_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": true
+   }
+  ],
+  [
+   "top unlocked",
+   {
+    "sub_locked": true,
+    "sub_own": true,
+    "mid_locked": false,
+    "mid_own": false
+   },
+   {
+    "ran": true,
+    "top_locked": false
+   }
+  ]
+ ]
+}
