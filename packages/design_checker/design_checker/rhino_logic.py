@@ -3290,8 +3290,8 @@ def drop_pending(facts, saved_ui):
 def box_opened(saved_ui, facts):
     """The box's choices as a box opens over `facts`: the address the lot had then kept for this session
     (`_box_address`, never saved), so typing it back is never a new address (Ben, 2026-10-25)."""
-    return dict(saved_ui or {}, _box_address=(facts or {}).get("address"),
-                _opened_empty=not (facts or {}).get("lot_id"))
+    return dict(saved_ui or {}, _box_address=(facts or {}).get("address"),   # (a new file: no lot and no address
+                _opened_empty=not (facts or {}).get("lot_id") and not (facts or {}).get("address"))   # yet)
 
 
 def start_gate(state, saved_ui):
@@ -3378,17 +3378,32 @@ def save_lookup(store, answer, address=None):
 
 
 def saved_offer(answer, store, address):
-    """The saved lookup to offer for `address` when this lookup failed to reach the services, else None."""
+    """The saved lookup to offer for `address` when this lookup failed to reach the services, else None. Only the
+    same site's: the key is the street address alone, so the town is checked too (same_site_address: "106 Ithaca
+    Rd, Lansing" never gets the City's 106; start-flow sceptic 1, finding 2)."""
     if (answer or {}).get("status") not in LOOKUP_FAILED or not lookup_key(address):
         return None
-    return (store or {}).get(lookup_key(address))
+    copy = (store or {}).get(lookup_key(address))
+    if not copy or not any(same_site_address(address, a) for a in (copy.get("query"), copy.get("address")) if a):
+        return None
+    return copy
 
 
-def as_saved(copy, address):
+def use_saved(offer, offered_for, typed):
+    """The saved lookup as the box's answer, only while the address typed is still the one it was offered for
+    (start-flow sceptic 1, finding 1: retyped, it went in under the new address, as if that had been looked up);
+    else None (the offer is dropped)."""
+    if not offer or not same_site_address(typed or "", offered_for or ""):
+        return None
+    return as_saved(offer)
+
+
+def as_saved(copy):
     """A saved lookup as an answer the box shows like any other, marked: its date on the line the box says, and on
-    every source label ("NYS Tax Parcels Public · saved on 2026-10-27"), so the rows and what Draw saves say so."""
+    every source label ("NYS Tax Parcels Public · saved on 2026-10-27"), so the rows and what Draw saves say so.
+    Its own query, never the address typed now."""
     date = copy.get("checked")
-    return dict(copy, saved_on=date, query=address or copy.get("query"),
+    return dict(copy, saved_on=date,
                 labels={k: v + SAVED_ON.format(date=date) for k, v in (copy.get("labels") or {}).items()})
 
 

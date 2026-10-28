@@ -1068,7 +1068,7 @@ def test_a_found_lookup_is_saved_only_as_far_as_its_sources_allow_and_never_with
     json.dumps(store)                                                  # a plain file
     # a failure, a guide only (the City's outline: never kept) and a saved copy itself are never saved
     for answer in ({"status": "offline"}, dict(found, writes=dict(found["writes"], lot_ring=None)),
-                   logic.as_saved(copy, "106 Ithaca Rd")):
+                   logic.as_saved(copy)):
         assert logic.save_lookup({}, answer, "106 Ithaca Rd") == {}
 
 
@@ -1093,7 +1093,8 @@ def test_the_saved_lookup_is_marked_with_its_date_and_the_district_is_picked_aga
     rows = {r["key"]: r for r in logic.box_rows({"address": "106 Ithaca Rd", "lookup": saved["_lookup"]})}
     assert ("use_saved", "Use the lookup saved on " + date, True) in rows["address"]["actions"]
     # used: shown like a lookup, every label and the line marked with the date; no district suggested
-    facts, saved, ring = logic.preview_lookup(logic.as_saved(copy, "106 Ithaca Rd"), facts, saved, ZONES)
+    facts, saved, ring = logic.preview_lookup(logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Rd"), facts, saved,
+                                              ZONES)
     assert ring == found["writes"]["lot_ring"]
     assert saved["_lookup"]["says"] == logic.SAVED_SAYS.format(address=facts.get("address") or "106 Ithaca Rd",
                                                                date=date)
@@ -1115,5 +1116,32 @@ def test_the_plugin_saves_found_lookups_and_offers_the_saved_one_only_when_offli
     saved = src[src.index("def _saved_lookup("):src.index("def _show_answer(")]
     assert "logic.save_lookup(store, answer, asked)" in saved and "logic.saved_offer(answer, store, asked)" in saved
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
-    assert 'logic.as_saved(offer, facts.get("address"))' in pick
+    assert 'logic.use_saved(saved_ui.pop("_saved_answer", None), saved_ui.pop("_saved_for", None),' in pick
     assert '"pick:use_saved"' in src                                  # the ticks go, as for any lookup
+
+
+def test_a_saved_lookup_is_never_used_for_another_address_or_another_town():
+    """Start-flow sceptic 1: (1) offline at 106, the address retyped to 96, then Use saved: 106's lot went in under
+    "96 Ithaca Rd" as if 96 had been looked up; (2) the key is the street address alone, so "106 Ithaca Rd, Lansing"
+    was offered the City's 106."""
+    found = _found_106()
+    store = logic.save_lookup({}, found, "106 Ithaca Rd")
+    copy = store[logic.lookup_key("106 Ithaca Rd")]
+    assert logic.use_saved(copy, "106 Ithaca Rd", "96 Ithaca Rd") is None                  # retyped: dropped
+    answer = logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Road")
+    assert answer and answer["query"] == copy["query"]                                     # its own query
+    facts, saved, _ = logic.preview_lookup(answer, {"address": "106 Ithaca Rd"}, logic.box_opened({}, {}), ZONES)
+    assert logic.draw_blocked({"address": "96 Ithaca Rd"}, saved) != ""                     # 96 never looked up
+    for other in ("106 Ithaca Rd, Lansing, NY 14882", "106 Ithaca Rd, Town of Ithaca"):
+        assert logic.saved_offer({"status": "offline"}, store, other) is None, other
+    assert logic.saved_offer({"status": "offline"}, store, "106 Ithaca Rd, Ithaca, NY 14850") is copy
+
+
+def test_edit_site_on_a_drawn_file_whose_lot_is_gone_is_not_a_new_file():
+    """Sceptic 1 (P2): the gate is for a new file only; a drawn file (its address saved) with its lot curve deleted
+    keeps "Draw my lot…"."""
+    opened = logic.box_opened({}, {"address": SAMPLE})
+    state = logic.start_gate({"address": SAMPLE, "lot_missing": True}, opened)
+    assert not state["needs_lookup"]
+    rows = {r["key"]: r for r in logic.box_rows(state)}
+    assert "draw_lot" in [a for a, _, _ in rows["lot"]["actions"]]
