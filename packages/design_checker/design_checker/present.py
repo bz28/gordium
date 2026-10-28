@@ -180,7 +180,15 @@ def _evaluate(text: str, values: dict):
 
 
 def _plain_rhs(node, values: dict, measured: dict) -> str:
-    """The limit with each measurement's value written in: max(min(25% × lot depth 90'-0", 50'-0"), 20'-0")."""
+    """The limit with each measurement's value written in: max(min(25% × lot depth 90'-0", 50'-0"), 20'-0"). A
+    choice the values decide ("6000 if use == ... else 7500" for the stated use, "7000 if conversion else 6000") is
+    written as the branch taken; one they don't decide is written whole."""
+
+    class Fold(ast.NodeTransformer):
+        def visit_IfExp(self, n):
+            self.generic_visit(n)
+            taken = _evaluate(ast.unparse(n.test), values)
+            return n.body if taken is True else n.orelse if taken is False else n
 
     class Show(ast.NodeTransformer):
         def visit_Name(self, n):
@@ -190,7 +198,7 @@ def _plain_rhs(node, values: dict, measured: dict) -> str:
             shown = value_text(values.get(n.id), m.get("unit") or "")
             return ast.Name(id=f"{n.id.replace('_', ' ')} {shown}")
 
-    text = ast.unparse(Show().visit(ast.parse(ast.unparse(node), mode="eval")))
+    text = ast.unparse(Show().visit(Fold().visit(ast.parse(ast.unparse(node), mode="eval"))))
     text = re.sub(r"\b0\.(\d+) \* ", lambda m: f"{int(m.group(1)) * 10 ** (2 - len(m.group(1)))}% × ", text)
     return text.replace(" * ", " × ")
 
@@ -206,7 +214,7 @@ def _is_chart(source: dict, documents: dict) -> bool:
 
 
 def _footnotes(text: str) -> list[str]:
-    return re.findall(r"\[fn(\d+)\]", text) + re.findall(r"^\((\d+)\)", text)
+    return re.findall(r"\[fn(\d+)\]", text) + re.findall(r"^(?:NOTES:\s*)?\((\d+)\)", text)
 
 
 # a chart row in the code's words, by how the chart's row label begins: the same row is cited the same way
@@ -229,10 +237,16 @@ def citation(source: dict, item_name: str, district: str, section_of, documents:
     chart (a footnote line: "…, note 16"); "§325-8A, p.25" for the law."""
     if _is_chart(source, documents):
         quote = " ".join(str(source.get("quote", "")).split())
-        if re.match(r"^\(\d+\)", quote):                  # the footnote itself, at the bottom of the page
+        # the footnote itself, at the bottom of the page; or a district's column heading carrying one ("RU [fn3]
+        # Regulations": its note, one name whichever rule cites it, PR2 review round 6)
+        if re.match(r"^(NOTES:\s*)?\(\d+\)", quote) or re.match(r"^\S+ \[fn[\d,]+\] Regulations$", quote):
             return ", ".join(["§325-8", "District Regulations Chart", district] +
                              [f"note {n}" for n in _footnotes(quote)])
-        row = _chart_row((source.get("cell") or {}).get("row") or quote) or item_name
+        # a row of the use list (chart p.2: a use and its marks, • / SP / - per district) is the Use column whichever
+        # rule cites it, so one link has one name; a heading or a note on that page is not (PR2 review round 5)
+        uses = (source.get("cell") or {}).get("section") in ("Primary Uses", "Accessory Uses") or (
+            source.get("page") == 2 and re.search(r"(?:(?:•|SP|-)(?:\[fn[\d,]+\])?\s+){4,}", quote + " ") is not None)
+        row = _chart_row((source.get("cell") or {}).get("row") or quote) or ("Use" if uses else item_name)
         return ", ".join(["§325-8", "District Regulations Chart", district, f"{row} column"])
     lines = source.get("lines") or [None]
     where = section_of(source.get("file"), source.get("page"), lines[0]) if lines[0] else ""
@@ -796,8 +810,11 @@ def _law_limit_way(check: str, values: dict, node):
     return best
 
 
-def _worst_reading(node, measured: dict, values: dict):
-    """(worst reading, required) as text when the comparison fails under one of the measurement's readings."""
+def _worst_reading(node, measured: dict, values: dict, review=()):
+    """(worst reading, required) as text when the comparison fails under one of the measurement's readings, and the
+    rule says fail there: none of its review conditions (`review`: the rule's review_when) holds at that reading
+    (RU's note 3: two primary buildings on a lot over 60,000 sf fail the check but need review for the approvals,
+    never "does not comply": PR2 review round 1)."""
     m = node.left.id
     readings = [r["value"] for r in (measured.get(m) or {}).get("readings") or [] if r.get("value") is not None]
     sign = SIGNS[type(node.ops[0])]
@@ -806,6 +823,8 @@ def _worst_reading(node, measured: dict, values: dict):
     worst = min(readings) if sign in ("≥", ">") else max(readings)
     trial = dict(values, **{m: worst})
     if _evaluate(ast.unparse(node), trial) is not False:
+        return None
+    if any(_evaluate(r["when"], trial) is not False for r in review):
         return None
     shown = _display(*_numbers(node, trial, measured, ""))
     return shown[0], shown[1]
@@ -1246,7 +1265,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     allowed = _evaluate(ast.unparse(node.comparators[0]), values)
                     if isinstance(allowed, (int, float)):
                         required = _pct(allowed / values["lot_area"] * 100, _toward(numbers[4], False), 1)
-                worst = _worst_reading(node, measured, values)
+                worst = _worst_reading(node, measured, values, rule.get("review_when") or ())
                 # (the overhang question in coverage is settled in PR 18: coverage_seen_from_above, so
                 # term-index's "both ways" words for it have nothing left to say)
                 if worst is not None:                   # say the bad one first: "probably fine" it isn't

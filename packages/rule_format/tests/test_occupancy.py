@@ -198,7 +198,7 @@ def test_a_floor_area_is_kept_as_typed_never_rounded():
     size = rule("R-1b", "home_occupation_size")
     assert outcome(size, {"use": "one_family_detached", "home_occupation": True, **facts}, USES) == "fail"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert '_square_feet(prompt) if kind == "area"' in rhino and "def _square_feet(prompt):" in rhino and "Rhino.Input.Custom.GetNumber()" in rhino
+    assert '_square_feet(prompt) if kind in ("area", "length")' in rhino and "def _square_feet(prompt):" in rhino and "Rhino.Input.Custom.GetNumber()" in rhino
 
 
 def test_the_owner_question_is_about_the_house_and_an_adu_on_the_lot_needs_review():
