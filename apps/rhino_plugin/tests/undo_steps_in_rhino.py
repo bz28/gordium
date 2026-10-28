@@ -23,9 +23,9 @@ Then, observed only (out.json "two_in_a_row", not a claim): two panel changes in
 one _Undo, which records it takes back. Last, the control: an edit and an action deliberately in one record; its
 claim passes only if one _Undo takes the edit back too (so the claims above can tell a merged step from a good one).
 Writes <temp>/gordium_undo_steps/out.json ("done": true at the end); the command line says which claims fail.
-Run from Rhino's own Run Python Script (or by a person), not through rhinocode: a script rhinocode runs is itself
-inside a command, and Rhino then ignores its _Undo (2026-10-28: every "undone" list empty, the "undone", "only its
-own record" and "checked again" claims all failing, while every "one step" and "nothing else" claim passed)."""
+Run through rhinocode on 2026-10-28, its _Undo took nothing back (every "undone" list empty, so the "undone", "only
+its own record" and "checked again" claims failed, while every "one step" and "nothing else" claim passed); why is
+not known yet (the script was not inside a command), so those claims are judged by a person's Cmd+Z for now."""
 import json
 import os
 import sys
