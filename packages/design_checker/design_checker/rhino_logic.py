@@ -2257,7 +2257,13 @@ def lookup_fields(state):
             "corner_lot": state.get("corner_lot"), "doubts": dict(state.get("doubts") or {})}
 
 
-def ticks_after_cancel(before_ticks, before_fields, state):
+def box_ticks(state):
+    """The ticks and sources the start box keeps across picks, as `state` has them (_box_loop's `ticked`)."""
+    return {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
+                                  "corner_source", "checked") if k in state}
+
+
+def ticks_after_cancel(before_ticks, before_fields, state, shown=None):
     """The start box's ticks and sources after Cancel lookup. The box and its dropdowns stay usable while a lookup
     runs, so the architect may have changed the district, the use, the address or the corner answer meanwhile. Each
     tick or source as it was when Look up was pressed (`before_ticks`, with `before_fields` from lookup_fields) comes
@@ -2266,19 +2272,27 @@ def ticks_after_cancel(before_ticks, before_fields, state):
     and the district changed to R-3a during the lookup leaves R-3a's tick as the box shows it (unticked unless the
     architect ticked it there), so Draw stays off until R-3a itself is confirmed (never a false pass: the rules
     checked would be R-3a's), and its source stays "entered by you", never the lookup's suggestion. "I checked this"
-    comes back for a doubt only if that doubt is as it was. (Review of #32, 2026-10-28.)"""
-    before_ticks, before_fields = before_ticks or {}, before_fields or {}
+    comes back for a doubt only if that doubt is as it was. A tick or source the architect changed while the lookup
+    ran (`shown`: the box's ticks as it first showed them then, box_ticks) is theirs and stays as they left it: an
+    "I checked this" or a district tick they took off is never put back (review of #32, 2026-10-28)."""
+    before_ticks, before_fields, shown = before_ticks or {}, before_fields or {}, shown or {}
     out = {}
     for tick, field in TICK_FIELDS:
         same = field in before_fields and before_fields[field] == state.get(field)
-        source = before_ticks if same else state
+        untouched = tick in shown and shown[tick] == state.get(tick)      # not changed by the architect meanwhile
+        source = before_ticks if same and untouched else state
         if tick in source:
             out[tick] = source[tick]
     if "checked" in before_ticks or "checked" in state:
         was, now = before_fields.get("doubts"), state.get("doubts") or {}
-        then, shown = set(before_ticks.get("checked") or []), set(state.get("checked") or [])
-        out["checked"] = sorted(k for k in then | shown
-                                if k in (then if was is not None and was.get(k) == now.get(k) else shown))
+        then, ticks = set(before_ticks.get("checked") or []), set(state.get("checked") or [])
+        first = set(shown.get("checked") or []) if "checked" in shown else None
+
+        def back(k):              # the tick from before Look up: the doubt as it was, the tick as the box showed it
+            return (was is not None and was.get(k) == now.get(k) and first is not None
+                    and (k in first) == (k in ticks))
+
+        out["checked"] = sorted(k for k in then | ticks if k in (then if back(k) else ticks))
     return out
 
 

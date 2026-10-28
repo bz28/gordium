@@ -735,7 +735,9 @@ def test_the_confirm_tick_survives_a_pick_and_ground_marking_can_be_undone():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0]
     assert "dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)" in loop
-    assert '"district_confirmed"' in loop.split("ticked = {k: state[k]", 1)[1].split(")", 1)[0]
+    assert "ticked = logic.box_ticks(state)" in loop
+    from design_checker import rhino_logic as logic
+    assert logic.box_ticks({"district_confirmed": True, "zone": "R-1b"}) == {"district_confirmed": True}
     assert "def not_the_ground(" in rhino and '"not_ground": not_the_ground' in rhino
     survey = rhino.split("def pick_survey(", 1)[1].split("\ndef ", 1)[0]
     assert '_set_source(doc, "lot"' in survey                                      # its source never goes stale

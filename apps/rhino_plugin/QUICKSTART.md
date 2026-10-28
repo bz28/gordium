@@ -252,7 +252,7 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      45 seconds; the box says what it is doing as it goes, "Looking up … · Reading the City zoning map…", with a
      moving mark and the seconds so far, and **Cancel lookup** stops it and leaves the box as it was; a tick or
      source comes back only for a field you haven't changed meanwhile, so a district you changed stays unconfirmed
-     until you tick it). Look up only shows what it found: the address and a suggested zoning
+     until you tick it, and a tick you changed while it ran stays as you left it). Look up only shows what it found: the address and a suggested zoning
      district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which
      draws that lot from the tax map (its street at the bottom of Top view), the street side and whether it's a
      corner lot, each with where it came from (not the ground: for now it is assumed flat, see **Ground** below).

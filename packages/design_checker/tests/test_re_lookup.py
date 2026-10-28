@@ -657,7 +657,7 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     assert loop.count("_draw_prepare(doc, facts, state, saved_ui, session, mode, options)") == 2
     assert "return _drawn(doc, facts, drawn_state, saved_ui, session, mode)" in loop   # the rebuilt state is saved
     draw = loop[loop.index('if what == "draw":'):]
-    assert loop.index("ticked = {k: state[k]") < loop.index('if what == "draw":') and "continue" in draw
+    assert loop.index("ticked = logic.box_ticks(state)") < loop.index('if what == "draw":') and "continue" in draw
     assert "logic.box_facts(facts, saved_ui, state)" in rhino[rhino.index("def _apply_box("):]
     edit = rhino[rhino.index("def edit_facts("):rhino.index("def report_path(")]
     outer = edit.index("    try:                                # one undo step")
