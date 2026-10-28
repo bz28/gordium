@@ -1,0 +1,15 @@
+{
+ "IsLocked": {
+  "own_after_lock": false,
+  "locked_after_lock": true,
+  "own_under_locked_parent": false,
+  "locked_after_parent_unlocked": false
+ },
+ "SetPersistentLocking": {
+  "own_after_lock": false,
+  "locked_after_lock": true,
+  "own_under_locked_parent": false,
+  "locked_after_parent_unlocked": false
+ },
+ "done": true
+}

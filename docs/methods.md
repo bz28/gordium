@@ -68,7 +68,7 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
   - Independent AI review (Claude) of all 399 rule/flag/reference labels: 354 judged correct (89%); 4 flagged as dangerous (a limit hidden in a definition), 41 minor. Under the category-vs-limit principle adopted afterwards, two of the four (kitchen, bed-and-breakfast inn) are category definitions, so they are open questions for the architects rather than clear misses.
   - Second review (Claude) of all 244 not_for_checking labels, looking only for the dangerous miss: a piece that constrains a design but would never be checked. 239 confirmed (325-27I among them, after a closer look); 5 changed (325-15F gas station site plan review and 325-29.6D collocation on a site with unpermitted equipment to flag; 325-29.17A-C, which say how the wireless requirements apply to a collocation, to reference); 0 open questions. 325-27I (who may operate a short-term rental) stays not_for_checking: it limits the operator, not the building. None of the 4 borderline pieces concerns house design.
   - Improved prompt (role, purpose, process, line citations) on the 100 pieces with known answers (chosen because the first prompt failed them): 70/100 against the key at the time. Under the later category-vs-limit principle the kitchen answer (reference) counts as right (71/100); dwelling unit (reference, key rule) is an open question for the architects. The rest of the misses are procedures over-labeled as rules (safe direction).
-- **The committed labels:** Haiku's answers plus 70 corrections made by an AI review (Claude, reading every rule, flag and reference label against the text) and 5 from the second review of every not_for_checking label, each recorded in `revised: {from, by, date, why}` with the reason rewritten for the new label. They are still drafts (architect approval is deferred for now, decided 2026-10-19). (Corrections to kitchen, adult day-care home and bed-and-breakfast inn were undone under the principle below; the 2026-10-20 research read all five numbered definitions as categories, and dwelling unit and rooming unit stay labeled rule, which gives the same result: findings recorded with each label, §17.)
+- **The committed labels:** Haiku's answers plus 70 corrections made by an AI review (Claude, reading every rule, flag and reference label against the text) and 5 from the second review of every not_for_checking label, each recorded in `revised: {from, by, date, why}` with the reason rewritten for the new label. They are still drafts (architect approval is deferred for now, decided 2026-10-19). (Corrections to kitchen, adult day-care home and bed-and-breakfast inn were undone under the principle below; the 2026-10-20 research read all five numbered definitions as categories, and dwelling unit and rooming unit stay labeled rule, which gives the same result: findings recorded with each label, §18.)
 - **Category vs limit:** a definition whose number sorts things into categories (a kitchen is 60 sq ft or more; an adult day-care home serves up to six adults) is reference: rules use it to classify. A definition that caps what a design may do ("a maximum of six units may be attached", "not more than two unrelated individuals is permitted") is a rule. The test: does it forbid or cap something, or only say what to call it?
 - **Weaknesses:** definitions with embedded limits remain the hardest case; procedures get over-labeled as rules.
 - **Improve:** a second, independent AI pass on every non-rule piece asking only "does this set a requirement?"; few-shot examples from another city's code (never from the answer key); compare models on the known-answer set.
@@ -156,8 +156,10 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
   building as stacked floor blocks (`envelope_builder.start`): inside every yard, at the coverage and height
   limits, one block per story. On any lot shape the building is measured and checked with the checker's own rules
   before it is drawn; if it would break one, nothing is drawn and Gordium says it can't generate a starting
-  building on this lot shape yet, so the architect draws one and Gordium checks it. Live checking is on: after each edit the corner message updates, failing parts
-  turn red, and a short note shows in the view only when a rule newly fails.
+  building on this lot shape yet, so the architect draws one and Gordium checks it. After an edit the results grey out ("Model changed since the
+  last check — press Check") until the panel's Check; with Check after every edit ticked, Gordium checks again by
+  itself. After a check the corner message updates, failing parts turn red, and a short note shows in the view
+  only when a rule newly fails.
 - **Stories from the shape:** Gordium's own floor blocks (each marked as one story when drawn) are counted.
   Anything else stacked (a podium, a bulkhead, a roof solid) and any typed count are readings: if they disagree
   it's a question. One solid with no floors asks for floors or a count. Never guessed from the height.
@@ -169,7 +171,39 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
   maximal (1 ft more on any side breaks a rule); over 60 random lot shapes no building placed breaks a rule; the whole flow run in Rhino 8 from an empty document (PR
   description).
 
-## 17. The term index and "show your work" research (code, then research; PR 17)
+## 17. Looking up a site from its address (code, `packages/site_lookup`)
+
+- **What:** `python -m site_lookup "<address>"` turns an address into start-box facts, each
+  exactly `{value, source, confirmed_by, date}` (source "from tax map" for the lot, "suggested by Gordium"
+  otherwise), with a status beside each (suggested / needs review / ask) and the service it came from. EPSG:2261
+  is US survey feet; lengths are converted to Gordium's international feet (× 1200/3937 ÷ 0.3048 = 1.000002).
+  No AI.
+- **How:** the NYS Geocoder's address point (the County's address points as a cross-check) → the tax parcel
+  containing it, outline asked for in EPSG:2261 (NY State Plane, feet) and measured by our own code (never the
+  service's area field) → the parcel's SWIS code must be the City of Ithaca's (500700), otherwise refused → lot
+  lines that run along a street centerline (within 30°) and sit within half the right-of-way + 10 ft of it are
+  street lines; two streets is a corner lot, and Gordium asks for the front → USGS 3DEP elevations at the
+  corners (today's ground, an estimate) → the City zoning map's zone under the lot, always a suggestion, with
+  rezonings the online map may not show yet (`amendments.yaml`: a padded box around each ordinance's map
+  area; Ord. 2025-12 Southside from the May 2026 Southside Form District Map) flagged for lots touching them,
+  until someone has checked the online map shows the rezoning (`map_shows_since`, set by hand; the map's own
+  edit date never clears one, since any edit moves it).
+- **Never a false pass:** two zones, two streets, a mismatched street, a far County point, an overlay, a
+  failing service, or incomplete evidence (missing elevations, unknown road widths, a match with no parcel,
+  City flags unavailable): each becomes ask or needs review with a plain reason, never a silent choice. The
+  strongest status wins (ask > needs review > suggested).
+- **Licensing:** City and County layers are used live and never stored; a project's snapshot keeps each fact
+  value, reason and note only as far as the strictest source it was worked out from allows (`store` in
+  `endpoints.yaml`), plus each source's URL, date and SHA-256. Test fixtures hold State and USGS answers only; the City stand-ins are synthetic.
+- **Tested by:** recorded State and USGS answers for 106, 109 and 96 Ithaca Rd, a Town of Ithaca address and
+  an unknown one, with synthetic stand-in City layers (106: parcel 84.-2-6, 7,033.7 sf, 75.8
+  ft on Ithaca Rd, interior, ground 735–749 ft, R-1b suggested; 109 and 96: corner lots, ask). A live check
+  runs with `GORDIUM_LIVE=1`.
+- **Weakness:** the tax map is approximate (about ±2 ft); the Southside area is a padded box, not the
+  districts' own outline, and an amendment stays flagged until someone checks the online map shows it
+  (`map_shows_since`); overlays are found but not checked.
+
+## 18. The term index and "show your work" research (code, then research; PR 17)
 
 - **What:** the term index (`4_term_definitions/term_index.yaml`, generated by `python -m section_labeling coverage`) lists, for every defined term and every word that means the same (`regulations/document_extraction_guide/term_synonyms.yaml`: yard, setback, open space; eave, overhang, cornice, projection...), every piece of the law that uses it, with page and line. Whole words, any case, plurals (+s, +es, and consonant + y → ies: balcony → balconies), phrases split across a line break. Three things read it: the drafting AI (related sections, as background it may not quote), the rules spreadsheet (a "Related sections" column) and whoever researches an open question.
 - **The rule it serves (resolve before asking):** before a question goes to the architects, read the whole law for it through the index, then the City's own decisions (zoning board records), then the building codes, then other cities, in that order. Each open question carries `research: {question, searched (piece ids), sources, why_open, readings}`; a settled one moves to `findings: {id, question, kind: law | reading, answer, sources, strength, confirm_with}`. `python -m rule_format` refuses an open question without research, a finding from the law without a quote it can verify, and a reading that claims more strength than its best source (strong = the code; City practice = the City's records; moderate = building codes; weak = other cities only). A question raised by code (a drafting run) says `why_open: pending: ...` with nothing searched, so it is honest about not being researched yet.
@@ -181,9 +215,9 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
 - **Tested by:** the index lists §325-18B for "yard" and §325-16A/B/C for height; a synonym alone is found; every definition has a synonyms entry; CI rebuilds the index and fails on any difference. The check refuses each kind of missing or overclaimed research (one test each), every committed open question has real research (none pending), and every finding's quote is verified on its page.
 - **Improve:** grow the synonym list from each review's misses; research each new drafted question before it reaches the questions page.
 
-## 18. What's not decided or not built
+## 19. What's not decided or not built
 
 - How model objects are identified beyond the layers (names, or asking every time).
-- Site facts: zone lookup from the address, lot lines and area (survey vs city records), ground levels.
+- Site facts: wiring the address lookup into the start box; survey vs city records for the lot lines.
 - Measuring curved walls and roofs, sloped ground, and stories from floors in the model.
 - Human approval: deferred (rules stay drafts, checked by code); the approval fields stay in the formats, unused.

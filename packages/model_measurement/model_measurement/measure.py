@@ -29,13 +29,12 @@ from rule_format.rulebook import MEASURES_FILE, load
 
 from . import interpretations as law
 from .stops import stop
-from .street_lines import matching_ids, street_verdict
+from .street_lines import _norm, matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
 
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
-PARALLEL = 30             # degrees: street lines turning more than this between them turn a corner
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count",
@@ -150,6 +149,12 @@ class Lot:
                   if any(_same_point(e[0], a) and _same_point(e[-1], b) or _same_point(e[0], b) and _same_point(e[-1], a)
                          for a, b in facts.get("street_line") or [])]
         self.street = street
+        # the street each drawn street line is recorded on (street_ids), where they match: where it changes is a
+        # corner the outline cleaning keeps (#18 round f)
+        given, ids = facts.get("street_line") or [], matching_ids(facts.get("street_line"), facts.get("street_ids"))
+        self.street_of = [next((_norm(ids[k]) if ids and ids[k] else None for k, (a, b) in enumerate(given)
+                                if _same_point(e[0], a) and _same_point(e[-1], b) or
+                                _same_point(e[0], b) and _same_point(e[-1], a)), None) for e in self.edges]
         self.street_problem = None
         if not facts.get("street_line"):
             self.street_problem = stop("no_street")
@@ -192,7 +197,8 @@ class Lot:
         n = len(self.edges)
         street = set(self.street)
         pts = [self.edges[i][0] for i in range(n)]
-        keep = [i for i in range(n) if self.curved[i] or self.curved[i - 1] or ((i in street) != ((i - 1) % n in street))]
+        keep = [i for i in range(n) if self.curved[i] or self.curved[i - 1] or ((i in street) != ((i - 1) % n in street))
+                or (i in street and (i - 1) % n in street and self.street_of[i] != self.street_of[(i - 1) % n])]
         alive = list(range(n))
 
         def cost(k):                    # removing alive[k]: how far the outline moves (every vertex it spans)
@@ -805,6 +811,8 @@ def _roof_part(building: dict, sloped: list) -> tuple | None:
 
 EAVE = "model#eave"        # whether what a pitched roof reaches past its walls is an eave: eave / not_eave
 PROJ = "model#projection"  # whether what sticks out past the walls at the ground is a projection: projection / part
+PAIR = "model#narrower"    # walls equally far from both side lines: which side is the narrower side yard, each reading
+#                            named by the line it holds narrower: "the side along lot line N the narrower side yard"
 
 
 def _eave_candidate(building: dict, sloped: list | None = None) -> dict | None:
@@ -2132,6 +2140,8 @@ NOT_FRAME_WORDS = {"frame_distances_apply": "the frame distances apply to every 
 EAVE_COVERAGE = ("eaves_not_counted", "eaves_over_2ft_counted", "eaves_counted")   # building_area's open question
 EAVE_QUESTION = ("whether what the pitched roof reaches past the walls is an eave (§325-18B) or part of the building "
                  "can't be told from the model: the architect confirms it (eaves_confirmed)")
+PAIR_QUESTION = ("the walls are equally far from both side lot lines: which side is the narrower side yard (each "
+                 "side's eaves are held to the minimum that side carries)")
 PROJ_QUESTION = ("whether a part below the roof that sticks out past the walls at the ground is an upper floor "
                  "(part of the building) or a bay window (a projection, §325-18B) can't be told from the model "
                  "(yard_projections)")
@@ -2228,8 +2238,14 @@ def _lot_lines(lot: Lot, facts: dict):
             return stop("law_missing", what="the corner-lot findings (front_yard, side_yard)")
         basis = {"front": [law.basis(two)], "side": [law.basis(one)], "rear": [], "depth": []}
         chain = lot.ordered_street()
-        if not any(_turn(lot.edges[a], lot.edges[b]) > PARALLEL for a, b in zip(chain, chain[1:])):
-            return stop("corner_one_street")    # stated a corner lot, but the lines given never turn a corner
+        streets_of = _street_groups(lot, facts, chain)
+        if streets_of is None:
+            # which lines are which street isn't recorded (or the names saved are stale): the lines given may all be
+            # one street's, so no yard is measured from them (#18 round f, P0: a yard to one street line passed);
+            # never told from where the lines turn
+            return _street_ids_stop(facts)
+        if len(streets_of) < 2:
+            return stop("corner_one_street")    # stated a corner lot, but every street line is on one street
         given = facts.get("address_street_line")
         if given:
             # the picks are drawn pieces: each matched to a drawn piece, then to the lot line it is part of
@@ -2238,11 +2254,18 @@ def _lot_lines(lot: Lot, facts: dict):
             idx = sorted({lot.line_of_piece(q) for q in hits if q is not None} & set(chain))
             if None in hits or not idx or not lot._contiguous(idx) or any(lot.line_of_piece(q) not in chain for q in hits):
                 return stop("address_not_a_street")
-            candidates = [idx]
+            # the address street is a whole street, the lines recorded on it (street_ids): a pick of some of its
+            # lines means that street, never a side lot line made of the rest of it; a pick across two streets
+            # isn't one (#18 independent round 1, R1: one piece picked read the other piece as a side line)
+            on = [g for g in streets_of if set(idx) & set(g)]
+            if len(on) != 1:
+                return stop("address_not_a_street")
+            candidates = [sorted(on[0])]
         else:
-            # the address street is one of the streets: the street lines split only where they may turn a corner
-            # (_street_splits), never mid-street (one street drawn in pieces is still one street, §325-8A col. 7)
-            candidates = [c for k in _street_splits(lot, chain) for c in (chain[:k], chain[k:])]
+            # the address street is one of the streets, each the lines recorded on it (street_ids: the street pick,
+            # or the lookup), never guessed from where the lines turn (#18 rounds b-e: no rule of angles could be
+            # made safe); not recorded: which yard is the rear can't be told
+            candidates = streets_of
             question.append("which street the lot's address is on decides which yard is the rear yard (§325-8A(14)(d)): "
                             "pick the address street (address_street_line)")
     else:
@@ -2280,34 +2303,46 @@ def _lot_lines(lot: Lot, facts: dict):
             "candidates": candidates}
 
 
-JOINT = 15                # degrees: a joint between two street lines turning no more than this is within one street
+def _street_ids_stop(facts: dict) -> str:
+    """Why a corner lot's streets can't be read from its street_ids (_street_groups gave None): saved for other
+    lines, not recorded for every street lot line, or recorded but one street's lines not next to each other (or a
+    lot line's pieces on two streets): each said as it is (#18 independent round 1, R2: recorded ids were told
+    "isn't recorded")."""
+    ids = facts.get("street_ids")
+    own = matching_ids(facts.get("street_line"), ids)
+    if ids is not None and own is None:
+        return stop("street_names_stale")
+    if own and all(own):
+        return stop("street_lines_split")
+    return stop("street_ids_needed")
 
 
-def _heading(edge) -> float:
-    (x, y) = _chord(edge)
-    return math.degrees(math.atan2(y, x))
+def _street_groups(lot: "Lot", facts: dict, chain: list) -> list[list[int]] | None:
+    """The street lot lines grouped by the street each is on (`street_ids`, one per `street_line`, recorded by the
+    street pick or the lookup), each group its lines in order along the lot: a corner lot's streets, each its own
+    frontage (§325-8A col. 7: the frontage on one street). None when that isn't recorded for every street lot line,
+    a lot line's pieces are on two streets, or one street's lines aren't one run: then which lines are which street
+    is the architect's to say, never guessed from where the lines turn."""
+    if matching_ids(facts.get("street_line"), facts.get("street_ids")) is None:
+        return None
 
-
-def _street_splits(lot: "Lot", chain: list) -> list[int]:
-    """Where a corner lot's street lines (`chain`, in order along the lot) may split into two streets: the indexes k
-    with chain[:k] one street and chain[k:] the other. A joint turning more than PARALLEL (30 degrees) is a corner
-    for sure; one turning more than JOINT (15) but no more than PARALLEL may be. Between the sure corners, a run of
-    pieces each joining within JOINT is one street only while it turns no more than PARALLEL in all (its pieces'
-    headings within PARALLEL of each other); a run that turns more (a corner rounded into many short pieces) may
-    split at any of its joints. The same limits as the Rhino panel's corner street pick (#15 7a16aa6: joints of 15
-    degrees or less, 30 or less in all, one street; over 30 a corner). Every split that may be is a reading; one
-    street drawn in pieces is never split mid-street (the frontage of one street, §325-8A col. 7, never two streets
-    added)."""
-    turns = [_turn(lot.edges[a], lot.edges[b]) for a, b in zip(chain, chain[1:])]
-    sure = {k + 1 for k, t in enumerate(turns) if t > PARALLEL}
-    maybe = {k + 1 for k, t in enumerate(turns) if JOINT < t <= PARALLEL}
-    bounds = [0, *sorted(sure), len(chain)]
-    for a, b in zip(bounds, bounds[1:]):
-        heads = [_heading(lot.edges[i]) for i in chain[a:b]]
-        spread = max((min(abs(x - y) % 360, 360 - abs(x - y) % 360) for x in heads for y in heads), default=0.0)
-        if spread > PARALLEL:
-            maybe |= set(range(a + 1, b))
-    return sorted(sure | maybe)
+    def id_of(piece):
+        return lot.street_of[piece]
+    names = []
+    for i in chain:
+        found = {id_of(q) for q in (lot.pieces[i] if lot.pieces else [i])}
+        if None in found or len(found) != 1:
+            return None
+        names.append(found.pop())
+    groups = []
+    for i, name in zip(chain, names):
+        if groups and groups[-1][0] == name:
+            groups[-1][1].append(i)
+        elif any(g[0] == name for g in groups):
+            return None                                  # one street's lines in two runs: not read
+        else:
+            groups.append((name, [i]))
+    return [g for _, g in groups]
 
 
 def _two_sides(found: list) -> list:
@@ -2357,8 +2392,17 @@ def _eaves_by_wall_side(lot: "Lot", r: dict, words: str, w: str, shape, walls: l
         _, _, ea, eb, _ = pairs[0]
         return [((_both(words, w), ea[0], {"points": ea[1], "named": {}, "line": ea[2]}),
                  (_both(words, w), eb[0], {"points": eb[1], "named": {}, "line": eb[2]}))]
-    return [((_both(words, ww), ea[0], {"points": ea[1], "named": wn, "line": ea[2], "pairing": k}),
-             (_both(words, ww), eb[0], {"points": eb[1], "named": wn, "line": eb[2], "pairing": k}))
+    # a pairing is a reading of its own (named: the checker settles it as it settles any named reading, and asks
+    # which side is the narrower only when the answer turns on it; #18 review: unnamed, it held every symmetric house
+    # with unequal eaves at needs review, R-1b's equal minimums included)
+    def named(wn, k, ea):
+        # the reading names the very line it holds narrower (#18 round c: a compass word from the sort order named
+        # the wrong side on lots whose side lines run north and south)
+        return wn if k is None else {**wn, PAIR: narrower(ea)}
+    def narrower(ea):
+        return f"the side along lot line {', '.join(lot.label(i) for i in ea[2])} the narrower side yard"
+    return [((_both(words, ww), ea[0], {"points": ea[1], "named": named(wn, k, ea), "line": ea[2], "pairing": k}),
+             (_both(words, ww), eb[0], {"points": eb[1], "named": named(wn, k, ea), "line": eb[2], "pairing": k}))
             for ww, wn, ea, eb, k in pairs]
 
 
@@ -2376,8 +2420,11 @@ def _width(lot: Lot, facts: dict, lines) -> dict:
     chain = lot.ordered_street()
     groups = [chain]
     if facts.get("corner_lot"):
-        groups = [c for c in lines["candidates"]] + [[i for i in chain if i not in c] for c in lines["candidates"]]
-        groups = [g for k, g in enumerate(groups) if g and g not in groups[:k]]
+        # each street's own frontage, the lines recorded on it (street_ids): never two streets added, never a
+        # guess from where the lines turn; not recorded, the lot width waits for the street pick
+        groups = _street_groups(lot, facts, chain)
+        if groups is None:
+            return _missing("lot_width", _street_ids_stop(facts))
     width = []
     for g in groups:
         on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(lot.label(i) for i in g)})" if len(groups) > 1 else ""
@@ -2491,14 +2538,15 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
                 d, p = _distance(lot.line(r["rear"]), s)
                 rear.append((_both(words, w), d, {"points": p, "named": n}))
         eaves = ", eaves included" if suffix else ""
+        qs = _both(q, PAIR_QUESTION) if any(x.get("pairing") is not None for _, _, x in small) else q
         out["side_yard_smaller" + suffix] = _decide(
             "side_yard_smaller" + suffix, small, "the least distance from the side lot line of the narrower side "
             "yard (to the walls) to the building, eaves included" if suffix else
-            "the least distance from the nearer side lot line to the building", objects, q, basis["side"])
+            "the least distance from the nearer side lot line to the building", objects, qs, basis["side"])
         out["side_yard_larger" + suffix] = _decide(
             "side_yard_larger" + suffix, large, "the least distance from the side lot line of the wider side yard "
             "(to the walls) to the building, eaves included" if suffix else
-            "the least distance from the farther side lot line to the building", objects, q, basis["side"])
+            "the least distance from the farther side lot line to the building", objects, qs, basis["side"])
         out["rear_yard" + suffix] = _decide("rear_yard" + suffix, rear,
                                             "the least distance from the rear lot line to the main building" + eaves,
                                             objects, q, basis["rear"])
