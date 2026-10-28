@@ -13,7 +13,8 @@ CODE = [p for p in (REPO / "packages").rglob("*.py")   # dated eval records (eva
 # Paths are judged inside the repository: a checkout can itself sit in a folder named .claude.
 DOCS = [p for p in REPO.rglob("*.md")
         if not {".git", ".claude", ".venv", "node_modules"} & set(p.relative_to(REPO).parts)
-        and p.name != "CLAUDE.md"]   # CLAUDE.md states the project's principles; it is changed by its own PR
+        and p.name != "CLAUDE.md"    # CLAUDE.md states the project's principles; it is changed by its own PR
+        and p.parent.name != "research"]       # docs/research: dated reports, evidence kept as written
 assert DOCS and CODE
 
 

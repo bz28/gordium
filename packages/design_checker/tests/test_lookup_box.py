@@ -116,7 +116,7 @@ def test_a_lot_on_two_streets_asks_for_the_front(name):
     p = looked_up(name)
     facts, saved, state = box(p)
     assert p["facts"]["corner_lot"]["value"] == "ask" and facts["corner_lot"] is True
-    assert logic.uncertain(state) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain(state) == logic.CORNER_HINT
     placed = frame({"facts": p["facts"]})
     assert max(pt[1] for seg in placed["street_line"] for pt in seg) < 2.0          # the address street at the bottom
 
@@ -170,7 +170,8 @@ def test_an_unsettled_lot_makes_every_item_measured_from_it_need_review_never_co
 # ---- what can't be filled in: the box keeps working and says why ---------------------------------------------
 
 @pytest.mark.parametrize("name, kw, says", [
-    ("106_ithaca_rd", {"offline": True}, "Couldn't reach the map services (offline?): enter the site by hand."),
+    ("106_ithaca_rd", {"offline": True}, "Couldn't reach the map services (offline?): Look up again later, or put "
+                                         "back the lot's own address (or clear it)"),
     ("not_found", {}, "No City of Ithaca address found for"),
     ("953_danby_rd_town", {}, "not the City of Ithaca"),
 ])
@@ -221,7 +222,10 @@ def test_only_what_each_source_allows_is_written_into_the_model():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
     assert 'answer["facts"]' not in body and "answer.get(\"facts\")" not in body     # geometry only from writes
-    assert 'STATE["lookup_guide"]' in body and "logic.apply_lookup(RhinoTable(doc), session" in body and "AddCurve" not in body
+    # Look up previews (logic.preview_lookup: nothing in the model); Draw writes through logic.apply_reset, which
+    # draws by apply_lookup (Ben, 2026-10-21: re-lookup)
+    assert 'STATE["lookup_guide"]' in body and "logic.preview_lookup(answer, facts, saved_ui" in body and \
+        "logic.apply_reset(table, session, facts, saved_ui, choice" in body and "AddCurve" not in body
 
 
 def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
@@ -493,7 +497,7 @@ def test_p3_the_lookups_files_are_closed_one_time_limit_and_no_silent_failure():
     poll = rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
     assert poll.count("_lookup_files_done(run)") == 2 and "_lookup_files_done(run)" in \
         rhino[rhino.index("def _lookup_stop("):rhino.index("def _lookup_done(")]
-    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(frame_site, "frame the looked-up lot")' in rhino
+    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(_frame_points, "frame the looked-up lot")' in rhino
     assert "frame_site_box" not in rhino
     assert "LOOKUP_LIMIT_S = " not in (REPO / "packages/design_checker/design_checker/lookup_box.py").read_text(
         encoding="utf-8")
@@ -566,7 +570,10 @@ class FakeTable:
         return "new%d" % self.n
 
     def add_lot(self, ring, name):
-        return self._new("Site", "lot")
+        i = self._new("Site", "lot")
+        if ring:
+            self.objects[i]["area"] = area([list(p) for p in ring])
+        return i
 
     def add_spot(self, p):
         return self._new("Gordium::Grade", "point")
@@ -574,6 +581,17 @@ class FakeTable:
     def ground_points(self):
         return [i for i, o in self.objects.items() if o["kind"] == "point"
                 and o["layer"] in ("Gordium::Grade", "Gordium::Grade::Finished")]
+
+    def massing(self):                       # the starting house's floors (Gordium::Massing and its sublayers)
+        return [i for i, o in self.objects.items() if logic.on_layer(o["layer"], logic.MASSING)]
+
+    def buildings(self):                     # the architect's buildings, as the plugin's RhinoTable finds them
+        kinds = {"brep": "Brep", "lot": "PolylineCurve", "point": "Point"}
+        return logic.own_buildings((i, o["layer"], o.get("type") or kinds.get(o["kind"], o["kind"]), o.get("holds"))
+                                   for i, o in self.objects.items())
+
+    def fingerprint(self, ids):
+        return repr(sorted((i, self.objects[i].get("geom")) for i in ids))
 
     def snapshot(self):
         return {i: (o["layer"], o["kind"]) for i, o in self.objects.items()}, sorted(self.layers), self.views
@@ -1074,7 +1092,7 @@ def test_every_tick_row_is_greyed_while_a_box_is_open():
     ticks = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
                  and any(isinstance(t, ast.Name) and t.id == "ticks" for t in n.targets))
     boxes = [ast.unparse(e.args[0]) for e in ticks.elts]
-    assert boxes == ["_auto_box(actions, parts)", "_envelope_box(actions)", "_massing_box(actions)",
+    assert boxes == ["_auto_box(actions, parts)", "_envelope_box(actions, parts)", "_massing_box(actions, parts)",
                      "_labels_box(actions, parts)",                        # + Check after every edit (the Check button)
                      "_context_box(actions, parts, context_on)"]          # + Show neighbourhood (PR #23)
     greyed = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
@@ -1145,10 +1163,13 @@ def test_a_looked_up_district_without_rules_is_never_preselected_or_called_sugge
 def test_a_district_picked_after_a_lookup_without_rules_turns_draw_on():
     """#19 zone review (P1): after an R-2a lookup the dropdown had no change handler, so picking R-1b and ticking
     I confirm never turned Draw on. The pick goes through zone_picked, wired to the dropdown's change."""
-    state = {"zone": None, "district_confirmed": True}
+    state = {"zone": None, "district_confirmed": False}
     assert logic.draw_reason(state) == "Pick the district to continue."
     logic.zone_picked(state, "R-1b", None)
-    assert state["zone"] == "R-1b" and state["zone_source"] == logic.ENTERED and logic.can_draw(state)
+    assert state["zone"] == "R-1b" and state["zone_source"] == logic.ENTERED
+    assert logic.draw_reason(state) == "Confirm the district to continue."
+    state["district_confirmed"] = True                                         # I confirm, for R-1b
+    assert logic.can_draw(state)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "zone.SelectedIndexChanged += logic.guard(zone_changed" in ui and "logic.zone_picked(state" in ui
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
