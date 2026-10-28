@@ -102,3 +102,21 @@ def test_each_case_would_comply_somewhere_once_the_answers_agree(key):
                      if i.get("rule") in rules and _reads(rules[i["rule"]]) & names and i["status"] == present.COMPLIES]
     assert complies, key
 
+
+
+def test_occupant_counts_that_can_all_be_true_are_no_contradiction():
+    """Review round 2: occupants are every unit's on the lot together (measures.yaml), so an accessory dwelling unit on
+    the lot, or one not ruled out, is one more unit: a house of 2 and an ADU of 2 are 4, at most 2 in one. No unit
+    stated is R-2c's own case ("no dwelling unit stated"). Neither is a contradiction; the plain impossible ones are."""
+    house = {"use": "one_family_detached", "occupants": 4, "occupants_most_in_one_unit": 2}
+    assert fact_conflicts({**house, "accessory_dwelling_unit": True}) == []
+    assert fact_conflicts(house) == []                                       # an ADU not ruled out
+    (why, names), = fact_conflicts({**house, "accessory_dwelling_unit": False})
+    assert why == ("4 occupants on the lot, but 1 home with at most 2 in each hold only 2 (no accessory dwelling unit): "
+                   "check the counts") and names == ("occupants", "occupants_most_in_one_unit")
+    semi = {"use": "one_family_semi_detached", "occupants": 3, "occupants_most_in_one_unit": 1,
+            "accessory_dwelling_unit": False}
+    assert fact_conflicts({**semi, "dwelling_units": 0}) == []
+    assert fact_conflicts({**semi, "dwelling_units": 3}) == []                # 3 homes of 1: exactly 3
+    assert fact_conflicts({**semi, "dwelling_units": 2})[0][1] == ("occupants", "occupants_most_in_one_unit",
+                                                                   "dwelling_units")

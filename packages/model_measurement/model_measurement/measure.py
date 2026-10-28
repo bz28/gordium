@@ -1796,11 +1796,15 @@ def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
     if type(total) is int and type(most) is int:
         stated = facts.get("dwelling_units")
         units = stated if type(stated) is int else IMPLIED_UNITS.get(facts.get("use"))
+        # an accessory dwelling unit on the lot (or not said) is one more unit whose occupants count too (review round 2:
+        # a house of 2 and an ADU of 2 are 4 occupants, at most 2 in one): no ceiling then. No unit at all is the
+        # rules' own case (R-2c: "no dwelling unit stated"), not this one.
         if most > total:
             out.append((stop("occupant_split_disagree", most=most, occupants=total),
                         ("occupants", "occupants_most_in_one_unit")))
-        elif units is not None and total > units * most:
-            out.append((stop("occupant_counts_disagree", occupants=total, units=units, most=most, held=units * most),
+        elif units and facts.get("accessory_dwelling_unit") is False and total > units * most:
+            out.append((stop("occupant_counts_disagree", occupants=total, units=units, homes="home" if units == 1 else
+                             "homes", most=most, held=units * most),
                         ("occupants", "occupants_most_in_one_unit") + (("dwelling_units",) if type(stated) is int else ())))
     return out
 
