@@ -67,7 +67,9 @@ def solids(scenario: dict, moved: bool = False) -> dict:
 
 def facts(scenario: dict) -> dict:
     pts = scenario["lot"]["points"]
-    out = {"jurisdiction": JURISDICTION, "zone": "R-1b", "use": "one_family_detached", "corner_lot": False,
+    # the district and use the architect states (an R-1b house unless the scenario says otherwise)
+    out = {"jurisdiction": JURISDICTION, "zone": scenario.get("district", "R-1b"),
+           "use": scenario.get("use", "one_family_detached"), "corner_lot": False,
            "street_line": [[list(pts[0]), list(pts[1])]], "lot_surveyed": scenario["lot"]["surveyed"]}
     grade = scenario.get("grade") or {}
     if "elevation" in grade:

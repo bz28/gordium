@@ -334,7 +334,7 @@ def make_panel(actions, host=None, context_on=True):
     footer = row(button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control
-    ticks = [row(_auto_box(actions, parts)), row(_envelope_box(actions)), row(_massing_box(actions)),
+    ticks = [row(_auto_box(actions, parts)), row(_envelope_box(actions, parts)), row(_massing_box(actions, parts)),
              row(_labels_box(actions, parts)), row(_context_box(actions, parts, context_on))]
     # while a start box is open these are off; the legend ("?") is not among them: it only shows something
     parts["greyed"] = [tree, detail_scroll, *ticks, footer.Items[0].Control, footer.Items[1].Control]
@@ -362,13 +362,19 @@ def say(parts, text):
         parts["message"].Text = text or ""
 
 
-def _massing_box(actions):
+def _massing_box(actions, parts):
     """Hide starting house: the Gordium::Massing layer off. Hidden, it is still checked (a hidden building still
-    counts, as everywhere in Gordium): only drawing it is turned off."""
+    counts, as everywhere in Gordium): only drawing it is turned off. Ticked as the document's layer is
+    (set_massing_tick), never left as last clicked (an Undo puts the layer back: the Rhino job at 540f718)."""
     box = ef.CheckBox()
     box.Text = "Hide starting house"
     box.Checked = False
-    box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
+
+    def changed(s, e):
+        if not parts.get("_setting_massing"):       # set from the document (set_massing_tick): not a change
+            actions["massing"](bool(box.Checked))
+    box.CheckedChanged += logic.guard(changed, "hide the starting house")
+    parts["massing_box"] = box
     return box
 
 
@@ -432,6 +438,17 @@ def set_auto_tick(parts, on):
         parts["_setting_auto"] = False
 
 
+def set_massing_tick(parts, hidden):
+    """The tick as this document's starting house layer is: ticked when it is hidden."""
+    if parts is None or parts.get("massing_box") is None:
+        return
+    parts["_setting_massing"] = True
+    try:
+        parts["massing_box"].Checked = bool(hidden)
+    finally:
+        parts["_setting_massing"] = False
+
+
 def _labels_box(actions, parts):
     """Show on-screen labels: each yard's and lot edge's label and the status box, off by default; remembered in the
     document."""
@@ -459,12 +476,30 @@ def set_labels_tick(parts, shown):
         parts["_setting_labels"] = False
 
 
-def _envelope_box(actions):
+def _envelope_box(actions, parts):
+    """Show buildable envelope: on by default, this Rhino session's own setting (never saved in the file): ticked as
+    it is (set_envelope_tick), never left as last clicked on a panel built again."""
     box = ef.CheckBox()
     box.Text = "Show buildable envelope"
     box.Checked = True
-    box.CheckedChanged += logic.guard(lambda s, e: actions["envelope"](bool(box.Checked)), "show or hide the envelope")
+
+    def changed(s, e):
+        if not parts.get("_setting_envelope"):      # set from the session (set_envelope_tick): not a change
+            actions["envelope"](bool(box.Checked))
+    box.CheckedChanged += logic.guard(changed, "show or hide the envelope")
+    parts["envelope_box"] = box
     return box
+
+
+def set_envelope_tick(parts, on):
+    """The tick as the session's envelope setting is."""
+    if parts is None or parts.get("envelope_box") is None:
+        return
+    parts["_setting_envelope"] = True
+    try:
+        parts["envelope_box"].Checked = bool(on)
+    finally:
+        parts["_setting_envelope"] = False
 
 
 def _wrap_width(parts):
@@ -659,7 +694,8 @@ def show_detail(parts):
     words = logic.hint_text(i.get("hint"), [b.Text for b in buttons])
     if words:
         d.AddRow(_wide(words, size=12))
-    for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
+    for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),
+                 det.get("outline")):           # how the lot lines were read from a cleaned outline (PR 18)
         if text:
             d.AddRow(_wide(text, size=12))
     for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by
@@ -851,7 +887,8 @@ def start_box(state, options, mode):
         keep()
         done("pick:" + what)
 
-    draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
+    draw = button(state.get("_draw_label") or ("Draw" if mode == "start" else "Check"),   # as what it does
+                  lambda: (keep(), done("draw")))
     reason = label(logic.draw_reason(state), size=11, width=560)   # wraps at the box's width
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
@@ -862,6 +899,13 @@ def start_box(state, options, mode):
             pick("lookup")
 
     address.KeyDown += logic.guard(enter_looks_up, "look up the address")
+
+    def address_typed(s, e):           # Draw off for an address not looked up, on again when the known one is back
+        state["address"] = address.Text
+        draw.Enabled = logic.can_draw(state) and not looking
+        reason.Text = logic.draw_reason(state)
+
+    address.TextChanged += logic.guard(address_typed, "follow the address typed")
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
     buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None   # (Advanced: off with flat ground)
 
@@ -878,6 +922,7 @@ def start_box(state, options, mode):
 
     def zone_changed(s, e):           # a district picked: set at once, so Draw, its reason and the row's source follow
         logic.zone_picked(state, zone.SelectedValue.Text if zone.SelectedValue else None, first_zone)
+        confirm.Checked = bool(state.get("district_confirmed"))     # another district: confirm it again
         draw.Enabled = logic.can_draw(state) and not looking
         reason.Text = logic.draw_reason(state)
         if "source" in zone_row:
