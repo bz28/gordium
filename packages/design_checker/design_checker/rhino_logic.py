@@ -2598,10 +2598,22 @@ CORNER_HINT = ("This lot faces two streets: click Change… on " + STREET_LABEL 
 
 
 def uncertain(state):
-    """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
-    says = (state.get("lookup") or {}).get("says")
+    """The one amber line for a case the box can't settle by itself, with what to do; None when there's none. A
+    lookup that went wrong (not found, offline…) says so here; what a found lookup only tells (the lot shown dashed,
+    nothing drawn until Draw) is lookup_note's plain line, never amber (the architect's review, 2026-10-28: the
+    question and the information read as one warning)."""
+    says = None if lookup_note(state) else (state.get("lookup") or {}).get("says")
     question = _question(state)
     return " · ".join(t for t in (question, says) if t) or None     # never one instead of the other
+
+
+LOOKUP_INFO = ("found", "set_aside")      # a lookup's own line that only informs: shown plain
+
+
+def lookup_note(state):
+    """The plain line under the amber one: what a found (or set-aside) lookup tells, or None."""
+    look = state.get("lookup") or {}
+    return look.get("says") if look.get("status") in LOOKUP_INFO else None
 
 
 def _question(state):

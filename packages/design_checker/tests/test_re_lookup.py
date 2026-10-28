@@ -423,7 +423,7 @@ def test_the_city_outline_only_clears_gordiums_drawing_then_waits_for_their_lot(
     box = site.box().look_up(guide_only("96_ithaca_rd"))
     rows, state = box.rows()
     assert not [a for a in rows["lot"]["actions"] if a[0] == "draw_lot"]
-    assert logic.GUIDE_PREVIEW in logic.uncertain(state)
+    assert logic.lookup_note(state) == logic.GUIDE_PREVIEW and logic.GUIDE_PREVIEW not in (logic.uncertain(state) or "")
     assert box.draw() == "open" and box.open
     assert {box.table.objects[i]["layer"] for i in ("lot1", "floor1", "floor2")} == {logic.HOLDING_LAYER}
     rows, state = box.rows()
@@ -699,7 +699,7 @@ def test_an_address_typed_after_look_up_drops_the_preview_and_its_district():
     assert box.facts["zone"] != "R-1b" or box.saved.get("zone_source") != "entered by you"   # the preview's
     assert box.type_address(SAMPLE).draw() == "box-again"
     assert box.facts["zone"] == "R-1b" and box.saved["zone_source"] == "entered by you"
-    said = logic.uncertain(box.shown()) or ""                 # its line went with it (round 3)
+    said = logic.lookup_note(box.shown()) or ""               # its line went with it (round 3)
     assert "Shown dashed" not in said and said.startswith("The lookup of 96 Ithaca")
     assert box.button() == "Check" and not box.saved["_lookup"]["asks"]
     assert box.type_address("96 Ithaca Rd").draw() == "off"      # typed again: to be looked up again, never "not found"
@@ -1696,3 +1696,19 @@ def test_review_r4_a_lot_picked_during_a_preview_never_gets_the_old_lots_street_
     assert box.type_address(OTHER).draw() == "box-again"
     box.draw()
     assert site.facts["lot_id"] == "lot2" and site.facts["corner_lot"] is False and site.facts["street_line"] == one
+
+
+
+def test_a_found_lookups_note_is_a_plain_line_never_the_amber_question():
+    """The architect's review (2026-10-28, item 16): one amber line read "? Does this lot face two streets? … ·
+    Shown dashed: …'s lot. Nothing in the model changes until Draw…": a question and a piece of information as one
+    warning. A found lookup's line is now its own plain line (lookup_note); the amber line keeps the questions and a
+    lookup that went wrong (not found, offline: what to do)."""
+    looked = {"lookup": {"status": "found", "says": logic.PREVIEW_SAYS.format(address="96 Ithaca Rd")},
+              "corner_lot": None}
+    assert logic.lookup_note(looked).startswith("Shown dashed") and "Shown dashed" not in logic.uncertain(looked)
+    assert logic.uncertain(looked).startswith("Does this lot face two streets?")
+    offline = {"lookup": {"status": "offline", "says": logic.LOOKUP_SAYS["offline"]}, "corner_lot": False}
+    assert logic.lookup_note(offline) is None and logic.uncertain(offline) == logic.LOOKUP_SAYS["offline"]
+    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'note = label(logic.lookup_note(state) or "", size=11)' in ui and "layout.AddRow(None, row(note))" in ui
