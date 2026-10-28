@@ -7,7 +7,7 @@ changed to match Gordium; a disagreement is investigated and listed.
 | File | Lot | District | Design | The edit |
 |---|---|---|---|---|
 | `r1_111_eastwood_ave.yaml` | 111 Eastwood Ave, parcel 500700-111.-2-2, 12,990.5 sf, 100 ft on Eastwood Ave | R-1a | 40 × 50 ft house, three 10 ft stories, and a 20 × 22 ft frame garage behind it | house and garage 6 ft toward the street: the front yard (24 ft < 25) fails |
-| `r2_316_e_falls_st.yaml` | 316 E Falls St, 4,763.9 sf, 56 ft on E Falls St | R-2b | two-family house 34 × 40 ft, three 9 ft stories | 1.5 ft west: the smaller side yard (4.52 ft < 5) fails |
+| `r2_316_e_falls_st.yaml` | 316 E Falls St, parcel 500700-12.-2-8, 4,763.9 sf, 56 ft on E Falls St | R-2b | two-family house 34 × 40 ft, three 9 ft stories | 1.5 ft west: the smaller side yard (4.52 ft < 5) fails |
 | `r3_423_n_cayuga_st.yaml` | 423 N Cayuga St, parcel 500700-49.-1-26, 7,938.0 sf, 52.5 ft on N Cayuga St | R-3aa | one-family house 30 × 60 ft, two 11 ft stories, at the 10 ft front-yard and 2-story limits | none |
 
 **Where the lots come from.** Each lot's corners are the State's tax-map outline (NYS Tax Parcels Public), looked up

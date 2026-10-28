@@ -582,12 +582,13 @@ sites:
         75 ft: both comply (worst case: Gordium''s tax-map rule, spec C2)'
       lot_depth_and_rear: lot depth = average of the side lines [137.84, 133.29] = 135.6 ft; rear yard required
         33.9 ft
-      largest_house: 'limited by chart p.3 note 13 or lot coverage, whichever is smaller: coverage allows 25% ×
-        12,973.9 sf (the worst-case lot) = 3,243.5 sf; note 13 keeps 50% of the developable lot area after the setbacks
-        as green space: the setbacks leave 6,302.8 sf (yards measured as least distances, round at the corners),
-        so 3,151.4 sf must stay green, and if that green space must lie within the same area the house may cover
-        at most 6,302.8 − 3,151.4 = 3,151.4 sf, less than coverage allows. If the green space may be anywhere on
-        the lot, coverage binds. Where it must be is an open reading (RU.green_space is a flag: needs review)'
+      largest_house: 'limited by chart p.3 note 13 or lot coverage, whichever is smaller, both worked on the worst-case
+        lot (every line 2 ft in, 12,973.9 sf): coverage allows 25% = 3,243.5 sf; note 13 keeps 50% of the developable
+        lot area after the setbacks as green space: on the worst-case lot the setbacks (front 25 ft, sides 10 ft,
+        rear 25% of the 132.48 ft depth = 33.12 ft; least distances, round at the corners) leave 5,746.0 sf, so
+        2,873.0 sf must stay green, and if that green space must lie within the same area the house may cover at
+        most 5,746.0 − 2,873.0 = 2,873.0 sf, less than coverage allows. If the green space may be anywhere on the
+        lot, coverage binds. Where it must be is an open reading (RU.green_space is a flag: needs review)'
       every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
         doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
       nudge:

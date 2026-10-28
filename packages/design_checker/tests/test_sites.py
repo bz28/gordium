@@ -127,4 +127,21 @@ def test_the_drawn_area_is_the_area_of_the_stored_corners():
 
 def test_rus_green_space_cap_uses_the_area_the_yards_leave():
     doc = yaml.safe_load((LIGHT / "expected.yaml").read_text(encoding="utf-8"))
-    assert "6,302.8 − 3,151.4 = 3,151.4" in doc["sites"]["RU"]["expected"]["largest_house"]
+    assert "5,746.0 − 2,873.0 = 2,873.0" in doc["sites"]["RU"]["expected"]["largest_house"]
+
+
+
+# Review round 3.
+
+def test_the_sites_table_runs_from_the_command_line(capsys):
+    assert scenarios.main(["--sites"]) == 0
+    out = capsys.readouterr().out
+    assert "r1_111_eastwood_ave" in out and "r3_423_n_cayuga_st" in out and "01_every_limit_at_the_line" not in out
+
+
+def test_the_sites_rhino_comparison_reads_the_deep_run(tmp_path, capsys):
+    """`--sites rhino <out.json>` judges a Rhino run against the deep-run sites (here: an empty run must fail)."""
+    ran = tmp_path / "rhino_out.json"
+    ran.write_text(json.dumps({"scenarios": {}}), encoding="utf-8")
+    assert scenarios.main(["--sites", "rhino", str(ran)]) == 1
+    assert "r2_316_e_falls_st: no result for 'as drawn'" in capsys.readouterr().out
