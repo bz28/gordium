@@ -106,8 +106,9 @@ STOPS = {
                                 "another building may be on this lot, or one of the counts is off",
     "occupant_split_disagree": "the most occupants in one dwelling unit ({most}) is more than the occupants of every "
                                "unit on the lot together ({occupants}): check both counts",
-    "occupant_counts_disagree": "{occupants} occupants on the lot, but {units} {homes} with at most {most} in each hold "
-                                "only {held} (no accessory dwelling unit): check the counts",
+    "occupant_counts_disagree": "{occupants} occupants on the lot, but {units} {unit_words} with at most {most} in any one "
+                                "can hold only {held}, with no accessory dwelling unit on the lot: check the occupant "
+                                "counts, the dwelling units and the accessory dwelling unit answer",
     "household_counts_disagree": "the count of unrelated people with minor dependent children included ({with_}) is "
                                  "lower than the count without them ({without}): check both counts",
     "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
