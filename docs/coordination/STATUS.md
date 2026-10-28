@@ -244,6 +244,17 @@ Scripts cannot press real keys (Eto), so these are the claims left for a person.
 - 2026-10-27 (Lane D) queue item 10 DONE: PR #39 coverage-audit at f9fd7d95 (base r3-hand #30): generated 6_coverage_report/residential_districts.md, 164 rule/flag pieces x 9 districts (python -m section_labeling audit [--check], CI step). Totals 1476 cells: rulebook 85, flag 10, parked 117, n/a 659, MISSING 605 (72 pieces, 49 ranked gaps; mostly wireless 21/district, nonconforming, operational). Real rules missing: HIGH §325-26 20 ft from stream banks (all 9), §325-8B(1) lot area per extra primary building (8; RU flagged); MEDIUM occupancy (Lane B), home occupation + SP accessory uses, §325-7B, South Hill overlay, 3-6 unit attached cap in R-3a/aa/b/RU. Review rounds 7/6/5/4 found, 6/5/5/4 confirmed (2 sceptics each), all fixed + revert-checked; CAP HIT: round 4 fixes not yet through a clean cold round. Full suite 1803 passed, 8 CI steps passed.
 
 ## FOR BEN: merge 2 (Lane A, 2026-10-27, updated after the Rhino runs; nothing merged)
+**Update 2026-10-28 (Lane D): the rest of merge 2 is ready. #15–#27 are on main; nothing else is merged.** Each PR below has main merged in (a new merge commit, never a force-push), now targets main, and has had one cold review of its merge. Merge in this order:
+| order | PR | branch | head | full suite (pytest + 7 CI steps) | notes |
+|---|---|---|---|---|---|
+| 1 | #48 | timing-fix | a9f6c4a1 | 1,766 passed, all 7 | brings rhino-ui's label timing fix (241064c) to main; test file only |
+| 2 | #26 | re-lookup | b6d6f88d | 1,896 passed, all 7 | includes the start flow (9da07289). Merge conflicts in confirm() and _draw_starting_house kept both sides; the redraw pin now matches main's `result = _confirm(...)`. Review clean |
+| 3 | #17 | term-index | 1c0ca872 | 1,821 passed, all 7 | review: methods §6 now cites §18 (main's site lookup took §17) |
+| 4 | #18 | measurement-2 | ee498dc4 | 2,550 passed, 6 other CI steps passed | **2 false-pass fixes**, each pinned by a test that fails on revert: (a) an unconfirmed looked-up lot or street now makes the accessory-building rule need review (merge review, 2 sceptics); (b) a solid left out of the measuring now makes the accessory-building and eaves rules need review. The one 'failure' was the known slow test_present …tax_map_and_on_a_survey (worker killed); alone it passed in 337 s |
+| 5 | #20 | answer-keys | 6dcfcc66 | 2,673 passed, 6 other CI steps passed | the same slow test; alone it passed in 420 s |
+| 6 | #22 | stress-tests | b19f383d | 2,634 passed, all 7 | |
+To-dos (#18, neither a false pass): with no accessory building labelled, its rule is left out silently; the separate "objects not included" row still needs review. The eave-yard part of fix (b) is not pinned on its own. The slow test's to-do belongs to the demo builder.
+
 Heads now (each full suite = pytest + all 7 CI steps, all passed):
 | PR | branch | base now | head | suite |
 |---|---|---|---|---|
