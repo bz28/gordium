@@ -4,6 +4,7 @@ with the day, as one Undo step, and checks again; Cancel, Esc or closing it chan
 A blank stays unset (needs review, never 0 or no). An answer given here shows in the start box and is kept by its
 next Draw for the same district and use. A row missing a site fact keeps Edit site…."""
 
+import inspect
 import json
 import random
 
@@ -153,6 +154,8 @@ class _Strings:
 
 
 class _Doc:
+    UndoRecordingEnabled = True        # (_tried turns it off for the trial check and back on)
+
     def __init__(self, facts, sources):
         self.log, self.recording, self.records = [], False, 0
         self.Strings = _Strings(self, {"lot_facts": json.dumps(facts), "fact_sources": json.dumps(sources)})
@@ -190,7 +193,7 @@ def _plugin(doc, dialog, refused=None):
             "stories") else []}
 
     ns["run_check"] = run_check
-    for name in ("enter_rooms", "_save_row", "_save_facts", "fact_sources"):
+    for name in ("enter_rooms", "_save_row", "_save_facts", "fact_sources", "_tried", "_put_back"):
         exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)      # noqa: S102
     return ns
 
@@ -293,7 +296,8 @@ def test_answers_survive_a_use_picked_and_picked_back():
     facts = _box(facts, "X", "multiple_family")           # Check: kept
     assert (facts["dwelling_units"], facts["rooms_let_for_profit"], facts["conversion"]) == (5, 2, True)
     rhino = RHINO[RHINO.index("def _apply_box("):RHINO.index("def _place_spots(")]
-    assert rhino.index("logic.box_applied(facts,") < rhino.index('use=state["use"]')   # the old use, first
+    assert rhino.index("logic.box_applied(facts,") < rhino.index("logic.box_facts(")   # the old use, first
+    assert 'use=state.get("use")' in inspect.getsource(logic.box_facts)                 # (box_facts sets the use)
 
 
 def test_answers_survive_a_district_picked_and_picked_back():
