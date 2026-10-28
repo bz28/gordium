@@ -531,8 +531,9 @@ def show(parts, view, stale=False, error=None, checking=False, select=None):
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
             # the values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)
-            values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
-                      "—" if stale_row else logic.cell_text(i["proposed"] if i["status"] != "not_checked" else ""),
+            name, proposed = logic.list_cells(i)          # the use row: the use's own name as its Item
+            values = [("" if stale_row else i["mark"] + "  ") + name,
+                      "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
                       "" if stale_row else logic.cell_text(i["required"]),
                       "" if stale_row else logic.cell_text(i.get("delta") or "")]
             ci = ef.TreeGridItem()

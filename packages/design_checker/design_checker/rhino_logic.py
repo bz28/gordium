@@ -101,6 +101,20 @@ def row_name(item):
     return name + (" · " + item["note"] if item.get("note") else "")
 
 
+USE_STATED = "stated"
+
+
+def list_cells(item):
+    """A row's Item and Proposed text in the panel's list. The use row names the use itself in the Item cell
+    ("One-family dwelling, detached (site)") with "stated" under Proposed: a use's name never fits the Proposed
+    column (64 px: "One-family" alone takes two lines at 380 px), and the Item cell has the room (coordinator,
+    2026-10-28, option A: the whole name, no made-up short forms). With no use stated, "Use (site)" and its "—"."""
+    proposed = item.get("proposed")
+    if item.get("name") == "Use" and proposed and proposed != "—":
+        return row_name(dict(item, name=proposed)), USE_STATED
+    return row_name(item), proposed
+
+
 def dock_host(hosts, serial):
     """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
     document's number); a panel made without one (key 0) serves when the front document has none."""
