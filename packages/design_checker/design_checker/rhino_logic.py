@@ -370,6 +370,10 @@ DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
 DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occupants", "occupants_most_in_one_unit",
                   "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
                   "home_occupation", "home_occupation_area", "home_occupation_unit_area")
+# Facts the measuring checks against each other (a count with the children counted can't be smaller than the count
+# without: model_measurement.project.fact_conflict_rows): kept or dropped together, so a contradiction is never hidden
+# by dropping half of it.
+CHECKED_TOGETHER = (("unrelated_persons", "unrelated_persons_with_children"),)
 USE_DETAILS_TITLE = "Use details — answer when you plan the interior"
 BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
 
@@ -586,7 +590,8 @@ def answers_applied(facts, answers, zone, use, options):
     out = {k: v for k, v in (facts or {}).items() if k not in BOX_ASKS}
     read = (((options or {}).get("follow_ups") or {}).get(zone) or {}).get(use)
     if read is not None:           # a use detail answered for another district or use never stays behind (it would
-        out = {k: v for k, v in out.items() if k not in DEFERRED_FACTS or k in read}   # decide this one's rules)
+        keep = set(read) | {b for pair in CHECKED_TOGETHER if set(pair) & set(read) for b in pair}
+        out = {k: v for k, v in out.items() if k not in DEFERRED_FACTS or k in keep}   # decide this one's rules)
     out.update(implied_by(options, zone, use))
     return update_counts(out, given), sorted(given)
 

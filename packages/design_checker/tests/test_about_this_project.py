@@ -240,7 +240,10 @@ def test_a_use_detail_answered_for_another_district_or_use_never_stays_behind(op
     r2c, _ = logic.answers_applied(facts, {}, "R-2c", "one_family_detached", options)
     assert r2c == facts                                                      # R-2c reads all three
     r3b, _ = logic.answers_applied(facts, {}, "R-3b", "one_family_detached", options)
-    assert "unrelated_persons" not in r3b and "occupants" not in r3b and r3b == {"home_occupation": False}
+    # (occupants is not read in R-3b; unrelated_persons stays only as the partner of the count R-3b does read)
+    assert "occupants" not in r3b and r3b == {"unrelated_persons": 3, "home_occupation": False}
+    r3b_two, _ = logic.answers_applied({"occupants": 4}, {}, "R-3b", "one_family_detached", options)
+    assert r3b_two == {}
 
 
 def test_facts_that_disagree_are_not_filed_as_use_details_to_answer():
@@ -276,3 +279,16 @@ def test_a_quick_answer_sets_all_its_fields_before_the_box_refreshes():
     fill = box[box.index("def quick_picked"):]
     assert fill.index("filling.append(True)") < fill.index("field.SelectedIndex") < fill.index("filling.clear()") \
         < fill.index("refresh_if_needed()")
+
+
+def test_two_counts_that_are_checked_against_each_other_are_kept_together(options):
+    """Round 2 sceptic: R-3a reads only the with-children count, so dropping the other hid the contradiction and the
+    rule passed. Both stay, the 'facts disagree' row stays, and nothing passes."""
+    both = {"unrelated_persons": 3, "unrelated_persons_with_children": 1, "functional_family_unit": False,
+            "home_occupation": False}
+    kept, _ = logic.answers_applied(both, {}, "R-3a", "one_family_detached", options)
+    assert kept["unrelated_persons"] == 3 and kept["unrelated_persons_with_children"] == 1
+    v = _view("R-3a", **kept)
+    assert any(i["id"].startswith("facts.conflict") for i in v["items"])
+    rule = next(i for i in v["items"] if i.get("rule") == "R-3a.occupancy_one_family")
+    assert rule["status"] == present.REVIEW
