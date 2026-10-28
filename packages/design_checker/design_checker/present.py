@@ -1074,6 +1074,16 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # may be the 10 ft one: 7'-0" against 8'-0", never against the 5 ft side's 3'-0" it already meets)
             n = about[0]
             primary = ast.Compare(left=n.left, ops=[ast.GtE()], comparators=n.comparators)
+    elif (_status(row) == COMPLIES and isinstance(body, ast.BoolOp) and isinstance(body.op, ast.And)
+          and len(compares) > 1 and all(isinstance(v, ast.Compare) for v in body.values)
+          and len({c.left.id for c in compares}) == 1):
+        # a range on one measure (R-3aa's stories: at least 2, at most 3): the limit it is nearest, never simply
+        # the first (the light run in Rhino, 2026-10-28: 3 stories showed "2 required" beside "complies")
+        def slack(c):
+            have, limit = values.get(c.left.id), _evaluate(ast.unparse(c.comparators[0]), values)
+            ok = isinstance(have, (int, float)) and isinstance(limit, (int, float))
+            return abs(have - limit) if ok else float("inf")
+        primary = min(compares, key=slack)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
