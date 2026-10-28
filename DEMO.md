@@ -63,6 +63,8 @@ Everything in the 2026-10-27 preview below, plus:
 - **New rules in all nine districts:** the 20 ft setback from a stream or inlet (§325-26), the South Hill Overlay
   (§325-8E, R-1 and R-2), homes per attached building (R-3a, R-3aa, R-3b, RU) and more than one main building on a
   lot. Each says **needs review** until Gordium has what it needs (from your model or your answers).
+- **Corner lot? is yours to answer.** After Look up the box shows what the lookup found ("No: one street" or
+  "Yes: two streets"). Change it and Draw keeps your answer (it used to save the lookup's).
 
 ## What was new on 2026-10-27
 
