@@ -320,6 +320,8 @@ Suite at 3188dd60: 2,845 passed, all 7 CI steps. Rehearsal: main + #48 → #26 (
 now merges with no conflicts. **Merge 2's order and other heads are unchanged.** #26 is 9eb789fc (the Rhino lane's
 corner fix).
 
+**Status 2026-10-28 evening: all of merge 3 is pushed.** Every rules-line branch also holds the Rhino lane's final heads (R-2c envelope fix, R-3aa range row, corner fix). The Rhino lane has 4 approved UI and wording fixes coming, on #37, #26, #33 and #45. The merge lane will merge them up the stack and re-run the top suites; heads below will move then.
+
 **Merge 3: every PR below has merge 2 merged in** (a new merge commit, never a force-push). Each merges into main with
 no conflicts once merge 2 is in. To retarget a PR: when its base PR is merged, set its base to main (Edit by the
 title), then Merge (merge commit).
@@ -330,12 +332,20 @@ title), then Merge (merge commit).
 | A2 | #29 | drawing-dims | d0f6c791 | (covered by #37's) | pushed |
 | A3 | #31 | depth-lines | 864897fc | (covered by #37's) | pushed |
 | A4 | #34 | osnap-curves | 6a46ce54 | (covered by #37's) | pushed |
-| A5 | #35 | massing-floors | 6e9cac34 | (covered by #37's) | pushed |
-| A6 | #37 | use-questions | a1d454ab | 3,055 passed, all 7 (at 60f10deb; later commits are QUICKSTART/GUIDE text) | pushed |
+| A5 | #35 | massing-floors | 9c14c632 | (covered by #37's) | pushed (includes the no-document side-yard fix, pinned) |
+| A6 | #37 | use-questions | 694ee808 | 3,056 passed, all 7 | pushed |
 | B1 | #32 | progress-cancel | 5c449c2a | (covered by #33's) | pushed |
 | B2 | #33 | address-autocomplete | e79325ea | 3,011 passed, all 7 | pushed |
-| C1–C8 | #24 → #30 → #38 → #41 → #42 → #43 → #44 → #45 | r2-hand … facts-up-front | local carries, not pushed | #45 local carry: 3,494 passed, all 7 | waiting for the Rhino lane's fixes on these branches (R-2c envelope, R-3aa range row); then merged in, suite, push |
-| C-side | #39 coverage-audit (on #30), #46 test-sites (on #38) | | local | running | same |
+| C1 | #24 | r2-hand | e97c73fa | (covered by #45's) | pushed |
+| C2 | #30 | r3-hand | 46ed7ede | (covered by #45's) | pushed |
+| C3 | #38 | occupancy-home-occupation | 27303919 | (covered by #45's) | pushed |
+| C4 | #41 | attached-units-cap | e3dc9f43 | (covered by #45's) | pushed |
+| C5 | #42 | primary-buildings | 870855bc | (covered by #45's) | pushed |
+| C6 | #43 | shared-yards-south-hill | beb1ce3c | (covered by #45's) | pushed |
+| C7 | #44 | stream-setback | e757b6f4 | (covered by #45's) | pushed |
+| C8 | #45 | facts-up-front | 1ae2580b | 3,497 passed, all 7 | pushed (holds #44 and #37) |
+| C-side | #39 | coverage-audit (on #30) | 396d1c50 | 3,183 passed, all 8 (audit regenerated) | pushed |
+| C-side | #46 | test-sites (on #38) | 6be32ff2 | 3,252 passed, all 7 | pushed |
 | D | #47 lookup-names, #51 no-document-start, #52 faster-start | | unchanged | (their own suites) | merge cleanly onto merge 2; targeted tests on the merge pass (#47 432, #51 201, #52 553) |
 | — | #21 drafting-stage1, #40 draft-rule-by-rule | | unchanged | — | **not carried**: see the decision below |
 
