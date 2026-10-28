@@ -3,6 +3,7 @@ the files show. A wrong "covered" would read as a false pass, so each check that
 with the decision it must refuse."""
 
 import copy
+import re
 from pathlib import Path
 
 import pytest
@@ -150,9 +151,9 @@ def test_parked_must_be_on_the_later_list_and_missing_needs_a_priority_and_why(d
 
 def test_an_open_question_must_link_a_real_question(decisions):
     good = {"status": "open_question", "why": "w", "link": "docs/questions_for_architects.md#5.11"}
-    assert problems(with_piece(decisions, "325-26", [{"what": "x", "all": good}])) == []
+    assert problems(with_piece(decisions, "325-25D", [{"what": "x", "all": good}])) == []
     for link in ("docs/nope.md", "docs/questions_for_architects.md#9.99 no such heading"):
-        found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(good, link=link)}]))
+        found = problems(with_piece(decisions, "325-25D", [{"what": "x", "all": dict(good, link=link)}]))
         assert any("link" in p or "has no" in p for p in found), link
 
 
@@ -183,12 +184,22 @@ def test_already_disclosed_means_the_section_is_on_every_results_not_checked_lis
 def test_the_missing_list_is_ranked_high_first_then_silent_before_disclosed(built):
     ranked = built.missing()
     order = [list(audit.PRIORITIES).index(m["priority"]) for m in ranked]
-    assert order == sorted(order) and ranked[0]["priority"] == "high"
+    assert order == sorted(order) and ranked[0]["priority"] == min({m["priority"] for m in ranked},
+                                                                    key=list(audit.PRIORITIES).index)
     for p in audit.PRIORITIES:
         same = [m["disclosed"] for m in ranked if m["priority"] == p]
         assert same == sorted(same), p                          # False (silent) before True (disclosed)
-    streams = next(m for m in ranked if m["pieces"] == ["325-26"])
-    assert streams["priority"] == "high" and streams["districts"] == built.districts
+    garage = next(m for m in ranked if m["pieces"] == ["325-25D"])
+    assert garage["priority"] == "low" and garage["districts"] == built.districts
+
+
+def test_the_rules_added_after_the_audit_close_its_high_gaps(built):
+    """§325-26 (streams, #44) and §325-8B(1) (each primary building's lot area, #42) were the high-priority gaps;
+    the stream rule now checks §325-26 in every district, and no high-priority gap is left."""
+    assert {built.status("325-26", d) for d in built.districts} == {"rulebook"}
+    i = part_index(built, "325-8B", "(1)")
+    assert {built.cells["325-8B"][d][i][1]["status"] for d in built.districts} == {"rulebook"}
+    assert not [m for m in built.missing() if m["priority"] == "high"]
 
 
 def test_measures_say_where_each_value_comes_from_and_none_when_nothing_fills_it(built):
@@ -251,9 +262,9 @@ def test_compliance_with_district_regulations_is_not_counted_as_covered(built, d
 
 
 def test_a_flagged_part_is_never_shown_with_a_check_mark(built):
-    """§325-8B in RU: primary_structures is a flag, so it is shown as flagged, never with a check mark."""
-    short = built._short("325-8B", "RU")
-    assert "partly flagged: primary_structures" in short and "✓ primary_structures" not in short
+    """§325-9B in R-1a: home_occupation is a flag, so it is shown as flagged, never with a check mark."""
+    short = built._short("325-9B", "R-1a")
+    assert "partly flagged: use, home_occupation" in short and "✓" not in short
 
 
 def test_the_table_is_the_same_whatever_python_hashes_sets_with():
@@ -345,7 +356,7 @@ def test_a_cell_covered_only_by_a_mapping_says_so(built):
 
 def test_mapped_is_shown_on_the_kind_of_part_that_is_mapped(built):
     """§325-8B in R-1a: use cites part (3) (✓, no label) and is only mapped onto part (4) (flagged, mapped)."""
-    assert "partly ✓ use;" in built._short("325-8B", "R-1a")
+    assert re.search(r"partly ✓ [^;]*\buse\b[^;]*;", built._short("325-8B", "R-1a"))
     assert "partly flagged: use (mapped)" in built._short("325-8B", "R-1a")
 
 
@@ -400,13 +411,13 @@ def test_a_reading_must_quote_the_law(decisions, decision):
 
 def test_the_quote_must_be_the_laws_words_exactly_where_it_says(decisions):
     base = {"status": "not_applicable", "why": "w"}
-    for extra in ({"quote": "No new structure shall be located nearer than 20 feet"},
+    for extra in ({"quote": "across a common lot line by mutual agreement"},
                   {"quote": "in any U-1 District", "page": 47}, {"quote": "in any U-1 District", "piece": "325-16D"}):
-        assert problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(base, **extra)}])) == [], extra
-    for extra in ({"quote": "No new structure shall be located nearer than 25 feet"},
+        assert problems(with_piece(decisions, "325-25D", [{"what": "x", "all": dict(base, **extra)}])) == [], extra
+    for extra in ({"quote": "across a common lot line by written agreement"},
                   {"quote": "in any U-1 District", "page": 48}, {"quote": "in any U-1 District", "piece": "325-26"},
                   {"quote": "in any U-1 District", "piece": "325-99Z"}):
-        found = problems(with_piece(decisions, "325-26", [{"what": "x", "all": dict(base, **extra)}]))
+        found = problems(with_piece(decisions, "325-25D", [{"what": "x", "all": dict(base, **extra)}]))
         assert any("quote not found at" in p for p in found), extra
 
 

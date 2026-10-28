@@ -21,6 +21,9 @@
 #   item: the parked item (parked);  link: path#heading (open_question)
 #   priority: high | medium | low | operational | other_project (missing);  note: anything else
 # Drafted by Claude (Lane D, queue item 10, 2026-10-27) from the law's text; a second reading, not an architect's.
+# The decisions for the rules added by #38 (occupancy, home occupation), #41 (attached buildings of three to six),
+# #42 (primary buildings, §325-8B(1)), #43 (§325-7B shared yards, the South Hill Overlay) and #44 (§325-26 streams)
+# added by Claude (coverage lane, 2026-10-28) from those rules and the law's text.
 
 districts: [R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU]
 
@@ -41,12 +44,6 @@ parked:
 _unlisted_why: &unlisted_why "Not a use the residential chart (p.2) lists for any residential district, so it isn't
   permitted there (§325-8A(2) says the permitted uses are listed). Gordium accepts only the chart's uses
   (4_term_definitions/uses.yaml)."
-_occupancy: &occupancy
-  status: missing
-  priority: medium
-  why: No rule counts unrelated occupants or checks who may live in a dwelling unit; the model can't show it and
-    the architect isn't asked.
-  note: Lane B is drafting occupancy rules on a branch stacked on r3-hand (not in this rulebook yet).
 _operational: &operational
   status: missing
   priority: operational
@@ -77,10 +74,9 @@ _unit_facilities: &unit_facilities
 _accessory_sp: &accessory_sp
   status: missing
   priority: medium
-  why: No rule or flag asks about the accessory uses that need a special permit (a home occupation unless it meets
-    four conditions; an antenna or dish over 6 ft, in the front yard or over 10 ft tall; a tower for electricity;
-    a neighborhood garden; neighborhood parking).
-  note: Home occupations are being drafted on Lane B's branch.
+  why: No rule or flag asks about the accessory uses that need a special permit other than a home occupation
+    (R-x.home_occupation flags one, §325-9B(1)(i)), namely an antenna or dish over 6 ft, in the front yard or over 10 ft
+    tall; a tower for electricity; a neighborhood garden; neighborhood parking.
 _bnb_conflict: &bnb_conflict
   status: missing
   priority: medium
@@ -99,6 +95,9 @@ pieces:
     - quote: "A smaller, secondary dwelling unit located on the same lot"
       what: What an accessory dwelling unit is and must have
       all: {status: parked, item: adus}
+      # R-1's occupancy rule cites the definition only to send an owner-occupied house with an ADU on the lot to
+      # review (the owner-and-ADU open question); it checks nothing the definition requires of the ADU.
+      R-1a, R-1b: {status: parked, item: adus, also: [occupancy_one_family]}
 
   325-3B:building_area:
     - lines: [[5, 23, 28]]
@@ -123,19 +122,31 @@ pieces:
 
   325-3B:cooperative_household:
     - what: Four or more unrelated persons in one unit make it a multiple dwelling
-      all: *occupancy
+      all:
+        status: missing
+        priority: low
+        why: No rule names a cooperative household. The occupancy rules (occupancy_one_family, occupancy_two_family)
+          keep four or more unrelated people in one unit from passing as a one- or two-family dwelling (at most two
+          unrelated per unit; one in RU; a two-family unit with more than one goes to review in R-3 and RU), but
+          nothing tells the architect that such a household makes the unit a multiple dwelling.
 
   325-3B:dwelling_one_family:
     - what: Who may occupy a one-family dwelling (one unrelated person, or two in R-1 when owner-occupied and in
         R-2/R-3)
-      all: *occupancy
+      all:
+        status: rulebook
+        rules: [occupancy_one_family]
+        note: From the architect's stated count of unrelated people in the most crowded unit (R-1 and R-2 leave minor
+          dependent children out, §325-8B(6); R-3 and RU count them). R-1's two unrelated people need the owner living
+          in the house; RU keeps the definition's base limit of one. A household stated to be a functional family unit
+          over the limit goes to review.
       R-3a, R-3aa, R-3b:
-        status: missing
-        priority: medium
-        why: No rule counts unrelated occupants or checks who may live in a dwelling unit; the model can't show it and
-          the architect isn't asked.
-        note: Lane B is drafting occupancy rules on a branch stacked on r3-hand (not in this rulebook yet).
+        status: rulebook
+        rules: [occupancy_one_family]
         also: [abutting_r1]
+        note: From the architect's stated count of unrelated people in the most crowded unit, minor dependent children
+          counted (§325-8B(6) leaves them out in R-1 and R-2 only). A household stated to be a functional family unit
+          over the limit goes to review.
 
   325-3B:one_family_attached_dwelling:
     - lines: [[8, 11, 14]]
@@ -149,10 +160,10 @@ pieces:
         cell: {section: Primary Uses, row: "One-family dwelling, attached [fn4]"}
       R-2c: {status: rulebook, rules: [attached_units_per_building], also: [lot_area_one_family_attached]}
       R-3a, R-3aa, R-3b, RU:
-        status: missing
-        priority: medium
-        why: No rule holds an attached building to three to six dwelling units here (R-2c.attached_units_per_building
-          does it from the stated attached_units_in_building), so a row of eight units can pass.
+        status: rulebook
+        rules: [attached_units_per_building]
+        note: From the architect's stated count of dwelling units in the whole attached building, every lot it
+          stands on (attached_units_in_building); the massing model shows only this lot's part of it.
     - lines: [[8, 11, 14]]
       what: Each dwelling shares a party wall or structure and has direct exterior access from the ground floor
       all: *attached_not_permitted
@@ -165,6 +176,7 @@ pieces:
         status: missing
         priority: low
         why: Nothing checks party walls or each unit's own ground-floor door; a massing model shows neither.
+        also: [attached_units_per_building]
 
   325-3B:dwelling_two_family:
     - lines: [[9, 3, 4]]
@@ -174,6 +186,7 @@ pieces:
         rules: [lot_area_two_family, lot_width_two_family]
         mapped: The two-family lot size and width apply to the house type this sentence defines, which the architect
           states as the use.
+        also: [occupancy_two_family]
       R-1a, R-1b: &two_family_not_permitted
         status: not_applicable
         why: A two-family dwelling isn't permitted in this district (chart p.2, "-").
@@ -181,13 +194,15 @@ pieces:
         page: 2
         quote: "Two-family dwelling [fn4] - - • • • • • • •"
         cell: {section: Primary Uses, row: "Two-family dwelling [fn4]"}
-      R-2c: {status: rulebook, rules: [lot_area_two_family]}
+      R-2c: {status: rulebook, rules: [lot_area_two_family], also: [occupancy_two_family]}
     - lines: [[9, 4, 9]]
       what: Who may occupy each unit of a two-family dwelling
       all:
         status: not_applicable
-        why: Its occupancy limits name only R-1/CR-1 and R-2/CR-2 zones.
+        why: Its occupancy limits name only R-1/CR-1 and R-2/CR-2 zones. (occupancy_two_family flags a unit with more
+          than one unrelated person here, under the multiple-dwelling definitions instead.)
         quote: In R-2 and CR-2 Zones, each unit of a two-family dwelling may be occupied
+        also: [occupancy_two_family]
       R-1a, R-1b:
         status: not_applicable
         why: A two-family dwelling isn't permitted in this district (chart p.2, "-"), whatever this definition's
@@ -196,13 +211,13 @@ pieces:
         page: 2
         quote: "Two-family dwelling [fn4] - - • • • • • • •"
         cell: {section: Primary Uses, row: "Two-family dwelling [fn4]"}
-      R-2a, R-2b: *occupancy
-      R-2c:
-        status: missing
-        priority: medium
-        why: No rule counts unrelated occupants or checks who may live in a dwelling unit; the model can't show it
-          and the architect isn't asked.
-        note: Lane B is drafting occupancy rules on a branch stacked on r3-hand (not in this rulebook yet).
+      R-2a, R-2b, R-2c:
+        status: rulebook
+        rules: [occupancy_two_family]
+        note: At most two unrelated people in each unit, from the architect's stated count for the most crowded unit
+          (minor dependent children left out, §325-8B(6)). Two in a unit goes to review, the open question whether
+          they are "roomers or boarders" that would make the building a multiple dwelling (§325-3B DWELLING,
+          MULTIPLE (3)).
 
   325-3B:dwelling_unit:
     - quote: "One or more rooms designed or used for living quarters by one household"
@@ -238,7 +253,13 @@ pieces:
 
   325-3B:functional_family_unit:
     - what: When unrelated people count as a functional family unit
-      all: *occupancy
+      all:
+        status: flag
+        rules: [occupancy_one_family]
+        why: Whether a household is a functional family unit is the City's finding on the criteria listed, weighed
+          case by case; the one-family occupancy rule sends a household stated to be one, over the unrelated-person
+          limit, to review (stated not to be one, the limit decides).
+        quote: the following criteria must be present
 
   325-3B:green_space:
     - quote: "Where a minimum green space requirement applies"
@@ -254,13 +275,24 @@ pieces:
       all: {status: rulebook, rules: [height, yard_projections]}
 
   325-3B:home_occupation:
-    - what: Home occupations (conditions; chart p.2 marks them SP in every residential district)
+    - lines: [[12, 26, 30], [13, 3, 17], [13, 20, 34]]
+      what: What a home occupation is and how it must run (in the dwelling or an accessory building, by a resident;
+        no more than two outside employees; no exterior display, storage or nuisance; traffic and parking; no retail)
       all:
-        status: missing
-        priority: medium
-        why: No rule or flag asks whether the dwelling holds a home occupation (§325-9B(1)(i) needs a special
-          permit unless it meets four conditions).
-        note: Lane B is drafting home-occupation rules on a branch stacked on r3-hand.
+        status: flag
+        rules: [home_occupation]
+        also: [home_occupation_size]
+        why: How a home occupation runs isn't drawn; once the architect says one is planned, home_occupation always
+          needs review, for these conditions and the special permit (§325-9B(1)(i)).
+        quote: which meets the following additional conditions
+    - lines: [[13, 18, 19]]
+      what: "(f) At most 25% of the dwelling unit and 500 indoor square feet, accessory structures included"
+      all:
+        status: rulebook
+        rules: [home_occupation_size]
+        note: From the architect's stated floor areas (the occupation's, accessory structures included, and its
+          dwelling unit's); 25% read as of the unit's floor area (the rule's finding quarter_by_floor_area, a reading
+          to confirm with the architects).
 
   325-3B:large_beverage_producer:
     - what: Large beverage producers (production cap, silo height)
@@ -301,7 +333,6 @@ pieces:
         status: missing
         priority: medium
         why: No rule checks the sleeping-room and unit floor areas each occupant needs; Gordium doesn't model rooms.
-        note: Lane B is drafting occupancy rules on a branch stacked on r3-hand.
         also: [lot_area_one_family_detached]
 
   325-3B:rooming_house:
@@ -389,10 +420,13 @@ pieces:
   325-7B:
     - what: A yard required for one building can't also count for another building
       all:
-        status: missing
-        priority: medium
-        why: Gordium measures yards from one main building; a lot with several main buildings isn't checked
-          building by building (see §325-8B(1)).
+        status: flag
+        rules: [yards_not_shared]
+        why: Gordium measures yards from the main building only. With two or more primary buildings on the lot,
+          yards_not_shared always needs review (one primary building, nothing on the lot can share its yards); how
+          the yards between two buildings divide is an open question (docs/research/2026-10-27_audit_gaps.md §5).
+          Garages and sheds may stand in side and rear yards (§325-25A).
+        quote: No part of a yard or other open space about any building required
 
   325-8A:
     - quote: "Uses which are permitted in each use district are listed"
@@ -406,10 +440,10 @@ pieces:
       all:
         status: missing
         priority: medium
-        why: No rule checks the accessory uses on chart p.2 (towers, home occupations and gardens need a special
-          permit; a private garage holds at most three cars in R-1 and R-2a/R-2b, six per building in R-2c; a
-          structure for construction purposes may stay two years). Parking is on the later list; ADUs are parked by the queue item 10 brief.
-        note: Home occupations are being drafted on Lane B's branch.
+        why: No rule checks the accessory uses on chart p.2 other than a home occupation (R-x.home_occupation and
+          home_occupation_size, under §325-3B and §325-9B(1)(i)). Towers and gardens need a special permit; a
+          private garage holds at most three cars in R-1 and R-2a/R-2b, six per building in R-2c; a structure for
+          construction purposes may stay two years. Parking is on the later list; ADUs are parked by the queue item 10 brief.
     - quote: "The off-street parking spaces listed in this column shall be provided"
       lines: [[24, 19, 21]]
       what: "Column 4: off-street parking"
@@ -471,12 +505,18 @@ pieces:
       lines: [[26, 10, 16]]
       what: "(1) Each additional primary building on the lot needs its own minimum lot area"
       all:
-        status: missing
-        priority: high
-        why: Gordium checks the lot area once, for one main building, and nothing asks how many primary buildings
-          are on the lot. With two houses drawn it asks which is the main building; once one is picked, the other
-          is read as an accessory building or a deck, so a second house on a lot sized for one can pass.
-      RU: {status: flag, rules: [primary_structures]}
+        status: rulebook
+        rules: [lot_area_each_primary_building]
+        note: The lot needs the use's figure once per primary building, the count read from the drawing or stated
+          (a building standing apart that could hold a home is read both ways until stated). Needs review when not
+          every building holds the lot's use, and for the uses whose figure grows with units, rooms or occupants.
+      RU:
+        status: rulebook
+        rules: [lot_area_each_primary_building]
+        also: [primary_structures]
+        note: The lot needs the use's figure once per primary building, the count read from the drawing or stated.
+          Needs review when not every building holds the lot's use, and for the uses whose figure grows with units.
+          RU's own cap on primary structures (chart note 3) is primary_structures.
     - lines: [[26, 17, 18]]
       what: "(2) Landfilling and bulkheading plans need Board of Public Works approval"
       all: {status: missing, priority: low, why: "No flag; a massing model doesn't show fill or bulkheads."}
@@ -499,11 +539,20 @@ pieces:
       all: *operational
     - lines: [[26, 28, 28], [27, 3, 3]]
       what: "(6) Minor children aren't counted as unrelated occupants (R-1 and R-2)"
-      all: *occupancy
+      all:
+        status: rulebook
+        rules: [occupancy_one_family]
+        note: The question the occupancy rule asks (unrelated_persons) leaves minor dependent children out.
+      R-2a, R-2b, R-2c:
+        status: rulebook
+        rules: [occupancy_one_family, occupancy_two_family]
+        note: The question the occupancy rules ask (unrelated_persons) leaves minor dependent children out.
       R-3a, R-3aa, R-3b, RU:
         status: not_applicable
-        why: Applies in R-1 and R-2 districts only.
+        why: Applies in R-1 and R-2 districts only (the occupancy rule here counts the children, its finding
+          children_counted_outside_r1_r2).
         quote: In R-1 and R-2 Districts, minor dependent children
+        also: [occupancy_one_family]
     - lines: [[27, 4, 8], [27, 11, 12]]
       what: "(7), (8), (10): pointers to the NYS Uniform Code, to Article V and to §325-8A(15)"
       all:
@@ -542,9 +591,11 @@ pieces:
   325-8E:
     - what: "South Hill Overlay: no second primary structure on a parcel (R-1 and R-2)"
       all:
-        status: missing
-        priority: medium
-        why: Nothing looks up the South Hill Overlay or asks how many primary structures stand on the parcel.
+        status: rulebook
+        rules: [south_hill_overlay]
+        note: Whether the lot is in the overlay is stated by the architect (not yet looked up on the map); asked only
+          once two or more primary buildings are counted, and blank then needs review. Primary structures standing
+          before the 2017 amendment, which the law lets stay and change, aren't seen (the rule can only be stricter).
       R-3a, R-3aa, R-3b, RU:
         status: not_applicable
         why: Applies to R-1 and R-2 property in the overlay only.
@@ -556,6 +607,8 @@ pieces:
       what: "Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood
         commercial, hospitals, day care)"
       all: {status: flag, rules: [use]}
+      # RU's occupancy rule cites (e) only for the code's own spelling of RU ("R-U"), a district of its own beside R-3.
+      RU: {status: flag, rules: [use], also: [occupancy_one_family]}
     - quote: "Bed-and-breakfast inns in all districts"
       lines: [[31, 36, 36]]
       what: "(p) Bed-and-breakfast inns need a special permit in all districts"
@@ -563,8 +616,18 @@ pieces:
       R-3a, R-3aa, R-3b, RU:
         status: flag
         rules: [use]
-    - lines: [[30, 37, 38], [31, 3, 33], [31, 37, 37]]
-      what: Accessory uses that need a special permit
+    - lines: [[30, 37, 38], [31, 3, 15]]
+      what: "(i) A home occupation needs a special permit unless it meets all four criteria"
+      all:
+        status: flag
+        rules: [home_occupation]
+        why: Whether a home occupation meets the four criteria (no stock, no traffic or parking beyond the residential
+          use, no exterior alterations or display, no nuisance) is about how it runs, not what is drawn;
+          home_occupation always needs review once one is planned.
+        quote: Home occupations in all residential districts, unless the home occupation meets all of the
+    - lines: [[31, 16, 33], [31, 37, 37]]
+      what: Other accessory uses that need a special permit (antennas and towers, telecommunications, gardens,
+        day care, neighborhood parking)
       all: *accessory_sp
 
   325-9D:
@@ -895,10 +958,12 @@ pieces:
 
   325-25:
     - what: Accessory structures follow §325-25 instead of the chart's side yards
-      all: {status: rulebook, rules: [accessory_buildings]}
+      # yards_not_shared cites §325-25 and §325-25A only to say §325-7B doesn't keep a garage or shed out of the
+      # main building's yards (its finding accessory_buildings_may_stand_in_yards); it checks none of them.
+      all: {status: rulebook, rules: [accessory_buildings], also: [yards_not_shared]}
   325-25A:
     - what: Accessory structures above grade are not in a required front yard (two on a corner lot)
-      all: {status: rulebook, rules: [accessory_buildings]}
+      all: {status: rulebook, rules: [accessory_buildings], also: [yards_not_shared]}
   325-25B:
     - what: Accessory structures wholly below grade may go anywhere
       all:
@@ -921,10 +986,12 @@ pieces:
   325-26:
     - what: New structures at least 20 ft from an inlet wall or a stream bank
       all:
-        status: missing
-        priority: high
-        why: Nothing looks up streams or inlets near the lot, or asks; a house 10 ft from a creek bank can pass.
-          (Ithaca's residential districts include lots along Cascadilla, Six Mile and Fall Creeks.)
+        status: rulebook
+        rules: [stream_setback]
+        note: The model doesn't show the water, so the architect states whether a stream bank or inlet wall is within
+          20 ft of the lot and, if so, the least level distance from any new structure; blank needs review. The
+          exception for structures "directly connected with marine or public or commercial recreation activities"
+          isn't applied (such a structure nearer than 20 ft shows as not complying, which is stricter, never a false pass).
 
   325-27D:
     - what: Short-term rentals (where, who may host)
