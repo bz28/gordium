@@ -20,6 +20,9 @@ import Rhino.Geometry as rg
 import scriptcontext as sc
 import System
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from test_docs_in_rhino import look_up_106  # noqa: E402
+
 S = os.path.join(tempfile.gettempdir(), "gordium_start_flow") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))   # the repo
 FRAMES = S + "frames/"
@@ -97,7 +100,7 @@ try:
                       "box_text": text})
 
     g.STATE["on_confirm"] = on_confirm
-    g.gordium_check()                                   # an empty model: the start flow
+    look_up_106(g, g.gordium_check)                                   # an empty model: the start flow
     lot_box = shown["box"]
     lot_box.Union(rg.Point3d(lot_box.Center.X, lot_box.Center.Y, 40 / g._scale(doc)))
     record(g, doc, "02_building", "OK: the largest legal building appears", lot_box, 0)

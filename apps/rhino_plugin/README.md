@@ -2,7 +2,8 @@
 
 New to it? Start with [QUICKSTART.md](QUICKSTART.md). `GordiumCheck` checks the open Rhino model against its zone's rules: PASS, FAIL or NEEDS REVIEW for every rule,
 the largest legal building drawn see-through on the lot, failing parts in red, and the architects'-format report
-saved next to the model. With live mode on (the default), it re-checks after every edit.
+saved next to the model. After an edit the results grey out until you press **Check** in the panel (tick **Check
+after every edit** to have it check again by itself).
 
 ## Set up (once)
 
@@ -39,8 +40,9 @@ Rhino: it keeps the old code loaded until then.
    neutral). A status box (never a ✓) sits top right; a short notice bottom left when an item newly fails.
    Every word and number comes from the checker's `view` (`design_checker/present.py`); the Rhino side decides
    nothing. If a check can't run, the old result is cleared and the panel says why, with Retry.
-5. **Live:** after every edit (a move, a stretch, a new or deleted object, a layer change), it re-checks once the model has been
-   still for half a second. No pop-ups.
+5. **After an edit** (a move, a stretch, a new or deleted object, a layer change) the results grey out ("Model
+   changed since the last check — press Check") until **Check** is pressed; with **Check after every edit** ticked
+   (off at first, kept with the file) it checks again once the model has been still for half a second. No pop-ups.
 
 The report (`<model>_gordium_report.xlsx`) is written next to the model by `GordiumCheck`, not on every edit.
 

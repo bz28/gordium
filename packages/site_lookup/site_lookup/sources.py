@@ -121,6 +121,28 @@ class Fetcher:
                  "paths": [[tuple(p[:2]) for p in path] for path in f["geometry"]["paths"]], "source": "state_streets"}
                 for f in body.get("features", []) if f.get("geometry")]
 
+    # ---- the context map: everything in a square around the lot (context.py) ---------------------------
+
+    def in_box(self, key: str, box, fields: str, page: int = 1000, cap: int = 5000) -> tuple[list[dict], bool]:
+        """Every feature of a layer meeting the box (x0, y0, x1, y1, EPSG:2261), page by page in OBJECTID order
+        (a service answers at most its maxRecordCount at a time and says `exceededTransferLimit` when there is
+        more). (features, complete): complete is False when `cap` features were reached and more were left."""
+        x0, y0, x1, y1 = box
+        base = {"geometry": f"{x0},{y0},{x1},{y1}", "geometryType": "esriGeometryEnvelope", "inSR": SR,
+                "spatialRel": "esriSpatialRelIntersects", "returnGeometry": "true", "outSR": SR, "outFields": fields,
+                "geometryPrecision": 2, "orderByFields": "OBJECTID", "resultRecordCount": page}
+        out: list[dict] = []
+        offset = 0
+        while True:
+            body = self._ask(key, {**base, "resultOffset": offset})
+            feats = body.get("features") or []
+            offset += len(feats)
+            out += [f for f in feats if f.get("geometry")]
+            if not (body.get("exceededTransferLimit") and feats):
+                return out, True
+            if offset >= cap:
+                return out, False
+
     # ---- zoning and overlays (live only) --------------------------------------------------------------
 
     def zoning_near(self, ring) -> list[dict]:

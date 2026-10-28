@@ -116,7 +116,7 @@ class Box:
                  "lookup": sv.get("_lookup") or {}, "live": sv.get("_live") or {}, "doubts": sv.get("doubts") or {},
                  "known_addresses": logic.known_addresses(sv),
                  "checked": sv.get("checked") or []}
-        return dict(state, **self.typed)
+        return dict(logic.show_pending_lot(dict(state, **self.typed), f, sv), **self.typed)
 
     def _apply(self, state=None):                  # gordium_rhino._apply_box: the box's answers into the facts
         state = state or self.shown()
@@ -147,7 +147,7 @@ class Box:
         question: back to the box), "open" (the City's guide: the box stays open for Draw my lot…), or "drawn"
         (saved, the session committed, the starting house drawn again when it was cleared)."""
         state = self.shown()
-        reason = logic.address_reason(state)
+        reason = logic.draw_blocked(state, self.saved)
         if reason:                                 # Draw is off (the plugin's _draw_prepare says why on any way in)
             self.said.append(reason)
             return "off"
@@ -246,20 +246,23 @@ def test_the_same_address_draws_nothing_new_and_its_button_says_check():
     assert site.table.snapshot()[0] == before[0]
 
 
-def test_looking_up_the_samples_own_address_draws_the_looked_up_lot_in_its_place():
-    """The demo build (#23 with #26): on the sample, 106 Ithaca Rd looked up was "the same address", so Draw drew
-    nothing, and the neighbourhood (drawn only around a looked-up lot, never the sample) never came. The sample is a
-    stand-in: looking up any address, its own included, draws the looked-up lot on the map in its place."""
-    site = Site(house=None)
+def test_look_up_then_check_on_a_drawn_sample_never_starts_fresh():
+    """Ben's P0 (coordinator, 2026-10-27): on a file drawn from the sample, Edit site's Look up of its own address
+    then Check started fresh: the lot and the starting house were redrawn over the architect's work. A drawn sample
+    is drawn (is_drawn): the same address draws nothing new, every answer and the drawing stay as they were."""
+    site = Site(house="gordium")
+    site.facts.update(unrelated_persons=2, home_occupation=True, home_occupation_area=300.0)
+    before = site.table.snapshot()
     box = site.box().look_up(answer("106_ithaca_rd"))
-    assert box.button() == "Draw" and "Shown dashed" in (logic.uncertain(box.shown()) or "")
+    assert box.button() == "Check"
     assert box.draw() == "drawn" and box.asked == []
-    lot = site.facts["lot_id"]
-    assert lot != "lot1" and "lot1" not in site.table.objects and site.saved["from_sample"] is False
-    assert site.saved["lookup_frame"] and logic.same_address(site.saved["drawn_address"], SAMPLE)
-    again = site.box().look_up(answer("106_ithaca_rd"))          # now it is the looked-up lot: the same address
-    assert again.button() == "Check" and again.draw() == "drawn" and site.facts["lot_id"] == lot
-
+    assert site.table.snapshot()[0] == before[0] and site.facts["lot_id"] == "lot1"     # nothing redrawn
+    assert (site.facts["unrelated_persons"], site.facts["home_occupation"], site.facts["home_occupation_area"]) == \
+        (2, True, 300.0)
+    edited = Site(house="edited")                       # their own edits: never even asked about
+    before = edited.table.snapshot()
+    again = edited.box().look_up(answer("106_ithaca_rd"))
+    assert again.draw() == "drawn" and again.asked == [] and edited.table.snapshot()[0] == before[0]
 
 def test_cancel_after_the_reset_puts_everything_back():
     site = Site()
@@ -503,13 +506,13 @@ def test_every_start_lookup_and_answer_keeps_the_promises(start):
                     box.asked[0][2] is None or "will be replaced)" in box.asked[0][2][0]), where
         assert site.facts.get("lot_id") in left, where         # never a Draw without a lot
         assert not [k for k in site.saved if k.startswith("_")], where
-        if kind == "same" and lot != "sample":
+        if kind == "same":                                     # a drawn sample too (Ben's P0, 2026-10-27)
             assert site.table.snapshot()[0] == before[0][0], where   # nothing new drawn, nothing removed
-        elif kind in ("new", "guide", "same"):                 # the sample's own address too: a real lot drawn
+        elif kind in ("new", "guide"):
             kept_house = said == "keep" and bool(box.asked) and box.asked[0][2]
             gone = gordiums - ({"floor1", "floor2"} if kept_house else set())
             assert not gone & left, where                      # nothing Gordium drew for the old address stays
-            assert logic.same_address(site.saved["drawn_address"], SAMPLE if kind == "same" else "96 Ithaca Rd"), where
+            assert logic.same_address(site.saved["drawn_address"], "96 Ithaca Rd"), where
 
 
 # ---- the plugin does what the harness does --------------------------------------------------------------------
@@ -634,7 +637,7 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     closes the undo step on any way out, errors included; RhinoTable.buildings is the checker's own buildings."""
     rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     prep = rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
-    steps = ("unlooked = logic.address_reason(dict(state, known_addresses=logic.known_addresses(saved_ui),",
+    steps = ("unlooked = logic.draw_blocked(state, saved_ui)",
              "if unlooked:                                          # Draw is off in the box; any other way in",
              "say(unlooked)\n        return facts, saved_ui, False, state",
              "facts, saved_ui = _apply_box(doc, facts, state, saved_ui)",
@@ -654,7 +657,7 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     assert loop.count("_draw_prepare(doc, facts, state, saved_ui, session, mode, options)") == 2
     assert "return _drawn(doc, facts, drawn_state, saved_ui, session, mode)" in loop   # the rebuilt state is saved
     draw = loop[loop.index('if what == "draw":'):]
-    assert loop.index("ticked = {k: state[k]") < loop.index('if what == "draw":') and "continue" in draw
+    assert loop.index("ticked = logic.box_ticks(state)") < loop.index('if what == "draw":') and "continue" in draw
     assert "logic.box_facts(facts, saved_ui, state)" in rhino[rhino.index("def _apply_box("):]
     edit = rhino[rhino.index("def edit_facts("):rhino.index("def report_path(")]
     outer = edit.index("    try:                                # one undo step")
@@ -715,6 +718,79 @@ def test_a_failed_lookup_after_a_preview_leaves_nothing_of_it():
     assert box.type_address(SAMPLE).draw() == "drawn"            # no preview left to drop (the lookup failed)
     assert site.facts["zone"] == "R-1b" and site.saved["zone_source"] == "entered by you"
     assert "lot_area" not in site.saved and not site.saved.get("street_source")
+
+
+def _rows_of(box):
+    return {r["key"]: r["text"] for r in logic.box_rows(box.shown())}
+
+
+def test_in_an_empty_file_a_found_lookup_shows_its_own_lot_and_street_after_draw():
+    """Ben, 2026-10-27: after Look up in an empty file (only the sample's stand-in lot) the Lot and Front lot line
+    rows kept the sample's 7,033 sf and Ithaca Rd until Draw. They show the looked-up lot, marked "after Draw"."""
+    site = Site()
+    sample = _rows_of(site.box())
+    assert "after Draw" not in sample["lot"] + sample["street"]
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    found = answer("96_ithaca_rd")["facts"]["lot"]["value"]["area_sf"]
+    rows = _rows_of(box)
+    assert rows["lot"].startswith(logic.lot_size(found)) and rows["lot"].endswith(" · after Draw")
+    assert "from the tax map" in rows["lot"] or "NYS" in rows["lot"]
+    assert rows["street"].endswith(" · after Draw") and rows["street"] != sample["street"] + " · after Draw"
+    assert logic.lot_size(6570.0) not in rows["lot"]               # never the sample lot's area
+    assert all(a[0] not in ("lot", "street") for r in logic.box_rows(box.shown())
+               if r["key"] in ("lot", "street") for a in r["actions"])
+    assert box.facts.get("lot_id") == "lot1" and "lot_area" not in box.saved     # display only: no fact written
+
+
+def test_with_a_lot_drawn_a_lookup_leaves_the_lot_and_street_rows_describing_the_drawing():
+    for lot in ("looked_up", "theirs"):
+        site = Site(lot=lot)
+        before = _rows_of(site.box())
+        rows = _rows_of(site.box().look_up(answer("96_ithaca_rd")))
+        assert rows["lot"] == before["lot"] and rows["street"] == before["street"], lot
+        assert "after Draw" not in rows["lot"] + rows["street"]
+
+
+def test_a_failed_lookup_after_a_found_one_leaves_none_of_its_lot_and_street():
+    site = Site()
+    before = _rows_of(site.box())
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert _rows_of(box)["lot"] != before["lot"]
+    box.look_up(answer("not_found"))
+    after = _rows_of(box)
+    assert (after["lot"], after["street"]) == (before["lot"], before["street"])
+    box.look_up(answer("96_ithaca_rd")).look_up(answer("109_ithaca_rd"))       # a new lookup: only the new one's
+    rows = _rows_of(box)
+    assert rows["lot"].startswith(logic.lot_size(answer("109_ithaca_rd")["facts"]["lot"]["value"]["area_sf"]))
+
+
+def test_no_after_draw_when_the_address_is_already_drawn_and_draw_would_draw_nothing():
+    """Review round 1: with no lot in the file but drawn_address equal to the looked-up address, Draw draws nothing,
+    so the rows must not promise a lot "after Draw"."""
+    site = Site(lot="looked_up", drawn="96 Ithaca Rd, Ithaca, NY")
+    for k in ("lot_id", "street_line"):
+        site.facts.pop(k)
+    del site.table.objects["lot1"]
+    rows = _rows_of(site.box().look_up(answer("96_ithaca_rd")))
+    assert "after Draw" not in rows["lot"] + rows["street"]
+
+
+def test_rows_do_not_show_the_found_lot_while_another_address_is_typed_or_looked_up():
+    """Review round 2: address A found, then B typed (or B being looked up): A's lot must not stay under B."""
+    site = Site()
+    before = _rows_of(site.box())
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert "after Draw" in _rows_of(box)["lot"]
+    box.type_address("109 Ithaca Rd, Ithaca, NY")
+    rows = _rows_of(box)
+    assert (rows["lot"], rows["street"]) == (before["lot"], before["street"])
+    box.type_address("")                       # blank: Draw sets the preview aside, so no promise either
+    rows = _rows_of(box)
+    assert (rows["lot"], rows["street"]) == (before["lot"], before["street"])
+    box.typed.clear()
+    box.saved["_lookup"] = dict(box.saved["_lookup"], looking="109 Ithaca Rd")
+    rows = _rows_of(box)
+    assert (rows["lot"], rows["street"]) == (before["lot"], before["street"])
 
 
 def test_buildings_on_a_sublayer_are_asked_about():
@@ -869,7 +945,7 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
     assert 'STATE["redraw_house"] =' in rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
     confirm = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
     assert confirm.index("gate.enter()") < confirm.index('STATE.pop("redraw_house", None)') < \
-        confirm.index("return _confirm(doc, facts, options, mode)")       # cleared as the box opens, before its Draw
+        confirm.index("result = _confirm(doc, facts, options, mode)")     # cleared as the box opens, before its Draw
     check = rhino[rhino.index("def gordium_check("):rhino.index("# ---- GordiumStart")]
     assert check.index("facts = confirm(") < check.index('STATE.pop("redraw_house", None)') < \
         check.index("if facts is None:")                                    # GordiumCheck: dropped with its box
@@ -881,3 +957,531 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
                # (#32: Draw reads it, in its own box, to work out the house it will draw: logic.plans_house)
                and not rhino.index("def _drawn(") < i < rhino.index("def hide_massing(")]
     assert outside == [], outside                                           # read nowhere else
+
+
+# ---- a new, empty file: an empty box, Draw off until a lookup is found, or the site by hand (Ben, 2026-10-27) ----
+
+def _empty_box(**saved):
+    opened = logic.box_opened(saved, {})                      # no lot when the box opened
+    state = {"address": "", "zone": None, "district_confirmed": False, "lot_missing": True, "has_lot": False,
+             "design_buffer": "0'-0\"", "known_addresses": logic.known_addresses(opened), "lookup": {}}
+    return logic.start_gate(state, opened), opened
+
+
+def test_a_new_file_opens_an_empty_box_and_draw_waits_for_a_found_lookup():
+    state, _ = _empty_box()
+    assert state["needs_lookup"] and logic.draw_reason(state) == logic.LOOK_UP_FIRST_SITE
+    assert logic.LOOK_UP_FIRST_SITE == ("Look up the address first. It finds the lot, zoning district and "
+                                        "neighbourhood.")
+    rows = {r["key"]: r for r in logic.box_rows(state)}
+    assert rows["lot"]["text"] == rows["street"]["text"] == "Look up an address to fill these in"
+    assert [a for a, _, _ in rows["lot"]["actions"]] == ["by_hand"]       # never "Draw my lot…" before choosing
+    # ticking the district changes nothing: still no Draw without a lookup (never facts the architect didn't choose)
+    assert logic.draw_reason(dict(state, zone="R-1b", district_confirmed=True)) == logic.LOOK_UP_FIRST_SITE
+    # a found lookup of the address typed: the gate opens (the rest of Draw's rules still apply)
+    found, _ = _empty_box(_pending={"address": "106 Ithaca Rd, Ithaca, NY", "query": "106 Ithaca Rd"})
+    found = logic.start_gate(dict(found, address="106 Ithaca Rd"), logic.box_opened(
+        {"_pending": {"address": "106 Ithaca Rd, Ithaca, NY", "query": "106 Ithaca Rd"}}, {}))
+    assert not found["needs_lookup"]
+    # another address typed after it: shut again
+    other = logic.start_gate(dict(found, address="96 Ithaca Rd"), logic.box_opened(
+        {"_pending": {"address": "106 Ithaca Rd, Ithaca, NY", "query": "106 Ithaca Rd"}}, {}))
+    assert other["needs_lookup"]
+
+
+def test_the_site_by_hand_is_the_architects_own_and_says_no_neighbourhood_is_drawn():
+    state, _ = _empty_box(_by_hand=True)
+    assert state["by_hand"] and not state["needs_lookup"]
+    rows = {r["key"]: r for r in logic.box_rows(state)}
+    assert "No neighbourhood is drawn" in rows["lot"]["help"]
+    assert [a for a, _, _ in rows["lot"]["actions"]] == ["draw_lot"]       # they draw the lot
+    typed = dict(state, address="12 New Lot Ln")                           # no lookup possible: a label only
+    assert logic.address_reason(typed) == ""
+    assert logic.draw_reason(typed) == "Pick the district to continue."   # and then the district, confirmed
+    assert logic.draw_reason(dict(typed, zone="R-1b")) == "Confirm the district to continue."
+    assert logic.draw_reason(dict(typed, zone="R-1b", district_confirmed=True)) == "Draw or pick the lot to continue."
+    assert logic.draw_reason(dict(typed, zone="R-1b", district_confirmed=True, lot_missing=False)) == ""
+    assert "_by_hand" not in logic.storable_ui({"_by_hand": True})        # never saved: only while the box is open
+
+
+def test_a_file_already_drawn_keeps_working_as_before():
+    opened = logic.box_opened({"drawn_address": SAMPLE}, {"lot_id": "lot1", "address": SAMPLE})
+    state = logic.start_gate({"address": SAMPLE, "zone": "R-1b", "district_confirmed": True, "has_lot": True,
+                              "design_buffer": "0'-0\"", "known_addresses": logic.known_addresses(opened)}, opened)
+    assert not state["needs_lookup"] and not state["by_hand"] and logic.draw_reason(state) == ""
+    # by hand never applies to a drawn file: a new address typed there must still be looked up
+    by_hand = logic.start_gate(dict(state, address="96 Ithaca Rd"), dict(opened, _by_hand=True))
+    assert not by_hand["by_hand"] and logic.address_reason(by_hand).startswith("Press Look up")
+
+
+def test_the_plugin_opens_new_files_empty_and_gates_every_box():
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    start = src[src.index("def gordium_start():"):src.index("def _draw_starting_house(")]
+    assert "sample_site" not in start and "from_sample=True" not in start
+    assert "logic.no_guessed_district({}, suggested_facts(" in start    # no district guessed in an empty file
+    assert "sample" not in logic.NO_LOT
+    state = src[src.index("def _box_state(doc"):src.index("\n\n\n", src.index("def _box_state(doc"))]
+    assert "logic.start_gate(" in state
+    assert 'if what == "by_hand":' in src and "logic.choose_by_hand(facts, saved_ui, in_city)" in src
+
+
+def test_draw_draws_nothing_on_an_empty_file_without_a_found_lookup_whatever_way_it_is_pressed():
+    """The scripted way in ticks the district and draws without the box's Draw button (_box_loop's auto path):
+    _draw_prepare asks draw_blocked, so it too never draws a site the architect didn't choose."""
+    opened = logic.box_opened({}, {})
+    state = {"address": "", "zone": "R-1b", "district_confirmed": True, "lot_missing": True}
+    assert logic.draw_blocked(state, opened) == logic.LOOK_UP_FIRST_SITE
+    assert logic.draw_blocked(dict(state, address="106 Ithaca Rd"), opened).startswith("Press Look up")
+    found = dict(opened, _pending={"address": "106 Ithaca Rd, Ithaca, NY", "query": "106 Ithaca Rd"})
+    assert logic.draw_blocked(dict(state, address="106 Ithaca Rd"), found) == ""
+    assert logic.draw_blocked(state, dict(opened, _by_hand=True)) == ""
+    drawn = logic.box_opened({"drawn_address": SAMPLE}, {"lot_id": "lot1", "address": SAMPLE})
+    assert logic.draw_blocked(dict(state, address=SAMPLE), drawn) == ""          # a drawn file: as before
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    prep = src[src.index("def _draw_prepare("):src.index("    facts, saved_ui = _apply_box(", src.index("def _draw_prepare("))]
+    assert "unlooked = logic.draw_blocked(state, saved_ui)" in prep and "return facts, saved_ui, False, state" in prep
+
+
+# ---- the offline safety net: the lookup saved on this computer (Ben, 2026-10-27) ----
+
+def _found_106():
+    from site_lookup.lookup import lookup
+    from test_lookup_box import T
+    from design_checker.lookup_box import box_payload
+    fx = T.load("106_ithaca_rd")
+    return box_payload(lookup(fx["address"], T.Fake(fx), T.NOW), T.NOW)
+
+
+def test_a_found_lookup_is_saved_only_as_far_as_its_sources_allow_and_never_with_the_district():
+    import json
+    found = _found_106()
+    assert found["status"] == "found" and found["writes"]["lot_ring"] and found["facts"]["zone"]["value"]
+    store = logic.save_lookup({}, found, "106 Ithaca Rd")
+    copy = store[logic.lookup_key("106 Ithaca Rd")]
+    assert "zone" not in copy["facts"]                                # the City's zoning map: used live, never kept
+    assert logic.USED_LIVE not in json.dumps(copy["facts"])           # nor any value a source forbids keeping
+    district = found["facts"]["zone"]["value"]                        # (the snapshot kept only its marker)
+    assert copy["writes"]["snapshot"]["facts"]["zone"]["value"] == logic.USED_LIVE
+    assert json.dumps(district) not in json.dumps({k: v for k, v in copy.items() if k != "writes"})
+    assert copy["facts"]["lot"]["value"]["area_sf"] == found["facts"]["lot"]["value"]["area_sf"]
+    assert copy["writes"]["lot_ring"] == found["writes"]["lot_ring"] and copy["writes"]["guide_ring"] is None
+    assert copy["checked"] == found["checked"]
+    json.dumps(store)                                                  # a plain file
+    # a failure, a guide only (the City's outline: never kept) and a saved copy itself are never saved
+    for answer in ({"status": "offline"}, dict(found, writes=dict(found["writes"], lot_ring=None)),
+                   logic.as_saved(copy)):
+        assert logic.save_lookup({}, answer, "106 Ithaca Rd") == {}
+
+
+def test_only_a_lookup_that_couldnt_reach_the_services_offers_the_saved_one_for_the_same_address():
+    store = logic.save_lookup({}, _found_106(), "106 Ithaca Rd")
+    for status in ("offline", "error", "timeout"):
+        assert logic.saved_offer({"status": status}, store, "106 ithaca road, Ithaca NY") is not None, status
+    for status in ("not_found", "outside_city", "multiple", "found"):   # an answer is an answer: never replaced
+        assert logic.saved_offer({"status": status}, store, "106 Ithaca Rd") is None, status
+    assert logic.saved_offer({"status": "offline"}, store, "96 Ithaca Rd") is None       # another address
+    assert logic.saved_offer({"status": "offline"}, store, "") is None
+
+
+def test_the_saved_lookup_is_marked_with_its_date_and_the_district_is_picked_again():
+    found = _found_106()
+    copy = logic.save_lookup({}, found, "106 Ithaca Rd")[logic.lookup_key("106 Ithaca Rd")]
+    date = copy["checked"]
+    # offline: the box says so and offers it (the Address row's button)
+    facts, saved, _ = logic.preview_lookup({"status": "offline", "query": "106 Ithaca Rd"}, {"address": "106 Ithaca Rd"},
+                                           logic.box_opened({}, {}), ZONES)
+    saved["_lookup"] = dict(saved["_lookup"], saved_offer=date, saved_for="106 Ithaca Rd")
+    rows = {r["key"]: r for r in logic.box_rows({"address": "106 Ithaca Rd", "lookup": saved["_lookup"]})}
+    assert ("use_saved", "Use the lookup saved on " + date, True) in rows["address"]["actions"]
+    retyped = {r["key"]: r for r in logic.box_rows({"address": "96 Ithaca Rd", "lookup": saved["_lookup"]})}
+    assert [a for a, _, _ in retyped["address"]["actions"]] == ["lookup"]     # round 6: no button that does nothing
+    # used: shown like a lookup, every label and the line marked with the date; no district suggested
+    facts, saved, ring = logic.preview_lookup(logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Rd"), facts, saved,
+                                              ZONES)
+    assert ring == found["writes"]["lot_ring"]
+    assert saved["_lookup"]["says"] == logic.SAVED_SAYS.format(address=facts.get("address") or "106 Ithaca Rd",
+                                                               date=date)
+    assert "saved on " + date in saved["_lookup"]["says"] and "pick the district again" in saved["_lookup"]["says"]
+    assert not facts.get("zone")
+    labels = saved["_pending"]["answer"]["labels"]
+    assert labels and all(v.endswith(" · saved on " + date) for v in labels.values())
+    gate = logic.start_gate({"address": "106 Ithaca Rd"}, saved)
+    assert not gate["needs_lookup"]                                  # it opens Draw's gate…
+    assert logic.draw_reason(dict(gate, zone=None, district_confirmed=False, has_lot=True)) == \
+        "Pick the district to continue."                             # …but the district is the architect's to pick
+
+
+def test_the_plugin_saves_found_lookups_and_offers_the_saved_one_only_when_offline():
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    done = src[src.index("def _lookup_done("):src.index("def _saved_lookups_path(")]
+    assert "_saved_lookup, " in done and "saved_offer=offer.get(\"checked\"), saved_for=asked" in done
+    saved = src[src.index("def _saved_lookup("):src.index("def _show_answer(")]
+    assert "logic.save_lookup(store, answer, asked)" in saved and "logic.saved_offer(answer, store, asked)" in saved
+    pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
+    assert 'logic.guard(logic.use_saved, "use the saved lookup")(' in pick
+    assert 'not STATE.get("lookup_fixture")' in saved and "readable" in saved and "os.getpid()" in saved
+    assert "ticked = logic.ticks_after_pick(what, ticked, " in src    # the ticks go, as for any lookup's answer
+    assert logic.ticks_after_pick("pick:use_saved", {"district_confirmed": True}, "found") == {
+        "district_confirmed": False}
+
+
+def test_a_saved_lookup_is_never_used_for_another_address_or_another_town():
+    """Start-flow sceptic 1: (1) offline at 106, the address retyped to 96, then Use saved: 106's lot went in under
+    "96 Ithaca Rd" as if 96 had been looked up; (2) the key is the street address alone, so "106 Ithaca Rd, Lansing"
+    was offered the City's 106."""
+    found = _found_106()
+    store = logic.save_lookup({}, found, "106 Ithaca Rd")
+    copy = store[logic.lookup_key("106 Ithaca Rd")]
+    assert logic.use_saved(copy, "106 Ithaca Rd", "96 Ithaca Rd") is None                  # retyped: dropped
+    answer = logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Road")
+    assert answer and answer["query"] == copy["query"]                                     # its own query
+    facts, saved, _ = logic.preview_lookup(answer, {"address": "106 Ithaca Rd"}, logic.box_opened({}, {}), ZONES)
+    assert logic.draw_blocked({"address": "96 Ithaca Rd"}, saved) != ""                     # 96 never looked up
+    for other in ("106 Ithaca Rd, Lansing, NY 14882", "106 Ithaca Rd, Town of Ithaca"):
+        assert logic.saved_offer({"status": "offline"}, store, other) is None, other
+    assert logic.saved_offer({"status": "offline"}, store, "106 Ithaca Rd, Ithaca, NY 14850") is copy
+
+
+def test_edit_site_on_a_drawn_file_whose_lot_is_gone_is_not_a_new_file():
+    """Sceptic 1 (P2): the gate is for a new file only; a drawn file (its address saved) with its lot curve deleted
+    keeps "Draw my lot…"."""
+    opened = logic.box_opened({}, {"address": SAMPLE})
+    state = logic.start_gate({"address": SAMPLE, "lot_missing": True}, opened)
+    assert not state["needs_lookup"]
+    rows = {r["key"]: r for r in logic.box_rows(state)}
+    assert "draw_lot" in [a for a, _, _ in rows["lot"]["actions"]]
+
+
+def test_sceptic_2_an_outline_only_lookup_and_by_hand_never_skip_the_address_rule():
+    """(1) A new file whose lookup found only the City's outline: Draw cleared for it and kept the box open to draw
+    the lot over it; the gate shut again (the preview gone) and offered only "by hand". (2) By hand, then a lookup
+    of the City's 106 found, then "106 Ithaca Rd, Lansing" typed: Draw went on with the City's lot."""
+    opened = logic.box_opened({}, {})
+    after_reset = dict(opened, _redrawn_for="106 Ithaca Road, Ithaca, NY, 14850",
+                       drawn_address="106 Ithaca Road, Ithaca, NY, 14850")
+    state = logic.start_gate({"address": "106 Ithaca Road, Ithaca, NY, 14850", "lot_missing": True}, after_reset)
+    assert not state["needs_lookup"]
+    assert "draw_lot" in [a for a, _, _ in {r["key"]: r for r in logic.box_rows(state)}["lot"]["actions"]]
+    pending = {"address": "106 Ithaca Road, Ithaca, NY, 14850", "query": "106 Ithaca Rd, Ithaca, NY 14850"}
+    by_hand = dict(opened, _by_hand=True, _pending=pending)
+    lansing = {"address": "106 Ithaca Rd, Lansing, NY", "zone": "R-1b", "district_confirmed": True,
+               "lot_missing": False, "has_lot": True}
+    assert logic.draw_blocked(lansing, by_hand) != ""
+    facts, saved = logic.settle_pending({"address": lansing["address"]}, by_hand, lansing["address"])
+    assert saved.get("_pending") is None                                    # another town's: the preview dropped
+
+
+def test_by_hand_chosen_after_a_found_lookup_works():
+    """Round 3: by hand, a found lookup, another address typed: the by-hand button showed again and did nothing."""
+    opened = logic.box_opened({}, {})
+    found = dict(opened, _by_hand=True, _pending={"address": "106 Ithaca Road, Ithaca, NY, 14850",
+                                                  "query": "106 Ithaca Rd", "undo": []})
+    assert logic.start_gate({"address": "5 Other St"}, found)["needs_lookup"]
+    facts, saved = logic.choose_by_hand({"address": "5 Other St"}, found, "2026-10-27")
+    state = logic.start_gate({"address": "5 Other St"}, saved)
+    assert state["by_hand"] and not state["needs_lookup"] and "_pending" not in saved
+    assert logic.draw_blocked(dict(state, zone="R-1b", district_confirmed=True, lot_missing=False), saved) == ""
+
+
+def test_by_hand_asks_for_the_district_tick_again():
+    """Round 4: the box loop's ticks carried across picks; by hand undid the lookup's district (back to the one
+    picked before), so the tick given to the lookup's district moved onto it and Draw went on."""
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    loop = src[src.index("def _box_loop("):src.index("\n\n\n", src.index("def _box_loop("))]
+    reset = loop[loop.index('if (what == "pick:by_hand" and saved_ui.get("_by_hand")'):]
+    assert "(not was_by_hand or (had_pending and not saved_ui.get(\"_pending\")))):" in reset.split("\n", 2)[1]
+    assert reset.split("\n", 3)[2].strip().startswith("ticked = {}")      # (round 12: only once by hand is taken)
+    assert loop.index('was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")') < \
+        loop.index("_box_pick(doc, what.split")
+    pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
+    assert pick.index("_lookup_stop()") < pick.index("logic.choose_by_hand(facts, saved_ui, in_city)")
+
+
+def test_round_5_by_hand_is_for_city_of_ithaca_lots_only():
+    """By hand skipped the town check, and choose_by_hand wiped an "outside the City" answer: a Lansing lot could be
+    drawn and checked under the City's rules."""
+    opened = logic.box_opened({}, {})
+    lansing = {"address": "106 Ithaca Rd, Lansing, NY"}
+    assert logic.draw_blocked(lansing, dict(opened, _by_hand=True)) == \
+        logic.BY_HAND_CITY_ONLY.format(address=lansing["address"])
+    _, outside = logic.lookup_choices({"status": "outside_city", "query": "953 Danby Rd, Ithaca, NY"}, {}, opened)
+    _, by_hand = logic.choose_by_hand({}, outside, "2026-10-27")
+    assert logic.draw_blocked({"address": "953 Danby Rd, Ithaca, NY"}, by_hand) != ""
+    assert logic.draw_blocked({"address": "12 New Lot Ln, Ithaca, NY 14850"}, dict(opened, _by_hand=True)) == ""
+    assert logic.draw_blocked({"address": "12 New Lot Ln"}, by_hand) != ""   # round 12: refused, whatever address
+
+
+def test_round_9_by_hand_reads_the_town_of_an_address_typed_without_commas():
+    """Round 9: address_place read only after a comma, so "12 Main St Lansing NY 14882" passed as a City lot."""
+    opened = dict(logic.box_opened({}, {}), _by_hand=True)
+    for other in ("12 Main St Lansing NY 14882", "106 Ithaca Rd Dryden NY", "12 Main St 14882"):
+        assert logic.draw_blocked({"address": other}, opened) == logic.BY_HAND_CITY_ONLY.format(address=other)
+    for city in ("106 Ithaca Rd", "106 Ithaca Rd Ithaca NY 14850", "106 Ithaca Road NY", "204 Utica St"):
+        assert logic.draw_blocked({"address": city}, opened) == ""
+    assert not logic.same_site_address("106 Ithaca Rd Dryden NY", "106 Ithaca Road, Ithaca, NY, 14850")
+    assert logic.same_site_address("106 Ithaca Rd Ithaca NY 14850", "106 Ithaca Road, Ithaca, NY, 14850")
+
+
+def test_round_10_the_town_after_the_street_is_read_whatever_the_ending():
+    """Round 10: the Town of Ithaca read as the City, a town with no state typed passed, and "Way" read as a town."""
+    opened = dict(logic.box_opened({}, {}), _by_hand=True)
+    for other in ("12 Main St Town of Ithaca NY", "12 Main St Town of Ithaca NY 14850", "12 Main St Lansing",
+                  "12 Main St East Ithaca NY", "12 Main St Cayuga Heights NY", "12 Main St, Town of Ithaca, NY"):
+        assert logic.draw_blocked({"address": other}, opened) == logic.BY_HAND_CITY_ONLY.format(address=other)
+    for city in ("1 Willard Way NY 14850", "1 Willard Way", "100 Aurora St N", "100 E State St Ithaca",
+                 "10 Rte 13 Ithaca NY", "100 Broadway Ithaca NY"):
+        assert logic.draw_blocked({"address": city}, opened) == "", city
+    assert logic.same_site_address("1 Willard Way NY 14850", "1 Willard Way, Ithaca, NY, 14850")
+
+
+def test_round_11_by_hand_needs_the_architects_word_that_the_lot_is_the_citys():
+    """Round 11: "1 Pine Tree Rd Ithaca NY 14850" is the Town's, yet by hand took it: the City's mail name and ZIP
+    also cover the Town, so the architect says Yes to IN_CITY_QUESTION, kept with its date; No changes nothing."""
+    opened = logic.box_opened({}, {})
+    facts, saved = logic.choose_by_hand({}, dict(opened), None)                  # No: still gated on a lookup
+    assert "_by_hand" not in saved and logic.draw_blocked({}, saved) == logic.LOOK_UP_FIRST_SITE
+    facts, saved = logic.choose_by_hand({}, dict(opened), "2026-10-27")
+    assert saved["city_by_hand"] == "2026-10-27" and "city_by_hand" in logic.storable_ui(saved)
+    assert logic.draw_blocked({}, saved) == ""
+    state = logic.start_gate({"address": ""}, saved)
+    assert state["by_hand"] and state["city_by_hand"] == "2026-10-27"
+    assert "Town of Ithaca" in logic.IN_CITY_QUESTION and "No: nothing changes" in logic.IN_CITY_QUESTION
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
+    assert pick.index("_ask_in_city()") < pick.index("logic.choose_by_hand(facts, saved_ui, in_city)")
+    assert "MessageBoxDefaultButton.No" in src[src.index("def _ask_in_city("):]
+
+
+def test_round_11_units_a_run_on_zip_and_a_town_after_a_street_with_no_ending():
+    opened = dict(logic.box_opened({}, {}), _by_hand=True)
+    for other in ("1 Snyder Hill Dryden", "1 Sapsucker Woods Lansing", "1 Lake Ridge Lansing",
+                  "1 Eastern Heights Dryden", "1 Main Rdg Lansing"):
+        assert logic.draw_blocked({"address": other}, opened) == logic.BY_HAND_CITY_ONLY.format(address=other)
+    for city in ("1 Oak Ave Apt 2", "12 Cascadilla St Unit B Ithaca", "1 Mitchell St Ithaca NY14850",
+                 "12 Oak Ave, Apt 2, Ithaca, NY", "100 Dryden Rd", "12 Oak Ave #3"):
+        assert logic.draw_blocked({"address": city}, opened) == "", city
+
+
+def test_round_12_outside_the_city_refuses_by_hand_whatever_the_address():
+    """Round 12: after the lookup said outside the City, a Yes then a cleared or retyped address opened Draw."""
+    opened = logic.box_opened({}, {})
+    _, outside = logic.lookup_choices({"status": "outside_city", "query": "12 Main St, Lansing"}, {}, opened)
+    assert logic.by_hand_refused(outside) == logic.BY_HAND_OUTSIDE.format(query="12 Main St, Lansing")
+    _, saved = logic.choose_by_hand({}, dict(outside), "2026-10-27")
+    assert "_by_hand" not in saved and "city_by_hand" not in saved
+    later = dict(opened, _by_hand=True, city_by_hand="2026-10-27")             # a Yes, then a lookup said outside
+    _, later = logic.lookup_choices({"status": "outside_city", "query": "14 Main St"}, {}, later)
+    for address in ("", "12 Main St", "14 Main St"):
+        assert logic.draw_blocked({"address": address}, later) == logic.BY_HAND_OUTSIDE.format(query="14 Main St")
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
+    assert "in_city = None if refused else _ask_in_city()" in pick
+
+
+def test_round_12_the_yes_is_shown_and_kept_once_on_the_address_source():
+    state = logic.start_gate({"address": "12 New Lot Ln", "has_lot": True}, {"city_by_hand": "2026-10-27"})
+    assert state["city_by_hand"] == "2026-10-27"                               # shown after the lot is drawn too
+    said = logic.IN_CITY_SAID.format(date="2026-10-27")
+    first = logic.fact_sources(dict(state, address_source=logic.ENTERED), "2026-10-27", True)["address"]["source"]
+    assert first == logic.ENTERED + " · " + said
+    again = logic.fact_sources(dict(state, address_source=first), "2026-10-28", True)["address"]["source"]
+    assert again == first                                                      # read back at the next Draw: once
+    assert logic.fact_sources(dict(state, city_by_hand=None, address_source=logic.ENTERED), "x", True)[
+        "address"]["source"] == logic.ENTERED
+
+
+def test_round_13_outside_the_city_outlives_a_later_lookup_that_finds_nothing():
+    """Round 13: outside the City, then an offline or not-found lookup, and by hand opened Draw on that lot."""
+    opened = logic.box_opened({}, {})
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "100 Snyder Hill Rd"}, {}, opened)
+    for then in ("offline", "not_found", "error", "multiple"):
+        _, later = logic.lookup_choices({"status": then, "query": "100 Snyder Hill Rd"}, {}, dict(saved))
+        assert logic.by_hand_refused(later)
+        _, tried = logic.choose_by_hand({}, dict(later), "2026-10-27")
+        assert "_by_hand" not in tried
+    _, found = logic.lookup_choices({"status": "found", "query": "100 Snyder Hill Rd"}, {}, dict(saved))
+    assert not logic.by_hand_refused(found)                     # a found lookup of that address ends it (round 14)
+
+
+def test_round_13_a_drawn_lot_the_lookup_says_is_outside_is_not_drawn_again():
+    """Round 13: a by-hand lot (its Yes kept), reopened and looked up outside the City: Draw went on."""
+    facts = {"lot_id": "L", "address": "100 Snyder Hill Rd, Ithaca, NY 14850"}
+    opened = logic.box_opened({"city_by_hand": "2026-10-27"}, facts)
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": facts["address"]}, facts, opened)
+    assert saved["city_by_hand"] == "2026-10-27"                               # the Yes kept, as said
+    assert logic.draw_blocked({"address": facts["address"]}, saved) == logic.BY_HAND_OUTSIDE.format(
+        query=facts["address"])
+
+
+def test_round_13_parts_of_a_lot_units_and_the_county_are_not_towns():
+    opened = dict(logic.box_opened({}, {}), _by_hand=True)
+    for city in ("101 N Aurora St Rear", "10 Cayuga St Bldg 2", "100 Cornell St 2nd Fl", "10 Cayuga St B",
+                 "1 Esty St 1/2", "10 Cayuga St - Ithaca", "10 Brindley St Lower",
+                 "10 Cayuga St Ithaca Tompkins County NY", "10 Cayuga St, Ithaca, Tompkins County, NY"):
+        assert logic.draw_blocked({"address": city}, opened) == "", city
+    assert logic.address_place("12 Main St Lansing NY 14882") == "lansing 14882"
+
+
+def test_round_14_the_lots_own_address_said_outside_blocks_draw_whatever_is_typed():
+    facts = {"lot_id": "L", "address": "106 Ithaca Rd"}
+    opened = logic.box_opened({}, facts)
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "106 Ithaca Rd"}, facts, opened)
+    for typed in ("", "106 Ithaca Rd", "106 Ithaca Rd, Ithaca, NY, 14850"):
+        assert logic.draw_blocked({"address": typed}, saved) == logic.BY_HAND_OUTSIDE.format(query="106 Ithaca Rd")
+
+
+def test_round_14_a_found_lookup_of_another_address_keeps_outside_the_city():
+    opened = logic.box_opened({}, {})
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "5 Foo Rd"}, {}, opened)
+    _, saved = logic.lookup_choices({"status": "found", "query": "106 Ithaca Rd"}, {}, saved)
+    assert saved["_outside_for"] == ["5 Foo Rd"] and logic.by_hand_refused(saved)
+    assert logic.draw_blocked({"address": "5 Foo Rd"}, saved) == logic.BY_HAND_OUTSIDE.format(query="5 Foo Rd")
+    _, saved = logic.lookup_choices({"status": "found", "query": "5 Foo Rd"}, {}, saved)   # found: that one ends
+    assert saved["_outside_for"] == [] and not logic.by_hand_refused(saved)
+
+
+def test_round_14_the_old_lots_yes_is_never_on_the_lot_drawn_in_its_place():
+    shown = {"city_by_hand": "2026-10-01", "address": "12 Old Ln", "address_source": logic.ENTERED}
+    fresh = {"address": "106 Ithaca Rd", "address_source": "City geocoder"}
+    state = logic.after_reset_state(shown, fresh)
+    assert logic.fact_sources(state, "2026-10-27", True)["address"]["source"] == "City geocoder"
+
+
+def test_round_15_a_saved_lookup_never_lifts_a_live_outside_the_city():
+    opened = logic.box_opened({}, {})
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "106 Ithaca Rd"}, {}, opened)
+    copy = logic.as_saved({"status": "found", "query": "106 Ithaca Rd", "checked": "2026-10-20", "labels": {}})
+    _, used = logic.lookup_choices(copy, {}, saved)
+    assert used["_outside_for"] == ["106 Ithaca Rd"]
+    assert logic.draw_blocked({"address": "106 Ithaca Rd"}, used) == logic.BY_HAND_OUTSIDE.format(
+        query="106 Ithaca Rd")
+    _, live = logic.lookup_choices({"status": "found", "query": "106 Ithaca Rd"}, {}, used)
+    assert live["_outside_for"] == []                                           # a live found one ends it
+
+
+def test_round_16_a_preview_set_aside_never_brings_back_an_outside_address_found_since():
+    opened = logic.box_opened({}, {})
+    _, saved = logic.lookup_choices({"status": "outside_city", "query": "12 Main St"}, {}, opened)
+    facts, saved, _ = logic.preview_lookup({"status": "found", "query": "12 Main St", "facts": {}}, {}, saved)
+    assert saved["_outside_for"] == []
+    facts, later, _ = logic.preview_lookup({"status": "not_found", "query": "9 Other St"}, facts, dict(saved))
+    assert later["_outside_for"] == [] and not logic.by_hand_refused(later)
+    _, by_hand = logic.choose_by_hand(facts, dict(saved), "2026-10-27")
+    assert by_hand.get("_by_hand") and logic.draw_blocked({"address": "12 Main St"}, by_hand) == ""
+
+
+def test_round_16_no_or_refused_over_a_preview_changes_nothing():
+    opened = logic.box_opened({}, {})
+    facts, saved, _ = logic.preview_lookup({"status": "found", "query": "106 Ithaca Rd", "facts": {}}, {}, opened)
+    assert saved.get("_pending")
+    assert logic.choose_by_hand(facts, dict(saved), None) == (facts, saved)           # No
+    _, outside = logic.lookup_choices({"status": "outside_city", "query": "5 Foo Rd"}, facts, dict(saved))
+    outside["_pending"] = saved["_pending"]
+    assert logic.choose_by_hand(facts, dict(outside), "2026-10-27") == (facts, outside)   # refused
+
+
+def test_round_9_a_saved_source_never_says_used_live():
+    saved = logic.as_saved({"checked": "2026-10-27", "labels": {"street_side": "City of Ithaca roads, used live"}})
+    assert saved["labels"]["street_side"] == "City of Ithaca roads" + logic.SAVED_ON.format(date="2026-10-27")
+
+
+def test_round_5_a_saved_lookup_is_filed_under_the_address_found_too():
+    found = _found_106()
+    assert logic.found_address(found) == "106 Ithaca Road, Ithaca, NY, 14850"
+    store = logic.save_lookup({}, dict(found, query="106 ithaca"), "106 ithaca")
+    assert logic.saved_offer({"status": "offline"}, store, "106 Ithaca Rd") is not None
+
+
+def test_round_5_no_district_is_guessed_for_a_file_with_no_site_in_edit_site_either():
+    suggested = {"zone": "R-1a", "use": "one_family_detached"}
+    assert logic.no_guessed_district({}, suggested)["zone"] is None
+    assert logic.no_guessed_district({"address": SAMPLE}, suggested)["zone"] == "R-1a"     # a site: as before
+    assert logic.no_guessed_district({}, dict(suggested, lot_id="lot1"))["zone"] == "R-1a"  # a lot drawn: as before
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    edit = src[src.index("def edit_facts("):src.index("\n\n\n", src.index("def edit_facts("))]
+    assert "logic.no_guessed_district(" in edit
+    assert "logic.no_guessed_district({}, suggested_facts(" in src[src.index("def gordium_start("):]
+
+
+def test_round_6_a_saved_lookups_front_line_keeps_its_source_and_date():
+    """The saved copy keeps the street line but not the street side's value (used live): the front line row lost
+    its source, and its "saved on" date."""
+    found = _found_106()
+    copy = logic.save_lookup({}, found, "106 Ithaca Rd")[logic.lookup_key("106 Ithaca Rd")]
+    facts, saved = logic.lookup_choices(logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Rd"), {}, {}, ZONES)
+    assert copy["writes"]["street_line"]                                 # the line is kept (and drawn at Draw)
+    assert saved.get("street_source", "").startswith(logic.SUGGESTED + " · ")
+    assert saved["street_source"].endswith(" · saved on " + copy["checked"])
+
+
+def test_round_6_a_stale_use_saved_button_says_why_it_did_nothing():
+    look = logic.saved_refused({"status": "offline", "saved_offer": "2026-10-20"}, "106 Ithaca Rd", "96 Ithaca Rd")
+    assert look["saved_offer"] is None
+    assert look["says"] == "The saved lookup is 106 Ithaca Rd's, not 96 Ithaca Rd's: press Look up to find 96 Ithaca Rd."
+    rows = {r["key"]: r for r in logic.box_rows({"address": "96 Ithaca Rd", "lookup": look})}
+    assert [a for a, _, _ in rows["address"]["actions"]] == ["lookup"]
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'logic.saved_refused(saved_ui.get("_lookup"), offered_for, facts.get("address"))' in src
+
+
+def test_round_7_a_saved_lookup_is_never_more_certain_than_the_live_one():
+    """P0, a false pass (round 7, cold reviewer + 2 sceptics): the State and County placed 106 Ithaca Rd 200 ft
+    apart, so the live lookup keeps the lot and street in doubt (their rows NEEDS REVIEW). The saved copy kept the
+    statuses but not the reason (the County's, not keepable), and a doubt needed a reason: offline the lot came back
+    certain, and Lot width, Front yard and Building height COMPLIED once the corner was answered."""
+    from test_lookup_box import T, looked_up
+
+    class Table:
+        n = 0
+
+        def add_lot(self, ring, name):
+            Table.n += 1
+            return "lot%d" % Table.n
+
+        def add_spot(self, p):
+            return "s"
+
+        def ground_points(self):
+            return []
+
+    class Session:
+        def hold(self, x):
+            pass
+
+        def add(self, x):
+            pass
+
+    fx = T.load("106_ithaca_rd")
+    pt = next(a for a in fx["answers"] if a["source"] == "geocoder")["body"]["candidates"][0]["location"]
+    live = looked_up("106_ithaca_rd", county=(pt["x"] + 200, pt["y"]))
+    store = logic.save_lookup({}, dict(live, checked="2026-10-27"), "106 Ithaca Rd")
+    saved = logic.use_saved(logic.saved_offer({"status": "offline"}, store, "106 Ithaca Rd"), "106 Ithaca Rd",
+                            "106 Ithaca Rd")
+    unsettled = {}
+    for tag, answer in (("live", live), ("saved", saved)):
+        f0, s0, _ = logic.preview_lookup(answer, {"address": "106 Ithaca Rd"}, logic.box_opened({}, {}), ZONES)
+        _, s, _ = logic.apply_lookup(Table(), Session(), s0["_pending"]["answer"], f0, s0, ZONES)
+        unsettled[tag] = set(logic.unsettled(s))
+    assert unsettled["live"] >= {"lot", "street"}
+    assert unsettled["saved"] >= unsettled["live"]
+
+
+def test_round_8_a_saved_lookups_district_and_overlay_lines_say_what_happened():
+    """Offline the zone row said the City map "gave no district for this lot" (it was never asked) and ran on into
+    an overlay doubt that didn't say it was about overlays."""
+    from test_lookup_box import looked_up
+    live = looked_up("106_ithaca_rd", historic=("East Hill",))
+    copy = logic.save_lookup({}, dict(live, checked="2026-10-27"), "106 Ithaca Rd")[logic.lookup_key("106 Ithaca Rd")]
+    facts, saved, _ = logic.preview_lookup(logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Rd"),
+                                           {"address": "106 Ithaca Rd"}, logic.box_opened({}, {}), ZONES)
+    assert saved["_live"]["zone"] == logic.SAVED_NO_DISTRICT
+    assert saved["_live"]["overlays"] == logic.OVERLAYS_NOT_KEPT
+    assert logic.NO_DISTRICT.endswith(".")
