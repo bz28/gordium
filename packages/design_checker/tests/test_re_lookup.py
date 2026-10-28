@@ -1207,6 +1207,22 @@ def test_round_5_by_hand_is_for_city_of_ithaca_lots_only():
     assert logic.draw_blocked({"address": "12 New Lot Ln"}, by_hand) == ""          # another, City address: fine
 
 
+def test_round_9_by_hand_reads_the_town_of_an_address_typed_without_commas():
+    """Round 9: address_place read only after a comma, so "12 Main St Lansing NY 14882" passed as a City lot."""
+    opened = dict(logic.box_opened({}, {}), _by_hand=True)
+    for other in ("12 Main St Lansing NY 14882", "106 Ithaca Rd Dryden NY", "12 Main St 14882"):
+        assert logic.draw_blocked({"address": other}, opened) == logic.BY_HAND_CITY_ONLY.format(address=other)
+    for city in ("106 Ithaca Rd", "106 Ithaca Rd Ithaca NY 14850", "106 Ithaca Road NY", "204 Utica St"):
+        assert logic.draw_blocked({"address": city}, opened) == ""
+    assert not logic.same_site_address("106 Ithaca Rd Dryden NY", "106 Ithaca Road, Ithaca, NY, 14850")
+    assert logic.same_site_address("106 Ithaca Rd Ithaca NY 14850", "106 Ithaca Road, Ithaca, NY, 14850")
+
+
+def test_round_9_a_saved_source_never_says_used_live():
+    saved = logic.as_saved({"checked": "2026-10-27", "labels": {"street_side": "City of Ithaca roads, used live"}})
+    assert saved["labels"]["street_side"] == "City of Ithaca roads" + logic.SAVED_ON.format(date="2026-10-27")
+
+
 def test_round_5_a_saved_lookup_is_filed_under_the_address_found_too():
     found = _found_106()
     assert logic.found_address(found) == "106 Ithaca Road, Ithaca, NY, 14850"

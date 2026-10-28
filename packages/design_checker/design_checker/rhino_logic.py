@@ -3456,10 +3456,11 @@ def saved_refused(look, offered_for, typed):
 def as_saved(copy):
     """A saved lookup as an answer the box shows like any other, marked: its date on the line the box says, and on
     every source label ("NYS Tax Parcels Public · saved on 2026-10-27"), so the rows and what Draw saves say so.
-    Its own query, never the address typed now."""
+    Its own query, never the address typed now. A source's ", used live" goes: what was saved is not live (round 9:
+    "City of Ithaca roads, used live · saved on <date>")."""
     date = copy.get("checked")
-    return dict(copy, saved_on=date,
-                labels={k: v + SAVED_ON.format(date=date) for k, v in (copy.get("labels") or {}).items()})
+    return dict(copy, saved_on=date, labels={k: v.replace(", used live", "") + SAVED_ON.format(date=date)
+                                             for k, v in (copy.get("labels") or {}).items()})
 
 
 def known_addresses(saved_ui):
@@ -3476,14 +3477,37 @@ ITHACA_PLACE = {"ithaca", "14850", "14851", "14852", "14853"}
 
 def address_place(address):
     """The town or ZIP an address names after its first comma, as words (state and country aside), or None when it
-    names none; the City's own name and ZIP codes count as none (the lot is in the City of Ithaca)."""
-    tail = str(address or "").split(",", 1)[1:] if "," in str(address or "") else []
+    names none; the City's own name and ZIP codes count as none (the lot is in the City of Ithaca). Typed without
+    commas, the tail after the street: a ZIP at the end, and the one word before a state or ZIP ("12 Main St Lansing
+    NY 14882" names "lansing 14882": start-flow review round 9, it read as the City's), a street word never a town."""
+    if "," not in str(address or ""):
+        return _place_without_commas(address)
+    tail = str(address or "").split(",", 1)[1:]
     text = (tail[0] if tail else "").lower().replace(",", " ").replace(".", "")
     text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
     text = text.replace("united states of america", "").replace("united states", "")
     words = [w for w in text.split() if w not in ("ny", "new", "york", "usa", "us")]
     words = [w[:5] if w[:5].isdigit() else w for w in words]
     places = [w for w in words if w not in ITHACA_PLACE]
+    return " ".join(places) or None
+
+
+def _place_without_commas(address):
+    """address_place for an address typed without commas: the ZIP it ends with and the word before the state or ZIP,
+    when either is not the City of Ithaca's; else None ("106 Ithaca Rd" and "106 Ithaca Rd Ithaca NY 14850" name
+    none). No state or ZIP typed: no town can be told from the street, so None."""
+    words = str(address or "").lower().replace(".", " ").split()
+    zips, tail = [], False
+    while len(words) > 2 and (words[-1] in ("ny", "new", "york", "usa", "us")
+                              or (words[-1][:5].isdigit() and len(words[-1]) in (5, 10))):
+        last = words.pop()
+        tail = True
+        if last[:5].isdigit():
+            zips.insert(0, last[:5])
+    town = words[-1] if tail and len(words) > 2 else None
+    if town and (town in STREET_WORDS or town in STREET_WORDS.values() or town in ITHACA_PLACE or town.isdigit()):
+        town = None
+    places = [w for w in ([town] if town else []) + zips if w not in ITHACA_PLACE]
     return " ".join(places) or None
 
 
