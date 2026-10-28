@@ -241,7 +241,7 @@ def test_picking_another_district_with_no_lookup_at_all(box):
 
 def test_picking_a_district_then_going_elsewhere_keeps_it_unconfirmed(box):
     """A pick (lot, street side) closes the box and opens it again: the district picked meanwhile goes out
-    unconfirmed, so _box_loop can't carry a stale tick to it."""
+    unconfirmed in the state the box hands back (the state _box_loop's ticks are copied from)."""
     state = _state(has_lot=True, lot_area=5000.0)
 
     def script(zone, confirm, buttons):
