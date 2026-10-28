@@ -250,9 +250,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 3. **The start box** opens (filled in from your lot, if you drew one). Read it top to bottom:
    - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
      45 seconds; the box says what it is doing as it goes, "Looking up … · Reading the City zoning map…", with a
-     moving mark and the seconds so far, and **Cancel lookup** stops it and leaves the box as it was; a tick or
-     source comes back only for a field you haven't changed meanwhile, so a district you changed stays unconfirmed
-     until you tick it, and a tick you changed while it ran stays as you left it). Look up only shows what it found: the address and a suggested zoning
+     moving mark and the seconds so far, and **Cancel lookup** stops it: nothing it would have filled in
+     changes, and your ticks stay as you left them). Look up only shows what it found: the address and a suggested zoning
      district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which
      draws that lot from the tax map (its street at the bottom of Top view), the street side and whether it's a
      corner lot, each with where it came from (not the ground: for now it is assumed flat, see **Ground** below).

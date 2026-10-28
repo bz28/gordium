@@ -2245,65 +2245,21 @@ def lookup_answer(text, query=None):
     return {"status": "error", "query": query, "detail": "the lookup printed no answer"}
 
 
-# each tick or source the start box keeps across picks, and the box field it is about (Cancel lookup, below)
-TICK_FIELDS = (("district_confirmed", "zone"), ("zone_source", "zone"), ("use_source", "use"),
-               ("address_source", "address"), ("corner_source", "corner_lot"))
-
-
-def lookup_fields(state):
-    """What the start box's ticks and sources are about, as the box says it when Look up is pressed: kept with the
-    ticks, so Cancel lookup can tell which of them still belong to what the box shows (ticks_after_cancel)."""
-    return {"zone": state.get("zone"), "use": state.get("use"), "address": state.get("address"),
-            "corner_lot": state.get("corner_lot"), "doubts": dict(state.get("doubts") or {})}
-
-
 def box_ticks(state):
     """The ticks and sources the start box keeps across picks, as `state` has them (_box_loop's `ticked`)."""
     return {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
                                   "corner_source", "checked") if k in state}
 
 
-def ticks_touched(opened, closed):
-    """What the architect changed in one showing of the start box: each tick or source (TICK_FIELDS) whose value it
-    closed with differs from the one it opened with, and ("checked", item) for each "I checked this" ticked or taken
-    off. _box_loop gathers these over every showing while a lookup runs (Cancel lookup: ticks_after_cancel)."""
-    opened, closed = opened or {}, closed or {}
-    touched = {tick for tick, _ in TICK_FIELDS if opened.get(tick) != closed.get(tick)}
-    return touched | {("checked", k) for k in set(opened.get("checked") or []) ^ set(closed.get("checked") or [])}
-
-
-def ticks_after_cancel(before_ticks, before_fields, state, touched=None):
-    """The start box's ticks and sources after Cancel lookup. The box and its dropdowns stay usable while a lookup
-    runs, so the architect may have changed the district, the use, the address or the corner answer meanwhile, or
-    the ticks themselves. Each tick or source as it was when Look up was pressed (`before_ticks`, with
-    `before_fields` from lookup_fields) comes back only if its field is unchanged since (`state`: the box as it is at
-    Cancel lookup) and the architect never changed that tick while the lookup ran (`touched`: ticks_touched over
-    every showing since Look up; None: nothing known, so nothing comes back); otherwise the box's own now. A district
-    tick given to one district never moves to another: "This is the lot's district" ticked on R-1b and the district
-    changed to R-3a during the lookup leaves R-3a's tick as the box shows it (unticked unless the architect ticked it
-    there), so Draw stays off until R-3a itself is confirmed (never a false pass: the rules checked would be R-3a's),
-    and its source stays "entered by you", never the lookup's suggestion. "I checked this" comes back for a doubt
-    only if that doubt is as it was. A tick the architect changed during the lookup, even changed back, is theirs as
-    they left it: one taken off is never put back (review of #32, 2026-10-28). (A tick changed and changed back
-    within one showing of the box leaves no trace: the box is as it was then.)"""
-    before_ticks, before_fields = before_ticks or {}, before_fields or {}
-    known = touched is not None
-    touched = set(touched or ())
-    out = {}
-    for tick, field in TICK_FIELDS:
-        same = field in before_fields and before_fields[field] == state.get(field)
-        source = before_ticks if known and same and tick not in touched else state
-        if tick in source:
-            out[tick] = source[tick]
-    if "checked" in before_ticks or "checked" in state:
-        was, now = before_fields.get("doubts"), state.get("doubts") or {}
-        then, ticks = set(before_ticks.get("checked") or []), set(state.get("checked") or [])
-
-        def back(k):              # the tick from before Look up: the doubt as it was, the tick never changed since
-            return known and was is not None and was.get(k) == now.get(k) and ("checked", k) not in touched
-
-        out["checked"] = sorted(k for k in then | ticks if k in (then if back(k) else ticks))
-    return out
+def ticks_after_pick(what, ticks):
+    """The start box's ticks and sources kept after a pick (_box_loop's `ticked`; `ticks`: box_ticks of the box as
+    the architect left it). A lookup's answer (found, or a saved one used) replaces them, so the district must be
+    confirmed again. Look up and Cancel lookup keep them exactly as the box shows them: while a lookup runs the box
+    shows the architect's own ticks (Draw is off meanwhile), and Cancel lookup leaves each as they left it. So no
+    tick or source from before Look up is ever brought back, onto a district, use, address or corner changed during
+    the lookup ("suggested by Gordium" on a district the architect picked) or after they took it off; and a district
+    they took off before Look up is never shown ticked again from the file (review of #32, 2026-10-28)."""
+    return {} if what in ("pick:lookup_done", "pick:use_saved") else dict(ticks or {})
 
 
 def lookup_cancelled(saved_ui, before):

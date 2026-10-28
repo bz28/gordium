@@ -1123,7 +1123,8 @@ def test_the_plugin_saves_found_lookups_and_offers_the_saved_one_only_when_offli
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
     assert 'logic.guard(logic.use_saved, "use the saved lookup")(' in pick
     assert 'not STATE.get("lookup_fixture")' in saved and "readable" in saved and "os.getpid()" in saved
-    assert '"pick:use_saved"' in src                                  # the ticks go, as for any lookup
+    assert "ticked = logic.ticks_after_pick(what, ticked)" in src     # the ticks go, as for any lookup's answer
+    assert logic.ticks_after_pick("pick:use_saved", {"district_confirmed": True}) == {}
 
 
 def test_a_saved_lookup_is_never_used_for_another_address_or_another_town():

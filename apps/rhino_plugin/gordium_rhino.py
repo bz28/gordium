@@ -2159,21 +2159,15 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
         facts, saved_ui, go, state = _draw_prepare(doc, facts, state, saved_ui, session, mode, options)
         return _drawn(doc, facts, state, saved_ui, session, mode) if go and state is not None else None
     ticked = {}                       # this box session's ticks and changed sources, kept across picks
-    before_lookup = {}                # ...as they were when the running lookup started (Cancel lookup),
-    before_fields = {}                # and what they were about then (the district, use, address, corner, doubts)
-    touched = None                    # the ticks the architect changed in the box while it runs (theirs)
     while True:
         state = dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)
         state["_on_shown"] = STATE.get("on_box_shown")     # the dialog capture in the in-Rhino test
         state["_draw_label"] = logic.draw_button(mode, saved_ui)   # Draw when it draws, else Check
         STATE["zones"] = options.get("zones") or []
-        opened = logic.box_ticks(state)
         what = ui.start_box(state, options, mode)
         if what is None:
             return None                      # rolled back by run_box: the model as it was
         ticked = logic.box_ticks(state)      # (saved only at Draw)
-        if touched is not None:              # each showing since Look up: what the architect changed in it
-            touched |= logic.ticks_touched(opened, ticked)
         if what == "draw":
             facts, saved_ui, go, drawn_state = _draw_prepare(doc, facts, state, saved_ui, session, mode, options)
             if go:
@@ -2186,17 +2180,10 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             elif drawn_state is not state:            # after the reset (the guide): its lot rows are the model's
                 ticked = {k: v for k, v in ticked.items() if k in GUIDE_KEEPS}
             continue
-        # the lookup's answer replaces them (and the district must be confirmed again); by hand undoes it (a tick
-        # given its district never moves to another)
-        if what == "pick:lookup":
-            before_lookup, before_fields, ticked = ticked, logic.lookup_fields(state), {}
-            touched = set()                  # gathered over every showing while it runs
-        elif what in ("pick:lookup_done", "pick:use_saved"):
-            ticked = {}
-        elif what == "pick:lookup_cancel":    # cancelled: the ticks as before Look up, each only if what it is
-            ticked = logic.ticks_after_cancel(before_lookup, before_fields, state, touched)   # about is
-            # unchanged, and the architect never changed it while the lookup ran (never a district's tick moved to
-            # another district changed meanwhile, never a tick they took off put back)
+        # the lookup's answer replaces them (and the district must be confirmed again); Look up and Cancel lookup
+        # keep them as the box shows them, never the ticks from before Look up brought back (rhino_logic.
+        # ticks_after_pick); by hand undoes them (a tick given its district never moves to another)
+        ticked = logic.ticks_after_pick(what, ticked)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         was_by_hand, had_pending = saved_ui.get("_by_hand"), saved_ui.get("_pending")
         facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)
