@@ -8,8 +8,8 @@ A fresh feet document; the box opened on facts (no lot needed), closed by itself
    follow_ups: none before #38, its household and home occupation questions after), the box under 900 px wide.
 2. R-1b, school: the amber line under Use says it isn't permitted by right in R-1b, with the chart's page.
 3. A district whose rules need the units, rooms let and new-or-conversion for a multiple dwelling (the options as
-   the worker would send them for R-3a): three questions in "About this project" (queue item 14), each a dropdown
-   on Not answered; the last reads Not answered / New construction / Conversion of an existing building.
+   the worker would send them for R-3a): two questions in "About this project" (queue item 14; rooms let is a use
+   detail, asked later in the panel), each a dropdown on Not answered; the last reads Not answered / New construction / Conversion of an existing building.
 4. Picking another use whose questions differ closes the box asking to open it again ("pick:refresh").
 5. A saved use the district doesn't list (two-family in R-1b) stays picked, with its line saying the Use row won't
    comply.
