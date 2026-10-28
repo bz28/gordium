@@ -6,12 +6,14 @@ it (the demo branch). Live lookups: it asks the City's and the State's services,
 
 For each site, a fresh feet document:
   1. GordiumStart with the address typed and Look up pressed, then Draw (the scripted picks the in-Rhino tests use).
-     Claims: the zone, the lot area drawn (to 0.5 sf of `drawn_area_sf`) and corner lot are the expected ones.
+     Claims: the zone, the lot area drawn (to 0.5 sf of `drawn_area_sf`) and corner lot are the expected ones. The
+     other start-box facts (frontage, street, overlays) are recorded for a person to compare, not claimed.
   2. After Draw: no row does not comply; every needs-review row carries a reason. Every row is recorded, for a person
      to compare with `largest_house` (which rule limits the starting house) and `lot_size`.
-  3. The nudge: the house's solids moved toward the street until their least distance to the street lines (measured
-     here, from the solids) is the nudge's `proposed_ft`; the check again. Claim: the nudge's rule does not comply
-     and no other row does; the rows are recorded with their proposed and required values.
+  3. The nudge: the house's solids moved square to the nearest street line by the front yard measured here (from the
+     solids) less the nudge's `proposed_ft`; the check again. Claims: the house's least distance to the street lines
+     is now `proposed_ft` (to 0.1 ft); the nudge's row shows `proposed_ft` and `required_ft`; it does not comply and
+     no other row does.
 Writes <temp>/gordium_light_run/out.json (each site's facts, rows and claims) and a Top capture per site.
 Not yet run in Rhino (Lane C). A failed claim is recorded and the run goes on to the next site."""
 import json
@@ -92,13 +94,24 @@ def street_lines(facts):
 
 
 def toward_street(doc, g, facts):
-    """The unit vector from the house's plan centre to the nearest point of any street line."""
+    """The unit vector from the house's nearest vertex to its nearest point on any street line: square to that line
+    when the nearest point is inside it, so moving by d cuts the front yard by d (on a street of several lines another
+    one can become nearer; the claim on the measured distance after the move catches that)."""
     pts = [rg.Point3d(v.Location.X, v.Location.Y, 0) for o in massing(doc, g) for v in o.Geometry.Vertices]
-    c = rg.Point3d(sum(p.X for p in pts) / len(pts), sum(p.Y for p in pts) / len(pts), 0)
-    near = min((ln.ClosestPoint(c, True) for ln in street_lines(facts)), key=lambda q: q.DistanceTo(c))
-    v = near - c
+    p, near = min(((p, ln.ClosestPoint(p, True)) for ln in street_lines(facts) for p in pts),
+                  key=lambda pq: pq[0].DistanceTo(pq[1]))
+    v = near - p
     v.Unitize()
     return v
+
+
+def feet(shown):
+    """A displayed length (12'-3 1/8") in feet, or None."""
+    import re
+    m = re.match(r"^(-?\d+)'-(\d+)(?: (\d+)/(\d+))?\"$", (shown or "").strip())
+    if not m:
+        return None
+    return int(m.group(1)) + (int(m.group(2)) + (int(m.group(3)) / float(m.group(4)) if m.group(3) else 0)) / 12.0
 
 
 def one_site(g, docs, district, site):
@@ -139,8 +152,14 @@ def one_site(g, docs, district, site):
             g.run_check(doc, report=False)
             after = rows(g)
             out["nudged"] = [(i.get("rule"), i["name"], i["status"], i.get("proposed"), i.get("required")) for i in after]
-            out["front_after_measured_here"] = front_distance(doc, g, facts)
+            out["front_after_measured_here"] = now = front_distance(doc, g, facts)
             hit = row_for(after, nudge["rule"])
+            claim("the house now stands proposed_ft from the street (measured here, to 0.1 ft)",
+                  now is not None and abs(now - nudge["proposed_ft"]) <= 0.1, now)
+            shown = [(feet(i.get("proposed")), feet(i.get("required"))) for i in hit]
+            claim("the front-yard row shows proposed_ft and required_ft (to 1/8 in + 0.1 ft)", shown and all(
+                a is not None and b is not None and abs(a - nudge["proposed_ft"]) <= 0.1 + 0.125 / 12
+                and abs(b - nudge["required_ft"]) <= 0.125 / 12 for a, b in shown), shown)
             claim("the nudge fails exactly its rule", hit and hit[0]["status"] == "does_not_comply" and not [
                 i for i in after if i["status"] == "does_not_comply" and i.get("rule") != nudge["rule"]],
                 [(i.get("rule"), i["status"]) for i in after if i["status"] == "does_not_comply"])

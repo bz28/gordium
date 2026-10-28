@@ -34,43 +34,52 @@ expected:
     cites: "§325-8A(2); chart p.2, Two-family dwelling, R-2B •"
   R-2b.lot_area_two_family:
     status: complies
+    values: {row: [4763.94, 3000]}       # [proposed, required] worked by hand
     working: "shoelace area = 4,763.9 sf ≥ 3,000 sf"
     cites: "chart p.3, Minimum Lot Size, Two-family dwelling, R-2B 3,000 sf"
   R-2b.lot_width_two_family:
     status: complies
+    values: {row: [56.0, 35]}       # [proposed, required] worked by hand
     working: "frontage on E Falls St = 56.0 ft ≥ 35 ft"
     cites: "§325-8A(7); chart p.3, Minimum Lot Width, Two-family dwelling, R-2B 35 ft"
   R-2b.stories:
     status: complies
+    values: {row: [3, 3]}       # [proposed, required] worked by hand
     working: "3 floor blocks = 3 stories ≤ 3"
     cites: "§325-3B STORY; chart p.3, Number of stories, R-2B 3"
   R-2b.height:
     status: complies
+    values: {row: [27.0, 35]}       # [proposed, required] worked by hand
     working: "9 + 9 + 9 = 27 ft ≤ 35 ft"
     cites: "§325-3B HEIGHT OF BUILDING; chart p.3, Height in feet, R-2B 35 ft"
   R-2b.lot_coverage:
     status: complies
+    values: {row: [28.55, 35]}       # [proposed, required] worked by hand
     working: "34 × 40 = 1,360 sf ≤ 35% × 4,763.9 = 1,667.4 sf"
     cites: "§325-8A(10); chart p.3, Percent of lot area, R-2B 35%"
   R-2b.front_yard:
     status: complies
+    values: {row: [12.0, 10]}       # [proposed, required] worked by hand
     working: "12.0 ft ≥ 10 ft"
     cites: "chart p.3, Front (minimum), R-2B 10 ft"
   R-2b.side_yards:
     status: complies
+    values: {east: [15.26, 10], west: [6.02, 5]}       # [proposed, required] worked by hand
     working: >-
       west line (0,0)–(1.6,84.98), nearest corner (7,52): 6.02 ft; east line (56,0)–(57.86,84.76), nearest corner
       (41,12): 15.26 ft; one side ≥ 10 (15.26) and the other ≥ 5 (6.02)
     cites: "§325-8A(12)-(13); chart p.3, Side (one side minimum) R-2B 10 ft, (other side minimum) 5 ft"
   R-2b.rear_yard:
     status: complies
+    values: {row: [32.83, 21.22]}       # [proposed, required] worked by hand
     working: >-
       lot depth = (84.995 + 84.78) ÷ 2 = 84.89 ft; 25% = 21.22 ft (between the 20 ft floor and the 50 ft cap);
       rear line (57.86,84.76)–(1.6,84.98) to the house back y = 52: 32.83 ft ≥ 21.22 ft
     cites: "§325-8A(14)(a)-(b); chart p.3, Rear, R-2B 25% / 50 ft, note 16"
   R-2b.yard_projections:
     status: complies
-    working: "no eaves (a flat-roofed box): the outermost yards equal the yards above"
+    values: {row: [12.0, 8]}       # [proposed, required] worked by hand
+    working: "no eaves (a flat-roofed box): the outermost yards equal the yards above; the tightest is the front: 12.0 ft ≥ 10 − 2 = 8 ft (§325-18B's 2 ft allowance)"
     cites: "§325-18B"
   R-2b.parking_dwelling_units:
     status: needs_review
@@ -94,13 +103,16 @@ then:
   expected:
     R-2b.side_yards:
       status: does_not_comply
+      values: {east: [16.76, 10], west: [4.52, 5]}       # [proposed, required] worked by hand
       working: "west side line to the corner (5.5,52): 4.52 ft < 5 ft (east 16.76 ≥ 10)"
       cites: "chart p.3, Side (other side minimum), R-2B 5 ft"
     R-2b.yard_projections:
       status: complies
-      working: "no eaves: §325-18B has nothing to measure (the wall itself is what the side yard rule catches)"
+      values: {row: [12.0, 8]}       # [proposed, required] worked by hand
+      working: "no eaves: §325-18B has nothing beyond the walls; the tightest outermost yard is still the front, 12.0 ft ≥ 8 ft (the wall at 4.52 ft is what the side yard rule catches)"
       cites: "§325-18B"
     R-2b.front_yard:
       status: complies
+      values: {row: [12.0, 10]}       # [proposed, required] worked by hand
       working: "unchanged: 12.0 ≥ 10"
       cites: "chart p.3, Front, R-2B"

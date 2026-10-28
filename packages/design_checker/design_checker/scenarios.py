@@ -10,6 +10,7 @@ A scenario is built the way an architect draws it in Rhino: the lot as one close
 first edge, each story its own floor block (marked with the height it was drawn, as GordiumStart marks them),
 solids that aren't on the Building layer left out of the site and listed as not included."""
 
+import re
 import json
 import sys
 from pathlib import Path
@@ -106,6 +107,42 @@ def rule_rows(view: dict, key: str) -> list[dict]:
     return [i for i in view["items"] if i.get("rule") == key or i.get("id") == key]
 
 
+_FT_IN = re.compile(r"^(-?\d+)'-(\d+)(?: (\d+)/(\d+))?\"$")
+
+
+def number(shown: str | None) -> tuple[float, float] | None:
+    """A displayed value as (number, how far the display may be from the true value): feet-inches to 1/8 in, square
+    feet to the whole foot, percents to one decimal, counts exactly. None when it isn't a number."""
+    t = (shown or "").strip()
+    m = _FT_IN.match(t)
+    if m:
+        ft, inch = int(m[1]), int(m[2]) + (int(m[3]) / int(m[4]) if m[3] else 0)
+        return ft + inch / 12, 0.125 / 12
+    if t.endswith(" sf"):
+        return float(t[:-3].replace(",", "")), 1.0
+    if t.endswith("%"):
+        return float(t[:-1]), 0.05
+    return (float(t), 0.0) if re.fullmatch(r"\d+", t) else None
+
+
+def values_problems(rows: list[dict], values: dict) -> list[str]:
+    """Hand-worked numbers per row ({row: [proposed, required]}, the row named by the part of its id after '#', or
+    'row' for a rule with one row), compared with what Gordium shows: they must agree within the display's rounding
+    plus 0.01 (the hand values are written to two decimals)."""
+    problems = []
+    by = {(i.get("id") or "").partition("#")[2] or "row": i for i in rows}
+    for name, want in values.items():
+        row = by.get(name)
+        if row is None:
+            problems.append(f"no {name} row")
+            continue
+        for field, hand in zip(("proposed", "required"), want):
+            got = number(row.get(field))
+            if got is None or abs(got[0] - hand) > got[1] + 0.01:
+                problems.append(f"{name} {field} {row.get(field)!r}, worked by hand {hand}")
+    return problems
+
+
 def compare(view: dict, plan: dict | None, expected: dict, expected_plan: dict | None = None) -> list[dict]:
     """One row per expected rule: {rule, expected, gordium, match, why}. A rule's status is the most cautious of
     its rows. `match` needs the status and every detail written down (at limit, margin, proposed, required, the
@@ -126,6 +163,8 @@ def compare(view: dict, plan: dict | None, expected: dict, expected_plan: dict |
         for field in ("margin", "proposed", "required"):
             if field in want and worst.get(field) != want[field]:
                 problems.append(f"{field} {worst.get(field)!r}, expected {want[field]!r}")
+        if want.get("values"):
+            problems += values_problems(rows, want["values"])
         if want.get("reason_has") and not any(want["reason_has"].lower() in (i.get("reason") or "").lower() for i in rows):
             problems.append("reason: " + "; ".join(i.get("reason") or "" for i in rows)[:160])
         out.append({"rule": key, "expected": want["status"], "gordium": got, "match": not problems,

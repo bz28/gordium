@@ -1,6 +1,8 @@
 what: 'Queue item 12, light run: one real, ordinary City of Ithaca residential lot per district, each looked up
   through site_lookup on 2026-10-27 and worked by hand from the law (not from Gordium''s code). Lane C runs each
-  in Rhino (apps/rhino_plugin/tests/light_run_in_rhino.py) and compares with these expected results.'
+  in Rhino (apps/rhino_plugin/tests/light_run_in_rhino.py): it claims the zone, corner lot, drawn lot area, no fail
+  after Draw, and the nudge (its measured distance, its row''s numbers, only it failing); the other facts here are
+  recorded beside its results for a person to compare.'
 how_picked: 'City tax parcels (live) with PrimaryZone = the district, a one- or two-family residence, no historic
   flag, flood zone, overlay or second zone, lot 1.15–2.5× the district''s minimum, outside the Southside rezoning
   area; then site_lookup run on each: the first with four (or near four) corners and every fact ''suggested'' (none

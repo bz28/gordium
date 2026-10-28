@@ -7,7 +7,12 @@
 - **the largest legal house:** which rule limits it (lot coverage at the worst-case tax-map lot, or the yards), and
   that after Draw no rule fails and every needs-review row says why;
 - **a nudge:** the house moved toward the street until its front yard is 3 ft short of the minimum (past the ±2 ft
-  tax-map tolerance), and exactly the front-yard rule must fail, with those numbers.
+  tax-map tolerance), and exactly the front-yard rule must fail, showing those numbers.
+
+What the Rhino script claims (pass/fail per site): the zone, corner lot no, the drawn lot area, no fail after Draw
+with every needs-review row giving a reason, and for the nudge the measured front yard, the row's proposed and
+required values, and that only the front yard fails. The rest (frontage, street, overlays, the largest house's
+limiting rule, the lot size and depth) is recorded beside these expected values for a person to compare.
 
 `lookups/<district>.json` is each lookup's snapshot: what `site_lookup` lets a project keep (the State's tax-map
 outline and the USGS ground; the City's zoning, roads and overlays and the County's address points are used live and

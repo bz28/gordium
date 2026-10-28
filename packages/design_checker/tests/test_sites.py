@@ -156,3 +156,52 @@ def test_each_deep_site_names_the_parcel_its_light_run_lookup_found():
         sc = scenarios.load(p)
         found = re.findall(r"parcel (500700-[\d.]+-\d+-\d+)", sc["what"])
         assert found == [light[sc["district"]]["parcel"]], (p.name, found)
+
+
+@pytest.mark.parametrize("path", DEEP, ids=[p.stem for p in DEEP])
+def test_every_measured_row_has_its_numbers_worked_by_hand(path):
+    """Status alone would let a measurement off by feet 'match' on a wide margin: every row Gordium shows with a
+    number has the hand-worked proposed and required values written down, in both steps."""
+    sc = scenarios.load(path)
+    for moved, expected in [(False, sc["expected"]), (True, (sc.get("then") or {}).get("expected") or {})]:
+        if not expected:
+            continue
+        s, f, extras = scenarios.site(sc, moved)
+        view = check_site(s, f, extras=extras)["view"]
+        for i in view["items"]:
+            if i.get("rule") in expected and scenarios.number(i.get("proposed")) and \
+                    i["rule"] not in ("R-2b.occupancy_two_family", "R-3aa.occupancy_one_family", "R-1a.occupancy_one_family"):
+                name = (i.get("id") or "").partition("#")[2] or "row"
+                assert name in (expected[i["rule"]].get("values") or {}), (path.stem, moved, i["id"])
+
+
+def test_a_house_off_by_feet_on_a_wide_margin_is_caught():
+    """The 111 Eastwood house moved 5 ft east: every status stays the same, but the side yards no longer match the
+    hand-worked 29.98 / 30.01 ft."""
+    sc = scenarios.load(next(p for p in DEEP if p.stem == "r1_111_eastwood_ave"))
+    for b in sc["buildings"]:
+        if b["id"] == "house":
+            b["outline"] = [[x + 5, y] for x, y in b["outline"]]
+    rows = {r["rule"]: r for r in scenarios.run(sc)[0]["rows"]}
+    assert rows["R-1a.side_yards"]["gordium"] == "complies" and not rows["R-1a.side_yards"]["match"]
+    assert "worked by hand 29.98" in rows["R-1a.side_yards"]["why"]
+
+
+def test_displayed_values_read_back_as_numbers():
+    assert scenarios.number("29'-11 5/8\"") == (29 + 11.625 / 12, 0.125 / 12)
+    assert scenarios.number("12,990 sf") == (12990.0, 1.0) and scenarios.number("18.8%") == (18.8, 0.05)
+    assert scenarios.number("3") == (3.0, 0.0) and scenarios.number("—") is None
+
+
+def test_the_light_run_nudge_claims_its_distance_and_numbers():
+    """light_run_in_rhino.py runs only in Rhino; here its feet reader is run and its nudge claims are read: the house's
+    measured front yard after the move, and the row's proposed and required values, are claimed against
+    proposed_ft / required_ft (not only the status)."""
+    import ast
+    src = (REPO / "apps/rhino_plugin/tests/light_run_in_rhino.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "feet")
+    ns = {}
+    exec(compile(ast.Module([fn], []), "feet", "exec"), ns)
+    assert ns["feet"]("22'-0 1/8\"") == 22 + 0.125 / 12 and ns["feet"]("25'-0\"") == 25 and ns["feet"]("—") is None
+    assert 'abs(now - nudge["proposed_ft"]) <= 0.1' in src
+    assert 'abs(a - nudge["proposed_ft"])' in src and 'abs(b - nudge["required_ft"])' in src

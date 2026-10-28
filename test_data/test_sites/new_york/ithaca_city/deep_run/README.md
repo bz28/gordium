@@ -20,7 +20,11 @@ from the tax map (±2 ft) and slope (the light run, `../light_run/`, covers the 
 §325-3B definitions; §325-18B; §325-25), with the arithmetic in each `working`: shoelace areas, and distances to the
 slightly slanted lot lines as the perpendicular from the house's nearest corner to the line. Each design states what
 a massing model can't show (bedrooms, parking, who lives there) under `stated`. Every rule Gordium shows for the
-design as drawn has an answer here (`packages/design_checker/tests/test_sites.py` checks that).
+design as drawn has an answer here (`packages/design_checker/tests/test_sites.py` checks that). Every row Gordium
+shows with a number also has the hand-worked numbers under `values` ([proposed, required], per side for side yards),
+in both steps, and they must agree with Gordium's display within its rounding (1/8 in, 1 sf, 0.05%) plus 0.01: a
+measurement off by feet fails even where the status would still be right. Distances Gordium doesn't display (the
+garage's frame distances to the side and rear lines) are checked only through the status.
 
 **Checked in code:** `python -m design_checker.scenarios --sites` (and `test_sites.py`, in CI). **In Rhino:**
 `apps/rhino_plugin/tests/deep_run_in_rhino.py` (Lane C), then `python -m design_checker.scenarios --sites rhino
