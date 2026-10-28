@@ -23,13 +23,15 @@ def facts():
     return load_facts(SITE / "spreadsheet_design_model_facts.yaml")
 
 
-def test_the_spreadsheet_model_gives_nine_passes_and_the_coverage_fail(facts, tmp_path):
+def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp_path):
     result = check(MODEL, facts, tmp_path / "report.xlsx")
     assert (tmp_path / "report.xlsx").exists()
     errors = {r["Rule id"]: r["Error"] for r in result["rows"]}
-    assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 9
+    # their nine rows pass, and so does R-1b.yard_projections (a box: no eaves, the yards to the eaves are the yards)
+    assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 10
+    assert errors["R-1b.yard_projections"] == "PASS"
     s = result["summary"]
-    assert s["state"] == "fail" and s["text"] == "9 pass · 1 fail"
+    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail"
     assert s["lines"] == ["Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"]
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
@@ -136,8 +138,15 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "9 pass · 1 fail"
-    assert replies[3]["result"]["zones"] == ["R-1b"]
+    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail"
+    assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-3a"]   # every hand-drafted rulebook
+
+
+def test_the_quickstart_names_every_district_the_start_box_offers(facts):
+    """The guide's opening line says which districts are checked; it must name every zone the start box offers."""
+    from design_checker.check import options
+    opening = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8").split("\n\n")[2]
+    assert all(zone in opening for zone in options(facts["jurisdiction"])["zones"]), opening
 
 
 def test_bad_lot_facts_are_a_plain_refusal(facts):
@@ -418,8 +427,10 @@ def test_the_sample_lot_gives_the_spec_massing():
     from rule_format.rulebook import load
     stored = load(REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/lot_outline_tax_map.yaml")
     assert abs(lot.area - stored["area_sf"]) < 1 and s["facts"]["lot_surveyed"] is False   # placed points rounded
-    assert (present.feet_inches(x1 - x0), present.feet_inches(y1 - y0)) == ("35'-11\"", "37'-4\"")
-    assert round(outline.area / lot.area * 100, 1) == 19.1 and outline.area <= 0.25 * 6357
+    # (PR 18: legal under every reading of which of 106's lot lines are side and rear lines, its tax-map outline
+    # cleaned within 0.25 ft: 15 lines -> 9; the strictest rear line sets the depth, so the house is wide and shallow)
+    assert (present.feet_inches(x1 - x0), present.feet_inches(y1 - y0)) == ("51'-4\"", "29'-8\"")
+    assert round(outline.area / lot.area * 100, 1) == 21.7 and outline.area <= 0.25 * 6357
     assert len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
     from design_checker.check import check_site
     from envelope_builder.start import floor_solids
@@ -1701,7 +1712,7 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
     detail = ui[ui.index("def show_detail("):]
     # 2: reason, then the buttons, then the measuring notes; the hint as text only when there's no button
     assert detail.index('for text in (det.get("line"), i.get("reason")):') < detail.index("for b in buttons:") \
-        < detail.index('for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):')
+        < detail.index('for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),')
     assert ("    words = logic.hint_text(i.get(\"hint\"), [b.Text for b in buttons])\n    if words:\n"
             "        d.AddRow(_wide(words, size=12))") in detail
     # never a button's words twice, nor "Add to check…" as dead text on a row a left-out solid made cautious (its

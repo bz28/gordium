@@ -21,7 +21,7 @@ jobs:
         run: python -m document_extraction --check
       - name: Rule files are valid (sources, quotes, worked examples, section labels)
         run: python -m rule_format
-      - name: Every line of the law is in exactly one piece; coverage report is current (no AI)
+      - name: Every line of the law is in exactly one piece; coverage report and term index are current (no AI)
         run: python -m section_labeling coverage --check
       - name: The rules workbook matches a fresh build (generated, never hand-edited)
         run: python -m rule_export --check

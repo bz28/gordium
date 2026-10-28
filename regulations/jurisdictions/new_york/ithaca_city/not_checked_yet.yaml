@@ -9,15 +9,15 @@ not_covered:
   - id: height_exceptions
     section: "§325-16A, §325-16B"
     name: Height exceptions (chimneys, spires, parapets)
-  - id: yard_projections
-    section: "§325-18"
-    name: Projections into yards (porches, decks, eaves)
-  - id: corner_lots
-    section: "§325-19C"
-    name: Corner lots
-  - id: accessory_structures
-    section: "§325-25"
-    name: Accessory structures (garages, sheds)
+  - id: small_projections
+    section: "§325-18B"
+    name: Windowsills, belt courses and cornices in yards (a massing model shows eaves only)
+  - id: corner_visibility
+    section: "§325-17B"
+    name: Corner lots, the clear triangle at the street corner
+  - id: accessory_below_grade
+    section: "§325-25B, §325-25D"
+    name: Accessory structures below grade or across a common lot line
   - id: adus
     section: "§325-28"
     name: Accessory dwelling units

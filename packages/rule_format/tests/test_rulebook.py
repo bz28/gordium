@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 from rule_format.rulebook import (TERM_SCHEMAS, Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
-                                  validate, validate_terms)
+                                  pending_research, validate, validate_terms)
 
 
 def quote_found(quote, tokens):
@@ -394,7 +394,8 @@ def test_review_reason_must_be_text(ctx):
 
 
 def test_rule_with_open_questions_cannot_be_approved(ctx):
-    question = {"open_questions": ["Is the yard measured to the wall or the eave?"]}
+    question = {"open_questions": ["Is the yard measured to the wall or the eave?"],
+                "research": [pending_research("Is the yard measured to the wall or the eave?", "a test")]}
     assert validate(rulebook(**question), ctx) == []                    # fine as a draft
     approved = APPROVED | question                                          # adding a question blocks approval
     assert any("open_questions remain" in p for p in validate(rulebook(**approved), ctx))
@@ -534,6 +535,8 @@ DEFINITION = {
     "measures": ["rear_yard"],
     "sources": [SOURCE],
     "open_questions": ["Which line is the rear lot line on an irregular lot?"],
+    "research": [{"question": "Which line is the rear lot line on an irregular lot?", "searched": [], "sources": [],
+                  "why_open": "pending the 2026-10-20 research pass"}],
     "drafted_by": "claude",
     "status": "draft",
 }
@@ -581,7 +584,7 @@ def test_invalid_answers_are_rejected(ctx, answers, problem):
 
 def test_answered_definition_can_be_approved(ctx):
     fields = TERM_SCHEMAS["definitions"]["approved"]
-    answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"} | {"answers": [ANSWER]}
+    answered = {k: v for k, v in DEFINITION.items() if k not in ("open_questions", "research")} | {"answers": [ANSWER]}
     approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20),
                            "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
     assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
@@ -591,7 +594,7 @@ def test_answered_definition_can_be_approved(ctx):
 
 def test_approved_definition_needs_reapproval_after_an_edit(ctx):
     fields = TERM_SCHEMAS["definitions"]["approved"]
-    answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"}
+    answered = {k: v for k, v in DEFINITION.items() if k not in ("open_questions", "research")}
     approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
                            "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
     assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
@@ -612,7 +615,7 @@ def test_definition_with_open_questions_cannot_be_approved(ctx):
 
 
 def test_approved_entry_without_drafter_is_reported_not_crashed(ctx):
-    entry = {k: v for k, v in DEFINITION.items() if k not in ("drafted_by", "open_questions")}
+    entry = {k: v for k, v in DEFINITION.items() if k not in ("drafted_by", "open_questions", "research")}
     entry |= {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
     assert any("missing 'drafted_by'" in p for p in validate_terms({"rear_yard": entry}, ctx, "definitions"))
 
