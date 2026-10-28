@@ -8,9 +8,8 @@ A fresh feet document; the box opened on facts (no lot needed), closed by itself
    follow_ups: none before #38, its household and home occupation questions after), the box under 900 px wide.
 2. R-1b, school: the amber line under Use says it isn't permitted by right in R-1b, with the chart's page.
 3. A district whose rules need the units, rooms let and new-or-conversion for a multiple dwelling (the options as
-   the worker would send them for R-3a): three questions after Use, two number fields and a dropdown reading
-   Not answered / New construction / Conversion of an existing building; typing "lots" in the last number field
-   says at once, in the one note under the questions, that it isn't kept.
+   the worker would send them for R-3a): two questions in "About this project" (queue item 14; rooms let is a use
+   detail, asked later in the panel), each a dropdown on Not answered; the last reads Not answered / New construction / Conversion of an existing building.
 4. Picking another use whose questions differ closes the box asking to open it again ("pick:refresh").
 5. A saved use the district doesn't list (two-family in R-1b) stays picked, with its line saying the Use row won't
    comply.
@@ -59,8 +58,15 @@ def fresh_module():
     return gordium_rhino
 
 
+def _walk(c):
+    yield c
+    for k in list(getattr(c, "Children", None) or []):
+        yield from _walk(k)
+
+
 def controls(dialog):
-    return list(dialog.Content.Children)
+    """Every control in the box, in the "About this project" section's own grid too (queue item 14)."""
+    return list(_walk(dialog.Content))
 
 
 def drop_items(d):
@@ -105,7 +111,7 @@ try:
     _, seen = open_box(g, doc, options, {"zone": "R-1b", "use": "one_family_detached"})
     use_drop = next((d for d in seen["drops"] if names[0] in d), None)
     log["1"] = seen
-    want = [g.logic.STATED_FACTS[k][0] for k in g.logic.follow_up_keys(options, "R-1b", "one_family_detached")]
+    want = [g.logic.about_label(k) for k in g.logic.follow_up_keys(options, "R-1b", "one_family_detached")]
     claim("1 the Use dropdown lists R-1b's chart uses, permitted first, one-family detached picked, its questions",
           use_drop == names and [u["permitted"] for u in r1b] == [True] * 4 + [False] * 3
           and names[0] in seen["picked"] and all(t in seen["labels"] for t in want)
@@ -125,21 +131,16 @@ try:
                                                                          "conversion"]})
     x["implied"] = dict(options["implied"], X={"one_family_detached": {}, "multiple_family": {}})
 
-    def typed(dialog, found, seen):
-        boxes = seen["texts"]
-        if boxes:
-            boxes[-1].Text = "lots"            # the last text field laid out: rooms let for profit
-        seen["after_typing"] = [c.Text for c in controls(dialog) if isinstance(c, ef.Label)]
-
-    _, seen = open_box(g, doc, x, {"zone": "X", "use": "multiple_family"}, typed)
+    _, seen = open_box(g, doc, x, {"zone": "X", "use": "multiple_family"})
     log["3"] = seen
-    asked = [t for t in seen["labels"] if t in [g.logic.STATED_FACTS[k][0] for k in ("dwelling_units",
-                                                                                     "rooms_let_for_profit",
-                                                                                     "conversion")]]
-    claim("3 three questions after Use, the conversion dropdown in its own words, 'lots' said at once as not kept",
-          len(asked) == 3 and [g.logic.NOT_ANSWERED, "New construction", "Conversion of an existing building"]
-          in seen["drops"] and any("Not kept: a whole number" in t for t in seen.get("after_typing") or []),
-          seen)
+    # rooms let for profit is a use detail (#45): asked later in the panel, never in the box
+    asked = [t for t in seen["labels"] if t in [g.logic.about_label(k) for k in ("dwelling_units",
+                                                                                 "rooms_let_for_profit",
+                                                                                 "conversion")]]
+    claim("3 two questions after Use (homes, new or converted; not the rooms let), each a one-click dropdown on Not "
+          "answered, the conversion one in its own words",
+          asked == [g.logic.about_label("dwelling_units"), g.logic.about_label("conversion")] and [g.logic.NOT_ANSWERED, "New construction", "Conversion of an existing building"]
+          in seen["drops"] and "About this project" in seen["labels"], seen)
 
     def other_use(dialog, found, seen):
         use = next(c for c in found if isinstance(c, ef.DropDown) and "Multiple family dwelling" in drop_items(c))

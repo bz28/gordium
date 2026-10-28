@@ -100,6 +100,33 @@ STOPS = {
                       "measured yet: an open question for the architects",
     "no_rooms": "enter bedrooms / parking spaces",
     "no_units": "enter the dwelling units, the rooms let for profit, and whether it is a conversion",
+    "no_occupants": "enter the occupants (§325-3B OCCUPANT: in R-2c, every person with the right to occupy)",
+    "no_building_units": "enter the dwelling units in the whole attached building, every lot it stands on",
+    "no_occupant_split": "optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that "
+                         "depends on how the occupants are split)",
+    "no_household": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, "
+                    "whether the household is a functional family unit, whether an accessory dwelling unit is on the "
+                    "lot (§325-3B)",
+    "attached_counts_disagree": "{here} dwelling units on this lot but {building} in the attached building: part of "
+                                "another building may be on this lot, or one of the counts or the use is off",
+    "occupant_split_disagree": "the most occupants in one dwelling unit ({most}) is more than the occupants of every "
+                               "unit on the lot together ({occupants}): check both counts",
+    "occupant_counts_disagree": "{occupants} occupants on the lot, but {units} {unit_words} with at most {most} in any one "
+                                "can hold only {held}, with no accessory dwelling unit on the lot: check {check} and "
+                                "the accessory dwelling unit answer",
+    "change_use_in_start_box": "change the use with Edit site… in the start box",
+    "household_counts_disagree": "the count of unrelated people with minor dependent children included ({with_}) is "
+                                 "lower than the count without them ({without}): check both counts",
+    "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
+                          "unit's (§325-3B HOME OCCUPATION)",
+    "no_primary_buildings": "enter the primary buildings on the lot (each separate building holding a home or other "
+                            "permitted primary use, the main one included; not a garage, shed or accessory dwelling "
+                            "unit) and whether every one holds the use entered (§325-8B(1))",
+    "no_stream": "say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if "
+                 "so, how far the nearest new structure is from it (§325-26)",
+    "stream_facts_disagree": "no stream or inlet is said to be within 20 ft of the lot, but a new structure is said to be "
+                             "{distance} ft from one: check both answers",
+    "no_south_hill": "say whether the lot is in the South Hill Overlay District (§325-8E, on the City's zoning map)",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",

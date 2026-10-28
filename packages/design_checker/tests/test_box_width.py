@@ -175,23 +175,36 @@ def width(c):
         return 100
     if kind == "Expander":
         return max(width(c.__dict__.get("Header")), width(c.__dict__.get("Content")))
+    if kind in ("DynamicLayout", "_DynamicLayout"):  # a layout inside a cell: its own columns, spacing and padding
+        return box_width(c, nested=True)[0]
     raise AssertionError(f"no width for a {kind}: add it to width() (a control sized 0 could hide a wide box)")
 
 
-def box_width(layout):
-    """Eto's DynamicLayout: each column as wide as its widest cell; the box adds its padding on both sides."""
+def box_width(layout, nested=False):
+    """Eto's DynamicLayout: each column as wide as its widest cell; the box adds its padding on both sides. A row of fewer
+    cells fills the first columns: a one-cell row sits in the first column and widens it (it is NOT spread across
+    the columns: the demo 7 Rhino run, 2026-10-28, measured #45's "About this project" grid, added as a one-cell row,
+    widening the first column to a 1,162 pt box this model had passed). A layout inside a cell has the padding and
+    spacing it sets itself."""
     columns = {}
     for cells in layout.rows:
         for i, cell in enumerate(cells):
             columns[i] = max(columns.get(i, 0), width(cell))
-    return 2 * PADDING + sum(columns.values()) + SPACING * max(len(columns) - 1, 0), layout
+    pad = layout.__dict__.get("Padding")
+    pad = pad.args[0] if pad is not None and pad.args else PADDING
+    spacing = layout.__dict__.get("Spacing")
+    spacing = spacing.args[0] if spacing is not None and spacing.args else SPACING
+    return 2 * pad + sum(columns.values()) + spacing * max(len(columns) - 1, 0), layout
 
 
 def texts(layout):
-    """Every label's text in the box, in the stack rows too."""
+    """Every label's text in the box, in the stack rows and nested layouts too."""
     out = []
     for cells in layout.rows:
         for c in cells:
+            if type(c).__name__ in ("DynamicLayout", "_DynamicLayout"):
+                out += texts(c)
+                continue
             for x in [i.control for i in c.__dict__.get("Items", [])] if type(c).__name__ == "StackLayout" else [c]:
                 if type(x).__name__ == "Label":
                     out.append(x.__dict__.get("Text"))
@@ -223,7 +236,8 @@ def _state(zone, use, questions):
 
 
 def _questions(rows):
-    return [{"key": k, "label": text, "kind": kind, "value": None} for k, kind, text in rows]
+    return [{"key": k, "label": text, "short": logic.about_label(k) if k in logic.STATED_FACTS else text[:30],
+             "kind": kind, "value": None, "choices": logic.choices_for(k, kind)} for k, kind, text in rows]
 
 
 def test_the_start_box_fits_a_laptop_with_the_longest_questions(ui):
@@ -232,7 +246,7 @@ def test_the_start_box_fits_a_laptop_with_the_longest_questions(ui):
     rows = LONG_QUESTIONS + [r for r in mine if r[0] not in dict((k, 1) for k, _, _ in LONG_QUESTIONS)]
     options = check.options(CITY)
     px, layout = laid_out(ui, _state("R-1b", "one_family_detached", _questions(rows)), options)
-    assert rows[0][2] in texts(layout), "the longest question is laid out in the box"
+    assert logic.about_label(rows[0][0]) in texts(layout), "the longest question is laid out in the box"
     assert px <= LAPTOP_PX, f"the start box is {px:.0f} px wide with the longest questions"
 
 
@@ -301,3 +315,114 @@ def test_each_refused_entry_is_named_in_the_one_note():
     assert both == ("Not kept: dwelling units (a whole number, 0 or more), rooms let for profit (a whole number, 0 or "
                     "more). Their rules need review until they are.")
     assert logic.answers_note([("dwelling_units", "count", "")]) == (logic.FOLLOW_UP_HELP, False)
+
+
+# ---- "About this project": blank by default, and the box's height --------------------------------------------------
+
+LAPTOP_HEIGHT_PX = 670         # 768 less the dialog's title bar (~30) and the taskbar / Dock (~70); CONTROL_PX errs tall
+LINE_PX, CONTROL_PX, ROW_PAD = 17, 28, 6
+
+
+def _cell_height(c):
+    kind = type(c).__name__
+    if kind == "Label":
+        size, bold = _font(c)
+        room = c.__dict__.get("Width")
+        lines = 1 if not room else max(1, -(-int(_text_px(c.__dict__.get("Text"), size, bold)) // int(room)))
+        return lines * LINE_PX * (size or 13) / 13
+    if kind in ("_DynamicLayout", "DynamicLayout"):
+        return box_height(c)
+    if kind == "StackLayout":
+        return max([_cell_height(i.control) for i in c.__dict__.get("Items", [])] + [0])
+    return CONTROL_PX
+
+
+def box_height(layout):
+    """Eto's DynamicLayout: each row as tall as its tallest cell, plus the spacing between rows."""
+    rows = [max(_cell_height(c) for c in cells) for cells in layout.rows]
+    spacing = layout.__dict__.get("Spacing")
+    gap = spacing.args[1] if spacing is not None and len(spacing.args) > 1 else ROW_PAD
+    return sum(rows) + gap * max(len(rows) - 1, 0)
+
+
+def _controls(layout):
+    for cells in layout.rows:
+        for c in cells:
+            if type(c).__name__ in ("_DynamicLayout", "DynamicLayout"):
+                yield from _controls(c)
+            else:
+                yield c
+
+
+def test_every_question_starts_unanswered(ui):
+    """No default: every one-click dropdown in the section sits on "Not answered" (index 0), every typed field is empty
+    (a quick-answers dropdown on its hint), whatever the district and use."""
+    options = check.options(CITY)
+    for zone, uses in sorted(options["follow_ups"].items()):
+        for use in uses:
+            questions = logic.follow_up_rows(options, zone, use, {})
+            _, layout = laid_out(ui, _state(zone, use, questions), options)
+            fields = [c for c in _controls(layout) if type(c).__name__ in ("DropDown", "TextBox")]
+            asked = [c for c in fields if c.__dict__.get("Width") in (logic.ABOUT_FIELD_WIDTH, logic.ABOUT_TYPED_WIDTH,
+                                                                      logic.ABOUT_QUICK_WIDTH)]
+            assert len(asked) >= len(questions), (zone, use)
+            for c in asked:
+                if type(c).__name__ == "DropDown":
+                    assert c.__dict__.get("SelectedIndex") == 0, (zone, use, [str(i) for i in c.__dict__["Items"]])
+                else:
+                    assert c.__dict__.get("Text") in ("", None), (zone, use)
+                    # (a TextBox the box never sets is a stand-in's empty text)
+
+
+def test_the_box_fits_a_laptop_screen_in_height_when_every_question_is_open(ui):
+    """The tallest box: the most questions any district and use asks, with the answers that open the floor-area and
+    distance questions, ≤ LAPTOP_HEIGHT_PX tall (1366 x 768 less the window's chrome)."""
+    options = check.options(CITY)
+    gate = {"stream_near_lot": True}
+    tallest = (0, None)
+    for zone, uses in sorted(options["follow_ups"].items()):
+        for use in uses:
+            questions = logic.follow_up_rows(options, zone, use, gate)
+            _, layout = laid_out(ui, _state(zone, use, questions), options)
+            tallest = max(tallest, (box_height(layout) + 28, (zone, use, len(questions))))
+    assert tallest[0] <= LAPTOP_HEIGHT_PX, tallest
+
+
+def test_the_height_model_counts_each_question_row(ui):
+    """The height model counts: "About this project" holds its questions one to a row in the box's second column
+    (since the demo 7 Rhino run, 2026-10-28: two to a row did not fit the second column), so the section is at least a
+    control's height a question (the laptop-height bound above can't pass by ignoring the section's rows)."""
+    options = check.options(CITY)
+    gate = {"stream_near_lot": True}
+    questions = logic.follow_up_rows(options, "R-2c", "two_family", gate)
+    assert len(questions) >= 2
+    _, layout = laid_out(ui, _state("R-2c", "two_family", questions), options)
+    about = [cells for cells in layout.rows if any(type(c).__name__ in ("_DynamicLayout", "DynamicLayout")
+                                                    for c in cells)]
+    assert about and type(about[0][0]).__name__ == "Label", "the section's title sits in the first column, beside it"
+    section = about[0][1]
+    quick = 1 if logic.quick_answers([q["key"] for q in questions]) else 0
+    assert len(section.rows) == len(questions) + quick and all(len(r) == 2 for r in section.rows), section.rows
+    assert box_height(section) >= len(questions) * CONTROL_PX, (box_height(section), len(questions))
+
+
+def test_a_one_cell_row_widens_the_first_column(ui):
+    """Eto on the Mac: a one-cell row sits in the first column and widens it (the demo 7 Rhino run, 2026-10-28: #45's
+    About grid, a one-cell row, made a 1,162 pt box). Beside a two-cell row, the box is then the one-cell row's width
+    PLUS the second column's: a model that spread the one-cell row across the columns would give only the wider of the
+    two (round 2 of the review: a lone one-cell row can't tell the two models apart)."""
+    gordium_ui, _ = ui
+
+    def text(n):
+        c = gordium_ui.ef.Label()
+        c.Text = "x" * n
+        return c
+
+    wide, small, second = text(130), text(5), text(50)       # ~780 px, ~30 px, ~300 px at size 13
+    layout = _DynamicLayout()
+    layout.AddRow(wide)
+    layout.AddRow(small, second)
+    eto = 2 * PADDING + width(wide) + SPACING + width(second)
+    spread = max(2 * PADDING + width(small) + SPACING + width(second), 2 * PADDING + width(wide))
+    assert spread < eto
+    assert box_width(layout)[0] == eto, (box_width(layout)[0], eto, spread)

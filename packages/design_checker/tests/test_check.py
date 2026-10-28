@@ -23,6 +23,12 @@ def facts():
     return load_facts(SITE / "spreadsheet_design_model_facts.yaml")
 
 
+# the rules waiting on who lives there and on a home occupation (§325-3B), and on whether a stream or inlet is near
+# the lot (§325-26): the sample's facts don't say
+WAITING_ON_THE_HOUSEHOLD = ["R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family",
+                            "R-1b.stream_setback"]
+
+
 def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp_path):
     result = check(MODEL, facts, tmp_path / "report.xlsx")
     assert (tmp_path / "report.xlsx").exists()
@@ -31,8 +37,13 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 10
     assert errors["R-1b.yard_projections"] == "PASS"
     s = result["summary"]
-    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail"
-    assert s["lines"] == ["Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"]
+    # who lives there, a home occupation and a stream near the lot aren't in their spreadsheet: those four rules wait
+    # (never a pass)
+    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 4 need review"
+    assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
+    assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
+    assert len(s["lines"]) == 5 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
+                                        in x for x in s["lines"][1:])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 
@@ -58,7 +69,8 @@ def test_needs_review_rows_say_why_in_the_measuring_words(facts):
     parking = next(r for r in result["interior"] if r["Rule id"] == "R-1b.parking_one_family")
     assert parking["Error"] == "NEEDS REVIEW" and parking["Why"] == "enter bedrooms / parking spaces"
     assert all(r["Rule id"] != "R-1b.parking_one_family" for r in result["rows"])
-    assert result["summary"]["state"] == "fail" and "need review" not in result["summary"]["text"]
+    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 4 need review")
+    assert sorted(r["Rule id"] for r in result["rows"] if r["Error"] == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
 
 
 def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
@@ -138,8 +150,9 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail"
-    assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-3a"]   # every hand-drafted rulebook
+    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 4 need review"
+    assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
+                                             "RU"]   # every hand-drafted rulebook
 
 
 def test_the_quickstart_names_every_district_the_start_box_offers(facts):
