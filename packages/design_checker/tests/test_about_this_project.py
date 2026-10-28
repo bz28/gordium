@@ -274,7 +274,9 @@ def test_a_quick_answer_sets_all_its_fields_before_the_box_refreshes():
     field and lost the second. The fields' own refresh is held back while a quick answer fills, then one refresh."""
     from rule_format.rulebook import REPO
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    box = ui[ui.index("def about_section("):ui.index("    layout = ef.DynamicLayout()\n    layout.Spacing")]
+    start = ui.index("def about_section(")             # (its own end: the box's layout after it, not an earlier one)
+    box = ui[start:ui.index("    layout = ef.DynamicLayout()\n    layout.Spacing", start)]
+    assert box                                          # never an empty slice that no assertion below could catch
     assert "None if filling else refresh_if_needed()" in box
     fill = box[box.index("def quick_picked"):]
     assert fill.index("filling.append(True)") < fill.index("field.SelectedIndex") < fill.index("filling.clear()") \
