@@ -99,6 +99,8 @@ STOPS = {
     "no_building_units": "enter the dwelling units in the whole attached building, every lot it stands on",
     "no_occupant_split": "optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that "
                          "depends on how the occupants are split)",
+    "attached_counts_disagree": "{here} dwelling units on this lot but {building} in the attached building: part of "
+                                "another building may be on this lot, or one of the counts or the use is off",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",
