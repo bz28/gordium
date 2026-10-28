@@ -10,9 +10,9 @@ from pathlib import Path
 
 from rule_format.rulebook import load
 
-from .measure import STREAM_SETBACK, measure
+from .measure import fact_conflicts as measure_conflicts
+from .measure import measure
 from .read_3dm import read_site
-from .stops import STOPS
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
@@ -24,10 +24,6 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "stream_near_lot", "stream_distance",
                "grade_points", "grade_from", "grade_is", "unsettled", "ground_fall", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
-# the unrelated people counted with the minor dependent children can't be fewer than without them: the measuring's
-# own words for it (one copy)
-COUNTS_DISAGREE = STOPS["household_counts_disagree"]
-STREAM_DISAGREE = STOPS["stream_facts_disagree"]
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).
@@ -49,21 +45,9 @@ def fact_conflicts(facts: dict) -> list[str]:
 
 
 def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
-    """fact_conflicts, each with the facts to correct it (the panel's "Enter …" button asks those)."""
-    out = []
-    here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
-    if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
-        out.append((f"{here} dwelling units on this lot but {building} in the attached building: part of another "
-                    "building may be on this lot, or one of the counts is off",
-                    ("dwelling_units", "attached_units_in_building")))
-    without, with_ = facts.get("unrelated_persons"), facts.get("unrelated_persons_with_children")
-    if type(without) is int and type(with_) is int and with_ < without:     # review round 3: said in every district
-        out.append((COUNTS_DISAGREE.format(without=without, with_=with_),
-                    ("unrelated_persons", "unrelated_persons_with_children")))
-    distance = facts.get("stream_distance")       # PR4 review round 2: both answers asked again, not only the "no"
-    if facts.get("stream_near_lot") is False and _number(distance) and distance < STREAM_SETBACK:
-        out.append((STREAM_DISAGREE.format(distance=distance), ("stream_near_lot", "stream_distance")))
-    return out
+    """fact_conflicts, each with the facts to correct it (the panel's "Enter …" button asks those). The measuring sets
+    each of those facts aside with the same reason (measure.fact_conflicts: one list)."""
+    return measure_conflicts(facts)
 
 
 def fact_problems(facts: dict) -> list[str]:

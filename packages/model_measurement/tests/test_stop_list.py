@@ -260,6 +260,7 @@ CASES = {
     "no_stream": _plain(),
     "stream_facts_disagree": _plain(stream_near_lot=False, stream_distance=5),
     "household_counts_disagree": _plain(unrelated_persons=3, unrelated_persons_with_children=1),
+    "attached_counts_disagree": _plain(use="one_family_attached", dwelling_units=4, attached_units_in_building=3),
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
