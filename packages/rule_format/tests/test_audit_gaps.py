@@ -126,3 +126,44 @@ def test_ru_note_3_counts_the_primary_buildings():
     for n, area, expect in cases:
         assert outcome(r, {"primary_buildings": n, "lot_area": area}, USES) == expect, (n, area)
     assert r["kind"] == "rule"
+
+
+# ---- §325-7B: a yard required for one building can't count for another ------------------------------------------
+@pytest.mark.parametrize("district", DISTRICTS)
+def test_a_second_primary_building_puts_the_shared_yard_question(district):
+    """One primary building: nothing on the lot to share its yards (not applicable). Two or more: how their yards are
+    divided is open (questions §5.17), so needs review, never a pass; not counted: needs review."""
+    r = rules_of(district)[f"{district}.yards_not_shared"]
+    assert outcome(r, {"primary_buildings": 1}, USES) == "not_applicable"
+    for n in (2, 3):
+        assert outcome(r, {"primary_buildings": n}, USES) == "needs_review"
+    assert outcome(r, {}, USES) == "needs_review"
+    assert len(r["open_questions"]) == 1 and {x["id"] for x in r["research"][0]["readings"]} == {
+        "to_lot_lines", "sum_between"}
+
+
+# ---- §325-8E(1)(a): the South Hill Overlay, R-1 and R-2 only ------------------------------------------------------
+SOUTH_HILL = {"R-1a", "R-1b", "R-2a", "R-2b", "R-2c"}
+
+
+@pytest.mark.parametrize("district", DISTRICTS)
+def test_the_south_hill_overlay_allows_one_primary_structure(district):
+    """"any property located within the South Hill Overlay District with a zoning designation of R-1 or R-2 is
+    prohibited from constructing a primary structure on any parcel already containing one or more primary
+    structures, and ... more than one primary structure on a parcel containing no primary structures"."""
+    rules = rules_of(district)
+    rid = f"{district}.south_hill_overlay"
+    if district not in SOUTH_HILL:
+        assert rid not in rules
+        return
+    r = rules[rid]
+    cases = [({"south_hill_overlay": True, "primary_buildings": 1}, "not_applicable"),
+             ({"south_hill_overlay": True, "primary_buildings": 2}, "fail"),
+             ({"south_hill_overlay": True, "primary_buildings": 3}, "fail"),
+             ({"south_hill_overlay": False, "primary_buildings": 3}, "pass"),
+             ({"primary_buildings": 1}, "not_applicable"),     # one: never asked, no row
+             ({"primary_buildings": 2}, "needs_review"),       # in the overlay or not: not said
+             ({"south_hill_overlay": True}, "needs_review"),   # not counted
+             ({}, "needs_review")]
+    for facts, expect in cases:
+        assert outcome(r, facts, USES) == expect, facts

@@ -61,6 +61,7 @@ def test_a_plain_rectangular_lot():
                          # one building, nothing standing apart: one primary building, read from the drawing; whether
                          # every primary building holds the lot's use is stated (not given here)
                          "primary_buildings": 1, "primary_buildings_same_use": None,
+                         "south_hill_overlay": None,
                          # a flat roof: nothing sticks out, the yards to the eaves are the yards
                          "front_yard_eaves": 25.0, "side_yard_smaller_eaves": 10.0, "side_yard_larger_eaves": 15.0,
                          "rear_yard_eaves": 35.0,
@@ -945,7 +946,7 @@ def test_a_fourth_floor_block_sharing_an_id_never_lets_the_stories_comply():
                 "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district",
                 "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
                 "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
-                "primary_buildings_same_use"}
+                "primary_buildings_same_use", "south_hill_overlay"}
     read_from_buildings = [k for k in m if k not in lot_only]
     assert read_from_buildings and all(m[k]["value"] is None and "share the id" in (m[k]["reason"] or "")
                                        for k in read_from_buildings), {k: m[k]["value"] for k in read_from_buildings}

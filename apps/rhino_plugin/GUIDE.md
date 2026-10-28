@@ -134,7 +134,8 @@ at a time: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, `Rooms let
 `Most occupants in any one dwelling unit (optional: how they are split)`, `Dwelling units in the whole attached
 building`, `Stories of the whole building`, and
 `Made by converting an existing building, not new construction? (§325-3B)`, and the household and home occupation
-questions, such as `Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?`. Each ends with `(Enter to skip)`:
+questions, such as `Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?`, and the lot's own
+questions, such as `Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?`. Each ends with `(Enter to skip)`:
 skipping leaves the fact unset, so its rule keeps waiting (never 0 or No).
 
 ## Not shown in this version

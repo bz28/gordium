@@ -261,6 +261,7 @@ CASES = {
     "no_household": _plain(),
     "no_home_occupation": _plain(),
     "no_primary_buildings": _plain(),
+    "no_south_hill": _plain(),
     "household_counts_disagree": _plain(unrelated_persons=3, unrelated_persons_with_children=1),
     "attached_counts_disagree": _plain(use="one_family_attached", dwelling_units=4, attached_units_in_building=3),
     "change_use_in_start_box": _plain(use="one_family_attached", dwelling_units=4, attached_units_in_building=3),

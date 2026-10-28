@@ -45,6 +45,7 @@ home_occupation_unit_area: {unit: sf, meaning: "Floor area of the dwelling unit 
 # (model_measurement: the main building, plus each solid standing apart that could hold a home and isn't listed as
 # an accessory building; readings when it can't tell).
 primary_buildings:    {unit: count,  meaning: "Primary buildings on the lot, the main one included: each separate building holding a permitted primary use (§325-3B PRIMARY STRUCTURE: a single structure containing a use permitted in the district), 1 or more; not an accessory building (a garage, a shed, an accessory dwelling unit)"}
+south_hill_overlay:   {unit: yes_no, meaning: "The lot is in the South Hill Overlay District (§325-8E; chart p.2 note 2), as the City's zoning map shows it; stated by the architect (Gordium doesn't look up the overlay map yet)"}
 primary_buildings_same_use: {unit: yes_no, meaning: "Every primary building on the lot holds the use entered for the lot (use), so each needs that use's lot area (§325-8B(1))"}
 # Yards to the building seen from above, eaves and cornices included: §325-18B lets those project up to 2 ft
 # into a required yard (the yards above are measured to the building, its eaves left out).
