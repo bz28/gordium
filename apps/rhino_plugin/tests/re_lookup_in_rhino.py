@@ -46,6 +46,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
@@ -221,7 +222,7 @@ def main():
         watch_draws(g)
         doc = docs.open("Large Objects - Feet")
         # 1. the sample
-        g.gordium_check()                              # an empty file: GordiumStart, the sample drawn
+        look_up_106(g, g.gordium_check)                              # an empty file: GordiumStart, the sample drawn
         facts = g.current_facts(doc)
         sample_lot, house = facts.get("lot_id"), g.RhinoTable(doc).massing()
         claim("1 the sample: its lot and a starting house", g._find(doc, sample_lot) is not None and len(house) >= 2,
@@ -315,7 +316,7 @@ def main():
         g = fresh_module()
         watch_draws(g)
         doc = docs.open("Large Objects - Feet")
-        g.gordium_check()
+        look_up_106(g, g.gordium_check)
         house = g.RhinoTable(doc).massing()
         floor = g._find(doc, house[-1])
         moved = str(doc.Objects.Transform(floor, Rhino.Geometry.Transform.Translation(3, 0, 0), True))
@@ -361,7 +362,7 @@ def main():
         g = fresh_module()
         watch_draws(g)
         doc = docs.open("Large Objects - Feet")
-        g.gordium_check()
+        look_up_106(g, g.gordium_check)
         facts = g.current_facts(doc)
         survey_lot = facts.get("lot_id")
         facts["lot_surveyed"] = True                   # as Use my survey… leaves it (pick_survey): theirs, a survey

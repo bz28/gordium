@@ -16,6 +16,7 @@ import scriptcontext as sc
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_needs") + "/"
 os.makedirs(S, exist_ok=True)
@@ -85,7 +86,7 @@ try:
     g = fresh_module()
     doc = docs.open("Large Objects - Feet")
     g.STATE["on_confirm"] = lambda *a: None
-    g.gordium_check()                                    # the sample, no bedrooms or parking stated
+    look_up_106(g, g.gordium_check)                                    # the sample, no bedrooms or parking stated
     item = parking(g)
     log["first"] = {k: item.get(k) for k in ("name", "status", "needs", "hint", "reason")}
     claim("the Parking row waits for exactly bedrooms and parking spaces",

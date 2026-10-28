@@ -42,6 +42,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close, leftovers  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 OUT = os.path.join(tempfile.gettempdir(), "gordium_pass2") + "/"
 os.makedirs(OUT, exist_ok=True)
@@ -179,7 +180,7 @@ try:
         doc = TestDocs("pass2").open("Large Objects - Feet")
         A["serial"] = doc.RuntimeSerialNumber
         g.STATE["on_confirm"] = lambda *a: None
-        g.gordium_check()
+        look_up_106(g, g.gordium_check)
         for _ in range(20):
             Rhino.RhinoApp.Wait()
             time.sleep(0.1)

@@ -35,6 +35,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_undo_steps") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -144,7 +145,7 @@ def main():
         g._count = lambda prompt: 2
         g._ask_yes_no_or_skip = lambda prompt: True
         doc = TestDocs("undo_steps").__enter__().open("Large Objects - Feet")
-        g.gordium_check()                                       # the sample, as GordiumStart draws it
+        look_up_106(g, g.gordium_check)                                       # the sample, as GordiumStart draws it
         building = doc.Layers.FindByFullPath("Building", -1)
         box(doc, 300, building)                                 # a second building: one to pick as the main one
         loose = box(doc, 320, doc.Layers.CurrentLayerIndex)     # not measured: one to add to the check
