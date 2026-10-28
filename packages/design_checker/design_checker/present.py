@@ -1540,13 +1540,17 @@ SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "
 
 def source_lines(sources: dict) -> list[str]:
     """Each site fact with where it came from, as the panel and the report show it: "Zoning district: R-1b ·
-    entered by you · confirmed by you, 2026-10-20". The checker never reads these: only the facts' values."""
+    entered by you · confirmed by you, 2026-10-20"; a box default left as it was, "Use: One-family dwelling,
+    detached · suggested by Gordium · default, not changed by you". The checker never reads these: only the facts'
+    values."""
     out = []
     for key, name in SOURCE_NAMES.items():
         s = sources.get(key)
         if not s or s.get("value") in (None, ""):
             continue
-        who = f"confirmed by {s['confirmed_by']}, {s.get('date')}" if s.get("confirmed_by") else "not confirmed"
+        who = (f"confirmed by {s['confirmed_by']}, {s.get('date')}" if s.get("confirmed_by") else
+               rhino_logic.UNTOUCHED if key in rhino_logic.BOX_DEFAULTS and s.get("source") != rhino_logic.ENTERED
+               else "not confirmed")
         out.append(f"{name}: {s['value']} · {s.get('source') or 'not known'} · {who}")
     return out
 

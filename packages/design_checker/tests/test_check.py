@@ -717,6 +717,29 @@ def test_gordiums_own_defaults_say_suggested_and_a_change_says_entered_by_you():
     s = logic.fact_sources(_box(use_source="entered by you", corner_lot=True, corner_source="entered by you"),
                            "2026-10-20", confirmed=True)
     assert s["use"]["source"] == "entered by you" and s["corner_lot"]["source"] == "entered by you"
+
+
+def test_a_box_default_left_as_it_was_is_never_confirmed_by_you():
+    """Architect's review (2026-10-28), a traceability error: "Use: One-family dwelling, detached · suggested by
+    Gordium · confirmed by you" for a use dropdown never changed. A box default (the use, the street, the corner
+    lot) left as it was is saved confirmed by no one and shown "default, not changed by you"; changed, it is the
+    architect's, confirmed at Draw. The district keeps its own tick; the facts the box doesn't offer as a default
+    (the address typed, the lot) are confirmed at Draw as before."""
+    from design_checker import rhino_logic as logic
+    s = logic.fact_sources(_box(corner_lot=False, district_confirmed=True), "2026-10-28", confirmed=True)
+    assert [s[k]["confirmed_by"] for k in ("use", "street", "corner_lot")] == [None, None, None]
+    assert s["zone"]["confirmed_by"] == "you" and s["lot"]["confirmed_by"] == "you"     # unchanged meaning
+    changed = logic.fact_sources(_box(corner_lot=False, use_source=logic.ENTERED, street_source=logic.ENTERED,
+                                      corner_source=logic.ENTERED), "2026-10-28", confirmed=True)
+    assert [changed[k]["confirmed_by"] for k in ("use", "street", "corner_lot")] == ["you", "you", "you"]
+    lines = present.source_lines(s)
+    use = next(x for x in lines if x.startswith("Use: "))
+    assert use.endswith(" · suggested by Gordium · default, not changed by you") and "confirmed by you" not in use
+    assert any(x.startswith("Use: ") and x.endswith("entered by you · confirmed by you, 2026-10-28")
+               for x in present.source_lines(changed))
+    assert any(x.startswith("Zoning district: ") and "confirmed by you" in x for x in lines)
+    gone = dict(s, starting_house={"value": "as first drawn", "source": logic.SUGGESTED, "confirmed_by": None})
+    assert next(x for x in present.source_lines(gone) if x.startswith("Starting house")).endswith("not confirmed")
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8").split("def start_box(", 1)[1]
     for key in ("address_source", "use_source", "corner_source", "zone_source"):   # a change in the box records it
         assert f'state["{key}"] = logic.ENTERED' in ui, key

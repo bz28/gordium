@@ -2611,9 +2611,18 @@ def ground_facts(state, lot_level, flat=None):
     return out
 
 
+# the box's own choices that Gordium fills in (the use, the street, the corner lot): the architect's word only once
+# changed (their source then ENTERED); left as they were, never "confirmed by you" (fact_sources, source_lines)
+BOX_DEFAULTS = ("use", "street", "corner_lot")
+UNTOUCHED = "default, not changed by you"
+
+
 def fact_sources(state, today, confirmed):
     """Every fact the box set, as {value, source, confirmed_by, date}: saved in the .3dm beside the facts and
-    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick)."""
+    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick).
+    A box default the architect left as it was (BOX_DEFAULTS) is confirmed by no one: pressing Draw is not saying
+    yes to a dropdown never opened (the architect's review, 2026-10-28: "Use: One-family dwelling, detached ·
+    suggested by Gordium · confirmed by you" for a use never changed)."""
     by = "you" if confirmed else None
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
@@ -2621,20 +2630,23 @@ def fact_sources(state, today, confirmed):
     def fact(value, source, who=by):
         return {"value": value, "source": source, "confirmed_by": who, "date": today}
 
+    def chosen(key):                   # a box default: the architect's only once changed
+        return by if state.get(key + "_source") == ENTERED else None
+
     return {
         "address": fact(state.get("address") or None, state.get("address_source") or ENTERED),
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
-        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
+        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED, chosen("use")),
         # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
         "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"), state.get("lot_source"))),
         # the street's name only when it may be kept (the City's roads may not: "street_name_saved" then None, and
         # the address's street, a kept fact, says it instead)
         "street": fact(street_name({**state, "street_name": state.get("street_name_saved")})
                        if "street_name_saved" in state else street_name(state),
-                       state.get("street_source") or SUGGESTED),
+                       state.get("street_source") or SUGGESTED, chosen("street")),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
-                           state.get("corner_source") or SUGGESTED),
+                           state.get("corner_source") or SUGGESTED, chosen("corner")),
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
         "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
                         "lot; height is checked as if flat)" if state.get("ground_fall") else ""),

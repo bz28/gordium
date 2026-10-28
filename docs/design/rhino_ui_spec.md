@@ -47,7 +47,7 @@ A3 [code] **"I confirm" is unticked on every new project.** On an existing proje
 
 A4 [code] **No regrading near the house.** Ticked, the ground shown counts as the finished grade, and height is checked normally. Unticked, with only the existing ground, height and stories need review (C5). Ground set with "I'll regrade" is finished ground (`rhino_logic.ground_facts`).
 
-A5 [code] **Every fact has a source.** Each fact the box sets is saved as {value, source, confirmed_by, date} in the .3dm (`Gordium / fact_sources`). A Change records the source "entered by you". The checker never reads the sources, only the values. The panel shows them (Site facts, when no row is selected), and the report's Check tab lists them (`rhino_logic.fact_sources`, `present.source_lines`).
+A5 [code] **Every fact has a source.** Each fact the box sets is saved as {value, source, confirmed_by, date} in the .3dm (`Gordium / fact_sources`). A Change records the source "entered by you". A box default left as it was (the use, the street, the corner lot) is confirmed by no one, shown "default, not changed by you": pressing Draw is not saying yes to a dropdown never opened (2026-10-28). The checker never reads the sources, only the values. The panel shows them (Site facts, when no row is selected), and the report's Check tab lists them (`rhino_logic.fact_sources`, `present.source_lines`).
 
 A6 [rhino] **Removed from the box:**
 - existing building, roof, floor-to-floor, the "Ground is" select, and the massing radio;
