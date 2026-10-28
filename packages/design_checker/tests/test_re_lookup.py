@@ -246,20 +246,23 @@ def test_the_same_address_draws_nothing_new_and_its_button_says_check():
     assert site.table.snapshot()[0] == before[0]
 
 
-def test_looking_up_the_samples_own_address_draws_the_looked_up_lot_in_its_place():
-    """The demo build (#23 with #26): on the sample, 106 Ithaca Rd looked up was "the same address", so Draw drew
-    nothing, and the neighbourhood (drawn only around a looked-up lot, never the sample) never came. The sample is a
-    stand-in: looking up any address, its own included, draws the looked-up lot on the map in its place."""
-    site = Site(house=None)
+def test_look_up_then_check_on_a_drawn_sample_never_starts_fresh():
+    """Ben's P0 (coordinator, 2026-10-27): on a file drawn from the sample, Edit site's Look up of its own address
+    then Check started fresh: the lot and the starting house were redrawn over the architect's work. A drawn sample
+    is drawn (is_drawn): the same address draws nothing new, every answer and the drawing stay as they were."""
+    site = Site(house="gordium")
+    site.facts.update(unrelated_persons=2, home_occupation=True, home_occupation_area=300.0)
+    before = site.table.snapshot()
     box = site.box().look_up(answer("106_ithaca_rd"))
-    assert box.button() == "Draw" and "Shown dashed" in (logic.uncertain(box.shown()) or "")
+    assert box.button() == "Check"
     assert box.draw() == "drawn" and box.asked == []
-    lot = site.facts["lot_id"]
-    assert lot != "lot1" and "lot1" not in site.table.objects and site.saved["from_sample"] is False
-    assert site.saved["lookup_frame"] and logic.same_address(site.saved["drawn_address"], SAMPLE)
-    again = site.box().look_up(answer("106_ithaca_rd"))          # now it is the looked-up lot: the same address
-    assert again.button() == "Check" and again.draw() == "drawn" and site.facts["lot_id"] == lot
-
+    assert site.table.snapshot()[0] == before[0] and site.facts["lot_id"] == "lot1"     # nothing redrawn
+    assert (site.facts["unrelated_persons"], site.facts["home_occupation"], site.facts["home_occupation_area"]) == \
+        (2, True, 300.0)
+    edited = Site(house="edited")                       # their own edits: never even asked about
+    before = edited.table.snapshot()
+    again = edited.box().look_up(answer("106_ithaca_rd"))
+    assert again.draw() == "drawn" and again.asked == [] and edited.table.snapshot()[0] == before[0]
 
 def test_cancel_after_the_reset_puts_everything_back():
     site = Site()
@@ -503,13 +506,13 @@ def test_every_start_lookup_and_answer_keeps_the_promises(start):
                     box.asked[0][2] is None or "will be replaced)" in box.asked[0][2][0]), where
         assert site.facts.get("lot_id") in left, where         # never a Draw without a lot
         assert not [k for k in site.saved if k.startswith("_")], where
-        if kind == "same" and lot != "sample":
+        if kind == "same":                                     # a drawn sample too (Ben's P0, 2026-10-27)
             assert site.table.snapshot()[0] == before[0][0], where   # nothing new drawn, nothing removed
-        elif kind in ("new", "guide", "same"):                 # the sample's own address too: a real lot drawn
+        elif kind in ("new", "guide"):
             kept_house = said == "keep" and bool(box.asked) and box.asked[0][2]
             gone = gordiums - ({"floor1", "floor2"} if kept_house else set())
             assert not gone & left, where                      # nothing Gordium drew for the old address stays
-            assert logic.same_address(site.saved["drawn_address"], SAMPLE if kind == "same" else "96 Ithaca Rd"), where
+            assert logic.same_address(site.saved["drawn_address"], "96 Ithaca Rd"), where
 
 
 # ---- the plugin does what the harness does --------------------------------------------------------------------
@@ -951,3 +954,70 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
                and not rhino.index("def confirm(") < i < rhino.index("def _confirm(")
                and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")]
     assert outside == [], outside                                           # read nowhere else
+
+
+# ---- a new, empty file: an empty box, Draw off until a lookup is found, or the site by hand (Ben, 2026-10-27) ----
+
+def _empty_box(**saved):
+    opened = logic.box_opened(saved, {})                      # no lot when the box opened
+    state = {"address": "", "zone": None, "district_confirmed": False, "lot_missing": True, "has_lot": False,
+             "design_buffer": "0'-0\"", "known_addresses": logic.known_addresses(opened), "lookup": {}}
+    return logic.start_gate(state, opened), opened
+
+
+def test_a_new_file_opens_an_empty_box_and_draw_waits_for_a_found_lookup():
+    state, _ = _empty_box()
+    assert state["needs_lookup"] and logic.draw_reason(state) == logic.LOOK_UP_FIRST_SITE
+    assert logic.LOOK_UP_FIRST_SITE == ("Look up the address first. It finds the lot, zoning district and "
+                                        "neighbourhood.")
+    rows = {r["key"]: r for r in logic.box_rows(state)}
+    assert rows["lot"]["text"] == rows["street"]["text"] == "Look up an address to fill these in"
+    assert [a for a, _, _ in rows["lot"]["actions"]] == ["by_hand"]       # never "Draw my lot…" before choosing
+    # ticking the district changes nothing: still no Draw without a lookup (never facts the architect didn't choose)
+    assert logic.draw_reason(dict(state, zone="R-1b", district_confirmed=True)) == logic.LOOK_UP_FIRST_SITE
+    # a found lookup of the address typed: the gate opens (the rest of Draw's rules still apply)
+    found, _ = _empty_box(_pending={"address": "106 Ithaca Rd, Ithaca, NY", "query": "106 Ithaca Rd"})
+    found = logic.start_gate(dict(found, address="106 Ithaca Rd"), logic.box_opened(
+        {"_pending": {"address": "106 Ithaca Rd, Ithaca, NY", "query": "106 Ithaca Rd"}}, {}))
+    assert not found["needs_lookup"]
+    # another address typed after it: shut again
+    other = logic.start_gate(dict(found, address="96 Ithaca Rd"), logic.box_opened(
+        {"_pending": {"address": "106 Ithaca Rd, Ithaca, NY", "query": "106 Ithaca Rd"}}, {}))
+    assert other["needs_lookup"]
+
+
+def test_the_site_by_hand_is_the_architects_own_and_says_no_neighbourhood_is_drawn():
+    state, _ = _empty_box(_by_hand=True)
+    assert state["by_hand"] and not state["needs_lookup"]
+    rows = {r["key"]: r for r in logic.box_rows(state)}
+    assert "No neighbourhood is drawn" in rows["lot"]["help"]
+    assert [a for a, _, _ in rows["lot"]["actions"]] == ["draw_lot"]       # they draw the lot
+    typed = dict(state, address="12 New Lot Ln")                           # no lookup possible: a label only
+    assert logic.address_reason(typed) == ""
+    assert logic.draw_reason(typed) == "Pick the district to continue."   # and then the district, confirmed
+    assert logic.draw_reason(dict(typed, zone="R-1b")) == "Confirm the district to continue."
+    assert logic.draw_reason(dict(typed, zone="R-1b", district_confirmed=True)) == "Draw or pick the lot to continue."
+    assert logic.draw_reason(dict(typed, zone="R-1b", district_confirmed=True, lot_missing=False)) == ""
+    assert "_by_hand" not in logic.storable_ui({"_by_hand": True})        # never saved: only while the box is open
+
+
+def test_a_file_already_drawn_keeps_working_as_before():
+    opened = logic.box_opened({"drawn_address": SAMPLE}, {"lot_id": "lot1", "address": SAMPLE})
+    state = logic.start_gate({"address": SAMPLE, "zone": "R-1b", "district_confirmed": True, "has_lot": True,
+                              "design_buffer": "0'-0\"", "known_addresses": logic.known_addresses(opened)}, opened)
+    assert not state["needs_lookup"] and not state["by_hand"] and logic.draw_reason(state) == ""
+    # by hand never applies to a drawn file: a new address typed there must still be looked up
+    by_hand = logic.start_gate(dict(state, address="96 Ithaca Rd"), dict(opened, _by_hand=True))
+    assert not by_hand["by_hand"] and logic.address_reason(by_hand).startswith("Press Look up")
+
+
+def test_the_plugin_opens_new_files_empty_and_gates_every_box():
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    start = src[src.index("def gordium_start():"):src.index("def _draw_starting_house(")]
+    assert "sample_site" not in start and "from_sample=True" not in start
+    assert 'suggested_facts(doc, options["zones"]), zone=None)' in start    # no district guessed in an empty file
+    assert "sample" not in logic.NO_LOT
+    state = src[src.index("def _box_state(doc"):src.index("\n\n\n", src.index("def _box_state(doc"))]
+    assert "logic.start_gate(" in state
+    assert 'if what == "by_hand":' in src and "_by_hand=True" in src

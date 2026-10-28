@@ -1351,7 +1351,13 @@ def lot_source(surveyed, source=None):
 
 
 NO_STREET_YET = "the street is set when the lot is drawn"
-NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+# a new, empty file (Ben, 2026-10-27): no sample prefilled; the site comes from a lookup, or by hand
+FILL_BY_LOOKUP = "Look up an address to fill these in"
+LOOK_UP_FIRST_SITE = "Look up the address first. It finds the lot, zoning district and neighbourhood."
+BY_HAND = "Enter the site by hand"
+BY_HAND_NOTE = ("Entered by hand: draw the lot, pick the district and the street side. No neighbourhood is drawn "
+                "(only a lookup finds one).")
+NO_LOT = "no lot yet: draw it on the Site layer, or look up the address"
 # a file with no lot the box can use (Edit site… in an empty file): its own lot, drawn or picked (never the sample)
 LOT_MISSING = "no lot yet: draw it, or pick a closed outline on the Site layer"
 
@@ -2058,8 +2064,10 @@ def box_rows(state, flat=None):
 
     after = AFTER_DRAW if state.get("after_draw") else ""     # the looked-up lot, not drawn yet (show_pending_lot)
     lot_actions = [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot and not after else []
-    if look.get("guide") or state.get("lot_missing"):
+    if (look.get("guide") or state.get("lot_missing")) and not state.get("needs_lookup"):
         lot_actions.insert(0, ("draw_lot", "Draw my lot…", True))
+    if state.get("needs_lookup"):                 # an empty file: the lookup fills the rows, or the site by hand
+        lot_actions = [("by_hand", BY_HAND + "…", True)]
     rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
          "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))],
@@ -2070,12 +2078,13 @@ def box_rows(state, flat=None):
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot",
-         "text": (LOT_MISSING if state.get("lot_missing") else
+         "text": (FILL_BY_LOOKUP if state.get("needs_lookup") else LOT_MISSING if state.get("lot_missing") else
                   lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source")) + after
                   if has_lot else NO_LOT),
-         "actions": lot_actions, "tick": None},
+         "actions": lot_actions, "tick": None, "help": BY_HAND_NOTE if state.get("by_hand") else None},
         {"key": "street", "label": STREET_LABEL, "help": STREET_HELP,
-         "text": ((street_name(state) if state.get("street_name") or not after else NO_STREET_YET) + after)
+         "text": FILL_BY_LOOKUP if state.get("needs_lookup") else
+         ((street_name(state) if state.get("street_name") or not after else NO_STREET_YET) + after)
          if (state.get("street_name") or has_lot)
          else "set from the lot, once there is one",
          "actions": [("street", "Change…", True)] if has_lot and not after else [], "tick": None,   # nothing to change yet: hidden
@@ -2502,6 +2511,8 @@ def draw_reason(state):
     unlooked = address_reason(state)
     if unlooked:
         return unlooked
+    if state.get("needs_lookup"):                 # an empty file: a found lookup first, or the site by hand
+        return LOOK_UP_FIRST_SITE
     if not state.get("zone"):
         return "Pick the district to continue."
     if not state.get("district_confirmed"):
@@ -3275,7 +3286,25 @@ def drop_pending(facts, saved_ui):
 def box_opened(saved_ui, facts):
     """The box's choices as a box opens over `facts`: the address the lot had then kept for this session
     (`_box_address`, never saved), so typing it back is never a new address (Ben, 2026-10-25)."""
-    return dict(saved_ui or {}, _box_address=(facts or {}).get("address"))
+    return dict(saved_ui or {}, _box_address=(facts or {}).get("address"),
+                _opened_empty=not (facts or {}).get("lot_id"))
+
+
+def start_gate(state, saved_ui):
+    """The box's state with the empty-file rule (Ben, 2026-10-27): a box opened on a file with no lot (a new project)
+    starts empty, and Draw stays off until a lookup of the address typed is found (`needs_lookup`), or the architect
+    chose to enter the site by hand (`by_hand`: they draw the lot, pick the district and the street side, all theirs;
+    no neighbourhood). A file with a lot drawn when the box opened is as before. Display and gating only: no fact
+    is written here."""
+    saved_ui = saved_ui or {}
+    if not saved_ui.get("_opened_empty"):
+        return dict(state, needs_lookup=False, by_hand=False)
+    by_hand = bool(saved_ui.get("_by_hand"))
+    pending = saved_ui.get("_pending") or {}
+    address = state.get("address") or ""
+    found = bool(pending) and (same_address(address, pending.get("address") or "")
+                               or same_address(address, pending.get("query") or ""))
+    return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand)
 
 
 def known_addresses(saved_ui):
@@ -3316,6 +3345,8 @@ def address_reason(state):
     address = (state.get("address") or "").strip()
     known = state.get("known_addresses")
     look = state.get("lookup") or {}
+    if state.get("by_hand") and not look.get("looking"):   # the site by hand, in a file that was empty: the address
+        return ""                                          # is the architect's label (no lot of another to mislabel)
     if known is not None and look.get("looking"):         # a lookup running: Draw off, its own address named
         return WAIT_LOOKUP.format(address=look["looking"])
     if not address or known is None or any(same_site_address(address, k) for k in known):
@@ -3367,10 +3398,11 @@ def own_work(table, facts, saved_ui):
 
 def is_drawn(address, saved_ui):
     """Whether `address` is the one a lookup drew in this file (its lot, placed on the map): then Draw draws nothing
-    new for it. Never the sample's: looking up 106 Ithaca Rd over the sample draws the looked-up lot in its place,
-    placed on the map, so its neighbourhood can be drawn (#23 never draws one around the sample)."""
+    new for it. A drawn sample counts too (coordinator, 2026-10-27, Ben's P0): Look up then Check in Edit site on a
+    file drawn from the sample started fresh, redrawing the lot and the house over the architect's work. New files
+    no longer start from the sample (start_gate): 106 Ithaca Rd is looked up like any address."""
     drawn = (saved_ui or {}).get("drawn_address")
-    return drawn is not None and not (saved_ui or {}).get("from_sample") and same_address(address, drawn)
+    return drawn is not None and same_address(address, drawn)
 
 
 def reset_plan(facts, saved_ui, mine):

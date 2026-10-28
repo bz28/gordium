@@ -25,8 +25,12 @@ Type a command's name in Rhino's command line.
 
 ## 1. Start a project
 
-1. Open an empty Rhino file (any unit; Gordium converts) and type `GordiumStart`. The **start box** opens, filled in with the
-   sample project (106 Ithaca Rd, district R-1b, one-family house).
+1. Open an empty Rhino file (any unit; Gordium converts) and type `GordiumStart`. The **start box** opens empty: the
+   lot rows say `Look up an address to fill these in`, and **Draw** stays off with
+   `Look up the address first. It finds the lot, zoning district and neighbourhood.`
+   To try Gordium, look up 106 Ithaca Rd. With no lookup possible (a lot the maps don't know), press
+   **Enter the site by hand…**: you draw the lot, pick the district and the street side, all "entered by you";
+   no neighbourhood is drawn (only a lookup finds one).
 2. Read each row:
    - **Address**: the project's address. **Look up** asks the City's and the State's maps about that address and fills in what they give (the lot, its district); each row says where its answer came from.
    - **Zoning district**: the district and where it came from ("entered by you"); **Change** picks another. Tick **This is the lot's
@@ -48,7 +52,7 @@ Type a command's name in Rhino's command line.
 uses that lot's facts). If the model already has a building, Gordium says (in a message and on the command line)
 `This model already has a building. To start over on another address, use Edit site… in the Gordium panel: Look up the new address and press Draw (the lot and starting house are drawn again for it). To check the building you have, use GordiumCheck.`
 From **Edit site…** (and `GordiumFacts`) the same box opens with its last button reading **Check** instead of **Draw**: it re-checks with the changed facts; a new address looked up there is drawn clean (Gordium asks once before removing anything you drew).
-**Cancel** closes the box without drawing the house. On a new file the sample lot has already been drawn on the Site layer, and stays; the command line says nothing was started.
+**Cancel** closes the box without drawing anything new; the command line says nothing was started.
 
 ## 2. The panel
 

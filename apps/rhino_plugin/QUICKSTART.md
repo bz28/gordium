@@ -230,12 +230,13 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 
 1. **New file.** File → New, a template in **feet** (any units work; feet is easiest to read).
 2. **Type `GordiumStart`** and press Enter.
-   - On an empty file Gordium draws its sample lot, 106 Ithaca Rd as the State tax map draws it (7,033 sf, its
-     front curving along Ithaca Road), so you can try it at once. It is placed as an address lookup places it: the
-     street along the bottom of Top view, the lot behind it.
+   - On an empty file the start box opens empty and **Draw** stays off until an address is looked up. To try
+     Gordium, look up 106 Ithaca Rd: the State tax map's lot (7,033 sf, its front curving along Ithaca Road),
+     placed with the street along the bottom of Top view, the lot behind it. A lot the maps don't know:
+     **Enter the site by hand…** (you draw the lot and pick the district and street side; no neighbourhood).
    - To use your own lot instead, first draw it as one closed polyline on a layer named `Site`, then run
      `GordiumStart`.
-3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
+3. **The start box** opens (filled in from your lot, if you drew one). Read it top to bottom:
    - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
      45 seconds; the box says "Looking up…"). Look up only shows what it found: the address and a suggested zoning
      district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which
@@ -303,7 +304,7 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
 | `GordiumFacts` | Open the start box again to change the site facts (the panel's **Edit site…** does the same). |
 | `GordiumOff` | Stop Gordium and clear its drawing. Nothing in your model is changed. |
 
-Gordium never changes your model, except for what you ask: the starting building and the sample lot. Everything
+Gordium never changes your model, except for what you ask: the starting building and a looked-up lot. Everything
 else (the envelope, the red, the labels, the status box) is drawn on top and disappears with `GordiumOff`.
 
 ## What "needs review" means
@@ -343,9 +344,9 @@ so the guide and Gordium can't drift apart.
 - **Undo:** Cmd+Z.
 - **Draw a box:** `Box`, then two corners and a height.
 
-### The starting house on the sample lot
+### The starting house at 106 Ithaca Rd
 
-The sample lot is 106 Ithaca Rd as the State tax map draws it (parcel 84.-2-6): 7,033 sf, 75'-10" wide along
+Looked up, 106 Ithaca Rd is the lot as the State tax map draws it (parcel 84.-2-6): 7,033 sf, 75'-10" wide along
 Ithaca Road (its front is a gentle curve) and about 101 ft deep, with a short jog at the back. In Top view the
 street is along the bottom (the lot faces south-east); "back" below means away from the street (up in Top view).
 The side yards are named by compass, as on a site plan: the southwest one is on your left as you face the lot from

@@ -1447,7 +1447,8 @@ def _lot_level(doc, facts):
 def _box_state(doc, facts, options, saved_ui, mode="check"):
     """The box's state: what is drawn, except that in a file with nothing drawn yet a found lookup's lot and street
     are shown (marked "after Draw": rhino_logic.show_pending_lot, tested in CI)."""
-    return logic.show_pending_lot(_box_state_drawn(doc, facts, options, saved_ui, mode), facts, saved_ui)
+    return logic.start_gate(logic.show_pending_lot(_box_state_drawn(doc, facts, options, saved_ui, mode), facts,
+                                                  saved_ui), saved_ui)
 
 
 def _box_state_drawn(doc, facts, options, saved_ui, mode="check"):
@@ -1767,7 +1768,9 @@ def _box_pick(doc, what, facts, saved_ui, session):
 
 
 def _one_pick(doc, what, facts, saved_ui, session):
-    if what == "lookup":
+    if what == "by_hand":                      # the site by hand (an empty file): the box shows its own rows
+        saved_ui = dict(saved_ui, _by_hand=True)
+    elif what == "lookup":
         saved_ui = _lookup_start(facts, saved_ui)
     elif what == "lookup_done":
         facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
@@ -2891,17 +2894,9 @@ def gordium_start():
                                ef.MessageBoxButtons.OK, ef.MessageBoxType.Information)
         return None
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
-    if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
-        sample = ask({"cmd": "sample_site"})
-        sample_lot = str(_add_lot(doc, sample))
-        # its facts are the sample project's; a lookup may replace its lot (never one the architect drew or picked)
-        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True, replaceable_lot=sample_lot,
-                                 street_name=sample.get("street_name"),     # its street, as the lookup named it
-                                 street_source=sample.get("street_source"),
-                                 drawn_address=sample["address"]))   # what is drawn: a lookup of another redraws
-        facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
-                                       suggested_facts(doc, options["zones"]))
-        facts["lot_id"] = str(_lot_candidates(doc)[0].Id)
+    if not _lot_candidates(doc):        # an empty model: an empty box (Ben, 2026-10-27): the site comes from a
+        # lookup, or by hand; no district guessed either (the lookup finds it, or the architect picks it)
+        facts = logic.with_suggestions({}, dict(suggested_facts(doc, options["zones"]), zone=None))
     else:                               # the architect's own lot: their saved facts, else the suggestions
         try:
             saved = current_facts(doc)
