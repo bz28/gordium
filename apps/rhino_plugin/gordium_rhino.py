@@ -1423,7 +1423,7 @@ def enter_rooms(needs):
         say("There are no site facts yet: run GordiumStart (or Edit site…) first.")
         return
 
-    answers = ui.row_dialog(logic.enter_words(needs), logic.row_fields(needs, facts),     # OK: words keep it open
+    answers = ui.row_dialog(logic.answer_words(needs), logic.row_fields(needs, facts),    # OK: words keep it open
                             lambda got: logic.row_problem(facts, needs, got))
     if answers is None:                 # Cancel, Esc, closed: nothing written, so no Undo step
         say("Cancelled: nothing changed.")

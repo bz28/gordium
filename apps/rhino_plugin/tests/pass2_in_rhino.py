@@ -249,7 +249,7 @@ try:
         kids = list(detail.Children)
         texts = [(type(c).__name__, getattr(c, "Text", None)) for c in kids]
         log["detail"] = texts[:30]
-        words = g.logic.enter_words(row_["needs"]) + "…"
+        words = g.logic.answer_words(row_["needs"]) + "…"
         log["row"] = {"name": row_["name"], "hint": row_.get("hint"), "button": words}
         b = next(k for k, c in enumerate(kids) if isinstance(c, ef.Button) and c.Text == words)
         reason = next(k for k, c in enumerate(kids) if isinstance(c, ef.Label) and c.Text == row_.get("reason"))

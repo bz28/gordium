@@ -1085,6 +1085,7 @@ def row_dialog(title, fields, check):
             for t in (logic.NOT_ANSWERED,) + logic.yes_no_words(q["key"]):
                 field.Items.Add(t)
             field.SelectedIndex = logic.row_choice(q["value"])
+            field.Width = logic.ANSWER_WIDTH           # every dropdown the same width: lined up
         else:                                  # a count: typed, blank when not answered (never 0)
             field = ef.TextBox()
             field.Width = 60
