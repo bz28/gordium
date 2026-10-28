@@ -145,3 +145,14 @@ def test_the_sites_rhino_comparison_reads_the_deep_run(tmp_path, capsys):
     ran.write_text(json.dumps({"scenarios": {}}), encoding="utf-8")
     assert scenarios.main(["--sites", "rhino", str(ran)]) == 1
     assert "r2_316_e_falls_st: no result for 'as drawn'" in capsys.readouterr().out
+
+
+def test_each_deep_site_names_the_parcel_its_light_run_lookup_found():
+    """Each deep-run lot is traceable to its tax parcel: the id in its description is the one the stored lookup for
+    the same address returned (the light run uses the same three addresses)."""
+    import re
+    light = yaml.safe_load((LIGHT / "expected.yaml").read_text(encoding="utf-8"))["sites"]
+    for p in DEEP:
+        sc = scenarios.load(p)
+        found = re.findall(r"parcel (500700-[\d.]+-\d+-\d+)", sc["what"])
+        assert found == [light[sc["district"]]["parcel"]], (p.name, found)
