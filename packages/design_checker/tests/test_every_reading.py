@@ -707,3 +707,35 @@ def test_a_doubtful_looked_up_lot_makes_the_accessory_building_rule_need_review(
     kw = dict(accessory_buildings=["shed"], accessory_frame=True)
     assert status(run(b, **kw), "R-1b.accessory_buildings") == "complies"
     assert status(run(b, **kw, unsettled={key: "This may be the wrong lot."}), "R-1b.accessory_buildings") == "needs_review"
+
+
+def _with_left_out(buildings, touching, **facts):
+    """The site run() builds, checked with one solid on the lot left out of the measuring (the plugin's extras)."""
+    n = len(LOT)
+    site = {"units": "ft", "problems": [], "buildings": buildings,
+            "lot": {"id": "lot", "edges": [{"points": [list(LOT[i]), list(LOT[(i + 1) % n])], "curved": False}
+                                           for i in range(n)]}}
+    return check_site(site, {**FACTS, **facts}, extras={"not_included": ["other"], "touching": touching})
+
+
+def test_a_solid_left_out_anywhere_on_the_lot_makes_the_accessory_building_rule_need_review():
+    """A frame shed well clear of every line complies; another solid on the lot, not measured, may be an accessory
+    building nearer a line (§325-25), so the rule needs review even when it doesn't touch the house (review of the
+    #18 carry onto main: the accessory rows were left out of the left-out caution and stayed "complies")."""
+    b = floors(15, 30, 45, 70, 2) + [prism(rect(20, 90, 30, 100), 0, 10, "shed")]
+    kw = dict(accessory_buildings=["shed"], accessory_frame=True)
+    assert status(run(b, **kw), "R-1b.accessory_buildings") == present.COMPLIES
+    item = rows(_with_left_out(b, [], **kw), "R-1b.accessory_buildings")[0]
+    assert item["status"] == present.REVIEW and "accessory building" in item["reason"]
+
+
+def test_a_solid_left_out_touching_the_house_makes_the_eaves_rule_need_review():
+    """Eaves 2 ft past walls 12 ft from the line comply (Y1); a solid touching the house left out of the measuring
+    may be a porch, part of the building (§325-18A), its roof nearer the line: the eaves rule needs review, as the
+    yards do. Not touching, it stands."""
+    house = (12, 30, 42, 70)
+    b = floors(*house, 2) + [roof(*house, 20, 28, 2.0, 0)]
+    assert status(run(b), "R-1b.yard_projections") == present.COMPLIES
+    assert status(_with_left_out(b, []), "R-1b.yard_projections") == present.COMPLIES
+    item = rows(_with_left_out(b, ["other"]), "R-1b.yard_projections")[0]
+    assert item["status"] == present.REVIEW and "touching the building" in item["reason"]
