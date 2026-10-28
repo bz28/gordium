@@ -2372,6 +2372,12 @@ def wants_suggestions(text, chosen=None):
     return len(text.lstrip()) >= SUGGEST_MIN_CHARS and text != chosen
 
 
+def hint_rows_shown(list_shown, note):
+    """Whether the start box's suggestion rows (the type-ahead list and its quiet note) take any room: only while
+    one of them has something to show (the architect's review, 2026-10-28: an empty gap under Address)."""
+    return bool(list_shown) or bool(note)
+
+
 def suggestions_shown(answer, typed):
     """(the list, a quiet note) for a type-ahead answer, or None when it is for something no longer typed (a stale
     answer is dropped). Offline, an error or too slow: no list and the note that suggestions are unavailable (the

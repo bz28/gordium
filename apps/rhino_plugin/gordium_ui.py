@@ -1046,6 +1046,16 @@ def start_box(state, options, mode):
     hint_list.Width, hint_list.Height = 300, logic.list_height(1)
     hint_list.Visible = False
     hint_note = label("", size=10)
+    hint_note.Visible = False
+    hint_rows = ef.StackLayout()      # the list and its note as one row, hidden while both are empty: no gap under
+    hint_rows.Orientation = ef.Orientation.Vertical       # Address (the architect's review, 2026-10-28)
+    hint_rows.Items.Add(ef.StackLayoutItem(hint_list))
+    hint_rows.Items.Add(ef.StackLayoutItem(hint_note))
+    hint_rows.Visible = False
+
+    def show_hint_rows():
+        hint_note.Visible = bool(hint_note.Text)
+        hint_rows.Visible = logic.hint_rows_shown(hint_list.Visible, hint_note.Text)
     wait_keys = ef.UITimer()
     wait_keys.Interval = logic.SUGGEST_DELAY_S
     wait_answer = ef.UITimer()
@@ -1068,6 +1078,7 @@ def start_box(state, options, mode):
         hints["items"] = []
         hint_list.Items.Clear()
         hint_list.Visible = False
+        show_hint_rows()
         fit_box()
 
     def pick_hint(index):
@@ -1084,8 +1095,8 @@ def start_box(state, options, mode):
         if not logic.wants_suggestions(address.Text, hints["chosen"]):
             suggester["stop"]()
             wait_answer.Stop()
-            hide_hints()
             hint_note.Text = ""
+            hide_hints()                             # (after the note is cleared: the rows fold away)
             return
         suggester["start"](address.Text)            # (stops one still running: its answer would be stale)
         wait_answer.Start()
@@ -1106,6 +1117,7 @@ def start_box(state, options, mode):
             hint_list.Items.Add(item)
         hint_list.Height = logic.list_height(len(items), list_row_px(hint_list))   # as tall as its rows, no empty rows
         hint_list.Visible = bool(items)
+        show_hint_rows()
         fit_box()
 
     wait_keys.Elapsed += logic.guard(ask_hints, "ask for address suggestions")
@@ -1178,8 +1190,7 @@ def start_box(state, options, mode):
         if key == "address":
             layout.AddRow(title, row(address, *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             if suggester is not None:      # the type-ahead list (hidden until there is one) and its quiet note
-                layout.AddRow(None, row(hint_list))
-                layout.AddRow(None, row(hint_note))
+                layout.AddRow(None, hint_rows)
             if r.get("matches"):           # several places match: pick one, then Look up again
                 matches = ef.DropDown()
                 matches.Items.Add("Which address?")

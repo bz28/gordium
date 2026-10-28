@@ -1342,3 +1342,13 @@ def test_the_address_streets_name_is_kept_through_draw():
     assert logic.address_street("106 Ithaca Road, Ithaca", "ITHACA") is None          # never a part of a name
     assert logic.address_street("106 West Ithaca Road", "ITHACA RD") is None
     assert logic.address_street(None, "ITHACA RD") is None
+
+
+def test_the_suggestion_rows_take_no_room_while_empty():
+    """The architect's review (2026-10-28, item 16): an empty gap under Address, the hidden type-ahead list and its
+    empty note still taking their rows. They are one row now, shown only while the list or the note has something."""
+    assert logic.hint_rows_shown(False, "") is False and logic.hint_rows_shown(False, None) is False
+    assert logic.hint_rows_shown(True, "") is True and logic.hint_rows_shown(False, "Suggestions are offline") is True
+    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "layout.AddRow(None, hint_rows)" in ui and "row(hint_list)" not in ui and "row(hint_note)" not in ui
+    assert "hint_rows.Visible = False" in ui and "hint_rows.Visible = logic.hint_rows_shown(" in ui
