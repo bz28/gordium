@@ -30,7 +30,7 @@ A PR is done when every item has its test, and each test fails if the behavior i
 A1 [rhino] **Command and dialog.** `GordiumStart` (and `GordiumCheck` on an empty file) opens one modal box, titled "New zoning check". `GordiumFacts` and the panel's **Edit site…** open the same box, titled "Zoning check · site". A Change or Pick button closes the box, runs the pick in the model, and opens the box again with the result.
 
 A2 [code] **Rows, in this order** (`rhino_logic.box_rows`, tested in CI):
-1. **Address** and **[Look up]**. The lookup is a later PR; until then it reads "Look up (coming soon)", disabled, and the facts come from the lot as drawn.
+1. **Address** and **[Look up]** (or Enter). The lookup (packages/site_lookup) runs in its own short-lived process, never in Rhino; the box says "Looking up…" and stops after 45 s. Found: the lot (the State's tax map, drawn with its street side at the bottom of Top view), the street side, the corner lot, today's ground (USGS spot grades) and a suggested zone, each with its source and never confirmed ("I confirm" stays unticked). A doubtful fact is amber with its reason and "I checked this"; until it is ticked or changed, every item measured from it needs review. What the box can't settle it asks (corner lot, two zones, several matches). Offline, not found, outside the City or too slow: the box says why and works by hand. Only what each source allows is saved (endpoints.yaml `store`): the City's outline is a guide on screen only.
 2. **Zoning district**, with its source ("entered by you" today; "from City map" once the lookup exists), a dropdown, and **☐ I confirm**. One district today; more than one later.
 3. **Use**: a dropdown.
 4. **Lot**: "<area> sf · from the tax map (±2 ft, approximate)" or "… · from your survey", with **Use my survey…** (pick the surveyed outline).
@@ -53,6 +53,8 @@ A6 [rhino] **Removed from the box:**
 - existing building, roof, floor-to-floor, the "Ground is" select, and the massing radio;
 - the starting building is always drawn with the envelope (a "Hide starting house" toggle sits in the panel, and hiding it doesn't stop it being checked);
 - floor-to-floor stays 11'-8" in code, editable later through GordiumFacts.
+
+A6b [rhino] **The neighbourhood (context map).** After Draw on a looked-up lot, the 1500 ft × 1500 ft square around it is drawn as a site context drawing: neighbouring parcels and street centerlines (the State's, `store: raw`) as grey curves on locked `Gordium::Context::Parcels` / `::Streets`, the square, a north arrow (the lot is turned so its street runs along the bottom, so north is rarely up), a 100 ft scale bar and the source lines on `::Notes`; the building footprints (kept, Ben's decision 2026-10-21) as outlines without heights on the unlocked `::Buildings` layer, editable: an outline the architect edits is theirs and Gordium never removes or redraws it. Never measured (`rhino_logic.classify`); a solid on those layers over the lot is said. A "Show neighbourhood" tick in the panel, kept with the file. (`design_checker.context_box`, `site_lookup.context`.)
 
 A7 [rhino] **Look.** System default buttons and checkboxes; no brand accent color.
 
