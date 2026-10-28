@@ -105,11 +105,13 @@ def test_an_attached_dwellings_units_are_asked_never_taken_as_one():
     assert logic.implied_facts("one_family_attached") == {} and logic.implied_facts("one_family_semi_detached") == {}
     assert follow_up_facts(X, "one_family_attached", NAMES) == ["dwelling_units", "rooms_let_for_profit", "conversion"]
     opts = _opts()
-    facts, _ = logic.answers_applied({"use": "one_family_attached", "lot_area": 6500},
-                                     {"rooms_let_for_profit": 0, "conversion": False}, "X", "one_family_attached", opts)
+    # rooms let for profit is a use detail (rhino_logic.DEFERRED_FACTS): answered in the panel, so it is in the facts
+    # already; the box answers the units and the conversion
+    facts, _ = logic.answers_applied({"use": "one_family_attached", "lot_area": 6500, "rooms_let_for_profit": 0},
+                                     {"conversion": False}, "X", "one_family_attached", opts)
     assert "dwelling_units" not in facts
     assert outcome(X[2], facts, USES) == "needs_review"           # units unanswered: never a pass
-    facts, _ = logic.answers_applied(facts, {"dwelling_units": 6, "rooms_let_for_profit": 0, "conversion": False},
+    facts, _ = logic.answers_applied(facts, {"dwelling_units": 6, "conversion": False},
                                      "X", "one_family_attached", opts)
     assert outcome(X[2], facts, USES) == "fail"                   # 6,000 + 750 x 3 = 8,250 sf needed, 6,500 given
 
@@ -125,7 +127,10 @@ def test_an_attached_dwellings_units_are_asked_never_taken_as_one():
 def test_the_answers_decide_the_rule_and_a_blank_never_passes(answers, lot, expected):
     """End to end through the checker's own verdict (outcome): the box's answers become the facts; an unanswered
     one leaves the rule needing review even on a lot big enough for any answer. Expected sizes by hand from note 7."""
-    facts, _ = logic.answers_applied({"use": "multiple_family", "lot_area": lot}, answers, "X", "multiple_family",
+    # rooms let for profit is a use detail answered in the panel (DEFERRED_FACTS): already in the facts, never the box's
+    rooms = {k: answers[k] for k in ("rooms_let_for_profit",) if k in answers}
+    box = {k: v for k, v in answers.items() if k not in rooms}
+    facts, _ = logic.answers_applied({"use": "multiple_family", "lot_area": lot, **rooms}, box, "X", "multiple_family",
                                      _opts())
     assert outcome(X[1], facts, USES) == expected
 

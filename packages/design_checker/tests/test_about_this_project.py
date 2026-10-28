@@ -292,3 +292,26 @@ def test_two_counts_that_are_checked_against_each_other_are_kept_together(option
     assert any(i["id"].startswith("facts.conflict") for i in v["items"])
     rule = next(i for i in v["items"] if i.get("rule") == "R-3a.occupancy_one_family")
     assert rule["status"] == present.REVIEW
+
+
+def test_rooms_let_for_profit_is_a_use_detail_and_the_units_and_conversion_stay_up_front(options):
+    """The coordinator for Ben (2026-10-27): rooms rented out is a use detail, asked later like the household and the
+    home business; the number of homes and new-or-converted shape the lot area and stay in the start box. R-3a's
+    attached-house lot size (R-3a.yaml: 6,000 sf, or 7,000 converted, + 750 a unit over three + 500 a room let for
+    profit) reads all three: with the two box answers given it waits only on the rooms, in the use details group,
+    needs review (never a pass); answered 0 on a 70 x 150 ft lot (10,500 sf >= 6,000) it complies."""
+    asked = logic.follow_up_keys(options, "R-3a", "one_family_attached")
+    assert "rooms_let_for_profit" not in asked and "rooms_let_for_profit" not in logic.BOX_ASKS
+    assert {"dwelling_units", "conversion"} <= set(asked)
+    facts, given = logic.answers_applied({}, {"dwelling_units": 3, "conversion": False, "rooms_let_for_profit": 2},
+                                         "R-3a", "one_family_attached", options)
+    assert "rooms_let_for_profit" not in given and facts.get("rooms_let_for_profit") is None   # the box never sets it
+    rid = "R-3a.lot_area_one_family_attached"
+    v = _view("R-3a", "one_family_attached", dwelling_units=3, conversion=False, attached_units_in_building=3)
+    row = next(i for i in v["items"] if i["rule"] == rid)
+    assert row["status"] == present.REVIEW and row["needs"] == ["rooms_let_for_profit"] and row["use_detail"], row
+    assert row["id"] in {g["key"]: g for g in v["groups"]}["use_details"]["items"]
+    assert v["state"] != present.COMPLIES
+    done = next(i for i in _view("R-3a", "one_family_attached", dwelling_units=3, conversion=False,
+                                 attached_units_in_building=3, rooms_let_for_profit=0)["items"] if i["rule"] == rid)
+    assert done["status"] == present.COMPLIES and not done["use_detail"], done

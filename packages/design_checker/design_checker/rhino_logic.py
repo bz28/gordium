@@ -363,13 +363,14 @@ INTERIOR_FACTS = ("sleeping_rooms", "parking_spaces")    # inside the building (
 # box never asks them up front: the panel's Enter flow still does, where the drawing can't say (measure._primary_buildings)
 DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
 # Use details (Ben, 2026-10-27: ask up front only what an architect knows at the start and what shapes the exterior or the
-# envelope): who lives there and a home business. Not asked in the start box; answered later, when the interior is planned,
+# envelope): who lives there, rooms let for profit (a use detail, the coordinator for Ben, 2026-10-27; the number of homes
+# and new-or-converted stay up front), and a home business. Not asked in the start box; answered later, when the interior is planned,
 # with the panel's Enter flow. Their rules never pass while unanswered (they stay "needs review"); the panel lists them
 # in their own collapsed group, apart from the building's problems (is_use_detail). Ben will settle the exact questions
 # later, so this tuple is the one place that moves them: a fact added here leaves the start box and joins that group.
 DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occupants", "occupants_most_in_one_unit",
                   "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
-                  "home_occupation", "home_occupation_area", "home_occupation_unit_area")
+                  "home_occupation", "home_occupation_area", "home_occupation_unit_area", "rooms_let_for_profit")
 # Facts the measuring checks against each other (a count with the children counted can't be smaller than the count
 # without: model_measurement.project.fact_conflict_rows): kept or dropped together, so a contradiction is never hidden
 # by dropping half of it.
