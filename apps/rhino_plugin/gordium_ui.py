@@ -912,7 +912,7 @@ def start_box(state, options, mode):
 
     def about_section(layout, questions):
         """"About this project": the facts only the architect knows that this district's rules need for the use
-        (rhino_logic.follow_up_rows, from the rulebook), compact: a quick-answers dropdown, then two questions a row,
+        (rhino_logic.follow_up_rows, from the rulebook), compact: a quick-answers dropdown, then one question a row,
         each a one-click dropdown (or, for a number, a field) that starts on "Not answered". The full question is its
         hover text. The box stays laptop-sized (logic.ABOUT_*; pinned in test_box_width.py)."""
         note = label(logic.FOLLOW_UP_HELP, size=11, width=logic.ABOUT_NOTE_WIDTH)
@@ -973,11 +973,13 @@ def start_box(state, options, mode):
 
             picker.SelectedIndexChanged += logic.guard(quick_picked, "pick a quick answer")
             grid.AddRow(label("Quick answers", size=12, width=logic.ABOUT_LABEL_WIDTH), picker)
-        for k in range(0, len(cells), 4):
-            grid.AddRow(*cells[k:k + 4])
-        layout.AddRow(label("About this project", bold=True))
-        layout.AddRow(grid)
-        layout.AddRow(note)
+        for k in range(0, len(cells), 2):     # one question a row: the second column stays laptop-sized
+            grid.AddRow(*cells[k:k + 2])
+        # its title in the box's first column and its questions in the second, as every other row: a one-cell row
+        # is NOT spread across the columns by Eto on the Mac: it sits in the first and widens it (the demo 7 Rhino run,
+        # 2026-10-28: the grid there made the box 1,162 pt wide)
+        layout.AddRow(label("About this project", bold=True), grid)
+        layout.AddRow(None, note)
 
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
