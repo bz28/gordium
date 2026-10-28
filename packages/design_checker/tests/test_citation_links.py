@@ -106,3 +106,16 @@ def test_list_numbers_and_footnote_markers_never_split_a_search():
         words = urllib.parse.unquote(link.split("&search=")[1]).strip('"')
         assert words.startswith(start) and "(1)" not in words, words
         assert "".join(words.split()) in _pdf_text("chapter_325_zoning_2026-10.pdf", page), words
+
+
+def test_a_documents_lines_are_read_again_after_a_re_extraction(tmp_path):
+    """The page lines a citation link searches are kept by the file's content, never by folder name, as the chart cells
+    are (#50): after a re-extraction in a long Rhino session the link searches the new text. Found carrying merge 2:
+    #20's folder-keyed cache met main's #50, which had taken away the import it used, so present.py no longer loaded."""
+    (tmp_path / "2_extracted_text").mkdir()
+    f = tmp_path / "2_extracted_text" / "code.jsonl"
+    f.write_text('{"file": "code.pdf"}\n{"page": 3, "line": 7, "text": "Lot width 50 ft"}\n', encoding="utf-8")
+    assert present._page_lines(tmp_path, "code.pdf") == {(3, 7): "Lot width 50 ft"}
+    f.write_text('{"file": "code.pdf"}\n{"page": 3, "line": 7, "text": "Lot width 60 ft"}\n', encoding="utf-8")
+    assert present._page_lines(tmp_path, "code.pdf") == {(3, 7): "Lot width 60 ft"}
+    assert present._page_lines(tmp_path, "missing.pdf") == {}
