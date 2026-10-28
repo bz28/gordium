@@ -23,6 +23,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close, leftovers  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_mvp") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -84,7 +85,7 @@ try:
         def on_confirm(doc_, facts, text, state):
             seen["rows"] = [r["key"] for r in g.logic.box_rows(state)]
         g.STATE["on_confirm"] = on_confirm
-        g.gordium_check()                                    # GordiumStart's flow on the sample
+        look_up_106(g, g.gordium_check)                                    # GordiumStart's flow on the sample
         claim("5 no Ground row in the start box", "ground" not in seen.get("rows", []) and "lot" in seen["rows"],
               seen.get("rows"))
         facts = g.current_facts(doc)

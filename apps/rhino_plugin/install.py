@@ -3,10 +3,10 @@
 
 It adds six command aliases that run the scripts in this folder:
     GordiumStart   a new project: confirm the prefilled facts, then draw the lot and the largest legal building
-    GordiumCheck   check the open model, show the largest legal building, turn on live re-checking
-    GordiumLive    turn live re-checking on or off
+    GordiumCheck   check the open model and show the largest legal building (after an edit: press Check)
+    GordiumLive    turn Check after every edit on or off (the panel's tick)
     GordiumFacts   change any lot fact, then bedrooms, parking spaces and stories
-    GordiumOff     stop live mode and clear Gordium's drawing
+    GordiumOff     stop Gordium noticing edits and clear its drawing
     GordiumPanel   register the Gordium panel only (for Rhino's startup commands: a restored tab is never empty)
 """
 import os

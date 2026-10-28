@@ -218,14 +218,17 @@ def test_a_floating_panel_is_placed_once_never_on_every_check():
     host = object()
     form = types.SimpleNamespace(host=host, Visible=True, Close=lambda: None)
     ui = types.SimpleNamespace(open_dock=lambda dock: None, DockHost=lambda dock, h: None,
-                               make_panel=lambda actions, dock_host: {"form": form},
-                               fit_floating=lambda h, window: fits.append(h) or "floating")
+                               make_panel=lambda actions, dock_host, **kw: {"form": form},   # (+ context_on, PR #23)
+                               fit_floating=lambda h, window: fits.append(h) or "floating",
+                               set_auto_tick=lambda parts, on: None)      # the Check button's tick, as the file has it
     doc = types.SimpleNamespace(RuntimeSerialNumber=1)
     rhino = types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc),
                                   UI=types.SimpleNamespace(RhinoEtoApp=types.SimpleNamespace(
                                       MainWindowForDocument=lambda d: None)))
-    ns = {"STATE": {}, "LEFTOVERS": {}, "ui": ui, "logic": logic, "Rhino": rhino, "_actions": lambda: None,
-          "register_dock": lambda: "dock", "sc": types.SimpleNamespace(sticky={"gordium_dock_hosts": {1: host}})}
+    ns = {"STATE": {}, "LEFTOVERS": {}, "ui": ui, "logic": logic, "Rhino": rhino, "_actions": lambda: None, "_sync_ticks": lambda doc: None,
+          "register_dock": lambda: "dock", "sc": types.SimpleNamespace(sticky={"gordium_dock_hosts": {1: host}}),
+          "_context_on": lambda doc: True,       # PR #23: the panel starts its Show neighbourhood tick as the file has it
+          "_auto": lambda doc: False}            # the Check button: Check after every edit, as the file has it
     exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
     first = ns["panel"]()
     second = ns["panel"]()

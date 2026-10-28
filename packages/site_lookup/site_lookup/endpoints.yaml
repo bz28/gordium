@@ -11,7 +11,9 @@ geocoder:
   name: NYS Geocoder (address points)
   owner: NYS ITS Geospatial Services
   url: https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates
-  terms: https://gis.ny.gov/address-geocoder
+  # the State's current page for this service (checked 2026-10-26); the old one, https://gis.ny.gov/address-geocoder,
+  # is now the "Legacy Address Geocoder" page, whose services "will remain online through October 2026"
+  terms: https://gis.ny.gov/nys-geocoding-service
   store: raw
 
 address_points:
@@ -72,6 +74,23 @@ gorge_zones:
   owner: City of Ithaca GIS Program
   url: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Gorge_Protection_Zones/FeatureServer/0/query
   store: none
+
+state_buildings:
+  name: NYS Building Footprints
+  owner: NYS ITS Geospatial Services (in the City of Ithaca from NYSERDA/CIESIN, from Tompkins County ITS GIS Division, 2014)
+  url: https://nysgeohub.ny.gov/arcgis/rest/services/Basemap/NYS_Building_Footprints/FeatureServer/1/query
+  terms: >-
+    State (licenseInfo, read 2026-10-21): "makes no representations or warranties ... The User accepts the Data
+    provided "as is"": a disclaimer only, no licence, no redistribution limit, no attribution required. In Ithaca every
+    footprint's source is Tompkins County ITS GIS Division, 2014 (CUGIR record: "Access Restrictions: None", "Use
+    Restrictions: None"). Kept in the customer's file as editable outlines: Ben's decision, 2026-10-21 (context map
+    plan D1). Only footprints whose NYSGeo_Source is in reviewed_sources are kept; any other is left out and named.
+    The State's values (read 2026-10-21) include "Microsoft" and "NYS Geospatial Services - previously, Microsoft"
+    (ODbL, share-alike: never kept) and others not yet reviewed; in Ithaca all 322 are NYSERDA.
+  reviewed_sources: [NYSERDA]       # NYSGeo_Source values whose terms were reviewed for keeping (above)
+  attribution: >-
+    Building footprints: NYS ITS Geospatial Services (NYSERDA/CIESIN; Tompkins County ITS GIS Division)
+  store: raw
 
 elevation:
   name: USGS 3DEP elevation (1 m where available; here the 2020 LiDAR)

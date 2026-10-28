@@ -116,7 +116,7 @@ def test_a_lot_on_two_streets_asks_for_the_front(name):
     p = looked_up(name)
     facts, saved, state = box(p)
     assert p["facts"]["corner_lot"]["value"] == "ask" and facts["corner_lot"] is True
-    assert logic.uncertain(state) == "This lot faces two streets: click Change… and pick each lot line on a street"
+    assert logic.uncertain(state) == logic.CORNER_HINT
     placed = frame({"facts": p["facts"]})
     assert max(pt[1] for seg in placed["street_line"] for pt in seg) < 2.0          # the address street at the bottom
 
@@ -933,7 +933,8 @@ def test_live_mode_never_rechecks_under_an_open_start_box():
     save = rhino[rhino.index("def save_facts("):rhino.index("def _save_facts(")]
     assert 'if not logic.allowed("save_facts", _box_open()):' in save and "_save_facts(doc, facts)" in save
     conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
-    assert conf.index("gate.leave()") < conf.index('STATE["dirty"] = time.time() - IDLE_SECONDS')
+    # the box's changes settled once it is closed (never moved earlier in time: the Check button, review round 1)
+    assert conf.index("gate.leave()") < conf.index("logic.changed_after_box(") and "time.time() - IDLE_SECONDS" not in conf
 
 
 def test_the_legend_stays_usable_while_a_box_is_open():
@@ -1099,7 +1100,9 @@ def test_every_tick_row_is_greyed_while_a_box_is_open():
     ticks = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
                  and any(isinstance(t, ast.Name) and t.id == "ticks" for t in n.targets))
     boxes = [ast.unparse(e.args[0]) for e in ticks.elts]
-    assert boxes == ["_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)"]
+    assert boxes == ["_auto_box(actions, parts)", "_envelope_box(actions, parts)", "_massing_box(actions, parts)",
+                     "_labels_box(actions, parts)",                        # + Check after every edit (the Check button)
+                     "_context_box(actions, parts, context_on)"]          # + Show neighbourhood (PR #23)
     greyed = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
                   and any(ast.unparse(t) == "parts['greyed']" for t in n.targets))
     assert any(isinstance(e, ast.Starred) and ast.unparse(e.value) == "ticks" for e in greyed.elts)
