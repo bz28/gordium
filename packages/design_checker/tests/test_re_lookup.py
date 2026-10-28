@@ -1715,3 +1715,6 @@ def test_a_found_lookups_note_is_a_plain_line_never_the_amber_question():
     assert logic.lookup_note(offline) is None and logic.uncertain(offline) == logic.LOOKUP_SAYS["offline"]
     ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert 'note = label(logic.lookup_note(state) or "", size=11)' in ui and "layout.AddRow(None, row(note))" in ui
+    # laid out only when there is a note: an empty label still takes a line (the start box ran 12 px past a laptop's
+    # height with every question open: the merge-3 suite's test_box_width)
+    assert "    if note.Text:" in ui and ui.index("    if note.Text:") < ui.index("layout.AddRow(None, row(note))")
