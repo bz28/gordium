@@ -34,6 +34,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_notice") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -119,7 +120,7 @@ try:
     docs = TestDocs("notice").__enter__()
     doc = docs.open("Large Objects - Feet")
     opened.append(doc)
-    g.gordium_check()                                    # GordiumStart's flow on the sample
+    look_up_106(g, g.gordium_check)                                    # GordiumStart's flow on the sample
     move(g, doc, -5)
     g.run_check(doc, report=False)
     n1 = log["1"] = notice(g, doc)
