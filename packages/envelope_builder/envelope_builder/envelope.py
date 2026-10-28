@@ -130,12 +130,20 @@ def _applies(rule: dict, measured: dict) -> bool:
         return True
 
 
-def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin: float = MARGIN) -> dict:
-    """{"outline": [[x, y], ...] or None, "holes", "base", "top", "yards": {front, side, rear}, "height",
-    "coverage": {...} or None, "notes": [...]}: the buildable area and height, and why anything is missing."""
+def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin: float = MARGIN,
+             sides: dict | None = None) -> dict:
+    """{"outline": [[x, y], ...] or None, "holes", "base", "top", "yards": {front, side, rear}, "side_split", "height",
+    "coverage": {...} or None, "notes": [...]}: the buildable area and height, and why anything is missing.
+
+    `side_split`: {"smaller", "larger"} when the zone lets the two side yards differ (R-2b: one 5 ft, the other
+    10 ft), else None. The envelope itself always keeps the larger on both sides (cautious: drawn and snapped to).
+    `sides` is for the starting house only (start.py): {"left": ft, "right": ft, "x": {edge index: x}}, each side
+    lot line pushed in by its own side's yard, the left side being the reading's side lines with the smaller x
+    (x along the street, in the street's frame). Used only when every reading names both sides; else ignored."""
     notes, need = [], {"front": [], "side": [], "rear": [], "building_height": [], "building_area": []}
+    split = {"side_yard_smaller": [], "side_yard_larger": []}
     out = {"outline": None, "holes": [], "base": facts.get("grade_elevation"), "top": None, "yards": {},
-           "height": None, "coverage": None, "notes": notes}
+           "side_split": None, "height": None, "coverage": None, "notes": notes}
     if facts.get("corner_lot") is not False:    # unknown, or a corner lot: its yards are open questions (§325-19C)
         notes.append("say whether this is a corner lot first" if facts.get("corner_lot") is None else
                      "a corner lot: which yards are front, side and rear is an open question; no envelope drawn")
@@ -147,8 +155,12 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
     for rule in rules:
         if rule.get("kind") == "flag" or not rule.get("check") or not _applies(rule, measured):
             continue
+        body = formula.parse(rule["check"]).body
+        # a side yard limit inside an `or` (two ways to comply) is never split: the panel's per-side rows read each
+        # side's comparison on its own, so only a plain `and` of minimums is safe to put on one side (review round 1)
+        plain = not any(isinstance(n, ast.BoolOp) and isinstance(n.op, ast.Or) for n in ast.walk(body))
         try:
-            limits = _needs(formula.parse(rule["check"]).body, measured)
+            limits = _needs(body, measured)
         except Unreadable as e:
             notes.append(f"{rule['id']}: a limit the envelope can't read ({e}); no envelope drawn")
             return out
@@ -158,6 +170,8 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
             if worst is None:
                 notes.append(f"{rule['id']}: the limit {limit} can't be worked out for this lot")
             need[key].append(worst)
+            if name in split:
+                split[name].append(worst if plain else None)
     area = [v for v in need.pop("building_area")]
     if area and None not in area:            # coverage is numbers, never a shape; unknown without a surveyed lot
         have = (measured.get("building_area") or {}).get("value")
@@ -166,6 +180,11 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
         return out
     yards = {k: max(need[k], default=0.0) for k in ("front", "side", "rear")}
     out["yards"] = yards
+    smaller = max(split["side_yard_smaller"], default=0.0) if None not in split["side_yard_smaller"] else None
+    larger = max(split["side_yard_smaller"] + split["side_yard_larger"], default=0.0) \
+        if None not in split["side_yard_smaller"] + split["side_yard_larger"] else None
+    if smaller is not None and larger is not None and larger > smaller + 1e-9:   # the larger meets both)
+        out["side_split"] = {"smaller": smaller, "larger": larger}
     if need["building_height"]:
         out["height"] = min(need["building_height"])
 
@@ -183,8 +202,16 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
     def push(i, d):
         return LineString(lot.edges[i]).buffer(d + margin, quad_segs=QUAD_SEGS) if d > 0 else Polygon()
 
+    def mean_x(group):
+        return sum(sides["x"][i] for i in group) / len(group)
+
     for _, left, right, back in readings:
-        cut = [push(i, yards["front"]) for i in front] + [push(i, yards["side"]) for i in left + right]
+        if sides is not None and left and right:      # the starting house's own split (a reading's two sides)
+            a, b = (left, right) if mean_x(left) <= mean_x(right) else (right, left)    # a: the left, from the street
+            cut = [push(i, yards["front"]) for i in front] + [push(i, sides["left"]) for i in a] + \
+                  [push(i, sides["right"]) for i in b]
+        else:
+            cut = [push(i, yards["front"]) for i in front] + [push(i, yards["side"]) for i in left + right]
         cut += [push(i, max(yards["side"], yards["rear"]) if not (left or right) else yards["rear"]) for i in back]
         keep = keep.difference(ops.unary_union(cut))
     if keep.is_empty:

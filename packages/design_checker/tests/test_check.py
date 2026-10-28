@@ -770,11 +770,12 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
 
 
 def test_units_are_converted_in_one_place_both_ways():
-    """Gordium works in feet; the Rhino side converts at five helpers and nowhere else (a mm template showed why the
+    """Gordium works in feet; the Rhino side converts at its helpers and nowhere else (a mm template showed why the
     edge must be one place: there the start had to be checked line by line)."""
     import re
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_facts_in_feet")
+    helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_feet_volume",
+               "_facts_in_feet")
     outside = []
     for chunk in re.split(r"\n(?=def )", rhino):
         name = re.match(r"def (\w+)", chunk)
@@ -856,7 +857,7 @@ def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
     body = rhino[rhino.index("def gordium_start"):]
     # round 8: cleared before any way out (a start that draws nothing keeps no earlier start's margin)
     assert body.index('_set_source(doc, "starting_house", None, None)') < body.index('if not start.get("floors")') \
-        < body.index("add_floors(doc, start)") < body.index("logic.starting_house_fact(")
+        < body.index("add_floors(doc, start, ") < body.index("logic.starting_house_fact(")
 
 
 def test_a_design_buffer_is_read_or_draw_stays_off():

@@ -617,6 +617,8 @@ def show_detail(parts):
                 d.AddRow(_wide(s, size=11))
                 if s.startswith("Marked as the ground"):   # the architect's word, so it can be taken back
                     d.AddRow(row(button("Not the ground", a["not_ground"])))
+                if logic.can_switch(s):             # one larger side yard: put it on the other side (one Undo)
+                    d.AddRow(row(button(logic.SWITCH_LABEL, a["switch_sides"])))
         d.Create()
         return
     det = i["detail"]
