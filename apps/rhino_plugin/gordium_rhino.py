@@ -2750,14 +2750,11 @@ def off():
 
 # ---- GordiumCheck ----------------------------------------------------------------------------------------
 
-NO_DOCUMENT = "Gordium: open or create a Rhino file first (no document is open)"
-
-
 def gordium_check():
     """Confirm the lot facts whenever any required one is missing (keeping what is saved), then check."""
     doc = Rhino.RhinoDoc.ActiveDoc
     if doc is None:                     # every document closed: say what to do, never crash
-        Rhino.RhinoApp.WriteLine(NO_DOCUMENT)
+        say(logic.NO_DOCUMENT)
         return None
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if not _buildings(doc) and not _lot_candidates(doc):    # an empty model: a new project starts here
@@ -2844,7 +2841,7 @@ def gordium_start():
     from a model with no building in it (an existing design is checked with GordiumCheck)."""
     doc = Rhino.RhinoDoc.ActiveDoc
     if doc is None:                     # every document closed: say what to do, never crash
-        Rhino.RhinoApp.WriteLine(NO_DOCUMENT)
+        say(logic.NO_DOCUMENT)
         return None
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if _buildings(doc):
