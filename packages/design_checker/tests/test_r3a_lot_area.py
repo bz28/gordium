@@ -50,3 +50,15 @@ def test_a_lot_that_could_be_big_enough_waits_for_the_units_as_its_own_review_ro
     missing = [k for k in ("dwelling_units", "rooms_let_for_profit", "conversion") if k not in facts]
     assert item["needs"] == missing, item
     assert "R-3a.lot_area_multiple_family" not in {r["Rule id"] for r in res["interior"]}
+
+
+@pytest.mark.parametrize("use, rid", [("multiple_family", "R-3a.lot_area_multiple_family")])
+@pytest.mark.parametrize("lot_d", [130, 300, 1000])
+def test_rooms_let_left_blank_is_never_a_pass_whatever_the_lot(use, rid, lot_d):
+    """Note 7 adds 500 sf a room let for profit, with no top: so with the rooms not entered no lot is big enough to
+    know (the coordinator, 2026-10-28: rooms let is a use detail, answered later; until then the row needs review,
+    never complies). 3 new units, rooms blank: needs review on 6,500, 15,000 and 50,000 sf, asking for the rooms."""
+    _, item = _item(50, lot_d, dwelling_units=3, conversion=False)
+    assert item["status"] == present.REVIEW and item["needs"] == ["rooms_let_for_profit"], item
+    _, done = _item(50, lot_d, dwelling_units=3, conversion=False, rooms_let_for_profit=0)
+    assert done["status"] == present.COMPLIES, done          # answered: decided (6,000 sf for 3 new units)
