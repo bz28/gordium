@@ -109,6 +109,7 @@ STOPS = {
     "occupant_counts_disagree": "{occupants} occupants on the lot, but {units} {unit_words} with at most {most} in any one "
                                 "can hold only {held}, with no accessory dwelling unit on the lot: check {check} and "
                                 "the accessory dwelling unit answer",
+    "change_use_in_start_box": "change the use with Edit site… in the start box",
     "household_counts_disagree": "the count of unrelated people with minor dependent children included ({with_}) is "
                                  "lower than the count without them ({without}): check both counts",
     "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
