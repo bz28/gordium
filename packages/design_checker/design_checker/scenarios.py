@@ -110,11 +110,11 @@ def rule_rows(view: dict, key: str) -> list[dict]:
 _FT_IN = re.compile(r"^(-?)(\d+)'-(\d+)(?: (\d+)/(\d+))?\"$")
 
 
-def number(shown: str | None) -> tuple[float, float] | None:
+def number(shown: str | None, field: str = "proposed") -> tuple[float, float] | None:
     """A displayed value as (number, how far the display may be from the true value): feet-inches to 1/8 in, square
-    feet to the whole foot, a percent with decimals to one step of its places (Gordium rounds it toward caution, so
-    up or down), a whole percent (the law's own figure) and counts exactly. A minus sign belongs to the whole length
-    (-0'-6" is -0.5 ft). None when it isn't a number."""
+    feet to the whole foot, a measured percent to 0.1 (Gordium rounds it toward caution to 1 or 2 places and drops
+    trailing zeros, so 18.95% can show as 19%), a required percent (the law's own figure) and counts exactly. A minus
+    sign belongs to the whole length (-0'-6" is -0.5 ft). None when it isn't a number."""
     t = (shown or "").strip()
     m = _FT_IN.match(t)
     if m:
@@ -123,8 +123,7 @@ def number(shown: str | None) -> tuple[float, float] | None:
     if t.endswith(" sf"):
         return float(t[:-3].replace(",", "")), 1.0
     if t.endswith("%"):
-        places = len(t[:-1].partition(".")[2])
-        return float(t[:-1]), (10.0 ** -places if places else 0.0)  # a step of the places shown; whole = exact
+        return float(t[:-1]), (0.0 if field == "required" else 0.1)
     return (float(t), 0.0) if re.fullmatch(r"\d+", t) else None
 
 
@@ -140,7 +139,7 @@ def values_problems(rows: list[dict], values: dict) -> list[str]:
             problems.append(f"no {name} row")
             continue
         for field, hand in zip(("proposed", "required"), want):
-            got = number(row.get(field))
+            got = number(row.get(field), field)
             if got is None or abs(got[0] - hand) > got[1] + 0.01:
                 problems.append(f"{name} {field} {row.get(field)!r}, worked by hand {hand}")
     return problems

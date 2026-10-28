@@ -192,7 +192,7 @@ def test_a_house_off_by_feet_on_a_wide_margin_is_caught():
 
 def test_displayed_values_read_back_as_numbers():
     assert scenarios.number("29'-11 5/8\"") == (29 + 11.625 / 12, 0.125 / 12)
-    assert scenarios.number("12,990 sf") == (12990.0, 1.0) and scenarios.number("18.8%") == (18.8, 0.1)
+    assert scenarios.number("12,990 sf") == (12990.0, 1.0) and scenarios.number("18.8%") == (18.8, 0.1) and scenarios.number("20%", "required") == (20.0, 0.0)
     assert scenarios.number("-0'-6\"") == (-0.5, 0.125 / 12) and scenarios.number("-1'-6\"")[0] == -1.5
     assert scenarios.number("3") == (3.0, 0.0) and scenarios.number("—") is None
 
@@ -213,8 +213,10 @@ def test_the_light_run_nudge_claims_its_distance_and_numbers():
 
 
 def test_a_percent_rounded_up_one_step_still_matches():
-    """Gordium rounds a proposed percent up (cautious): 18.71% shows as 18.8%, which must still match 18.71."""
+    """Gordium rounds a proposed percent up (cautious) and drops trailing zeros: 18.71% shows as 18.8% and 18.95% as
+    19%, and both must still match; a required percent is the law's figure and must match exactly."""
     rows = [{"id": "X.lot_coverage", "proposed": "18.8%", "required": "20%"}]
     assert scenarios.values_problems(rows, {"row": [18.71, 20]}) == []
     assert scenarios.values_problems(rows, {"row": [18.6, 20]})            # two steps off is a mismatch
-    assert scenarios.number("19.95%") == (19.95, 0.01) and scenarios.number("20%") == (20.0, 0.0)
+    assert scenarios.values_problems([{"id": "X", "proposed": "19%", "required": "35%"}], {"row": [18.95, 35]}) == []
+    assert scenarios.values_problems([{"id": "X", "proposed": "19%", "required": "35%"}], {"row": [18.95, 34.9]})
