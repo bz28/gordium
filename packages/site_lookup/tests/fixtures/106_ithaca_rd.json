@@ -1,0 +1,1029 @@
+{
+ "address": "106 Ithaca Rd, Ithaca, NY 14850",
+ "captured": "2026-10-20",
+ "answers": [
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "106 Ithaca Rd, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": [
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847685.7846391561,
+       "y": 888327.0531127378
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847402.8731671124,
+       "ymin": 887962.3130632279,
+       "xmax": 847968.6875274088,
+       "ymax": 888691.7964071822
+      }
+     },
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847685.7846391561,
+       "y": 888327.0531127378
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847402.8731671124,
+       "ymin": 887962.3130632279,
+       "xmax": 847968.6875274088,
+       "ymax": 888691.7964071822
+      }
+     },
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847685.7846391561,
+       "y": 888327.0531127378
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847402.8731671124,
+       "ymin": 887962.3130632279,
+       "xmax": 847968.6875274088,
+       "ymax": 888691.7964071822
+      }
+     },
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847726.2249457666,
+       "y": 888293.5161629447
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847443.3137256589,
+       "ymin": 887928.7756434493,
+       "xmax": 848009.1275820795,
+       "ymax": 888658.2599273612
+      }
+     },
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847726.2249457666,
+       "y": 888293.5161629447
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847443.3137256589,
+       "ymin": 887928.7756434493,
+       "xmax": 848009.1275820795,
+       "ymax": 888658.2599273612
+      }
+     },
+     {
+      "address": "106 Ithaca Road, NY, 14850",
+      "location": {
+       "x": 847726.2249457666,
+       "y": 888293.5161629447
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847443.3137256589,
+       "ymin": 887928.7756434493,
+       "xmax": 848009.1275820795,
+       "ymax": 888658.2599273612
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_parcels",
+   "params": {
+    "geometry": "{\"x\": 847685.7846391561, \"y\": 888327.0531127378}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "SWIS,PRINT_KEY,MUNI_NAME,CITYTOWN_NAME,PARCEL_ADDR"
+   },
+   "body": {
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "SWIS",
+      "alias": "SWIS",
+      "type": "esriFieldTypeString",
+      "length": 10
+     },
+     {
+      "name": "PRINT_KEY",
+      "alias": "PRINT_KEY",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "MUNI_NAME",
+      "alias": "MUNI_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "CITYTOWN_NAME",
+      "alias": "CITYTOWN_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "PARCEL_ADDR",
+      "alias": "PARCEL_ADDR",
+      "type": "esriFieldTypeString",
+      "length": 255
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "SWIS": "500700",
+       "PRINT_KEY": "84.-2-6",
+       "MUNI_NAME": "Ithaca, City",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "106 Ithaca Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          847728.3900338345,
+          888315.9688356004
+         ],
+         [
+          847722.6401125732,
+          888308.030820129
+         ],
+         [
+          847717.7648868919,
+          888301.6560134675
+         ],
+         [
+          847712.3279283496,
+          888293.7809447139
+         ],
+         [
+          847705.5149896143,
+          888285.405810788
+         ],
+         [
+          847700.9530816674,
+          888278.5940880359
+         ],
+         [
+          847694.8899107263,
+          888270.4058803518
+         ],
+         [
+          847688.6397757346,
+          888263.030902565
+         ],
+         [
+          847683.4527796973,
+          888254.9691315404
+         ],
+         [
+          847601.357107991,
+          888314.0189466483
+         ],
+         [
+          847601.4984755326,
+          888314.0188739961
+         ],
+         [
+          847611.6996411238,
+          888314.2922333265
+         ],
+         [
+          847653.6004517096,
+          888369.7520881945
+         ],
+         [
+          847653.7963032017,
+          888369.6114726093
+         ],
+         [
+          847673.2516521207,
+          888355.6205509076
+         ],
+         [
+          847728.3900338345,
+          888315.9688356004
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "elevation",
+   "params": {
+    "geometry": "{\"points\": [[847728.3900338345, 888315.9688356004], [847722.6401125732, 888308.030820129], [847717.7648868919, 888301.6560134675], [847712.3279283496, 888293.7809447139], [847705.5149896143, 888285.405810788], [847700.9530816674, 888278.5940880359], [847694.8899107263, 888270.4058803518], [847688.6397757346, 888263.030902565], [847683.4527796973, 888254.9691315404], [847601.357107991, 888314.0189466483], [847611.6996411238, 888314.2922333265], [847653.6004517096, 888369.7520881945], [847673.2516521207, 888355.6205509076], [847668.0731596969, 888312.4843831194]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryMultipoint",
+    "returnFirstValueOnly": "true",
+    "interpolation": "RSP_BilinearInterpolation"
+   },
+   "body": {
+    "samples": [
+     {
+      "location": {
+       "x": 847728.3900338345,
+       "y": 888315.9688356004,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 0,
+      "value": "225.767639160",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847722.6401125732,
+       "y": 888308.030820129,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 1,
+      "value": "225.418884277",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847717.7648868919,
+       "y": 888301.6560134675,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 2,
+      "value": "225.321380615",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847712.3279283496,
+       "y": 888293.7809447139,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 3,
+      "value": "225.161987305",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847705.5149896143,
+       "y": 888285.405810788,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 4,
+      "value": "224.883361816",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847700.9530816674,
+       "y": 888278.5940880359,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 5,
+      "value": "224.693359375",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847694.8899107263,
+       "y": 888270.4058803518,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 6,
+      "value": "224.339309692",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847688.6397757346,
+       "y": 888263.030902565,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 7,
+      "value": "224.138061523",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847683.4527796973,
+       "y": 888254.9691315404,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 8,
+      "value": "223.971313477",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847601.357107991,
+       "y": 888314.0189466483,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 9,
+      "value": "227.030258179",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847611.6996411238,
+       "y": 888314.2922333265,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 10,
+      "value": "227.031616211",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847653.6004517096,
+       "y": 888369.7520881945,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 11,
+      "value": "228.282394409",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847673.2516521207,
+       "y": 888355.6205509076,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 12,
+      "value": "228.005020142",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847668.0731596969,
+       "y": 888312.4843831194,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 13,
+      "value": "227.261108398",
+      "rasterId": 47371,
+      "resolution": 1
+     }
+    ]
+   }
+  },
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "106 Ithaca Rd, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": [
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847685.7846391561,
+       "y": 888327.0531127378
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847402.8731671124,
+       "ymin": 887962.3130632279,
+       "xmax": 847968.6875274088,
+       "ymax": 888691.7964071822
+      }
+     },
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847685.7846391561,
+       "y": 888327.0531127378
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847402.8731671124,
+       "ymin": 887962.3130632279,
+       "xmax": 847968.6875274088,
+       "ymax": 888691.7964071822
+      }
+     },
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847685.7846391561,
+       "y": 888327.0531127378
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847402.8731671124,
+       "ymin": 887962.3130632279,
+       "xmax": 847968.6875274088,
+       "ymax": 888691.7964071822
+      }
+     },
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847726.2249457666,
+       "y": 888293.5161629447
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847443.3137256589,
+       "ymin": 887928.7756434493,
+       "xmax": 848009.1275820795,
+       "ymax": 888658.2599273612
+      }
+     },
+     {
+      "address": "106 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847726.2249457666,
+       "y": 888293.5161629447
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847443.3137256589,
+       "ymin": 887928.7756434493,
+       "xmax": 848009.1275820795,
+       "ymax": 888658.2599273612
+      }
+     },
+     {
+      "address": "106 Ithaca Road, NY, 14850",
+      "location": {
+       "x": 847726.2249457666,
+       "y": 888293.5161629447
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "106",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847443.3137256589,
+       "ymin": 887928.7756434493,
+       "xmax": 848009.1275820795,
+       "ymax": 888658.2599273612
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_parcels",
+   "params": {
+    "geometry": "{\"x\": 847685.7846391561, \"y\": 888327.0531127378}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "SWIS,PRINT_KEY,MUNI_NAME,CITYTOWN_NAME,PARCEL_ADDR"
+   },
+   "body": {
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "SWIS",
+      "alias": "SWIS",
+      "type": "esriFieldTypeString",
+      "length": 10
+     },
+     {
+      "name": "PRINT_KEY",
+      "alias": "PRINT_KEY",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "MUNI_NAME",
+      "alias": "MUNI_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "CITYTOWN_NAME",
+      "alias": "CITYTOWN_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "PARCEL_ADDR",
+      "alias": "PARCEL_ADDR",
+      "type": "esriFieldTypeString",
+      "length": 255
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "SWIS": "500700",
+       "PRINT_KEY": "84.-2-6",
+       "MUNI_NAME": "Ithaca, City",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "106 Ithaca Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          847728.3900338345,
+          888315.9688356004
+         ],
+         [
+          847722.6401125732,
+          888308.030820129
+         ],
+         [
+          847717.7648868919,
+          888301.6560134675
+         ],
+         [
+          847712.3279283496,
+          888293.7809447139
+         ],
+         [
+          847705.5149896143,
+          888285.405810788
+         ],
+         [
+          847700.9530816674,
+          888278.5940880359
+         ],
+         [
+          847694.8899107263,
+          888270.4058803518
+         ],
+         [
+          847688.6397757346,
+          888263.030902565
+         ],
+         [
+          847683.4527796973,
+          888254.9691315404
+         ],
+         [
+          847601.357107991,
+          888314.0189466483
+         ],
+         [
+          847601.4984755326,
+          888314.0188739961
+         ],
+         [
+          847611.6996411238,
+          888314.2922333265
+         ],
+         [
+          847653.6004517096,
+          888369.7520881945
+         ],
+         [
+          847653.7963032017,
+          888369.6114726093
+         ],
+         [
+          847673.2516521207,
+          888355.6205509076
+         ],
+         [
+          847728.3900338345,
+          888315.9688356004
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_streets",
+   "params": {
+    "geometry": "847451.357107991,888104.9691315404,847878.3900338345,888519.7520881945",
+    "geometryType": "esriGeometryEnvelope",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "CompleteStreetName"
+   },
+   "body": {
+    "displayFieldName": "CompleteStreetName",
+    "fieldAliases": {
+     "CompleteStreetName": "CompleteStreetName"
+    },
+    "geometryType": "esriGeometryPolyline",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "CompleteStreetName",
+      "type": "esriFieldTypeString",
+      "alias": "CompleteStreetName",
+      "length": 100
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "CompleteStreetName": "Irving Place"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847233.4857382863,
+          888381.7216168141
+         ],
+         [
+          847380.5674295581,
+          888408.8495499706
+         ],
+         [
+          847504.437083428,
+          888439.9752244971
+         ],
+         [
+          847646.6266463975,
+          888490.0837645201
+         ],
+         [
+          847791.8001505822,
+          888535.0625654364
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Irving Place"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847872.1030693857,
+          888428.0275420275
+         ],
+         [
+          847807.7540253955,
+          888497.9135266424
+         ],
+         [
+          847791.8001505822,
+          888535.0625654364
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Ithaca Road"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847872.1030693857,
+          888428.0275420275
+         ],
+         [
+          847921.973171248,
+          888479.8602785567
+         ],
+         [
+          847965.8994626228,
+          888517.7980338479
+         ],
+         [
+          848033.3361140528,
+          888567.4313682308
+         ],
+         [
+          848116.5028257251,
+          888621.466919725
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Ithaca Road"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847635.2013696413,
+          888117.2750635265
+         ],
+         [
+          847694.1903501607,
+          888218.637639511
+         ],
+         [
+          847760.769007309,
+          888305.47173447
+         ],
+         [
+          847854.8194054961,
+          888409.7858456142
+         ],
+         [
+          847872.1030693857,
+          888428.0275420275
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Mitchell Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847635.2013696413,
+          888117.2750635265
+         ],
+         [
+          847657.8857861442,
+          888106.3754633253
+         ],
+         [
+          847679.4747303727,
+          888104.9401424892
+         ],
+         [
+          847702.9625637754,
+          888110.7934769663
+         ],
+         [
+          848003.5139599942,
+          888234.3184792689
+         ],
+         [
+          848061.2727182141,
+          888246.7839561965
+         ],
+         [
+          848213.2156172565,
+          888247.3206231175
+         ],
+         [
+          848444.3181070277,
+          888233.7775732145
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Ithaca Road"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847620.391772847,
+          888089.561985586
+         ],
+         [
+          847635.2013696413,
+          888117.2750635265
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "live_status": "found"
+}
