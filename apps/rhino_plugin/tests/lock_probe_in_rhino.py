@@ -1,0 +1,140 @@
+#! python3
+"""Rhino 8's own layer locks, without Gordium (run in Rhino, not in CI): what the fake layer table in
+packages/design_checker/tests/test_context_box.py assumes, and what the neighbourhood's locks need. Each case on its
+own fresh layers "LockProbe_<case>" (the top) and "...::Sub", or, for the nested cases, "...::Mid::Sub" with Mid
+left unlocked (as Gordium::Context sits between "Gordium" and Parcels), in a fresh feet document. Each row records
+Sub's (and Mid's) IsLocked and own lock (GetPersistentLocking) after every step.
+1. is_locked: Sub locked by IsLocked; the top locked, then unlocked (grade_lock_probe.json's first row at e997f0e,
+   again).
+2. persistent_then_is_locked: Sub given SetPersistentLocking(True), then IsLocked; the top locked, then unlocked
+   (that probe's second row, again).
+3. persistent_alone: Sub given SetPersistentLocking(True) only, the top unlocked: does it record an own lock at all?
+   Read the "sub set" row's "own". (Its rows after the top's lock and unlock answer it only if case 4 shows a
+   recorded own lock survives the top being locked again.)
+4. relock: the top locked, Sub given its own lock (locked if it isn't, then SetPersistentLocking(True), as Gordium's
+   _set_own_lock does), the top unlocked (Sub locked?), then
+   locked and unlocked again: does locking a parent clear a recorded own lock? (At 994012d: no, it is kept.)
+5. nested_is_locked, nested_relock: cases 1 and 4 with Mid between the top and Sub.
+5b. mid_relock: Gordium's own route (gordium_rhino._lock_context): Sub locked, Mid locked for a moment, Sub given
+   its own lock
+   (locked if it isn't, then SetPersistentLocking(True)), Mid unlocked; then the top locked and unlocked: is Sub's
+   own lock, recorded under Mid, kept through the top's lock and unlock?
+6. Manual only, never in a scripted run (CASES leaves them out: a scripted -_Layer waits at the command line):
+   MANUAL_CASES, layer_command and nested_layer_command, Sub locked by IsLocked, the top locked and unlocked by
+   Rhino's own -_Layer command typed by a person. Run at 994012d: cases 1-5 (lock_probe_994012d.json); the manual
+   ones not run.
+Writes <temp>/gordium_lock_probe/out.json ("done": true at the end); closes its document."""
+import json
+import os
+import sys
+import tempfile
+import traceback
+
+import Rhino
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from test_docs_in_rhino import TestDocs, close  # noqa: E402
+
+S = os.path.join(tempfile.gettempdir(), "gordium_lock_probe") + "/"
+os.makedirs(S, exist_ok=True)
+CASES = ("is_locked", "persistent_then_is_locked", "persistent_alone", "relock", "nested_is_locked", "nested_relock",
+         "mid_relock")
+MANUAL_CASES = ("layer_command", "nested_layer_command")     # a person types -_Layer: never in a scripted run
+out, doc = {"done": False}, None
+
+
+def save():
+    json.dump(out, open(S + "out.json", "w", encoding="utf-8"), indent=1)
+
+
+def layer(name, parent=None):
+    new = Rhino.DocObjects.Layer()
+    new.Name = name
+    if parent is not None:
+        new.ParentLayerId = doc.Layers[parent].Id
+    return doc.Layers.Add(new)
+
+
+def state(sub, mid):
+    row = {"sub_locked": bool(doc.Layers[sub].IsLocked), "sub_own": bool(doc.Layers[sub].GetPersistentLocking())}
+    if mid is not None:
+        row.update(mid_locked=bool(doc.Layers[mid].IsLocked), mid_own=bool(doc.Layers[mid].GetPersistentLocking()))
+    return row
+
+
+def command(text):
+    """Rhino's own command, scripted as typed (whether it ran)."""
+    return bool(Rhino.RhinoApp.RunScript(text, False))
+
+
+def lock_top(top, name, locked, by_command):
+    if by_command:
+        return command('-_Layer %s "%s" _Enter' % ("_Lock" if locked else "_Unlock", name))
+    doc.Layers[top].IsLocked = locked
+    return True
+
+
+def probe(case):
+    name = "LockProbe_" + case
+    top = layer(name)
+    mid = layer("Mid", top) if case.startswith(("nested", "mid")) else None
+    sub = layer("Sub", mid if mid is not None else top)
+    by_command = case.endswith("layer_command")
+    rows = []
+    if case == "persistent_then_is_locked":
+        doc.Layers[sub].SetPersistentLocking(True)
+        doc.Layers[sub].IsLocked = True
+    elif case in ("is_locked", "nested_is_locked") or by_command:
+        doc.Layers[sub].IsLocked = True
+    elif case == "persistent_alone":
+        doc.Layers[sub].SetPersistentLocking(True)
+    rows.append(["sub set", state(sub, mid)])
+    if case == "mid_relock":
+        doc.Layers[sub].IsLocked = True             # as _lock_context's first pass, then the moment's lock
+        doc.Layers[mid].IsLocked = True
+        if not doc.Layers[sub].IsLocked:
+            doc.Layers[sub].IsLocked = True
+        doc.Layers[sub].SetPersistentLocking(True)
+        rows.append(["mid locked, sub's own lock set", state(sub, mid)])
+        doc.Layers[mid].IsLocked = False
+        rows.append(["mid unlocked", state(sub, mid)])
+    if case in ("relock", "nested_relock"):
+        doc.Layers[top].IsLocked = True
+        if not doc.Layers[sub].IsLocked:        # as Gordium's _set_own_lock gives a layer its own lock
+            doc.Layers[sub].IsLocked = True
+        doc.Layers[sub].SetPersistentLocking(True)
+        rows.append(["top locked, sub's own lock set", state(sub, mid)])
+        doc.Layers[top].IsLocked = False
+        rows.append(["top unlocked", state(sub, mid)])
+    ran = lock_top(top, name, True, by_command)
+    rows.append(["top locked", state(sub, mid), {"ran": ran, "top_locked": bool(doc.Layers[top].IsLocked)}])
+    ran = lock_top(top, name, False, by_command)
+    rows.append(["top unlocked", state(sub, mid), {"ran": ran, "top_locked": bool(doc.Layers[top].IsLocked)}])
+    return rows
+
+
+try:
+    docs = TestDocs("lock_probe").__enter__()
+    doc = docs.open("Large Objects - Feet")
+    for case in CASES:
+        out["case"] = case
+        save()                                  # before the case: a stuck command still leaves the cases before it
+        try:
+            out[case] = probe(case)
+        except Exception:
+            out[case] = {"trace": traceback.format_exc()}
+        save()
+    out.pop("case", None)
+except Exception:
+    out["trace"] = traceback.format_exc()
+finally:
+    try:
+        if doc is not None:
+            close(doc)
+    except Exception:
+        pass
+    out["done"] = True
+    try:
+        save()
+    except Exception:
+        pass
