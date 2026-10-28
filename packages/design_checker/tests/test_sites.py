@@ -220,3 +220,7 @@ def test_a_percent_rounded_up_one_step_still_matches():
     assert scenarios.values_problems(rows, {"row": [18.6, 20]})            # two steps off is a mismatch
     assert scenarios.values_problems([{"id": "X", "proposed": "19%", "required": "35%"}], {"row": [18.95, 35]}) == []
     assert scenarios.values_problems([{"id": "X", "proposed": "19%", "required": "35%"}], {"row": [18.95, 34.9]})
+    near = [{"id": "X", "proposed": "25.02%", "required": "25%"}]     # 2 places near the limit: a step of 0.01
+    assert scenarios.values_problems(near, {"row": [25.015, 25]}) == []
+    assert scenarios.values_problems(near, {"row": [24.95, 25]})
+    assert scenarios.values_problems([{"id": "X", "proposed": "24.95%", "required": "25%"}], {"row": [25.01, 25]})

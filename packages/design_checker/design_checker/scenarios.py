@@ -112,8 +112,9 @@ _FT_IN = re.compile(r"^(-?)(\d+)'-(\d+)(?: (\d+)/(\d+))?\"$")
 
 def number(shown: str | None, field: str = "proposed") -> tuple[float, float] | None:
     """A displayed value as (number, how far the display may be from the true value): feet-inches to 1/8 in, square
-    feet to the whole foot, a measured percent to 0.1 (Gordium rounds it toward caution to 1 or 2 places and drops
-    trailing zeros, so 18.95% can show as 19%), a required percent (the law's own figure) and counts exactly. A minus
+    feet to the whole foot, a measured percent to one step of its places, 0.01 at 2 places (near a limit) and 0.1
+    otherwise (Gordium rounds it toward caution to 1 or 2 places and drops trailing zeros, so 18.95% can show as
+    19%), a required percent (the law's own figure) and counts exactly. A minus
     sign belongs to the whole length (-0'-6" is -0.5 ft). None when it isn't a number."""
     t = (shown or "").strip()
     m = _FT_IN.match(t)
@@ -123,7 +124,8 @@ def number(shown: str | None, field: str = "proposed") -> tuple[float, float] | 
     if t.endswith(" sf"):
         return float(t[:-3].replace(",", "")), 1.0
     if t.endswith("%"):
-        return float(t[:-1]), (0.0 if field == "required" else 0.1)
+        places = len(t[:-1].partition(".")[2])
+        return float(t[:-1]), (0.0 if field == "required" else 0.01 if places >= 2 else 0.1)
     return (float(t), 0.0) if re.fullmatch(r"\d+", t) else None
 
 
