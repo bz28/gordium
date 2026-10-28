@@ -123,3 +123,25 @@ def test_without_a_grade_the_buildable_area_is_drawn_but_never_a_height_plane():
 def test_no_coverage_numbers_from_a_lot_that_isnt_surveyed():
     env, _ = build([(0, 0), (73, 0), (73, 90), (0, 90)], {**FACTS, "lot_surveyed": False})
     assert env["coverage"] is None and env["outline"] is not None
+
+
+def test_a_limit_that_depends_on_the_use_is_worked_out_for_the_use_stated():
+    """R-2c's side yards and coverage depend on the use (zoning chart notes 12, 14, 15): worked out for the use the
+    architect stated (one-family detached: 10 ft, the larger of 10 and 5, on both sides; 35% coverage), never
+    "can't be worked out" (the light run in Rhino, 2026-10-28: R-2c drew no starting house). Another use gets its own
+    numbers; no use stated: still not worked out (never guessed)."""
+    rules = [dict(r) for r in R1B]
+    rules[1] = {"id": "sides", "check": 'side_yard_larger >= (15 if use == "one_family_detached_zero_lot_line" else 10)'
+                ' and side_yard_smaller >= (10 if use in ["one_family_semi_detached"] else 5)'}
+    rules[4] = {"id": "coverage", "check": 'building_area <= (0.4 if use in ["two_family"] else 0.35) * lot_area'}
+    site = {"lot": lot([(0, 0), (73, 0), (73, 90), (0, 90)]), "buildings": [box(10, 30, 63, 65)], "problems": []}
+    env = envelope(site, FACTS, measure(site, FACTS), rules)
+    assert env["yards"]["side"] == 10 and env["coverage"]["allowed"] == pytest.approx(0.35 * 73 * 90)
+    assert env["outline"] is not None and not any("can't be worked out" in n for n in env["notes"])
+    zero = {**FACTS, "use": "one_family_detached_zero_lot_line"}
+    assert envelope(site, zero, measure(site, zero), rules)["yards"]["side"] == 15
+    two = {**FACTS, "use": "two_family"}
+    assert envelope(site, two, measure(site, two), rules)["coverage"]["allowed"] == pytest.approx(0.4 * 73 * 90)
+    none = {k: v for k, v in FACTS.items() if k != "use"}
+    env = envelope(site, none, measure(site, none), rules)
+    assert env["outline"] is None and any("sides" in n and "can't be worked out" in n for n in env["notes"])
