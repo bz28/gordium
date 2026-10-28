@@ -58,7 +58,8 @@ Everything in the 2026-10-27 preview below, plus:
   details** group. Each row's **Enter…** button opens a small window that asks only what that row needs.
 - **Every panel change is one Undo step**, and Undo takes back only that change, never your own earlier edit.
 - **A window says what Gordium is doing**, with the seconds so far. A check, the starting house and the zoning
-  report have **Cancel**; a lookup has **Cancel lookup**. Cancel changes nothing.
+  report have **Cancel**; a lookup has **Cancel lookup**. Cancel changes nothing, and a check you cancel stays
+  cancelled until your next edit.
 - **New rules in all nine districts:** the 20 ft setback from a stream or inlet (§325-26), the South Hill Overlay
   (§325-8E, R-1 and R-2), homes per attached building (R-3a, R-3aa, R-3b, RU) and more than one main building on a
   lot. Each says **needs review** until Gordium has what it needs (from your model or your answers).
@@ -186,9 +187,6 @@ Everything in the 2026-10-21 evening preview, plus:
   after a lookup of a corner lot, draw your building yourself.
 - **Checked inside Rhino on a Mac, not yet on Windows** (2026-10-28: start flow, Undo, the start box's questions,
   progress and Cancel). If something looks wrong, take a screenshot and send it to Ben.
-- **With "Check after every edit" on, a check you cancel may start again right away**, and the model's own
-  Gordium layers can be redrawn while a lookup box is open. Neither can show a pass (the panel says cancelled or out
-  of date); being looked at.
 - **Windows:** please confirm that no black console window appears and that Task Manager shows only one
   `python` checker while Rhino is open.
 - **Ground is taken as flat** at the lot's level (the panel says so).
