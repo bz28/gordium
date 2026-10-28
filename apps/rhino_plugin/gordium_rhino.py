@@ -1769,7 +1769,8 @@ def _box_pick(doc, what, facts, saved_ui, session):
 
 def _one_pick(doc, what, facts, saved_ui, session):
     if what == "by_hand":                      # the site by hand (an empty file): the box shows its own rows
-        saved_ui = dict(saved_ui, _by_hand=True)
+        facts, saved_ui = logic.choose_by_hand(facts, saved_ui)
+        STATE.pop("lookup_guide", None)
     elif what == "lookup":
         saved_ui = _lookup_start(facts, saved_ui)
     elif what == "lookup_done":

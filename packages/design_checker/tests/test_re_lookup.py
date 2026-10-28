@@ -1020,7 +1020,7 @@ def test_the_plugin_opens_new_files_empty_and_gates_every_box():
     assert "sample" not in logic.NO_LOT
     state = src[src.index("def _box_state(doc"):src.index("\n\n\n", src.index("def _box_state(doc"))]
     assert "logic.start_gate(" in state
-    assert 'if what == "by_hand":' in src and "_by_hand=True" in src
+    assert 'if what == "by_hand":' in src and "logic.choose_by_hand(facts, saved_ui)" in src
 
 
 def test_draw_draws_nothing_on_an_empty_file_without_a_found_lookup_whatever_way_it_is_pressed():
@@ -1165,3 +1165,15 @@ def test_sceptic_2_an_outline_only_lookup_and_by_hand_never_skip_the_address_rul
     assert logic.draw_blocked(lansing, by_hand) != ""
     facts, saved = logic.settle_pending({"address": lansing["address"]}, by_hand, lansing["address"])
     assert saved.get("_pending") is None                                    # another town's: the preview dropped
+
+
+def test_by_hand_chosen_after_a_found_lookup_works():
+    """Round 3: by hand, a found lookup, another address typed: the by-hand button showed again and did nothing."""
+    opened = logic.box_opened({}, {})
+    found = dict(opened, _by_hand=True, _pending={"address": "106 Ithaca Road, Ithaca, NY, 14850",
+                                                  "query": "106 Ithaca Rd", "undo": []})
+    assert logic.start_gate({"address": "5 Other St"}, found)["needs_lookup"]
+    facts, saved = logic.choose_by_hand({"address": "5 Other St"}, found)
+    state = logic.start_gate({"address": "5 Other St"}, saved)
+    assert state["by_hand"] and not state["needs_lookup"] and "_pending" not in saved
+    assert logic.draw_blocked(dict(state, zone="R-1b", district_confirmed=True, lot_missing=False), saved) == ""

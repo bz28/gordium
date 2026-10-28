@@ -3316,6 +3316,15 @@ def start_gate(state, saved_ui):
     return dict(state, needs_lookup=not by_hand and not found, by_hand=by_hand)
 
 
+def choose_by_hand(facts, saved_ui):
+    """(facts, saved_ui) once the architect chose "Enter the site by hand": any looked-up preview set aside (its box
+    changes undone; else a found lookup kept the gate on the lookup and the button did nothing: start-flow round 3)."""
+    facts, saved_ui = drop_pending(facts, saved_ui)
+    saved_ui["_lookup"] = {}
+    saved_ui["_by_hand"] = True
+    return facts, saved_ui
+
+
 def draw_blocked(state, saved_ui):
     """Why Draw must draw nothing, whatever way it was pressed (the box, where Draw is off then, or a scripted run
     that ticks and draws): an address typed but not looked up (address_reason), or a file that opened empty with
