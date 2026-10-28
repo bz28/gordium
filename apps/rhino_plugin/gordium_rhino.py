@@ -1769,6 +1769,7 @@ def _box_pick(doc, what, facts, saved_ui, session):
 
 def _one_pick(doc, what, facts, saved_ui, session):
     if what == "by_hand":                      # the site by hand (an empty file): the box shows its own rows
+        _lookup_stop()                         # a lookup still running is never used after this
         facts, saved_ui = logic.choose_by_hand(facts, saved_ui)
         STATE.pop("lookup_guide", None)
     elif what == "lookup":
@@ -1962,7 +1963,8 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             elif drawn_state is not state:            # after the reset (the guide): its lot rows are the model's
                 ticked = {k: v for k, v in ticked.items() if k in GUIDE_KEEPS}
             continue
-        if what in ("pick:lookup", "pick:lookup_done", "pick:use_saved"):   # the lookup's answer replaces them (and the district
+        # the lookup's answer replaces them; by hand undoes it (a tick given its district never moves to another)
+        if what in ("pick:lookup", "pick:lookup_done", "pick:use_saved", "pick:by_hand"):   # (and the district
             ticked = {}                                   # must be confirmed again)
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui, session)

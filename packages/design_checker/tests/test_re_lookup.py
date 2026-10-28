@@ -1177,3 +1177,15 @@ def test_by_hand_chosen_after_a_found_lookup_works():
     state = logic.start_gate({"address": "5 Other St"}, saved)
     assert state["by_hand"] and not state["needs_lookup"] and "_pending" not in saved
     assert logic.draw_blocked(dict(state, zone="R-1b", district_confirmed=True, lot_missing=False), saved) == ""
+
+
+def test_by_hand_asks_for_the_district_tick_again():
+    """Round 4: the box loop's ticks carried across picks; by hand undid the lookup's district (back to the one
+    picked before), so the tick given to the lookup's district moved onto it and Draw went on."""
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    loop = src[src.index("def _box_loop("):src.index("\n\n\n", src.index("def _box_loop("))]
+    reset = loop[loop.index('if what in ("pick:lookup", "pick:lookup_done"'):]
+    assert '"pick:by_hand"' in reset.split("\n", 1)[0] and reset.split("\n", 2)[1].strip() == "ticked = {}"
+    pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
+    assert pick.index("_lookup_stop()") < pick.index("logic.choose_by_hand(facts, saved_ui)")
