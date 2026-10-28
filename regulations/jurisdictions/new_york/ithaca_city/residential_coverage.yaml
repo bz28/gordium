@@ -76,7 +76,8 @@ _accessory_sp: &accessory_sp
   priority: medium
   why: No rule or flag asks about the accessory uses that need a special permit other than a home occupation
     (R-x.home_occupation flags one, §325-9B(1)(i)), namely an antenna or dish over 6 ft, in the front yard or over 10 ft
-    tall; a tower for electricity; a neighborhood garden; neighborhood parking.
+    tall; telecommunications facilities; a tower for electricity; a neighborhood garden; neighborhood
+    parking.
 _bnb_conflict: &bnb_conflict
   status: missing
   priority: medium
@@ -626,8 +627,8 @@ pieces:
           home_occupation always needs review once one is planned.
         quote: Home occupations in all residential districts, unless the home occupation meets all of the
     - lines: [[31, 16, 33], [31, 37, 37]]
-      what: Other accessory uses that need a special permit (antennas and towers, telecommunications, gardens,
-        day care, neighborhood parking)
+      what: Other accessory uses that need a special permit (antennas and towers, telecommunications, towers for
+        electricity, gardens, neighborhood parking)
       all: *accessory_sp
 
   325-9D:
