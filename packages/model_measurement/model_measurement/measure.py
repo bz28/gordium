@@ -1828,8 +1828,8 @@ def _set_aside_conflicts(out: dict, facts: dict) -> None:
             before = out.get(name) or {}
             # the use is changed in the start box, not by an "Enter …" button: the row that reads it says where
             # (R-2c lists every use's rows as needs review, and the use row didn't say how to fix it)
-            pointer = "(change the use with Edit site… in the start box)"
-            why_here = f"{why} {pointer}" if name == "use" and pointer not in (before.get("reason") or "") else why
+            pointer = stop("change_use_in_start_box")
+            why_here = why + "; " + pointer if name == "use" and pointer not in (before.get("reason") or "") else why
             reason = why_here if before.get("value") is not None or not before.get("reason") else before["reason"] + "; " + why_here
             out[name] = _record(name, STATED[name], reason=reason)
 
