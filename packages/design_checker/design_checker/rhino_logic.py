@@ -362,7 +362,27 @@ INTERIOR_FACTS = ("sleeping_rooms", "parking_spaces")    # inside the building (
 # Read from the drawing (the main building is one; solids standing apart that could hold a home are readings), so the
 # box never asks them up front: the panel's Enter flow still does, where the drawing can't say (measure._primary_buildings)
 DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
-BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS)   # what the box can ask
+# Use details (Ben, 2026-10-27: ask up front only what an architect knows at the start and what shapes the exterior or the
+# envelope): who lives there and a home business. Not asked in the start box; answered later, when the interior is planned,
+# with the panel's Enter flow. Their rules never pass while unanswered (they stay "needs review"); the panel lists them
+# in their own collapsed group, apart from the building's problems (is_use_detail). Ben will settle the exact questions
+# later, so this tuple is the one place that moves them: a fact added here leaves the start box and joins that group.
+DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occupants", "occupants_most_in_one_unit",
+                  "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
+                  "home_occupation", "home_occupation_area", "home_occupation_unit_area")
+USE_DETAILS_TITLE = "Use details — answer when you plan the interior"
+BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
+
+
+def is_use_detail(item):
+    """Whether a panel row is a use detail still waiting to be answered: it needs review, and everything it is waiting
+    on (its "needs") is a deferred fact. Only then: a row waiting on anything else too, one with no named need, and any
+    row that has been decided (complies, fails) stays among the building's rows, so an answer that fails counts as a
+    failure and a question left open never reads as a pass."""
+    needs = item.get("needs") or []
+    return item.get("status") == "needs_review" and bool(needs) and all(k in DEFERRED_FACTS for k in needs)
+
+
 
 
 def answered_in_box(needs):

@@ -504,7 +504,7 @@ def show(parts, view, stale=False, error=None, checking=False):
         gi.Tag = "group:" + g["key"]
         title = ("Site · " if g["key"] == "complies" and all(by_id[i]["group"] == "site" for i in g["items"]) else "")
         gi.Values = System.Array[System.Object]([title + g["title"] + " · " + str(len(g["items"])), "", "", ""])
-        gi.Expanded = parts["expanded"].get(gi.Tag, g["key"] not in ("complies", "not_covered"))
+        gi.Expanded = parts["expanded"].get(gi.Tag, g["key"] not in ("complies", "not_covered", "use_details"))
         for item_id in g["items"]:
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"

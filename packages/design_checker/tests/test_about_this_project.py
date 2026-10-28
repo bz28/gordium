@@ -3,8 +3,9 @@ only the ones the chosen district's and use's rules need, each with one-click an
 rows that wait on a fact say so exactly as before (never a false pass).
 
 Expected values come from the rulebooks read by hand (R-1b.yaml lines 386-491 for the stream and South Hill rules,
-1076 for the household rule, 1262 for the home occupation): R-1b with a one-family house reads exactly these seven
-facts; its floor areas and the stream's distance wait on a yes."""
+1076 for the household rule, 1262 for the home occupation): R-1b with a one-family house reads these seven facts, of
+which the start box asks the two that shape the envelope (stream, South Hill); the household and home business are use
+details (rhino_logic.DEFERRED_FACTS), answered later; the stream's distance waits on a yes."""
 
 import copy
 
@@ -15,8 +16,9 @@ from design_checker import rhino_logic as logic
 from design_checker.check import check_site
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
-R1B_ASKS = ["unrelated_persons", "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
-            "home_occupation", "stream_near_lot", "south_hill_overlay"]
+R1B_ASKS = ["stream_near_lot", "south_hill_overlay"]       # up front: what shapes the envelope (Ben, 2026-10-27)
+HOUSEHOLD = ["unrelated_persons", "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
+             "home_occupation"]                             # use details: deferred, answered when the interior is planned
 
 
 @pytest.fixture(scope="module")
@@ -28,6 +30,9 @@ def test_r1b_one_family_asks_exactly_the_facts_its_rules_read(options):
     rows = logic.follow_up_rows(options, "R-1b", "one_family_detached", {})
     assert [r["key"] for r in rows] == R1B_ASKS
     assert all(r["value"] is None for r in rows), "no default: every question starts unanswered"
+    # the household and home business are never asked up front, whatever else is answered
+    every = logic.follow_up_rows(options, "R-1b", "one_family_detached", {"home_occupation": True, "stream_near_lot": True})
+    assert not {r["key"] for r in every} & set(logic.DEFERRED_FACTS)
 
 
 def test_what_the_drawing_shows_is_never_asked_up_front(options):
@@ -38,14 +43,12 @@ def test_what_the_drawing_shows_is_never_asked_up_front(options):
             assert not set(asked) & set(logic.INTERIOR_FACTS), (zone, use)
 
 
-def test_the_floor_areas_and_the_distance_wait_for_their_yes(options):
+def test_the_distance_waits_for_its_yes_and_the_floor_areas_are_not_asked_up_front(options):
     ask = lambda facts: [r["key"] for r in logic.follow_up_rows(options, "R-1b", "one_family_detached", facts)]
-    base = ask({})
-    assert "home_occupation_area" not in base and "stream_distance" not in base
-    assert "home_occupation_area" not in ask({"home_occupation": False})
-    assert "stream_distance" not in ask({"stream_near_lot": False})
-    assert {"home_occupation_area", "home_occupation_unit_area"} <= set(ask({"home_occupation": True}))
+    assert "stream_distance" not in ask({}) and "stream_distance" not in ask({"stream_near_lot": False})
     assert "stream_distance" in ask({"stream_near_lot": True})
+    # deferred: not even after a yes (answered in the panel, when the interior is planned)
+    assert "home_occupation_area" not in ask({"home_occupation": True})
 
 
 def test_the_list_is_derived_from_the_rulebook_not_hard_coded():
@@ -71,11 +74,13 @@ def test_each_yes_no_offers_its_two_answers_in_plain_words():
 
 
 def test_quick_answers_fill_only_what_is_asked():
-    quick = dict(logic.quick_answers(R1B_ASKS))
+    quick = dict(logic.quick_answers(R1B_ASKS + HOUSEHOLD))
     assert quick["1 family, no roomers"] == {"unrelated_persons": 0, "functional_family_unit": False}
     assert quick["No stream, not in South Hill"] == {"stream_near_lot": False, "south_hill_overlay": False}
     assert logic.quick_answers(["stream_near_lot"]) == [("No stream, not in South Hill", {"stream_near_lot": False})]
     assert logic.quick_answers(["occupants"]) == []
+    # R-1b's start box asks neither household question: those quick answers are not offered
+    assert [w for w, _ in logic.quick_answers(R1B_ASKS)] == ["No stream, not in South Hill"]
 
 
 def test_a_typed_number_is_kept_as_typed_and_never_below_its_least():
@@ -91,12 +96,15 @@ def test_a_typed_number_is_kept_as_typed_and_never_below_its_least():
 
 
 def test_a_stale_answer_never_stays_behind(options):
-    """The distance typed before the stream answer flipped to No is dropped, so the facts never disagree."""
-    answers = {"stream_near_lot": False, "stream_distance": 5, "home_occupation": False, "home_occupation_area": 300}
-    facts, answered = logic.answers_applied({}, answers, "R-1b", "one_family_detached", options)
-    assert facts == {"stream_near_lot": False, "home_occupation": False}
-    assert answered == ["home_occupation", "stream_near_lot"]
-    facts, _ = logic.answers_applied({}, {**answers, "stream_near_lot": True}, "R-1b", "one_family_detached", options)
+    """The distance typed before the stream answer flipped to No is dropped, so the facts never disagree; a use detail
+    answered in the panel is kept, not erased by the box."""
+    answers = {"stream_near_lot": False, "stream_distance": 5}
+    facts, answered = logic.answers_applied({"unrelated_persons": 2, "home_occupation": True}, answers, "R-1b",
+                                            "one_family_detached", options)
+    assert facts == {"stream_near_lot": False, "unrelated_persons": 2, "home_occupation": True}
+    assert answered == ["stream_near_lot"]
+    facts, _ = logic.answers_applied({}, {"stream_near_lot": True, "stream_distance": 5}, "R-1b",
+                                     "one_family_detached", options)
     assert facts["stream_distance"] == 5
 
 
@@ -104,6 +112,8 @@ def test_the_box_reopens_when_a_yes_opens_a_question(options):
     shown = ("R-1b", "one_family_detached", logic.gate_of({}))
     assert not logic.box_needs_refresh(options, shown, ("R-1b", "one_family_detached", logic.gate_of({"stream_near_lot": False})))
     assert logic.box_needs_refresh(options, shown, ("R-1b", "one_family_detached", logic.gate_of({"stream_near_lot": True})))
+    # a home business yes opens nothing in the box (deferred)
+    assert not logic.box_needs_refresh(options, shown, ("R-1b", "one_family_detached", logic.gate_of({"home_occupation": True})))
     # a district pick still works with the old two-part form
     assert logic.box_needs_refresh(options, ("R-1b", "one_family_detached"), ("R-3b", "one_family_detached"))
 
@@ -120,36 +130,82 @@ def _rows(zone="R-1b", use="one_family_detached", **facts):
     return {i["rule"]: i for i in res["view"]["items"]}
 
 
-def test_the_box_asks_every_stated_fact_a_review_row_waits_on(options):
-    """In every district, the stated facts the rows wait on (with nothing answered) are all ones the box asks, so a
-    single visit to the box can clear them (the interior's and the drawn ones are asked elsewhere)."""
+def _view(zone="R-1b", use="one_family_detached", **facts):
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "12_r3a_two_family_at_the_building_limits.yaml"))
+    sc["district"], sc["use"] = zone, use
+    sc["lot"]["points"] = [[0, 0], [70, 0], [70, 150], [0, 150]]
+    sc["buildings"] = [{"id": "house", "outline": [[15, 40], [50, 40], [50, 80], [15, 80]], "base": 0, "floors": [10, 10]}]
+    s, f, extras = scenarios.site(sc)
+    return check_site(s, {**f, "main_building": "house_floor1", **facts}, extras=extras)["view"]
+
+
+def _waiting(view):
+    return {k for i in view["items"] if i["status"] == present.REVIEW for k in i.get("needs") or []}
+
+
+def test_the_box_asks_every_stated_fact_a_building_row_waits_on_and_the_rest_are_use_details(options):
+    """Every stated fact a needs-review row waits on is either asked in the box (a single visit clears it), a use detail
+    (deferred, in its own group), or one asked elsewhere (the interior's, the drawn ones)."""
     for zone in options["zones"]:
-        rows = _rows(zone)
-        waiting = {k for i in rows.values() if i["status"] == present.REVIEW for k in i.get("needs") or []}
-        outside = waiting & set(logic.STATED_FACTS) - set(logic.BOX_ASKS) - {"stories"}
-        assert not outside - set(logic.INTERIOR_FACTS) - set(logic.DRAWN_FACTS), (zone, outside)
-        missing = (waiting & set(logic.BOX_ASKS)) - set(logic.follow_up_keys(options, zone, "one_family_detached"))
-        assert not missing, (zone, missing)
+        waiting = _waiting(_view(zone)) & set(logic.STATED_FACTS) - {"stories"}
+        asked = set(logic.follow_up_keys(options, zone, "one_family_detached"))
+        elsewhere = set(logic.INTERIOR_FACTS) | set(logic.DRAWN_FACTS) | set(logic.DEFERRED_FACTS)
+        assert not waiting - asked - elsewhere, (zone, waiting - asked - elsewhere)
 
 
-def test_unanswered_still_needs_review_and_answering_decides_the_row(options):
-    rows = _rows()
-    for rule, fact in (("R-1b.stream_setback" if "R-1b.stream_setback" in rows else None, "stream_near_lot"),):
-        pass
-    waiting = {k for i in rows.values() if i["status"] == present.REVIEW for k in i.get("needs") or []}
-    # (the South Hill row is shown only with a second primary building: R-1b.south_hill_overlay applies_when)
-    assert {"stream_near_lot", "unrelated_persons", "home_occupation"} <= waiting, waiting
-    answers = {"unrelated_persons": 0, "owner_occupied": True, "accessory_dwelling_unit": False,
-               "functional_family_unit": False, "home_occupation": False, "stream_near_lot": False,
-               "south_hill_overlay": False}
+def test_use_details_unanswered_are_their_own_collapsed_group_and_never_a_pass():
+    v = _view()
+    details = [i for i in v["items"] if i.get("use_detail")]
+    assert details, "R-1b's household rule waits on the household"
+    assert all(i["status"] == present.REVIEW for i in details)              # still needs review (never pass)
+    assert all(set(i["needs"]) <= set(logic.DEFERRED_FACTS) for i in details)
+    groups = {g["key"]: g for g in v["groups"]}
+    assert groups["use_details"]["title"] == logic.USE_DETAILS_TITLE
+    assert set(groups["use_details"]["items"]) == {i["id"] for i in details}
+    assert not {i["id"] for i in details} & set(groups.get("review", {"items": []})["items"])
+    # not counted among the building's problems, but said, and apart from the passes
+    building_review = sum(1 for i in v["items"] if i["status"] == present.REVIEW and not i.get("use_detail"))
+    assert f"{len(details)} use detail" in v["summary"] and "to answer" in v["summary"]
+    assert v["summary"].count("need review") + v["summary"].count("needs review") == (1 if building_review else 0)
+    assert v["state"] != present.COMPLIES, "a question left open is never a pass"
+
+
+def test_only_use_details_left_is_still_not_a_pass():
+    """Everything else decided: the header state is needs review, never complies, and the summary still says so."""
+    items = [{"id": "a", "status": present.COMPLIES, "group": "building"},
+             {"id": "b", "status": present.REVIEW, "group": "building", "use_detail": True}]
+    assert present.state(items) == present.REVIEW
+    assert present.summary(items) == "1 complies · 1 use detail to answer"
+    assert present.state(items[:1]) == present.COMPLIES
+
+
+def test_an_answered_use_detail_leaves_the_group_and_counts_like_any_row():
+    """Answered to fail: it is a failure in the building's rows, counted; answered to pass: complies; a row waiting on
+    something besides use details stays among the building's rows."""
+    failing = _view(unrelated_persons=5, owner_occupied=False, accessory_dwelling_unit=False,
+                    functional_family_unit=False)
+    assert any(i["status"] == present.FAILS and not i.get("use_detail") for i in failing["items"]
+               if "unrelated" in i["name"].lower() or "occupan" in i["name"].lower() or "famil" in i["name"].lower())
+    assert "does not comply" in failing["summary"]
+    for i in _view()["items"]:
+        if i["status"] == present.REVIEW and not i.get("use_detail"):
+            assert not i.get("needs") or not all(k in logic.DEFERRED_FACTS for k in i["needs"]), i["id"]
+    mixed = {"status": present.REVIEW, "needs": ["unrelated_persons", "stream_near_lot"]}
+    assert not logic.is_use_detail(mixed)
+    assert not logic.is_use_detail({"status": present.REVIEW, "needs": []})
+    assert not logic.is_use_detail({"status": present.COMPLIES, "needs": ["unrelated_persons"]})
+    assert logic.is_use_detail({"status": present.REVIEW, "needs": ["unrelated_persons", "home_occupation"]})
+
+
+def test_unanswered_stream_still_needs_review_and_answering_decides_it(options):
+    waiting = _waiting(_view())
+    assert {"stream_near_lot"} <= waiting
+    answers = {"stream_near_lot": False, "south_hill_overlay": False}
     facts, _ = logic.answers_applied({}, answers, "R-1b", "one_family_detached", options)
-    after = _rows(**facts)
-    still = {k for i in after.values() if i["status"] == present.REVIEW for k in i.get("needs") or []}
+    still = _waiting(_view(**facts))
     assert not still & set(answers), still
-    # one answer at a time clears only its own rows: the others stay needs review
-    one, _ = logic.answers_applied({}, {"stream_near_lot": False}, "R-1b", "one_family_detached", options)
-    left = {k for i in _rows(**one).values() if i["status"] == present.REVIEW for k in i.get("needs") or []}
-    assert "stream_near_lot" not in left and {"unrelated_persons", "home_occupation"} <= left
+    assert "stream_near_lot" in _waiting(_view(**logic.answers_applied({}, {"south_hill_overlay": False}, "R-1b",
+                                                                       "one_family_detached", options)[0]))
 
 
 def test_a_close_stream_is_a_fail_and_a_far_one_a_pass_once_the_distance_is_typed(options):
@@ -158,20 +214,17 @@ def test_a_close_stream_is_a_fail_and_a_far_one_a_pass_once_the_distance_is_type
     far, _ = logic.answers_applied({}, {"stream_near_lot": True, "stream_distance": 20}, "R-1b",
                                    "one_family_detached", options)
     unsaid, _ = logic.answers_applied({}, {"stream_near_lot": True}, "R-1b", "one_family_detached", options)
-    status = lambda f: next(i["status"] for r, i in _rows(**f).items() if "stream" in r)
+    status = lambda f: next(i["status"] for i in _view(**f)["items"] if "stream" in (i.get("rule") or ""))
     assert status(near) == present.FAILS
     assert status(far) == present.COMPLIES
     assert status(unsaid) == present.REVIEW          # "yes", no distance: still needs review
 
 
-def test_floor_areas_are_typed_square_feet_not_a_yes_no(options):
-    """The demo found #38's floor-area questions as a No/Yes dropdown once #37 and #38 met: they are typed entries
-    (no choices), decimals kept, blank = unanswered (the rule needs review)."""
-    rows = {r["key"]: r for r in logic.follow_up_rows(options, "R-1b", "one_family_detached", {"home_occupation": True})}
+def test_floor_areas_are_typed_square_feet_not_a_yes_no():
+    """The demo found #38's floor-area questions as a No/Yes dropdown once #37 and #38 met: a typed entry (no choices),
+    decimals kept, blank = unanswered. They are use details now, so the Enter flow and the box's code path share this."""
     for k in ("home_occupation_area", "home_occupation_unit_area"):
-        assert rows[k]["kind"] == "area" and rows[k]["choices"] is None, rows[k]
+        assert logic.STATED_FACTS[k][1] == "area" and logic.choices_for(k, "area") is None
     assert logic.parse_answer("area", "500.4") == 500.4          # never rounded down to the 500 sq ft limit
     assert logic.parse_answer("area", "  ") is None
-    facts, _ = logic.answers_applied({}, {"home_occupation": True, "home_occupation_area": 500.4}, "R-1b",
-                                     "one_family_detached", options)
-    assert facts["home_occupation_area"] == 500.4 and "home_occupation_unit_area" not in facts
+    assert logic.update_counts({}, {"home_occupation_area": 500.4})["home_occupation_area"] == 500.4

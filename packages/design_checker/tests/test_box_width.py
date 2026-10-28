@@ -379,7 +379,7 @@ def test_the_box_fits_a_laptop_screen_in_height_when_every_question_is_open(ui):
     """The tallest box: the most questions any district and use asks, with the answers that open the floor-area and
     distance questions, ≤ LAPTOP_HEIGHT_PX tall (1366 x 768 less the window's chrome)."""
     options = check.options(CITY)
-    gate = {"home_occupation": True, "stream_near_lot": True}
+    gate = {"stream_near_lot": True}
     tallest = (0, None)
     for zone, uses in sorted(options["follow_ups"].items()):
         for use in uses:
@@ -392,7 +392,7 @@ def test_the_box_fits_a_laptop_screen_in_height_when_every_question_is_open(ui):
 def test_the_old_one_row_per_question_box_would_not_have_fit_the_height(ui):
     """The height model counts: the questions one to a row, each at the old width, would be taller than the section."""
     options = check.options(CITY)
-    gate = {"home_occupation": True, "stream_near_lot": True}
+    gate = {"stream_near_lot": True}
     questions = logic.follow_up_rows(options, "R-2c", "two_family", gate)
     _, layout = laid_out(ui, _state("R-2c", "two_family", questions), options)
     section = max(box_height(c) for cells in layout.rows for c in cells

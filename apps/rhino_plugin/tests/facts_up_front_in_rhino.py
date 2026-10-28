@@ -6,25 +6,24 @@ this script checks what only the real Eto box can show). Every claim is recorded
 and the run fails at the end if any did. A fresh feet document; the box opened on facts (no lot needed).
 Run it as use_questions_in_rhino.py is run (same helpers), then read <temp>/gordium_facts_up_front/out.json.
 
-1. R-1b, one-family detached: a bold "About this project" label, a "Quick answers" dropdown and exactly R-1b's seven
-   questions (Unrelated people in one home, Owner lives in the house, Accessory dwelling unit, Functional family unit,
-   Home business, Stream or inlet, South Hill Overlay), every dropdown on "Not answered" (index 0): nothing assumed.
-   The floor-area and distance fields are not there yet.
+1. R-1b, one-family detached: a bold "About this project" label, a "Quick answers" dropdown and exactly the questions
+   that shape the envelope (Stream or inlet, South Hill Overlay), every dropdown on "Not answered" (index 0): nothing
+   assumed. No household or home-business question is in the box (use details: deferred), and no distance field yet.
 2. The box fits a laptop: the dialog is at most 900 px wide and 700 px tall (1366 x 768 less the window's chrome).
 3. One click: the stream dropdown lists "Not answered", "No stream within 20 ft", "Stream or inlet within 20 ft";
-   Quick answers lists "1 family, no roomers" among its choices.
-4. Picking "1 family, no roomers" fills "Unrelated people in one home" with "0 (one family)" and "Functional family unit"
-   with "Not relying on one", then the Quick answers dropdown returns to its hint; the other questions stay
-   "Not answered".
+   Quick answers lists "No stream, not in South Hill".
+4. Picking that quick answer fills both dropdowns; the Quick answers dropdown returns to its hint.
 5. Picking "Stream or inlet within 20 ft" closes the box to open it again ("pick:refresh"); the box that opens next, on
-   the facts that pick saved, shows the "Distance to it (ft)" field, and "Home business planned" likewise opens
-   "Business floor area (sq ft)" and "Its home's floor area (sq ft)".
-6. Draw with some answered: the box's state["answers"] holds exactly those answers (No home business -> False; No stream
-   -> False; "0 (one family)" -> 0), and every unanswered question is None. Draw with none answered: every answer None
-   and answers_applied sends the checker no household, home-occupation, stream or overlay fact (so those rows say
-   "needs review", with the reason they give today).
-7. Edit site... shows the saved answers again (the dropdowns on the words saved), and a changed one is kept.
-8. Every district's box for each of its uses stays at most 900 px wide and 700 px tall.
+   the facts that pick saved, shows the "Distance to it (ft)" field.
+6. Draw with the stream answered: state["answers"] holds it (No stream -> False), the rest None. Draw with none answered:
+   answers_applied sends the checker no stream or overlay fact (those rows say "needs review").
+7. Edit site... shows the saved answers on their words.
+8. Every district's box for each of its uses stays at most 900 px wide and 700 px tall; an attached-building use asks
+   "Homes in the attached building" as a one-click dropdown.
+9. The panel: after a check on R-1b with nothing answered, the tree has a collapsed group "Use details — answer when you
+   plan the interior" holding the household and home-business rows (each still amber "?"), the header line reads
+   "... · N use details to answer" and the header state is not "complies"; the group is not expanded. Enter... on one
+   of its rows asks its question (the existing flow) and, answered to fail, moves the row into "Does not comply".
 Writes <temp>/gordium_facts_up_front/out.json; closes its document."""
 import json
 import os
@@ -130,41 +129,38 @@ try:
     doc = TestDocs("facts_up_front").__enter__().open("Large Objects - Feet")
     options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
     r1b = {"zone": "R-1b", "use": "one_family_detached"}
+    not_answered = g.logic.NOT_ANSWERED
+    envelope_qs = ["Stream or inlet", "South Hill Overlay"]
+    later = ["Unrelated people in one home", "Owner lives in the house", "Accessory dwelling unit",
+             "Functional family unit", "Home business", "Business floor area (sq ft)", "Distance to it (ft)"]
     _, seen, _ = open_box(g, doc, options, r1b)
     log["1"] = seen
-    section = [t for t in seen["labels"] if t == "About this project"]
-    not_answered = g.logic.NOT_ANSWERED
-    asked_drops = [d for d in seen["drops"] if d and d[0] == not_answered]
-    claim("1 'About this project' with Quick answers and exactly R-1b's seven questions, all on Not answered",
-          len(section) == 1 and "Quick answers" in seen["labels"] and all(t in seen["labels"] for t in R1B)
-          and not any(t in seen["labels"] for t in ("Distance to it (ft)", "Business floor area (sq ft)"))
-          and len(asked_drops) == 7                       # one dropdown a question (unrelated people: 0 to 6)
-          and all(p == not_answered for d, p in zip(seen["drops"], seen["picked"]) if d and d[0] == not_answered),
-          seen)
+    answer_drops = [(d, p) for d, p in zip(seen["drops"], seen["picked"]) if d and d[0] == not_answered]
+    claim("1 'About this project' with Quick answers and exactly the two envelope questions, all on Not answered",
+          seen["labels"].count("About this project") == 1 and "Quick answers" in seen["labels"]
+          and all(t in seen["labels"] for t in envelope_qs) and not any(t in seen["labels"] for t in later)
+          and len(answer_drops) == 2 and all(p == not_answered for _, p in answer_drops), seen)
     claim("2 the box is at most 900 x 700", 0 < seen["box"]["width"] <= LAPTOP_W and 0 < seen["box"]["height"] <= LAPTOP_H,
           seen["box"])
     stream = next((d for d in seen["drops"] if "No stream within 20 ft" in d), None)
-    quick = next((d for d in seen["drops"] if "1 family, no roomers" in d), None)
-    claim("3 one-click answers: the stream's two answers in words, and Quick answers lists 1 family, no roomers",
+    quick = next((d for d in seen["drops"] if "No stream, not in South Hill" in d), None)
+    claim("3 one-click answers: the stream's two answers in words, and the quick answer listed",
           stream == [not_answered, "No stream within 20 ft", "Stream or inlet within 20 ft"] and quick is not None,
           {"stream": stream, "quick": quick})
 
     def quick_pick(dialog, found, seen):
-        picker = drop_with(found, "1 family, no roomers")
-        picker.SelectedIndex = drop_items(picker).index("1 family, no roomers")
-        seen["after"] = {"unrelated": selected(drop_with(found, "0 (one family)")),
-                         "functional": selected(drop_with(found, "Not relying on one")),
-                         "picker": selected(picker),
-                         "others": [selected(c) for c in found if isinstance(c, ef.DropDown)
-                                    and not (set(drop_items(c)) & {"0 (one family)", "Not relying on one",
-                                                                   "1 family, no roomers"})]}
+        picker = drop_with(found, "No stream, not in South Hill")
+        picker.SelectedIndex = drop_items(picker).index("No stream, not in South Hill")
+        seen["after"] = {"stream": selected(drop_with(found, "No stream within 20 ft")),
+                         "south": selected(drop_with(found, "In the South Hill Overlay")),
+                         "picker": selected(picker)}
 
     _, seen, _ = open_box(g, doc, options, r1b, quick_pick)
     after = seen.get("after") or {}
     log["4"] = seen
-    claim("4 '1 family, no roomers' fills the unrelated people and functional family answers; the rest stay blank",
-          after.get("unrelated") == "0 (one family)" and after.get("functional") == "Not relying on one"
-          and after.get("picker") == g.logic.QUICK_HINT and set(after.get("others") or []) == {not_answered}, after)
+    claim("4 the quick answer fills both dropdowns; Quick answers returns to its hint",
+          after.get("stream") == "No stream within 20 ft" and after.get("south") == "Not in the South Hill Overlay"
+          and after.get("picker") == g.logic.QUICK_HINT, after)
 
     def yes_stream(dialog, found, seen):
         d = drop_with(found, "Stream or inlet within 20 ft")
@@ -172,49 +168,41 @@ try:
 
     what, _, _ = open_box(g, doc, options, r1b, yes_stream)
     _, seen_s, _ = open_box(g, doc, options, dict(r1b, stream_near_lot=True))
-    _, seen_h, _ = open_box(g, doc, options, dict(r1b, home_occupation=True))
-    log["5"] = {"returned": what, "stream": seen_s["labels"], "home": seen_h["labels"]}
-    claim("5 a yes closes the box to open again, with the distance / floor-area questions that wait on it",
-          what == "pick:refresh" and "Distance to it (ft)" in seen_s["labels"]
-          and "Business floor area (sq ft)" in seen_h["labels"] and "Its home's floor area (sq ft)" in seen_h["labels"],
-          log["5"])
+    log["5"] = {"returned": what, "stream": seen_s["labels"]}
+    claim("5 a yes closes the box to open again, with the distance question that waits on it",
+          what == "pick:refresh" and "Distance to it (ft)" in seen_s["labels"], log["5"])
 
-    def some(dialog, found, seen):
-        for item, words in (("No home business", "No home business"), ("No stream within 20 ft", "No stream within 20 ft"),
-                            ("0 (one family)", "0 (one family)")):
-            d = drop_with(found, item)
-            d.SelectedIndex = drop_items(d).index(words)
+    def stream_no(dialog, found, seen):
+        d = drop_with(found, "No stream within 20 ft")
+        d.SelectedIndex = drop_items(d).index("No stream within 20 ft")
         click_draw(found)
 
-    what, _, state = open_box(g, doc, options, r1b, some)
-    log["6a"] = {"returned": what, "answers": state.get("answers")}
-    got = {k: v for k, v in (state.get("answers") or {}).items() if k in g.logic.follow_up_keys(options, "R-1b",
-                                                                                              "one_family_detached")}
-    want = {"unrelated_persons": 0, "home_occupation": False, "stream_near_lot": False}
-    claim("6a Draw with three answered: exactly those three are kept, the rest None",
-          what == "draw" and {k: v for k, v in got.items() if v is not None} == want
-          and all(v is None for k, v in got.items() if k not in want), log["6a"])
+    what, _, state = open_box(g, doc, options, r1b, stream_no)
+    got = {k: v for k, v in (state.get("answers") or {}).items() if k in ("stream_near_lot", "south_hill_overlay")}
+    log["6a"] = {"returned": what, "answers": got}
+    claim("6a Draw with the stream answered: it is kept, the other None",
+          what == "draw" and got.get("stream_near_lot") is False and got.get("south_hill_overlay") is None, log["6a"])
     what, _, state = open_box(g, doc, options, r1b, lambda dialog, found, seen: click_draw(found))
     facts, answered = g.logic.answers_applied({}, state.get("answers"), "R-1b", "one_family_detached", options)
     log["6b"] = {"returned": what, "facts": facts}
     claim("6b Draw with none answered: nothing is sent to the checker for them (their rows say needs review)",
-          what == "draw" and answered == [] and not set(facts) & set(g.logic.follow_up_keys(options, "R-1b",
-                                                                                           "one_family_detached")),
+          what == "draw" and answered == [] and "stream_near_lot" not in facts and "south_hill_overlay" not in facts,
           log["6b"])
-    _, seen, _ = open_box(g, doc, options, dict(r1b, home_occupation=False, stream_near_lot=False, unrelated_persons=2),
-                          mode="edit")
+    _, seen, _ = open_box(g, doc, options, dict(r1b, stream_near_lot=False), mode="edit")
     log["7"] = seen
-    claim("7 Edit site... shows the saved answers on their words",
-          {"No home business", "No stream within 20 ft", "2"} <= set(seen["picked"]), seen["picked"])
+    claim("7 Edit site... shows the saved answer on its words", "No stream within 20 ft" in seen["picked"], seen["picked"])
     boxes = {}
     for zone in options["zones"]:
         for use in [u["id"] for u in options["district_uses"].get(zone) or []]:
             _, seen, _ = open_box(g, doc, options, {"zone": zone, "use": use})
-            boxes["%s/%s" % (zone, use)] = seen["box"]
+            boxes["%s/%s" % (zone, use)] = dict(seen["box"], homes="Homes in the attached building" in seen["labels"])
     log["8"] = boxes
-    claim("8 every district's box for every use is at most 900 x 700",
-          bool(boxes) and all(0 < b["width"] <= LAPTOP_W and 0 < b["height"] <= LAPTOP_H for b in boxes.values()),
-          {k: b for k, b in boxes.items() if not (0 < b["width"] <= LAPTOP_W and 0 < b["height"] <= LAPTOP_H)})
+    bad = {k: b for k, b in boxes.items() if not (0 < b["width"] <= LAPTOP_W and 0 < b["height"] <= LAPTOP_H)}
+    attached = [b["homes"] for k, b in boxes.items() if k.endswith("/one_family_attached")]
+    claim("8 every district's box for every use is at most 900 x 700; an attached building asks its homes",
+          bool(boxes) and not bad and bool(attached) and all(attached), bad or attached)
+    # 9 (the panel): see the spec above; to be driven by the Rhino run with GordiumStart on the sample lot, then Check,
+    # reading the Gordium panel tree: group "use_details" collapsed, header summary, state not "complies".
 except Exception:
     log["trace"] = traceback.format_exc()
 finally:

@@ -247,13 +247,14 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
      lookup, because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
-   - **About this project**: the facts only you know, that this district's rules need for the use (household,
-     home business, a stream near the lot, the South Hill Overlay, the homes in an attached building). Each is a
-     one-click dropdown ("No home business", "No stream within 20 ft", "1 family, no roomers" under Quick answers)
-     and **starts on Not answered**: Gordium never assumes. Leave one unanswered and the rows that need it say
-     "needs review", as always. A "yes" opens the question that follows it (a stream's distance, the business's
-     floor area). Hover a question for its full wording. Answers are saved with the project; change them in Edit
-     site… or answer one later with its Enter… button.
+   - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
+     near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building
+     holds. Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
+     assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
+     its full wording. Answers are saved with the project; change them in Edit site… .
+     Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
+     panel's collapsed **Use details — answer when you plan the interior** group (still needs review, not counted among
+     the building's problems, never a pass), each with its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
      survey…** to pick your surveyed outline instead.
