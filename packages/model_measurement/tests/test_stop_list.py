@@ -257,6 +257,7 @@ CASES = {
     "no_home_occupation": _plain(),
     "household_counts_disagree": _plain(unrelated_persons=3, unrelated_persons_with_children=1),
     "attached_counts_disagree": _plain(use="one_family_attached", dwelling_units=4, attached_units_in_building=3),
+    "change_use_in_start_box": _plain(use="one_family_attached", dwelling_units=4, attached_units_in_building=3),
     "occupant_split_disagree": _plain(occupants=2, occupants_most_in_one_unit=3),
     "occupant_counts_disagree": _plain(use="two_family", occupants=10, occupants_most_in_one_unit=1,
                                       accessory_dwelling_unit=False),

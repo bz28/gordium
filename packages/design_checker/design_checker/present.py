@@ -747,6 +747,39 @@ def _holding_way(check: str, values: dict) -> list | None:
     return None
 
 
+def _law_limit_way(check: str, values: dict, node):
+    """For a rule whose ways to comply are each one limit on the same measure plus conditions only (R-1's occupancy:
+    "unrelated_persons <= 1 or unrelated_persons <= 2 and owner_occupied and not accessory_dwelling_unit"), the limit
+    the law sets here: the loosest of the ways whose conditions hold as stated (item 12: an owner-occupied R-1a house
+    showed "1 required" where §325-3B allows 2). None for any other rule (a way with limits on other measures, e.g.
+    the §325-16C height bonus raising the yards, keeps the row's own numbers)."""
+    body = formula.parse(check).body
+    if node is None or not (isinstance(body, ast.BoolOp) and isinstance(body.op, ast.Or)):
+        return None
+    m, op = node.left.id, type(node.ops[0])
+    if op not in (ast.LtE, ast.Lt, ast.GtE, ast.Gt):
+        return None
+    best, best_limit = None, None
+    for alt in body.values:
+        parts = alt.values if isinstance(alt, ast.BoolOp) and isinstance(alt.op, ast.And) else [alt]
+        limits = [p for p in parts if isinstance(p, ast.Compare)]
+        others = [p for p in parts if not isinstance(p, ast.Compare)]
+        if len(limits) != 1 or any(isinstance(n, ast.Compare) for p in others for n in ast.walk(p)):
+            return None
+        c = limits[0]
+        if not (len(c.ops) == 1 and isinstance(c.left, ast.Name) and c.left.id == m and type(c.ops[0]) is op):
+            return None
+        if any(_evaluate(ast.unparse(p), values) is not True for p in others):
+            continue                                   # this way's conditions don't hold (or aren't said)
+        limit = _evaluate(ast.unparse(c.comparators[0]), values)
+        if not isinstance(limit, (int, float)) or isinstance(limit, bool):
+            continue
+        looser = best_limit is None or (limit > best_limit if op in (ast.LtE, ast.Lt) else limit < best_limit)
+        if looser:
+            best, best_limit = c, limit
+    return best
+
+
 def _worst_reading(node, measured: dict, values: dict):
     """(worst reading, required) as text when the comparison fails under one of the measurement's readings."""
     m = node.left.id
@@ -1041,6 +1074,16 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # may be the 10 ft one: 7'-0" against 8'-0", never against the 5 ft side's 3'-0" it already meets)
             n = about[0]
             primary = ast.Compare(left=n.left, ops=[ast.GtE()], comparators=n.comparators)
+    elif (_status(row) == COMPLIES and isinstance(body, ast.BoolOp) and isinstance(body.op, ast.And)
+          and len(compares) > 1 and all(isinstance(v, ast.Compare) for v in body.values)
+          and len({c.left.id for c in compares}) == 1):
+        # a range on one measure (R-3aa's stories: at least 2, at most 3): the limit it is nearest, never simply
+        # the first (the light run in Rhino, 2026-10-28: 3 stories showed "2 required" beside "complies")
+        def slack(c):
+            have, limit = values.get(c.left.id), _evaluate(ast.unparse(c.comparators[0]), values)
+            ok = isinstance(have, (int, float)) and isinstance(limit, (int, float))
+            return abs(have - limit) if ok else float("inf")
+        primary = min(compares, key=slack)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
@@ -1091,6 +1134,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             if way:
                 node = next((c for c in way if c.left.id == node.left.id), node)
                 raised = [c for c in way if c.left.id != node.left.id]
+        if node is not None and not splits and not raised and check:
+            node = _law_limit_way(check, values, node) or node     # the limit the law sets here (owner-occupied: 2)
         numbers = _numbers(node, values, measured, label) if node is not None else (None, None, None, "", "")
         proposed, required, margin_t, margin = (*_display(*numbers),) if node is not None else ("—", "—", "", None)
         if name == "Use":
