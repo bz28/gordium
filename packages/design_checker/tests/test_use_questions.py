@@ -201,20 +201,27 @@ def test_the_box_rows_answers_and_their_source():
     assert "logic.sources_kept(fact_sources(doc))" in drawn
 
 
-def test_an_unanswered_fact_says_tell_gordium_and_its_button_opens_the_box():
-    assert logic.needs_reason(["dwelling_units"]) == (
-        "Tell Gordium the dwelling units (Edit site…): the model doesn't show them")
-    # the interior's facts (not asked in the box) keep their own words and their own Enter… button
+def test_an_unanswered_fact_says_what_it_needs_and_its_button_opens_its_own_dialog():
+    """Coordinator, 2026-10-28 (agreed with Ben): a row waiting on stated facts no longer opens the whole start box
+    ("Tell Gordium in Edit site…", gone): its one button opens a small dialog asking exactly those facts."""
+    assert logic.needs_reason(["dwelling_units"]) == "Needs dwelling units, which the model doesn't show"
     assert logic.needs_reason(["sleeping_rooms", "parking_spaces"]) == (
         "Needs bedrooms and parking spaces, which the model doesn't show")
-    assert logic.needs_reason(["dwelling_units", "stories"]).startswith("Needs ")
-    assert logic.answered_in_box(["dwelling_units", "conversion"]) and not logic.answered_in_box(["sleeping_rooms"])
-    assert not logic.answered_in_box([]) and not logic.answered_in_box(["dwelling_units", "stories"])
+    assert logic.needs_reason([]) is None
+    assert logic.row_buttons({"needs": ["dwelling_units", "conversion"]}) == [
+        ("Enter dwelling units and whether it is a conversion…", "enter")]
+    assert logic.row_buttons({"needs": ["sleeping_rooms", "parking_spaces"]}) == [
+        ("Enter bedrooms and parking spaces…", "enter")]
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'if i.get("needs") and logic.answered_in_box(i["needs"]):' in ui and 'a["edit_site"]' in ui
-    box = ui[ui.index("def start_box("):ui.index("def text_box_size(")]
-    assert 'questions = state.get("follow_ups") or []' in box and 'for q in questions:' in box and 'state["answers"] = answers' in box
-    assert "logic.answers_note(" in box and "note.Text = text" in box     # a refused entry is said at once
+    assert "Tell Gordium in Edit site" not in ui and not hasattr(logic, "answered_in_box")
+    detail = ui[ui.index("def show_detail("):ui.index("def row_dialog(")]
+    assert "for words, what in logic.row_buttons(i):" in detail
+    assert 'buttons.append(button(words, lambda: a["enter"](i["needs"])))' in detail
+    assert 'buttons.append(button(words, a["edit_site"]))' in detail
+    ui_box = ui[ui.index("def start_box("):ui.index("def row_dialog(")]
+    assert 'questions = state.get("follow_ups") or []' in ui_box and 'for q in questions:' in ui_box
+    assert 'state["answers"] = answers' in ui_box
+    assert "logic.answers_note(" in ui_box and "note.Text = text" in ui_box     # a refused entry is said at once
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     apply_ = rhino[rhino.index("def _apply_box("):rhino.index("def _place_spots(")]
     assert 'logic.answers_applied(facts, state.get("answers"), state["zone"], state["use"],' in apply_

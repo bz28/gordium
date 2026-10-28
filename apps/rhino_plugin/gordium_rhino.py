@@ -1377,28 +1377,61 @@ def set_grade():
 
 
 def enter_rooms(needs):
-    """A row's "Enter …" button: one prompt for each fact it waits for (`needs`, the row's own list), a whole number
-    or yes / no. Enter skips one: it stays unset (never 0 or no), so its rule keeps waiting."""
+    """A row's "Enter …" button: a small dialog (ui.row_dialog) asking only the stated facts it waits for (`needs`,
+    the row's own list, logic.row_fields). OK saves exactly those (logic.row_answers_applied: a blank stays unset,
+    never 0 or no), each "entered by you" with the day (logic.row_sources), as ONE Undo step, then checks again.
+    Cancel, Esc or closing it changes nothing and makes no Undo step. The address, district, use, lot, street side and
+    every other fact are never touched (the facts are read as saved: load_facts, never current_facts, which would
+    drop a lot no longer drawn). A count of stories below the floors drawn is refused by the measuring: said in its
+    words, and nothing is saved."""
     doc = Rhino.RhinoDoc.ActiveDoc
     if not needs:
         say("This row isn't waiting for anything you can enter.")
         return
+    if not logic.allowed("save_facts", _box_open()):     # nothing writes the facts under an open start box
+        say(logic.BOX_BUSY)
+        return
     try:
-        facts = current_facts(doc)
-        answers = {}
-        for key in needs:
-            prompt, kind, _ = logic.STATED_FACTS[key]
-            answers[key] = _count(prompt) if kind == "count" else _ask_yes_no_or_skip(prompt)
-    except Cancelled:
+        facts = load_facts(doc)
+    except ValueError as e:
+        say(str(e))
+        return
+    if facts is None:
+        say("There are no site facts yet: run GordiumStart (or Edit site…) first.")
+        return
+
+    answers = ui.row_dialog(logic.enter_words(needs), logic.row_fields(needs, facts),     # OK: words keep it open
+                            lambda got: logic.row_problem(facts, needs, got))
+    if answers is None:                 # Cancel, Esc, closed: nothing written, so no Undo step
         say("Cancelled: nothing changed.")
         return
-    save_facts(doc, logic.update_counts(facts, answers))
-    run_check(doc, report=False)
-    refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
-    if refused:                         # fewer stories than the floors drawn: the measuring refuses it, so is it
-        save_facts(doc, facts)
+    new = logic.row_answers_applied(facts, needs, answers)
+    if new == facts:                    # OK with the answers as they were: nothing to save, no Undo step
+        say("Nothing new entered: nothing changed.")
+        return
+    if "stories" in needs and new.get("stories") is not None:   # the measuring decides if the count can stand: tried
+        _save_facts(doc, new)                                   # first, outside any Undo step
         run_check(doc, report=False)
-        say(refused)
+        refused = logic.refused_stories((STATE.get("last") or {}).get("items"))
+        _save_facts(doc, facts)                                 # back as it was (saved below, as one Undo step)
+        if refused:                     # fewer stories than the floors drawn: refused, so nothing is saved
+            run_check(doc, report=False)
+            say(refused)
+            return
+    _save_row(doc, needs, new)
+    run_check(doc, report=False)
+
+
+def _save_row(doc, needs, new):
+    """A row dialog's answers, saved as one Undo step: the facts and the sources of exactly the row's facts."""
+    record = doc.BeginUndoRecord("Gordium: " + logic.enter_words(needs).lower())
+    STATE["row_record"] = record                 # for the tests
+    try:
+        _save_facts(doc, new)
+        sources = logic.row_sources(fact_sources(doc), needs, new, logic.city_day())
+        doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
+    finally:
+        doc.EndUndoRecord(record)
 
 
 def pick_main_building():
@@ -1678,7 +1711,7 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "use_choices": logic.district_use_names(options, facts.get("zone"), facts.get("use")),
             "use_note": logic.use_note(options, facts.get("zone"), facts.get("use")),
             "follow_ups": logic.follow_up_rows(options, facts.get("zone"), facts.get("use"), facts),
-            "answers": {k: facts.get(k) for k in logic.follow_up_keys(options, facts.get("zone"), facts.get("use"))},
+            "answers": logic.box_answers(options, facts.get("zone"), facts.get("use"), facts),   # the saved facts
             "options": options,          # for _apply_box and fact_sources: which facts the district and use read
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
             # the street's name only with its street line (a survey outline or a corner answer drops the line:

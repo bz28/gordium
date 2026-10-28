@@ -643,10 +643,11 @@ def show_detail(parts):
     # what to do about it, right under the reason: a button where there is one (never its words twice, nor the
     # button scrolled out of sight below the measuring notes: the architect's review), else the hint's words
     buttons = []
-    if i.get("needs") and logic.answered_in_box(i["needs"]):     # answered in the box, not a pop-up (Ben)
-        buttons.append(button("Tell Gordium in Edit site…", a["edit_site"]))
-    elif i.get("needs"):                  # exactly the stated facts this row waits for, asked in turn
-        buttons.append(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"])))
+    for words, what in logic.row_buttons(i):     # its own small dialog for the stated facts it waits on; Edit site…
+        if what == "enter":                      # where a site fact is missing (logic.row_buttons)
+            buttons.append(button(words, lambda: a["enter"](i["needs"])))
+        else:
+            buttons.append(button(words, a["edit_site"]))
     if i.get("hint") == "Pick the main building…":
         buttons.append(button("Pick the main building…", a["main"]))
     if i["id"] == "scope.not_included":
@@ -1019,6 +1020,57 @@ def start_box(state, options, mode):
         dialog.Closed += logic.guard(lambda s, e: timer.Stop(), "stop waiting for the lookup")
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen.get("what")
+
+
+def row_dialog(title, fields, check):
+    """A row's own small dialog (logic.row_fields): one line per stated fact the row waits on, a count typed or a
+    yes / no picked ("Not answered" first), and [Cancel] [OK]. OK calls `check(answers)` (answers: key -> text, "yes",
+    "no" or "" for blank): words back keep the dialog open with them shown; None closes it. Returns the answers on
+    OK, or None (Cancel, Esc, closed: the caller changes nothing)."""
+    dialog = ef.Dialog[bool]()
+    dialog.Title = title
+    dialog.Padding = ed.Padding(14)
+    dialog.Resizable = False
+    layout = ef.DynamicLayout()
+    layout.Spacing = ed.Size(8, 8)
+    asked, chosen = {}, {}
+    for q in fields:
+        if q["kind"] == "yes_no":
+            field = ef.DropDown()
+            for t in (logic.NOT_ANSWERED,) + logic.yes_no_words(q["key"]):
+                field.Items.Add(t)
+            field.SelectedIndex = logic.row_choice(q["value"])
+        else:                                  # a count: typed, blank when not answered (never 0)
+            field = ef.TextBox()
+            field.Width = 60
+            field.Text = "" if q["value"] is None else str(q["value"])
+        asked[q["key"]] = (q["kind"], field)
+        layout.AddRow(row(label(q["label"], size=12, width=logic.QUESTION_WIDTH), field))
+    note = label(logic.FOLLOW_UP_HELP, size=11, width=logic.QUESTION_WIDTH + 80)
+    layout.AddRow(row(note))
+
+    def answers():
+        return {k: logic.row_choice_text(f.SelectedIndex) if kind == "yes_no" else f.Text
+                for k, (kind, f) in asked.items()}
+
+    def ok():
+        got = answers()
+        problem = check(got)
+        if problem:                            # not an answer: said, and the dialog stays open (nothing saved)
+            note.Text = problem
+            note.TextColor = eto_status_color("needs_review")
+            return
+        chosen["answers"] = got
+        dialog.Close(True)
+
+    done = button("OK", ok)
+    cancel = button("Cancel", lambda: dialog.Close(False))
+    layout.AddRow(row(cancel, done))
+    dialog.Content = layout
+    dialog.DefaultButton = done
+    dialog.AbortButton = cancel
+    dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
+    return chosen.get("answers")
 
 
 # ---- the viewport (F, G) -------------------------------------------------------------------------------------

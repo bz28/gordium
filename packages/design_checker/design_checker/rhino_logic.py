@@ -296,12 +296,6 @@ INTERIOR_FACTS = ("sleeping_rooms", "parking_spaces")    # inside the building (
 BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS)   # what the box can ask
 
 
-def answered_in_box(needs):
-    """Whether a row's missing facts are all ones the box asks (its button then opens the box, Edit site…, to answer
-    them there: Ben, 2026-10-25, "a link to answer in the box, not a pop-up")."""
-    return bool(needs) and all(k in BOX_ASKS for k in needs)
-
-
 # What a use itself says about a fact, from the City's own definitions, so it is never asked (Ben, 2026-10-25):
 # §325-3 "DWELLING, ONE-FAMILY — A dwelling unit…" (chapter p.7) and "DWELLING, TWO-FAMILY — A building containing two
 # dwelling units…" (p.9). Exactly these uses: a semi-detached or attached one-family dwelling is one unit of a
@@ -471,15 +465,108 @@ def enter_words(needs):
 
 
 def needs_reason(needs):
-    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show". Facts the start
-    box asks (answered_in_box) say where to answer them (Ben, 2026-10-25: in the box, not a pop-up): "Tell Gordium
-    the dwelling units (Edit site…): the model doesn't show them"."""
+    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show" (its button,
+    enter_words, asks exactly those in a small dialog: row_fields)."""
     if not needs:
         return None
-    if answered_in_box(needs):
-        return "Tell Gordium the " + _and([STATED_FACTS[k][2] for k in needs]) + " (Edit site…): the model doesn't " \
-            "show them"
     return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show"
+
+
+# ---- a row's own dialog (coordinator, 2026-10-28, agreed with Ben): the row's "Enter …" button asks only the
+# stated facts that row waits for (its `needs`), in a small modal dialog; OK saves exactly those, each "entered by
+# you" with the day, as one Undo step, and checks again; Cancel, Esc or closing it changes nothing. It never touches
+# the address, the lookup, the district, the use, the lot, the street side or any other fact: those stay in the
+# start box (Edit site…), whose follow-up questions read the same facts, so an answer given here shows there.
+
+SITE_HINT = "Edit site…"            # a row whose missing fact comes from the site (present.py's hint for it)
+SITE_ASKS = ("Corner lot?",)        # the start box's own question a measuring's reason names (stops.py)
+
+
+def row_fields(needs, facts):
+    """The dialog's questions for a row waiting on `needs`, in the row's order: each {"key", "label", "kind"
+    (count / yes_no), "value" (as saved, or None)}. Only stated facts (STATED_FACTS): never a site fact."""
+    return [{"key": k, "label": STATED_FACTS[k][0], "kind": STATED_FACTS[k][1], "value": (facts or {}).get(k)}
+            for k in needs or [] if k in STATED_FACTS]
+
+
+def row_choice(value):
+    """A yes / no question's dropdown index for a saved value: Not answered (0), the no answer (1), the yes (2)."""
+    return {None: 0, False: 1, True: 2}[value]
+
+
+def row_choice_text(index):
+    """A yes / no dropdown's pick as parse_answer reads it: Not answered is blank (never no)."""
+    return {1: "no", 2: "yes"}.get(index, "")
+
+
+def row_answers_applied(facts, needs, answers):
+    """The facts after OK in a row's dialog: each key in `needs` set from its answer (`answers`: key -> the text
+    typed, or "yes" / "no" / "" from a dropdown: row_choice_text); a blank (or missing) answer leaves that fact unset,
+    so its rules need review (never 0 or no). Every other key is exactly as it was. Any entry that isn't an answer
+    raises ValueError with words for the dialog, and nothing changes."""
+    out = dict(facts or {})
+    bad = []
+    for k in [k for k in needs or [] if k in STATED_FACTS]:
+        try:
+            value = parse_answer(STATED_FACTS[k][1], (answers or {}).get(k))
+        except ValueError as e:
+            bad.append(f"{STATED_FACTS[k][0]}: {e}")
+            continue
+        if value is None:
+            out.pop(k, None)
+        else:
+            out[k] = value
+    if bad:
+        raise ValueError("Not saved. " + "; ".join(bad) + ". Correct it, or leave it blank (it then needs review).")
+    return out
+
+
+def row_problem(facts, needs, answers):
+    """What the row's dialog says at OK when an entry isn't an answer (row_answers_applied's words; it stays open
+    and nothing is saved), or None when OK may close it."""
+    try:
+        row_answers_applied(facts, needs, answers)
+    except ValueError as e:
+        return str(e)
+    return None
+
+
+def row_sources(sources, needs, facts, day):
+    """The saved sources after OK in a row's dialog: each fact in `needs` that is set, "entered by you" on `day`;
+    one left blank, none (an unset fact has no source). Every other source is exactly as it was."""
+    out = dict(sources or {})
+    for k in [k for k in needs or [] if k in STATED_FACTS]:
+        v = (facts or {}).get(k)
+        if v is None:
+            out.pop(k, None)
+        else:
+            out[k] = {"value": {True: "yes", False: "no"}.get(v, v) if isinstance(v, bool) else v,
+                      "source": ENTERED, "confirmed_by": "you", "date": day}
+    return out
+
+
+def site_row(item):
+    """Whether a row waits on a site fact (address, lot, district, street side, corner lot): only the start box
+    gives those, so the row keeps its Edit site… button."""
+    item = item or {}
+    return item.get("hint") == SITE_HINT or any(q in (item.get("reason") or "") for q in SITE_ASKS)
+
+
+def row_buttons(item):
+    """A row's buttons, as (words, action): its own dialog for the stated facts it waits on ("Enter dwelling
+    units…", action "enter"), then, where a site fact is missing too, Edit site… ("edit_site") as the second."""
+    out = []
+    if (item or {}).get("needs"):
+        out.append((enter_words(item["needs"]) + "…", "enter"))
+    if site_row(item):
+        out.append((SITE_HINT, "edit_site"))
+    return out
+
+
+def box_answers(options, zone, use, facts):
+    """What the start box's follow-up questions show as answered: read from the saved facts themselves (the box
+    keeps no copy of its own), so an answer given in a row's dialog shows in the box and Draw sets it again."""
+    return {k: (facts or {}).get(k) for k in follow_up_keys(options, zone, use)}
 
 
 def update_counts(facts, answers):

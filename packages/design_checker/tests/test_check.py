@@ -86,11 +86,11 @@ def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
     assert logic.enter_words(needs) == "Enter dwelling units, rooms let for profit and whether it is a conversion"
     assert [logic.STATED_FACTS[k][1] for k in needs] == ["count", "count", "yes_no"]
     assert logic.needs_of(names, {"dwelling_units": 4, "rooms_let_for_profit": 0, "conversion": False}) == []
-    # the panel asks exactly the row's own list (never a fixed pair), and saves through update_counts
+    # the panel asks exactly the row's own list (never a fixed pair), in its own dialog (test_row_dialog.py)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert 'a["enter"](i["needs"])' in ui and "Enter bedrooms and parking spaces…" not in ui
-    assert "for key in needs:" in rhino and "logic.update_counts(facts, answers)" in rhino
+    assert "logic.row_fields(needs, facts)" in rhino and "logic.row_answers_applied(facts, needs, answers)" in rhino
 
 
 def test_an_interior_rule_that_fails_is_never_hidden(facts):
