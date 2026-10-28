@@ -1777,12 +1777,13 @@ def _one_pick(doc, what, facts, saved_ui, session):
     elif what == "lookup_done":
         facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
     elif what == "use_saved":                  # offline: the lookup saved on this computer, marked with its date
+        offered_for = saved_ui.pop("_saved_for", None)
         answer = logic.guard(logic.use_saved, "use the saved lookup")(
-            saved_ui.pop("_saved_answer", None), saved_ui.pop("_saved_for", None), facts.get("address"))
-        if answer:                             # (the address retyped since: the offer is dropped, nothing shown)
+            saved_ui.pop("_saved_answer", None), offered_for, facts.get("address"))
+        if answer:
             facts, saved_ui = _show_answer(doc, answer, facts, saved_ui)
-        else:
-            saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, saved_offer=None)
+        else:                                  # the address retyped since: the offer dropped, and said (round 6)
+            saved_ui["_lookup"] = logic.saved_refused(saved_ui.get("_lookup"), offered_for, facts.get("address"))
     else:                                      # the pick's outcome only; rhino_logic.pick_effect decides the rest
         facts, saved_ui = logic.pick_effect(what, _pick_outcome(doc, what, facts, saved_ui, session), facts, saved_ui)
     _highlight(doc, facts)
@@ -2065,7 +2066,7 @@ def _lookup_done(doc, facts, saved_ui, session):
     saved_ui.pop("_saved_for", None)
     if offer:                                   # offline: the box offers the lookup saved on this computer
         saved_ui = dict(saved_ui, _saved_answer=offer, _saved_for=asked)
-        saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, saved_offer=offer.get("checked"))
+        saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, saved_offer=offer.get("checked"), saved_for=asked)
     return facts, saved_ui
 
 

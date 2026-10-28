@@ -1089,9 +1089,11 @@ def test_the_saved_lookup_is_marked_with_its_date_and_the_district_is_picked_aga
     # offline: the box says so and offers it (the Address row's button)
     facts, saved, _ = logic.preview_lookup({"status": "offline", "query": "106 Ithaca Rd"}, {"address": "106 Ithaca Rd"},
                                            logic.box_opened({}, {}), ZONES)
-    saved["_lookup"] = dict(saved["_lookup"], saved_offer=date)
+    saved["_lookup"] = dict(saved["_lookup"], saved_offer=date, saved_for="106 Ithaca Rd")
     rows = {r["key"]: r for r in logic.box_rows({"address": "106 Ithaca Rd", "lookup": saved["_lookup"]})}
     assert ("use_saved", "Use the lookup saved on " + date, True) in rows["address"]["actions"]
+    retyped = {r["key"]: r for r in logic.box_rows({"address": "96 Ithaca Rd", "lookup": saved["_lookup"]})}
+    assert [a for a, _, _ in retyped["address"]["actions"]] == ["lookup"]     # round 6: no button that does nothing
     # used: shown like a lookup, every label and the line marked with the date; no district suggested
     facts, saved, ring = logic.preview_lookup(logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Rd"), facts, saved,
                                               ZONES)
@@ -1112,7 +1114,7 @@ def test_the_plugin_saves_found_lookups_and_offers_the_saved_one_only_when_offli
     from rule_format.rulebook import REPO
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     done = src[src.index("def _lookup_done("):src.index("def _saved_lookups_path(")]
-    assert "_saved_lookup, " in done and "saved_offer=offer.get(\"checked\")" in done
+    assert "_saved_lookup, " in done and "saved_offer=offer.get(\"checked\"), saved_for=asked" in done
     saved = src[src.index("def _saved_lookup("):src.index("def _show_answer(")]
     assert "logic.save_lookup(store, answer, asked)" in saved and "logic.saved_offer(answer, store, asked)" in saved
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
@@ -1222,3 +1224,25 @@ def test_round_5_no_district_is_guessed_for_a_file_with_no_site_in_edit_site_eit
     edit = src[src.index("def edit_facts("):src.index("\n\n\n", src.index("def edit_facts("))]
     assert "logic.no_guessed_district(" in edit
     assert "logic.no_guessed_district({}, suggested_facts(" in src[src.index("def gordium_start("):]
+
+
+def test_round_6_a_saved_lookups_front_line_keeps_its_source_and_date():
+    """The saved copy keeps the street line but not the street side's value (used live): the front line row lost
+    its source, and its "saved on" date."""
+    found = _found_106()
+    copy = logic.save_lookup({}, found, "106 Ithaca Rd")[logic.lookup_key("106 Ithaca Rd")]
+    facts, saved = logic.lookup_choices(logic.use_saved(copy, "106 Ithaca Rd", "106 Ithaca Rd"), {}, {}, ZONES)
+    assert copy["writes"]["street_line"]                                 # the line is kept (and drawn at Draw)
+    assert saved.get("street_source", "").startswith(logic.SUGGESTED + " · ")
+    assert saved["street_source"].endswith(" · saved on " + copy["checked"])
+
+
+def test_round_6_a_stale_use_saved_button_says_why_it_did_nothing():
+    look = logic.saved_refused({"status": "offline", "saved_offer": "2026-10-20"}, "106 Ithaca Rd", "96 Ithaca Rd")
+    assert look["saved_offer"] is None
+    assert look["says"] == "The saved lookup is 106 Ithaca Rd's, not 96 Ithaca Rd's: press Look up to find 96 Ithaca Rd."
+    rows = {r["key"]: r for r in logic.box_rows({"address": "96 Ithaca Rd", "lookup": look})}
+    assert [a for a, _, _ in rows["address"]["actions"]] == ["lookup"]
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'logic.saved_refused(saved_ui.get("_lookup"), offered_for, facts.get("address"))' in src

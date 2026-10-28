@@ -2072,7 +2072,9 @@ def box_rows(state, flat=None):
         {"key": "address", "label": "Address", "text": state.get("address") or "",
          "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))]
          + ([("use_saved", USE_SAVED.format(date=look["saved_offer"]), True)]
-            if look.get("saved_offer") and not look.get("looking") else []),
+            if look.get("saved_offer") and not look.get("looking")
+            and same_site_address(state.get("address") or "", look.get("saved_for") or "") else []),
+         # (an address retyped since the offer: no button, as pressing it would do nothing: round 6)
          "tick": None, "matches": look.get("matches") or [],
          "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
         {"key": "zone", "label": "Zoning district", "text": zone_row_text(state),
@@ -2330,7 +2332,9 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     else:                                        # the replaced lot's street name goes with its street lines (the
         saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street), and so
         saved_ui.pop("_street_name", None)       # does its source: the street side's own, or none (headless check)
-        if side and draws_line:
+        # (a saved lookup keeps the line, not the street side's value, used live: its source still says where the
+        # line came from and when it was saved: start-flow round 6)
+        if (side or payload.get("saved_on")) and draws_line:
             saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
         else:
             saved_ui.pop("street_source", None)
@@ -3358,6 +3362,7 @@ USE_SAVED = "Use the lookup saved on {date}"
 SAVED_SAYS = ("The map services didn't answer. Shown: the lookup of {address} saved on {date} (the lot and its street "
               "line only: pick the district again).")
 SAVED_ON = " · saved on {date}"
+SAVED_NOT_THIS = "The saved lookup is {saved_for}'s, not {address}'s: press Look up to find {address}."
 USED_LIVE = "(used live, not stored)"                     # site_lookup.lookup.USED_LIVE: a value never stored
 
 
@@ -3385,7 +3390,8 @@ def storable_lookup(answer):
         return None
     return {"status": "found", "query": answer.get("query"), "message": "", "asks": [], "matches": [],
             "facts": facts, "details": {k: v for k, v in (snap.get("details") or {}).items() if k in facts},
-            "labels": {k: v for k, v in (answer.get("labels") or {}).items() if k in facts},
+            "labels": {k: v for k, v in (answer.get("labels") or {}).items()     # (the service names only; the
+                       if k in facts or (k == "street_side" and w.get("street_line"))},   # street line's, with it)
             "kept_reasons": {}, "street_storable": bool(answer.get("street_storable")),
             "writes": {"lot_ring": w.get("lot_ring"), "guide_ring": None, "street_line": w.get("street_line"),
                        "spots": list(w.get("spots") or []), "frame": w.get("frame"), "snapshot": snap},
@@ -3430,6 +3436,13 @@ def use_saved(offer, offered_for, typed):
     if not offer or not same_site_address(typed or "", offered_for or ""):
         return None
     return as_saved(offer)
+
+
+def saved_refused(look, offered_for, typed):
+    """The lookup line once "Use the lookup saved on …" was pressed for an address retyped since (the button was
+    still on screen: the box's rows aren't rebuilt while typing): the offer gone, and why."""
+    return dict(look or {}, saved_offer=None,
+                says=SAVED_NOT_THIS.format(saved_for=offered_for or "another address", address=typed or "the address"))
 
 
 def as_saved(copy):
