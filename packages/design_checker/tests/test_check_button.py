@@ -74,7 +74,7 @@ def test_the_plugin_checks_by_itself_only_when_asked_and_says_press_check_otherw
     check = body(RHINO, "def check_now(", "\ndef ")
     assert "run_check(doc, report=False)" in check
     run = body(RHINO, "def run_check(", "\ndef _toast(")
-    assert 'ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))' in run
+    assert "_sync_ticks(doc)" in run and "ui.set_auto_tick(p, _auto(doc))" in body(RHINO, "def _sync_ticks(", "\ndef ")
     confirm = body(RHINO, "def confirm(", "\ndef _confirm(")
     assert 'logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None,' in confirm
     assert "failed=failed)" in confirm and confirm.index("failed = True") < confirm.index("result = _confirm(")
@@ -103,7 +103,7 @@ def test_a_document_come_to_the_front_is_checked_once_whatever_the_tick():
     assert logic.should_check_front(False, False, False) is False
     new = body(RHINO, "def _new_document(", "\ndef ")
     assert 'STATE["check_front"] = True' in new and 'STATE["dirty"] = None' in new
-    assert "ui.set_auto_tick(p, _auto(Rhino.RhinoDoc.ActiveDoc))" in new
+    assert "_sync_ticks(Rhino.RhinoDoc.ActiveDoc)" in new and new.index("_sync_ticks(") < new.index("ui.show(")
     idle = body(RHINO, "def _idle(", "\ndef ")
     assert 'logic.should_check_front(STATE.get("check_front"), STATE.get("running"), _box_open())' in idle
 
@@ -124,7 +124,7 @@ def test_gordium_start_says_who_checks_the_building_they_draw():
 def test_every_new_or_refilled_panel_shows_the_documents_tick():
     """P3: a rebuilt panel and the check-error path left the tick off for a document that has it on."""
     assert body(RHINO, "def panel(", "\ndef ").count("ui.set_auto_tick(p, _auto(doc))") == 2
-    assert 'ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))' in body(RHINO, "def run_check(", "\ndef _toast(")
+    assert "_sync_ticks(doc)" in body(RHINO, "def run_check(", "\ndef _toast(")
 
 
 # ---- review round 2 -------------------------------------------------------------------------------------------

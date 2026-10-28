@@ -13,6 +13,14 @@ so a draft that passes every code check can be used; people read the rules throu
 | The permitted uses (chart page 2) | `chart-p2-primary_uses` | Plain code, from the marks •, SP, - (free) |
 | The accessory uses (chart page 2) | `chart-p2-accessory_uses` | Not drafted yet: recorded with the reason (no measure of accessory uses yet) |
 
+**Related sections.** Each unit also gets, as background, the requirement sections (labeled rule or flag) that
+use the same defined words, from the term index (`4_term_definitions/term_index.yaml`): the yard chart unit reads
+§325-18B, the eaves rule. They are the most relevant first (most uses of those words per word of text), at most
+12,000 characters, and any left out are named. The AI may not quote them or draft from them (each sets its own
+rules, drafted from its own unit); if the unit's rule depends on one, it says so in an open question. A question a
+draft raises gets a research entry saying it is pending (nothing searched yet), so it passes the show-your-work
+check honestly.
+
 ## Chart numbers are never typed
 
 The AI writes a *template*: a rule whose chart numbers are slots.

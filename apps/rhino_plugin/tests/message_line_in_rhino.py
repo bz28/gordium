@@ -17,6 +17,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_message_line") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -47,7 +48,7 @@ try:
     g = fresh_module()
     doc = docs.open("Large Objects - Feet")
     g.STATE["on_confirm"] = lambda *a: None
-    g.gordium_check()                                    # the sample lot and its starting house
+    look_up_106(g, g.gordium_check)                                    # the sample lot and its starting house
     parts = g.STATE.get("panel_parts") or {}
     g.open_report()
     log["after_report"] = parts["message"].Text

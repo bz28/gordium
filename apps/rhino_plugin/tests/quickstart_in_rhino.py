@@ -22,6 +22,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_quickstart") + "/"
 FRAMES = S + "frames/"
@@ -100,7 +101,7 @@ try:
     doc = docs.open("Large Objects - Feet")
     opened.append(doc)
     g.STATE["on_confirm"] = lambda *a: None
-    g.gordium_check()                                         # GordiumStart's flow on an empty file (flat ground)
+    look_up_106(g, g.gordium_check)                                         # GordiumStart's flow on an empty file (flat ground)
     ft = 1.0 / g._scale(doc)
     ring = g.STATE["start"]["floors"][0]["outline"]
     log["house"] = ring
@@ -231,7 +232,7 @@ try:
     doc2 = docs.open("Small Objects - Millimeters")
     opened.append(doc2)
     g.STATE["on_confirm"] = lambda *a: None
-    g.gordium_check()
+    look_up_106(g, g.gordium_check)
     rows_mm = items()
     same = all(rows_mm.get(name, {}).get(f) == want for name, fields in tests[0]["got"].items()
                for f, want in fields.items())

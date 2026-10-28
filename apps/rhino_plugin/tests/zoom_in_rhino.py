@@ -17,6 +17,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_zoom") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -54,7 +55,7 @@ try:
     doc.Objects.AddBrep(rg.Box(rg.Plane(far, rg.Vector3d.ZAxis), rg.Interval(0, size), rg.Interval(0, size),
                                rg.Interval(0, size)).ToBrep())
     g.STATE["on_confirm"] = lambda *a: None
-    g.gordium_check()                                            # empty but for the far box: the start flow
+    look_up_106(g, g.gordium_check)                                            # empty but for the far box: the start flow
     facts = g.current_facts(doc)
     lot = g._find(doc, facts.get("lot_id") or "")
     corners = [c for c in lot.Geometry.GetBoundingBox(True).GetCorners()][:4]
