@@ -33,6 +33,7 @@ import traceback
 
 import Eto.Forms as ef
 import scriptcontext as sc
+import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
@@ -70,16 +71,23 @@ def fresh_module():
     return gordium_rhino
 
 
-def walk(c):
-    """Every control under `c`, nested layouts too."""
+def walk(c, seen=None):
+    """Every control under `c`, nested layouts too, each once (Eto's Children already lists a container's nested
+    controls, so walking each child's again met a nested layout's controls once per level: three times in the demo 7
+    Rhino run, 2026-10-28)."""
+    seen = set() if seen is None else seen
+    key = System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(c)   # the .NET object (a new wrapper each read)
+    if key in seen:
+        return
+    seen.add(key)
     yield c
     kids = getattr(c, "Children", None)
     if kids is not None:
         for k in list(kids):
-            yield from walk(k)
+            yield from walk(k, seen)
     content = getattr(c, "Content", None)
     if content is not None and content is not c:
-        yield from walk(content)
+        yield from walk(content, seen)
 
 
 def drop_items(d):
@@ -94,11 +102,15 @@ def drop_with(found, item):
     return next((c for c in found if isinstance(c, ef.DropDown) and item in drop_items(c)), None)
 
 
-def open_box(g, doc, options, facts, act=None, mode="start"):
+def open_box(g, doc, options, facts, act=None, mode="start", ready=False):
     """The real start box on these facts; `act(dialog, found, seen)` runs once it is shown (the box then closes by
-    itself unless `act` closed it). Returns (what the box returned, what was seen, the state the box kept)."""
+    itself unless `act` closed it). Returns (what the box returned, what was seen, the state the box kept). `ready`:
+    the district confirmed and a lot there, as the architect has them before Draw (Draw is off until then: #32, #49).
+    It stands in for them: 6a / 6b test which answers Draw keeps, not Draw's gating (CI: test_lookup_box.py)."""
     seen = {}
     state = g._box_state(doc, dict(facts, jurisdiction=g.JURISDICTION), options, {}, mode)
+    if ready:
+        state.update(district_confirmed=True, lot_missing=False)
 
     def shown(dialog):
         found = list(walk(dialog.Content))
@@ -135,7 +147,9 @@ try:
              "Functional family unit", "Home business", "Business floor area (sq ft)", "Distance to it (ft)"]
     _, seen, _ = open_box(g, doc, options, r1b)
     log["1"] = seen
-    answer_drops = [(d, p) for d, p in zip(seen["drops"], seen["picked"]) if d and d[0] == not_answered]
+    corner_words = g.logic.CORNER_CHOICES[1:]                   # Corner lot?'s own choices (it starts blank too)
+    answer_drops = [(d, p) for d, p in zip(seen["drops"], seen["picked"])   # About's (not Corner lot?)
+                    if d and d[0] == not_answered and d[1:] != corner_words]
     claim("1 'About this project' with Quick answers and exactly the two envelope questions, all on Not answered",
           seen["labels"].count("About this project") == 1 and "Quick answers" in seen["labels"]
           and all(t in seen["labels"] for t in envelope_qs) and not any(t in seen["labels"] for t in later)
@@ -177,12 +191,12 @@ try:
         d.SelectedIndex = drop_items(d).index("No stream within 20 ft")
         click_draw(found)
 
-    what, _, state = open_box(g, doc, options, r1b, stream_no)
+    what, _, state = open_box(g, doc, options, r1b, stream_no, ready=True)
     got = {k: v for k, v in (state.get("answers") or {}).items() if k in ("stream_near_lot", "south_hill_overlay")}
     log["6a"] = {"returned": what, "answers": got}
     claim("6a Draw with the stream answered: it is kept, the other None",
           what == "draw" and got.get("stream_near_lot") is False and got.get("south_hill_overlay") is None, log["6a"])
-    what, _, state = open_box(g, doc, options, r1b, lambda dialog, found, seen: click_draw(found))
+    what, _, state = open_box(g, doc, options, r1b, lambda dialog, found, seen: click_draw(found), ready=True)
     facts, answered = g.logic.answers_applied({}, state.get("answers"), "R-1b", "one_family_detached", options)
     log["6b"] = {"returned": what, "facts": facts}
     claim("6b Draw with none answered: nothing is sent to the checker for them (their rows say needs review)",

@@ -181,21 +181,20 @@ def width(c):
 
 
 def box_width(layout, nested=False):
-    """Eto's DynamicLayout: each column as wide as its widest cell; the box adds its padding on both sides. A row of one
-    cell spans every column (it needs the box to be at least that wide, and widens no column). A layout inside a cell
-    has the padding and spacing it sets itself."""
-    columns, spanning = {}, 0
+    """Eto's DynamicLayout: each column as wide as its widest cell; the box adds its padding on both sides. A row of fewer
+    cells fills the first columns: a one-cell row sits in the first column and widens it (it is NOT spread across
+    the columns: the demo 7 Rhino run, 2026-10-28, measured #45's "About this project" grid, added as a one-cell row,
+    widening the first column to a 1,162 pt box this model had passed). A layout inside a cell has the padding and
+    spacing it sets itself."""
+    columns = {}
     for cells in layout.rows:
-        if len(cells) == 1:
-            spanning = max(spanning, width(cells[0]))
-            continue
         for i, cell in enumerate(cells):
             columns[i] = max(columns.get(i, 0), width(cell))
     pad = layout.__dict__.get("Padding")
     pad = pad.args[0] if pad is not None and pad.args else PADDING
     spacing = layout.__dict__.get("Spacing")
     spacing = spacing.args[0] if spacing is not None and spacing.args else SPACING
-    return max(2 * pad + sum(columns.values()) + spacing * max(len(columns) - 1, 0), 2 * pad + spanning), layout
+    return 2 * pad + sum(columns.values()) + spacing * max(len(columns) - 1, 0), layout
 
 
 def texts(layout):
@@ -389,13 +388,31 @@ def test_the_box_fits_a_laptop_screen_in_height_when_every_question_is_open(ui):
     assert tallest[0] <= LAPTOP_HEIGHT_PX, tallest
 
 
-def test_the_old_one_row_per_question_box_would_not_have_fit_the_height(ui):
-    """The height model counts: the questions one to a row, each at the old width, would be taller than the section."""
+def test_the_height_model_counts_each_question_row(ui):
+    """The height model counts: "About this project" holds its questions one to a row in the box's second column
+    (since the demo 7 Rhino run, 2026-10-28: two to a row did not fit the second column), so the section is at least a
+    control's height a question (the laptop-height bound above can't pass by ignoring the section's rows)."""
     options = check.options(CITY)
     gate = {"stream_near_lot": True}
     questions = logic.follow_up_rows(options, "R-2c", "two_family", gate)
+    assert len(questions) >= 2
     _, layout = laid_out(ui, _state("R-2c", "two_family", questions), options)
-    section = max(box_height(c) for cells in layout.rows for c in cells
-                  if type(c).__name__ in ("_DynamicLayout", "DynamicLayout"))
-    one_per_row = len(questions) * (CONTROL_PX + ROW_PAD)
-    assert section < one_per_row, (section, one_per_row)
+    about = [cells for cells in layout.rows if any(type(c).__name__ in ("_DynamicLayout", "DynamicLayout")
+                                                    for c in cells)]
+    assert about and type(about[0][0]).__name__ == "Label", "the section's title sits in the first column, beside it"
+    section = about[0][1]
+    quick = 1 if logic.quick_answers([q["key"] for q in questions]) else 0
+    assert len(section.rows) == len(questions) + quick and all(len(r) == 2 for r in section.rows), section.rows
+    assert box_height(section) >= len(questions) * CONTROL_PX, (box_height(section), len(questions))
+
+
+def test_a_one_cell_row_widens_the_first_column(ui):
+    """Eto on the Mac: a one-cell row sits in the first column and widens it (the demo 7 Rhino run, 2026-10-28: #45's
+    About grid, a one-cell row, made a 1,162 pt box). The model must count it, or a wide one-cell row passes."""
+    gordium_ui, _ = ui
+    wide, narrow = _DynamicLayout(), _DynamicLayout()
+    cell = gordium_ui.ef.Label()
+    cell.Text = "x" * 200                                         # ~1,200 px of text, no wrap width
+    wide.AddRow(cell)
+    narrow.AddRow(gordium_ui.ef.Label(), gordium_ui.ef.Label())
+    assert box_width(wide)[0] >= width(cell) > box_width(narrow)[0]
