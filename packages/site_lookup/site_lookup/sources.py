@@ -98,13 +98,14 @@ class Fetcher:
 
     def city_parcels_at(self, p) -> list[dict]:
         body = self._ask("city_parcels", {**self._point_query(p),
-                                          "outFields": "SWISPRINTK,SWIS,MUNI,LOCADDR,SecZones,HISTPROP,ILPCREVIEW"})
+                                          "outFields": "SWISPRINTK,SWIS,MUNI,LOCADDR,SecZones,OverlayZone,HISTPROP,ILPCREVIEW"})
         out = []
         for f in body.get("features", []):
             a = f["attributes"]
             out.append({"id": a.get("SWISPRINTK"), "swis": str(a.get("SWIS") or ""), "muni": a.get("MUNI") or "",
                         "address": a.get("LOCADDR") or "", "rings": [g.open_ring(r) for r in f["geometry"]["rings"]],
-                        "secondary_zones": a.get("SecZones"), "historic_property": a.get("HISTPROP"),
+                        "secondary_zones": a.get("SecZones"), "overlay_zones": a.get("OverlayZone"),
+                        "historic_property": a.get("HISTPROP"),
                         "landmarks_review": a.get("ILPCREVIEW"), "source": "city_parcels"})
         return out
 

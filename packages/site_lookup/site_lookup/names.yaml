@@ -14,6 +14,16 @@ districts:
       why: >-
         §325-4 lists the district as "R-U Residential" (Chapter 325, p.22 line 20), and the City's zoning map writes
         R-U (614 University Ave, looked up 2026-10-27); the zoning chart's column, and Gordium's rulebook, write RU.
+  # Overlays the City's zoning map draws on top of the base districts. One found on the lot (2%+ of it) goes to the
+  # overlays row, which needs review (overlays aren't checked in this release); it is never taken for the district.
+  overlays:
+    SHOD: >-
+      South Hill Overlay District: §325-4 (Chapter 325, p.23 line 12); its restrictions, §325-8E(1) (p.29 lines
+      30-36), bar a second primary structure on R-1 and R-2 parcels in it
+    SLAUOZ: >-
+      Mandatory Street Level Active Use Overlay Zone (Chapter 325, p.29 lines 8-13)
+    Adult Us: >-
+      Adult Use Overlay Zone: §325-29.1D(1) (Chapter 325, p.76 line 8)
 
 roads:
   # The City's road layer (NAME) → the street as an address on it is written, before Gordium's usual
