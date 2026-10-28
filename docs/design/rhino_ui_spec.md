@@ -177,6 +177,8 @@ E1 [code] **Contents.** Each detail shows:
 - a "to comply" hint where one exists;
 - the precision sentence (C9).
 
+Plain words come first (2026-10-28, `rhino_logic.detail_parts`): the calculation's result ("Required: 24'-1 7/8" to 32'-10 1/8""), the law's words and the footnotes, the citation and its links are in view; the formula with its values, the measured scope, the chart's own cell ("R-1B: 25%/ 50 ft [fn16]") and the precision sentence sit under **How it's worked out**, closed until the architect opens it. Nothing is dropped.
+
 E2 [code] **Citation format,** as an examiner writes it: "§325-8, District Regulations Chart, R-1b, Rear yard column, note 16" and "§325-8A(14)". The PDF page appears only as the link target. One format on every surface, the report included.
 
 E3 [code] **Link targets.** Each cited section has its own link target; no two sections share a URL (a test enforces this). Every link resolves to a real document, never a placeholder.

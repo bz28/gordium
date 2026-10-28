@@ -668,9 +668,9 @@ def show_detail(parts):
     words = logic.hint_text(i.get("hint"), [b.Text for b in buttons])
     if words:
         d.AddRow(_wide(words, size=12))
-    for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
-        if text:
-            d.AddRow(_wide(text, size=12))
+    split = logic.detail_parts(det)         # plain words in view; the formula and the chart's shorthand behind a toggle
+    for text in split["notes"]:
+        d.AddRow(_wide(text, size=12))
     for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by
         d.AddRow(_wide(t["term"], bold=True, size=12))
         d.AddRow(_wide("“" + t["text"] + "”", size=11))
@@ -682,11 +682,8 @@ def show_detail(parts):
         d.AddRow(_section(det["diagram"]))
     if det.get("zoom_note"):
         d.AddRow(_wide(det["zoom_note"], size=11))
-    for q in det.get("quotes") or []:
-        if q.get("text"):
-            d.AddRow(_wide("“" + q["text"] + "”", size=12))
-            if q.get("where"):
-                d.AddRow(_wide(q["where"], size=11))
+    for q in split["quotes"]:
+        _quote_rows(d, q)
     if det.get("citation"):
         d.AddRow(_wide(det["citation"], size=11))
     for c in det.get("cited") or []:
@@ -697,10 +694,31 @@ def show_detail(parts):
         url = c["link"]
         link.Click += logic.guard(lambda s, e, u=url: Rhino.UI.Dialogs.ShowMessage(u, "Gordium") if not _open(u) else None, "open the link")
         d.AddRow(link)
-    if det.get("precision"):
-        d.AddRow(_wide(det["precision"], size=11))
+    if split["worked"] or split["worked_quotes"]:       # How it's worked out: collapsed until opened, then kept open
+        toggle = ef.LinkButton()
+        toggle.Text = ("▾ " if parts.get("worked_out") else "▸ ") + logic.WORKED_OUT
+        toggle.Click += logic.guard(lambda s, e: _toggle_worked_out(parts), "show how it's worked out")
+        d.AddRow(toggle)
+        if parts.get("worked_out"):
+            for text in split["worked"]:
+                d.AddRow(_wide(text, size=11))
+            for q in split["worked_quotes"]:              # the chart's own cell, with where it is from
+                _quote_rows(d, q)
     d.Add(None)
     d.Create()
+
+
+def _quote_rows(d, q):
+    """One quote of the code's words, and where it is from."""
+    d.AddRow(_wide("“" + q["text"] + "”", size=12))
+    if q.get("where"):
+        d.AddRow(_wide(q["where"], size=11))
+
+
+def _toggle_worked_out(parts):
+    """Open or close How it's worked out (the panel remembers it while it is open, for every row)."""
+    parts["worked_out"] = not parts.get("worked_out")
+    show_detail(parts)
 
 
 def _section(dg):

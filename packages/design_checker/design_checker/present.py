@@ -1229,8 +1229,12 @@ def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict 
         if cell is not None and str(cell.get("value") or "").strip():   # a heading row has no value: its own words
             section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
             row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])
-            return {"text": f"{section} · {row} · {cell['column']}: {cell['value']}", "where": cite(source)}
-    return {"text": text or _cell_words(source), "where": cite(source)}
+            return {"text": f"{section} · {row} · {cell['column']}: {cell['value']}", "where": cite(source),
+                    "chart": True}
+    # "chart": the chart's own shorthand ("R-1B: 25%/ 50 ft [fn16]"), which the panel keeps under "How it's worked
+    # out" (its footnotes, "(16) But not less than 20 ft.", and the law's words are plain and stay in view)
+    return {"text": text or _cell_words(source), "where": cite(source),
+            "chart": _is_chart(source, documents) and not re.match(r"^\(\d+\)", text)}
 
 
 def _cell_words(source: dict) -> str:

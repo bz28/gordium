@@ -146,6 +146,32 @@ def newly_failing(before, view):
     return None
 
 
+WORKED_OUT = "How it's worked out"
+
+
+def detail_parts(det):
+    """The selected item's detail, split for the panel (the architect's review, 2026-10-28: the formula
+    "max(min(25% × lot depth —, 50), 20)", the measuring notes and the chart's shorthand "R-1B: 25%/ 50 ft [fn16]"
+    read as jargon). Plain words first, in view: the notes, the result of the working ("Required: 24'-1 7/8" to
+    32'-10 1/8"") and the law's own words. Behind WORKED_OUT, collapsed until opened: the formula with the values
+    written in, what was measured, the chart's own cell and the precision rule. Nothing is dropped: every quote,
+    with where it is from, is in one or the other, and the citation and its links stay in view.
+      notes          texts shown in view (at the limit, the colours, the plain result)
+      quotes         the law's words and the chart's footnotes, in view
+      worked         texts behind the toggle (the whole working, what was measured, the precision)
+      worked_quotes  the chart's own cells, behind the toggle"""
+    det = det or {}
+    calc = det.get("calc") or ""
+    head, _, rest = calc.partition(": ")
+    working, equals, result = rest.partition(" = ")
+    plain = head + ": " + result if equals and head in ("Required", "Allowed") else calc
+    quotes = [q for q in det.get("quotes") or [] if q.get("text")]
+    return {"notes": [t for t in (det.get("at_limit"), det.get("colours"), plain) if t],
+            "quotes": [q for q in quotes if not q.get("chart")],
+            "worked": [t for t in (calc if plain != calc else None, det.get("scope"), det.get("precision")) if t],
+            "worked_quotes": [q for q in quotes if q.get("chart")]}
+
+
 def labels_on(ui_state):
     """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
     unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the

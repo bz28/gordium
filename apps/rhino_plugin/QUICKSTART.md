@@ -288,9 +288,9 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      neutral;
    - in Top view each yard is drawn as measured, marked ✓ ? or ✕.
 6. **Read the panel.** Click any row. The bottom half shows the city's exact words, the examiner-style citation
-   ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was
-   measured and worked out, and what to change ("To comply: move the building 0'-6" farther from that lot
-   line."). **Zoom to** (or a double-click) frames the item: yards in Top, height in a front elevation.
+   ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, and what to
+   change ("To comply: move the building 0'-6" farther from that lot line."). **How it's worked out** (closed at
+   first) opens the working: the formula with the values written in, what was measured, and the chart's own cell. **Zoom to** (or a double-click) frames the item: yards in Top, height in a front elevation.
 7. **Zoning report…** checks the model as it is now and writes the report: `<your model>_gordium_report.xlsx`,
    next to your model file, or in your **Documents** folder (`untitled_gordium_report.xlsx`) if the model isn't
    saved yet. It has the same results as the panel. The line above the buttons says "Report saved to …" with the

@@ -4,6 +4,7 @@ summary, which objects turn red, the failing distances, and the background JSON 
 import io
 import json
 import math
+import re
 
 import pytest
 
@@ -1734,7 +1735,7 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
     detail = ui[ui.index("def show_detail("):]
     # 2: reason, then the buttons, then the measuring notes; the hint as text only when there's no button
     assert detail.index('for text in (det.get("line"), i.get("reason")):') < detail.index("for b in buttons:") \
-        < detail.index('for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):')
+        < detail.index('for text in split["notes"]:')
     assert ("    words = logic.hint_text(i.get(\"hint\"), [b.Text for b in buttons])\n    if words:\n"
             "        d.AddRow(_wide(words, size=12))") in detail
     # never a button's words twice, nor "Add to check…" as dead text on a row a left-out solid made cautious (its
@@ -4259,3 +4260,47 @@ def test_a_recheck_brings_the_newly_failing_row_into_view(facts):
     # selected and scrolled to, its group opened BEFORE the list is built from parts["expanded"]
     assert body.index('parts["expanded"]["group:" + g["key"]] = True') < body.index("gi.Expanded = parts[")
     assert ".Focus()" not in ui                                       # never takes the keyboard from the viewport
+
+
+def test_the_detail_shows_plain_words_first_and_the_working_behind_a_toggle(facts):
+    """Architect's review (2026-10-28): the detail read "Required: max(min(25% × lot depth —, 50), 20) = …", the
+    measuring notes and the chart's shorthand "R-1B: 25%/ 50 ft [fn16]" before anything plain. Plain words first
+    (the result: "Required: 24'-1 7/8" to 32'-10 1/8""); the formula, what was measured, the chart's own cell and
+    the precision behind "How it's worked out", collapsed until opened. Nothing dropped: every quote is in one
+    part or the other, with where it is from, and the citation and its links stay in view (traceability)."""
+    from design_checker import rhino_logic as logic
+    det = {"calc": "Required: max(min(25% × lot depth —, 50), 20) = 24'-1 7/8\" to 32'-10 1/8\"",
+           "scope": "Measured: 1 group, 3 solids on Gordium::Massing · footprint 1,523 sf",
+           "precision": "Values are measured to 1/8 in.", "at_limit": None, "colours": None,
+           "quotes": [{"text": "Yard Dimensions · Rear · R-1B: 25%/ 50 ft [fn16]", "where": "§325-8", "chart": True},
+                      {"text": "(16) But not less than 20 ft.", "where": "§325-8, note 16", "chart": False},
+                      {"text": "", "where": "x"}]}
+    got = logic.detail_parts(det)
+    assert got["notes"] == ["Required: 24'-1 7/8\" to 32'-10 1/8\""]
+    assert got["worked"] == [det["calc"], det["scope"], det["precision"]]
+    assert [q["text"] for q in got["quotes"]] == ["(16) But not less than 20 ft."]
+    assert [q["text"] for q in got["worked_quotes"]] == ["Yard Dimensions · Rear · R-1B: 25%/ 50 ft [fn16]"]
+    plain = {"calc": "Required: 22'-6\", raised by the front yard's other way", "quotes": []}
+    assert logic.detail_parts(plain)["notes"] == [plain["calc"]] and logic.detail_parts(plain)["worked"] == []
+    area = logic.detail_parts({"calc": "Allowed: 25% × lot area 6,570 sf = 1,642 sf; footprint 1,523 sf"})
+    assert area["notes"] == ["Allowed: 1,642 sf; footprint 1,523 sf"] and area["worked"][0].startswith("Allowed: 25%")
+    # the real checker's items: every quote kept, the chart's cells (and only they) behind the toggle
+    behind = 0
+    for i in check(MODEL, facts)["view"]["items"]:
+        d = i["detail"]
+        parts = logic.detail_parts(d)
+        kept = parts["quotes"] + parts["worked_quotes"]
+        assert sorted(q["text"] for q in kept) == sorted(q["text"] for q in d.get("quotes") or [] if q.get("text"))
+        assert not any(re.search(r"\bR-\w+: ", q["text"]) for q in parts["quotes"]), i["name"]   # no chart cell
+        behind += len(parts["worked_quotes"])
+        if d.get("calc") and " = " in d["calc"]:
+            assert d["calc"] in parts["worked"] and not any("max(" in t or "min(" in t for t in parts["notes"])
+    assert behind >= 3                                                       # the chart's cells really are there
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    detail = ui[ui.index("def show_detail("):ui.index("def _section(")]
+    assert 'det.get("calc")' not in detail and 'det.get("scope")' not in detail     # only through detail_parts
+    assert 'det.get("quotes")' not in detail and 'det.get("precision")' not in detail
+    assert 'if parts.get("worked_out"):' in detail and "logic.WORKED_OUT" in detail   # collapsed until opened
+    assert detail.index('d.AddRow(_wide(det["citation"], size=11))') < detail.index("logic.WORKED_OUT")   # in view
+    assert detail.index('for c in det.get("cited") or []:') < detail.index("logic.WORKED_OUT")
+    assert '"worked_out"' not in ui[:ui.index("def show_detail(")]          # nobody opens it but the architect
