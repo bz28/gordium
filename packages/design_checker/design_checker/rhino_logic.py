@@ -2972,8 +2972,10 @@ def follow_up_sources(state, fact):
 
 def sources_kept(saved):
     """The saved sources Draw keeps before adding the box's own: never an earlier follow-up answer (a fact the box
-    asks), which Draw sets again or drops with its fact (fact_sources)."""
-    return {k: v for k, v in (saved or {}).items() if k not in BOX_ASKS}
+    asks), which Draw sets again or drops with its fact (fact_sources), nor a use detail's (DEFERRED_FACTS: a rooms
+    let for profit answered in the box before it became one would otherwise say "entered by you" after its fact is
+    gone; the panel's Enter flow sets no source)."""
+    return {k: v for k, v in (saved or {}).items() if k not in BOX_ASKS + DEFERRED_FACTS}
 
 
 def district_confirmed(mode, zone_fact, zone):

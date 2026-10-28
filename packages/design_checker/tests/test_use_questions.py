@@ -204,6 +204,8 @@ def test_the_box_rows_answers_and_their_source():
     saved = {"zone": {"value": "X"}, "dwelling_units": {"value": 5}, "conversion": {"value": "no"},
              "ground_marked": {"value": "1 object"}}
     assert logic.sources_kept(saved) == {"zone": {"value": "X"}, "ground_marked": {"value": "1 object"}}
+    # nor an old box answer for a fact that is now a use detail (rooms let for profit, #45 review)
+    assert logic.sources_kept({**saved, "rooms_let_for_profit": {"value": 2}}) == logic.sources_kept(saved)
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     drawn = rhino[rhino.index("def _drawn("):rhino.index("def hide_massing(")]
     assert "logic.sources_kept(fact_sources(doc))" in drawn

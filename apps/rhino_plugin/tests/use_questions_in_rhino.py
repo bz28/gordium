@@ -133,11 +133,13 @@ try:
 
     _, seen = open_box(g, doc, x, {"zone": "X", "use": "multiple_family"})
     log["3"] = seen
+    # rooms let for profit is a use detail (#45): asked later in the panel, never in the box
     asked = [t for t in seen["labels"] if t in [g.logic.about_label(k) for k in ("dwelling_units",
                                                                                  "rooms_let_for_profit",
                                                                                  "conversion")]]
-    claim("3 three questions after Use, each a one-click dropdown on Not answered, the conversion one in its own words",
-          len(asked) == 3 and [g.logic.NOT_ANSWERED, "New construction", "Conversion of an existing building"]
+    claim("3 two questions after Use (homes, new or converted; not the rooms let), each a one-click dropdown on Not "
+          "answered, the conversion one in its own words",
+          asked == [g.logic.about_label("dwelling_units"), g.logic.about_label("conversion")] and [g.logic.NOT_ANSWERED, "New construction", "Conversion of an existing building"]
           in seen["drops"] and "About this project" in seen["labels"], seen)
 
     def other_use(dialog, found, seen):
