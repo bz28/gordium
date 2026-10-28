@@ -47,7 +47,8 @@ def massing(doc):
     if index < 0:
         return {"layer": None, "objects": 0}
     layer = doc.Layers[index]
-    objs = list(doc.Objects.FindByLayer(layer) or [])
+    objs = [o for o in doc.Objects if o.Attributes.LayerIndex >= 0 and   # (its floors are on its sublayers)
+            doc.Layers[o.Attributes.LayerIndex].FullPath.startswith("Gordium::Massing")]
     box = Rhino.Geometry.BoundingBox.Empty
     for o in objs:
         box.Union(o.Geometry.GetBoundingBox(True))

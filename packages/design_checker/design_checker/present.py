@@ -1197,6 +1197,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             why = worst + said + "."
             if not (measured.get("stories") or {}).get("count_settles") and PICK_MAIN_WHY not in why:
                 hint = PICK_MAIN if (measured.get("stories") or {}).get("main_assumed") else hint
+        span_ft = None                   # a limit read two ways (the lot depth open), in feet: its range
         if node is not None and required == "—" and st in (REVIEW, FAILS):
             # the limit waits on an open measurement (the lot depth, on which lines are side or rear): show the
             # limit's range over its readings, and say once what it depends on (architect review P1-3)
@@ -1213,6 +1214,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             if got:
                 unit = (measured.get(node.left.id) or {}).get("unit") or ""
                 lo, hi = min(got), max(got)
+                span_ft = [lo, hi] if unit == "ft" else None
                 required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
                             f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
                 # the same limit under every reading: it depends on none of them (#20 review round 1)
@@ -1304,6 +1306,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
             "objects": (measured.get(node.left.id) or {}).get("objects", []) if node is not None else [],
             "points": (measured.get(node.left.id) or {}).get("points") if node is not None else None,
+            # the limit as drawn, in feet, for the plan's faint required line (a yard, the height); None otherwise
+            "limit_ft": (numbers[1] if node is not None and numbers[3] == "ft" and isinstance(numbers[1], (int, float))
+                         else None),
+            "limit_span_ft": span_ft,
             "detail": {
                 "line": line,
                 "quotes": quotes,
@@ -1539,6 +1545,8 @@ def _raise_yards(items, measured, values, facts):
                     continue
                 t["required"], t["margin"], t["hint"] = value_text(req, unit, sign, False), margin_text(margin, unit), None
                 t["_node"] = c                           # its Delta and colours are the raised minimum's
+                if unit == "ft":                         # the plan's faint required line too (review round 1, F1)
+                    t["limit_ft"] = req
                 t["_raised"] = (i["rule"], expr)         # (and its "To comply", confirmed against it: settle)
                 t["_expr"] = f"({t['_expr']}) and ({expr})" if t.get("_expr") else expr
                 if worst is not None:                    # the raised minimum fails at the tax-map worst case
@@ -1697,7 +1705,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "", "required": "", "margin": "",
                       "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
                       "needs": list(needs),               # exactly what its "Enter …" asks for
-                      "hint": rhino_logic.enter_words(needs), "reason": rhino_logic.needs_reason(needs),
+                      "hint": rhino_logic.answer_words(needs), "reason": rhino_logic.needs_reason(needs),
                       "detail": {"line": "", "quotes": [{"text": " ".join(str(s.get("quote", "")).split()),
                                                          "where": cite(s)} for s in rule.get("sources") or []],
                                  "citation": "", "links": [], "calc": None, "scope": "", "precision": "",
@@ -1781,7 +1789,8 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
 
 SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Front lot line (on the street)",
                 "corner_lot": "Corner lot", "ground_marked": "Marked as the ground", "starting_house": "Starting house",
-                "ground": "Ground"}
+                "ground": "Ground", "dwelling_units": "Dwelling units", "rooms_let_for_profit": "Rooms let for profit",
+                "conversion": "Conversion of an existing building"}
 
 
 def source_lines(sources: dict) -> list[str]:

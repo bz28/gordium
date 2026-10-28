@@ -18,7 +18,8 @@ REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_bu
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
         "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
-        "show_context", "_context_on", "check_now", "set_auto_check", "_auto", "_massing_hidden", "_sync_ticks"]
+        "show_context", "_context_on", "check_now", "set_auto_check", "_auto", "_massing_hidden", "_sync_ticks",
+        "switch_side_yards", "_save_row"]
 
 
 class Doc:
@@ -26,6 +27,7 @@ class Doc:
 
     RuntimeSerialNumber = 1
     UndoRecordingEnabled = True
+    ModelAbsoluteTolerance = 0.001
 
     def __init__(self):
         self.open, self.records, self.outside, self.unrecorded = [], [], [], []
@@ -47,6 +49,8 @@ class Doc:
 
         class Layer:
             _visible = True
+            IsDeleted = False                                 # (#35's hide_massing walks every Massing layer)
+            FullPath = logic.MASSING
 
             @property
             def IsVisible(self):
@@ -63,6 +67,9 @@ class Doc:
 
             def __getitem__(self, i):
                 return layer
+
+            def __iter__(self):
+                return iter([layer])
 
         class Objects:
             def ModifyAttributes(self, o, attrs, quiet):
@@ -119,12 +126,18 @@ def _plugin(doc, said):
                                 "set_context_tick": staticmethod(lambda parts, on: None),
                                 "set_massing_tick": staticmethod(lambda parts, on: None),
                                 "set_envelope_tick": staticmethod(lambda parts, on: None),
-                                "open_target": staticmethod(lambda path: (True, None))}),
+                                "open_target": staticmethod(lambda path: (True, None)),
+                                # a row's dialog (Enter …, #37): OK with each count ns["_answer"], each yes / no "yes"
+                                "row_dialog": staticmethod(lambda title, fields, check: {
+                                    f["key"]: "yes" if f["kind"] == "yes_no" else str(ns["_answer"])
+                                    for f in fields})}),
+          "load_facts": lambda doc: json.loads(doc.Strings.GetValue("Gordium", "lot_facts")
+                                               or '{"lot_id": "lot1", "zone": "R-1b"}'),
           "_box_open": lambda: False, "run_check": lambda doc, report=False: {"report_error": "not in a test"},
           "current_facts": lambda doc: {"lot_id": "lot1", "zone": "R-1b"},
           "_lot_candidates": lambda doc: [type("L", (), {"Id": "lot1"})(), type("L", (), {"Id": "lot2"})()],
           "_buildings": lambda doc: [obj(), obj()], "_pick": lambda doc, prompt, objs, kind, *a: "lot2"
-          if kind == "Lot" else "b2", "_count": lambda prompt: 2, "_ask_yes_no_or_skip": lambda prompt: True,
+          if kind == "Lot" else "b2", "_answer": 2,
           "_layer": lambda doc, name: 0, "_find": lambda doc, i: obj(), "report_path": lambda doc: "/nowhere.xlsx",
           "time": __import__("time"), "_clear": lambda o: None, "JURISDICTION": "ithaca",
           "ask": lambda request: {"zones": []}, "suggested_facts": lambda doc, zones: {},
@@ -135,7 +148,13 @@ def _plugin(doc, said):
           "_context_visible": lambda doc, on: setattr(doc.Layers[0], "IsVisible", on) or True,
           "_context_record": lambda doc: None, "sync_context": lambda doc, facts: None,
           "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}"),
-          "_settle_live": lambda: None}                      # (#32: a running re-check finished)
+          "_settle_live": lambda: None,                      # (#32: a running re-check finished)
+          # (#34: the envelope's snap curves shown or hidden in every open document; nothing written in this one)
+          "_envelope_everywhere": lambda: None,
+          # Switch side yards (#35): no starting house here, so refused and nothing written; its own one Undo step is
+          # pinned in test_side_yards. (#35's layer locks: each layer's own lock as it was)
+          "_start_floors": lambda doc: [], "_feet_length": lambda doc, x: x,
+          "_own_lock": lambda doc, layer: False, "_set_own_lock": lambda doc, layer, own: None}
     for name in REAL:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     exec(SRC[SRC.index("class RhinoTable:"):].split("\ndef ", 1)[0], ns)      # noqa: S102
@@ -152,7 +171,9 @@ CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": (
          # Show neighbourhood (#23): the tick saved, the context layers shown, a neighbourhood fetched and drawn
          "context": ((True,), True),
          # Check (#27): a check, nothing written; Check after every edit: the setting saved in the file
-         "check": ((), False), "auto_check": ((False,), True)}
+         "check": ((), False), "auto_check": ((False,), True),
+         # Switch side yards (#35): refused with no starting house (its real step: test_side_yards)
+         "switch_sides": ((), False)}
 
 
 def test_the_guard_covers_every_panel_action():
@@ -189,7 +210,7 @@ def test_a_refused_count_leaves_the_file_as_it_was_and_no_undo_step():
     assert doc.records == [] and doc.outside == [] and doc.UndoRecordingEnabled
     assert doc.Strings.data[("Gordium", "lot_facts")] == stored and checks == [2, 3]
     assert said == ["1 story. The count wasn't kept."]
-    ns["_count"] = lambda prompt: 4                                       # a count it keeps: one step, one check
+    ns["_answer"] = 4                                                      # a count it keeps: one step, one check
     checks.clear()
     ns["_actions"]()["enter"](["stories"])
     assert doc.records == [logic.UNDO_WORDS["enter"]] and doc.outside == [] and checks == [4]

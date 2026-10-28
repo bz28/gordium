@@ -972,7 +972,7 @@ def test_closing_the_box_works_out_each_panel_control_from_the_panel_as_it_is_no
     assert "_was_enabled" not in body and "saved" not in body                # nothing remembered by position
     assert 'zoom_ok = parts.get("selected") in (parts.get("by_id") or {}) and not parts.get("stale")' in body
     show = ui[ui.index("def show("):ui.index("def _header(")]
-    assert 'parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]' in show   # same rule
+    assert "set_zoom(parts)" in show and "set_zoom(parts)" in body                  # same rule (logic.zoom_state)
 
 
 def test_a_box_that_edited_is_checked_once_not_twice():
@@ -1341,3 +1341,18 @@ def test_the_address_streets_name_is_kept_through_draw():
     assert logic.address_street("106 Ithaca Road, Ithaca", "ITHACA") is None          # never a part of a name
     assert logic.address_street("106 West Ithaca Road", "ITHACA RD") is None
     assert logic.address_street(None, "ITHACA RD") is None
+
+
+def test_zoom_to_turns_on_as_a_row_is_picked_and_says_why_when_off():
+    """UX review 2026-10-27: picking a needs-review row left Zoom to greyed until the panel next redrew (the selection
+    never touched it), with nothing saying why."""
+    assert logic.zoom_state(True, False, False) == (True, "Zoom to the selected item (or double-click its row).")
+    assert logic.zoom_state(False, False, False) == (False, "Select a row to zoom to it.")
+    assert logic.zoom_state(True, True, False) == (False, "Out of date: press Check, then zoom.")
+    assert logic.zoom_state(True, False, True)[0] is False and "start box" in logic.zoom_state(True, False, True)[1]
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    picked = ui[ui.index("    def selected(sender, e):"):ui.index("tree.SelectedItemChanged")]
+    assert picked.index("set_zoom(parts)") < picked.index("show_detail(parts)")
+    setter = ui[ui.index("def set_zoom(parts):"):ui.index("def set_box_open(")]
+    assert "b.Enabled, b.ToolTip = logic.zoom_state(" in setter
+    assert ui.count('parts["zoom_button"].Enabled =') == 0              # one place decides it
