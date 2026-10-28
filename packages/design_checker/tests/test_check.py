@@ -4185,3 +4185,24 @@ def test_another_document_shows_its_own_ticks():
     ns["STATE"]["panel_parts"] = {"form": form}
     ns["_new_document"](None, None)
     assert synced == [front]
+
+
+def test_red_is_drawn_last_over_amber_and_everything_else():
+    """Architect's review (2026-10-28): in Top view the amber eaves strip (needs review) was drawn over the failing
+    red wall under it. The red parts, and the red outline of a failing solid, are now the last things the scene
+    draws (rhino_logic.red_last splits them off, in their order)."""
+    from design_checker import rhino_logic as logic
+    parts = [("wall", "does_not_comply"), ("eaves", "needs_review"), ("porch", "does_not_comply"), ("x", "complies")]
+    rest, red = logic.red_last(parts)
+    assert red == [("wall", "does_not_comply"), ("porch", "does_not_comply")]
+    assert rest == [("eaves", "needs_review"), ("x", "complies")]
+    assert logic.red_last(None) == ([], [])
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    scene = rhino[rhino.index("def draw_scene(o, e):"):rhino.index("def _draw_coloured(")]
+    draws = [k for k in range(len(scene)) if scene.startswith("d.Draw", k) or scene.startswith("_draw_coloured(", k)]
+    last_red = scene.index("for g, status in red:")
+    assert scene.index("for g, status in rest:") < scene.index("if o.confirm is not None:") < last_red
+    assert scene.index("for g in o.red:") > last_red                         # the red outline too
+    # after it only the red's own three draws: its parts, and the failing solid's outline (a mesh or a brep)
+    assert [scene[k:k + 20] for k in draws if k > last_red] == [
+        "_draw_coloured(d, g,", "d.DrawMeshWires(g, u", "d.DrawBrepWires(g, u"]

@@ -122,6 +122,15 @@ def highlight(status):
     return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
 
 
+def red_last(coloured):
+    """The coloured parts, (shape, status) each, split into (the rest, the red): the red (does not comply) is drawn
+    after everything else, so nothing covers it. In Top view a needs-review amber strip (the eaves) lay over the
+    failing red wall below it and hid the one thing that certainly has to change (the architect's review,
+    2026-10-28)."""
+    rest = [c for c in coloured or [] if highlight(c[1]) != "red"]
+    return rest, [c for c in coloured or [] if highlight(c[1]) == "red"]
+
+
 def labels_on(ui_state):
     """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
     unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the

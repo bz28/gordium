@@ -468,11 +468,8 @@ def draw_scene(o, e):
     d = e.Display
     dark = ui.viewport_dark()
     old = stale(o)
-    for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
-        if isinstance(g, rg.Mesh):
-            d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
-        else:
-            d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+    # red (does not comply) is drawn last, below: over the amber and everything else (logic.red_last)
+    rest, red = logic.red_last(getattr(o, "encroach", None) or [])
     if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
         d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
     if o.envelope is not None:               # see-through, drawn after the solids so they show through it
@@ -486,11 +483,8 @@ def draw_scene(o, e):
     for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
         d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
     if not old:                              # after the envelope, so its blue never tints them (F5)
-        for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
-            name = logic.highlight(status)
-            colour = ui.HIGHLIGHT[name]
-            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
-            d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
+        for g, status in rest:               # only the part over: amber review (the red comes last)
+            _draw_coloured(d, g, status)
     for pt in getattr(o, "grade_points", None) or []:           # spot grades
         d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
     if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
@@ -514,6 +508,24 @@ def draw_scene(o, e):
             d.DrawBrepWires(main, BLUE, 3)
         elif isinstance(main, rg.Mesh):
             d.DrawMeshWires(main, BLUE, 3)
+    # last of all, the red: nothing drawn after it can cover it (in Top view the amber eaves strip lay over the
+    # failing wall: the architect's review, 2026-10-28)
+    if not old:
+        for g, status in red:                # the part over that does not comply
+            _draw_coloured(d, g, status)
+    for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
+        if isinstance(g, rg.Mesh):
+            d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
+        else:
+            d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+
+
+def _draw_coloured(d, g, status):
+    """One coloured part of the building, shaded and edged in its status's colour (red fails, amber review)."""
+    name = logic.highlight(status)
+    colour = ui.HIGHLIGHT[name]
+    d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+    d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
 
 
 def _model_on_screen(o, viewport):
