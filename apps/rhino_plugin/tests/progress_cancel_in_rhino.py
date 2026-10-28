@@ -383,8 +383,10 @@ def main():
               "Look up" in after.get("buttons", []) and
               not any((t or "").startswith("Looking up") for t in after.get("texts", [])) and
               any("cancelled: nothing changed" in (t or "") for t in after.get("texts", [])), after)
+        own = getattr(g.logic, "ENVELOPE", None)          # Gordium's snap curves (where the osnap layer exists): redrawn
+        mine = lambda objs: {k: v for k, v in objs.items() if not (own and (v == own or v.startswith(own + "::")))}
         claim("7 Cancel lookup stopped the lookup while the box was still open, the model unchanged",
-              not after.get("lookup_running", True) and objects(doc2) == model, after)
+              not after.get("lookup_running", True) and mine(objects(doc2)) == mine(model), after)
         reason = [t for t in after.get("texts", []) if (t or "").startswith("Press Look up to find 96 Ithaca Rd")]
         claim("7 after Cancel lookup, Draw is as it was with the address typed before Look up (off, saying why)",
               after.get("draw_on") == boxes[0].get("draw_typed") is False and reason and
