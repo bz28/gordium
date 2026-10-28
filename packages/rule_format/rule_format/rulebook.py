@@ -11,9 +11,11 @@ A missing or unusable measurement, or a value the formula can't evaluate -> need
 import datetime
 import hashlib
 import json
+import pickle
 import re
 import sys
-from collections import Counter
+import threading
+from collections import Counter, OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -85,7 +87,41 @@ class _StrictLoader(yaml.SafeLoader):
 
 
 def load(path):
-    return yaml.load(Path(path).read_text(encoding="utf-8"), Loader=_StrictLoader)
+    """A YAML file (a rulebook, a term file, sources.yaml...) read with the strict loader. Kept by its bytes
+    (_kept): re-read every call, parsed again only when its bytes changed, a fresh copy every time."""
+    def parse(data: bytes):
+        text = data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")   # exactly as read_text() reads it
+        return yaml.load(text, Loader=_StrictLoader)
+    return _kept("yaml", Path(path).read_bytes(), parse)
+
+
+def _kept(kind: str, data: bytes, build):
+    """build(data), worked out once per exact content. Reading a file is fast; parsing it is the slow part
+    (pure-Python YAML: ~20 ms for a rulebook, and one check reads about twenty files; the extracted text is
+    ~35 ms more to split into words), and a check is run hundreds of times while an architect edits.
+
+    Never stale: the key is the SHA-256 of the bytes just read (never the file's name or date), so a file whose
+    bytes changed in any way is worked out again. Never shared: what is kept is the result pickled (bytes, which
+    nothing can change), and every call un-pickles a fresh copy, so a caller that edits what it got can't change
+    what the next caller gets. A file that fails to read or parse is never kept: the same error every time.
+    `kind` keeps different readings of the same bytes apart."""
+    key = (kind, hashlib.sha256(data).digest())
+    with _KEPT_LOCK:
+        frozen = _KEPT.get(key)
+        if frozen is not None:
+            _KEPT.move_to_end(key)
+    if frozen is None:
+        frozen = pickle.dumps(build(data), protocol=pickle.HIGHEST_PROTOCOL)
+        with _KEPT_LOCK:
+            _KEPT[key] = frozen
+            while len(_KEPT) > _KEPT_MAX:
+                _KEPT.popitem(last=False)            # the least recently used goes first
+    return pickle.loads(frozen)
+
+
+_KEPT: "OrderedDict[tuple[str, bytes], bytes]" = OrderedDict()   # (kind, SHA-256 of the bytes) -> result, pickled
+_KEPT_LOCK = threading.Lock()                        # the Rhino command may check from more than one thread
+_KEPT_MAX = 256                                      # results kept; a test run writing many temp files stays bounded
 
 
 def rulebook_paths(folder) -> list[Path]:
@@ -118,7 +154,13 @@ def utf8_console() -> None:
 def read_jsonl(path) -> list[dict]:
     """Every row of a JSON-lines file, read as UTF-8, blank lines skipped. The one reader of the repository's
     .jsonl files (extracted text, sections, run records), so every package reads the same bytes the same way."""
-    return [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+    return _jsonl_rows(Path(path).read_bytes())
+
+
+def _jsonl_rows(data: bytes) -> list[dict]:
+    """read_jsonl for bytes already read: decoded and split exactly as read_text(encoding="utf-8") would."""
+    text = data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return [json.loads(line) for line in text.splitlines() if line.strip()]
 
 
 def jurisdictions(repo: Path = REPO) -> list[Path]:
@@ -202,30 +244,48 @@ class Context:
     def _load_cells(self, name, sha, path):
         """Chart cells read by the chart reader (document_extraction/charts.py). Only cells it read with
         certainty are in the file; unresolved parts of a table can never be cited."""
-        rows = read_jsonl(path)
-        if not rows or rows[0].get("sha256") != sha:
+        read_from, cells, districts = _kept("cells", Path(path).read_bytes(), _cells_of)
+        if read_from != sha:
             self._problem(name, f"{path.name} was read from a different version; re-extract")
             return
-        cells = {}
-        for r in rows[1:]:
-            if "columns" in r:
-                self.districts |= {district_name(c["name"]) for c in r["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])}
-            elif "value" in r and not r.get("heading"):
-                cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
+        self.districts |= districts
         self.cells[name] = cells
 
     def _load_extracted(self, name, sha, path):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
         The header ties it to the PDF version; CI re-extracts the text from the PDF (python -m
         document_extraction --check) and requires an exact match, so this file can't be edited by hand."""
-        rows = read_jsonl(path)
-        if not rows or rows[0].get("sha256") != sha:
+        read_from, pages = _kept("extracted", Path(path).read_bytes(), _pages_of)
+        if read_from != sha:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
-        pages: dict[int, dict[int, list[str]]] = {}
-        for row in rows[1:]:
-            pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
         self.pages[name] = pages
+
+
+def _cells_of(data: bytes) -> tuple:
+    """A .cells.jsonl file's bytes -> (the PDF fingerprint its header names, or None; its cells; its districts)."""
+    rows = _jsonl_rows(data)
+    if not rows:
+        return None, {}, set()
+    cells, districts = {}, set()
+    for r in rows[1:]:
+        if "columns" in r:
+            districts |= {district_name(c["name"]) for c in r["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])}
+        elif "value" in r and not r.get("heading"):
+            cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
+    return rows[0].get("sha256"), cells, districts
+
+
+def _pages_of(data: bytes) -> tuple:
+    """An extracted-text .jsonl file's bytes -> (the PDF fingerprint its header names, or None; page -> line ->
+    the line's words)."""
+    rows = _jsonl_rows(data)
+    if not rows:
+        return None, {}
+    pages: dict[int, dict[int, list[str]]] = {}
+    for row in rows[1:]:
+        pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
+    return rows[0].get("sha256"), pages
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
