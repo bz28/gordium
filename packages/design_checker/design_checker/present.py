@@ -251,9 +251,59 @@ def combined(citations: list[str]) -> str:
     return "; ".join(dict.fromkeys(rest + [f"District Regulations Chart, {n}" for n in notes]))
 
 
+LINK_WORDS = 5        # the search's least length; longer only where another line on the page begins alike
+
+
+_LIST_NUMBER = r"\((?:\d+|[a-z]|[ivx]+)\)"
+
+
+def _searchable(text: str) -> list[str]:
+    """The words a PDF viewer's search finds in one run. The PDF stores a footnote marker ([fn4] is a superscript
+    digit) and a list number ("(1) ONE-FAMILY DETACHED DWELLING" on chapter 325 p.7, "HOME OCCUPATION — (1) A" on
+    p.12) apart from the words around them, so a search across one lands nowhere: leading markers are left out, and
+    the search stops before the next one."""
+    text = re.sub(r"^(?:\s*(?:\[fn\w*\]|" + _LIST_NUMBER + r"))+", "", text)
+    return re.split(r"\[fn|\s" + _LIST_NUMBER + r"(?=\s)", text)[0].split()
+
+
+def _unique_start(words: list[str], page: list[list[str]]) -> str:
+    """The first LINK_WORDS words, more if another line of the page begins with them too ("One-family dwelling,
+    detached, zero lot line - -" begins a row of both chart p.3 sections), so the search lands on this one."""
+    n = LINK_WORDS
+    while n < len(words) and sum(line[:n] == words[:n] for line in page) > 1:
+        n += 1
+    return " ".join(words[:n])
+
+
+@functools.lru_cache(maxsize=16)
+def _page_lines(j: Path, file: str) -> dict:
+    """{(page, line): text} of one document's extracted text (2_extracted_text/<file stem>.jsonl)."""
+    path = j / "2_extracted_text" / (Path(file).stem + ".jsonl")
+    return {(r["page"], r["line"]): r["text"] for r in (read_jsonl(path) if path.exists() else []) if "line" in r}
+
+
+def anchor_text(source: dict, j: Path) -> str:
+    """The words a source points at on its page: its quote; for a chart cell, its row's own line, the one of the
+    cell's row lines that begins with the row label (a label alone, "One-family dwelling, detached", is a row of
+    both the lot-size and the lot-width sections of chart p.3; a cell's first row line can be a neighbouring cell's
+    wrapped words, which the PDF doesn't hold in that order); else the label."""
+    if source.get("quote"):
+        return str(source["quote"])
+    want = source.get("cell") or {}
+    label = " ".join(str(want.get("row") or "").split())
+    cell = next((c for c in _chart_cells(j) if c.get("file") == source.get("file") and c.get("page") == source.get("page")
+                 and c.get("section") == want.get("section") and " ".join(str(c.get("row", "")).split()) == label), None)
+    lines = _page_lines(j, source.get("file") or "")
+    own = [lines.get((source.get("page"), n)) or "" for n in (cell or {}).get("row_lines") or []]
+    return next((t for t in own if label and " ".join(t.split()).startswith(label)), label)
+
+
 def link(source: dict, j: Path, documents: dict) -> str:
-    """The page, plus the first words of the quote to find on it, so two sections never share a link."""
-    words = " ".join(str(source.get("quote") or (source.get("cell") or {}).get("row") or "").split()[:5])
+    """The page, plus the first words of what the source points at on it (anchor_text), so two sections never
+    share a link."""
+    words = _unique_start(_searchable(anchor_text(source, j)),
+                          [_searchable(t) for (pg, _), t in _page_lines(j, source.get("file") or "").items()
+                           if pg == source.get("page")])
     base = page_link(j, documents, source["file"], source.get("page"))
     return base + ("&search=" + urllib.parse.quote(f'"{words}"') if words else "")
 
@@ -292,6 +342,18 @@ def _fails_whatever_part(expr: str, values: dict, unknown: dict) -> bool:
     numbers = [n for n in unknown["names"] if MEASURE_KINDS.get(n) == "number" and n in formula.names(expr)]
     return all(formula.truth_direction(expr, n) == -1 for n in numbers) and all(
         _evaluate(expr, dict(values, **s)) is False for s in unknown["settings"])
+
+
+def _fails_every_reading(expr: str, values: dict, measured: dict, facts: dict) -> bool:
+    """One limit of a rule that fails under every reading of THE reading set (reading_set.combos): a measurement it
+    reads that has readings and no value (a pitched roof's height) leaves it unknown as drawn, yet it fails whichever
+    reading is taken (#20 review round 1: the eaves rows named the front yard, which passed, for a side eave that
+    failed, because every limit holds the height bonus)."""
+    names = formula.names(expr)
+    if not any(values.get(n) is None and (measured.get(n) or {}).get("readings") for n in names):
+        return False
+    every = reading_set.combos(names, values, measured, facts)
+    return bool(every) and all(_evaluate(expr, trial) is False for trial, _ in every)
 
 
 FACT_WORDS = {"sleeping_rooms": "bedrooms", "parking_spaces": "parking spaces"}   # interior facts, as asked
@@ -951,7 +1013,45 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
         unknown = row.get("Unknown")        # not measured: a limit that fails at every value they could take
         primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False
-                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)), primary)
+                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)
+                        or _fails_every_reading(ast.unparse(c), values, measured, facts)), primary)
+    elif (_status(row) == REVIEW and rule.get("review_when") and isinstance(body, ast.BoolOp)
+          and isinstance(body.op, ast.And) and all(isinstance(v, ast.Compare) for v in body.values)):
+        # a several-limit rule held back by its own review_when (its reason is the row's): name the limit that
+        # review is about, the measure it holds below a limit (the which-side eaves review: that side's eave),
+        # never simply the first limit (#18: "Eaves into front yard" for a side eave's question)
+        why_text = " ".join(str(row.get("Why") or "").split())
+        said = {" ".join(w.split()) for w in str(row.get("Why") or "").split("; ")}
+        at_least = {c.left.id for c in compares if isinstance(c.ops[0], (ast.GtE, ast.Gt))}
+        about = []                      # (measure, the limit the review holds it below), in the rule's order
+        for r in rule["review_when"]:
+            reason = " ".join(str(r.get("reason") or "").split())
+            # the row's reason is this one: a whole entry of it, or (a reason with "; " of its own) all of it in it
+            if reason and (reason in said or len(reason) > 40 and reason in why_text):
+                # each measure the review holds below a limit, where that holds as drawn (or can't be told), on a
+                # measure the rule asks to be at least something: that limit is what the review is about
+                about += [n for n in ast.walk(formula.parse(r["when"]).body)
+                          if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.left, ast.Name)
+                          and isinstance(n.ops[0], (ast.Lt, ast.LtE)) and n.left.id in at_least
+                          and _evaluate(ast.unparse(n), values) is not False]
+        failing = next((c for c in compares if _fails_every_reading(ast.unparse(c), values, measured, facts)), None)
+        if failing is not None:         # a limit failing under every reading is named first (#18 round 4)
+            primary = failing
+        elif about:
+            # the limit the question is about, as a requirement: "at least" the review's own limit (the side that
+            # may be the 10 ft one: 7'-0" against 8'-0", never against the 5 ft side's 3'-0" it already meets)
+            n = about[0]
+            primary = ast.Compare(left=n.left, ops=[ast.GtE()], comparators=n.comparators)
+    elif (_status(row) == COMPLIES and isinstance(body, ast.BoolOp) and isinstance(body.op, ast.And)
+          and len(compares) > 1 and all(isinstance(v, ast.Compare) for v in body.values)
+          and len({c.left.id for c in compares}) == 1):
+        # a range on one measure (R-3aa's stories: at least 2, at most 3): the limit it is nearest, never simply
+        # the first (the light run in Rhino, 2026-10-28: 3 stories showed "2 required" beside "complies")
+        def slack(c):
+            have, limit = values.get(c.left.id), _evaluate(ast.unparse(c.comparators[0]), values)
+            ok = isinstance(have, (int, float)) and isinstance(limit, (int, float))
+            return abs(have - limit) if ok else float("inf")
+        primary = min(compares, key=slack)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
@@ -1130,7 +1230,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 lo, hi = min(got), max(got)
                 required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
                             f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
-                limit_q = list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
+                # the same limit under every reading: it depends on none of them (#20 review round 1)
+                limit_q = [] if hi - lo < 1e-9 else list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
                 rest = list(dict.fromkeys(q for n in sorted(every - set(open_)) if values.get(n) is None
                                           and (measured.get(n) or {}).get("readings")
                                           for q in _questions_of(measured[n]) if q not in limit_q))
