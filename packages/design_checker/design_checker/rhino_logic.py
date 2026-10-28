@@ -283,16 +283,78 @@ def with_suggestions(saved, suggested):
 STATED_FACTS = {
     "sleeping_rooms": ("Bedrooms", "count", "bedrooms"),
     "parking_spaces": ("Off-street parking spaces", "count", "parking spaces"),
-    "dwelling_units": ("Dwelling units", "count", "dwelling units"),
+    "dwelling_units": ("Dwelling units on this lot (a semi-detached or attached building split along its party walls: "
+                       "this lot's units only)", "count", "dwelling units"),
     "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
     "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
                    "whether it is a conversion"),
+    "occupants": ("Occupants on this lot, all dwelling units together (§325-3B OCCUPANT: in R-2c, every person with the "
+                  "right to occupy, living there yet or not)", "count", "occupants"),
+    "occupants_most_in_one_unit": ("Most occupants in any one dwelling unit (optional: how they are split)", "count",
+                                   "the most occupants in one unit"),
+    "attached_units_in_building": ("Dwelling units in the whole attached building, every lot it stands on (§325-3B: "
+                                   "three to six)", "count", "the units in the whole building"),
     "abuts_r1_district": ("Is any R-1a or R-1b land touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it? (§325-19E)",
                           "yes_no", "whether the lot abuts R-1 land"),
+    # who lives there (§325-3B's one-family and two-family dwellings) and a home occupation: blank until said, so
+    # the rules that read them need review (never 0 or no)
+    "unrelated_persons": ("Most people in any one dwelling unit not related by blood, marriage or adoption to its "
+                          "household's family (minor dependent children in a parent's or relative's care left out)",
+                          "count", "unrelated people per unit"),
+    # asked alone in R-3 and RU, so it says the whole count itself (review round 2: "the same count" pointed at a
+    # question never asked there)
+    "unrelated_persons_with_children": ("Most people in any one dwelling unit not related by blood, marriage or adoption "
+                                        "to its household's family, minor dependent children counted too", "count",
+                                        "unrelated people per unit, children counted"),
+    # the house itself, not only an accessory dwelling unit on the lot; with an ADU on the lot the allowance needs
+    # review (the owner-and-ADU open question, #38 review)
+    "owner_occupied": ("Does the owner (§325-3B OWNER) live in the one-family dwelling itself (not only in an "
+                       "accessory dwelling unit on the lot)?", "yes_no", "whether the owner lives there"),
+    "accessory_dwelling_unit": ("Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?", "yes_no",
+                                "whether an ADU is on the lot"),
+    "functional_family_unit": ("Is the household to be shown to the City to be a functional family unit (§325-3B)?",
+                               "yes_no", "whether the household is a functional family unit"),
+    "home_occupation": ("Is a home occupation planned (§325-3B: a business, studio or office run by a resident)?",
+                        "yes_no", "whether a home occupation is planned"),
+    # floor areas in square feet, any number 0 or more (never rounded: 500.4 sq ft typed as 500 would pass the
+    # 500 sq ft limit; review round 1)
+    "home_occupation_area": ("Home occupation's indoor floor area, accessory buildings included (sq ft)", "area",
+                             "the home occupation's floor area"),
+    "home_occupation_unit_area": ("Floor area of the dwelling unit it is in (sq ft)", "area",
+                                  "its dwelling unit's floor area"),
+    # how many primary buildings the lot holds (§325-8B(1), §325-7B, §325-8E): read from the drawing where it can
+    # be (one building, or none standing apart that could hold a home); asked where it can't
+    "primary_buildings": ("Primary buildings on the lot, the main one included: each separate building holding a home "
+                          "or other primary use, not a garage, shed or accessory dwelling unit (§325-8B(1))", "count",
+                          "the primary buildings on the lot"),
+    "primary_buildings_same_use": ("Does every primary building on the lot hold the use entered for the lot?",
+                                   "yes_no", "whether every primary building holds the lot's use"),
+    # a stream or inlet near the lot (§325-26): the model doesn't show the water; the distance in feet as typed
+    # (never rounded: 19.96 ft typed as 20 would pass)
+    "stream_near_lot": ("Is any inlet wall, or the bank of an inlet channel or stream (at average water level), within "
+                        "20 ft of the lot? (§325-26)", "yes_no", "whether a stream or inlet is within 20 ft of the lot"),
+    "stream_distance": ("Least horizontal distance from any new structure (house, addition, garage, deck, fence; not a "
+                        "patio) to that wall or bank, at average water level (ft)", "length",
+                        "the distance from the stream"),
+    "south_hill_overlay": ("Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?", "yes_no",
+                           "whether the lot is in the South Hill Overlay"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
+# The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
+# at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
+# accept what the check refuses (#r2 review round 2).
+MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1}
+# Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit
+# is 1 to occupants): asked only where some value in that range would change the row (present.could_settle).
+OPTIONAL = {"occupants_most_in_one_unit": "occupants"}
+
+
+def minimum(key):
+    return MINIMUM.get(key, 0)
+
+
 STORIES_ASKED = ("enter the number of stories", "enter the count")      # the measuring's own words when it waits for the count
 
 
@@ -313,7 +375,36 @@ def refused_stories(items):
 
 
 INTERIOR_FACTS = ("sleeping_rooms", "parking_spaces")    # inside the building (on hold): never asked in the box
-BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS)   # what the box can ask
+# Read from the drawing (the main building is one; solids standing apart that could hold a home are readings), so the
+# box never asks them up front: the panel's Enter flow still does, where the drawing can't say (measure._primary_buildings)
+DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
+# Use details (Ben, 2026-10-27: ask up front only what an architect knows at the start and what shapes the exterior or the
+# envelope): who lives there, rooms let for profit (a use detail, the coordinator for Ben, 2026-10-27; the number of homes
+# and new-or-converted stay up front), and a home business. Not asked in the start box; answered later, when the interior is planned,
+# with the panel's Enter flow. Their rules never pass while unanswered (they stay "needs review"); the panel lists them
+# in their own collapsed group, apart from the building's problems (is_use_detail). Ben will settle the exact questions
+# later, so this tuple is the one place that moves them: a fact added here leaves the start box and joins that group.
+DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occupants", "occupants_most_in_one_unit",
+                  "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
+                  "home_occupation", "home_occupation_area", "home_occupation_unit_area", "rooms_let_for_profit")
+# Facts the measuring checks against each other (a count with the children counted can't be smaller than the count
+# without: model_measurement.project.fact_conflict_rows): kept or dropped together, so a contradiction is never hidden
+# by dropping half of it.
+CHECKED_TOGETHER = (("unrelated_persons", "unrelated_persons_with_children"),)
+USE_DETAILS_TITLE = "Use details — answer when you plan the interior"
+BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
+
+
+def is_use_detail(item, facts=None):
+    """Whether a panel row is a use detail still waiting to be answered: it needs review, and everything it is waiting
+    on (its "needs") is a deferred fact that is still blank in `facts`. Only then: a row waiting on anything else too,
+    one with no named need, a row about facts that disagree (they are filled in), and any row that has been decided
+    (complies, fails) stays among the building's rows, so an answer that fails counts as a failure and a question left
+    open never reads as a pass."""
+    needs = item.get("needs") or []
+    return (item.get("status") == "needs_review" and bool(needs) and all(k in DEFERRED_FACTS for k in needs)
+            and all((facts or {}).get(k) is None for k in needs)
+            and not str(item.get("id") or "").startswith("facts.conflict"))
 
 
 # What a use itself says about a fact, from the City's own definitions, so it is never asked (Ben, 2026-10-25):
@@ -330,17 +421,122 @@ def implied_facts(use):
     return dict(IMPLIED_BY_USE.get(use) or {})
 
 
-def follow_up_keys(options, zone, use):
-    """The facts the box asks after Use for this district and use (options["follow_ups"], from the rulebook)."""
-    return [k for k in (((options or {}).get("follow_ups") or {}).get(zone) or {}).get(use) or [] if k in BOX_ASKS]
+# A fact that only matters once another is "yes": its rules are gated by it (a stream's distance by "a stream is within
+# 20 ft", the home occupation's floor areas by "a home occupation is planned"), so it is asked only after that answer.
+# Until then the rules say they need the first answer, never the second.
+ASKED_AFTER = {"home_occupation_area": "home_occupation", "home_occupation_unit_area": "home_occupation",
+               "stream_distance": "stream_near_lot"}
+
+
+def follow_up_keys(options, zone, use, answers=None):
+    """The facts the box asks after Use for this district and use (options["follow_ups"], from the rulebook). With
+    `answers` (the facts as entered so far), a fact in ASKED_AFTER is asked only when the one it waits on is yes;
+    without them, every fact the rules read."""
+    keys = [k for k in (((options or {}).get("follow_ups") or {}).get(zone) or {}).get(use) or [] if k in BOX_ASKS]
+    if answers is None:
+        return keys
+    return [k for k in keys if k not in ASKED_AFTER or answers.get(ASKED_AFTER[k]) is True]
+
+
+def gate_of(answers):
+    """The answers that decide which follow-up questions are asked (the ones ASKED_AFTER names): what the box compares
+    to know it must open again."""
+    return {p: (answers or {}).get(p) is True for p in sorted(set(ASKED_AFTER.values()))}
+
+
+# What each question is called in the box's compact "About this project" section (the full question is its hover text
+# and the panel's Enter prompt), and the one-click answers it offers after "Not answered". A yes / no question offers
+# its two answers in the architect's words; a count with a small range offers the numbers. Never a default: the
+# dropdown starts on "Not answered" and the rules that read the fact say so (NEVER a false pass).
+ABOUT_LABELS = {
+    "unrelated_persons": "Unrelated people in one home",
+    "unrelated_persons_with_children": "Unrelated people in one home",
+    "occupants": "Occupants on the lot",
+    "occupants_most_in_one_unit": "Most occupants in one unit",
+    "rooms_let_for_profit": "Rooms let for profit",
+    "dwelling_units": "Homes on this lot",
+    "attached_units_in_building": "Homes in the attached building",
+    "owner_occupied": "Owner lives in the house",
+    "accessory_dwelling_unit": "Accessory dwelling unit",
+    "functional_family_unit": "Functional family unit",
+    "home_occupation": "Home business",
+    "home_occupation_area": "Business floor area (sq ft)",
+    "home_occupation_unit_area": "Its home's floor area (sq ft)",
+    "stream_near_lot": "Stream or inlet",
+    "stream_distance": "Distance to it (ft)",
+    "south_hill_overlay": "South Hill Overlay",
+    "abuts_r1_district": "Next to R-1 land",
+    "conversion": "New or converted",
+}
+ABOUT_WORDS = {            # (the "no" answer, the "yes" answer)
+    "owner_occupied": ("Owner lives elsewhere", "Owner lives in the house"),
+    "accessory_dwelling_unit": ("No ADU on the lot", "ADU on the lot"),
+    "functional_family_unit": ("Not relying on one", "Will show it to the City"),
+    "home_occupation": ("No home business", "Home business planned"),
+    "stream_near_lot": ("No stream within 20 ft", "Stream or inlet within 20 ft"),
+    "south_hill_overlay": ("Not in the South Hill Overlay", "In the South Hill Overlay"),
+    "abuts_r1_district": ("No R-1 land touches it", "R-1 land touches or faces it"),
+}
+ABOUT_COUNTS = {            # a count's one-click numbers (a typed number is not offered here: the panel's Enter flow)
+    "unrelated_persons": [("0 (one family)", 0)] + [(str(n), n) for n in range(1, 7)],
+    "unrelated_persons_with_children": [("0 (one family)", 0)] + [(str(n), n) for n in range(1, 7)],
+    "rooms_let_for_profit": [("None", 0)] + [(str(n), n) for n in range(1, 7)],
+    "attached_units_in_building": [(str(n), n) for n in range(2, 9)],
+    "dwelling_units": [(str(n), n) for n in range(1, 9)],
+}
+# Several answers in one click (shown only when the district and use ask at least one of them; it fills the others
+# that are asked and leaves the rest as they were). Each is a statement the architect makes by picking it.
+QUICK_ANSWERS = (
+    ("1 family, no roomers", {"unrelated_persons": 0, "unrelated_persons_with_children": 0, "rooms_let_for_profit": 0,
+                              "functional_family_unit": False}),
+    ("Owner lives there, no ADU", {"owner_occupied": True, "accessory_dwelling_unit": False}),
+    ("No home business", {"home_occupation": False}),
+    ("No stream, not in South Hill", {"stream_near_lot": False, "south_hill_overlay": False}),
+)
+
+
+ABOUT_LABEL_WIDTH, ABOUT_FIELD_WIDTH, ABOUT_TYPED_WIDTH, ABOUT_QUICK_WIDTH = 190, 215, 100, 215   # px
+ABOUT_NOTE_WIDTH = 560
+QUICK_HINT = "Pick to fill several answers…"
+
+
+def about_label(key):
+    return ABOUT_LABELS.get(key) or STATED_FACTS[key][2][:1].upper() + STATED_FACTS[key][2][1:]
+
+
+def choices_for(key, kind, value=None):
+    """The one-click answers a question offers, [(words, value)], or None when it is typed (areas, distances, the
+    counts without a small range). A value already set that the list lacks (typed in the panel) stays among them."""
+    if kind == "yes_no":
+        no, yes = yes_no_words(key)
+        return [(no, False), (yes, True)]
+    listed = ABOUT_COUNTS.get(key)
+    if listed is None:
+        return None
+    if value is not None and value not in [v for _, v in listed]:
+        listed = listed + [(str(value), value)]
+    return list(listed)
+
+
+def quick_answers(keys):
+    """The one-click answers for several questions at once: [(words, {fact: value})], each only with the facts that are
+    asked (`keys`), and only when it fills at least one."""
+    out = []
+    for words, sets in QUICK_ANSWERS:
+        mine = {k: v for k, v in sets.items() if k in keys}
+        if mine:
+            out.append((words, mine))
+    return out
 
 
 def follow_up_rows(options, zone, use, facts):
     """The box's questions after Use: the facts the district's rules need for this use (follow_up_keys), each
-    {"key", "label", "kind" (count / yes_no), "value" (as entered, or None)}; none when the district has no such
-    rule (R-1b today) or the use says them."""
-    return [{"key": k, "label": STATED_FACTS[k][0], "kind": STATED_FACTS[k][1], "value": (facts or {}).get(k)}
-            for k in follow_up_keys(options, zone, use)]
+    {"key", "label" (the full question), "short" (its name in the compact section), "kind" (count / yes_no / area /
+    length), "value" (as entered, or None), "choices" (its one-click answers, or None when typed)}; none when the
+    district has no such rule or the use says them."""
+    return [{"key": k, "label": STATED_FACTS[k][0], "short": about_label(k), "kind": STATED_FACTS[k][1],
+             "value": (facts or {}).get(k), "choices": choices_for(k, STATED_FACTS[k][1], (facts or {}).get(k))}
+            for k in follow_up_keys(options, zone, use, facts or {})]
 
 
 # The words a yes / no question's dropdown offers after "Not answered": (the "no" answer, the "yes" answer)
@@ -351,7 +547,7 @@ FOLLOW_UP_HELP = ("Your answers. Leave one blank and the rules that need it say 
 
 
 def yes_no_words(key):
-    return YES_NO_WORDS.get(key) or ("No", "Yes")
+    return YES_NO_WORDS.get(key) or ABOUT_WORDS.get(key) or ("No", "Yes")
 
 
 def _listed(options, zone):
@@ -384,11 +580,14 @@ def district_use_names(options, zone, current=None):
 
 
 def box_needs_refresh(options, shown, now):
-    """Whether the box must open again after a pick in its Use or district dropdown: `shown` and `now` are
-    (zone, use) as laid out and as picked. Again when the uses offered, the note under Use or the questions after
-    it differ (their fields are laid out once); never for a pick that changes none of them."""
-    def layout(zone, use):
-        return district_use_names(options, zone, use), use_note(options, zone, use), follow_up_keys(options, zone, use)
+    """Whether the box must open again after a pick in its Use or district dropdown, or in a question another waits on
+    (a stream's yes opens its distance): `shown` and `now` are (zone, use) or (zone, use, gate_of(answers)) as laid
+    out and as picked. Again when the uses offered, the note under Use or the questions after it differ (their fields
+    are laid out once); never for a pick that changes none of them."""
+    def layout(zone, use, gate=None):
+        asked = None if gate is None else {p: True for p, yes in gate.items() if yes}
+        return district_use_names(options, zone, use), use_note(options, zone, use), \
+            follow_up_keys(options, zone, use, asked)
     return layout(*shown) != layout(*now)
 
 
@@ -425,8 +624,15 @@ def box_applied(facts, answers, zone, use, options, track):
        it, and the architect's own answer set aside for it ("held") comes back: a two-family's 2 units are never read
        as a multiple dwelling's count, and a semi-detached pair's typed 2 survives a look at two-family.
     3. What the new use says for the facts its rules read (implied_by) is set; an architect's answer there is held.
+    4. A fact asked only after another's yes (ASKED_AFTER) goes when that question is answered no in the box: it no
+       longer applies (a blank keeps it: nothing contradicts it, and its rule needs review either way).
     Every other fact stays as stored, never read unshown: any fact this district's rules read for this use is asked
-    (follow_up_keys) and shown with its value when the box opens laid out for it (box_needs_refresh)."""
+    (follow_up_keys) and shown with its value when the box opens laid out for it (box_needs_refresh). A fact asked
+    only after another's yes (ASKED_AFTER: a stream's distance) is read only by rules gated by that yes. The use
+    details (DEFERRED_FACTS, answered in the panel's row dialog, never in the box) stay as stored whatever the use or
+    district: where the new use's rules don't read one it decides nothing, and where they do it is the architect's
+    answer, shown in its row; so the facts checked together (CHECKED_TOGETHER) always stay together, and a
+    contradiction between them is never hidden by dropping half of it."""
     now = implied_by(options, zone, use)
     out = dict(facts or {})
     said, held = list((track or {}).get("said") or []), dict((track or {}).get("held") or {})
@@ -442,6 +648,9 @@ def box_applied(facts, answers, zone, use, options, track):
         if v is not None:
             given[k] = v
     out = update_counts(out, given)
+    for k, gate in ASKED_AFTER.items():   # "no" said in the box to the question it waits on: moot, so it goes (#45: a
+        if given.get(gate) is False:      # stream's old 5 ft beside a new "no stream within 20 ft" would make the
+            out.pop(k, None)              # facts disagree)
     for k in [k for k in said if k not in now]:
         out.pop(k, None)
         said.remove(k)
@@ -468,9 +677,10 @@ def implied_by(options, zone, use):
     return dict((((options or {}).get("implied") or {}).get(zone) or {}).get(use) or {})
 
 
-def parse_answer(kind, text):
-    """A follow-up field's text as the fact's value: a whole number 0 or more (count), yes / no (yes_no); blank:
-    None (unanswered: its rules stay NEEDS REVIEW, never 0 or no); anything else raises ValueError."""
+def parse_answer(kind, text, key=None):
+    """A follow-up field's text as the fact's value: a whole number (count: `key`'s least, 0 unless MINIMUM says
+    more), a number of square feet or feet (area, length: 0 or more, as typed, never rounded), yes / no (yes_no);
+    blank: None (unanswered: its rules stay NEEDS REVIEW, never 0 or no); anything else raises ValueError."""
     text = (text or "").strip().lower()
     if not text:
         return None
@@ -480,16 +690,23 @@ def parse_answer(kind, text):
         if text in ("no", "n"):
             return False
         raise ValueError("answer yes or no")
-    if not (text.isascii() and text.isdigit()):
-        raise ValueError("a whole number, 0 or more")
+    if kind in ("area", "length"):
+        # commas only as thousands separators (1,200): "2,5" is not 25 (a European decimal comma is refused, not misread)
+        if not re.fullmatch(r"((\d+|\d{1,3}(,\d{3})+)(\.\d+)?|\.\d+)", text, re.ASCII):
+            raise ValueError("a number of " + ("square feet" if kind == "area" else "feet") + ", 0 or more")
+        number = float(text.replace(",", ""))
+        return int(number) if number == int(number) else number
+    least = minimum(key) if key else 0
+    if not (text.isascii() and text.isdigit()) or int(text) < least:
+        raise ValueError(f"a whole number, {least} or more")
     return int(text)
 
 
-def answer_problem(kind, text):
+def answer_problem(kind, text, key=None):
     """What the box says beside a follow-up field whose text isn't an answer (None when it is, or is blank): the
     entry is not kept, so the rules that need it say so (never read as 0)."""
     try:
-        parse_answer(kind, text)
+        parse_answer(kind, text, key)
     except ValueError as e:
         return f"Not kept: {e}. Its rules need review until it is."
     return None
@@ -519,7 +736,7 @@ def answers_note(entries):
     said = []
     for key, kind, text in entries:
         try:
-            parse_answer(kind, text)
+            parse_answer(kind, text, key)
         except ValueError as e:
             said.append((STATED_FACTS[key][2] if key in STATED_FACTS else key.replace("_", " "), str(e)))
     if not said:
@@ -531,9 +748,12 @@ def answers_note(entries):
     return f"Not kept: {listed}. Their rules need review until they are.", True
 
 
-def needs_of(names, values):
-    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
-    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None]
+def needs_of(names, values, settles=None):
+    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked; never the
+    stories count (asked only where the measuring asks for it: stories_needed). An optional one (OPTIONAL) only where
+    `settles(key)` says entering it could change the row."""
+    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None
+            and (k not in OPTIONAL or (settles is not None and settles(k)))]
 
 
 def _and(words):
@@ -603,7 +823,7 @@ def row_answers_applied(facts, needs, answers):
     bad = []
     for k in [k for k in needs or [] if k in STATED_FACTS]:
         try:
-            value = parse_answer(STATED_FACTS[k][1], (answers or {}).get(k))
+            value = parse_answer(STATED_FACTS[k][1], (answers or {}).get(k), k)
         except ValueError as e:
             bad.append(f"{STATED_FACTS[k][0]}: {e}")
             continue
@@ -669,13 +889,20 @@ def update_counts(facts, answers):
     whether the building is a conversion and whether the lot abuts R-1 land (yes / no) from the Lot facts prompts. An answer of None means the prompt
     was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
-    for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit"):
+    counts = list(dict.fromkeys(["stories"] + [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "count"]))
+    for key in counts:
         if answers.get(key) is not None:
             n = int(answers[key])
-            if n < 0 or n != answers[key]:
-                raise ValueError(f"{key} must be a whole number, 0 or more")
+            if n < minimum(key) or n != answers[key]:
+                raise ValueError(f"{key} must be a whole number, {minimum(key)} or more")
             out[key] = n
-    for key in ("conversion", "abuts_r1_district"):
+    for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind in ("area", "length")]:
+        if answers.get(key) is not None:
+            a = answers[key]
+            if type(a) not in (int, float) or not math.isfinite(a) or a < 0:
+                raise ValueError(f"{key} must be a number of {'square feet' if STATED_FACTS[key][1] == 'area' else 'feet'}, 0 or more")
+            out[key] = a
+    for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "yes_no"]:
         if answers.get(key) is not None:
             out[key] = bool(answers[key])
     return out
@@ -3557,11 +3784,13 @@ def follow_up_sources(state, fact):
 
 
 def sources_kept(saved, facts):
-    """The saved sources Draw keeps before adding the box's own (fact_sources): of the facts the box can ask
-    (BOX_ASKS), only those still set in `facts` (the facts after Draw: an answer kept, unshown, keeps its "entered
-    by you"); a fact Draw unset or dropped (a blank, what the old use said) loses its source with it. Those Draw
-    asks or the use says are given their source again by fact_sources."""
-    return {k: v for k, v in (saved or {}).items() if k not in BOX_ASKS or (facts or {}).get(k) is not None}
+    """The saved sources Draw keeps before adding the box's own (fact_sources): of the facts the box can ask (BOX_ASKS)
+    and the use details (DEFERRED_FACTS, answered in the panel's row dialog, which saves their "entered by you":
+    row_sources), only those still set in `facts` (the facts after Draw: an answer kept, unshown, keeps its source);
+    a fact Draw unset or dropped (a blank, what the old use said) loses its source with it. Those Draw asks or the use
+    says are given their source again by fact_sources."""
+    return {k: v for k, v in (saved or {}).items()
+            if k not in BOX_ASKS + DEFERRED_FACTS or (facts or {}).get(k) is not None}
 
 
 def district_confirmed(mode, zone_fact, zone):

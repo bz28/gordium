@@ -17,8 +17,8 @@ RHINO = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8"
 UI = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
 STATED = list(logic.STATED_FACTS)
 # an R-3a-like district (test_use_questions.X): a multiple dwelling's lot size reads its units, rooms let and conversion
-OPTS = {"follow_ups": {"X": {"multiple_family": ["dwelling_units", "rooms_let_for_profit", "conversion"],
-                             "two_family": ["rooms_let_for_profit", "conversion"]}},
+OPTS = {"follow_ups": {"X": {"multiple_family": ["dwelling_units", "attached_units_in_building", "conversion"],
+                             "two_family": ["attached_units_in_building", "conversion"]}},
         "implied": {"X": {"two_family": {"dwelling_units": 2}}}}
 # what a saved project holds besides the stated facts: none of it may change in a row's dialog
 SITE = {"jurisdiction": "new_york/ithaca_city", "address": "106 Ithaca Rd", "zone": "X", "use": "multiple_family",
@@ -27,11 +27,14 @@ SITE = {"jurisdiction": "new_york/ithaca_city", "address": "106 Ithaca Rd", "zon
         "street_name": "Ithaca Rd"}
 
 
-def _value(kind, rng):
+def _value(kind, rng, key=None):
     """An answer as the dialog gives it, and what it means: (text, value, bad)."""
     if kind == "yes_no":
         return rng.choice([("", None, False), ("yes", True, False), ("no", False, False)])
-    return rng.choice([("", None, False), ("0", 0, False), ("3", 3, False), (" 12 ", 12, False),
+    if kind in ("area", "length"):
+        return rng.choice([("", None, False), ("0", 0, False), ("1,500.5", 1500.5, False), ("19.96", 19.96, False),
+                           ("-1", None, True), ("2,5", None, True), ("lots", None, True)])
+    return rng.choice([("", None, False), ("0", 0, logic.minimum(key) > 0), ("3", 3, False), (" 12 ", 12, False),
                        ("-1", None, True), ("2.5", None, True), ("lots", None, True)])
 
 
@@ -44,9 +47,9 @@ def test_only_the_rows_facts_change_whatever_is_saved_and_answered():
         facts = {k: v for k, v in SITE.items() if rng.random() < 0.8}
         for k in STATED:
             if rng.random() < 0.4:
-                facts[k] = rng.choice([True, False]) if logic.STATED_FACTS[k][1] == "yes_no" else rng.randint(0, 9)
+                facts[k] = rng.choice([True, False]) if logic.STATED_FACTS[k][1] == "yes_no" else rng.randint(logic.minimum(k), 9)
         needs = rng.sample(STATED, rng.randint(1, len(STATED)))
-        given = {k: _value(logic.STATED_FACTS[k][1], rng) for k in needs}
+        given = {k: _value(logic.STATED_FACTS[k][1], rng, k) for k in needs}
         answers = {k: t for k, (t, _, _) in given.items() if rng.random() < 0.95}   # one missing: blank
         before = json.loads(json.dumps(facts))
         if any(given[k][2] for k in answers):
@@ -107,7 +110,7 @@ def test_an_answer_from_the_dialog_shows_in_the_start_box_and_draw_keeps_it():
     facts.pop("dwelling_units")
     new = logic.row_answers_applied(facts, ["dwelling_units", "conversion"], {"dwelling_units": "5", "conversion": "yes"})
     shown = logic.box_answers(OPTS, "X", "multiple_family", new)
-    assert shown == {"dwelling_units": 5, "rooms_let_for_profit": None, "conversion": True}
+    assert shown == {"dwelling_units": 5, "attached_units_in_building": None, "conversion": True}
     rows = logic.follow_up_rows(OPTS, "X", "multiple_family", new)
     assert {r["key"]: r["value"] for r in rows} == shown
     drawn, answered = logic.answers_applied(new, shown, "X", "multiple_family", OPTS)    # Edit site… → Check / Draw
@@ -223,7 +226,7 @@ def test_ok_saves_exactly_the_rows_facts_as_one_undo_step_then_checks():
 
     ns = _plugin(doc, dialog)
     ns["enter_rooms"](["dwelling_units", "conversion"])
-    assert seen["bad"].startswith("Not saved. Dwelling units: a whole number")
+    assert seen["bad"].startswith("Not saved. Dwelling units on this lot")
     assert doc.records == 1
     assert [e[0] for e in doc.log] == ["begin", "set", "set", "end"]
     assert all(rec for kind, _, rec in doc.log if kind == "set")          # every write inside the one record
@@ -269,8 +272,8 @@ def test_ok_with_nothing_new_makes_no_undo_step():
 # ---- the box changes only what it shows (Rhino run, 2026-10-28, P0: answers given, Use changed to church and
 # back, every answer came back blank and Check saved them unset; the same on any district change) ---------------
 
-BOX = {"follow_ups": {"X": {"multiple_family": ["dwelling_units", "rooms_let_for_profit", "conversion"],
-                            "two_family": ["rooms_let_for_profit", "conversion"], "church": []},
+BOX = {"follow_ups": {"X": {"multiple_family": ["dwelling_units", "attached_units_in_building", "conversion"],
+                            "two_family": ["attached_units_in_building", "conversion"], "church": []},
                       "Y": {"multiple_family": [], "two_family": []}},
        "implied": {"X": {"two_family": {"dwelling_units": 2}, "multiple_family": {}, "church": {}},
                    "Y": {"two_family": {"dwelling_units": 2}, "multiple_family": {}}}}
@@ -287,14 +290,14 @@ def _box(facts, zone, use, typed=None):
 
 def test_answers_survive_a_use_picked_and_picked_back():
     facts = _box(dict(SITE, zone="X", use="multiple_family"), "X", "multiple_family",
-                 {"dwelling_units": 5, "rooms_let_for_profit": 2, "conversion": True})          # answered, Check
-    assert (facts["dwelling_units"], facts["rooms_let_for_profit"], facts["conversion"]) == (5, 2, True)
+                 {"dwelling_units": 5, "attached_units_in_building": 2, "conversion": True})          # answered, Check
+    assert (facts["dwelling_units"], facts["attached_units_in_building"], facts["conversion"]) == (5, 2, True)
     facts = _box(facts, "X", "church")                    # Use: church (asks none of them)
     facts = _box(facts, "X", "multiple_family")           # and back
     assert logic.box_answers(BOX, "X", "multiple_family", facts) == {
-        "dwelling_units": 5, "rooms_let_for_profit": 2, "conversion": True}                  # shown again
+        "dwelling_units": 5, "attached_units_in_building": 2, "conversion": True}                  # shown again
     facts = _box(facts, "X", "multiple_family")           # Check: kept
-    assert (facts["dwelling_units"], facts["rooms_let_for_profit"], facts["conversion"]) == (5, 2, True)
+    assert (facts["dwelling_units"], facts["attached_units_in_building"], facts["conversion"]) == (5, 2, True)
     rhino = RHINO[RHINO.index("def _apply_box("):RHINO.index("def _place_spots(")]
     assert rhino.index("logic.box_applied(facts,") < rhino.index("logic.box_facts(")   # the old use, first
     assert 'use=state.get("use")' in inspect.getsource(logic.box_facts)                 # (box_facts sets the use)
@@ -302,9 +305,9 @@ def test_answers_survive_a_use_picked_and_picked_back():
 
 def test_answers_survive_a_district_picked_and_picked_back():
     facts = _box(dict(SITE, zone="X", use="multiple_family"), "X", "multiple_family",
-                 {"dwelling_units": 5, "rooms_let_for_profit": 0, "conversion": False})
+                 {"dwelling_units": 5, "attached_units_in_building": 1, "conversion": False})
     facts = _box(_box(facts, "Y", "multiple_family"), "X", "multiple_family")
-    assert (facts["dwelling_units"], facts["rooms_let_for_profit"], facts["conversion"]) == (5, 0, False)
+    assert (facts["dwelling_units"], facts["attached_units_in_building"], facts["conversion"]) == (5, 1, False)
 
 
 def test_what_a_use_said_goes_when_the_use_changes():
@@ -333,9 +336,10 @@ def test_the_box_changes_only_the_fields_it_shows_and_what_the_uses_say():
         facts["use"] = rng.choice(uses)
         for k in STATED:
             if rng.random() < 0.5:
-                facts[k] = rng.choice([True, False]) if logic.STATED_FACTS[k][1] == "yes_no" else rng.randint(0, 6)
+                facts[k] = rng.choice([True, False]) if logic.STATED_FACTS[k][1] == "yes_no" else rng.randint(logic.minimum(k), 6)
         zone, use = rng.choice(zones), rng.choice(uses)
-        answers = {k: rng.choice([None, False, True] if logic.STATED_FACTS[k][1] == "yes_no" else [None, 0, 3])
+        answers = {k: rng.choice([None, False, True] if logic.STATED_FACTS[k][1] == "yes_no" else
+                                 [None, logic.minimum(k), 3])
                    for k in STATED if rng.random() < 0.5}                 # a field shown (None: left blank)
         said = [k for k in logic.BOX_ASKS if k in facts and rng.random() < 0.3]   # by their saved source
         before = json.loads(json.dumps(facts))
@@ -345,6 +349,8 @@ def test_the_box_changes_only_the_fields_it_shows_and_what_the_uses_say():
         for k in set(before) | set(out):
             if k in now:
                 assert out[k] == now[k] and k in track["said"]
+            elif k in logic.ASKED_AFTER and logic.ASKED_AFTER[k] in logic.BOX_ASKS and answers.get(logic.ASKED_AFTER[k]) is False:
+                assert k not in out                                        # answered no to what it waits on: moot
             elif k in answers and k in logic.BOX_ASKS:
                 assert out.get(k) == answers[k]                            # shown: its answer, blank unset
             elif k in said:
@@ -358,16 +364,16 @@ def test_reviewed_flows_typed_answers_survive_and_never_revert():
     # F1: a new project, answers typed, Use church and back: every answer as typed
     g = dict(SITE, zone="X", use="multiple_family")
     t = logic.box_track(g, {})
-    g, t = logic.box_applied(g, {"dwelling_units": 5, "rooms_let_for_profit": 2, "conversion": True}, "X", "church",
+    g, t = logic.box_applied(g, {"dwelling_units": 5, "attached_units_in_building": 2, "conversion": True}, "X", "church",
                              BOX, t)
     g = dict(g, use="church")
     g, t = logic.box_applied(g, logic.box_answers(BOX, "X", "church", g), "X", "multiple_family", BOX, t)
     assert logic.box_answers(BOX, "X", "multiple_family", dict(g, use="multiple_family")) == {
-        "dwelling_units": 5, "rooms_let_for_profit": 2, "conversion": True}
+        "dwelling_units": 5, "attached_units_in_building": 2, "conversion": True}
     # F1: 5 saved at an earlier Draw, 9 typed (the real count), church and back: 9, never the older 5 (a false pass)
     f = dict(SITE, zone="X", use="multiple_family", dwelling_units=5)
     t = logic.box_track(f, {"dwelling_units": {"value": 5, "source": logic.ENTERED}})
-    f, t = logic.box_applied(f, {"dwelling_units": 9, "rooms_let_for_profit": None, "conversion": None}, "X",
+    f, t = logic.box_applied(f, {"dwelling_units": 9, "attached_units_in_building": None, "conversion": None}, "X",
                              "church", BOX, t)
     f, t = logic.box_applied(dict(f, use="church"), {}, "X", "multiple_family", BOX, t)
     assert f["dwelling_units"] == 9
@@ -406,15 +412,91 @@ def test_every_answer_typed_in_the_box_is_saved_as_yours_at_draw():
     saved = {"conversion": {"value": "no", "source": logic.ENTERED, "confirmed_by": "you", "date": "2026-10-01"},
              "zone": {"value": "X"}}
     f = {"zone": "X", "use": "multiple_family", "conversion": False}
-    f, t = logic.box_applied(f, {"conversion": True, "rooms_let_for_profit": 3}, "X", "church", BOX,
+    f, t = logic.box_applied(f, {"conversion": True, "attached_units_in_building": 3}, "X", "church", BOX,
                              logic.box_track(f, saved))
     out = logic.sources_kept(saved, f)
     out.update(logic.fact_sources({"zone": "X", "use": "church", "options": BOX, "answers": {}}, "2026-10-28", True))
     out = logic.typed_sources(out, t, f, "2026-10-28")
     assert out["conversion"] == {"value": "yes", "source": logic.ENTERED, "confirmed_by": "you", "date": "2026-10-28"}
-    assert out["rooms_let_for_profit"]["value"] == 3 and out["rooms_let_for_profit"]["source"] == logic.ENTERED
+    assert out["attached_units_in_building"]["value"] == 3 and out["attached_units_in_building"]["source"] == logic.ENTERED
     drawn = RHINO[RHINO.index("def _drawn("):RHINO.index("def hide_massing(")]
     assert 'logic.typed_sources(sources, ui_state.get("_answers"), out, logic.city_day())' in drawn
     apply_ = RHINO[RHINO.index("def _apply_box("):RHINO.index("def _place_spots(")]
     assert 'saved_ui.get("_answers") or logic.box_track(facts, fact_sources(doc))' in apply_
     assert "saved_ui = dict(saved_ui, _answers=track)" in apply_
+
+
+# ---- with #45's box (facts-up-front): use details out of the box, typed areas and lengths, one-click answers --------
+
+USE45 = {"follow_ups": {"R": {"one_family_detached": ["unrelated_persons", "owner_occupied", "home_occupation",
+                                                      "home_occupation_area", "home_occupation_unit_area",
+                                                      "stream_near_lot", "stream_distance"],
+                              "church": ["stream_near_lot", "stream_distance"]}},
+         "implied": {"R": {"one_family_detached": {}, "church": {}}}}
+
+
+def test_use_details_stay_as_answered_whatever_the_use():
+    """Use details (DEFERRED_FACTS) are never in the box: a Use picked and picked back keeps every one, read by the
+    rules or not (#45's drop of those the new use doesn't read decided nothing and lost answers), and the facts
+    checked together stay together, so a contradiction between them is never hidden."""
+    facts = dict(SITE, zone="R", use="one_family_detached", unrelated_persons=2, unrelated_persons_with_children=1,
+                 home_occupation=True, home_occupation_area=250, home_occupation_unit_area=1500.5, owner_occupied=True)
+    track = logic.box_track(facts, {})
+    after, track = logic.box_applied(facts, logic.box_answers(USE45, "R", "one_family_detached", facts), "R",
+                                     "church", USE45, track)
+    after, track = logic.box_applied(dict(after, use="church"), logic.box_answers(USE45, "R", "church", after), "R",
+                                     "one_family_detached", USE45, track)
+    for k in logic.DEFERRED_FACTS:
+        assert after.get(k) == facts.get(k), k
+    for pair in logic.CHECKED_TOGETHER:
+        assert all(k in after for k in pair) or not any(k in after for k in pair)
+    assert not set(logic.DEFERRED_FACTS) & set(logic.BOX_ASKS)
+
+
+def test_a_stream_distance_goes_with_a_no_and_stays_through_a_use_that_doesnt_ask():
+    """#45's protection, kept: "no stream within 20 ft" answered in the box makes an old distance moot, so it goes
+    (kept, 5 ft beside "no" would make the facts disagree). A Use pick that doesn't show the stream question keeps
+    both, and they come back with a use that asks them."""
+    facts = dict(SITE, zone="R", use="church", stream_near_lot=True, stream_distance=19.5)
+    no, _ = logic.box_applied(facts, {"stream_near_lot": False, "stream_distance": 19.5}, "R", "church", USE45,
+                              logic.box_track(facts, {}))
+    assert no["stream_near_lot"] is False and "stream_distance" not in no
+    blank, _ = logic.box_applied(facts, {"stream_near_lot": None, "stream_distance": 19.5}, "R", "church", USE45,
+                                 logic.box_track(facts, {}))
+    assert "stream_near_lot" not in blank and blank["stream_distance"] == 19.5     # nothing contradicts it
+    opts = {"follow_ups": {"R": {"church": ["stream_near_lot", "stream_distance"], "school": []}}, "implied": {}}
+    there, t = logic.box_applied(facts, {"stream_near_lot": True, "stream_distance": 19.5}, "R", "school", opts,
+                                 logic.box_track(facts, {}))
+    back, _ = logic.box_applied(dict(there, use="school"), {}, "R", "church", opts, t)
+    assert (back["stream_near_lot"], back["stream_distance"]) == (True, 19.5)
+
+
+def test_the_row_dialog_takes_areas_lengths_and_least_counts():
+    needs = ["home_occupation_area", "stream_distance", "occupants_most_in_one_unit"]
+    out = logic.row_answers_applied({}, needs, {"home_occupation_area": "1,500.5", "stream_distance": "19.96",
+                                                "occupants_most_in_one_unit": "1"})
+    assert out == {"home_occupation_area": 1500.5, "stream_distance": 19.96, "occupants_most_in_one_unit": 1}
+    for bad in ({"home_occupation_area": "2,5"}, {"stream_distance": "-1"}, {"occupants_most_in_one_unit": "0"}):
+        assert logic.row_problem({}, needs, bad).startswith("Not saved. ")      # never rounded, never below its least
+    assert [f["kind"] for f in logic.row_fields(needs, {})] == ["area", "length", "count"]
+
+
+def test_use_details_answered_in_the_row_dialog_are_yours_and_kept_at_draw():
+    needs = ["unrelated_persons", "owner_occupied"]
+    new = logic.row_answers_applied(SITE, needs, {"unrelated_persons": "2", "owner_occupied": "yes"})
+    sources = logic.row_sources({}, needs, new, "2026-10-28")
+    assert sources["unrelated_persons"] == {"value": 2, "source": logic.ENTERED, "confirmed_by": "you",
+                                            "date": "2026-10-28"} and sources["owner_occupied"]["value"] == "yes"
+    assert logic.sources_kept(sources, new) == sources                          # kept at Draw while set
+    assert logic.sources_kept(sources, dict(new, unrelated_persons=None)) == {"owner_occupied": sources["owner_occupied"]}
+
+
+def test_a_quick_answer_counts_as_typed():
+    """A one-click answer fills fields the box shows; each is the architect's, saved "entered by you" at Draw."""
+    facts = dict(SITE, zone="R", use="church")
+    words, picks = logic.quick_answers(logic.follow_up_keys(USE45, "R", "church"))[0]
+    assert picks == {"stream_near_lot": False}
+    after, track = logic.box_applied(facts, dict(logic.box_answers(USE45, "R", "church", facts), **picks), "R",
+                                     "church", USE45, logic.box_track(facts, {}))
+    src = logic.typed_sources({}, track, after, "2026-10-28")
+    assert src["stream_near_lot"]["source"] == logic.ENTERED and src["stream_near_lot"]["value"] == "no"

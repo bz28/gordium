@@ -2869,34 +2869,11 @@ def _yes_no(prompt, current):
     return bool(rc[1]) if rc[0] == Rhino.Commands.Result.Success else current
 
 
-def _count(prompt):
-    """A whole number the architect types, or None when the prompt is skipped (never a default)."""
-    gi = Rhino.Input.Custom.GetInteger()
-    gi.SetCommandPrompt(prompt + " (Enter to skip)")
-    gi.AcceptNothing(True)
-    gi.SetLowerLimit(0, False)
-    got = gi.Get()
-    _go_on(got)
-    return gi.Number() if got == Rhino.Input.GetResult.Number else None
-
-
 def _ask_in_city():
     """The City's date (logic.city_day) when the architect says Yes to logic.IN_CITY_QUESTION, else None (No, or the dialog closed)."""
     got = ef.MessageBox.Show(Rhino.UI.RhinoEtoApp.MainWindow, logic.IN_CITY_QUESTION, "Gordium",
                              ef.MessageBoxButtons.YesNo, ef.MessageBoxType.Question, ef.MessageBoxDefaultButton.No)
     return logic.city_day() if got == ef.DialogResult.Yes else None
-
-
-def _ask_yes_no_or_skip(prompt):
-    """Yes (True) or No (False), or None when the prompt is skipped (never a default; _yes_no keeps a current
-    answer instead)."""
-    go = Rhino.Input.Custom.GetOption()
-    go.SetCommandPrompt(prompt + " (Enter to skip)")
-    yes, no = go.AddOption("Yes"), go.AddOption("No")
-    go.AcceptNothing(True)
-    got = go.Get()
-    _go_on(got)
-    return (go.OptionIndex() == yes) if got == Rhino.Input.GetResult.Option else None
 
 
 def change_facts(doc, facts, options):

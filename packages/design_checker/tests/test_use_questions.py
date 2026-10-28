@@ -92,8 +92,11 @@ def test_only_the_facts_this_districts_rules_need_for_the_use_are_asked():
     assert implied_for(X, "two_family", NAMES) == {"dwelling_units": 2}
     assert implied_for(X, "school", NAMES) == {}                  # no rule reads its units: nothing sent
     city = options(CITY)
-    assert all(v == [] for v in city["follow_ups"]["R-1b"].values())       # R-1b's rules need none of them today
-    assert all(v == {} for v in city["implied"]["R-1b"].values())          # so nothing is sent the checker can't use
+    # R-1b's rules read no unit counts, rooms let or conversion (they read #38's household and home-occupation facts,
+    # asked in "About this project"): so nothing is implied for a use, nothing is sent the checker can't use
+    unit_facts = {"dwelling_units", "rooms_let_for_profit", "conversion"}
+    assert not any(unit_facts & set(v) for v in city["follow_ups"]["R-1b"].values())
+    assert all(v == {} for v in city["implied"]["R-1b"].values())
 
 
 def test_an_attached_dwellings_units_are_asked_never_taken_as_one():
@@ -102,11 +105,13 @@ def test_an_attached_dwellings_units_are_asked_never_taken_as_one():
     assert logic.implied_facts("one_family_attached") == {} and logic.implied_facts("one_family_semi_detached") == {}
     assert follow_up_facts(X, "one_family_attached", NAMES) == ["dwelling_units", "rooms_let_for_profit", "conversion"]
     opts = _opts()
-    facts, _ = logic.answers_applied({"use": "one_family_attached", "lot_area": 6500},
-                                     {"rooms_let_for_profit": 0, "conversion": False}, "X", "one_family_attached", opts)
+    # rooms let for profit is a use detail (rhino_logic.DEFERRED_FACTS): answered in the panel, so it is in the facts
+    # already; the box answers the units and the conversion
+    facts, _ = logic.answers_applied({"use": "one_family_attached", "lot_area": 6500, "rooms_let_for_profit": 0},
+                                     {"conversion": False}, "X", "one_family_attached", opts)
     assert "dwelling_units" not in facts
     assert outcome(X[2], facts, USES) == "needs_review"           # units unanswered: never a pass
-    facts, _ = logic.answers_applied(facts, {"dwelling_units": 6, "rooms_let_for_profit": 0, "conversion": False},
+    facts, _ = logic.answers_applied(facts, {"dwelling_units": 6, "conversion": False},
                                      "X", "one_family_attached", opts)
     assert outcome(X[2], facts, USES) == "fail"                   # 6,000 + 750 x 3 = 8,250 sf needed, 6,500 given
 
@@ -122,7 +127,10 @@ def test_an_attached_dwellings_units_are_asked_never_taken_as_one():
 def test_the_answers_decide_the_rule_and_a_blank_never_passes(answers, lot, expected):
     """End to end through the checker's own verdict (outcome): the box's answers become the facts; an unanswered
     one leaves the rule needing review even on a lot big enough for any answer. Expected sizes by hand from note 7."""
-    facts, _ = logic.answers_applied({"use": "multiple_family", "lot_area": lot}, answers, "X", "multiple_family",
+    # rooms let for profit is a use detail answered in the panel (DEFERRED_FACTS): already in the facts, never the box's
+    rooms = {k: answers[k] for k in ("rooms_let_for_profit",) if k in answers}
+    box = {k: v for k, v in answers.items() if k not in rooms}
+    facts, _ = logic.answers_applied({"use": "multiple_family", "lot_area": lot, **rooms}, box, "X", "multiple_family",
                                      _opts())
     assert outcome(X[1], facts, USES) == expected
 
@@ -165,7 +173,7 @@ def test_the_box_opens_again_only_when_the_use_or_district_changes_what_it_shows
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     box = ui[ui.index("def start_box("):ui.index("def text_box_size(")]
     assert "logic.box_needs_refresh(" in box and 'pick("refresh")' in box
-    assert box.count("        refresh_if_needed()\n") == 2       # the district's dropdown and the use's
+    assert box.count("        refresh_if_needed()\n") == 3       # the district, the use, and the quick answers (a yes opens a question)
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     loop = rhino[rhino.index("def _box_loop("):rhino.index("def _lookup_start(")]
     assert 'if what != "pick:refresh":' in loop                    # a refresh is no pick in the model
@@ -205,6 +213,11 @@ def test_the_box_rows_answers_and_their_source():
     assert logic.sources_kept(saved, {"zone": "X"}) == {"zone": {"value": "X"}, "ground_marked": {"value": "1 object"}}
     assert logic.sources_kept(saved, {"zone": "X", "conversion": False}) == {
         "zone": {"value": "X"}, "ground_marked": {"value": "1 object"}, "conversion": {"value": "no"}}
+    # a use detail's (rooms let for profit, #45): its source goes with its fact, and stays while it is set (the row
+    # dialog that answers it now saves its "entered by you": row_sources)
+    rooms = {**saved, "rooms_let_for_profit": {"value": 2}}
+    assert logic.sources_kept(rooms, {"zone": "X"}) == logic.sources_kept(saved, {"zone": "X"})
+    assert logic.sources_kept(rooms, {"rooms_let_for_profit": 2})["rooms_let_for_profit"] == {"value": 2}
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     drawn = rhino[rhino.index("def _drawn("):rhino.index("def hide_massing(")]
     assert "logic.sources_kept(fact_sources(doc), out)" in drawn
@@ -230,6 +243,7 @@ def test_an_unanswered_fact_says_what_it_needs_and_its_button_opens_its_own_dial
     ui_box = ui[ui.index("def start_box("):ui.index("def row_dialog(")]
     assert 'questions = state.get("follow_ups") or []' in ui_box and 'for q in questions:' in ui_box
     assert 'state["answers"] = answers' in ui_box
+    assert "about_section(layout, questions)" in ui_box and '"About this project"' in ui_box   # the compact section
     assert "logic.answers_note(" in ui_box and "note.Text = text" in ui_box     # a refused entry is said at once
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     apply_ = rhino[rhino.index("def _apply_box("):rhino.index("def _place_spots(")]

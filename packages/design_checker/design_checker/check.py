@@ -109,11 +109,14 @@ def _why(row: dict, rules: dict, measured: dict, allowed: dict | None = None, fa
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
         rule = rules[row["Rule id"]]
+        values = {k: m.get("value") for k, m in measured.items()}
         own = _review_reasons(rule, measured, allowed, facts) if allowed is not None else []
         for name in sorted(set().union(*(formula.names(rule[k]) for k in ("applies_when", "check") if rule.get(k)))):
             if own and (measured.get(name) or {}).get("readings"):
                 continue                # needs review under every one of its readings: it changes nothing
             reason = (measured.get(name) or {}).get("reason")
+            if name in logic.OPTIONAL and not present.could_settle(rule, values, name):
+                continue        # an optional fact that can't change this row isn't why it needs review (r2 round 2)
             if (measured.get(name) or {}).get("value") is None and reason and reason not in reasons:
                 reasons.append(reason)
         reasons = own + reasons
@@ -1725,7 +1728,7 @@ def follow_up_facts(rules: list, use: str | None, uses: dict) -> list:
     says (one-family: one dwelling unit)."""
     implied = logic.implied_facts(use)
     return [k for k in logic.STATED_FACTS if k in _read_for(rules, use, uses) and k != "stories"
-            and k not in INTERIOR and k not in implied]
+            and k not in INTERIOR and k not in logic.DRAWN_FACTS and k not in implied]
 
 
 def implied_for(rules: list, use: str | None, uses: dict) -> dict:

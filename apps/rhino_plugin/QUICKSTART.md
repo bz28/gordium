@@ -2,7 +2,8 @@
 
 For an architect who has just opened Rhino. About 10 minutes the first time, then 1 minute per project.
 
-Gordium checks your massing against the City of Ithaca zoning rules (the R-1a, R-1b and R-3a districts, for now;
+Gordium checks your massing against the City of Ithaca zoning rules (the residential districts R-1a, R-1b, R-2a, R-2b,
+R-2c, R-3a, R-3aa, R-3b and RU, for now;
 the sample project below is an R-1b one-family house) while you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
@@ -267,11 +268,19 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      again, or put back the lot's own address (or clear it) and fill the rest in by hand. Outside the City: Draw
      stays off for that address, and in a new file by hand is refused, until a live lookup of that same address
      finds the lot, or you close the box. Another address looked up and found can be drawn; by hand stays refused.
-   - **Zoning district**: "entered by you" (R-1b, R-1a and R-3a can be picked), or after Look up "suggested by
-     Gordium · City of Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do,
+   - **Zoning district**: "entered by you" (R-1b, R-1a, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b and RU can be picked),
+     or after Look up "suggested by Gordium · City of Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do,
      on every new project, after every lookup and after you pick another district (a tick is for one district),
      because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
+   - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
+     near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building
+     holds. Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
+     assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
+     its full wording. Answers are saved with the project; change them in Edit site… .
+     Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
+     panel's collapsed **Use details — answer when you plan the interior** group (still needs review, not counted among
+     the building's problems, never a pass), each with its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
      survey…** to pick your surveyed outline instead.
