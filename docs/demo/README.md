@@ -14,6 +14,6 @@ All pictures are the sample project, 106 Ithaca Rd (zone R-1b, one-family house)
 | [3_edit_does_not_comply.png](3_edit_does_not_comply.png) | The house widened 4 ft into the side yard: red only on the part that is over, and a notice naming the 2 items that no longer comply (lot coverage, east side yard) |
 | [4_panel.png](4_panel.png) | The panel: every item, bad news first, with proposed, required and margin |
 | [5_zoning_report_button.png](5_zoning_report_button.png) | The panel after pressing **Zoning report…**: it writes the report in the architects' spreadsheet format, opens it and says where it was saved |
-| [6_address_lookup.png](6_address_lookup.png) | The start box after **Look up** on 106 Ithaca Rd: each fact shown with its source; the zone stays a suggestion until the architect ticks **I confirm**. Being added in the start-box address lookup PR (#19); not in this branch yet |
+| [6_address_lookup.png](6_address_lookup.png) | The start box after **Look up** on 106 Ithaca Rd: each fact shown with its source; the zone stays a suggestion until the architect ticks **I confirm**. |
 
 The step-by-step instructions that produce these screens are in [the quickstart](../../apps/rhino_plugin/QUICKSTART.md).
