@@ -2616,7 +2616,9 @@ def lookup_note(state):
     says = look.get("says") if look.get("status") in LOOKUP_INFO else None
     # the offline safety net (a saved copy shown: the services didn't answer, pick the district again) asks for
     # something: it stays on the amber line (review round 1 of this change)
-    return None if says and says.startswith(SAVED_SAYS.split("{")[0]) else says
+    # and so does the guide-only note (the State's tax map didn't answer: draw your lot over the guide; round 2)
+    asks = says and (says.startswith(SAVED_SAYS.split("{")[0]) or says == GUIDE_PREVIEW)
+    return None if asks else says
 
 
 def _question(state):

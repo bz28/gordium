@@ -423,7 +423,7 @@ def test_the_city_outline_only_clears_gordiums_drawing_then_waits_for_their_lot(
     box = site.box().look_up(guide_only("96_ithaca_rd"))
     rows, state = box.rows()
     assert not [a for a in rows["lot"]["actions"] if a[0] == "draw_lot"]
-    assert logic.lookup_note(state) == logic.GUIDE_PREVIEW and logic.GUIDE_PREVIEW not in (logic.uncertain(state) or "")
+    assert logic.GUIDE_PREVIEW in logic.uncertain(state) and logic.lookup_note(state) is None   # it asks: amber
     assert box.draw() == "open" and box.open
     assert {box.table.objects[i]["layer"] for i in ("lot1", "floor1", "floor2")} == {logic.HOLDING_LAYER}
     rows, state = box.rows()
