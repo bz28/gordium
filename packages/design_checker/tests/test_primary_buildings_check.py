@@ -1,0 +1,118 @@
+"""§325-8B(1) through the whole checker, as the panel shows it: a house and a building standing apart that could hold
+a home (a big garage or a second house). Gordium can't tell which, so the lot-area row for each primary building
+waits for the architect's count (never a pass); stated, it is decided. Expected figures by hand: R-1b, 6,000 sf for
+each one-family house; the lot is 60 x 150 = 9,000 sf."""
+
+import copy
+
+from design_checker import present, scenarios
+from design_checker.check import check_site
+
+RULE = "R-1b.lot_area_each_primary_building"
+
+
+def _rows(lot=(60, 150), **facts):
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "12_r3a_two_family_at_the_building_limits.yaml"))
+    sc["district"], sc["use"] = "R-1b", "one_family_detached"
+    w, d = lot
+    sc["lot"]["points"] = [[0, 0], [w, 0], [w, d], [0, d]]
+    sc["buildings"] = [{"id": "house", "outline": [[15, 25], [45, 25], [45, 60], [15, 60]], "base": 0, "floors": [10, 10]},
+                       {"id": "back", "outline": [[15, 100], [45, 100], [45, 125], [15, 125]], "base": 0, "floors": [10]}]
+    s, f, extras = scenarios.site(sc)
+    res = check_site(s, {**f, "main_building": "house_floor1", **facts}, extras=extras)
+    return {i["rule"]: i for i in res["view"]["items"]}
+
+
+def test_a_second_building_that_could_be_a_house_waits_for_the_count():
+    """9,000 sf holds one house (6,000) but not two (12,000): the count decides, so the row asks for it."""
+    item = _rows()[RULE]
+    assert item["status"] == present.REVIEW, item
+    assert "primary_buildings" in item["needs"], item
+
+
+def test_once_counted_the_row_is_decided():
+    assert _rows(primary_buildings=2, primary_buildings_same_use=True)[RULE]["status"] == present.FAILS
+    assert RULE not in _rows(primary_buildings=1)               # one primary building: not applicable, not shown
+    # the one-house lot-area row is unchanged: 9,000 sf of 6,000
+    assert _rows(primary_buildings=1)["R-1b.lot_area_one_family_detached"]["status"] == present.COMPLIES
+
+
+def test_a_garage_listed_as_an_accessory_building_is_not_a_second_house():
+    assert RULE not in _rows(accessory_buildings=["back_floor1"])
+
+
+def test_the_working_names_the_figure_for_the_stated_use():
+    """The required lot area's working reads as a sum an architect can follow: the stated use picks its figure, so
+    the panel says 2 × 6000 = 12,000 sf, not the whole "6000 if use == ... else 7500" choice."""
+    calc = _rows(primary_buildings=2, primary_buildings_same_use=True)[RULE]["detail"]["calc"]
+    assert calc == "Required: primary buildings 2 × 6000 = 12,000 sf", calc
+
+
+def _ru(lot_w, lot_d):
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "12_r3a_two_family_at_the_building_limits.yaml"))
+    sc["district"], sc["use"] = "RU", "two_family"
+    sc["lot"]["points"] = [[0, 0], [lot_w, 0], [lot_w, lot_d], [0, lot_d]]
+    sc["buildings"] = [{"id": "house", "outline": [[40, 40], [80, 40], [80, 80], [40, 80]], "base": 0, "floors": [10, 10]},
+                       {"id": "back", "outline": [[40, 150], [70, 150], [70, 175], [40, 175]], "base": 0, "floors": [10]}]
+    s, f, extras = scenarios.site(sc)
+    res = check_site(s, {**f, "main_building": "house_floor1"}, extras=extras)
+    return {i["rule"]: i for i in res["view"]["items"]}["RU.primary_structures"]
+
+
+def test_ru_two_possible_buildings_on_a_big_lot_never_read_as_not_complying():
+    """Review round 1 (PR2): on a 75,000 sf RU lot, two primary buildings need review for the ILPC's and the
+    Planning Board's approval (note 3), so the row's words never say "does not comply" at the two-building reading;
+    on a 50,000 sf lot two don't comply, and the row says so first."""
+    big = _ru(250, 300)
+    assert big["status"] == present.REVIEW and "does not comply" not in big["reason"], big["reason"]
+    small = _ru(200, 250)
+    assert small["status"] == present.REVIEW and "does not comply under that reading" in small["reason"], small["reason"]
+
+
+def test_a_count_that_could_change_the_row_is_asked_even_on_a_big_lot():
+    """Review round 1 (PR2, F2): with a building standing apart that could be a house, Gordium doesn't decide the
+    lot-area row from the readings' ends; it asks the count (needs review), never a pass, as the docs now say."""
+    item = _rows(lot=(200, 300), primary_buildings_same_use=True)[RULE]      # 60,000 sf: enough for 1 or 2
+    assert item["status"] == present.REVIEW and "primary_buildings" in item["needs"], item
+
+
+def test_a_use_row_cited_by_two_rules_has_one_name():
+    """The full suite (test_present.test_no_two_sections_share_a_link): the lot-area row for each primary building
+    cites the chart's use row, as the use rule does; one link, one name: "Use column"."""
+    seen = {}
+    for item in _rows(primary_buildings=2, primary_buildings_same_use=True).values():
+        for c in item["detail"].get("cited") or []:
+            seen.setdefault(c["link"], set()).add(c["citation"])
+    assert all(len(names) == 1 for names in seen.values()), {k: v for k, v in seen.items() if len(v) > 1}
+
+
+def test_only_a_use_row_on_the_chart_use_page_is_named_use_column():
+    """PR2 review round 5: the "Use column" name is for a use row (its marks per district), never a note or a
+    heading on the same page: R-1b's note 1 ("NOTES: (1) ...") is note 1, RU's heading is not the Use column."""
+    from design_checker.present import citation, _documents
+    from rule_format.rulebook import REPO
+    j = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    docs, sect = _documents(j), (lambda *a: "")
+    chart = "zoning_charts_2026-04.pdf"
+    note = {"file": chart, "page": 2, "lines": [41, 41], "quote": "NOTES: (1) In R-1 and R-2 Districts, minor"}
+    head = {"file": chart, "page": 2, "lines": [6, 6], "quote": "RU [fn3] Regulations"}
+    row = {"file": chart, "page": 2, "lines": [9, 9], "quote": "One-family dwelling, detached [fn4] • • • • • • • • •"}
+    assert citation(note, "Occupancy", "R-1b", sect, docs).endswith("note 1")
+    assert "Use column" not in citation(head, "Primary structures", "RU", sect, docs)
+    assert citation(row, "Lot area", "R-1b", sect, docs).endswith("Use column")
+
+
+def test_every_link_in_an_ru_check_has_one_name():
+    """PR2 review round 6: RU.use and RU.primary_structures both cite RU's column heading ("RU [fn3] Regulations");
+    one link, one name (note 3), for every chart p.2 link across a whole RU check. (p.3's lot-size and lot-width
+    rows for a two-family dwelling share one search link already on the base branch: reported, not this PR's.)"""
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "12_r3a_two_family_at_the_building_limits.yaml"))
+    sc["district"], sc["use"] = "RU", "two_family"
+    sc["lot"]["points"] = [[0, 0], [300, 0], [300, 250], [0, 250]]
+    s, f, extras = scenarios.site(sc)
+    seen = {}
+    for item in check_site(s, f, extras=extras)["view"]["items"]:
+        for c in item["detail"].get("cited") or []:
+            if "Zoning-Charts" in c["link"] and "#page=2&" in c["link"]:
+                seen.setdefault(c["link"], set()).add(c["citation"])
+    assert seen and all(len(names) == 1 for names in seen.values()), {k: v for k, v in seen.items() if len(v) > 1}

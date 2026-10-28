@@ -40,6 +40,12 @@ functional_family_unit: {unit: yes_no, meaning: "The household is to be shown to
 home_occupation:      {unit: yes_no, meaning: "A home occupation (§325-3B: a business, studio or office run by a resident in their dwelling unit or a building accessory to it) is planned"}
 home_occupation_area: {unit: sf,     meaning: "Indoor floor area the home occupation uses, its accessory structures included"}
 home_occupation_unit_area: {unit: sf, meaning: "Floor area of the dwelling unit the home occupation is in"}
+# How many primary buildings stand on the lot (§325-3B PRIMARY STRUCTURE; §325-8B(1): each further primary use in a
+# separate building needs its own lot area; §325-7B; §325-8E). Stated by the architect, or read from the drawing
+# (model_measurement: the main building, plus each solid standing apart that could hold a home and isn't listed as
+# an accessory building; readings when it can't tell).
+primary_buildings:    {unit: count,  meaning: "Primary buildings on the lot, the main one included: each separate building holding a permitted primary use (§325-3B PRIMARY STRUCTURE: a single structure containing a use permitted in the district), 1 or more; not an accessory building (a garage, a shed, an accessory dwelling unit)"}
+primary_buildings_same_use: {unit: yes_no, meaning: "Every primary building on the lot holds the use entered for the lot (use), so each needs that use's lot area (§325-8B(1))"}
 # Yards to the building seen from above, eaves and cornices included: §325-18B lets those project up to 2 ft
 # into a required yard (the yards above are measured to the building, its eaves left out).
 front_yard_eaves:        {unit: ft, meaning: "Depth of the front yard measured to the outermost part of the building, eaves included"}
