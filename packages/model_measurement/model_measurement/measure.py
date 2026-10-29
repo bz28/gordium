@@ -45,7 +45,7 @@ STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking
           "functional_family_unit": "yes_no", "home_occupation": "yes_no", "home_occupation_area": "sf",
           "home_occupation_unit_area": "sf", "accessory_dwelling_unit": "yes_no",
           "primary_buildings": "count", "primary_buildings_same_use": "yes_no",
-          "south_hill_overlay": "yes_no"}
+          "south_hill_overlay": "yes_no", "stream_near_lot": "yes_no", "stream_distance": "ft"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
        "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
        "occupants": "no_occupants", "occupants_most_in_one_unit": "no_occupant_split",
@@ -55,7 +55,7 @@ ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "
        "home_occupation": "no_home_occupation", "home_occupation_area": "no_home_occupation",
        "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_household",
        "primary_buildings": "no_primary_buildings", "primary_buildings_same_use": "no_primary_buildings",
-       "south_hill_overlay": "no_south_hill"}
+       "south_hill_overlay": "no_south_hill", "stream_near_lot": "no_stream", "stream_distance": "no_stream"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",
@@ -65,6 +65,7 @@ YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
 EAVE_YARDS = tuple(f"{y}_eaves" for y in YARDS)
 ACCESSORY_YARDS = ("accessory_front_yard", "accessory_side_yard", "accessory_rear_yard")
 LOT_LINE_MEASURES = ("lot_width", "lot_depth") + YARDS + EAVE_YARDS + ACCESSORY_YARDS   # need the street side
+STREAM_SETBACK = 20       # ft: §325-26, the only distance stream_near_lot is asked about ("within 20 ft of the lot")
 TOUCH = 0.1               # ft: a solid this close to the main building (in plan) is part of it (a porch, steps)
 
 
@@ -1803,6 +1804,12 @@ def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
     if type(without) is int and type(with_) is int and with_ < without:
         out.append((stop("household_counts_disagree", without=without, with_=with_),
                     ("unrelated_persons", "unrelated_persons_with_children")))
+    # "no inlet wall or stream bank within 20 ft of the lot" and a new structure under 20 ft from one can't both be
+    # true (a structure stands on the lot): which answer is wrong can't be told, so both are set aside (PR4 review
+    # round 1 set aside only the "no"; round 2 asked both again)
+    distance = facts.get("stream_distance")
+    if facts.get("stream_near_lot") is False and type(distance) in (int, float) and distance < STREAM_SETBACK:
+        out.append((stop("stream_facts_disagree", distance=distance), ("stream_near_lot", "stream_distance")))
     # the occupants of every unit on the lot together, and the most in any one unit (R-2c notes 4-6): the most in one
     # unit can't be more than all of them, and the units can't hold more than units x the most in one (#38 review
     # round 1: 2 units, 10 occupants, at most 1 in a unit read as "both units lived in" and complied on 7,200 sf)

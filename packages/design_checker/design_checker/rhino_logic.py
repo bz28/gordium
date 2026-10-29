@@ -239,6 +239,13 @@ STATED_FACTS = {
                           "the primary buildings on the lot"),
     "primary_buildings_same_use": ("Does every primary building on the lot hold the use entered for the lot?",
                                    "yes_no", "whether every primary building holds the lot's use"),
+    # a stream or inlet near the lot (§325-26): the model doesn't show the water; the distance in feet as typed
+    # (never rounded: 19.96 ft typed as 20 would pass)
+    "stream_near_lot": ("Is any inlet wall, or the bank of an inlet channel or stream (at average water level), within "
+                        "20 ft of the lot? (§325-26)", "yes_no", "whether a stream or inlet is within 20 ft of the lot"),
+    "stream_distance": ("Least horizontal distance from any new structure (house, addition, garage, deck, fence; not a "
+                        "patio) to that wall or bank, at average water level (ft)", "length",
+                        "the distance from the stream"),
     "south_hill_overlay": ("Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?", "yes_no",
                            "whether the lot is in the South Hill Overlay"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
@@ -311,11 +318,11 @@ def update_counts(facts, answers):
             if n < minimum(key) or n != answers[key]:
                 raise ValueError(f"{key} must be a whole number, {minimum(key)} or more")
             out[key] = n
-    for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "area"]:
+    for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind in ("area", "length")]:
         if answers.get(key) is not None:
             a = answers[key]
             if type(a) not in (int, float) or not math.isfinite(a) or a < 0:
-                raise ValueError(f"{key} must be a number of square feet, 0 or more")
+                raise ValueError(f"{key} must be a number of {'square feet' if STATED_FACTS[key][1] == 'area' else 'feet'}, 0 or more")
             out[key] = a
     for key in [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "yes_no"]:
         if answers.get(key) is not None:

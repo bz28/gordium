@@ -122,6 +122,10 @@ STOPS = {
     "no_primary_buildings": "enter the primary buildings on the lot (each separate building holding a home or other "
                             "permitted primary use, the main one included; not a garage, shed or accessory dwelling "
                             "unit) and whether every one holds the use entered (§325-8B(1))",
+    "no_stream": "say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if "
+                 "so, how far the nearest new structure is from it (§325-26)",
+    "stream_facts_disagree": "no stream or inlet is said to be within 20 ft of the lot, but a new structure is said to be "
+                             "{distance} ft from one: check both answers",
     "no_south_hill": "say whether the lot is in the South Hill Overlay District (§325-8E, on the City's zoning map)",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings

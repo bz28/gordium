@@ -167,3 +167,22 @@ def test_the_south_hill_overlay_allows_one_primary_structure(district):
              ({}, "needs_review")]
     for facts, expect in cases:
         assert outcome(r, facts, USES) == expect, facts
+
+
+# ---- §325-26: "No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet
+# channel or stream, measured at an average water level" -------------------------------------------------------
+@pytest.mark.parametrize("district", DISTRICTS)
+def test_new_structures_keep_20_ft_from_a_stream_bank(district):
+    r = rules_of(district)[f"{district}.stream_setback"]
+    cases = [({"stream_near_lot": False}, "pass"),                         # nothing within 20 ft of the lot
+             ({"stream_near_lot": True, "stream_distance": 20}, "pass"),   # "nearer than 20 feet" is barred
+             ({"stream_near_lot": True, "stream_distance": 25.5}, "pass"),
+             ({"stream_near_lot": True, "stream_distance": 19.99}, "fail"),
+             ({"stream_near_lot": True, "stream_distance": 0}, "fail"),
+             ({"stream_near_lot": True}, "needs_review"),
+             ({"stream_distance": 30}, "pass"),                            # 30 ft from it, whatever else is said
+             ({"stream_distance": 10}, "needs_review"),                    # near the lot or not: not said
+             ({}, "needs_review")]                                         # never a pass on a blank
+    for facts, expect in cases:
+        assert outcome(r, {"use": "one_family_detached", **facts}, USES) == expect, facts
+    assert "applies_when" not in r                                       # every use, every residential district

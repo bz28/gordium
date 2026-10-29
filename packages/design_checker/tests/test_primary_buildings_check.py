@@ -91,6 +91,28 @@ def test_a_count_that_could_change_the_row_is_asked_even_on_a_big_lot():
     assert item["status"] == present.REVIEW and "primary_buildings" in item["needs"], item
 
 
+def test_the_stream_row_waits_for_the_architect_and_then_decides():
+    """§325-26 through the checker: nothing said about streams needs review and asks; "no stream within 20 ft of the
+    lot" complies; a deck 12 ft from the bank does not comply."""
+    blank = _rows(primary_buildings=1)["R-1b.stream_setback"]
+    assert blank["status"] == present.REVIEW and blank["needs"] == ["stream_near_lot", "stream_distance"], blank
+    assert _rows(primary_buildings=1, stream_near_lot=False)["R-1b.stream_setback"]["status"] == present.COMPLIES
+    near = _rows(primary_buildings=1, stream_near_lot=True, stream_distance=12)["R-1b.stream_setback"]
+    assert near["status"] == present.FAILS
+
+
+def test_contradictory_stream_answers_never_pass():
+    """PR4 review round 1 (P1): "no stream within 20 ft of the lot" with a structure said to be 5 ft from a bank
+    contradict each other (a structure stands on the lot); the "no" is set aside, so the row needs review and says
+    why, never complies."""
+    item = _rows(primary_buildings=1, stream_near_lot=False, stream_distance=5)["R-1b.stream_setback"]
+    assert item["status"] == present.REVIEW, item
+    assert "check both answers" in item["reason"], item["reason"]
+    # no contradiction at 20 ft or more: complies
+    assert _rows(primary_buildings=1, stream_near_lot=False, stream_distance=25)["R-1b.stream_setback"]["status"] \
+        == present.COMPLIES
+
+
 def test_a_use_row_cited_by_two_rules_has_one_name():
     """The full suite (test_present.test_no_two_sections_share_a_link): the lot-area row for each primary building
     cites the chart's use row, as the use rule does; one link, one name: "Use column"."""

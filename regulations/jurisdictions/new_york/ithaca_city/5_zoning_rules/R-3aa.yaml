@@ -929,6 +929,74 @@ rules:
     drafted_by: claude
     status: draft
 
+  - id: R-3aa.stream_setback
+    kind: rule
+    topic: dimensions
+    title: "New structures at least 20 ft from an inlet wall or stream bank (§325-26)"
+    check: not stream_near_lot or stream_distance >= 20
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [15, 19]
+        quote: "No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities. (See illustration below.) Properties located within the Cherry Street District, the Market District, the Newman District, and the West End/Waterfront District are exempt from this requirement."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 19
+        lines: [19, 20]
+        quote: "STRUCTURE — Anything constructed or erected on the ground or which is attached to another structure or building. Structures shall not include patios or terraces."
+    examples:
+      - given: {stream_near_lot: false}
+        expect: pass
+        note: nothing within 20 ft of the lot, so no structure on it can be nearer
+      - given: {stream_near_lot: true, stream_distance: 20}
+        expect: pass
+        note: at the limit ("nearer than 20 feet" is what's barred)
+      - given: {stream_near_lot: true, stream_distance: 19.9}
+        expect: fail
+      - given: {stream_near_lot: true}
+        expect: needs_review
+        note: a stream or inlet near the lot, the distance not given
+      - given: {stream_distance: 35}
+        expect: pass
+        note: the nearest new structure is 35 ft from it, whatever else is said
+      - given: {stream_distance: 12}
+        expect: needs_review
+        note: whether a stream or inlet is near the lot not said
+      - given: {}
+        expect: needs_review
+        note: nothing said about streams, never a pass
+    findings:
+    - id: stream_setback_measured_level
+      question: How is §325-26's 20 ft measured?
+      kind: law
+      answer: 'Across, level, from the new structure to the point where the average water level meets the bank (or the inlet wall): the section''s own illustration (p.67 of the PDF, below the text; read from the page, research §7) draws "20'' MIN" as a horizontal dimension from the structure''s face to the bank at "AVERAGE LEVEL", between the high-water and low-water lines; the text says the distance is "measured at an average water level".'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [15, 16]
+        quote: No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level
+      report: docs/research/2026-10-27_audit_gaps.md §7
+    - id: stream_setback_every_structure
+      question: Which structures does §325-26 reach?
+      kind: law
+      answer: 'Every new structure: "Anything constructed or erected on the ground or which is attached to another structure or building", so a garage, a deck, a shed or a fence as well as the house; patios and terraces are not structures. Its exception is for structures "directly connected with marine or public or commercial recreation activities".'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 19
+        lines: [19, 20]
+        quote: STRUCTURE — Anything constructed or erected on the ground or which is attached to another structure or building. Structures shall not include patios or terraces.
+      report: docs/research/2026-10-27_audit_gaps.md §7
+    notes: >-
+      Gordium's model doesn't show the water, so the architect states whether any inlet wall or stream bank (at average
+      water level) is within 20 ft of the lot (stream_near_lot) and, if so, the least distance from any new structure
+      to it (stream_distance, measured across, level, as the section's illustration shows). Both blank by default: a
+      blank needs review, never a pass. An addition counts as new construction (Gordium asks the cautious way). Not
+      applied: the exception for structures "directly connected with marine or public or commercial recreation
+      activities" (a dock or boathouse): Gordium shows such a structure nearer than 20 ft as not complying; ask the
+      zoning office. The districts exempted by name (Cherry Street, Market, Newman, West End/Waterfront) aren't
+      residential districts.
+    drafted_by: claude
+    status: draft
+
   - id: R-3aa.lot_size_zero_lot_line
     kind: flag
     topic: dimensions
