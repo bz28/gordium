@@ -10,13 +10,20 @@ from pathlib import Path
 
 from rule_format.rulebook import load
 
+from .measure import fact_conflicts as measure_conflicts
 from .measure import measure
 from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
-               "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
-               "eaves_confirmed", "unsettled", "ground_assumed", "ground_fall", "plan_north_deg", "street_ids"}
+               "dwelling_units", "rooms_let_for_profit", "conversion", "occupants",
+               "occupants_most_in_one_unit", "attached_units_in_building", "abuts_r1_district",
+               "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
+               "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
+               "primary_buildings", "primary_buildings_same_use", "south_hill_overlay",
+               "stream_near_lot", "stream_distance",
+               "grade_points", "grade_from", "grade_is", "unsettled", "ground_fall", "address_street_line", "accessory_buildings", "accessory_frame",
+               "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).
@@ -31,6 +38,19 @@ def _point(p) -> bool:
     return isinstance(p, list) and len(p) == 2 and all(_number(v) for v in p)
 
 
+def fact_conflicts(facts: dict) -> list[str]:
+    """Lot facts that are each well formed but disagree with each other. Not a refusal (the check runs; the rows they
+    decide need review): the panel shows each one, so the architect can correct the count."""
+    return [message for message, _ in fact_conflict_rows(facts)]
+
+
+def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
+    """fact_conflicts, each with the facts to correct it (the panel's "Enter …" button asks those). The measuring sets
+    each of those facts aside with the same reason (measure.fact_conflicts: one list). The use is set aside too when it
+    is one of the answers, but it is changed in the start box (Edit site…), not by the Enter button."""
+    return [(why, tuple(n for n in names if n != "use")) for why, names in measure_conflicts(facts)]
+
+
 def fact_problems(facts: dict) -> list[str]:
     """What's wrong with lot facts, by field. One check for every way facts arrive (a file, the Rhino command)."""
     problems = [f"unknown lot fact {k!r}" for k in sorted(set(facts) - FACT_FIELDS)]
@@ -41,10 +61,22 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("plan_north_deg must be a number (degrees the plan is turned from true north)")
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
-    for k in ("stories", "sleeping_rooms", "parking_spaces"):
+    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants",
+              "unrelated_persons", "unrelated_persons_with_children"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
-    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame"):
+    for k in ("home_occupation_area", "home_occupation_unit_area"):               # square feet, never rounded
+        if facts.get(k) is not None and not (_number(facts[k]) and facts[k] >= 0):
+            problems.append(f"{k} must be a number of square feet, 0 or more")
+    if facts.get("stream_distance") is not None and not (_number(facts["stream_distance"]) and facts["stream_distance"] >= 0):
+        problems.append("stream_distance must be a number of feet, 0 or more")       # as typed, never rounded
+    for k in ("occupants_most_in_one_unit", "attached_units_in_building",       # at least one, by definition
+              "primary_buildings"):
+        if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
+            problems.append(f"{k} must be a whole number, 1 or more")
+    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district",
+              "owner_occupied", "functional_family_unit", "home_occupation", "accessory_dwelling_unit",
+              "primary_buildings_same_use", "south_hill_overlay", "stream_near_lot"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")

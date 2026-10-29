@@ -37,8 +37,25 @@ TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
-STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
-ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms"}
+STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count",
+          "dwelling_units": "count", "rooms_let_for_profit": "count", "conversion": "yes_no",
+          "occupants": "count", "occupants_most_in_one_unit": "count",
+          "attached_units_in_building": "count", "abuts_r1_district": "yes_no",
+          "unrelated_persons": "count", "unrelated_persons_with_children": "count", "owner_occupied": "yes_no",
+          "functional_family_unit": "yes_no", "home_occupation": "yes_no", "home_occupation_area": "sf",
+          "home_occupation_unit_area": "sf", "accessory_dwelling_unit": "yes_no",
+          "primary_buildings": "count", "primary_buildings_same_use": "yes_no",
+          "south_hill_overlay": "yes_no", "stream_near_lot": "yes_no", "stream_distance": "ft"}
+ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
+       "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
+       "occupants": "no_occupants", "occupants_most_in_one_unit": "no_occupant_split",
+       "attached_units_in_building": "no_building_units", "abuts_r1_district": "no_abuts_r1",
+       "unrelated_persons": "no_household", "unrelated_persons_with_children": "no_household",
+       "owner_occupied": "no_household", "functional_family_unit": "no_household",
+       "home_occupation": "no_home_occupation", "home_occupation_area": "no_home_occupation",
+       "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_household",
+       "primary_buildings": "no_primary_buildings", "primary_buildings_same_use": "no_primary_buildings",
+       "south_hill_overlay": "no_south_hill", "stream_near_lot": "no_stream", "stream_distance": "no_stream"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",
@@ -48,6 +65,7 @@ YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
 EAVE_YARDS = tuple(f"{y}_eaves" for y in YARDS)
 ACCESSORY_YARDS = ("accessory_front_yard", "accessory_side_yard", "accessory_rear_yard")
 LOT_LINE_MEASURES = ("lot_width", "lot_depth") + YARDS + EAVE_YARDS + ACCESSORY_YARDS   # need the street side
+STREAM_SETBACK = 20       # ft: §325-26, the only distance stream_near_lot is asked about ("within 20 ft of the lot")
 TOUCH = 0.1               # ft: a solid this close to the main building (in plan) is part of it (a porch, steps)
 
 
@@ -1714,6 +1732,7 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
             for name, unit in STATED.items():           # what the architect stated still stands
                 if facts.get(name) is not None:
                     out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")
+            _set_aside_conflicts(out, facts)
             if facts.get("zone"):
                 out["district"] = _record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
     finally:
@@ -1762,12 +1781,85 @@ def pick_main(buildings: list[dict], facts: dict) -> tuple:
     return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
+# the dwelling units a use itself says (§325-3B: a one-family dwelling is a dwelling unit; a two-family dwelling holds two)
+IMPLIED_UNITS = {"one_family_detached": 1, "two_family": 2}
+
+
+def fact_conflicts(facts: dict) -> list[tuple[str, tuple]]:
+    """Stated facts each well formed but contradicting each other: (the reason, the facts in it). Every fact in one is
+    set aside with that reason (_set_aside_conflicts), so no row reading it can comply on facts that contradict each
+    other (#38: R-1b's occupancy row complied on two unrelated-people counts that disagreed, because only the count
+    R-3 and RU read was set aside); the panel also shows each one as a "Lot facts disagree" row with the button to
+    re-enter them (project.fact_conflict_rows)."""
+    out = []
+    here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
+    if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
+        # the use is one of the answers too (review round 4: not an attached house, the counts don't clash), so it is
+        # set aside with them and the rows that read it need review (R-2c.use complied beside the clash)
+        out.append((stop("attached_counts_disagree", here=here, building=building),
+                    ("dwelling_units", "attached_units_in_building", "use")))
+    # the unrelated people counted with minor dependent children can't be fewer than without them: a mistyped pair,
+    # and which count is wrong can't be told (review round 2 set aside only the one R-3 and RU read)
+    without, with_ = facts.get("unrelated_persons"), facts.get("unrelated_persons_with_children")
+    if type(without) is int and type(with_) is int and with_ < without:
+        out.append((stop("household_counts_disagree", without=without, with_=with_),
+                    ("unrelated_persons", "unrelated_persons_with_children")))
+    # "no inlet wall or stream bank within 20 ft of the lot" and a new structure under 20 ft from one can't both be
+    # true (a structure stands on the lot): which answer is wrong can't be told, so both are set aside (PR4 review
+    # round 1 set aside only the "no"; round 2 asked both again)
+    distance = facts.get("stream_distance")
+    if facts.get("stream_near_lot") is False and type(distance) in (int, float) and distance < STREAM_SETBACK:
+        out.append((stop("stream_facts_disagree", distance=distance), ("stream_near_lot", "stream_distance")))
+    # the occupants of every unit on the lot together, and the most in any one unit (R-2c notes 4-6): the most in one
+    # unit can't be more than all of them, and the units can't hold more than units x the most in one (#38 review
+    # round 1: 2 units, 10 occupants, at most 1 in a unit read as "both units lived in" and complied on 7,200 sf)
+    total, most = facts.get("occupants"), facts.get("occupants_most_in_one_unit")
+    if type(total) is int and type(most) is int:
+        stated = facts.get("dwelling_units")
+        units = stated if type(stated) is int else IMPLIED_UNITS.get(facts.get("use"))
+        # an accessory dwelling unit on the lot (or not said) is one more unit whose occupants count too (review round 2:
+        # a house of 2 and an ADU of 2 are 4 occupants, at most 2 in one): no ceiling then. No unit at all is the
+        # rules' own case (R-2c: "no dwelling unit stated"), not this one.
+        if most > total:
+            out.append((stop("occupant_split_disagree", most=most, occupants=total),
+                        ("occupants", "occupants_most_in_one_unit")))
+        elif units and facts.get("accessory_dwelling_unit") is False and total > units * most:
+            # "no ADU" is one of the answers that can't all be true (review round 3: R-1b's occupancy rule reads it and
+            # complied on it), so it is set aside too; the units only when stated (else the use's own, §325-3B)
+            said = type(stated) is int          # the units entered, or the use's own count (review round 4: say which)
+            out.append((stop("occupant_counts_disagree", occupants=total, units=units,
+                             unit_words=("dwelling unit" if units == 1 else "dwelling units") + (
+                                 "" if said else " (what this use is, §325-3B)"),
+                             most=most, held=units * most,
+                             check="the occupant counts, the dwelling units" if said else "the use, the occupant counts"),
+                        # the use's own count is an answer too (review round 4: R-1a.use complied on a one-family house
+                        # whose counts fit only a two-family one), so then the use is set aside with them
+                        ("occupants", "occupants_most_in_one_unit", "accessory_dwelling_unit")
+                        + (("dwelling_units",) if said else ("use",))))
+    return out
+
+
+def _set_aside_conflicts(out: dict, facts: dict) -> None:
+    """Every stated fact in a contradiction (fact_conflicts) is set aside with the contradiction as its reason: the
+    rules that read it need review, saying so, and never comply on it."""
+    for why, names in fact_conflicts(facts):
+        for name in names:
+            before = out.get(name) or {}
+            # the use is changed in the start box, not by an "Enter …" button: the row that reads it says where
+            # (R-2c lists every use's rows as needs review, and the use row didn't say how to fix it)
+            pointer = stop("change_use_in_start_box")
+            why_here = why + "; " + pointer if name == "use" and pointer not in (before.get("reason") or "") else why
+            reason = why_here if before.get("value") is not None or not before.get("reason") else before["reason"] + "; " + why_here
+            out[name] = _record(name, STATED[name], reason=reason)
+
+
 def _measure(site: dict, facts: dict) -> dict[str, dict]:
     out = {}
     for name, unit in STATED.items():
         v = facts.get(name)
         out[name] = (_record(name, unit, v, "stated by the architect (not measured from the model)")
                      if v is not None else _record(name, unit, reason=stop(ASK[name])))
+    _set_aside_conflicts(out, facts)
     # the lot's zoning district is the zone the architect stated (the facts' "zone")
     out["district"] = (_record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
                        if facts.get("zone") else _record("district", "text", reason=stop("no_district")))
@@ -1866,6 +1958,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                 "the solids on the Building layer standing apart from the main building (§325-25)",
                 [i for b in detached for i in _parts(b)]))
     out["accessory_distances_apply"] = _distances_apply(facts, detached, why_building or why_main)
+    out["primary_buildings"] = _primary_buildings(out["primary_buildings"], facts, detached, why_building or why_main)
 
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None
@@ -2057,6 +2150,34 @@ def _touching(seed: dict, candidates: list[dict], plans: dict) -> list[dict]:
         found += new
         grown = ops.unary_union([grown] + [plans[b["id"]] for b in new])
     return found
+
+
+def _primary_buildings(stated: dict, facts: dict, detached: list[dict], why: str | None) -> dict:
+    """How many primary buildings stand on the lot (§325-3B PRIMARY STRUCTURE: a single structure containing a
+    permitted use; §325-8B(1): each further primary use "located in a separate building" needs its own lot area;
+    §325-7B, §325-8E). The architect's count when stated (the model can't tell a second house from a garage);
+    else read from the drawing: the main building is one, and each solid standing apart from it is a second one
+    only if it could hold a principal use (_could_be_principal: enclosed, a story tall, a habitable room's floor
+    area) and the architect hasn't listed it as an accessory building. None that could: one, measured. Some that
+    could: two readings, every one an accessory building (one) and every one a primary building (one more each);
+    the readings show the range; a rule the count could change needs review until the architect states it."""
+    name = "primary_buildings"
+    if stated.get("value") is not None:
+        return stated
+    if why:
+        return _missing(name, why)
+    listed = facts.get("accessory_buildings") or []
+    could = [b for b in detached if _could_be_principal(b) and not any(i in _parts(b) for i in listed)]
+    if not could:
+        return _record(name, "count", 1, "the main building only: every other solid touches it, is listed as an "
+                       "accessory building, or is too small or low to hold a habitable room",
+                       [])
+    ids = [i for b in could for i in _parts(b)]
+    return _record(name, "count", None, "the main building and the solids standing apart from it", ids,
+                   readings=[{"reading": "every building standing apart is an accessory building", "value": 1},
+                             {"reading": "every building standing apart that could hold a home is a primary "
+                                         "building", "value": 1 + len(could)}],
+                   reason=stop("no_primary_buildings"))
 
 
 def _distances_apply(facts: dict, detached: list[dict], why: str | None) -> dict:

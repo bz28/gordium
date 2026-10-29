@@ -6,7 +6,7 @@ not in CI. From a fresh document: GordiumStart on the sample, then:
 - labels off by default (item 1): the document's setting is off and the panel's tick unticked; a failing yard (the
   house moved 5 ft to the left, QUICKSTART test 6's failing yard) still has its shortfall label; ticking turns the labels on, saved in the document;
 - the panel (items 2, 3): no code-edition line in its header (it is in the legend's text), the column is "Delta" and
-  its cells say "to spare" / "short".
+  its cells say "+…" (to spare) / "short" / "over".
 Captures: Top view with labels off (the failing shortfall only) and on; the panel. Writes <temp>/gordium_mvp/out.json
 and frames/*.png; closes its document. Phase "close" (sc.sticky["gordium_mvp_phase"]) closes it if a run left it."""
 import json
@@ -111,7 +111,7 @@ try:
         claim("2 the legend names it", ("Checked against: " + head["code"]) in g.logic.legend_text(head["code"]))
         claim("3 the column is Delta", [c.HeaderText for c in parts["tree"].Columns][3] == "Delta",
               [c.HeaderText for c in parts["tree"].Columns])
-        claim("3 Delta in words", any(r[3].endswith(" to spare") for r in rows), [r[3] for r in rows])
+        claim("3 Delta in words", any(r[3].startswith(("+", "≥ +")) for r in rows), [r[3] for r in rows])
         # a failing yard: the house 5 ft to the left (the left side yard short under every reading); labels off
         ft = 1.0 / g._scale(doc)
         for o in g._buildings(doc):
@@ -121,12 +121,15 @@ try:
         rear = next(r for r in rows if "Side yard, Southwest" in r[0])
         claim("3 a shortfall says short", rear[3].endswith(" short"), rear)
         o = g.overlay()
-        failing = [t for _, t, st in o.yard_dims if st == "does_not_comply"]
-        claim("1 labels off: a failing yard's shortfall still labelled",
-              failing and all(g.logic.yard_label_shown(False, "does_not_comply") for _ in failing) and
-              "needs" in failing[0], failing)
-        claim("1 labels off: the others not", not g.logic.yard_label_shown(False, "complies"))
+        # (the drawing shows a failing yard's number with its ✕; what it needs is the panel's and the notice's).
+        # Top drawn last first: o.placed is the last view's (capture redraws Top)
         capture(doc, "1_labels_off_failing_shortfall_only")
+        failing = [pl[5] for j, pl in (getattr(o, "placed", None) or {}).items()
+                   if isinstance(j, int) and pl[5] and o.yard_dims[j][2] == "does_not_comply"]
+        claim("1 labels off: a failing yard's number still shown, with its ✕",
+              failing and all(g.logic.yard_label_shown(False, "does_not_comply") for _ in failing) and
+              failing[0].startswith("✕ "), failing)
+        claim("1 labels off: the others not", not g.logic.yard_label_shown(False, "complies"))
         g.set_labels(True)                                   # the panel's tick
         ui_state = g._ui_state(doc)
         claim("1 the tick turns them on, saved in the document",

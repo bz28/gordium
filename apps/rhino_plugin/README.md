@@ -35,9 +35,11 @@ Rhino: it keeps the old code loaded until then.
    needs review · complies · not checked · not covered), each with its mark, proposed, required and margin
    (feet-inches to 1/8", never rounded toward compliance); the selected item shows the code's words, the
    examiner's citation and links, and how it was measured. The viewport draws the property line with each edge's
-   length, each yard as measured with its status, the required yards shaded, the envelope see-through, and red
-   only on the part of the building inside a required yard or above the height limit (the massing stays
-   neutral). A status box (never a ✓) sits top right; a short notice bottom left when an item newly fails.
+   length, each yard as a drawing-style dimension in its status colour (the required line faint; the height
+   dimensioned in the elevations), the required yards shaded, the envelope see-through, and colour
+   only on the offending part of each building: its part inside a required yard or above the height limit (cut
+   from the solid itself, `_offending`), red where it fails under every reading, amber under some only (the
+   massing stays neutral). A status box (never a ✓) sits top right; a short notice bottom left when an item newly fails.
    Every word and number comes from the checker's `view` (`design_checker/present.py`); the Rhino side decides
    nothing. If a check can't run, the old result is cleared and the panel says why, with Retry.
 5. **After an edit** (a move, a stretch, a new or deleted object, a layer change) the results grey out ("Model
@@ -56,7 +58,7 @@ The report (`<model>_gordium_report.xlsx`) is written next to the model by `Gord
 - `packages/design_checker/tests/test_check.py::test_rhino_decisions`: which objects are sent, which facts are
   missing, skipped prompts, feet (the Rhino command's decisions, `design_checker/rhino_logic.py`, run in CI).
 - `packages/design_checker/tests/test_scenarios.py`: the hand-worked scenarios (hand-worked by Claude before Gordium ran, not yet verified by an architect)
-  (`test_data/test_sites/new_york/ithaca_city/scenarios/`), ten designs with the results worked out by hand
+  (`test_data/test_sites/new_york/ithaca_city/scenarios/`), twelve designs with the results worked out by hand
   before Gordium ran; every row matches or is an investigated disagreement, and a "does not comply" is never
   shown as complies.
 - In Rhino 8 (Mac), driven by scripts (run in Rhino, not CI): `tests/ui_flow_in_rhino.py` (from an empty file:
