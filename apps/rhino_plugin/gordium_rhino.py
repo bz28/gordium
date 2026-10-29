@@ -36,10 +36,12 @@ STATE = sc.sticky.setdefault("gordium_state", {})
 LEFTOVERS = sc.sticky.setdefault("gordium_leftovers", {})
 _MODULE = sys.modules.get(__name__)
 REPO = STATE.get("repo") or os.path.dirname(os.path.dirname(HERE))   # apps/rhino_plugin -> the repo
-JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
-CITY = "City of Ithaca"
 sys.path.insert(0, os.path.join(REPO, "packages", "design_checker", "design_checker"))
 import rhino_logic as logic  # noqa: E402  (plain Python, tested in CI: which objects, which facts)
+# the place the plugin checks, from the place registry (its jurisdiction.yaml, through rhino_logic's place.json):
+# the only place for now; a place picker would set these
+JURISDICTION = logic.PLACE["jurisdiction"]
+CITY = logic.PLACE["name"]
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 import gordium_ui as ui  # noqa: E402  (the panel, the start box, the drawing helpers)

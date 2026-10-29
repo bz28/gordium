@@ -1,4 +1,4 @@
-"""The hand-worked scenarios (test_data/test_sites/new_york/ithaca_city/scenarios/; hand-worked by Claude before Gordium ran, not yet verified by an architect):
+"""The hand-worked scenarios (the plugin's place's test_data/test_sites/<state>/<place>/scenarios/; hand-worked by Claude before Gordium ran, not yet verified by an architect):
 each scenario built as a site, checked, and compared with the result worked out by hand. The expected results are never changed to match
 Gordium; a disagreement is investigated (a code fix, or a question for the architects).
 
@@ -18,12 +18,14 @@ from pathlib import Path
 import yaml
 
 from design_checker import present
-from rule_format.rulebook import REPO, utf8_console
+from rule_format.place import plugin_place
+from rule_format.rulebook import utf8_console
 
-FOLDER = REPO / "test_data/test_sites/new_york/ithaca_city/scenarios"
-# real City of Ithaca lots, one full design per district family, every rule worked out by hand (queue item 12)
-SITES = REPO / "test_data/test_sites/new_york/ithaca_city/deep_run"
-JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
+PLACE = plugin_place()                  # the plugin's place (the registry): its test sites and its rules
+FOLDER = PLACE.test_sites / "scenarios"
+# real lots, one full design per district family, every rule worked out by hand (Ithaca: queue item 12)
+SITES = PLACE.test_sites / "deep_run"
+JURISDICTION = PLACE.jurisdiction
 # the most cautious status a rule's rows give is the rule's status
 CAUTION = {present.FAILS: 3, present.REVIEW: 2, present.NOT_CHECKED: 1, present.COMPLIES: 0}
 TOUCH = 0.1                     # ft: a left-out solid this close to the building may be part of it

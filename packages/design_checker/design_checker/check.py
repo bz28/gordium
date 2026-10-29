@@ -35,6 +35,7 @@ from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
 from rule_format import formula
+from rule_format.place import plugin_place
 from rule_format.rulebook import MEASURE_KINDS, REPO, Context, load, load_bytes, outcome, rulebook_for
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
@@ -1640,21 +1641,19 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     return out
 
 
-SAMPLE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
-
-
-SAMPLE_OUTLINE = SAMPLE / "lot_outline_tax_map.yaml"
-
-
 def sample_site() -> dict:
-    """The sample project GordiumStart offers: 106 Ithaca Rd's real lot, as the State tax map draws it (parcel
-    84.-2-6), placed exactly as the address lookup places it (lot_outline_tax_map.yaml: its source, the frame, made
-    by code from a recorded lookup), so the sample and a looked-up 106 are the same drawing and the neighbourhood
-    map lines up around it. A tax-map outline: each lot line may be 2'-0" off, so the lot size and every yard are
-    checked under every reading of where the lines are. Its facts (zone, use) prefilled for the architect to
-    confirm. Points in feet."""
-    outline = load(SAMPLE_OUTLINE)
-    facts = {**load_facts(SAMPLE / "spreadsheet_design_model_facts.yaml"), "lot_surveyed": False,
+    """The sample project GordiumStart offers, the plugin's place's sample lot (its jurisdiction.yaml sample_site;
+    Ithaca: 106 Ithaca Rd's real lot, as the State tax map draws it, parcel 84.-2-6), placed exactly as the address
+    lookup places it (lot_outline_tax_map.yaml: its source, the frame, made by code from a recorded lookup), so the
+    sample and a looked-up 106 are the same drawing and the neighbourhood map lines up around it. A tax-map outline:
+    each lot line may be 2'-0" off, so the lot size and every yard are checked under every reading of where the
+    lines are. Its facts (zone, use) prefilled for the architect to confirm. Points in feet."""
+    sample = plugin_place().sample_site
+    if sample is None:
+        raise ValueError(f"{plugin_place().name} has no sample site (sample_site in its jurisdiction.yaml)")
+    folder, address = sample["folder"], sample["address"]
+    outline = load(folder / "lot_outline_tax_map.yaml")
+    facts = {**load_facts(folder / "spreadsheet_design_model_facts.yaml"), "lot_surveyed": False,
              "street_line": outline["street_line"], "corner_lot": bool(outline.get("corner_lot")),
              "plan_north_deg": outline["frame"]["rotation_deg"],     # the plan's turn from true north: compass names
              # each street line's street, as the lookup found it: one street (Ithaca Rd), however it curves
@@ -1662,8 +1661,9 @@ def sample_site() -> dict:
              * len(outline["street_line"])}
     keep = {"jurisdiction", "zone", "use", "street_line", "corner_lot", "ground_is_flat", "grade_elevation",
             "lot_surveyed", "plan_north_deg", "street_ids"}
-    return {"address": "106 Ithaca Rd, Ithaca, NY", "lot": [list(p) for p in outline["ring"]],
-            "lot_name": "Lot · 106 Ithaca Rd · from the State tax map (parcel " + outline["source"]["print_key"]
+    return {"address": address, "lot": [list(p) for p in outline["ring"]],
+            "lot_name": "Lot · " + address.split(",")[0] + " · from the State tax map (parcel "
+                        + outline["source"]["print_key"]
                         + "), each line ±2'-0\", not a survey",
             "frame": outline["frame"],
             # the street its street line is on, as the lookup found it on the State tax map ("ITHACA RD"): the
