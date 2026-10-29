@@ -395,6 +395,11 @@ def _feet_length(doc, model):
     return model * _scale(doc)
 
 
+def _feet_volume(doc, model_volume):
+    """A volume in the model's units cubed, in cubic feet."""
+    return model_volume * _scale(doc) ** 3
+
+
 def _feet_area(doc, model_area):
     """An area in the model's units squared, in square feet."""
     return model_area * _scale(doc) ** 2
@@ -1083,7 +1088,7 @@ def PANEL_ACTIONS():
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check,
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
-            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
+            "massing": hide_massing, "switch_sides": switch_side_yards, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
             "context": show_context, "check": check_now, "auto_check": set_auto_check}
 
 
@@ -1629,7 +1634,8 @@ def _extras(doc, facts):
     lot left out, the use's name."""
     buildings = _buildings(doc)
     groups = {i for o in buildings for i in (o.Attributes.GetGroupList() or [])}
-    layers = sorted({doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings})
+    layers = sorted({logic.MASSING if logic.on_layer(path, logic.MASSING) else path   # its floors' sublayers said
+                     for path in (doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings)})   # once (F3)
     left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
@@ -2562,7 +2568,14 @@ def hide_massing(hidden):
         say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
         return
     with logic.undo_step(doc, logic.UNDO_WORDS["massing"]):
-        doc.Layers[index].IsVisible = not hidden
+        touched = logic.outermost_first([(i, layer.FullPath) for i, layer in enumerate(doc.Layers)
+                                         if not layer.IsDeleted and logic.on_layer(layer.FullPath, logic.MASSING)])
+        locks = [(i, _own_lock(doc, doc.Layers[i])) for i in touched]   # (a parent's IsVisible passes its lock down)
+        for layer in touched:
+            doc.Layers[layer].IsVisible = not hidden     # the parent and each floor's sublayer, each set (review of
+            #                                              feature 5, F2: never left to what the parent passes down)
+        for i, own in locks:                             # each layer's own lock as it was (the architect edits them)
+            _set_own_lock(doc, doc.Layers[i], own)
     doc.Views.Redraw()
 
 
@@ -2915,11 +2928,21 @@ def run_check(doc, report=True):
         second = [head["draft"].split(" · ")[0]] + [t for t in (head["lot"], head["grade"])
                                                      if "approximate" in t or "not set" in t or "existing" in t]
         o.message = (view["state"], view["summary"], [" · ".join(second)])
-        env = _envelope_brep(doc, _drawn_envelope(doc, facts, result.get("envelope"))) \
-            if STATE.get("envelope_on", True) else None
+        # on a tax-map lot the cautious envelope, every lot line 2'-0" nearer (logic.envelope_outlines)
+        outlines = logic.envelope_outlines(result.get("envelope"), result.get("plan"))
+        shown = _drawn_envelope(doc, facts, dict(result.get("envelope") or {}, outline=outlines[0])) if outlines \
+            else None
+        env = None
+        if STATE.get("envelope_on", True) and shown:
+            pieces = [_envelope_brep(doc, dict(shown, outline=ring)) for ring in outlines]
+            pieces = [b for b in pieces if b is not None]
+            if pieces:
+                env = pieces[0]
+                for b in pieces[1:]:
+                    env.Append(b)
         o.envelope = env
         o.box = env.GetBoundingBox(True) if env else rg.BoundingBox.Empty
-        drawn = _drawn_envelope(doc, facts, result.get("envelope")) if env is not None else None
+        drawn = shown if env is not None else None
         o.envelope_lines = _envelope_lines(doc, drawn) if drawn else None
         o.height_limit = (o.envelope_lines[1], logic.height_limit_text((result.get("envelope") or {}).get("top"),
                                                                        _ft_text(drawn["top"] - drawn["base"]))) \
@@ -3269,9 +3292,11 @@ def _add_lot(doc, sample):
     return doc.Objects.AddCurve(curve, attrs)
 
 
-def add_floors(doc, start):
-    """The starting building: one solid per story, stacked, as one group on Gordium::Massing (so a Move moves the
-    house), named Floor 1, 2… None, with nothing added, if a floor isn't a box Rhino can make."""
+def add_floors(doc, start, floor_to_floor=None, design_buffer=0.0):
+    """The starting building: one solid per story, stacked, as one group (so a Move moves the house), each on its own
+    sublayer Gordium::Massing::Floor 1, 2… (named Floor 1, 2…), with Gordium::Massing::Roof made for the roof, each
+    carrying how it was drawn (logic.start_tag: what Switch side yards reads). None, with nothing added, if a floor
+    isn't a box Rhino can make."""
     breps = []
     for floor in start["floors"]:
         corners = [_model_point(doc, (x, y), z) for z in (floor["base"], floor["top"]) for x, y in floor["outline"]]
@@ -3280,12 +3305,14 @@ def add_floors(doc, start):
         return None                     # nothing added: the caller says so
     group = doc.Groups.Add("Gordium starting building")
     ids = []
-    for i, (floor, brep) in enumerate(zip(start["floors"], breps)):
+    _layer(doc, logic.MASSING_ROOF)          # the roof's sublayer, ready for the architect's roof (the starting house
+    for i, (floor, brep) in enumerate(zip(start["floors"], breps)):   # is flat-topped: its top floor's top)
         a = Rhino.DocObjects.ObjectAttributes()
-        a.LayerIndex = _layer(doc, logic.MASSING)
+        a.LayerIndex = _layer(doc, logic.massing_floor(i + 1))      # each floor on its own sublayer (Ben, 2026-10-21)
         a.Name = "Floor " + str(i + 1)
         # one story, at the height drawn: what makes it count as a story (a stretched block no longer does)
         a.SetUserString(logic.FLOOR_KEY, str(i + 1) + ";" + repr(floor["top"] - floor["base"]))
+        a.SetUserString(logic.START_KEY, logic.start_tag(start, i, floor_to_floor, design_buffer))
         a.AddToGroup(group)
         ids.append(doc.Objects.AddBrep(brep, a))
     return ids
@@ -3334,9 +3361,10 @@ def _draw_starting_house(doc, facts):
     saved_ui = _ui_state(doc)
     # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless
     # GordiumFacts set another
-    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
-                 "floor_to_floor": logic.parse_feet(saved_ui.get("floor_to_floor")) or logic.FLOOR_TO_FLOOR,
-                 "design_buffer": logic.parse_feet(saved_ui.get("design_buffer")) or 0.0})   # Draw is off if unread
+    floor_to_floor = logic.parse_feet(saved_ui.get("floor_to_floor")) or logic.FLOOR_TO_FLOOR
+    design_buffer = logic.parse_feet(saved_ui.get("design_buffer")) or 0.0              # Draw is off if unread
+    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts), "floor_to_floor": floor_to_floor,
+                 "design_buffer": design_buffer})
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
@@ -3350,7 +3378,7 @@ def _draw_starting_house(doc, facts):
                                  "(run GordiumStart again in " + _doc_name(doc) + ")")
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
-    if add_floors(doc, start) is None:
+    if add_floors(doc, start, floor_to_floor, design_buffer) is None:
         Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; " + logic.draw_one_hint(_auto(doc)))
         live(True)
         documents(True)
@@ -3367,8 +3395,100 @@ def _draw_starting_house(doc, facts):
     documents(True)
     frame_site(doc, facts)
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
-                             logic.MASSING)
+                             logic.MASSING + "::Floor 1…" + str(len(start["floors"])))
     return result
+
+
+def _start_floors(doc):
+    """The starting house's floor blocks in the model (each carrying logic.START_KEY), with their bounding boxes in
+    feet, their volumes in cubic feet (None when not a solid Rhino can measure: then never redrawn) and whether each
+    is locked or hidden, itself or by its layer (then never redrawn: Rhino deletes neither, and the architect's lock
+    and Hide starting house are kept; review round 3)."""
+    found = []
+    settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+    settings.HiddenObjects = True                # every floor, whatever its state (a hidden one is refused, said so)
+    settings.LockedObjects = True
+    for o in doc.Objects.GetObjectList(settings):
+        text = o.Attributes.GetUserString(logic.START_KEY) if not o.IsDeleted else None
+        if text:
+            b = o.Geometry.GetBoundingBox(True)
+            props = rg.VolumeMassProperties.Compute(o.Geometry) if isinstance(o.Geometry, rg.Brep) else None
+            volume = _feet_volume(doc, props.Volume) if props is not None else None    # (a notch changes it)
+            layer = doc.Layers[o.Attributes.LayerIndex]       # (a locked or hidden parent too: IsLocked, IsVisible)
+            locked = bool(o.IsLocked or o.IsHidden or o.IsReference or layer.IsLocked or not layer.IsVisible)
+            found.append((o, text, (tuple(_feet_point(doc, b.Min)), tuple(_feet_point(doc, b.Max))), volume, locked))
+    return found
+
+
+def switch_side_yards():
+    """Switch side yards (the panel, under the Starting house site fact): where the district lets the two side yards
+    differ (R-2b: one 10 ft, the other 5 ft), the starting house is redrawn with the larger one on the other side,
+    as one Undo step. The new house is proven by the checker like the first (a house that would break a rule is
+    never drawn: the old one stays and the panel says why); a house the architect has changed is never redrawn."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every file closed: say what to do, touch nothing
+        say(logic.NO_DOCUMENT)
+        return None
+    found = _start_floors(doc)
+    plan = logic.switch_plan([(text, box, volume, locked) for _, text, box, volume, locked in found], tolerance=_feet_length(
+        doc, doc.ModelAbsoluteTolerance) + 0.01)
+    if plan.get("refused"):
+        say(plan["refused"])
+        return None
+    try:
+        facts = current_facts(doc)
+    except ValueError as e:
+        say("The site facts can't be read, so the starting house isn't redrawn: " + str(e))
+        return None
+    path = os.path.join(tempfile.gettempdir(), "gordium_switch_" + str(doc.RuntimeSerialNumber) + ".3dm")
+    export(doc, path)                   # (the checker leaves the model's buildings out when it draws a new house)
+    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
+                 "floor_to_floor": plan["floor_to_floor"], "design_buffer": plan["design_buffer"],
+                 "larger_side": plan["larger_side"]})
+    split = start.get("side_split") or {}
+    if not start.get("floors") or split.get("larger_side") != plan["larger_side"]:
+        why = "; ".join(start.get("notes") or []) or "no house could be drawn that way"
+        say("The larger side yard can't go on the " + plan["larger_side"] + " (" + why + "): the starting house is "
+            "kept as it was.")
+        return None
+    record = doc.BeginUndoRecord("Gordium: " + logic.SWITCH_LABEL.lower())
+    STATE["switch_record"] = record              # 0 inside a running command (its own Undo step): for the tests
+    try:                                # the new house first: if it can't be drawn, the old one is untouched
+        ids = add_floors(doc, start, plan["floor_to_floor"], plan["design_buffer"])
+        if ids is None:
+            say("The switched starting house couldn't be drawn; the old one is kept.")
+            return None
+        gone = []
+        for o, _, _, _, _ in found:
+            if not doc.Objects.Delete(o, True):
+                break
+            gone.append(o)
+        kept = len(found) - len(gone)
+        if kept:                        # never two houses: the new one goes again, the old one stays whole (round 2,
+            for o in gone:              # F1; round 4: the floors already deleted come back)
+                doc.Objects.Undelete(o)
+            for i in ids:
+                new = doc.Objects.FindId(i)
+                if new is not None:
+                    doc.Objects.Delete(new, True, True)
+            say("The old starting house couldn't be removed (" + str(kept) + " floors), so it is kept as it was.")
+            return None
+        fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())
+        if fact:
+            _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
+    finally:
+        doc.EndUndoRecord(record)
+    doc.Views.Redraw()
+    result = run_check(doc, report=False)
+    say("Starting house redrawn. " + (_said_sides(start) or ""))
+    return result
+
+
+def _said_sides(start):
+    """The new house's side yards, as its note says them ("Side yards: 10'-0" on the right (east), …")."""
+    note = start.get("margin_note") or ""
+    at = note.find(logic.SIDE_YARDS_SAID)
+    return note[at:] if at >= 0 else None
 
 
 # ---- the context map: the neighbourhood around a looked-up lot (design_checker.context_box) ---------------------
