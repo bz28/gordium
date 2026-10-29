@@ -542,7 +542,7 @@ def test_the_plugin_replaces_them_each_check_whatever_the_layers_state_and_out_o
     for name in ("set_envelope", "toggle_envelope"):                         # F11: every document, box open or not
         assert fns[name].index("_envelope_everywhere()") < fns[name].index("run_check(")
     assert "for d in Rhino.RhinoDoc.OpenDocuments() or []:" in fns["_envelope_everywhere"]
-    run = fns["run_check"]
+    run = fns["run_check"] + fns["_check_apply"] + fns["_check_failed"]   # (#32 split run_check into these)
     assert "logic.guard(lambda: _envelope_curves(doc, result.get(\"plan\"), sent)," in run          # F9
     assert "_envelope_curves(doc, None, facts)" in run
     # replacing them is no edit of the model, whoever calls it (a check's own redraw: UX review 2026-10-27; a failed

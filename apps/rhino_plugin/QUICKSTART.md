@@ -238,9 +238,25 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      street side; no neighbourhood).
    - To use your own lot instead, first draw it as one closed polyline on a layer named `Site`, then run
      `GordiumStart`.
+   Whenever Gordium takes more than a moment, a small window says what it is doing, with the seconds so far: Rhino
+   keeps drawing meanwhile. A check, the starting house and the zoning report have **Cancel** (starting the
+   checker and reading the lot facts have none: they are quick once it runs); **Esc** stops it too while that
+   window is in front (anywhere else in Rhino, Esc keeps its usual meaning). Cancel stops the
+   work and changes nothing: a **Draw** cancelled while Gordium works out the starting house draws nothing (the
+   model is as it was before the box); once it is drawn, Cancel stops only the check that follows. A cancelled
+   check leaves the panel saying "Check cancelled" (press **Check again**); a cancelled report leaves the file as it
+   was. Live re-checks after an edit run in the background: the panel says "Checking…" with what it is doing and
+   its own **Cancel**.
 3. **The start box** opens (filled in from your lot, if you drew one). Read it top to bottom:
-   - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
-     45 seconds; the box says "Looking up…"). Look up only shows what it found: the address and a suggested zoning
+   - **Address**: type it and press **Look up** (or Enter). After 4 characters and a short pause, a list under the
+     box offers the City of Ithaca addresses that start that way (the City's own address list, asked live, never
+     kept; Town of Ithaca addresses never appear): **Down**/**Up** and **Enter**, or a click, picks one; **Esc**
+     closes the list. Offline, it quietly says "Suggestions unavailable" and typing works as before. No town
+     typed? Look up asks for the address in the City ("106 Ithaca Rd" becomes "106 Ithaca Rd, Ithaca, NY"). If a
+     lookup finds no lot, the box says so and that the lot shown is still the one you had. Gordium asks the public map services (it takes up to
+     45 seconds; the box says what it is doing as it goes, "Looking up … · Reading the City zoning map…", with a
+     moving mark and the seconds so far, and **Cancel lookup** stops it: nothing it would have filled in
+     changes, and your ticks stay as you left them). Look up only shows what it found: the address and a suggested zoning
      district fill in, and the lot it found is shown dashed. Nothing in the model changes until **Draw**, which
      draws that lot from the tax map (its street at the bottom of Top view), the street side and whether it's a
      corner lot, each with where it came from (not the ground: for now it is assumed flat, see **Ground** below).
@@ -333,9 +349,9 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      so none is lost under a roof; in Perspective and the elevations they hide behind your solids, as Rhino's own
      lines do.
 6. **Read the panel.** Click any row. The bottom half shows the city's exact words, the examiner-style citation
-   ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was
-   measured and worked out, and what to change ("To comply: move the building 0'-6" farther from that lot
-   line."). **Zoom to** (or a double-click) frames the item: yards in Top, height in a front elevation.
+   ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, and what to
+   change ("To comply: move the building 0'-6" farther from that lot line."). **How it's worked out** (closed at
+   first) opens the working: the formula with the values written in, what was measured, and the chart's own cell. **Zoom to** (or a double-click) frames the item: yards in Top, height in a front elevation.
 7. **Zoning report…** checks the model as it is now and writes the report: `<your model>_gordium_report.xlsx`,
    next to your model file, or in your **Documents** folder (`untitled_gordium_report.xlsx`) if the model isn't
    saved yet. It has the same results as the panel. The line above the buttons says "Report saved to …" with the
@@ -439,7 +455,7 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 4. **Undo, then pull the rear wall 17 ft back** (Cmd+Shift+click the back face, Gumball 17). Lot coverage 27.8%
    against 25%: **does not comply**, even on the largest lot the tax map allows.
 5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply**,
-   −4'-0" short (the height doesn't depend on the lot lines). Only the part above 35'-0" turns red.
+   4'-0" over (the height doesn't depend on the lot lines). Only the part above 35'-0" turns red.
 6. **Undo, then move the southwest wall 3 ft out** (Cmd+Shift+click the face on your left, seen from the street).
    Side yard, Southwest 9'-0 5/8": **needs review**, up to 2'-11 3/8" short (it complies if the tax map's line is out
    the lucky way). **Move it 5 ft out instead:** 7'-0 5/8": **does not comply**, at least 0'-11 1/4" short (rounded
@@ -455,10 +471,11 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 10. **The height bonus** (§325-16C: a taller house if every yard is larger): raise the roof 3 ft (38'-0"), move the
     house 3 ft back, and pull each side wall 3 ft in. On this lot Building height **needs review**: the bonus needs
     the rear yard larger too, and which lines are the rear lot line is the open question above.
-11. **Delta in words, true however the lot lines lie:** after test 2 the Front yard row reads "at least 5'-0 5/8" to
-    spare"; in test 6 the Southwest side yard reads "up to 2'-11 3/8" short" (3 ft out: it may comply) and "at least
-    0'-11 1/4" short" (5 ft out: the red strip). The same in the report and the note. With a survey it reads the
-    margin itself: after test 2, "+7'-0 5/8" to spare".
+11. **Delta in words, true however the lot lines lie:** after test 2 the Front yard row reads "≥ +5'-0 5/8""
+    (at least that much to spare); in test 6 the Southwest side yard reads "up to 2'-11 3/8" short" (3 ft out: it
+    may comply) and "at least 0'-11 1/4" short" (5 ft out: the red strip). A maximum passed says "over" instead
+    of "short" (test 5's "4'-0" over"). The same in the report and the note. With a survey it reads the margin
+    itself: after test 2, "+7'-0 5/8"".
 12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
     an open question for a corner lot).
 13. **A survey:** with a surveyed lot, a new starting house goes exactly to the limits: 39'-10" × 41'-4", its southwest

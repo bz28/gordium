@@ -30,7 +30,8 @@ def _world():
         raise AssertionError("the plugin touched the model or the checker with no document open")
 
     ns = {"Rhino": rhino, "logic": logic, "_recover": touched, "_buildings": touched, "_lot_candidates": touched,
-          "ask": touched, "STATE": {}, "ui": MagicMock()}
+          "ask": touched, "STATE": {}, "ui": MagicMock(),
+          "_envelope_everywhere": lambda: None}     # (#34: the envelope in every open document; none here)
     exec(SRC[SRC.index("def say("):].split("\ndef ", 1)[0], ns)                               # noqa: S102
     for name in COMMANDS:
         exec(SRC[SRC.index("def %s(" % name):].split("\ndef ", 1)[0], ns)                      # noqa: S102

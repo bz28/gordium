@@ -9,6 +9,7 @@ import math
 import queue
 import re
 import threading
+import time
 
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
@@ -162,6 +163,23 @@ def row_name(item):
     return name + (" · " + item["note"] if item.get("note") else "")
 
 
+USE_STATED = "stated"
+
+
+def list_cells(item):
+    """A row's Item and Proposed text in the panel's list, and its name heading the detail. The use row names the
+    use itself, "Use: One-family dwelling, detached", with "stated" under Proposed: no use's name fits the 64 px
+    Proposed column ("One-family" alone takes two lines), and the Item cell has the room (coordinator, 2026-10-28,
+    option A: the whole name, no made-up short forms). "Use:" keeps what the row is about; "(site)" is left off:
+    measured in Rhino, "Use: One-family dwelling, detached" fits two lines of the Item cell at the panel's 400 px
+    only without it. A longer name ("…, semi-detached"), or any at 380 px, ends "…" in the list like every long
+    Item; the detail, headed with this same text, has it whole. With no use stated, "Use (site)" and its "—"."""
+    proposed = item.get("proposed")
+    if item.get("name") == "Use" and proposed and proposed != "—":
+        return "Use: " + proposed + (" · " + item["note"] if item.get("note") else ""), USE_STATED
+    return row_name(item), proposed
+
+
 def dock_host(hosts, serial):
     """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
     document's number); a panel made without one (key 0) serves when the front document has none."""
@@ -181,6 +199,56 @@ def highlight(status):
     """The colour a part of the model is shaded, from its rule's result only (never from the envelope): red for
     does not comply (under every reading), amber for needs review, nothing for complies or anything else."""
     return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
+
+
+def red_last(coloured):
+    """The coloured parts, (shape, status) each, split into (the rest, the red): the red (does not comply) is drawn
+    after everything else, so nothing covers it. In Top view a needs-review amber strip (the eaves) lay over the
+    failing red wall below it and hid the one thing that certainly has to change (the architect's review,
+    2026-10-28)."""
+    rest = [c for c in coloured or [] if highlight(c[1]) != "red"]
+    return rest, [c for c in coloured or [] if highlight(c[1]) == "red"]
+
+
+def newly_failing(before, view):
+    """The row to bring into view after a re-check: the first, in the panel's order, that does not comply now and
+    did not at the check before (`before`: {item id: status} then, None on a document's first check). None when
+    nothing newly fails, so a re-check that changes nothing for the worse never moves the list (the architect's
+    review, 2026-10-28: after an edit the newly failing row was out of sight below the rows that need review)."""
+    if before is None or not view:
+        return None
+    status = {i["id"]: i["status"] for i in view.get("items") or []}
+    for g in view.get("groups") or []:
+        for item_id in g.get("items") or []:
+            if status.get(item_id) == "does_not_comply" and before.get(item_id) != "does_not_comply":
+                return item_id
+    return None
+
+
+WORKED_OUT = "How it's worked out"
+
+
+def detail_parts(det):
+    """The selected item's detail, split for the panel (the architect's review, 2026-10-28: the formula
+    "max(min(25% × lot depth —, 50), 20)", the measuring notes and the chart's shorthand "R-1B: 25%/ 50 ft [fn16]"
+    read as jargon). Plain words first, in view: the notes, the result of the working ("Required: 24'-1 7/8" to
+    32'-10 1/8"") and the law's own words. Behind WORKED_OUT, collapsed until opened: the formula with the values
+    written in, what was measured, the chart's own cell and the precision rule. Nothing is dropped: every quote,
+    with where it is from, is in one or the other, and the citation and its links stay in view.
+      notes          texts shown in view (at the limit, the colours, the plain result)
+      quotes         the law's words and the chart's footnotes, in view
+      worked         texts behind the toggle (the whole working, what was measured, the precision)
+      worked_quotes  the chart's own cells, behind the toggle"""
+    det = det or {}
+    calc = det.get("calc") or ""
+    head, _, rest = calc.partition(": ")
+    working, equals, result = rest.partition(" = ")
+    plain = head + ": " + result if equals and head in ("Required", "Allowed") else calc
+    quotes = [q for q in det.get("quotes") or [] if q.get("text")]
+    return {"notes": [t for t in (det.get("at_limit"), det.get("colours"), plain, det.get("outline")) if t],
+            "quotes": [q for q in quotes if not q.get("chart")],
+            "worked": [t for t in (calc if plain != calc else None, det.get("scope"), det.get("precision")) if t],
+            "worked_quotes": [q for q in quotes if q.get("chart")]}
 
 
 def coloured_info(entry):
@@ -245,7 +313,8 @@ def legend_text(code=None):
             "dimensioned up from the grade plane, with the limit faint. In plan these lines are drawn over "
             "everything; in every other view they hide behind the solids in front of them, as the model's own lines "
             "do. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
-            "Delta: how far over or under each limit (+ to spare, − short).\n\n"
+            "Delta: how far over or under each limit (+ to spare, ≥ + at least that much to spare, − short of a "
+            "minimum, over past a maximum).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
             "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
@@ -257,6 +326,20 @@ def legend_text(code=None):
 
 
 COLUMN_DELTA = "Delta"          # the panel's and the report's column for how far over or under (was "Margin")
+
+# eighths of an inch as one character each, in the panel's narrow cells only (the detail and the report keep "7/8")
+CELL_FRACTIONS = {"1/8": "⅛", "1/4": "¼", "3/8": "⅜", "1/2": "½", "5/8": "⅝", "3/4": "¾", "7/8": "⅞"}
+
+
+def cell_text(text):
+    """A Proposed, Required or Delta value as the panel's list draws it, in its two lines of a narrow column (the
+    architect's review, 2026-10-28: "34'-11 7/8" to 36'-3 3/8"" and "at least 0'-5 1/4" if confirmed" were cut
+    off; the panel is not made wider). The same words, shorter: each fraction of an inch one character ("34'-11⅞"")
+    and a range one value per line ("34'-11⅞"–" then "36'-3⅜""), so a line never breaks inside a number. The
+    selected item's detail below the list shows the words whole, as everywhere else."""
+    import re
+    text = re.sub(r'(\d) ([1357]/8|1/4|1/2|3/4)"', lambda m: m.group(1) + CELL_FRACTIONS[m.group(2)] + '"', text or "")
+    return re.sub(r'(["%]|\d sf) to (?=[\d+−])', "\\1–\n", text)        # after a value, before the next
 
 
 def missing(facts):
@@ -2872,13 +2955,14 @@ def box_rows(state, flat=None):
         lot_actions = [("by_hand", BY_HAND + "…", True)]
     rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
-         "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))]
+         # while it runs, the button stops it (the box as it was before Look up: lookup_cancelled)
+         "actions": [("lookup_cancel", CANCEL_LOOKUP, True) if look.get("looking") else ("lookup", "Look up", True)]
          + ([("use_saved", USE_SAVED.format(date=look["saved_offer"]), True)]
             if look.get("saved_offer") and not look.get("looking")
             and same_site_address(state.get("address") or "", look.get("saved_for") or "") else []),
          # (an address retyped since the offer: no button, as pressing it would do nothing: round 6)
          "tick": None, "matches": look.get("matches") or [],
-         "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
+         "status": lookup_status(look["looking"], None, 0.0) if look.get("looking") else None},
         {"key": "zone", "label": "Zoning district", "text": zone_row_text(state),
          "actions": [("zone", "Change", True)], "tick": (ZONE_TICK, bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
@@ -2999,6 +3083,96 @@ def zone_picked(state, zone, first):
     return state
 LOOKUP_LIMIT_S = 45                               # the whole lookup; the box says so, the Rhino side stops it then
 LOOKING = "Looking up {}… (up to %d s)" % LOOKUP_LIMIT_S
+CANCEL_LOOKUP = "Cancel lookup"
+LOOKUP_CANCELLED = "Look up of {address} cancelled: nothing changed."
+LOOKUP_FIRST_STEP = "Starting the lookup…"
+
+
+def lookup_status(address, step, elapsed, limit=LOOKUP_LIMIT_S):
+    """The box's live line while a lookup runs: which address, what it is doing now (the lookup's own latest step),
+    a moving mark and the seconds so far, and when it stops by itself."""
+    return "Looking up %s · %s  %s" % (address, step or LOOKUP_FIRST_STEP, progress_line(elapsed, limit))
+
+
+def lookup_step(text):
+    """The lookup's latest step from what it has printed so far ({"step": ...} lines), or None."""
+    latest = None
+    for line in str(text or "").splitlines():
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and isinstance(d.get("step"), str) and "status" not in d:
+            latest = d["step"]
+    return latest
+
+
+def lookup_answer(text, query=None):
+    """The lookup's answer: its last line that is one ({"status": ...}); a run that printed none (stopped, crashed)
+    is an error the box can say, never an answer made up from a progress line."""
+    for line in reversed(str(text or "").strip().splitlines()):
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and "status" in d:
+            return d
+    return {"status": "error", "query": query, "detail": "the lookup printed no answer"}
+
+
+def box_ticks(state):
+    """The ticks and sources the start box keeps across picks, as `state` has them (_box_loop's `ticked`)."""
+    return {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
+                                  "corner_source", "checked") if k in state}
+
+
+BOX_FIELDS = ("zone", "address", "use", "corner_lot")     # what the box's ticks and sources are about
+
+
+def box_moved(facts_before, ui_before, facts_after, ui_after):
+    """Whether a pick changed what the start box's ticks and sources are about: the district, address, use or corner
+    answer, the doubts "I checked this" settles, or an earlier lookup's preview put back (drop_pending: its district,
+    sources and address go back to what they were before it)."""
+    facts_before, facts_after = facts_before or {}, facts_after or {}
+    ui_before, ui_after = ui_before or {}, ui_after or {}
+    return (any(facts_before.get(k) != facts_after.get(k) for k in BOX_FIELDS)
+            or (ui_before.get("doubts") or {}) != (ui_after.get("doubts") or {})
+            or (ui_before.get("_pending") is not None and ui_after.get("_pending") is not ui_before.get("_pending")))
+
+
+def ticks_after_pick(what, ticks, answer=None, moved=True):
+    """The start box's ticks and sources kept after a pick (_box_loop's `ticked`; `ticks`: box_ticks of the box as
+    the architect left it; `answer`: the status of a lookup answer the pick put in the box, None for none; `moved`:
+    box_moved for this pick). A lookup's answer (or a saved one used) replaces them, so the district must be confirmed
+    again, unless it filled nothing and moved nothing (not found, offline, outside the City, too slow, a saved one
+    refused, with no earlier preview put back): then the box is as the architect left it, and so are its ticks.
+    Everything else keeps them exactly as the box shows them: Look up (while it runs the box shows the architect's
+    own ticks; Draw is off meanwhile) and Cancel lookup. So no tick or source from before Look up is ever brought
+    back, onto a district, use, address or corner changed during the lookup ("suggested by Gordium" on a district the
+    architect picked) or after they took it off; no tick is kept on a district a lookup's answer put in or back; and
+    a district they took off is never shown ticked again from the file (review of #32, 2026-10-28): an answer that
+    replaces them leaves the district unconfirmed outright, never the earlier Draw's confirmation again (an earlier
+    preview put back also puts back the file's tick, and the architect may have taken it off: sceptic of round 4)."""
+    if what in ("pick:lookup_done", "pick:use_saved") and (answer == "found" or moved):
+        return {"district_confirmed": False}
+    return dict(ticks or {})
+
+
+def lookup_cancelled(saved_ui, before):
+    """The box's choices after Cancel lookup: as they were before Look up was pressed (`before`: the lookup line
+    then, None for none), saying it was cancelled. Nothing else changes: the lookup only ever fills the box when its
+    answer is in."""
+    saved_ui = dict(saved_ui or {})
+    address = ((saved_ui.get("_lookup") or {}).get("looking")) or "the address"
+    restored = dict(before or {})
+    restored.pop("looking", None)
+    earlier = (before or {}).get("says") or ""
+    if (before or {}).get("cancelled"):            # the line before was an earlier Cancel's: said once, not again
+        earlier = (before or {}).get("said_before") or ""
+    restored.update(says=" ".join(t for t in (LOOKUP_CANCELLED.format(address=address), earlier) if t),
+                    cancelled=True, said_before=earlier)
+    saved_ui["_lookup"] = restored
+    return saved_ui
 CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
 DOUBT_KEPT = "The lookup found this doubtful (its reason came from a source that can't be kept): check it."
 LOOKUP_SAYS = {                                   # the box's line when a lookup couldn't fill it in
@@ -3025,6 +3199,109 @@ def storable_ui(saved_ui):
     """What of the box's choices may be written into the .3dm: never a session key ("_…": the lookup's live wording,
     the City's zones and street name, its asks)."""
     return {k: v for k, v in (saved_ui or {}).items() if not str(k).startswith("_")}
+
+
+STILL_SHOWN = "The lot shown is still {address}'s: nothing in the model changed."
+NOTHING_CHANGED = "Nothing in the model changed."
+
+
+def still_shown(saved_ui):
+    """After a lookup that found no lot: which lot the model still shows (the one drawn, else the lot's own address
+    when the box opened), so the architect never wonders whether the old lot is the new address's."""
+    saved_ui = saved_ui or {}
+    address = saved_ui.get("drawn_address") or saved_ui.get("_box_address")
+    return STILL_SHOWN.format(address=address.split(",")[0].strip()) if address else NOTHING_CHANGED
+
+
+# ---- address type-ahead (site_lookup.suggest, in lookup_box's own short process; the box shows the list) ----------
+SUGGEST_DELAY_S = 0.3          # s after the last key before the City's address layer is asked
+SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestions unavailable"
+SUGGEST_MIN_CHARS = 4
+SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and press Look up."
+NO_MATCH = "No matching address suggested: type the full address and press Look up."
+CITY_SUFFIX = ", Ithaca, NY"
+
+
+BOX_TEXT_WIDTH = 560           # px: the start box's long lines wrap here (one unbroken amber line stretched the box
+                               # across the screen: Rhino run of #33 a3eb1d7)
+LIST_ROW_PX, LIST_PAD_PX = 20, 2   # (2: the frame's border, so a row's text sits centred, not high: Rhino run of ee8f2ce)
+
+
+def list_height(rows, row_px=LIST_ROW_PX):
+    """The suggestion list's height in px: as tall as its rows (1 to 8) at `row_px` each (the pitch Rhino lays its
+    rows out at, read from the list where it can be), never rows of empty space (Rhino run of a3eb1d7: one suggestion
+    sat above five empty rows)."""
+    return max(1, min(int(rows or 0), 8)) * int(row_px) + LIST_PAD_PX
+
+
+def wants_suggestions(text, chosen=None):
+    """Whether to ask for suggestions for what is typed: at least SUGGEST_MIN_CHARS characters, and not the
+    suggestion just picked (picking one never opens the list again)."""
+    text = str(text or "")
+    return len(text.lstrip()) >= SUGGEST_MIN_CHARS and text != chosen
+
+
+HINT_NOTE_PX = 20          # the quiet note's one line (size 10) and its row spacing
+
+
+def hint_rows_px(list_shown, list_px, note):
+    """How much taller the start box is while its suggestion rows show: the list (and its spacing) and the note's
+    line, each only while shown (review round 1: an offline note showed with nothing added, pushing Draw down)."""
+    return ((list_px + 6) if list_shown else 0) + (HINT_NOTE_PX if note else 0)
+
+
+def hint_rows_shown(list_shown, note):
+    """Whether the start box's suggestion rows (the type-ahead list and its quiet note) take any room: only while
+    one of them has something to show (the architect's review, 2026-10-28: an empty gap under Address)."""
+    return bool(list_shown) or bool(note)
+
+
+def suggestions_shown(answer, typed):
+    """(the list, a quiet note) for a type-ahead answer, or None when it is for something no longer typed (a stale
+    answer is dropped). Offline, an error or too slow: no list and the note that suggestions are unavailable (the
+    box still works by typing). None found: a quiet note says so, so the architect can tell the list is working
+    (UX review 2026-10-27: "312 Hudson St" showed nothing at all)."""
+    answer = answer or {}
+    if answer.get("query") != typed:
+        return None
+    if answer.get("status") == "ok":
+        found = [str(s) for s in answer.get("suggestions") or []]
+        return found, "" if found else NO_MATCH
+    return [], SUGGESTIONS_UNAVAILABLE
+
+
+def list_step(index, count, key):
+    """The list's selection after Down or Up in the address box (none selected: -1). Stays within the list."""
+    if count <= 0:
+        return -1
+    if key == "down":
+        return min(index + 1, count - 1)
+    if key == "up":
+        return max(index - 1, 0)
+    return index
+
+
+def with_city(address):
+    """The address as the lookup is asked for it: ", Ithaca, NY" added when no town or ZIP is typed (Ben, 2026-10-21:
+    "106 Ithaca Rd" is the City's). Only when the address plainly ends with its street ("106 Ithaca Rd", "120 North
+    Cayuga Street"): anything after the street type ("106 Ithaca Rd Dryden", "12 Main St Cayuga Heights", a ZIP)
+    may be another town and is kept as typed, so another town stays another town (review round 1), and anything
+    after a comma is kept as typed too."""
+    text = " ".join(str(address or "").split())
+    if not text or "," in text:
+        return text
+    words = text.lower().replace(".", " ").split()
+    street_types = {w for k, v in STREET_WORDS.items() if k not in ("north", "south", "east", "west") for w in (k, v)}
+    if len(words) >= 3 and words[0][:1].isdigit() and words[-1] in street_types:
+        return text + CITY_SUFFIX
+    return text
+
+
+def clean_address(text):
+    """An address as the architect reads it: the geocoder's "96 Ithaca Road, Ithaca, NY, 14850" as "96 Ithaca Road,
+    Ithaca, NY 14850" (no comma before the ZIP; Rhino run of #33 df08fc0). Anything else as it is."""
+    import re
+    return re.sub(r",\s*(\d{5}(?:-\d{4})?)\s*$", r" \1", str(text or "").strip())
 
 
 def lookup_says(payload):
@@ -3088,6 +3365,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         outside.append(look["query"] or facts.get("address") or "the address")
     saved_ui["_outside_for"] = outside
     if look["status"] != "found":
+        look["says"] = " ".join(t for t in (look["says"], still_shown(saved_ui)) if t)
         return facts, saved_ui
     got, details = payload.get("facts") or {}, payload.get("details") or {}
     labels, kept = payload.get("labels") or {}, payload.get("kept_reasons") or {}
@@ -3111,7 +3389,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     if found_overlays:                       # what was found, by name, not only that something was
         live["overlays"] = _merged("Found on this lot: " + "; ".join(found_overlays) + ".", live.get("overlays") or "")
     if value("address"):
-        facts["address"] = value("address")
+        facts["address"] = clean_address(value("address"))
         saved_ui["address_source"] = SUGGESTED + " · " + label("address", "address")
     zone = value("zone")
     names = {z.lower(): z for z in zones} if zones else {}
@@ -3365,6 +3643,18 @@ def draw_reason(state):
     return ""
 
 
+def box_reason(state):
+    """The box's own reason line under Draw: draw_reason's, except when it would only repeat the amber line a lookup
+    that found no lot already shows (what happened, what to do, the lot still shown): said once (Rhino run of #33
+    ee8f2ce: the no-lot state said it twice)."""
+    reason = draw_reason(state)
+    look = state.get("lookup") or {}
+    if reason and look.get("says") and look.get("status") in LOOKUP_SAYS and reason == address_reason(state) \
+            and same_site_address(state.get("address"), look.get("query")):    # (that lookup's address, not another)
+        return ""
+    return reason
+
+
 def can_draw(state):
     """Draw is on only once the address typed is one already found (address_reason), the district is confirmed (a
     looked-up district is only a suggestion), the design buffer, if typed, can be read, and there is a lot."""
@@ -3529,9 +3819,18 @@ def ground_facts(state, lot_level, flat=None):
     return out
 
 
+# the box's own choices that Gordium fills in (the use, the street, the corner lot): the architect's word only once
+# changed (their source then ENTERED); left as they were, never "confirmed by you" (fact_sources, source_lines)
+BOX_DEFAULTS = ("use", "street", "corner_lot")
+UNTOUCHED = "default, not changed by you"
+
+
 def fact_sources(state, today, confirmed):
     """Every fact the box set, as {value, source, confirmed_by, date}: saved in the .3dm beside the facts and
-    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick)."""
+    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick).
+    A box default the architect left as it was (BOX_DEFAULTS) is confirmed by no one: pressing Draw is not saying
+    yes to a dropdown never opened (the architect's review, 2026-10-28: "Use: One-family dwelling, detached ·
+    suggested by Gordium · confirmed by you" for a use never changed)."""
     by = "you" if confirmed else None
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
@@ -3539,13 +3838,20 @@ def fact_sources(state, today, confirmed):
     def fact(value, source, who=by):
         return {"value": value, "source": source, "confirmed_by": who, "date": today}
 
+    def chosen(key):                   # a box default: the architect's only once changed, or ticked "I checked this"
+        # (review round 1 of panel-wording, P2: a street ticked as checked read "default, not changed by you")
+        # (the corner answer sits on the street's row, ROW_OF: that row's tick confirms it too; round 2, P3)
+        row = ROW_OF.get(key + "_lot", key) if key == "corner" else key
+        mine = state.get(key + "_source") == ENTERED or row in (state.get("checked") or [])
+        return by if mine else None
+
     city = (" · " + IN_CITY_SAID.format(date=state["city_by_hand"])) if state.get("city_by_hand") else ""
     return {     # (the architect's Yes, by hand, on the address's source: shown in the panel and report, round 12)
         "address": fact(state.get("address") or None,     # (an earlier Draw's Yes, read back, never twice)
                         (state.get("address_source") or ENTERED).split(" · " + IN_CITY_SAID.split(" (")[0])[0] + city),
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
-        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
+        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED, chosen("use")),
         # the follow-up answers (Ben, 2026-10-25): each saved as entered by you, and what the use itself says,
         # shown in the panel and the report (exactly the facts answers_applied sends the checker)
         **follow_up_sources(state, fact),
@@ -3555,9 +3861,9 @@ def fact_sources(state, today, confirmed):
         # the address's street, a kept fact, says it instead)
         "street": fact(street_name({**state, "street_name": state.get("street_name_saved")})
                        if "street_name_saved" in state else street_name(state),
-                       state.get("street_source") or SUGGESTED),
+                       state.get("street_source") or SUGGESTED, chosen("street")),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
-                           state.get("corner_source") or SUGGESTED),
+                           state.get("corner_source") or SUGGESTED, chosen("corner")),
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
         "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
                         "lot; height is checked as if flat)" if state.get("ground_fall") else ""),
@@ -3925,10 +4231,50 @@ def gate_actions(actions, box_open, say, open_ok=("legend",)):
         def run(*args, **kwargs):
             if box_open() and name not in open_ok:
                 say(BOX_BUSY)
-                return None
+                return REFUSED              # (a checkbox puts its tick back: gordium_ui._tick)
             return fn(*args, **kwargs)
         return run
     return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+WORKING = "Gordium is working (its window says on what): wait for it, or press Cancel there."
+
+
+REFUSED = object()        # what a gated panel action returns when it did nothing (its checkbox puts its tick back)
+
+
+def busy_actions(actions, busy, say, open_ok=("legend",)):
+    """The panel's actions, each saying WORKING instead while Gordium waits for an answer (busy()): the wait window is
+    a plain one while Rhino keeps answering, so a button pressed meanwhile must never start a second piece of work
+    on top of it (another check, a start box). `open_ok`: the ones that only show something. A refused action
+    returns REFUSED, so a checkbox that called it shows its setting as it still is (independent review of #32)."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if busy() and name not in open_ok:
+                say(WORKING)
+                return REFUSED
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+class NotInFront(Exception):
+    """Another file came to the front while Gordium read this one's facts (Rhino runs during the checker's wait):
+    whatever was about to prompt or save stops (gordium_rhino.current_facts)."""
+
+
+def front_actions(actions, say):
+    """The panel's actions, each saying why (NotInFront's words) and doing nothing more when the file it was
+    reading is no longer the one in front."""
+    def guarded(fn):
+        def run(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except NotInFront as e:
+                say(str(e))
+                return REFUSED
+        return run
+    return {name: guarded(fn) for name, fn in actions.items()}
 
 
 def recovery_message(removed, back):
@@ -4008,6 +4354,162 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         guide = w["guide_ring"]
     saved_ui["lookup_snapshot"] = w.get("snapshot")
     return facts, saved_ui, guide
+
+
+# ---- long work: a line that says what Gordium is doing, and a Cancel that stops it --------------------------------
+# The checker's and the lookup's work runs in their own processes; the plugin waits for them on a Job's thread,
+# never on Rhino's, so Rhino keeps drawing and answering while they work (a slow one shows a small window after
+# WAIT_WINDOW_S with the current step, the seconds so far and Cancel). Cancel stops the process: its answer is never
+# used, so nothing it would have changed changes.
+
+class WorkCancelled(Exception):
+    """The architect pressed Cancel while Gordium worked: the work was stopped and nothing it would have changed was
+    changed."""
+
+
+WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (no flash on a quick check)
+SPINNER = ("●○○", "○●○", "○○●")
+SPIN_S = 0.3               # s per frame of the moving mark
+CANCELLING = "Cancelling…"
+STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint, while it has the keyboard (Esc reaches it)
+STOP_HINT_CLICK = "Click Cancel to stop"   # ... and while it hasn't: never a promise Esc can't keep
+FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
+              "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
+              "sample_site": "Loading the sample lot…"}
+CHECK_CANCELLED = "Check cancelled"
+CHECK_CANCELLED_NOTE = ("Nothing in the model changed. Nothing is shown as checked until the next check: press "
+                        "Check again.")
+DRAW_CANCELLED = ("Draw cancelled: nothing was drawn, and the model is as it was before the box opened (Draw again "
+                  "when you're ready).")
+REPORT_CANCELLED = "Zoning report cancelled: the report file wasn't changed."
+REPORT_CANCELLED_LATE = ("Zoning report cancelled as it finished: the new report had already been saved to {path} "
+                         "(not opened).")
+
+
+def report_cancelled(path, changed):
+    """What Zoning report… says when its check was cancelled: the file as it was, or (Cancel pressed in the moment
+    after the checker moved the new report in) that it was saved anyway."""
+    return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
+SETTLING = "Finishing the check that is running…"
+CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
+                   "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
+                   "panel) for a report of the model now.")
+NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
+                "command again in the file you want.")
+def outdated_report_message(path, report_error, had_report):
+    """What a check whose model changed while it ran says of its report: written, but of the model as it was; or,
+    when the checker couldn't write it, that it wasn't written and why (never that it was: independent review of
+    #32)."""
+    if report_error:                     # (its own full stop dropped: report_message adds one)
+        return report_message(path, False, str(report_error).rstrip(". "), stale=bool(had_report))
+    return REPORT_OUTDATED.format(path=path)
+
+
+HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
+                  "Gordium will check it.")
+DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
+                 "is as it was: Draw again.")
+
+
+class ModelChanged(WorkCancelled):
+    """The model was edited (or another document came to the front) while Gordium worked out something to draw for
+    it: nothing is drawn; `said` is what the architect is told."""
+    said = DRAW_OUTDATED
+
+
+def progress_line(elapsed, limit=None):
+    """The moving mark and the seconds so far ("○●○  7 s"), with when the work stops by itself if it has a limit.
+    The mark is worked out from the time, so it moves at the same pace whoever draws it."""
+    elapsed = max(0.0, float(elapsed or 0))
+    text = "%s  %d s" % (SPINNER[int(elapsed / SPIN_S) % len(SPINNER)], int(elapsed))
+    return text + (" (stops at %d s)" % limit if limit else "")
+
+
+class Job:
+    """One piece of long work on its own thread, never Rhino's: work(step) returns the result; step(text) says what
+    it is doing now. Rhino's thread only reads it (done, step, elapsed()), waits a moment for it (wait), and may
+    cancel it: `stop` (run on the caller's thread) stops the process doing the work, and from then on the work's
+    result is never used (outcome() says "cancelled" even if an answer still arrives)."""
+
+    def __init__(self, work, step, stop=None, clock=time.monotonic):
+        self.step, self.done, self.cancelled = step, False, False
+        self.result = self.error = None
+        self._stop, self._clock = stop, clock
+        self.started = clock()
+        self._thread = threading.Thread(target=self._run, args=(work,), daemon=True, name="gordium-job")
+        self._thread.start()
+
+    def say(self, text):
+        if text and not self.cancelled:
+            self.step = text
+
+    def _run(self, work):
+        try:
+            self.result = work(self.say)
+        except BaseException as e:            # noqa: BLE001  (kept for the caller, on its own thread)
+            self.error = e
+        finally:
+            self.done = True
+
+    def elapsed(self):
+        return self._clock() - self.started
+
+    def finished(self):
+        """Nothing more to wait for: the work is done, or it was cancelled (its answer is dropped)."""
+        return self.done or self.cancelled
+
+    def wait(self, timeout):
+        """Wait at most `timeout` s for the work; whether there is nothing more to wait for."""
+        self._thread.join(timeout)
+        return self.finished()
+
+    def cancellable(self):
+        return self._stop is not None and not self.finished()
+
+    def cancel(self):
+        """Stop the work (once; never after it is done; never work with no way to stop it, whose thread would go on
+        reading the checker's answers: review round 2): True when it was stopped."""
+        if not self.cancellable():
+            return False
+        self.cancelled = True
+        self.step = CANCELLING
+        if self._stop is not None:
+            self._stop()
+        return True
+
+    def outcome(self):
+        """("cancelled", None), ("error", the exception) or ("done", the result)."""
+        if self.cancelled:
+            return "cancelled", None
+        if self.error is not None:
+            return "error", self.error
+        return "done", self.result
+
+
+def plans_house(mode, redraw, caller_draws):
+    """Whether Draw works out a starting house before the box commits: GordiumStart's box always draws one; another
+    box only when its Draw reset the site (`redraw`) AND its caller draws the house after (`caller_draws`: Edit
+    site…). GordiumCheck's box never draws one, so it never asks for one (review round 1: a "start" request for
+    nothing, and its Cancel escaped the command)."""
+    return mode == "start" or bool(redraw and caller_draws)
+
+
+def result_stale(dirty_at, shown_at, now, after, rechecking):
+    """Whether the result on screen is out of date, so nothing is drawn as complying or not (F7, H1): the model
+    changed more than `after` s ago and no check has finished since, or a background re-check is running (live mode
+    clears the pending edit when it starts one, and the result on screen is of the model before that edit: review
+    round 1, P1, a false pass shown while the re-check ran)."""
+    if rechecking:
+        return True
+    return bool(dirty_at and now - dirty_at >= after and (shown_at or 0) < dirty_at)
+
+
+def checked_while_still(begun_at, dirty_at):
+    """Whether a check that read the model at `begun_at` still shows the model: no edit since (`dirty_at`, the last
+    edit not yet re-checked, None for none). A live re-check runs while the architect may keep editing; its result
+    is shown only if nothing changed after it read the model, else it is dropped and the model checked again."""
+    return not dirty_at or dirty_at < begun_at
 
 
 # ---- the context map (design_checker.context_box): the neighbourhood around a looked-up lot ---------------------
@@ -4403,14 +4905,15 @@ def _write_lines(stream, sends, process=None):
         pass
 
 
-def exchange(sends, lines, request, limit):
-    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for)."""
+def exchange(sends, lines, request, limit, on_step=None):
+    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for); each progress
+    line before it goes to `on_step`."""
     sends.put(json.dumps(request) + "\n")
-    return answer_for(lines, request["id"], limit)
+    return answer_for(lines, request["id"], limit, on_step)
 
 
 HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",
-           "worker", "worker_sends", "worker_lines")
+           "worker", "worker_sends", "worker_lines", "live_timer", "live_check")
 
 
 def sweep(leftovers, state=None, release=None):
@@ -4449,26 +4952,33 @@ def current_only(fn, is_current):
     return run
 
 
-def answer_for(lines, request_id, limit):
+def answer_for(lines, request_id, limit, on_step=None, clock=time.monotonic):
     """The checker's answer to request `request_id`, from `lines` (a queue the plugin's reader thread fills with
-    every line the checker writes, then None when it stops); None if it stopped. Raises CheckerOutOfStep when no
-    line comes within `limit` seconds, when the line isn't an answer, or when it is another request's answer:
-    then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever showing
-    an earlier check's result as this one's."""
-    try:
-        line = lines.get(timeout=limit)
-    except queue.Empty:
-        raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
-    if line is None:
-        return None
-    try:
-        answer = json.loads(line)
-    except ValueError:
-        answer = None
-    if not isinstance(answer, dict) or answer.get("id") != request_id:
-        raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
-                               "nothing from it is shown")
-    return answer
+    every line the checker writes, then None when it stops); None if it stopped. This request's progress lines
+    ({"id", "step"}, sent before its answer) go to `on_step`. Raises CheckerOutOfStep when the answer doesn't come
+    within `limit` seconds of asking (progress lines don't extend it), when a line isn't this request's, or isn't
+    an answer: then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever
+    showing an earlier check's result as this one's."""
+    deadline = clock() + limit
+    while True:
+        try:
+            line = lines.get(timeout=max(0.0, deadline - clock()))
+        except queue.Empty:
+            raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
+        if line is None:
+            return None
+        try:
+            answer = json.loads(line)
+        except ValueError:
+            answer = None
+        if not isinstance(answer, dict) or answer.get("id") != request_id:
+            raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
+                                   "nothing from it is shown")
+        if "step" in answer and "ok" not in answer:      # a progress line: what it is doing now
+            if on_step is not None:
+                on_step(str(answer["step"]))
+            continue
+        return answer
 
 
 # ---- processes started from Rhino: never a console window (Windows) -----------------------------------------------

@@ -9,7 +9,9 @@ Requests (one JSON object per line): {"id": 1, "cmd": "check", "model": "<.3dm>"
 "model": "<.3dm with the lot>", "facts": {...}, "larger_side": null} (the largest legal starting building, as stacked floors;
 "larger_side": "left" or "right" puts a zone's larger side yard there), {"id": 5, "cmd": "sample_site"} (the
 106 Ithaca Rd lot and facts GordiumStart offers). Answers:
-{"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. The process stays up, so a
+{"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. A request with "progress": true
+also gets {"id": 1, "step": "Measuring the building…"} lines before its answer, one as each stage starts (the
+plugin's progress line; the answer is always the request's last line). The process stays up, so a
 check after an edit doesn't pay for starting Python and loading the rules again.
 """
 
@@ -25,15 +27,16 @@ from rule_format.rulebook import utf8_console
 from .check import check, options, sample_site, start
 
 
-def answer(request: dict) -> dict:
+def answer(request: dict, step=None) -> dict:
+    """The answer to one request; `step(text)` is told each stage of a check or a start as it begins."""
     try:
         if request.get("cmd") == "check":
             report = request.get("report")
             result = check(Path(request["model"]), request["facts"], Path(report) if report else None,
-                           request.get("building_problems"), request.get("extras"))
+                           request.get("building_problems"), request.get("extras"), step=step)
         elif request.get("cmd") == "start":
             result = start(Path(request["model"]), request["facts"], request.get("floor_to_floor"),
-                           request.get("design_buffer") or 0.0, request.get("larger_side"))
+                           request.get("design_buffer") or 0.0, request.get("larger_side"), step=step)
         elif request.get("cmd") == "sample_site":
             result = sample_site()
         elif request.get("cmd") == "facts":
@@ -58,9 +61,17 @@ def serve(stdin=sys.stdin, stdout=sys.stdout) -> None:
             except json.JSONDecodeError as e:
                 request, reply = {}, {"id": None, "ok": False, "error": f"not JSON: {e}"}
             else:
-                reply = answer(request)
+                reply = answer(request, _steps(request, stdout) if request.get("progress") else None)
             stdout.write(json.dumps(reply) + "\n")
             stdout.flush()
+
+
+def _steps(request: dict, stdout):
+    """A request's progress lines, each written (and flushed) as its stage starts."""
+    def step(text: str) -> None:
+        stdout.write(json.dumps({"id": request.get("id"), "step": text}) + "\n")
+        stdout.flush()
+    return step
 
 
 def main(argv: list[str]) -> int:

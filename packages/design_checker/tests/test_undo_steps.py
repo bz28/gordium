@@ -148,6 +148,7 @@ def _plugin(doc, said):
           "_context_visible": lambda doc, on: setattr(doc.Layers[0], "IsVisible", on) or True,
           "_context_record": lambda doc: None, "sync_context": lambda doc, facts: None,
           "draw_context": lambda doc, frame, left=0: doc.Strings.SetString("Gordium", "context", "{}"),
+          "_settle_live": lambda: None,                      # (#32: a running re-check finished)
           # (#34: the envelope's snap curves shown or hidden in every open document; nothing written in this one)
           "_envelope_everywhere": lambda: None,
           # Switch side yards (#35): no starting house here, so refused and nothing written; its own one Undo step is
