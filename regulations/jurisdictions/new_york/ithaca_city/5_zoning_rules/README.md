@@ -15,8 +15,12 @@ Each rule has:
 Rules stay marked **draft**: architect approval is deferred for now (decided 2026-10-19), so the checker uses draft rules that have passed every code check (`python -m rule_format`). The approval fields are kept, unused, so approval can be switched on later without a rebuild.
 
 **Two kinds of draft live here:**
-- `R-1b.yaml`: R-1b drafted by Claude by hand. It is the answer key the drafting script is graded on, and is
-  never shown to the script.
+- `R-1b.yaml`, `R-1a.yaml`, `R-3a.yaml`: drafted by Claude by hand from the City's documents only (never from
+  anything the script drafted). They are the answer keys the drafting script is graded on, and are never shown
+  to the script. R-1a is R-1b's closest sibling (the next chart column: it catches a column mix-up); R-3a is a
+  multi-family district (it catches single-family assumptions). Each chart number is checked against the chart
+  reader's cells for its own column (`packages/document_extraction/tests/test_r1b_matches_chart.py`). A hand
+  rulebook is the one the checker uses for its zone (`rulebook.rulebook_for`).
 - `drafted/`: every residential district drafted by the drafting script (`packages/rule_drafting`):
   `drafted/<district>.yaml` and `drafted/general.yaml` (rules for every district). Chart numbers in these
   come only from the chart reader's cells. The script's own records are in `drafted/records/`: what it

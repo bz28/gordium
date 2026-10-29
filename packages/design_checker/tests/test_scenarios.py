@@ -11,8 +11,8 @@ from design_checker.check import check_site
 PATHS = scenarios.paths()
 
 
-def test_there_are_ten_scenarios_each_with_working_and_a_citation():
-    assert len(PATHS) == 10
+def test_there_are_twelve_scenarios_each_with_working_and_a_citation():
+    assert len(PATHS) == 12        # ten R-1b designs, one R-1a, one R-3a
     for p in PATHS:
         sc = scenarios.load(p)
         for block in [sc["expected"], (sc.get("then") or {}).get("expected") or {}]:
