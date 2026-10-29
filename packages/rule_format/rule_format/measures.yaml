@@ -17,3 +17,15 @@ side_yard_larger:  {unit: ft,    meaning: Width of the wider side yard}
 rear_yard:         {unit: ft,    meaning: Depth of the rear yard}
 sleeping_rooms:    {unit: count, meaning: Bed or sleeping rooms in the dwelling unit}
 parking_spaces:    {unit: count, meaning: Off-street parking spaces provided}
+# Yards to the building seen from above, eaves and cornices included: §325-18B lets those project up to 2 ft
+# into a required yard (the yards above are measured to the building, its eaves left out).
+front_yard_eaves:        {unit: ft, meaning: "Depth of the front yard measured to the outermost part of the building, eaves included"}
+side_yard_smaller_eaves: {unit: ft, meaning: "Width of the narrower side yard measured to the outermost part of the building, eaves included"}
+side_yard_larger_eaves:  {unit: ft, meaning: "Width of the wider side yard measured to the outermost part of the building, eaves included"}
+rear_yard_eaves:         {unit: ft, meaning: "Depth of the rear yard measured to the outermost part of the building, eaves included"}
+# Accessory buildings (garages, sheds) standing apart from the main building.
+accessory_buildings:       {unit: count,  meaning: "Number of accessory buildings on the lot"}
+accessory_front_yard:      {unit: ft,     meaning: "Least distance from a street lot line to an accessory building"}
+accessory_side_yard:       {unit: ft,     meaning: "Least distance from a side lot line to an accessory building"}
+accessory_rear_yard:       {unit: ft,     meaning: "Least distance from the rear lot line to an accessory building"}
+accessory_distances_apply: {unit: yes_no, meaning: "The city's side and rear distances for accessory buildings apply to the accessory buildings on the lot"}

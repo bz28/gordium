@@ -240,7 +240,8 @@ def load_chart_test():
 # larger than its Column 13 (0/5/10 ft), which suggests the larger yard meets Column 12. R-1B's two minimums are
 # both 10 ft, so either reading enforces the cell exactly; the chart reader's test uses one, a draft may use the other.
 SIDE_ROWS = {"Side (one side minimum)", "Side (other side minimum)"}
-OTHER_SIDE = {"side_yard_smaller": "side_yard_larger", "side_yard_larger": "side_yard_smaller"}
+OTHER_SIDE = {"side_yard_smaller": "side_yard_larger", "side_yard_larger": "side_yard_smaller",
+              "side_yard_smaller_eaves": "side_yard_larger_eaves", "side_yard_larger_eaves": "side_yard_smaller_eaves"}
 
 
 def side_cells_equal(chart, cells) -> bool:
