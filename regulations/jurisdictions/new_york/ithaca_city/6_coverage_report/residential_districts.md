@@ -1372,32 +1372,32 @@ Code can't prove that the law's words support a decision; it proves only that th
 
 ## Every rule in each rulebook: measured? tested on a model?
 
-**Measures**: each name the rule's formulas use, and where its value comes from: *model* = model_measurement measures it from the Rhino model; *stated* = the architect states it (the model can't show it); *model or stated* = counted from the floor blocks drawn, else the architect's count; *none* = nothing fills it in, so the rule can only say needs review. A flag has no check: it always says needs review where it applies. **Tested on a model**: *real model* = the architects' Rhino models of a test site (model_measurement/tests/test_models.py checks this rule's result on them); *scenario* = a design worked by hand from the law, drawn by code and checked (design_checker/tests/test_scenarios.py, in test_data/test_sites/…/scenarios).
+**Measures**: each name the rule's formulas use, and where its value comes from: *model* = model_measurement measures it from the Rhino model; *stated* = the architect states it (the model can't show it); *model or stated* = counted from the floor blocks drawn, else the architect's count; *none* = nothing fills it in, so the rule can only say needs review. A flag has no check: it always says needs review where it applies. **Tested on a model**: *real model* = the architects' Rhino models of a test site (model_measurement/tests/test_models.py checks this rule's result on them); *scenario* = a design worked by hand from the law, drawn by code and checked (design_checker/tests/test_scenarios.py for test_data/test_sites/…/scenarios; design_checker/tests/test_sites.py for the real lots in test_data/test_sites/…/deep_run).
 
-### R-1a: 19 rules, 3 flags; 8 checked on a model
+### R-1a: 19 rules, 3 flags; 14 checked on a model
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-1a.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
-| `R-1a.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | scenario 11 |
+| `R-1a.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | scenario r1 |
+| `R-1a.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | scenario r1, scenario 11 |
 | `R-1a.lot_area_other_use` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-1a.lot_area_each_primary_building` | rule | §325-3B:lot (via definition), §325-3B:primary_structure, §325-8B | lot_area (model), primary_buildings (stated), primary_buildings_same_use (stated), use (stated) | **none** |
 | `R-1a.yards_not_shared` | flag | §325-3B:lot_building, §325-3B:yard, §325-7B, §325-25, §325-25A | primary_buildings (stated) | **none** |
-| `R-1a.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | **none** |
+| `R-1a.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | scenario r1 |
 | `R-1a.south_hill_overlay` | rule | §325-3B:primary_structure, §325-8E | primary_buildings (stated), south_hill_overlay (stated) | **none** |
-| `R-1a.lot_width_one_family_detached` | rule | §325-8A | lot_width (model), use (stated) | scenario 11 |
+| `R-1a.lot_width_one_family_detached` | rule | §325-8A | lot_width (model), use (stated) | scenario r1, scenario 11 |
 | `R-1a.lot_width_other_use` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
-| `R-1a.stories` | rule | §325-3B:story (via definition), §325-8A (via definition), §325-16C | stories (model or stated) | scenario 11 |
-| `R-1a.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), lot_depth (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | scenario 11 |
-| `R-1a.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A, §325-25B | building_area (model), lot_area (model) | scenario 11 |
-| `R-1a.front_yard` | rule | §325-3B:front_yard (via definition), §325-18A (via definition), §325-18B (via definition), §325-19C | front_yard (model) | scenario 11 |
-| `R-1a.side_yards` | rule | §325-3B:side_yard (via definition), §325-8A (via definition), §325-18A (via definition), §325-18B (via definition) | side_yard_larger (model), side_yard_smaller (model) | scenario 11 |
-| `R-1a.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | lot_depth (model), rear_yard (model) | scenario 11 |
-| `R-1a.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-8A (via definition), §325-16C, §325-18B | building_height (model), front_yard_eaves (model), lot_depth (model), rear_yard_eaves (model), side_yard_larger_eaves (model), side_yard_smaller_eaves (model) | **none** |
-| `R-1a.accessory_buildings` | rule | §325-25, §325-25A, §325-25C | accessory_buildings (model), accessory_distances_apply (model), accessory_front_yard (model), accessory_rear_yard (model), accessory_side_yard (model) | **none** |
-| `R-1a.parking_one_family` | rule | §325-28C | parking_spaces (stated), sleeping_rooms (stated), use (stated) | **none** |
+| `R-1a.stories` | rule | §325-3B:story (via definition), §325-8A (via definition), §325-16C | stories (model or stated) | scenario r1, scenario 11 |
+| `R-1a.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), lot_depth (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | scenario r1, scenario 11 |
+| `R-1a.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A, §325-25B | building_area (model), lot_area (model) | scenario r1, scenario 11 |
+| `R-1a.front_yard` | rule | §325-3B:front_yard (via definition), §325-18A (via definition), §325-18B (via definition), §325-19C | front_yard (model) | scenario r1, scenario 11 |
+| `R-1a.side_yards` | rule | §325-3B:side_yard (via definition), §325-8A (via definition), §325-18A (via definition), §325-18B (via definition) | side_yard_larger (model), side_yard_smaller (model) | scenario r1, scenario 11 |
+| `R-1a.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | lot_depth (model), rear_yard (model) | scenario r1, scenario 11 |
+| `R-1a.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-8A (via definition), §325-16C, §325-18B | building_height (model), front_yard_eaves (model), lot_depth (model), rear_yard_eaves (model), side_yard_larger_eaves (model), side_yard_smaller_eaves (model) | scenario r1 |
+| `R-1a.accessory_buildings` | rule | §325-25, §325-25A, §325-25C | accessory_buildings (model), accessory_distances_apply (model), accessory_front_yard (model), accessory_rear_yard (model), accessory_side_yard (model) | scenario r1 |
+| `R-1a.parking_one_family` | rule | §325-28C | parking_spaces (stated), sleeping_rooms (stated), use (stated) | scenario r1 |
 | `R-1a.parking_other_uses` | flag | — (the chart only) | use (stated) | **none** |
-| `R-1a.occupancy_one_family` | rule | §325-3B:accessory_dwelling_unit, §325-3B:dwelling, §325-3B:dwelling_one_family, §325-3B:family, §325-3B:functional_family_unit, §325-3B:owner, §325-3B:primary_residence, §325-8B | accessory_dwelling_unit (stated), functional_family_unit (stated), owner_occupied (stated), unrelated_persons (stated), use (stated) | **none** |
+| `R-1a.occupancy_one_family` | rule | §325-3B:accessory_dwelling_unit, §325-3B:dwelling, §325-3B:dwelling_one_family, §325-3B:family, §325-3B:functional_family_unit, §325-3B:owner, §325-3B:primary_residence, §325-8B | accessory_dwelling_unit (stated), functional_family_unit (stated), owner_occupied (stated), unrelated_persons (stated), use (stated) | scenario r1 |
 | `R-1a.home_occupation_size` | rule | §325-3B:home_occupation | home_occupation (stated), home_occupation_area (stated), home_occupation_unit_area (stated), use (stated) | **none** |
 | `R-1a.home_occupation` | flag | §325-3B:home_occupation, §325-9B | home_occupation (stated), use (stated) | **none** |
 
@@ -1462,37 +1462,37 @@ Code can't prove that the law's words support a decision; it proves only that th
 | `R-2a.home_occupation_size` | rule | §325-3B:home_occupation | home_occupation (stated), home_occupation_area (stated), home_occupation_unit_area (stated), use (stated) | **none** |
 | `R-2a.home_occupation` | flag | §325-3B:home_occupation, §325-9B | home_occupation (stated), use (stated) | **none** |
 
-### R-2b: 24 rules, 5 flags; 0 checked on a model
+### R-2b: 24 rules, 5 flags; 13 checked on a model
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-2b.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
+| `R-2b.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | scenario r2 |
 | `R-2b.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-2b.lot_area_one_family_semi_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
-| `R-2b.lot_area_two_family` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
+| `R-2b.lot_area_two_family` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | scenario r2 |
 | `R-2b.lot_area_other_use` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-2b.lot_area_each_primary_building` | rule | §325-3B:lot (via definition), §325-3B:primary_structure, §325-8B | lot_area (model), primary_buildings (stated), primary_buildings_same_use (stated), use (stated) | **none** |
 | `R-2b.yards_not_shared` | flag | §325-3B:lot_building, §325-3B:yard, §325-7B, §325-25, §325-25A | primary_buildings (stated) | **none** |
-| `R-2b.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | **none** |
+| `R-2b.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | scenario r2 |
 | `R-2b.south_hill_overlay` | rule | §325-3B:primary_structure, §325-8E | primary_buildings (stated), south_hill_overlay (stated) | **none** |
 | `R-2b.lot_width_one_family_detached` | rule | §325-8A | lot_width (model), use (stated) | **none** |
 | `R-2b.lot_width_one_family_semi_detached` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
-| `R-2b.lot_width_two_family` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
+| `R-2b.lot_width_two_family` | rule | §325-8A (via definition) | lot_width (model), use (stated) | scenario r2 |
 | `R-2b.lot_width_other_use` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
-| `R-2b.stories` | rule | §325-3B:story (via definition), §325-8A (via definition), §325-16C | stories (model or stated) | **none** |
-| `R-2b.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), lot_depth (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | **none** |
-| `R-2b.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A, §325-25B | building_area (model), lot_area (model) | **none** |
-| `R-2b.front_yard` | rule | §325-3B:front_yard (via definition), §325-18A (via definition), §325-18B (via definition), §325-19C | front_yard (model) | **none** |
-| `R-2b.side_yards` | rule | §325-3B:side_yard (via definition), §325-8A (via definition), §325-18A (via definition), §325-18B (via definition) | side_yard_larger (model), side_yard_smaller (model) | **none** |
-| `R-2b.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | lot_depth (model), rear_yard (model) | **none** |
-| `R-2b.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-3B:side_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B | building_height (model), front_yard_eaves (model), lot_depth (model), rear_yard_eaves (model), side_yard_larger (model), side_yard_larger_eaves (model), side_yard_smaller (model), side_yard_smaller_eaves (model) | **none** |
+| `R-2b.stories` | rule | §325-3B:story (via definition), §325-8A (via definition), §325-16C | stories (model or stated) | scenario r2 |
+| `R-2b.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), lot_depth (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | scenario r2 |
+| `R-2b.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A, §325-25B | building_area (model), lot_area (model) | scenario r2 |
+| `R-2b.front_yard` | rule | §325-3B:front_yard (via definition), §325-18A (via definition), §325-18B (via definition), §325-19C | front_yard (model) | scenario r2 |
+| `R-2b.side_yards` | rule | §325-3B:side_yard (via definition), §325-8A (via definition), §325-18A (via definition), §325-18B (via definition) | side_yard_larger (model), side_yard_smaller (model) | scenario r2 |
+| `R-2b.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | lot_depth (model), rear_yard (model) | scenario r2 |
+| `R-2b.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-3B:side_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B | building_height (model), front_yard_eaves (model), lot_depth (model), rear_yard_eaves (model), side_yard_larger (model), side_yard_larger_eaves (model), side_yard_smaller (model), side_yard_smaller_eaves (model) | scenario r2 |
 | `R-2b.accessory_buildings` | rule | §325-25, §325-25A, §325-25C | accessory_buildings (model), accessory_distances_apply (model), accessory_front_yard (model), accessory_rear_yard (model), accessory_side_yard (model) | **none** |
 | `R-2b.parking_one_family` | rule | §325-28C | parking_spaces (stated), sleeping_rooms (stated), use (stated) | **none** |
-| `R-2b.parking_dwelling_units` | flag | — (the chart only) | use (stated) | **none** |
+| `R-2b.parking_dwelling_units` | flag | — (the chart only) | use (stated) | scenario r2 |
 | `R-2b.parking_other_uses` | flag | — (the chart only) | use (stated) | **none** |
 | `R-2b.loading` | flag | — (the chart only) | use (stated) | **none** |
 | `R-2b.occupancy_one_family` | rule | §325-3B:dwelling_one_family, §325-3B:family, §325-3B:functional_family_unit, §325-8B | functional_family_unit (stated), unrelated_persons (stated), use (stated) | **none** |
-| `R-2b.occupancy_two_family` | rule | §325-3B:dwelling_multiple_or_multiple_residence, §325-3B:dwelling_two_family, §325-3B:family, §325-8B | unrelated_persons (stated), use (stated) | **none** |
+| `R-2b.occupancy_two_family` | rule | §325-3B:dwelling_multiple_or_multiple_residence, §325-3B:dwelling_two_family, §325-3B:family, §325-8B | unrelated_persons (stated), use (stated) | scenario r2 |
 | `R-2b.home_occupation_size` | rule | §325-3B:home_occupation | home_occupation (stated), home_occupation_area (stated), home_occupation_unit_area (stated), use (stated) | **none** |
 | `R-2b.home_occupation` | flag | §325-3B:home_occupation, §325-9B | home_occupation (stated), use (stated) | **none** |
 
@@ -1578,12 +1578,12 @@ Code can't prove that the law's words support a decision; it proves only that th
 | `R-3a.home_occupation_size` | rule | §325-3B:home_occupation | home_occupation (stated), home_occupation_area (stated), home_occupation_unit_area (stated), use (stated) | **none** |
 | `R-3a.home_occupation` | flag | §325-3B:home_occupation, §325-9B | home_occupation (stated), use (stated) | **none** |
 
-### R-3aa: 29 rules, 9 flags; 0 checked on a model
+### R-3aa: 29 rules, 9 flags; 14 checked on a model
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-3aa.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
-| `R-3aa.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
+| `R-3aa.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | scenario r3 |
+| `R-3aa.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | scenario r3 |
 | `R-3aa.lot_area_one_family_semi_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-3aa.lot_area_two_family` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-3aa.lot_area_one_family_attached` | rule | §325-3B:conversion, §325-3B:lot (via definition) | conversion (stated), dwelling_units (stated), lot_area (model), rooms_let_for_profit (stated), use (stated) | **none** |
@@ -1593,30 +1593,30 @@ Code can't prove that the law's words support a decision; it proves only that th
 | `R-3aa.lot_area_other_use` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-3aa.lot_area_each_primary_building` | rule | §325-3B:lot (via definition), §325-3B:primary_structure, §325-8B | lot_area (model), primary_buildings (stated), primary_buildings_same_use (stated), use (stated) | **none** |
 | `R-3aa.yards_not_shared` | flag | §325-3B:lot_building, §325-3B:yard, §325-7B, §325-25, §325-25A | primary_buildings (stated) | **none** |
-| `R-3aa.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | **none** |
+| `R-3aa.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | scenario r3 |
 | `R-3aa.lot_size_zero_lot_line` | flag | §325-8B | use (stated) | **none** |
-| `R-3aa.lot_width_one_family_detached` | rule | §325-8A | lot_width (model), use (stated) | **none** |
+| `R-3aa.lot_width_one_family_detached` | rule | §325-8A | lot_width (model), use (stated) | scenario r3 |
 | `R-3aa.lot_width_one_family_semi_detached` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
 | `R-3aa.lot_width_one_family_attached` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
 | `R-3aa.lot_width_two_family` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
 | `R-3aa.lot_width_multiple_family` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
 | `R-3aa.lot_width_fraternity` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
 | `R-3aa.lot_width_other_use` | rule | §325-8A (via definition) | lot_width (model), use (stated) | **none** |
-| `R-3aa.stories` | rule | §325-3B:building_area (via definition), §325-3B:story (via definition), §325-8A, §325-8B, §325-16C | accessory_buildings (model), building_area (model), stories (model or stated) | **none** |
-| `R-3aa.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), lot_depth (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | **none** |
-| `R-3aa.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A, §325-25B | building_area (model), lot_area (model) | **none** |
-| `R-3aa.footprint_block_front` | flag | §325-3B:primary_structure | — | **none** |
-| `R-3aa.front_yard` | rule | §325-3B:front_yard (via definition), §325-18A (via definition), §325-18B (via definition), §325-19C | front_yard (model) | **none** |
-| `R-3aa.side_yards` | rule | §325-3B:side_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | side_yard_larger (model), side_yard_smaller (model) | **none** |
-| `R-3aa.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | lot_depth (model), rear_yard (model) | **none** |
-| `R-3aa.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-3B:side_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B | building_height (model), front_yard_eaves (model), lot_depth (model), rear_yard_eaves (model), side_yard_larger (model), side_yard_larger_eaves (model), side_yard_smaller (model), side_yard_smaller_eaves (model) | **none** |
+| `R-3aa.stories` | rule | §325-3B:building_area (via definition), §325-3B:story (via definition), §325-8A, §325-8B, §325-16C | accessory_buildings (model), building_area (model), stories (model or stated) | scenario r3 |
+| `R-3aa.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), lot_depth (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | scenario r3 |
+| `R-3aa.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A, §325-25B | building_area (model), lot_area (model) | scenario r3 |
+| `R-3aa.footprint_block_front` | flag | §325-3B:primary_structure | — | scenario r3 |
+| `R-3aa.front_yard` | rule | §325-3B:front_yard (via definition), §325-18A (via definition), §325-18B (via definition), §325-19C | front_yard (model) | scenario r3 |
+| `R-3aa.side_yards` | rule | §325-3B:side_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | side_yard_larger (model), side_yard_smaller (model) | scenario r3 |
+| `R-3aa.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | lot_depth (model), rear_yard (model) | scenario r3 |
+| `R-3aa.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-3B:side_yard (via definition), §325-8A (via definition), §325-16C, §325-18A (via definition), §325-18B | building_height (model), front_yard_eaves (model), lot_depth (model), rear_yard_eaves (model), side_yard_larger (model), side_yard_larger_eaves (model), side_yard_smaller (model), side_yard_smaller_eaves (model) | scenario r3 |
 | `R-3aa.accessory_buildings` | rule | §325-25, §325-25A, §325-25C | accessory_buildings (model), accessory_distances_apply (model), accessory_front_yard (model), accessory_rear_yard (model), accessory_side_yard (model) | **none** |
 | `R-3aa.abutting_r1` | flag | §325-3B:dwelling_one_family, §325-3B:one_family_semidetached_dwelling, §325-8B, §325-19E | abuts_r1_district (stated), use (stated) | **none** |
-| `R-3aa.parking_one_family` | rule | §325-28C | parking_spaces (stated), sleeping_rooms (stated), use (stated) | **none** |
+| `R-3aa.parking_one_family` | rule | §325-28C | parking_spaces (stated), sleeping_rooms (stated), use (stated) | scenario r3 |
 | `R-3aa.parking_dwelling_units` | flag | — (the chart only) | use (stated) | **none** |
 | `R-3aa.parking_other_uses` | flag | — (the chart only) | use (stated) | **none** |
 | `R-3aa.loading` | flag | §325-21A, §325-21B | use (stated) | **none** |
-| `R-3aa.occupancy_one_family` | rule | §325-3B:dwelling_one_family, §325-3B:family, §325-3B:functional_family_unit, §325-8B | functional_family_unit (stated), unrelated_persons_with_children (stated), use (stated) | **none** |
+| `R-3aa.occupancy_one_family` | rule | §325-3B:dwelling_one_family, §325-3B:family, §325-3B:functional_family_unit, §325-8B | functional_family_unit (stated), unrelated_persons_with_children (stated), use (stated) | scenario r3 |
 | `R-3aa.occupancy_two_family` | flag | §325-3B:dwelling_multiple_or_multiple_residence, §325-3B:dwelling_two_family, §325-3B:family | unrelated_persons (stated), use (stated) | **none** |
 | `R-3aa.home_occupation_size` | rule | §325-3B:home_occupation | home_occupation (stated), home_occupation_area (stated), home_occupation_unit_area (stated), use (stated) | **none** |
 | `R-3aa.home_occupation` | flag | §325-3B:home_occupation, §325-9B | home_occupation (stated), use (stated) | **none** |
