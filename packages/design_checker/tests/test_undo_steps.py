@@ -117,6 +117,7 @@ def _plugin(doc, said):
           "SECTION": "Gordium", "ENTRY": "lot_facts", "UI_ENTRY": "ui", "SOURCES_ENTRY": "sources",
           "LAYERS": logic.LAYERS, "Cancelled": logic.Cancelled,
           "Rhino": type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": doc}),
+                                      "RhinoApp": type("RA", (), {"WriteLine": staticmethod(lambda text: None)}),
                                       "DocObjects": type("DO", (), {"ObjectType": type("OT", (), {"Curve": 4})})}),
           "live": lambda on: None,
           "ui": type("UI", (), {"legend": staticmethod(lambda code: None),
@@ -188,7 +189,8 @@ def test_every_panel_change_is_exactly_one_named_undo_step(name):
     _plugin(doc, said)["_actions"]()[name](*args)
     assert doc.outside == [], f"{name} wrote {doc.outside} outside any undo record (Ctrl+Z would skip it)"
     assert doc.open == [] and doc.unrecorded == []                          # every record it began, ended
-    assert doc.records == ([logic.UNDO_WORDS[name]] if changes else []), doc.records
+    words = logic.undo_enter(args[0]) if name == "enter" else logic.UNDO_WORDS.get(name)   # Enter: by its facts
+    assert doc.records == ([words] if changes else []), doc.records
 
 
 def test_a_refused_count_leaves_the_file_as_it_was_and_no_undo_step():
@@ -213,7 +215,8 @@ def test_a_refused_count_leaves_the_file_as_it_was_and_no_undo_step():
     ns["_answer"] = 4                                                      # a count it keeps: one step, one check
     checks.clear()
     ns["_actions"]()["enter"](["stories"])
-    assert doc.records == [logic.UNDO_WORDS["enter"]] and doc.outside == [] and checks == [4]
+    assert doc.records == [logic.undo_enter(["stories"])] and doc.outside == [] and checks == [4]
+    assert doc.records == ["Gordium: enter " + logic.STATED_FACTS["stories"][2]]      # named by the row's own facts
     assert json.loads(doc.Strings.data[("Gordium", "lot_facts")])["stories"] == 4
 
 

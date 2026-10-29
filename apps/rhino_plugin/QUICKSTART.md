@@ -436,8 +436,10 @@ Three rows need review from the start, and that is Gordium being honest, not a m
   Not answered, so this row waits on it ("say whether any inlet wall or stream bank … is within 20 ft of the lot").
   Answer it with the row's **Answer 2 questions…** button and the row is decided.
 - **Rear yard**: which of the short lines at the back count as side lot lines and which as the rear lot line is an
-  open question for the architects (it decides the lot's depth, and so the rear yard's requirement), so the rear
-  yard's Proposed and Required show the range each can take, and the reason says so once: "Complies under every
+  open question for the architects (it decides the lot's depth, and so the rear yard's requirement). The list
+  shows the tightest reading, 36'-3 3/8" against 32'-10 1/8", each marked "(varies)", and its Delta reads
+  "+3'-5 1/4"; worst +0'-5 1/4"" (the least under any reading, the tax map's 2 ft too). The row's details give the
+  range each can take (34'-11 7/8" to 36'-3 3/8" against 24'-1 7/8" to 32'-10 1/8"), and the reason says so once: "Complies under every
   reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the
   zoning office".
 - **Eaves into front yard** waits on the same question, and says the same.
@@ -454,8 +456,8 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 2. **Move the house 5 ft back.** Front yard 32'-0 5/8": complies. The rear yard still needs review (the open
    question above).
 3. **Move it 10 ft back instead.** Rear yard 24'-11 7/8" to 26'-6 1/8": **needs review**. **Now move it 15 ft back:**
-   Rear yard 19'-11 7/8" to 21'-8 3/8": **does not comply**, at least 1'-1 7/8" short: short under every reading
-   of the back lines and of the tax map. (From 11 to 13 ft back it still needs review: under some readings of the
+   Rear yard 19'-11 7/8" to 21'-8 3/8": **does not comply**, "still 1'-1 7/8" short under every reading": short
+   under every reading of the back lines and of the tax map. (From 11 to 13 ft back it still needs review: under some readings of the
    back lines and of the tax map it could still comply. From 14 ft back it does not comply.) A note appears, and the strip of the house that is over
    turns red.
 4. **Undo, then pull the rear wall 11 ft back** (Cmd+Shift+click the back face, Gumball 11). Lot coverage 29.7%
@@ -463,9 +465,10 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply**,
    4'-0" over (the height doesn't depend on the lot lines). Only the part above 35'-0" turns red.
 6. **Undo, then move the southwest wall 3 ft out** (Cmd+Shift+click the face on your left, seen from the street).
-   Side yard, Southwest 9'-0 1/2": **needs review**, up to 2'-11 1/2" short (it complies if the tax map's line is out
-   the lucky way). **Move it 5 ft out instead:** 7'-0 1/2": **does not comply**, at least 0'-11 3/8" short (rounded
-   down: never more than certain), and that strip turns red.
+   Side yard, Southwest 9'-0 1/2": **needs review**, 0'-11 1/2" short as drawn, "+1'-0 1/2" if the tax-map lines
+   are 2 ft off the other way" (it complies if the tax map's line is out the lucky way). **Move it 5 ft out
+   instead:** 7'-0 1/2": **does not comply**, 2'-11 1/2" short, "still 0'-11 3/8" short if the tax-map lines are 2 ft
+   off the other way" (rounded down: never more than certain), and that strip turns red.
 7. **Undo.** Everything is back to the starting results.
 
 ### Harder tests
@@ -477,11 +480,13 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 10. **The height bonus** (§325-16C: a taller house if every yard is larger): raise the roof 3 ft (38'-0"), move the
     house 3 ft back, and pull each side wall 3 ft in. On this lot Building height **needs review**: the bonus needs
     the rear yard larger too, and which lines are the rear lot line is the open question above.
-11. **Delta in words, true however the lot lines lie:** after test 2 the Front yard row reads "≥ +5'-0 5/8""
-    (at least that much to spare); in test 6 the Southwest side yard reads "up to 2'-11 1/2" short" (3 ft out: it
-    may comply) and "at least 0'-11 3/8" short" (5 ft out: the red strip). A maximum passed says "over" instead
-    of "short" (test 5's "4'-0" over"). The same in the report and the note. With a survey it reads the margin
-    itself: after test 2, "+7'-0 5/8"".
+11. **Delta in words, as drawn and if the tax-map lines are 2 ft off:** after test 2 the Front yard row's details
+    read "+7'-0 5/8" (+5'-0 5/8" if the tax-map lines are 2 ft off)" (the list says it shorter: "+7'-0 5/8"; worst
+    +5'-0 5/8""); in test 6 the Southwest side yard reads "0'-11 1/2" short (+1'-0 1/2" if the tax-map lines are 2 ft
+    off the other way)" (3 ft out: it may comply) and "2'-11 1/2" short (still 0'-11 3/8" short if the tax-map lines
+    are 2 ft off the other way)" (5 ft out: the red strip). A maximum passed says "over" instead of "short" (test
+    5's "4'-0" over"). The same in the report and the note. With a survey it reads the margin itself: after test 2,
+    "+7'-0 5/8"".
 12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
     an open question for a corner lot).
 13. **A survey:** with a surveyed lot, a new starting house goes to the limits: 55'-4" × 31'-8", its southwest

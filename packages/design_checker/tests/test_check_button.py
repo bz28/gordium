@@ -232,3 +232,22 @@ def test_a_start_box_that_ends_in_an_error_leaves_the_results_greyed():
     assert logic.changed_after_box(10.0, None, False, failed=True) == 10.0        # changed before the box: still
     assert logic.changed_after_box(None, None, False, failed=True) is None        # nothing touched: nothing to grey
     assert logic.changed_after_box(None, 20.0, False) is None                     # a Cancel, as before
+
+
+def test_check_leaves_its_own_words_on_the_command_line():
+    """The audit of main (2026-10-29): "Gordium: Cancelled: nothing changed." (an earlier button's words) stayed on
+    Rhino's command line after the next Check. Check writes its result there, as GordiumCheck does."""
+    import types
+    lines = []
+    doc = object()
+    rhino = types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc),
+                                  RhinoApp=types.SimpleNamespace(WriteLine=lines.append))
+    ns = {"Rhino": rhino, "STATE": {"dirty": 5.0}, "logic": logic, "say": lines.append,
+          "run_check": lambda d, report: {"view": {"summary": "3 need review · 9 comply"}}}
+    exec(body(RHINO, "def check_now(", "\ndef "), ns)     # noqa: S102
+    ns["check_now"]()
+    assert lines == ["Gordium: 3 need review · 9 comply"] and ns["STATE"]["dirty"] is None
+    ns["run_check"] = lambda d, report: None              # a check that didn't finish says its own words itself
+    lines.clear()
+    ns["check_now"]()
+    assert lines == []

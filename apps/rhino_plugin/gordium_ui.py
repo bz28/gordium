@@ -567,11 +567,11 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
             # the values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)
-            name, proposed = logic.list_cells(i)          # the use row: the use's own name as its Item
-            values = [("" if stale_row else i["mark"] + "  ") + name,
+            name, proposed, required, delta = logic.list_values(i)   # the use row: the use's own name as its Item;
+            values = [("" if stale_row else i["mark"] + "  ") + name,   # a tax-map Delta and a span: their short forms
                       "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
-                      "" if stale_row else logic.cell_text(i["required"]),
-                      "" if stale_row else logic.cell_text(i.get("delta") or "")]
+                      "" if stale_row else logic.cell_text(required),
+                      "" if stale_row else logic.cell_text(delta)]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
             ci.Values = System.Array[System.Object](values)

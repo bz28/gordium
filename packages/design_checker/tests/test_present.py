@@ -353,16 +353,21 @@ def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
     from design_checker.check import check_site
     tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
     words = {x: items(check_site(_plot(box(x, 30, 35, 65)), tax)["view"])["Side yard, West"] for x in (7, 11, 16)}
+    # the audit of main (2026-10-29): the margin as drawn first, then the end of the ±2 ft that decides the status
+    off = "if the tax-map lines are 2 ft off"
     assert [(words[x]["delta"], words[x]["approx"]) for x in (7, 11, 16)] == [
-        ("at least 1'-0\" short", True), ("up to 1'-0\" short", True), ("≥ +4'-0\"", True)]
+        (f"3'-0\" short (still 1'-0\" short {off} the other way)", True),
+        (f"+1'-0\" if confirmed (1'-0\" short {off})", True), (f"+6'-0\" (+4'-0\" {off})", True)]
+    assert [words[x]["delta_cell"] for x in (7, 11, 16)] == [
+        "−3'-0\"; best −1'-0\"", "+1'-0\"; worst −1'-0\"", "+6'-0\"; worst +4'-0\""]
     assert words[7]["margin"] == "−3'-0\"" and words[7]["status"] == present.FAILS     # as drawn, unchanged
-    assert "as drawn" in words[7]["detail"]["line"] and "at least 1'-0\" short" in words[7]["detail"]["line"]
+    assert words[7]["detail"]["line"] == "7'-0\" proposed, 10'-0\" required · " + words[7]["delta"]
     survey = items(check_site(_plot(box(7, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])["Side yard, West"]
     assert (survey["delta"], survey["approx"]) == ("−3'-0\" short", False)
     # the notice and the report say the same words as the panel
     before = {i["id"]: i["status"] for i in check_site(_plot(box(16, 30, 35, 65)), tax)["view"]["items"]}
     now = check_site(_plot(box(7, 30, 35, 65)), tax)["view"]["items"]
-    assert present.notice(before, now)[1].endswith("· at least 1'-0\" short")
+    assert present.notice(before, now)[1].endswith("· " + words[7]["delta"])
     # round 2: settle is the ONLY writer of the Delta; nothing falls back to the as-drawn margin's words
     for path in ("packages/design_checker/design_checker/check.py", "packages/design_checker/design_checker/present.py",
                  "apps/rhino_plugin/gordium_ui.py"):
@@ -708,11 +713,15 @@ def test_lot_area_and_coverage_deltas_use_the_tax_map_lot_area_like_their_verdic
     tol = r["measurements"]["lot_area"]["tolerance"]
     area = v["Lot area"]
     assert area["status"] == present.REVIEW and area["approx"]
-    assert area["delta"] == "up to " + present._area(6000 - tol["low"], "up") + " short"     # never "to spare"
+    # as drawn (6,570 sf), then short at the tax map's low end: never a bare "to spare" on a row in review
+    assert area["delta"] == ("+570 sf if confirmed (" + present._area(6000 - tol["low"], "up") +
+                             " short if the tax-map lines are 2 ft off)")
     cov = v["Lot coverage"]
-    assert cov["approx"] and cov["status"] == present.FAILS and cov["delta"].startswith("at least ")
-    assert cov["delta"].endswith(" over")                             # coverage is a most: past it is "over"
-    assert cov["delta"] != cov["margin"].lstrip("−") + " over"        # the certain excess, not the as-drawn one
+    assert cov["approx"] and cov["status"] == present.FAILS
+    head, tail = cov["delta"].split(" (", 1)
+    assert head == cov["margin"].lstrip("−") + " over"                # as drawn, a most: past it is "over"
+    assert tail.startswith("still ") and tail.endswith(" over if the tax-map lines are 2 ft off the other way)")
+    assert tail.split()[1] != cov["margin"].lstrip("−")               # the certain excess, not the as-drawn one
 
 
 def test_the_height_row_is_never_marked_tax_map_approximate(tax_map):
@@ -731,14 +740,16 @@ def test_red_and_amber_agree_with_the_rear_yards_own_readings():
     tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
     r = check_site(_plot(box(10, 30, 35, 78.5)), tax)                 # rear wall 3'-6" over the drawn 25'-0"
     rear = items(r["view"])["Rear yard"]
-    assert (rear["status"], rear["delta"]) == (present.FAILS, "at least 0'-6\" short")
+    assert (rear["status"], rear["delta"]) == (    # 3'-6" short as drawn; still 0'-6" short at best
+        present.FAILS, "3'-6\" short (still 0'-6\" short if the tax-map lines are 2 ft off the other way)")
     red = [g for g in r["plan"]["encroach"] if g["status"] == present.FAILS]
     (strip,) = red
     ys = [p[1] for p in strip["outline"]]
     assert min(ys) == pytest.approx(78.0, abs=0.01) and max(ys) == pytest.approx(78.5, abs=0.01)   # 0'-6" deep
     r = check_site(_plot(box(10, 30, 35, 72.5)), tax)                 # 2'-6" clear: needs review, "up to 0'-6" short"
     rear = items(r["view"])["Rear yard"]
-    assert (rear["status"], rear["delta"], rear["colour"]) == (present.REVIEW, "up to 0'-6\" short", "amber")
+    assert (rear["status"], rear["delta"], rear["colour"]) == (
+        present.REVIEW, "+2'-6\" if confirmed (0'-6\" short if the tax-map lines are 2 ft off)", "amber")
     amber = [p for g in r["plan"]["encroach"] if g["status"] == present.REVIEW for p in g["outline"]]
     assert max(p[1] for p in amber) == pytest.approx(72.5, abs=0.01)      # the rear doubt (69.5 to 72.5 deep) shows
 
@@ -765,13 +776,23 @@ def _shown_agrees(i):
     … short", "less than … over", a survey's "−… short" or "… over") only on a row that fails, and on a yard always
     with red; a row that complies never says "short" or "over"; red only on a row that fails."""
     d, st = i.get("delta") or "", i["status"]
-    certain = (d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))) or (
-        d.endswith(" over") and not d.startswith("up to "))
-    bare_room = d.startswith(("+", "≥ +")) and not d.endswith(" if confirmed")
+    if d.endswith(present.TAX_OFF + ")") or d.endswith(present.TAX_OFF + " the other way)") or \
+            d.endswith(present.TAX_OFF + " the other way); see why"):
+        # a tax-map lot's Delta (present.tax_delta): "<as drawn> (<the end that decides it> if the tax-map lines are
+        # 2 ft off[ the other way])": certain only when short even at best ("still"), room bare only if it complies
+        head, tail = d.split(" (", 1)
+        certain = tail.startswith("still ") and not d.endswith("; see why")
+        bare_room = head.startswith("+") and not head.endswith(" if confirmed")
+        says_short = any(w in x for x in (head, tail) for w in (" short", " over"))
+    else:
+        certain = (d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))) or (
+            d.endswith(" over") and not d.startswith("up to "))
+        bare_room = d.startswith(("+", "≥ +")) and not d.endswith(" if confirmed")
+        says_short = d.endswith((" short", " over"))
     assert not bare_room or st == present.COMPLIES, (i["name"], st, d)
     assert not certain or st == present.FAILS, (i["name"], st, d)
     assert not (certain and i["measure"] in present.YARD_MEASURES) or i["colour"] == "red", (i["name"], i["colour"], d)
-    assert st != present.COMPLIES or not d.endswith((" short", " over")), (i["name"], st, d)
+    assert st != present.COMPLIES or not says_short, (i["name"], st, d)
     assert i["colour"] != "red" or st == present.FAILS, (i["name"], st)
     assert i["colour"] == "none" or i["measure"] in present.YARD_MEASURES, i["name"]
 
