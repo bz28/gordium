@@ -194,9 +194,9 @@ Every reason the code gives today comes from the table:
   smallest fall its USGS lidar can tell from level ground; why, at `FLAT_FALL_FT` in measure.py): "the ground falls
   about <fall> ft across the lot, but Gordium assumes it flat: height is measured from the average ground level at
   the walls (the grade plane, §325-3), which Gordium can't set yet: check height and stories against your survey";
-  with no looked-up ground at all, "Gordium assumes the ground flat, but has no ground levels for this lot to show
-  it is (Look up the address to read them): height is measured from the average ground level at the walls (the
-  grade plane, §325-3): check height and stories against your survey". What flat ground gives is kept beside it
+  with no looked-up ground, or only part of it (fewer than 3 levels, or a level missing), "Gordium assumes the
+  ground flat, but couldn't read this lot's ground levels in full to show it is: height is measured from the average
+  ground level at the walls (the grade plane, §325-3): check height and stories against your survey". What flat ground gives is kept beside it
   (shown, never deciding).
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
   are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one

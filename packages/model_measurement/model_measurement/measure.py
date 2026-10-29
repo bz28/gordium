@@ -1448,9 +1448,10 @@ def tax_map_lot_area(polygon) -> dict:
 # (§325-3 STORY: a level counts once the floor above is over 6 ft above the grade plane). The line is therefore the
 # smallest fall the lookup can tell from level ground: USGS 3DEP lidar (QL2 or better, Lidar Base Specification)
 # repeats on smooth ground to within 6 cm (0.2 ft) and its overlapping swaths agree to within 8 cm (0.26 ft), so
-# level ground reads a fall of a few tenths of a foot; 0.5 ft (6 in) is above that, and is also the fall the NYS
-# Residential Code asks of finished ground in the first 10 ft from a house (R401.3), i.e. less than ordinary
-# finish grading. A fall of FLAT_FALL_FT or more, or no ground levels at all, and height and stories need review.
+# level ground reads a fall of a few tenths of a foot; 0.5 ft (6 in) is above that. (It is not a "safe" fall: the
+# NYS Residential Code R401.3 asks finished ground to fall at least 6 in in the first 10 ft from a house, so real
+# grading at the walls can move the grade plane by that much on a lot the lookup reads level.) A fall of
+# FLAT_FALL_FT or more, or no whole reading of the ground, and height and stories need review.
 # What it leaves (said in the PR, for Ben): under 0.5 ft the flat assumption still decides, so a house drawn at the
 # limit on a lot falling 0.4 ft could be up to that much over, the same residual as assuming any lot flat; and the
 # fall is read at the lot's corners and middle only (a dip between them isn't seen).
@@ -1464,9 +1465,9 @@ def flat_assumption_unsafe(facts: dict) -> str | None:
     if facts.get("ground_assumed") != "flat":
         return None
     fall = facts.get("ground_fall")
-    if not isinstance(fall, (int, float)) or isinstance(fall, bool):
-        return stop("flat_unknown")
-    return stop("flat_sloped", fall=f"{fall:g}") if fall >= FLAT_FALL_FT else None
+    if not isinstance(fall, (int, float)) or isinstance(fall, bool) or not 0 <= fall < math.inf:
+        return stop("flat_unknown")                   # no fall, or one that isn't a fall (NaN, negative, infinite)
+    return None if fall < FLAT_FALL_FT else stop("flat_sloped", fall=f"{fall:g}")   # level only when shown level
 
 
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall

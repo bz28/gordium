@@ -2130,7 +2130,7 @@ def test_assumed_flat_ground_with_no_ground_looked_up_gives_needs_review():
     """No lookup ground at all (a lot by hand, the elevation service down): nothing shows the lot is flat."""
     got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat"})
     assert got["building_height"]["value"] is None and got["stories"]["value"] is None
-    assert "no ground levels for this lot" in got["building_height"]["reason"]
+    assert "couldn't read this lot's ground levels in full" in got["building_height"]["reason"]
 
 
 def test_a_level_looked_up_lot_and_stated_flat_ground_are_unchanged():
@@ -2144,6 +2144,18 @@ def test_a_level_looked_up_lot_and_stated_flat_ground_are_unchanged():
         assert (got["building_height"]["value"], got["stories"]["value"]) == (30.0, 3), facts
     got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": 0.5})
     assert got["building_height"]["value"] is None and got["stories"]["value"] is None
+
+
+def test_a_fall_that_is_not_a_fall_never_reads_as_level():
+    """Review round 2: measure() called directly (no fact_problems guard) with a NaN, negative or infinite fall
+    read the lot as level (only `fall >= 0.5` was unsafe). Level is now only a fall shown to be 0 <= fall < 0.5."""
+    from model_measurement.measure import flat_assumption_unsafe
+    from model_measurement.stops import stop
+    for bad in (float("nan"), -1, -0.1, float("inf"), True, "0.0", None):
+        assert flat_assumption_unsafe({"ground_assumed": "flat", "ground_fall": bad}) == stop("flat_unknown"), bad
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": float("nan")})
+    assert got["building_height"]["value"] is None and got["stories"]["value"] is None
+    assert flat_assumption_unsafe({"ground_assumed": "flat", "ground_fall": 0.49}) is None
 
 
 def test_existing_ground_keeps_its_own_reason_under_assumed_flat_ground():

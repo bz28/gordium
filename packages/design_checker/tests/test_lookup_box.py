@@ -1075,7 +1075,7 @@ def test_with_flat_ground_the_ground_fact_is_an_assumption_credited_to_no_one():
     assert logic.FLAT_GROUND
     state = {"ground": {"kind": "spot", "count": 14, "source": "suggested by Gordium · USGS 3DEP elevation"}}
     got = logic.fact_sources(state, "2026-10-21", confirmed=True)["ground"]
-    assert got["value"] == "assumed flat (no ground levels looked up)" and got["source"] == logic.ASSUMED_SOURCE and got["confirmed_by"] is None
+    assert got["value"] == "assumed flat (ground levels not read in full)" and got["source"] == logic.ASSUMED_SOURCE and got["confirmed_by"] is None
 
 
 def test_with_flat_ground_a_lookup_keeps_no_ground_doubt_and_draws_no_spot_grades():
@@ -1154,7 +1154,8 @@ def test_with_flat_ground_the_looked_up_fall_is_said_plainly_never_used():
     assert "for key, value in logic.ground_facts(state, _lot_level(doc, facts)).items():\n        if value is None:\n" \
            "            facts.pop(key, None)" in src
     assert present.grade_label(logic.ground_facts({}, 0.0)) == (
-        "assumed flat (elevation 0'-0\"), but no ground levels were looked up: height and stories need review")
+        "assumed flat (elevation 0'-0\"), but the lot's ground levels weren't read in full: height and stories need "
+        "review")
     assert present.grade_label(logic.ground_facts({"ground_fall": 0.3}, 0.0)) == (
         "assumed flat (the looked-up ground falls only about 0.3 ft across the lot)")
     _, saved = logic.lookup_choices({**payload, "writes": {**payload["writes"], "spots": []}}, {}, saved)

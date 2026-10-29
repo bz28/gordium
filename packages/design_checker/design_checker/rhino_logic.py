@@ -3887,7 +3887,7 @@ def fact_sources(state, today, confirmed):
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
         # (whether that decides height and stories is the measuring's: measure.flat_assumption_unsafe)
         "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
-                        "lot)" if state.get("ground_fall") is not None else " (no ground levels looked up)"),
+                        "lot)" if state.get("ground_fall") is not None else " (ground levels not read in full)"),
                         ASSUMED_SOURCE, None) if FLAT_GROUND else
                    fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                         "as drawn" if kind == "flat" else ground.get("source") or

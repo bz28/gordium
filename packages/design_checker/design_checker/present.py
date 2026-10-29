@@ -1886,8 +1886,8 @@ def grade_label(facts: dict) -> str:
         if _measuring.flat_assumption_unsafe(facts):          # and that height and stories wait on it (the measuring's)
             return (f"assumed flat, but the looked-up ground falls about {fall:g} ft across the lot: height and "
                     "stories need review" if fall is not None else
-                    f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)}), but no ground levels "
-                    "were looked up: height and stories need review")
+                    f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)}), but the lot's ground "
+                    "levels weren't read in full: height and stories need review")
         if fall:
             return f"assumed flat (the looked-up ground falls only about {fall:g} ft across the lot)"
         return f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)})"   # the team's words

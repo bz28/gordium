@@ -125,6 +125,8 @@ doc = None
 try:
     g = fresh_module()
     doc = TestDocs("offending").__enter__().open("Large Objects - Feet")
+    # a lot known level (fall 0.0): the height limit's plane is drawn (with no ground looked up it isn't: sloped-lot fix)
+    g.STATE["box_overrides"] = dict(g.STATE.get("box_overrides") or {}, ground_fall=0.0)
     g.gordium_check()                                    # GordiumStart's flow on the sample
     k = 1.0 / g._scale(doc)                              # feet -> model units (1 in a feet file)
     box = rg.BoundingBox.Empty
