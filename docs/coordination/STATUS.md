@@ -248,10 +248,10 @@ Scripts cannot press real keys (Eto), so these are the claims left for a person.
 | order | PR | branch | head | full suite (pytest + 7 CI steps) | notes |
 |---|---|---|---|---|---|
 | 1 | #48 | timing-fix | a9f6c4a1 | 1,766 passed, all 7 | brings rhino-ui's label timing fix (241064c) to main; test file only |
-| 2 | #26 | re-lookup | b6d6f88d | 1,896 passed, all 7 | includes the start flow (9da07289). Merge conflicts in confirm() and _draw_starting_house kept both sides; the redraw pin now matches main's `result = _confirm(...)`. Review clean |
+| 2 | #26 | re-lookup | **09703c46** (2026-10-28: Rhino lane taste fixes + merge lane empty-note fix) | in #33's suite (3,627 passed, all 7) | see merge 3 |
 | 3 | #17 | term-index | 1c0ca872 | 1,821 passed, all 7 | review: methods §6 now cites §18 (main's site lookup took §17) |
 | 4 | #18 | measurement-2 | ee498dc4 | 2,550 passed, 6 other CI steps passed | **2 false-pass fixes**, each pinned by a test that fails on revert: (a) an unconfirmed looked-up lot or street now makes the accessory-building rule need review (merge review, 2 sceptics); (b) a solid left out of the measuring now makes the accessory-building and eaves rules need review. The one 'failure' was the known slow test_present …tax_map_and_on_a_survey (worker killed); alone it passed in 337 s |
-| 5 | #20 | answer-keys | 2ba74f42 (was 6dcfcc66) | 2,845 passed, all 7 (at 3188dd60; 2ba74f42 adds QUICKSTART text only) | **changed 2026-10-28 by the merge lane**, see the note under merge 3 |
+| 5 | #20 | answer-keys | **35676e6b** (was 6dcfcc66) | 2,845 passed, all 7 at 3188dd60; later: QUICKSTART text and #26 merged in, in #33's suite | **changed 2026-10-28 by the merge lane**, see merge 3 |
 | 6 | #22 | stress-tests | b19f383d | 2,634 passed, all 7 | |
 To-dos (#18, neither a false pass): with no accessory building labelled, its rule is left out silently; the separate "objects not included" row still needs review. The eave-yard part of fix (b) is not pinned on its own. The slow test's to-do belongs to the demo builder.
 
@@ -309,83 +309,99 @@ REAL INPUT (Lane C, at #27 2c7c875), Cmd+Z once after each, the tick must follow
   drawn, still one step).
 - Hide starting house, then Cmd+Z: layer AND tick back. Also: switch to another open file: its own ticks show.
 
-## FOR BEN: merge 3 (merge lane, updated 2026-10-28; nothing merged; the older table below is history)
-**Merge 2 needed one fix first (#20 answer-keys, now 2ba74f42).** Merging the six merge-2 heads onto today's main in
-Ben's order showed two problems, both in #20:
-1. QUICKSTART conflicted with #26. Fixed by merging re-lookup 9eb789fc and main into answer-keys.
-2. present.py would not load. #20's citation-link cache used `functools`, and #50 (on main) had removed that import.
-   Every test that loads the panel would have failed on main after merge 2. Fixed: the cache is now keyed by the
-   file's content, as #50 does for chart cells. Pinned by a test that fails on revert.
-Suite at 3188dd60: 2,845 passed, all 7 CI steps. Rehearsal: main + #48 → #26 (9eb789fc) → #17 → #18 → #20 → #22
-now merges with no conflicts. **Merge 2's order and other heads are unchanged.** #26 is 9eb789fc (the Rhino lane's
-corner fix).
-
-**Status 2026-10-28 evening: all of merge 3 is pushed.** Every rules-line branch also holds the Rhino lane's final heads (R-2c envelope fix, R-3aa range row, corner fix). The Rhino lane has 4 approved UI and wording fixes coming, on #37, #26, #33 and #45. The merge lane will merge them up the stack and re-run the top suites; heads below will move then.
-
-**Merge 3: every PR below has merge 2 merged in** (a new merge commit, never a force-push). Each merges into main with
-no conflicts once merge 2 is in. To retarget a PR: when its base PR is merged, set its base to main (Edit by the
+## FOR BEN: merge 3 (merge lane, updated 2026-10-28 evening; nothing merged; the older notes below are history)
+**Every PR below is pushed and final** (merge commits only, never a force-push). In this order each one merges into
+main with no conflicts. This was checked by merging every head onto today's main in exactly this order (rehearsal
+84a3175e, then #39 on top). To retarget a PR: once the PR below it is merged, set its base to main (Edit, by the
 title), then Merge (merge commit).
 
-| step | PR | branch | head | full suite (pytest + 7 CI steps) | state |
-|---|---|---|---|---|---|
-| A1 | #28 | highlight-offending | fb9ef6dc | (covered by #37's) | pushed |
-| A2 | #29 | drawing-dims | d0f6c791 | (covered by #37's) | pushed |
-| A3 | #31 | depth-lines | 864897fc | (covered by #37's) | pushed |
-| A4 | #34 | osnap-curves | 6a46ce54 | (covered by #37's) | pushed |
-| A5 | #35 | massing-floors | 9c14c632 | (covered by #37's) | pushed (includes the no-document side-yard fix, pinned) |
-| A6 | #37 | use-questions | 694ee808 | 3,056 passed, all 7 | pushed |
-| B1 | #32 | progress-cancel | 5c449c2a | (covered by #33's) | pushed |
-| B2 | #33 | address-autocomplete | e79325ea | 3,011 passed, all 7 | pushed |
-| C1 | #24 | r2-hand | e97c73fa | (covered by #45's) | pushed |
-| C2 | #30 | r3-hand | 46ed7ede | (covered by #45's) | pushed |
-| C3 | #38 | occupancy-home-occupation | 27303919 | (covered by #45's) | pushed |
-| C4 | #41 | attached-units-cap | e3dc9f43 | (covered by #45's) | pushed |
-| C5 | #42 | primary-buildings | 870855bc | (covered by #45's) | pushed |
-| C6 | #43 | shared-yards-south-hill | beb1ce3c | (covered by #45's) | pushed |
-| C7 | #44 | stream-setback | e757b6f4 | (covered by #45's) | pushed |
-| C8 | #45 | facts-up-front | 1ae2580b | 3,497 passed, all 7 | pushed (holds #44 and #37) |
-| C-side | #39 | coverage-audit (on #30) | 396d1c50 | 3,183 passed, all 8 (audit regenerated) | pushed |
-| C-side | #46 | test-sites (on #38) | 6be32ff2 | 3,252 passed, all 7 | pushed |
-| D | #47 lookup-names, #51 no-document-start, #52 faster-start | | unchanged | (their own suites) | merge cleanly onto merge 2; targeted tests on the merge pass (#47 432, #51 201, #52 553) |
-| — | #21 drafting-stage1, #40 draft-rule-by-rule | | unchanged | — | **not carried**: see the decision below |
+**Two things changed in merge 2:**
+- **#26 re-lookup is now 09703c46.** The Rhino lane's taste fix (79d6654c) puts a found lookup's note on a plain line
+  under the amber question. The merge lane's fix: that line is laid out only when there is a note. An empty label
+  still took a line and pushed the start box 12 px past a laptop's height. Pinned by a test that fails on revert.
+- **#20 answer-keys is now 35676e6b,** with #26's fixes merged in.
+Merge 2's order and its other heads are unchanged.
 
-Order for Ben (after merge 2):
-1. **UI stack:** #28 → #29 → #31 → #34 → #35 → #37. Each one is retargeted to main after the one below it merges.
-   #28's base is check-button, which is already merged, so retarget #28 first.
-2. **#32 → #33.** Retarget #32 to main, since #26 is merged in merge 2.
-3. **Rules line:** #24 → #30 → #38 → #41 → #42 → #43 → #44 → #45.
-   - #24's base is answer-keys, so retarget #24 after #20 merges.
-   - #45 holds #37, so merge it after both #44 and #37.
-4. **Reports** (generated tables and evals; they pass once a round finds no wrong content):
-   - #39 after #30;
-   - #46 after #38;
-   - #47 at any time.
-5. **Independent of the others:** #51 and #52 (each based on main).
+**Order for Ben (after merge 2):**
+1. **Rules line:** #24 → #30 → #38 → #41 → #42 → #43 → #44.
+   - #24's base is answer-keys, so retarget it after #20 merges.
+   - Then **#46** test-sites, after #44: its hand-worked site answers now cover #44's stream setback.
+2. **UI stack:** #28 → #29 → #31 → #34 → #35. Retarget #28 first (check-button is merged).
+3. **#45** facts-up-front. It brings **#37**, which GitHub then shows as merged.
+   - Why: #37 and the rules line (#24–#44) change the same row-dialog code differently, and only #45 holds both,
+     correctly merged. #37 merged on its own beside the rules line would conflict.
+   - #37 stays pushed and up to date (3847c90c) for review.
+4. **#47** lookup-names, then **#51** no-document-start.
+5. **#32** progress-cancel, then **#33** address-autocomplete. #32 now holds #45, #47 and #51.
+6. **#52** faster-start (any time).
+7. **#53** panel-wording, last. It conflicted with merge 2 itself, so the stack is merged into it.
+8. **#39** coverage-audit, any time after #45. The audit lane updated its decisions for #38 and #41–#45.
+9. **#21 and #40:** not carried (see below).
 
-Conflict resolutions (all kept both sides' intent; one cold Opus review of the UI and #32/#33 resolutions found no P0 or P1):
-- check.plan / check.start: main's `overlays` switch and geometry-error stop, with #28's per-building colouring, #29's
-  dimensions, #34's snap outlines and #35's larger side yard.
-- enter_rooms: #37's row dialog with main's tried-first story count, in one undo step (as the demo resolved it).
-- MERGE BUG fixed in #37: #26 and #37 each defined `NOT_ANSWERED` and `_listed`. #26's are now
-  `LOOKUP_NOT_ANSWERED` and `_joined`. This is the demo's own fix, now on the PR, and it is pinned.
-- Tests changed with merge 2 in:
-  - #29's overhang numbers carry no "? ": both readings comply under #18's every-reading rule.
-  - The undo and side-yard test harnesses learn #34's, #35's and #37's new functions.
-  - #35's R-2b stand-in gets R-2b's eaves rule.
-  - GUIDE names #24's, #38's and #43's prompts and #37's dialog (main's guide test asks for every prompt).
-- #45 also gets demo's test_area_answers.py, which the STATUS note asked #45 to carry.
-- P2 to-dos (match the demo, not changed):
-  - the row dialog's Undo reads "Gordium: enter the row's facts", not the row's own words;
-  - `_count` and `_ask_yes_no_or_skip` are now unused in #37.
+| PR | branch | head | full suite (pytest + all CI steps) |
+|---|---|---|---|
+| #24 | r2-hand | 853f013c | covered by #33's |
+| #30 | r3-hand | 0479d49a | covered by #33's |
+| #38 | occupancy-home-occupation | 3a1ec42a | covered by #33's |
+| #41 | attached-units-cap | fbe93912 | covered by #33's |
+| #42 | primary-buildings | 64448e78 | covered by #33's |
+| #43 | shared-yards-south-hill | 227a91c6 | covered by #33's |
+| #44 | stream-setback | f31542a8 | covered by #33's |
+| #46 | test-sites | a034010c | SUITE46 |
+| #28 → #35 | highlight-offending … massing-floors | fb9ef6dc, d0f6c791, 864897fc, 6a46ce54, 9c14c632 | unchanged; covered by #33's |
+| #37 | use-questions | 3847c90c | lands through #45; covered by #33's |
+| #45 | facts-up-front | f4d40939 | covered by #33's |
+| #47, #51 | lookup-names, no-document-start | 9610a679, 9e5d6b74 | unchanged; covered by #33's (they are merged into #32) |
+| #32 | progress-cancel | 82ff1375 | covered by #33's |
+| #33 | address-autocomplete | 6ec9b4c2 | **3,627 passed, all 7** |
+| #52 | faster-start | 89bf4667 | unchanged; in the demo's suite |
+| #53 | panel-wording | 36806a5b | covered by the demo's: the demo is #53 plus #46, #52 and DEMO.md |
+| #39 | coverage-audit | ab9d824c | 3,567 passed, all 8 (audit lane) |
+| demo | demo | 04fd1eaa (local; the Rhino lane pushes it after its Rhino smoke) | **3,679 passed, all 7** |
 
-**Decision for Ben: #21 and #40.**
-- #21 (AI-drafted zones, off by default) conflicts with merge 2 in the start box's district code: its "preselect the
-  drafted zone" logic against main's new empty start box. It also conflicts in present.py, rhino_logic.py,
-  pyproject.toml and the rules xlsx. That is a rules-and-start-box carry needing its own review round (2 Opus
-  sceptics).
-- #40 (the eval report) holds #21 and r3-hand, so it can't merge before #21.
-- Recommendation: leave #21 and #40 out of merge 3 and carry them as their own job afterwards, or close #21 if
-  drafted zones stay off. Ben to say which.
+**Conflicts and how they were resolved** (every resolution keeps both sides' intent):
+- **#26's taste fix:**
+  - Into #37, #45 and #33: the plain lookup note was kept with each branch's own wrapping width for the amber line.
+  - In the UI spec: #37's "Answer N questions" wording kept with #45's box_applied.
+- **#32 with the UI stack:** #32 split run_check and the start into helpers, and the UI stack's additions moved
+  into those helpers, as the demo build had them:
+  - #34's cautious envelope outlines and snap curves, drawn in _check_apply and cleared in _check_failed;
+  - #35's larger side passed through start();
+  - #37's refresh pick, beside #32's progress line and wait window.
+- **#47 with #32:** lookup.py as the demo resolved it. _zoning returns the overlays the zoning map draws, and
+  _lookup checks them once, after #32's progress steps.
+- **#51 with #32:** GordiumStart, GordiumCheck and Edit site… say "Open a Rhino model first." before asking the
+  checker anything, and check again after the wait.
+- **#53 with the stack:**
+  - Drawing: the depth-lines drawing is kept, and #53's red is drawn right after the amber and before the
+    dimensions and lot lines, so a dimension still reads over it on its halo. The failing solid's red outline is
+    the last thing drawn.
+  - Panel: #53's newly-failing row is selected in #32's _check_apply. #53's plain detail keeps PR 18's
+    cleaned-outline note in view (pinned).
+  - Legend: the UI stack's legend text, with #53's Delta line.
+  - Facts: #53's "I checked this" confirmation, with the stack's follow-up sources.
+- **Tests that pin source text** now follow the merged code (each was checked to still fail if the behaviour
+  goes).
+- **Found by the suites and fixed:**
+  - #26's empty note row (above);
+  - #45's quick-answer pin, which read an empty slice once #32 was in;
+  - #46's sites, which had no answer for #44's stream rule (now "needs review": nothing is stated about a stream);
+  - #53's two source pins.
+- **From the Rhino lane, carried up:** design fixes on #37, #26, #33 and #45; #53's use-row fix; #45's
+  in-Rhino stand-in fixes, with a new CI test.
+
+**Decision for Ben: #21 and #40** (unchanged).
+- #21 (AI-drafted zones, off by default) conflicts with merge 2 in the start box: its "preselect the drafted zone"
+  logic meets main's new empty start box. It also conflicts in present.py, rhino_logic.py, pyproject.toml and the
+  rules xlsx. Carrying it needs its own review round (2 Opus sceptics).
+- #40 (the eval report) holds #21, so it can't merge before #21.
+- Recommendation: carry #21 and #40 as their own job after merge 3, or close #21 if drafted zones stay off.
+
+**To-dos (no false pass):**
+- The row dialog's Undo label is generic.
+- `_count` and `_ask_yes_no_or_skip` are unused in #37.
+- main has a duplicate `COMPASS` in present.py.
+- The audit lane's #39 to-do (§325-8A col 3 and §325-9D undercounted).
 
 ### Earlier merge-3 notes (Lane B, 2026-10-27; history)
 Runs after merge 2. Conflicts below are real trial merges (`git merge --no-commit --no-ff`, then abort): each PR alone onto a scratch main = main + merge 2 in its order (#15 #16 #19 #23 #27 clean; #26 and #17-#22 needed merge 2's own carries, steps 6-7, done in the scratch by a rough union, so gordium_rhino.py / project.py / docs/README.md conflicts may shrink once Lane A's real carries land). "Retarget": set the PR's base to main first (Edit by the title), then Merge (merge commit). xlsx / review.md / reports in a conflict are generated: rebuild (`python -m rule_export`, `section_labeling coverage`, `project_report`), never hand-merged.
@@ -449,3 +465,4 @@ Order: (1) #24 → #30 → #38 (rules line; each carried from main first, suite 
 - 2026-10-28 rhino-lane: taste batch done. PR #53 panel-wording opened (8b6188a5). Pushed (ff) #37 db4f57f8, #26 79d6654c, #33 d49dc898, #45 895124b6; merge lane told. Demo carry waits on a main->demo merge decision.
 - 2026-10-28 (Rhino lane) #53 use row: "Use: One-family dwelling, detached | stated | permitted" (was cut "One- / family d…"; coordinator option A): 77a7cdc9 local on panel-wording, 2 review rounds (last clean), Rhino panel_width 9/9; merge lane pulls it. #45 stubs: needs_in_rhino and undo_steps answer row_dialog; new CI check test_in_rhino_stand_ins catches stand-ins for removed names: f27bde9e on the merge lane's c03b3b68, 2 rounds (last clean), Rhino needs 6/6, undo_steps all one-step claims (its _Undo claims don't run under rhinocode, cause unknown: a person's Cmd+Z). Waiting for the demo rebuild SHA to smoke it.
 - 2026-10-28 (coverage-audit lane) #39 pushed (ff 396d1c50..ab9d824c) on merge lane carry ed492954 + facts-up-front f4d40939: saved decisions for the rules of #38, #41-#45 (18 parts: 9 covered, 4 flagged, 5 cited-only; party walls still partly covered); 53 gaps -> 44, no high gap left; no new gaps. Review round 1 (Opus cold): no wrong covered/flag decision, 1 wording fix; to-do: §325-8A col 3 and §325-9D accessory part undercounted (home-occupation flag not credited). Full suite 3,567 passed, 8 CI steps. #39 merges after #45.
+- 2026-10-28 (Rhino lane) demo pushed fd72b64d → 04fd1eaa (merge lane's rebuild; its suite 3,679 passed) after a Rhino smoke from an empty file: real start box (lookup 6.5 s, Draw ~19 s, house and envelope framed), panel wording, highlight 19/19 (red with amber, dimensions over colours), progress_cancel 29/29 with Rhino in front throughout. Already on fd72b64d too, so not from the rebuild: (a) the starting house for 106 is now 51'-4" × 29'-8" (side yards 12' and 12', coverage 21.7%, legal), so QUICKSTART's walkthrough numbers and quickstart/highlight/panel_width scripts expect the old 35'-11" × 37'-4" house (9 quickstart steps differ); (b) the 'Use details — answer when you plan the interior · N' group heading is cut off at 380/400 px (#45). P3: the start box keeps an empty amber line after the lookup answers Corner lot? (#26).
