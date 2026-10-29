@@ -48,6 +48,21 @@ def test_the_working_names_the_figure_for_the_stated_use():
     assert calc == "Required: primary buildings 2 × 6000 = 12,000 sf", calc
 
 
+def test_two_primary_buildings_bring_the_shared_yard_and_south_hill_rows():
+    """Two houses (stated): §325-7B needs review (questions §5.17); the South Hill row asks whether the lot is in the
+    overlay, and once it is, a second primary structure does not comply. One house: neither row is shown, and the
+    overlay is never asked."""
+    two = _rows(primary_buildings=2, primary_buildings_same_use=True)
+    assert two["R-1b.yards_not_shared"]["status"] == present.REVIEW
+    assert two["R-1b.south_hill_overlay"]["status"] == present.REVIEW
+    assert two["R-1b.south_hill_overlay"]["needs"] == ["south_hill_overlay"]
+    assert _rows(primary_buildings=2, south_hill_overlay=True)["R-1b.south_hill_overlay"]["status"] == present.FAILS
+    one = _rows(primary_buildings=1)
+    assert "R-1b.yards_not_shared" not in one
+    assert "R-1b.south_hill_overlay" not in one             # one house: no row, nothing asked (full suite: no
+    # extra complying row on every R-1/R-2 design)
+
+
 def _ru(lot_w, lot_d):
     sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "12_r3a_two_family_at_the_building_limits.yaml"))
     sc["district"], sc["use"] = "RU", "two_family"

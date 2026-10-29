@@ -239,6 +239,8 @@ STATED_FACTS = {
                           "the primary buildings on the lot"),
     "primary_buildings_same_use": ("Does every primary building on the lot hold the use entered for the lot?",
                                    "yes_no", "whether every primary building holds the lot's use"),
+    "south_hill_overlay": ("Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?", "yes_no",
+                           "whether the lot is in the South Hill Overlay"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
