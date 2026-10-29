@@ -1203,6 +1203,9 @@ def show_panel(p, result, facts, error=None):
 def zoom_to(item):
     """Frame the selected item: yards in Top, height and stories in a front elevation (D9)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not item:
         say("Zoom to: select an item in the list first.")
         return
@@ -1314,6 +1317,9 @@ def pick_survey():
     """Pick survey lot lines…: the lot outline the architect says is from a survey (a closed curve on the Site
     layer); lot size and coverage no longer wait for one."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     try:
         facts = current_facts(doc)
         lots = _lot_candidates(doc)
@@ -1408,6 +1414,9 @@ def enter_rooms(needs):
     drop a lot no longer drawn). A count of stories below the floors drawn is refused by the measuring: said in its
     words, and nothing is saved."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not needs:
         say("This row isn't waiting for anything you can enter.")
         return
@@ -1482,6 +1491,9 @@ def pick_main_building():
     """Pick the main building… (the panel): with several buildings, the one the yards, height and stories are
     measured to. Click it, or choose one; Enter keeps it."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     facts = current_facts(doc)
     buildings = _buildings(doc)
     if len(buildings) < 2:
@@ -1506,6 +1518,9 @@ def add_to_check(ids):
     """Add to check…: objects on the lot that aren't measured go on the Building layer, so every rule measures
     them."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not ids:
         say("Nothing selected to add to the check: pick the objects in the row first.")
         return
@@ -1611,6 +1626,9 @@ def this_is_the_ground(ids):
     file with who said it and when (a site fact, shown in the panel and the report, with "Not the ground" to undo
     it); then the check runs again without them."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not ids:
         say("Nothing selected to mark as the ground: pick the objects in the row first.")
         return
@@ -1627,6 +1645,9 @@ def this_is_the_ground(ids):
 def not_the_ground():
     """Undo "This is the ground": every object marked so is checked again (counted as left out until added)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     with logic.undo_step(doc, logic.UNDO_WORDS["not_ground"]):
         state = _ui_state(doc)
         state.pop("ground_ids", None)
@@ -2599,6 +2620,9 @@ def _drawn(doc, facts, state, saved_ui, session=None):
 def hide_massing(hidden):
     """Hide starting house: the Gordium::Massing layer off (still checked: only its drawing is turned off)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     index = doc.Layers.FindByFullPath(logic.MASSING, -1)
     if index < 0:
         ui.set_massing_tick(STATE.get("panel_parts"), False)    # nothing hidden: never left ticked
@@ -2757,6 +2781,9 @@ def edit_facts():
     """Edit site… (and GordiumFacts): the start box, prefilled with what is saved. Bedrooms and parking spaces
     are entered from their own rows ("Enter…")."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     try:
         saved = current_facts(doc)
@@ -2903,6 +2930,9 @@ def run_check(doc, report=True):
     result is cleared from the view and the panel says why, with Retry (H2): never left showing. While a start box
     is open it does nothing at all (its overlay, the panel and the "before" statuses stay): the box's own edits
     would otherwise be checked mid-box; live mode checks once the box closes."""
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if STATE.get("running") or not logic.allowed("check", _box_open()):
         return None
     o = overlay()
@@ -3162,6 +3192,9 @@ def toggle_live():
     results grey out until checked): turning the edit hooks off would leave old marks showing as current after an
     edit (review round 2 of the Check button)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     if not STATE.get("live"):
         live(True)
     set_auto_check(not _auto(doc))
@@ -3233,6 +3266,9 @@ def off():
 def gordium_check():
     """Confirm the lot facts whenever any required one is missing (keeping what is saved), then check."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if not _buildings(doc) and not _lot_candidates(doc):    # an empty model: a new project starts here
         return gordium_start()
@@ -3324,6 +3360,9 @@ def gordium_start():
     then the lot and the largest legal starting building as stacked floors, checked, with live mode on. Starts
     from a model with no building in it (an existing design is checked with GordiumCheck)."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
     _recover(doc)                       # anything an unfinished start box set aside (Rhino closed), back first
     if _buildings(doc):
         Rhino.RhinoApp.WriteLine("Gordium: " + logic.START_HAS_BUILDING)
