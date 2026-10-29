@@ -269,21 +269,51 @@ def test_a_units_change_counts_and_another_property_change_does_not():
 
 
 def test_live_mode_hears_layer_block_and_units_changes_through_those_rules():
-    """The hooks are live mode's own (the open-box watcher had them; live mode did not), each through its rule, and
-    each taken off again with the rest."""
+    """The hooks are live mode's own (the open-box watcher had them; live mode did not), each taken off again with
+    the rest."""
     live = body(RHINO, "def live(on):", "\ndef ")
     for event, fn in (("LayerTableEvent", "_layer_changed"), ("InstanceDefinitionTableEvent", "_block_changed"),
                       ("DocumentPropertiesChanged", "_properties_changed")):
-        assert f'("{event}", _handler(' in live and fn in live, event
+        hook = live[live.index(f'("{event}", _handler('):]
+        assert hook[:hook.index("notice an edit")].count(fn) == 1, event          # its own handler, no other
     assert 'STATE["live_more"] = more' in live
     assert 'for name, handler in STATE.pop("live_more", None) or []:' in body(RHINO, "def _unhook():", "\ndef ")
-    layer = body(RHINO, "def _layer_changed(", "\ndef ")
-    assert "logic.layer_edit_counts(str(e.EventType), _layer_key(e.OldState), _layer_key(e.NewState))" in layer
-    assert "_changed(sender, e)" in layer
-    block = body(RHINO, "def _block_changed(", "\ndef ")
-    assert "logic.block_edit_counts(str(e.EventType))" in block and "_changed(sender, e)" in block
-    props = body(RHINO, "def _properties_changed(", "\ndef ")
-    assert "logic.units_edit_counts(seen.get(doc.RuntimeSerialNumber), now)" in props and "_changed(sender, e)" in props
+
+
+def _handlers(units=("Feet", 1.0)):
+    """The plugin's own handlers, run with stand-ins for Rhino: what each one does to STATE["dirty"]."""
+    import types
+    doc = types.SimpleNamespace(RuntimeSerialNumber=7, ModelUnitSystem=units[0])
+    ns = {"logic": logic, "STATE": {}, "time": types.SimpleNamespace(time=lambda: 100.0),
+          "Rhino": types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc)),
+          "_scale": lambda d: units[1] if d.ModelUnitSystem == units[0] else 1 / 12}
+    for name in ("_changed", "_layer_key", "_layer_changed", "_block_changed", "_units", "_properties_changed"):
+        exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
+    return ns, doc
+
+
+def test_each_handler_marks_the_model_changed_only_for_an_edit_that_counts():
+    import types
+    layer = lambda name, parent="p": types.SimpleNamespace(Name=name, ParentLayerId=parent)    # noqa: E731
+    ns, doc = _handlers()
+    ns["_layer_changed"](None, types.SimpleNamespace(EventType="Modified", OldState=layer("Site"),
+                                                     NewState=layer("Site")))
+    assert ns["STATE"].get("dirty") is None                       # a colour or visibility change
+    ns["_layer_changed"](None, types.SimpleNamespace(EventType="Modified", OldState=layer("Building"),
+                                                     NewState=layer("Old")))
+    assert ns["STATE"]["dirty"] == 100.0                          # renamed
+    ns, doc = _handlers()
+    ns["_block_changed"](None, types.SimpleNamespace(EventType="Added"))
+    assert ns["STATE"].get("dirty") is None
+    ns["_block_changed"](None, types.SimpleNamespace(EventType="Modified"))
+    assert ns["STATE"]["dirty"] == 100.0
+    ns, doc = _handlers()
+    ns["STATE"]["units_seen"] = {7: ns["_units"](doc)}
+    ns["_properties_changed"](None, types.SimpleNamespace(Document=doc))
+    assert ns["STATE"].get("dirty") is None                       # another property: same units
+    doc.ModelUnitSystem = "Inches"
+    ns["_properties_changed"](None, types.SimpleNamespace(Document=doc))
+    assert ns["STATE"]["dirty"] == 100.0                          # the units changed
 
 
 def test_each_check_notes_the_units_it_read():
@@ -291,3 +321,7 @@ def test_each_check_notes_the_units_it_read():
     begin = body(RHINO, "def _check_begin(", "\ndef ")
     assert 'STATE.setdefault("units_seen", {})[doc.RuntimeSerialNumber] = _units(doc)' in begin
     assert "def _units(doc):" in RHINO and "_scale(doc)" in body(RHINO, "def _units(doc):", "\ndef ")
+    # a document come to the front is noted too, so a render setting changed there before its first check never
+    # greys it (review round 1, finding 2)
+    assert 'STATE.setdefault("units_seen", {}).setdefault(front.RuntimeSerialNumber, _units(front))' in body(
+        RHINO, "def _new_document(", "\ndef ")

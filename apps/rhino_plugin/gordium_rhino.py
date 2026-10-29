@@ -3569,6 +3569,9 @@ def _new_document(sender, e):
         _sync_ticks(Rhino.RhinoDoc.ActiveDoc)   # its own ticks (Check after every edit too, before the header)
         ui.show(p, None, error="no check yet for this document (press Check)")
     STATE["dirty"] = None               # the last document's edits are not this one's (it is checked below)
+    front = Rhino.RhinoDoc.ActiveDoc
+    if front is not None:               # its units as they are now: only a change from them counts (a render setting
+        STATE.setdefault("units_seen", {}).setdefault(front.RuntimeSerialNumber, _units(front))   # never does)
     STATE["check_front"] = True         # check the document now in front once, if it has lot facts (not an edit:
     #                                     whatever Check after every edit says: review round 1 of the Check button)
 
