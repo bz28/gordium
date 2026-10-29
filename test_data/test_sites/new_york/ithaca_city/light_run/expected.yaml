@@ -1,0 +1,604 @@
+what: 'Queue item 12, light run: one real, ordinary City of Ithaca residential lot per district, each looked up
+  through site_lookup on 2026-10-27 and worked by hand from the law (not from Gordium''s code). Lane C runs each
+  in Rhino (apps/rhino_plugin/tests/light_run_in_rhino.py): it claims the zone, corner lot, drawn lot area, no fail
+  after Draw, and the nudge (its measured distance, its row''s numbers, only it failing); the other facts here are
+  recorded beside its results for a person to compare.'
+how_picked: 'City tax parcels (live) with PrimaryZone = the district, a one- or two-family residence, no historic
+  flag, flood zone, overlay or second zone, lot 1.15–2.5× the district''s minimum, outside the Southside rezoning
+  area; then site_lookup run on each: the first with four (or near four) corners and every fact ''suggested'' (none
+  needs review). RU has no ordinary one-family lot outside a historic district: 614 University Ave (an apartment
+  house, not historic) is the closest.'
+independent: Areas, lengths and the yard envelope worked from the tax-map corners with the law's own numbers (point-to-line
+  distances, shoelace areas); the 2 ft tax-map margin and the worst-case lot (every line 2 ft in) are Ben's tax-map
+  rule (2026-10-21), applied the same way.
+tax_map_rule: 'The lots are from the tax map (±2 ft per lot line). Gordium''s rule for that (Ben, 2026-10-21; spec
+  C2): a measurement complies only if it does at the worst case (lot width 2 ft less; lot area with every line 2
+  ft in), and the starting house keeps 2 ft back from every limit and under coverage at the worst-case area.'
+sites:
+  R-1a:
+    address: 111 Eastwood Ave, Ithaca, NY 14850
+    parcel: 500700-111.-2-2
+    looked_up: '2026-10-27'
+    zone:
+      expect: R-1a
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 12990.5
+      corners: 4
+      edge_lengths_ft:
+      - 129.93
+      - 100.0
+      - 129.88
+      - 100.0
+      street: Eastwood Ave
+      street_edges:
+      - 3
+      frontage_ft: 100.0
+      corner_lot: 'no'
+      drawn_area_sf: 12990.42
+    ground:
+      range_ft:
+      - 717.01
+      - 737.78
+      expect: assumed flat (Gordium's MVP); today's ground falls 20.8 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 10000
+      min_lot_width_ft: 75
+      front_ft: 25
+      sides_ft:
+      - 10
+      - 10
+      rear: 25% of the lot depth, at most 50 ft, at least 20 ft
+      coverage: 20%
+      height_ft: 35
+      stories: 3
+    expected:
+      start_box: 'zone R-1a; lot 12,990.5 sf from the tax map; street side Eastwood Ave, 100.0 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'lot area 12,990.5 sf (worst case 12,086.8) ≥ 10,000 sf; frontage 100.0 ft (worst case 98.0) ≥ 75
+        ft: both comply (worst case: Gordium''s tax-map rule, spec C2)'
+      lot_depth_and_rear: lot depth = average of the side lines [129.93, 129.88] = 129.9 ft; rear yard required
+        32.5 ft
+      largest_house: 'limited by lot coverage: footprint at most 20% × 12,086.8 sf (the tax-map lot with every line
+        2 ft in) = 2,417.4 sf; the yards would leave 5,200.5 sf even 2 ft back from every limit, so coverage binds
+        first'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward Eastwood Ave until its front yard is 22 ft (3 ft past the 25 ft minimum: beyond
+          the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: R-1a.front_yard
+        status: does_not_comply
+        proposed_ft: 22
+        required_ft: 25
+        working: '22 < 25: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), R-1A 25 ft; §325-3B YARD, FRONT
+  R-1b:
+    address: 108 Irving Pl, Ithaca, NY 14850
+    parcel: 500700-67.-11-13
+    looked_up: '2026-10-27'
+    zone:
+      expect: R-1b
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 8918.3
+      corners: 4
+      edge_lengths_ft:
+      - 59.9
+      - 149.09
+      - 60.16
+      - 148.11
+      street: Irving Pl
+      street_edges:
+      - 0
+      frontage_ft: 59.9
+      corner_lot: 'no'
+      drawn_area_sf: 8918.09
+    ground:
+      range_ft:
+      - 730.26
+      - 743.21
+      expect: assumed flat (Gordium's MVP); today's ground falls 13.0 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 6000
+      min_lot_width_ft: 50
+      front_ft: 25
+      sides_ft:
+      - 10
+      - 10
+      rear: 25% of the lot depth, at most 50 ft, at least 20 ft
+      coverage: 25%
+      height_ft: 35
+      stories: 3
+    expected:
+      start_box: 'zone R-1b; lot 8,918.3 sf from the tax map; street side Irving Pl, 59.9 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'lot area 8,918.3 sf (worst case 8,099.6) ≥ 6,000 sf; frontage 59.9 ft (worst case 57.9) ≥ 50 ft:
+        both comply'
+      lot_depth_and_rear: lot depth = average of the side lines [149.09, 148.1] = 148.6 ft; rear yard required 37.1
+        ft
+      largest_house: 'limited by lot coverage: footprint at most 25% × 8,099.6 sf (the tax-map lot with every line
+        2 ft in) = 2,024.9 sf; the yards would leave 2,968.0 sf even 2 ft back from every limit, so coverage binds
+        first'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward Irving Pl until its front yard is 22 ft (3 ft past the 25 ft minimum: beyond
+          the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: R-1b.front_yard
+        status: does_not_comply
+        proposed_ft: 22
+        required_ft: 25
+        working: '22 < 25: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), R-1B 25 ft; §325-3B YARD, FRONT
+  R-2a:
+    address: 553 Spencer Rd, Ithaca, NY 14850
+    parcel: 500700-124.-2-2
+    looked_up: '2026-10-27'
+    zone:
+      expect: R-2a
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 8750.0
+      corners: 4
+      edge_lengths_ft:
+      - 50.0
+      - 174.94
+      - 50.02
+      - 175.0
+      street: Spencer Rd
+      street_edges:
+      - 2
+      frontage_ft: 50.0
+      corner_lot: 'no'
+      drawn_area_sf: 8748.84
+    ground:
+      range_ft:
+      - 407.59
+      - 475.18
+      expect: assumed flat (Gordium's MVP); today's ground falls 67.6 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 5000
+      min_lot_width_ft: 45
+      front_ft: 25
+      sides_ft:
+      - 10
+      - 10
+      rear: 25% of the lot depth, at most 50 ft, at least 20 ft
+      coverage: 30%
+      height_ft: 35
+      stories: 3
+    expected:
+      start_box: 'zone R-2a; lot 8,750.0 sf from the tax map; street side Spencer Rd, 50.0 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'lot area 8,750.0 sf (worst case 7,864.9) ≥ 5,000 sf; frontage 50.0 ft (worst case 48.0) ≥ 45 ft:
+        both comply'
+      lot_depth_and_rear: lot depth = average of the side lines [174.94, 175.0] = 175.0 ft; rear yard required 43.7
+        ft
+      largest_house: 'limited by lot coverage: footprint at most 30% × 7,864.9 sf (the tax-map lot with every line
+        2 ft in) = 2,359.5 sf; the yards would leave 2,658.1 sf even 2 ft back from every limit, so coverage binds
+        first'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward Spencer Rd until its front yard is 22 ft (3 ft past the 25 ft minimum: beyond
+          the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: R-2a.front_yard
+        status: does_not_comply
+        proposed_ft: 22
+        required_ft: 25
+        working: '22 < 25: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), R-2A 25 ft; §325-3B YARD, FRONT
+  R-2b:
+    address: 316 E Falls St, Ithaca, NY 14850
+    parcel: 500700-12.-2-8
+    looked_up: '2026-10-27'
+    zone:
+      expect: R-2b
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 4764.1
+      corners: 4
+      edge_lengths_ft:
+      - 56.0
+      - 85.0
+      - 56.26
+      - 84.78
+      street: E Falls St
+      street_edges:
+      - 0
+      frontage_ft: 56.0
+      corner_lot: 'no'
+      drawn_area_sf: 4764.13
+    ground:
+      range_ft:
+      - 398.02
+      - 400.6
+      expect: assumed flat (Gordium's MVP); today's ground falls 2.6 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 3000
+      min_lot_width_ft: 35
+      front_ft: 10
+      sides_ft:
+      - 10
+      - 5
+      rear: 25% of the lot depth, at most 50 ft, at least 20 ft
+      coverage: 35%
+      height_ft: 35
+      stories: 3
+    expected:
+      start_box: 'zone R-2b; lot 4,764.1 sf from the tax map; street side E Falls St, 56.0 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'lot area 4,764.1 sf (worst case 4,216.1) ≥ 3,000 sf; frontage 56.0 ft (worst case 54.0) ≥ 35 ft:
+        both comply'
+      lot_depth_and_rear: lot depth = average of the side lines [85.0, 84.78] = 84.9 ft; rear yard required 21.2
+        ft
+      largest_house: 'limited by lot coverage: footprint at most 35% × 4,216.1 sf (the tax-map lot with every line
+        2 ft in) = 1,475.6 sf; the yards would leave 1,843.0 sf even 2 ft back from every limit, so coverage binds
+        first'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward E Falls St until its front yard is 7 ft (3 ft past the 10 ft minimum: beyond
+          the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: R-2b.front_yard
+        status: does_not_comply
+        proposed_ft: 7
+        required_ft: 10
+        working: '7 < 10: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), R-2B 10 ft; §325-3B YARD, FRONT
+  R-2c:
+    address: 206 Floral Ave, Ithaca, NY 14850
+    parcel: 500700-57.-3-4
+    looked_up: '2026-10-27'
+    zone:
+      expect: R-2c
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 4335.8
+      corners: 5
+      edge_lengths_ft:
+      - 50.01
+      - 92.3
+      - 15.91
+      - 33.16
+      - 85.55
+      street: Floral Ave
+      street_edges:
+      - 0
+      frontage_ft: 50.0
+      corner_lot: 'no'
+      drawn_area_sf: 4336.07
+    ground:
+      range_ft:
+      - 397.88
+      - 427.25
+      expect: assumed flat (Gordium's MVP); today's ground falls 29.4 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 2500
+      min_lot_width_ft: 40
+      front_ft: 10
+      sides_ft:
+      - 10
+      - 5
+      rear: 25% of the lot depth, at most 50 ft, at least 20 ft
+      coverage: 35%
+      height_ft: 35
+      stories: 3
+    expected:
+      start_box: 'zone R-2c; lot 4,335.8 sf from the tax map; street side Floral Ave, 50.0 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'R-2c''s lot size grows with the occupants (chart p.3 note 4: 2,500 sf for the first, +500 each):
+        4,335.8 sf allows 4 occupants (4,000 sf); at the worst case 3,798.5 sf, 3; until the occupants are stated
+        it needs review. Frontage 50.0 ft ≥ 40 ft complies'
+      lot_depth_and_rear: lot depth = average of the side lines [92.31, 85.55] = 88.9 ft; rear yard required 22.2
+        ft
+      largest_house: 'limited by lot coverage: footprint at most 35% × 3,798.5 sf (the tax-map lot with every line
+        2 ft in) = 1,329.5 sf; the yards would leave 1,564.7 sf even 2 ft back from every limit, so coverage binds
+        first'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward Floral Ave until its front yard is 7 ft (3 ft past the 10 ft minimum: beyond
+          the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: R-2c.front_yard
+        status: does_not_comply
+        proposed_ft: 7
+        required_ft: 10
+        working: '7 < 10: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), R-2C 10 ft; §325-3B YARD, FRONT
+  R-3a:
+    address: 607 Cliff St, Ithaca, NY 14850
+    parcel: 500700-42.-2-1
+    looked_up: '2026-10-27'
+    zone:
+      expect: R-3a
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 6673.1
+      corners: 5
+      edge_lengths_ft:
+      - 119.9
+      - 51.35
+      - 129.14
+      - 55.59
+      - 1.58
+      street: Cliff St
+      street_edges:
+      - 1
+      frontage_ft: 51.4
+      corner_lot: 'no'
+      drawn_area_sf: 6672.12
+    ground:
+      range_ft:
+      - 433.35
+      - 466.64
+      expect: assumed flat (Gordium's MVP); today's ground falls 33.3 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 5000
+      min_lot_width_ft: 40
+      front_ft: 10
+      sides_ft:
+      - 10
+      - 5
+      rear: 20% of the lot depth, at most 50 ft, at least 20 ft
+      coverage: 35%
+      height_ft: 40
+      stories: 4
+    expected:
+      start_box: 'zone R-3a; lot 6,673.1 sf from the tax map; street side Cliff St, 51.4 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'lot area 6,673.1 sf (worst case 5,973.1) ≥ 5,000 sf; frontage 51.4 ft (worst case 49.4) ≥ 40 ft:
+        both comply'
+      lot_depth_and_rear: lot depth = average of the side lines [119.9, 129.14] = 124.5 ft; rear yard required 24.9
+        ft
+      largest_house: 'limited by lot coverage: footprint at most 35% × 5,973.1 sf (the tax-map lot with every line
+        2 ft in) = 2,090.6 sf; the yards would leave 2,944.0 sf even 2 ft back from every limit, so coverage binds
+        first'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward Cliff St until its front yard is 7 ft (3 ft past the 10 ft minimum: beyond
+          the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: R-3a.front_yard
+        status: does_not_comply
+        proposed_ft: 7
+        required_ft: 10
+        working: '7 < 10: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), R-3A 10 ft; §325-3B YARD, FRONT
+  R-3aa:
+    address: 423 N Cayuga St, Ithaca, NY 14850
+    parcel: 500700-49.-1-26
+    looked_up: '2026-10-27'
+    zone:
+      expect: R-3aa
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 7938.0
+      corners: 5
+      edge_lengths_ft:
+      - 37.8
+      - 151.45
+      - 52.5
+      - 151.51
+      - 14.51
+      street: N Cayuga St
+      street_edges:
+      - 2
+      frontage_ft: 52.5
+      corner_lot: 'no'
+      drawn_area_sf: 7937.99
+    ground:
+      range_ft:
+      - 397.36
+      - 398.91
+      expect: assumed flat (Gordium's MVP); today's ground falls 1.6 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 5000
+      min_lot_width_ft: 50
+      front_ft: 10
+      sides_ft:
+      - 10
+      - 5
+      rear: 25% of the lot depth, at most 50 ft, at least 20 ft
+      coverage: 35%
+      height_ft: 35
+      stories: 3 at most, 2 at least
+    expected:
+      start_box: 'zone R-3aa; lot 7,938.0 sf from the tax map; street side N Cayuga St, 52.5 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'lot area 7,938.0 sf (worst case 7,138.4) ≥ 5,000 sf; frontage 52.5 ft (worst case 50.5) ≥ 50 ft:
+        both comply'
+      lot_depth_and_rear: lot depth = average of the side lines [151.45, 151.52] = 151.5 ft; rear yard required
+        37.9 ft
+      largest_house: 'limited by lot coverage: footprint at most 35% × 7,138.4 sf (the tax-map lot with every line
+        2 ft in) = 2,498.5 sf; the yards would leave 3,329.0 sf even 2 ft back from every limit, so coverage binds
+        first. Chart p.3 note 2 may limit it further: a new primary structure''s footprint may be at most 120% of
+        the average footprint on the whole block front, which needs the neighbours'' buildings (not worked here;
+        R-3aa.footprint_block_front is a flag: needs review)'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward N Cayuga St until its front yard is 7 ft (3 ft past the 10 ft minimum: beyond
+          the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: R-3aa.front_yard
+        status: does_not_comply
+        proposed_ft: 7
+        required_ft: 10
+        working: '7 < 10: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), R-3AA 10 ft; §325-3B YARD, FRONT
+  R-3b:
+    address: 422 W Seneca St, Ithaca, NY 14850
+    parcel: 500700-59.-5-3
+    looked_up: '2026-10-27'
+    zone:
+      expect: R-3b
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 4400.1
+      corners: 4
+      edge_lengths_ft:
+      - 33.11
+      - 132.85
+      - 33.13
+      - 132.85
+      street: W Seneca St
+      street_edges:
+      - 0
+      frontage_ft: 33.1
+      corner_lot: 'no'
+      drawn_area_sf: 4400.05
+    ground:
+      range_ft:
+      - 391.6
+      - 392.85
+      expect: assumed flat (Gordium's MVP); today's ground falls 1.2 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 3000
+      min_lot_width_ft: 30
+      front_ft: 10
+      sides_ft:
+      - 10
+      - 5
+      rear: 20% of the lot depth, at most 50 ft, at least 20 ft
+      coverage: 40%
+      height_ft: 40
+      stories: 4
+    expected:
+      start_box: 'zone R-3b; lot 4,400.1 sf from the tax map; street side W Seneca St, 33.1 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'lot area 4,400.1 sf (worst case 3,752.1) ≥ 3,000 sf; frontage 33.1 ft (worst case 31.1) ≥ 30 ft:
+        both comply'
+      lot_depth_and_rear: lot depth = average of the side lines [132.86, 132.86] = 132.9 ft; rear yard required
+        26.6 ft
+      largest_house: 'limited by the yards: 2 ft back from every limit they leave 1,302.8 sf, under the 40% coverage
+        cap at the worst-case lot (1,500.9 sf)'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward W Seneca St until its front yard is 7 ft (3 ft past the 10 ft minimum: beyond
+          the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: R-3b.front_yard
+        status: does_not_comply
+        proposed_ft: 7
+        required_ft: 10
+        working: '7 < 10: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), R-3B 10 ft; §325-3B YARD, FRONT
+  RU:
+    address: 614 University Ave, Ithaca, NY 14850
+    parcel: 500700-29.-4-5
+    looked_up: '2026-10-27'
+    zone:
+      expect: RU
+      source: 'the City of Ithaca zoning map, asked live 2026-10-27 through site_lookup; recorded here as this test''s
+        expected district for the parcel (as 106 Ithaca Rd''s README records its zone), not as the map''s data:
+        the lookup snapshot keeps none of the map''s answer (its terms). The law''s own map is 1_source_documents/zoning_maps_2026-05.pdf'
+      note: 'the City''s map writes R-U; Gordium''s rulebook is RU: the start box must show RU and load RU''s rules
+        (if it shows R-U with no rules, that is a lookup bug for #19)'
+    lot:
+      source: NYS Tax Parcels Public (tax map, ±2 ft per lot line)
+      area_sf: 13924.2
+      corners: 10
+      edge_lengths_ft:
+      - 17.61
+      - 39.84
+      - 137.83
+      - 27.65
+      - 27.65
+      - 27.65
+      - 27.65
+      - 133.28
+      - 16.65
+      - 27.24
+      street: University Ave
+      street_edges:
+      - 3
+      - 4
+      - 5
+      - 6
+      frontage_ft: 110.6
+      corner_lot: 'no'
+      drawn_area_sf: 13924.87
+    ground:
+      range_ft:
+      - 609.93
+      - 626.59
+      expect: assumed flat (Gordium's MVP); today's ground falls 16.7 ft across the lot (USGS 3DEP)
+    law:
+      cites: zoning chart p.2 (uses), p.3 (one-family dwelling, detached), p.14 (parking); §325-8A(6),(7),(10),(11)-(14);
+        §325-3B HEIGHT OF BUILDING, STORY
+      min_lot_area_sf: 10000
+      min_lot_width_ft: 75
+      front_ft: 25
+      sides_ft:
+      - 10
+      - 10
+      rear: 25% of the lot depth, at most 50 ft, at least 30 ft
+      coverage: 25%
+      height_ft: 35
+      stories: 3
+    expected:
+      start_box: 'zone RU; lot 13,924.2 sf from the tax map; street side University Ave, 110.6 ft of frontage; corner
+        lot: no; overlays: none found'
+      lot_size: 'lot area 13,924.2 sf (worst case 12,973.9) ≥ 10,000 sf; frontage 110.6 ft (worst case 108.6) ≥
+        75 ft: both comply (worst case: Gordium''s tax-map rule, spec C2)'
+      lot_depth_and_rear: lot depth = average of the side lines [137.84, 133.29] = 135.6 ft; rear yard required
+        33.9 ft
+      largest_house: 'limited by chart p.3 note 13 or lot coverage, whichever is smaller, both worked on the worst-case
+        lot (every line 2 ft in, 12,973.9 sf): coverage allows 25% = 3,243.5 sf; note 13 keeps 50% of the developable
+        lot area after the setbacks as green space: on the worst-case lot the setbacks (front 25 ft, sides 10 ft,
+        rear 25% of the 132.48 ft depth = 33.12 ft; least distances, round at the corners) leave 5,746.0 sf, so
+        2,873.0 sf must stay green, and if that green space must lie within the same area the house may cover at
+        most 5,746.0 − 2,873.0 = 2,873.0 sf, less than coverage allows. If the green space may be anywhere on the
+        lot, coverage binds. Where it must be is an open reading (RU.green_space is a flag: needs review)'
+      every_rule: after Draw no rule does not comply; a rule is needs review only with its reason (a fact the box
+        doesn't ask, such as who lives there, bedrooms or a home occupation, or a reading the tax map leaves open)
+      nudge:
+        edit: 'move the house toward University Ave until its front yard is 22 ft (3 ft past the 25 ft minimum:
+          beyond the ±2 ft tax-map tolerance, so it fails under every reading)'
+        rule: RU.front_yard
+        status: does_not_comply
+        proposed_ft: 22
+        required_ft: 25
+        working: '22 < 25: 3''-0" short'
+        cites: zoning chart p.3, Front (minimum), RU 25 ft; §325-3B YARD, FRONT
