@@ -1802,13 +1802,17 @@ USES_FILE = "4_term_definitions/uses.yaml"
 def _options_files(j: Path) -> dict:
     """Every file options reads, by its path in the jurisdiction (as posix), sorted: each rulebook the folder listing
     finds (5_zoning_rules/*.yaml and 5_zoning_rules/drafted/*.yaml, hand-drafted and AI-drafted both, whichever
-    rulebook_for picks) and the city's uses (uses.yaml), each with its bytes, None for one that isn't a file. The
-    only place options reads a file: the answer is worked out from these bytes (test_options_cache pins that no
-    other file is opened)."""
+    rulebook_for picks) and the city's uses (uses.yaml), each with its bytes, None for a rulebook name that isn't a
+    file and for no uses.yaml (one that is there but can't be read, a folder, is an error, as before). The only place
+    options reads the disk: the answer is worked out from these bytes and names alone, even which rulebook is a
+    district's (test_options_cache pins that nothing else is opened or looked at)."""
     found = [p for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
-             for p in folder.glob("*.yaml")] + [j / USES_FILE]
-    return {p.relative_to(j).as_posix(): p.read_bytes() if p.is_file() else None
-            for p in sorted(set(found), key=lambda p: p.relative_to(j).as_posix())}
+             for p in folder.glob("*.yaml")]
+    files = {p.relative_to(j).as_posix(): p.read_bytes() if p.is_file() else None
+             for p in sorted(set(found), key=lambda p: p.relative_to(j).as_posix())}
+    uses = j / USES_FILE
+    files[USES_FILE] = uses.read_bytes() if uses.exists() else None
+    return files
 
 
 def _options_lists():
@@ -1826,13 +1830,15 @@ def _options(j: Path, files: dict) -> dict:
         if data is None:                          # appeared or went between the listing and now: never a guess
             raise ValueError(f"{path} changed while the options were read; ask again")
         return load_bytes(data)
+    def there(path: Path) -> bool:                # rulebook_for's choice made from what was read, never the disk
+        return files.get(path.relative_to(j).as_posix()) is not None
     zones = sorted({Path(name).stem for name, data in files.items() if name != USES_FILE and data is not None
-                    and rulebook_for(j, Path(name).stem)})
+                    and rulebook_for(j, Path(name).stem, there)})
     uses = (read(j / USES_FILE) or {}) if files.get(USES_FILE) is not None else {}
     names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}
     district_uses, follow_ups, implied = {}, {}, {}
     for zone in zones:
-        rules = read(rulebook_for(j, zone))["rules"]
+        rules = read(rulebook_for(j, zone, there))["rules"]
         district_uses[zone] = use_choices(rules, names, zone)
         every = list(dict.fromkeys([u["id"] for u in district_uses[zone]] + list(names)))   # a saved use the
         read_for = {u: _read_for(rules, u, names) for u in every}                           # district doesn't list

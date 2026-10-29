@@ -141,12 +141,13 @@ def rulebook_paths(folder) -> list[Path]:
                   key=lambda p: p.relative_to(folder).as_posix()) if folder.is_dir() else []
 
 
-def rulebook_for(jurisdiction, zone: str) -> Path | None:
+def rulebook_for(jurisdiction, zone: str, exists=Path.is_file) -> Path | None:
     """The rulebook that holds a zone's rules: the hand-drafted 5_zoning_rules/<zone>.yaml when it exists,
     else the AI-drafted 5_zoning_rules/drafted/<zone>.yaml, else None. The one definition, used by the
-    project report and the answer-key test alike."""
+    project report and the answer-key test alike. `exists(path)`: whether a file is there, on disk unless the caller
+    decides from what it has already read (check.options, from the files it read once)."""
     folder = Path(jurisdiction) / "5_zoning_rules"
-    return next((p for p in (folder / f"{zone}.yaml", folder / "drafted" / f"{zone}.yaml") if p.is_file()), None)
+    return next((p for p in (folder / f"{zone}.yaml", folder / "drafted" / f"{zone}.yaml") if exists(p)), None)
 
 
 def utf8_console() -> None:

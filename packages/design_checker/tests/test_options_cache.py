@@ -4,6 +4,7 @@ the same answer as working it out afresh, for every district and every use; a ch
 changed code list, is worked out again; a caller can't change what the next one gets; an error is never kept; the
 kept answers are bounded; and every file the answer reads is in the key."""
 import json
+import os
 import shutil
 import sys
 import time
@@ -127,6 +128,20 @@ def test_a_changed_code_list_is_worked_out_again(monkeypatch):
     assert implied == _fresh(REPO / CITY)
 
 
+@pytest.mark.parametrize("module,name,swap", [
+    (check, "INTERIOR", lambda v: set(v) - {"parking_spaces"}),                     # an interior fact asked after all
+    (logic, "DRAWN_FACTS", lambda v: tuple(x for x in v if x != "primary_buildings")),   # a drawn fact asked
+    (check, "MEASURE_KINDS", lambda v: {**v, "conversion": "text"}),               # a measure typed otherwise
+])
+def test_every_other_code_list_is_in_the_key(monkeypatch, module, name, swap):
+    """Review round 1: only two of the five lists were pinned. Each swap changes the answer (checked), and the
+    answer after it is the one worked out afresh, never the one kept under the old list."""
+    before = check.options(CITY)
+    monkeypatch.setattr(module, name, swap(getattr(module, name)))
+    after = check.options(CITY)
+    assert after != before and after == _fresh(REPO / CITY)
+
+
 def test_a_caller_cannot_change_what_the_next_caller_gets():
     pristine = json.dumps(check.options(CITY))
     got = check.options(CITY)
@@ -138,6 +153,50 @@ def test_a_caller_cannot_change_what_the_next_caller_gets():
     got["district_uses"][zone][0]["name"] = "changed"
     got["implied"][zone].clear()
     assert json.dumps(check.options(CITY)) == pristine
+
+
+@pytest.mark.parametrize("gone", ["5_zoning_rules/R-1b.yaml", "5_zoning_rules/RU.yaml"])
+def test_a_file_that_goes_while_the_options_are_worked_out_is_never_kept_under_its_old_bytes(tmp_path, monkeypatch,
+                                                                                             gone):
+    """Review round 1: which rulebook is a district's was looked up on the disk after the files were read, so a hand
+    rulebook deleted in between gave the drafted one's questions (or a lone one's district went missing), kept under
+    the key of the files with it there. Now the choice is made from what was read: deleted and put back in that
+    moment, the answer is the one the files give."""
+    j = _city(tmp_path)
+    (j / "5_zoning_rules/drafted").mkdir()
+    (j / "5_zoning_rules/drafted/R-1b.yaml").write_text(yaml.safe_dump({"rules": []}), encoding="utf-8")
+    path = j / gone
+    data = path.read_bytes()
+    read_files = check._options_files
+
+    def read_then_delete(where):
+        files = read_files(where)
+        path.unlink()                         # gone between the reading and the working out
+        return files
+    monkeypatch.setattr(check, "_options_files", read_then_delete)
+    during = check.options(str(j))
+    path.write_bytes(data)                    # back, the same bytes
+    monkeypatch.undo()
+    assert during == check.options(str(j)) == _fresh(j)
+    assert any(during["follow_ups"]["R-1b"].values()) and "RU" in during["zones"]
+
+
+def test_a_second_call_is_never_worked_out_again():
+    """The kept answer is used: the same files, worked out once (counted, not timed)."""
+    calls = []
+    real = check._options
+
+    def counted(*a):
+        calls.append(1)
+        return real(*a)
+    check._OPTIONS.clear()
+    try:
+        check._options = counted
+        check.options(CITY)
+        check.options(CITY)
+    finally:
+        check._options = real
+    assert len(calls) == 1
 
 
 def test_an_error_is_never_kept(tmp_path):
@@ -202,7 +261,13 @@ def test_every_file_the_answer_reads_is_in_its_key(tmp_path, where):
     keyed = {(j / name).resolve() for name in files}
     assert opened and set(opened) <= keyed, sorted(set(opened) - keyed)
     assert {(j / n).resolve() for n, data in files.items() if data is not None} <= set(opened)
-    from_bytes, inside = _opened(lambda: check._options(j, files))
+    def no_disk(*a, **k):
+        raise AssertionError("the options looked at the disk after reading their files")
+    with pytest.MonkeyPatch.context() as m:   # nor looks: no stat (is_file, exists), no listing (review round 1)
+        m.setattr(Path, "stat", no_disk)
+        m.setattr(os, "scandir", no_disk)
+        m.setattr(os, "listdir", no_disk)
+        from_bytes, inside = _opened(lambda: check._options(j, files))
     assert inside == []
     assert answer == from_bytes == _fresh(j)       # and those bytes are all it needs: the answer read from disk
 
@@ -221,3 +286,13 @@ def test_options_is_quick():
     again = time.perf_counter() - t
     assert kept < 0.05, kept
     assert again < 1.0, again
+
+
+def test_a_uses_file_that_cannot_be_read_is_an_error_as_before(tmp_path):
+    """Review round 1: a uses.yaml that is there but is no file (a folder) is an error, as it always was, never a
+    city with no uses."""
+    j = _city(tmp_path)
+    (j / "4_term_definitions/uses.yaml").unlink()
+    (j / "4_term_definitions/uses.yaml").mkdir()
+    with pytest.raises(IsADirectoryError):
+        check.options(str(j))
