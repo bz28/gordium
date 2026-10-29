@@ -10,8 +10,13 @@ python -m design_checker serve                            # for Rhino: one JSON 
 ```
 
 Requests to the worker: `check` (a model and its lot facts), `start` (the largest legal starting building for
-the lot in a model, `envelope_builder.start`), `sample_site` (106 Ithaca Rd's lot and facts, as files
+the lot in a model, `envelope_builder.start`), `sample_site` (the plugin's place's sample lot, from its jurisdiction.yaml: 106 Ithaca Rd's lot and facts, as files
 drawn from the sample before 2026-10-27 have them; GordiumStart no longer prefills it: a new file starts empty), `options` (zones and uses), `facts` (what's wrong with saved lot facts).
+
+**The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
+`rhino_logic.py` runs in Rhino's Python, which can't read YAML, so it reads `place.json` beside it: the place's name,
+time zone and how its addresses are written, copied from its `jurisdiction.yaml` by `python -m rule_format place
+--write` and checked current in CI. Never edit `place.json` by hand.
 
 What it adds for the Rhino command, never changing a result:
 - **summary:** one line for the viewport corner: "All 10 rules pass", or "9 pass · 1 fail" with what fails and
