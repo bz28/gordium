@@ -1,5 +1,5 @@
 from site_lookup import geometry as g
-from site_lookup.sources import normalize_street
+from site_lookup.adapters.ithaca_city.sources import normalize_street
 
 SQUARE = [(0, 0), (10, 0), (10, 10), (0, 10)]
 

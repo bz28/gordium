@@ -48,7 +48,7 @@ T = _site_lookup_tests()
 
 
 def looked_up(name, **kw):
-    from site_lookup.lookup import lookup
+    from site_lookup.adapters.ithaca_city.lookup import lookup
     fx = T.load(name)
     return box_payload(lookup(fx["address"], T.Fake(fx, **kw), T.NOW))
 
@@ -1239,7 +1239,7 @@ def test_checked_is_the_citys_own_day_and_draw_saves_the_same():
     tomorrow. It is the City's own day (America/New_York), the same Draw saves."""
     import datetime as dt
     from design_checker.lookup_box import box_payload
-    from site_lookup.lookup import lookup
+    from site_lookup.adapters.ithaca_city.lookup import lookup
     late = dt.datetime(2026, 10, 23, 1, 30, tzinfo=dt.timezone.utc)          # 9:30 pm on the 22nd in Ithaca
     assert logic.city_day(late) == "2026-10-22"
     assert logic.city_day(dt.datetime(2026, 12, 23, 4, 30, tzinfo=dt.timezone.utc)) == "2026-12-22"   # UTC-5

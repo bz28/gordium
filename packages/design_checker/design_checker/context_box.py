@@ -15,9 +15,13 @@ import math
 import sys
 from pathlib import Path
 
+from rule_format.place import plugin_place
 from rule_format.rulebook import utf8_console
-from site_lookup.context import HALF_SIZE_FT, context
+from site_lookup import adapter
 from site_lookup.http import Http
+
+PLACE_CONTEXT = adapter(plugin_place()).context    # the plugin's place's own lookup (the registry)
+HALF_SIZE_FT, context = PLACE_CONTEXT.HALF_SIZE_FT, PLACE_CONTEXT.context
 
 from .rhino_logic import NOTE_HEIGHT_FT, is_stored, note_text     # one definition for both sides
 

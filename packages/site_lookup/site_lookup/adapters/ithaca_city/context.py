@@ -16,8 +16,8 @@ import datetime as dt
 import hashlib
 import json
 
-from . import geometry as g
-from .http import Offline, ServiceError
+from ... import geometry as g
+from ...http import Offline, ServiceError
 from .lookup import US_SURVEY_FT
 from .sources import ENDPOINTS, Fetcher
 

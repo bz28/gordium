@@ -1050,7 +1050,7 @@ def test_draw_draws_nothing_on_an_empty_file_without_a_found_lookup_whatever_way
 # ---- the offline safety net: the lookup saved on this computer (Ben, 2026-10-27) ----
 
 def _found_106():
-    from site_lookup.lookup import lookup
+    from site_lookup.adapters.ithaca_city.lookup import lookup
     from test_lookup_box import T
     from design_checker.lookup_box import box_payload
     fx = T.load("106_ithaca_rd")

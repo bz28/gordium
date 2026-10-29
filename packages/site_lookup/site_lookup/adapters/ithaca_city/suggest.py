@@ -6,17 +6,18 @@ a suggestion can never stand for a fact about the lot."""
 
 import re
 
-from .sources import ENDPOINTS, _DIR, _SUFFIX
+from .sources import ENDPOINTS, PLACE, _DIR, _SUFFIX
 
 MIN_CHARS = 4                 # fewer typed: no suggestions (too many matches to be useful)
 LIMIT = 8                     # suggestions shown at most
-CITY_TAIL = ", Ithaca, NY"    # added to a suggestion: the lookup is asked for this City's address
+CITY_TAIL = PLACE.addresses["tail"]   # ", Ithaca, NY", added to a suggestion: the lookup is asked for this City's
 UPPER_WORDS = set(_DIR.values())      # N, S, E, W stay capitals ("120 N Cayuga St")
 
 
 MAX_SPELLINGS = 8             # spellings asked for at most (each word that may be shortened doubles them)
-CITY_WORDS = {"ITHACA", "CITY", "OF", "NY", "NEW", "YORK", "USA", "US", "UNITED", "STATES", "AMERICA",
-              "14850", "14851", "14852", "14853"}
+CITY_WORDS = ({w.upper() for w in PLACE.addresses["own_words"] + PLACE.addresses["state_words"]}   # ITHACA NY NEW
+              | {"CITY", "OF", "USA", "US", "UNITED", "STATES", "AMERICA"}                       # YORK, its ZIPs
+              | set(PLACE.addresses["zip_codes"]))
 
 
 def other_town(after_comma: str) -> bool:

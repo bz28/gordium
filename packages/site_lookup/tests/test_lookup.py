@@ -15,10 +15,10 @@ import sys
 
 from site_lookup import geometry as g
 from site_lookup.http import Offline, ServiceError
-from site_lookup.lookup import lookup
-from site_lookup.sources import ENDPOINTS
+from site_lookup.adapters.ithaca_city.lookup import lookup
+from site_lookup.adapters.ithaca_city.sources import ENDPOINTS
 
-lookup_module = sys.modules["site_lookup.lookup"]        # the module (the package exports the function by the same name)
+lookup_module = sys.modules["site_lookup.adapters.ithaca_city.lookup"]        # the module (the package exports the function by the same name)
 
 FIX = Path(__file__).parent / "fixtures"
 NOW = dt.datetime(2026, 10, 20, 18, 0, tzinfo=dt.timezone.utc)
@@ -351,7 +351,7 @@ def test_the_same_answers_give_the_same_snapshot():
 
 
 def test_areas_are_never_read_from_a_service():
-    src = "".join(p.read_text(encoding="utf-8") for p in (Path(__file__).parents[1] / "site_lookup").glob("*.py"))
+    src = "".join(p.read_text(encoding="utf-8") for p in (Path(__file__).parents[1] / "site_lookup").rglob("*.py"))
     assert "Shape__Area" not in src and "CALCACRES" not in src
     assert "outSR" in src                                # every geometry is asked for in EPSG:2261
 
@@ -700,7 +700,7 @@ def test_a_lot_in_r_u_and_another_district_asks_between_ru_and_it():
 def test_the_residential_districts_are_the_zoning_charts_columns():
     """names.yaml's residential districts are exactly the chart's residential columns (p.3, in order), written as
     the rulebooks write them (R-1A's file is R-1a.yaml); every alias names one of them."""
-    from site_lookup.sources import NAMES
+    from site_lookup.adapters.ithaca_city.sources import NAMES
     d = NAMES["districts"]
     cells = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text/zoning_charts_2026-04.cells.jsonl"
     page3 = next(r for r in map(json.loads, cells.read_text(encoding="utf-8").splitlines()) if r.get("page") == 3
@@ -763,13 +763,13 @@ def test_a_city_road_named_for_two_streets_is_the_addresss_street():
                                         ("W CLINTON ST EB LANE", "W CLINTON ST"), ("N MEADOW ST SB", "N MEADOW ST"),
                                         ("W BUFFALO ST BRIDGE", "W BUFFALO ST"), ("Ithaca Road", "ITHACA RD")])
 def test_city_road_names_read_as_the_address_writes_them(raw, street):
-    from site_lookup.sources import road_name
+    from site_lookup.adapters.ithaca_city.sources import road_name
     assert road_name(raw) == street
 
 
 @pytest.mark.parametrize("raw", ["E STATE ST /M.L.K. JR ST", "e state st / m.l.k. jr st", "MLK JR ST"])
 def test_a_road_name_not_in_the_table_is_never_matched_by_likeness(raw):
-    from site_lookup.sources import road_name
+    from site_lookup.adapters.ithaca_city.sources import road_name
     assert road_name(raw) != "E STATE ST"
 
 
