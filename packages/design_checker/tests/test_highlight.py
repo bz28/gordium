@@ -79,7 +79,8 @@ def test_the_drawn_list_carries_what_each_piece_is_for_so_the_checks_read_what_i
                                           "building": "house"}
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))" in src
-    assert 'for g, status, _ in getattr(o, "encroach", None) or []:' in src           # draw_scene draws that list
+    assert 'rest, red = logic.red_last(getattr(o, "encroach", None) or [])' in src   # draw_scene draws that list
+    assert "for g, status, _ in rest + red:" in src                                   # (#53: the red over the amber)
 
 
 def test_each_building_is_made_into_a_solid_once_per_check_not_once_per_block():

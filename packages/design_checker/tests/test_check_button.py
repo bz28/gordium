@@ -181,7 +181,7 @@ def test_edits_are_noticed_whichever_command_drew_the_results():
     greyed the results (old marks shown as current) and the tick did nothing."""
     run = body(RHINO, "def _check_apply(", "\ndef _toast(")       # (#32 split run_check)
     at = run.index('STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = begun["at"]')
-    assert run.index('if not STATE.get("live"):', at) < run.index("live(True)", at) < run.index("ui.show(panel(), view)")
+    assert run.index('if not STATE.get("live"):', at) < run.index("live(True)", at) < run.index("ui.show(panel(), view")
     assert 'if not STATE.get("live"):' in body(RHINO, "def set_auto_check(", "\ndef ")
 
 
