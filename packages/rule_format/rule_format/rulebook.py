@@ -90,10 +90,15 @@ class _StrictLoader(yaml.SafeLoader):
 def load(path):
     """A YAML file (a rulebook, a term file, sources.yaml...) read with the strict loader. Kept by its bytes
     (_kept): re-read every call, parsed again only when its bytes changed, a fresh copy every time."""
+    return load_bytes(Path(path).read_bytes())
+
+
+def load_bytes(data: bytes):
+    """load(), for a file's bytes already read (check.options reads each file once, and works from those bytes)."""
     def parse(data: bytes):
         text = data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")   # exactly as read_text() reads it
         return yaml.load(text, Loader=_StrictLoader)
-    return _kept("yaml", Path(path).read_bytes(), parse)
+    return _kept("yaml", data, parse)
 
 
 def _kept(kind: str, data: bytes, build):
