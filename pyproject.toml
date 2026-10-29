@@ -35,7 +35,7 @@ include = ["rule_format*", "document_extraction*", "section_labeling*", "rule_dr
 rule_format = ["*.yaml"]
 section_labeling = ["*.yaml"]
 rule_drafting = ["*.yaml"]
-site_lookup = ["*.yaml"]
+site_lookup = ["*.yaml", "adapters/*/*.yaml"]   # each place's lookup data
 design_checker = ["place.json"]   # the plugin's copy of its place's settings (rule_format/place.py)
 
 [tool.pytest.ini_options]

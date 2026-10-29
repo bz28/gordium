@@ -2,7 +2,7 @@
 
 **Purpose:** which public map services the address lookup asks, who owns each, what Gordium may store from each, and when we need written permission.\
 **For:** Ben (business and licensing decisions), engineers working on the address lookup, anyone asking "is this data ours to keep?"\
-**Kept current by:** whoever adds or changes a source in `packages/site_lookup/site_lookup/endpoints.yaml` (in that PR), and Ben when a permission answer comes back.
+**Kept current by:** whoever adds or changes a source in `packages/site_lookup/site_lookup/adapters/ithaca_city/endpoints.yaml` (in that PR), and Ben when a permission answer comes back.
 
 The **address lookup** is the **Look up** button in the start box: it asks public map services about a typed address and fills in the lot, the street side, the ground and a zoning suggestion (package `site_lookup`, PR #16; in the start box from PR #19). Each source has a **store level**, what a saved project may keep from it:
 
@@ -23,7 +23,7 @@ The **address lookup** is the **Look up** button in the start box: it asks publi
 
 ## The sources
 
-Copied from `packages/site_lookup/site_lookup/endpoints.yaml` on the `site-lookup` branch (PR #16). That file is the source of truth; if this table and the file disagree, the file wins and this table is fixed.
+Copied from `packages/site_lookup/site_lookup/adapters/ithaca_city/endpoints.yaml` on the `site-lookup` branch (PR #16). That file is the source of truth; if this table and the file disagree, the file wins and this table is fixed.
 
 | Source | Question it answers | Owner | May we store it? | Terms |
 |---|---|---|---|---|

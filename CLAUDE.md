@@ -34,7 +34,9 @@ regulations/     DATA: rule documents and rulebooks (no code)
     6_coverage_report/    generated proof nothing was skipped
     7_published_rulebooks/ frozen versions the checker uses; never changed once made
 packages/        LOGIC: one package per job (rule_format, document_extraction, site_lookup,
-                 model_labeling, model_measurement, envelope_builder, design_checker)
+                 model_labeling, model_measurement, envelope_builder, design_checker). A place's own code
+                 has its own folder, chosen by its jurisdiction.yaml: site_lookup/adapters/<place>/ (its map
+                 services, names, rezonings) and model_measurement/places/<place>/ (its measurement definitions)
 apps/            PRODUCTS people use (command_line, rule_review_app; later rhino_plugin, api)
 test_data/       answer_keys/ (architects' hand-checked rules), test_sites/ (real lots + models + expected results)
 docs/            design notes, decisions/ (one short file per big decision)

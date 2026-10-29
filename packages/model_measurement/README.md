@@ -12,6 +12,16 @@ python -m model_measurement --check                          # CI: every committ
 The measured file is a project file: `python -m project_report <model>_measured.yaml` writes the architects'
 format report from it.
 
+**One folder per place.** A lot is measured by its own place's definitions: `places/<place>/measure.py`, chosen by
+the lot facts' `jurisdiction` through that place's `jurisdiction.yaml` (`adapters: measurement:`, read by
+`rule_format.place`); `places.measuring(place)` gives it. The City of Ithaca's (Chapter 325) is
+`places/ithaca_city/measure.py`. Shared by every place: reading the model (`read_3dm.py`), the street lines
+(`street_lines.py`), the one table of reasons a measurement stops (`stops.py`; a reason citing a place's law is that
+place's) and what research settled (`interpretations.py`, which reads the lot's own place's files: facts naming no
+place are a plain error, never Ithaca's law). Shared code that reads a place's names without a lot at hand (the
+checker's display, the envelope builder) imports them from `plugin_measuring`, the plugin's place's module. Everything
+below describes the City of Ithaca's.
+
 ## What goes in
 
 - **The model.** The lot is the closed outline on the `Site` layer; buildings are the solids or closed meshes

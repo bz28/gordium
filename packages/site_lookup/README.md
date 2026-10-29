@@ -9,6 +9,13 @@ python -m site_lookup "106 Ithaca Rd, Ithaca, NY 14850"          # asks the live
 python -m site_lookup "106 Ithaca Rd, Ithaca, NY 14850" --json   # the full result, as the start box receives it
 ```
 
+**One folder per place.** Shared: `geometry.py` (plane geometry in feet) and `http.py` (asking a service). Each
+place's own lookup is `site_lookup/adapters/<place>/`, chosen by the place's `jurisdiction.yaml` (`adapters:
+lookup:`) through `adapter(place)`: the City of Ithaca's is `adapters/ithaca_city/` (`lookup.py`, `sources.py`,
+`suggest.py`, `context.py`, and its data: `endpoints.yaml`, `names.yaml`, `amendments.yaml`). Its place's values
+(the SWIS code, EPSG:2261, the address tail, its name in messages) come from those settings. A place with no
+settings, or no adapter folder, is a plain error. Everything below describes the City of Ithaca's.
+
 ```
 106 Ithaca Rd, Ithaca, NY 14850: found
   parcel       500700-84.-2-6               [suggested] · suggested by Gordium · NYS Tax Parcels Public
@@ -97,7 +104,7 @@ the fixtures. A test checks every fixture and snapshot against `endpoints.yaml`.
 
 ## The context map (the neighbourhood around the lot)
 
-`site_lookup.context.context(lot_ring, http, half_size_ft=750)` asks for everything in a 1500 ft × 1500 ft square
+`site_lookup.adapters.ithaca_city.context.context(lot_ring, http, half_size_ft=750)` asks for everything in a 1500 ft × 1500 ft square
 centred on the lot, the way an architect's site context drawing shows it. Drawing only: nothing in it is ever
 measured or checked.
 
