@@ -160,7 +160,10 @@ def test_use_details_unanswered_are_their_own_collapsed_group_and_never_a_pass()
     assert all(i["status"] == present.REVIEW for i in details)              # still needs review (never pass)
     assert all(set(i["needs"]) <= set(logic.DEFERRED_FACTS) for i in details)
     groups = {g["key"]: g for g in v["groups"]}
-    assert groups["use_details"]["title"] == logic.USE_DETAILS_TITLE
+    assert groups["use_details"]["title"] == logic.USE_DETAILS_TITLE == "Use details (for later)"
+    # when to answer is in each row's reason, ahead of what to enter (the title no longer says it)
+    assert all(i["reason"].startswith("Answer when you plan the interior: ") for i in details), [i["reason"] for i in details]
+    assert not any((i["reason"] or "").startswith("Answer when") for i in v["items"] if not i.get("use_detail"))
     assert set(groups["use_details"]["items"]) == {i["id"] for i in details}
     assert not {i["id"] for i in details} & set(groups.get("review", {"items": []})["items"])
     # not counted among the building's problems, but said, and apart from the passes

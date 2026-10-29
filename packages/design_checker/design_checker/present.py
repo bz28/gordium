@@ -1853,6 +1853,9 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                                  "scope": "", "precision": "", "at_limit": None}})
     for i in items:                                  # the use details still to answer: their own group (never a pass)
         i["use_detail"] = rhino_logic.is_use_detail(i, facts)
+        if i["use_detail"]:                          # when to answer, in the row (the group's title is short)
+            i["reason"] = f"{rhino_logic.USE_DETAILS_WHEN}: {i['reason']}" if i.get("reason") else \
+                rhino_logic.USE_DETAILS_WHEN
     return {"items": items, "summary": summary(items), "state": state(items),
             "header": header(facts, dict(extras, waiting_main=any(
                 PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values()),
