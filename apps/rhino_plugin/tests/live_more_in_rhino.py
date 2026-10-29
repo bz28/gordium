@@ -2,7 +2,7 @@
 """Live mode hears edits that touch no object (the audit of main, 2026-10-29), in Rhino 8, each claim asserted. Run in
 Rhino, not in CI; the rules are tested in CI (packages/design_checker/tests/test_check_button.py). Before, live mode
 heard only objects added, deleted, replaced or re-attributed, so these left the last results showing as current. A
-fresh feet document, GordiumCheck (the sample drawn and checked), then, each followed by real idle:
+fresh feet document, GordiumCheck with 106 Ithaca Rd looked up (recorded answers), drawn and checked, then, each followed by real idle:
 1. The model's units changed to inches WITHOUT scaling (every length now 12 times shorter): the results grey out
    ("Model changed since the last check — press Check"). Check.
 2. The Gordium::Massing layer renamed (its floors no longer on a building layer): greyed. Check.
@@ -26,7 +26,7 @@ import scriptcontext as sc
 import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import TestDocs, close, look_up_106  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
@@ -80,9 +80,11 @@ def idle_enough():
 
 
 def greyed(g):
-    rows = g._status_rows(g.overlay(), True)
+    o = g.overlay()
+    rows = g._status_rows(o, g.stale(o)) if getattr(o, "message", None) else []
     return {"stale": bool(run["parts"].get("stale")), "dirty": g.STATE.get("dirty") is not None,
-            "status": rows[0] if rows else None}
+            "status": rows[0] if rows else None, "last": (g.STATE.get("last") or {}).get("view_summary")
+            or (g.STATE.get("last") or {}).get("error")}
 
 
 def checked_now(g, name):
@@ -94,7 +96,8 @@ def step_a():
     run["docs"] = TestDocs("livemore").__enter__()
     g = run["g"] = fresh_module()
     doc = run["doc"] = run["docs"].open("Large Objects - Feet")
-    g.gordium_check()
+    g.STATE["on_confirm"] = lambda *a: None
+    look_up_106(g, g.gordium_check)                 # an empty file: 106 Ithaca Rd looked up (recorded), drawn, checked
     run["parts"] = g.STATE.get("panel_parts") or {}
     claim("0 checked, current", not run["parts"].get("stale") and g.STATE.get("live"), greyed(g))
     capture(doc, "0_checked")
