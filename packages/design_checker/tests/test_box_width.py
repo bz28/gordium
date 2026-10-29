@@ -58,6 +58,8 @@ class _Meta(type):
 
 
 class _Thing(metaclass=_Meta):
+    Loaded = False                         # never shown on a screen: Eto's Loaded stays False (no sizes to read)
+
     def __init__(self, *args, **kwargs):
         self.args = args
 

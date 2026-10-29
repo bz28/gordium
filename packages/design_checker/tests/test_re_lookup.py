@@ -1722,3 +1722,21 @@ def test_a_found_lookups_note_is_a_plain_line_never_the_amber_question():
     # laid out only when there is a note: an empty label still takes a line (the start box ran 12 px past a laptop's
     # height with every question open: the merge-3 suite's test_box_width)
     assert "    if note.Text:" in ui and ui.index("    if note.Text:") < ui.index("layout.AddRow(None, row(note))")
+
+
+def test_the_amber_line_takes_no_room_while_it_asks_nothing_and_the_box_grows_when_it_comes_back():
+    """Rhino walk, 2026-10-28 (demo smoke): once the lookup had answered "Corner lot?", the start box kept an empty
+    amber line, a blank gap above "Shown dashed…". The line is now shown only while it asks something. A box
+    opened with it hidden has no room for it, so when "Corner lot?" is set back to Not answered the box grows to
+    show it (measured in Rhino: inner height 283, the content 270 with the line, padding 14 + 14: Cancel and Draw
+    were cut off by 15 px until it grew to 298), and never shrinks as answers change."""
+    assert logic.grown_height(283, 270.0, 28) == 298              # the line back: the box grows to the content
+    assert logic.grown_height(282, 254.0, 28) is None             # opened with the line: it already fits
+    assert logic.grown_height(298, 255.0, 28) is None             # the line hidden again: never smaller
+    assert logic.grown_height(283, 269.2, 28) == 298              # a part pixel rounds up, never clips
+    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    box = ui[ui.index("def start_box("):]
+    box = box[:box.index("\ndef ")]
+    assert "layout.AddRow(None, amber_row)" in box and "row(amber)" in box.split("amber_row = ", 1)[1][:20]
+    assert "amber_row.Visible = bool(text)" in box
+    assert "logic.grown_height(dialog.ClientSize.Height, layout.GetPreferredSize().Height," in box
