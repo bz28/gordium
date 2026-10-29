@@ -235,7 +235,10 @@ def test_the_boxs_own_drawing_is_in_its_step_from_the_first_line():
     assert "_draw_lot(doc, session.table._changing)" in pick and "session.table._changing)" in pick.split(
         "_place_spots(", 1)[1]
     done = SRC[SRC.index("def _lookup_done("):].split("\ndef ", 1)[0]
-    assert "apply_lookup(session.table," in done and "RhinoTable(doc)" not in done
+    done += SRC[SRC.index("def _show_answer("):].split("\ndef ", 1)[0]    # (its answer shown: the start flow)
+    assert "_show_answer(doc, answer, facts, saved_ui)" in done
+    # (#26: the lookup only previews, the model changed at Draw, inside the box's step; never a table of its own)
+    assert ("apply_lookup(session.table," in done or "preview_lookup(" in done) and "RhinoTable(doc)" not in done
 
 
 def test_a_tried_count_leaves_undo_recording_as_it_was():
@@ -284,6 +287,14 @@ def test_the_plugin_still_compiles():
     """Undo steps round 4: a re-indented try left gordium_rhino.py unloadable, unseen by the guard (it runs functions
     cut from the source). The whole file must compile."""
     compile(SRC, "gordium_rhino.py", "exec")
+
+
+def test_a_new_addresss_reset_goes_in_the_boxs_own_step():
+    """#26 with #19's one step per box: a reset to a new address began a record of its own, ending the box's step
+    (Draw my lot or spot grades placed before it): two steps for one box. It begins one only if none is held."""
+    prepare = SRC[SRC.index("def _draw_prepare("):].split("\ndef ", 1)[0]
+    assert '    if not STATE.get("undo"):' in prepare and prepare.index('if not STATE.get("undo")') < prepare.index(
+        '_begin_undo(doc, "Gordium: start fresh for "')
 
 
 def test_an_undone_check_after_every_edit_is_read_again_from_the_file():

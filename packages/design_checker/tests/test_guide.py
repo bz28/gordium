@@ -86,7 +86,7 @@ def test_every_fixed_command_line_prompt_in_the_code_is_in_the_guide():
 
 def test_the_messages_an_architect_reads_beside_draw_and_after_a_refused_start_are_in_the_guide():
     for text, src in (("Confirm the district to continue.", LOGIC),
-                      ("Gordium: this model already has a building; GordiumStart begins from an empty lot", RHINO),
-                      ("(use GordiumCheck to check a design)", RHINO)):
+                      ("This model already has a building. To start over on another address, use Edit site…", LOGIC),
+                      ("To check the building you have, use GordiumCheck.", LOGIC)):
         assert text in src and text in GUIDE, text
     assert "**Change** picks another" in GUIDE and '"zone", "Change"' in LOGIC

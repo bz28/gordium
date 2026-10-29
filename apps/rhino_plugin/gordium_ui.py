@@ -837,7 +837,8 @@ def start_box(state, options, mode):
         keep()
         done("pick:" + what)
 
-    draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
+    draw = button(state.get("_draw_label") or ("Draw" if mode == "start" else "Check"),   # as what it does
+                  lambda: (keep(), done("draw")))
     reason = label(logic.draw_reason(state), size=11)
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
@@ -848,6 +849,13 @@ def start_box(state, options, mode):
             pick("lookup")
 
     address.KeyDown += logic.guard(enter_looks_up, "look up the address")
+
+    def address_typed(s, e):           # Draw off for an address not looked up, on again when the known one is back
+        state["address"] = address.Text
+        draw.Enabled = logic.can_draw(state) and not looking
+        reason.Text = logic.draw_reason(state)
+
+    address.TextChanged += logic.guard(address_typed, "follow the address typed")
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
     buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None   # (Advanced: off with flat ground)
 
@@ -929,6 +937,7 @@ def start_box(state, options, mode):
         layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
     amber = label("", eto_status_color("needs_review"), size=12)    # one line, following the answers given
+    note = label(logic.lookup_note(state) or "", size=11)             # what a found lookup tells: plain, not amber
 
     def refresh_amber(*_):
         state["corner_lot"] = [None, False, True][max(corner.SelectedIndex, 0)]
@@ -938,6 +947,8 @@ def start_box(state, options, mode):
     refresh_amber()
     corner.SelectedIndexChanged += logic.guard(refresh_amber, "answer the corner lot")
     layout.AddRow(None, row(amber))
+    if note.Text:                     # nothing found to tell: no empty line in the box (it made the box taller)
+        layout.AddRow(None, row(note))
     layout.AddRow(None, row(reason))
     layout.AddRow(None, row(cancel, draw))
     dialog.Content = layout
