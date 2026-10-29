@@ -3,7 +3,7 @@
 scene's red notice stayed over the next house), in Rhino 8, each claim recorded. Run in Rhino, not in CI; the logic
 is pinned in CI (packages/design_checker/tests/test_check.py, test_no_notice_outlives_the_model_it_was_about).
 GordiumStart on the sample (106 Ithaca Rd), then:
-1. The house moved 5 ft to the left (the Southwest side yard 7'-0 5/8" of 10'-0") and checked: the notice says the
+1. The house moved 5 ft to the left (the Southwest side yard 7'-0 1/2" of 10'-0") and checked: the notice says the
    side yard no longer complies, and it is drawn in the Top view.
    In the framed Top view it is compact (at most rhino_logic.NOTICE_MAX_SHARE of the view's width) and covers none
    of the model on screen.

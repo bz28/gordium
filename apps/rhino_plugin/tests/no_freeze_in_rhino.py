@@ -17,6 +17,7 @@ read the checker's pipe on Rhino's thread while the current copy's reader took t
 Writes <temp>/gordium_no_freeze/out.json."""
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -163,6 +164,7 @@ try:
     claim("6 the old drawing is off; the new one is on and registered",
           not first_overlay.Enabled and g.STATE["overlay"] is not first_overlay and g.STATE["overlay"].Enabled and
           "overlay" in g.LEFTOVERS)
+    g.set_auto_check(True)    # Check after every edit is off by default (PR 07c66754): ticked, as the architect does
     g.STATE["dirty"] = None
     ft = 1.0 / g._scale(doc)
     for o in g._buildings(doc):
@@ -174,13 +176,15 @@ try:
     for serial in list((g.STATE.get("checked_at") or {})):
         g.STATE["checked_at"][serial] = g.STATE["dirty"] - 1.0
     g._idle(None, None)
-    claim("6 and re-checked", (before, west(g)["proposed"]) == ("12'-0 5/8\"", "11'-0 5/8\""),
+    g._settle_live()                     # the re-check runs in the background (#32): its answer, waited for and drawn
+    claim("6 and re-checked", (before, west(g)["proposed"]) == ("12'-0 1/2\"", "11'-0 1/2\""),
           (before, west(g)["proposed"]))
     # 7 (review round 2): an update over a copy from before LEFTOVERS existed (9303d10: what a cofounder has
     # before git pull), with that copy on and STATE kept, the new copy imported WITHOUT off()
     g.off()
     old_root = S + "old_9303d10"
-    if not os.path.isdir(old_root + "/apps"):
+    if not os.path.isfile(old_root + "/apps/rhino_plugin/gordium_rhino.py"):   # macOS empties old temp files,
+        shutil.rmtree(old_root, ignore_errors=True)                              # keeping their folders
         os.makedirs(old_root, exist_ok=True)
         tar = g.ui.spawn(["git", "-C", WT, "archive", "9303d10"], run=True, capture_output=True, check=True).stdout
         g.ui.spawn(["tar", "-x", "-C", old_root], run=True, input=tar, check=True)

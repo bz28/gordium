@@ -128,9 +128,9 @@ try:
         return rg.Transform.Scale(plane, f if axis == 0 else 1, f if axis == 1 else 1, 1)
 
     check(doc, 0, "The starting house", {
-        "Front yard": {"proposed": "27'-0 3/4\""}, "Side yard, Southwest": {"proposed": "12'-0 5/8\""},
-        "Side yard, Northeast": {"proposed": "27'-4 1/4\""}, "Rear yard": {"status": "needs_review"},
-        "Lot coverage": {"proposed": "19.1%", "status": "complies"}, "Lot area": {"status": "complies"},
+        "Front yard": {"proposed": "27'-0 3/4\""}, "Side yard, Southwest": {"proposed": "12'-0 1/2\""},
+        "Side yard, Northeast": {"proposed": "12'-0 3/8\""}, "Rear yard": {"status": "needs_review"},
+        "Lot coverage": {"proposed": "21.7%", "status": "complies"}, "Lot area": {"status": "complies"},
         "Building height": {"proposed": "35'-0\"", "status": "complies", "margin": "at limit"},   # the bonus's question doesn't matter
         "Stories": {"status": "complies"}})
     tests.append({"n": 1, "test": "1 Labels (checked by mvp_checks_in_rhino.py)", "expected": {}, "got": {},
@@ -140,23 +140,26 @@ try:
     check(doc, 2, "2 Move back 5 ft", {"Front yard": {"proposed": "32'-0 5/8\"", "status": "complies"},
                                        "Rear yard": {"status": "needs_review"}})
     undo(ids, t)
-    t = rg.Transform.Translation(north * 6)
-    xf(ids, t)
-    check(doc, 3, "3 Move back 6 ft", {"Rear yard": {"status": "needs_review", "proposed": "21'-6 1/8\""}})
-    undo(ids, t)
-    t = rg.Transform.Translation(north * 7)       # short under some readings only (the depth's ±4'-0"): review
-    xf(ids, t)
-    check(doc, 3, "3 Move back 7 ft", {"Rear yard": {"status": "needs_review", "proposed": "20'-6 1/8\"",
-                                                     "delta": "up to 7'-11 1/4\" short"}})
-    undo(ids, t)
     t = rg.Transform.Translation(north * 10)
     xf(ids, t)
-    check(doc, 3, "3 Move back 10 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "17'-6 1/8\"",
-                                                      "delta": "at least 0'-7 1/4\" short"}})
+    check(doc, 3, "3 Move back 10 ft", {"Rear yard": {"status": "needs_review",
+                                                      "proposed": "24'-11 7/8\" to 26'-6 1/8\""}})
     undo(ids, t)
-    t = stretch(ids, 1, None, 17)
+    t = rg.Transform.Translation(north * 13)      # short under some readings only (back lines, tax map): review
     xf(ids, t)
-    check(doc, 4, "4 Pull the rear wall 17 ft", {"Lot coverage": {"status": "does_not_comply", "proposed": "27.8%"}})
+    check(doc, 3, "3 Move back 13 ft", {"Rear yard": {"status": "needs_review",
+                                                      "proposed": "21'-11 7/8\" to 23'-7 3/8\"",
+                                                      "delta": "up to 12'-2 3/4\" short"}})
+    undo(ids, t)
+    t = rg.Transform.Translation(north * 15)
+    xf(ids, t)
+    check(doc, 3, "3 Move back 15 ft", {"Rear yard": {"status": "does_not_comply",
+                                                      "proposed": "19'-11 7/8\" to 21'-8 3/8\"",
+                                                      "delta": "at least 1'-1 7/8\" short"}})
+    undo(ids, t)
+    t = stretch(ids, 1, None, 11)
+    xf(ids, t)
+    check(doc, 4, "4 Pull the rear wall 11 ft", {"Lot coverage": {"status": "does_not_comply", "proposed": "29.7%"}})
     undo(ids, t)
     base = g.STATE["start"]["floors"][-1]
     roof = rg.Transform.Scale(rg.Plane(rg.Point3d(0, 0, base["base"] * ft), rg.Vector3d.ZAxis), 1, 1,
@@ -167,17 +170,17 @@ try:
     undo(top_floor, roof)
     t = stretch(ids, 0, None, 3, low=True)
     xf(ids, t)
-    check(doc, 6, "6 The left side wall 3 ft out", {"Side yard, Southwest": {"status": "needs_review", "proposed": "9'-0 5/8\"",
-                                                                         "delta": "up to 2'-11 3/8\" short"}})
+    check(doc, 6, "6 The left side wall 3 ft out", {"Side yard, Southwest": {"status": "needs_review", "proposed": "9'-0 1/2\"",
+                                                                         "delta": "up to 2'-11 1/2\" short"}})
     undo(ids, t)
     t = stretch(ids, 0, None, 5, low=True)
     xf(ids, t)
     check(doc, 6, "6 The left side wall 5 ft out", {"Side yard, Southwest": {"status": "does_not_comply",
-                                                                         "proposed": "7'-0 5/8\"",
-                                                                         "delta": "at least 0'-11 1/4\" short"}})
+                                                                         "proposed": "7'-0 1/2\"",
+                                                                         "delta": "at least 0'-11 3/8\" short"}})
     undo(ids, t)
     check(doc, 7, "7 Undo: back to the start", {"Front yard": {"proposed": "27'-0 3/4\""},
-                                                "Lot coverage": {"proposed": "19.1%", "status": "complies"}})
+                                                "Lot coverage": {"proposed": "21.7%", "status": "complies"}})
 
     rear = max(p[1] for p in ring)                             # 8. a garage on the Default layer, behind the house
     garage = doc.Objects.AddBrep(rg.Box(rg.Plane(rg.Point3d(40 * ft, (rear + 6) * ft, 0), rg.Vector3d.ZAxis),
@@ -225,8 +228,8 @@ try:
     xs = [p[0] for p in start["floors"][0]["outline"]]
     log["survey_width"] = max(xs) - min(xs)
     g.add_floors(doc, start)
-    check(doc, 13, "13 A survey: to the limits", {"Side yard, Southwest": {"proposed": "10'-0\"", "status": "complies"}})
-    tests[-1]["match"] = tests[-1]["match"] and round(log["survey_width"] * 12) == 39 * 12 + 10   # 39'-10" wide
+    check(doc, 13, "13 A survey: to the limits", {"Side yard, Southwest": {"proposed": "10'-0 1/4\"", "status": "complies"}})
+    tests[-1]["match"] = tests[-1]["match"] and round(log["survey_width"] * 12) == 55 * 12 + 4    # 55'-4" wide
 
     # 14. other units: a millimeter template, the same start, the same rows as the feet run's starting house
     doc2 = docs.open("Small Objects - Millimeters")
