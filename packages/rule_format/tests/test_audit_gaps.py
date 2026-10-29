@@ -49,3 +49,80 @@ def test_a_row_of_seven_is_never_steered_to_another_use(district):
     notes = " ".join(r["notes"].split())
     assert "enter that use" not in notes and "not settled" in notes and "§5.6" in notes
     assert all(e["given"].get("use") != "multiple_family" for e in r["examples"])
+
+
+# ---- §325-8B(1): "each square-footage requirement applies separately to the initial permitted primary use and to each
+# additional permitted primary use located in a separate building" ----------------------------------------------
+# Typed by hand from the chart (p.3, Minimum Lot Size), per district: the fixed figures. A use whose lot area grows
+# with units, rooms or occupants (or is a flag or an open question for one building) needs review with two or more
+# buildings, since how they split between the buildings isn't known.
+FIXED = {
+    "R-1a": {"one_family_detached": 10000, "church": 10000},
+    "R-1b": {"one_family_detached": 6000, "church": 7500},
+    "R-2a": {"one_family_detached": 5000, "one_family_semi_detached": 5000, "two_family": 5000, "church": 6000},
+    "R-2b": {"one_family_detached": 3000, "one_family_semi_detached": 3000, "two_family": 3000, "church": 4000},
+    "R-2c": {"church": 4000},
+    "R-3a": {"one_family_detached": 5000, "one_family_semi_detached": 5000, "two_family": 5000, "fraternity_sorority_group_house": 25000, "church": 6000},
+    "R-3aa": {"one_family_detached": 5000, "one_family_semi_detached": 5000, "two_family": 5000, "fraternity_sorority_group_house": 25000, "church": 6000},
+    "R-3b": {"one_family_detached": 3000, "one_family_semi_detached": 3000, "two_family": 3000, "fraternity_sorority_group_house": 25000, "church": 4000},
+    "RU": {"one_family_detached": 10000, "one_family_semi_detached": 15000, "two_family": 15000,
+           "fraternity_sorority_group_house": 30000, "church": 30000},
+}
+# (and, review round 3: the uses whose one-building lot size is itself a flag or an open question, the zero-lot-line
+# house and the nursing home, never fall into the fixed "Other use" figure)
+BY_UNITS = {"R-2c": ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+                     "two_family", "one_family_attached"],
+            "R-3a": ["one_family_attached", "multiple_family", "dormitory", "nursing_home",
+                     "one_family_detached_zero_lot_line"],
+            "R-3aa": ["one_family_attached", "multiple_family", "nursing_home", "one_family_detached_zero_lot_line"],
+            "R-3b": ["one_family_attached", "multiple_family", "dormitory", "nursing_home",
+                     "one_family_detached_zero_lot_line"],
+            "RU": ["one_family_attached", "multiple_family", "dormitory"]}
+
+
+def each(district, **facts):
+    return outcome(rules_of(district)[f"{district}.lot_area_each_primary_building"], facts, USES)
+
+
+@pytest.mark.parametrize("district", DISTRICTS)
+def test_each_primary_building_needs_its_own_lot_area(district):
+    for use, f in FIXED[district].items():
+        for n in (2, 3):
+            same = {"use": use, "primary_buildings": n, "primary_buildings_same_use": True}
+            assert each(district, **same, lot_area=n * f) == "pass", (use, n)
+            assert each(district, **same, lot_area=n * f - 1) == "fail", (use, n)
+        # one primary building: the use's own rule decides (not this one), whatever the lot
+        assert each(district, use=use, primary_buildings=1, lot_area=1) == "not_applicable"
+        # another use in one of the buildings, or not said: its own figure, by hand; never a pass
+        assert each(district, use=use, primary_buildings=2, primary_buildings_same_use=False,
+                    lot_area=10 ** 7) == "needs_review"
+        assert each(district, use=use, primary_buildings=2, lot_area=10 ** 7) == "needs_review"
+        assert each(district, use=use, lot_area=10 ** 7) == "needs_review"          # not counted
+    for use in BY_UNITS.get(district, []):
+        assert each(district, use=use, primary_buildings=2, primary_buildings_same_use=True,
+                    lot_area=10 ** 7) == "needs_review", use
+        # one building of it: its own rule (units, rooms, occupants) decides, never this one's fixed figure
+        assert each(district, use=use, primary_buildings=1, lot_area=1) == "not_applicable", use
+        # two: needs review whatever the fixed "Other use" figure says (review round 3: never that figure)
+        assert each(district, use=use, primary_buildings=2, primary_buildings_same_use=True, lot_area=1) == \
+            "needs_review", use
+
+
+def test_the_codes_own_example():
+    """§325-8B(1): "in R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family
+    house, and an additional area of 3,000 square feet is required for each additional one-family house or two-family
+    house on the property"."""
+    for use in ("one_family_detached", "two_family"):
+        assert each("R-2b", use=use, primary_buildings=2, primary_buildings_same_use=True, lot_area=6000) == "pass"
+        assert each("R-2b", use=use, primary_buildings=2, primary_buildings_same_use=True, lot_area=5999) == "fail"
+
+
+def test_ru_note_3_counts_the_primary_buildings():
+    """Chart p.2 note 3: under 60,000 sf one primary structure; over 60,000 sf two with the ILPC's and the Planning
+    Board's approval; at least 90,000 sf as many as three with them. Approvals can't be known: review."""
+    r = rules_of("RU")["RU.primary_structures"]
+    cases = [(1, 5000, "pass"), (1, 10 ** 6, "pass"), (2, 59999, "fail"), (2, 60000, "needs_review"),
+             (2, 60001, "needs_review"), (3, 89999, "fail"), (3, 90000, "needs_review"), (4, 10 ** 6, "fail")]
+    for n, area, expect in cases:
+        assert outcome(r, {"primary_buildings": n, "lot_area": area}, USES) == expect, (n, area)
+    assert r["kind"] == "rule"
