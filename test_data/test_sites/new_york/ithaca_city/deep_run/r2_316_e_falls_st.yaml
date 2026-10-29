@@ -1,0 +1,126 @@
+title: "R-2b, 316 E Falls St: a three-story two-family house on a real 56 ft lot"
+what: >-
+  The real tax lot at 316 East Falls Street (parcel 500700-12.-2-8, NYS Tax Parcels Public, looked up 2026-10-27; zone R-2b on
+  the City's zoning map, checked live that day), turned so its street line (E Falls St, the 56 ft line) runs from
+  (0, 0) along +x. Treated as surveyed for this run (the tax map is ±2 ft), on flat ground at elevation 0. A two-family
+  house 34 × 40 ft, three 9 ft stories, 12 ft from the street, 6 ft from the west side line (R-2b's smaller side is
+  5 ft) and 15 ft from the east. Every applicable R-2b rule is worked out by hand from Chapter 325 and the charts.
+  Then the house moves 1.5 ft west: the smaller side yard falls to 4.52 ft and fails.
+district: R-2b
+use: two_family
+lot:
+  points: [[0.0, 0.0], [56.0, 0.0], [57.86, 84.76], [1.6, 84.98]]
+  surveyed: true
+buildings:
+  - id: house
+    outline: [[7, 12], [41, 12], [41, 52], [7, 52]]
+    base: 0
+    floors: [9, 9, 9]
+grade: {elevation: 0}
+stated:
+  dwelling_units: 2
+  sleeping_rooms: 3
+  parking_spaces: 2
+  unrelated_persons: 2               # the most in either unit: a family and two unrelated people
+  unrelated_persons_with_children: 2
+  owner_occupied: false
+  accessory_dwelling_unit: false
+  functional_family_unit: false
+  home_occupation: false
+expected:
+  R-2b.use:
+    status: complies
+    working: "a two-family dwelling: marked • for R-2B"
+    cites: "§325-8A(2); chart p.2, Two-family dwelling, R-2B •"
+  R-2b.lot_area_two_family:
+    status: complies
+    values: {row: [4763.94, 3000]}       # [proposed, required] worked by hand
+    working: "shoelace area = 4,763.9 sf ≥ 3,000 sf"
+    cites: "chart p.3, Minimum Lot Size, Two-family dwelling, R-2B 3,000 sf"
+  R-2b.lot_width_two_family:
+    status: complies
+    values: {row: [56.0, 35]}       # [proposed, required] worked by hand
+    working: "frontage on E Falls St = 56.0 ft ≥ 35 ft"
+    cites: "§325-8A(7); chart p.3, Minimum Lot Width, Two-family dwelling, R-2B 35 ft"
+  R-2b.stories:
+    status: complies
+    values: {row: [3, 3]}       # [proposed, required] worked by hand
+    working: "3 floor blocks = 3 stories ≤ 3"
+    cites: "§325-3B STORY; chart p.3, Number of stories, R-2B 3"
+  R-2b.height:
+    status: complies
+    values: {row: [27.0, 35]}       # [proposed, required] worked by hand
+    working: "9 + 9 + 9 = 27 ft ≤ 35 ft"
+    cites: "§325-3B HEIGHT OF BUILDING; chart p.3, Height in feet, R-2B 35 ft"
+  R-2b.lot_coverage:
+    status: complies
+    values: {row: [28.55, 35]}       # [proposed, required] worked by hand
+    working: "34 × 40 = 1,360 sf ≤ 35% × 4,763.9 = 1,667.4 sf"
+    cites: "§325-8A(10); chart p.3, Percent of lot area, R-2B 35%"
+  R-2b.front_yard:
+    status: complies
+    values: {row: [12.0, 10]}       # [proposed, required] worked by hand
+    working: "12.0 ft ≥ 10 ft"
+    cites: "chart p.3, Front (minimum), R-2B 10 ft"
+  R-2b.side_yards:
+    status: complies
+    values: {east: [15.26, 10], west: [6.02, 5]}       # [proposed, required] worked by hand
+    working: >-
+      west line (0,0)–(1.6,84.98), nearest corner (7,52): 6.02 ft; east line (56,0)–(57.86,84.76), nearest corner
+      (41,12): 15.26 ft; one side ≥ 10 (15.26) and the other ≥ 5 (6.02)
+    cites: "§325-8A(12)-(13); chart p.3, Side (one side minimum) R-2B 10 ft, (other side minimum) 5 ft"
+  R-2b.rear_yard:
+    status: complies
+    values: {row: [32.83, 21.22]}       # [proposed, required] worked by hand
+    working: >-
+      lot depth = (84.995 + 84.78) ÷ 2 = 84.89 ft; 25% = 21.22 ft (between the 20 ft floor and the 50 ft cap);
+      rear line (57.86,84.76)–(1.6,84.98) to the house back y = 52: 32.83 ft ≥ 21.22 ft
+    cites: "§325-8A(14)(a)-(b); chart p.3, Rear, R-2B 25% / 50 ft, note 16"
+  R-2b.yard_projections:
+    status: complies
+    values: {row: [12.0, 8]}       # [proposed, required] worked by hand
+    working: "no eaves (a flat-roofed box): the outermost yards equal the yards above; the tightest is the front: 12.0 ft ≥ 10 − 2 = 8 ft (§325-18B's 2 ft allowance)"
+    cites: "§325-18B"
+  R-2b.parking_dwelling_units:
+    status: needs_review
+    working: >-
+      1 space per dwelling unit for each unit's first three bedrooms, 2 per unit for 4–5: the design states one bedroom
+      count (3, which Gordium's sleeping_rooms means for one dwelling unit), not the other unit's, so the spaces needed
+      can't be worked out from what is stated: needs review (2 are given; that is enough only if both units have at
+      most three bedrooms)
+    cites: "chart p.14, Minimum Parking Requirement, Residential, R-2B (first three bed or sleeping rooms per dwelling unit: 1 space per dwelling unit)"
+  R-2b.occupancy_two_family:
+    status: needs_review
+    values: {row: [2, 2]}       # [most unrelated people in either unit, R-2's limit per unit] worked by hand
+    working: >-
+      each unit's own limit is met: the most unrelated people in either unit is 2, and R-2 allows "not more than two
+      unrelated individuals" per unit. But with two unrelated people in each unit the building can hold four, and
+      §325-3B DWELLING, MULTIPLE (3) makes "a building ... occupied by one or two families and more than two roomers
+      or boarders" a multiple dwelling, not permitted in R-2. Whether unrelated housemates are roomers or boarders
+      the law doesn't say: a person decides (first worked as complies; changed on reading (3), before comparing)
+    cites: "§325-3B DWELLING, TWO-FAMILY (p.9); §325-3B DWELLING, MULTIPLE OR MULTIPLE RESIDENCE (3) (p.7)"
+  R-2b.stream_setback:
+    status: needs_review
+    working: >-
+      §325-26: no new structure nearer than 20 ft to an inlet wall or a stream bank (at average water level), in every
+      district. This site states nothing about a stream or inlet near the lot (no stream_near_lot, no stream_distance),
+      and the model can't show one, so it can't be settled: needs review until the architect says (never assumed)
+    cites: "§325-26 (chapter p.67); §325-3B STRUCTURE (p.19)"
+then:
+  move: [-1.5, 0]
+  expected:
+    R-2b.side_yards:
+      status: does_not_comply
+      values: {east: [16.76, 10], west: [4.52, 5]}       # [proposed, required] worked by hand
+      working: "west side line to the corner (5.5,52): 4.52 ft < 5 ft (east 16.76 ≥ 10)"
+      cites: "chart p.3, Side (other side minimum), R-2B 5 ft"
+    R-2b.yard_projections:
+      status: complies
+      values: {row: [12.0, 8]}       # [proposed, required] worked by hand
+      working: "no eaves: §325-18B has nothing beyond the walls; the tightest outermost yard is still the front, 12.0 ft ≥ 8 ft (the wall at 4.52 ft is what the side yard rule catches)"
+      cites: "§325-18B"
+    R-2b.front_yard:
+      status: complies
+      values: {row: [12.0, 10]}       # [proposed, required] worked by hand
+      working: "unchanged: 12.0 ≥ 10"
+      cites: "chart p.3, Front, R-2B"

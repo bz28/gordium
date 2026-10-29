@@ -8,6 +8,8 @@
     python -m section_labeling label --limit N      # label the next N unlabeled pieces (or --all);
                                                     # prints the estimate, then needs --yes to spend money
     python -m section_labeling cost                 # what the recorded runs actually cost
+    python -m section_labeling audit [--check]      # write (or check) 6_coverage_report/residential_districts.md:
+                                                    # every rule and flag piece x district; no AI
 
 The model and its settings come from section_labeling/settings.yaml (one place; recorded in every run).
 The API key is read from ANTHROPIC_API_KEY only; a key not tied to one workspace also needs
@@ -26,7 +28,7 @@ import yaml
 from rule_format.labels import load_pieces
 from rule_format.rulebook import REPO, Context, jurisdictions, load, read_jsonl, utf8_console
 
-from . import coverage, labeler, term_index
+from . import coverage, district_audit, labeler, term_index
 from .budget import Budget, BudgetExceeded
 
 PLACES = REPO / "regulations/jurisdictions"
@@ -102,6 +104,23 @@ def cmd_coverage(args) -> int:
             index = term_index.build(load(definitions) or {}, load(term_index.SYNONYMS_FILE) or {}, docs)
             failed += not _write_or_check(j / "4_term_definitions" / term_index.INDEX_NAME,
                                           term_index.render(index), args.check)
+    return 1 if failed else 0
+
+
+def cmd_audit(args) -> int:
+    """The district coverage audit (district_audit.py): write it, or (--check) compare with a fresh build. A decision
+    the files don't back stops it, with every problem listed."""
+    failed = 0
+    for j in district_audit.places():
+        if args.place is not None and j.relative_to(PLACES).as_posix() != args.place:
+            continue
+        text, problems = district_audit.build(j)
+        for problem in problems:
+            print(f"✗ {j.relative_to(PLACES).as_posix()}: {problem}")
+        if problems:
+            failed += 1
+            continue
+        failed += not _write_or_check(j / district_audit.OUTPUT, text, args.check)
     return 1 if failed else 0
 
 
@@ -292,10 +311,11 @@ def cmd_cost(args) -> int:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(prog="python -m section_labeling")
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("coverage", "estimate", "label", "cost"):
+    for name in ("coverage", "estimate", "label", "cost", "audit"):
         p = sub.add_parser(name)
         p.add_argument("--place", help="state/place, e.g. new_york/ithaca_city (default: all)")
-    sub.choices["coverage"].add_argument("--check", action="store_true", help="compare; write nothing")
+    for name in ("coverage", "audit"):
+        sub.choices[name].add_argument("--check", action="store_true", help="compare; write nothing")
     for name in ("estimate", "label"):
         sub.choices[name].add_argument("--limit", type=int, help="only the next N unlabeled pieces")
         sub.choices[name].add_argument("--only", nargs="+", default=[], help="these piece ids (relabels them)")
@@ -303,7 +323,8 @@ def main(argv: list[str]) -> int:
     sub.choices["label"].add_argument("--all", action="store_true", help="every unlabeled piece")
     sub.choices["label"].add_argument("--yes", action="store_true", help="spend money: actually call the API")
     args = parser.parse_args(argv)
-    return {"coverage": cmd_coverage, "estimate": cmd_estimate, "label": cmd_label, "cost": cmd_cost}[args.command](args)
+    return {"coverage": cmd_coverage, "estimate": cmd_estimate, "label": cmd_label, "cost": cmd_cost,
+            "audit": cmd_audit}[args.command](args)
 
 
 if __name__ == "__main__":
