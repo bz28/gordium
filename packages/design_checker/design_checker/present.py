@@ -1232,7 +1232,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
                            "zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""))
         if spanned and not line:      # a span: the detail says it whole, with its limit (a narrow panel cuts the cell)
-            line = _detail_line(proposed, required, margin_t, numbers[4], None)
+            line = (_detail_line(proposed, required, margin_t, numbers[4], None) if required not in ("—", None)
+                    else f"{proposed} proposed")          # (its limit not worked out: never "— required")
         alts = _alternatives(check, values, measured, facts) if st == FAILS and not why and not splits else []
         shown = [[x for x in alt if x[6]] for alt in alts]          # the reason: what fails as drawn
         if len(alts) > 1 and all(shown):                # several ways to comply, none met: say each one
