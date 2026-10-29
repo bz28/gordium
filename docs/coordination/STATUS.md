@@ -309,7 +309,9 @@ REAL INPUT (Lane C, at #27 2c7c875), Cmd+Z once after each, the tick must follow
   drawn, still one step).
 - Hide starting house, then Cmd+Z: layer AND tick back. Also: switch to another open file: its own ticks show.
 
-## FOR BEN: merge 3 (merge lane, updated 2026-10-28 evening; nothing merged; the older notes below are history)
+## FOR BEN: merge 3: MERGED (2026-10-28, main 5ebc3fd5; the notes below are history)
+
+All 22 PRs merged by the coordinator at Ben's request, with merge commits: #24, #30, #38, #41–#44, #46, #28, #29, #31, #34, #35, #37, #45, #47, #51, #32, #33, #52, #53, #39. #32, #33 and #45 needed main merged in because of a GitHub mergeability quirk; their full suites were green. Not carried: #21, #40 (Ben's call). Next: the Rhino lane's #54–#56, then a demo rebuild from main.
 
 **Merge 3 ready (after merge 2 landed at 38ea0dd3).** #24, #28, #32 (and #21) now target main. GitHub says every merge-3 PR is mergeable. #32, #33 and #53 had main merged in (8e955cf4, 7847add3, f4a3d98c; no file changes, so the earlier suite results stand). Closing-keyword check: no commit names another open PR that merges later, except 47e42fc1 "fix: #37", which lands with #45 (as planned, #45 brings #37). Retarget #37 to main after #35 merges.
 **Every PR below is pushed and final** (merge commits only, never a force-push). In this order each one merges into
