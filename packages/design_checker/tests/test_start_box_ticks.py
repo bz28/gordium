@@ -33,6 +33,8 @@ class Event:
 class Thing:
     """Any Eto object: attributes are kept, events are Events, anything else is another Thing."""
 
+    Loaded = False                              # never shown on a screen: Eto's Loaded stays False (no sizes to read)
+
     def __init__(self, *args, **kwargs):
         self.__dict__["_events"] = {}
         self.__dict__["args"] = args
