@@ -1282,7 +1282,15 @@ def check_now():
 
 def set_envelope(on):
     STATE["envelope_on"] = bool(on)
+    _envelope_everywhere()
     run_check(Rhino.RhinoDoc.ActiveDoc, report=False)
+
+
+def _envelope_everywhere():
+    """The Envelope layer shown or hidden in every open document at once, a start box open or not (the check that
+    follows may not run then: review of feature 4, F11)."""
+    for d in Rhino.RhinoDoc.OpenDocuments() or []:
+        logic.guard(lambda d=d: _show_envelope_layer(d), "show or hide the curves to snap to")()
 
 
 def _ui_state(doc):
@@ -2919,6 +2927,8 @@ def run_check(doc, report=True):
         o.north = _north(doc, facts)
         o.unmeasured = _unmeasured_outlines(doc, extras.get("not_included"))
         _draw_plan(doc, o, result, sent)
+        logic.guard(lambda: _envelope_curves(doc, result.get("plan"), sent),   # the curves to snap to, redrawn
+                    "draw the curves to snap to")()        # (never measured; a failure never stops the check: F9)
         STATE["statuses_by_doc"][doc.RuntimeSerialNumber] = result["statuses"]
         STATE["last"] = {"summary": result["summary"], "view_summary": view["summary"], "state": view["state"],
                          "rows": [{k: r.get(k) for k in ("Requirement", "Table limit", "Proposed", "Units",
@@ -2952,6 +2962,7 @@ def run_check(doc, report=True):
         return result
     except Exception as e:
         _clear(o)
+        logic.guard(lambda: _envelope_curves(doc, None, facts), "clear the curves to snap to")()   # no edit (F1)
         o.doc = doc.RuntimeSerialNumber
         o.message = ("needs_review", "⚠ Check could not run", [str(e)[:120]])
         STATE["last"] = {"error": str(e), "at": time.time()}
@@ -3135,6 +3146,7 @@ def toggle_live():
 def toggle_envelope():
     STATE["envelope_on"] = not STATE.get("envelope_on", True)
     ui.set_envelope_tick(STATE.get("panel_parts"), STATE["envelope_on"])
+    _envelope_everywhere()
     run_check(Rhino.RhinoDoc.ActiveDoc, report=False)
 
 
@@ -3369,6 +3381,89 @@ def _draw_starting_house(doc, facts):
 
 CONTEXT_GREYS = {"Parcels": (150, 150, 150), "Streets": (120, 120, 120), "Buildings": (135, 135, 135),
                  "Notes": (110, 110, 110)}
+
+
+ENVELOPE_BLUE = (29, 95, 138)
+
+
+def _envelope_curves(doc, plan, facts):
+    """The buildable outline and each yard's required line as real curves on a locked Gordium::Envelope layer, for
+    the architect to snap to (Osnap; Ben, 2026-10-21): on a tax-map lot the cautious outline solid and the outline
+    as drawn dashed (logic.envelope_curves). Each is tagged Gordium's (ENVELOPE_KEY), never measured
+    (logic.classify), and replaced at every check: the old ones deleted first whatever the layer's state (hidden,
+    locked, or under a locked "Gordium": deleted ignoring those modes; review of feature 4, F1), and the new ones
+    drawn only once none is left, so they never pile up. None of it is recorded for Undo, inside a command too
+    (GordiumCheck's Undo step never stops on them: F6). The layer shown only with "Show buildable envelope".
+    `plan` None: only the old ones go (no layer made for that: a failed check in a file Gordium never drew in
+    leaves no Gordium layers). How many old ones could not be deleted (0: all replaced; else the layer hidden and
+    the architect told, so stale curves never pass for current ones). Replacing them is no edit of the model: the
+    "model changed" mark (STATE["dirty"], set by live mode's hooks on every add and delete) is left as it was
+    (UX review 2026-10-27: after any check but the first, its own redraw greyed the results it had just shown;
+    review of feature 4, round 4, F1: a failed check's clearing did the same)."""
+    if plan is None and doc.Layers.FindByFullPath(logic.ENVELOPE, -1) < 0:
+        return 0
+    dirty = STATE.get("dirty")
+    was = doc.UndoRecordingEnabled
+    doc.UndoRecordingEnabled = False             # the layer too: an Undo never removes it from under the curves
+    try:                                         # (review of dd44f1b, F1)
+        index = _layer(doc, logic.ENVELOPE)
+        layer = doc.Layers[index]
+        if layer.Color.ToArgb() == System.Drawing.Color.Black.ToArgb():          # a new layer: Gordium's blue
+            layer.Color = System.Drawing.Color.FromArgb(*ENVELOPE_BLUE)
+        for old in _envelope_objects(doc, index):
+            doc.Objects.Delete(old, True, True)        # quiet, ignoring hidden and locked
+        left = len(_envelope_objects(doc, index))
+        if left:                                   # never a second set over the first, nor stale ones shown as
+            layer.IsVisible = False                # current (review of dd44f1b, F2)
+            say("the curves to snap to couldn't be replaced (" + str(left) + " left); hidden until the "
+                "next check")
+            return left
+        z = _lot_level(doc, facts or {})
+        dashed = doc.Linetypes.Find("Dashed")
+        for c in logic.envelope_curves(plan):
+            pts = [_model_point(doc, p, z) for p in c["points"]]
+            if c["closed"]:
+                pts.append(pts[0])
+            if len(pts) < 2:
+                continue
+            attrs = Rhino.DocObjects.ObjectAttributes()
+            attrs.LayerIndex = index
+            attrs.Name = "Gordium: " + c["what"]
+            attrs.SetUserString(logic.ENVELOPE_KEY, c["what"])
+            if c["dashed"] and dashed >= 0:
+                attrs.LinetypeSource = Rhino.DocObjects.ObjectLinetypeSource.LinetypeFromObject
+                attrs.LinetypeIndex = dashed
+            doc.Objects.AddPolyline(pts, attrs)
+        _show_envelope_layer(doc)
+        return 0
+    finally:
+        doc.UndoRecordingEnabled = was
+        STATE["dirty"] = dirty
+
+
+def _envelope_objects(doc, index):
+    """Gordium's curves on its Envelope layer (tagged ENVELOPE_KEY), whatever the layer's state."""
+    settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+    settings.HiddenObjects = True
+    settings.LockedObjects = True
+    settings.LayerIndexFilter = index
+    return [o for o in doc.Objects.GetObjectList(settings) if o.Attributes.GetUserString(logic.ENVELOPE_KEY)]
+
+
+def _show_envelope_layer(doc):
+    """The Envelope layer shown with "Show buildable envelope", hidden without it, and locked (its own lock: under a
+    locked "Gordium" too); not recorded for Undo."""
+    index = doc.Layers.FindByFullPath(logic.ENVELOPE, -1)
+    if index < 0:
+        return
+    layer = doc.Layers[index]
+    was = doc.UndoRecordingEnabled
+    doc.UndoRecordingEnabled = False
+    try:
+        layer.IsVisible = bool(STATE.get("envelope_on", True))
+        _set_own_lock(doc, layer, True)
+    finally:
+        doc.UndoRecordingEnabled = was
 
 
 def _context_layer(doc, name):
