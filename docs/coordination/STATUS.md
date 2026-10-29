@@ -347,7 +347,7 @@ Merge 2's order and its other heads are unchanged.
 | #42 | primary-buildings | 64448e78 | covered by #33's |
 | #43 | shared-yards-south-hill | 227a91c6 | covered by #33's |
 | #44 | stream-setback | f31542a8 | covered by #33's |
-| #46 | test-sites | a034010c | SUITE46 |
+| #46 | test-sites | a034010c | **3,352 passed, all 7** |
 | #28 → #35 | highlight-offending … massing-floors | fb9ef6dc, d0f6c791, 864897fc, 6a46ce54, 9c14c632 | unchanged; covered by #33's |
 | #37 | use-questions | 3847c90c | lands through #45; covered by #33's |
 | #45 | facts-up-front | f4d40939 | covered by #33's |
@@ -357,7 +357,7 @@ Merge 2's order and its other heads are unchanged.
 | #52 | faster-start | 89bf4667 | unchanged; in the demo's suite |
 | #53 | panel-wording | 36806a5b | covered by the demo's: the demo is #53 plus #46, #52 and DEMO.md |
 | #39 | coverage-audit | ab9d824c | 3,567 passed, all 8 (audit lane) |
-| demo | demo | 04fd1eaa (local; the Rhino lane pushes it after its Rhino smoke) | **3,679 passed, all 7** |
+| demo | demo | 04fd1eaa (pushed by the Rhino lane after its smoke: highlight 19/19, note row, red outline) | **3,679 passed, all 7** |
 
 **Conflicts and how they were resolved** (every resolution keeps both sides' intent):
 - **#26's taste fix:**
