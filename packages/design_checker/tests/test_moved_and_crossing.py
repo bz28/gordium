@@ -660,7 +660,10 @@ def test_the_outline_cleaning_note_is_shown_in_the_panel_and_the_report(tmp_path
     from design_checker.check import check_site, sample_site
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     show = ui.split("def show_detail", 1)[1].split("\ndef ", 1)[0]
-    assert 'det.get("outline")' in show
+    # (since #53, show_detail lists the plain notes from rhino_logic.detail_parts, which keeps this one in view)
+    assert 'split = logic.detail_parts(det)' in show and 'for text in split["notes"]:' in show
+    from design_checker import rhino_logic
+    assert "the outline" in rhino_logic.detail_parts({"outline": "the outline"})["notes"]
     s = sample_site()
     n = len(s["lot"])
     site = {"units": "ft", "problems": [], "buildings": floors(20, 30, 50, 60, 2),
