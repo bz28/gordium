@@ -1,7 +1,7 @@
 #! python3
 """Red/amber highlighting in Rhino 8, each claim asserted (the run fails loudly otherwise). Run in Rhino, not in CI.
 GordiumStart on the sample (106 Ithaca Rd's tax-map lot: lot lines ±2'-0"), then the house moved 5 ft to the left
-(seen from the street), so that side yard is 7'-0 5/8" against the 10'-0" required. The lot line may really be up
+(seen from the street), so that side yard is 7'-0 1/2" against the 10'-0" required. The lot line may really be up
 to 2 ft either way:
 - red: over under every reading, 10 - 2 - the yard wide (about 0.95 ft: worked from the measured yard);
 - amber: the rest of the doubt, 4 ft wide (within 12 ft, less the red); anything amber past 12 ft is the rear
@@ -79,8 +79,8 @@ try:
         doc = TestDocs("highlight").__enter__().open("Large Objects - Feet")
         look_up_106(g, g.gordium_check)                                    # GordiumStart's flow on the sample
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
-        claim("the sample is 106's tax-map lot, the left side yard 12'-0 5/8\" of 10'-0\"",
-              items["Side yard, Southwest"]["proposed"] == "12'-0 5/8\"" and items["Side yard, Southwest"]["required"] == "10'-0\"",
+        claim("the sample is 106's tax-map lot, the left side yard 12'-0 1/2\" of 10'-0\"",
+              items["Side yard, Southwest"]["proposed"] == "12'-0 1/2\"" and items["Side yard, Southwest"]["required"] == "10'-0\"",
               items["Side yard, Southwest"])
         claim("the start house: nothing red", not any(s == "does_not_comply" for _, s in g.overlay().encroach),
               [s for _, s in g.overlay().encroach])
@@ -90,7 +90,7 @@ try:
         g.run_check(doc, report=False)
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
         west = items["Side yard, Southwest"]
-        claim("moved: the left side yard 7'-0 5/8\", does not comply", west["proposed"] == "7'-0 5/8\"" and
+        claim("moved: the left side yard 7'-0 1/2\", does not comply", west["proposed"] == "7'-0 1/2\"" and
               west["status"] == "does_not_comply", west)
         import math
         yard = math.dist(west["points"][0][:2], west["points"][-1][:2])   # the measured yard, feet
@@ -145,12 +145,12 @@ try:
               (hl["red"].R, hl["red"].G, hl["red"].B, hl["amber"].R, hl["amber"].G, hl["amber"].B) ==
               (215, 38, 61, 242, 169, 0) and g.ui.HIGHLIGHT_EDGE["red"] > g.ui.HIGHLIGHT_EDGE["amber"])
         toast = (getattr(g.overlay(), "toast", None) or [[]])[0]
-        claim("1 the notice says what holds however the lot lines lie: at least 0'-11 1/4\" short (the red part)",
-              any(t.endswith("· at least 0'-11 1/4\" short") for t in toast), toast)
+        claim("1 the notice says what holds however the lot lines lie: at least 0'-11 3/8\" short (the red part)",
+              any(t.endswith("· at least 0'-11 3/8\" short") for t in toast), toast)
         cells = [[str(v) for v in grp.Children[k].Values] for grp in g.STATE["panel_parts"].get("groups") or []
                  for k in range(grp.Children.Count)]
         west_row = next(c for c in cells if "Side yard, Southwest" in c[0])
-        claim("1 the panel's Delta says the same", west_row[3] == "at least 0'-11 1/4\" short", west_row)
+        claim("1 the panel's Delta says the same", west_row[3] == "at least 0'-11 3/8\" short", west_row)
         # what the Top view really drew (gordium_rhino.draw_screen keeps it in STATE["drawn"]): the claims read the
         # drawing's own placement, never a sum of their own (the Rhino job at 27c8e5d: a claim's own taken boxes
         # said "no corner clear" while the screen placed the notice correctly)

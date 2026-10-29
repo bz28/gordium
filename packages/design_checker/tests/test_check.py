@@ -397,9 +397,9 @@ def test_the_massing_layer_holds_building_objects():
 
 def test_the_sample_lot_gives_the_spec_massing():
     """106 Ithaca Rd as the State tax map draws it (7,033.8 sf; 7,033.5 as placed, its points rounded to 1/10,000 ft) -> the starting house
-    kept 2'-0" back from every limit: 35'-11" x 37'-4", three floors to 35'-0", 27'-0 3/4" from the street. Here the
-    left side yard binds, not coverage: 19.1% of the lot as drawn, well under 25% of the smallest lot the tax map
-    allows (6,357 sf, the checker's own worst case)."""
+    kept 2'-0" back from every limit: 51'-4" x 29'-8", three floors to 35'-0", 27'-0 3/4" from the street. Coverage
+    is 21.7% of the lot as drawn, under 25% of the smallest lot the tax map allows (6,357 sf, the checker's own worst
+    case)."""
     import math
     import tempfile
     from pathlib import Path
