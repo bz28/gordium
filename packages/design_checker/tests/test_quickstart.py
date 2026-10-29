@@ -159,6 +159,7 @@ def test_3_short_only_under_some_readings_needs_review_short_under_all_fails(hou
     assert (rear["status"], rear["proposed"]) == (present.REVIEW, proposed)
     dy, proposed, short = said(r"Now move it (\d+) ft back:\*\*\s+Rear yard\s+" + RANGE + r": \*\*does not "
                                r"comply\*\*, at least (\d+'-\d+(?: \d/\d)?\") short")
+    dy_fails = dy
     moved = _moved(got["floors"], dy=float(dy))
     rear = _check(moved, facts)["Rear yard"]
     assert (rear["status"], rear["proposed"], rear["delta"]) == (present.FAILS, proposed, f"at least {short} short")
@@ -172,6 +173,11 @@ def test_3_short_only_under_some_readings_needs_review_short_under_all_fails(hou
         assert ("yard", present.FAILS) not in _regions(moved, facts), dy
         row = next(x for x in check_site(_site(moved), facts)["rows"] if x["Rule id"] == "R-1b.rear_yard")
         assert not row["Fails"], (dy, row["Provisional"])        # the checker itself: one reading set (round 2)
+    first = int(said(r"From (\d+) ft back it does not comply")[0])     # the first whole foot short under every reading
+    assert first == int(high) + 1 and first < int(dy_fails)
+    for dy in range(first, int(dy_fails) + 1):
+        rear = _check(_moved(got["floors"], dy=float(dy)), facts)["Rear yard"]
+        assert rear["status"] == present.FAILS and rear["delta"].startswith("at least "), (dy, rear["delta"])
 
 
 def test_4_pull_the_rear_wall_back_coverage_fails_on_every_tax_map_lot(house):
@@ -340,7 +346,8 @@ def test_coverage_over_only_on_some_tax_map_lots_needs_review(house):
 
 def test_a_side_yard_short_under_every_reading_fails_in_the_checker_itself(house):
     """Review round 2: the house moved 11 ft right and 18 ft back on 106 is 0'-9 7/8" from its Northeast line,
-    short by at least 7'-2" whichever lines are the sides (it was 26 ft right for the narrower house before PR 18). The checker gave up (18 x 18 readings, over its 200) and
+    short by at least 7'-2" whichever lines are the sides (it was 26 ft right for the narrower house before
+    PR 18). The checker gave up (18 x 18 readings, over its 200) and
     said needs review while the panel's own set said "at least … short": one reading set now decides both."""
     got, facts = house
     moved = _moved(got["floors"], dx=11.0, dy=18.0)

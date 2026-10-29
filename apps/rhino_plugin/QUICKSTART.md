@@ -395,7 +395,7 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 3. **Move it 10 ft back instead.** Rear yard 24'-11 7/8" to 26'-6 1/8": **needs review**. **Now move it 15 ft back:**
    Rear yard 19'-11 7/8" to 21'-8 3/8": **does not comply**, at least 1'-1 7/8" short: short under every reading
    of the back lines and of the tax map. (From 11 to 13 ft back it still needs review: under some readings of the
-   back lines and of the tax map it could still comply.) A note appears, and the strip of the house that is over
+   back lines and of the tax map it could still comply. From 14 ft back it does not comply.) A note appears, and the strip of the house that is over
    turns red.
 4. **Undo, then pull the rear wall 11 ft back** (Cmd+Shift+click the back face, Gumball 11). Lot coverage 29.7%
    against 25%: **does not comply**, even on the largest lot the tax map allows.
