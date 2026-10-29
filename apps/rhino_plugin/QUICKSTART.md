@@ -257,6 +257,14 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      on every new project, after every lookup and after you pick another district (a tick is for one district),
      because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
+   - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
+     near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building
+     holds. Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
+     assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
+     its full wording. Answers are saved with the project; change them in Edit site… .
+     Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
+     panel's collapsed **Use details — answer when you plan the interior** group (still needs review, not counted among
+     the building's problems, never a pass), each with its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
      survey…** to pick your surveyed outline instead.
@@ -362,6 +370,13 @@ usually what fixes it:
   because only the zoning office can settle it.
 - **Something on the lot isn't measured**: a solid not on the `Building` layer (a shed on Default, an imported
   garage). Lot coverage counts every building on the lot, so it needs review until you **Add to check…**.
+- **It needs a fact the model can't show** (bedrooms, parking spaces, dwelling units, rooms let for profit,
+  whether it is a conversion, the number of stories): its button names them when that fits, for example **Enter bedrooms
+  and parking spaces…**, or says how many, for example **Answer 3 questions…**. It opens a small window that asks only them (a number, or Not answered / No / Yes). **OK** saves just
+  those answers, each "entered by you" with the date, as one Undo step, and checks again; **Cancel** (or Esc)
+  changes nothing. Left blank, a fact stays unanswered and its rule keeps needing review (never read as 0 or no).
+  Answers to the start box's questions show there too the next time you open **Edit site…**. A row that needs a
+  site fact (the lot, the district, the street side, Corner lot?) has an **Edit site…** button instead.
 
 "– not checked" means Gordium doesn't check it yet (parking needs bedroom and parking counts; overlays come in a
 later release). "Not checked yet" lists the code sections not in Gordium yet (coming in a later version): check

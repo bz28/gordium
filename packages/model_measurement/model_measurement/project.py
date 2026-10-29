@@ -22,8 +22,8 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                "primary_buildings", "primary_buildings_same_use", "south_hill_overlay",
                "stream_near_lot", "stream_distance",
-               "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
-               "eaves_confirmed", "unsettled", "ground_assumed", "ground_fall", "plan_north_deg", "street_ids"}
+               "grade_points", "grade_from", "grade_is", "unsettled", "ground_fall", "address_street_line", "accessory_buildings", "accessory_frame",
+               "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).

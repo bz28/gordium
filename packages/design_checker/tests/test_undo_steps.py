@@ -19,7 +19,7 @@ REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_bu
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
         "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
         "show_context", "_context_on", "check_now", "set_auto_check", "_auto", "_massing_hidden", "_sync_ticks",
-        "switch_side_yards"]
+        "switch_side_yards", "_save_row"]
 
 
 class Doc:
@@ -126,12 +126,18 @@ def _plugin(doc, said):
                                 "set_context_tick": staticmethod(lambda parts, on: None),
                                 "set_massing_tick": staticmethod(lambda parts, on: None),
                                 "set_envelope_tick": staticmethod(lambda parts, on: None),
-                                "open_target": staticmethod(lambda path: (True, None))}),
+                                "open_target": staticmethod(lambda path: (True, None)),
+                                # a row's dialog (Enter …, #37): OK with each count ns["_answer"], each yes / no "yes"
+                                "row_dialog": staticmethod(lambda title, fields, check: {
+                                    f["key"]: "yes" if f["kind"] == "yes_no" else str(ns["_answer"])
+                                    for f in fields})}),
+          "load_facts": lambda doc: json.loads(doc.Strings.GetValue("Gordium", "lot_facts")
+                                               or '{"lot_id": "lot1", "zone": "R-1b"}'),
           "_box_open": lambda: False, "run_check": lambda doc, report=False: {"report_error": "not in a test"},
           "current_facts": lambda doc: {"lot_id": "lot1", "zone": "R-1b"},
           "_lot_candidates": lambda doc: [type("L", (), {"Id": "lot1"})(), type("L", (), {"Id": "lot2"})()],
           "_buildings": lambda doc: [obj(), obj()], "_pick": lambda doc, prompt, objs, kind, *a: "lot2"
-          if kind == "Lot" else "b2", "_count": lambda prompt, least=0: 2, "_ask_yes_no_or_skip": lambda prompt: True,
+          if kind == "Lot" else "b2", "_answer": 2,
           "_layer": lambda doc, name: 0, "_find": lambda doc, i: obj(), "report_path": lambda doc: "/nowhere.xlsx",
           "time": __import__("time"), "_clear": lambda o: None, "JURISDICTION": "ithaca",
           "ask": lambda request: {"zones": []}, "suggested_facts": lambda doc, zones: {},
@@ -203,7 +209,7 @@ def test_a_refused_count_leaves_the_file_as_it_was_and_no_undo_step():
     assert doc.records == [] and doc.outside == [] and doc.UndoRecordingEnabled
     assert doc.Strings.data[("Gordium", "lot_facts")] == stored and checks == [2, 3]
     assert said == ["1 story. The count wasn't kept."]
-    ns["_count"] = lambda prompt, least=0: 4                                      # a count it keeps: one step, one check
+    ns["_answer"] = 4                                                      # a count it keeps: one step, one check
     checks.clear()
     ns["_actions"]()["enter"](["stories"])
     assert doc.records == [logic.UNDO_WORDS["enter"]] and doc.outside == [] and checks == [4]

@@ -152,9 +152,15 @@ def test_every_counted_facts_prompt_accepts_exactly_what_its_checks_accept():
             logic.update_counts({}, {k: least - 1})
         assert k in FACT_FIELDS and fact_problems({k: least}) == [] and fact_problems({k: least - 1}), k
     plugin = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "_count(prompt, logic.minimum(key))" in plugin and "gi.SetLowerLimit(least, False)" in plugin
+    # the row's own dialog accepts exactly the same (parse_answer with the fact's minimum): a refused entry is said in
+    # the dialog, which stays open, and nothing is saved (never an exception out of the button)
+    for k in counts:
+        least = logic.minimum(k)
+        assert logic.row_answers_applied({}, [k], {k: str(least)}) == {k: least}
+        assert logic.row_problem({}, [k], {k: str(least - 1)}) if least else True
     enter = plugin[plugin.index("def enter_rooms("):plugin.index("\ndef ", plugin.index("def enter_rooms(") + 1)]
-    assert "except ValueError" in enter and enter.index("except ValueError") < enter.index("save_facts(")
+    assert "lambda got: logic.row_problem(facts, needs, got)" in enter
+    assert enter.index("if answers is None:") < enter.index("_save_row(")
 
 
 def test_round_4s_case_one_unit_of_a_six_unit_building_never_complies():

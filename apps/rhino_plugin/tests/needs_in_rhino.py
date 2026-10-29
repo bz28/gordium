@@ -1,10 +1,11 @@
 #! python3
 """A row's own "Enter …" button, in Rhino 8, each claim asserted (the run fails loudly otherwise). Run in Rhino, not in
 CI. The sample (no bedrooms or parking spaces stated): the Parking row's detail in the panel has one button, named
-from exactly the facts that row waits for; clicking it (the button itself) asks exactly those, in order, a whole
-number each; a skipped answer stays unset (never 0) and the row then waits only for the other, its button saying
-so; answering that one checks the row. The command line's prompts are answered by stand-ins that record what was
-asked (a script can't type at Rhino's prompt). Writes <temp>/gordium_needs/out.json; closes its document."""
+from exactly the facts that row waits for; clicking it (the button itself) opens the row's own dialog
+(gordium_ui.row_dialog), which asks exactly those, in order, a whole number each; a blank answer stays unset (never
+0) and the row then waits only for the other, its button saying so; answering that one checks the row. The dialog is
+answered by a stand-in that records what it was asked and passes its answers through the dialog's own OK check (a
+script can't type in a modal dialog). Writes <temp>/gordium_needs/out.json; closes its document."""
 import json
 import os
 import sys
@@ -94,26 +95,38 @@ try:
     texts, found = enter_button(g, item)
     claim("its detail has one Enter button, named from what it waits for",
           texts == ["Enter bedrooms and parking spaces…"], texts)
-    asked = []
-    answers = {"Bedrooms": 3, "Off-street parking spaces": None}     # parking skipped
-    g._count = lambda prompt: asked.append(prompt) or answers[prompt]
-    g._ask_yes_no_or_skip = lambda prompt: asked.append(prompt) or None
+    asked, kinds, refused = [], [], []
+    answers = {"Bedrooms": "3", "Off-street parking spaces": ""}     # parking left blank
+
+    def dialog(title, fields, check):                    # the row's dialog, answered as typed, then OK
+        asked.extend(f["label"] for f in fields)
+        kinds.extend(f["kind"] for f in fields)
+        got = {f["key"]: answers[f["label"]] for f in fields}
+        words = check(got)                               # the dialog's own OK check: words would keep it open
+        if words:
+            refused.append(words)
+            return None
+        return got
+    g.ui.row_dialog = dialog
     found[texts[0]].PerformClick()                       # the button itself
-    claim("clicking it asks exactly those, in order", asked == ["Bedrooms", "Off-street parking spaces"], list(asked))
+    claim("clicking it asks exactly those, in order, a whole number each",
+          asked == ["Bedrooms", "Off-street parking spaces"] and kinds == ["count", "count"] and not refused,
+          (list(asked), list(kinds), refused))
     facts = g.current_facts(doc)
     log["facts_after_first"] = {k: facts.get(k) for k in ("sleeping_rooms", "parking_spaces")}
-    claim("the answer is saved; the skipped one stays unset (never 0)",
+    claim("the answer is saved; the blank one stays unset (never 0)",
           facts.get("sleeping_rooms") == 3 and facts.get("parking_spaces") is None, log["facts_after_first"])
     item = parking(g)
     texts, found = enter_button(g, item)
     claim("the row now waits only for parking spaces, and its button says so",
           item.get("needs") == ["parking_spaces"] and texts == ["Enter parking spaces…"], (item.get("needs"), texts))
     asked.clear()
-    answers["Off-street parking spaces"] = 2
+    answers["Off-street parking spaces"] = "2"
     found[texts[0]].PerformClick()
     item = parking(g)
     log["last"] = {k: item.get(k) for k in ("name", "status", "needs")}
     claim("answering that one asks only it, and the row is checked", asked == ["Off-street parking spaces"] and
+          not refused and
           item["status"] != "not_checked" and not item.get("needs"), (list(asked), log["last"]))
     log["ok"] = True
 except Exception:

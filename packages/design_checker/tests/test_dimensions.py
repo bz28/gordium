@@ -616,8 +616,9 @@ def test_a_yard_measured_to_an_upper_floor_overhang_says_so_and_the_wall_keeps_t
     plain = [y["number"] for y in _numbers(box(10, 25, 35, 65))[1]["plan"]["yards"]]
     assert plain == ['25\'-0"', '15\'-0"', '10\'-0"', '35\'-0"']                    # no words added
     over = [y["number"] for y in _numbers(box(10, 30, 35, 65, 0, 10, "g"), box(10, 27, 35, 65, 10, 20, "u"))[1]["plan"]["yards"]]
-    assert over[0] == '27\'-0" (to 2nd-floor overhang) to 30\'-0"'   # the nearer reading is the overhang's
-    # (both readings clear the 25'-0" front yard, so the row complies: no "? "; main's every-reading rule, #18)
+    # the nearer reading is the overhang's; both readings meet the 25 ft front yard and the eaves rule (§325-18B,
+    # R-1b.yard_projections, on this stack) settles the overhang, so the row complies: no review mark
+    assert over[0] == '27\'-0" (to 2nd-floor overhang) to 30\'-0"'
     assert over[1:] == ['15\'-0"', '10\'-0"', '35\'-0"']               # walls flush with the floor below: plain
     third = [y["number"] for y in _numbers(box(12, 30, 35, 65, 0, 10, "g"), box(12, 30, 35, 65, 10, 20, "m"),
                                            box(10, 30, 35, 65, 20, 30, "u"))[1]["plan"]["yards"]]
