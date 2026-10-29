@@ -2,7 +2,8 @@
 
 For an architect who has just opened Rhino. About 10 minutes the first time, then 1 minute per project.
 
-Gordium checks your massing against the City of Ithaca zoning rules (the R-1a, R-1b and R-3a districts, for now;
+Gordium checks your massing against the City of Ithaca zoning rules (the R-1a, R-1b, R-2a, R-2b, R-2c and R-3a
+districts, for now;
 the sample project below is an R-1b one-family house) while you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
@@ -251,8 +252,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      again, or put back the lot's own address (or clear it) and fill the rest in by hand. Outside the City: Draw
      stays off for that address, and in a new file by hand is refused, until a live lookup of that same address
      finds the lot, or you close the box. Another address looked up and found can be drawn; by hand stays refused.
-   - **Zoning district**: "entered by you" (R-1b, R-1a and R-3a can be picked), or after Look up "suggested by
-     Gordium · City of Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do,
+   - **Zoning district**: "entered by you" (R-1b, R-1a, R-2a, R-2b, R-2c and R-3a can be picked), or after
+     Look up "suggested by Gordium · City of Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do,
      on every new project, after every lookup and after you pick another district (a tick is for one district),
      because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
