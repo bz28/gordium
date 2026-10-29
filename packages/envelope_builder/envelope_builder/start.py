@@ -21,7 +21,8 @@ import math
 from shapely import affinity
 from shapely.geometry import LineString, Point, Polygon, box
 
-from model_measurement.measure import Lot, measure
+from model_measurement.places import measuring
+from model_measurement.plugin_measuring import Lot
 from rule_format import formula
 from rule_format.rulebook import REPO, Context, outcome
 
@@ -334,7 +335,7 @@ def _failing(site: dict, facts: dict, floors: list[dict], rules: list[dict], use
         return outcome(rule, {k: v["value"] for k, v in measured.items()}, {"use": uses})
 
     def fails(buildings):
-        measured = measure({**site, "buildings": buildings}, facts)
+        measured = measuring(facts.get("jurisdiction")).measure({**site, "buildings": buildings}, facts)
         values = {k: v["value"] for k, v in measured.items()}
         return [r["id"] for r in rules if judged(r, measured) == "fail"], values
 

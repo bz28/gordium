@@ -151,14 +151,14 @@ def model_tests(j: Path) -> dict[str, list[str]]:
 
 
 # Stated by the architect, but measured from the model when it is drawn that way: stories are counted from the floor
-# blocks drawn (model_measurement.measure._stories_whole); the typed count is the fallback, or a cross-check.
+# blocks drawn (model_measurement/places/ithaca_city/measure.py _stories_whole); the typed count is the fallback, or a cross-check.
 DRAWN_OR_STATED = {"stories"}
 
 
 def measure_sources() -> tuple[set, set]:
     """(measured from the model, stated by the architect): the names model_measurement fills in. A name in
     DRAWN_OR_STATED is in both."""
-    from model_measurement.measure import STATED, UNITS
+    from model_measurement.plugin_measuring import STATED, UNITS
     return set(UNITS) | (DRAWN_OR_STATED & set(STATED)), set(STATED) | {"district"}
 
 

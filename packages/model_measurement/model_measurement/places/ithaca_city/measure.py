@@ -27,9 +27,9 @@ from shapely.validation import explain_validity
 
 from rule_format.rulebook import MEASURES_FILE, load
 
-from . import interpretations as law
-from .stops import stop
-from .street_lines import _norm, matching_ids, street_verdict
+from ... import interpretations as law
+from ...stops import stop
+from ...street_lines import _norm, matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
 

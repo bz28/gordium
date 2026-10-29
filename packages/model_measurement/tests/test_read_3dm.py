@@ -3,7 +3,7 @@
 import pytest
 import rhino3dm as r
 
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 from model_measurement.read_3dm import ID_KEY, read_site
 
 
@@ -320,7 +320,7 @@ def test_a_single_precision_meshed_gable_is_two_roof_planes_near_and_far(tmp_pat
     planes grouped from one small triangle's normal split a slope in two (256 + 256 + 512, read by PR #18 as a
     second eave); planes fitted over their whole group don't. The 40,000 ft case pins the grouping; 20,000 and
     152 ft are regression guards."""
-    from model_measurement import measure as M
+    from model_measurement.places.ithaca_city import measure as M
     mesh, w, depth, eave, ridge = gable_mesh(x0, y0, 16, double=False)
     m = model()
     lot = [(x0 - 20, y0 - 30), (x0 + w + 20, y0 - 30), (x0 + w + 20, y0 + depth + 30), (x0 - 20, y0 + depth + 30)]
@@ -408,7 +408,7 @@ def test_a_typed_box_with_a_computed_apex_reads_its_typed_walls_exactly(tmp_path
 def test_a_genuinely_different_slope_is_still_its_own_plane():
     """Tolerant to rounding noise, not to real shape: two halves of a 20 ft roof whose slopes differ by 1 in 100
     (0.1 ft over each half) stay two planes."""
-    from model_measurement.measure import _planes
+    from model_measurement.places.ithaca_city.measure import _planes
     faces = []
     for i in range(20):
         for half, rise in ((0, 0.25), (10, 0.26)):

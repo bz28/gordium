@@ -30,7 +30,8 @@ from design_checker import rhino_logic as logic
 from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
 from envelope_builder.envelope import envelope
-from model_measurement.measure import TAX_MAP_TOLERANCE, measure
+from model_measurement.places import measuring
+from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
@@ -537,7 +538,7 @@ def side_lines(site: dict, facts: dict) -> list[str] | None:
     is called when it couldn't be measured. Only when the measuring itself knows which lines are sides: the lot not
     a corner lot (unknown counts as maybe), and every reading of its lines giving the same two names (review round
     1). None otherwise, or without a lot."""
-    from model_measurement.measure import Lot
+    from model_measurement.plugin_measuring import Lot
     if facts.get("corner_lot") is not False or not (site.get("lot") or {}).get("edges") or not facts.get("street_line"):
         return None
     lot = Lot(site, facts)
@@ -752,7 +753,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     model_path = Path(name)
     say = step or _quiet
     say(STEPS["measure"])
-    measured = measure(site, facts)
+    measured = measuring(facts["jurisdiction"]).measure(site, facts)     # the lot's own place's measuring
     project = {"title": facts.get("title") or model_path.stem, "jurisdiction": facts.get("jurisdiction"),
                "zone": facts.get("zone"),
                "measurements": {k: {"value": m["value"], "from": working(m, model_path.name)} for k, m in measured.items()}}
@@ -853,7 +854,7 @@ def _envelope_facts(site: dict, facts: dict) -> dict:
     if facts.get("grade_is") == "existing":
         return {**facts, "ground_is_flat": None}
     if facts.get("grade_points"):
-        from model_measurement.measure import envelope_grade   # the measuring's own refusals, the same function
+        from model_measurement.plugin_measuring import envelope_grade   # the measuring's own refusals, the same function
         grade, why = envelope_grade(site.get("buildings") or [], facts)
         return {**facts, "ground_is_flat": True, "grade_elevation": grade} if why is None else {**facts, "ground_is_flat": None}
     return facts
@@ -1291,7 +1292,7 @@ def cautious_outline(outline, facts) -> list | None:
     as-drawn one dashed)."""
     from shapely.geometry import Polygon
     from envelope_builder.envelope import QUAD_SEGS
-    from model_measurement.measure import TAX_MAP_TOLERANCE
+    from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE
     if not outline or not from_tax_map(facts):
         return None
     inner = Polygon(outline).buffer(-TAX_MAP_TOLERANCE, quad_segs=QUAD_SEGS)   # every lot line 2'-0" nearer: at
@@ -1347,7 +1348,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
     or the part above the height limit (spec F2, F4, F5). The building itself stays neutral.
     Each yard's red and amber are its own row's (present.settle: from the row's readings, after every status
     change), never another yard's: red where its wall is short under every reading, amber under some."""
-    from model_measurement.measure import Lot, _projection, union as unary_union
+    from model_measurement.plugin_measuring import Lot, _projection, union as unary_union
     from model_measurement.stops import stop
 
     lot = site.get("lot") or {}
@@ -1626,7 +1627,7 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}
     say(STEPS["largest"])
-    measured = measure(site, drawing)
+    measured = measuring(facts["jurisdiction"]).measure(site, drawing)  # the lot's own place's measuring
     geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
     if geo:                             # nothing drawn from geometry the measuring couldn't work out
         return {"floors": [], "notes": [geo], "preview": None}

@@ -18,7 +18,7 @@ import random
 import pytest
 from shapely.geometry import Polygon
 
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 
 JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
 
