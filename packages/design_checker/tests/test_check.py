@@ -3453,7 +3453,7 @@ def _plugin_functions(names, **extra):
     from design_checker import rhino_logic as logic_
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     view = type("View", (), {"ActiveViewportID": "vp"})()
-    doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})()})()
+    doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})(), "RuntimeSerialNumber": 1})()
     size_of = staticmethod(lambda lines, size: (max(len(t) for t in lines) * size * 0.6 + 22,     # gordium_ui's
                                                 len(lines) * (size + 9) + 10))                   # text_box_size
     ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": size_of,
@@ -3461,7 +3461,7 @@ def _plugin_functions(names, **extra):
     ns = {"time": time_, "logic": logic_, "ui": ui_, "STATE": {},
           "Rhino": type("Rhino", (), {"RhinoDoc": type("RhinoDoc", (), {"ActiveDoc": doc})}),
           "rg": type("rg", (), {"BoundingBox": type("BoundingBox", (), {"Empty": None})}),
-          "_model_on_screen": lambda o, viewport: None}
+          "_model_on_screen": lambda o, viewport: None, "_units": lambda d: 1.0}
     ns.update(extra)
     for name in names:
         exec(src[src.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
@@ -4401,7 +4401,7 @@ def test_another_document_shows_its_own_ticks():
     synced = []
     form = type("F", (), {"Visible": True})()
     ui_ = type("UI", (), {"show": staticmethod(lambda *a, **k: None)})
-    front = object()
+    front = type("Doc", (), {"RuntimeSerialNumber": 2})()
     ns = _plugin_functions(["_new_document"], ui=ui_, _sync_ticks=synced.append, _clear=lambda o: None,
                            Rhino=type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": front})}))
     ns["STATE"]["panel_parts"] = {"form": form}

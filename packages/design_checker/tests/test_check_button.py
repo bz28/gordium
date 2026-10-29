@@ -285,8 +285,7 @@ def _handlers(units=("Feet", 1.0)):
     import types
     doc = types.SimpleNamespace(RuntimeSerialNumber=7, ModelUnitSystem=units[0])
     ns = {"logic": logic, "STATE": {}, "time": types.SimpleNamespace(time=lambda: 100.0),
-          "Rhino": types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc)),
-          "_scale": lambda d: units[1] if d.ModelUnitSystem == units[0] else 1 / 12}
+          "Rhino": types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc))}
     for name in ("_changed", "_layer_key", "_layer_changed", "_block_changed", "_units", "_properties_changed"):
         exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
     return ns, doc
@@ -320,7 +319,7 @@ def test_each_check_notes_the_units_it_read():
     """So a later change of units is told from any other property change (logic.units_edit_counts)."""
     begin = body(RHINO, "def _check_begin(", "\ndef ")
     assert 'STATE.setdefault("units_seen", {})[doc.RuntimeSerialNumber] = _units(doc)' in begin
-    assert "def _units(doc):" in RHINO and "_scale(doc)" in body(RHINO, "def _units(doc):", "\ndef ")
+    assert "str(doc.ModelUnitSystem)" in body(RHINO, "def _units(doc):", "\ndef ")
     # a document come to the front is noted too, so a render setting changed there before its first check never
     # greys it (review round 1, finding 2)
     assert 'STATE.setdefault("units_seen", {}).setdefault(front.RuntimeSerialNumber, _units(front))' in body(

@@ -1,5 +1,9 @@
 # Live mode hears layer, block and units edits: Rhino 8 evidence
 
+**Purpose:** the in-Rhino record that live mode greys its results after a layer renamed, a block edited or the units changed.\
+**For:** reviewers and engineers.\
+**Kept current by:** never (a dated record).
+
 Run with `apps/rhino_plugin/tests/live_more_in_rhino.py` in Ben's Rhino 8 (2026-10-29), from an extracted copy.
 
 | File | What it shows |

@@ -3539,8 +3539,9 @@ def _block_changed(sender, e):
 
 
 def _units(doc):
-    """The model's units as the check reads them: their name and feet per model unit (_scale)."""
-    return (str(doc.ModelUnitSystem), _scale(doc)) if doc is not None else None
+    """The model's units as the check reads them: the unit system's name, the one setting export sends the checker
+    (it converts in one place, _scale; this only tells one setting from another)."""
+    return str(doc.ModelUnitSystem) if doc is not None else None
 
 
 def _properties_changed(sender, e):
