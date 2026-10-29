@@ -2,6 +2,7 @@
 each test names the spec criterion it pins. Results come from the checker; present can only make one more
 cautious, so most of these check that something is never shown as complying without evidence."""
 
+import ast
 import json
 import re
 import sys
@@ -203,7 +204,7 @@ def test_details_quote_the_chart_cells_verbatim(tax_map):
 
 def test_groups_come_in_order_and_include_what_isnt_checked(tax_map):
     keys = [g["key"] for g in tax_map["view"]["groups"]]
-    assert keys == sorted(keys, key=["fails", "review", "complies", "not_checked", "not_covered"].index)
+    assert keys == sorted(keys, key=["fails", "review", "complies", "use_details", "not_checked", "not_covered"].index)
     names = [i["name"] for i in tax_map["view"]["items"]]
     assert any(n.startswith("Overlays") for n in names) and any("§325-17B" in n for n in names)
 
@@ -331,7 +332,14 @@ def test_amber_follows_every_yard_in_doubt():
     from design_checker.check import check_site
     tax = check_site(_plot(box(11, 25, 35, 65)), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
     assert items(tax["view"])["Front yard"]["status"] == present.REVIEW
-    assert _regions(tax) == [(present.REVIEW, 11, 35, pytest.approx(86, abs=1.5))]
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    blocks = tax["plan"]["encroach"]
+    assert {e["status"] for e in blocks} == {present.REVIEW}
+    assert {e["row"] for e in blocks} == {"Front yard", "Side yard, West"}      # each strip named for its own row
+    joined = unary_union([Polygon(e["outline"]) for e in blocks])
+    assert joined.area == pytest.approx(86, abs=1.5) and joined.bounds[0] == pytest.approx(11)
+    assert sum(Polygon(e["outline"]).area for e in blocks) == pytest.approx(joined.area, abs=0.01)   # never twice
 
 
 def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
@@ -339,13 +347,14 @@ def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
     yards need 10 ft, the tax map ±2 ft on each lot length the rule reads):
     - West wall 7 ft from the line: the yard is really 5 to 9 ft, so 1 to 5 ft short: "at least 1'-0" short"
       (the red part), never "−3'-0" short";
-    - 11 ft: really 9 to 13: "up to 1'-0" short" (amber, no red); 16 ft: really 14 to 18: "at least 4'-0" to spare";
+    - 11 ft: really 9 to 13: "up to 1'-0" short" (amber, no red); 16 ft: really 14 to 18: at least 4'-0" to
+      spare, "≥ +4'-0"";
     - the same walls on a survey: the margin itself."""
     from design_checker.check import check_site
     tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
     words = {x: items(check_site(_plot(box(x, 30, 35, 65)), tax)["view"])["Side yard, West"] for x in (7, 11, 16)}
     assert [(words[x]["delta"], words[x]["approx"]) for x in (7, 11, 16)] == [
-        ("at least 1'-0\" short", True), ("up to 1'-0\" short", True), ("at least 4'-0\" to spare", True)]
+        ("at least 1'-0\" short", True), ("up to 1'-0\" short", True), ("≥ +4'-0\"", True)]
     assert words[7]["margin"] == "−3'-0\"" and words[7]["status"] == present.FAILS     # as drawn, unchanged
     assert "as drawn" in words[7]["detail"]["line"] and "at least 1'-0\" short" in words[7]["detail"]["line"]
     survey = items(check_site(_plot(box(7, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])["Side yard, West"]
@@ -367,22 +376,42 @@ def test_delta_words_never_overstate():
     assert present.delta_words(R, (-3.25, 1.75), "ft", True) == "up to 3'-3\" short"
     assert present.delta_words(R, (-3.25 + 1 / 200, 1.75), "ft", True) == "up to 3'-3\" short"    # rounded up
     assert present.delta_words(C, (0.0, 4.0), "ft", True) == "at the limit at worst"
-    assert present.delta_words(C, (5.0, 9.0), "ft", True) == "at least 5'-0\" to spare"
-    assert present.delta_words(C, (7.0, 7.0), "ft", False) == "+7'-0\" to spare"            # one reading: the margin
+    assert present.delta_words(C, (5.0, 9.0), "ft", True) == "≥ +5'-0\""                   # at least that, to spare
+    assert present.delta_words(C, (7.0, 7.0), "ft", False) == "+7'-0\""                     # one reading: the margin
     assert present.delta_words(F, (-1.25, -1.25), "ft", False) == "−1'-3\" short"
     assert present.delta_words(C, None, "ft", False) == ""
-    # never kinder than the status: room on a row that needs review is "if confirmed", never "to spare"
+    # never kinder than the status: room on a row that needs review is "if confirmed", never a bare "+"
     assert present.delta_words(R, (7.0, 7.0), "ft", False) == "+7'-0\" if confirmed"
-    assert present.delta_words(R, (5.0, 9.0), "ft", True) == "at least 5'-0\" if confirmed"
+    assert present.delta_words(R, (5.0, 9.0), "ft", True) == "≥ +5'-0\" if confirmed"
     # round 2: the certain words ("at least … short") only on a row that fails; one in review says to see why
     assert present.delta_words(R, (-5.0, -1.0), "ft", True) == "at least 1'-0\" short; see why"
     assert present.delta_words(R, (-1.0, -1.0), "ft", False) == "−1'-0\" short; see why"
-    assert "to spare" not in present.delta_words(F, (1.0, 2.0), "ft", False)
+    # room, yet it fails: never the "+" of a row that complies (panel-wording review round 1, P3)
+    assert present.delta_words(F, (1.0, 1.0), "ft", False) == "1'-0\" room here; see why"
+    assert present.delta_words(F, (2.0, 5.0), "ft", True) == "at least 2'-0\" room here; see why"
     # every unit: lot area in sf, coverage in % (round 1: "+570 sf to spare" on a lot area that needs review)
     assert present.delta_words(R, (-66.2, 570.4), "sf", True) == "up to 67 sf short"
     assert present.delta_words(F, (-1000.0, -384.6), "sf", True) == "at least 384 sf short"
-    assert present.delta_words(C, (0.937, 6.2), "%", True) == "at least 0.93% to spare"
+    assert present.delta_words(C, (0.937, 6.2), "%", True) == "≥ +0.93%"
     assert present.delta_words(F, (-6.2, -0.004), "%", True) == "less than 0.01% short"
+
+
+def test_a_maximum_passed_says_over_and_a_minimum_not_met_says_short():
+    """Architect's review (2026-10-28): One-family occupancy (at most 1 family, 3 drawn) read "−2 short; see why"
+    while its detail said "over by 2". A most (≤, <) passed reads "2 over", with its units ("1'-6" over", "120 sf
+    over"), in every form; a least not met keeps "short" and its "−"."""
+    C, R, F = present.COMPLIES, present.REVIEW, present.FAILS
+    assert present.delta_words(R, (-2.0, -2.0), "count", False, maximum=True) == "2 over; see why"
+    assert present.delta_words(F, (-1.5, -1.5), "ft", False, maximum=True) == "1'-6\" over"
+    assert present.delta_words(F, (-120.0, -120.0), "sf", False, maximum=True) == "120 sf over"
+    assert present.delta_words(F, (-5.0, -1.0), "ft", True, maximum=True) == "at least 1'-0\" over"
+    assert present.delta_words(R, (-3.25, 1.75), "ft", True, maximum=True) == "up to 3'-3\" over"
+    assert present.delta_words(F, (-6.2, -0.004), "%", True, maximum=True) == "less than 0.01% over"
+    assert present.delta_words(C, (7.0, 7.0), "ft", False, maximum=True) == "+7'-0\""     # room reads the same
+    assert present.delta_words(F, (-1.5, -1.5), "ft", False) == "−1'-6\" short"            # a minimum: unchanged
+    # which it is comes from the rule's own comparison: building height is a most, a yard a least
+    assert present._is_maximum(ast.parse("building_height <= 35", mode="eval").body)
+    assert not present._is_maximum(ast.parse("rear_yard >= 25", mode="eval").body)
 
 
 def test_on_the_tax_map_red_is_over_under_every_reading_and_amber_is_the_rest_of_the_doubt():
@@ -423,6 +452,128 @@ def test_a_height_that_needs_review_is_amber_above_the_limit():
     assert plan(site, env, {"items": [{"measure": "building_height", "status": present.COMPLIES}]}, {})["encroach"] == []
 
 
+def test_only_what_rises_above_the_height_limit_is_coloured_a_roofs_ridge_not_its_eaves():
+    """A roof sloping from 30 ft (at y 25) to 40 ft (at y 65) under a 35 ft limit: only the half of the plan where
+    the roof is above 35 ft (y 45 to 65, 25 × 20 = 500 sf) is coloured, never the whole 1,000 sf footprint."""
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    from test_measure import sloped_roof_box
+    site = _plot(sloped_roof_box(10, 25, 35, 65, 30, 40, "house"))
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    (top,) = plan(site, env, {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
+    assert Polygon(top["outline"]).area == pytest.approx(500, abs=0.01)
+    assert min(p[1] for p in top["outline"]) == pytest.approx(45)
+    assert (top["base"], top["top"], top["building"]) == (35, 40, "house")
+
+
+def test_a_building_over_the_limit_with_only_walls_above_it_is_still_coloured_over_its_own_plan():
+    """Independent review of #28, P1: a vault or dome read as walls (its curved roof faces left out) rises over the
+    limit with nothing above it seen from above; it was coloured nowhere. Never less than its own plan."""
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    house = box(10, 25, 35, 65, 0, 38)
+    house["faces"] = [f for f in house["faces"] if not all(p[2] == 38 for p in f["points"])]   # its top left out
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    for status in (present.FAILS, present.REVIEW):
+        tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": status}]},
+                                {})["encroach"] if e["why"] == "height"]
+        assert [(t["base"], t["top"], t["status"]) for t in tops] == [(35, 38, status)]
+        assert Polygon(tops[0]["outline"]).area == pytest.approx(1000)
+
+
+def test_a_vault_read_as_walls_beside_a_flat_roof_over_the_limit_is_coloured_too():
+    """Review of the #28 fix (L1): one building whose flat roof part rises over the limit (seen from above) and a
+    vault part read as walls also over it: the walls lie outside what is seen from above, so its whole plan."""
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    from test_measure import sloped_roof_box
+    flat = box(10, 25, 20, 65, 0, 38)
+    vault = box(20, 25, 35, 65, 0, 38)
+    vault["faces"] = [f for f in vault["faces"] if not all(p[2] == 38 for p in f["points"])]
+    house = {"id": "house", "faces": flat["faces"] + vault["faces"], "problems": []}
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": present.FAILS}]},
+                            {})["encroach"] if e["why"] == "height"]
+    assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000)        # the vault's 600 sf too
+    for f in vault["faces"]:                     # the same vault, its walls' tops 1e-4 ft out of plumb
+        for p in f["points"]:
+            if p[2] == 38:
+                p[0] += 1e-4                     # (both ways: every wall leans)
+                p[1] += 1e-4
+    house = {"id": "house", "faces": flat["faces"] + vault["faces"], "problems": []}
+    tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": present.FAILS}]},
+                            {})["encroach"] if e["why"] == "height"]
+    assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000, abs=0.1)
+    gable = plan(_plot(sloped_roof_box(10, 25, 35, 65, 30, 40, "house")), env,
+                 {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
+    assert Polygon(gable[0]["outline"]).area == pytest.approx(500, abs=0.01)           # a roof's walls: still its ridge
+
+
+def test_a_vault_springing_below_the_limit_gets_a_block_at_the_limit_for_rhino_to_reach_its_real_top():
+    """Review of 2cae58d (F1): walls to 30 ft read, a curved vault to 42 ft left out: the checker's own top is
+    under the 35 ft limit, so no block was made and nothing was coloured. Now a block over its plan at the limit
+    (no height of its own here); Rhino reaches it to the real vault's top (rhino_logic.block_span)."""
+    from shapely.geometry import Polygon
+    from design_checker.check import check_site
+    from model_measurement.stops import stop
+    vault = box(10, 25, 35, 65, 0, 30)
+    vault["faces"] = [f for f in vault["faces"] if not all(p[2] == 30 for p in f["points"])]
+    vault["problems"] = [stop("curved_surface")]
+    r = check_site(_plot(vault), {**FACTS, "jurisdiction": CITY})
+    assert items(r["view"])["Building height"]["status"] == present.REVIEW
+    tops = [e for e in r["plan"]["encroach"] if e["why"] == "height"]
+    assert [(t["base"], t["top"]) for t in tops] == [(35, 35)]
+    assert Polygon(tops[0]["outline"]).area == pytest.approx(1000)
+    assert logic_span(tops[0], 0.0, 42.0) == (35, 42.0) and logic_span(tops[0], 0.0, 30.0) == (35, 35)
+
+
+def logic_span(entry, bottom, top):
+    from design_checker import rhino_logic
+    return rhino_logic.block_span(entry, bottom, top)
+
+
+def test_a_building_with_a_curved_surface_never_complies_on_height_and_is_coloured_above_the_limit():
+    """The vault probe at fc0b023: walls to 36 ft read, the curved vault left out by the reader (a problem it reports):
+    the height row needs review, never complies, and the block over the limit covers the building's plan (the
+    Rhino side cuts the real vault from there: rhino_logic.block_span)."""
+    from shapely.geometry import Polygon
+    from design_checker.check import check_site
+    from model_measurement.stops import stop
+    vault = box(10, 25, 35, 65, 0, 36)
+    vault["faces"] = [f for f in vault["faces"] if not all(p[2] == 36 for p in f["points"])]
+    vault["problems"] = [stop("curved_surface")]
+    r = check_site(_plot(vault), {**FACTS, "jurisdiction": CITY})
+    assert items(r["view"])["Building height"]["status"] == present.REVIEW
+    tops = [e for e in r["plan"]["encroach"] if e["why"] == "height"]
+    assert tops and all(t["status"] == present.REVIEW for t in tops)
+    assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000)
+
+
+def test_only_the_buildings_that_rise_above_the_limit_are_coloured_each_to_its_own_top():
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    site = _plot(box(10, 25, 35, 65, 0, 38, "house"), box(36, 70, 46, 80, 0, 12, "garage"))
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    tops = plan(site, env, {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
+    assert [(t["base"], t["top"], round(Polygon(t["outline"]).area, 3)) for t in tops] == [(35, 38, 1000)]
+    assert tops[0]["building"] == "house"                                     # the low garage: nothing
+
+
+def test_a_yard_strip_is_cut_per_building_each_from_its_own_bottom_to_its_own_top():
+    """A 30 ft house and a separate 10 ft wing both 2 ft from the west line, short of it under every reading by
+    4 ft: each building gets its own strip, the wing's only up to the wing's own 10 ft (never the house's 30)."""
+    from design_checker.check import plan
+    site = _plot(box(2, 25, 20, 65, 0, 30, "house"), box(2, 68, 10, 80, 1, 10, "wing"))
+    env = {"outline": [[10, 25], [40, 25], [40, 65], [10, 65]], "top": 35, "base": 0}
+    item = {"measure": "side_yard_smaller", "status": present.FAILS, "colour": "red",
+            "limits": [{"points": [[0, 40], [2, 40]], "near": 4, "far": 4}]}
+    strips = plan(site, env, {"items": [item]}, {}, FACTS)["encroach"]
+    assert sorted((e["base"], e["top"]) for e in strips) == [(0, 30), (1, 10)]     # the wing never to 30 ft
+    got = sorted((e["building"], e["status"], e["base"], e["top"], round(max(p[0] for p in e["outline"]), 3))
+                 for e in strips)
+    assert got == [("house", present.FAILS, 0, 30, 4.0), ("wing", present.FAILS, 1, 10, 4.0)]
+
+
 def test_the_colour_comes_from_the_result_only():
     """rhino_logic.highlight: the one place a result becomes a colour (the conduit draws only what it names)."""
     sys.path.insert(0, str(REPO / "packages/design_checker/design_checker"))
@@ -431,9 +582,12 @@ def test_the_colour_comes_from_the_result_only():
         == ["red", "amber", None, None, None]
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     scene = src.split("def draw_scene(", 1)[1].split("\ndef ", 1)[0]
-    assert "name = logic.highlight(status)" in scene and "colour = ui.HIGHLIGHT[name]" in scene
+    # each part drawn in draw_scene's one loop, the red after the amber (merged with depth-lines, whose see-through
+    # fills are pinned in the scene itself: test_depth)
+    coloured = scene[scene.index("for g, status, _ in rest + red:"):]
+    assert "name = logic.highlight(status)" in coloured and "colour = ui.HIGHLIGHT[name]" in coloured
     # drawn after the translucent envelope, so its blue never tints them (seen muddy in Rhino, 2026-10-21)
-    assert scene.index("o.envelope, Rhino.Display.DisplayMaterial") < scene.index("ui.HIGHLIGHT[name]")
+    assert scene.index("o.envelope, Rhino.Display.DisplayMaterial") < scene.index("for g, status, _ in rest + red:")
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "FromArgb(215, 38, 61)" in ui and "FromArgb(242, 169, 0)" in ui      # #D7263D, #F2A900
 
@@ -557,7 +711,8 @@ def test_lot_area_and_coverage_deltas_use_the_tax_map_lot_area_like_their_verdic
     assert area["delta"] == "up to " + present._area(6000 - tol["low"], "up") + " short"     # never "to spare"
     cov = v["Lot coverage"]
     assert cov["approx"] and cov["status"] == present.FAILS and cov["delta"].startswith("at least ")
-    assert cov["delta"] != cov["margin"] + " short"                   # the certain shortfall, not the as-drawn one
+    assert cov["delta"].endswith(" over")                             # coverage is a most: past it is "over"
+    assert cov["delta"] != cov["margin"].lstrip("−") + " over"        # the certain excess, not the as-drawn one
 
 
 def test_the_height_row_is_never_marked_tax_map_approximate(tax_map):
@@ -565,7 +720,7 @@ def test_the_height_row_is_never_marked_tax_map_approximate(tax_map):
     margin, and it is not "(approx.)"."""
     r = tax_map
     h = items(r["view"])["Building height"]
-    assert h["approx"] is False and h["delta"] in ("at limit", h["margin"] + " to spare", h["margin"] + " short")
+    assert h["approx"] is False and h["delta"] in ("at limit", h["margin"], h["margin"].lstrip("−") + " over")
     assert "tax map" not in h["detail"]["line"]
 
 
@@ -606,15 +761,17 @@ def test_red_is_only_for_a_yard_that_fails_never_one_that_needs_review():
 
 def _shown_agrees(i):
     """The invariants between a row's status, the Delta the architect sees (settle's words, the only ones) and its
-    colour: "to spare" only on a row that complies; the certain words ("at least … short", "less than … short", a
-    survey's "−… short") only on a row that fails, and on a yard always with red; a row that complies never says
-    "short"; red only on a row that fails."""
+    colour: a bare room ("+2'-0"", "≥ +3'-0"": to spare) only on a row that complies; the certain words ("at least
+    … short", "less than … over", a survey's "−… short" or "… over") only on a row that fails, and on a yard always
+    with red; a row that complies never says "short" or "over"; red only on a row that fails."""
     d, st = i.get("delta") or "", i["status"]
-    certain = d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))
-    assert "to spare" not in d or st == present.COMPLIES, (i["name"], st, d)
+    certain = (d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))) or (
+        d.endswith(" over") and not d.startswith("up to "))
+    bare_room = d.startswith(("+", "≥ +")) and not d.endswith(" if confirmed")
+    assert not bare_room or st == present.COMPLIES, (i["name"], st, d)
     assert not certain or st == present.FAILS, (i["name"], st, d)
     assert not (certain and i["measure"] in present.YARD_MEASURES) or i["colour"] == "red", (i["name"], i["colour"], d)
-    assert st != present.COMPLIES or "short" not in d, (i["name"], st, d)
+    assert st != present.COMPLIES or not d.endswith((" short", " over")), (i["name"], st, d)
     assert i["colour"] != "red" or st == present.FAILS, (i["name"], st)
     assert i["colour"] == "none" or i["measure"] in present.YARD_MEASURES, i["name"]
 
@@ -751,7 +908,7 @@ def test_a_side_yard_that_complies_only_under_every_reading_of_an_open_question_
     side = items(r["view"])["Side yard, wider"]
     assert side["status"] == present.REVIEW and (side["reason"] or "").startswith("Complies under every reading, but it depends on"), (
         side["status"], side["reason"])
-    assert "if confirmed" in side["delta"] and "to spare" not in side["delta"]
+    assert side["delta"].endswith(" if confirmed")                      # never a bare "+", which is to spare
     _never_above_the_checker(r)
 
 
@@ -1789,3 +1946,20 @@ def test_chart_quotes_follow_a_re_extraction_in_the_same_session(tmp_path):
     assert quote().endswith("R-1A: 10,000 sf")
     write("12,000 sf")
     assert quote().endswith("R-1A: 12,000 sf")
+
+
+def test_a_range_rule_that_complies_shows_the_limit_it_is_nearest():
+    """R-3aa's stories are a range (at least 2, at most 3; chart p.3 note 11). The light run in Rhino (2026-10-28)
+    showed a 3-story house as "3 | 2 required | complies": the first limit, the minimum, beside a count at the
+    maximum. A complying range row shows the limit the design is nearest: 3 stories against 3, 2 against 2, and
+    4 stories still does not comply against 3."""
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    base = {**facts, "lot_surveyed": True, "zone": "R-3aa", "main_building": "f0"}
+    base.pop("stories", None)
+    for n, required, status in ((3, "3", present.COMPLIES), (2, "2", present.COMPLIES),
+                                (4, "3", present.FAILS)):
+        house = [floor(12, 30, 36, 60, z0=8 * i, z1=8 * (i + 1), id=f"f{i}") for i in range(n)]
+        st = items(check_site(_plot(*house, lot_=lot), base)["view"])["Stories"]
+        assert (st["proposed"], st["required"], st["status"]) == (str(n), required, status), st

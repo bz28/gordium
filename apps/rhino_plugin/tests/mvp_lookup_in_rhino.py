@@ -91,10 +91,12 @@ try:
           facts.get("ground_assumed") == "flat", head.get("grade"))
     rows = [i for i in items if i.get("margin") or i.get("delta")]
     bad = [(i["name"], i["status"], i.get("delta")) for i in rows
-           if ("to spare" in (i.get("delta") or "") and i["status"] != "complies")
-           or (i["status"] == "does_not_comply" and "short" not in (i.get("delta") or "") and i.get("delta"))]
+           if ((i.get("delta") or "").startswith(("+", "≥ +")) and i["status"] != "complies"
+               and not i["delta"].endswith((" if confirmed", " here; see why")))
+           or (i["status"] == "does_not_comply" and not (i.get("delta") or "").endswith((" short", " over"))
+               and not (i.get("delta") or "").endswith(" here; see why") and i.get("delta"))]
     claim("every Delta in words, never kinder than its row", rows and all(
-        not (i.get("delta") or "").startswith(("+", "−")) or i["delta"].endswith(("to spare", "short", "if confirmed"))
+        not (i.get("delta") or "").startswith("−") or i["delta"].endswith(("short", "short; see why"))
         for i in rows) and not bad, {"bad": bad, "rows": [(i["name"], i["status"], i.get("delta")) for i in rows]})
     view = doc.Views.Find("Top", False) or doc.Views.ActiveView
     bmp = view.CaptureToBitmap(System.Drawing.Size(1000, 640))

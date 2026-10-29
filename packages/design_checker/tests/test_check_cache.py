@@ -9,7 +9,7 @@ import time
 import pytest
 
 from design_checker.check import check_site
-from rule_format import rulebook
+from rule_format import formula, rulebook
 from rule_format.rulebook import REPO, jurisdictions, rulebook_paths
 
 sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
@@ -37,9 +37,21 @@ def test_every_district_checks_the_same_on_a_first_check_and_from_the_cache(city
         for house in HOUSES:
             site = {"units": "ft", "lot": PLAIN, "buildings": [house], "problems": []}
             rulebook._KEPT.clear()
-            cold = answer(check_site(site, facts))          # every file parsed fresh
+            formula._names.cache_clear()
+            cold = answer(check_site(site, facts))          # every file parsed fresh, every formula walked
             warm = answer(check_site(site, facts))          # every file from the cache
             assert warm == cold, (zone, surveyed, house["id"] if isinstance(house, dict) else house)
+
+
+@pytest.mark.parametrize("city,zone", districts())
+def test_every_district_checks_the_same_with_and_without_the_formula_names_cache(city, zone, monkeypatch):
+    """formula.names kept per formula text (formula._names) changes no answer: every check is the same as with
+    each formula walked afresh on every call."""
+    facts = {**FACTS, "jurisdiction": city, "zone": zone, "lot_surveyed": False}
+    sites = [{"units": "ft", "lot": PLAIN, "buildings": [house], "problems": []} for house in HOUSES]
+    kept = [answer(check_site(site, facts)) for site in sites]
+    monkeypatch.setattr(formula, "_names", formula._names.__wrapped__)
+    assert [answer(check_site(site, facts)) for site in sites] == kept
 
 
 def test_there_is_a_district_to_check():

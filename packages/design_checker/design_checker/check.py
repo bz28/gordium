@@ -40,7 +40,7 @@ COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # What sets a row aside as "not checked yet: interior" (out of the counts): only these, inside the building. Every
 # other stated fact (rhino_logic.STATED_FACTS: what can be ASKED, such as R-3a's dwelling units) leaves its row a
 # review row, with its own "Enter …" button from `needs` (PR #20 round 2: never hidden, even when it fails).
-INTERIOR = {"sleeping_rooms", "parking_spaces"}
+INTERIOR = set(logic.INTERIOR_FACTS)
 NUMBER = re.compile(r"^([≥≤<>=]) (-?[\d,]+(?:\.\d+)?)$")
 
 
@@ -109,11 +109,14 @@ def _why(row: dict, rules: dict, measured: dict, allowed: dict | None = None, fa
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
         rule = rules[row["Rule id"]]
+        values = {k: m.get("value") for k, m in measured.items()}
         own = _review_reasons(rule, measured, allowed, facts) if allowed is not None else []
         for name in sorted(set().union(*(formula.names(rule[k]) for k in ("applies_when", "check") if rule.get(k)))):
             if own and (measured.get(name) or {}).get("readings"):
                 continue                # needs review under every one of its readings: it changes nothing
             reason = (measured.get(name) or {}).get("reason")
+            if name in logic.OPTIONAL and not present.could_settle(rule, values, name):
+                continue        # an optional fact that can't change this row isn't why it needs review (r2 round 2)
             if (measured.get(name) or {}).get("value") is None and reason and reason not in reasons:
                 reasons.append(reason)
         reasons = own + reasons
@@ -706,8 +709,18 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
             part.unlink()
 
 
+# What a check or a start is doing, in the architect's words, as each stage begins (the plugin's progress line)
+STEPS = {"read": "Reading the model…", "measure": "Measuring the building…", "rules": "Checking the rules…",
+         "report": "Writing the zoning report…", "lot": "Reading the lot…",
+         "largest": "Finding the largest building that complies…"}
+
+
+def _quiet(text: str) -> None:
+    """No progress line (the command line, the tests)."""
+
+
 def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,
-          extras: dict | None = None) -> dict:
+          extras: dict | None = None, step=None) -> dict:
     """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
     Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
     building measure need review, never silently dropped. `extras` is what the command adds for the panel: what
@@ -717,24 +730,28 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     model_path = Path(model_path)
+    (step or _quiet)(STEPS["read"])
     site = read_site(model_path, facts)
     if building_problems:
         site["buildings"].append({"id": "Building layer", "faces": [], "problems": list(building_problems)})
-    return check_site(site, facts, model_path.name, report_path, extras)
+    return check_site(site, facts, model_path.name, report_path, extras, step=step)
 
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
-               extras: dict | None = None) -> dict:
+               extras: dict | None = None, step=None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
     generator builds. Exactly the same measuring, rules and presentation as a model read from a file."""
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     model_path = Path(name)
+    say = step or _quiet
+    say(STEPS["measure"])
     measured = measure(site, facts)
     project = {"title": facts.get("title") or model_path.stem, "jurisdiction": facts.get("jurisdiction"),
                "zone": facts.get("zone"),
                "measurements": {k: {"value": m["value"], "from": working(m, model_path.name)} for k, m in measured.items()}}
+    say(STEPS["rules"])
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "project.yaml"
         path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True), encoding="utf-8")
@@ -796,6 +813,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
+            say(STEPS["report"])
             _report(t, v, report_path)
         except OSError as e:
             report_error = f"{e.strerror or e} ({report_path})"
@@ -916,6 +934,408 @@ def _yard_lines(lot, measure: str, point):
     return lot.line(hit) if hit else None
 
 
+def _clip_above(points: list, z: float) -> list:
+    """A face's points clipped to the part at height z or above (Sutherland-Hodgman against one level)."""
+    out = []
+    for k, p in enumerate(points):
+        q = points[(k + 1) % len(points)]
+        if p[2] >= z:
+            out.append(list(p))
+        if (p[2] >= z) != (q[2] >= z):               # the edge crosses the level: where it does
+            t = (z - p[2]) / (q[2] - p[2])
+            out.append([p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1]), z])
+    return out
+
+
+WALL_TILT = 1e-3      # a face whose plan is under this share of its own area is a wall (plumb, or within a hair)
+
+
+def _is_wall(points: list) -> bool:
+    """Whether a face stands upright: its plan (seen from above) is under WALL_TILT of its own area (Newell's
+    method), so a wall a hair out of plumb is a wall too (review of the #28 fix, L1)."""
+    nx = ny = nz = 0.0
+    for k, p in enumerate(points):
+        q = points[(k + 1) % len(points)]
+        nx += (p[1] - q[1]) * (p[2] + q[2])
+        ny += (p[2] - q[2]) * (p[0] + q[0])
+        nz += (p[0] - q[0]) * (p[1] + q[1])
+    full = (nx * nx + ny * ny + nz * nz) ** 0.5
+    return full <= 1e-12 or abs(nz) <= WALL_TILT * full
+
+
+def walls_beyond(building: dict, z: float, region) -> bool:
+    """Whether a wall (a face seen edge-on from above) rises over height z somewhere `region` (what above() sees)
+    doesn't cover: its plan, 0.05 ft each side, not inside the region."""
+    from shapely.geometry import LineString
+    for f in building.get("faces") or []:
+        if not any(p[2] > z + 1e-6 for p in f["points"]):
+            continue
+        if not _is_wall(f["points"]):
+            continue                                    # not a wall: above() already sees it
+        clipped = [p[:2] for p in _clip_above(f["points"], z)]
+        trace = LineString(clipped) if len(clipped) >= 2 else None
+        if trace is not None and trace.length > 1e-6 and not region.buffer(0.05).contains(trace):
+            return True
+    return False
+
+
+def above(building: dict, z: float):
+    """The building seen from above where it rises above height z: each face clipped to z and above, projected
+    flat (a pitched roof's strip along its ridge, a flat roof's whole outline; vertical faces add nothing)."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    parts = []
+    for f in building.get("faces") or []:
+        if not any(p[2] > z + 1e-6 for p in f["points"]) or _is_wall(f["points"]):
+            continue                                    # (a wall's sliver of plan adds nothing: walls_beyond)
+        shell = _clip_above(f["points"], z)
+        if len(shell) < 3:
+            continue
+        poly = Polygon([p[:2] for p in shell]).buffer(0)
+        for h in f.get("holes") or []:
+            hole = _clip_above(h, z)
+            if len(hole) >= 3:
+                poly = poly.difference(Polygon([p[:2] for p in hole]).buffer(0))
+        if poly.area > 1e-9:
+            parts.append(poly)
+    return unary_union(parts) if parts else Polygon()
+
+
+REQUIRED_HALF_FT = 6.0     # the faint required line: this far either side of its yard's dimension
+HEIGHT_DIM_OFFSET_FT = 4.0  # the height dimension stands this far out from the building's corner
+
+
+def _dim_label(i: dict) -> str:
+    """A dimension's words, as the plan shows them: its mark, its name, the measured distance (feet-inches) and,
+    when it fails, what is needed."""
+    return (f"{i['mark']} {i['name']} {i['proposed']}" +
+            (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
+            (" (approx.)" if i.get("approx") else ""))
+
+
+ORDINALS = {1: "1st", 2: "2nd", 3: "3rd"}
+ON_WALL_FT = 0.01                    # a closest point this near the ground floor's outline is on its wall
+
+
+def measured_to(points: list, solids: list, footprint) -> str:
+    """What a yard's dimension is measured to, when it is not the ground-floor wall: "2nd-floor overhang", or
+    "a part above the ground floor" when no floor level names it (a bay, eaves, a sloped underside). "" for the
+    ground-floor wall (today's plain label) and whenever it can't be told. Labelling only: the yard is measured "from
+    the ground upward", to its least distance (§325-3 Yard), so the number and its pass or fail never change.
+    `points`: the yard's measured closest points (one on the building seen from above, one on the lot line);
+    `solids`: (building, its projection) pairs; the ground floor is every horizontal face at the lowest level."""
+    from shapely.geometry import Point, Polygon
+    from shapely.ops import unary_union
+    if not points or len(points) < 2 or footprint is None or footprint.is_empty or not solids:
+        return ""
+    from shapely.geometry import LineString
+    ends = [Point(p[:2]) for p in points]
+    house = min(ends, key=lambda q: footprint.boundary.distance(q))
+    lot_end = ends[1] if house is ends[0] else ends[0]
+    dx, dy = house.x - lot_end.x, house.y - lot_end.y
+    length = (dx * dx + dy * dy) ** 0.5
+    if length < 1e-9:
+        return ""
+    far = 1e4 / length               # the lot line here: square to the dimension through its lot end
+    line = LineString([(lot_end.x - dy * far, lot_end.y + dx * far), (lot_end.x + dy * far, lot_end.y - dx * far)])
+    flats = []                       # (z, outline) of every horizontal face
+    for b, _ in solids:
+        for f in b["faces"]:
+            zs = [p[2] for p in f["points"]]
+            if len(zs) >= 3 and max(zs) - min(zs) < 1e-6:
+                poly = Polygon([tuple(p[:2]) for p in f["points"]]).buffer(0)
+                if poly.area > 1e-9:
+                    flats.append((zs[0], poly))
+    if not flats:
+        return ""
+    bottom = min(z for z, _ in flats)
+    ground = unary_union([poly for z, poly in flats if z - bottom < 1e-6])
+    if ground.is_empty or ground.distance(line) - length <= ON_WALL_FT:
+        return ""                   # the ground floor's wall is as near: today's plain label
+    levels = sorted({round(min(p[2] for f in b["faces"] for p in f["points"]), 4) for b, _ in solids})
+    starts = sorted(z for z, poly in flats if z - bottom >= 1e-6 and poly.boundary.distance(house) <= ON_WALL_FT)
+    if starts and len(levels) > 1 and round(starts[0], 4) in levels:
+        n = levels.index(round(starts[0], 4)) + 1
+        return f"{ORDINALS.get(n, str(n) + 'th')}-floor overhang"
+    return "a part above the ground floor"
+
+
+def number_to(number: str, proposed: str, what: str) -> str:
+    """The drawn number with what it is measured to (measured_to), the number itself unchanged: "22'-0\" (to 2nd-floor
+    overhang)"; a range (the yard read two ways, the open question of walls or overhangs) names its nearer end, the
+    one measured to the overhang: "? 27'-0\" (to 2nd-floor overhang) to 30'-0\"". `what` "": `number` as it is."""
+    if not what or proposed not in number:
+        return number
+    low, sep, high = proposed.partition(" to ")
+    return number.replace(proposed, low + f" (to {what})" + (sep + high if sep else ""))
+
+
+def required_lines(points: list, item: dict, edges: list) -> tuple[list, str | None]:
+    """The yard's required line(s) across its dimension, and why there is none: one at its limit (`limit_ft`), or,
+    when the limit depends on an open measurement (the lot depth, on the tax map), one at each end of its range
+    (`limit_span_ft`), so every dimensioned yard shows where its minimum lies (Rhino check of #29)."""
+    lo_hi = item.get("limit_span_ft")
+    limits = [item["limit_ft"]] if isinstance(item.get("limit_ft"), (int, float)) else (
+        sorted(set(lo_hi)) if lo_hi else [])
+    lines = [x for x in (required_line(points, limit, edges) for limit in limits) if x]
+    why = None if lines else ("its limit is not a length in feet" if not limits else
+                              "the minimum is 0 ft (on the lot line)" if all(x <= 0 for x in limits) else
+                              "the dimension has no length")
+    return lines, why
+
+
+def required_tags(item: dict) -> list:
+    """The small tag at each required line's end, in the order of required_lines: "min 25'-0\"" (feet-inches, as
+    the panel's Required column rounds a minimum: up)."""
+    lo_hi = item.get("limit_span_ft")
+    limits = [item["limit_ft"]] if isinstance(item.get("limit_ft"), (int, float)) else (
+        sorted(set(lo_hi)) if lo_hi else [])
+    return ["min " + present.value_text(x, "ft", "≥", False) for x in limits if x > 0]
+
+
+def required_line(points: list, limit, edges: list) -> list | None:
+    """Where the yard's required line crosses its dimension (plan, feet): a short line square to the dimension,
+    `limit` from the lot line along it, REQUIRED_HALF_FT either side, drawn faint. The dimension's lot-line end is
+    whichever end lies nearer the lot's outline (a measurement's points are a lot-line point and a building point).
+    None without a limit in feet or a dimension of some length."""
+    from shapely.geometry import LineString, Point
+    if not isinstance(limit, (int, float)) or limit <= 0 or not points or len(points) < 2:
+        return None
+    a, b = [list(p[:2]) for p in points[:2]]
+    length = math.dist(a, b)
+    if length < 1e-6:
+        return None
+    if edges:
+        ring = LineString([tuple(p[:2]) for e in edges for p in e["points"]])
+        if ring.distance(Point(b)) < ring.distance(Point(a)):
+            a, b = b, a
+    ux, uy = (b[0] - a[0]) / length, (b[1] - a[1]) / length
+    cx, cy = a[0] + ux * limit, a[1] + uy * limit
+    return [[cx - uy * REQUIRED_HALF_FT, cy + ux * REQUIRED_HALF_FT], [cx + uy * REQUIRED_HALF_FT, cy - ux * REQUIRED_HALF_FT]]
+
+
+DIM_NEAR_FT = 0.02    # a wall run's "nearest part": within this (1/4") of the yard as measured
+STRAIGHT_FT = 1e-3    # a footprint point this close to the line through its neighbours lies on a straight wall
+BEND_SLACK_FT = 0.5   # at a bend in the lot line in front of the wall: a square dimension at most this much longer
+
+
+def _wall_runs(footprint) -> list:
+    """The footprint's outline as wall runs: its pieces, those that carry straight on joined (a gable's footprint
+    keeps a point mid-wall under the ridge: review round 3 of #29, F1)."""
+    out = []
+    for g in getattr(footprint, "geoms", [footprint]):
+        for ring_ in [g.exterior, *g.interiors]:
+            pts = [p for p in list(ring_.coords)[:-1]]
+            pts = [p for k, p in enumerate(pts) if math.dist(p, pts[k - 1]) > 1e-9]
+            n = len(pts)
+            if n < 3:
+                continue
+
+            def straight(k):                      # pts[k] lies on a straight line from pts[k-1] to pts[k+1]
+                a, b, c = pts[k - 1], pts[k], pts[(k + 1) % n]
+                cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0])
+                dot = (b[0] - a[0]) * (c[0] - b[0]) + (b[1] - a[1]) * (c[1] - b[1])
+                # off the line from a to c by under STRAIGHT_FT (feet, not an angle: a model's single-precision
+                # points sit 1e-6 ft off a straight wall; review round 4, F1)
+                return abs(cross) / max(math.dist(a, c), 1e-12) <= STRAIGHT_FT and dot > 0
+            corners = [k for k in range(n) if not straight(k)]
+            for j, k in enumerate(corners):
+                end = corners[(j + 1) % len(corners)]
+                chain = [pts[(k + i) % n] for i in range(((end - k) % n or n) + 1)]
+                out += _straight_runs(chain)
+    return out
+
+
+def _straight_runs(chain: list) -> list:
+    """A chain of points joined into runs that each stay within STRAIGHT_FT of their own end-to-end line
+    (Douglas-Peucker): a wall drawn as many short pieces along a curve is many runs, never one chord in front of
+    it (independent review of #29, round 5)."""
+    a, b = chain[0], chain[-1]
+    length = math.dist(a, b)
+    far, at = 0.0, None
+    for k, p in enumerate(chain[1:-1], 1):
+        off = (abs((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) / length if length > 1e-12
+               else math.dist(a, p))
+        if off > far:
+            far, at = off, k
+    if at is None or far <= STRAIGHT_FT:
+        return [(a, b)] if length > 1e-9 else []
+    return _straight_runs(chain[:at + 1]) + _straight_runs(chain[at:])
+
+
+DIM_CANDIDATES = 15   # positions offered along a wall run for the viewport to place a yard's dimension clear
+
+
+def dim_points(points: list, measure: str, shape, footprint, edges: list, worst: bool = True) -> list:
+    """Where a yard's dimension is drawn by preference (plan, feet): [its lot-line end, its building end]; the first
+    of dim_candidates, or the measurement's own pair when there is none."""
+    found = dim_candidates(points, measure, shape, footprint, edges, worst)
+    return found[0] if found else points
+
+
+def dim_candidates(points: list, measure: str, shape, footprint, edges: list, worst: bool = True) -> list:
+    """Where a yard's dimension may be drawn (plan, feet), best first: pairs [its lot-line end, its building end],
+    as a drawing would place it (Rhino checks of #29). The building end lies on the wall run facing the yard's lot
+    line, never a corner the next yard's dimension shares; the lot end is its square projection onto the lot-line
+    piece it falls on (0° by construction). Best is nearest the middle of the run; the plugin draws the first (its
+    number placed by rhino_logic.place_dim_label).
+    How far along the run it may go: a yard that fails or needs review (`worst`) is dimensioned where it is
+    shortest, within DIM_NEAR_FT of the yard as measured (the drawing never shows more room than the label);
+    a complying yard anywhere its dimension is within BEND_SLACK_FT of it (a lot line a fraction of a degree off
+    the wall: anywhere along it). At a bend in the lot line right in front of the wall the nearest square position
+    within BEND_SLACK_FT. The label is always the yard as measured, its closest point. None (an empty list) when
+    there is no lot shape or footprint to work from."""
+    from shapely.geometry import LineString, Point
+    if not points or len(points) < 2 or shape is None or footprint is None or footprint.is_empty:
+        return []
+    a, b = [tuple(p[:2]) for p in points[:2]]
+    if edges:
+        ring = LineString([tuple(p[:2]) for e in edges for p in e["points"]])
+        if ring.distance(Point(b)) < ring.distance(Point(a)):
+            a, b = b, a
+    lines = _yard_lines(shape, measure, a)
+    if lines is None:
+        return []
+    pieces = [(q[k], q[k + 1]) for g in getattr(lines, "geoms", [lines]) for q in [list(g.coords)]
+              for k in range(len(q) - 1) if math.dist(q[k], q[k + 1]) > 1e-9]
+    near = Point(b)
+    measured = lines.distance(near)
+    runs = [r for r in _wall_runs(footprint) if LineString(r).distance(near) < 1e-6]
+    if not runs or not pieces:
+        return []
+    facing = min(pieces, key=lambda s: LineString(s).distance(near))
+
+    def turn(run):                                 # how far the run is from parallel to the lot-line piece
+        (p, q), (u, w) = run, facing
+        cross = (q[0] - p[0]) * (w[1] - u[1]) - (q[1] - p[1]) * (w[0] - u[0])
+        return abs(cross) / (math.dist(p, q) * math.dist(u, w))
+    p, q = min(runs, key=turn)
+    steps = 200
+    at = [(p[0] + (q[0] - p[0]) * t / steps, p[1] + (q[1] - p[1]) * t / steps) for t in range(steps + 1)]
+
+    def onto(start, piece):                        # square projection onto a piece, if it falls on it
+        (u, w) = piece
+        dx, dy = w[0] - u[0], w[1] - u[1]
+        t = ((start[0] - u[0]) * dx + (start[1] - u[1]) * dy) / (dx * dx + dy * dy)
+        return (u[0] + t * dx, u[1] + t * dy) if -1e-9 <= t <= 1 + 1e-9 else None
+
+    def square(k, slack):                          # the dimension from at[k], if square and short enough
+        feet = [x for x in (onto(at[k], piece) for piece in pieces) if x is not None]
+        if not feet:
+            return None
+        foot = min(feet, key=lambda x: math.dist(x, at[k]))
+        if footprint.boundary.distance(Point(at[k])) > 1e-6:      # a start never off the wall (backstop)
+            return None
+        return [list(foot), list(at[k])] if math.dist(foot, at[k]) <= measured + slack + 1e-6 else None
+    middle = steps // 2
+    # never at the corners themselves; a complying yard's kept off the last twentieth of the wall (room for the
+    # neighbouring yard's), a short one where it is shortest, however near the corner that is
+    inner = range(1, steps) if worst else range(steps // 20, steps - steps // 20 + 1)
+    # a short yard: where it is shortest, its corner too before any slack (review round 6, F1: a house turned
+    # against its lot is shortest at a corner); then the bend slack
+    ends = range(steps + 1)
+    tries = ([(inner, DIM_NEAR_FT), (ends, DIM_NEAR_FT), (inner, BEND_SLACK_FT), (ends, BEND_SLACK_FT)] if worst
+             else [(inner, BEND_SLACK_FT), (ends, BEND_SLACK_FT)])
+    found = []
+    for ks, slack in tries:
+        found = [(k, d) for k, d in ((k, square(k, slack)) for k in ks) if d]
+        if found:
+            break
+    if len(found) > DIM_CANDIDATES:                 # spread evenly along the run, both ways from the best
+        spread = max(1, -(-(found[-1][0] - found[0][0]) // (DIM_CANDIDATES - 1)))
+        best = min(found, key=lambda kd: abs(kd[0] - middle))[0]
+        found = [(k, d) for k, d in found if (k - best) % spread == 0]
+    if worst and slack > DIM_NEAR_FT:               # with slack: the shortest first (round 6, F1); within 1/4"
+        return [d for k, d in sorted(found, key=lambda kd: (round(math.dist(*kd[1]), 4), abs(kd[0] - middle)))]
+    # every one as short as the yard: nearest the middle, off the shared corner (round 7, F2)
+    return [d for k, d in sorted(found, key=lambda kd: abs(kd[0] - middle))]
+
+
+def height_dim(site: dict, env: dict, v: dict, measured: dict) -> dict | None:
+    """The height's vertical dimension for the elevations (feet): from the grade plane up the measured height,
+    beside the buildings' corner (HEIGHT_DIM_OFFSET_FT out from it), labelled and coloured as the height row, the
+    limit as a faint line across it. None without a grade, a measured height (the larger reading when they
+    differ: never drawn lower than it may be) or a building."""
+    item = next((i for i in v["items"] if i.get("measure") == "building_height"), None)
+    record = (measured or {}).get("building_height") or {}
+    value = record.get("value")
+    if value is None and record.get("readings"):
+        value = max(r["value"] for r in record["readings"] if isinstance(r.get("value"), (int, float)))
+    pts = [p for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
+    if item is None or not isinstance(value, (int, float)) or not env or env.get("base") is None or not pts:
+        return None
+    x = max(p[0] for p in pts) + HEIGHT_DIM_OFFSET_FT
+    y = min(p[1] for p in pts) - HEIGHT_DIM_OFFSET_FT
+    limit = item.get("limit_ft")
+    return {"at": [x, y], "base": env["base"], "top": env["base"] + value, "status": item["status"],
+            "label": _dim_label(item), "number": logic.dim_number(item["mark"], item["proposed"], item["status"]),
+            "limit": env["base"] + limit if isinstance(limit, (int, float)) else None}
+
+
+def from_tax_map(facts) -> bool:
+    """Whether the lot's lines are the tax map's (each right only to within ±TAX_MAP_TOLERANCE): anything but a lot
+    marked surveyed, an unknown one too (as the rows read it: present.py's "(approx.)"; review of feature 4, F2)."""
+    return not (facts or {}).get("lot_surveyed")
+
+
+def cautious_outline(outline, facts) -> list | None:
+    """On a tax-map lot, the buildable outline drawn in by TAX_MAP_TOLERANCE on every side: where the building
+    stands clear however the tax map's lines really lie, as a list of rings (a narrow outline can come apart in
+    pieces, each kept; none at all where nothing is left 2'-0" in: an empty list, never the outline as drawn: review
+    of feature 4, F3). None on a survey or without an outline (Ben, 2026-10-25: the cautious outline to snap to; the
+    as-drawn one dashed)."""
+    from shapely.geometry import Polygon
+    from envelope_builder.envelope import QUAD_SEGS
+    from model_measurement.measure import TAX_MAP_TOLERANCE
+    if not outline or not from_tax_map(facts):
+        return None
+    inner = Polygon(outline).buffer(-TAX_MAP_TOLERANCE, quad_segs=QUAD_SEGS)   # every lot line 2'-0" nearer: at
+    # an inside corner too, exactly 2'-0" (a square join made it 2'-10": review of feature 4, round 4, F2)
+    return [_ring(g) for g in getattr(inner, "geoms", [inner]) if g.geom_type == "Polygon" and not g.is_empty]
+
+
+def full_yard_lines(shape, lot: dict, items: list) -> list:
+    """Each measured yard's required line in full across the lot (plan, feet): its lot line(s) moved in by the
+    row's limit, clipped to the lot; a limit that waits on an open measurement (the lot depth on the tax map:
+    `limit_span_ft`) gives a line at each end of its range, as required_lines does (review of feature 4, F4).
+    [{"measure", "name", "status", "limit_ft", "points": [[x, y], ...]}], one entry per piece; nothing for a yard
+    without a limit in feet or without a lot shape. The lot is the measurement's own polygon, curved lines and
+    all (F5)."""
+    from shapely.geometry import LineString, Point
+    from envelope_builder.envelope import QUAD_SEGS
+    if shape is None or not (lot or {}).get("edges"):
+        return []
+    area = shape.polygon.buffer(0)
+    out = []
+    for i in items:
+        lo_hi = i.get("limit_span_ft")
+        limits = [i["limit_ft"]] if isinstance(i.get("limit_ft"), (int, float)) else (
+            sorted(set(lo_hi)) if lo_hi else [])
+        if i.get("measure") not in YARD_MEASURES or not i.get("points"):
+            continue
+        a, b = [tuple(p[:2]) for p in i["points"][:2]]
+        lot_end = a if area.exterior.distance(Point(a)) <= area.exterior.distance(Point(b)) else b
+        lines = _yard_lines(shape, i["measure"], lot_end)
+        if lines is None:
+            continue
+        for limit in limits:
+            if limit <= 0:
+                continue
+            # round corners at the envelope's own fineness (its QUAD_SEGS), so the line and the envelope's arc
+            # agree (reviews of dd44f1b, F3, and d5fca99, R1)
+            band = area.intersection(lines.buffer(limit, quad_segs=QUAD_SEGS))
+            # (only its polygon parts: a touch at a point or along a line makes a collection, whose boundary is
+            # None in shapely 2.1: review of feature 4, F8)
+            parts = [g for g in getattr(band, "geoms", [band]) if g.geom_type == "Polygon" and not g.is_empty]
+            for part in parts:
+                inner = part.boundary.difference(area.exterior.buffer(1e-6))
+                for g in getattr(inner, "geoms", [inner]):
+                    if isinstance(g, LineString) and g.length > 1e-3:
+                        out.append({"measure": i["measure"], "name": i.get("name"), "status": i.get("status"),
+                                    "limit_ft": limit, "points": [list(p) for p in g.coords]})
+    return out
+
+
 def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None, overlays: bool = True) -> dict:
     """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
     its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
@@ -923,23 +1343,40 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
     Each yard's red and amber are its own row's (present.settle: from the row's readings, after every status
     change), never another yard's: red where its wall is short under every reading, amber under some."""
     from model_measurement.measure import Lot, _projection, union as unary_union
+    from model_measurement.stops import stop
 
     lot = site.get("lot") or {}
     edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
              for r, length in edge_runs(lot.get("edges") or [])
              if length >= SHORTEST_LABELLED_EDGE]   # a tax-map sliver (0'-1 5/8"): no label, it only clutters
-    yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
-              (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
-              (" (approx.)" if i.get("approx") else "")}
-             for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
+    solids = [(b, _projection(b)) for b in site.get("buildings") or [] if b.get("faces")] if overlays else []
+    footprint = unary_union([p for _, p in solids]) if solids else None
+    shape = Lot(site, facts or {}) if overlays and lot.get("edges") and facts and facts.get("street_line") else None
+    yards = []
+    for i in v["items"]:
+        if not (i.get("points") and i.get("measure") in YARD_MEASURES):
+            continue
+        worst = i["status"] in (present.FAILS, present.REVIEW)
+        options = dim_candidates(i["points"], i["measure"], shape, footprint, lot.get("edges") or [], worst) or \
+            [i["points"]]
+        candidates = []
+        for at in options:
+            lines, why = required_lines(at, i, lot.get("edges") or [])
+            candidates.append({"points": at, "required_lines": lines})
+        # a yard with no required line says why, on its label (review round 3, F2)
+        yards.append({"points": candidates[0]["points"], "measured_points": i["points"], "status": i["status"],
+                      "label": _dim_label(i) + (f" · no required line: {why}" if why else ""),
+                      "required_lines": candidates[0]["required_lines"], "required_why": why,
+                      # on the drawing: its number only, the "min" tags only where it fails or needs review
+                      "number": number_to(logic.dim_number(i["mark"], i["proposed"], i["status"]), i["proposed"],
+                                          measured_to(i["points"], solids, footprint)),
+                      "required_tags": required_tags(i) if i["status"] in (present.FAILS, present.REVIEW) else [],
+                      "candidates": candidates})
     encroach = []
-    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")] if overlays else []
-    footprint = unary_union(plans) if plans else None
-    tops = [p[2] for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
+    tops = [p[2] for b, _ in solids for f in b["faces"] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
     if footprint is not None and not footprint.is_empty and env and env.get("outline") and tops:
-        shape = Lot(site, facts or {}) if lot.get("edges") and facts and facts.get("street_line") else None
-        reds, ambers = [], []
+        rows = []                                  # (the row, its red region or None, its amber regions)
         for i in v["items"]:
             if i.get("colour") not in ("red", "amber") or shape is None:
                 continue
@@ -951,31 +1388,68 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                 strip = (lambda d: footprint.intersection(lines.buffer(d, quad_segs=32)) if d > 0 else None)
                 near.append(strip(limit["near"]))
                 far.append(strip(limit["far"]))
+            red = None
             if i["colour"] == "red" and near and all(g is not None for g in near):
                 red = near[0]
                 for g in near[1:]:                          # short under EVERY reading: where every one says so
                     red = red.intersection(g)
-                reds.append(red)
-            ambers += [g for g in far if g is not None]
-        red = unary_union(reds) if reds else None
-        doubt = unary_union(ambers) if ambers else None
-        if doubt is not None and red is not None:
-            doubt = doubt.difference(red)
-        # outlines simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude;
-        # without a grade the strip stands on the building's own base, never at 0
-        base = env["base"] if env.get("base") is not None else min(tops)
-        for region, status in ((red, present.FAILS), (doubt, present.REVIEW)):
-            for g in hole_free(region):
-                if g.area > 1e-3:
-                    encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
-                                     "status": status})
+            rows.append((i, red, [g for g in far if g is not None]))
+        reds = [r for _, r, _ in rows if r is not None]
+        red_all = unary_union(reds) if reds else None
+        # each region is its own row's (the side yard's, the rear yard's…), named on it, and coloured once: where
+        # two rows' strips overlap (a corner), the first row's; amber never where any row is red
+        taken = {present.FAILS: None, present.REVIEW: red_all}
+        regions = []
+        for i, red, ambers in rows:
+            for region, status in ((red, present.FAILS), (unary_union(ambers) if ambers else None, present.REVIEW)):
+                if region is None or region.is_empty:
+                    continue
+                if taken[status] is not None:
+                    region = region.difference(taken[status])
+                taken[status] = region if taken[status] is None else unary_union([taken[status], region])
+                regions.append((region, status, i))
+        # per building: only the part of THAT building in the yard, from its own bottom to its own top (a garage
+        # in a side yard is never coloured up to the house's ridge). The viewport then cuts each building by its
+        # block (Rhino's boolean), so a cantilever over a yard is coloured, not the air under it. Outlines
+        # simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude.
+        for region, status, i in regions:
+            for b, own in solids:
+                zs = [p[2] for f in b["faces"] for p in f["points"]]
+                for g in hole_free(region.intersection(own)):
+                    if g.area > 1e-3:
+                        encroach.append({"outline": _ring(g), "base": min(zs), "top": max(zs), "why": "yard",
+                                         "status": status, "building": b.get("id"), "measure": i.get("measure"),
+                                         "row": i.get("name")})
         height = statuses.get("building_height")
-        if height in (present.FAILS, present.REVIEW) and env.get("top") is not None and max(tops) > env["top"]:
-            for g in getattr(footprint, "geoms", [footprint]):
-                encroach.append({"outline": _ring(g), "base": env["top"], "top": max(tops), "why": "height",
-                                 "status": height})
-    return {"edges": edges, "yards": yards, "encroach": encroach,
-            "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
+        if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
+            for b, own in solids:                       # only what rises above the limit: a roof's ridge, not its eaves
+                top = max(p[2] for f in b["faces"] for p in f["points"])
+                # a curved surface the reader left out (a vault) may rise over the limit from walls below it: a
+                # block over its plan at the limit, no taller here; Rhino reaches it to the real solid's top and
+                # cuts it (rhino_logic.block_span), nothing when the solid stays under (review of 2cae58d, F1)
+                unread = bool(set(b.get("problems") or []) & {stop("curved_surface"), stop("curved_edge")})
+                if top <= env["top"] + 1e-6 and not unread:
+                    continue
+                top = max(top, env["top"])
+                region = above(b, env["top"])
+                # nothing above it seen from above, or a wall rising over the limit outside what is (a vault read as
+                # walls, alone or beside a flat roof): its own plan, never less (independent review of #28, P1, L1)
+                if region.is_empty or region.area <= 1e-3 or walls_beyond(b, env["top"], region):
+                    region = own
+                for g in hole_free(region):
+                    if g.area > 1e-3:
+                        encroach.append({"outline": _ring(g), "base": env["top"], "top": top, "why": "height",
+                                         "status": height, "building": b.get("id"),
+                                         "measure": "building_height", "row": "Building height"})
+    return {"edges": edges, "yards": yards, "encroach": encroach, "height": height_dim(site, env, v, measured),
+            "footprint": [_ring(g) for g in getattr(footprint, "geoms", [footprint])
+                          if footprint is not None and not footprint.is_empty and g.geom_type == "Polygon"],
+            "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None,
+            # what the architect snaps to (Osnap curves on Gordium::Envelope): the cautious outline on a tax-map lot
+            # (every lot line 2'-0" nearer), and each yard's required line in full
+            "buildable_cautious": cautious_outline(env.get("outline") if env else None, facts),
+            "lot_from_tax_map": from_tax_map(facts),
+            "yard_lines": full_yard_lines(shape, lot, v["items"])}
 
 
 def _start_preview(out: dict, measured: dict) -> dict | None:
@@ -1000,36 +1474,75 @@ def _start_preview(out: dict, measured: dict) -> dict | None:
             "kept_back": present.feet_inches(out["kept_back"], "nearest") if out.get("kept_back") else None}
 
 
-TAX_MAP_NOTE = ("Starting house keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey "
-                "for the full area.")
+TAX_MAP_NOTE = ("Largest house that complies even if the tax-map lines are 2'-0\" off; limited by {limit}. Use my "
+                "survey… for the full size.")
 NOT_PROVEN = ("Starting house: Gordium couldn't keep it clear of the tax map's 2'-0\" tolerance on this lot; the items "
               "that say so need review until a survey.")
 
 
-def margin_note(keep, buffer, tax, proven):
-    """What the starting house keeps back, in the architect's words (Ben's wording when it is the tax map alone)."""
+def limit_words(out, lot_area):
+    """What stopped the starting house growing, in the architect's words, with its number (Ben, 2026-10-21: "limited
+    by coverage 25%"): the lot coverage limit and its percent of the lot, or the yards and their minimums."""
+    ft = lambda v: present.feet_inches(v, "up")                    # noqa: E731 (a minimum: up, as the panel)
+    if out.get("limited_by") == "coverage" and out.get("coverage_allowed") and lot_area:
+        return "lot coverage " + present._pct(out["coverage_allowed"] / lot_area * 100, "down", 2)
+    yards = out.get("yards") or {}
+    split = out.get("side_split")
+    sides = ("sides " + ft(split["larger"]) + " and " + ft(split["smaller"])) if split else \
+        ("sides " + ft(yards.get("side", 0)))
+    if yards:
+        return "the yards (front " + ft(yards.get("front", 0)) + ", " + sides + ", rear " + ft(yards.get("rear", 0)) + ")"
+    return "the yards"
+
+
+def side_words(split, plan_north_deg=0.0):
+    """Which side the larger side yard is on, in the architect's words, seen from the street, each side with its
+    true compass point: 'Side yards: 10'-0" on the left (north), 5'-0" on the right (south), seen from the street.'
+    None when the two side yards are the same (no choice was made)."""
+    if not split:
+        return None
+    ft = lambda v: present.feet_inches(v, "up")                    # noqa: E731 (a minimum: up, as the panel)
+
+    def named(side):
+        where = present.compass(*split[side + "_toward"], plan_north_deg or 0.0)
+        return f"{ft(split[side])} on the {side}" + (f" ({where.lower()})" if where else "")
+
+    first = split["larger_side"]
+    second = "right" if first == "left" else "left"
+    return f"Side yards: {named(first)}, {named(second)}, seen from the street."
+
+
+def margin_note(keep, buffer, tax, proven, limit="the yards"):
+    """What the starting house is and keeps back, in the architect's words, with what limited it (Ben's wording when
+    it is the tax map alone: "Largest house that complies even if the tax-map lines are 2'-0" off; limited by …")."""
     ft = lambda v: present.feet_inches(v, "nearest")
     if tax and not proven:
         return NOT_PROVEN
     if tax and not buffer:
-        return TAX_MAP_NOTE if abs(keep - TAX_MAP_TOLERANCE) < 1e-9 else TAX_MAP_NOTE.replace("2'-0\"", ft(keep), 1)
+        note = TAX_MAP_NOTE.format(limit=limit)
+        return note if abs(keep - TAX_MAP_TOLERANCE) < 1e-9 else note.replace(
+            "limited by", "kept " + ft(keep) + " back; limited by", 1)
     if tax:
         return (f"Starting house keeps {ft(keep)} back from each limit: {ft(keep - buffer)} because the lot is from "
-                f"the tax map (use a survey for the full area) and {ft(buffer)} your design buffer.")
+                f"the tax map (use a survey for the full area) and {ft(buffer)} your design buffer; limited by "
+                f"{limit}.")
     if buffer:
-        return f"Starting house keeps {ft(keep)} back from each limit (your design buffer)."
-    return "Starting house goes to the limits (the lot is from a survey)."
+        return f"Starting house keeps {ft(keep)} back from each limit (your design buffer); limited by {limit}."
+    return f"Largest house the rules allow; limited by {limit} (the lot is from a survey)."   # (only the tax-map
+    #                                         wording is Ben's; "complies" is the panel's to say: review of feature 5, F6)
 
 
 LOT_ONLY = {"lot_area", "lot_width", "lot_depth"}   # items about the lot itself, whatever the house
 
 
-def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer):
+def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer, larger_side=None):
     """The starting house, kept back from the limits so that it complies even at the tax-map worst case (Ben,
     2026-10-20): on a lot not from a survey, every yard line moves in by the tax-map tolerance and coverage is sized
     for the smallest lot the tax map allows; on a survey it goes to the limits. A design buffer (ft) is added on top
     of either. Proven, not assumed: the house is checked with the panel's own worst case, and if any item would still
-    need review from the tolerance (a rear yard minimum also grows with the lot depth) it steps back 3 in. more."""
+    need review from the tolerance (a rear yard minimum also grows with the lot depth) it steps back 3 in. more.
+    `larger_side`: where the larger side yard goes ("left" or "right", seen from the street; None: Gordium's choice),
+    kept on the side first chosen while it steps back."""
     from envelope_builder.start import floor_solids
     tax = not drawing.get("lot_surveyed")
     buffer = max(design_buffer or 0.0, 0.0)
@@ -1038,7 +1551,9 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     drawn = next((r["value"] for r in (measured.get("lot_area") or {}).get("readings") or []), None)
     scale = tol["low"] / drawn if tax and tol and drawn else 1.0
     out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
-                                 coverage_scale=scale)
+                                 coverage_scale=scale, larger_side=larger_side)
+    first = out.get("side_split")
+    side = first["larger_side"] if first else larger_side
     proven = not tax
     for _ in range(12):
         if not tax or not out.get("floors"):
@@ -1050,18 +1565,26 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
             break
         keep += 0.25
         out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
-                                     coverage_scale=scale)
+                                     coverage_scale=scale, larger_side=side)
+    if first and out.get("side_split"):          # Gordium's choice stays its choice while it steps back
+        out["side_split"]["asked"] = first["asked"]
     out["kept_back"] = keep
     if out.get("coverage_allowed") and scale:      # the rule's own allowance on the lot as drawn; what it was sized to
         out["coverage_target"] = out["coverage_allowed"]
         out["coverage_allowed"] = out["coverage_allowed"] / scale
-    out["margin_note"] = margin_note(keep, buffer, tax, proven) if out.get("floors") else None
-    if out["margin_note"] and (tax or buffer):
-        out["notes"].append(out["margin_note"])
+    lot_area = (measured.get("lot_area") or {}).get("value") or drawn   # what the allowance is a share of
+    out["margin_note"] = margin_note(keep, buffer, tax, proven, limit_words(out, lot_area)) \
+        if out.get("floors") else None
+    sides = side_words(out.get("side_split"), drawing.get("plan_north_deg")) if out["margin_note"] else None
+    if sides:                                    # which side the larger side yard is on (Switch side yards swaps)
+        out["margin_note"] += " " + sides
+    if out["margin_note"]:                        # said always: what the house is and what limits it (Ben's
+        out["notes"].append(out["margin_note"])   # "reassure in place")
     return out
 
 
-def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0) -> dict:
+def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0,
+          larger_side: str | None = None, step=None) -> dict:
     """The largest legal starting building for the lot in a model (its buildings, if any, left out): stacked
     floor blocks, one per story, from the zone's rules (envelope_builder.start). With no grade set, it is drawn
     standing at the lot's own level (and said so): the check then says height and stories need review until the
@@ -1069,6 +1592,8 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    say = step or _quiet
+    say(STEPS["lot"])
     site = {**read_site(Path(model_path), facts), "buildings": []}
     if site.get("problems"):
         return {"floors": [], "notes": list(site["problems"])}
@@ -1095,11 +1620,12 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     existing = drawing.get("grade_is") == "existing"
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}
+    say(STEPS["largest"])
     measured = measure(site, drawing)
     geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
     if geo:                             # nothing drawn from geometry the measuring couldn't work out
         return {"floors": [], "notes": [geo], "preview": None}
-    out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer)
+    out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer, larger_side)
     if existing and out.get("floors"):
         out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "
                             "No regrading near the house (or set the finished ground)")
@@ -1143,11 +1669,111 @@ def sample_site() -> dict:
             "facts": {k: v for k, v in facts.items() if k in keep}}
 
 
+def _use_lists(body) -> list:
+    """The use names a formula lists in `use in [...]` (the chart's own rows), in order."""
+    import ast
+    out = []
+    for node in ast.walk(body):
+        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use" and \
+                any(isinstance(op, ast.In) for op in node.ops):
+            for comp in node.comparators:
+                if isinstance(comp, ast.List):
+                    out += [e.value for e in comp.elts if isinstance(e, ast.Constant) and isinstance(e.value, str)]
+    return out
+
+
+def use_choices(rules: list, names: dict, district: str) -> list:
+    """The uses the district's chart lists, for the box's Use dropdown (Ben, 2026-10-25): from the district's own
+    use rule, never a hand-kept list, as [{"id", "name", "permitted", "note"}]. Permitted ones first, then those the
+    chart marks otherwise, each saying so with the chart's page. A use rule is written one of two ways: a rule
+    whose check lists the permitted uses and whose review_when lists the special-permit ones (R-1b), or a flag that
+    applies to the special-permit uses, every other city use permitted (R-3a's "every other listed use is
+    permitted"). Every city use, none marked, when the district has no use rule (nothing to narrow it by)."""
+    from rule_format import formula
+    rule = next((r for r in rules if r.get("topic") == "uses" and (r.get("check") or r.get("applies_when"))), None)
+    if rule is None:
+        return [{"id": k, "name": n, "permitted": None, "note": None} for k, n in names.items()]
+    page = next((s.get("page") for s in rule.get("sources") or [] if "chart" in (s.get("file") or "")), None)
+    cite = f"zoning chart p.{page}" if page else "the zoning chart"
+
+    def entry(u, note=None):
+        return {"id": u, "name": names.get(u, u.replace("_", " ")), "permitted": note is None, "note": note}
+
+    if rule.get("check"):
+        permitted = _use_lists(formula.parse(rule["check"]).body)
+        special = [(u, (r.get("reason") or "").split(". ")[0].rstrip(".")) for r in rule.get("review_when") or []
+                   for u in _use_lists(formula.parse(r["when"]).body)]
+    else:
+        flagged = _use_lists(formula.parse(rule["applies_when"]).body)
+        permitted = [u for u in names if u not in flagged]
+        special = [(u, "by special permit") for u in flagged]
+    out, seen = [], set()
+    for u in permitted:
+        if u not in seen:
+            seen.add(u)
+            out.append(entry(u))
+    for u, why in special:
+        if u not in seen:
+            seen.add(u)
+            said = why if "chart" in why else (f"{why} ({cite})" if why else cite)
+            out.append(entry(u, f"Not permitted by right in {district}: {said}."))
+    return out
+
+
+def follow_up_facts(rules: list, use: str | None, uses: dict) -> list:
+    """The facts the box asks after the use, derived from the rulebook (Ben, 2026-10-25: no hand-kept list): every
+    stated fact (rhino_logic.STATED_FACTS: what only the architect can say) that a rule of this district reads, in
+    its applies_when, check or review_when, when that rule can apply to this use (its applies_when not false for
+    it). Never the stories (measured), never the interior's (bedrooms, parking: on hold), never one the use itself
+    says (one-family: one dwelling unit)."""
+    implied = logic.implied_facts(use)
+    return [k for k in logic.STATED_FACTS if k in _read_for(rules, use, uses) and k != "stories"
+            and k not in INTERIOR and k not in logic.DRAWN_FACTS and k not in implied]
+
+
+def implied_for(rules: list, use: str | None, uses: dict) -> dict:
+    """What the use itself says (rhino_logic.implied_facts) for the facts this district's rules read for it, and
+    only those (a fact no rule reads is never sent: the checker knows only the facts its rules can use)."""
+    read = _read_for(rules, use, uses)
+    return {k: v for k, v in logic.implied_facts(use).items() if k in read}
+
+
+def _read_for(rules: list, use: str | None, uses: dict) -> set:
+    """Every name the district's rules read when they can apply to this use (applies_when not false for it)."""
+    from rule_format import formula
+    # every name described exactly as the checker's own verdict describes it (outcome: the city's measures and the
+    # uses, check_site), so a condition is settled here as it is there: false for this use whatever the rest turns
+    # out to be ("use in [multiple_family] and not conversion" for a one-family house) asks nothing, and a rule the
+    # checker could still find applicable (a name it can't type) is asked (review round 2: typed apart, a row
+    # needed review that the box never asked about)
+    kinds = MEASURE_KINDS | {"use": frozenset(uses)}
+    wanted = set()
+    for rule in rules:
+        if rule.get("applies_when") and use is not None:
+            try:
+                if formula.evaluate(rule["applies_when"], {"use": use}, kinds) is False:
+                    continue                      # not this use's rule: nothing it reads is asked
+            except (formula.MissingMeasure, formula.EvaluationError):
+                pass                              # depends on what isn't known yet: it may apply, so asked
+        wanted |= reading_set.rule_names(rule)
+    return wanted
+
+
 def options(jurisdiction: str) -> dict:
-    """What the confirm dialog offers: the zones that have a rulebook, and the city's use names."""
+    """What the confirm dialog offers: the zones that have a rulebook, the city's use names, and per district the
+    uses its chart lists (use_choices) and per use the facts to ask after it (follow_up_facts)."""
     j = REPO / jurisdiction
     zones = sorted({p.stem for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
                     for p in folder.glob("*.yaml") if rulebook_for(j, p.stem)})
     uses_file = j / "4_term_definitions/uses.yaml"
     uses = load(uses_file) or {} if uses_file.exists() else {}
-    return {"zones": zones, "uses": {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}}
+    names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}
+    district_uses, follow_ups, implied = {}, {}, {}
+    for zone in zones:
+        rules = load(rulebook_for(j, zone))["rules"]
+        district_uses[zone] = use_choices(rules, names, zone)
+        every = list(dict.fromkeys([u["id"] for u in district_uses[zone]] + list(names)))   # a saved use the
+        follow_ups[zone] = {u: follow_up_facts(rules, u, names) for u in every}           # district doesn't list
+        implied[zone] = {u: implied_for(rules, u, names) for u in every}                  # is asked its own too
+    return {"zones": zones, "uses": names, "district_uses": district_uses, "follow_ups": follow_ups,
+            "implied": implied}

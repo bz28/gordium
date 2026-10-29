@@ -26,11 +26,11 @@ python -m site_lookup "106 Ithaca Rd, Ithaca, NY 14850" --json   # the full resu
 | **Address point** | The State's address points (score ≥ 90); the County's address points as a cross-check (more than 50 ft apart → needs review). Never the Census geocoder: it places addresses along the street, 46 ft off at 106 Ithaca Rd | NYS Geocoder; Tompkins County TCAddress (live only) |
 | **Parcel and lot outline** | The tax parcel containing the point, asked for in EPSG:2261 (NY State Plane, **US survey feet**); area and lengths computed by Gordium, never read from the service, and converted to Gordium's international feet (× 1200/3937 ÷ 0.3048 = 1.000002: 0.03 sf on a 7,000 sf lot). The outline is stored relative to its centroid, with the centroid's State Plane position (survey feet). Source "from tax map": downstream that means ±2'-0" and the 2 ft starting-house margin | NYS Tax Parcels Public (the State's copy of the County tax map, storable); City of Ithaca tax parcels as a live fallback and for City-only flags |
 | **City only** | The parcel's SWIS code must be 500700 (City of Ithaca). The State names both the City and the Town of Ithaca "ITHACA", so the code decides. Anything else is refused | NYS Tax Parcels |
-| **Street side and corner lot** | A lot line faces a street when it runs within 30° of the street's centerline and its midpoint is within half the right-of-way + 10 ft of it (tax-map lines sit a few feet off the right-of-way edge). A street counts with at least 10 ft of frontage. Corner lot is `yes`/`no`/`ask`: one street → `no`; two streets → `ask` (it looks like a corner lot, so the start box asks which line is the front). The address on a street the lot doesn't touch → needs review. Road widths unknown (the State fallback, or a City road near the lot without one) → a 50 ft right-of-way is assumed, the street side needs review and the corner lot is `ask` (a wider second street could be missed) | City of Ithaca roads (with right-of-way widths, live only); NYS Streets as a fallback |
+| **Street side and corner lot** | A lot line faces a street when it runs within 30° of the street's centerline and its midpoint is within half the right-of-way + 10 ft of it (tax-map lines sit a few feet off the right-of-way edge). A street counts with at least 10 ft of frontage. Corner lot is `yes`/`no`/`ask`: one street → `no`; two streets → `ask` (it looks like a corner lot, so the start box asks which line is the front). The address on a street the lot doesn't touch → needs review. A City road's name is read through `names.yaml`'s exact table first ("E STATE ST / M.L.K. JR ST" is E State St; one direction of a divided street, "W CLINTON ST EB LANE", is W Clinton St); a name not listed is used as the layer writes it. Road widths unknown (the State fallback, or a City road near the lot without one) → a 50 ft right-of-way is assumed, the street side needs review and the corner lot is `ask` (a wider second street could be missed) | City of Ithaca roads (with right-of-way widths, live only); NYS Streets as a fallback |
 | **Ground** | The elevation at each lot corner and the centre, in feet above NAVD88. It's **today's** ground; finished ground is set in the start box | USGS 3DEP (1 m, the 2020 LiDAR here) |
-| **Zone** | The City zoning polygon(s) under a grid of points inside the lot; more than one zone covering 2%+ of the lot → Gordium asks. Always a suggestion: the start box's "I confirm" tick is the architect's statement | City of Ithaca zoning map (online, informational; live only, never stored) |
+| **Zone** | The City zoning polygon(s) under a grid of points inside the lot; more than one zone covering 2%+ of the lot → Gordium asks. The map's code is matched exactly against `names.yaml`: a residential district as the rulebooks write it is used as is, a listed alias is renamed (the map's `R-U` is the rulebook's `RU`, as §325-4 and the chart write it two ways), and any other code is shown as the map gives it and needs review (never matched by likeness). Always a suggestion: the start box's "I confirm" tick is the architect's statement | City of Ithaca zoning map (online, informational; live only, never stored) |
 | **Rezonings the map may not show** | `amendments.yaml`: ordinances the City adopted, each with a padded box around the districts on its map (Ord. 2025-12 Southside: from the May 2026 Southside Form District Map, p.9). A lot touching the box, or on a street the ordinance names → needs review. An ordinance without a box → every City lot needs review. A row is cleared only by `map_shows_since`, set by hand after checking the online map shows the rezoning; the map's own edit date never clears one (any edit moves it) | kept by hand |
-| **Overlays** | Historic districts, gorge protection zones, secondary zones and landmark flags on the parcel. Not checked in this release, so any found, or any that couldn't be looked for → needs review | City of Ithaca layers (live only) |
+| **Overlays** | Historic districts, gorge protection zones, secondary and overlay zones and landmark flags on the parcel, and the overlays the zoning map draws over the districts (`names.yaml`: SHOD, SLAUOZ, the Adult Use Overlay Zone; every polygon under a point is counted, so an overlay is never taken for the district nor missed for coming second). Not checked in this release, so any found, or any that couldn't be looked for → needs review | City of Ithaca layers (live only) |
 
 **Incomplete evidence is never "suggested".** A second address match that couldn't be placed on a parcel,
 elevations missing at some corners, road widths unknown (a second street could be missed: the corner lot is
@@ -118,6 +118,29 @@ about 1 s, 160 KB. In CI: `tests/fixtures/106_ithaca_rd_context.json` (the State
 175 KB, recorded 2026-10-21 by `capture.py`). The live-only machinery (a source that may not be kept, shown on screen
 and never saved) stays for any such source; its tests switch the footprints back to store: none. Tests:
 `tests/test_context.py`; the Rhino side's in `design_checker/tests/test_context_box.py`.
+
+## Address type-ahead (suggest.py): which service, and why
+
+The start box's list of addresses as the architect types (`suggest.suggest`, run by
+`python -m design_checker.lookup_box --suggest "106 Itha"`). Researched 2026-10-26; every source read that day:
+
+| Service | City-only? | Terms | Verdict |
+|---|---|---|---|
+| NYS ITS geocoder `suggest` (`.../NYS_Geocoder/GeocodeServer`, capabilities "Geocode,ReverseGeocode,Suggest") | No: every result says City "Ithaca", Town and Cayuga Heights alike; `searchExtent` is only a box | A disclaimer only ("The User accepts the Data provided 'as is'"; https://gis.ny.gov/nys-geocoding-service); NYS says suggest is meant for type-ahead | Not used: each suggestion would need its own City check |
+| Tompkins County address points (TCAddress) | Yes, by `MUNICIPALI = 'CITY OF ITHACA'` | "Please do not redistribute data to a third party without permission from Tompkins County GIS" (its ArcGIS item's licenseInfo) | Not used: showing it to architects may count as redistribution; would need the County's permission |
+| **City of Ithaca addresses** (`Address_Labels/FeatureServer/0`, "AddressSearchandLabels", 6,588 addresses) | **Yes: City addresses only** | Credit only: "Data contained in this product was originally produced by the GIS Program, City of Ithaca, NY. The originator does not warrant the accuracy or completeness of the information portrayed by the data." (item de917e8fea3c4377808aff5522d4170b, licenseInfo) | **Used** (`city_addresses` in endpoints.yaml, `store: none`, the credit kept with it) |
+
+It covers about 99% of the County's City addresses (6,500 in both; 88 only in the City's, mostly half numbers; 55
+only in the County's). A suggestion is only typing help: the address picked is looked up as any typed address is
+(the State geocoder, then the tax parcel's SWIS code decides City or Town), so nothing about the lot ever rests on
+a suggestion. Asked: `UPPER(FULL_ADDRE) LIKE '<typed, in capitals>%'`, distinct, at most 8, in order. A direction
+after the number ("North") and a street-type word ("Road", "Court") may be the City's short form ("N", "RD") or part
+of the street's own name ("101 SOUTH ST", "102 E COURT ST"), so both spellings are asked for, as typed first, OR-ed
+(at most 8 spellings); a dot after a letter is dropped ("N." is "N"; "106.5" keeps its dot); a finished last word
+matches that whole word only; another town after a comma ("…, Dryden") gets no suggestions. Nothing is stored (tests use hand-written
+stand-in addresses, `tests/test_suggest.py`). Found on the way: endpoints.yaml's `geocoder.terms` link is the
+State's "Legacy Address Geocoder" page (retired after October 2026); the current page is
+https://gis.ny.gov/nys-geocoding-service (the service URL itself is already the current one).
 
 ## Not yet
 

@@ -3,8 +3,10 @@ the checker worker, which answers one request at a time: a lookup given up on wo
 
     python -m design_checker.lookup_box "106 Ithaca Rd, Ithaca, NY 14850"            # the live services
     python -m design_checker.lookup_box "106 Ithaca Rd, Ithaca, NY 14850" --fixture 106_ithaca_rd   # recorded
+    python -m design_checker.lookup_box --suggest "106 Itha"          # type-ahead: City of Ithaca addresses, live
 
-prints one JSON line: site_lookup's result, where the lot lands in the model (`frame`), and exactly what the
+prints a {"step": "Finding the address…"} line as each stage starts (the box shows the latest, live), then, last,
+one JSON line: site_lookup's result, where the lot lands in the model (`frame`), and exactly what the
 Rhino side may write into the .3dm (`writes`, by each source's store policy in site_lookup/endpoints.yaml).
 No AI; the map services' own answers, worked out by plain code."""
 import datetime as dt
@@ -152,27 +154,101 @@ def _fixture_http(name: str):
     sys.path.insert(0, str(tests))
     spec.loader.exec_module(mod)
     fx = mod.load(name)
-    return mod.Fake(fx), mod.NOW
+    return _RecordedAddress(mod.Fake(fx), fx.get("address") or ""), mod.NOW
+
+
+class _RecordedAddress:
+    """A recorded lookup asked for the start of its own address ("96 Ithaca Rd, Ithaca, NY", as Look up adds the
+    City's name, for one recorded as "… NY 14850") answers as it was recorded: test runs only (--fixture)."""
+
+    def __init__(self, fake, address):
+        self.fake, self.address = fake, address
+
+    def post(self, url, params):
+        line = (params or {}).get("SingleLine")
+        if line and line != self.address and self.address.startswith(line.rstrip(" ,")):
+            params = dict(params, SingleLine=self.address)
+        return self.fake.post(url, params)
+
+
+SUGGEST_TIMEOUT_S = 3.0           # a type-ahead answer slower than this is no help: "Suggestions unavailable"
+
+
+def _suggest_fixture_http(offline=False):
+    """Stand-in answers for the City's address layer (site_lookup's tests: STAND_IN_ADDRESSES, hand-written, never
+    the City's data), for the in-Rhino run and the CI tests: no live call. `offline`: the layer unreachable."""
+    import importlib.util
+    tests = Path(__file__).resolve().parents[2] / "site_lookup" / "tests"
+    spec = importlib.util.spec_from_file_location("site_lookup_suggest_fixtures", tests / "test_suggest.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, str(tests))
+    spec.loader.exec_module(mod)
+    return mod.StandIn(offline=offline)
+
+
+def suggest_main(text: str, fixture: bool = False, pause: float = 0.0, offline: bool = False) -> dict:
+    """One type-ahead answer, as one JSON line for the box: {"status": "ok", "query", "suggestions"} or
+    {"status": "offline" | "error", "query"} (the box then says, quietly, that suggestions are unavailable)."""
+    from site_lookup.http import Offline, ServiceError
+    from site_lookup.suggest import suggest
+    if pause:
+        import time
+        time.sleep(pause)
+    try:
+        http = _suggest_fixture_http(offline) if fixture else Http(timeout=SUGGEST_TIMEOUT_S, retries=0)
+        return {"status": "ok", "query": text, "suggestions": suggest(text, http)}
+    except Offline:
+        return {"status": "offline", "query": text}
+    except (ServiceError, KeyError, TypeError, ValueError) as e:
+        return {"status": "error", "query": text, "detail": f"{type(e).__name__}: {e}"}
+
+
+def step_line(text: str) -> str:
+    """One progress line ({"step": ...}): printed as each stage starts, before the answer, which is always the last
+    line (rhino_logic.lookup_step and lookup_answer read them)."""
+    return json.dumps({"step": text})
 
 
 def main(argv: list[str]) -> int:
-    fixture = argv[argv.index("--fixture") + 1] if "--fixture" in argv else None
-    args = [a for k, a in enumerate(argv) if a != "--fixture" and (k == 0 or argv[k - 1] != "--fixture")]
+    if argv[:1] == ["--suggest"]:                    # --suggest TEXT [--fixture] [--slow S]: type-ahead only
+        text = argv[1] if len(argv) > 1 else ""
+        slow = float(argv[argv.index("--slow") + 1]) if "--slow" in argv[2:] else 0.0
+        print(json.dumps(suggest_main(text, "--fixture" in argv[2:], slow, "--offline" in argv[2:])), flush=True)
+        return 0
+    flags = {"--fixture": None, "--slow": None}     # --slow S: the in-Rhino test's pause at each stage (fixture only)
+    args = []
+    k = 0
+    while k < len(argv):
+        if argv[k] in flags and k + 1 < len(argv):
+            flags[argv[k]] = argv[k + 1]
+            k += 2
+            continue
+        args.append(argv[k])
+        k += 1
+    fixture = flags["--fixture"]
     if len(args) != 1:
         print(__doc__.strip(), file=sys.stderr)
         return 2
+    pause = float(flags["--slow"] or 0) if fixture else 0.0
+
+    def step(text):
+        print(step_line(text), flush=True)
+        if pause:
+            import time
+            time.sleep(pause)
+
     try:
         if fixture:
             http, now = _fixture_http(fixture)
         else:
             http, now = Http(timeout=TIMEOUT_S, retries=RETRIES), dt.datetime.now(dt.timezone.utc)
-        result = lookup(args[0], http, now)
-        print(json.dumps(box_payload(result, now), default=str))
+        result = lookup(args[0], http, now, step=step)
+        print(json.dumps(box_payload(result, now), default=str), flush=True)
     except Exception as e:                # never a traceback for the box: a plain state it can say
         print(json.dumps({"status": "error", "message": "The lookup failed: enter the site by hand.",
                           "detail": f"{type(e).__name__}: {e}", "asks": [], "matches": [], "facts": {}, "details": {},
                           "writes": {"lot_ring": None, "guide_ring": None, "street_line": None, "spots": [],
-                                     "frame": None, "snapshot": None}}))
+                                     "frame": None, "snapshot": None}}), flush=True)
     return 0
 
 

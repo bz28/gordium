@@ -166,7 +166,7 @@ try:
                               (base["top"] - base["base"] + 4) / (base["top"] - base["base"]))
     xf(top_floor, roof)
     check(doc, 5, "5 Raise the roof 4 ft", {"Building height": {"status": "does_not_comply", "proposed": "39'-0\"",
-                                                                "delta": "−4'-0\" short"}})
+                                                                "delta": "4'-0\" over"}})
     undo(top_floor, roof)
     t = stretch(ids, 0, None, 3, low=True)
     xf(ids, t)
@@ -211,7 +211,7 @@ try:
     undo(top_floor, roof3)
     t = rg.Transform.Translation(north * 5)                     # 11. Delta in words (test 2's front yard)
     xf(ids, t)
-    check(doc, 11, "11 Delta in words", {"Front yard": {"delta": "at least 5'-0 5/8\" to spare"}})
+    check(doc, 11, "11 Delta in words", {"Front yard": {"delta": "≥ +5'-0 5/8\""}})
     undo(ids, t)
 
     setfacts(doc, corner_lot=True)                              # 12. a corner lot

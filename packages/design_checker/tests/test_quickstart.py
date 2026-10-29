@@ -195,11 +195,11 @@ def test_5_raise_the_roof_fails(house):
     got, facts = house
     floors = copy.deepcopy(got["floors"])
     feet, height, short = said(r"raise the roof (\d+) ft\*\* \(the top face of Floor 3\). Building height " + LEN
-                               + r": \*\*does not comply\*\*,\s+(−\d+'-\d+\") short \(the height doesn't depend on "
+                               + r": \*\*does not comply\*\*,\s+(\d+'-\d+\") over \(the height doesn't depend on "
                                r"the lot lines\)")
     floors[-1]["top"] += float(feet)
     h = _check(floors, facts)["Building height"]
-    assert (h["status"], h["proposed"], h["delta"], h["approx"]) == (present.FAILS, height, short + " short", False)
+    assert (h["status"], h["proposed"], h["delta"], h["approx"]) == (present.FAILS, height, short + " over", False)
     assert ("height", present.FAILS) in _regions(floors, facts)                 # "the part above 35'-0" turns red"
 
 
@@ -248,17 +248,17 @@ def test_11_delta_in_words(house):
     from design_checker import rhino_logic as logic
     got, facts = house
     front_words, up_words, least_words, survey_words = (" ".join(w.split()) for w in said(
-        r'after test 2 the Front yard row reads "(at least \d+\'-\d+(?: \d/\d)?" to\s+spare)"; in test 6 the Southwest\s+'
-        r'side yard reads "(up to \d+\'-\d+(?: \d/\d)?" short)" \(3 ft out: it may comply\) and "(at least\s+'
-        r'\d+\'-\d+(?: \d/\d)?" short)" \(5 ft out: the red strip\).*?With a survey it reads the\s+margin itself: '
-        r'after test 2, "(\+\d+\'-\d+(?: \d/\d)?" to spare)"'))
+        r'after test 2 the Front yard row reads "(≥ \+\d+\'-\d+(?: \d/\d)?")"\s+\(at least that much to spare\); in '
+        r'test 6 the Southwest\s+side yard reads "(up to \d+\'-\d+(?: \d/\d)?" short)" \(3 ft out: it\s+may comply\) '
+        r'and "(at least\s+\d+\'-\d+(?: \d/\d)?" short)" \(5 ft out: the red strip\).*?With a survey it reads the '
+        r'margin\s+itself: after test 2, "(\+\d+\'-\d+(?: \d/\d)?")"'))
     back, = said(r"Move the house (\d+) ft back")
     front = _check(_moved(got["floors"], dy=float(back)), facts)["Front yard"]
     assert front["delta"] == front_words
     assert _left_side(_check(_wall_out(got["floors"], 3), facts))["delta"] == up_words
     assert _left_side(_check(_wall_out(got["floors"], 5), facts))["delta"] == least_words
     surveyed = _check(_moved(got["floors"], dy=float(back)), facts, lot_surveyed=True)["Front yard"]
-    assert surveyed["delta"] == survey_words == surveyed["margin"] + " to spare"
+    assert surveyed["delta"] == survey_words == surveyed["margin"]          # a bare "+": complies, to spare
 
 
 def test_spot_grades_when_flat_ground_is_switched_off(house):

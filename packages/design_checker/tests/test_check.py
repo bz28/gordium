@@ -5,6 +5,7 @@ import io
 import inspect
 import json
 import math
+import re
 
 import pytest
 
@@ -23,6 +24,12 @@ def facts():
     return load_facts(SITE / "spreadsheet_design_model_facts.yaml")
 
 
+# the rules waiting on who lives there and on a home occupation (§325-3B), and on whether a stream or inlet is near
+# the lot (§325-26): the sample's facts don't say
+WAITING_ON_THE_HOUSEHOLD = ["R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family",
+                            "R-1b.stream_setback"]
+
+
 def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp_path):
     result = check(MODEL, facts, tmp_path / "report.xlsx")
     assert (tmp_path / "report.xlsx").exists()
@@ -31,8 +38,13 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 10
     assert errors["R-1b.yard_projections"] == "PASS"
     s = result["summary"]
-    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail"
-    assert s["lines"] == ["Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"]
+    # who lives there, a home occupation and a stream near the lot aren't in their spreadsheet: those four rules wait
+    # (never a pass)
+    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 4 need review"
+    assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
+    assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
+    assert len(s["lines"]) == 5 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
+                                        in x for x in s["lines"][1:])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 
@@ -58,7 +70,8 @@ def test_needs_review_rows_say_why_in_the_measuring_words(facts):
     parking = next(r for r in result["interior"] if r["Rule id"] == "R-1b.parking_one_family")
     assert parking["Error"] == "NEEDS REVIEW" and parking["Why"] == "enter bedrooms / parking spaces"
     assert all(r["Rule id"] != "R-1b.parking_one_family" for r in result["rows"])
-    assert result["summary"]["state"] == "fail" and "need review" not in result["summary"]["text"]
+    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 4 need review")
+    assert sorted(r["Rule id"] for r in result["rows"] if r["Error"] == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
 
 
 def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
@@ -89,11 +102,11 @@ def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
     assert logic.enter_words(needs) == "Enter dwelling units, rooms let for profit and whether it is a conversion"
     assert [logic.STATED_FACTS[k][1] for k in needs] == ["count", "count", "yes_no"]
     assert logic.needs_of(names, {"dwelling_units": 4, "rooms_let_for_profit": 0, "conversion": False}) == []
-    # the panel asks exactly the row's own list (never a fixed pair), and saves through update_counts
+    # the panel asks exactly the row's own list (never a fixed pair), in its own dialog (test_row_dialog.py)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert 'a["enter"](i["needs"])' in ui and "Enter bedrooms and parking spaces…" not in ui
-    assert "for key in needs:" in rhino and "logic.update_counts(facts, answers)" in rhino
+    assert "logic.row_fields(needs, facts)" in rhino and "logic.row_answers_applied(facts, needs, answers)" in rhino
 
 
 def test_an_interior_rule_that_fails_is_never_hidden(facts):
@@ -138,8 +151,9 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail"
-    assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-3a"]   # every hand-drafted rulebook
+    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 4 need review"
+    assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
+                                             "RU"]   # every hand-drafted rulebook
 
 
 def test_the_quickstart_names_every_district_the_start_box_offers(facts):
@@ -495,8 +509,10 @@ def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(fac
     from envelope_builder.start import floor_solids
     from model_measurement.read_3dm import read_site
     tax = start(MODEL, {**facts, "lot_surveyed": False})
-    assert tax["kept_back"] == 2.0 and TAX_MAP_NOTE in tax["notes"] and tax["preview"]["kept_back"] == "2'-0\""
-    assert tax["margin_note"] == TAX_MAP_NOTE
+    note = ("Largest house that complies even if the tax-map lines are 2'-0\" off; limited by lot coverage 25%. "
+            "Use my survey… for the full size.")                  # Ben, 2026-10-21: what limits it, said in place
+    assert tax["kept_back"] == 2.0 and note in tax["notes"] and tax["preview"]["kept_back"] == "2'-0\""
+    assert tax["margin_note"] == note == TAX_MAP_NOTE.format(limit="lot coverage 25%") and tax["limited_by"] == "coverage"
     # coverage is sized for the worst case, so no note says it needs review (review round 7)
     assert not any("NEEDS REVIEW for coverage" in n for n in tax["notes"])
     site = {**read_site(MODEL, facts), "buildings": floor_solids(tax["floors"])}
@@ -506,7 +522,8 @@ def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(fac
     lot_area = next(i for i in view["items"] if i["name"] == "Lot area")    # the lot's own size, not the house's:
     assert lot_area["status"] == present.REVIEW and "at worst 5,934 sf against 6,000 sf" in lot_area["reason"]
     surveyed = start(MODEL, {**facts, "lot_surveyed": True})
-    assert surveyed["kept_back"] == 0.0 and TAX_MAP_NOTE not in surveyed["notes"]
+    assert surveyed["kept_back"] == 0.0 and note not in surveyed["notes"]
+    assert surveyed["margin_note"] == "Largest house the rules allow; limited by lot coverage 25% (the lot is from a survey)."
     xs = [p[0] for p in surveyed["floors"][0]["outline"]]
     assert max(xs) - min(xs) == pytest.approx(53.0)                 # 73 − 2 × 10: exactly at the side yards
     buffered = start(MODEL, {**facts, "lot_surveyed": True}, design_buffer=1.0)
@@ -729,6 +746,33 @@ def test_gordiums_own_defaults_say_suggested_and_a_change_says_entered_by_you():
     s = logic.fact_sources(_box(use_source="entered by you", corner_lot=True, corner_source="entered by you"),
                            "2026-10-20", confirmed=True)
     assert s["use"]["source"] == "entered by you" and s["corner_lot"]["source"] == "entered by you"
+
+
+def test_a_box_default_left_as_it_was_is_never_confirmed_by_you():
+    """Architect's review (2026-10-28), a traceability error: "Use: One-family dwelling, detached · suggested by
+    Gordium · confirmed by you" for a use dropdown never changed. A box default (the use, the street, the corner
+    lot) left as it was is saved confirmed by no one and shown "default, not changed by you"; changed, it is the
+    architect's, confirmed at Draw. The district keeps its own tick; the facts the box doesn't offer as a default
+    (the address typed, the lot) are confirmed at Draw as before."""
+    from design_checker import rhino_logic as logic
+    s = logic.fact_sources(_box(corner_lot=False, district_confirmed=True), "2026-10-28", confirmed=True)
+    assert [s[k]["confirmed_by"] for k in ("use", "street", "corner_lot")] == [None, None, None]
+    assert s["zone"]["confirmed_by"] == "you" and s["lot"]["confirmed_by"] == "you"     # unchanged meaning
+    changed = logic.fact_sources(_box(corner_lot=False, use_source=logic.ENTERED, street_source=logic.ENTERED,
+                                      corner_source=logic.ENTERED), "2026-10-28", confirmed=True)
+    assert [changed[k]["confirmed_by"] for k in ("use", "street", "corner_lot")] == ["you", "you", "you"]
+    # ticked "I checked this" (the street: CHECKABLE) is the architect's too (review round 1 of panel-wording, P2)
+    ticked = logic.fact_sources(_box(corner_lot=False, checked=["street"]), "2026-10-28", confirmed=True)
+    assert ticked["street"]["confirmed_by"] == "you" and ticked["use"]["confirmed_by"] is None
+    assert ticked["corner_lot"]["confirmed_by"] == "you"     # on the street's row, ticked with it (round 2, P3)
+    lines = present.source_lines(s)
+    use = next(x for x in lines if x.startswith("Use: "))
+    assert use.endswith(" · suggested by Gordium · default, not changed by you") and "confirmed by you" not in use
+    assert any(x.startswith("Use: ") and x.endswith("entered by you · confirmed by you, 2026-10-28")
+               for x in present.source_lines(changed))
+    assert any(x.startswith("Zoning district: ") and "confirmed by you" in x for x in lines)
+    gone = dict(s, starting_house={"value": "as first drawn", "source": logic.SUGGESTED, "confirmed_by": None})
+    assert next(x for x in present.source_lines(gone) if x.startswith("Starting house")).endswith("not confirmed")
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8").split("def start_box(", 1)[1]
     for key in ("address_source", "use_source", "corner_source", "zone_source"):   # a change in the box records it
         assert f'state["{key}"] = logic.ENTERED' in ui, key
@@ -746,7 +790,9 @@ def test_the_confirm_tick_survives_a_pick_and_ground_marking_can_be_undone():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0]
     assert "dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)" in loop
-    assert '"district_confirmed"' in loop.split("ticked = {k: state[k]", 1)[1].split(")", 1)[0]
+    assert "ticked = logic.box_ticks(state)" in loop
+    from design_checker import rhino_logic as logic
+    assert logic.box_ticks({"district_confirmed": True, "zone": "R-1b"}) == {"district_confirmed": True}
     assert "def not_the_ground(" in rhino and '"not_ground": not_the_ground' in rhino
     survey = rhino.split("def pick_survey(", 1)[1].split("\ndef ", 1)[0]
     assert '_set_source(doc, "lot"' in survey                                      # its source never goes stale
@@ -773,17 +819,19 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
     assert "_save_ui_state" not in loop                                         # Cancel saves nothing
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
-    assert "sources = fact_sources(doc)" in drawn and "sources.update(" in drawn  # the ground marking is kept
+    assert "sources = logic.sources_kept(fact_sources(doc), out)" in drawn and "sources.update(" in drawn   # the ground
+    assert "ground_marked" not in logic.BOX_ASKS                    # marking is kept (only follow-up answers go)
     # a new file starts empty (Ben, 2026-10-27): no sample lot or its facts put down (test_re_lookup pins the rest)
     assert "from_sample=True" not in rhino.split("def gordium_start(", 1)[1].split("\ndef ", 1)[0]
 
 
 def test_units_are_converted_in_one_place_both_ways():
-    """Gordium works in feet; the Rhino side converts at five helpers and nowhere else (a mm template showed why the
+    """Gordium works in feet; the Rhino side converts at its helpers and nowhere else (a mm template showed why the
     edge must be one place: there the start had to be checked line by line)."""
     import re
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_facts_in_feet")
+    helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_feet_volume",
+               "_facts_in_feet")
     outside = []
     for chunk in re.split(r"\n(?=def )", rhino):
         name = re.match(r"def (\w+)", chunk)
@@ -835,11 +883,13 @@ def test_the_margin_note_says_what_was_kept_and_which_part_is_the_buffer(facts):
     got = start(MODEL, {**facts, "lot_surveyed": False}, design_buffer=1.0)
     assert got["kept_back"] == 3.0
     assert got["margin_note"] == ("Starting house keeps 3'-0\" back from each limit: 2'-0\" because the lot is from "
-                                  "the tax map (use a survey for the full area) and 1'-0\" your design buffer.")
-    assert got["margin_note"] in got["notes"] and TAX_MAP_NOTE not in got["notes"]
-    assert margin_note(2.25, 0.0, True, True).startswith("Starting house keeps 2'-3\" back")
+                                  "the tax map (use a survey for the full area) and 1'-0\" your design buffer; "
+                                  "limited by lot coverage 25%.")
+    assert got["margin_note"] in got["notes"]
+    assert "kept 2'-3\" back; limited by the yards" in margin_note(2.25, 0.0, True, True)    # stepped back further
     assert margin_note(2.0, 0.0, True, False) == NOT_PROVEN          # never claimed without the proof
-    assert margin_note(0.0, 0.0, False, True) == "Starting house goes to the limits (the lot is from a survey)."
+    assert margin_note(0.0, 0.0, False, True, "the yards") == \
+        "Largest house the rules allow; limited by the yards (the lot is from a survey)."
 
 
 def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
@@ -855,14 +905,15 @@ def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
     from design_checker.check import NOT_PROVEN, TAX_MAP_NOTE
     lines = [present.source_lines({"starting_house": logic.starting_house_fact(n, "2026-10-20")})[0]
              for n in (TAX_MAP_NOTE, NOT_PROVEN)]
-    assert lines[0].startswith("Starting house: as first drawn, it keeps 2'-0\" back from each limit")
+    assert lines[0].startswith("Starting house: as first drawn, the largest house that complies even if the "
+                               "tax-map lines are 2'-0\" off")
     assert lines[1].startswith("Starting house: as first drawn, Gordium couldn't keep it clear")
     assert not any(ln.count("Starting house") > 1 for ln in lines) and NOT_PROVEN.endswith(".")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = rhino[rhino.index("def gordium_start"):]
     # round 8: cleared before any way out (a start that draws nothing keeps no earlier start's margin)
     assert body.index('_set_source(doc, "starting_house", None, None)') < body.index('if not start.get("floors")') \
-        < body.index("add_floors(doc, start)") < body.index("logic.starting_house_fact(")
+        < body.index("add_floors(doc, start, ") < body.index("logic.starting_house_fact(")
 
 
 def test_a_design_buffer_is_read_or_draw_stays_off():
@@ -977,11 +1028,16 @@ def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_p
     assert check(MODEL, facts, tmp_path / "ok.xlsx")["report_error"] is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
-    body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'if report and result.get("report_error"):' in body and "say(first + logic.report_message(path, False" in body
-    # round 12: "out of date" only for a report that was there before this check, not one its own write left
-    assert body.index("had_report = bool(report) and os.path.exists(report_path(doc))") < body.index("result = ask(")
-    assert 'result["report_error"], stale=had_report))' in body
+    body = rhino[rhino.index("def _check_apply("):rhino.index("def _check_failed(")]
+    assert 'if report and result.get("report_error"):' in body and \
+        "say(first + logic.report_message(report_path(doc), False" in body
+    # round 12: "out of date" only for a report that was there before this check, not one its own write left: read
+    # with the model, before the request is made (and run_check reads the model before it asks)
+    begin = rhino[rhino.index("def _check_begin("):rhino.index("def _check_apply(")]
+    assert begin.index("had_report = bool(report) and os.path.exists(report_path(doc))") < begin.index('"request":')
+    run = rhino[rhino.index("def run_check("):rhino.index("def _check_begin(")]
+    assert run.index("begun = _check_begin(doc, report)") < run.index("result = ask(")
+    assert 'result["report_error"], stale=begun["had_report"]))' in body
     from design_checker import rhino_logic as logic
     assert logic.report_message("/x/r.xlsx", False, "Permission denied", stale=True).endswith(
         "The report already at /x/r.xlsx is from an earlier check: out of date.")
@@ -1083,7 +1139,9 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
     assert "if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw and "    if not boxed:\n        return" in draw
     assert "if plan and labels and zoomed_in else []" in draw                                   # lot-edge labels: only when on
-    assert "d.Draw2dLine(System.Drawing.PointF(a.X, a.Y)" in draw.split("yard_label_shown")[0]   # lines regardless
+    assert "\n            _dimension(d, e.Viewport, best, color)\n" in draw       # lines regardless (not under the
+    assert "\n        if flat:" in draw                              # (in plan on screen; off plan draw_scene)
+    # labels' condition: drawn with no words when they are off; the words are the one placer's, place_dim_label)
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
     assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
     check_code = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
@@ -1103,9 +1161,10 @@ def test_with_labels_off_a_failing_yards_shortfall_still_shows():
     assert logic.yard_label_shown(False, "does_not_comply") and logic.yard_label_shown(True, "complies")
     assert not logic.yard_label_shown(False, "complies") and not logic.yard_label_shown(False, "needs_review")
     items = [{"points": [[0, 0], [0, 21.17]], "status": "does_not_comply", "mark": "✕", "name": "Rear yard",
-              "proposed": "21'-2\"", "required": "22'-6\"", "measure": "rear_yard", "reason": ""},
+              "proposed": "21'-2\"", "required": "22'-6\"", "measure": "rear_yard", "reason": "", "limit_ft": 22.5},
              {"points": [[0, 0], [12, 0]], "status": "complies", "mark": "✓", "name": "Side yard, West",
-              "proposed": "12'-0\"", "required": "10'-0\"", "measure": "side_yard_smaller", "reason": ""}]
+              "proposed": "12'-0\"", "required": "10'-0\"", "measure": "side_yard_smaller", "reason": "",
+              "limit_ft": 10.0}]
     got = plan({"lot": {"edges": []}, "buildings": []}, {"outline": [], "holes": []}, {"items": items}, {})
     labels = [y["label"] for y in got["yards"]]
     assert "✕ Rear yard 21'-2\", needs 22'-6\"" in labels and "✓ Side yard, West 12'-0\"" in labels
@@ -1122,20 +1181,65 @@ def test_the_code_edition_line_is_in_the_legend_and_the_report_not_the_panel(fac
     assert '"legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code"))' in rhino
 
 
+def test_the_lists_values_fit_two_lines_of_a_narrow_column():
+    """Architect's review (2026-10-28): at the panel's own width the Proposed "34'-11 7/8" to 36'-3 3/8"" and the
+    Delta "at least 0'-5 1/4" if confirmed" were cut off ("…if confir…"). Eto's tree grid has one row height for
+    every row, so the cells keep two lines and the values are made to fit them: each fraction one character, a
+    range one value per line; the words otherwise the same (the detail and the report keep "7/8")."""
+    from design_checker import rhino_logic as logic
+    assert logic.cell_text("34'-11 7/8\" to 36'-3 3/8\"") == "34'-11⅞\"–\n36'-3⅜\""
+    assert logic.cell_text("24'-1 7/8\" to 32'-10\"") == "24'-1⅞\"–\n32'-10\""
+    assert logic.cell_text("5,934 sf to 6,570 sf") == "5,934 sf–\n6,570 sf"
+    assert logic.cell_text("≥ +0'-5 1/4\" if confirmed") == "≥ +0'-5¼\" if confirmed"
+    assert logic.cell_text("up to 2'-11 1/8\" short") == "up to 2'-11⅛\" short"    # "up to": words, not a range
+    for same in ("25'-0\"", "3", "25%", "at limit", "—", ""):
+        assert logic.cell_text(same) == same
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rows = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
+    assert rows.count("logic.cell_text(") == 3                    # Proposed, Required and Delta; never the name
+
+
+def test_the_use_row_names_the_use_in_its_item_cell(facts, tmp_path):
+    """Rhino walk at 380 px (2026-10-28): the use row's Proposed showed "One- / family d…": no use's name fits the
+    64 px Proposed column. Option A (coordinator, 2026-10-28): the Item cell names the use ("Use: …"; no "(site)":
+    it fits two lines at 400 px only without), and Proposed says "stated"; the detail heads with the same text, so
+    a name the list ends "…" is whole there; with no use stated the row stays "Use (site)" and "—". The report
+    unchanged (review round 1: "Use" kept, the note and a use not permitted pinned)."""
+    from design_checker import rhino_logic as logic
+    got = check(MODEL, facts, tmp_path / "r.xlsx")
+    use = next(i for i in got["view"]["items"] if i["name"] == "Use")
+    assert use["proposed"] == "One-family dwelling, detached" and use["group"] == "site"
+    assert logic.list_cells(use) == ("Use: One-family dwelling, detached", "stated")
+    assert logic.list_cells(dict(use, note="as entered")) == ("Use: One-family dwelling, detached · as entered",
+                                                              "stated")
+    fails = dict(use, proposed="Two-family dwelling", status=present.FAILS, required="not permitted")
+    assert logic.list_cells(fails) == ("Use: Two-family dwelling", "stated")   # Required says "not permitted"
+    for unset in ("—", None, ""):
+        assert logic.list_cells(dict(use, proposed=unset)) == ("Use (site)", unset)
+    other = next(i for i in got["view"]["items"] if i["name"] == "Lot area")
+    assert logic.list_cells(other) == (logic.row_name(other), other["proposed"])
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rows = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
+    assert "logic.list_cells(i)" in rows and "logic.row_name(i)" not in rows
+    detail = ui[ui.index("def show_detail("):]
+    assert "logic.list_cells(i)[0] + \" · \" + words" in detail    # the detail heads with the list's name, whole
+
+
 def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
     """Coordinator refinement (c): the sign unmistakable beside the colour, in the panel and the report; the value
     itself (and the answer key's) unchanged."""
     import openpyxl
     from design_checker import rhino_logic as logic
-    assert present.delta_words(present.COMPLIES, (2.0, 2.0), "ft", False) == "+2'-0\" to spare"
+    assert present.delta_words(present.COMPLIES, (2.0, 2.0), "ft", False) == "+2'-0\""     # "+": to spare
     assert present.delta_words(present.FAILS, (-1 - 1 / 3, -1 - 1 / 3), "ft", False) == "−1'-4\" short"
     assert present.delta_words(present.COMPLIES, (0.0, 0.0), "ft", False) == "at limit"
     got = check(MODEL, facts, tmp_path / "r.xlsx")
     margins = [i["margin"] for i in got["view"]["items"] if i["margin"]]
-    assert margins and not any(m.endswith(("to spare", "short")) for m in margins)        # the data as it was
+    assert margins and not any(m.endswith(("short", "over")) for m in margins)            # the data as it was
     cells = [c for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
-    assert any(c.endswith(" to spare") for c in cells)
+    deltas = {i["delta"] for i in got["view"]["items"] if i.get("delta")}
+    assert deltas and deltas <= set(cells)                            # the report's Delta: the panel's words
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert '(i.get("delta") or "")' in ui and "delta_text" not in ui          # settle's words only (round 2)
 
@@ -1164,7 +1268,7 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     rows = {i["name"]: i for i in got["view"]["items"]}
     for name in ("Building height", "Stories"):
         assert rows[name]["status"] == present.COMPLIES and rows[name]["note"] == "assuming flat ground"
-        assert logic.row_name(rows[name]) == name + " · assuming flat ground"
+        assert logic.row_name(rows[name]) == logic.list_cells(rows[name])[0] == name + " · assuming flat ground"
     assert "assumed" in got["view"]["header"]["grade"]
     text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
                     for row in ws.iter_rows(values_only=True) for c in row if c)
@@ -1176,7 +1280,7 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     row = next(r for r in sheet.iter_rows(values_only=True) if r[item] == "Stories · assuming flat ground")
     assert not row[why]
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert "logic.row_name(i)" in ui
+    assert "logic.list_cells(i)" in ui
 
 
 # ---- the plugin and the worker stay in step (audit P1-1) -----------------------------------------------------
@@ -1188,10 +1292,10 @@ def test_a_stray_line_on_the_workers_stdout_never_reaches_the_plugin(facts):
     import sys
     noisy = ("import os, design_checker.__main__ as m\n"
              "real = m.answer\n"
-             "def answer(r):\n"
+             "def answer(r, *more):\n"
              "    print('a library says hello')\n"
              "    os.write(1, b'C code says hello\\n')\n"
-             "    return real(r)\n"
+             "    return real(r, *more)\n"
              "m.answer = answer\n"
              "m.main(['serve'])\n")
     requests = [{"id": 1, "cmd": "facts", "facts": {"lot_area_sqft": 1}}, {"id": 2, "cmd": "facts", "facts": {}}]
@@ -1227,7 +1331,7 @@ def test_the_plugin_takes_only_this_requests_answer_and_never_waits_forever():
 def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_checker():
     """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
+    ask = src[src.index("def ask("):src.index("# ---- the model", src.index("def ask("))]   # ask, its job, its answer
     assert "logic.exchange(" in ask and "_stop_worker()" in ask and "readline" not in ask and "stdin" not in ask
     assert "logic.pipes(p)" in src                  # the pipes served by threads (test_checker_pipes.py)
 
@@ -1705,7 +1809,7 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
     detail = ui[ui.index("def show_detail("):]
     # 2: reason, then the buttons, then the measuring notes; the hint as text only when there's no button
     assert detail.index('for text in (det.get("line"), i.get("reason")):') < detail.index("for b in buttons:") \
-        < detail.index('for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),')
+        < detail.index('for text in split["notes"]:')
     assert ("    words = logic.hint_text(i.get(\"hint\"), [b.Text for b in buttons])\n    if words:\n"
             "        d.AddRow(_wide(words, size=12))") in detail
     # never a button's words twice, nor "Add to check…" as dead text on a row a left-out solid made cautious (its
@@ -1724,7 +1828,9 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
         < zoom.index("        o.Select(True)")
     # 4 and 5
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
-    assert "ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 30, dark, 13)" in rhino
+    # the height limit's label: past its line's end, off the building (Rhino check of #28 at fc0b023; #29)
+    assert "ui.draw_text_box(d, [limit[1]], BLUE, int(spot[0]), int(spot[1]), dark, 13)" in rhino
+    assert "spot = logic.limit_label_spot(line_, house, w, h, view, taken=taken + placed_boxes)" in rhino
     assert "    boxed = bool(o.message and labels and _in_active_view(e))" in draw
     assert draw.index("    boxed = ") < draw.index("    if boxed:\n        taken.append(logic.status_box(") \
         < draw.index("    if not boxed:\n        return")         # nor its room kept clear in the other views
@@ -1758,9 +1864,11 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     assert logic.leader_end((0, 0), (10, 40, 80, 20)) == (10, 40)     # its corner
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
-    assert ('    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, lot_points or getattr(o, "lot_outline", None)))'
-            in draw)                                  # judged from the lot's edges: a lot with arcs too (round 3, F5)
-    assert '    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]' in draw
+    zoom = rhino[rhino.index("def _zoomed_in("):rhino.index("def _model_dimension(")]   # (one place, scene and screen)
+    assert "    zoomed_in = _zoomed_in(o, e.Viewport)" in draw
+    assert ('    return logic.labels_shown(_screen_size(viewport, lot_points or getattr(o, "lot_outline", None)))'
+            in zoom)                                  # judged from the lot's edges: a lot with arcs too (round 3, F5)
+    assert '    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]' in zoom
     assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
     assert '    edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []' in draw
     assert 'colors[key] = (ui.status_color("complies", dark), True)' in draw            # edges: a leader when short
@@ -1952,7 +2060,7 @@ def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the
     assert '"\\n" + logic.STREET_LABEL + " = the highlighted blue line · " +' in rhino
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert ('            if r.get("help"):          # what that row is, in a sentence (the front lot line\'s)\n'
-            '                layout.AddRow(None, row(label(r["help"], size=11)))') in ui
+            '                layout.AddRow(None, row(label(r["help"], size=11, width=560)))') in ui
 
 
 def test_the_envelope_never_uses_a_grade_the_measuring_refused():
@@ -2083,7 +2191,8 @@ def test_no_process_gordium_starts_from_rhino_opens_a_console_window_on_windows(
     opener = ui[ui.index("def open_target("):ui.index("def _open(")]
     assert '            os.startfile(what)' in opener and "logic.open_command(os.name, target)" in opener
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "p = ui.spawn([_python()" in rhino and "opened, why = ui.open_target(path)" in rhino
+    assert 'command = STATE.get("worker_command") or [_python(), "-u", "-m", "design_checker", "serve"]' in rhino
+    assert "p = ui.spawn(list(command)" in rhino and "opened, why = ui.open_target(path)" in rhino
 
 
 def test_one_street_or_two_is_the_streets_identity_and_only_then_the_drawings_whole_swing():
@@ -4021,7 +4130,8 @@ def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
         draw.index('drawn["complete"] = True') < draw.index("if not boxed:")
     assert draw.count('drawn["complete"]') == 1
     check = src[src.index("def run_check("):src.index("def _toast(")]
-    assert 'say(first + logic.report_message(path, False, result["report_error"], stale=had_report))' in check
+    assert 'say(first + logic.report_message(report_path(doc), False, result["report_error"], stale=begun["had_report"]))' \
+        in check                                                         # (#32 split run_check)
     assert 'first = "✕ " + result["notice"] + " · " if result.get("notice") else ""' in check
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
@@ -4146,6 +4256,81 @@ def test_the_notice_keeps_its_heading_numbers_and_mark_whole():
             assert "0'-11 1/4\" short" in "\n".join(got) and "7'-0 5/8\" proposed" in "\n".join(got), got
 
 
+# ---- feature 5: the starting house on its own sublayers, its note, the cautious envelope (Ben, 2026-10-21) ----------
+
+from design_checker import rhino_logic as logic  # noqa: E402
+
+def test_the_starting_house_floors_go_on_their_own_sublayers_and_count_as_the_building():
+    assert logic.massing_floor(1) == "Gordium::Massing::Floor 1" and logic.massing_floor(3) == "Gordium::Massing::Floor 3"
+    assert logic.MASSING_ROOF == "Gordium::Massing::Roof"
+    for layer in (logic.massing_floor(2), logic.MASSING_ROOF):
+        assert logic.classify(layer, "Brep") == "building"                  # measured, as on Gordium::Massing
+        assert logic.building_name(layer, "Floor 2", True) == "the starting house"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    floors = rhino[rhino.index("def add_floors("):rhino.index("def gordium_start(")]
+    assert "a.LayerIndex = _layer(doc, logic.massing_floor(i + 1))" in floors
+    assert "_layer(doc, logic.MASSING_ROOF)" in floors
+    assert "a.LayerIndex = _layer(doc, logic.MASSING)\n" not in floors
+    hide = rhino[rhino.index("def hide_massing("):rhino.index("Cancelled = logic.Cancelled")]
+    assert "logic.on_layer(layer.FullPath, logic.MASSING)" in hide and "doc.Layers[layer].IsVisible = not hidden" in hide
+    extras = rhino[rhino.index("def _extras("):rhino.index("def _extras(") + 800]
+    assert "logic.MASSING if logic.on_layer(path, logic.MASSING) else path" in extras      # said once (F3)
+    from envelope_builder import start as gen
+    src = (REPO / "packages/envelope_builder/envelope_builder/start.py").read_text(encoding="utf-8")
+    assert src.index("a corner between slices") < src.index('out["limited_by"] =') and "narrowed" in src   # F4
+
+
+def test_the_starting_house_note_says_what_limited_it_with_its_number():
+    """Ben (2026-10-21, "reassure in place"): "largest that complies even if tax-map lines are 2 ft off; limited by
+    coverage 25%". The yards when they stopped it, each with its minimum."""
+    from design_checker.check import TAX_MAP_NOTE, limit_words, margin_note
+    assert limit_words({"limited_by": "coverage", "coverage_allowed": 1500.0}, 6000.0) == "lot coverage 25%"
+    assert limit_words({"limited_by": "yards", "yards": {"front": 25, "side": 10, "rear": 30}}, 6000.0) == \
+        "the yards (front 25'-0\", sides 10'-0\", rear 30'-0\")"
+    assert margin_note(2.0, 0.0, True, True, "lot coverage 25%") == TAX_MAP_NOTE.format(limit="lot coverage 25%")
+    assert TAX_MAP_NOTE.endswith("Use my survey… for the full size.")
+    fact = logic.starting_house_fact(TAX_MAP_NOTE.format(limit="lot coverage 25%"), "2026-10-26")
+    assert fact["value"].startswith("as first drawn, the largest house that complies even if the tax-map lines")
+
+
+def test_rhino_logic_runs_without_anything_rhinos_python_lacks(monkeypatch):
+    """Rhino's own Python runs rhino_logic and has none of the .venv's packages: every check in Rhino failed with
+    "No module named 'shapely'" (envelope_outlines, Lane C in Rhino at f45c991). With shapely hidden the envelope's
+    outlines still come out, largest first (a clockwise ring too); and rhino_logic imports only the standard
+    library, anywhere in the module."""
+    import ast
+    import sys
+    for name in ("shapely", "shapely.geometry", "numpy"):
+        monkeypatch.setitem(sys.modules, name, None)            # import raises, as in Rhino
+    env = {"outline": [[0, 0], [40, 0], [40, 60], [0, 60]]}
+    small, inner = [[0, 0], [1, 0], [1, 1], [0, 1]], [[2, 2], [2, 58], [38, 58], [38, 2]]   # inner: clockwise
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small, inner]}) == [
+        inner, small]
+    big_ccw, small_cw = [[0, 0], [10, 0], [10, 10], [0, 10]], [[0, 0], [0, 1], [1, 1], [1, 0]]   # either winding
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small_cw, big_ccw]}) == [
+        big_ccw, small_cw]
+    from pathlib import Path
+    tree = ast.parse(Path(logic.__file__).read_text(encoding="utf-8"))
+    imported = {(a.name if isinstance(n, ast.Import) else n.module).split(".")[0]
+                for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom)) and not getattr(n, "level", 0)
+                for a in (n.names if isinstance(n, ast.Import) else [n])}
+    assert imported <= set(sys.stdlib_module_names), imported - set(sys.stdlib_module_names)
+    assert not [n for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.level]   # no package-relative import
+
+
+def test_on_a_tax_map_lot_the_envelope_is_drawn_on_the_cautious_outline():
+    """Ben (2026-10-21): the cautious envelope on tax-map lots; on a survey the outline as drawn."""
+    env = {"outline": [[0, 0], [40, 0], [40, 60], [0, 60]]}
+    inner = [[2, 2], [38, 2], [38, 58], [2, 58]]
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": False, "buildable_cautious": None}) == [env["outline"]]
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [inner]}) == [inner]
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": []}) == []   # none 2'-0" in
+    small = [[0, 0], [1, 0], [1, 1], [0, 1]]
+    assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small, inner]})[0] == inner
+    assert logic.envelope_outlines(None, {}) == []
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    run = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert 'outlines = logic.envelope_outlines(result.get("envelope"), result.get("plan"))' in run
 def test_saved_street_lines_never_take_the_suggestions_street_ids():
     """Street ids review round 3, F1 (P0): a corner lot saved before street ids existed (both streets' lines, no
     ids) merged with a suggestion that carries "Street 1" ids for other lines kept the lines and took those ids,
@@ -4187,10 +4372,12 @@ def test_every_panel_tick_follows_the_document():
     sync = rhino[rhino.index("def _sync_ticks("):].split("\ndef ", 1)[0]
     for name in set(boxes):
         body = ui_src[ui_src.index("def _%s_box(" % name):].split("\ndef ", 1)[0]
-        assert 'parts["%s_box"] = box' % name in body and 'if not parts.get("_setting_%s")' % name in body, name
+        assert 'parts["%s_box"] = box' % name in body and ('if not parts.get("_setting_%s")' % name in body or
+                                                          'skip=lambda: parts.get("_setting_%s")' % name in body), name
         assert "def set_%s_tick(parts, " % name in ui_src, name
         assert "ui.set_%s_tick(" % name in sync, name
-    run = rhino[rhino.index("def run_check("):].split("\ndef ", 1)[0]
+    run = "".join(rhino[rhino.index("def %s(" % f):].split("\ndef ", 1)[0]          # (#32 split run_check)
+              for f in ("_check_apply", "_check_failed"))
     made = rhino[rhino.index("def panel("):].split("\ndef ", 1)[0]
     assert run.count("_sync_ticks(doc)") == 2 and made.count("ui.make_panel(") == made.count("_sync_ticks(doc)") == 2
 
@@ -4222,6 +4409,111 @@ def test_another_document_shows_its_own_ticks():
     assert synced == [front]
 
 
+def test_red_is_drawn_last_over_amber_and_everything_else():
+    """Architect's review (2026-10-28): in Top view the amber eaves strip (needs review) was drawn over the failing
+    red wall under it. The red parts come after every amber one (rhino_logic.red_last splits them off, in their
+    order), and the red outline of a failing solid is the last thing the scene draws. (Merged with depth-lines: the
+    coloured parts stay before the dimensions and lot lines, so a dimension still reads over them, on its halo.)"""
+    from design_checker import rhino_logic as logic
+    parts = [("wall", "does_not_comply"), ("eaves", "needs_review"), ("porch", "does_not_comply"), ("x", "complies")]
+    rest, red = logic.red_last(parts)
+    assert red == [("wall", "does_not_comply"), ("porch", "does_not_comply")]
+    assert rest == [("eaves", "needs_review"), ("x", "complies")]
+    assert logic.red_last(None) == ([], [])
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    scene = rhino[rhino.index("def draw_scene(o, e):"):rhino.index("def _see_through(")]
+    assert 'rest, red = logic.red_last(getattr(o, "encroach", None) or [])' in scene
+    coloured = scene.index("for g, status, _ in rest + red:")                # every amber part, then every red one
+    assert scene.count("d.DrawBrepShaded(g, ") == 1 and coloured < scene.index("d.DrawBrepShaded(g, ")
+    assert coloured < scene.index("_scene_dims(o, e, d, dark, old)") < scene.index("if o.confirm is not None:")
+    last_red = scene.index("for g in o.red:")
+    assert last_red > scene.index("if o.confirm is not None:")              # the red outline last of all
+    draws = [k for k in range(len(scene)) if scene.startswith("d.Draw", k)]
+    finally_at = scene.index("    finally:")
+    assert [scene[k:k + 20] for k in draws if last_red < k < finally_at] == [
+        "d.DrawMeshWires(g, u", "d.DrawBrepWires(g, u"]
+
+
+def test_a_recheck_brings_the_newly_failing_row_into_view(facts):
+    """Architect's review (2026-10-28): after an edit made the front yard fail, its row was out of sight below the
+    rows that need review. The first row (in the panel's order) that does not comply now and did not before is
+    selected and scrolled to; nothing newly failing (or a first check) leaves the list where it was."""
+    from design_checker import rhino_logic as logic
+    view = {"items": [{"id": "a", "status": "needs_review"}, {"id": "b", "status": "does_not_comply"},
+                      {"id": "c", "status": "does_not_comply"}, {"id": "d", "status": "complies"}],
+            "groups": [{"key": "fails", "items": ["c", "b"]}, {"key": "review", "items": ["a"]},
+                       {"key": "complies", "items": ["d"]}]}
+    assert logic.newly_failing({"a": "needs_review", "b": "complies", "c": "complies"}, view) == "c"   # panel order
+    assert logic.newly_failing({"c": "does_not_comply", "b": "needs_review"}, view) == "b"   # c failed already
+    assert logic.newly_failing({"b": "does_not_comply", "c": "does_not_comply"}, view) is None     # none new
+    assert logic.newly_failing(None, view) is None                                               # a first check
+    # the real checker's view: the same items the notice names (present.notice), first in the panel's order
+    got = check(MODEL, facts)["view"]
+    before = {i["id"]: ("complies" if i["status"] == "does_not_comply" else i["status"]) for i in got["items"]}
+    failing = [i for g in got["groups"] for i in g["items"]
+               if {x["id"]: x["status"] for x in got["items"]}[i] == "does_not_comply"]
+    assert logic.newly_failing(before, got) == (failing[0] if failing else None)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'ui.show(panel(), view, select=logic.newly_failing(extras["before"], view))' in rhino
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    body = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
+    assert 'if select in by_id:' in body and 'parts["selected"] = select' in body \
+        and 'parts["expanded"]["group:" + g["key"]] = True' in body
+    # selected and scrolled to, its group opened BEFORE the list is built from parts["expanded"]
+    assert body.index('parts["expanded"]["group:" + g["key"]] = True') < body.index("gi.Expanded = parts[")
+    # selecting it never takes the keyboard from the viewport (Focus() is only for #32's wait window and #33's
+    # address field, in their own windows)
+    scroll = ui[ui.index("def _scroll_to("):ui.index("def ", ui.index("def _scroll_to(") + 10)]
+    assert ".Focus()" not in body and ".Focus()" not in scroll
+
+
+def test_the_detail_shows_plain_words_first_and_the_working_behind_a_toggle(facts):
+    """Architect's review (2026-10-28): the detail read "Required: max(min(25% × lot depth —, 50), 20) = …", the
+    measuring notes and the chart's shorthand "R-1B: 25%/ 50 ft [fn16]" before anything plain. Plain words first
+    (the result: "Required: 24'-1 7/8" to 32'-10 1/8""); the formula, what was measured, the chart's own cell and
+    the precision behind "How it's worked out", collapsed until opened. Nothing dropped: every quote is in one
+    part or the other, with where it is from, and the citation and its links stay in view (traceability)."""
+    from design_checker import rhino_logic as logic
+    det = {"calc": "Required: max(min(25% × lot depth —, 50), 20) = 24'-1 7/8\" to 32'-10 1/8\"",
+           "scope": "Measured: 1 group, 3 solids on Gordium::Massing · footprint 1,523 sf",
+           "precision": "Values are measured to 1/8 in.", "at_limit": None, "colours": None,
+           "quotes": [{"text": "Yard Dimensions · Rear · R-1B: 25%/ 50 ft [fn16]", "where": "§325-8", "chart": True},
+                      {"text": "(16) But not less than 20 ft.", "where": "§325-8, note 16", "chart": False},
+                      {"text": "", "where": "x"}]}
+    got = logic.detail_parts(det)
+    assert got["notes"] == ["Required: 24'-1 7/8\" to 32'-10 1/8\""]
+    assert got["worked"] == [det["calc"], det["scope"], det["precision"]]
+    assert [q["text"] for q in got["quotes"]] == ["(16) But not less than 20 ft."]
+    assert [q["text"] for q in got["worked_quotes"]] == ["Yard Dimensions · Rear · R-1B: 25%/ 50 ft [fn16]"]
+    plain = {"calc": "Required: 22'-6\", raised by the front yard's other way", "quotes": []}
+    assert logic.detail_parts(plain)["notes"] == [plain["calc"]] and logic.detail_parts(plain)["worked"] == []
+    # how the lot lines were read from a cleaned outline (PR 18) stays in view, after the plain result (merge of #53)
+    assert logic.detail_parts(dict(plain, outline="Lot lines read from a cleaned outline"))["notes"] == [
+        plain["calc"], "Lot lines read from a cleaned outline"]
+    area = logic.detail_parts({"calc": "Allowed: 25% × lot area 6,570 sf = 1,642 sf; footprint 1,523 sf"})
+    assert area["notes"] == ["Allowed: 1,642 sf; footprint 1,523 sf"] and area["worked"][0].startswith("Allowed: 25%")
+    # the real checker's items: every quote kept, the chart's cells (and only they) behind the toggle
+    behind = 0
+    for i in check(MODEL, facts)["view"]["items"]:
+        d = i["detail"]
+        parts = logic.detail_parts(d)
+        kept = parts["quotes"] + parts["worked_quotes"]
+        assert sorted(q["text"] for q in kept) == sorted(q["text"] for q in d.get("quotes") or [] if q.get("text"))
+        assert not any(re.search(r"\bR-\w+: ", q["text"]) for q in parts["quotes"]), i["name"]   # no chart cell
+        behind += len(parts["worked_quotes"])
+        if d.get("calc") and " = " in d["calc"]:
+            assert d["calc"] in parts["worked"] and not any("max(" in t or "min(" in t for t in parts["notes"])
+    assert behind >= 3                                                       # the chart's cells really are there
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    detail = ui[ui.index("def show_detail("):ui.index("def _section(")]
+    assert 'det.get("calc")' not in detail and 'det.get("scope")' not in detail     # only through detail_parts
+    assert 'det.get("quotes")' not in detail and 'det.get("precision")' not in detail
+    assert 'if parts.get("worked_out"):' in detail and "logic.WORKED_OUT" in detail   # collapsed until opened
+    assert detail.index('d.AddRow(_wide(det["citation"], size=11))') < detail.index("logic.WORKED_OUT")   # in view
+    assert detail.index('for c in det.get("cited") or []:') < detail.index("logic.WORKED_OUT")
+    assert '"worked_out"' not in ui[:ui.index("def show_detail(")]          # nobody opens it but the architect
+
+
 def test_the_label_timing_allowance_follows_the_machine_never_below_the_idle_bound():
     """_load scales the label timing pins' absolute bounds by how much slower the machine is than the idle Mac,
     never below 1 (a fast machine keeps them as set), so a busy machine can't fail them while a real slowdown of the
@@ -4229,3 +4521,26 @@ def test_the_label_timing_allowance_follows_the_machine_never_below_the_idle_bou
     assert _load(IDLE_UNIT_S / 2) == 1.0 and _load() == 1.0
     assert _load(IDLE_UNIT_S * 3, IDLE_UNIT_S) == pytest.approx(3.0)
     assert 0 < _label_unit() < 1e-3
+
+
+def test_a_rows_button_and_dialog_say_how_many_questions_when_there_are_several():
+    """The architect's review (2026-10-28): the row dialog's button and title were the whole ~25-word list of facts,
+    cut off on the button and in the title bar. Several facts: "Answer 4 questions…" (the dialog lists each; the
+    reason still names them); one: its own words. The dropdowns are one width, lined up; the note under them is a
+    sentence."""
+    from design_checker import rhino_logic as logic
+    four = ["sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit"]
+    assert all(k in logic.STATED_FACTS for k in four)
+    assert logic.answer_words(four) == "Answer %d questions" % len(four)
+    assert logic.answer_words(["stories"]) == logic.enter_words(["stories"]) == "Enter the number of stories"
+    two = ["sleeping_rooms", "parking_spaces"]                      # short enough: its own words
+    assert logic.answer_words(two) == "Enter bedrooms and parking spaces"
+    assert logic.answer_words([]) is None
+    assert logic.row_buttons({"needs": four})[0] == ("Answer %d questions…" % len(four), "enter")
+    assert logic.needs_reason(four).startswith("Needs ") and len(logic.needs_reason(four)) > 40   # still named
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "ui.row_dialog(logic.answer_words(needs)," in rhino
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    dialog = ui[ui.index("def row_dialog("):ui.index("def ", ui.index("def row_dialog(") + 10)]
+    assert "field.Width = logic.ANSWER_WIDTH" in dialog
+    assert logic.FOLLOW_UP_HELP.startswith("Your answers. ") and logic.FOLLOW_UP_HELP.endswith(".")
