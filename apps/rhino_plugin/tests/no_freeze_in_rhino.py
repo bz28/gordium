@@ -176,6 +176,7 @@ try:
     for serial in list((g.STATE.get("checked_at") or {})):
         g.STATE["checked_at"][serial] = g.STATE["dirty"] - 1.0
     g._idle(None, None)
+    g._settle_live()                     # the re-check runs in the background (#32): its answer, waited for and drawn
     claim("6 and re-checked", (before, west(g)["proposed"]) == ("12'-0 1/2\"", "11'-0 1/2\""),
           (before, west(g)["proposed"]))
     # 7 (review round 2): an update over a copy from before LEFTOVERS existed (9303d10: what a cofounder has
