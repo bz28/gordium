@@ -1,0 +1,59 @@
+{
+ "_made_by": "python -m rule_format place --write, from regulations/jurisdictions/new_york/ithaca_city/jurisdiction.yaml: never edit by hand",
+ "jurisdiction": "regulations/jurisdictions/new_york/ithaca_city",
+ "name": "City of Ithaca",
+ "time_zone": {
+  "name": "America/New_York",
+  "standard_utc_offset_hours": -5,
+  "daylight_saving": "us_federal"
+ },
+ "addresses": {
+  "tail": ", Ithaca, NY",
+  "own_words": [
+   "ithaca"
+  ],
+  "also_written": [
+   "city of ithaca",
+   "ithaca city"
+  ],
+  "zip_codes": [
+   "14850",
+   "14851",
+   "14852",
+   "14853"
+  ],
+  "state_words": [
+   "ny",
+   "new",
+   "york"
+  ],
+  "county_words": [
+   "tompkins",
+   "county"
+  ],
+  "nearby_places": [
+   "lansing",
+   "dryden",
+   "danby",
+   "enfield",
+   "newfield",
+   "caroline",
+   "ulysses",
+   "groton",
+   "trumansburg",
+   "freeville",
+   "varna",
+   "etna",
+   "slaterville",
+   "brooktondale",
+   "cayuga"
+  ],
+  "shares_mail_as": "Ithaca, NY 14850",
+  "shares_mail_with": [
+   "Town of Ithaca",
+   "Cayuga Heights",
+   "Lansing",
+   "Dryden"
+  ]
+ }
+}
