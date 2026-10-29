@@ -379,11 +379,26 @@ def test_a_district_decided_twice_through_an_alias_is_refused(decisions):
 # Review round 5.
 
 
-def test_rooming_units_and_bed_and_breakfasts_in_r1_r2_are_not_claimed_settled(built):
+def test_rooming_units_in_r1_r2_are_not_claimed_settled(built):
     for d in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c"):
         assert {dec["status"] for _, dec in built.cells["325-3B:rooming_unit"][d]} == {"missing"}
-        assert built.cells["325-10C"][d][part_index(built, "325-10C", "Bed-and-breakfast")][1]["status"] == "missing"
-        assert built.cells["325-9B"][d][part_index(built, "325-9B", "(p) Bed-and-breakfast")][1]["status"] == "missing"
+
+
+def test_bed_and_breakfasts_in_r1_r2_are_the_use_rules_special_permit(built):
+    """The chart marks a bed-and-breakfast inn "-" in R-1 and R-2, but §325-9B(1)(p) needs a special permit for one
+    "in all districts" (2026-10-29: it was a fail, listed as missing). The use rule now says needs review, citing
+    §325-9B(1)(p), with the chart-vs-text reading as its finding; the coverage table says so."""
+    from rule_format.rulebook import REPO, load, outcome
+    for d in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c"):
+        for piece, words in (("325-10C", "Bed-and-breakfast"), ("325-9B", "(p) Bed-and-breakfast")):
+            dec = built.cells[piece][d][part_index(built, piece, words)][1]
+            assert dec["status"] == "flag" and dec["rules"] == ["use"], (d, piece, dec)
+        rules = load(REPO / f"regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/{d}.yaml")["rules"]
+        use = next(r for r in rules if r["id"] == f"{d}.use")
+        allowed = {"use": {"bed_and_breakfast_inn", "dormitory"}}
+        assert outcome(use, {"use": "bed_and_breakfast_inn"}, allowed) == "needs_review", d
+        assert outcome(use, {"use": "dormitory"}, allowed) == "fail", d          # a "-" use still fails
+        assert any(f["id"] == "bed_and_breakfast_by_special_permit" for f in use["findings"])
 
 
 

@@ -59,6 +59,12 @@ rules:
           schools, nursery schools and child day-care centers in R-2, neighborhood commercial facilities in R-2, and
           group or adult day-care facilities in R-2 as requiring a special permit from the Planning and Development
           Board; the zero-lot-line and attached one-family dwellings are marked SP on the chart only.
+      - when: use == "bed_and_breakfast_inn"
+        reason: >-
+          Marked - for R-2C on the zoning chart (p.2), but §325-9B(1)(p) lists bed-and-breakfast inns "in all
+          districts" as needing a special permit from the Planning and Development Board (§325-9F(1)(c) and
+          §325-10C(2) too): allowed only with that special permit. The chart and the law's text disagree; Gordium
+          reads the text (see the finding), to confirm with the architects or the City.
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 2
@@ -153,6 +159,13 @@ rules:
         lines: [34, 34]
         quote: "(n) Group or adult day-care facilities in R-2 and CR-2 Districts."
         not_limits: {2: "district names (R-2, CR-2), not numbers"}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Bed-and-breakfast inn", column: R-2C}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 31
+        lines: [36, 36]
+        quote: "(p) Bed-and-breakfast inns in all districts."
     examples:
       - given: {use: one_family_detached}
         expect: pass
@@ -172,12 +185,42 @@ rules:
       - given: {use: dormitory}
         expect: fail
       - given: {use: bed_and_breakfast_inn}
-        expect: fail
+        expect: needs_review
       - given: {use: nursery_school_or_child_day_care}
         expect: needs_review
       - given: {use: school}
         expect: needs_review
     findings:
+    - id: bed_and_breakfast_by_special_permit
+      question: The chart (p.2) marks a bed-and-breakfast inn "-" (not permitted) in R-2C, but §325-9 lists
+        bed-and-breakfast inns "in all districts" among the uses needing a special permit. Which governs?
+      kind: reading
+      answer: 'The law''s text: a bed-and-breakfast inn may be allowed in R-2C with a special permit from the Planning
+        and Development Board, so the use needs review (the special permit), never fails. The text says so three times,
+        each naming every district or the residential ones (§325-9B(1)(p) "in all districts", §325-9F(1)(c) "in all
+        residential districts", §325-10C(2)(c) "in residential zones"); the chart, which §325-8A makes part of the
+        chapter, says "-". Gordium''s reading, to confirm with the architects or the City.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 31
+        lines:
+        - 36
+        - 36
+        quote: (p) Bed-and-breakfast inns in all districts.
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 34
+        lines:
+        - 13
+        - 13
+        quote: A bed-and-breakfast inn special permit in all residential districts
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 35
+        lines:
+        - 10
+        - 10
+        quote: Bed-and-breakfast inns in residential zones must be compatible
+      strength: strong
+      confirm_with: the architects or the City zoning office
     - id: chart_marks
       question: The chart has no legend for its marks. We read • as permitted and - as not permitted; SP matches §325-9B(1)'s
         list of uses needing a special permit from the Planning and Development Board. Confirm.

@@ -364,6 +364,7 @@ These were questions on this page. Research answered them, so Gordium uses the a
 | The chart's marks | • permitted, - not permitted, SP needs a special permit (NEEDS REVIEW) | Reading · strong | §325-8A(2), §325-8B(3), §325-9B(1) |
 | "Public utility structure" = "public utility facilities" | The same use; a special permit either way | Reading · strong | chart p.2, §325-9B(1)(c) |
 | Can a permitted (•) use still need review? | Yes: Article V's regulations still apply, as rules of their own | The law | §325-8A(2), p.24 |
+| A bed-and-breakfast inn in R-1 or R-2 (the chart marks it "-") | Allowed only with a special permit from the Planning and Development Board: NEEDS REVIEW, not FAIL. The law's text names bed-and-breakfast inns "in all districts" (and "in all residential districts" for the permit's term); the chart's "-" disagrees, so this is a reading to confirm (2026-10-29) | Reading · strong | §325-9B(1)(p), p.31; §325-9F(1)(c), p.34; §325-10C(2)(c), p.35; chart p.2 |
 | Parking for a house with an ADU | An ADU needs no off-street parking | The law | §325-28C(2), p.72 |
 | Five definitions with numbers (adult day-care home, bed-and-breakfast inn, kitchen, dwelling unit, rooming unit) | Categories: the number says what to call something, and the use rules judge the rest. Dwelling unit and rooming unit stay labeled "rule": a design that claims one must have it, which gives the same result | Reading · strong | how §325-3 and the operative sections are built |
 
