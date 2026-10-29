@@ -224,6 +224,33 @@ def test_the_kept_answers_are_bounded(tmp_path, monkeypatch):
         assert len(check._OPTIONS) <= 3
 
 
+def test_the_least_recently_used_answer_goes_first(tmp_path, monkeypatch):
+    """Review round 2: the bound alone passed with everything dropped at once, or with an answer asked again still
+    dropped first. Kept A, B, C; A asked again; D added: B goes, A and C stay (counted: kept ones aren't worked
+    out again)."""
+    monkeypatch.setattr(check, "_OPTIONS_MAX", 3)
+    check._OPTIONS.clear()
+    cities = {}
+    for name in "ABCD":
+        j = tmp_path / name
+        (j / "4_term_definitions").mkdir(parents=True)
+        (j / "4_term_definitions/uses.yaml").write_text(f"{name.lower()}_use: {{name: Use {name}}}\n",
+                                                        encoding="utf-8")
+        cities[name] = str(j)
+    calls = []
+    real = check._options
+    monkeypatch.setattr(check, "_options", lambda *a: calls.append(Path(a[0]).name) or real(*a))
+    for name in "ABCAD":
+        check.options(cities[name])
+    assert calls == ["A", "B", "C", "D"]                   # A's second ask was kept
+    calls.clear()
+    for name in "ACD":
+        check.options(cities[name])
+    assert calls == []                                    # A, C and D still kept
+    check.options(cities["B"])
+    assert calls == ["B"]                                 # B was the one dropped
+
+
 _OPENED: list | None = None
 
 
@@ -275,7 +302,9 @@ def test_every_file_the_answer_reads_is_in_its_key(tmp_path, where):
 def test_options_is_quick():
     """Loose bounds (the Mac measured ~3 ms kept and ~0.1 s worked out again with the rule files decoded; it was
     ~2 s before _read_for was worked out once per district and use): kept, well under 50 ms; worked out again,
-    under 1 s."""
+    under 1 s. Warmed here first, whatever ran before (review round 2: a kept answer with the rule files no longer
+    decoded made the "again" call a cold one)."""
+    _clear()
     check.options(CITY)
     t = time.perf_counter()
     check.options(CITY)
