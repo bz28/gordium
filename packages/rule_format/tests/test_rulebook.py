@@ -787,12 +787,18 @@ def test_quoted_values_that_fit_their_measure_pass(chart_ctx):
 
 def test_one_definition_of_a_district_column():
     """The chart reader, the inspector and the drafter decide 'is this column a district' the same way, so an
-    extra all-caps heading (NOTES, SP) can't become a district in one place and not another."""
-    from document_extraction import charts
-    from rule_format.rulebook import DISTRICT_COLUMN
-    assert charts.DISTRICT is DISTRICT_COLUMN
+    extra all-caps heading (NOTES, SP) can't become a district in one place and not another: each from the place's
+    own settings (its jurisdiction.yaml, through the registry), with no copy of the pattern in their code."""
+    from pathlib import Path
+    from rule_format.place import place
+    column = place("new_york/ithaca_city").district_column
     names = ["R-1A", "R-1B", "R-3AA", "RU", "NOTES", "SP", "ADU", "Additional Regulations"]
-    assert [n for n in names if DISTRICT_COLUMN.fullmatch(n)] == ["R-1A", "R-1B", "R-3AA", "RU"]
+    assert [n for n in names if column.fullmatch(n)] == ["R-1A", "R-1B", "R-3AA", "RU"]
+    packages = Path(__file__).resolve().parents[2]
+    for code in ("document_extraction/document_extraction/charts.py", "rule_format/rule_format/rulebook.py",
+                 "rule_drafting/rule_drafting/chart_values.py", "rule_drafting/rule_drafting/__main__.py"):
+        text = (packages / code).read_text(encoding="utf-8")
+        assert "R-\\d" not in text and "DISTRICT_COLUMN =" not in text, code
 
 
 # ---- every number a cited footnote or law quote states is used, or declared not a limit ----------------------

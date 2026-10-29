@@ -24,11 +24,11 @@ def load_cells(path: Path) -> tuple[dict, list[dict], list[dict]]:
     return rows[0], [r for r in rows[1:] if "columns" in r], [r for r in rows[1:] if "value" in r]
 
 
-def districts(tables: list[dict]) -> list[str]:
-    """The district columns, in chart order (R-1A ... RU), from the first table that has them."""
-    from rule_format.rulebook import DISTRICT_COLUMN
+def districts(tables: list[dict], district_column) -> list[str]:
+    """The district columns, in chart order (R-1A ... RU), from the first table that has them (`district_column`:
+    the place's own pattern, rule_format.place's Place.district_column)."""
     for t in tables:
-        names = [c["name"] for c in t["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])]
+        names = [c["name"] for c in t["columns"] if district_column.fullmatch(c["name"])]
         if names:
             return names
     return []

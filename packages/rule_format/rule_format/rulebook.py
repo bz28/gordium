@@ -245,17 +245,20 @@ class Context:
                 ctx.pieces |= {row["id"] for row in read_jsonl(cut)[1:]}
             cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
             if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
-                ctx._load_cells(name, sha, cells)
+                ctx._load_cells(name, sha, cells, j)
         proposed = j / PROPOSED_MEASURES
         if proposed.exists():
             listed_measures = load(proposed) or {}
             ctx.proposed = {n: m for n, m in listed_measures.items() if isinstance(m, dict) and n not in ctx.measures}
         return ctx
 
-    def _load_cells(self, name, sha, path):
+    def _load_cells(self, name, sha, path, j):
         """Chart cells read by the chart reader (document_extraction/charts.py). Only cells it read with
-        certainty are in the file; unresolved parts of a table can never be cited."""
-        found = _kept(f"cells {sha}", Path(path).read_bytes(), lambda data: _cells_of(data, sha))
+        certainty are in the file; unresolved parts of a table can never be cited. `j`: the jurisdiction, whose
+        settings say which chart columns are districts."""
+        from .place import place
+        column = place(j).district_column
+        found = _kept(f"cells {sha} {column.pattern}", Path(path).read_bytes(), lambda data: _cells_of(data, sha, column))
         if found is None:
             self._problem(name, f"{path.name} was read from a different version; re-extract")
             return
@@ -274,16 +277,17 @@ class Context:
         self.pages[name] = pages
 
 
-def _cells_of(data: bytes, sha: str) -> tuple | None:
-    """A .cells.jsonl file's bytes -> (its cells, its districts), or None when its header names another PDF
-    version than `sha` (checked before any row is read, so a stale file is always "re-extract", never a crash)."""
+def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | None:
+    """A .cells.jsonl file's bytes -> (its cells, its districts: the columns `district_column` matches), or None when
+    its header names another PDF version than `sha` (checked before any row is read, so a stale file is always
+    "re-extract", never a crash)."""
     rows = _jsonl_rows(data)
     if not rows or rows[0].get("sha256") != sha:
         return None
     cells, districts = {}, set()
     for r in rows[1:]:
         if "columns" in r:
-            districts |= {district_name(c["name"]) for c in r["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])}
+            districts |= {district_name(c["name"]) for c in r["columns"] if district_column.fullmatch(c["name"])}
         elif "value" in r and not r.get("heading"):
             cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
     return cells, districts
@@ -304,9 +308,9 @@ def _pages_of(data: bytes, sha: str) -> dict | None:
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
                  "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages"}
 LAYOUTS = {"ecode360"}   # document layouts the section splitter knows (document_extraction/sections.py)
-# A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU): the one definition, used by the
-# chart reader, the inspector and the drafter alike. Ithaca's residential names; another city adds its own here.
-DISTRICT_COLUMN = re.compile(r"R-\d[A-Z]*|RU")
+# A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU), is each place's own: its
+# jurisdiction.yaml districts.chart_column, through the registry (place.py: Place.district_column), the one
+# definition the chart reader, the inspector and the drafter all use.
 
 
 def district_name(column: str) -> str:

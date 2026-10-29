@@ -12,8 +12,7 @@ use the rule decides about is cited by its own cell, so the inspector's use-row 
 from rule_format.rulebook import district_name, pending_research
 
 from .chart_values import FOOTNOTE, footnotes
-
-CHART_FILE = "zoning_charts_2026-04.pdf"
+from .templates import CHART_FILE   # noqa: F401  (the place's zoning chart: one definition)
 SECTION = "Primary Uses"
 MARK_QUESTION = ("The chart has no legend for its marks. We read • as permitted and - as not permitted; SP "
                  "matches §325-9B(1)'s list of uses needing a special permit from the Planning and Development "

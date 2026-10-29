@@ -38,12 +38,10 @@ import statistics
 from dataclasses import dataclass, field
 
 import pdfplumber
-from rule_format.rulebook import DISTRICT_COLUMN
 
 from .extract import EXTRACTOR, footnote_marks, page_lines, sha256
 
 READER = f"{EXTRACTOR}; cells from drawn rectangles (charts.py)"
-DISTRICT = DISTRICT_COLUMN                      # a district column's name, as the chart prints it (one definition)
 EDGE = 1.0          # points: a word or cell may overhang an edge by this much (drawing rounding)
 ROW_GAP = 0.75      # lines of one row are closer than this share of the normal row height
 
@@ -111,8 +109,9 @@ def _within(inner_x0, inner_x1, outer_x0, outer_x1) -> bool:
     return inner_x0 >= outer_x0 - EDGE and inner_x1 <= outer_x1 + EDGE
 
 
-def read_page(page, page_number: int) -> list[dict]:
-    """The page's column record, then one record per cell (or unresolved piece)."""
+def read_page(page, page_number: int, district: re.Pattern) -> list[dict]:
+    """The page's column record, then one record per cell (or unresolved piece). `district`: a column name that is
+    a district, as the chart prints it (the place's own: rule_format.place, Place.district_column)."""
     lines, body = page_lines(page)
     tokens = {n: line_tokens(line, n, body) for n, line in enumerate(lines, 1)}
     rects = [r for r in page.rects if r["width"] > EDGE and r["height"] > EDGE]
@@ -127,7 +126,7 @@ def read_page(page, page_number: int) -> list[dict]:
 
     # Columns: header rectangles named like a district, then any other header column beside them.
     named = [(r, _strip_footnotes(text_in(r))) for r in rects]
-    labelled = [(r, n) for r, n in named if DISTRICT.fullmatch(n)]
+    labelled = [(r, n) for r, n in named if district.fullmatch(n)]
     # A district is a named header with no other named header under it ("R-1" groups R-1A and R-1B).
     districts = sorted([(r, n) for r, n in labelled
                         if not any(o is not r and _within(o["x0"], o["x1"], r["x0"], r["x1"]) and o["top"] > r["top"]
@@ -317,10 +316,10 @@ def _same_key_unresolved(out: list[dict]) -> list[dict]:
     return kept
 
 
-def read_charts(pdf_path, pages: list[int]) -> list[dict]:
-    """The header, then each listed page's columns and cells."""
+def read_charts(pdf_path, pages: list[int], district: re.Pattern) -> list[dict]:
+    """The header, then each listed page's columns and cells (`district`: as read_page)."""
     rows = []
     with pdfplumber.open(pdf_path) as pdf:
         for n in pages:
-            rows += read_page(pdf.pages[n - 1], n)
+            rows += read_page(pdf.pages[n - 1], n, district)
     return [{"file": pdf_path.name, "sha256": sha256(pdf_path), "pages": pages, "reader": READER}, *rows]

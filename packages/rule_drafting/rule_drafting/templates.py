@@ -10,6 +10,7 @@ import ast
 import re
 
 from rule_format import formula
+from rule_format.place import only_place
 from rule_format.rulebook import district_name, pending_research
 
 DRAFTED_QUESTION = "raised by the drafting script (the AI's draft); not searched yet"
@@ -17,7 +18,8 @@ DRAFTED_QUESTION = "raised by the drafting script (the AI's draft); not searched
 from .chart_values import fill, number_text
 
 SLOT = re.compile(r"\{([a-z][a-z0-9_]*)\}")
-CHART_FILE = "zoning_charts_2026-04.pdf"
+# the zoning chart drafting reads: the registry's one place's (its jurisdiction.yaml law.zoning_chart)
+CHART_FILE = only_place("rule drafting", "give it a --place option first").law_file("zoning_chart")
 
 
 def formula_fields(template: dict) -> list[tuple[tuple, str]]:

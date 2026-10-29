@@ -14,6 +14,7 @@ from pathlib import Path
 
 import yaml
 
+from rule_format.place import place
 from rule_format.rulebook import jurisdictions, utf8_console
 
 from . import sections
@@ -42,7 +43,8 @@ def main(argv: list[str]) -> int:
             if doc.get("layout") == "ecode360":
                 outputs[out_dir / f"{Path(doc['file']).stem}.sections.jsonl"] = sections.to_jsonl(sections.split(rows), rows[0])
             if doc.get("chart_pages"):   # tables read into cells, from the same lines
-                outputs[out_dir / f"{Path(doc['file']).stem}.cells.jsonl"] = to_jsonl(read_charts(pdf, doc["chart_pages"]))
+                outputs[out_dir / f"{Path(doc['file']).stem}.cells.jsonl"] = to_jsonl(read_charts(
+                    pdf, doc["chart_pages"], place(jurisdiction).district_column))
             for path, fresh in outputs.items():
                 failed += not _write_or_check(path, fresh, check)
     return 1 if failed else 0
