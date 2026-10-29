@@ -1125,7 +1125,7 @@ def test_the_delta_column_is_named_delta_in_the_panel_and_the_report(facts, tmp_
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
     assert logic.COLUMN_DELTA == "Delta" and "Delta" in cells and "Margin" not in cells
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert '(logic.COLUMN_DELTA, 86)' in ui and '"Margin"' not in ui
+    assert '(logic.COLUMN_DELTA, 100)' in ui and '"Margin"' not in ui
 
 
 def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_document():

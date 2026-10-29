@@ -438,7 +438,7 @@ Three rows need review from the start, and that is Gordium being honest, not a m
 - **Rear yard**: which of the short lines at the back count as side lot lines and which as the rear lot line is an
   open question for the architects (it decides the lot's depth, and so the rear yard's requirement). The list
   shows the tightest reading, 36'-3 3/8" against 32'-10 1/8", each marked "(varies)", and its Delta reads
-  "+3'-5 1/4"; worst +0'-5 1/4"" (the least under any reading, the tax map's 2 ft too). The row's details give the
+  "+3'-5 1/4"" over "worst +0'-5 1/4"" (the least under any reading, the tax map's 2 ft too). The row's details give the
   range each can take (34'-11 7/8" to 36'-3 3/8" against 24'-1 7/8" to 32'-10 1/8"), and the reason says so once: "Complies under every
   reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the
   zoning office".
@@ -481,8 +481,8 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
     house 3 ft back, and pull each side wall 3 ft in. On this lot Building height **needs review**: the bonus needs
     the rear yard larger too, and which lines are the rear lot line is the open question above.
 11. **Delta in words, as drawn and if the tax-map lines are 2 ft off:** after test 2 the Front yard row's details
-    read "+7'-0 5/8" (+5'-0 5/8" if the tax-map lines are 2 ft off)" (the list says it shorter: "+7'-0 5/8"; worst
-    +5'-0 5/8""); in test 6 the Southwest side yard reads "0'-11 1/2" short (+1'-0 1/2" if the tax-map lines are 2 ft
+    read "+7'-0 5/8" (+5'-0 5/8" if the tax-map lines are 2 ft off)" (the list says it shorter, on two lines:
+    "+7'-0 5/8"" over "worst +5'-0 5/8""); in test 6 the Southwest side yard reads "0'-11 1/2" short (+1'-0 1/2" if the tax-map lines are 2 ft
     off the other way)" (3 ft out: it may comply) and "2'-11 1/2" short (still 0'-11 3/8" short if the tax-map lines
     are 2 ft off the other way)" (5 ft out: the red strip). A maximum passed says "over" instead of "short" (test
     5's "4'-0" over"). The same in the report and the note. With a survey it reads the margin itself: after test 2,

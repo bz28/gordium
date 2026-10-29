@@ -359,7 +359,7 @@ def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
         (f"3'-0\" short (still 1'-0\" short {off} the other way)", True),
         (f"+1'-0\" if confirmed (1'-0\" short {off})", True), (f"+6'-0\" (+4'-0\" {off})", True)]
     assert [words[x]["delta_cell"] for x in (7, 11, 16)] == [
-        "−3'-0\"; best −1'-0\"", "+1'-0\"; worst −1'-0\"", "+6'-0\"; worst +4'-0\""]
+        "−3'-0\"\nbest −1'-0\"", "+1'-0\"\nworst −1'-0\"", "+6'-0\"\nworst +4'-0\""]
     assert words[7]["margin"] == "−3'-0\"" and words[7]["status"] == present.FAILS     # as drawn, unchanged
     assert words[7]["detail"]["line"] == "7'-0\" proposed, 10'-0\" required · " + words[7]["delta"]
     survey = items(check_site(_plot(box(7, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])["Side yard, West"]

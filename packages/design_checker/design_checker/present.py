@@ -968,8 +968,9 @@ def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
     every reading)", "+2'-10 5/8" if confirmed (0'-1 3/8" short under another reading)".
     The verdict is the checker's and unchanged: only the words. Never overstated (room rounds down, a shortfall
     up) and never kinder than the status: a row in review says its room "if confirmed", one that fails another way
-    its room "room here; see why". Returns (words, the panel cell's shorter form: the two numbers signed, the
-    second after "worst" or "best", to fit the narrow Delta column's two lines; the detail has the words whole)."""
+    its room "room here; see why". Returns (words, the panel cell's shorter form: the two numbers signed, one a
+    line, the second after "worst" or "best", to fit the narrow Delta column's two lines (measured in Rhino); the
+    detail has the words whole)."""
     low, high = span
     head = _plain_margin(drawn, unit, maximum)
     if drawn >= 0 and status == REVIEW and head != "at limit":
@@ -996,7 +997,7 @@ def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
         ("over" if maximum else "short") if _rounds_to_nothing(-end, unit) else "−" + _amount(-end, unit, "down"))
     # short even at best on a row in review for another reason: the certain words with "see why", as delta_words
     why = "; see why" if certain and status != FAILS else ""
-    return f"{head} ({tail}){why}", f"{margin_text(drawn, unit)}; {word} {cell_end}"
+    return f"{head} ({tail}){why}", f"{margin_text(drawn, unit)}\n{word} {cell_end}"
 
 VARIES = " (varies)"
 

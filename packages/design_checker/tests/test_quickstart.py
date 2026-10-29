@@ -259,13 +259,14 @@ def test_10_the_height_bonus_waits_for_the_open_question(house):
 def test_11_delta_in_words(house):
     from design_checker import rhino_logic as logic
     got, facts = house
-    front_words, front_cell, up_words, least_words, survey_words = (" ".join(w.split()) for w in said(
-        r'after test 2 the Front yard row\'s details\s+read "(.+?\))" \(the list says it shorter: "(.+?)"\); in test 6 '
+    front_words, cell_1, cell_2, up_words, least_words, survey_words = (" ".join(w.split()) for w in said(
+        r'after test 2 the Front yard row\'s details\s+read "(.+?\))" \(the list says it shorter, on two lines: "(.+?)" '
+        r'over "(.+?)"\); in test 6 '
         r'the Southwest side yard reads "(.+?\))" \(3 ft out: it may comply\) and "(.+?\))" \(5 ft out: the red '
         r'strip\).*?With a survey it reads the margin itself: after test 2,\s+"(\+\d+\'-\d+(?: \d/\d)?")"'))
     back, = said(r"Move the house (\d+) ft back")
     front = _check(_moved(got["floors"], dy=float(back)), facts)["Front yard"]
-    assert front["delta"] == front_words and front["delta_cell"] == front_cell
+    assert front["delta"] == front_words and front["delta_cell"] == cell_1 + "\n" + cell_2
     assert _left_side(_check(_wall_out(got["floors"], 3), facts))["delta"] == up_words
     assert _left_side(_check(_wall_out(got["floors"], 5), facts))["delta"] == least_words
     surveyed = _check(_moved(got["floors"], dy=float(back)), facts, lot_surveyed=True)["Front yard"]
@@ -425,9 +426,9 @@ def test_the_rear_yards_span_shows_its_tightest_pair_in_the_list(house):
     assert rear["proposed"] == "34'-11 7/8\" to 36'-3 3/8\"" and rear["required"] == "24'-1 7/8\" to 32'-10 1/8\""
     assert rear["cells"] == {"proposed": "36'-3 3/8\" (varies)", "required": "32'-10 1/8\" (varies)"}
     assert rear["delta"] == "+3'-5 1/4\" if confirmed (at least +0'-5 1/4\" under every reading)"
-    assert rear["delta_cell"] == "+3'-5 1/4\"; worst +0'-5 1/4\""
+    assert rear["delta_cell"] == "+3'-5 1/4\"\nworst +0'-5 1/4\""
     assert rear["detail"]["line"].startswith(rear["proposed"] + " proposed, " + rear["required"] + " required")
     assert logic.list_values(rear)[1:] == ("36'-3 3/8\" (varies)", "32'-10 1/8\" (varies)", rear["delta_cell"])
     side = _check(got["floors"], facts)["Side yard, Southwest"]     # one reading as drawn: no cells, its own value
     assert "cells" not in side and logic.list_values(side)[1:] == (side["proposed"], side["required"],
-                                                                  "+2'-0 1/2\"; worst +0'-0 1/2\"")
+                                                                  "+2'-0 1/2\"\nworst +0'-0 1/2\"")

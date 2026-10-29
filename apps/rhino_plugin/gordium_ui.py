@@ -23,7 +23,9 @@ PANEL_WIDTH = 400          # as wide as Rhino's own panels (architect's review, 
 # fixed widths that fit the panel: an Item column sized to its text pushed the numbers out of sight (seen in the
 # Rhino window capture). The mark is the first thing in the Item cell: on the Mac the tree's expand arrows take
 # the first column, which hid a column of its own.
-COLUMNS = [("Item", 120), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 86)]   # Item takes the rest
+COLUMNS = [("Item", 106), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 100)]   # Item takes the rest
+# (Delta 100 px: a tax-map lot's two lines, "+2'-0⅜"" then "worst +0'-0⅜"", each one line, measured in Rhino
+# 2026-10-29: "worst +12,033 sf" needs 99 px; Item's 106 is its least, it takes whatever the panel has)
 ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" short" wraps instead of being cut off
 #                           (Eto's tree grid has one height for every row: a third line would cost rows in view, so
 #                           the values are made to fit two instead: logic.cell_text)
