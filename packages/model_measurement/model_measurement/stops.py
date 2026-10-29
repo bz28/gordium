@@ -104,8 +104,21 @@ STOPS = {
     "no_building_units": "enter the dwelling units in the whole attached building, every lot it stands on",
     "no_occupant_split": "optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that "
                          "depends on how the occupants are split)",
+    "no_household": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, "
+                    "whether the household is a functional family unit, whether an accessory dwelling unit is on the "
+                    "lot (§325-3B)",
     "attached_counts_disagree": "{here} dwelling units on this lot but {building} in the attached building: part of "
                                 "another building may be on this lot, or one of the counts or the use is off",
+    "occupant_split_disagree": "the most occupants in one dwelling unit ({most}) is more than the occupants of every "
+                               "unit on the lot together ({occupants}): check both counts",
+    "occupant_counts_disagree": "{occupants} occupants on the lot, but {units} {unit_words} with at most {most} in any one "
+                                "can hold only {held}, with no accessory dwelling unit on the lot: check {check} and "
+                                "the accessory dwelling unit answer",
+    "change_use_in_start_box": "change the use with Edit site… in the start box",
+    "household_counts_disagree": "the count of unrelated people with minor dependent children included ({with_}) is "
+                                 "lower than the count without them ({without}): check both counts",
+    "no_home_occupation": "say whether a home occupation is planned and, if so, its floor area and its dwelling "
+                          "unit's (§325-3B HOME OCCUPATION)",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",
