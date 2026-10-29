@@ -672,8 +672,24 @@ labels:
         of the dwelling.
     piece_sha256: 4a0ce7ec9f069ae79b4467da8d4884fbb4bace8a36967df6bef6468c3de3c2f1
     drafted_by: section_labeling/claude-haiku-5-5
-    open_questions:
-    - "Category or limit? Is 'not more than six adults' only what separates an adult day-care home from a group facility (reference), or a cap a home must meet (rule)?"
+    findings:
+    - id: adult_day_care_home_is_a_category
+      question: Category or limit? Is 'not more than six adults' only what separates an adult day-care home from a group
+        facility (reference), or a cap a home must meet (rule)?
+      kind: reading
+      answer: 'A category: the definition says what the word means, and the requirements live in the chart and Article
+        V, so a design that misses it is a different use, which the use rules then judge.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines:
+        - 37
+        - 38
+        quote: A dwelling unit in which adult day care is provided to not more than six adults at one time by a resident
+          of the dwelling.
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §6
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:agriculture:
@@ -775,8 +791,24 @@ labels:
         or one family per guest room, used for lodging on an overnight basis.
     piece_sha256: 785b4ff62a2a20cd52345cfcc8b8b79d9cc657f749374855c7d7b94106c66273
     drafted_by: section_labeling/claude-haiku-5-5
-    open_questions:
-    - "Category or limit? Are 'five to 10 guest rooms' and 'two persons or one family per guest room' only what makes a use a bed-and-breakfast inn (reference), or limits an inn must meet (rule)?"
+    findings:
+    - id: bed_and_breakfast_inn_is_a_category
+      question: Category or limit? Are 'five to 10 guest rooms' and 'two persons or one family per guest room' only
+        what makes a use a bed-and-breakfast inn (reference), or limits an inn must meet (rule)?
+      kind: reading
+      answer: 'A category: the definition says what the word means, and the requirements live in the chart and Article
+        V, so a design that misses it is a different use, which the use rules then judge.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 5
+        lines:
+        - 14
+        - 16
+        quote: An owner-managed, single dwelling unit that provides five to 10 guest rooms, limited to two persons or
+          one family per guest room, used for lodging on an overnight basis.
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §6
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:boardinghouse:
@@ -1261,8 +1293,27 @@ labels:
       by: Claude (review of all labels, 2026-10-19)
       date: 2026-10-19
       why: "the separate-entrance wording reads as a requirement; same label as rooming unit until the architects decide"
-    open_questions:
-    - "Category or limit? Is 'having a separate entrance from the outside of the building or through a common hall' only what makes rooms a dwelling unit (reference), or a requirement every dwelling unit must meet (rule)? Labeled rule until answered, the same as rooming unit."
+    findings:
+    - id: dwelling_unit_is_a_category
+      question: Category or limit? Is 'having a separate entrance from the outside of the building or through a common
+        hall' only what makes rooms a dwelling unit (reference), or a requirement every dwelling unit must meet (rule)?
+        Labeled rule until answered, the same as rooming unit.
+      kind: reading
+      answer: 'A category: the definition says what the word means, and the requirements live in the chart and Article
+        V, so a design that misses it is a different use, which the use rules then judge. A design that claims a dwelling
+        unit must have it, so the label rule gives the same result; it stays.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines:
+        - 10
+        - 12
+        quote: DWELLING UNIT — One or more rooms designed or used for living quarters by one household, including provisions
+          for living, cooking, sanitary and sleeping facilities, and having a separate entrance from the outside of
+          the building or through a common hall.
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §6
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:enlargement:
@@ -1704,8 +1755,24 @@ labels:
         cooking or preparation of food.
     piece_sha256: 884fde18d6fe2d8725610280e83c60af1e794586c8775547aea7fe7b93058a4b
     drafted_by: section_labeling/claude-haiku-5-5
-    open_questions:
-    - "Category or limit? Is 'a kitchen is 60 square feet or more, at least 5 feet wide' only the line between a kitchen and a kitchenette (reference), or a minimum size every kitchen must meet (rule)?"
+    findings:
+    - id: kitchen_is_a_category
+      question: Category or limit? Is 'a kitchen is 60 square feet or more, at least 5 feet wide' only the line between
+        a kitchen and a kitchenette (reference), or a minimum size every kitchen must meet (rule)?
+      kind: reading
+      answer: 'A category: the definition says what the word means, and the requirements live in the chart and Article
+        V, so a design that misses it is a different use, which the use rules then judge.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 14
+        lines:
+        - 5
+        - 6
+        quote: KITCHEN — Space, 60 square feet or more in floor area, with a minimum width of five feet, used for cooking
+          or preparation of food.
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §6
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:kitchenette:
@@ -2422,8 +2489,25 @@ labels:
       quote: ROOMING UNIT — One or more rooms designed or used for living quarters by one household,
     piece_sha256: f09f0ed1cce8b79665697c66367961eb8871c962e9e5b6be055b19dd2b01ccc7
     drafted_by: section_labeling/claude-haiku-5-5
-    open_questions:
-    - "Category or limit? Is the kitchen-or-separate-entrance wording only what makes a space a rooming unit (reference), or a requirement a rooming unit must meet (rule)? Labeled rule until answered, the same as dwelling unit."
+    findings:
+    - id: rooming_unit_is_a_category
+      question: Category or limit? Is the kitchen-or-separate-entrance wording only what makes a space a rooming unit
+        (reference), or a requirement a rooming unit must meet (rule)? Labeled rule until answered, the same as dwelling
+        unit.
+      kind: reading
+      answer: 'A category: the definition says what the word means, and the requirements live in the chart and Article
+        V, so a design that misses it is a different use, which the use rules then judge. A design that claims a rooming
+        unit must have it, so the label rule gives the same result; it stays.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 18
+        lines:
+        - 11
+        - 11
+        quote: ROOMING UNIT — One or more rooms designed or used for living quarters by one household,
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §6
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:row_house:
@@ -4908,6 +4992,47 @@ labels:
         line in all districts
     piece_sha256: 941d288d7f7de8827e56754efff441bd05d2c9ddc351af7d46cbdb7bb0c4bb78
     drafted_by: section_labeling/claude-haiku-5-5
+    open_questions:
+    - Which side and rear distances apply to an accessory building that isn't frame (masonry or metal), and is there
+      a height limit for accessory buildings other than ADUs?
+    research:
+    - question: Which side and rear distances apply to an accessory building that isn't frame (masonry or metal), and
+        is there a height limit for accessory buildings other than ADUs?
+      searched:
+      - 325-25
+      - 325-25A
+      - 325-25B
+      - 325-25C
+      - 325-25D
+      - 325-28C
+      - 325-3B:accessory_building_or_structure
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines:
+        - 6
+        - 7
+        quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines:
+        - 7
+        - 8
+        quote: except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side
+          lot line nor less than three feet from any rear lot line
+      why_open: §325-25C's first sentence sets distances for "frame accessory buildings". Its R-1 clause says "accessory
+        buildings" without "frame", but the subsection is headed "Frame accessory buildings", so whether a building
+        that isn't frame has distance limits (in R-1 or elsewhere) isn't settled. §325-25 sets no height limit. Nothing
+        else in the code or the City's records fills the gap.
+      readings:
+      - id: frame_distances_apply
+        reading: the frame distances apply to every accessory building
+      - id: r1_distances_apply_to_all_accessory_buildings
+        reading: in R-1, the 6 ft side / 3 ft rear distances apply to every accessory building; elsewhere only frame
+          ones have distances
+      - id: front_yard_rule_only
+        reading: only "not in a required front yard" applies
+      report: docs/research/2026-10-20_architect_questions.md §X2
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-26:
@@ -5204,6 +5329,25 @@ labels:
       quote: A maximum of one ADU is allowed per parcel.
     piece_sha256: fe4380bede6be129faef355e595599603b7ca820e0c8d6637a6e11e661e1beb4
     drafted_by: section_labeling/claude-haiku-5-5
+    open_questions:
+    - On a corner lot, which front yard is the "primary front yard" for an ADU (§325-28C)?
+    research:
+    - question: On a corner lot, which front yard is the "primary front yard" for an ADU (§325-28C)?
+      searched:
+      - 325-28
+      - 325-28A
+      - 325-28C
+      - 325-8A
+      - 325-19C
+      sources: []
+      why_open: '"Primary" and "secondary" front yard are never defined; the yard on the address street (as §325-8A(14)(d)
+        uses it for the rear yard) is a plausible but weak reading.'
+      readings:
+      - id: address_street_yard
+        reading: the front yard on the street the address is on
+      - id: designer_named_yard
+        reading: the front yard the designer names
+      report: docs/research/2026-10-20_architect_questions.md §X3
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29:
