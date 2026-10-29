@@ -331,7 +331,14 @@ def test_amber_follows_every_yard_in_doubt():
     from design_checker.check import check_site
     tax = check_site(_plot(box(11, 25, 35, 65)), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
     assert items(tax["view"])["Front yard"]["status"] == present.REVIEW
-    assert _regions(tax) == [(present.REVIEW, 11, 35, pytest.approx(86, abs=1.5))]
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    blocks = tax["plan"]["encroach"]
+    assert {e["status"] for e in blocks} == {present.REVIEW}
+    assert {e["row"] for e in blocks} == {"Front yard", "Side yard, West"}      # each strip named for its own row
+    joined = unary_union([Polygon(e["outline"]) for e in blocks])
+    assert joined.area == pytest.approx(86, abs=1.5) and joined.bounds[0] == pytest.approx(11)
+    assert sum(Polygon(e["outline"]).area for e in blocks) == pytest.approx(joined.area, abs=0.01)   # never twice
 
 
 def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
@@ -421,6 +428,128 @@ def test_a_height_that_needs_review_is_amber_above_the_limit():
         (top,) = plan(site, env, {"items": [{"measure": "building_height", "status": status}]}, {})["encroach"]
         assert (top["why"], top["status"], top["base"], top["top"]) == ("height", status, 35, 38)
     assert plan(site, env, {"items": [{"measure": "building_height", "status": present.COMPLIES}]}, {})["encroach"] == []
+
+
+def test_only_what_rises_above_the_height_limit_is_coloured_a_roofs_ridge_not_its_eaves():
+    """A roof sloping from 30 ft (at y 25) to 40 ft (at y 65) under a 35 ft limit: only the half of the plan where
+    the roof is above 35 ft (y 45 to 65, 25 × 20 = 500 sf) is coloured, never the whole 1,000 sf footprint."""
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    from test_measure import sloped_roof_box
+    site = _plot(sloped_roof_box(10, 25, 35, 65, 30, 40, "house"))
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    (top,) = plan(site, env, {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
+    assert Polygon(top["outline"]).area == pytest.approx(500, abs=0.01)
+    assert min(p[1] for p in top["outline"]) == pytest.approx(45)
+    assert (top["base"], top["top"], top["building"]) == (35, 40, "house")
+
+
+def test_a_building_over_the_limit_with_only_walls_above_it_is_still_coloured_over_its_own_plan():
+    """Independent review of #28, P1: a vault or dome read as walls (its curved roof faces left out) rises over the
+    limit with nothing above it seen from above; it was coloured nowhere. Never less than its own plan."""
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    house = box(10, 25, 35, 65, 0, 38)
+    house["faces"] = [f for f in house["faces"] if not all(p[2] == 38 for p in f["points"])]   # its top left out
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    for status in (present.FAILS, present.REVIEW):
+        tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": status}]},
+                                {})["encroach"] if e["why"] == "height"]
+        assert [(t["base"], t["top"], t["status"]) for t in tops] == [(35, 38, status)]
+        assert Polygon(tops[0]["outline"]).area == pytest.approx(1000)
+
+
+def test_a_vault_read_as_walls_beside_a_flat_roof_over_the_limit_is_coloured_too():
+    """Review of the #28 fix (L1): one building whose flat roof part rises over the limit (seen from above) and a
+    vault part read as walls also over it: the walls lie outside what is seen from above, so its whole plan."""
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    from test_measure import sloped_roof_box
+    flat = box(10, 25, 20, 65, 0, 38)
+    vault = box(20, 25, 35, 65, 0, 38)
+    vault["faces"] = [f for f in vault["faces"] if not all(p[2] == 38 for p in f["points"])]
+    house = {"id": "house", "faces": flat["faces"] + vault["faces"], "problems": []}
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": present.FAILS}]},
+                            {})["encroach"] if e["why"] == "height"]
+    assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000)        # the vault's 600 sf too
+    for f in vault["faces"]:                     # the same vault, its walls' tops 1e-4 ft out of plumb
+        for p in f["points"]:
+            if p[2] == 38:
+                p[0] += 1e-4                     # (both ways: every wall leans)
+                p[1] += 1e-4
+    house = {"id": "house", "faces": flat["faces"] + vault["faces"], "problems": []}
+    tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": present.FAILS}]},
+                            {})["encroach"] if e["why"] == "height"]
+    assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000, abs=0.1)
+    gable = plan(_plot(sloped_roof_box(10, 25, 35, 65, 30, 40, "house")), env,
+                 {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
+    assert Polygon(gable[0]["outline"]).area == pytest.approx(500, abs=0.01)           # a roof's walls: still its ridge
+
+
+def test_a_vault_springing_below_the_limit_gets_a_block_at_the_limit_for_rhino_to_reach_its_real_top():
+    """Review of 2cae58d (F1): walls to 30 ft read, a curved vault to 42 ft left out: the checker's own top is
+    under the 35 ft limit, so no block was made and nothing was coloured. Now a block over its plan at the limit
+    (no height of its own here); Rhino reaches it to the real vault's top (rhino_logic.block_span)."""
+    from shapely.geometry import Polygon
+    from design_checker.check import check_site
+    from model_measurement.stops import stop
+    vault = box(10, 25, 35, 65, 0, 30)
+    vault["faces"] = [f for f in vault["faces"] if not all(p[2] == 30 for p in f["points"])]
+    vault["problems"] = [stop("curved_surface")]
+    r = check_site(_plot(vault), {**FACTS, "jurisdiction": CITY})
+    assert items(r["view"])["Building height"]["status"] == present.REVIEW
+    tops = [e for e in r["plan"]["encroach"] if e["why"] == "height"]
+    assert [(t["base"], t["top"]) for t in tops] == [(35, 35)]
+    assert Polygon(tops[0]["outline"]).area == pytest.approx(1000)
+    assert logic_span(tops[0], 0.0, 42.0) == (35, 42.0) and logic_span(tops[0], 0.0, 30.0) == (35, 35)
+
+
+def logic_span(entry, bottom, top):
+    from design_checker import rhino_logic
+    return rhino_logic.block_span(entry, bottom, top)
+
+
+def test_a_building_with_a_curved_surface_never_complies_on_height_and_is_coloured_above_the_limit():
+    """The vault probe at fc0b023: walls to 36 ft read, the curved vault left out by the reader (a problem it reports):
+    the height row needs review, never complies, and the block over the limit covers the building's plan (the
+    Rhino side cuts the real vault from there: rhino_logic.block_span)."""
+    from shapely.geometry import Polygon
+    from design_checker.check import check_site
+    from model_measurement.stops import stop
+    vault = box(10, 25, 35, 65, 0, 36)
+    vault["faces"] = [f for f in vault["faces"] if not all(p[2] == 36 for p in f["points"])]
+    vault["problems"] = [stop("curved_surface")]
+    r = check_site(_plot(vault), {**FACTS, "jurisdiction": CITY})
+    assert items(r["view"])["Building height"]["status"] == present.REVIEW
+    tops = [e for e in r["plan"]["encroach"] if e["why"] == "height"]
+    assert tops and all(t["status"] == present.REVIEW for t in tops)
+    assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000)
+
+
+def test_only_the_buildings_that_rise_above_the_limit_are_coloured_each_to_its_own_top():
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    site = _plot(box(10, 25, 35, 65, 0, 38, "house"), box(36, 70, 46, 80, 0, 12, "garage"))
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    tops = plan(site, env, {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
+    assert [(t["base"], t["top"], round(Polygon(t["outline"]).area, 3)) for t in tops] == [(35, 38, 1000)]
+    assert tops[0]["building"] == "house"                                     # the low garage: nothing
+
+
+def test_a_yard_strip_is_cut_per_building_each_from_its_own_bottom_to_its_own_top():
+    """A 30 ft house and a separate 10 ft wing both 2 ft from the west line, short of it under every reading by
+    4 ft: each building gets its own strip, the wing's only up to the wing's own 10 ft (never the house's 30)."""
+    from design_checker.check import plan
+    site = _plot(box(2, 25, 20, 65, 0, 30, "house"), box(2, 68, 10, 80, 1, 10, "wing"))
+    env = {"outline": [[10, 25], [40, 25], [40, 65], [10, 65]], "top": 35, "base": 0}
+    item = {"measure": "side_yard_smaller", "status": present.FAILS, "colour": "red",
+            "limits": [{"points": [[0, 40], [2, 40]], "near": 4, "far": 4}]}
+    strips = plan(site, env, {"items": [item]}, {}, FACTS)["encroach"]
+    assert sorted((e["base"], e["top"]) for e in strips) == [(0, 30), (1, 10)]     # the wing never to 30 ft
+    got = sorted((e["building"], e["status"], e["base"], e["top"], round(max(p[0] for p in e["outline"]), 3))
+                 for e in strips)
+    assert got == [("house", present.FAILS, 0, 30, 4.0), ("wing", present.FAILS, 1, 10, 4.0)]
 
 
 def test_the_colour_comes_from_the_result_only():

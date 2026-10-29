@@ -133,6 +133,36 @@ def highlight(status):
     return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
 
 
+def coloured_info(entry):
+    """What a coloured piece is, kept with it in the drawn list: why (yard or height), the row it is for (its
+    measure and name) and its building, from the plan's block (check.plan). The in-Rhino checks read exactly the
+    list that is drawn, so a claim can't mistake the rear yard's strip for the side yard's (Rhino check of #28)."""
+    return {k: entry.get(k) for k in ("why", "measure", "row", "building")}
+
+
+def block_span(entry, solid_bottom=None, solid_top=None):
+    """The heights (feet) a coloured block is cut from in Rhino: the checker's (check.plan), reaching to the real
+    solid's own top (and, for a yard strip, its own bottom) when Rhino's solid goes further. The checker measures
+    only the faces it can read (a curved vault is left out: its height needs review), so its top can be the wall
+    tops, while the vault above them is just as much over the limit (the Rhino check of #28 at fc0b023: only the
+    band from 35 to 36 ft was coloured, under a vault to 42 ft). A height block always starts at the limit."""
+    base, top = entry["base"], entry["top"]
+    if solid_top is not None:
+        top = max(top, solid_top)
+    if solid_bottom is not None and entry.get("why") != "height":
+        base = min(base, solid_bottom)
+    return base, top
+
+
+def offending_pieces(pieces, block):
+    """What a coloured block draws: the building's own part inside it (Rhino's boolean intersection, `pieces`), or
+    the block itself when the intersection gave nothing (it failed, or the building is a mesh or a solid Rhino
+    can't cut; a block instance is never measured: it is a setup problem, "explode it"), so a failing part is never
+    left uncoloured because a boolean failed."""
+    kept = [p for p in pieces or [] if p is not None]
+    return kept or [block]
+
+
 def labels_on(ui_state):
     """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
     unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the
@@ -158,12 +188,15 @@ def legend_text(code=None):
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
             "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
-            "measured distance. Red marks only the part of the building inside a required yard or above the height "
-            "limit. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "measured distance. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
-            "In the model: RED is the part of the building that does not comply (under every reading); AMBER is the "
-            "part a rule that needs review is about (for example inside the 2'-0\" tax-map caution zone of a yard). "
-            "The buildable envelope is only a see-through guide: colours come from the rules' results.")
+            "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
+            "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
+            "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
+            "block isn't measured until it is exploded). RED: it "
+            "fails there under every reading. AMBER: it fails there under some readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
+            "Nothing where it complies. The buildable envelope is only a see-through guide: colours come from the "
+            "rules' results.")
     return text + ("\n\nChecked against: " + code if code else "")
 
 
@@ -3006,6 +3039,19 @@ def controls_enabled(box_open, zoom_ok):
     between, after a document switch: verification round 4 of PR #19). Zoom to also needs a selected, current item
     (`zoom_ok`, as gordium_ui.show decides it)."""
     return (not box_open, (not box_open) and bool(zoom_ok))
+
+
+def zoom_state(selected_ok, stale, box_open):
+    """(Zoom to on or off, its tooltip saying why when off): on only for a selected, current item with no start box
+    open. Worked out every time the selection, the results or the box change (UX review 2026-10-27: selecting a row
+    left it greyed until the panel next redrew, with nothing saying why)."""
+    if box_open:
+        return False, "Close the start box first."
+    if not selected_ok:
+        return False, "Select a row to zoom to it."
+    if stale:
+        return False, "Out of date: press Check, then zoom."
+    return True, "Zoom to the selected item (or double-click its row)."
 
 
 def last_check_at(checked_at, document):
