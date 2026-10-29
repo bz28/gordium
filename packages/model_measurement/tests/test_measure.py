@@ -7,7 +7,7 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 
 from model_measurement.measure import measure
 
-FACTS = {"street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True,
+FACTS = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True,
          "grade_elevation": 0, "use": "one_family_detached", "stories": 2, "zone": "R-1b"}
 
 

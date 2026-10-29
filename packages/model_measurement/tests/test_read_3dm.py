@@ -38,7 +38,7 @@ def write(m, tmp_path, name="m.3dm"):
     return path
 
 
-FACTS = {"street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0}
+FACTS = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0}
 
 
 def test_a_lot_and_a_solid(tmp_path):
