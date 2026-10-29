@@ -24,7 +24,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs  # noqa: E402
 import System
 
-S = os.path.join(tempfile.gettempdir(), "gordium_scenarios") + "/"
+# which folder of hand-worked designs: the scenarios (default), or the deep-run sites (deep_run_in_rhino.py sets it)
+FOLDER_NAME = os.environ.get("GORDIUM_SCENARIO_FOLDER", "scenarios")
+S = os.path.join(tempfile.gettempdir(), "gordium_" + FOLDER_NAME) + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))   # the repo
 FRAMES = S + "frames/"
 if not os.path.isdir(FRAMES):
@@ -101,7 +103,7 @@ def draw(g, doc, data):
     a.LayerIndex = g._layer(doc, g.LAYERS["lot"])
     pts = [rg.Point3d(x, y, 0) for x, y in data["scenario"]["lot"]["points"]]
     lot = doc.Objects.AddPolyline(rg.Polyline(pts + pts[:1]), a)
-    ids = []
+    ids, guids = [], {}                   # a design's building id -> the Rhino objects drawn for it
     for s in data["solids"]["buildings"]:
         b = Rhino.DocObjects.ObjectAttributes()
         b.LayerIndex = g._layer(doc, g.LAYERS["building"])
@@ -109,6 +111,7 @@ def draw(g, doc, data):
         if s.get("floor") is not None:
             b.SetUserString(g.logic.FLOOR_KEY, s["name"].split()[-1] + ";" + repr(s["floor"]))
         ids.append(doc.Objects.AddBrep(g._prism(doc, s["outline"], s["base"], s["top"]), b))
+        guids.setdefault(s.get("building", s["id"]), []).append(str(ids[-1]))
     for s in data["solids"]["others"]:
         d = Rhino.DocObjects.ObjectAttributes()
         d.LayerIndex = g._layer(doc, "Default")
@@ -121,6 +124,11 @@ def draw(g, doc, data):
         doc.Objects.AddPoint(rg.Point3d(x, y, z), p)
     facts = {k: v for k, v in data["facts"].items() if k != "grade_points"}
     facts["lot_id"] = str(lot)
+    # a stated building (an accessory garage, the main building) by its design id -> the objects Rhino gave it
+    if facts.get("accessory_buildings"):
+        facts["accessory_buildings"] = [gid for b in facts["accessory_buildings"] for gid in guids.get(b, [b])]
+    if facts.get("main_building") in guids:
+        facts["main_building"] = guids[facts["main_building"]][0]
     g.save_facts(doc, facts)
     doc.Views.Redraw()
     return lot, ids
@@ -141,7 +149,7 @@ try:
     doc = docs.open("Large Objects - Feet")
     if doc.Path and "scratchpad" not in doc.Path and "gordium" not in doc.Path.lower():
         raise RuntimeError("refusing to clear " + doc.Path + ": open a new empty document first")
-    folder = os.path.join(WT, "test_data/test_sites/new_york/ithaca_city/scenarios")
+    folder = os.path.join(WT, "test_data/test_sites/new_york/ithaca_city", FOLDER_NAME)
     for f in sorted(os.listdir(folder)):
         if not f.endswith(".yaml"):
             continue
