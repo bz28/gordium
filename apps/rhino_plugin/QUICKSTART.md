@@ -423,7 +423,8 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
     an open question for a corner lot).
 13. **A survey:** with a surveyed lot, a new starting house goes to the limits: 55'-4" × 31'-8", its southwest
-    side yard at 10'-0 1/4", complying.
+    side yard at 10'-0 1/4", complying (its sides are whole inches, rounded down, so it sits just inside the
+    10 ft limit).
 14. **Other units:** start in a Millimeters, Meters or Inches template. The results are the same: Gordium works
     in feet and converts at Rhino's edge.
 
