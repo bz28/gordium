@@ -23,6 +23,8 @@ jobs:
         run: python -m rule_format
       - name: Every line of the law is in exactly one piece; coverage report and term index are current (no AI)
         run: python -m section_labeling coverage --check
+      - name: The residential coverage audit (every rule and flag piece x district) matches a fresh build (no AI)
+        run: python -m section_labeling audit --check
       - name: The rules workbook matches a fresh build (generated, never hand-edited)
         run: python -m rule_export --check
       - name: The measured example models match a fresh measurement (Rhino files measured by code, no AI)
@@ -53,6 +55,8 @@ jobs:
         run: python -m rule_format
       - name: Every line of the law is in exactly one piece; coverage report is current (no AI)
         run: python -m section_labeling coverage --check
+      - name: The residential coverage audit (every rule and flag piece x district) matches a fresh build (no AI)
+        run: python -m section_labeling audit --check
       - name: The rules workbook matches a fresh build (generated, never hand-edited)
         run: python -m rule_export --check
       - name: The measured example models match a fresh measurement (Rhino files measured by code, no AI)
