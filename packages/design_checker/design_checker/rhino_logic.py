@@ -2600,6 +2600,15 @@ CORNER_HINT = ("This lot faces two streets: click Change… on " + STREET_LABEL 
                "(one click keeps the whole street) and press Enter")
 
 
+def grown_height(client_height, content_height, padding):
+    """The start box's new inner height when a line shown again needs more room (the amber line back after "Corner
+    lot?" is set to Not answered): the content's own height plus the box's padding above and below, if that is more
+    than the box has; else None. Never smaller: the box doesn't jump as answers change (a box opened with the line
+    hidden had no room for it, and Cancel and Draw were cut off at the bottom: the Rhino walk, 2026-10-28)."""
+    want = int(math.ceil(content_height)) + padding
+    return want if want > client_height else None
+
+
 def uncertain(state):
     """The one amber line for a case the box can't settle by itself, with what to do; None when there's none. A
     lookup that went wrong (not found, offline…) says so here; what a found lookup only tells (the lot shown dashed,

@@ -938,16 +938,23 @@ def start_box(state, options, mode):
         layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
     amber = label("", eto_status_color("needs_review"), size=12)    # one line, following the answers given
+    amber_row = row(amber)            # shown only while it asks something: empty, it was a blank line in the box
     note = label(logic.lookup_note(state) or "", size=11)             # what a found lookup tells: plain, not amber
 
     def refresh_amber(*_):
         state["corner_lot"] = [None, False, True][max(corner.SelectedIndex, 0)]
         text = logic.uncertain(state)
         amber.Text = "?  " + text if text else ""
+        amber_row.Visible = bool(text)
+        if text and dialog.Loaded:     # back after an answer was taken away: the box grows to show it (never shrinks)
+            grown = logic.grown_height(dialog.ClientSize.Height, layout.GetPreferredSize().Height,
+                                       dialog.Padding.Top + dialog.Padding.Bottom)
+            if grown is not None:
+                dialog.ClientSize = ed.Size(dialog.ClientSize.Width, grown)
 
     refresh_amber()
     corner.SelectedIndexChanged += logic.guard(refresh_amber, "answer the corner lot")
-    layout.AddRow(None, row(amber))
+    layout.AddRow(None, amber_row)
     if note.Text:                     # nothing found to tell: no empty line in the box (it made the box taller)
         layout.AddRow(None, row(note))
     layout.AddRow(None, row(reason))
