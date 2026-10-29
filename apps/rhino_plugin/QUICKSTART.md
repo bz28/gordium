@@ -263,8 +263,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
      its full wording. Answers are saved with the project; change them in Edit site… .
      Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
-     panel's collapsed **Use details — answer when you plan the interior** group (still needs review, not counted among
-     the building's problems, never a pass), each with its **Enter…** button.
+     panel's collapsed **Use details (for later)** group (still needs review, not counted among the building's
+     problems, never a pass). Each row says "Answer when you plan the interior: …" and has its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
      survey…** to pick your surveyed outline instead.

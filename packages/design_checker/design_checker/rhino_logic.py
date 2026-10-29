@@ -390,7 +390,10 @@ DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occup
 # without: model_measurement.project.fact_conflict_rows): kept or dropped together, so a contradiction is never hidden
 # by dropping half of it.
 CHECKED_TOGETHER = (("unrelated_persons", "unrelated_persons_with_children"),)
-USE_DETAILS_TITLE = "Use details — answer when you plan the interior"
+# the group's title is short, so the narrow panel shows it whole with its count ("Use details (for later) · 3"); when to
+# answer is said in each row's reason instead (coordinator for Ben, 2026-10-28)
+USE_DETAILS_TITLE = "Use details (for later)"
+USE_DETAILS_WHEN = "Answer when you plan the interior"
 BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
 
 
