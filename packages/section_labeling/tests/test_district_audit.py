@@ -44,6 +44,15 @@ def test_saved_audit_is_current(capsys):
     assert cli.main(["audit", "--check"]) == 0, capsys.readouterr().out
 
 
+def test_the_key_names_every_test_that_earns_a_scenario_credit():
+    """A deep-run lot (deep_run/, checked by test_sites.py) earns "scenario r1" etc. as the hand-worked scenarios do
+    (scenarios/, test_scenarios.py); the key must say where each kind is checked, so a reader can find the test."""
+    text = SAVED.read_text(encoding="utf-8")
+    assert "scenario r1" in text
+    assert "design_checker/tests/test_sites.py for the real lots in test_data/test_sites/…/deep_run" in text
+    assert "design_checker/tests/test_scenarios.py for test_data/test_sites/…/scenarios" in text
+
+
 def test_a_rulebook_change_not_regenerated_differs_from_the_saved_table(tmp_path):
     book = load(ITHACA / "5_zoning_rules/R-1b.yaml")
     book["rules"] = [r for r in book["rules"] if r["id"] != "R-1b.parking_other_uses"]   # cites no piece of Ch. 325

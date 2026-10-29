@@ -122,7 +122,8 @@ def is_disclosed(pid: str, sections: list[str]) -> bool:
 def model_tests(j: Path) -> dict[str, list[str]]:
     """{rule id: [what checks it on a model]}, from test_data/test_sites/<place>: a design file's `compare` (each
     row of the architects' spreadsheet, checked on the site's Rhino models by model_measurement/tests/test_models.py)
-    and a scenario's `expected` (and its `then`'s; design_checker/tests/test_scenarios.py)."""
+    and a scenario's `expected` (and its `then`'s; design_checker/tests/test_scenarios.py for scenarios/,
+    test_sites.py for the real lots in deep_run/)."""
     place = j.relative_to(REPO / "regulations/jurisdictions")
     root = REPO / "test_data/test_sites" / place
     out: dict[str, list[str]] = {}
@@ -668,7 +669,8 @@ class Audit:
                "check: it always says needs review where it applies. **Tested on a model**: *real model* = the "
                "architects' Rhino models of a test site (model_measurement/tests/test_models.py checks this rule's "
                "result on them); *scenario* = a design worked by hand from the law, drawn by code and checked "
-               "(design_checker/tests/test_scenarios.py, in test_data/test_sites/…/scenarios).", ""]
+               "(design_checker/tests/test_scenarios.py for test_data/test_sites/…/scenarios; "
+               "design_checker/tests/test_sites.py for the real lots in test_data/test_sites/…/deep_run).", ""]
         for d in self.districts:
             rules = self.books[d]
             kinds = Counter(r.get("kind") for r in rules.values())
