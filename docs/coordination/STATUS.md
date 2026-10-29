@@ -310,6 +310,8 @@ REAL INPUT (Lane C, at #27 2c7c875), Cmd+Z once after each, the tick must follow
 - Hide starting house, then Cmd+Z: layer AND tick back. Also: switch to another open file: its own ticks show.
 
 ## FOR BEN: merge 3 (merge lane, updated 2026-10-28 evening; nothing merged; the older notes below are history)
+
+**Merge 3 ready (after merge 2 landed at 38ea0dd3).** #24, #28, #32 (and #21) now target main. GitHub says every merge-3 PR is mergeable. #32, #33 and #53 had main merged in (8e955cf4, 7847add3, f4a3d98c; no file changes, so the earlier suite results stand). Closing-keyword check: no commit names another open PR that merges later, except 47e42fc1 "fix: #37", which lands with #45 (as planned, #45 brings #37). Retarget #37 to main after #35 merges.
 **Every PR below is pushed and final** (merge commits only, never a force-push). In this order each one merges into
 main with no conflicts. This was checked by merging every head onto today's main in exactly this order (rehearsal
 84a3175e, then #39 on top). To retarget a PR: once the PR below it is merged, set its base to main (Edit, by the
