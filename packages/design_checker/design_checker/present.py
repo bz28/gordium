@@ -1270,10 +1270,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         as_is = (measured.get(node.left.id) or {}).get("measured_as_is") if node is not None else None
         if as_is is not None and proposed == "—":      # measured, but the result waits (existing ground): the value
             proposed = value_text(as_is, (measured.get(node.left.id) or {}).get("unit") or "", numbers[4])   # with ?
+        spanned = False
         if node is not None and proposed == "—":        # the readings disagree: show their span, not a dash
             span = _range(node.left.id, measured, values, numbers[4])
             if span:
-                proposed = span
+                proposed, spanned = span, True
                 if node.left.id == "building_area" and values.get("lot_area"):    # the limit in the same unit
                     allowed = _evaluate(ast.unparse(node.comparators[0]), values)
                     if isinstance(allowed, (int, float)):
@@ -1329,6 +1330,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     # (the tax map's own sentence, and "complies under every reading, but it depends on …", say more)
                     why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
                            "zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""))
+        if spanned and not line:      # a span: the detail says it whole, with its limit (a narrow panel cuts the cell)
+            line = (_detail_line(proposed, required, margin_t, numbers[4], None) if required not in ("—", None)
+                    else f"{proposed} proposed")          # (its limit not worked out: never "— required")
         alts = _alternatives(check, values, measured, facts) if st == FAILS and not why and not splits else []
         shown = [[x for x in alt if x[6]] for alt in alts]          # the reason: what fails as drawn
         if len(alts) > 1 and all(shown):                # several ways to comply, none met: say each one
@@ -1849,6 +1853,9 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                                  "scope": "", "precision": "", "at_limit": None}})
     for i in items:                                  # the use details still to answer: their own group (never a pass)
         i["use_detail"] = rhino_logic.is_use_detail(i, facts)
+        if i["use_detail"]:                          # when to answer, in the row (the group's title is short)
+            i["reason"] = f"{rhino_logic.USE_DETAILS_WHEN}: {i['reason']}" if i.get("reason") else \
+                rhino_logic.USE_DETAILS_WHEN
     return {"items": items, "summary": summary(items), "state": state(items),
             "header": header(facts, dict(extras, waiting_main=any(
                 PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values()),

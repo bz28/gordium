@@ -11,11 +11,15 @@ show in red, the envelope and the plan.
 """
 
 import ast
+import hashlib
 import itertools
 import math
 import os
+import pickle
 import re
 import tempfile
+import threading
+from collections import OrderedDict
 from pathlib import Path
 
 import shapely
@@ -31,7 +35,7 @@ from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, Context, load, outcome, rulebook_for
+from rule_format.rulebook import MEASURE_KINDS, REPO, Context, load, load_bytes, outcome, rulebook_for
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
@@ -1720,21 +1724,24 @@ def use_choices(rules: list, names: dict, district: str) -> list:
     return out
 
 
-def follow_up_facts(rules: list, use: str | None, uses: dict) -> list:
+def follow_up_facts(rules: list, use: str | None, uses: dict, read: set | None = None) -> list:
     """The facts the box asks after the use, derived from the rulebook (Ben, 2026-10-25: no hand-kept list): every
     stated fact (rhino_logic.STATED_FACTS: what only the architect can say) that a rule of this district reads, in
     its applies_when, check or review_when, when that rule can apply to this use (its applies_when not false for
     it). Never the stories (measured), never the interior's (bedrooms, parking: on hold), never one the use itself
-    says (one-family: one dwelling unit)."""
+    says (one-family: one dwelling unit). `read`: _read_for(rules, use, uses), when the caller has it already
+    (options works it out once per district and use, for this and implied_for)."""
+    read = _read_for(rules, use, uses) if read is None else read
     implied = logic.implied_facts(use)
-    return [k for k in logic.STATED_FACTS if k in _read_for(rules, use, uses) and k != "stories"
+    return [k for k in logic.STATED_FACTS if k in read and k != "stories"
             and k not in INTERIOR and k not in logic.DRAWN_FACTS and k not in implied]
 
 
-def implied_for(rules: list, use: str | None, uses: dict) -> dict:
+def implied_for(rules: list, use: str | None, uses: dict, read: set | None = None) -> dict:
     """What the use itself says (rhino_logic.implied_facts) for the facts this district's rules read for it, and
-    only those (a fact no rule reads is never sent: the checker knows only the facts its rules can use)."""
-    read = _read_for(rules, use, uses)
+    only those (a fact no rule reads is never sent: the checker knows only the facts its rules can use). `read`:
+    as follow_up_facts's."""
+    read = _read_for(rules, use, uses) if read is None else read
     return {k: v for k, v in logic.implied_facts(use).items() if k in read}
 
 
@@ -1761,19 +1768,81 @@ def _read_for(rules: list, use: str | None, uses: dict) -> set:
 
 def options(jurisdiction: str) -> dict:
     """What the confirm dialog offers: the zones that have a rulebook, the city's use names, and per district the
-    uses its chart lists (use_choices) and per use the facts to ask after it (follow_up_facts)."""
+    uses its chart lists (use_choices) and per use the facts to ask after it (follow_up_facts).
+
+    Worked out once per exact input (the answer depends on nothing else): every file it reads is read once here
+    (_options_files), the answer is worked out from those bytes alone, and it is kept by their SHA-256 and names
+    (the folder listing decides the zones) and by the code's own lists it reads (_options_lists). A file changed in
+    any way, added or removed is worked out again. What is kept is the answer pickled, and every call un-pickles a
+    fresh copy, so a caller that edits what it got can't change the next caller's. An error is never kept (the
+    same error every time), and at most _OPTIONS_MAX answers are (least recently used goes first)."""
     j = REPO / jurisdiction
-    zones = sorted({p.stem for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
-                    for p in folder.glob("*.yaml") if rulebook_for(j, p.stem)})
-    uses_file = j / "4_term_definitions/uses.yaml"
-    uses = load(uses_file) or {} if uses_file.exists() else {}
+    files = _options_files(j)
+    key = (tuple((name, None if data is None else hashlib.sha256(data).digest()) for name, data in files.items()),
+           _options_lists())
+    with _OPTIONS_LOCK:
+        frozen = _OPTIONS.get(key)
+        if frozen is not None:
+            _OPTIONS.move_to_end(key)
+    if frozen is None:
+        frozen = pickle.dumps(_options(j, files), protocol=pickle.HIGHEST_PROTOCOL)
+        with _OPTIONS_LOCK:
+            _OPTIONS[key] = frozen
+            while len(_OPTIONS) > _OPTIONS_MAX:
+                _OPTIONS.popitem(last=False)
+    return pickle.loads(frozen)
+
+
+_OPTIONS: "OrderedDict[tuple, bytes]" = OrderedDict()   # (input names and SHA-256s, code lists) -> answer, pickled
+_OPTIONS_LOCK = threading.Lock()                      # the Rhino command may ask from more than one thread
+_OPTIONS_MAX = 16                                     # a session has one city; tests writing temp cities stay bounded
+USES_FILE = "4_term_definitions/uses.yaml"
+
+
+def _options_files(j: Path) -> dict:
+    """Every file options reads, by its path in the jurisdiction (as posix), sorted: each rulebook the folder listing
+    finds (5_zoning_rules/*.yaml and 5_zoning_rules/drafted/*.yaml, hand-drafted and AI-drafted both, whichever
+    rulebook_for picks) and the city's uses (uses.yaml), each with its bytes, None for a rulebook name that isn't a
+    file and for no uses.yaml (one that is there but can't be read, a folder, is an error, as before). The only place
+    options reads the disk: the answer is worked out from these bytes and names alone, even which rulebook is a
+    district's (test_options_cache pins that nothing else is opened or looked at)."""
+    found = [p for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
+             for p in folder.glob("*.yaml")]
+    files = {p.relative_to(j).as_posix(): p.read_bytes() if p.is_file() else None
+             for p in sorted(set(found), key=lambda p: p.relative_to(j).as_posix())}
+    uses = j / USES_FILE
+    files[USES_FILE] = uses.read_bytes() if uses.exists() else None
+    return files
+
+
+def _options_lists():
+    """The code's own lists the options answer reads (a test may swap one): which facts are stated, drawn, interior
+    or implied by a use, and how each measure is typed."""
+    return repr((list(logic.STATED_FACTS), sorted(INTERIOR), tuple(logic.DRAWN_FACTS),
+                 sorted((u, sorted(v.items())) for u, v in logic.IMPLIED_BY_USE.items()),
+                 sorted(MEASURE_KINDS.items())))
+
+
+def _options(j: Path, files: dict) -> dict:
+    """The options answer, from the files' bytes (_options_files) alone."""
+    def read(path: Path):
+        data = files.get(path.relative_to(j).as_posix())
+        if data is None:                          # appeared or went between the listing and now: never a guess
+            raise ValueError(f"{path} changed while the options were read; ask again")
+        return load_bytes(data)
+    def there(path: Path) -> bool:                # rulebook_for's choice made from what was read, never the disk
+        return files.get(path.relative_to(j).as_posix()) is not None
+    zones = sorted({Path(name).stem for name, data in files.items() if name != USES_FILE and data is not None
+                    and rulebook_for(j, Path(name).stem, there)})
+    uses = (read(j / USES_FILE) or {}) if files.get(USES_FILE) is not None else {}
     names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}
     district_uses, follow_ups, implied = {}, {}, {}
     for zone in zones:
-        rules = load(rulebook_for(j, zone))["rules"]
+        rules = read(rulebook_for(j, zone, there))["rules"]
         district_uses[zone] = use_choices(rules, names, zone)
         every = list(dict.fromkeys([u["id"] for u in district_uses[zone]] + list(names)))   # a saved use the
-        follow_ups[zone] = {u: follow_up_facts(rules, u, names) for u in every}           # district doesn't list
-        implied[zone] = {u: implied_for(rules, u, names) for u in every}                  # is asked its own too
+        read_for = {u: _read_for(rules, u, names) for u in every}                           # district doesn't list
+        follow_ups[zone] = {u: follow_up_facts(rules, u, names, read_for[u]) for u in every}   # is asked its own
+        implied[zone] = {u: implied_for(rules, u, names, read_for[u]) for u in every}          # too
     return {"zones": zones, "uses": names, "district_uses": district_uses, "follow_ups": follow_ups,
             "implied": implied}

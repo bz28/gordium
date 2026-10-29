@@ -473,7 +473,10 @@ DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occup
 # without: model_measurement.project.fact_conflict_rows): kept or dropped together, so a contradiction is never hidden
 # by dropping half of it.
 CHECKED_TOGETHER = (("unrelated_persons", "unrelated_persons_with_children"),)
-USE_DETAILS_TITLE = "Use details — answer when you plan the interior"
+# the group's title is short, so the narrow panel shows it whole with its count ("Use details (for later) · 3"); when to
+# answer is said in each row's reason instead (coordinator for Ben, 2026-10-28)
+USE_DETAILS_TITLE = "Use details (for later)"
+USE_DETAILS_WHEN = "Answer when you plan the interior"
 BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
 
 
@@ -3750,6 +3753,15 @@ def starting_house_fact(note, today):
 # street, and Enter ends it (never "pick each lot line": a click already takes the street's every piece)
 CORNER_HINT = ("This lot faces two streets: click Change… on " + STREET_LABEL + ", then click once on each street "
                "(one click keeps the whole street) and press Enter")
+
+
+def grown_height(client_height, content_height, padding):
+    """The start box's new inner height when a line shown again needs more room (the amber line back after "Corner
+    lot?" is set to Not answered): the content's own height plus the box's padding above and below, if that is more
+    than the box has; else None. Never smaller: the box doesn't jump as answers change (a box opened with the line
+    hidden had no room for it, and Cancel and Draw were cut off at the bottom: the Rhino walk, 2026-10-28)."""
+    want = int(math.ceil(content_height)) + padding
+    return want if want > client_height else None
 
 
 def uncertain(state):

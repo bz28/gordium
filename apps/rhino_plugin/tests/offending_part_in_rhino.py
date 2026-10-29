@@ -8,11 +8,11 @@ taken for the side yard's.
 A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, tax-map lot: lines ±2'-0"), then the starting
 house replaced by one solid of the architect's. Points are placed by their distance from the left lot line (the
 real lot's line is slanted) and tested inside or outside the coloured pieces:
-1. A cantilever, amber. A 20 ft house where the starting house stood (its wall 12'-0 5/8" from the left line), its
+1. A cantilever, amber. A 20 ft house where the starting house stood (its wall 12'-0 1/2" from the left line), its
    upper half (10 to 20 ft) reaching 6 ft out toward that line. The left side yard needs review (to the wall it
    complies, to the cantilever it doesn't): amber. Claims: the row needs review; its pieces amber only; a point in
    the cantilever (11 ft from the line, 15 ft up) is coloured; the point under it (11 ft, 5 ft up) is not.
-2. A cantilever, red. The same house moved 5 ft toward the line (its wall 7'-0 5/8" from it), its cantilever 4 ft:
+2. A cantilever, red. The same house moved 5 ft toward the line (its wall 7'-0 1/2" from it), its cantilever 4 ft:
    short under every reading. Claims: the row does not comply; red and amber both drawn for it; in the
    cantilever (5 ft from the line, 15 ft up) red; under it (5 ft, 5 ft up) nothing; the house's own wall strip
    7.5 ft from the line, 5 ft up, red (within 8 ft: short however the line lies); 10 ft from it, amber.

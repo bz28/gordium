@@ -20,8 +20,8 @@ Run it as use_questions_in_rhino.py is run (same helpers), then read <temp>/gord
 7. Edit site... shows the saved answers on their words.
 8. Every district's box for each of its uses stays at most 900 px wide and 700 px tall; an attached-building use asks
    "Homes in the attached building" as a one-click dropdown.
-9. The panel: after a check on R-1b with nothing answered, the tree has a collapsed group "Use details — answer when you
-   plan the interior" holding the household and home-business rows (each still amber "?"), the header line reads
+9. The panel: after a check on R-1b with nothing answered, the tree has a collapsed group "Use details (for later)"
+   holding the household and home-business rows (each still amber "?"), the header line reads
    "... · N use details to answer" and the header state is not "complies"; the group is not expanded. Enter... on one
    of its rows asks its question (the existing flow) and, answered to fail, moves the row into "Does not comply".
 Writes <temp>/gordium_facts_up_front/out.json; closes its document."""

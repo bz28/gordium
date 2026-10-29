@@ -42,7 +42,22 @@ and the commands are the same, so neither `pip install` nor `install.py` is need
 
 Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
 
-## What's new (2026-10-28, evening)
+## What's new (2026-10-28, late evening)
+
+Everything in the evening's preview below (now all on `main`), plus:
+
+- **GordiumStart opens its box faster.** After the first time, its districts, uses and questions are ready in about
+  2 ms instead of about 2 s. The questions are the same.
+- **The start box's amber line takes no room while it asks nothing.** When a question comes back, the box grows to
+  show it, so Cancel and Draw are never cut off.
+- **A span of readings is said whole in the row's detail** (for example "35'-0 5/8" to 35'-8 3/4""), rather than
+  only one end of it.
+- **The use-details group is now "Use details (for later)"**, so its heading fits the panel, and each of its rows
+  says when to answer it. These rows stay "needs review" until you answer; they never pass.
+- **QUICKSTART's walkthrough numbers match today's starting house** at 106 Ithaca Rd (51'-4" × 29'-8"), which
+  changed when Gordium began trying each reading of the tax-map lot lines.
+
+## What was new on 2026-10-28, evening
 
 Everything in the morning's preview below, plus:
 
