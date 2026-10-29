@@ -431,7 +431,10 @@ lot the tax map allows:
 - side yard, southwest 12'-0 1/2" (needs 10'-0"); northeast, 12'-0 3/8";
 - coverage 21.7% (the limit is 25%).
 
-Two rows need review from the start, and that is Gordium being honest about this lot, not a mistake:
+Three rows need review from the start, and that is Gordium being honest, not a mistake:
+- **New structures at least 20 ft from an inlet wall or stream bank**: the start box's stream question was left
+  Not answered, so this row waits on it ("say whether any inlet wall or stream bank … is within 20 ft of the lot").
+  Answer it with the row's **Answer 2 questions…** button and the row is decided.
 - **Rear yard**: which of the short lines at the back count as side lot lines and which as the rear lot line is an
   open question for the architects (it decides the lot's depth, and so the rear yard's requirement), so the rear
   yard's Proposed and Required show the range each can take, and the reason says so once: "Complies under every

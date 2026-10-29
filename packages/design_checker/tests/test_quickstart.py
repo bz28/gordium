@@ -8,6 +8,7 @@ import re
 import pytest
 
 from design_checker import present
+from design_checker import rhino_logic as logic
 from design_checker.check import check_site, sample_site, start
 from envelope_builder.start import floor_solids
 from rule_format.rulebook import REPO
@@ -126,9 +127,15 @@ def test_the_starting_house_on_the_sample_lot(house):
     tall_at, = said(r"\*\*Building height\*\*: (\d+'-\d+\") is at the limit and complies")
     assert (height["proposed"], height["status"], height["margin"], height["note"]) == (
         tall_at, present.COMPLIES, "at limit", "assuming flat ground")   # the bonus's open question doesn't matter
-    said("Two rows need review from the start")
-    assert [i["name"] for i in items.values() if i["status"] == present.REVIEW and i.get("measure")] == [
-        "Rear yard", "Eaves into front yard"]
+    said("Three rows need review from the start")
+    stream = "New structures at least 20 ft from an inlet wall or stream bank"
+    said(r"\*\*" + stream + r"\*\*: the start box's stream question was left Not answered")
+    assert [i["name"] for i in items.values() if i["status"] == present.REVIEW and not i.get("use_detail")] == [
+        stream, "Rear yard", "Eaves into front yard"]
+    assert items[stream]["reason"].startswith("say whether any inlet wall or stream bank") and \
+        set(items[stream]["needs"]) == {"stream_near_lot", "stream_distance"}       # waits on the question, nothing else
+    button, = said(r"Answer it with the row's \*\*(.+?)…\*\* button")
+    assert button == logic.answer_words(items[stream]["needs"])
     stories, = said(r"Stories (\d) complies, at the limit, saying \"assuming flat ground\"")
     assert items["Stories"]["proposed"] == stories and items["Stories"]["status"] == present.COMPLIES
     said("Lot area complies even at the tax map's worst case")
