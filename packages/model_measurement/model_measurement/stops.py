@@ -71,6 +71,12 @@ STOPS = {
                          "the Building layer",
     "grade_walls_unclear": "the building's walls can't be told apart in plan (no wall longer than 1 ft, a round or "
                            "finely faceted outline): set the grade as flat ground instead",
+    "flat_sloped": "the ground falls about {fall} ft across the lot, but Gordium assumes it flat: height is measured "
+                   "from the average ground level at the walls (the grade plane, §325-3), which Gordium can't set "
+                   "yet: check height and stories against your survey",
+    "flat_unknown": "Gordium assumes the ground flat, but has no ground levels for this lot to show it is (Look up "
+                    "the address to read them): height is measured from the average ground level at the walls (the "
+                    "grade plane, §325-3): check height and stories against your survey",
     "existing_grade": "measured from existing grade; the code's grade plane is finished ground level (§325-3): tick "
                       "No regrading near the house, or set the finished ground",
     # facts a massing model doesn't show, until they are entered

@@ -1937,7 +1937,7 @@ def _box_state_drawn(doc, facts, options, saved_ui, mode="check"):
             else saved_ui.get("street_name"),
             "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span, "source": ground_source},
-            "ground_fall": saved_ui.get("ground_fall"),     # the looked-up ground's fall: said, never used (MVP)
+            "ground_fall": saved_ui.get("ground_fall"),     # the looked-up fall: a slope holds height and stories at review
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
             "corner_source": saved_ui.get("corner_source") or source("corner_lot"),
             "zones_found": saved_ui.get("_zones_found") or [],

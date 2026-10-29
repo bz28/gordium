@@ -1075,7 +1075,7 @@ def test_with_flat_ground_the_ground_fact_is_an_assumption_credited_to_no_one():
     assert logic.FLAT_GROUND
     state = {"ground": {"kind": "spot", "count": 14, "source": "suggested by Gordium · USGS 3DEP elevation"}}
     got = logic.fact_sources(state, "2026-10-21", confirmed=True)["ground"]
-    assert got["value"] == "assumed flat" and got["source"] == logic.ASSUMED_SOURCE and got["confirmed_by"] is None
+    assert got["value"] == "assumed flat (no ground levels looked up)" and got["source"] == logic.ASSUMED_SOURCE and got["confirmed_by"] is None
 
 
 def test_with_flat_ground_a_lookup_keeps_no_ground_doubt_and_draws_no_spot_grades():
@@ -1126,8 +1126,9 @@ def test_the_yard_measures_are_defined_once():
 
 def test_with_flat_ground_the_looked_up_fall_is_said_plainly_never_used():
     """Architect review in Rhino (P1-5): "Ground: assumed flat" said nothing of the ground the lookup found. Under
-    FLAT_GROUND the spot grades are still never drawn or used, but their fall is said: "assumed flat (the looked-up
-    ground falls about 3.5 ft across the lot; height is checked as if flat)", in the header and the Ground fact."""
+    FLAT_GROUND the spot grades are still never drawn, but their fall is said, in the header and the Ground fact;
+    and since 3.5 ft is more than flat ground (measure.FLAT_FALL_FT), the header says height and stories need review
+    (the sloped-lot fix: it once said "height is checked as if flat", a false pass)."""
     from design_checker import present
     payload = {"status": "found", "facts": {"lot": {"value": {"area_sf": 7033}}},
                "writes": {"lot_ring": [[0, 0], [50, 0], [50, 100], [0, 100]],
@@ -1136,9 +1137,26 @@ def test_with_flat_ground_the_looked_up_fall_is_said_plainly_never_used():
     assert saved["ground_fall"] == 3.5 and saved.get("ground_kind") != "spot"
     facts = logic.ground_facts({"ground_fall": saved["ground_fall"]}, 0.0)
     assert facts["ground_assumed"] == "flat" and facts["ground_fall"] == 3.5 and not facts.get("grade_points")
-    said = "assumed flat (the looked-up ground falls about 3.5 ft across the lot; height is checked as if flat)"
-    assert present.grade_label(facts) == said
-    assert logic.fact_sources({"ground_fall": 3.5}, "2026-10-21", True)["ground"]["value"] == said
+    assert present.grade_label(facts) == ("assumed flat, but the looked-up ground falls about 3.5 ft across the lot: "
+                                          "height and stories need review")
+    assert logic.fact_sources({"ground_fall": 3.5}, "2026-10-21", True)["ground"]["value"] == (
+        "assumed flat (the looked-up ground falls about 3.5 ft across the lot)")
+    # a level lot (0.0 ft) is known flat, not unknown: its fall reaches the checker (it was dropped as falsy)
+    assert logic.ground_facts({"ground_fall": 0.0}, 0.0)["ground_fall"] == 0.0
+    # none looked up: None, which Draw's merge (gordium_rhino._apply_box: a None drops the key) uses to remove a fall
+    # an earlier lookup saved (slope review round 1, F1: a stale 0.0 passed a lot with no ground read)
+    assert logic.ground_facts({}, 0.0)["ground_fall"] is None
+    facts = {"ground_fall": 0.0, "ground_assumed": "flat"}
+    for key, value in logic.ground_facts({}, 0.0).items():          # the merge, as _apply_box does it
+        facts.pop(key, None) if value is None else facts.__setitem__(key, value)
+    assert "ground_fall" not in facts
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "for key, value in logic.ground_facts(state, _lot_level(doc, facts)).items():\n        if value is None:\n" \
+           "            facts.pop(key, None)" in src
+    assert present.grade_label(logic.ground_facts({}, 0.0)) == (
+        "assumed flat (elevation 0'-0\"), but no ground levels were looked up: height and stories need review")
+    assert present.grade_label(logic.ground_facts({"ground_fall": 0.3}, 0.0)) == (
+        "assumed flat (the looked-up ground falls only about 0.3 ft across the lot)")
     _, saved = logic.lookup_choices({**payload, "writes": {**payload["writes"], "spots": []}}, {}, saved)
     assert "ground_fall" not in saved                        # a lookup with no ground found says none
 
@@ -1372,3 +1390,20 @@ def test_zoom_to_turns_on_as_a_row_is_picked_and_says_why_when_off():
     setter = ui[ui.index("def set_zoom(parts):"):ui.index("def set_box_open(")]
     assert "b.Enabled, b.ToolTip = logic.zoom_state(" in setter
     assert ui.count('parts["zoom_button"].Enabled =') == 0              # one place decides it
+
+
+def test_a_partial_ground_reading_gives_no_fall():
+    """Slope review round 1, F2: with elevations missing at some points (the lookup's ground doubt) or fewer than
+    three points, max - min can't tell the fall (one point reads 0.0, "level", and height passed): no fall is kept,
+    so the ground counts as unknown and height and stories need review."""
+    lot = [[0, 0], [50, 0], [50, 100], [0, 100]]
+    whole = {"status": "found", "facts": {"lot": {"value": {"area_sf": 5000}}},
+             "writes": {"lot_ring": lot, "spots": [[0, 0, 0.0], [50, 0, 0.1], [50, 100, 0.2], [25, 50, 0.1]]}}
+    assert logic.lookup_choices(whole, {}, {})[1]["ground_fall"] == 0.2
+    partial = dict(whole, details={"ground": {"status": "needs_review",
+                                              "reason": "Elevation missing at 3 of 4 points: check the ground."}})
+    assert "ground_fall" not in logic.lookup_choices(partial, {}, {"ground_fall": 0.0})[1]
+    one = dict(whole, writes=dict(whole["writes"], spots=[[0, 0, 0.0]]))
+    assert "ground_fall" not in logic.lookup_choices(one, {}, {})[1]
+    two = dict(whole, writes=dict(whole["writes"], spots=[[0, 0, 0.0], [50, 0, 0.0]]))
+    assert "ground_fall" not in logic.lookup_choices(two, {}, {})[1]
