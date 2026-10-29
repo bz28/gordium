@@ -192,8 +192,9 @@ def legend_text(code=None):
             "where it needs review, complying ones neutral grey (colour only what's wrong); its number only, on its "
             "line (✕ or ? before it when wrong; its name and what it needs are in the panel), the required line "
             "dashed across it, tagged \"min\" where the yard fails or needs review; in the elevations the height, "
-            "dimensioned up from the grade plane, with the limit faint. Values are measured to 1/8 in. and never "
-            "rounded toward compliance.\n\n"
+            "dimensioned up from the grade plane, with the limit faint. In plan these lines are drawn over "
+            "everything; in every other view they hide behind the solids in front of them, as the model's own lines "
+            "do. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
@@ -3020,6 +3021,38 @@ def is_plan_view(parallel, direction_z, tolerance=0.99):
     down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
     up on the ground line)."""
     return bool(parallel) and direction_z <= -tolerance
+
+
+DIM_LIFT_FT = 0.1       # the yard dimensions stand this far above the lot's level (never in it, never under it)
+
+
+def dim_level(lot_level_ft):
+    """The height (feet) the yard dimensions are drawn at: just above the lot's own level (its outline's lowest
+    point), so the ground and a lot drawn above z 0 never hide them where they are depth-tested; 0 + lift
+    without a lot."""
+    return (lot_level_ft or 0.0) + DIM_LIFT_FT
+
+
+def lines_on_top(parallel, direction_z):
+    """Whether Gordium's lines (the lot line, the envelope's outline, the dimensions, the neighbourhood) are drawn
+    over everything in this view: in plan yes, so a line under the roof (the buildable outline, a dimension to the
+    wall) stays visible; in every other view (perspective, the elevations, shaded or not) no: depth-tested, hidden
+    behind the solids in front of them, as the model's own lines are (Ben, 2026-10-21)."""
+    return is_plan_view(parallel, direction_z)
+
+
+def model_ticks(a, b, size):
+    """A dimension's end ticks in the model (drawn depth-tested with it): for a level line, at each end a slash at
+    45° to it in plan (dim_ticks on x and y), at that end's own height; for an upright one (the height), a slash
+    leaning 45° across x, y and z, so it shows in the Front and the Right views alike. `size` in model units.
+    Each tick is a pair of (x, y, z)."""
+    if ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5 > 1e-9:
+        return [((p0[0], p0[1], end[2]), (p1[0], p1[1], end[2]))
+                for (p0, p1), end in zip(dim_ticks(a[:2], b[:2], size), (a, b))]
+    if abs(b[2] - a[2]) < 1e-9:
+        return []
+    s = size / 2 / 3 ** 0.5                  # a slash of length `size` along (1, -1, 1)
+    return [((p[0] - s, p[1] + s, p[2] - s), (p[0] + s, p[1] - s, p[2] + s)) for p in (a, b)]
 
 
 # ---- the start box as one transaction (review rounds 1-2 of PR #19) ----------------------------------------------
