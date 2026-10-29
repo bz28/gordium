@@ -3240,6 +3240,7 @@ def _check_begin(doc, report, facts=None):
     if not STATE.get("headless"):            # the message line tells of this check's action only, whatever happens
         ui.say(STATE.get("panel_parts"), "")
     at = time.time()
+    STATE.setdefault("units_seen", {})[doc.RuntimeSerialNumber] = _units(doc)   # the units this check reads
     facts = current_facts(doc) if facts is None else facts
     if logic.missing(facts):
         raise ValueError("lot facts missing: " + ", ".join(logic.missing(facts)) + " (run GordiumCheck)")
@@ -3515,6 +3516,46 @@ def _changed(sender, e):
     STATE["dirty"] = time.time()
 
 
+def _layer_key(layer):
+    """A layer's (name, parent id) as text, None if it can't be read (logic.layer_edit_counts then counts it)."""
+    try:
+        return (str(layer.Name), str(layer.ParentLayerId)) if layer is not None else None
+    except Exception:                                    # noqa: BLE001  (a layer Rhino has let go of)
+        return None
+
+
+def _layer_changed(sender, e):
+    """A layer renamed, moved under another parent, deleted or brought back: which objects are the lot and the
+    buildings may have changed, so the results grey out (logic.layer_edit_counts; Gordium's own visibility, lock
+    and colour changes don't count)."""
+    if logic.layer_edit_counts(str(e.EventType), _layer_key(e.OldState), _layer_key(e.NewState)):
+        _changed(sender, e)
+
+
+def _block_changed(sender, e):
+    """A block's contents edited, redefined, deleted or brought back: every building placed from it changed."""
+    if logic.block_edit_counts(str(e.EventType)):
+        _changed(sender, e)
+
+
+def _units(doc):
+    """The model's units as the check reads them: their name and feet per model unit (_scale)."""
+    return (str(doc.ModelUnitSystem), _scale(doc)) if doc is not None else None
+
+
+def _properties_changed(sender, e):
+    """The document's properties changed: an edit if its units did (lengths are read in feet by its scale), noted
+    for each document by its serial number (logic.units_edit_counts: a document not noted yet counts)."""
+    doc = getattr(e, "Document", None) or Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        return
+    seen = STATE.setdefault("units_seen", {})
+    now = _units(doc)
+    if logic.units_edit_counts(seen.get(doc.RuntimeSerialNumber), now):
+        seen[doc.RuntimeSerialNumber] = now
+        _changed(sender, e)
+
+
 def _new_document(sender, e):
     """Another document (new, opened, or switched to): nothing from the last one stays drawn or listed."""
     o = STATE.get("overlay")
@@ -3589,6 +3630,8 @@ def documents(on):
 
 
 def _unhook():
+    for name, handler in STATE.pop("live_more", None) or []:     # the layer, block and units hooks
+        _off(Rhino.RhinoDoc, name, handler)
     hooks = STATE.pop("hooks", None)
     if hooks and len(hooks) == 3:            # set by an earlier version of this script, before a reload
         hooks = (hooks[0], hooks[1], None, None, None, hooks[2])
@@ -3609,8 +3652,9 @@ def _unhook():
 
 
 def live(on):
-    """Notice each edit (objects added, deleted, moved or changed, a layer change or hiding one): the results grey
-    out until a check; the idle handler checks by itself only with Check after every edit ticked."""
+    """Notice each edit (objects added, deleted, moved or changed; a layer renamed, moved, deleted or brought back;
+    a block's contents edited; the model's units changed): the results grey out until a check; the idle handler
+    checks by itself only with Check after every edit ticked."""
     _unhook()
     STATE["live"] = on
     if not on:
@@ -3626,6 +3670,21 @@ def live(on):
     _on(Rhino.RhinoDoc, "ModifyObjectAttributes", attributes)
     _on(Rhino.RhinoApp, "Idle", idle)
     STATE["hooks"] = (objects, replaced, attributes, idle)
+    # what sorts objects into lot and building, or sizes them, without touching an object: a layer renamed or
+    # moved, a block's contents edited, the model's units (the audit of main, 2026-10-29: a ✓ stayed current)
+    more = [("LayerTableEvent", _handler(System.EventHandler[Rhino.DocObjects.Tables.LayerTableEventArgs],
+                                         _layer_changed, "notice an edit")),
+            ("InstanceDefinitionTableEvent", _handler(
+                System.EventHandler[Rhino.DocObjects.Tables.InstanceDefinitionTableEventArgs], _block_changed,
+                "notice an edit")),
+            ("DocumentPropertiesChanged", _handler(System.EventHandler[Rhino.DocumentEventArgs],
+                                                   _properties_changed, "notice an edit"))]
+    for name, handler in more:
+        _on(Rhino.RhinoDoc, name, handler)
+    STATE["live_more"] = more
+    front = Rhino.RhinoDoc.ActiveDoc
+    if front is not None:                    # the units as they are now: only a change from them counts
+        STATE.setdefault("units_seen", {}).setdefault(front.RuntimeSerialNumber, _units(front))
 
 
 def toggle_live():
