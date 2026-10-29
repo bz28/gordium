@@ -1968,6 +1968,11 @@ def test_rules_not_in_gordium_yet_read_not_checked_yet_in_the_panel_and_the_repo
                    report_path=report)
     grey = [i for i in r["view"]["items"] if i["group"] == "not_covered"]
     assert grey, "the rulebook has sections not in Gordium yet"
+    # the private garage's car limit and front-yard parking are listed on every result (audit of main, 2026-10-29)
+    names = {i["id"]: i["name"] for i in grey}
+    assert names["gap.garage_cars"].startswith("§325-8A(3), chart p.2 notes 6 and 7 Private garage size")
+    assert names["gap.front_yard_parking"].startswith("§325-20E Parking in front yards")
+    assert names["gap.parking_areas"].startswith("§325-20D(2), §325-20F Driveways and parking areas")
     titles = {g["key"]: g["title"] for g in present.grouped(r["view"]["items"])}
     assert titles["not_covered"] == "Not checked yet"
     for i in grey:
