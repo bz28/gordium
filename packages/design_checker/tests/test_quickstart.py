@@ -380,3 +380,19 @@ def test_a_row_with_no_reading_set_never_says_to_spare_unless_it_complies(house,
     head = next(x for x in rows if x and "Item" in x)
     cell = next(x for x in rows if x and str(x[head.index("Item")]).startswith("Building height"))
     assert "to spare" not in str(cell[head.index(next(c for c in head if c and "Delta" in str(c)))])
+
+
+def test_a_span_of_readings_is_whole_in_its_detail(house):
+    """In Rhino (panel_width, 380 px): the sample house 5 ft left reads its rear yard as a span, "35'-0 5/8" to
+    35'-8 3/4"", cut short in the narrow panel's cell and said nowhere else: its detail line was empty (it was
+    worked out while the value was still a dash). The span and its limit are now the detail's line (on a tax-map
+    lot, with the Delta the row shows)."""
+    got, facts = house
+    items = _check(_moved(got["floors"], dx=-5), facts)
+    spans = {n: i for n, i in items.items() if " to " in (i["proposed"] or "")}
+    assert "Rear yard" in spans, sorted(spans)
+    for name, i in spans.items():
+        line = i["detail"]["line"]
+        assert line.startswith(f"{i['proposed']} proposed") and f"{i['required']} required" in line, (name, line)
+        if i.get("approx"):
+            assert line.endswith(i["delta"]), (name, line, i["delta"])
