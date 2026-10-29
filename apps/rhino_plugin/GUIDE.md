@@ -86,6 +86,8 @@ Buttons along the panel:
 - **Zoning report…**: writes the report in the architects' spreadsheet format, opens it and says where it saved it.
 - **?**: the legend (what the marks and colours mean, and which version of the law was checked).
 - **Retry**: shown only when a check failed, to try it again.
+- **Check again**: shown after you stopped a check (Esc, or Cancel beside "Checking…"). Nothing in the model
+  changed, and nothing is shown as checked until you press it.
 - **Enter …** (for example "Enter dwelling units…", or "Answer 3 questions…" when the facts' names don't fit the button): on a row that waits for facts only you know, it opens a small
   window asking just those. **OK** saves them, each "entered by you" with the day, as one Undo step, and checks
   again; **Cancel** or Esc changes nothing. A blank answer leaves the fact unset, so the row keeps needing review

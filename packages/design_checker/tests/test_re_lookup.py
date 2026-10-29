@@ -652,20 +652,21 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
              '                                                     saved_ui["_pending"].get("answer"))',
              "if choice is None:\n            return facts, saved_ui, False, state", "_begin_undo(",
              "logic.apply_reset(table, session, facts, saved_ui, choice",
-             "logic.after_reset_state(state, _box_state(doc, facts, options, saved_ui, mode))",
+             "_reset_state(doc, facts, options, saved_ui, mode, state)",   # (logic.after_reset_state, as the dry plan: #32)
              'if guide and not facts.get("lot_id"):', "return facts, saved_ui, True, fresh_state")
     at = [prep.find(step) for step in steps]
     assert -1 not in at and at == sorted(at), [st for st, i in zip(steps, at) if i == -1] or at
     loop = rhino[rhino.index("def _box_loop("):rhino.index("def _lookup_start(")]
     assert loop.count("_draw_prepare(doc, facts, state, saved_ui, session, mode, options)") == 2
-    assert "return _drawn(doc, facts, drawn_state, saved_ui, session)" in loop      # the rebuilt state is saved
+    assert "return _drawn(doc, facts, drawn_state, saved_ui, session, mode)" in loop   # the rebuilt state is saved
     draw = loop[loop.index('if what == "draw":'):]
-    assert loop.index("ticked = {k: state[k]") < loop.index('if what == "draw":') and "continue" in draw
+    assert loop.index("ticked = logic.box_ticks(state)") < loop.index('if what == "draw":') and "continue" in draw
     assert "logic.box_facts(facts, saved_ui, state)" in rhino[rhino.index("def _apply_box("):]
     edit = rhino[rhino.index("def edit_facts("):rhino.index("def report_path(")]
     outer = edit.index("    try:                                # one undo step")
     assert outer < edit.index("facts = confirm(") < edit.index("    finally:\n        STATE.pop(\"redraw_house\"")
-    assert edit.rstrip().endswith("run_check(doc, report=False)") and "_end_undo(doc)" in edit
+    assert edit.rstrip().endswith("run_check(doc, report=False)        # the model as it is (as it was, after a "
+                                  "Cancel)\n    if cancelled:\n        say(cancelled)") and "_end_undo(doc)" in edit
     table = rhino[rhino.index("class RhinoTable"):]
     assert "return logic.own_buildings(" in table[table.index("def buildings("):]
     # one walk of the model for the checker's sorting and a reset's questions (round 3)
@@ -948,7 +949,6 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
     confirm = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
     assert confirm.index("gate.enter()") < confirm.index('STATE.pop("redraw_house", None)') < \
         confirm.index("result = _confirm(doc, facts, options, mode)")     # cleared as the box opens, before its Draw
-    # (main's confirm() keeps _confirm's result for its changed-after-box bookkeeping: merge 2 of #26)
     check = rhino[rhino.index("def gordium_check("):rhino.index("# ---- GordiumStart")]
     assert check.index("facts = confirm(") < check.index('STATE.pop("redraw_house", None)') < \
         check.index("if facts is None:")                                    # GordiumCheck: dropped with its box
@@ -956,7 +956,9 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
     edit = (rhino.index("def edit_facts("), rhino.index("def report_path("))
     outside = [rhino.count("\n", 0, i) + 1 for i in readers if not edit[0] < i < edit[1]
                and not rhino.index("def confirm(") < i < rhino.index("def _confirm(")
-               and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")]
+               and not rhino.index("def gordium_check(") < i < rhino.index("# ---- GordiumStart")
+               # (#32: Draw reads it, in its own box, to work out the house it will draw: logic.plans_house)
+               and not rhino.index("def _drawn(") < i < rhino.index("def hide_massing(")]
     assert outside == [], outside                                           # read nowhere else
 
 
@@ -1124,7 +1126,9 @@ def test_the_plugin_saves_found_lookups_and_offers_the_saved_one_only_when_offli
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
     assert 'logic.guard(logic.use_saved, "use the saved lookup")(' in pick
     assert 'not STATE.get("lookup_fixture")' in saved and "readable" in saved and "os.getpid()" in saved
-    assert '"pick:use_saved"' in src                                  # the ticks go, as for any lookup
+    assert "ticked = logic.ticks_after_pick(what, ticked, " in src    # the ticks go, as for any lookup's answer
+    assert logic.ticks_after_pick("pick:use_saved", {"district_confirmed": True}, "found") == {
+        "district_confirmed": False}
 
 
 def test_a_saved_lookup_is_never_used_for_another_address_or_another_town():

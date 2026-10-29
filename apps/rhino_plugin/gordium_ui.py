@@ -362,6 +362,25 @@ def say(parts, text):
         parts["message"].Text = text or ""
 
 
+def _tick(box, action, where, skip=lambda: False):
+    """A checkbox that calls `action(ticked)`; if the action was refused (logic.REFUSED: Gordium is working, or its
+    file is no longer in front), the tick goes back, so the panel always shows the setting as it is (independent
+    review of #32). `skip()`: a change made by Gordium itself (set_labels_tick), not the architect's."""
+    putting_back = {"on": False}
+
+    def changed(s, e):
+        if putting_back["on"] or skip():
+            return
+        if action(bool(box.Checked)) is logic.REFUSED:
+            putting_back["on"] = True
+            try:
+                box.Checked = not box.Checked
+            finally:
+                putting_back["on"] = False
+
+    box.CheckedChanged += logic.guard(changed, where)
+
+
 def _massing_box(actions, parts):
     """Hide starting house: the Gordium::Massing layer off. Hidden, it is still checked (a hidden building still
     counts, as everywhere in Gordium): only drawing it is turned off. Ticked as the document's layer is
@@ -369,11 +388,8 @@ def _massing_box(actions, parts):
     box = ef.CheckBox()
     box.Text = "Hide starting house"
     box.Checked = False
-
-    def changed(s, e):
-        if not parts.get("_setting_massing"):       # set from the document (set_massing_tick): not a change
-            actions["massing"](bool(box.Checked))
-    box.CheckedChanged += logic.guard(changed, "hide the starting house")
+    # (set from the document by set_massing_tick: not the architect's change)
+    _tick(box, actions["massing"], "hide the starting house", skip=lambda: parts.get("_setting_massing"))
     parts["massing_box"] = box
     return box
 
@@ -456,11 +472,8 @@ def _labels_box(actions, parts):
     box.Text = "Show on-screen labels"
     box.Checked = False
 
-    def changed(s, e):
-        if not parts.get("_setting_labels"):        # set from the document (set_labels_tick): not a change
-            actions["labels"](bool(box.Checked))
-
-    box.CheckedChanged += logic.guard(changed, "show or hide the on-screen labels")
+    # (set from the document by set_labels_tick: not the architect's change)
+    _tick(box, actions["labels"], "show or hide the on-screen labels", skip=lambda: parts.get("_setting_labels"))
     parts["labels_box"] = box
     return box
 
@@ -482,11 +495,8 @@ def _envelope_box(actions, parts):
     box = ef.CheckBox()
     box.Text = "Show buildable envelope"
     box.Checked = True
-
-    def changed(s, e):
-        if not parts.get("_setting_envelope"):      # set from the session (set_envelope_tick): not a change
-            actions["envelope"](bool(box.Checked))
-    box.CheckedChanged += logic.guard(changed, "show or hide the envelope")
+    # (set from the session by set_envelope_tick: not the architect's change)
+    _tick(box, actions["envelope"], "show or hide the envelope", skip=lambda: parts.get("_setting_envelope"))
     parts["envelope_box"] = box
     return box
 
@@ -510,19 +520,21 @@ def _wrap_width(parts):
     return max(240, width - 48) if width > 0 else None
 
 
-def show(parts, view, stale=False, error=None, checking=False):
-    """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet) or a
-    check that couldn't run: rows keep their names but show no mark and "—", Zoom to is off (H1, H2, H5). The
-    selection and which groups are open are kept by item id across refreshes (D8); the list shows its first group's
-    heading whole at the top, scrolled only as far as the selected row needs (the Rhino job at 6361a3f)."""
+def show(parts, view, stale=False, error=None, checking=False, job=None, cancelled=False):
+    """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet: the
+    header says a check is on its way, or to press Check), a check running (`checking`; `job`: its live line and
+    Cancel under "Checking…"), cancelled, or one that couldn't run: rows keep their names but show no mark and "—",
+    Zoom to is off (H1, H2, H5). The selection and which groups are open are kept by item id across refreshes (D8);
+    the list shows its first group's heading whole at the top, scrolled only as far as the selected row needs (the
+    Rhino job at 6361a3f)."""
     global WRAP_AT
     WRAP_AT = _wrap_width(parts) if DOCKED else None
     tree = parts["tree"]
-    parts["stale"] = stale or error is not None or checking
+    parts["stale"] = stale or error is not None or checking or cancelled or job is not None
     if view is not None:
         parts["view"] = view
     view = parts["view"]
-    _header(parts, view, error, checking or stale)
+    _header(parts, view, error, checking or stale or job is not None, job, cancelled, checking)
     if view is None:
         tree.DataStore = ef.TreeGridItemCollection()
         parts["by_id"], parts["groups"] = {}, []
@@ -586,17 +598,27 @@ def _scroll_to(tree, row, rows):
             pass
 
 
-def _header(parts, view, error, out_of_date):
+def _header(parts, view, error, out_of_date, job=None, cancelled=False, checking=False):
     h = parts["header"]
     h.Clear()
     a = parts["actions"]
     head = (view or {}).get("header") or {}
     lines = logic.panel_header(head)
+    parts["progress_label"], parts["progress_job"] = None, job
     h.AddRow(_wide(lines["above"][0], bold=True, size=13))
     if error is not None:
         h.AddRow(row(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
                      button("Retry", a["retry"])))
         h.AddRow(_wide(error, size=11))
+    elif cancelled:                        # nothing shown as checked until the next check
+        h.AddRow(row(_wide(logic.CHECK_CANCELLED, eto_status_color("needs_review"), bold=True, size=15),
+                     button("Check again", a["retry"])))
+        h.AddRow(_wide(logic.CHECK_CANCELLED_NOTE, size=11))
+    elif out_of_date and (checking or job is not None):   # a check running: what it is doing, the seconds, Cancel
+        h.AddRow(_wide("Checking…", bold=True, size=15))
+        if job is not None:
+            parts["progress_label"] = label(progress_text(job), size=11, width=PANEL_WIDTH - 140)
+            h.AddRow(row(parts["progress_label"], button("Cancel", job.cancel)))
     elif out_of_date:                      # greyed rows below; a check on its way, or press Check
         h.AddRow(_wide(logic.out_of_date_line(parts.get("auto_check"), parts.get("checked_before", True)), bold=True,
                        size=15))
@@ -622,6 +644,131 @@ def _header(parts, view, error, out_of_date):
     h.Create()
 
 
+def progress_text(job, limit=None):
+    """A running job's line: what it is doing now, then the moving mark and the seconds so far."""
+    return (job.step or "Working…") + "  " + logic.progress_line(job.elapsed(), limit)
+
+
+def show_progress(parts, job):
+    """The panel's live line under "Checking…", moved on (the timer that waits for the job calls this)."""
+    lab = (parts or {}).get("progress_label")
+    if lab is not None:
+        lab.Text = progress_text(job)
+
+
+def follow(parts, job):
+    """The panel follows a running check: "Checking…" with this job's live line and Cancel (laid out once, on the
+    first tick), then the line moved on at each tick (review round 1: a check the architect started never showed it)."""
+    if parts is None:
+        return
+    if parts.get("progress_job") is not job or parts.get("progress_label") is None:
+        show(parts, None, checking=True, job=job)
+    show_progress(parts, job)
+
+
+WAIT_SHOWN = None          # the in-Rhino test's hook: called with the wait window's labels each time they are set
+
+
+def take_keyboard(form):
+    """The wait window made the key window, so Esc reaches it: Eto's own Focus, and on the Mac the window's own
+    makeKeyAndOrderFront (Rhino run of 65c07d7: Eto reported no focus after BringToFront and Focus). Never raises."""
+    for step in (lambda: form.BringToFront(), lambda: form.Focus(),
+                 lambda: form.ControlObject.MakeKeyAndOrderFront(form.ControlObject)):
+        try:
+            step()
+        except Exception:
+            pass
+
+
+def has_keyboard(form):
+    """Whether the window has the keyboard (Esc reaches it): Eto's HasFocus, or on the Mac the window being the key
+    window. False when neither can be read."""
+    try:
+        if form.HasFocus:
+            return True
+    except Exception:
+        pass
+    try:
+        return bool(form.ControlObject.IsKeyWindow)
+    except Exception:
+        return False
+
+
+def wait(job, cancellable=False, headless=False, on_tick=None, limit=None):
+    """Wait for a job (logic.Job) without ever blocking Rhino: work done within logic.WAIT_WINDOW_S shows nothing;
+    longer, a small window says what Gordium is doing (the job's own step, a moving mark, the seconds so far) with
+    Cancel when `cancellable` (Esc too, with this window in front: logic.STOP_HINT says so). The window is a plain one, not modal, and this loop itself keeps it current
+    while it lets Rhino run (Rhino.RhinoApp.Wait: Rhino draws and answers between passes). Nothing here depends on a
+    modal session or a timer: on the Mac a wait window's timer never ran and a closed dialog stayed painted when a
+    modal was ended from a timer and another opened (Rhino runs of #32 aea73b8 and #33 a3eb1d7: frozen "0 s"). The
+    window closes as soon as the job is done or cancelled; its own close button cancels the work, or (not
+    cancellable) is refused until it is done. `on_tick(job)` runs at each pass too (the panel's live line). While it
+    waits, the panel's buttons say Gordium is busy (gordium_rhino._actions); live mode starts no check (asking).
+    Headless (the scripted tests): just waits."""
+    if job.wait(logic.WAIT_WINDOW_S if not headless else 0):
+        return
+    if headless:
+        while not job.wait(0.2):
+            pass
+        return
+    form = ef.Form()
+    form.Title = "Gordium"
+    form.Padding = ed.Padding(16)
+    form.Resizable = form.Minimizable = form.Maximizable = False
+    form.Topmost = True
+    step = label(job.step, bold=True, size=13, width=380)
+    line = label(logic.progress_line(job.elapsed(), limit), size=11, width=380)
+    layout = ef.DynamicLayout()
+    layout.Spacing = ed.Size(8, 8)
+    layout.AddRow(step)
+    layout.AddRow(line)
+    state = {"done": False}
+
+    def cancel():
+        if job.cancel():
+            step.Text = logic.CANCELLING
+        if stop is not None:
+            stop.Enabled = False
+
+    stop = button("Cancel", cancel) if cancellable else None
+    hint = label(logic.STOP_HINT_CLICK, size=11)   # "Esc or Cancel" only once the window has the keyboard
+    if stop is not None:                  # (Esc stops it only here: elsewhere in Rhino Esc keeps its own meaning)
+        layout.AddRow(row(stop, hint))
+
+    def key(s, e):                        # Esc, with this window in front: Cancel
+        if e.Key == ef.Keys.Escape and cancellable:
+            e.Handled = True
+            cancel()
+
+    def closing(s, e):                    # the window's own close button: Cancel, or keep waiting
+        if not state["done"]:
+            if cancellable:
+                cancel()
+            e.Cancel = not job.finished()
+
+    form.Content = layout
+    form.KeyDown += logic.guard(key, "cancel with Esc")
+    form.Closing += logic.guard(closing, "close the progress window")
+    # Esc cancels only with this window in front (or Cancel clicked): an Esc elsewhere in Rhino keeps Rhino's own
+    # meaning (end a command, clear a selection) and never silently cancels a check or a Draw (coordinator, 2026-10-26)
+    form.Show()
+    take_keyboard(form)
+    try:
+        while not job.finished():
+            Rhino.RhinoApp.Wait()          # Rhino draws and answers (the panel, the viewports) between passes
+            step.Text = job.step or ""
+            line.Text = logic.progress_line(job.elapsed(), limit)
+            focused = has_keyboard(form)   # Esc is promised only while it works (Rhino run of 65c07d7)
+            if cancellable:
+                hint.Text = logic.STOP_HINT if focused else logic.STOP_HINT_CLICK
+            if WAIT_SHOWN is not None:
+                WAIT_SHOWN(step.Text, line.Text, focused, hint.Text)
+            if on_tick is not None:
+                logic.guard(on_tick, "show what Gordium is doing")(job)
+            job.wait(0.05)
+    finally:
+        state["done"] = True
+        logic.guard(form.Close, "close the progress window")()
 def set_zoom(parts):
     """Zoom to on or off for the panel as it is now, its tooltip saying why when off (logic.zoom_state)."""
     b = parts.get("zoom_button")
@@ -950,6 +1097,7 @@ def start_box(state, options, mode):
 
     use.SelectedIndexChanged += logic.guard(use_changed, "pick the use")
     cancel = button("Cancel", lambda: done(None))
+    status = {}                       # the running lookup's live line, once laid out
 
     def fit(text, room, **kw):        # a label that wraps at `room` px when its text is wider (logic.text_wider)
         return label(text, width=room if logic.text_wider(text, kw.get("size"), room) else None, **kw)
@@ -1046,8 +1194,9 @@ def start_box(state, options, mode):
 
                 matches.SelectedIndexChanged += logic.guard(matched, "pick the address")
                 layout.AddRow(None, row(matches))
-            if r.get("status"):            # Looking up 106 Ithaca Rd… (the box stays usable; Cancel works)
-                layout.AddRow(None, row(fit(r["status"], 560, size=11)))
+            if r.get("status"):            # Looking up 106 Ithaca Rd · Finding the address…  ○●○  3 s (live;
+                status["label"] = label(r["status"], size=11, width=560)   # Cancel lookup stops it)
+                layout.AddRow(None, row(status["label"]))
         elif key == "zone":
             confirm.Text = r["tick"][0]
             zone_row["source"] = fit(r["text"].split(" · ", 1)[-1], 260, size=11)
@@ -1111,15 +1260,18 @@ def start_box(state, options, mode):
     if shown is not None:
         dialog.Shown += logic.guard(lambda s, e: shown(dialog), "run the start box hook")
     poll = state.get("_poll")                 # a lookup running in its own process: the box closes itself when it
-    if looking and poll is not None:          # answers (or the time runs out), and opens again filled in
+    progress = state.get("_progress")         # answers (or the time runs out), and opens again filled in; until
+    if looking and poll is not None:          # then its line says what it is doing, live
         timer = ef.UITimer()
-        timer.Interval = 0.5
+        timer.Interval = 0.25
 
         def tick(s, e):
             if poll() is not None:
                 timer.Stop()
                 keep()
                 done("pick:lookup_done")
+            elif progress is not None and status.get("label") is not None:
+                status["label"].Text = progress()
 
         timer.Elapsed += logic.guard(tick, "wait for the address lookup")
         dialog.Shown += logic.guard(lambda s, e: timer.Start(), "start waiting for the lookup")

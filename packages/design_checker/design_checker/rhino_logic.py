@@ -9,6 +9,7 @@ import math
 import queue
 import re
 import threading
+import time
 
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
@@ -2869,13 +2870,14 @@ def box_rows(state, flat=None):
         lot_actions = [("by_hand", BY_HAND + "…", True)]
     rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
-         "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))]
+         # while it runs, the button stops it (the box as it was before Look up: lookup_cancelled)
+         "actions": [("lookup_cancel", CANCEL_LOOKUP, True) if look.get("looking") else ("lookup", "Look up", True)]
          + ([("use_saved", USE_SAVED.format(date=look["saved_offer"]), True)]
             if look.get("saved_offer") and not look.get("looking")
             and same_site_address(state.get("address") or "", look.get("saved_for") or "") else []),
          # (an address retyped since the offer: no button, as pressing it would do nothing: round 6)
          "tick": None, "matches": look.get("matches") or [],
-         "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
+         "status": lookup_status(look["looking"], None, 0.0) if look.get("looking") else None},
         {"key": "zone", "label": "Zoning district", "text": zone_row_text(state),
          "actions": [("zone", "Change", True)], "tick": (ZONE_TICK, bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
@@ -2996,6 +2998,96 @@ def zone_picked(state, zone, first):
     return state
 LOOKUP_LIMIT_S = 45                               # the whole lookup; the box says so, the Rhino side stops it then
 LOOKING = "Looking up {}… (up to %d s)" % LOOKUP_LIMIT_S
+CANCEL_LOOKUP = "Cancel lookup"
+LOOKUP_CANCELLED = "Look up of {address} cancelled: nothing changed."
+LOOKUP_FIRST_STEP = "Starting the lookup…"
+
+
+def lookup_status(address, step, elapsed, limit=LOOKUP_LIMIT_S):
+    """The box's live line while a lookup runs: which address, what it is doing now (the lookup's own latest step),
+    a moving mark and the seconds so far, and when it stops by itself."""
+    return "Looking up %s · %s  %s" % (address, step or LOOKUP_FIRST_STEP, progress_line(elapsed, limit))
+
+
+def lookup_step(text):
+    """The lookup's latest step from what it has printed so far ({"step": ...} lines), or None."""
+    latest = None
+    for line in str(text or "").splitlines():
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and isinstance(d.get("step"), str) and "status" not in d:
+            latest = d["step"]
+    return latest
+
+
+def lookup_answer(text, query=None):
+    """The lookup's answer: its last line that is one ({"status": ...}); a run that printed none (stopped, crashed)
+    is an error the box can say, never an answer made up from a progress line."""
+    for line in reversed(str(text or "").strip().splitlines()):
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and "status" in d:
+            return d
+    return {"status": "error", "query": query, "detail": "the lookup printed no answer"}
+
+
+def box_ticks(state):
+    """The ticks and sources the start box keeps across picks, as `state` has them (_box_loop's `ticked`)."""
+    return {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
+                                  "corner_source", "checked") if k in state}
+
+
+BOX_FIELDS = ("zone", "address", "use", "corner_lot")     # what the box's ticks and sources are about
+
+
+def box_moved(facts_before, ui_before, facts_after, ui_after):
+    """Whether a pick changed what the start box's ticks and sources are about: the district, address, use or corner
+    answer, the doubts "I checked this" settles, or an earlier lookup's preview put back (drop_pending: its district,
+    sources and address go back to what they were before it)."""
+    facts_before, facts_after = facts_before or {}, facts_after or {}
+    ui_before, ui_after = ui_before or {}, ui_after or {}
+    return (any(facts_before.get(k) != facts_after.get(k) for k in BOX_FIELDS)
+            or (ui_before.get("doubts") or {}) != (ui_after.get("doubts") or {})
+            or (ui_before.get("_pending") is not None and ui_after.get("_pending") is not ui_before.get("_pending")))
+
+
+def ticks_after_pick(what, ticks, answer=None, moved=True):
+    """The start box's ticks and sources kept after a pick (_box_loop's `ticked`; `ticks`: box_ticks of the box as
+    the architect left it; `answer`: the status of a lookup answer the pick put in the box, None for none; `moved`:
+    box_moved for this pick). A lookup's answer (or a saved one used) replaces them, so the district must be confirmed
+    again, unless it filled nothing and moved nothing (not found, offline, outside the City, too slow, a saved one
+    refused, with no earlier preview put back): then the box is as the architect left it, and so are its ticks.
+    Everything else keeps them exactly as the box shows them: Look up (while it runs the box shows the architect's
+    own ticks; Draw is off meanwhile) and Cancel lookup. So no tick or source from before Look up is ever brought
+    back, onto a district, use, address or corner changed during the lookup ("suggested by Gordium" on a district the
+    architect picked) or after they took it off; no tick is kept on a district a lookup's answer put in or back; and
+    a district they took off is never shown ticked again from the file (review of #32, 2026-10-28): an answer that
+    replaces them leaves the district unconfirmed outright, never the earlier Draw's confirmation again (an earlier
+    preview put back also puts back the file's tick, and the architect may have taken it off: sceptic of round 4)."""
+    if what in ("pick:lookup_done", "pick:use_saved") and (answer == "found" or moved):
+        return {"district_confirmed": False}
+    return dict(ticks or {})
+
+
+def lookup_cancelled(saved_ui, before):
+    """The box's choices after Cancel lookup: as they were before Look up was pressed (`before`: the lookup line
+    then, None for none), saying it was cancelled. Nothing else changes: the lookup only ever fills the box when its
+    answer is in."""
+    saved_ui = dict(saved_ui or {})
+    address = ((saved_ui.get("_lookup") or {}).get("looking")) or "the address"
+    restored = dict(before or {})
+    restored.pop("looking", None)
+    earlier = (before or {}).get("says") or ""
+    if (before or {}).get("cancelled"):            # the line before was an earlier Cancel's: said once, not again
+        earlier = (before or {}).get("said_before") or ""
+    restored.update(says=" ".join(t for t in (LOOKUP_CANCELLED.format(address=address), earlier) if t),
+                    cancelled=True, said_before=earlier)
+    saved_ui["_lookup"] = restored
+    return saved_ui
 CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
 DOUBT_KEPT = "The lookup found this doubtful (its reason came from a source that can't be kept): check it."
 LOOKUP_SAYS = {                                   # the box's line when a lookup couldn't fill it in
@@ -3922,10 +4014,50 @@ def gate_actions(actions, box_open, say, open_ok=("legend",)):
         def run(*args, **kwargs):
             if box_open() and name not in open_ok:
                 say(BOX_BUSY)
-                return None
+                return REFUSED              # (a checkbox puts its tick back: gordium_ui._tick)
             return fn(*args, **kwargs)
         return run
     return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+WORKING = "Gordium is working (its window says on what): wait for it, or press Cancel there."
+
+
+REFUSED = object()        # what a gated panel action returns when it did nothing (its checkbox puts its tick back)
+
+
+def busy_actions(actions, busy, say, open_ok=("legend",)):
+    """The panel's actions, each saying WORKING instead while Gordium waits for an answer (busy()): the wait window is
+    a plain one while Rhino keeps answering, so a button pressed meanwhile must never start a second piece of work
+    on top of it (another check, a start box). `open_ok`: the ones that only show something. A refused action
+    returns REFUSED, so a checkbox that called it shows its setting as it still is (independent review of #32)."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if busy() and name not in open_ok:
+                say(WORKING)
+                return REFUSED
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
+
+
+class NotInFront(Exception):
+    """Another file came to the front while Gordium read this one's facts (Rhino runs during the checker's wait):
+    whatever was about to prompt or save stops (gordium_rhino.current_facts)."""
+
+
+def front_actions(actions, say):
+    """The panel's actions, each saying why (NotInFront's words) and doing nothing more when the file it was
+    reading is no longer the one in front."""
+    def guarded(fn):
+        def run(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except NotInFront as e:
+                say(str(e))
+                return REFUSED
+        return run
+    return {name: guarded(fn) for name, fn in actions.items()}
 
 
 def recovery_message(removed, back):
@@ -4005,6 +4137,162 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         guide = w["guide_ring"]
     saved_ui["lookup_snapshot"] = w.get("snapshot")
     return facts, saved_ui, guide
+
+
+# ---- long work: a line that says what Gordium is doing, and a Cancel that stops it --------------------------------
+# The checker's and the lookup's work runs in their own processes; the plugin waits for them on a Job's thread,
+# never on Rhino's, so Rhino keeps drawing and answering while they work (a slow one shows a small window after
+# WAIT_WINDOW_S with the current step, the seconds so far and Cancel). Cancel stops the process: its answer is never
+# used, so nothing it would have changed changes.
+
+class WorkCancelled(Exception):
+    """The architect pressed Cancel while Gordium worked: the work was stopped and nothing it would have changed was
+    changed."""
+
+
+WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (no flash on a quick check)
+SPINNER = ("●○○", "○●○", "○○●")
+SPIN_S = 0.3               # s per frame of the moving mark
+CANCELLING = "Cancelling…"
+STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint, while it has the keyboard (Esc reaches it)
+STOP_HINT_CLICK = "Click Cancel to stop"   # ... and while it hasn't: never a promise Esc can't keep
+FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
+              "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
+              "sample_site": "Loading the sample lot…"}
+CHECK_CANCELLED = "Check cancelled"
+CHECK_CANCELLED_NOTE = ("Nothing in the model changed. Nothing is shown as checked until the next check: press "
+                        "Check again.")
+DRAW_CANCELLED = ("Draw cancelled: nothing was drawn, and the model is as it was before the box opened (Draw again "
+                  "when you're ready).")
+REPORT_CANCELLED = "Zoning report cancelled: the report file wasn't changed."
+REPORT_CANCELLED_LATE = ("Zoning report cancelled as it finished: the new report had already been saved to {path} "
+                         "(not opened).")
+
+
+def report_cancelled(path, changed):
+    """What Zoning report… says when its check was cancelled: the file as it was, or (Cancel pressed in the moment
+    after the checker moved the new report in) that it was saved anyway."""
+    return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
+SETTLING = "Finishing the check that is running…"
+CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
+                   "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
+                   "panel) for a report of the model now.")
+NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
+                "command again in the file you want.")
+def outdated_report_message(path, report_error, had_report):
+    """What a check whose model changed while it ran says of its report: written, but of the model as it was; or,
+    when the checker couldn't write it, that it wasn't written and why (never that it was: independent review of
+    #32)."""
+    if report_error:                     # (its own full stop dropped: report_message adds one)
+        return report_message(path, False, str(report_error).rstrip(". "), stale=bool(had_report))
+    return REPORT_OUTDATED.format(path=path)
+
+
+HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
+                  "Gordium will check it.")
+DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
+                 "is as it was: Draw again.")
+
+
+class ModelChanged(WorkCancelled):
+    """The model was edited (or another document came to the front) while Gordium worked out something to draw for
+    it: nothing is drawn; `said` is what the architect is told."""
+    said = DRAW_OUTDATED
+
+
+def progress_line(elapsed, limit=None):
+    """The moving mark and the seconds so far ("○●○  7 s"), with when the work stops by itself if it has a limit.
+    The mark is worked out from the time, so it moves at the same pace whoever draws it."""
+    elapsed = max(0.0, float(elapsed or 0))
+    text = "%s  %d s" % (SPINNER[int(elapsed / SPIN_S) % len(SPINNER)], int(elapsed))
+    return text + (" (stops at %d s)" % limit if limit else "")
+
+
+class Job:
+    """One piece of long work on its own thread, never Rhino's: work(step) returns the result; step(text) says what
+    it is doing now. Rhino's thread only reads it (done, step, elapsed()), waits a moment for it (wait), and may
+    cancel it: `stop` (run on the caller's thread) stops the process doing the work, and from then on the work's
+    result is never used (outcome() says "cancelled" even if an answer still arrives)."""
+
+    def __init__(self, work, step, stop=None, clock=time.monotonic):
+        self.step, self.done, self.cancelled = step, False, False
+        self.result = self.error = None
+        self._stop, self._clock = stop, clock
+        self.started = clock()
+        self._thread = threading.Thread(target=self._run, args=(work,), daemon=True, name="gordium-job")
+        self._thread.start()
+
+    def say(self, text):
+        if text and not self.cancelled:
+            self.step = text
+
+    def _run(self, work):
+        try:
+            self.result = work(self.say)
+        except BaseException as e:            # noqa: BLE001  (kept for the caller, on its own thread)
+            self.error = e
+        finally:
+            self.done = True
+
+    def elapsed(self):
+        return self._clock() - self.started
+
+    def finished(self):
+        """Nothing more to wait for: the work is done, or it was cancelled (its answer is dropped)."""
+        return self.done or self.cancelled
+
+    def wait(self, timeout):
+        """Wait at most `timeout` s for the work; whether there is nothing more to wait for."""
+        self._thread.join(timeout)
+        return self.finished()
+
+    def cancellable(self):
+        return self._stop is not None and not self.finished()
+
+    def cancel(self):
+        """Stop the work (once; never after it is done; never work with no way to stop it, whose thread would go on
+        reading the checker's answers: review round 2): True when it was stopped."""
+        if not self.cancellable():
+            return False
+        self.cancelled = True
+        self.step = CANCELLING
+        if self._stop is not None:
+            self._stop()
+        return True
+
+    def outcome(self):
+        """("cancelled", None), ("error", the exception) or ("done", the result)."""
+        if self.cancelled:
+            return "cancelled", None
+        if self.error is not None:
+            return "error", self.error
+        return "done", self.result
+
+
+def plans_house(mode, redraw, caller_draws):
+    """Whether Draw works out a starting house before the box commits: GordiumStart's box always draws one; another
+    box only when its Draw reset the site (`redraw`) AND its caller draws the house after (`caller_draws`: Edit
+    site…). GordiumCheck's box never draws one, so it never asks for one (review round 1: a "start" request for
+    nothing, and its Cancel escaped the command)."""
+    return mode == "start" or bool(redraw and caller_draws)
+
+
+def result_stale(dirty_at, shown_at, now, after, rechecking):
+    """Whether the result on screen is out of date, so nothing is drawn as complying or not (F7, H1): the model
+    changed more than `after` s ago and no check has finished since, or a background re-check is running (live mode
+    clears the pending edit when it starts one, and the result on screen is of the model before that edit: review
+    round 1, P1, a false pass shown while the re-check ran)."""
+    if rechecking:
+        return True
+    return bool(dirty_at and now - dirty_at >= after and (shown_at or 0) < dirty_at)
+
+
+def checked_while_still(begun_at, dirty_at):
+    """Whether a check that read the model at `begun_at` still shows the model: no edit since (`dirty_at`, the last
+    edit not yet re-checked, None for none). A live re-check runs while the architect may keep editing; its result
+    is shown only if nothing changed after it read the model, else it is dropped and the model checked again."""
+    return not dirty_at or dirty_at < begun_at
 
 
 # ---- the context map (design_checker.context_box): the neighbourhood around a looked-up lot ---------------------
@@ -4400,14 +4688,15 @@ def _write_lines(stream, sends, process=None):
         pass
 
 
-def exchange(sends, lines, request, limit):
-    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for)."""
+def exchange(sends, lines, request, limit, on_step=None):
+    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for); each progress
+    line before it goes to `on_step`."""
     sends.put(json.dumps(request) + "\n")
-    return answer_for(lines, request["id"], limit)
+    return answer_for(lines, request["id"], limit, on_step)
 
 
 HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",
-           "worker", "worker_sends", "worker_lines")
+           "worker", "worker_sends", "worker_lines", "live_timer", "live_check")
 
 
 def sweep(leftovers, state=None, release=None):
@@ -4446,26 +4735,33 @@ def current_only(fn, is_current):
     return run
 
 
-def answer_for(lines, request_id, limit):
+def answer_for(lines, request_id, limit, on_step=None, clock=time.monotonic):
     """The checker's answer to request `request_id`, from `lines` (a queue the plugin's reader thread fills with
-    every line the checker writes, then None when it stops); None if it stopped. Raises CheckerOutOfStep when no
-    line comes within `limit` seconds, when the line isn't an answer, or when it is another request's answer:
-    then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever showing
-    an earlier check's result as this one's."""
-    try:
-        line = lines.get(timeout=limit)
-    except queue.Empty:
-        raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
-    if line is None:
-        return None
-    try:
-        answer = json.loads(line)
-    except ValueError:
-        answer = None
-    if not isinstance(answer, dict) or answer.get("id") != request_id:
-        raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
-                               "nothing from it is shown")
-    return answer
+    every line the checker writes, then None when it stops); None if it stopped. This request's progress lines
+    ({"id", "step"}, sent before its answer) go to `on_step`. Raises CheckerOutOfStep when the answer doesn't come
+    within `limit` seconds of asking (progress lines don't extend it), when a line isn't this request's, or isn't
+    an answer: then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever
+    showing an earlier check's result as this one's."""
+    deadline = clock() + limit
+    while True:
+        try:
+            line = lines.get(timeout=max(0.0, deadline - clock()))
+        except queue.Empty:
+            raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
+        if line is None:
+            return None
+        try:
+            answer = json.loads(line)
+        except ValueError:
+            answer = None
+        if not isinstance(answer, dict) or answer.get("id") != request_id:
+            raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
+                                   "nothing from it is shown")
+        if "step" in answer and "ok" not in answer:      # a progress line: what it is doing now
+            if on_step is not None:
+                on_step(str(answer["step"]))
+            continue
+        return answer
 
 
 # ---- processes started from Rhino: never a console window (Windows) -----------------------------------------------
