@@ -12,7 +12,6 @@ use the rule decides about is cited by its own cell, so the inspector's use-row 
 from rule_format.rulebook import district_name, pending_research
 
 from .chart_values import FOOTNOTE, footnotes
-from .templates import CHART_FILE   # noqa: F401  (the place's zoning chart: one definition)
 SECTION = "Primary Uses"
 MARK_QUESTION = ("The chart has no legend for its marks. We read • as permitted and - as not permitted; SP "
                  "matches §325-9B(1)'s list of uses needing a special permit from the Planning and Development "
@@ -28,9 +27,9 @@ def use_ids(uses: dict) -> dict[str, str]:
 
 
 def use_rule(column: str, rows: dict[str, dict[str, dict]], uses: dict, notes: dict[str, dict],
-             drafted_by: str, heading_notes: set[str] = frozenset()) -> tuple[dict | None, list[str], list[dict]]:
+             drafted_by: str, heading_notes: set[str] = frozenset(), *, chart: str) -> tuple[dict | None, list[str], list[dict]]:
     """(the rule for this district, problems, unresolved: the notes on its rows and column heading, for a
-    person). rows: {row label: {column: cell}} for Primary Uses."""
+    person). rows: {row label: {column: cell}} for Primary Uses. chart: the place's zoning chart file."""
     ids, problems = use_ids(uses), []
     allowed, special, footnoted, refused, sources, quoted = [], [], {}, [], [], set()
     on_rows: dict[str, list[str]] = {}          # a row-label note -> the rows (of uses the rule decides) it is on
@@ -58,7 +57,7 @@ def use_rule(column: str, rows: dict[str, dict[str, dict]], uses: dict, notes: d
         else:
             problems.append(f"row {label!r}: unknown mark {cell['value']!r}")
             continue
-        sources.append({"file": CHART_FILE, "page": cell["page"],
+        sources.append({"file": chart, "page": cell["page"],
                         "cell": {"section": SECTION, "row": label.strip(), "column": column}})
         for n in footnotes(label):
             on_rows.setdefault(n, []).append(name)
@@ -69,7 +68,7 @@ def use_rule(column: str, rows: dict[str, dict[str, dict]], uses: dict, notes: d
     for n in sorted(quoted | set(on_rows) | set(heading_notes), key=int):
         if n not in notes:
             return None, problems + [f"footnote {n} isn't under the table"], []
-        sources.append({"file": CHART_FILE, "page": 2, "lines": notes[n]["lines"], "quote": notes[n]["text"]})
+        sources.append({"file": chart, "page": 2, "lines": notes[n]["lines"], "quote": notes[n]["text"]})
         where = ([f"the rows {', '.join(repr(r) for r in on_rows[n])}"] if n in on_rows else []) + \
                 ([f"the {column} column heading"] if n in heading_notes else [])
         if where:

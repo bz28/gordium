@@ -35,10 +35,14 @@ from section_labeling.budget import Budget, BudgetExceeded
 from section_labeling.labeler import numbered_lines
 
 from . import chart_values, drafter
-from .templates import CHART_FILE
 from .uses import SECTION as USES_SECTION, use_rule
 
-PLACE = only_place("rule drafting", "give it a --place option first").folder   # the registry's one place
+def one_place() -> Path:
+    """The folder of the place drafting reads when none is given: the registry's one place (a second one needs a
+    --place option first), asked only when drafting runs, so the modules import with any number of places."""
+    return only_place("rule drafting", "give it a --place option first").folder
+
+
 LEDGER = Path.home() / ".config/gordium/rule_drafting_ledger.json"   # outside the repo: shared by every checkout
 USES_UNIT = "chart-p2-primary_uses"
 ACCESSORY_UNIT = "chart-p2-accessory_uses"
@@ -53,11 +57,13 @@ def slug(text: str) -> str:
 class Inputs:
     """Everything drafting reads, for one jurisdiction."""
 
-    def __init__(self, j: Path = PLACE):
+    def __init__(self, j: Path | None = None):
+        j = j or one_place()
         self.j, self.drafted, self.records = j, j / "5_zoning_rules/drafted", j / "5_zoning_rules/drafted/records"
         self.ctx = Context.for_jurisdiction(j)
         law = Path(place(j).law_file("zoning_code")).stem     # the place's zoning code (Ithaca: Chapter 325)
-        stem = Path(CHART_FILE).stem
+        self.chart = place(j).law_file("zoning_chart")     # the place's zoning chart (Ithaca: April 2026)
+        stem = Path(self.chart).stem
         _, self.tables, cells = chart_values.load_cells(j / f"2_extracted_text/{stem}.cells.jsonl")
         self.cells_list = cells
         self.cells = {(c["page"], c["section"], c["row"].strip(), c["column"]): c for c in cells if not c["heading"]}
@@ -66,7 +72,7 @@ class Inputs:
         self.notes = {t["page"]: chart_values.notes_under_table(chart_rows[1:], t["page"], t["bottom"]) for t in self.tables}
         law_header, pieces = load_pieces(j / f"2_extracted_text/{law}.sections.jsonl")
         terms_file = j / "4_term_definitions/term_index.yaml"     # related sections by shared words (generated)
-        self.law = {"file": law_header["file"], "pieces": pieces,
+        self.law = {"file": law_header["file"], "chart": self.chart, "pieces": pieces,
                     "rows": read_jsonl(j / f"2_extracted_text/{law}.jsonl"),
                     "terms": load(terms_file) if terms_file.exists() else None}
         labels_file = j / f"3_section_labels/{law}.yaml"
@@ -363,7 +369,7 @@ def draft_uses(i: Inputs) -> dict:
         heading = {n for t in i.tables if t["page"] == 2 for c in t["columns"] if c["name"] == column
                    for h in c["headers"] for n in chart_values.footnotes(h)}
         rule, problems, notes_for_a_person = use_rule(column, rows, i.uses, i.notes.get(2, {}),
-                                                      "rule_drafting/chart_code", heading)
+                                                      "rule_drafting/chart_code", heading, chart=i.chart)
         if rule is not None and (bad := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, i.ctx)):
             problems, rule = problems + bad, None
         if rule is None:
