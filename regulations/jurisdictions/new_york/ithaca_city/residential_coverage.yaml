@@ -23,12 +23,13 @@
 # Drafted by Claude (Lane D, queue item 10, 2026-10-27) from the law's text; a second reading, not an architect's.
 # The decisions for the rules added by #38 (occupancy, home occupation), #41 (attached buildings of three to six),
 # #42 (primary buildings, §325-8B(1)), #43 (§325-7B shared yards, the South Hill Overlay) and #44 (§325-26 streams)
-# added by Claude (coverage lane, 2026-10-28) from those rules and the law's text.
+# added by Claude (coverage lane, 2026-10-28) from those rules and the law's text; the accessory dwelling unit
+# decisions (§325-3B, §325-8A, §325-8B, §325-25, §325-28) by Claude (ADU lane, 2026-10-29) from the adu_* rules.
 
 districts: [R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU]
 
-# Ben's later list (2026-10-25: finish the queue first, then pick from these), plus accessory dwelling units
-# (the queue item 10 brief, 2026-10-27; also listed on every result, not_checked_yet.yaml).
+# Ben's later list (2026-10-25: finish the queue first, then pick from these). Accessory dwelling units, parked by
+# the queue item 10 brief (2026-10-27), are now checked (the adu_* rules, 2026-10-29).
 parked:
   corner_lot_front: {name: "Corner lots: which side is the front", decided: "Ben's later list, 2026-10-25"}
   historic_flood: {name: "Historic district and flood zone lookups", decided: "Ben's later list, 2026-10-25"}
@@ -38,7 +39,6 @@ parked:
   chimney_fence: {name: "Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK)",
                   decided: "Ben's later list, 2026-10-25"}
   parking: {name: "Parking (typed count and read from the drawing): on hold", decided: "Ben's later list, 2026-10-25"}
-  adus: {name: "Accessory dwelling units", decided: "queue item 10 brief, 2026-10-27"}
 
 # Reused decisions.
 _unlisted_why: &unlisted_why "Not a use the residential chart (p.2) lists for any residential district, so it isn't
@@ -94,11 +94,29 @@ _no_yard_object: &no_yard_object
 pieces:
   325-3B:accessory_dwelling_unit:
     - quote: "A smaller, secondary dwelling unit located on the same lot"
-      what: What an accessory dwelling unit is and must have
-      all: {status: parked, item: adus}
+      lines: [[4, 7, 8]]
+      what: What an accessory dwelling unit is (a second dwelling unit on the lot of a primary structure)
+      all: {status: rulebook, rules: [adu_one_per_parcel]}
       # R-1's occupancy rule cites the definition only to send an owner-occupied house with an ADU on the lot to
       # review (the owner-and-ADU open question); it checks nothing the definition requires of the ADU.
-      R-1a, R-1b: {status: parked, item: adus, also: [occupancy_one_family]}
+      R-1a, R-1b: {status: rulebook, rules: [adu_one_per_parcel], also: [occupancy_one_family]}
+      RU: {status: rulebook, rules: [adu_not_permitted]}
+    - quote: "An ADU must have a separate entrance from the outside of the building or through a common hall"
+      lines: [[4, 8, 11]]
+      what: What an ADU must have (a separate entrance; living, cooking, sanitary and sleeping facilities; the
+        building code for residential use)
+      all:
+        status: missing
+        priority: low
+        why: &adu_inside_all The inside of the unit (its entrance, kitchen, bathroom and bedrooms) and the building
+          code are the plans' review, not what a massing model shows; no rule or flag.
+        also: [adu_one_per_parcel]
+      R-1a, R-1b:
+        status: missing
+        priority: low
+        why: *adu_inside_all
+        also: [adu_one_per_parcel, occupancy_one_family]
+      RU: {status: missing, priority: low, why: *adu_inside_all, also: [adu_not_permitted]}
 
   325-3B:building_area:
     - lines: [[5, 23, 28]]
@@ -443,9 +461,15 @@ pieces:
           no note), so there is no garage size to check there.
         quote: Uses permitted to be accessory to the main use of the
       R-1a, R-1b, R-2a, R-2b, R-2c: {status: rulebook, rules: [private_garage]}
+      RU:
+        status: not_applicable
+        why: The chart's private garage row (p.2 line 32) has no car limit for R-3a, R-3aa, R-3b and RU (a plain •,
+          no note), so there is no garage size to check there.
+        quote: Uses permitted to be accessory to the main use of the
+        also: [adu_not_permitted]
     - lines: [[24, 17, 18]]
       what: "Column 3: the other permitted accessory uses (chart p.2: structure for construction purposes, adult
-        day-care home, towers, home occupation, neighborhood parking area, gardens, ADU)"
+        day-care home, towers, home occupation, neighborhood parking area, gardens)"
       all:
         status: missing
         priority: medium
@@ -453,7 +477,7 @@ pieces:
           home_occupation_size, under §325-3B and §325-9B(1)(i)) and a private garage's size (the part above).
           Towers and gardens need a special permit; a structure for construction purposes may stay two years.
           §325-20E and §325-20F are listed on every result as not checked yet (not_checked_yet.yaml). Parking is on
-          the later list; ADUs are parked by the queue item 10 brief.
+          the later list. An ADU is the next part.
       R-1a, R-1b, R-2a, R-2b, R-2c:
         status: missing
         priority: medium
@@ -461,8 +485,32 @@ pieces:
           home_occupation_size, under §325-3B and §325-9B(1)(i)) and a private garage's size (the part above).
           Towers and gardens need a special permit; a structure for construction purposes may stay two years.
           §325-20E and §325-20F are listed on every result as not checked yet (not_checked_yet.yaml). Parking is on
-          the later list; ADUs are parked by the queue item 10 brief.
+          the later list. An ADU is the next part.
         also: [private_garage]
+      RU:
+        status: missing
+        priority: medium
+        why: No rule checks the accessory uses on chart p.2 other than a home occupation (RU.home_occupation and
+          home_occupation_size, under §325-3B and §325-9B(1)(i)). Towers and gardens need a special permit; a structure
+          for construction purposes may stay two years. §325-20E and §325-20F are listed on every result as not
+          checked yet (not_checked_yet.yaml). Parking is on the later list. An ADU is the next part.
+        also: [adu_not_permitted]
+    - lines: [[24, 17, 18]]
+      what: "Column 3: an accessory dwelling unit (chart p.2 line 30)"
+      all:
+        status: rulebook
+        rules: [adu_one_per_parcel, adu_bedrooms, adu_front_yard, adu_attached_size, adu_detached_size,
+          adu_detached_setbacks]
+        mapped: Each rule cites the district's own cell in the chart's Accessory Dwelling Unit row (p.2 line 30),
+          the listing Column 3 refers to.
+      R-1a, R-1b, R-2a, R-2b, R-2c:
+        status: rulebook
+        rules: [adu_one_per_parcel, adu_bedrooms, adu_front_yard, adu_attached_size, adu_detached_size,
+          adu_detached_setbacks]
+        mapped: Each rule cites the district's own cell in the chart's Accessory Dwelling Unit row (p.2 line 30),
+          the listing Column 3 refers to.
+        also: [private_garage]
+      RU: {status: rulebook, rules: [adu_not_permitted]}
     - quote: "The off-street parking spaces listed in this column shall be provided"
       lines: [[24, 19, 21]]
       what: "Column 4: off-street parking"
@@ -544,6 +592,7 @@ pieces:
       what: "(3) Uses are generally cumulative, except where a specific prohibition or omission says otherwise"
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
+      RU: {status: rulebook, rules: [use, adu_not_permitted]}
     - quote: "the regulations applying to such use shall be those of whichever district has the stricter regulations"
       lines: [[26, 22, 25]]
       what: "(4) A use allowed by special permit or variance follows the stricter district's regulations"
@@ -982,7 +1031,8 @@ pieces:
       all: {status: rulebook, rules: [accessory_buildings], also: [yards_not_shared]}
   325-25A:
     - what: Accessory structures above grade are not in a required front yard (two on a corner lot)
-      all: {status: rulebook, rules: [accessory_buildings], also: [yards_not_shared]}
+      all: {status: rulebook, rules: [accessory_buildings, adu_front_yard], also: [yards_not_shared]}
+      RU: {status: rulebook, rules: [accessory_buildings], also: [yards_not_shared]}
   325-25B:
     - what: Accessory structures wholly below grade may go anywhere
       all:
@@ -995,6 +1045,7 @@ pieces:
   325-25C:
     - what: Frame accessory buildings 3 ft from side and rear lot lines (6 ft side in R-1)
       all: {status: rulebook, rules: [accessory_buildings]}
+      R-1a, R-1b: {status: rulebook, rules: [accessory_buildings, adu_detached_setbacks]}
   325-25D:
     - what: A detached garage may straddle a common lot line by agreement
       all:
@@ -1021,13 +1072,65 @@ pieces:
 
   325-28B:
     - quote: "This section applies to all accessory dwelling units (ADUs) within the City of Ithaca"
-      what: Accessory dwelling units (applicability)
-      all: {status: parked, item: adus}
+      what: Accessory dwelling units (applicability; new construction's area requirements for every ADU permitted
+        since 2025)
+      all:
+        status: rulebook
+        rules: [adu_one_per_parcel, adu_bedrooms, adu_front_yard, adu_attached_size, adu_detached_size,
+          adu_detached_setbacks]
+        mapped: &adu_every One rule for each of §325-28C's requirements, applied to every ADU on the lot (a design is
+          checked as new construction; an existing accessory building's own allowances are review conditions).
+      RU:
+        status: rulebook
+        rules: [adu_not_permitted]
+        mapped: &adu_ru The section sets the requirements wherever an ADU is allowed; RU's chart cell is blank, so
+          Gordium reads an ADU as not permitted there (RU.adu_not_permitted, to confirm with the City).
   325-28C:
-    - quote: "A maximum of one ADU is allowed per parcel"
-      what: Accessory dwelling unit requirements (one per parcel, size, height, setbacks)
-      all: {status: parked, item: adus, also: [parking_one_family]}
-      RU: {status: parked, item: adus}
+    - lines: [[72, 7, 8]]
+      what: "(1) At most one ADU per parcel"
+      all: {status: rulebook, rules: [adu_one_per_parcel]}
+      RU: &adu_ru_decision {status: rulebook, rules: [adu_not_permitted], mapped: *adu_ru}
+    - lines: [[72, 9, 9]]
+      what: "(2) No off-street parking is required for an ADU"
+      all: {status: rulebook, rules: [parking_one_family]}
+      RU: *adu_ru_decision
+    - lines: [[72, 10, 10]]
+      what: "(3) At most two bedrooms"
+      all: {status: rulebook, rules: [adu_bedrooms]}
+      RU: *adu_ru_decision
+    - lines: [[72, 11, 11]]
+      what: "(4) Not in the primary front yard"
+      all: {status: rulebook, rules: [adu_front_yard]}
+      RU: *adu_ru_decision
+    - lines: [[72, 12, 14]]
+      what: "(5), (6) May not be sold separately, nor the parcel subdivided to separate it"
+      all:
+        status: missing
+        priority: operational
+        why: Ownership (a sale, a subdivision), not what is drawn; no rule or flag. Listed on every result as not
+          checked yet (not_checked_yet.yaml).
+    - lines: [[72, 15, 16]]
+      what: "(7)(a) An attached ADU at most 40% of the primary structure's floor area"
+      all: {status: rulebook, rules: [adu_attached_size]}
+      RU: *adu_ru_decision
+    - lines: [[72, 17, 22]]
+      what: "(7)(b), (c) A detached ADU: an existing building may not grow past; new construction at most 800 sf
+        footprint, two stories and 20 ft"
+      all: {status: rulebook, rules: [adu_detached_size]}
+      RU: *adu_ru_decision
+    - lines: [[72, 23, 24]]
+      what: "(8)(a) An attached ADU's setbacks are the primary structure's"
+      all: {status: rulebook, rules: [front_yard, side_yards, rear_yard], mapped: "An attached ADU is part of the house (§325-3B), so the house's own yard rules measure it."}
+      RU: *adu_ru_decision
+    - lines: [[72, 25, 30]]
+      what: "(8)(b) A detached ADU's side and rear setbacks: 5 ft, or the primary structure's if less; an existing
+        building may not encroach further"
+      all: {status: rulebook, rules: [adu_detached_setbacks], also: [adu_front_yard]}
+      RU: *adu_ru_decision
+    - lines: [[72, 31, 31]]
+      what: "(8)(b)[2][b] A detached ADU's secondary front yard: the primary structure's front setback"
+      all: {status: rulebook, rules: [adu_front_yard]}
+      RU: *adu_ru_decision
 
   325-29:
     - quote: "Officially designated landmarks or landmark districts of the City shall be governed by the provisions of Chapter 228"

@@ -20,7 +20,8 @@
 #
 # Draft (approval deferred, decided 2026-10-19). Not covered yet, as in R-1b (later rules or flags): ornamental
 # parapets and cornices above the height limit (§325-16B), accessory uses and structures (p.2), accessory dwelling
-# units (§325-28; RU's accessory-dwelling-unit cell on p.2 is blank, neither • nor -), height exceptions for chimneys and similar (§325-16A, applied when measuring height), the loading rule for
+# units beyond whether one is permitted (RU's accessory-dwelling-unit cell on p.2 is blank, neither • nor -:
+# RU.adu_not_permitted), height exceptions for chimneys and similar (§325-16A, applied when measuring height), the loading rule for
 # nonresidential uses ("Allowed by variance", p.14). RU is not an R-3
 # district, so §325-19E doesn't apply, and §325-11B(1) doesn't allow cluster subdivisions in it. Parking is written
 # as in R-3a and stays "not checked yet: interior".
@@ -2418,5 +2419,63 @@ rules:
       strength: strong
       report: docs/research/2026-10-27_occupancy_and_home_occupation.md §7
     notes: "Always needs review once one is planned: whether it needs the special permit (§325-9B(1)(i)) and §325-3B's conditions on how it runs are a person's to check. Its size is RU.home_occupation_size. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
+    drafted_by: claude
+    status: draft
+
+  - id: RU.adu_not_permitted
+    kind: rule
+    topic: uses
+    title: "Accessory dwelling unit: not listed for RU (chart p.2)"
+    check: not accessory_dwelling_unit
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: RU}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [17, 18]
+        quote: "(3) Column 3: Permitted Accessory Uses. Uses permitted to be accessory to the main use of the premises are listed, subject to the further regulations of Article V."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [19, 20]
+        quote: "(3) Regulations, standards and permitted uses are generally cumulative, except for the P-1 and MH-1 Districts and except where otherwise indicated by specific prohibition or omission."
+        not_limits: {1: "the district names P-1 and MH-1, not a number"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [7, 11]
+        quote: "ACCESSORY DWELLING UNIT (ADU) — A smaller, secondary dwelling unit located on the same lot as a primary residential, commercial, or mixed-use structure. An ADU must have a separate entrance from the outside of the building or through a common hall and must provide living, cooking, sanitary, and sleeping facilities. All ADUs must adhere to building code regulations for residential use."
+    findings:
+    - id: blank_cell_not_listed
+      question: 'RU''s cell in the chart''s "Accessory Dwelling Unit" row is blank (neither • nor -). Is an ADU
+        permitted in RU?'
+      kind: reading
+      answer: 'No: Column 3''s accessory uses "are listed", and the chart lists the ADU for R-1a to R-3b only, leaving
+        RU''s cell empty; §325-8B(3) treats what is left out as an "omission". §325-28B''s "This section applies to all
+        accessory dwelling units (ADUs) within the City of Ithaca" sets the requirements wherever an ADU is
+        allowed; it doesn''t allow one everywhere. To confirm with the City zoning office: the blank, unlike the "-"
+        elsewhere on the chart, may be an oversight in the 2025 amendment.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [17, 18]
+        quote: Uses permitted to be accessory to the main use of the premises are listed
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [20, 20]
+        quote: specific prohibition or omission
+      strength: strong
+      confirm_with: the City zoning office
+      report: docs/research/2026-10-29_accessory_dwelling_units.md §8
+    examples:
+      - given: {accessory_dwelling_unit: false}
+        expect: pass
+      - given: {accessory_dwelling_unit: true}
+        expect: fail
+      - given: {}
+        expect: needs_review
+        note: whether an ADU is planned, not said
+    notes: >-
+      The chart's "Accessory Dwelling Unit" row (p.2 line 30) has eight marks, R-1A to R-3B; RU's cell is blank.
+      Gordium's reading (blank_cell_not_listed, to confirm with the City): not permitted in RU. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
     drafted_by: claude
     status: draft

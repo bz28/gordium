@@ -10,7 +10,7 @@
 # interpretations are open questions for the architects. Draft (approval deferred).
 #
 # Not covered yet (later rules or flags): ornamental parapets and cornices above the height limit
-# (§325-16B), accessory uses and structures (p.2), height exceptions for chimneys and similar
+# (§325-16B), accessory uses and structures (p.2), an ADU's sale and subdivision (§325-28C(5), (6)), height exceptions for chimneys and similar
 # (§325-16A, applied when measuring height).
 
 district: R-1b
@@ -1032,7 +1032,7 @@ rules:
     findings:
     - id: adu_needs_no_parking
       question: 'The requirement is per dwelling unit. R-1b allows an accessory dwelling unit (chart p.2): does a house
-        with an ADU need parking for both units? (Not checked yet; ADUs aren''t measured.)'
+        with an ADU need parking for both units?'
       kind: law
       answer: 'No: an ADU needs no off-street parking (§325-28C(2)). The house''s own parking is unchanged.'
       sources:
@@ -1475,5 +1475,467 @@ rules:
       checked here: the definition's "no business ... for profit" (a home occupation in a garage is checked by the
       home-occupation rules) and where the garage stands (accessory_buildings, §325-25). Research:
       docs/research/2026-10-29_private_garage.md.
+    drafted_by: claude
+    status: draft
+
+  - id: R-1b.adu_one_per_parcel
+    kind: rule
+    topic: density_and_occupancy
+    title: "Accessory dwelling unit: at most one per parcel (§325-28C(1))"
+    applies_when: accessory_dwelling_unit
+    check: adus_on_parcel <= 1
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [8, 8]
+        quote: "(1) A maximum of one ADU is allowed per parcel."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [7, 11]
+        quote: "ACCESSORY DWELLING UNIT (ADU) — A smaller, secondary dwelling unit located on the same lot as a primary residential, commercial, or mixed-use structure. An ADU must have a separate entrance from the outside of the building or through a common hall and must provide living, cooking, sanitary, and sleeping facilities. All ADUs must adhere to building code regulations for residential use."
+    examples:
+      - given: {accessory_dwelling_unit: true, adus_on_parcel: 1}
+        expect: pass
+      - given: {accessory_dwelling_unit: true, adus_on_parcel: 2}
+        expect: fail
+      - given: {accessory_dwelling_unit: true}
+        expect: needs_review
+        note: how many ADUs the parcel will have, not said
+      - given: {accessory_dwelling_unit: false}
+        expect: not_applicable
+      - given: {}
+        expect: needs_review
+        note: whether an ADU is planned, not said
+    notes: >-
+      Chart p.2 permits an accessory dwelling unit in R-1b; §325-28C sets its requirements. The architect states
+      whether an ADU is planned (accessory_dwelling_unit) and how many the parcel will have, any already there
+      included (adus_on_parcel). A blank needs review, never a pass. No off-street parking is required for an ADU
+      (§325-28C(2), the parking rule's finding adu_needs_no_parking). Not checked: that it may be leased but not
+      sold separately, and that the parcel may not be subdivided to separate it (§325-28C(5), (6)): ownership, not
+      design. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+    drafted_by: claude
+    status: draft
+
+  - id: R-1b.adu_bedrooms
+    kind: rule
+    topic: density_and_occupancy
+    title: "Accessory dwelling unit: at most two bedrooms (§325-28C(3))"
+    applies_when: accessory_dwelling_unit
+    check: adu_bedrooms <= 2
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [10, 10]
+        quote: "(3) An ADU may have a maximum of two bedrooms."
+    examples:
+      - given: {accessory_dwelling_unit: true, adu_bedrooms: 2}
+        expect: pass
+      - given: {accessory_dwelling_unit: true, adu_bedrooms: 0}
+        expect: pass
+        note: a studio
+      - given: {accessory_dwelling_unit: true, adu_bedrooms: 3}
+        expect: fail
+      - given: {accessory_dwelling_unit: true}
+        expect: needs_review
+      - given: {accessory_dwelling_unit: false, adu_bedrooms: 5}
+        expect: not_applicable
+    notes: >-
+      The ADU's bedrooms are stated by the architect (adu_bedrooms): the model doesn't show which rooms are
+      bedrooms. Chapter 325 doesn't define a bedroom; the parking chart's "bed or sleeping rooms" is the nearest
+      wording. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+    drafted_by: claude
+    status: draft
+
+  - id: R-1b.adu_front_yard
+    kind: rule
+    topic: dimensions
+    title: "Detached ADU: not in the primary front yard nor a required one (§325-28C)"
+    applies_when: accessory_dwelling_unit and adu_detached
+    check: not adu_in_primary_front_yard and adu_front_yard >= 25
+    review_when:
+      - when: adu_existing_building and not adu_in_primary_front_yard and adu_front_yard < 25
+        reason: >-
+          An existing accessory building in a required front yard: §325-28C(8)(b) sets no setback for an ADU in an
+          existing accessory building, which may be altered or expanded only if it doesn't further encroach upon a
+          setback for new construction. Check by hand that the building isn't being enlarged toward the street.
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [11, 11]
+        quote: "(4) ADUs may not be located in the primary front yard."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [26, 27]
+        quote: "[1] An existing accessory building may be altered or expanded, provided that it does not further encroach upon any setback requirement for new construction."
+        not_limits: {1: "[1], a list marker"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [31, 31]
+        quote: "[b] Front setback, secondary front yard: same as primary structure."
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-1B}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 20
+        lines: [31, 34]
+        quote: "(1) FRONT YARD — An open space extending the full width of the lot between a main building and the front lot line, unoccupied and unobstructed by buildings or structures from the ground upward, the depth of which shall be the least distance between the front lot line and the front of such main building."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [37, 40]
+        quote: "A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard, except as permitted under the further provisions of this section. Corner lots shall be considered to have two front yards."
+        not_limits: {2: "two front yards on a corner lot: which yards are front yards (adu_front_yard is measured to the nearer street), not a limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [15, 17]
+        quote: "ACCESSORY DWELLING UNIT, DETACHED — An accessory dwelling unit (ADU) located within an existing or newly constructed accessory structure such as a detached garage, carriage house, or other freestanding building."
+    findings:
+    - id: adu_building_is_accessory_structure
+      question: 'Is a detached ADU''s building an accessory structure, so that §325-25 (not in a required front yard)
+        reaches it as well as §325-28?'
+      kind: law
+      answer: 'Yes: a detached ADU is "located within an existing or newly constructed accessory structure"
+        (§325-3B), and §325-25A keeps accessory structures out of a required front yard. Its side and rear distances
+        are §325-28C(8)''s (this district''s adu_detached_setbacks).'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [15, 16]
+        quote: located within an existing or newly constructed accessory structure
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [38, 38]
+        quote: but not in a required front yard
+      strength: strong
+      report: docs/research/2026-10-29_accessory_dwelling_units.md §2
+    - id: secondary_front_setback_is_the_required_one
+      question: '"Front setback, secondary front yard: same as primary structure": the front yard the district
+        requires of the primary structure, or the distance the house actually stands back?'
+      kind: reading
+      answer: 'The district''s required front yard (25 ft): the same list''s side and rear setback is the
+        "setback required for primary structure", and §325-25A keeps every accessory structure out of a required
+        front yard, the same figure. A house standing farther back doesn''t push the ADU back, and one standing
+        closer (an older house) doesn''t bring it forward.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [29, 29]
+        quote: setback required for primary structure
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [38, 38]
+        quote: not in a required front yard
+      strength: moderate
+      confirm_with: the architects
+      report: docs/research/2026-10-29_accessory_dwelling_units.md §4
+    examples:
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_in_primary_front_yard: false, adu_front_yard: 70}
+        expect: pass
+        note: behind the house
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_in_primary_front_yard: true, adu_front_yard: 30}
+        expect: fail
+        note: nearer the street than the front of the house, in the primary front yard
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: true, adu_in_primary_front_yard: true, adu_front_yard: 30}
+        expect: fail
+        note: (4) applies to every ADU, an existing building's too
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_in_primary_front_yard: false, adu_front_yard: 24}
+        expect: fail
+        note: a corner lot's secondary front yard, 24 ft from the side street (at least 25 ft)
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_in_primary_front_yard: false, adu_front_yard: 25}
+        expect: pass
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: true, adu_in_primary_front_yard: false, adu_front_yard: 24}
+        expect: needs_review
+        note: an existing building may stay where it is, but not be enlarged further toward the street
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_front_yard: 70}
+        expect: needs_review
+        note: whether it is in the primary front yard isn't known (a corner lot, or the house not picked)
+      - given: {accessory_dwelling_unit: true, adu_detached: false}
+        expect: not_applicable
+        note: an attached ADU is part of the house, which is never in its own front yard
+    notes: >-
+      Measured from the detached ADU's building, the solid the architect picks (adu_building).
+      adu_in_primary_front_yard: some part of it, seen from above, nearer the street lot line than the front of the
+      main building is (§325-3B FRONT YARD); adu_front_yard: its least distance to a street lot line (on a corner lot
+      the nearer street, so the secondary front yard is checked too). On a corner lot, which front yard is the
+      primary one is open (325-28C#1, in the section labels): both streets are read as primary, and the rule
+      complies only if it does under both. An attached ADU is part of the house, whose own front yard rule applies
+      ("same as primary structure", §325-28C(8)(a)). Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+    drafted_by: claude
+    status: draft
+
+  - id: R-1b.adu_attached_size
+    kind: rule
+    topic: dimensions
+    title: "Attached ADU: at most 40% of the primary structure's floor area"
+    applies_when: accessory_dwelling_unit and not adu_detached
+    check: adu_floor_area <= 0.4 * (primary_floor_area - adu_floor_area)
+    review_when:
+      - when: >-
+          adu_floor_area > 0.4 * (primary_floor_area - adu_floor_area)
+          and adu_floor_area <= 0.4 * primary_floor_area
+        reason: >-
+          Within 40% of the whole primary structure (the ADU included) but over 40% of the rest of it: which is
+          meant is this rule's open question. Check by hand or ask the zoning office.
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [16, 16]
+        quote: "(a) Attached ADU: The ADU shall not exceed 40% of the floor area of the primary structure."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [12, 14]
+        quote: "ACCESSORY DWELLING UNIT, ATTACHED — An accessory dwelling unit (ADU) that is connected to or contained within the primary structure, such as a basement, building addition, or attached garage."
+    examples:
+      - given: {accessory_dwelling_unit: true, adu_detached: false, adu_floor_area: 400, primary_floor_area: 1500}
+        expect: pass
+        note: 400 is within 40% of the rest (0.4 x 1,100 = 440 sf) and of the whole (600 sf)
+      - given: {accessory_dwelling_unit: true, adu_detached: false, adu_floor_area: 500, primary_floor_area: 1500}
+        expect: needs_review
+        note: over 40% of the rest (0.4 x 1,000 = 400 sf), within 40% of the whole (600 sf)
+      - given: {accessory_dwelling_unit: true, adu_detached: false, adu_floor_area: 700, primary_floor_area: 1500}
+        expect: fail
+        note: over 40% under both readings (600 sf at most)
+      - given: {accessory_dwelling_unit: true, adu_detached: false, adu_floor_area: 400}
+        expect: needs_review
+      - given: {accessory_dwelling_unit: true, adu_detached: true}
+        expect: not_applicable
+      - given: {accessory_dwelling_unit: true}
+        expect: needs_review
+        note: attached or detached not said
+    open_questions:
+    - '§325-28C(7)(a): an attached ADU "shall not exceed 40% of the floor area of the primary structure". Is that 40% of the whole primary structure, the ADU included, or of the rest of it (the main dwelling without the ADU)?'
+    research:
+    - question: '§325-28C(7)(a): an attached ADU "shall not exceed 40% of the floor area of the primary structure". Is that 40% of the whole primary structure, the ADU included, or of the rest of it (the main dwelling without the ADU)?'
+      searched:
+      - 325-28
+      - 325-28B
+      - 325-28C
+      - 325-3B:accessory_dwelling_unit
+      - 325-3B:accessory_dwelling_unit_attached
+      - 325-3B:accessory_dwelling_unit_detached
+      - 325-3B:primary_structure
+      - 325-3B:dwelling_unit
+      - 325-3B:dwelling_two_family
+      - 325-3B:habitable_space
+      - 325-3B:story
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 9
+        lines: [7, 7]
+        quote: one unit may be no larger than 50% of the floor area of the larger
+      - rank: 4
+        cite: 'Other cities word the same limit both ways, for example "of the primary dwelling" or "of the existing
+          primary dwelling unit"; none read settles Ithaca''s words (web search, 2026-10-29)'
+      why_open: >-
+        Chapter 325 doesn't define floor area, and §325-28 doesn't say whether the attached ADU is counted in the
+        primary structure. The ATTACHED definition puts the ADU "within the primary structure", which supports the
+        whole structure (ADU included); the two-family dwelling's "no larger than 50% of the floor area of the
+        larger" (§325-3B) compares the two units, which supports comparing the ADU with the rest. No City
+        interpretation or Board of Zoning Appeals decision on ADUs was found (web search, 2026-10-29). Gordium passes
+        what complies under both, fails what fails under both, and asks between.
+      readings:
+      - id: whole_structure
+        reading: 40% of the whole primary structure's floor area, the ADU included
+      - id: rest_of_structure
+        reading: 40% of the floor area of the rest of the primary structure, the ADU left out
+      report: docs/research/2026-10-29_accessory_dwelling_units.md §5
+    notes: >-
+      The floor areas are stated by the architect (adu_floor_area; primary_floor_area, the whole primary structure
+      the ADU is in, the ADU included): Chapter 325 doesn't define floor area, and the model's solids don't show
+      floors. An attached ADU's setbacks are the primary structure's (§325-28C(8)(a)): the house's own yard rules
+      measure it as part of the house. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+    drafted_by: claude
+    status: draft
+
+  - id: R-1b.adu_detached_size
+    kind: rule
+    topic: dimensions
+    title: "Detached ADU: 800 sf footprint; two stories and 20 ft"
+    applies_when: accessory_dwelling_unit and adu_detached
+    check: adu_footprint <= 800 and adu_height <= 20 and adu_stories <= 2
+    review_when:
+      - when: adu_existing_building and not (adu_footprint <= 800 and adu_height <= 20 and adu_stories <= 2)
+        reason: >-
+          An existing accessory building larger than new construction may be: §325-28C(7)(b) sets no size limit
+          for it, but it may be altered or expanded only within the limits for new construction. Check by hand that
+          it isn't being enlarged.
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [17, 19]
+        quote: "(b) Detached ADU, existing accessory building: none. [1] An existing accessory building may be altered or expanded, provided that it does not exceed the size limitations for new construction."
+        not_limits: {1: "[1], a list marker"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [20, 22]
+        quote: "(c) Detached ADU, new construction: [1] 800 SF maximum building footprint. [2] Maximum height of two stories and 20'."
+        not_limits: {1: "[1], a list marker"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [15, 17]
+        quote: "ACCESSORY DWELLING UNIT, DETACHED — An accessory dwelling unit (ADU) located within an existing or newly constructed accessory structure such as a detached garage, carriage house, or other freestanding building."
+    examples:
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_footprint: 800, adu_height: 20, adu_stories: 2}
+        expect: pass
+        note: at every limit
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_footprint: 801, adu_height: 18, adu_stories: 2}
+        expect: fail
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_footprint: 600, adu_height: 20.5, adu_stories: 2}
+        expect: fail
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_footprint: 600, adu_height: 19, adu_stories: 3}
+        expect: fail
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: true, adu_footprint: 900, adu_height: 18, adu_stories: 1}
+        expect: needs_review
+        note: an existing carriage house over 800 sf may stay as it is, but not be enlarged
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_footprint: 900, adu_height: 18, adu_stories: 1}
+        expect: needs_review
+        note: over 800 sf, and whether the building already exists isn't said
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_footprint: 500, adu_stories: 1}
+        expect: needs_review
+        note: height not measured
+      - given: {accessory_dwelling_unit: true, adu_detached: false}
+        expect: not_applicable
+    notes: >-
+      Measured from the detached ADU's building, the solid the architect picks (adu_building), on its own: its
+      footprint seen from above (eaves read both ways: "footprint" isn't defined), its height as building height is
+      measured, from the grade plane at its own walls, and its stories (a plain solid under 21 ft tall, 7 ft a story, holds at
+      most two, read as two; a taller one needs its floors drawn). The height bonus of §325-16C is for the main
+      building, not for this. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+    drafted_by: claude
+    status: draft
+
+  - id: R-1b.adu_detached_setbacks
+    kind: rule
+    topic: dimensions
+    title: "Detached ADU: 5 ft from the side and rear lot lines (§325-28C(8))"
+    applies_when: accessory_dwelling_unit and adu_detached
+    check: adu_side_yard >= 5 and adu_rear_yard >= 5
+    review_when:
+      - when: adu_existing_building and not (adu_side_yard >= 5 and adu_rear_yard >= 5)
+        reason: >-
+          An existing accessory building nearer a lot line than new construction may be: §325-28C(8)(b) sets no
+          setback for it, but it may be altered or expanded only if it doesn't further encroach upon a setback for
+          new construction. Check by hand that it isn't being enlarged toward the lot line.
+      - when: adu_side_yard >= 5 and adu_side_yard < 6 and adu_rear_yard >= 5
+        reason: >-
+          5 ft or more but under 6 ft from a side lot line: §325-28 allows 5 ft, but §325-25C keeps accessory
+          buildings in R-1 six feet from a side lot line. Which governs is this rule's open question.
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [28, 30]
+        quote: "[2] Detached ADU, new construction: [a] Side and rear setback: 5' or setback required for primary structure, whichever is less."
+        not_limits: {2: "[2], a list marker"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [26, 27]
+        quote: "[1] An existing accessory building may be altered or expanded, provided that it does not further encroach upon any setback requirement for new construction."
+        not_limits: {1: "[1], a list marker"}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Side (one side minimum)", column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Side (other side minimum)", column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
+        not_limits: {20: "the primary structure's rear yard floor: more than 5 ft, so 5 ft is the lesser"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [6, 9]
+        quote: "C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this section."
+        not_limits: {1: "the district name R-1, not a number of feet", 3: "the 3 ft frame-building distances: less than the ADU's 5 ft, never the deciding figure"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [15, 17]
+        quote: "ACCESSORY DWELLING UNIT, DETACHED — An accessory dwelling unit (ADU) located within an existing or newly constructed accessory structure such as a detached garage, carriage house, or other freestanding building."
+    examples:
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_side_yard: 6, adu_rear_yard: 5}
+        expect: pass
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_side_yard: 4.9, adu_rear_yard: 10}
+        expect: fail
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_side_yard: 8, adu_rear_yard: 4}
+        expect: fail
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: true, adu_side_yard: 2, adu_rear_yard: 10}
+        expect: needs_review
+        note: "an existing garage 2 ft from the side line may stay, but not be enlarged toward it"
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_side_yard: 2, adu_rear_yard: 10}
+        expect: needs_review
+        note: "under 5 ft, and whether the building already exists isn't said"
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_rear_yard: 10}
+        expect: needs_review
+        note: "side not measured"
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: false, adu_side_yard: 5, adu_rear_yard: 5}
+        expect: needs_review
+        note: "5 ft complies with §325-28, not with §325-25C's 6 ft"
+      - given: {accessory_dwelling_unit: true, adu_detached: false}
+        expect: not_applicable
+    open_questions:
+    - 'In R-1, §325-25C keeps accessory buildings at least six feet from a side lot line; §325-28C(8) gives a new detached ADU 5 ft from the side and rear lot lines, or the primary structure''s required setback if that is less. Does a detached ADU''s building need 6 ft from a side lot line in R-1, or 5 ft?'
+    research:
+    - question: 'In R-1, §325-25C keeps accessory buildings at least six feet from a side lot line; §325-28C(8) gives a new detached ADU 5 ft from the side and rear lot lines, or the primary structure''s required setback if that is less. Does a detached ADU''s building need 6 ft from a side lot line in R-1, or 5 ft?'
+      searched:
+      - 325-28
+      - 325-28C
+      - 325-3B:accessory_dwelling_unit_detached
+      - 325-3B:accessory_building_or_structure
+      - 325-3B:yard
+      - 325-25
+      - 325-25A
+      - 325-25C
+      - 325-8A
+      - 325-25D
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [23, 23]
+        quote: (8) All ADUs shall meet the following setback requirements
+      - rank: 2
+        cite: 'Ithaca Times, "Ithaca Common Council advances accessory dwelling unit policy" (2025-03-07): the ADU side
+          setback was raised from 4 ft to 5 ft to align with the state fire code'
+        url: https://www.ithaca.com/news/ithaca/ithaca-common-council-advances-accessory-dwelling-unit-policy-debates-key-provisions/article_57d66044-facd-11ef-a5a6-93d46f9f9efa.html
+      why_open: >-
+        §325-28 (2025) is the later, more specific section and says "All ADUs shall meet the following setback
+        requirements"; §325-25C (older) keeps accessory buildings in R-1 six feet from a side lot line, and a
+        detached ADU's building is an accessory structure (§325-3B). Both can be met at 6 ft, and neither section
+        says it overrides the other. The Council's 2025 debate (as reported) set 5 ft for fire-code reasons without
+        mentioning §325-25C. Whether §325-25C's R-1 clause reaches buildings that aren't frame is open too
+        (325-25C#1). No City interpretation or Board of Zoning Appeals decision on ADUs was found (web search,
+        2026-10-29). Gordium passes 6 ft or more, fails under 5 ft, and asks between.
+      readings:
+      - id: adu_section_governs
+        reading: 5 ft (§325-28, the later and more specific section)
+      - id: both_apply
+        reading: 6 ft (§325-25C also applies; meeting both means 6 ft)
+      report: docs/research/2026-10-29_accessory_dwelling_units.md §6
+    notes: >-
+      "5' or setback required for primary structure, whichever is less": the house's required side yards in
+      R-1b are 5 ft or more (chart p.3) and its rear yard at least 20 ft (note 16), so the lesser is 5 ft. Measured
+      from the detached ADU's building, the solid the architect picks (adu_building): its least distance, seen from
+      above, to a side lot line and to the rear lot line, every reading of which lines are side and rear. The
+      ADU's building is measured here, not as an ordinary accessory building (§325-25C's 3 ft are less than 5
+      ft). In R-1, §325-25C's 6 ft from a side lot line for accessory buildings may also apply (this rule's open question): 5 ft to under 6 ft needs review. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
     drafted_by: claude
     status: draft
