@@ -426,7 +426,7 @@ def test_the_rear_yards_span_shows_its_tightest_pair_in_the_list(house):
     assert rear["proposed"] == "34'-11 7/8\" to 36'-3 3/8\"" and rear["required"] == "24'-1 7/8\" to 32'-10 1/8\""
     assert rear["cells"] == {"proposed": "36'-3 3/8\" (varies)", "required": "32'-10 1/8\" (varies)"}
     assert rear["delta"] == "+3'-5 1/4\" if confirmed (at least +0'-5 1/4\" under every reading)"
-    assert rear["delta_cell"] == "+3'-5 1/4\"\nworst +0'-5 1/4\""
+    assert rear["delta_cell"] == "worst +0'-5 1/4\"\nif confirmed"     # in review: never kinder than the status
     assert rear["detail"]["line"].startswith(rear["proposed"] + " proposed, " + rear["required"] + " required")
     assert logic.list_values(rear)[1:] == ("36'-3 3/8\" (varies)", "32'-10 1/8\" (varies)", rear["delta_cell"])
     side = _check(got["floors"], facts)["Side yard, Southwest"]     # one reading as drawn: no cells, its own value

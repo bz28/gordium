@@ -1241,7 +1241,9 @@ def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
     deltas = {i["delta"] for i in got["view"]["items"] if i.get("delta")}
     assert deltas and deltas <= set(cells)                            # the report's Delta: the panel's words
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert '(i.get("delta") or "")' in ui and "delta_text" not in ui          # settle's words only (round 2)
+    assert "logic.list_values(i)" in ui and "delta_text" not in ui           # settle's words only (round 2), or
+    logic_src = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    assert 'item.get("delta_cell") or item.get("delta")' in logic_src          # their shorter form, made by settle
 
 
 

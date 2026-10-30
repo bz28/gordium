@@ -975,8 +975,8 @@ def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
     head = _plain_margin(drawn, unit, maximum)
     if drawn >= 0 and status == REVIEW and head != "at limit":
         head += " if confirmed"
-    elif drawn >= 0 and status == FAILS:
-        head = head.lstrip("+") + " room here; see why"
+    elif drawn >= 0 and status == FAILS:            # "at limit here", never "at limit room here" (review round 1)
+        head = ("at limit here" if head == "at limit" else head.lstrip("+") + " room here") + "; see why"
     worst = drawn >= 0 or low >= 0       # the worst: how much room is certain, or how short it may be; else the
     end, word = (low, "worst") if worst else (high, "best")      # best: whether it could comply another way
     certain = end < 0 and drawn < 0      # short even at best: the certain shortfall, rounded DOWN
@@ -997,7 +997,17 @@ def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
         ("over" if maximum else "short") if _rounds_to_nothing(-end, unit) else "−" + _amount(-end, unit, "down"))
     # short even at best on a row in review for another reason: the certain words with "see why", as delta_words
     why = "; see why" if certain and status != FAILS else ""
-    return f"{head} ({tail}){why}", f"{margin_text(drawn, unit)}\n{word} {cell_end}"
+    # the cell is never kinder than the status either (review round 1 of plain-words: "+2'-0" / worst +0'-6"" beside
+    # a ✕, "+4'-0 3/4" / worst +2'-0 3/4"" in review without "if confirmed"): a ✕ row's room has no "+" and says
+    # "see why"; a row in review with room under every reading says the certain room "if confirmed"
+    if drawn >= 0 and status == FAILS:
+        cell = ("at limit" if head.startswith("at limit") else margin_text(drawn, unit).lstrip("+") + " room") \
+            + "\nsee why"
+    elif drawn >= 0 and end >= 0 and status == REVIEW:
+        cell = f"{word} {cell_end}\nif confirmed"
+    else:
+        cell = f"{margin_text(drawn, unit)}\n{word} {cell_end}"
+    return f"{head} ({tail}){why}", cell
 
 VARIES = " (varies)"
 

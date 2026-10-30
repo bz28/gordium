@@ -438,7 +438,8 @@ Three rows need review from the start, and that is Gordium being honest, not a m
 - **Rear yard**: which of the short lines at the back count as side lot lines and which as the rear lot line is an
   open question for the architects (it decides the lot's depth, and so the rear yard's requirement). The list
   shows the tightest reading, 36'-3 3/8" against 32'-10 1/8", each marked "(varies)", and its Delta reads
-  "+3'-5 1/4"" over "worst +0'-5 1/4"" (the least under any reading, the tax map's 2 ft too). The row's details give the
+  "+3'-5 1/4" if confirmed (at least +0'-5 1/4" under every reading)", the least under any reading, the tax map's
+  2 ft too (the list says it shorter: "worst +0'-5 1/4"" over "if confirmed"). The row's details give the
   range each can take (34'-11 7/8" to 36'-3 3/8" against 24'-1 7/8" to 32'-10 1/8"), and the reason says so once: "Complies under every
   reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the
   zoning office".

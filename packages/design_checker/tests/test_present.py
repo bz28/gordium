@@ -776,10 +776,12 @@ def _shown_agrees(i):
     … short", "less than … over", a survey's "−… short" or "… over") only on a row that fails, and on a yard always
     with red; a row that complies never says "short" or "over"; red only on a row that fails."""
     d, st = i.get("delta") or "", i["status"]
-    if d.endswith(present.TAX_OFF + ")") or d.endswith(present.TAX_OFF + " the other way)") or \
-            d.endswith(present.TAX_OFF + " the other way); see why"):
-        # a tax-map lot's Delta (present.tax_delta): "<as drawn> (<the end that decides it> if the tax-map lines are
-        # 2 ft off[ the other way])": certain only when short even at best ("still"), room bare only if it complies
+    if re.search(r" \(.*(" + re.escape(present.TAX_OFF) + r"( the other way)?|under every reading|under another "
+                 r"reading)\)(; see why)?$", d):
+        # a tax-map lot's Delta, or a span's (present.tax_delta): "<as drawn> (<the end that decides it> if the
+        # tax-map lines are 2 ft off[ the other way] | under every reading | under another reading)": certain only
+        # when short even at best ("still"), room bare only if it complies (review round 1 of plain-words: the
+        # "under … reading" forms fell to the old words' checks)
         head, tail = d.split(" (", 1)
         certain = tail.startswith("still ") and not d.endswith("; see why")
         bare_room = head.startswith("+") and not head.endswith(" if confirmed")
@@ -791,6 +793,12 @@ def _shown_agrees(i):
         says_short = d.endswith((" short", " over"))
     assert not bare_room or st == present.COMPLIES, (i["name"], st, d)
     assert not certain or st == present.FAILS, (i["name"], st, d)
+    cell = i.get("delta_cell")              # the list's two-line form: never kinder than the status either
+    if cell:
+        assert st == present.COMPLIES or not (cell.startswith("+") and "−" not in cell and " short" not in cell
+                                              and " over" not in cell), (i["name"], st, cell)
+        assert st != present.FAILS or not cell.startswith("+"), (i["name"], st, cell)
+        assert st == present.COMPLIES or not cell.startswith("worst +") or cell.endswith("\nif confirmed"), cell
     assert not (certain and i["measure"] in present.YARD_MEASURES) or i["colour"] == "red", (i["name"], i["colour"], d)
     assert st != present.COMPLIES or not says_short, (i["name"], st, d)
     assert i["colour"] != "red" or st == present.FAILS, (i["name"], st)
@@ -929,7 +937,10 @@ def test_a_side_yard_that_complies_only_under_every_reading_of_an_open_question_
     side = items(r["view"])["Side yard, wider"]
     assert side["status"] == present.REVIEW and (side["reason"] or "").startswith("Complies under every reading, but it depends on"), (
         side["status"], side["reason"])
-    assert side["delta"].endswith(" if confirmed")                      # never a bare "+", which is to spare
+    # never a bare "+", which is to spare: in the words ("+9'-6" if confirmed (at least … under every reading)") and
+    # in the list's shorter form ("worst +9'-6"" over "if confirmed")
+    assert side["delta"].split(" (", 1)[0].endswith(" if confirmed"), side["delta"]
+    assert side["delta_cell"].endswith("\nif confirmed"), side["delta_cell"]
     _never_above_the_checker(r)
 
 
@@ -1984,3 +1995,19 @@ def test_a_range_rule_that_complies_shows_the_limit_it_is_nearest():
         house = [floor(12, 30, 36, 60, z0=8 * i, z1=8 * (i + 1), id=f"f{i}") for i in range(n)]
         st = items(check_site(_plot(*house, lot_=lot), base)["view"])["Stories"]
         assert (st["proposed"], st["required"], st["status"]) == (str(n), required, status), st
+
+
+def test_the_delta_cell_is_never_kinder_than_the_status():
+    """Review round 1 of plain-words: the list's two-line Delta dropped the words that qualify it. A row in review
+    with room under every reading showed "+4'-0 3/4" / worst +2'-0 3/4"" (no "if confirmed"); a row that fails
+    another way showed "+2'-0" / worst +0'-6"" beside its ✕; one at limit read "at limit room here"."""
+    off = "if the tax-map lines are 2 ft off"
+    assert present.tax_delta(present.REVIEW, 4 + 0.75 / 12, (2 + 0.75 / 12, 6), "ft") == (
+        f"+4'-0 3/4\" if confirmed (+2'-0 3/4\" {off})", "worst +2'-0 3/4\"\nif confirmed")
+    assert present.tax_delta(present.FAILS, 2.0, (0.5, 4), "ft") == (
+        f"2'-0\" room here; see why (+0'-6\" {off})", "2'-0\" room\nsee why")
+    assert present.tax_delta(present.FAILS, 0.004, (-0.1, 2), "ft") == (
+        f"at limit here; see why (0'-1 1/4\" short {off})", "at limit\nsee why")
+    # a row in review that may be short keeps both numbers: the shortfall is shown, nothing kinder
+    assert present.tax_delta(present.REVIEW, 2.0, (-0.02, 4), "ft")[1] == "+2'-0\"\nworst −0'-0 1/4\""
+    assert present.tax_delta(present.COMPLIES, 3.4375, (0.4375, 6), "ft")[1] == "+3'-5 1/4\"\nworst +0'-5 1/4\""
