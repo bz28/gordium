@@ -28,6 +28,8 @@ JURISDICTIONS = "regulations/jurisdictions"
 PLUGIN_FILE = REPO / "packages/design_checker/design_checker/place.json"
 ADAPTER_KINDS = ("lookup", "measurement")
 DAYLIGHT_RULES = ("us_federal", "none")      # the daylight-saving rules rhino_logic.city_day knows
+ADDRESS_LISTS = {"own_words": 1, "also_written": 0, "zip_codes": 1, "state_words": 1, "county_words": 0,
+                 "nearby_places": 0, "shares_mail_with": 1}   # each list the plugin reads, and how many it needs
 REQUIRED = {"name": str, "boundary": dict, "coordinates": dict, "time_zone": dict, "districts": dict, "law": dict,
             "addresses": dict, "adapters": dict}
 
@@ -186,8 +188,21 @@ def settings_problems(settings) -> list[str]:
     if not settings["law"].get("zoning_code"):
         out.append("law names no zoning_code")
     out += [f"adapters names no {k}" for k in ADAPTER_KINDS if not settings["adapters"].get(k)]
-    if not str(settings["addresses"].get("tail") or "").strip():
+    a = settings["addresses"]
+    if not str(a.get("tail") or "").strip():
         out.append("addresses.tail is missing")
+    if not str(a.get("shares_mail_as") or "").strip():
+        out.append("addresses.shares_mail_as is missing")
+    for k, at_least in ADDRESS_LISTS.items():     # the plugin reads each at once (rhino_logic), so none may be missing
+        words = a.get(k)
+        if not isinstance(words, list) or not all(isinstance(w, str) and w.strip() for w in words):
+            out.append(f"addresses.{k} must be a list of words")
+        elif len(words) < at_least:
+            out.append(f"addresses.{k} names none")
+    site = settings.get("sample_site")
+    if site is not None and not (isinstance(site, dict) and all(str(site.get(k) or "").strip()
+                                                               for k in ("folder", "address"))):
+        out.append("sample_site must give a folder and an address")
     return out
 
 

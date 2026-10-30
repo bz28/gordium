@@ -5298,7 +5298,8 @@ def no_guessed_district(saved, suggested):
 
 IN_CITY_QUESTION = ("Is this lot in the " + PLACE["name"] + "?\n\nGordium checks " + PLACE["name"] + " lots only. An "
                     "address that reads \"" + _ADDRESSES["shares_mail_as"] + "\" may instead be in the "
-                    + ", ".join(_ADDRESSES["shares_mail_with"][:-1]) + " or " + _ADDRESSES["shares_mail_with"][-1]
+                    + (", ".join(_ADDRESSES["shares_mail_with"][:-1]) + " or " if _ADDRESSES["shares_mail_with"][1:]
+                       else "") + _ADDRESSES["shares_mail_with"][-1]
                     + ", which have their own zoning codes. The City's tax map says which.\n\n"
                     "Yes: enter the site by hand as a " + PLACE["name"] + " lot. No: nothing changes.")
 IN_CITY_SAID = "You said this lot is in the " + PLACE["name"] + " ({date})."
