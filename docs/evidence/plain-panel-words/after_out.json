@@ -1,6 +1,6 @@
 {
- "phase": "open",
- "wt": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/rh_b",
+ "phase": "after2",
+ "wt": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/rh_b2",
  "rows": [
   {
    "values": [
@@ -47,13 +47,13 @@
     "?  Rear yard",
     "36'-3\u215c\" (varies)",
     "32'-10\u215b\" (varies)",
-    "+3'-5\u00bc\"\nworst +0'-5\u00bc\""
+    "worst +0'-5\u00bc\"\nif confirmed"
    ],
    "shown": [
     "?  Rear yard",
     "36'-3\u215c\" (varies)",
     "32'-10\u215b\" (varies)",
-    "+3'-5\u00bc\"\nworst +0'-5\u00bc\""
+    "worst +0'-5\u00bc\"\nif confirmed"
    ],
    "cut": [
     false,
@@ -67,13 +67,13 @@
     "?  Eaves into front yard",
     "27'-0\u00be\"",
     "23'-0\"",
-    "+4'-0\u00be\"\nworst +2'-0\u00be\""
+    "worst +2'-0\u00be\"\nif confirmed"
    ],
    "shown": [
     "?  Eaves into front yard",
     "27'-0\u00be\"",
     "23'-0\"",
-    "+4'-0\u00be\"\nworst +2'-0\u00be\""
+    "worst +2'-0\u00be\"\nif confirmed"
    ],
    "cut": [
     false,
@@ -634,7 +634,7 @@
    "proposed": "34'-11 7/8\" to 36'-3 3/8\"",
    "required": "24'-1 7/8\" to 32'-10 1/8\"",
    "delta": "+3'-5 1/4\" if confirmed (at least +0'-5 1/4\" under every reading)",
-   "delta_cell": "+3'-5 1/4\"\nworst +0'-5 1/4\"",
+   "delta_cell": "worst +0'-5 1/4\"\nif confirmed",
    "cells": {
     "proposed": "36'-3 3/8\" (varies)",
     "required": "32'-10 1/8\" (varies)"
@@ -645,7 +645,7 @@
    "proposed": "27'-0 3/4\"",
    "required": "23'-0\"",
    "delta": "+4'-0 3/4\" if confirmed (+2'-0 3/4\" if the tax-map lines are 2 ft off)",
-   "delta_cell": "+4'-0 3/4\"\nworst +2'-0 3/4\"",
+   "delta_cell": "worst +2'-0 3/4\"\nif confirmed",
    "cells": null
   },
   "One-family occupancy": {
