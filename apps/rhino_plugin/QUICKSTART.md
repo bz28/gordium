@@ -278,7 +278,8 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      holds, how many cars the lot's private garages hold (R-1 and R-2). Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
      assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
      its full wording. Answers are saved with the project; change them in Edit site… .
-     Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
+     Who lives there (household), an accessory dwelling unit and a home business are asked later, when you plan
+     the interior: they sit in the
      panel's collapsed **Use details (for later)** group (still needs review, not counted among the building's
      problems, never a pass). Each row says "Answer when you plan the interior: …" and has its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
@@ -493,6 +494,14 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
     10 ft limit).
 14. **Other units:** start in a Millimeters, Meters or Inches template. The results are the same: Gordium works
     in feet and converts at Rhino's edge.
+15. **A backyard cottage (a detached ADU, §325-28):** draw a `Box` 20 × 16 × 18 ft on the Building layer behind
+    the house, at least 5 ft from the side and rear lot lines. In **Use details (for later)**, answer **ADU on the
+    lot**; the ADU's rows then ask the rest with their **Enter…** buttons: detached, new construction, one on the
+    parcel, two bedrooms. Then they ask for its building: **Pick the ADU's building…** and click the box. The ADU's
+    rows are decided: 320 sf footprint, 18 ft, at most 2 stories: complies; 5 ft or more from the side and rear lot lines: complies
+    (in R-1, 5 ft to under 6 ft needs review: whether §325-25C's 6 ft also applies is an open question); not nearer
+    the street than the house: complies. Move it in front of the house: **does not comply** (not in the primary front
+    yard). Make it 22 ft tall: **does not comply** (20 ft at most). The cottage still counts toward lot coverage.
 
 ### What counts as a problem
 

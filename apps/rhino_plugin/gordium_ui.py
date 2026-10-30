@@ -845,6 +845,8 @@ def show_detail(parts):
             buttons.append(button(words, a["edit_site"]))
     if i.get("hint") == "Pick the main building…":
         buttons.append(button("Pick the main building…", a["main"]))
+    if i.get("hint") == "Pick the ADU's building…":
+        buttons.append(button("Pick the ADU's building…", a["adu"]))
     if i["id"] == "scope.not_included":
         buttons.append(button("Add to check…", lambda: a["add"](i["objects"])))
         if i.get("ground_like"):              # only the architect's word leaves it out (never a guess)

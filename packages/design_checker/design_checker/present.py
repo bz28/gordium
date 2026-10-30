@@ -1631,6 +1631,8 @@ from model_measurement.stops import stop as _stop  # noqa: E402
 
 PICK_MAIN_WHY = _stop("no_main_building")        # the measuring's exact words when several buildings could be it
 PICK_MAIN = "Pick the main building…"            # the row's hint, and the panel's button
+PICK_ADU_WHY = _stop("no_adu_building")          # a detached ADU's rules waiting for its building to be picked
+PICK_ADU = "Pick the ADU's building…"            # the row's hint, and the panel's button
 ASSUMED_MAIN_NOTE = "assuming the starting house is the main building"      # a Gordium reading: to confirm
 ASSUMED_MAIN = "Main building: the starting house (assumed) · change it with Main building…"
 
@@ -1792,6 +1794,8 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     for i in items:                                  # waiting on the main building: the row says how to pick it
         if PICK_MAIN_WHY in (i.get("reason") or "") and not i.get("hint"):
             i["hint"] = PICK_MAIN
+        elif PICK_ADU_WHY in (i.get("reason") or "") and not i.get("hint"):
+            i["hint"] = PICK_ADU
     if facts.get("ground_assumed") == "flat":                 # on the rows the ground decides (MVP, Ben 2026-10-20)
         for i in items:
             if i.get("measure") in ("building_height", "stories"):

@@ -1226,7 +1226,7 @@ def PANEL_ACTIONS():
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
             "massing": hide_massing, "switch_sides": switch_side_yards, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
-            "context": show_context, "check": check_now, "auto_check": set_auto_check}
+            "adu": pick_adu_building, "context": show_context, "check": check_now, "auto_check": set_auto_check}
 
 
 DOCK_ID = "7c3e9a51-2d84-4b6f-9e17-5a0c8d2f4b63"   # the Gordium panel's id: Rhino remembers where it is docked
@@ -1645,6 +1645,34 @@ def pick_main_building():
     if picked:
         facts["main_building"] = picked
         with logic.undo_step(doc, logic.UNDO_WORDS["main"]):
+            save_facts(doc, facts)
+            run_check(doc, report=False)
+    else:
+        run_check(doc, report=False)
+
+
+def pick_adu_building():
+    """Pick the ADU's building… (the panel): a detached accessory dwelling unit's building, the solid its own size,
+    height and setbacks are measured from (§325-28C), never the main building. Click it, or choose one; Enter keeps
+    it."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
+    facts = current_facts(doc)
+    buildings = _buildings(doc)
+    if len(buildings) < 2:
+        say("There is only one building: the main building. Draw the ADU's building on the Building layer first.")
+        return
+    try:
+        picked = _pick(doc, "Click the ADU's building (a solid on the Building layer), or choose one; Enter keeps it",
+                       buildings, "Building")
+    except Cancelled:
+        say("Cancelled: nothing changed.")
+        return
+    if picked:
+        facts["adu_building"] = picked
+        with logic.undo_step(doc, logic.UNDO_WORDS["adu"]):
             save_facts(doc, facts)
             run_check(doc, report=False)
     else:

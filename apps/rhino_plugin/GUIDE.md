@@ -80,6 +80,10 @@ Buttons along the panel:
 - **Pick survey lot lines…**: choose your surveyed lot lines in the model. Shown while the lot is the tax map's.
 - **Main building…** and **Pick the main building…**: when the file holds several buildings, say which one is the
   house being checked. **Main building…** is in the header only then.
+- **Pick the ADU's building…**: on the accessory dwelling unit's rows, once you've said a detached ADU is planned:
+  click the solid it is in. Gordium then measures it on its own (§325-28C): its footprint, height, stories, its
+  distances to the side and rear lot lines, and whether it is in the primary front yard. It is never taken for the
+  main building, nor checked again as an ordinary garage or shed.
 - **Add to check…** and **This is the ground**: on the row for an object Gordium left out, to include it or to say
   it is the ground. **Not the ground** is in the Site facts, when nothing is selected, if Gordium took an object
   for the ground because you marked it.
@@ -129,6 +133,7 @@ Picking other things:
 - `Click the surveyed lot outline (Site layer); Enter keeps the one outlined` (**Pick survey lot lines…**)
 - `Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it` (**Use my survey…**)
 - `Click the main building (a solid on the Building layer), or choose one; Enter keeps it`
+- `Click the ADU's building (a solid on the Building layer), or choose one; Enter keeps it` (**Pick the ADU's building…**)
 
 The next two are asked only when the **Ground** row is on (see "Not shown in this version"):
 
@@ -142,9 +147,14 @@ in one small window: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, 
 questions, such as `Most occupants in any one dwelling unit (optional: how they are split)` and
 `Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?`, and the lot's own questions, such as
 `Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?` (the start box asks the lot's
-questions under **About this project** when the district's rules need them). One is asked only by its row:
+questions under **About this project** when the district's rules need them). Some are asked only by their rows:
 `Private garages on the lot (an attached garage counts)`, once the cars the garages hold are entered and over the
-chart's limit (R-1 and R-2). Left blank (or **Not answered**), a
+chart's limit (R-1 and R-2); and, once an ADU is said to be on the lot, `Is the accessory dwelling unit detached: in
+its own building, not in or on the main building? (§325-3B)`, `Accessory dwelling units on the parcel, any already
+there included (§325-28C(1))` and `Bedrooms in the accessory dwelling unit (§325-28C(3))`, then for a detached one
+`Is the detached ADU in an accessory building that already exists (not new construction)? (§325-28C(7)(b))`, and for
+an attached one `Floor area of the attached accessory dwelling unit (sq ft)` and `Floor area of the whole main
+building the ADU is in, the ADU included (sq ft)`. Left blank (or **Not answered**), a
 fact stays unset, so its rule keeps waiting (never 0 or No).
 
 ## Not shown in this version
