@@ -1,8 +1,6 @@
 # Gordium's settings for this place: what the code needs to know about it that its law doesn't say. Kept by hand.
-# Read only through the registry (packages/rule_format/rule_format/place.py); each field says what it is for. Not yet
-# read: boundary, coordinates and adapters. Ithaca's address lookup (site_lookup) still holds its own copy of them
-# until it moves into a folder of its own (docs/adding_a_place.md, the lookup step). A new place starts from a copy
-# of this file (docs/adding_a_place.md).
+# Read only through the registry (packages/rule_format/rule_format/place.py); each field says what it is for. A new
+# place starts from a copy of this file (docs/adding_a_place.md).
 
 name: City of Ithaca                  # as the architect reads it ("Gordium checks City of Ithaca lots only")
 

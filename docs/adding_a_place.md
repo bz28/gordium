@@ -4,9 +4,7 @@
 **For:** engineers adding a place; Ben deciding when one is ready.\
 **Kept current by:** any PR that changes what a place needs (a new setting, a new step, an adapter's interface).
 
-A place is mostly **data** (its documents, rules and settings) plus **two pieces of its own code**: how its map services are asked (the lookup adapter) and how its law defines each measurement (the measuring adapter). Everything else is shared, and finds the place through the **registry**: the place's settings file, read by `packages/rule_format/rule_format/place.py`. The chart reader, the drafter, the coverage audit and the Rhino plugin already do; a test (`test_place.py`) fails if shared code names a place's folder or law files.
-
-**Not done yet:** Ithaca's lookup and measuring code still sit in shared folders (`packages/site_lookup/site_lookup/` and `packages/model_measurement/model_measurement/measure.py`), and the lookup still has its own copy of Ithaca's boundary codes (SWIS), coordinate system and address ending. The measuring and lookup steps below describe where they move, so they read those from the settings.
+A place is mostly **data** (its documents, rules and settings) plus **two pieces of its own code**: how its map services are asked (the lookup adapter) and how its law defines each measurement (the measuring adapter). Everything else is shared, and finds the place through the **registry**: the place's settings file, read by `packages/rule_format/rule_format/place.py`. The chart reader, the drafter, the coverage audit and the Rhino plugin do, and the settings name the place's own lookup and measuring folders, which read its boundary codes (SWIS), coordinate system and address ending from them. A test (`test_place.py`) fails if shared code names a place's folder or law files.
 
 Each numbered folder below is under `regulations/jurisdictions/<state>/<place>/` (lowercase with underscores, e.g. `new_york/ithaca_city`). Folder meanings: [regulations/README.md](../regulations/README.md).
 
