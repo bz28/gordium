@@ -2203,9 +2203,10 @@ def _adu_building(out: dict, adu: dict | None, why: str | None, buildings: list[
     reaches past the walls (a candidate eave) it is also read without it, and the two readings say so (a footprint
     that complies only one way needs review). Height (§325-3 HEIGHT OF BUILDING): _height_of, from the grade plane at
     the ADU building's own walls when spot grades are given (§325-3: the ground at ITS walls), else the ground level
-    given; whatever stops the main building's height for want of ground stops this one too (flat ground not said,
-    sloped ground, existing grade). Stories: _stories_whole, read from the drawing only: a plain solid h ft tall holds
-    at most floor(h / 7) stories (R305.1), so one 20 ft or lower holds at most two and the count is never asked."""
+    given; whatever stops the main building's height for want of ground stops this one too (flat ground not said or
+    sloped ground, existing grade, flat ground assumed on a lot not shown level). Stories: _stories_whole, read
+    from the drawing only: a plain solid h ft tall holds at most floor(h / 7) stories (R305.1), so one 20 ft or
+    lower holds at most two and the count is never asked."""
     if why is not None:
         for name in ADU_MEASURES:
             out[name] = _missing(name, why)
@@ -2243,10 +2244,21 @@ def _adu_building(out: dict, adu: dict | None, why: str | None, buildings: list[
         elif stories["value"] is None and most is not None:      # it could hold more than two: draw the floors
             stories["reason"] = stop("adu_stories_unclear", height=f"{_r(_rise(adu)):g}", most=f"{most:g}")
         out["adu_stories"] = stories
-    if facts.get("grade_is") == "existing":     # finished ground decides, as for the main building
+    # the main building's two ground gates, the same way: finished ground decides (existing ground can't), and flat
+    # ground assumed decides only where the lookup shows the lot level (flat_assumption_unsafe): else the 20 ft and
+    # two-story limits could pass on ground never read. What the drawing gives is shown, never decides.
+    why_ground = (stop("existing_grade") if facts.get("grade_is") == "existing" else flat_assumption_unsafe(facts))
+    if why_ground:
         for name in ("adu_height", "adu_stories"):
-            if out[name].get("value") is not None or out[name].get("readings"):
-                out[name] = _missing(name, stop("existing_grade"))
+            as_is = out[name].get("value")
+            as_is_readings = sorted({r["value"] for r in out[name].get("readings") or [] if r.get("value") is not None})
+            if as_is is None and not as_is_readings:
+                continue                       # nothing measured: its own reason says why
+            out[name] = _missing(name, why_ground)
+            if as_is is not None:
+                out[name]["measured_as_is"] = as_is
+            else:
+                out[name]["measured_as_is_readings"] = as_is_readings
     # its distances to the lot lines: _adu_yards, once the lot lines are known (else the lot's own reason)
 
 

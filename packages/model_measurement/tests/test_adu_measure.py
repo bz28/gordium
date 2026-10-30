@@ -95,7 +95,26 @@ def test_it_waits_for_the_ground_whenever_the_main_building_does():
         assert m["adu_height"]["reason"] == m["adu_stories"]["reason"] == why, facts
         assert m["adu_footprint"]["value"] == 300.0              # the plan doesn't need the ground's level
     m = _m(HOUSE, ADU, **DETACHED, grade_is="existing")
-    assert m["adu_height"]["reason"] == stop("existing_grade")
+    assert m["adu_height"]["reason"] == m["adu_stories"]["reason"] == stop("existing_grade")
+    assert (m["adu_height"]["measured_as_is"], m["adu_stories"]["measured_as_is"]) == (18.0, 2)
+
+
+def test_flat_ground_assumed_decides_its_height_only_where_the_lookup_shows_the_lot_level():
+    """The Rhino MVP assumes the ground flat (ground_assumed); the main building's height and stories then need
+    review unless the looked-up ground falls under 0.5 ft (flat_assumption_unsafe), and so do the ADU's: else its
+    20 ft and two-story limits would pass on ground never read. The flat reading (18 ft; at most floor(18 / 7) = 2
+    stories) is kept to show, never to decide."""
+    assumed = {**DETACHED, "ground_assumed": "flat"}
+    for fall, why in ((14.2, stop("flat_sloped", fall="14.2")), (0.5, stop("flat_sloped", fall="0.5")),
+                      (None, stop("flat_unknown"))):
+        m = _m(HOUSE, ADU, **assumed, **({} if fall is None else {"ground_fall": fall}))
+        for name, as_is in (("adu_height", 18.0), ("adu_stories", 2)):
+            assert m[name]["value"] is None and m[name]["reason"] == why, (fall, name, m[name])
+            assert m[name]["measured_as_is"] == as_is, (fall, name)
+        assert m["building_height"]["reason"] == why                      # the main building's, the same
+        assert m["adu_footprint"]["value"] == 300.0                       # the plan doesn't need the ground
+    level = _m(HOUSE, ADU, **assumed, ground_fall=0.4)                    # shown level: flat decides
+    assert _v(level, "adu_height", "adu_stories") == (18.0, 2)
 
 
 def test_a_tall_plain_solid_asks_for_its_floors():

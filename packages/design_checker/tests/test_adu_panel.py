@@ -77,3 +77,15 @@ def test_the_adus_facts_are_asked_only_once_an_adu_is_said_to_be_on_the_lot():
     assert {"adu_existing_building", "adu_floor_area", "primary_floor_area"} <= set(
         logic.needs_of(names, {"accessory_dwelling_unit": True, "adu_detached": True}))
     assert not set(logic.BOX_ASKS) & (names - {"accessory_dwelling_unit"})       # never asked up front
+
+
+def test_on_ground_assumed_flat_the_size_row_passes_only_where_the_lookup_shows_the_lot_level():
+    """The Rhino MVP's flat ground (ground_assumed) decides the ADU's 20 ft and two stories only where the looked-up
+    ground falls under 0.5 ft, as for the main building: on 106 Ithaca Rd's 14.2 ft fall, or with no fall read, the
+    300 sf, 18 ft cottage needs review, never a pass."""
+    cottage = box(30, 70, 45, 90, 0, 18, id="cottage")
+    for fall in ({"ground_fall": 14.2}, {}):
+        row = _rows(HOUSE, cottage, adu_building="cottage", ground_assumed="flat", **fall)[SIZE]
+        assert row["status"] == present.REVIEW and "assume" in row["reason"] and "flat" in row["reason"], (fall, row)
+    level = _rows(HOUSE, cottage, adu_building="cottage", ground_assumed="flat", ground_fall=0.0)[SIZE]
+    assert level["status"] == present.COMPLIES
