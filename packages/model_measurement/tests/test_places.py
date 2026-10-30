@@ -31,7 +31,9 @@ def fake_town(monkeypatch):
     own = types.ModuleType("model_measurement.places.fake_town.measure")
     own.measure = lambda site, facts: asked.append(("measure", facts["jurisdiction"])) or {}
     own.fact_conflicts = lambda facts: asked.append(("fact_conflicts", facts["jurisdiction"])) or []
-    monkeypatch.setitem(sys.modules, "model_measurement.places.fake_town", types.ModuleType("fake_town"))
+    folder = types.ModuleType("fake_town")
+    folder.SERVES = ("test_state/fake_town",)
+    monkeypatch.setitem(sys.modules, "model_measurement.places.fake_town", folder)
     monkeypatch.setitem(sys.modules, "model_measurement.places.fake_town.measure", own)
     return own, asked
 
@@ -65,3 +67,16 @@ def test_a_lot_naming_no_place_or_an_unknown_one_is_a_plain_error(tmp_path, monk
         project.project(Path("lot.3dm"), {"zone": "R-1b"})
     with pytest.raises(UnknownPlace, match="jurisdiction.yaml is missing"):
         project.fact_conflict_rows({"jurisdiction": str(tmp_path)})
+
+
+def test_a_place_naming_another_places_measuring_is_a_plain_error(tmp_path):
+    """Measuring is a place's own law's definitions: a second place that names Ithaca's folder in its settings is
+    refused until an engineer adds it to that folder's SERVES (citing both laws), never measured as Ithaca."""
+    import yaml
+    settings = yaml.safe_load((FAKE / "jurisdiction.yaml").read_text(encoding="utf-8"))
+    settings["adapters"]["measurement"] = "ithaca_city"
+    folder = tmp_path / "regulations/jurisdictions/test_state/borrower"
+    folder.mkdir(parents=True)
+    (folder / "jurisdiction.yaml").write_text(yaml.safe_dump(settings), encoding="utf-8")
+    with pytest.raises(UnknownPlace, match="the measuring adapter 'ithaca_city' doesn't serve it"):
+        measuring(folder)
