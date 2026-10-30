@@ -4419,6 +4419,20 @@ def report_cancelled(path, changed):
     return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
 SETTLING = "Finishing the check that is running…"
 CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+
+
+def check_not_done(last, since):
+    """Why a Check gave no result, for the command line (STATE["last"], set by that check at or after `since`):
+    cancelled, the model changed while it ran, or it could not run; None when nothing was set by it (a box open, a
+    check already running: nothing happened, so nothing is said)."""
+    last = last or {}
+    if not last.get("error") or last.get("at", 0) < since:
+        return None
+    if last.get("cancelled"):
+        return CHECK_CANCELLED + ". " + CHECK_CANCELLED_NOTE
+    if last.get("outdated"):
+        return CHECK_OUTDATED
+    return "Check could not run: " + str(last["error"])[:200]
 REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
                    "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
                    "panel) for a report of the model now.")

@@ -242,12 +242,24 @@ def test_check_leaves_its_own_words_on_the_command_line():
     doc = object()
     rhino = types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc),
                                   RhinoApp=types.SimpleNamespace(WriteLine=lines.append))
+    clock = [100.0]
     ns = {"Rhino": rhino, "STATE": {"dirty": 5.0}, "logic": logic, "say": lines.append,
+          "time": types.SimpleNamespace(time=lambda: clock[0]),
           "run_check": lambda d, report: {"view": {"summary": "3 need review · 9 comply"}}}
     exec(body(RHINO, "def check_now(", "\ndef "), ns)     # noqa: S102
     ns["check_now"]()
     assert lines == ["Gordium: 3 need review · 9 comply"] and ns["STATE"]["dirty"] is None
-    ns["run_check"] = lambda d, report: None              # a check that didn't finish says its own words itself
+    # a check that gave no result says why there too (review round 1 of plain-words: the panel said so, the command
+    # line kept "Cancelled: nothing changed."), each as the check left it in STATE["last"]
+    for last, said in (({"error": "the check was cancelled", "cancelled": True}, logic.CHECK_CANCELLED + ". "),
+                       ({"error": logic.CHECK_OUTDATED, "outdated": True}, logic.CHECK_OUTDATED),
+                       ({"error": "the checker stopped"}, "Check could not run: the checker stopped")):
+        ns["run_check"] = lambda d, report, last=last: ns["STATE"].update(last={**last, "at": clock[0]})
+        lines.clear()
+        ns["check_now"]()
+        assert len(lines) == 1 and lines[0].startswith("Gordium: " + said), (lines, said)
+    ns["run_check"] = lambda d, report: None              # nothing happened (a box open): nothing is said
+    ns["STATE"]["last"] = {"error": "an earlier check's", "at": clock[0] - 1}
     lines.clear()
     ns["check_now"]()
     assert lines == []

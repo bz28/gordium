@@ -1422,10 +1422,13 @@ def check_now():
         say(logic.NO_DOCUMENT)
         return None
     STATE["dirty"] = None
+    started = time.time()
     result = run_check(doc, report=False)
-    summary = ((result or {}).get("view") or {}).get("summary")
-    if summary:                         # the command line's last words are this check's, never an earlier button's
-        Rhino.RhinoApp.WriteLine("Gordium: " + summary)                    # ("Cancelled: nothing changed." stayed)
+    # the command line's last words are this check's, never an earlier button's ("Cancelled: nothing changed."
+    # stayed): its summary, or why it gave none (cancelled, failed, outdated: review round 1 of plain-words)
+    words = ((result or {}).get("view") or {}).get("summary") or logic.check_not_done(STATE.get("last"), started)
+    if words:
+        Rhino.RhinoApp.WriteLine("Gordium: " + words)
     return result
 
 
