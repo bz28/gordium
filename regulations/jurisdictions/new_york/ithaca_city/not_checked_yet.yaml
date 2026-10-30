@@ -23,10 +23,10 @@ not_covered:
     name: Accessory dwelling units
   - id: garage_cars
     section: "§325-8A(3), chart p.2 notes 6 and 7"
-    name: Private garage size (R-1 and R-2a, R-2b, 3 cars; R-2c, 6 cars per building)
+    name: "Private garage size (R-1a, R-1b, R-2a, R-2b: 3 cars; R-2c: 6 cars per building)"
   - id: front_yard_parking
     section: "§325-20E"
-    name: Parking in front yards (25% of the front yard, driveway width, cars square to the street)
+    name: Parking in front yards (lots over 50 ft wide, up to 25% of the front yard; narrower lots, a driveway up to 12 ft wide; cars square to the street)
   - id: parking_areas
     section: "§325-20D(2), §325-20F"
-    name: Driveways and parking areas for 3 or more cars (width, share of the side and rear yards)
+    name: Driveways and parking areas (every driveway at least 8 ft wide; parking for 3 or more cars, its share of the side and rear yards)
