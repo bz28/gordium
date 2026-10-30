@@ -260,3 +260,20 @@ def test_where_the_front_of_the_main_building_is_is_read_every_way():
     got = _m(walls, roof, adu, **DETACHED)["adu_in_primary_front_yard"]
     assert got["value"] is None and {r["value"] for r in got["readings"]} == {False, True}
     assert "front of the main building" in got["reason"]
+
+
+def test_the_main_building_is_chosen_before_the_adus_building_is_set_aside():
+    """Review round 1 (P2): the ADU's building was listed as accessory before the main building was chosen, so with
+    no main building picked and Gordium's starting house picked as the ADU, the garage left over was taken as the
+    main building and adu_is_main never fired. Chosen from the facts as given: the starting house (three floor
+    blocks) is still the assumed main building, so picking it as the ADU says so; and two plain buildings with
+    neither picked as main stay a question (no_main_building), whichever is the ADU."""
+    from test_measure import floor
+    house = [floor(10, 60, 35, 85, z0=10 * i, z1=10 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(15, 25, 35, 45, 0, 12, id="garage")
+    base = {"accessory_dwelling_unit": True, "adu_detached": True, "stories": 3}
+    m = _m(garage, *house, **base, adu_building="f0")
+    assert all(m[n]["reason"] == stop("adu_is_main") for n in ADU_MEASURES), {n: m[n].get("reason")
+                                                                             for n in ADU_MEASURES}
+    plain = _m(garage, box(10, 60, 35, 85, 0, 20, id="house"), **base, adu_building="house")
+    assert plain["building_height"]["reason"] == plain["front_yard"]["reason"] == stop("no_main_building")

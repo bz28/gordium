@@ -1920,6 +1920,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # docs/research/2026-10-29_accessory_dwelling_units.md), so it is never judged twice or two ways
     adu, why_adu = (None, why_building) if why_building else _adu_pick(_stacks(buildings), facts)
     adu_ids = _parts(adu) if adu is not None else []
+    # the main building is chosen from the facts as given, before the ADU's building is listed as accessory: listed
+    # first, a starting house picked as the ADU would leave another building (a garage) to be taken as the main one,
+    # and adu_is_main would never say so; and two plain buildings with neither picked as main stay a question
+    main_facts = facts
     if adu_ids:
         facts = dict(facts, accessory_buildings=list(dict.fromkeys([*(facts.get("accessory_buildings") or []),
                                                                     *adu_ids])))
@@ -1929,14 +1933,14 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # cut at the ground blamed on overhangs.
     why_spots = None
     if facts.get("grade_points") and not why_building:     # spot grades (or terrain sampled at the walls): the
-        grade, why_spots = grade_plane(buildings, facts)        # grade plane, once the buildings can be measured
+        grade, why_spots = grade_plane(buildings, main_facts)   # grade plane, once the buildings can be measured
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
     spots = facts.get("grade_points") if not why_building else None
     # whether the buildings meet the ground: with spot grades ONE test, at their footprint, whatever the points'
     # positions (stress F15: the grade plane's average and the footprint judged it differently); else the level
     stacked = _stacks(buildings) if spots else []
-    home = _grade_home(buildings, facts) if spots else None       # the solids the grade plane is read for
+    home = _grade_home(buildings, main_facts) if spots else None  # the solids the grade plane is read for
     ground_problem = (_meets_ground(stacked, spots, stacked) if spots else None) or \
         (_ground_against(buildings, grade, off_check=not spots, points=spots, home=home)
          if grade is not None else None)
@@ -1955,7 +1959,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
-    main, assumed = pick_main(buildings, facts)
+    main, assumed = pick_main(buildings, main_facts)
     if assumed:                         # every other possible principal building is also read as the main one
         out["_assumed_main"] = list(main["parts"])
     why_main = None if main else stop("no_main_building")

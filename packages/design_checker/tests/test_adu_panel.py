@@ -89,3 +89,28 @@ def test_on_ground_assumed_flat_the_size_row_passes_only_where_the_lookup_shows_
         assert row["status"] == present.REVIEW and "assume" in row["reason"] and "flat" in row["reason"], (fall, row)
     level = _rows(HOUSE, cottage, adu_building="cottage", ground_assumed="flat", ground_fall=0.0)[SIZE]
     assert level["status"] == present.COMPLIES
+
+
+def test_the_size_row_says_it_assumes_flat_ground():
+    """Review round 1 (P3a): the detached ADU's size row reads adu_height and adu_stories, measured on the ground
+    assumed flat, so it carries the same note as the main building's height and stories rows."""
+    row = _rows(HOUSE, box(30, 70, 45, 90, 0, 18, id="cottage"), adu_building="cottage", ground_assumed="flat",
+                ground_fall=0.0)[SIZE]
+    assert "flat ground" in (row.get("note") or ""), row
+
+
+def test_every_reason_the_pick_answers_offers_the_pick():
+    """Review round 1 (P3b): picked as the ADU, the main building itself or a solid touching it says to pick the ADU's
+    own building: the pick's button (the row's hint) is offered there too."""
+    for adu in ("house", "porch"):
+        rows = _rows(HOUSE, box(35, 30, 40, 40, 0, 10, id="porch"), adu_building=adu)
+        assert rows[SIZE]["hint"] == present.PICK_ADU, (adu, rows[SIZE])
+
+
+def test_no_pick_is_offered_before_a_detached_adu_is_said_to_be_on_the_lot():
+    """Review round 1 (P3c): with whether an ADU is on the lot, or whether it is detached, not answered, the rows ask
+    that first; the pick's button comes once both are yes."""
+    cottage = box(30, 70, 45, 90, 0, 18, id="cottage")
+    for blank in ("accessory_dwelling_unit", "adu_detached"):
+        rows = _rows(HOUSE, cottage, **{blank: None})
+        assert all(rows[n]["hint"] != present.PICK_ADU for n in (SIZE, SETBACKS, FRONT)), blank
