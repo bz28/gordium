@@ -1,8 +1,6 @@
 # Research: accessory dwelling units (City of Ithaca, §325-28)
 
-**Purpose:** the research behind the accessory-dwelling-unit rules (`<district>.adu_one_per_parcel`, `adu_bedrooms`,
-`adu_front_yard`, `adu_attached_size`, `adu_detached_size`, `adu_detached_setbacks` in R-1a to R-3b, and
-`RU.adu_not_permitted`): what the law says, what was searched, what it settled, and why three questions stay open.\
+**Purpose:** the research behind the accessory-dwelling-unit rules (`<district>.adu_*` in R-1a to R-3b, and `RU.adu_not_permitted`): what the law says, what was searched, what it settled, and why three questions stay open.\
 **For:** anyone checking why Gordium reads the ADU rules the way it does; architects answering the questions.\
 **Kept current by:** nobody: a dated record. New research gets its own dated report.
 

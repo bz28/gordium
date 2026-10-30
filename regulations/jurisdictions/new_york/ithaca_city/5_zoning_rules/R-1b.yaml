@@ -1485,13 +1485,13 @@ rules:
     applies_when: accessory_dwelling_unit
     check: adus_on_parcel <= 1
     sources:
-      - file: zoning_charts_2026-04.pdf
-        page: 2
-        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 72
         lines: [8, 8]
         quote: "(1) A maximum of one ADU is allowed per parcel."
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 4
         lines: [7, 11]
@@ -1526,13 +1526,13 @@ rules:
     applies_when: accessory_dwelling_unit
     check: adu_bedrooms <= 2
     sources:
-      - file: zoning_charts_2026-04.pdf
-        page: 2
-        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 72
         lines: [10, 10]
         quote: "(3) An ADU may have a maximum of two bedrooms."
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
     examples:
       - given: {accessory_dwelling_unit: true, adu_bedrooms: 2}
         expect: pass
@@ -1565,13 +1565,13 @@ rules:
           existing accessory building, which may be altered or expanded only if it doesn't further encroach upon a
           setback for new construction. Check by hand that the building isn't being enlarged toward the street.
     sources:
-      - file: zoning_charts_2026-04.pdf
-        page: 2
-        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 72
         lines: [11, 11]
         quote: "(4) ADUs may not be located in the primary front yard."
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 72
         lines: [26, 27]
@@ -1685,13 +1685,13 @@ rules:
           Within 40% of the whole primary structure (the ADU included) but over 40% of the rest of it: which is
           meant is this rule's open question. Check by hand or ask the zoning office.
     sources:
-      - file: zoning_charts_2026-04.pdf
-        page: 2
-        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 72
         lines: [16, 16]
         quote: "(a) Attached ADU: The ADU shall not exceed 40% of the floor area of the primary structure."
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 4
         lines: [12, 14]
@@ -1771,6 +1771,11 @@ rules:
           for it, but it may be altered or expanded only within the limits for new construction. Check by hand that
           it isn't being enlarged.
     sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [20, 22]
+        quote: "(c) Detached ADU, new construction: [1] 800 SF maximum building footprint. [2] Maximum height of two stories and 20'."
+        not_limits: {1: "[1], a list marker"}
       - file: zoning_charts_2026-04.pdf
         page: 2
         cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
@@ -1778,11 +1783,6 @@ rules:
         page: 72
         lines: [17, 19]
         quote: "(b) Detached ADU, existing accessory building: none. [1] An existing accessory building may be altered or expanded, provided that it does not exceed the size limitations for new construction."
-        not_limits: {1: "[1], a list marker"}
-      - file: chapter_325_zoning_2026-10.pdf
-        page: 72
-        lines: [20, 22]
-        quote: "(c) Detached ADU, new construction: [1] 800 SF maximum building footprint. [2] Maximum height of two stories and 20'."
         not_limits: {1: "[1], a list marker"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 4
@@ -1835,14 +1835,14 @@ rules:
           5 ft or more but under 6 ft from a side lot line: §325-28 allows 5 ft, but §325-25C keeps accessory
           buildings in R-1 six feet from a side lot line. Which governs is this rule's open question.
     sources:
-      - file: zoning_charts_2026-04.pdf
-        page: 2
-        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 72
         lines: [28, 30]
         quote: "[2] Detached ADU, new construction: [a] Side and rear setback: 5' or setback required for primary structure, whichever is less."
         not_limits: {2: "[2], a list marker"}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Accessory Dwelling Unit", column: R-1B}
       - file: chapter_325_zoning_2026-10.pdf
         page: 72
         lines: [26, 27]
