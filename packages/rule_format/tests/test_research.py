@@ -122,12 +122,13 @@ def entries():
 def test_every_open_question_was_researched_and_none_is_pending():
     """The 2026-10-20 pass researched every question then open, and the 2026-10-27 occupancy research the one it
     raised (R-1b.occupancy_one_family: an owner and an ADU), and the 2026-10-27 audit-gap research the one it raised
-    (R-1b.yards_not_shared: two primary buildings' yards): none is left pending, and every one names the sections
+    (R-1b.yards_not_shared: two primary buildings' yards), and the 2026-10-29 bed-and-breakfast research the one it
+    raised (R-1b.use: the chart's "-" or §325-9B(1)(p)'s special permit): none is left pending, and every one names the sections
     read, its report section and why it is still open."""
     research = [x for _, e in entries() for x in e.get("research", [])]
-    assert len(research) == sum(len(e.get("open_questions", [])) for _, e in entries()) == 21
+    assert len(research) == sum(len(e.get("open_questions", [])) for _, e in entries()) == 22
     reports = (REPORT, "docs/research/2026-10-27_occupancy_and_home_occupation.md",
-               "docs/research/2026-10-27_audit_gaps.md")
+               "docs/research/2026-10-27_audit_gaps.md", "docs/research/2026-10-29_bed_and_breakfast.md")
     assert all(x["searched"] and not x["why_open"].startswith("pending") and x["report"].startswith(reports)
                for x in research)
 

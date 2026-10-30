@@ -219,6 +219,7 @@ rules:
         (web search 2026-10-29); Planning and Development Board agendas show bed-and-breakfast special permits
         (2 Fountain Place, 2018, a "Bed and Breakfast Home") without saying the district. Until answered, a
         bed-and-breakfast inn in R-1B needs review, never passes.
+      report: docs/research/2026-10-29_bed_and_breakfast.md §3
     notes: The check passes uses marked • for R-1B, sends uses marked SP to review, and fails the rest (marked -). What
       the marks mean is Gordium's reading (the chart_marks finding, to confirm with the architects). The chart's columns
       are R-1A, R-1B, … so R-1b is the second mark in each row.

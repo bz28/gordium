@@ -229,6 +229,7 @@ rules:
         (web search 2026-10-29); Planning and Development Board agendas show bed-and-breakfast special permits
         (2 Fountain Place, 2018, a "Bed and Breakfast Home") without saying the district. Until answered, a
         bed-and-breakfast inn in R-1A needs review, never passes.
+      report: docs/research/2026-10-29_bed_and_breakfast.md §3
     notes: The R-1A column is the first mark in each row of page 2. Its marks are the same as R-1B's in every primary-use
       row (checked row by row against the chart reader's R-1A cells and the marks' positions on the page), so the
       permitted list is R-1b's. What the marks mean is Gordium's reading (the chart_marks finding).
