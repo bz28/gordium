@@ -23,6 +23,6 @@ Each numbered folder below is under `regulations/jurisdictions/<state>/<place>/`
 
 ## Before it reaches architects
 
-- **The Rhino plugin checks one place.** With two places that have settings, the plugin stops with a plain error until it has a place picker (a small change: it reads its place from `design_checker/place.json`, which `python -m rule_format place --write` makes from the settings). Build the picker in the same PR as the second place.
+- **The Rhino plugin checks one place.** With two places that have settings, the plugin stops with a plain error until it has a place picker (a small change: it reads its place from `design_checker/place.json`, which `python -m rule_format place --write` makes from the settings). Build the picker in the same PR as the second place. In the same PR, the checker's display and envelope helpers (`check.py`, `present.py`, `reading_set.py` and `envelope_builder`, which take tolerances and yard lists from `model_measurement.plugin_measuring`) switch to the lot's own place's measuring (`measuring(facts["jurisdiction"])`), as the measuring itself already does.
 - **Wording.** Some on-screen messages say "the City" (the City's map, the City's tax map). Reword them for a place that isn't a city.
 - **Shared measure names.** `packages/rule_format/rule_format/measures.yaml` lists every measure, Ithaca-only ones included (`abuts_r1_district`, `south_hill_overlay`). A second place adds its own there; split it by place if the list grows confusing.
