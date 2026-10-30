@@ -1158,6 +1158,9 @@ def test_with_flat_ground_the_looked_up_fall_is_said_plainly_never_used():
         "review")
     assert present.grade_label(logic.ground_facts({"ground_fall": 0.3}, 0.0)) == (
         "assumed flat (the looked-up ground falls only about 0.3 ft across the lot)")
+    for bad in (float("nan"), -1.0):                         # review round 2: never "falls about nan ft"
+        assert present.grade_label(logic.ground_facts({"ground_fall": bad}, 0.0)).endswith(
+            "weren't read in full: height and stories need review"), bad
     _, saved = logic.lookup_choices({**payload, "writes": {**payload["writes"], "spots": []}}, {}, saved)
     assert "ground_fall" not in saved                        # a lookup with no ground found says none
 

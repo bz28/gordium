@@ -1883,9 +1883,10 @@ def grade_label(facts: dict) -> str:
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
     if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
         fall = facts.get("ground_fall")                       # a lookup found the ground: say plainly how it falls
-        if _measuring.flat_assumption_unsafe(facts):          # and that height and stories wait on it (the measuring's)
+        why = _measuring.flat_assumption_unsafe(facts)        # and that height and stories wait on it (the measuring's)
+        if why:                                               # a fall only when it is one (not NaN, -1, or none)
             return (f"assumed flat, but the looked-up ground falls about {fall:g} ft across the lot: height and "
-                    "stories need review" if fall is not None else
+                    "stories need review" if why != _measuring.stop("flat_unknown") else
                     f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)}), but the lot's ground "
                     "levels weren't read in full: height and stories need review")
         if fall:

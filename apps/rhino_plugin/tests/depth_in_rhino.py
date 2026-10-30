@@ -99,6 +99,9 @@ if stale is not None:                               # closed, so phase 2 never j
 try:
     g = fresh_module()
     doc = TestDocs("depth").__enter__().open("Large Objects - Feet")
+    # a lot known level (fall 0.0): the height is measured, so phase 2 has its dimension (with no ground looked up,
+    # height needs review and has none: the sloped-lot fix)
+    g.STATE["box_overrides"] = dict(g.STATE.get("box_overrides") or {}, ground_fall=0.0)
     g.gordium_check()                                    # GordiumStart's flow on the sample
     g.set_labels(True)
     o = g.overlay()
