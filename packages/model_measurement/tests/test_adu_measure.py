@@ -200,6 +200,25 @@ def test_a_corner_lot_reads_each_street_as_the_primary_one():
     assert unnamed["value"] is None and unnamed["reason"]
 
 
+def test_a_corner_lot_whose_streets_cant_be_told_apart_waits(monkeypatch):
+    """Never both streets read as one: the ADU 5 ft from East St, the house 25 ft from South St, would be "nearer the
+    street than the house" (5 < 15) only by mixing the two. (The lot lines' own checks stop such a lot first; this
+    holds even if they didn't.)"""
+    import inspect
+
+    import model_measurement.measure as measure_module
+    real = measure_module._street_groups
+
+    def unknown_here(*a):           # unknown only to this measurement: every other one still reads the streets
+        return None if inspect.stack()[1].function == "_in_primary_front_yard" else real(*a)
+    monkeypatch.setattr(measure_module, "_street_groups", unknown_here)
+    facts = {**DETACHED, "corner_lot": True, "street_line": [[[0, 0], [50, 0]], [[50, 0], [50, 100]]],
+             "street_ids": ["South St", "East St"], "address_street_line": [[[0, 0], [50, 0]]]}
+    got = _m(HOUSE, ADU, **facts)["adu_in_primary_front_yard"]
+    assert got["value"] is None and got["reason"] == stop("street_lines_split")     # the names given, not one run
+    assert _m(HOUSE, ADU, **facts)["adu_side_yard"]["value"] == 30.0     # the rest as usual: x = 0 (East St is a street)
+
+
 def test_in_the_front_yard_waits_for_the_main_building():
     off = box(60, 25, 80, 55, id="house")                  # the main building wholly off the lot
     got = _m(off, ADU, **DETACHED)["adu_in_primary_front_yard"]
