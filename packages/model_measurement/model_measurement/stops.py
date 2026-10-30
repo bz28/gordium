@@ -126,6 +126,10 @@ STOPS = {
                  "so, how far the nearest new structure is from it (§325-26)",
     "stream_facts_disagree": "no stream or inlet is said to be within 20 ft of the lot, but a new structure is said to be "
                              "{distance} ft from one: check both answers",
+    "no_garage_cars": "enter how many cars the lot's private garages hold, all together: every enclosed garage, attached "
+                      "or detached (0 if there is none; a carport isn't enclosed) (chart p.2 notes 6 and 7)",
+    "no_private_garages": "enter how many private garages are on the lot, an attached garage included (chart p.2 notes 6 "
+                          "and 7: needed when the cars are over the limit)",
     "no_south_hill": "say whether the lot is in the South Hill Overlay District (§325-8E, on the City's zoning map)",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings

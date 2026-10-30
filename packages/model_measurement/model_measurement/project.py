@@ -21,7 +21,7 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
                "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                "primary_buildings", "primary_buildings_same_use", "south_hill_overlay",
-               "stream_near_lot", "stream_distance",
+               "stream_near_lot", "stream_distance", "garage_cars", "private_garages",
                "grade_points", "grade_from", "grade_is", "unsettled", "ground_fall", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
@@ -62,7 +62,7 @@ def fact_problems(facts: dict) -> list[str]:
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
     for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants",
-              "unrelated_persons", "unrelated_persons_with_children"):
+              "unrelated_persons", "unrelated_persons_with_children", "garage_cars"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
     for k in ("home_occupation_area", "home_occupation_unit_area"):               # square feet, never rounded
@@ -71,7 +71,7 @@ def fact_problems(facts: dict) -> list[str]:
     if facts.get("stream_distance") is not None and not (_number(facts["stream_distance"]) and facts["stream_distance"] >= 0):
         problems.append("stream_distance must be a number of feet, 0 or more")       # as typed, never rounded
     for k in ("occupants_most_in_one_unit", "attached_units_in_building",       # at least one, by definition
-              "primary_buildings"):
+              "primary_buildings", "private_garages"):     # asked only for a garage, so at least one
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
             problems.append(f"{k} must be a whole number, 1 or more")
     for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district",
