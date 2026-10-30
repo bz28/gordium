@@ -114,6 +114,10 @@ def test_two_places_need_a_picker_never_the_first_one(tmp_path):
     (lambda s: s["addresses"].update(nearby_places="lansing"), "addresses.nearby_places must be a list of words"),
     (lambda s: s["addresses"].update(shares_mail_with=[]), "addresses.shares_mail_with names none"),
     (lambda s: s.update(sample_site={"address": "1 Main St"}), "sample_site must give a folder and an address"),
+    (lambda s: s["addresses"].update(nearby_places=["Elsewhere"]), "addresses.nearby_places must be lowercase"),
+    (lambda s: s["addresses"].update(own_words=["Testville"]), "addresses.own_words must be lowercase"),
+    (lambda s: s["coordinates"].update(epsg=True), "coordinates.epsg must be a whole number"),
+    (lambda s: s["time_zone"].update(standard_utc_offset_hours=False), "standard_utc_offset_hours must be a number"),
 ])
 def test_settings_that_cant_be_used_are_refused_with_what_is_wrong(tmp_path, change, problem):
     import yaml

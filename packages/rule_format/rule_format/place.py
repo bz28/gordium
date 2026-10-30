@@ -30,6 +30,7 @@ ADAPTER_KINDS = ("lookup", "measurement")
 DAYLIGHT_RULES = ("us_federal", "none")      # the daylight-saving rules rhino_logic.city_day knows
 ADDRESS_LISTS = {"own_words": 1, "also_written": 0, "zip_codes": 1, "state_words": 1, "county_words": 0,
                  "nearby_places": 0, "shares_mail_with": 1}   # each list the plugin reads, and how many it needs
+MATCHED_LOWERCASE = set(ADDRESS_LISTS) - {"shares_mail_with"}   # matched against a lowercased address (rhino_logic)
 REQUIRED = {"name": str, "boundary": dict, "coordinates": dict, "time_zone": dict, "districts": dict, "law": dict,
             "addresses": dict, "adapters": dict}
 
@@ -172,10 +173,10 @@ def settings_problems(settings) -> list[str]:
         out.append("name is empty")
     if not settings["boundary"].get("swis"):
         out.append("boundary names no swis codes")
-    if not isinstance(settings["coordinates"].get("epsg"), int):
+    if not isinstance(settings["coordinates"].get("epsg"), int) or isinstance(settings["coordinates"]["epsg"], bool):
         out.append("coordinates.epsg must be a whole number (the EPSG code)")
     tz = settings["time_zone"]
-    if not isinstance(tz.get("standard_utc_offset_hours"), (int, float)):
+    if not isinstance(tz.get("standard_utc_offset_hours"), (int, float)) or isinstance(tz["standard_utc_offset_hours"], bool):
         out.append("time_zone.standard_utc_offset_hours must be a number")
     if tz.get("daylight_saving") not in DAYLIGHT_RULES:
         out.append(f"time_zone.daylight_saving must be one of {', '.join(DAYLIGHT_RULES)}")
@@ -199,6 +200,8 @@ def settings_problems(settings) -> list[str]:
             out.append(f"addresses.{k} must be a list of words")
         elif len(words) < at_least:
             out.append(f"addresses.{k} names none")
+        elif k in MATCHED_LOWERCASE and any(w != w.lower() for w in words):
+            out.append(f"addresses.{k} must be lowercase (a typed address is lowercased before it is matched)")
     site = settings.get("sample_site")
     if site is not None and not (isinstance(site, dict) and all(str(site.get(k) or "").strip()
                                                                for k in ("folder", "address"))):
