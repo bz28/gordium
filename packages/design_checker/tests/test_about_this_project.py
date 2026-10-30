@@ -24,7 +24,8 @@ CITY = "regulations/jurisdictions/new_york/ithaca_city"
 R1B_ASKS = ["accessory_dwelling_unit",                    # up front: a detached ADU is a building (Ben, 2026-10-30)
             "stream_near_lot", "south_hill_overlay",        # up front: what shapes the envelope (Ben, 2026-10-27)
             "garage_cars"]
-HOUSEHOLD = ["unrelated_persons", "owner_occupied", "functional_family_unit", "home_occupation"]                             # use details: deferred, answered when the interior is planned
+HOUSEHOLD = ["unrelated_persons", "owner_occupied", "functional_family_unit",
+             "home_occupation"]                       # use details: deferred, answered when the interior is planned
 
 
 @pytest.fixture(scope="module")

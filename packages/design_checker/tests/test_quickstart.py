@@ -177,7 +177,8 @@ def test_the_starting_house_on_the_sample_lot(house):
 ADU_ROWS = ["Accessory dwelling unit: at most one per parcel", "Accessory dwelling unit: at most two bedrooms",
             "Detached ADU: not in the primary front yard nor a required one",
             "Attached ADU: at most 40% of the primary structure's floor area",
-            "Detached ADU: 800 sf footprint; two stories and 20 ft", "Detached ADU: 5 ft from the side and rear lot lines"]
+            "Detached ADU: 800 sf footprint; two stories and 20 ft",
+            "Detached ADU: 5 ft from the side and rear lot lines"]
 
 
 def test_15_a_backyard_cottage(house):
@@ -194,8 +195,8 @@ def test_15_a_backyard_cottage(house):
     size, setbacks, front = rows[ADU_ROWS[4]], rows[ADU_ROWS[5]], rows[ADU_ROWS[2]]
     said(r"not nearer the street than the house:\s+complies")
     assert front["status"] == present.COMPLIES, front
-    said(r"5 ft or more from the side and rear lot lines: it is, under every reading, but on this lot it needs\s+review "
-         r"like the house's rear yard")
+    said(r"5 ft or more from the side and rear lot lines: it is, under every reading, but on this lot it "
+         r"needs\s+review like the house's rear yard")
     assert setbacks["status"] == present.REVIEW and setbacks["reason"] == rows["Rear yard"]["reason"], setbacks
     footprint, = said(r"Its size \((\d+) sf footprint, 18 ft, at most 2 stories\) \*\*needs\s+review\*\* here")
     assert size["proposed"] == f"{footprint} sf" and size["status"] == present.REVIEW
