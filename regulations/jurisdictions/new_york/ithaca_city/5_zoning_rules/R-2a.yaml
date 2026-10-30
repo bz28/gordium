@@ -2158,9 +2158,6 @@ rules:
         page: 9
         lines: [7, 7]
         quote: one unit may be no larger than 50% of the floor area of the larger
-      - rank: 4
-        cite: 'Other cities word the same limit both ways, for example "of the primary dwelling" or "of the existing
-          primary dwelling unit"; none read settles Ithaca''s words (web search, 2026-10-29)'
       why_open: >-
         Chapter 325 doesn't define floor area, and §325-28 doesn't say whether the attached ADU is counted in the
         primary structure. The ATTACHED definition puts the ADU "within the primary structure", which supports the
