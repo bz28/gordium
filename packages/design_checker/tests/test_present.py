@@ -2022,6 +2022,7 @@ def test_the_delta_words_never_read_as_a_pass_on_a_row_that_is_not_one():
     assert present.tax_delta(present.REVIEW, 1.0, (0.004, 2), "ft", several=True)[0] == \
         "+1'-0\" if confirmed (at limit at worst)"
     assert present.tax_delta(present.FAILS, -0.3, (-0.3, 1.75), "ft")[0].endswith("the other way); see why")
+    assert present.tax_delta(present.FAILS, -0.25, (-2.25, 1.75), "ft")[1] == "−0'-3\"\nsee why"   # round 3
     assert present.TAX_OFF not in present.tax_delta(present.COMPLIES, 2.0, (2.0, 2.0), "ft", several=True)[0]
     src = Path(present.__file__).read_text(encoding="utf-8")
     assert "_is_maximum(node), several or not approx)" in src           # settle: a survey never says the tax map

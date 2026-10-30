@@ -1004,6 +1004,8 @@ def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
     if drawn >= 0 and status == FAILS:
         cell = ("at limit" if head.startswith("at limit") else margin_text(drawn, unit).lstrip("+") + " room") \
             + "\nsee why"
+    elif status == FAILS and why:           # short as drawn, room at best, failing another way: never "best +…"
+        cell = margin_text(drawn, unit) + "\nsee why"                   # beside a ✕ (review round 3)
     elif drawn >= 0 and end >= 0 and status == REVIEW:
         cell = f"{word} {cell_end}\nif confirmed"
     else:

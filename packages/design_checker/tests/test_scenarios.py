@@ -131,7 +131,7 @@ def test_raised_yards_keep_their_detail_and_on_a_tax_map_lot_need_review_and_say
     assert "at worst Front yard 25'-0\" against 27'-0\"" in t["Building height"]["reason"]   # the part that fails
     assert t["Front yard"]["status"] == present.REVIEW and t["Front yard"]["required"] == "27'-0\""
     assert t["Front yard"]["delta"] == (    # round 1: the raised 27'-0", the line ±2'-0": at it as drawn, 2'-0" short
-        "at limit (2'-0\" short if the tax-map lines are 2 ft off)")
+        "at limit if confirmed (2'-0\" short if the tax-map lines are 2 ft off)")    # in review: never read as a pass
 
 
 def test_a_chart_heading_row_is_quoted_in_its_own_words():

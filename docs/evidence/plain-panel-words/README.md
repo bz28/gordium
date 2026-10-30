@@ -4,7 +4,7 @@
 **For:** reviewers and engineers.\
 **Kept current by:** never (a dated record).
 
-Run in Ben's Rhino 8 on 2026-10-29, from extracted copies: main at ad164beb and this branch at 1fa72c09 (the command history and the rows that comply) and 62950a79 (the rows in review, after review round 1's fix to the list's short Delta). The script looks up 106 Ithaca Rd (R-1b, tax-map lot lines ±2 ft), draws the starting house, writes "Cancelled: nothing changed." as an earlier button would, then presses Check. It records every list cell, whether the cell fits its column, and the last lines of Rhino's command history.
+Run in Ben's Rhino 8 on 2026-10-29. Later wording fixes from review rounds 2 and 3 ("at limit if confirmed", "at limit at worst", "see why" on a failing row) change no cell on this lot and are pinned by unit tests (`test_present.py`), not re-captured. The runs used extracted copies: main at ad164beb and this branch at 1fa72c09 (the command history and the rows that comply) and 62950a79 (the rows in review, after review round 1's fix to the list's short Delta). The script looks up 106 Ithaca Rd (R-1b, tax-map lot lines ±2 ft), draws the starting house, writes "Cancelled: nothing changed." as an earlier button would, then presses Check. It records every list cell, whether the cell fits its column, and the last lines of Rhino's command history.
 
 | File | What it shows |
 |---|---|
