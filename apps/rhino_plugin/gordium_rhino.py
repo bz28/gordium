@@ -1469,10 +1469,13 @@ def pick_survey():
     if not picked:
         say(why)
         return
-    facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
+    replaced = picked != facts.get("lot_id")
+    facts = logic.after_lot_pick(facts, picked) if replaced else facts
     facts["lot_surveyed"] = True
     with logic.undo_step(doc, logic.UNDO_WORDS["survey"]):     # one Ctrl+Z puts it all back (asked first, outside)
         saved_ui = logic.settle(_ui_state(doc), "lot")
+        if replaced:                                           # another lot: its ground was never looked up
+            saved_ui = logic.lot_ground_dropped(saved_ui)
         _save_ui_state(doc, saved_ui)
         left = logic.unsettled(saved_ui)
         if left:
@@ -2971,6 +2974,8 @@ def _change_facts(doc, facts, options):
     if len(lots) > 1:
         picked = _pick(doc, "Click the lot outline (a closed curve on the Site layer), or choose one; Enter keeps it",
                        lots, "Lot", Rhino.DocObjects.ObjectType.Curve)
+        if picked and picked != facts.get("lot_id"):           # another lot: its ground was never looked up
+            _save_ui_state(doc, logic.lot_ground_dropped(_ui_state(doc)))
         facts = logic.after_lot_pick(facts, picked)
         _highlight(doc, facts)
     if len(buildings) > 1:

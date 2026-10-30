@@ -1097,7 +1097,18 @@ def after_lot_pick(facts, picked_lot):
         out["lot_id"] = picked_lot
         set_street_lines(out, None)          # the old lot's street lines and their names go with it
         out.pop("plan_north_deg", None)      # the looked-up lot's turn belonged to it
+        out.pop("ground_fall", None)         # and so did its ground (lot_ground_dropped: the saved state's too)
     return out
+
+
+def lot_ground_dropped(saved_ui):
+    """The saved state once the architect puts another lot in place of the looked-up one (their survey, a lot they
+    drew, another outline picked): the looked-up ground fall was read on the old lot, so it no longer shows the lot
+    level (review round 3: a level reading kept after the lookup's doubtful lot was replaced let height and stories
+    pass on ground never read). Height and stories need review until the address is looked up again."""
+    saved_ui = dict(saved_ui)
+    saved_ui.pop("ground_fall", None)
+    return saved_ui
 
 
 def street_enter_keeps(facts):
@@ -3564,7 +3575,8 @@ def pick_effect(what, outcome, facts, saved_ui):
         saved_ui["street_name"] = name
         saved_ui["street_source"] = ENTERED
     elif what in ("lot", "draw_lot"):
-        facts = after_lot_pick(facts, outcome) if outcome != facts.get("lot_id") else facts
+        if outcome != facts.get("lot_id"):             # another lot: the looked-up ground was read on the old one
+            facts, saved_ui = after_lot_pick(facts, outcome), lot_ground_dropped(saved_ui)
         facts["lot_surveyed"] = what == "lot"          # Use my survey…: a survey; drawn over the guide: not
         saved_ui = settle(saved_ui, "lot")
         if what == "draw_lot":

@@ -1411,3 +1411,23 @@ def test_a_partial_ground_reading_gives_no_fall():
     assert "ground_fall" not in logic.lookup_choices(one, {}, {})[1]
     two = dict(whole, writes=dict(whole["writes"], spots=[[0, 0, 0.0], [50, 0, 0.0]]))
     assert "ground_fall" not in logic.lookup_choices(two, {}, {})[1]
+
+
+def test_a_lot_replaced_by_hand_drops_the_looked_up_fall():
+    """Review round 3: a lookup reads lot A level (fall 0.0); the architect then puts lot B in its place (their
+    survey, a lot drawn over the guide, the survey command, the setup pick). The fall was read on A, so it goes, from
+    the facts and the saved state (the next Draw writes the saved one back): height and stories need review on B.
+    Keeping the same lot (Enter) keeps it."""
+    from model_measurement.measure import flat_assumption_unsafe
+    facts, ui = {"lot_id": "A", "ground_fall": 0.0}, {"ground_fall": 0.0, "replaceable_lot": "A"}
+    for what in ("lot", "draw_lot"):
+        f2, ui2 = logic.pick_effect(what, "B", facts, ui)
+        assert "ground_fall" not in ui2 and "ground_fall" not in f2, what
+        sent = logic.ground_facts(ui2, 0.0)
+        assert sent["ground_fall"] is None and flat_assumption_unsafe(sent), what
+        f3, ui3 = logic.pick_effect(what, "A", facts, ui)                  # the same lot kept: so is its reading
+        assert ui3["ground_fall"] == 0.0 and f3["ground_fall"] == 0.0, what
+    assert "ground_fall" not in logic.after_lot_pick(facts, "B")            # the survey command's and setup's path
+    assert logic.after_lot_pick(facts, "A")["ground_fall"] == 0.0
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert src.count("logic.lot_ground_dropped(") == 2                       # GordiumSurvey and the setup lot pick
