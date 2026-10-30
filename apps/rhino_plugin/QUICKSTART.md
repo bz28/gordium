@@ -275,7 +275,7 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    - **Use**: one-family dwelling, detached.
    - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
      near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building
-     holds. Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
+     holds, how many cars the lot's private garages hold (R-1 and R-2). Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
      assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
      its full wording. Answers are saved with the project; change them in Edit site… .
      Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
@@ -431,7 +431,7 @@ lot the tax map allows:
 - side yard, southwest 12'-0 1/2" (needs 10'-0"); northeast, 12'-0 3/8";
 - coverage 21.7% (the limit is 25%).
 
-Three rows need review from the start, and that is Gordium being honest, not a mistake:
+Four rows need review from the start, and that is Gordium being honest, not a mistake:
 - **New structures at least 20 ft from an inlet wall or stream bank**: the start box's stream question was left
   Not answered, so this row waits on it ("say whether any inlet wall or stream bank … is within 20 ft of the lot").
   Answer it with the row's **Answer 2 questions…** button and the row is decided.
@@ -441,6 +441,10 @@ Three rows need review from the start, and that is Gordium being honest, not a m
   reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the
   zoning office".
 - **Eaves into front yard** waits on the same question, and says the same.
+- **Private garage: not more than three cars**: the start box's garage question was left Not answered, so this row
+  waits on it ("enter how many cars the lot's private garages hold, all together …"). Answer it with the row's
+  **Enter the cars the private garages hold…** button: three or fewer complies; over three, the row then asks how
+  many garages there are (whether the three cars are for each garage or the whole lot is an open question).
 
 **Building height**: 35'-0" is at the limit and complies. The height rule's taller-house bonus reads the rear yard,
 but at 35 ft or under the bonus never comes into it, so the open question doesn't matter.
