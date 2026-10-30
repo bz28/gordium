@@ -26,8 +26,9 @@ def test_contradictory_stream_answers_are_a_lot_facts_row_asking_both():
     """PR4 review round 2: the "no" and the distance under 20 ft are shown as lot facts that disagree, with both
     asked again (the distance may be the typo), as the household counts are."""
     from model_measurement.project import fact_conflict_rows
-    rows = fact_conflict_rows({"stream_near_lot": False, "stream_distance": 5})
+    city = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city"}     # each lot is its own place's
+    rows = fact_conflict_rows({**city, "stream_near_lot": False, "stream_distance": 5})
     assert [facts for _, facts in rows] == [("stream_near_lot", "stream_distance")]
     assert "check both answers" in rows[0][0]
-    assert fact_conflict_rows({"stream_near_lot": False, "stream_distance": 20}) == []
-    assert fact_conflict_rows({"stream_near_lot": True, "stream_distance": 5}) == []
+    assert fact_conflict_rows({**city, "stream_near_lot": False, "stream_distance": 20}) == []
+    assert fact_conflict_rows({**city, "stream_near_lot": True, "stream_distance": 5}) == []
