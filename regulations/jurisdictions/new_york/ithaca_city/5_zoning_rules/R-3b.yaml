@@ -2773,6 +2773,9 @@ rules:
       - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: true, adu_in_primary_front_yard: false, adu_front_yard: 9}
         expect: needs_review
         note: an existing building may stay where it is, but not be enlarged further toward the street
+      - given: {accessory_dwelling_unit: true, adu_detached: true, adu_existing_building: true, adu_in_primary_front_yard: false, adu_front_yard: 15}
+        expect: pass
+        note: an existing building 15 ft from the street, clear of the 10 ft required front yard
       - given: {accessory_dwelling_unit: true, adu_detached: true, adu_front_yard: 70}
         expect: needs_review
         note: whether it is in the primary front yard isn't known (a corner lot, or the house not picked)
@@ -2962,15 +2965,6 @@ rules:
         not_limits: {1: "[1], a list marker"}
       - file: zoning_charts_2026-04.pdf
         page: 3
-        cell: {section: Yard Dimensions, row: "Side (one side minimum)", column: R-3B}
-      - file: zoning_charts_2026-04.pdf
-        page: 3
-        cell: {section: Yard Dimensions, row: "Side (other side minimum)", column: R-3B}
-      - file: zoning_charts_2026-04.pdf
-        page: 3
-        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-3B}
-      - file: zoning_charts_2026-04.pdf
-        page: 3
         lines: [66, 66]
         quote: "(16) But not less than 20 ft."
         not_limits: {20: "the primary structure's rear yard floor: more than 5 ft, so 5 ft is the lesser"}
@@ -2997,8 +2991,10 @@ rules:
       - given: {accessory_dwelling_unit: true, adu_detached: false}
         expect: not_applicable
     notes: >-
-      "5' or setback required for primary structure, whichever is less": the house's required side yards in
-      R-3b are 5 ft or more (chart p.3) and its rear yard at least 20 ft (note 16), so the lesser is 5 ft. Measured
+      "5' or setback required for primary structure, whichever is less": the house's required yards (chart
+      p.3, Yard Dimensions, R-3B: side, one side 10 ft, other side 5 ft; rear 20%/50 ft, not less than 20 ft
+      (note 16)) are all 5 ft or more, so the lesser is 5 ft. The chart's cells are named here, not cited as the
+      formula's inputs: in R-3b they never change the 5 ft. Measured
       from the detached ADU's building, the solid the architect picks (adu_building): its least distance, seen from
       above, to a side lot line and to the rear lot line, every reading of which lines are side and rear. The
       ADU's building is measured here, not as an ordinary accessory building (§325-25C's 3 ft are less than 5
