@@ -103,6 +103,12 @@ measurements:
   south_hill_overlay:
     value: null
     from: 'not measured: say whether the lot is in the South Hill Overlay District (§325-8E, on the City''s zoning map)'
+  garage_cars:
+    value: null
+    from: 'not measured: enter how many cars the lot''s private garages hold, all together: every enclosed garage, attached or detached (0 if there is none; a carport isn''t enclosed) (chart p.2 notes 6 and 7)'
+  private_garages:
+    value: null
+    from: 'not measured: enter how many private garages are on the lot, an attached garage included (chart p.2 notes 6 and 7: needed when the cars are over the limit)'
   primary_buildings_same_use:
     value: null
     from: 'not measured: enter the primary buildings on the lot (each separate building holding a home or other permitted primary use, the main one included; not a garage, shed or accessory dwelling unit) and whether every one holds the use entered (§325-8B(1))'

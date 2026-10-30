@@ -21,9 +21,6 @@ not_covered:
   - id: adus
     section: "§325-28"
     name: Accessory dwelling units
-  - id: garage_cars
-    section: "§325-8A(3), chart p.2 notes 6 and 7"
-    name: "Private garage size (R-1a, R-1b, R-2a, R-2b: 3 cars; R-2c: 6 cars per building)"
   - id: front_yard_parking
     section: "§325-20E"
     name: Parking in front yards (lots over 50 ft wide, up to 25% of the front yard; narrower lots, a driveway up to 12 ft wide; cars square to the street)

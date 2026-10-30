@@ -436,17 +436,33 @@ pieces:
       all: {status: rulebook, rules: [use]}
       R-3a, R-3b: {status: flag, rules: [use]}
     - lines: [[24, 17, 18]]
-      what: "Column 3: permitted accessory uses (chart p.2: private garage, structure for construction purposes,
-        adult day-care home, towers, home occupation, neighborhood parking area, gardens, ADU)"
+      what: "Column 3: a private garage's size (chart p.2 notes 6 and 7)"
+      all:
+        status: not_applicable
+        why: The chart's private garage row (p.2 line 32) has no car limit for R-3a, R-3aa, R-3b and RU (a plain •,
+          no note), so there is no garage size to check there.
+        quote: Uses permitted to be accessory to the main use of the
+      R-1a, R-1b, R-2a, R-2b, R-2c: {status: rulebook, rules: [private_garage]}
+    - lines: [[24, 17, 18]]
+      what: "Column 3: the other permitted accessory uses (chart p.2: structure for construction purposes, adult
+        day-care home, towers, home occupation, neighborhood parking area, gardens, ADU)"
       all:
         status: missing
         priority: medium
         why: No rule checks the accessory uses on chart p.2 other than a home occupation (R-x.home_occupation and
-          home_occupation_size, under §325-3B and §325-9B(1)(i)). Towers and gardens need a special permit; a
-          private garage holds at most three cars in R-1 and R-2a/R-2b, six per building in R-2c; a structure for
-          construction purposes may stay two years. The garage limit is listed on every result as not checked yet
-          (not_checked_yet.yaml), as are §325-20E and §325-20F. Parking is on the later list; ADUs are parked by the
-          queue item 10 brief.
+          home_occupation_size, under §325-3B and §325-9B(1)(i)) and a private garage's size (the part above).
+          Towers and gardens need a special permit; a structure for construction purposes may stay two years.
+          §325-20E and §325-20F are listed on every result as not checked yet (not_checked_yet.yaml). Parking is on
+          the later list; ADUs are parked by the queue item 10 brief.
+      R-1a, R-1b, R-2a, R-2b, R-2c:
+        status: missing
+        priority: medium
+        why: No rule checks the accessory uses on chart p.2 other than a home occupation (R-x.home_occupation and
+          home_occupation_size, under §325-3B and §325-9B(1)(i)) and a private garage's size (the part above).
+          Towers and gardens need a special permit; a structure for construction purposes may stay two years.
+          §325-20E and §325-20F are listed on every result as not checked yet (not_checked_yet.yaml). Parking is on
+          the later list; ADUs are parked by the queue item 10 brief.
+        also: [private_garage]
     - quote: "The off-street parking spaces listed in this column shall be provided"
       lines: [[24, 19, 21]]
       what: "Column 4: off-street parking"
