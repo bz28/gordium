@@ -54,7 +54,7 @@ name, the codes that tell its land apart (SWIS), its coordinate system and time 
 districts, its law files, and which lookup and measuring code serve it. `place.py` is the one reader: code asks
 `place("new_york/ithaca_city")`, `places()` or `plugin_place()` instead of typing a place's values in (not yet the
 address lookup: `site_lookup` still has its own copy of Ithaca's boundary codes, coordinate system and address
-ending, until it moves into a folder of its own, docs/adding_a_place.md steps 7 and 8). A place with no
+ending, until it moves into a folder of its own, docs/adding_a_place.md, the lookup step). A place with no
 settings file, or one with a missing or unusable field, is a plain error (`UnknownPlace`), never another place's
 settings in its stead. The Rhino plugin's Python can't read YAML, so `python -m rule_format place --write` copies
 what it needs to `packages/design_checker/design_checker/place.json`; `python -m rule_format` checks the copy is

@@ -31,6 +31,7 @@ DAYLIGHT_RULES = ("us_federal", "none")      # the daylight-saving rules rhino_l
 ADDRESS_LISTS = {"own_words": 1, "also_written": 0, "zip_codes": 1, "state_words": 1, "county_words": 0,
                  "nearby_places": 0, "shares_mail_with": 1}   # each list the plugin reads, and how many it needs
 MATCHED_LOWERCASE = set(ADDRESS_LISTS) - {"shares_mail_with"}   # matched against a lowercased address (rhino_logic)
+ONE_WORD = MATCHED_LOWERCASE - {"also_written"}           # matched word by word (also_written: as a phrase)
 REQUIRED = {"name": str, "boundary": dict, "coordinates": dict, "time_zone": dict, "districts": dict, "law": dict,
             "addresses": dict, "adapters": dict}
 
@@ -82,10 +83,10 @@ class Place:
 
     def law_file(self, role: str) -> str:
         """A document in 1_source_documents/ by what it is (zoning_code, zoning_chart)."""
-        try:
-            return self.settings["law"][role]
-        except KeyError:
-            raise UnknownPlace(f"{self.key}: {SETTINGS} names no {role} under law") from None
+        name = (self.settings.get("law") or {}).get(role)
+        if not isinstance(name, str) or not name.strip():
+            raise UnknownPlace(f"{self.key}: {SETTINGS} names no {role} under law")
+        return name
 
     def adapter(self, kind: str) -> str:
         """The folder name of the place's own lookup or measuring code."""
@@ -181,17 +182,22 @@ def settings_problems(settings) -> list[str]:
     if tz.get("daylight_saving") not in DAYLIGHT_RULES:
         out.append(f"time_zone.daylight_saving must be one of {', '.join(DAYLIGHT_RULES)}")
     try:
-        re.compile(str(settings["districts"].get("chart_column") or ""))
+        pattern = re.compile(str(settings["districts"].get("chart_column") or ""))
         if not settings["districts"].get("chart_column"):
             out.append("districts.chart_column is missing")
+        elif pattern.fullmatch(""):
+            out.append("districts.chart_column matches an empty heading (it must match only district names)")
     except re.error as e:
         out.append(f"districts.chart_column isn't a pattern ({e})")
     if not settings["law"].get("zoning_code"):
         out.append("law names no zoning_code")
+    out += [f"law.{k} must name a file" for k, v in settings["law"].items() if not (isinstance(v, str) and v.strip())]
     out += [f"adapters names no {k}" for k in ADAPTER_KINDS if not settings["adapters"].get(k)]
     a = settings["addresses"]
     if not str(a.get("tail") or "").strip():
         out.append("addresses.tail is missing")
+    elif not str(a["tail"]).startswith(", "):
+        out.append('addresses.tail must start with ", " (it is added to the end of a typed address)')
     if not str(a.get("shares_mail_as") or "").strip():
         out.append("addresses.shares_mail_as is missing")
     for k, at_least in ADDRESS_LISTS.items():     # the plugin reads each at once (rhino_logic), so none may be missing
@@ -202,6 +208,8 @@ def settings_problems(settings) -> list[str]:
             out.append(f"addresses.{k} names none")
         elif k in MATCHED_LOWERCASE and any(w != w.lower() for w in words):
             out.append(f"addresses.{k} must be lowercase (a typed address is lowercased before it is matched)")
+        elif k in ONE_WORD and any(len(w.split()) != 1 for w in words):
+            out.append(f"addresses.{k} must be single words (each is matched against one word of an address)")
     site = settings.get("sample_site")
     if site is not None and not (isinstance(site, dict) and all(str(site.get(k) or "").strip()
                                                                for k in ("folder", "address"))):

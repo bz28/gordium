@@ -117,6 +117,10 @@ def test_two_places_need_a_picker_never_the_first_one(tmp_path):
     (lambda s: s["addresses"].update(nearby_places=["Elsewhere"]), "addresses.nearby_places must be lowercase"),
     (lambda s: s["addresses"].update(own_words=["Testville"]), "addresses.own_words must be lowercase"),
     (lambda s: s["coordinates"].update(epsg=True), "coordinates.epsg must be a whole number"),
+    (lambda s: s["addresses"].update(tail="Testville TS"), 'addresses.tail must start with ", "'),
+    (lambda s: s["law"].update(zoning_chart=None), "law.zoning_chart must name a file"),
+    (lambda s: s["districts"].update(chart_column="(T-1)|"), "districts.chart_column matches an empty heading"),
+    (lambda s: s["addresses"].update(nearby_places=["cayuga heights"]), "addresses.nearby_places must be single words"),
     (lambda s: s["time_zone"].update(standard_utc_offset_hours=False), "standard_utc_offset_hours must be a number"),
 ])
 def test_settings_that_cant_be_used_are_refused_with_what_is_wrong(tmp_path, change, problem):
@@ -214,3 +218,11 @@ def test_the_plugin_loads_with_the_fewest_address_words_the_check_accepts(tmp_pa
     spec.loader.exec_module(logic)
     assert "may instead be in the Elsewhere, which" in logic.IN_CITY_QUESTION
     assert logic.CITY_SUFFIX == ", Testville, TS"
+
+
+def test_a_law_file_named_by_no_value_is_a_plain_error_never_none(tmp_path):
+    import yaml
+    settings = yaml.safe_load((FAKE / "jurisdiction.yaml").read_text(encoding="utf-8"))
+    p = registry.Place(FAKE, settings | {"law": {"zoning_code": "code.pdf", "zoning_chart": None}})
+    with pytest.raises(UnknownPlace, match="names no zoning_chart under law"):
+        p.law_file("zoning_chart")
