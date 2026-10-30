@@ -2011,3 +2011,17 @@ def test_the_delta_cell_is_never_kinder_than_the_status():
     # a row in review that may be short keeps both numbers: the shortfall is shown, nothing kinder
     assert present.tax_delta(present.REVIEW, 2.0, (-0.02, 4), "ft")[1] == "+2'-0\"\nworst −0'-0 1/4\""
     assert present.tax_delta(present.COMPLIES, 3.4375, (0.4375, 6), "ft")[1] == "+3'-5 1/4\"\nworst +0'-5 1/4\""
+
+
+def test_the_delta_words_never_read_as_a_pass_on_a_row_that_is_not_one():
+    """Review round 2 of plain-words: a row in review at the limit read "at limit (…)" like a pass; one with several
+    readings at the limit read "at least at limit"; a row that fails another way with room under some reading had
+    no "see why"; and a surveyed lot whose readings all agreed was told about the tax map."""
+    off = "if the tax-map lines are 2 ft off"
+    assert present.tax_delta(present.REVIEW, 0.0, (0.0, 2), "ft")[0] == f"at limit if confirmed (at limit {off})"
+    assert present.tax_delta(present.REVIEW, 1.0, (0.004, 2), "ft", several=True)[0] == \
+        "+1'-0\" if confirmed (at limit at worst)"
+    assert present.tax_delta(present.FAILS, -0.3, (-0.3, 1.75), "ft")[0].endswith("the other way); see why")
+    assert present.TAX_OFF not in present.tax_delta(present.COMPLIES, 2.0, (2.0, 2.0), "ft", several=True)[0]
+    src = Path(present.__file__).read_text(encoding="utf-8")
+    assert "_is_maximum(node), several or not approx)" in src           # settle: a survey never says the tax map

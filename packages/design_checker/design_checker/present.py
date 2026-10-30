@@ -973,7 +973,7 @@ def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
     detail has the words whole)."""
     low, high = span
     head = _plain_margin(drawn, unit, maximum)
-    if drawn >= 0 and status == REVIEW and head != "at limit":
+    if drawn >= 0 and status == REVIEW:      # "at limit if confirmed" too: never read as a pass (review round 2)
         head += " if confirmed"
     elif drawn >= 0 and status == FAILS:            # "at limit here", never "at limit room here" (review round 1)
         head = ("at limit here" if head == "at limit" else head.lstrip("+") + " room here") + "; see why"
@@ -989,14 +989,15 @@ def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
         tail += " " + TAX_OFF + ("" if worst else " the other way")
     elif certain:
         tail += " under every reading"
-    elif end >= 0 and worst:
-        tail = "at least " + tail + " under every reading"
+    elif end >= 0 and worst:                 # "at limit at worst", never "at least at limit" (review round 2)
+        tail = "at limit at worst" if tail == "at limit" else "at least " + tail + " under every reading"
     else:
         tail += " under another reading"
     cell_end = margin_text(end, unit) if not certain else (
         ("over" if maximum else "short") if _rounds_to_nothing(-end, unit) else "−" + _amount(-end, unit, "down"))
     # short even at best on a row in review for another reason: the certain words with "see why", as delta_words
-    why = "; see why" if certain and status != FAILS else ""
+    # a row that fails another way but has room under some reading points to why too (review round 2)
+    why = "; see why" if (certain and status != FAILS) or (status == FAILS and drawn < 0 and not certain) else ""
     # the cell is never kinder than the status either (review round 1 of plain-words: "+2'-0" / worst +0'-6"" beside
     # a ✕, "+4'-0 3/4" / worst +2'-0 3/4"" in review without "if confirmed"): a ✕ row's room has no "+" and says
     # "see why"; a row in review with room under every reading says the certain room "if confirmed"
@@ -1105,7 +1106,8 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
         several = len({round(r["margin"], 9) for r in base or []}) > 1
         if base and (approx or i.get("cells")):    # a tax-map lot, or a span shown by its tightest pair
             i["delta"], i["delta_cell"] = tax_delta(i["status"], min(r["margin"] for r in base), span, unit,
-                                                    _is_maximum(node), several)
+                                                    _is_maximum(node), several or not approx)   # a survey:
+            #   never the tax map's words, even when every reading as drawn agrees (review round 2 of plain-words)
         body = ast.parse(expr or ast.unparse(node), mode="eval").body
         one_way = not isinstance(body, ast.BoolOp) or (i.get("_raised") and isinstance(body.op, ast.And))
         if (i.get("_advice") or {}).get("crossing"):     # partly off the lot: its one advice, move it back (PR 18)
