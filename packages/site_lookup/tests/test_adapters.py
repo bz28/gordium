@@ -50,3 +50,18 @@ def test_a_place_with_no_settings_has_no_lookup(tmp_path):
 def test_the_outside_message_names_the_place_from_its_settings():
     src = (Path(ithaca_city.__file__).parent / "lookup.py").read_text(encoding="utf-8")
     assert "not the {PLACE.name}" in src and "City of Ithaca only" not in src
+
+
+def test_nothing_names_the_lookup_or_measuring_by_its_old_shared_path():
+    """Ithaca's lookup and measuring live in their place's folders: no code, test, doc or setting points a reader
+    at the old shared paths (the lookup and measure modules directly under each package)."""
+    import re
+    repo = Path(__file__).resolve().parents[3]
+    old = re.compile(r"model_measurement[./]measure(?![a-z_])|site_lookup[./]"
+                     r"(?:lookup|sources|suggest|context|endpoints|names|amendments)(?![a-z_])")
+    files = [repo / "pyproject.toml", repo / "CLAUDE.md"] + [p for top in ("packages", "apps", "docs")
+             for p in (repo / top).rglob("*") if p.suffix in {".py", ".md", ".yaml", ".toml", ".json"}]
+    found = [f"{p.relative_to(repo)}:{n}" for p in files if p.is_file()
+             for n, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1)
+             if old.search(line)]
+    assert found == []

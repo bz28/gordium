@@ -7,7 +7,7 @@ the checker worker, which answers one request at a time: a lookup given up on wo
 
 prints a {"step": "Finding the address…"} line as each stage starts (the box shows the latest, live), then, last,
 one JSON line: site_lookup's result, where the lot lands in the model (`frame`), and exactly what the
-Rhino side may write into the .3dm (`writes`, by each source's store policy in site_lookup/endpoints.yaml).
+Rhino side may write into the .3dm (`writes`, by each source's store policy in site_lookup/adapters/ithaca_city/endpoints.yaml).
 No AI; the map services' own answers, worked out by plain code."""
 import datetime as dt
 import json
