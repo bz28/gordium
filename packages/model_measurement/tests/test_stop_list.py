@@ -288,6 +288,8 @@ CASES = {
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
+    "flat_sloped": _plain(ground_assumed="flat", ground_fall=14.2),       # 106 Ithaca Rd's looked-up fall
+    "flat_unknown": _plain(ground_assumed="flat"),                        # no lookup ground at all
     "grade_with_others": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(40, 75, 48, 90, 0, 12, id="shed")],
                                 grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [44, 74.5, 0]],
                                 main_building="house",          # one spot grade at the shed: not at all its walls

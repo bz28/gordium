@@ -1137,7 +1137,18 @@ def after_lot_pick(facts, picked_lot):
         out["lot_id"] = picked_lot
         set_street_lines(out, None)          # the old lot's street lines and their names go with it
         out.pop("plan_north_deg", None)      # the looked-up lot's turn belonged to it
+        out.pop("ground_fall", None)         # and so did its ground (lot_ground_dropped: the saved state's too)
     return out
+
+
+def lot_ground_dropped(saved_ui):
+    """The saved state once the architect puts another lot in place of the looked-up one (their survey, a lot they
+    drew, another outline picked): the looked-up ground fall was read on the old lot, so it no longer shows the lot
+    level (review round 3: a level reading kept after the lookup's doubtful lot was replaced let height and stories
+    pass on ground never read). Height and stories need review until the address is looked up again."""
+    saved_ui = dict(saved_ui)
+    saved_ui.pop("ground_fall", None)
+    return saved_ui
 
 
 def street_enter_keeps(facts):
@@ -3512,7 +3523,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         saved_ui["ground_kind"] = "spot"
         saved_ui["ground_source"] = SUGGESTED + " · " + label("ground", "ground")
     zs = [p[2] for p in writes.get("spots") or []]
-    if FLAT_GROUND and zs:                       # said, never used: how much the ground the lookup found falls
+    # how much the ground the lookup found falls: said, and from 0.5 ft (measure.FLAT_FALL_FT) it holds height and
+    # stories at needs review; the points themselves are never used. Only from a whole reading: with points missing
+    # (the elevation service's doubt) or fewer than three, a fall can't be told (one point reads 0.0, "level": a
+    # false pass, slope review round 1), so none is kept and the ground counts as unknown
+    whole = (details.get("ground") or {}).get("status") not in ("needs_review", "ask") and len(zs) >= GROUND_POINTS
+    if FLAT_GROUND and zs and whole:
         saved_ui["ground_fall"] = round(max(zs) - min(zs), 1)
     else:
         saved_ui.pop("ground_fall", None)
@@ -3599,7 +3615,8 @@ def pick_effect(what, outcome, facts, saved_ui):
         saved_ui["street_name"] = name
         saved_ui["street_source"] = ENTERED
     elif what in ("lot", "draw_lot"):
-        facts = after_lot_pick(facts, outcome) if outcome != facts.get("lot_id") else facts
+        if outcome != facts.get("lot_id"):             # another lot: the looked-up ground was read on the old one
+            facts, saved_ui = after_lot_pick(facts, outcome), lot_ground_dropped(saved_ui)
         facts["lot_surveyed"] = what == "lot"          # Use my survey…: a survey; drawn over the guide: not
         saved_ui = settle(saved_ui, "lot")
         if what == "draw_lot":
@@ -3840,10 +3857,13 @@ def _question(state):
     return " · ".join(asks) or None
 
 
-# The MVP assumes flat ground (Ben, 2026-10-20): flat at the lot level and finished, so height and stories are
-# checked (with "assuming flat ground" on their rows and in the report). The spot-grade, terrain and regrade paths
-# stay, behind this one switch: set it to False to bring the Ground row back.
+# The MVP assumes flat ground (Ben, 2026-10-20): flat at the lot level and finished (with "assuming flat ground" on
+# the height and stories rows and in the report). Height and stories are checked on it only where the lookup found
+# the lot level (measure.flat_assumption_unsafe: a fall under 0.5 ft); a sloping lot, or one with no ground looked
+# up, gives them needs review (2026-10-29). The spot-grade, terrain and regrade paths stay, behind this one switch:
+# set it to False to bring the Ground row back.
 FLAT_GROUND = True
+GROUND_POINTS = 3          # the fewest looked-up ground points a fall is read from (the lookup reads every corner + 1)
 ASSUMED_FLAT = "assuming flat ground"
 ASSUMED_SOURCE = "assumed (flat ground, the MVP's rule)"
 
@@ -3855,7 +3875,10 @@ def ground_facts(state, lot_level, flat=None):
     only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
     if FLAT_GROUND if flat is None else flat:
         return {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": lot_level, "grade_from": None,
-                "ground_assumed": "flat", **({"ground_fall": state["ground_fall"]} if state.get("ground_fall") else {})}
+                "ground_assumed": "flat",
+                # the looked-up fall, 0 too (level, known); None (unknown) removes one saved for an earlier lookup
+                # (Draw sets every key given and drops each None: slope review round 1, a stale 0.0 passed)
+                "ground_fall": state.get("ground_fall")}
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
     finished = kind == "regrade" or bool(state.get("no_regrading"))
@@ -3914,8 +3937,9 @@ def fact_sources(state, today, confirmed):
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED, chosen("corner")),
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
+        # (whether that decides height and stories is the measuring's: measure.flat_assumption_unsafe)
         "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
-                        "lot; height is checked as if flat)" if state.get("ground_fall") else ""),
+                        "lot)" if state.get("ground_fall") is not None else " (ground levels not read in full)"),
                         ASSUMED_SOURCE, None) if FLAT_GROUND else
                    fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                         "as drawn" if kind == "flat" else ground.get("source") or

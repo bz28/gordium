@@ -1456,6 +1456,36 @@ def tax_map_lot_area(polygon) -> dict:
     (73 x 90 -> 69 x 86 = 5,934 sf at the smallest). The one definition of the worst-case lot area."""
     return {"ft": TAX_MAP_TOLERANCE, "low": _r(polygon.buffer(-TAX_MAP_TOLERANCE, join_style=2).area),
             "high": _r(polygon.buffer(TAX_MAP_TOLERANCE, join_style=2).area)}
+# Flat ground ASSUMED (the Rhino MVP's switch, rhino_logic.FLAT_GROUND: facts["ground_assumed"] == "flat") is only
+# used where the lookup's ground shows the lot is flat. Height is measured from the grade plane (§325-3: the average
+# finished ground at the walls; where it slopes away, the lowest point within 6 ft), and on ground that falls F ft
+# the grade plane can sit up to about F below where a building drawn on the flat lot stands: so for a building AT
+# the height limit (the starting house is drawn there) any real fall can change the answer, and stories with it
+# (§325-3 STORY: a level counts once the floor above is over 6 ft above the grade plane). The line is therefore the
+# smallest fall the lookup can tell from level ground: USGS 3DEP lidar (QL2 or better, Lidar Base Specification)
+# repeats on smooth ground to within 6 cm (0.2 ft) and its overlapping swaths agree to within 8 cm (0.26 ft), so
+# level ground reads a fall of a few tenths of a foot; 0.5 ft (6 in) is above that. (It is not a "safe" fall: the
+# NYS Residential Code R401.3 asks finished ground to fall at least 6 in in the first 10 ft from a house, so real
+# grading at the walls can move the grade plane by that much on a lot the lookup reads level.) A fall of
+# FLAT_FALL_FT or more, or no whole reading of the ground, and height and stories need review.
+# What it leaves (said in the PR, for Ben): under 0.5 ft the flat assumption still decides, so a house drawn at the
+# limit on a lot falling 0.4 ft could be up to that much over, the same residual as assuming any lot flat; and the
+# fall is read at the lot's corners and middle only (a dip between them isn't seen).
+FLAT_FALL_FT = 0.5
+
+
+def flat_assumption_unsafe(facts: dict) -> str | None:
+    """Why the assumed flat ground can't decide height and stories, or None: the lookup's ground falls
+    FLAT_FALL_FT or more across the lot, or there is no lookup ground to show it is flat. Ground the architect
+    stated (no ground_assumed) is never second-guessed here."""
+    if facts.get("ground_assumed") != "flat":
+        return None
+    fall = facts.get("ground_fall")
+    if not isinstance(fall, (int, float)) or isinstance(fall, bool) or not 0 <= fall < math.inf:
+        return stop("flat_unknown")                   # no fall, or one that isn't a fall (NaN, negative, infinite)
+    return None if fall < FLAT_FALL_FT else stop("flat_sloped", fall=f"{fall:g}")   # level only when shown level
+
+
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
 
 
@@ -1972,6 +2002,19 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             if as_is is not None:
                 out[name]["measured_as_is"] = as_is
             elif as_is_readings:               # its readings disagree: kept, so what waits is said as it is
+                out[name]["measured_as_is_readings"] = as_is_readings
+    # flat ground assumed where it may not be: the same, its own reason (existing ground, above, already holds them)
+    why_flat = flat_assumption_unsafe(facts) if facts.get("grade_is") != "existing" else None
+    if why_flat:
+        for name in ("building_height", "stories"):
+            if out[name].get("value") is None and not out[name].get("readings"):
+                continue                       # nothing measured: its own reason says why
+            as_is = out[name].get("value")     # what flat ground gives: shown, never decides
+            as_is_readings = sorted({r["value"] for r in out[name].get("readings") or [] if r.get("value") is not None})
+            out[name] = _missing(name, why_flat)
+            if as_is is not None:
+                out[name]["measured_as_is"] = as_is
+            elif as_is_readings:
                 out[name]["measured_as_is_readings"] = as_is_readings
 
     # the accessory buildings (§325-25): every solid standing apart from the main building (one touching it, a

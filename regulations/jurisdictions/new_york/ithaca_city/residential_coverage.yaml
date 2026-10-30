@@ -33,7 +33,7 @@ districts: [R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU]
 parked:
   corner_lot_front: {name: "Corner lots: which side is the front", decided: "Ben's later list, 2026-10-25"}
   historic_flood: {name: "Historic district and flood zone lookups", decided: "Ben's later list, 2026-10-25"}
-  slope: {name: "Real ground slope (lots are treated as flat)", decided: "Ben's later list, 2026-10-25"}
+  slope: {name: "Real ground slope (lots are treated as flat; on a sloping lot height and stories need review)", decided: "Ben's later list, 2026-10-25"}
   survey_import: {name: "Survey import (CAD/PDF)", decided: "Ben's later list, 2026-10-25"}
   non_residential: {name: "Non-residential districts", decided: "Ben's later list, 2026-10-25"}
   chimney_fence: {name: "Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK)",

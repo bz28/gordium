@@ -290,9 +290,13 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      keeps the whole street, however many pieces the tax map drew it in, and stops at the corner; the command line
      says what it kept ("Ithaca Rd: 8 lot-line pieces, 75'-10" of frontage"). Where the lot line bends with no clear
      corner, Gordium asks, and needs your Yes or No (neither guess is safe).
-   - **Ground**: for now Gordium assumes the ground is **flat at the lot level and finished** (no regrading), so
-     height and stories are checked; their rows say "assuming flat ground", and so does the report. (Spot grades,
-     terrain and regrading come back in a later release.)
+   - **Ground**: for now Gordium assumes the ground is **flat at the lot level and finished** (no regrading); the
+     rows for height and stories say "assuming flat ground", and so does the report. That assumption decides them
+     only when Look up found the lot level (its ground falls less than 6 inches across the lot). Height is measured
+     from the average ground level at the walls (the grade plane, §325-3), so on a sloping lot, or with no ground
+     looked up, height and stories **need review**, saying how far the ground falls: check them against your
+     survey. (Spot grades, terrain and regrading, which let Gordium check them on a slope, come back in a later
+     release.)
    - An amber line appears when the box can't decide something itself, with what to do (for example "This lot
      faces two streets: pick the front").
 
@@ -432,7 +436,7 @@ lot the tax map allows:
 - side yard, southwest 12'-0 1/2" (needs 10'-0"); northeast, 12'-0 3/8";
 - coverage 21.7% (the limit is 25%).
 
-Four rows need review from the start, and that is Gordium being honest, not a mistake:
+Six rows need review from the start, and that is Gordium being honest, not a mistake:
 - **New structures at least 20 ft from an inlet wall or stream bank**: the start box's stream question was left
   Not answered, so this row waits on it ("say whether any inlet wall or stream bank … is within 20 ft of the lot").
   Answer it with the row's **Answer 2 questions…** button and the row is decided.
@@ -441,16 +445,19 @@ Four rows need review from the start, and that is Gordium being honest, not a mi
   yard's Proposed and Required show the range each can take, and the reason says so once: "Complies under every
   reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the
   zoning office".
-- **Eaves into front yard** waits on the same question, and says the same.
+- **Eaves into front yard** waits on the same question, and on the height (its limit grows with the height bonus,
+  and the height waits on the ground, below).
+- **Building height** (35'-0", at the limit) and **Stories** (3, at the limit): the lookup found the ground falls
+  about 14.2 ft across this lot, and Gordium is assuming it flat, so neither can be decided: "the ground falls about
+  14.2 ft across the lot, but Gordium assumes it flat: height is measured from the average ground level at the
+  walls (the grade plane, §325-3), which Gordium can't set yet: check height and stories against your survey". The
+  header's Ground line says the same. On a lot the lookup finds level, both comply.
 - **Private garage: not more than three cars**: the start box's garage question was left Not answered, so this row
   waits on it ("enter how many cars the lot's private garages hold, all together …"). Answer it with the row's
   **Enter the cars the private garages hold…** button: three or fewer complies; over three, the row then asks how
   many garages there are (whether the three cars are for each garage or the whole lot is an open question).
 
-**Building height**: 35'-0" is at the limit and complies. The height rule's taller-house bonus reads the rear yard,
-but at 35 ft or under the bonus never comes into it, so the open question doesn't matter.
-
-Stories 3 complies, at the limit, saying "assuming flat ground". Lot area complies even at the tax map's worst case.
+Lot area complies even at the tax map's worst case.
 
 ### Simple tests
 
@@ -465,8 +472,9 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
    turns red.
 4. **Undo, then pull the rear wall 11 ft back** (Cmd+Shift+click the back face, Gumball 11). Lot coverage 29.7%
    against 25%: **does not comply**, even on the largest lot the tax map allows.
-5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply**,
-   4'-0" over (the height doesn't depend on the lot lines). Only the part above 35'-0" turns red.
+5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). On this sloping lot Building height 39'-0" still
+   **needs review** (the ground, as above). On a lot the lookup finds level it **does not comply**, 4'-0" over
+   (the height doesn't depend on the lot lines), and only the part above 35'-0" turns red.
 6. **Undo, then move the southwest wall 3 ft out** (Cmd+Shift+click the face on your left, seen from the street).
    Side yard, Southwest 9'-0 1/2": **needs review**, up to 2'-11 1/2" short (it complies if the tax map's line is out
    the lucky way). **Move it 5 ft out instead:** 7'-0 1/2": **does not comply**, at least 0'-11 3/8" short (rounded
@@ -481,7 +489,8 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 9. **Move one floor on its own** (Floor 2, 3 ft to the right, seen from the street). Stories needs review: "floors misaligned".
 10. **The height bonus** (§325-16C: a taller house if every yard is larger): raise the roof 3 ft (38'-0"), move the
     house 3 ft back, and pull each side wall 3 ft in. On this lot Building height **needs review**: the bonus needs
-    the rear yard larger too, and which lines are the rear lot line is the open question above.
+    the rear yard larger too, and which lines are the rear lot line is the open question above (and the ground, as
+    above).
 11. **Delta in words, true however the lot lines lie:** after test 2 the Front yard row reads "≥ +5'-0 5/8""
     (at least that much to spare); in test 6 the Southwest side yard reads "up to 2'-11 1/2" short" (3 ft out: it
     may comply) and "at least 0'-11 3/8" short" (5 ft out: the red strip). A maximum passed says "over" instead
