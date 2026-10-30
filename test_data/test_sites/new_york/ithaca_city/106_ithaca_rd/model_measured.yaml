@@ -139,3 +139,39 @@ measurements:
   accessory_distances_apply:
     value: null
     from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'
+  adu_detached:
+    value: null
+    from: 'not measured: say whether the accessory dwelling unit is attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing accessory building or new construction (§325-3B, §325-28C(7))'
+  adu_existing_building:
+    value: null
+    from: 'not measured: say whether the accessory dwelling unit is attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing accessory building or new construction (§325-3B, §325-28C(7))'
+  adus_on_parcel:
+    value: null
+    from: 'not measured: enter how many accessory dwelling units are on the parcel (§325-28C(1): one at most)'
+  adu_bedrooms:
+    value: null
+    from: 'not measured: enter the accessory dwelling unit''s bedrooms (§325-28C(3): two at most)'
+  adu_floor_area:
+    value: null
+    from: 'not measured: enter the attached accessory dwelling unit''s floor area and the main building''s, the ADU included (§325-28C(7)(a): 40% at most)'
+  primary_floor_area:
+    value: null
+    from: 'not measured: enter the attached accessory dwelling unit''s floor area and the main building''s, the ADU included (§325-28C(7)(a): 40% at most)'
+  adu_footprint:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_height:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_stories:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_front_yard:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_side_yard:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_rear_yard:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'

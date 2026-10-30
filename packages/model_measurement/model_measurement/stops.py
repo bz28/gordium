@@ -130,6 +130,13 @@ STOPS = {
                       "or detached (0 if there is none; a carport isn't enclosed) (chart p.2 notes 6 and 7)",
     "no_private_garages": "enter how many private garages are on the lot, an attached garage included (chart p.2 notes 6 "
                           "and 7: needed when the cars are over the limit)",
+    "no_adu_kind": "say whether the accessory dwelling unit is attached (in or on the main building) or detached (its "
+                   "own building) and, if detached, whether it is in an existing accessory building or new construction "
+                   "(§325-3B, §325-28C(7))",
+    "no_adus_on_parcel": "enter how many accessory dwelling units are on the parcel (§325-28C(1): one at most)",
+    "no_adu_bedrooms": "enter the accessory dwelling unit's bedrooms (§325-28C(3): two at most)",
+    "no_adu_floor_area": "enter the attached accessory dwelling unit's floor area and the main building's, the ADU "
+                         "included (§325-28C(7)(a): 40% at most)",
     "no_south_hill": "say whether the lot is in the South Hill Overlay District (§325-8E, on the City's zoning map)",
     "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
@@ -139,6 +146,16 @@ STOPS = {
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
     "no_main_building": "more than one building: pick the main building",
+    "no_adu_building": "pick the detached accessory dwelling unit's building (the solid it is in) with Pick the ADU's "
+                       "building…",
+    "no_detached_adu": "no detached accessory dwelling unit is said to be on the lot",
+    "adu_not_found": "the solid picked as the accessory dwelling unit's building is no longer in the model: pick it again",
+    "adu_is_main": "the solid picked as the accessory dwelling unit's building is the main building or touches it (part "
+                   "of it, §325-18A): pick the ADU's own building, or say the ADU is attached",
+    "adu_ground": "the spot grades don't give the ground at the accessory dwelling unit's own walls (§325-3 GRADE "
+                  "PLANE): place spot grades around its building",
+    "adu_stories_unclear": "the accessory dwelling unit's building, {height} ft tall, could hold up to {most} stories "
+                           "(7 ft a story, R305.1): draw each story as its own solid standing on the one below",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't inside the lot: {what}",
     "open_solid": "a building isn't a closed solid: {what}",

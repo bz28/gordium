@@ -37,6 +37,8 @@ format report from it.
   | `lot_id`, `main_building` | only when there is more than one candidate |
   | `primary_buildings`, `primary_buildings_same_use` | how many primary buildings stand on the lot, the main one included (§325-3B PRIMARY STRUCTURE), and whether every one holds the lot's use (§325-8B(1): each needs its own lot area). The count is read from the drawing where it can be: one building, or every solid standing apart from the main building touching it, listed in `accessory_buildings`, or too small or low to hold a home (`_could_be_principal`): 1. Otherwise two readings, every one an accessory building (1) / every one that could hold a home a primary building (1 more each), until the count is stated |
   | `garage_cars`, `private_garages` | the cars the lot's private garages hold, all together (every enclosed garage, attached or detached; 0 for none), and how many private garages there are: the chart's car limit (p.2 notes 6 and 7: three cars in R-1a to R-2b, six per building in R-2c). The count of garages matters only when the cars are over the limit (whether the limit is for each garage or the lot is an open question) |
+  | `adu_building` | the id of the solid that is the detached accessory dwelling unit's building, picked in Rhino as the main building is (never guessed). While an ADU may be on the lot and may be detached (`accessory_dwelling_unit` and `adu_detached` not no), it is never the main building or a freestanding deck, it is measured on its own (`adu_*` below), and it is left out of §325-25's accessory measurements and of the count of primary buildings: the ADU's own rules hold it to §325-25 as well as §325-28 (research: `docs/research/2026-10-29_accessory_dwelling_units.md`). Said no to either, it is an ordinary building again |
+  | `adu_detached`, `adu_existing_building`, `adus_on_parcel`, `adu_bedrooms`, `adu_floor_area`, `primary_floor_area` | the accessory dwelling unit (§325-3B, §325-28C): detached or attached; for a detached one, in an existing accessory building or new; how many ADUs the parcel has; its bedrooms; for an attached one, its floor area and the primary structure's, the ADU included |
   | `stories`, `sleeping_rooms`, `parking_spaces` | not drawn in a massing model; the rules that need them say "needs review" until they're entered |
 
 ## How each number is found
@@ -61,6 +63,7 @@ one), and each lot-line measurement says the outline was cleaned (its `from` tex
 | Building area | every building on the lot seen from above, principal and accessory (garages count), porches, decks and cantilevered floors included (findings coverage_seen_from_above, garages_count); eaves: every reading of building_area's open question | building_area: "the total area … of the principal building and all accessory buildings" |
 | Height | ground level to the highest level of a flat or mansard roof (its highest section is level, or within a drainage slope of level: under 1/2 inch per foot); a pitched roof midway between eave and ridge of its highest section (finding pitched_roof_midpoint), with the eave read every way height_of_building's open question lists: the underside of the lowest eave, the top of the wall plate, the drip edge | height_of_building: "to the highest level of a flat or mansard roof or to the average height of a pitched … roof" |
 | Yards to the eaves (`front_yard_eaves`, …) | the same yards measured to the building seen from above, eaves included, for §325-18B (eaves may project up to 2 ft into a required yard) | yard_projections: "shall not project more than two feet into any required yard" |
+| Detached ADU (`adu_footprint`, `adu_height`, `adu_stories`, `adu_front_yard`, `adu_side_yard`, `adu_rear_yard`) | the picked building on its own: its footprint seen from above (with a candidate eave, read with and without it: "footprint" isn't defined); its height as the main building's is measured, from the grade plane at its own walls (spot grades given) or the ground level given, waiting whenever the main building's height waits for the ground; its stories read from the drawing only (a plain solid holds at most one story per 7 ft, R305.1: at most two is measured as two, never asked; more needs its floors drawn); its least distances from the street lot line(s), a side lot line and the rear lot line, every reading of which lines are side and rear | §325-28C(7)(c), (8)(b)[2] |
 | Accessory buildings | how many solids stand apart from the main building; their least distance from the street lot line(s), a side lot line and the rear lot line; whether §325-25C's distances apply (`accessory_distances_apply`: frame, by law; otherwise every reading of 325-25C#1) | side_yard: accessory_structures_follow_325_25 |
 
 The yards are measured to the nearest part of the building with its eaves left out (the finding yards_to_nearest_part:
@@ -236,6 +239,19 @@ Every reason the code gives today comes from the table:
   into a solid)" (the same for a surface or anything else that isn't a solid or mesh: it is reported, never left
   out, since leaving it out would undercount coverage).
 - **Accessory buildings:** "no accessory building on the lot (every solid is the main building or touches it)".
+- **A detached accessory dwelling unit** (§325-28C): "pick the detached accessory dwelling unit's building (the solid
+  it is in) with Pick the ADU's building…"; "no detached accessory dwelling unit is said to be on the lot" (its rules
+  don't apply then); "the solid picked as the accessory dwelling unit's building is no longer in the model: pick it
+  again"; "the solid picked as the accessory dwelling unit's building is the main building or touches it (part of it,
+  §325-18A): pick the ADU's own building, or say the ADU is attached"; "the spot grades don't give the ground at the
+  accessory dwelling unit's own walls (§325-3 GRADE PLANE): place spot grades around its building"; "the accessory
+  dwelling unit's building, {height} ft tall, could hold up to {most} stories (7 ft a story, R305.1): draw each story
+  as its own solid standing on the one below"; and its stated facts: "say whether the accessory dwelling unit is
+  attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing
+  accessory building or new construction (§325-3B, §325-28C(7))"; "enter how many accessory dwelling units are on the
+  parcel (§325-28C(1): one at most)"; "enter the accessory dwelling unit's bedrooms (§325-28C(3): two at most)";
+  "enter the attached accessory dwelling unit's floor area and the main building's, the ADU included (§325-28C(7)(a):
+  40% at most)".
 - **The height:** "no roof plane of the pitched roof's highest section lies over the walls: the wall plate can't
   be found"; "the roof's shape can't be read (no faces open to the sky)"; "another solid's height can't be
   read: …"; "too many solids with open roof questions to list every reading: pick the main building's parts, or

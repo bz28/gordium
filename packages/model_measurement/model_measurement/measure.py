@@ -46,7 +46,10 @@ STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking
           "home_occupation_unit_area": "sf", "accessory_dwelling_unit": "yes_no",
           "primary_buildings": "count", "primary_buildings_same_use": "yes_no",
           "south_hill_overlay": "yes_no", "stream_near_lot": "yes_no", "stream_distance": "ft",
-          "garage_cars": "count", "private_garages": "count"}
+          "garage_cars": "count", "private_garages": "count",
+          # an accessory dwelling unit (§325-28): its kind, and what the model doesn't show
+          "adu_detached": "yes_no", "adu_existing_building": "yes_no", "adus_on_parcel": "count",
+          "adu_bedrooms": "count", "adu_floor_area": "sf", "primary_floor_area": "sf"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
        "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
        "occupants": "no_occupants", "occupants_most_in_one_unit": "no_occupant_split",
@@ -57,16 +60,26 @@ ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "
        "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_household",
        "primary_buildings": "no_primary_buildings", "primary_buildings_same_use": "no_primary_buildings",
        "south_hill_overlay": "no_south_hill", "stream_near_lot": "no_stream", "stream_distance": "no_stream",
-       "garage_cars": "no_garage_cars", "private_garages": "no_private_garages"}
+       "garage_cars": "no_garage_cars", "private_garages": "no_private_garages",
+       "adu_detached": "no_adu_kind", "adu_existing_building": "no_adu_kind", "adus_on_parcel": "no_adus_on_parcel",
+       "adu_bedrooms": "no_adu_bedrooms", "adu_floor_area": "no_adu_floor_area",
+       "primary_floor_area": "no_adu_floor_area"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",
          "rear_yard_eaves": "ft", "accessory_front_yard": "ft", "accessory_side_yard": "ft",
-         "accessory_rear_yard": "ft", "accessory_buildings": "count", "accessory_distances_apply": "yes_no"}
+         "accessory_rear_yard": "ft", "accessory_buildings": "count", "accessory_distances_apply": "yes_no",
+         "adu_footprint": "sf", "adu_height": "ft", "adu_stories": "count", "adu_front_yard": "ft",
+         "adu_side_yard": "ft", "adu_rear_yard": "ft"}
 YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
 EAVE_YARDS = tuple(f"{y}_eaves" for y in YARDS)
 ACCESSORY_YARDS = ("accessory_front_yard", "accessory_side_yard", "accessory_rear_yard")
-LOT_LINE_MEASURES = ("lot_width", "lot_depth") + YARDS + EAVE_YARDS + ACCESSORY_YARDS   # need the street side
+# a detached accessory dwelling unit's building, the solid the architect picks (adu_building, §325-28C)
+ADU_YARDS = ("adu_front_yard", "adu_side_yard", "adu_rear_yard")
+ADU_MEASURES = ("adu_footprint", "adu_height", "adu_stories") + ADU_YARDS
+ADU_STORIES = 2           # §325-28C(7)(c)[2]: a new detached ADU's "maximum height of two stories": a plain solid
+                          # that can hold no more is measured at the most it can hold (_adu_building)
+LOT_LINE_MEASURES = ("lot_width", "lot_depth") + YARDS + EAVE_YARDS + ACCESSORY_YARDS + ADU_YARDS   # need the street
 STREAM_SETBACK = 20       # ft: §325-26, the only distance stream_near_lot is asked about ("within 20 ft of the lot")
 TOUCH = 0.1               # ft: a solid this close to the main building (in plan) is part of it (a porch, steps)
 
@@ -1434,7 +1447,7 @@ TAX_MAP_SLACK = {"front_yard": TAX_MAP_TOLERANCE, "side_yard_smaller": TAX_MAP_T
                  **{name: TAX_MAP_TOLERANCE for name in ("front_yard_eaves", "side_yard_smaller_eaves",
                                                          "side_yard_larger_eaves", "rear_yard_eaves",
                                                          "accessory_front_yard", "accessory_side_yard",
-                                                         "accessory_rear_yard")}}
+                                                         "accessory_rear_yard") + ADU_YARDS}}
 
 
 def tax_map_lot_area(polygon) -> dict:
@@ -1869,6 +1882,16 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     grade = facts.get("grade_elevation")
     # objects are told apart by id below (spans, outlines): two with one id are refused (_building_problems)
     why_building = _building_problems(buildings)
+    # a detached accessory dwelling unit's building (§325-28C), the solid the architect picks (adu_building), never
+    # guessed. For the main-building pick and the main yards it is listed as an accessory building (never the main
+    # building, never a freestanding deck); it is measured on its own (_adu_building, _adu_yards) and left out of
+    # §325-25's accessory measurements: its own rows hold it to §325-25 as well as §325-28 (research:
+    # docs/research/2026-10-29_accessory_dwelling_units.md), so it is never judged twice or two ways
+    adu, why_adu = (None, why_building) if why_building else _adu_pick(_stacks(buildings), facts)
+    adu_ids = _parts(adu) if adu is not None else []
+    if adu_ids:
+        facts = dict(facts, accessory_buildings=list(dict.fromkeys([*(facts.get("accessory_buildings") or []),
+                                                                    *adu_ids])))
     # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
@@ -1954,6 +1977,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # porch, deck, steps or an attached garage, is part of it). Counted even without a lot outline.
     parts_of = _attached(main, buildings) if main is not None and not why_building else []
     detached = [b for b in buildings if main is not None and b is not main and b not in parts_of]
+    adu = next((b for b in buildings if adu_ids[0] in _parts(b)), None) if adu_ids else None   # as _stacks joined it
+    if adu is not None and main is not None and (adu is main or any(adu is b for b in parts_of)):
+        adu, why_adu = None, stop("adu_is_main")         # touching the main building: part of it (§325-18A)
+    detached = [b for b in detached if b is not adu]
     out["accessory_buildings"] = (
         _missing("accessory_buildings", why_building or why_main) if why_building or why_main else
         _record("accessory_buildings", "count", len(detached),
@@ -1961,6 +1988,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                 [i for b in detached for i in _parts(b)]))
     out["accessory_distances_apply"] = _distances_apply(facts, detached, why_building or why_main)
     out["primary_buildings"] = _primary_buildings(out["primary_buildings"], facts, detached, why_building or why_main)
+    _adu_building(out, adu, why_adu, buildings, facts, grade, why_grade)
 
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None
@@ -2054,7 +2082,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     else:
         out["building_area"] = _coverage(buildings, views, facts, main)
     if crosses:                         # coverage, the height and the accessory count: whatever else follows
-        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached, buildings)
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached, buildings, adu)
 
     if why_street:
         return out
@@ -2066,6 +2094,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                    "the average length of the two side lot lines", [lot.id], lines["question"],
                                    lines["basis"]["depth"])
 
+    if adu is not None:                 # the ADU's building on its own: whatever is wrong with the main building's
+        _adu_yards(out, lot, lines, adu, both(why_plan, stop("outside_lot", what="the ADU's building")
+                                              if place.get(adu["id"]) == "off" else None))
     # every other reason the plan can't be trusted, on its own (never read off an `or` chain: review round 9)
     why_rest = why_building or why_plan or why_main or (why_grade if plan_level is None else None)
     why_yards = both(why_building, why_main_off) if why_building else why_main_off or why_rest
@@ -2090,8 +2121,115 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         for name in ACCESSORY_YARDS:
             out[name] = dict(_missing(name, why_acc_off), objects=unplaced_ids(detached))
     if crosses:
-        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached, buildings)
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached, buildings, adu)
     return out
+
+
+def _adu_pick(buildings: list[dict], facts: dict) -> tuple:
+    """(the ADU's building, None) or (None, why): the building the architect picked as the detached ADU's
+    (adu_building names one of its solids), as _stacks joins them. Only while an ADU may be on the lot and may be
+    detached: an answer of no to either and the solid is an ordinary building again (an accessory building, measured
+    by §325-25's rows: never left unjudged)."""
+    if facts.get("accessory_dwelling_unit") is False or facts.get("adu_detached") is False:
+        return None, stop("no_detached_adu")
+    picked = facts.get("adu_building")
+    if not picked:
+        return None, stop("no_adu_building")
+    adu = next((b for b in buildings if picked in _parts(b)), None)
+    if adu is None:
+        return None, stop("adu_not_found")
+    if facts.get("main_building") in _parts(adu):
+        return None, stop("adu_is_main")
+    return adu, None
+
+
+def _as(name: str, record: dict) -> dict:
+    """A measurement made by another's code (the height, the stories) under its own name and unit."""
+    return dict(record, definition=name, unit=UNITS[name])
+
+
+def _adu_building(out: dict, adu: dict | None, why: str | None, buildings: list[dict], facts: dict, grade,
+                  why_grade: str | None):
+    """The detached ADU's building (§325-28C(7)(c)): its footprint, its height and its stories, each measured as the
+    main building's are, from the ADU building's own ground. Its distances to the lot lines are _adu_yards's.
+
+    Footprint (not defined in Chapter 325): everything the building covers seen from above; where a pitched roof
+    reaches past the walls (a candidate eave) it is also read without it, and the two readings say so (a footprint
+    that complies only one way needs review). Height (§325-3 HEIGHT OF BUILDING): _height_of, from the grade plane at
+    the ADU building's own walls when spot grades are given (§325-3: the ground at ITS walls), else the ground level
+    given; whatever stops the main building's height for want of ground stops this one too (flat ground not said,
+    sloped ground, existing grade). Stories: _stories_whole, read from the drawing only: a plain solid h ft tall holds
+    at most floor(h / 7) stories (R305.1), so one 20 ft or lower holds at most two and the count is never asked."""
+    if why is not None:
+        for name in ADU_MEASURES:
+            out[name] = _missing(name, why)
+        return
+    view = _views(adu, facts, None)
+    objects = _parts(adu)
+    how = "the ADU's building seen from above (its building footprint)"
+    if view["candidate"]:
+        out["adu_footprint"] = _decide(
+            "adu_footprint", [("everything it covers, eaves included", view["above"].area, {}),
+                              ("what reaches past the walls read as an eave, left out", view["body"].area, {})],
+            how, objects, "whether the eaves count toward the ADU's building footprint (§325-28C(7)(c)[1]: "
+            "\"footprint\" isn't defined in Chapter 325)")
+    else:
+        out["adu_footprint"] = _record("adu_footprint", "sf", _r(view["above"].area), how, objects)
+    spots = facts.get("grade_points")
+    if why_grade:
+        g, why_g = None, why_grade
+    elif spots:                          # the ADU building's own grade plane, from the spot grades at ITS walls
+        g, why_g = _grade_from_points([adu], spots, [b for b in buildings if b is not adu])
+        why_g = stop("adu_ground") if why_g else _meets_ground([adu], spots, buildings)
+    else:
+        g, why_g = grade, None
+    if why_g:
+        out["adu_height"], out["adu_stories"] = _missing("adu_height", why_g), _missing("adu_stories", why_g)
+    else:
+        out["adu_height"] = _as("adu_height", _height(adu, g, facts))
+        stories = _as("adu_stories", _stories_whole([adu], g, None, None, called="the ADU's building"))
+        most = max((r["value"] for r in stories["readings"]), default=None)
+        if stories["value"] is None and most is not None and most <= ADU_STORIES:
+            # a plain solid that holds one story or two: at most the limit whichever, so the most is the value (a
+            # count it can't be over: never a pass the drawing doesn't support), and nothing is asked
+            stories = _record("adu_stories", "count", most, f"at most {most:g}: the most a solid "
+                              f"{_r(_rise(adu)):g} ft tall can hold (7 ft a story, R305.1)", objects)
+        elif stories["value"] is None and most is not None:      # it could hold more than two: draw the floors
+            stories["reason"] = stop("adu_stories_unclear", height=f"{_r(_rise(adu)):g}", most=f"{most:g}")
+        out["adu_stories"] = stories
+    if facts.get("grade_is") == "existing":     # finished ground decides, as for the main building
+        for name in ("adu_height", "adu_stories"):
+            if out[name].get("value") is not None or out[name].get("readings"):
+                out[name] = _missing(name, stop("existing_grade"))
+    # its distances to the lot lines: _adu_yards, once the lot lines are known (else the lot's own reason)
+
+
+def _adu_yards(out: dict, lot: "Lot", lines: dict, adu: dict, why: str | None):
+    """The ADU building's least distances, seen from above, from the street lot line(s) (on a corner lot, the
+    nearer street), from a side lot line and from the rear lot line, every reading of which lines are side and
+    rear: as an accessory building's are measured (_accessory_yards), for the ADU's building alone."""
+    if why:
+        for name in ADU_YARDS:
+            out[name] = _missing(name, why)
+        return
+    shape, objects = _projection(adu), [lot.id, *_parts(adu)]
+    d, p = _distance(lot.line(lot.street), shape)
+    out["adu_front_yard"] = _record("adu_front_yard", "ft", _r(d), "the least distance from the street lot "
+                                    "line(s) to the ADU's building", objects, p)
+    if lines["problem"]:
+        for name in ("adu_side_yard", "adu_rear_yard"):
+            out[name] = _missing(name, lines["problem"])
+        return
+    side, rear = [], []
+    for words, r in lines["readings"]:
+        d, p = min((_distance(lot.line(g), shape) for g in r["sides"]), key=lambda x: x[0])
+        side.append((words, d, {"points": p}))
+        d, p = _distance(lot.line(r["rear"]), shape)
+        rear.append((words, d, {"points": p}))
+    out["adu_side_yard"] = _decide("adu_side_yard", side, "the least distance from a side lot line to the ADU's "
+                                   "building", objects, lines["question"])
+    out["adu_rear_yard"] = _decide("adu_rear_yard", rear, "the least distance from the rear lot line to the ADU's "
+                                   "building", objects, lines["question"])
 
 
 def _crossed(lot: Lot, plan) -> set:
@@ -2104,7 +2242,7 @@ def _crossed(lot: Lot, plan) -> set:
 
 
 def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict, parts_of: list, detached: list,
-                    buildings: list):
+                    buildings: list, adu: dict | None = None):
     """A building that crosses a lot line stands partly on another lot: it fails every rule that measures it,
     whatever the readings or answers (the checker does that, check.crossing). Each measurement of a building
     records that building's own crossings, `crossings`: [{"who", "lines": street / side / rear}]: the main
@@ -2130,11 +2268,16 @@ def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict,
     for name in ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply"):
         if entries_acc and name in out:
             out[name]["crossings"] = entries_acc
-    known = {id(b) for b in group + list(detached)}
+    entries_adu = ([{"who": "the ADU's building", "lines": kinds(crossed[adu["id"]])}]
+                   if adu is not None and adu["id"] in crossed else [])
+    for name in ADU_MEASURES:           # the ADU's building partly on another lot: every ADU rule measuring it fails
+        if entries_adu and name in out:
+            out[name]["crossings"] = entries_adu
+    known = {id(b) for b in group + list(detached) + ([adu] if adu is not None else [])}
     entries_any = [{"who": f'building "{_parts(b)[0]}"', "lines": kinds(crossed[b["id"]])}
                    for b in buildings if b["id"] in crossed and id(b) not in known]
-    if (entries_main or entries_acc or entries_any) and "building_area" in out:
-        out["building_area"]["crossings"] = entries_main + entries_acc + entries_any
+    if (entries_main or entries_acc or entries_adu or entries_any) and "building_area" in out:
+        out["building_area"]["crossings"] = entries_main + entries_acc + entries_adu + entries_any
 
 
 def _attached(main: dict, buildings: list[dict]) -> list[dict]:
