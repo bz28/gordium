@@ -105,6 +105,23 @@ def test_two_places_need_a_picker_never_the_first_one(tmp_path):
     (lambda s: s["law"].pop("zoning_code"), "law names no zoning_code"),
     (lambda s: s["adapters"].pop("measurement"), "adapters names no measurement"),
     (lambda s: s["addresses"].update(tail=""), "addresses.tail is missing"),
+    (lambda s: s["addresses"].pop("shares_mail_as"), "addresses.shares_mail_as is missing"),
+    (lambda s: s["addresses"].pop("own_words"), "addresses.own_words must be a list of words"),
+    (lambda s: s["addresses"].pop("also_written"), "addresses.also_written must be a list of words"),
+    (lambda s: s["addresses"].update(zip_codes=[14850]), "addresses.zip_codes must be a list of words"),
+    (lambda s: s["addresses"].pop("state_words"), "addresses.state_words must be a list of words"),
+    (lambda s: s["addresses"].pop("county_words"), "addresses.county_words must be a list of words"),
+    (lambda s: s["addresses"].update(nearby_places="lansing"), "addresses.nearby_places must be a list of words"),
+    (lambda s: s["addresses"].update(shares_mail_with=[]), "addresses.shares_mail_with names none"),
+    (lambda s: s.update(sample_site={"address": "1 Main St"}), "sample_site must give a folder and an address"),
+    (lambda s: s["addresses"].update(nearby_places=["Elsewhere"]), "addresses.nearby_places must be lowercase"),
+    (lambda s: s["addresses"].update(own_words=["Testville"]), "addresses.own_words must be lowercase"),
+    (lambda s: s["coordinates"].update(epsg=True), "coordinates.epsg must be a whole number"),
+    (lambda s: s["addresses"].update(tail="Testville TS"), 'addresses.tail must start with ", "'),
+    (lambda s: s["law"].update(zoning_chart=None), "law.zoning_chart must name a file"),
+    (lambda s: s["districts"].update(chart_column="(T-1)|"), "districts.chart_column matches an empty heading"),
+    (lambda s: s["addresses"].update(nearby_places=["cayuga heights"]), "addresses.nearby_places must be single words"),
+    (lambda s: s["time_zone"].update(standard_utc_offset_hours=False), "standard_utc_offset_hours must be a number"),
 ])
 def test_settings_that_cant_be_used_are_refused_with_what_is_wrong(tmp_path, change, problem):
     import yaml
@@ -179,3 +196,33 @@ def test_the_check_above_finds_a_place_named_in_code():
     assert _code_strings('X = "regulations/jurisdictions/new_york/ithaca_city"\n') == [
         "regulations/jurisdictions/new_york/ithaca_city"]
     assert _code_strings('"""Docs: new_york/ithaca_city."""\nY = 1  # new_york/ithaca_city\n') == []
+
+
+def test_the_plugin_loads_with_the_fewest_address_words_the_check_accepts(tmp_path):
+    """The check above and the plugin agree: settings it lets through (here every list it allows to be empty is
+    empty, and one place shares the mail) make a place.json rhino_logic loads and reads addresses with."""
+    import importlib.util
+    import yaml
+    settings = yaml.safe_load((FAKE / "jurisdiction.yaml").read_text(encoding="utf-8"))
+    settings["addresses"].update(also_written=[], county_words=[], nearby_places=[], shares_mail_with=["Elsewhere"])
+    root = tmp_path / "repo"
+    folder = root / "regulations/jurisdictions/test_state/fewest"
+    folder.mkdir(parents=True)
+    (folder / "jurisdiction.yaml").write_text(yaml.safe_dump(settings), encoding="utf-8")
+    plugin = tmp_path / "plugin"
+    plugin.mkdir()
+    shutil.copy(REPO / "packages/design_checker/design_checker/rhino_logic.py", plugin)
+    (plugin / "place.json").write_text(registry.plugin_file_text(root), encoding="utf-8")
+    spec = importlib.util.spec_from_file_location("rhino_logic_fewest", plugin / "rhino_logic.py")
+    logic = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(logic)
+    assert "may instead be in the Elsewhere, which" in logic.IN_CITY_QUESTION
+    assert logic.CITY_SUFFIX == ", Testville, TS"
+
+
+def test_a_law_file_named_by_no_value_is_a_plain_error_never_none(tmp_path):
+    import yaml
+    settings = yaml.safe_load((FAKE / "jurisdiction.yaml").read_text(encoding="utf-8"))
+    p = registry.Place(FAKE, settings | {"law": {"zoning_code": "code.pdf", "zoning_chart": None}})
+    with pytest.raises(UnknownPlace, match="names no zoning_chart under law"):
+        p.law_file("zoning_chart")
