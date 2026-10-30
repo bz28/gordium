@@ -30,7 +30,9 @@ def test_ithaca_gets_its_own_lookup_and_its_settings():
 
 
 def test_a_second_place_gets_its_own_lookup_never_ithacas(monkeypatch):
+    from rule_format.place import place
     own = types.ModuleType("site_lookup.adapters.fake_town")       # its own adapter, as its folder would give it
+    own.sources = types.SimpleNamespace(PLACE=place(FAKE))         # serving its own place
     monkeypatch.setitem(sys.modules, "site_lookup.adapters.fake_town", own)
     assert adapter(FAKE) is own and adapter(FAKE) is not ithaca_city
 
@@ -65,3 +67,23 @@ def test_nothing_names_the_lookup_or_measuring_by_its_old_shared_path():
              for n, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1)
              if old.search(line)]
     assert found == []
+
+
+def test_a_place_naming_another_places_lookup_is_a_plain_error(tmp_path):
+    """A lookup folder holds its own place's boundary codes and address ending: a second place that names Ithaca's
+    folder would be looked up as Ithaca (its SWIS codes, its "outside the City" answer), so it is refused."""
+    import yaml
+    settings = yaml.safe_load((FAKE / "jurisdiction.yaml").read_text(encoding="utf-8"))
+    settings["adapters"]["lookup"] = "ithaca_city"
+    folder = tmp_path / "regulations/jurisdictions/test_state/borrower"
+    folder.mkdir(parents=True)
+    (folder / "jurisdiction.yaml").write_text(yaml.safe_dump(settings), encoding="utf-8")
+    with pytest.raises(UnknownPlace, match="lookup adapter 'ithaca_city' serves new_york/ithaca_city, not .*borrower"):
+        adapter(folder)
+
+
+def test_the_command_line_names_an_unknown_place_in_one_line(capsys):
+    from site_lookup.__main__ import main
+    assert main(["--place", "nowhere/x", "106 Ithaca Rd"]) == 2
+    out = capsys.readouterr().out
+    assert out.startswith("no settings for") and "Traceback" not in out

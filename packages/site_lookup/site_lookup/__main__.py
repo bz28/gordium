@@ -7,7 +7,7 @@ import sys
 
 from rule_format.rulebook import utf8_console
 
-from rule_format.place import only_place
+from rule_format.place import UnknownPlace, only_place
 
 from .adapters import adapter
 from .http import Http
@@ -38,8 +38,12 @@ def main(argv: list[str]) -> int:
     if len(args) != 1 or args[0] in ("-h", "--help"):
         print(__doc__.strip())
         return 2
-    place = where or only_place("python -m site_lookup", "say which with --place <state>/<place>")
-    r = adapter(place).lookup.lookup(args[0], Http())
+    try:
+        found = adapter(where or only_place("python -m site_lookup", "say which with --place <state>/<place>"))
+    except UnknownPlace as e:
+        print(e)
+        return 2
+    r = found.lookup.lookup(args[0], Http())
     print(f"{r['query']}: {r['status']}" + (f" · {r['message']}" if r["message"] else ""))
     for name, f in r["facts"].items():
         d = r["details"][name]

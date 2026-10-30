@@ -10,12 +10,18 @@ from rule_format.place import UnknownPlace, place
 
 def adapter(where):
     """The lookup code of the place `where` (as rule_format.place.place takes it). A place with no settings, or whose
-    settings name a lookup folder that isn't here, is a plain error (UnknownPlace), never another place's lookup."""
+    settings name a lookup folder that isn't here, or one that serves another place (a folder holds its own place's
+    boundary codes and address ending: sources.PLACE), is a plain error (UnknownPlace), never another place's lookup."""
     p = place(where)
     name = p.adapter("lookup")
     try:
-        return importlib.import_module(f"{__name__}.{name}")
+        found = importlib.import_module(f"{__name__}.{name}")
     except ModuleNotFoundError as e:
         if e.name != f"{__name__}.{name}":
             raise
         raise UnknownPlace(f"{p.key}: its lookup adapter {name!r} isn't in site_lookup/adapters/") from None
+    serves = getattr(getattr(found, "sources", None), "PLACE", None)
+    if getattr(serves, "key", None) != p.key:
+        raise UnknownPlace(f"{p.key}: its lookup adapter {name!r} serves "
+                           f"{getattr(serves, 'key', 'no place')}, not {p.key}: give the place a lookup of its own")
+    return found
