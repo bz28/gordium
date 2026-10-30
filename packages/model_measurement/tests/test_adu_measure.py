@@ -174,3 +174,51 @@ def test_stated_values_are_measured_as_stated_and_blanks_stop():
     assert fact_problems({"adu_building": "x", "adu_detached": True, "adu_existing_building": False,
                           "adus_on_parcel": 1, "adu_bedrooms": 0, "adu_floor_area": 0, "primary_floor_area": 0}) == []
 
+
+
+def test_in_the_primary_front_yard_when_nearer_the_street_than_the_main_building():
+    """FRONT YARD (§325-3B): between the main building and the front lot line, its depth the least distance from the
+    front lot line to the front of the main building: here 25 ft (the house's front wall at y = 25)."""
+    assert _m(HOUSE, ADU, **DETACHED)["adu_in_primary_front_yard"]["value"] is False       # 70 ft back
+    beside = box(38, 20, 48, 40, 0, 18, id="adu")          # 20 ft from the street: 5 ft nearer than the house
+    assert _m(HOUSE, beside, **DETACHED)["adu_in_primary_front_yard"]["value"] is True
+    level = box(38, 25, 48, 40, 0, 18, id="adu")           # level with the house's front: on the yard's edge only
+    assert _m(HOUSE, level, **DETACHED)["adu_in_primary_front_yard"]["value"] is False
+
+
+def test_a_corner_lot_reads_each_street_as_the_primary_one():
+    """South St (y = 0) and East St (x = 50). The ADU 30..45 x 70..90: 70 ft from South St (house 25: no), 5 ft from
+    East St (house 50 - 35 = 15: yes). Which is primary is open (325-28C#1): both readings, no value."""
+    facts = {**DETACHED, "corner_lot": True, "street_line": [[[0, 0], [50, 0]], [[50, 0], [50, 100]]],
+             "street_ids": ["South St", "East St"], "address_street_line": [[[0, 0], [50, 0]]]}
+    got = _m(HOUSE, ADU, **facts)["adu_in_primary_front_yard"]
+    assert got["value"] is None and sorted(r["value"] for r in got["readings"]) == [False, True]
+    assert "325-28C#1" in got["reason"]
+    away = box(2, 80, 12, 95, 0, 18, id="adu")              # 80 from South St, 38 from East St: no either way
+    assert _m(HOUSE, away, **facts)["adu_in_primary_front_yard"]["value"] is False
+    unnamed = _m(HOUSE, ADU, **{**facts, "street_ids": None})["adu_in_primary_front_yard"]
+    assert unnamed["value"] is None and unnamed["reason"]
+
+
+def test_in_the_front_yard_waits_for_the_main_building():
+    off = box(60, 25, 80, 55, id="house")                  # the main building wholly off the lot
+    got = _m(off, ADU, **DETACHED)["adu_in_primary_front_yard"]
+    assert got["value"] is None and got["reason"] == stop("outside_lot", what="the main building")
+
+
+def test_where_the_front_of_the_main_building_is_is_read_every_way():
+    """The house's walls 10..35 x 25..55 to 10 ft; its gable roof 2 ft past the walls at each eave (y 23..57). An ADU
+    whose front is at y = 24 is nearer the street than the walls (25) but not than the eave (23): the answer depends
+    on where the front of the main building is, so both readings and the question are said."""
+    walls = box(10, 25, 35, 55, 0, 10, id="house")
+    base = [(10, 23), (35, 23), (35, 57), (10, 57)]
+    roof = {"id": "house roof", "problems": [], "faces": [
+        {"points": [[x, y, 10] for x, y in base]},
+        {"points": [[10, 23, 10], [35, 23, 10], [35, 40, 16], [10, 40, 16]]},
+        {"points": [[10, 57, 10], [35, 57, 10], [35, 40, 16], [10, 40, 16]]},
+        {"points": [[10, 23, 10], [10, 40, 16], [10, 57, 10]]},
+        {"points": [[35, 23, 10], [35, 40, 16], [35, 57, 10]]}]}
+    adu = box(38, 24, 48, 40, 0, 18, id="adu")
+    got = _m(walls, roof, adu, **DETACHED)["adu_in_primary_front_yard"]
+    assert got["value"] is None and {r["value"] for r in got["readings"]} == {False, True}
+    assert "front of the main building" in got["reason"]

@@ -70,16 +70,17 @@ UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area"
          "rear_yard_eaves": "ft", "accessory_front_yard": "ft", "accessory_side_yard": "ft",
          "accessory_rear_yard": "ft", "accessory_buildings": "count", "accessory_distances_apply": "yes_no",
          "adu_footprint": "sf", "adu_height": "ft", "adu_stories": "count", "adu_front_yard": "ft",
-         "adu_side_yard": "ft", "adu_rear_yard": "ft"}
+         "adu_side_yard": "ft", "adu_rear_yard": "ft", "adu_in_primary_front_yard": "yes_no"}
 YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
 EAVE_YARDS = tuple(f"{y}_eaves" for y in YARDS)
 ACCESSORY_YARDS = ("accessory_front_yard", "accessory_side_yard", "accessory_rear_yard")
 # a detached accessory dwelling unit's building, the solid the architect picks (adu_building, §325-28C)
 ADU_YARDS = ("adu_front_yard", "adu_side_yard", "adu_rear_yard")
-ADU_MEASURES = ("adu_footprint", "adu_height", "adu_stories") + ADU_YARDS
+ADU_FRONT = "adu_in_primary_front_yard"    # yes/no: §325-28C(4), "ADUs may not be located in the primary front yard"
+ADU_MEASURES = ("adu_footprint", "adu_height", "adu_stories") + ADU_YARDS + (ADU_FRONT,)
 ADU_STORIES = 2           # §325-28C(7)(c)[2]: a new detached ADU's "maximum height of two stories": a plain solid
                           # that can hold no more is measured at the most it can hold (_adu_building)
-LOT_LINE_MEASURES = ("lot_width", "lot_depth") + YARDS + EAVE_YARDS + ACCESSORY_YARDS + ADU_YARDS   # need the street
+LOT_LINE_MEASURES = ("lot_width", "lot_depth") + YARDS + EAVE_YARDS + ACCESSORY_YARDS + ADU_YARDS + (ADU_FRONT,)
 STREAM_SETBACK = 20       # ft: §325-26, the only distance stream_near_lot is asked about ("within 20 ft of the lot")
 TOUCH = 0.1               # ft: a solid this close to the main building (in plan) is part of it (a porch, steps)
 
@@ -2095,8 +2096,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                    lines["basis"]["depth"])
 
     if adu is not None:                 # the ADU's building on its own: whatever is wrong with the main building's
-        _adu_yards(out, lot, lines, adu, both(why_plan, stop("outside_lot", what="the ADU's building")
-                                              if place.get(adu["id"]) == "off" else None))
+        group_views = [views[b["id"]] for b in group] if views and group else []
+        _adu_yards(out, lot, lines, facts, adu, both(why_plan, stop("outside_lot", what="the ADU's building")
+                                                     if place.get(adu["id"]) == "off" else None),
+                   group_views, why_main or why_main_off or (None if group_views else why_grade or why_building))
     # every other reason the plan can't be trusted, on its own (never read off an `or` chain: review round 9)
     why_rest = why_building or why_plan or why_main or (why_grade if plan_level is None else None)
     why_yards = both(why_building, why_main_off) if why_building else why_main_off or why_rest
@@ -2204,15 +2207,19 @@ def _adu_building(out: dict, adu: dict | None, why: str | None, buildings: list[
     # its distances to the lot lines: _adu_yards, once the lot lines are known (else the lot's own reason)
 
 
-def _adu_yards(out: dict, lot: "Lot", lines: dict, adu: dict, why: str | None):
+def _adu_yards(out: dict, lot: "Lot", lines: dict, facts: dict, adu: dict, why: str | None, main_views: list,
+               why_main: str | None):
     """The ADU building's least distances, seen from above, from the street lot line(s) (on a corner lot, the
     nearer street), from a side lot line and from the rear lot line, every reading of which lines are side and
-    rear: as an accessory building's are measured (_accessory_yards), for the ADU's building alone."""
+    rear: as an accessory building's are measured (_accessory_yards), for the ADU's building alone. And whether it
+    is in the primary front yard (_in_primary_front_yard)."""
     if why:
-        for name in ADU_YARDS:
+        for name in ADU_YARDS + (ADU_FRONT,):
             out[name] = _missing(name, why)
         return
     shape, objects = _projection(adu), [lot.id, *_parts(adu)]
+    out[ADU_FRONT] = (_missing(ADU_FRONT, why_main) if why_main else
+                      _in_primary_front_yard(lot, facts, shape, main_views, objects))
     d, p = _distance(lot.line(lot.street), shape)
     out["adu_front_yard"] = _record("adu_front_yard", "ft", _r(d), "the least distance from the street lot "
                                     "line(s) to the ADU's building", objects, p)
@@ -2230,6 +2237,54 @@ def _adu_yards(out: dict, lot: "Lot", lines: dict, adu: dict, why: str | None):
                                    "building", objects, lines["question"])
     out["adu_rear_yard"] = _decide("adu_rear_yard", rear, "the least distance from the rear lot line to the ADU's "
                                    "building", objects, lines["question"])
+
+
+FRONT_OF_MAIN = (("above", "the main building as seen from above"),
+                 ("body", "the main building, what might be its eaves left out"),
+                 ("ground", "the main building's walls at the ground"))
+PRIMARY_QUESTION = ("which front yard is the primary front yard on a corner lot is an open question for the "
+                    "architects (325-28C#1)")
+FRONT_OF_MAIN_QUESTION = ("where the front of the main building is: what reaches past its walls (eaves, an upper "
+                          "floor, a bay window) can't be told from the model")
+
+
+def _in_primary_front_yard(lot: "Lot", facts: dict, shape, main_views: list, objects: list) -> dict:
+    """Whether the ADU's building is in the primary front yard (§325-28C(4)). FRONT YARD (§325-3B): "an open space
+    extending the full width of the lot between a main building and the front lot line ... the depth of which shall
+    be the least distance between the front lot line and the front of such main building": the ADU is in it when
+    some part of it, seen from above, is nearer that street lot line than the main building is (at the same
+    distance it only touches the yard's edge). One street: its front yard. A corner lot has two front yards
+    (§325-19C) and which is the primary one is open (325-28C#1): each street is read as the primary one. Where the
+    front of the main building is (its outline from above, without what might be eaves, its walls at the ground) is
+    read every way the drawing allows. Each reading gives yes or no; they agree, or the question is said."""
+    streets = [lot.ordered_street()]
+    if facts.get("corner_lot"):             # each street on its own, never two added; not recorded: wait (_width)
+        streets = _street_groups(lot, facts, lot.ordered_street())
+        if streets is None:
+            return _missing(ADU_FRONT, _street_ids_stop(facts))
+    fronts = []
+    for key, words in FRONT_OF_MAIN:
+        parts = [v[key] for v in main_views if v.get(key) is not None and not v[key].is_empty]
+        if len(parts) == len(main_views) and parts:
+            fronts.append((words, ops.unary_union(parts)))
+    readings = []
+    for g in streets:
+        line = lot.line(g)
+        adu_d, _ = _distance(line, shape)
+        where = (f"the front yard on lot line{'s' if len(g) > 1 else ''} {', '.join(lot.label(i) for i in g)} "
+                 "the primary one") if len(streets) > 1 else ""
+        mine = [(words, bool(adu_d < _distance(line, main)[0] - SAME)) for words, main in fronts]
+        if len({v for _, v in mine}) == 1:          # where the main building's front is doesn't matter here
+            mine = [("", mine[0][1])]
+        readings += [{"reading": _both(where, f"to {words}" if words else ""), "value": v} for words, v in mine]
+    how = "whether the ADU's building is nearer the primary street's lot line than the main building is"
+    values = {r["value"] for r in readings}
+    if len(values) == 1:
+        return _record(ADU_FRONT, "yes_no", values.pop(), how, objects)
+    questions = (([PRIMARY_QUESTION] if len(streets) > 1 else []) +
+                 ([FRONT_OF_MAIN_QUESTION] if any(r["reading"].count("to the main") for r in readings) else []))
+    return _record(ADU_FRONT, "yes_no", None, how, objects, readings=readings,
+                   reason=stop("readings_differ", question="; ".join(questions)))
 
 
 def _crossed(lot: Lot, plan) -> set:

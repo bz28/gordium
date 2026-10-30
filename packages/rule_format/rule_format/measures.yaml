@@ -82,3 +82,4 @@ adu_stories:           {unit: count,  meaning: "Stories of the detached ADU's bu
 adu_front_yard:        {unit: ft,     meaning: "Least distance from a street lot line to the detached ADU's building"}
 adu_side_yard:         {unit: ft,     meaning: "Least distance from a side lot line to the detached ADU's building"}
 adu_rear_yard:         {unit: ft,     meaning: "Least distance from the rear lot line to the detached ADU's building"}
+adu_in_primary_front_yard: {unit: yes_no, meaning: "Some part of the detached ADU's building, seen from above, is nearer the primary street's lot line than the front of the main building is (§325-3B FRONT YARD: the open space between the main building and the front lot line)"}

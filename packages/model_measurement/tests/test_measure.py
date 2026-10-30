@@ -74,7 +74,8 @@ def test_a_plain_rectangular_lot():
                          "adu_floor_area": None, "primary_floor_area": None,
                          # no ADU's building picked: nothing to measure
                          "adu_footprint": None, "adu_height": None, "adu_stories": None, "adu_front_yard": None,
-                         "adu_side_yard": None, "adu_rear_yard": None}
+                         "adu_side_yard": None, "adu_rear_yard": None,
+                         "adu_in_primary_front_yard": None}
     (ax, ay), (bx, by) = m["front_yard"]["points"]                              # the working: where it was measured
     assert ay == 0 and by == 25 and ax == bx and 10 <= ax <= 35
     assert m["sleeping_rooms"]["reason"] == m["parking_spaces"]["reason"] == "enter bedrooms / parking spaces"

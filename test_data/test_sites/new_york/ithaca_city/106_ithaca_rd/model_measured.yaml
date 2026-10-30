@@ -175,3 +175,6 @@ measurements:
   adu_rear_yard:
     value: null
     from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_in_primary_front_yard:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
