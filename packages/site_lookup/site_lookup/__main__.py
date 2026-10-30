@@ -32,8 +32,11 @@ def main(argv: list[str]) -> int:
     as_json = "--json" in argv
     args = [a for a in argv if a != "--json"]
     where = None
-    if "--place" in args[:-1]:
+    if "--place" in args:
         k = args.index("--place")
+        if k + 1 >= len(args):
+            print("--place needs a place: --place <state>/<place>")
+            return 2
         where, args = args[k + 1], args[:k] + args[k + 2:]
     if len(args) != 1 or args[0] in ("-h", "--help"):
         print(__doc__.strip())

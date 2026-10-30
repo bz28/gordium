@@ -87,3 +87,8 @@ def test_the_command_line_names_an_unknown_place_in_one_line(capsys):
     assert main(["--place", "nowhere/x", "106 Ithaca Rd"]) == 2
     out = capsys.readouterr().out
     assert out.startswith("no settings for") and "Traceback" not in out
+
+
+def test_place_with_nothing_after_it_is_a_usage_error_not_an_address(capsys):
+    from site_lookup.__main__ import main
+    assert main(["--place"]) == 2 and "--place needs a place" in capsys.readouterr().out
