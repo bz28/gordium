@@ -688,7 +688,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 ### §325-10C Additional conditions (rule, pp.35–37)
 
 - **Bed-and-breakfast inns (special-permit conditions)**
-  - R-1a, R-1b, R-2a, R-2b, R-2c: flag (needs review): `use` (cited in finding bed_and_breakfast_by_special_permit) The law: “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5).
+  - R-1a, R-1b, R-2a, R-2b, R-2c: flag (needs review): `use` (cited) The law: “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5).
   - R-3a, R-3aa, R-3b, RU: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review. The law: “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5).
 - **Neighborhood gardens (special-permit conditions)**
   - all 9 districts: **MISSING** (low): A garden is an accessory use needing a special permit (chart p.2); nothing asks about one.
@@ -1376,7 +1376,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-1a.use` | rule | §325-8A, §325-8B, §325-9B, §325-9F, §325-10C | use (stated) | scenario r1 |
+| `R-1a.use` | rule | §325-8A, §325-8B, §325-9B, §325-10C | use (stated) | scenario r1 |
 | `R-1a.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | scenario r1, scenario 11 |
 | `R-1a.lot_area_other_use` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-1a.lot_area_each_primary_building` | rule | §325-3B:lot (via definition), §325-3B:primary_structure, §325-8B | lot_area (model), primary_buildings (stated), primary_buildings_same_use (stated), use (stated) | **none** |
@@ -1403,7 +1403,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-1b.use` | rule | §325-8A, §325-8B, §325-9B, §325-9F, §325-10C | use (stated) | real model 106_ithaca_rd (106_ithaca_rd/spreadsheet_design.yaml) |
+| `R-1b.use` | rule | §325-8A, §325-8B, §325-9B, §325-10C | use (stated) | real model 106_ithaca_rd (106_ithaca_rd/spreadsheet_design.yaml) |
 | `R-1b.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | real model 106_ithaca_rd (106_ithaca_rd/spreadsheet_design.yaml), scenario 01, scenario 02, scenario 03, scenario 08, scenario 09 |
 | `R-1b.lot_area_other_use` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-1b.lot_area_each_primary_building` | rule | §325-3B:lot (via definition), §325-3B:primary_structure, §325-8B | lot_area (model), primary_buildings (stated), primary_buildings_same_use (stated), use (stated) | **none** |
@@ -1430,7 +1430,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-2a.use` | rule | §325-8A, §325-8B, §325-9B, §325-9F, §325-10C | use (stated) | **none** |
+| `R-2a.use` | rule | §325-8A, §325-8B, §325-9B, §325-10C | use (stated) | **none** |
 | `R-2a.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-2a.lot_area_one_family_semi_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-2a.lot_area_two_family` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
@@ -1464,7 +1464,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-2b.use` | rule | §325-8A, §325-8B, §325-9B, §325-9F, §325-10C | use (stated) | scenario r2 |
+| `R-2b.use` | rule | §325-8A, §325-8B, §325-9B, §325-10C | use (stated) | scenario r2 |
 | `R-2b.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-2b.lot_area_one_family_semi_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-2b.lot_area_two_family` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | scenario r2 |
@@ -1498,7 +1498,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-2c.use` | rule | §325-8A, §325-8B, §325-9B, §325-9F, §325-10C | use (stated) | **none** |
+| `R-2c.use` | rule | §325-8A, §325-8B, §325-9B, §325-10C | use (stated) | **none** |
 | `R-2c.lot_area_one_family_detached` | rule | §325-3B:one_family_detached_dwelling, §325-3B:lot (via definition), §325-3B:occupant | lot_area (model), occupants (stated), use (stated) | **none** |
 | `R-2c.lot_area_zero_lot_line` | rule | §325-3B:one_family_detached_dwelling_zero_lot_line, §325-3B:lot (via definition) | lot_area (model), occupants (stated), use (stated) | **none** |
 | `R-2c.lot_area_one_family_semi_detached` | rule | §325-3B:one_family_semidetached_dwelling, §325-3B:dwelling_unit, §325-3B:lot (via definition) | dwelling_units (stated), lot_area (model), occupants (stated), occupants_most_in_one_unit (stated), use (stated) | **none** |
