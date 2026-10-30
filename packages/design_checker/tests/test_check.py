@@ -1365,7 +1365,7 @@ def test_the_checker_proves_every_starting_building_with_its_own_verdict(monkeyp
     real = generator._failing
     monkeypatch.setattr(generator, "_failing", lambda *a: seen.append(a[-1]) or real(*a))
     site, facts, rules = _jogged_unsurveyed()
-    out = checker.largest_legal_building(site, facts, checker.measure(site, facts), rules)
+    out = checker.largest_legal_building(site, facts, checker.measuring(facts["jurisdiction"]).measure(site, facts), rules)
     assert out["floors"] and seen == [checker.verdict]
 
 
