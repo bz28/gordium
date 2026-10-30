@@ -57,7 +57,7 @@ ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "
        "unrelated_persons": "no_household", "unrelated_persons_with_children": "no_household",
        "owner_occupied": "no_household", "functional_family_unit": "no_household",
        "home_occupation": "no_home_occupation", "home_occupation_area": "no_home_occupation",
-       "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_household",
+       "home_occupation_unit_area": "no_home_occupation", "accessory_dwelling_unit": "no_adu",
        "primary_buildings": "no_primary_buildings", "primary_buildings_same_use": "no_primary_buildings",
        "south_hill_overlay": "no_south_hill", "stream_near_lot": "no_stream", "stream_distance": "no_stream",
        "garage_cars": "no_garage_cars", "private_garages": "no_private_garages",

@@ -46,7 +46,8 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
     assert len(s["lines"]) == 12 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
-                                        in x or "private garages hold" in x for x in s["lines"][1:])
+                                        in x or "private garages hold" in x or "accessory dwelling unit (ADU)" in x
+                                        for x in s["lines"][1:])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 

@@ -111,8 +111,9 @@ STOPS = {
     "no_occupant_split": "optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that "
                          "depends on how the occupants are split)",
     "no_household": "enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, "
-                    "whether the household is a functional family unit, whether an accessory dwelling unit is on the "
-                    "lot (§325-3B)",
+                    "whether the household is a functional family unit (§325-3B)",
+    # asked in the start box (Ben, 2026-10-30: a detached ADU is a building), so not among who lives there
+    "no_adu": "say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28)",
     "attached_counts_disagree": "{here} dwelling units on this lot but {building} in the attached building: part of "
                                 "another building may be on this lot, or one of the counts or the use is off",
     "occupant_split_disagree": "the most occupants in one dwelling unit ({most}) is more than the occupants of every "

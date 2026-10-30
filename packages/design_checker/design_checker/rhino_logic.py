@@ -487,7 +487,7 @@ DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
 # in their own collapsed group, apart from the building's problems (is_use_detail). Ben will settle the exact questions
 # later, so this tuple is the one place that moves them: a fact added here leaves the start box and joins that group.
 DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occupants", "occupants_most_in_one_unit",
-                  "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
+                  "owner_occupied", "functional_family_unit",
                   "home_occupation", "home_occupation_area", "home_occupation_unit_area", "rooms_let_for_profit",
                   "adu_bedrooms", "adu_floor_area", "primary_floor_area")
 # Facts the measuring checks against each other (a count with the children counted can't be smaller than the count
@@ -502,7 +502,8 @@ USE_DETAILS_WHEN = "Answer when you plan the interior"
 # private garages matters only when the cars they hold are over the chart's limit (a lot of three cars or fewer passes
 # whatever the count), so asking it up front would ask every architect with a garage a question that rarely matters.
 # A row waiting on the garage's car limit asks the cars first (needs_of); entered over the limit, it then asks this.
-# An accessory dwelling unit's facts likewise wait for "is there an ADU" (a use detail), and a detached one's for
+# An accessory dwelling unit's facts likewise wait for "is there an ADU" (asked in the start box: a detached ADU is a
+# building, so it shapes the exterior, Ben 2026-10-30), and a detached one's for
 # "detached?": a lot without an ADU is never asked them (its rules are not applicable once that is answered no).
 ROW_ONLY_FACTS = {"private_garages": "garage_cars", "adu_detached": "accessory_dwelling_unit",
                   "adus_on_parcel": "accessory_dwelling_unit", "adu_bedrooms": "accessory_dwelling_unit",
@@ -610,7 +611,7 @@ ABOUT_COUNTS = {            # a count's one-click numbers (a typed number is not
 QUICK_ANSWERS = (
     ("1 family, no roomers", {"unrelated_persons": 0, "unrelated_persons_with_children": 0, "rooms_let_for_profit": 0,
                               "functional_family_unit": False}),
-    ("Owner lives there, no ADU", {"owner_occupied": True, "accessory_dwelling_unit": False}),
+    ("Owner lives there", {"owner_occupied": True}),       # whether an ADU is on the lot: asked up front, alone
     ("No home business", {"home_occupation": False}),
     ("No stream, not in South Hill", {"stream_near_lot": False, "south_hill_overlay": False}),
 )

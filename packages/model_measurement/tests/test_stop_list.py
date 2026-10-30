@@ -265,6 +265,7 @@ CASES = {
     "no_garage_cars": _plain(),
     "no_private_garages": _plain(),
     "no_stream": _plain(),
+    "no_adu": _plain(),
     "no_adu_kind": _plain(),
     "no_adus_on_parcel": _plain(),
     "no_adu_bedrooms": _plain(),

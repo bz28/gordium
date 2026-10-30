@@ -133,12 +133,12 @@ def test_the_starting_house_on_the_sample_lot(house):
         assert (row["proposed"], row["status"], row["note"]) == (at, present.REVIEW, "assuming flat ground")
     why, = said(r'neither can be decided: "(the ground falls .+? against your survey)"')
     assert " ".join(why.split()) in height["reason"] and " ".join(why.split()) in items["Stories"]["reason"]
-    said("Six rows need review from the start")
+    said("Thirteen rows need review from the start")
     stream = "New structures at least 20 ft from an inlet wall or stream bank"
     said(r"\*\*" + stream + r"\*\*: the start box's stream question was left Not answered")
     assert [i["name"] for i in items.values() if i["status"] == present.REVIEW and not i.get("use_detail")] == [
-        stream, "Stories", "Building height", "Rear yard", "Eaves into front yard",
-        "Private garage: not more than three cars"]
+        stream, "Stories", "Building height", "Rear yard", "Eaves into front yard", "One-family occupancy",
+        "Private garage: not more than three cars", *ADU_ROWS]
     assert items[stream]["reason"].startswith("say whether any inlet wall or stream bank") and \
         set(items[stream]["needs"]) == {"stream_near_lot", "stream_distance"}       # waits on the question, nothing else
     button, = said(r"Answer it with the row's \*\*(.+?)…\*\* button")
@@ -155,11 +155,60 @@ def test_the_starting_house_on_the_sample_lot(house):
         assert decided["needs"] == ([] if cars == 3 else ["private_garages"]), (cars, decided)  # "then asks how many"
     assert _check(got["floors"], facts, garage_cars=4, private_garages=1)[
         "Private garage: not more than three cars"]["status"] == present.FAILS
+    # the start box's ADU question (Ben, 2026-10-30): left Not answered, the six ADU rows and the occupancy row wait
+    said(r"The six \*\*accessory dwelling unit\*\* rows .+? and \*\*One-family occupancy\*\*: the start box's ADU "
+         r"question was\s+left Not answered")
+    why, = said(r'they wait on it \("(say whether an accessory dwelling unit .+?)"\)')
+    for name in (*ADU_ROWS, "One-family occupancy"):
+        assert " ".join(why.split()) in items[name]["reason"] and "accessory_dwelling_unit" in items[name]["needs"]
+    button, = said(r"Answer it with an ADU row's \*\*(.+?)…\*\* button")
+    assert button == logic.answer_words(items[ADU_ROWS[0]]["needs"])
+    said(r"\*\*No ADU on the lot\*\* and\s+the six ADU rows go")
+    assert logic.yes_no_words("accessory_dwelling_unit")[0] == "No ADU on the lot"
+    no = _check(got["floors"], facts, accessory_dwelling_unit=False)
+    assert not set(no) & set(ADU_ROWS) and no["One-family occupancy"]["use_detail"]
     said("On a lot the lookup finds level, both comply")
     level = _check(got["floors"], facts, ground_fall=0.0)
     assert all(level[n]["status"] == present.COMPLIES for n in ("Building height", "Stories"))
     said("Lot area complies even at the tax map's worst case")
     assert items["Lot area"]["status"] == present.COMPLIES
+
+
+ADU_ROWS = ["Accessory dwelling unit: at most one per parcel", "Accessory dwelling unit: at most two bedrooms",
+            "Detached ADU: not in the primary front yard nor a required one",
+            "Attached ADU: at most 40% of the primary structure's floor area",
+            "Detached ADU: 800 sf footprint; two stories and 20 ft", "Detached ADU: 5 ft from the side and rear lot lines"]
+
+
+def test_15_a_backyard_cottage(house):
+    """A 20 x 16 x 18 ft box behind the starting house (30..50 x 64..80: 12 ft and more from the rear lot line, which
+    runs at y = 92.3 to 93.2, and over 25 ft from each side), picked as a detached ADU's building."""
+    import sys
+    sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
+    from test_measure import box
+    got, facts = house
+    said(r"draw a `Box` 20 × 16 × 18 ft on the Building layer behind\s+the house")
+    adu = {"accessory_dwelling_unit": True, "adu_detached": True, "adu_existing_building": False, "adus_on_parcel": 1,
+           "adu_bedrooms": 2, "adu_building": "cottage"}
+    rows = _check(got["floors"], facts, [box(30, 64, 50, 80, 0, 18, id="cottage")], **adu)
+    size, setbacks, front = rows[ADU_ROWS[4]], rows[ADU_ROWS[5]], rows[ADU_ROWS[2]]
+    said(r"not nearer the street than the house:\s+complies")
+    assert front["status"] == present.COMPLIES, front
+    said(r"5 ft or more from the side and rear lot lines: it is, under every reading, but on this lot it needs\s+review "
+         r"like the house's rear yard")
+    assert setbacks["status"] == present.REVIEW and setbacks["reason"] == rows["Rear yard"]["reason"], setbacks
+    footprint, = said(r"Its size \((\d+) sf footprint, 18 ft, at most 2 stories\) \*\*needs\s+review\*\* here")
+    assert size["proposed"] == f"{footprint} sf" and size["status"] == present.REVIEW
+    assert size["reason"].startswith("the ground falls about 14.2 ft") and "flat ground" in size["note"]
+    said(r"On a lot\s+the lookup finds level it complies, and made 22 ft tall it \*\*does not comply\*\*")
+    level = dict(facts, ground_fall=0.0)
+    assert _check(got["floors"], level, [box(30, 64, 50, 80, 0, 18, id="cottage")], **adu)[ADU_ROWS[4]]["status"] \
+        == present.COMPLIES
+    assert _check(got["floors"], level, [box(30, 64, 50, 80, 0, 22, id="cottage")], **adu)[ADU_ROWS[4]]["status"] \
+        == present.FAILS
+    said(r"Move it in front\s+of the house: \*\*does not comply\*\*")
+    assert _check(got["floors"], facts, [box(30, 5, 50, 21, 0, 18, id="cottage")], **adu)[ADU_ROWS[2]]["status"] \
+        == present.FAILS
 
 
 def test_1_on_screen_labels_are_off_until_ticked():
