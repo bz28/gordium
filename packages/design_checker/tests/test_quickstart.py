@@ -54,9 +54,10 @@ def house(tmp_path_factory):
     m.Objects.AddPolyline([r.Point3d(x, y, 0) for x, y in SAMPLE["lot"] + SAMPLE["lot"][:1]], attrs)
     path = tmp_path_factory.mktemp("qs") / "lot.3dm"
     m.Write(str(path), 8)
-    # the MVP: flat ground assumed, at the lot level, finished (rhino_logic.ground_facts with FLAT_GROUND)
+    # the MVP: flat ground assumed, at the lot level, finished (rhino_logic.ground_facts with FLAT_GROUND), with
+    # the fall the lookup finds for 106 (its recorded USGS answer: test_lookup_box pins 14.2 ft)
     facts = {**SAMPLE["facts"], "address": SAMPLE["address"], "grade_is": "finished", "ground_is_flat": True,
-             "grade_elevation": 0.0, "ground_assumed": "flat"}
+             "grade_elevation": 0.0, "ground_assumed": "flat", "ground_fall": 14.2}
     return start(path, facts), facts
 
 
@@ -119,19 +120,25 @@ def test_the_starting_house_on_the_sample_lot(house):
     assert rear["status"] == present.REVIEW and rear["reason"] == ("Complies under every reading, but it depends on an "
                                                                     "open question: which lot lines count as side and "
                                                                     "which as rear; confirm with the zoning office")
-    said(r"\*\*Eaves into front yard\*\* waits on the same question, and says the same")
+    said(r"\*\*Eaves into front yard\*\* waits on the same question, and on the height")
     eaves = items["Eaves into front yard"]
-    assert eaves["status"] == present.REVIEW and eaves["reason"] == rear["reason"]
+    assert eaves["status"] == present.REVIEW and "side and rear" in eaves["reason"] and \
+        eaves["reason"].startswith("the ground falls about 14.2 ft")
     said(r"Complies under every\s+reading, but it depends on an open question: which lot lines count as side and "
          r"which as rear; confirm with the\s+zoning office")
-    tall_at, = said(r"\*\*Building height\*\*: (\d+'-\d+\") is at the limit and complies")
-    assert (height["proposed"], height["status"], height["margin"], height["note"]) == (
-        tall_at, present.COMPLIES, "at limit", "assuming flat ground")   # the bonus's open question doesn't matter
-    said("Four rows need review from the start")
+    tall_at, stories_at, fall = said(r"\*\*Building height\*\* \((\d+'-\d+\"), at the limit\) and \*\*Stories\*\* "
+                                     r"\((\d), at the limit\): the lookup found the ground falls\s+about ([\d.]+) ft")
+    assert float(fall) == facts["ground_fall"]
+    for row, at in ((height, tall_at), (items["Stories"], stories_at)):    # the sloped-lot fix: never a pass
+        assert (row["proposed"], row["status"], row["note"]) == (at, present.REVIEW, "assuming flat ground")
+    why, = said(r'neither can be decided: "(the ground falls .+? against your survey)"')
+    assert " ".join(why.split()) in height["reason"] and " ".join(why.split()) in items["Stories"]["reason"]
+    said("Six rows need review from the start")
     stream = "New structures at least 20 ft from an inlet wall or stream bank"
     said(r"\*\*" + stream + r"\*\*: the start box's stream question was left Not answered")
     assert [i["name"] for i in items.values() if i["status"] == present.REVIEW and not i.get("use_detail")] == [
-        stream, "Rear yard", "Eaves into front yard", "Private garage: not more than three cars"]
+        stream, "Stories", "Building height", "Rear yard", "Eaves into front yard",
+        "Private garage: not more than three cars"]
     assert items[stream]["reason"].startswith("say whether any inlet wall or stream bank") and \
         set(items[stream]["needs"]) == {"stream_near_lot", "stream_distance"}       # waits on the question, nothing else
     button, = said(r"Answer it with the row's \*\*(.+?)…\*\* button")
@@ -148,8 +155,9 @@ def test_the_starting_house_on_the_sample_lot(house):
         assert decided["needs"] == ([] if cars == 3 else ["private_garages"]), (cars, decided)  # "then asks how many"
     assert _check(got["floors"], facts, garage_cars=4, private_garages=1)[
         "Private garage: not more than three cars"]["status"] == present.FAILS
-    stories, = said(r"Stories (\d) complies, at the limit, saying \"assuming flat ground\"")
-    assert items["Stories"]["proposed"] == stories and items["Stories"]["status"] == present.COMPLIES
+    said("On a lot the lookup finds level, both comply")
+    level = _check(got["floors"], facts, ground_fall=0.0)
+    assert all(level[n]["status"] == present.COMPLIES for n in ("Building height", "Stories"))
     said("Lot area complies even at the tax map's worst case")
     assert items["Lot area"]["status"] == present.COMPLIES
 
@@ -213,13 +221,17 @@ def test_4_pull_the_rear_wall_back_coverage_fails_on_every_tax_map_lot(house):
 def test_5_raise_the_roof_fails(house):
     got, facts = house
     floors = copy.deepcopy(got["floors"])
-    feet, height, short = said(r"raise the roof (\d+) ft\*\* \(the top face of Floor 3\). Building height " + LEN
-                               + r": \*\*does not comply\*\*,\s+(\d+'-\d+\") over \(the height doesn't depend on "
-                               r"the lot lines\)")
+    feet, height, short = said(r"raise the roof (\d+) ft\*\* \(the top face of Floor 3\). On this sloping lot "
+                               r"Building height " + LEN + r" still\s+\*\*needs review\*\* \(the ground, as above\)\. "
+                               r"On a lot the lookup finds level it \*\*does not comply\*\*, (\d+'-\d+\") over")
     floors[-1]["top"] += float(feet)
     h = _check(floors, facts)["Building height"]
+    assert (h["status"], h["proposed"]) == (present.REVIEW, height)            # 14.2 ft of fall: never a fail or pass
+    assert ("height", present.FAILS) not in _regions(floors, facts)
+    level = {**facts, "ground_fall": 0.0}                                      # a lot the lookup found level
+    h = _check(floors, level)["Building height"]
     assert (h["status"], h["proposed"], h["delta"], h["approx"]) == (present.FAILS, height, short + " over", False)
-    assert ("height", present.FAILS) in _regions(floors, facts)                 # "the part above 35'-0" turns red"
+    assert ("height", present.FAILS) in _regions(floors, level)                 # "the part above 35'-0" turns red"
 
 
 def test_6_the_left_side_wall_out(house):
@@ -392,6 +404,7 @@ def test_a_row_with_no_reading_set_never_says_to_spare_unless_it_complies(house,
     got, facts = house
     floors = copy.deepcopy(got["floors"])
     floors[-1]["top"] -= 1.0
+    facts = {**facts, "ground_fall": 0.0}           # a level lot: the height measured, its Delta the question here
     for over in ({"corner_lot": True}, {"street_line": None, "street_ids": None}):
         r = check_site(_site(floors), {**facts, **over})
         h = next(i for i in r["view"]["items"] if i["name"] == "Building height")
@@ -420,3 +433,29 @@ def test_a_span_of_readings_is_whole_in_its_detail(house):
         assert line.startswith(f"{i['proposed']} proposed") and f"{i['required']} required" in line, (name, line)
         if i.get("approx"):
             assert line.endswith(i["delta"]), (name, line, i["delta"])
+
+
+def test_the_starting_house_on_a_sloping_lot_is_the_flat_lots_and_says_so(house, tmp_path):
+    """The sloped-lot fix: the starting house is still drawn standing at the lot's level, sized by the zone's
+    limits exactly as on a level lot (it relies on flat ground), and its note says height and stories need review."""
+    import rhino3dm as r
+    got, facts = house
+    assert any(n.startswith("drawn as if the ground were flat") and "falls about 14.2 ft" in n for n in got["notes"])
+    m = r.File3dm()
+    m.Settings.ModelUnitSystem = r.UnitSystem.Feet
+    layer = r.Layer()
+    layer.Name = "Site"
+    m.Layers.Add(layer)
+    attrs = r.ObjectAttributes()
+    attrs.LayerIndex = 0
+    m.Objects.AddPolyline([r.Point3d(x, y, 0) for x, y in SAMPLE["lot"] + SAMPLE["lot"][:1]], attrs)
+    path = tmp_path / "lot.3dm"
+    m.Write(str(path), 8)
+    level = start(path, {**facts, "ground_fall": 0.0})
+    assert level["floors"] == got["floors"]
+    assert not any("as if the ground were flat" in n for n in level["notes"])
+    # the envelope draws no height plane over a lot that may slope (its height needs review), only the buildable area
+    sloped_env = check_site(_site(got["floors"]), facts)["envelope"]
+    level_env = check_site(_site(got["floors"]), {**facts, "ground_fall": 0.0})["envelope"]
+    assert level_env["top"] is not None and level_env["outline"]
+    assert sloped_env["top"] is None and sloped_env["base"] is None and sloped_env["outline"] == level_env["outline"]

@@ -1257,11 +1257,13 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     assert "ground" in {r["key"] for r in logic.box_rows({}, flat=False)}                        # the switch
     flat = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False}, 2.0)
     assert flat == {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": 2.0, "grade_from": None,
-                    "ground_assumed": "flat"}
+                    "ground_assumed": "flat", "ground_fall": None}      # (no lookup ground: unknown)
     assert logic.ground_facts({"ground": {"kind": "spot"}}, 2.0, flat=False)["grade_from"] == "spot"
     # the check itself at the house's own base (0 here): a ground above it would put part of the house below
     # grade, which the stories rule rightly asks about (a basement or cellar, §325-3; #14's one stories definition)
-    level = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False}, 0.0)
+    # (a lookup that found the ground level, 0.0 ft of fall: a known flat lot, which alone lets flat decide them)
+    level = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False, "ground_fall": 0.0}, 0.0)
+    assert level["ground_fall"] == 0.0
     sent = {**facts, **{k: v for k, v in level.items() if v is not None}}
     assert fact_problems(sent) == []
     got = check(MODEL, sent, tmp_path / "r.xlsx")

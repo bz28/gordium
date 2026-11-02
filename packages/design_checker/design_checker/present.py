@@ -1358,7 +1358,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             base = _evaluate(limit, dict(values, building_height=0.0))
             if isinstance(base, (int, float)):
                 required = f"{numbers[4]} {value_text(base, unit, numbers[4], False)}".strip()
-                waits = ("the height is measured from existing grade only; the bonus needs it from finished grade"
+                waits = ("the height is measured as if the ground were flat; the bonus needs it from the grade plane"
+                         if as_is and facts.get("grade_is") != "existing" and _measuring.flat_assumption_unsafe(facts)
+                         else
+                         "the height is measured from existing grade only; the bonus needs it from finished grade"
                          if as_is else "the height isn't measured yet")
                 more = f"more if the §325-16C height bonus applies; {waits}"
                 why = f"{why} ({more})" if why else f"{_bonus_waits(st, False)} ({more})"
@@ -1879,9 +1882,15 @@ def grade_label(facts: dict) -> str:
     elevation 0'-0"", or "not set"."""
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
     if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
-        if facts.get("ground_fall"):                          # a lookup found the ground: say plainly how it falls
-            return (f"assumed flat (the looked-up ground falls about {facts['ground_fall']:g} ft across the lot; "
-                    "height is checked as if flat)")
+        fall = facts.get("ground_fall")                       # a lookup found the ground: say plainly how it falls
+        why = _measuring.flat_assumption_unsafe(facts)        # and that height and stories wait on it (the measuring's)
+        if why:                                               # a fall only when it is one (not NaN, -1, or none)
+            return (f"assumed flat, but the looked-up ground falls about {fall:g} ft across the lot: height and "
+                    "stories need review" if why != _measuring.stop("flat_unknown") else
+                    f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)}), but the lot's ground "
+                    "levels weren't read in full: height and stories need review")
+        if fall:
+            return f"assumed flat (the looked-up ground falls only about {fall:g} ft across the lot)"
         return f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)})"   # the team's words
     points = facts.get("grade_points") or []
     if points:
