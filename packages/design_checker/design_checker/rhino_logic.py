@@ -426,6 +426,19 @@ STATED_FACTS = {
                     "there is none; a carport isn't enclosed)", "count", "the cars the private garages hold"),
     "private_garages": ("Private garages on the lot (an attached garage counts)", "count",
                         "the private garages on the lot"),
+    # an accessory dwelling unit (§325-28): what kind it is, then, only once an ADU is said to be on the lot, what its
+    # rules read (ROW_ONLY_FACTS); a detached one's building is picked in the model (adu_building), never typed
+    "adu_detached": ("Is the accessory dwelling unit detached: in its own building, not in or on the main building? "
+                     "(§325-3B)", "yes_no", "whether the ADU is detached"),
+    "adu_existing_building": ("Is the detached ADU in an accessory building that already exists (not new "
+                              "construction)? (§325-28C(7)(b))", "yes_no", "whether the ADU's building already exists"),
+    "adus_on_parcel": ("Accessory dwelling units on the parcel, any already there included (§325-28C(1))", "count",
+                       "the ADUs on the parcel"),
+    "adu_bedrooms": ("Bedrooms in the accessory dwelling unit (§325-28C(3))", "count", "the ADU's bedrooms"),
+    # floor areas as typed, never rounded (as the home occupation's)
+    "adu_floor_area": ("Floor area of the attached accessory dwelling unit (sq ft)", "area", "the ADU's floor area"),
+    "primary_floor_area": ("Floor area of the whole main building the ADU is in, the ADU included (sq ft)", "area",
+                           "the main building's floor area"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
@@ -434,7 +447,7 @@ STATED_FACTS = {
 # at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
 # accept what the check refuses (#r2 review round 2).
 MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1,
-           "private_garages": 1}
+           "private_garages": 1, "adus_on_parcel": 1}
 # Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit
 # is 1 to occupants): asked only where some value in that range would change the row (present.could_settle).
 OPTIONAL = {"occupants_most_in_one_unit": "occupants"}
@@ -474,8 +487,9 @@ DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
 # in their own collapsed group, apart from the building's problems (is_use_detail). Ben will settle the exact questions
 # later, so this tuple is the one place that moves them: a fact added here leaves the start box and joins that group.
 DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occupants", "occupants_most_in_one_unit",
-                  "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
-                  "home_occupation", "home_occupation_area", "home_occupation_unit_area", "rooms_let_for_profit")
+                  "owner_occupied", "functional_family_unit",
+                  "home_occupation", "home_occupation_area", "home_occupation_unit_area", "rooms_let_for_profit",
+                  "adu_bedrooms", "adu_floor_area", "primary_floor_area")
 # Facts the measuring checks against each other (a count with the children counted can't be smaller than the count
 # without: model_measurement.project.fact_conflict_rows): kept or dropped together, so a contradiction is never hidden
 # by dropping half of it.
@@ -488,7 +502,13 @@ USE_DETAILS_WHEN = "Answer when you plan the interior"
 # private garages matters only when the cars they hold are over the chart's limit (a lot of three cars or fewer passes
 # whatever the count), so asking it up front would ask every architect with a garage a question that rarely matters.
 # A row waiting on the garage's car limit asks the cars first (needs_of); entered over the limit, it then asks this.
-ROW_ONLY_FACTS = {"private_garages": "garage_cars"}
+# An accessory dwelling unit's facts likewise wait for "is there an ADU" (asked in the start box: a detached ADU is a
+# building, so it shapes the exterior, Ben 2026-10-30), and a detached one's for
+# "detached?": a lot without an ADU is never asked them (its rules are not applicable once that is answered no).
+ROW_ONLY_FACTS = {"private_garages": "garage_cars", "adu_detached": "accessory_dwelling_unit",
+                  "adus_on_parcel": "accessory_dwelling_unit", "adu_bedrooms": "accessory_dwelling_unit",
+                  "adu_existing_building": "adu_detached", "adu_floor_area": "adu_detached",
+                  "primary_floor_area": "adu_detached"}
 BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS
                  and k not in ROW_ONLY_FACTS)   # what the box can ask
 
@@ -570,6 +590,8 @@ ABOUT_LABELS = {
 ABOUT_WORDS = {            # (the "no" answer, the "yes" answer)
     "owner_occupied": ("Owner lives elsewhere", "Owner lives in the house"),
     "accessory_dwelling_unit": ("No ADU on the lot", "ADU on the lot"),
+    "adu_detached": ("Attached (in or on the house)", "Detached (its own building)"),
+    "adu_existing_building": ("New construction", "In an existing accessory building"),
     "functional_family_unit": ("Not relying on one", "Will show it to the City"),
     "home_occupation": ("No home business", "Home business planned"),
     "stream_near_lot": ("No stream within 20 ft", "Stream or inlet within 20 ft"),
@@ -589,7 +611,7 @@ ABOUT_COUNTS = {            # a count's one-click numbers (a typed number is not
 QUICK_ANSWERS = (
     ("1 family, no roomers", {"unrelated_persons": 0, "unrelated_persons_with_children": 0, "rooms_let_for_profit": 0,
                               "functional_family_unit": False}),
-    ("Owner lives there, no ADU", {"owner_occupied": True, "accessory_dwelling_unit": False}),
+    ("Owner lives there", {"owner_occupied": True}),       # whether an ADU is on the lot: asked up front, alone
     ("No home business", {"home_occupation": False}),
     ("No stream, not in South Hill", {"stream_near_lot": False, "south_hill_overlay": False}),
 )
@@ -1038,7 +1060,7 @@ def set_street_lines(facts, lines, ids=None):
 
 
 def drop_stale(facts, lot_ids, building_ids):
-    """The saved facts without a lot or main building that is no longer in the model (redrawn, joined, deleted):
+    """The saved facts without a lot, main building or ADU's building that is no longer in the model (redrawn, joined, deleted):
     the lot's street lines go with it, so the confirm dialog asks again instead of keeping an id nothing has."""
     out = dict(facts or {})
     if out.get("lot_id") and out["lot_id"] not in lot_ids:
@@ -1046,6 +1068,8 @@ def drop_stale(facts, lot_ids, building_ids):
         set_street_lines(out, None)
     if out.get("main_building") and out["main_building"] not in building_ids:
         out.pop("main_building")
+    if out.get("adu_building") and out["adu_building"] not in building_ids:      # the ADU's building, the same way
+        out.pop("adu_building")
     return out
 
 
@@ -4231,7 +4255,8 @@ def last_check_at(checked_at, document):
 # Each panel change is one Rhino undo step, named in Edit > Undo by what it did (a change written outside any undo
 # record is skipped by Ctrl+Z, which undoes the architect's own earlier edit instead: #32's review, 2026-10-26)
 UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",
-              "main": "Gordium: pick the main building", "add": "Gordium: add to check",
+              "main": "Gordium: pick the main building", "adu": "Gordium: pick the ADU's building",
+              "add": "Gordium: add to check",
               "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
               "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
               "edit_site": "Gordium: the start box", "grade": "Gordium: the start box",

@@ -26,7 +26,9 @@ def facts():
 
 # the rules waiting on who lives there and on a home occupation (§325-3B), and on whether a stream or inlet is near
 # the lot (§325-26), and on the cars its private garages hold (chart p.2 note 6): the sample's facts don't say
-WAITING_ON_THE_HOUSEHOLD = ["R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family",
+WAITING_ON_THE_HOUSEHOLD = ["R-1b.adu_attached_size", "R-1b.adu_bedrooms", "R-1b.adu_detached_setbacks",
+                            "R-1b.adu_detached_size", "R-1b.adu_front_yard", "R-1b.adu_one_per_parcel",
+                            "R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family",
                             "R-1b.private_garage", "R-1b.stream_setback"]
 
 
@@ -38,13 +40,14 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 10
     assert errors["R-1b.yard_projections"] == "PASS"
     s = result["summary"]
-    # who lives there, a home occupation, a stream near the lot and the garage's cars aren't in their spreadsheet:
-    # those five rules wait (never a pass)
-    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 5 need review"
+    # who lives there, whether an accessory dwelling unit is planned, a home occupation, a stream near the lot and the
+    # garage's cars aren't in their spreadsheet: those eleven rules wait (never a pass; six are the ADU's, §325-28)
+    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 11 need review"
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
-    assert len(s["lines"]) == 6 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
-                                        in x or "private garages hold" in x for x in s["lines"][1:])
+    assert len(s["lines"]) == 12 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
+                                        in x or "private garages hold" in x or "accessory dwelling unit (ADU)" in x
+                                        for x in s["lines"][1:])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 
@@ -70,7 +73,8 @@ def test_needs_review_rows_say_why_in_the_measuring_words(facts):
     parking = next(r for r in result["interior"] if r["Rule id"] == "R-1b.parking_one_family")
     assert parking["Error"] == "NEEDS REVIEW" and parking["Why"] == "enter bedrooms / parking spaces"
     assert all(r["Rule id"] != "R-1b.parking_one_family" for r in result["rows"])
-    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 5 need review")
+    # WAITING_ON_THE_HOUSEHOLD's eleven (the six ADU rules among them, §325-28)
+    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 11 need review")
     assert sorted(r["Rule id"] for r in result["rows"] if r["Error"] == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
 
 
@@ -151,7 +155,7 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 5 need review"
+    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 11 need review"
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 

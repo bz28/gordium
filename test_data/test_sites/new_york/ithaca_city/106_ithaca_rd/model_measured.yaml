@@ -69,19 +69,19 @@ measurements:
     from: 'not measured: say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)'
   unrelated_persons:
     value: null
-    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)'
   unrelated_persons_with_children:
     value: null
-    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)'
   owner_occupied:
     value: null
-    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)'
   accessory_dwelling_unit:
     value: null
-    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+    from: 'not measured: say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28)'
   functional_family_unit:
     value: null
-    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit, whether an accessory dwelling unit is on the lot (§325-3B)'
+    from: 'not measured: enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)'
   home_occupation:
     value: null
     from: 'not measured: say whether a home occupation is planned and, if so, its floor area and its dwelling unit''s (§325-3B HOME OCCUPATION)'
@@ -139,3 +139,42 @@ measurements:
   accessory_distances_apply:
     value: null
     from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'
+  adu_detached:
+    value: null
+    from: 'not measured: say whether the accessory dwelling unit is attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing accessory building or new construction (§325-3B, §325-28C(7))'
+  adu_existing_building:
+    value: null
+    from: 'not measured: say whether the accessory dwelling unit is attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing accessory building or new construction (§325-3B, §325-28C(7))'
+  adus_on_parcel:
+    value: null
+    from: 'not measured: enter how many accessory dwelling units are on the parcel (§325-28C(1): one at most)'
+  adu_bedrooms:
+    value: null
+    from: 'not measured: enter the accessory dwelling unit''s bedrooms (§325-28C(3): two at most)'
+  adu_floor_area:
+    value: null
+    from: 'not measured: enter the attached accessory dwelling unit''s floor area and the main building''s, the ADU included (§325-28C(7)(a): 40% at most)'
+  primary_floor_area:
+    value: null
+    from: 'not measured: enter the attached accessory dwelling unit''s floor area and the main building''s, the ADU included (§325-28C(7)(a): 40% at most)'
+  adu_footprint:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_height:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_stories:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_front_yard:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_side_yard:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_rear_yard:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'
+  adu_in_primary_front_yard:
+    value: null
+    from: 'not measured: pick the detached accessory dwelling unit''s building (the solid it is in) with Pick the ADU''s building…'

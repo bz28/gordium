@@ -67,3 +67,19 @@ accessory_front_yard:      {unit: ft,     meaning: "Least distance from a street
 accessory_side_yard:       {unit: ft,     meaning: "Least distance from a side lot line to an accessory building"}
 accessory_rear_yard:       {unit: ft,     meaning: "Least distance from the rear lot line to an accessory building"}
 accessory_distances_apply: {unit: yes_no, meaning: "The city's side and rear distances for accessory buildings apply to the accessory buildings on the lot"}
+# An accessory dwelling unit (§325-3B ACCESSORY DWELLING UNIT, ATTACHED and DETACHED; §325-28C). Stated by the
+# architect: what kind it is and what the model doesn't show (research: docs/research/2026-10-29_accessory_dwelling_units.md).
+adu_detached:          {unit: yes_no, meaning: "The accessory dwelling unit is detached: in an accessory structure of its own (§325-3B ACCESSORY DWELLING UNIT, DETACHED: a detached garage, carriage house or other freestanding building); no: attached, connected to or contained within the primary structure (a basement, an addition, an attached garage)"}
+adu_existing_building: {unit: yes_no, meaning: "The detached accessory dwelling unit is in an existing accessory building (§325-28C(7)(b), (8)(b)); no: new construction (§325-28C(7)(c), (8)(b)[2])"}
+adus_on_parcel:        {unit: count,  meaning: "Accessory dwelling units on the parcel, 1 or more (§325-28C(1))"}
+adu_bedrooms:          {unit: count,  meaning: "Bedrooms in the accessory dwelling unit (§325-28C(3))"}
+adu_floor_area:        {unit: sf,     meaning: "Floor area of the attached accessory dwelling unit, as typed (never rounded)"}
+primary_floor_area:    {unit: sf,     meaning: "Floor area of the primary structure the attached accessory dwelling unit is in, the ADU included (§325-28C(7)(a): whether the 40% is of the whole structure or of the rest of it is an open question)"}
+# Measured from the detached ADU's building, the solid the architect picks (adu_building), on its own.
+adu_footprint:         {unit: sf,     meaning: "The detached ADU's building footprint: everything its building covers seen from above (eaves read both ways)"}
+adu_height:            {unit: ft,     meaning: "Height of the detached ADU's building, measured as the city defines building height, from the grade plane at its own walls"}
+adu_stories:           {unit: count,  meaning: "Stories of the detached ADU's building, read from the drawing (a plain solid at 7 ft a story at most)"}
+adu_front_yard:        {unit: ft,     meaning: "Least distance from a street lot line to the detached ADU's building"}
+adu_side_yard:         {unit: ft,     meaning: "Least distance from a side lot line to the detached ADU's building"}
+adu_rear_yard:         {unit: ft,     meaning: "Least distance from the rear lot line to the detached ADU's building"}
+adu_in_primary_front_yard: {unit: yes_no, meaning: "Some part of the detached ADU's building, seen from above, is nearer the primary street's lot line than the front of the main building is (§325-3B FRONT YARD: the open space between the main building and the front lot line)"}

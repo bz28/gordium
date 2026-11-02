@@ -845,6 +845,8 @@ def show_detail(parts):
             buttons.append(button(words, a["edit_site"]))
     if i.get("hint") == "Pick the main building…":
         buttons.append(button("Pick the main building…", a["main"]))
+    if i.get("hint") == "Pick the ADU's building…":
+        buttons.append(button("Pick the ADU's building…", a["adu"]))
     if i["id"] == "scope.not_included":
         buttons.append(button("Add to check…", lambda: a["add"](i["objects"])))
         if i.get("ground_like"):              # only the architect's word leaves it out (never a guess)
@@ -1321,7 +1323,8 @@ def start_box(state, options, mode):
             cells += [name, field]
         grid = ef.DynamicLayout()
         grid.Padding = ed.Padding(0)
-        grid.Spacing = ed.Size(8, 4)
+        grid.Spacing = ed.Size(8, 2)       # 2 px between questions: seven and the quick answers fit a laptop
+                                           # (the ADU question asked up front, 2026-10-30)
         quick = logic.quick_answers([q["key"] for q in questions])
         if quick:                          # several answers in one click; the fields it fills stay editable
             picker = ef.DropDown()

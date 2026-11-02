@@ -22,6 +22,8 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                "primary_buildings", "primary_buildings_same_use", "south_hill_overlay",
                "stream_near_lot", "stream_distance", "garage_cars", "private_garages",
+               "adu_building", "adu_detached", "adu_existing_building", "adus_on_parcel", "adu_bedrooms",
+               "adu_floor_area", "primary_floor_area",
                "grade_points", "grade_from", "grade_is", "unsettled", "ground_fall", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
@@ -54,7 +56,7 @@ def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
 def fact_problems(facts: dict) -> list[str]:
     """What's wrong with lot facts, by field. One check for every way facts arrive (a file, the Rhino command)."""
     problems = [f"unknown lot fact {k!r}" for k in sorted(set(facts) - FACT_FIELDS)]
-    text = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "main_building"}
+    text = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "main_building", "adu_building"}
     problems += [f"{k} must be text" for k in sorted(text & set(facts))
                  if facts[k] is not None and not isinstance(facts[k], str)]
     if facts.get("plan_north_deg") is not None and not _number(facts["plan_north_deg"]):
@@ -62,10 +64,11 @@ def fact_problems(facts: dict) -> list[str]:
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
     for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants",
-              "unrelated_persons", "unrelated_persons_with_children", "garage_cars"):
+              "unrelated_persons", "unrelated_persons_with_children", "garage_cars", "adu_bedrooms"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
-    for k in ("home_occupation_area", "home_occupation_unit_area"):               # square feet, never rounded
+    for k in ("home_occupation_area", "home_occupation_unit_area",               # square feet, never rounded
+              "adu_floor_area", "primary_floor_area"):
         if facts.get(k) is not None and not (_number(facts[k]) and facts[k] >= 0):
             problems.append(f"{k} must be a number of square feet, 0 or more")
     if facts.get("stream_distance") is not None and not (_number(facts["stream_distance"]) and facts["stream_distance"] >= 0):
@@ -73,12 +76,14 @@ def fact_problems(facts: dict) -> list[str]:
     if facts.get("ground_fall") is not None and not (_number(facts["ground_fall"]) and facts["ground_fall"] >= 0):
         problems.append("ground_fall must be a number of feet, 0 or more")      # how far the looked-up ground falls
     for k in ("occupants_most_in_one_unit", "attached_units_in_building",       # at least one, by definition
-              "primary_buildings", "private_garages"):     # asked only for a garage, so at least one
+              "primary_buildings", "private_garages",     # asked only for a garage, so at least one
+              "adus_on_parcel"):                            # asked only once an ADU is said to be on the lot
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
             problems.append(f"{k} must be a whole number, 1 or more")
     for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district",
               "owner_occupied", "functional_family_unit", "home_occupation", "accessory_dwelling_unit",
-              "primary_buildings_same_use", "south_hill_overlay", "stream_near_lot"):
+              "primary_buildings_same_use", "south_hill_overlay", "stream_near_lot", "adu_detached",
+              "adu_existing_building"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")

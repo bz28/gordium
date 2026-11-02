@@ -1634,6 +1634,11 @@ from model_measurement.stops import stop as _stop  # noqa: E402
 
 PICK_MAIN_WHY = _stop("no_main_building")        # the measuring's exact words when several buildings could be it
 PICK_MAIN = "Pick the main building…"            # the row's hint, and the panel's button
+PICK_ADU_WHY = _stop("no_adu_building")          # a detached ADU's rules waiting for its building to be picked
+PICK_ADU = "Pick the ADU's building…"            # the row's hint, and the panel's button
+# every reason a detached ADU's rows give that the pick answers: none picked, the picked solid gone, or the main
+# building (or a part of it) picked
+PICK_ADU_WHYS = (PICK_ADU_WHY, _stop("adu_not_found"), _stop("adu_is_main"))
 ASSUMED_MAIN_NOTE = "assuming the starting house is the main building"      # a Gordium reading: to confirm
 ASSUMED_MAIN = "Main building: the starting house (assumed) · change it with Main building…"
 
@@ -1795,9 +1800,13 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     for i in items:                                  # waiting on the main building: the row says how to pick it
         if PICK_MAIN_WHY in (i.get("reason") or "") and not i.get("hint"):
             i["hint"] = PICK_MAIN
+        elif (any(w in (i.get("reason") or "") for w in PICK_ADU_WHYS) and not i.get("hint")
+              and facts.get("accessory_dwelling_unit") is True and facts.get("adu_detached") is True):
+            i["hint"] = PICK_ADU        # only once a detached ADU is said to be on the lot: before, its question
     if facts.get("ground_assumed") == "flat":                 # on the rows the ground decides (MVP, Ben 2026-10-20)
-        for i in items:
-            if i.get("measure") in ("building_height", "stories"):
+        for i in items:                                       # the main building's, and the detached ADU's size row
+            check_reads = re.findall(r"\w+", str((rules_by_id.get(i.get("rule")) or {}).get("check") or ""))
+            if i.get("measure") in ("building_height", "stories") or {"adu_height", "adu_stories"} & set(check_reads):
                 i["note"] = "assuming flat ground"
     for i in items:                                  # measured from an assumed main building: said on the row
         if (measured.get(i.get("measure")) or {}).get("main_assumed"):

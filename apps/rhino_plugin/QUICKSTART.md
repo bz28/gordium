@@ -273,12 +273,14 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      on every new project, after every lookup and after you pick another district (a tick is for one district),
      because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
-   - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
+   - **About this project**: the facts you know at the start that shape the building's outline: whether an
+     accessory dwelling unit (ADU) is on the lot (a detached one is a building of its own), a stream or inlet
      near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building
      holds, how many cars the lot's private garages hold (R-1 and R-2). Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
      assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
      its full wording. Answers are saved with the project; change them in Edit site… .
-     Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
+     Who lives there (household) and a home business are asked later, when you plan
+     the interior: they sit in the
      panel's collapsed **Use details (for later)** group (still needs review, not counted among the building's
      problems, never a pass). Each row says "Answer when you plan the interior: …" and has its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
@@ -435,7 +437,7 @@ lot the tax map allows:
 - side yard, southwest 12'-0 1/2" (needs 10'-0"); northeast, 12'-0 3/8";
 - coverage 21.7% (the limit is 25%).
 
-Six rows need review from the start, and that is Gordium being honest, not a mistake:
+Thirteen rows need review from the start, and that is Gordium being honest, not a mistake:
 - **New structures at least 20 ft from an inlet wall or stream bank**: the start box's stream question was left
   Not answered, so this row waits on it ("say whether any inlet wall or stream bank … is within 20 ft of the lot").
   Answer it with the row's **Answer 2 questions…** button and the row is decided.
@@ -455,6 +457,12 @@ Six rows need review from the start, and that is Gordium being honest, not a mis
   waits on it ("enter how many cars the lot's private garages hold, all together …"). Answer it with the row's
   **Enter the cars the private garages hold…** button: three or fewer complies; over three, the row then asks how
   many garages there are (whether the three cars are for each garage or the whole lot is an open question).
+- The six **accessory dwelling unit** rows (one per parcel, two bedrooms, not in the primary front yard, the attached
+  ADU's 40%, the detached ADU's size and its setbacks) and **One-family occupancy**: the start box's ADU question was
+  left Not answered, so they wait on it ("say whether an accessory dwelling unit (ADU), attached or detached, is on
+  the lot"). Answer it with an ADU row's **Enter whether an ADU is on the lot…** button: **No ADU on the lot** and
+  the six ADU rows go (they don't apply), and One-family occupancy joins **Use details (for later)**, waiting only
+  on who lives there.
 
 Lot area complies even at the tax map's worst case.
 
@@ -502,6 +510,18 @@ Lot area complies even at the tax map's worst case.
     10 ft limit).
 14. **Other units:** start in a Millimeters, Meters or Inches template. The results are the same: Gordium works
     in feet and converts at Rhino's edge.
+15. **A backyard cottage (a detached ADU, §325-28):** draw a `Box` 20 × 16 × 18 ft on the Building layer behind
+    the house, at least 5 ft from the side and rear lot lines. Answer **ADU on the lot** (in **Edit site…**, or an
+    ADU row's **Enter whether an ADU is on the lot…**); the ADU's rows then ask the rest with their **Enter…**
+    buttons: detached, new construction, one on the parcel, two bedrooms. Then they ask for its building: **Pick the
+    ADU's building…** and click the box. The ADU's rows are decided: not nearer the street than the house:
+    complies. 5 ft or more from the side and rear lot lines: it is, under every reading, but on this lot it needs
+    review like the house's rear yard ("Complies under every reading, but it depends on an open question: which lot
+    lines count as side and which as rear"); in R-1, 5 ft to under 6 ft also needs review (whether §325-25C's 6 ft
+    applies too is an open question). Its size (320 sf footprint, 18 ft, at most 2 stories) **needs
+    review** here, as the house's height does: the ground falls about 14.2 ft and Gordium assumes it flat. On a lot
+    the lookup finds level it complies, and made 22 ft tall it **does not comply** (20 ft at most). Move it in front
+    of the house: **does not comply** (not in the primary front yard). The cottage still counts toward lot coverage.
 
 ### What counts as a problem
 

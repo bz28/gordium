@@ -61,11 +61,15 @@ def test_rules_they_dont_cover_dont_apply_or_pass(site):
     # wait for them (never a pass); nor how many primary buildings stand on the lot (§325-8B(1), queue item 15), so
     # the lot area for each, the shared-yards and South Hill rows wait for the count; nor
     # whether a stream or inlet is near the lot (§325-26), so that row waits too; nor how many cars a private garage
-    # holds (chart p.2 note 6), so the garage row waits
+    # holds (chart p.2 note 6), so the garage row waits; nor whether an accessory dwelling unit is planned (§325-28),
+    # so its six rows wait
     assert others == {"R-1b.lot_area_other_use": "not_applicable", "R-1b.lot_width_other_use": "not_applicable",
                       "R-1b.parking_other_uses": "not_applicable", "R-1b.yard_projections": "pass",
                       "R-1b.accessory_buildings": "needs_review", "R-1b.occupancy_one_family": "needs_review",
                       "R-1b.home_occupation_size": "needs_review", "R-1b.home_occupation": "needs_review",
                       "R-1b.lot_area_each_primary_building": "needs_review",
                       "R-1b.yards_not_shared": "needs_review", "R-1b.south_hill_overlay": "needs_review",
-                      "R-1b.stream_setback": "needs_review", "R-1b.private_garage": "needs_review"}
+                      "R-1b.stream_setback": "needs_review", "R-1b.private_garage": "needs_review",
+                      "R-1b.adu_one_per_parcel": "needs_review", "R-1b.adu_bedrooms": "needs_review",
+                      "R-1b.adu_front_yard": "needs_review", "R-1b.adu_attached_size": "needs_review",
+                      "R-1b.adu_detached_size": "needs_review", "R-1b.adu_detached_setbacks": "needs_review"}
