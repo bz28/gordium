@@ -1418,7 +1418,7 @@ def test_a_lot_replaced_by_hand_drops_the_looked_up_fall():
     survey, a lot drawn over the guide, the survey command, the setup pick). The fall was read on A, so it goes, from
     the facts and the saved state (the next Draw writes the saved one back): height and stories need review on B.
     Keeping the same lot (Enter) keeps it."""
-    from model_measurement.measure import flat_assumption_unsafe
+    from model_measurement.places.ithaca_city.measure import flat_assumption_unsafe
     facts, ui = {"lot_id": "A", "ground_fall": 0.0}, {"ground_fall": 0.0, "replaceable_lot": "A"}
     for what in ("lot", "draw_lot"):
         f2, ui2 = logic.pick_effect(what, "B", facts, ui)

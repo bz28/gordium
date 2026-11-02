@@ -852,7 +852,7 @@ def _envelope_facts(site: dict, facts: dict) -> dict:
     accepts give the grade plane, so the height plane is drawn from it; existing ground never sets it (it isn't
     the grade the code measures from), so then only the buildable area is drawn; nor does flat ground assumed on a
     lot that may slope (measure.flat_assumption_unsafe: its height and stories need review, so no height plane)."""
-    from model_measurement.measure import flat_assumption_unsafe
+    from model_measurement.plugin_measuring import flat_assumption_unsafe
     if facts.get("grade_is") == "existing" or flat_assumption_unsafe(facts):
         return {**facts, "ground_is_flat": None}
     if facts.get("grade_points"):
@@ -1610,7 +1610,7 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     # (the spots themselves aren't at the new building's walls: it's drawn on their plane, and the check that follows
     # judges the spots as they are)
     drawing = facts
-    from model_measurement.measure import flat_assumption_unsafe
+    from model_measurement.plugin_measuring import flat_assumption_unsafe
     unsafe_flat = flat_assumption_unsafe(facts)
     if unsafe_flat:                     # flat ground assumed on a lot that may not be: drawn standing at the lot's
         # level all the same (as with no grade, below), its height and stories from the zone's limits; the check

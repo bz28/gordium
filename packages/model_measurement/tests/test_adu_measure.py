@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from model_measurement.measure import ADU_MEASURES, TAX_MAP_SLACK, measure
+from model_measurement.places.ithaca_city.measure import ADU_MEASURES, TAX_MAP_SLACK, measure
 from model_measurement.project import fact_problems
 from model_measurement.stops import stop
 
@@ -225,7 +225,7 @@ def test_a_corner_lot_whose_streets_cant_be_told_apart_waits(monkeypatch):
     holds even if they didn't.)"""
     import inspect
 
-    import model_measurement.measure as measure_module
+    import model_measurement.places.ithaca_city.measure as measure_module
     real = measure_module._street_groups
 
     def unknown_here(*a):           # unknown only to this measurement: every other one still reads the streets

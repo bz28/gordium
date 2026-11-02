@@ -2145,7 +2145,7 @@ def test_assumed_flat_ground_with_no_ground_looked_up_gives_needs_review():
 def test_a_level_looked_up_lot_and_stated_flat_ground_are_unchanged():
     """A fall under FLAT_FALL_FT (0.5 ft: lidar can't tell it from level), 0.0 included, and flat ground the
     architect stated (no ground_assumed) are measured as before; 0.5 ft itself is sloped."""
-    from model_measurement.measure import FLAT_FALL_FT
+    from model_measurement.places.ithaca_city.measure import FLAT_FALL_FT
     assert FLAT_FALL_FT == 0.5
     for facts in ({**DRAWN, "ground_assumed": "flat", "ground_fall": 0.0},
                   {**DRAWN, "ground_assumed": "flat", "ground_fall": 0.4}, DRAWN):
@@ -2158,7 +2158,7 @@ def test_a_level_looked_up_lot_and_stated_flat_ground_are_unchanged():
 def test_a_fall_that_is_not_a_fall_never_reads_as_level():
     """Review round 2: measure() called directly (no fact_problems guard) with a NaN, negative or infinite fall
     read the lot as level (only `fall >= 0.5` was unsafe). Level is now only a fall shown to be 0 <= fall < 0.5."""
-    from model_measurement.measure import flat_assumption_unsafe
+    from model_measurement.places.ithaca_city.measure import flat_assumption_unsafe
     from model_measurement.stops import stop
     for bad in (float("nan"), -1, -0.1, float("inf"), True, "0.0", None):
         assert flat_assumption_unsafe({"ground_assumed": "flat", "ground_fall": bad}) == stop("flat_unknown"), bad

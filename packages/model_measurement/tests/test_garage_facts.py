@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 from model_measurement.project import fact_problems
 from model_measurement.stops import stop
 
