@@ -1371,7 +1371,7 @@ def test_the_checker_proves_every_starting_building_with_its_own_verdict(monkeyp
     real = generator._failing
     monkeypatch.setattr(generator, "_failing", lambda *a: seen.append(a[-1]) or real(*a))
     site, facts, rules = _jogged_unsurveyed()
-    out = checker.largest_legal_building(site, facts, checker.measure(site, facts), rules)
+    out = checker.largest_legal_building(site, facts, checker.measuring(facts["jurisdiction"]).measure(site, facts), rules)
     assert out["floors"] and seen == [checker.verdict]
 
 
@@ -1612,7 +1612,7 @@ def test_the_stored_sample_ring_is_rebuilt_from_the_states_own_outline():
                             .read_text(encoding="utf-8"))
     raw = stored["state_ring_epsg2261_us_survey_ft"]
     assert raw[0] == raw[-1] and len(raw) == len(stored["ring"]) + 1
-    us = (1200 / 3937) / 0.3048                             # survey feet to feet (site_lookup.lookup.US_SURVEY_FT)
+    us = (1200 / 3937) / 0.3048                             # survey feet to feet (site_lookup.adapters.ithaca_city.lookup.US_SURVEY_FT)
     ox, oy = stored["frame"]["origin_epsg2261_us_survey_ft"]
     outline = [[round((x - ox) * us, 2), round((y - oy) * us, 2)] for x, y in raw[:-1]]
     a = math.radians(stored["frame"]["rotation_deg"])
@@ -1736,7 +1736,7 @@ def test_review_round_1_of_the_architects_fixes():
         names = sorted(i["name"] for i in check_site(site, f, extras=extras)["view"]["items"]
                        if i["name"].startswith("Side yard"))
         assert names == ["Side yard, narrower", "Side yard, wider"], (corner, names)
-    from model_measurement import measure as measuring
+    from model_measurement.places.ithaca_city import measure as measuring
     rect = [(0, 0), (50, 0), (50, 100), (0, 100)]           # edges: 0 front, 1 east, 2 back, 3 west
     plain = {**site, "lot": {"id": "lot", "edges": [{"points": [list(rect[i]), list(rect[(i + 1) % 4])]}
                                                     for i in range(4)]}}
@@ -3348,7 +3348,7 @@ def test_every_street_line_is_saved_with_its_street_id():
     # round 2: (D1) Gordium's own ids never vouch for one street in the measuring: a curved edge (the box sees only
     # its ends) still swings in the measuring's own check, so a 50° arc then a line ask one street or two
     from model_measurement import street_lines
-    from model_measurement.measure import measure
+    from model_measurement.places.ithaca_city.measure import measure
     from test_measure import FACTS as MFACTS, site as msite, box as mbox
     arc = [(60 + 20 * m_.sin(m_.radians(t)), 20 - 20 * m_.cos(m_.radians(t))) for t in range(0, 51, 5)]
     e = arc[-1]

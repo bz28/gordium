@@ -27,7 +27,7 @@ import pytest
 
 from design_checker import present
 from design_checker.check import row_verdict
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 from rule_format.rulebook import REPO, Context
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))

@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from model_measurement import measure as measure_module
+from model_measurement.places.ithaca_city import measure as measure_module
 from model_measurement.stops import STOPS
 
 # a blank holding another reason or an open question may hold anything; any other blank is a word or a few

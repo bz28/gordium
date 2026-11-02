@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 import rhino3dm as r
 
-from model_measurement.measure import MAX_COMBINATIONS, MAX_UNCLEAR_EDGES, measure
+from model_measurement.places.ithaca_city.measure import MAX_COMBINATIONS, MAX_UNCLEAR_EDGES, measure
 from model_measurement.read_3dm import read_site
 from model_measurement.stops import STOPS
 
@@ -172,7 +172,7 @@ SHEDS = [sloped_roof_box(2 + 6 * i, 70, 6 + 6 * i, 74, 20, 30, f"shed {i}") for 
 def _geos_error(tmp_path):
     """Any shapely / GEOS failure while measuring: a stop with its reason, never a crash (stress F14)."""
     import shapely
-    from model_measurement import measure as m
+    from model_measurement.places.ithaca_city import measure as m
 
     def broken(building):
         raise shapely.errors.GEOSException("TopologyException: side location conflict at 1 2")
@@ -378,7 +378,7 @@ def test_the_measuring_gives_reasons_only_from_the_table():
     """Whatever becomes a reason comes from stop(), followed through names: a reason written into the code
     would be missed by the README and the cases. (conftest.py also checks every reason the tests make.)"""
     found = []
-    for name in ("read_3dm.py", "measure.py"):
+    for name in ("read_3dm.py", "places/ithaca_city/measure.py"):
         tree = ast.parse((CODE / name).read_text(encoding="utf-8"))
         bound = {}                      # module-level names (constants, tables); a local why_... is checked itself
         for node in tree.body:

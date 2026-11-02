@@ -15,7 +15,7 @@ import openpyxl
 import pytest
 
 from model_measurement.__main__ import pairs, text
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 from model_measurement.project import load_facts
 from model_measurement.read_3dm import read_site
 from rule_format.rulebook import REPO, Context, load, outcome, rulebook_for

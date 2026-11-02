@@ -3280,7 +3280,7 @@ def still_shown(saved_ui):
     return STILL_SHOWN.format(address=address.split(",")[0].strip()) if address else NOTHING_CHANGED
 
 
-# ---- address type-ahead (site_lookup.suggest, in lookup_box's own short process; the box shows the list) ----------
+# ---- address type-ahead (the place's site_lookup adapter's suggest, in lookup_box's own process; the box shows the list) ----
 SUGGEST_DELAY_S = 0.3          # s after the last key before the City's address layer is asked
 SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestions unavailable"
 SUGGEST_MIN_CHARS = 4
@@ -4741,7 +4741,7 @@ def context_replaces(payload):
     return out | ({"gordium"} if out else set())
 
 
-LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.context's mark on a live-only layer's credit line
+LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.adapters.ithaca_city.context's mark on a live-only layer's credit line
 NOTE_WIDTH = 60                          # characters per line of the Sources note (it sits inside the square)
 NOTE_HEIGHT_FT = 2.5                     # its text height (about the scale bar label's): ~95 ft wide at 60 characters
 NOTE_LINE_FT = 1.7 * NOTE_HEIGHT_FT      # the most one displayed line may take, spacing included (the in-Rhino claim)
@@ -5449,7 +5449,7 @@ SAVED_SAYS = ("The map services didn't answer. Shown: the lookup of {address} sa
               "line only: pick the district again).")
 SAVED_ON = " · saved on {date}"
 SAVED_NOT_THIS = "The saved lookup is {saved_for}'s, not {address}'s: press Look up to find {address}."
-USED_LIVE = "(used live, not stored)"                     # site_lookup.lookup.USED_LIVE: a value never stored
+USED_LIVE = "(used live, not stored)"                     # site_lookup.adapters.ithaca_city.lookup.USED_LIVE: a value never stored
 
 
 def lookup_key(address):

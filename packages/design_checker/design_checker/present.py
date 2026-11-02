@@ -37,7 +37,7 @@ GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies",
           ("use_details", rhino_logic.USE_DETAILS_TITLE), ("not_checked", "Not checked"), ("not_covered", NOT_YET)]
 
 from model_measurement.project import fact_conflict_rows  # noqa: E402  (lot facts that disagree: shown)
-from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
+from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
 EIGHTH = 1 / 96                           # 1/8 in, in feet
@@ -402,7 +402,7 @@ def _holds(expr: str, values: dict, row: dict):
     return True if got == {True} else False if got == {False} else None
 
 
-from model_measurement import measure as _measuring  # noqa: E402  (its open questions, by name)
+from model_measurement import plugin_measuring as _measuring  # noqa: E402  (its open questions, by name)
 
 # Every open question the measuring asks, each with a short name for the panel: by its tag ("(lot_depth)"), or by
 # its own words where it has none. A test checks that every question the measuring can ask is here.
@@ -1645,7 +1645,7 @@ ASSUMED_MAIN = "Main building: the starting house (assumed) · change it with Ma
 
 BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_height", "stories")
 # (model_measurement's own lists: a yard added there is never left out here)
-from model_measurement.measure import ACCESSORY_YARDS, EAVE_YARDS  # noqa: E402
+from model_measurement.plugin_measuring import ACCESSORY_YARDS, EAVE_YARDS  # noqa: E402
 LEFT_OUT_ACCESSORY = ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply")
 
 
@@ -1727,7 +1727,7 @@ def _cautious_for_left_out(items, left_out, touching, rules_by_id=None):
 # Every measurement worked out from the lot lines is model_measurement's own list (LOT_LINE_MEASURES: the main
 # yards, their eaves and the accessory buildings' yards): one list, so a yard added there is never left out here
 # (the merge of #18 onto main left the accessory yards out: accessory_buildings stayed "complies" on a doubtful lot).
-from model_measurement.measure import LOT_LINE_MEASURES  # noqa: E402
+from model_measurement.plugin_measuring import LOT_LINE_MEASURES  # noqa: E402
 UNSETTLED_DECIDES = {
     "lot": ("lot_area",) + LOT_LINE_MEASURES,
     "street": LOT_LINE_MEASURES,

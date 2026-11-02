@@ -517,7 +517,7 @@ def test_every_row_that_needs_review_says_why_over_a_stress_sample(size):
 def _measured(design, order):
     """Every measurement as order-free facts: its value and each reading's value with its named answers (the
     reading's words name lot lines by the drawn numbering, which a different start point renumbers)."""
-    from model_measurement.measure import measure
+    from model_measurement.places.ithaca_city.measure import measure
     out = {}
     for name, r in measure(generate.gordium_site(design, order), generate.gordium_facts(design)).items():
         value = round(r["value"], 2) if isinstance(r.get("value"), (int, float)) else r.get("value")

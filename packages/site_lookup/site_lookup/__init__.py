@@ -1,5 +1,6 @@
-"""Address in, site facts out (City of Ithaca): see README.md."""
+"""Address in, site facts out: see README.md. Shared here: geometry and http; each place's own lookup is in
+adapters/<name>/, chosen by its settings (adapter(place))."""
 
-from .lookup import lookup
+from .adapters import adapter
 
-__all__ = ["lookup"]
+__all__ = ["adapter"]

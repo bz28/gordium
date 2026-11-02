@@ -10,8 +10,7 @@ from pathlib import Path
 
 from rule_format.rulebook import load
 
-from .measure import fact_conflicts as measure_conflicts
-from .measure import measure
+from .places import measuring
 from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
@@ -50,7 +49,8 @@ def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
     """fact_conflicts, each with the facts to correct it (the panel's "Enter …" button asks those). The measuring sets
     each of those facts aside with the same reason (measure.fact_conflicts: one list). The use is set aside too when it
     is one of the answers, but it is changed in the start box (Edit site…), not by the Enter button."""
-    return [(why, tuple(n for n in names if n != "use")) for why, names in measure_conflicts(facts)]
+    return [(why, tuple(n for n in names if n != "use"))
+            for why, names in measuring(facts.get("jurisdiction")).fact_conflicts(facts)]
 
 
 def fact_problems(facts: dict) -> list[str]:
@@ -162,7 +162,7 @@ def project(model_path: Path, facts: dict) -> dict:
     problems = fact_problems(facts)
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
-    measured = measure(read_site(model_path, facts), facts)
+    measured = measuring(facts.get("jurisdiction")).measure(read_site(model_path, facts), facts)   # the lot's place's
     return {"title": facts.get("title") or Path(model_path).stem, "jurisdiction": facts.get("jurisdiction"),
             "zone": facts.get("zone"),
             "measurements": {name: {"value": r["value"], "from": working(r, Path(model_path).name)}

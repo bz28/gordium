@@ -29,7 +29,7 @@ import oracle  # noqa: E402
 
 from design_checker import present  # noqa: E402
 from design_checker.check import row_verdict  # noqa: E402
-from model_measurement.measure import measure  # noqa: E402
+from model_measurement.places.ithaca_city.measure import measure  # noqa: E402
 from rule_format.rulebook import REPO, Context  # noqa: E402
 
 DESIGNS = int(os.environ.get("GORDIUM_STRESS_DESIGNS", "150"))

@@ -132,7 +132,10 @@ def folder_of(where) -> Path:
 
 
 def place(where) -> Place:
-    """A place's settings. `where`: <state>/<place>, its folder in the repo (as lot facts name it), or any folder."""
+    """A place's settings. `where`: <state>/<place>, its folder in the repo (as lot facts name it), any folder, or a
+    Place already read (given back as it is)."""
+    if isinstance(where, Place):
+        return where
     if where is None or str(where).strip() in ("", "."):
         raise UnknownPlace("no place given: say which place (regulations/jurisdictions/<state>/<place>)")
     return _read(str(folder_of(where).resolve()))
