@@ -6,10 +6,19 @@ import contextlib
 import datetime as _dt
 import json
 import math
+import os
 import queue
 import re
 import threading
 import time
+
+# The place the plugin checks (its only place, for now), from the place registry: its settings file,
+# regulations/jurisdictions/<state>/<place>/jurisdiction.yaml, copied for Rhino's Python (which can't read YAML) into
+# place.json beside this file by `python -m rule_format place --write` (CI checks the copy is current). Every value
+# below that names the place (its name, the address tail, its own words and ZIP codes, its time zone) comes from it.
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "place.json"), encoding="utf-8") as _f:
+    PLACE = json.load(_f)
+_ADDRESSES = PLACE["addresses"]
 
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
@@ -3064,10 +3073,15 @@ OVERLAYS_NOT_KEPT = "Overlays may apply here (a saved lookup can't keep them): c
 
 
 def city_day(now=None):
-    """The City's own day (Ithaca: America/New_York) at `now` (UTC; default the present), as YYYY-MM-DD: the day a
-    lookup was checked and a Draw is saved, never the UTC day (after about 8 pm in Ithaca that is tomorrow). US
-    Eastern time by the federal rule (15 U.S.C. 260a: from 2 am on the second Sunday of March to 2 am on the
-    first Sunday of November, UTC-4; otherwise UTC-5), so no time-zone database is needed in Rhino's Python."""
+    """The place's own day (its time zone: PLACE, e.g. Ithaca's America/New_York) at `now` (UTC; default the present),
+    as YYYY-MM-DD: the day a lookup was checked and a Draw is saved, never the UTC day (after about 8 pm in Ithaca
+    that is tomorrow). Its standard offset, one hour more by the US federal rule when it keeps daylight time (15
+    U.S.C. 260a: from 2 am on the second Sunday of March to 2 am on the first Sunday of November; Ithaca: UTC-4,
+    otherwise UTC-5), so no time-zone database is needed in Rhino's Python."""
+    zone = PLACE["time_zone"]
+    standard = zone["standard_utc_offset_hours"]
+    if zone["daylight_saving"] not in ("us_federal", "none"):
+        raise ValueError("unknown daylight-saving rule " + repr(zone["daylight_saving"]) + " in place.json")
     now = now or _dt.datetime.now(_dt.timezone.utc)
     if now.tzinfo is None:
         now = now.replace(tzinfo=_dt.timezone.utc)
@@ -3076,8 +3090,9 @@ def city_day(now=None):
     def sunday(month, nth):              # the nth Sunday of the month in now's year
         first = _dt.datetime(now.year, month, 1)
         return first + _dt.timedelta(days=(6 - first.weekday()) % 7 + 7 * (nth - 1))
-    summer = sunday(3, 2) + _dt.timedelta(hours=7) <= now < sunday(11, 1) + _dt.timedelta(hours=6)
-    return (now - _dt.timedelta(hours=4 if summer else 5)).date().isoformat()
+    summer = (zone["daylight_saving"] == "us_federal" and         # 2 am local: standard time, then daylight time
+              sunday(3, 2) + _dt.timedelta(hours=2 - standard) <= now < sunday(11, 1) + _dt.timedelta(hours=1 - standard))
+    return (now + _dt.timedelta(hours=standard + 1 if summer else standard)).date().isoformat()
 
 
 def two_zones_ask(zones):
@@ -3271,7 +3286,7 @@ SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestion
 SUGGEST_MIN_CHARS = 4
 SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and press Look up."
 NO_MATCH = "No matching address suggested: type the full address and press Look up."
-CITY_SUFFIX = ", Ithaca, NY"
+CITY_SUFFIX = _ADDRESSES["tail"]           # the place's own: ", Ithaca, NY" (PLACE)
 
 
 BOX_TEXT_WIDTH = 560           # px: the start box's long lines wrap here (one unbroken amber line stretched the box
@@ -5189,7 +5204,7 @@ PICK_A_MATCH = "Pick one of the matches under Address, then press Look up."
 WAIT_LOOKUP = "Looking up {address}: Draw once the answer is in."
 GUIDE_PREVIEW = ("The State's tax map didn't answer; the City's outline is shown as a dashed guide only (it can't be "
                  "kept). Draw clears what Gordium drew for the old address; then Draw my lot… over the guide.")
-CITY_TAIL = {"ithaca", "ny", "new", "york", "usa"}
+CITY_TAIL = set(_ADDRESSES["own_words"]) | set(_ADDRESSES["state_words"]) | {"usa"}   # Ithaca: ithaca ny new york
 
 
 def address_words(address):
@@ -5367,8 +5382,8 @@ def start_gate(state, saved_ui):
                 outside_for=saved_ui.get("_outside_for") or [])
 
 
-BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
-                     "(a City of Ithaca one), or clear it.")
+BY_HAND_CITY_ONLY = ("Gordium checks " + PLACE["name"] + " lots only: {address} is in another place. Correct the "
+                     "address (a " + PLACE["name"] + " one), or clear it.")
 
 
 def no_guessed_district(saved, suggested):
@@ -5380,13 +5395,15 @@ def no_guessed_district(saved, suggested):
     return suggested
 
 
-IN_CITY_QUESTION = ("Is this lot in the City of Ithaca?\n\nGordium checks City of Ithaca lots only. An address "
-                    "that reads \"Ithaca, NY 14850\" may instead be in the Town of Ithaca, Cayuga Heights, Lansing "
-                    "or Dryden, which have their own zoning codes. The City's tax map says which.\n\n"
-                    "Yes: enter the site by hand as a City of Ithaca lot. No: nothing changes.")
-IN_CITY_SAID = "You said this lot is in the City of Ithaca ({date})."
-BY_HAND_OUTSIDE = ("The lookup said {query} is outside the City of Ithaca, and Gordium checks City of Ithaca lots "
-                   "only: look up a City of Ithaca address, or close this box.")
+IN_CITY_QUESTION = ("Is this lot in the " + PLACE["name"] + "?\n\nGordium checks " + PLACE["name"] + " lots only. An "
+                    "address that reads \"" + _ADDRESSES["shares_mail_as"] + "\" may instead be in the "
+                    + (", ".join(_ADDRESSES["shares_mail_with"][:-1]) + " or " if _ADDRESSES["shares_mail_with"][1:]
+                       else "") + _ADDRESSES["shares_mail_with"][-1]
+                    + ", which have their own zoning codes. The City's tax map says which.\n\n"
+                    "Yes: enter the site by hand as a " + PLACE["name"] + " lot. No: nothing changes.")
+IN_CITY_SAID = "You said this lot is in the " + PLACE["name"] + " ({date})."
+BY_HAND_OUTSIDE = ("The lookup said {query} is outside the " + PLACE["name"] + ", and Gordium checks " + PLACE["name"]
+                   + " lots only: look up a " + PLACE["name"] + " address, or close this box.")
 
 
 def by_hand_refused(saved_ui):
@@ -5536,7 +5553,7 @@ def known_addresses(saved_ui):
                         pending.get("query")) if a]
 
 
-ITHACA_PLACE = {"ithaca", "14850", "14851", "14852", "14853"}
+ITHACA_PLACE = set(_ADDRESSES["own_words"]) | set(_ADDRESSES["zip_codes"])   # the place's own name and ZIPs
 
 
 def address_place(address):
@@ -5562,14 +5579,13 @@ DIRECTIONS = {"north", "south", "east", "west", "n", "s", "e", "w"}
 STREET_ENDINGS = ((set(STREET_WORDS) | set(STREET_WORDS.values())) - DIRECTIONS    # "East Ithaca" is the Town's
                   | {"way", "park", "walk", "row", "alley", "aly", "path", "trail", "trl", "ext", "extension", "sq",
                      "square", "plaza", "loop", "run", "crossing", "pike", "tpke", "turnpike", "rte", "route"})
-STATE_WORDS = ("ny", "new", "york", "usa", "us", "tompkins", "county")
+STATE_WORDS = (*_ADDRESSES["state_words"], "usa", "us", *_ADDRESSES["county_words"])   # Ithaca's: ny … tompkins county
 UNIT_WORDS = {"apt", "apartment", "unit", "#", "ste", "suite", "fl", "floor", "rm", "room", "bldg", "building"}
 NOT_A_PLACE = {"rear", "front", "lower", "upper", "-", "&"}    # a part of a lot or house ("101 N Aurora St Rear")
 # Places around the City that share its "Ithaca" mail and ZIPs, read as a town even after a street with no known
 # ending ("1 Snyder Hill Dryden": round 11); "town" and "village" too ("Town of Ithaca"). By hand, the architect also
 # says the lot is in the City (IN_CITY_QUESTION): an address alone can't prove it.
-NEARBY_PLACES = {"town", "village", "lansing", "dryden", "danby", "enfield", "newfield", "caroline", "ulysses",
-                 "groton", "trumansburg", "freeville", "varna", "etna", "slaterville", "brooktondale", "cayuga"}
+NEARBY_PLACES = {"town", "village"} | set(_ADDRESSES["nearby_places"])     # (PLACE: Lansing, Dryden, … for Ithaca)
 
 
 def _address_tokens(text):
@@ -5578,7 +5594,9 @@ def _address_tokens(text):
     read as a town)."""
     text = str(text or "").lower().replace(".", "").replace("#", " # ")
     text = re.sub(r"\bny(\d{5})", r"ny \1", text)
-    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    text = " ".join(text.split())
+    for other in _ADDRESSES["also_written"]:                 # "city of ithaca", "ithaca city" -> "ithaca"
+        text = text.replace(other, _ADDRESSES["own_words"][0])
     words, out = text.split(), []
     i = 0
     while i < len(words):

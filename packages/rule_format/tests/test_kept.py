@@ -173,16 +173,18 @@ def test_a_stale_file_with_a_broken_row_is_still_re_extract_never_a_crash(tmp_pa
     f.write_text(json.dumps({"file": "doc.pdf", "sha256": "a" * 64}) + "\n"
                  + json.dumps({"page": "not a number", "columns": [{"no": "name"}], "value": 1}) + "\n", encoding="utf-8")
     ctx = blank()
-    getattr(ctx, loader)("doc.pdf", "b" * 64, f)
+    j = [REPO / "regulations/jurisdictions/new_york/ithaca_city"] if loader == "_load_cells" else []   # its settings
+    getattr(ctx, loader)("doc.pdf", "b" * 64, f, *j)
     assert "different version" in ctx.problems[0] and not ctx.pages and not ctx.cells
     with pytest.raises((KeyError, ValueError)):                       # the right version, broken: still loud
-        getattr(blank(), loader)("doc.pdf", "a" * 64, f)
+        getattr(blank(), loader)("doc.pdf", "a" * 64, f, *j)
 
 
 def test_extracted_text_and_chart_cells_match_a_reading_without_the_cache():
     """Context's pages and cells against the same files read straight from disk the way the code did before the
     cache (read_jsonl, then the same loops written out here), for every document of every jurisdiction."""
-    from rule_format.rulebook import DISTRICT_COLUMN, district_name, read_jsonl, tokenize
+    from rule_format.place import place
+    from rule_format.rulebook import district_name, read_jsonl, tokenize
     checked = 0
     for j in jurisdictions():
         ctx = Context.for_jurisdiction(j)
@@ -203,7 +205,7 @@ def test_extracted_text_and_chart_cells_match_a_reading_without_the_cache():
                 rows, cells, districts = read_jsonl(cells_file), {}, set()
                 for r in rows[1:]:
                     if "columns" in r:
-                        districts |= {district_name(c["name"]) for c in r["columns"] if DISTRICT_COLUMN.fullmatch(c["name"])}
+                        districts |= {district_name(c["name"]) for c in r["columns"] if place(j).district_column.fullmatch(c["name"])}
                     elif "value" in r and not r.get("heading"):
                         cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
                 assert ctx.cells[name] == cells

@@ -180,7 +180,7 @@ def test_every_call_is_charged_against_the_cap_and_refused_past_it(inputs, tmp_p
 
 
 def test_the_answer_key_is_never_shown_to_the_drafter(inputs):
-    hand = cli.load(cli.PLACE / "5_zoning_rules/R-1b.yaml")
+    hand = cli.load(cli.one_place() / "5_zoning_rules/R-1b.yaml")
     texts = [inputs.system()] + [drafter.unit_message(u, drafter.gather_context(u, inputs.law, {"notes": inputs.notes},
                                                                                 inputs.definitions))
                                  for u in inputs.units() if not u.get("code")]
@@ -200,7 +200,7 @@ def test_the_request_asks_for_the_template_shape_with_cached_instructions(inputs
 def test_permitted_use_rules_follow_the_chart_marks(inputs):
     result = cli.draft_uses(inputs)
     r1b = result["rules"]["R-1b"][0]
-    hand = next(r for r in cli.load(cli.PLACE / "5_zoning_rules/R-1b.yaml")["rules"] if r["id"] == "R-1b.use")
+    hand = next(r for r in cli.load(cli.one_place() / "5_zoning_rules/R-1b.yaml")["rules"] if r["id"] == "R-1b.use")
     assert r1b["check"] == hand["check"]                                       # same allowed uses as the hand draft
     no_rule = {cli.district_name(c) for c in inputs.columns} - set(result["rules"])
     assert no_rule == {"R-3a", "R-3b"}                                          # nothing there fails: for a person
@@ -216,7 +216,7 @@ def test_a_drafted_question_says_it_is_not_researched_yet(inputs):
     assert [x["question"] for x in r1b["research"]] == r1b["open_questions"]
     assert r1b["research"][0]["why_open"].startswith("pending") and research_problems(r1b, inputs.ctx) == []
     asked = template("x", "front_yard >= 1", [], [({"front_yard": "2"}, "pass")]) | {"open_questions": ["Why?"]}
-    rule, why = fill_template(asked, None, {}, [], "claude")
+    rule, why = fill_template(asked, None, {}, [], "claude", inputs.chart)
     assert why is None and rule["research"] == [{"question": "Why?", "searched": [], "sources": [],
                                                  "why_open": "pending: " + DRAFTED_QUESTION}]
     assert research_problems(rule, inputs.ctx) == []
@@ -250,7 +250,7 @@ def test_a_reference_to_no_section_of_the_law_is_named_for_a_person(inputs):
     assert context["unfound"] == ["325-999"]
     assert "325-999" in drafter.unit_message(u, context)
     result = drafter.keep({"rules": {}, "unresolved": [], "rejected": [], "problems": []}, u, inputs.cells,
-                          inputs.columns, context)
+                          inputs.columns, context, chart=inputs.chart)
     assert any("325-999" in g["why"] and "matches no section" in g["why"] for g in result["unresolved"])
 
 
@@ -264,7 +264,7 @@ def test_a_template_with_an_undefined_slot_is_rejected(inputs):
 
 def test_a_general_rule_is_filled_once_with_no_district(inputs):
     general = template("front_yard", "front_yard >= 0", [], [({"front_yard": "1"}, "pass")])
-    rule, why = fill_template(general, None, inputs.cells, [], "x")
+    rule, why = fill_template(general, None, inputs.cells, [], "x", inputs.chart)
     assert why is None and rule["id"] == "general.front_yard" and not SLOT.search(json.dumps(rule))
 
 
@@ -765,7 +765,7 @@ def test_a_long_section_is_named_as_dropped_and_the_short_ones_after_it_still_co
     assert "325-20D" in context["dropped"] and "325-20E" in ids             # the cut didn't stop the loop
     assert "left out for length" in drafter.unit_message(u, context)
     result = drafter.keep({"rules": {}, "unresolved": [], "rejected": [], "problems": []}, u, inputs.cells,
-                          inputs.columns, context)
+                          inputs.columns, context, chart=inputs.chart)
     assert {d for d in context["dropped"]} <= {g["why"].split()[3].rstrip(",") for g in result["unresolved"]
                                                  if "left out of the drafter's input" in g["why"]}
 
@@ -782,7 +782,7 @@ def test_a_drafting_run_rewrites_the_labels_review_list(inputs, tmp_path, monkey
     monkeypatch.setattr(cli, "LEDGER", tmp_path / "ledger.json")
     monkeypatch.setattr(cli, "refresh_review_list", lambda i: refreshed.append(i.j))
     assert cli.main(["draft", "--only", cli.USES_UNIT, "--yes"]) == 0
-    assert refreshed == [cli.PLACE]
+    assert refreshed == [cli.one_place()]
 
 
 def test_drafted_rules_are_listed_apart_from_hand_rules_with_the_same_id(tmp_path):
@@ -840,10 +840,10 @@ def test_a_cell_cited_in_another_section_with_the_same_row_label_doesnt_cover_th
     u = unit(inputs, "chart-p3-minimum_lot_width")
     lot_size = "Minimum Lot Size [fn3]"
     rule = {"id": "R-2a.x", "sources": [_cell_source(lot_size, "Two-family dwelling", "R-2A")]}
-    gaps = drafter.chart_gaps(u, {"rules": {"R-2a": [rule]}, "unresolved": []}, inputs.cells, inputs.columns)
+    gaps = drafter.chart_gaps(u, {"rules": {"R-2a": [rule]}, "unresolved": []}, inputs.cells, inputs.columns, inputs.chart)
     assert any(g["rule"] == "R-2a.chart-p3-minimum_lot_width" and "'Two-family dwelling'" in g["why"] for g in gaps)
     failed = {"rule": "R-2a.y", "why": "'Two-family dwelling': no", "cells": [[3, lot_size, "Two-family dwelling", "R-2A"]]}
-    gaps = drafter.chart_gaps(u, {"rules": {}, "unresolved": [failed]}, inputs.cells, inputs.columns)
+    gaps = drafter.chart_gaps(u, {"rules": {}, "unresolved": [failed]}, inputs.cells, inputs.columns, inputs.chart)
     assert any(g["rule"] == "R-2a.chart-p3-minimum_lot_width" and "'Two-family dwelling'" in g["why"] for g in gaps)
 
 
@@ -873,7 +873,7 @@ def test_a_run_stopped_by_the_budget_still_rewrites_the_review_list(inputs, tmp_
     monkeypatch.setattr(cli, "_client", lambda: FakeClient())
     monkeypatch.setattr(drafter, "draft_unit", stop)
     assert cli.main(["draft", "--only", cli.USES_UNIT, "chart-p3-yard_dimensions", "--yes"]) == 1
-    assert refreshed == [cli.PLACE]                                 # the use rules were saved before the stop
+    assert refreshed == [cli.one_place()]                                 # the use rules were saved before the stop
 
 
 def test_a_measure_added_since_isnt_a_to_do(inputs, tmp_path):
@@ -906,3 +906,24 @@ def test_without_a_term_index_the_drafter_still_runs(inputs):
     u = unit(inputs, "chart-p3-yard_dimensions")
     context = drafter.gather_context(u, inputs.law | {"terms": None}, {"notes": inputs.notes}, inputs.definitions)
     assert context["related"] == [] and context["related_dropped"] == []
+
+
+def test_drafting_reads_the_given_places_chart_and_imports_with_two_places(inputs, monkeypatch):
+    """The chart a rule cites is its own place's (jurisdiction.yaml law.zoning_chart), handed in with the place,
+    never one fixed when the code loads: so with a second place, drafting's modules still import, and only drafting
+    with no place given asks for one."""
+    import importlib
+    from rule_format import place as registry
+    assert inputs.chart == registry.place(inputs.j).law_file("zoning_chart") == inputs.law["chart"]
+    rule, why = fill_template(FRONT, "R-1B", inputs.cells, [], "x", "another_places_chart.pdf")
+    assert why is None and {s["file"] for s in rule["sources"] if "cell" in s} == {"another_places_chart.pdf"}
+    ithaca = registry.place(inputs.j)
+    monkeypatch.setattr(registry, "places", lambda repo=None: [ithaca, ithaca])
+    import rule_drafting.templates, rule_drafting.uses, rule_drafting.drafter
+    for m in (rule_drafting.templates, rule_drafting.uses, rule_drafting.drafter, cli):
+        importlib.reload(m)                                  # each module loads with two places
+    with pytest.raises(registry.UnknownPlace, match="give it a --place option first"):
+        cli.Inputs()
+    monkeypatch.undo()
+    for m in (rule_drafting.templates, rule_drafting.uses, rule_drafting.drafter, cli):
+        importlib.reload(m)

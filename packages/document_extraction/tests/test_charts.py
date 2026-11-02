@@ -9,18 +9,20 @@ import document_extraction.__main__ as cli
 from document_extraction import charts as chart_reader
 from document_extraction.charts import line_tokens, read_charts, read_page, render
 from document_extraction.extract import _mark_superscripts, page_lines, sha256
+from rule_format.place import place
 
 REPO = Path(__file__).resolve().parents[3]
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 CHARTS = ITHACA / "1_source_documents/zoning_charts_2026-04.pdf"
 SAVED = ITHACA / "2_extracted_text/zoning_charts_2026-04.cells.jsonl"
 PAGES = [2, 3, 14]
+DISTRICT = place(ITHACA).district_column       # a chart column that is a district, as Ithaca's settings say
 DISTRICTS = ["R-1A", "R-1B", "R-2A", "R-2B", "R-2C", "R-3A", "R-3AA", "R-3B", "RU"]
 
 
 @pytest.fixture(scope="module")
 def cells():
-    return read_charts(CHARTS, PAGES)
+    return read_charts(CHARTS, PAGES, DISTRICT)
 
 
 def cell(cells, page, row, column, section=None):
@@ -163,6 +165,7 @@ def test_check_catches_a_hand_edited_cells_file(tmp_path, monkeypatch):
     shutil.copy(CHARTS, src / CHARTS.name)
     (src / "sources.yaml").write_text(f"documents:\n  - file: {CHARTS.name}\n    sha256: {sha256(CHARTS)}\n"
                                       f"    chart_pages: [3]\n", encoding="utf-8")
+    shutil.copy(ITHACA / "jurisdiction.yaml", src.parent / "jurisdiction.yaml")     # its settings: Ithaca's chart
     assert cli.main([]) == 0 and cli.main(["--check"]) == 0
     out = src.parent / "2_extracted_text" / f"{CHARTS.stem}.cells.jsonl"
     rows = out.read_text(encoding="utf-8").splitlines()
@@ -204,7 +207,7 @@ HEADER_LINES = [line(0, (120, "R-1")), line(10, (105, "R-1A"), (155, "R-1B"))]
 def read(monkeypatch, rects, lines, verticals=()):
     page = Page(HEADER + rects, HEADER_LINES + lines, verticals)
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
-    return read_page(page, 1)
+    return read_page(page, 1, DISTRICT)
 
 
 def test_a_group_header_is_not_a_column(monkeypatch):
@@ -299,7 +302,7 @@ def test_a_header_column_left_of_the_districts_is_unresolved(monkeypatch):
                  (100, 20, 150, 40)],
                 [line(5, (55, "B-1"), (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))])
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
-    assert read_page(page, 1) == [{"page": 1, "unresolved": DIVIDED, "text": "B-1, 25"}]
+    assert read_page(page, 1, DISTRICT) == [{"page": 1, "unresolved": DIVIDED, "text": "B-1, 25"}]
 
 
 DIVIDED = "the label area is divided: a column left of the districts?"
@@ -312,12 +315,12 @@ def test_an_unnamed_column_left_of_the_districts_is_caught_on_white_rows_too(mon
     page = Page(rects, [line(5, (105, "R-1A")), line(25, (5, "Front"), (110, "10")),
                         line(45, (5, "Side"), (60, "5"), (110, "6")), line(65, (5, "Rear"), (110, "7"))])
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
-    out = read_page(page, 1)
+    out = read_page(page, 1, DISTRICT)
     assert out[0]["unresolved"] == DIVIDED and not any("value" in r for r in out)   # no "Side 5" row
     bordered = Page([(0, 0, 100, 20), (100, 0, 150, 20), (0, 20, 100, 40), (100, 20, 150, 40)],
                     [line(5, (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))],
                     verticals=[(50, 20, 40)])                                   # a border inside the label area
-    assert read_page(bordered, 1)[0]["unresolved"] == DIVIDED
+    assert read_page(bordered, 1, DISTRICT)[0]["unresolved"] == DIVIDED
 
 
 def test_a_column_covered_by_two_cells_is_unresolved(monkeypatch):
@@ -332,7 +335,7 @@ def test_a_label_area_split_into_cells_is_unresolved(monkeypatch):
                  (100, 20, 150, 40)],                                         # an unnamed column left of R-1A
                 [line(5, (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))])
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
-    out = read_page(page, 1)
+    out = read_page(page, 1, DISTRICT)
     assert out == [{"page": 1, "unresolved": DIVIDED, "text": "(unnamed), 25"}]   # no "Front 25" row
     nested = read(monkeypatch, [(0, 20, 100, 40), (0, 20, 40, 40), (100, 20, 150, 40), (150, 20, 200, 40)],
                   [line(25, (5, "Front"), (60, "25"), (110, "10"))])            # two label cells, both at the left
@@ -396,9 +399,9 @@ def test_a_footnote_is_its_own_token_in_a_cell(monkeypatch):
 
 def test_a_page_without_a_table_says_so(monkeypatch):
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
-    assert read_page(Page([], [line(5, (5, "Notes"))]), 4) == [{"page": 4, "unresolved": "no table drawn on this page"}]
+    assert read_page(Page([], [line(5, (5, "Notes"))]), 4, DISTRICT) == [{"page": 4, "unresolved": "no table drawn on this page"}]
     no_districts = Page([(0, 0, 100, 20)], [line(5, (5, "Title"))])
-    assert read_page(no_districts, 4) == [{"page": 4, "unresolved": "no district header found"}]
+    assert read_page(no_districts, 4, DISTRICT) == [{"page": 4, "unresolved": "no district header found"}]
 
 
 def test_rows_after_an_unread_heading_name_no_section_and_duplicates_are_unresolved(monkeypatch):

@@ -32,7 +32,7 @@ def box(x0, y0, x1, y1, z1=30):
                                      *walls], "problems": []}
 
 
-FACTS = {"street_line": [[[0, 0], [73, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0, "use": "one_family_detached"}
+FACTS = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "street_line": [[[0, 0], [73, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0, "use": "one_family_detached"}
 
 
 def build(points, facts=FACTS, house=None):

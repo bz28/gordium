@@ -36,6 +36,7 @@ rule_format = ["*.yaml"]
 section_labeling = ["*.yaml"]
 rule_drafting = ["*.yaml"]
 site_lookup = ["*.yaml"]
+design_checker = ["place.json"]   # the plugin's copy of its place's settings (rule_format/place.py)
 
 [tool.pytest.ini_options]
 testpaths = ["packages"]

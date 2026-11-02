@@ -17,7 +17,6 @@ DRAFTED_QUESTION = "raised by the drafting script (the AI's draft); not searched
 from .chart_values import fill, number_text
 
 SLOT = re.compile(r"\{([a-z][a-z0-9_]*)\}")
-CHART_FILE = "zoning_charts_2026-04.pdf"
 
 
 def formula_fields(template: dict) -> list[tuple[tuple, str]]:
@@ -146,9 +145,10 @@ def _example_value(text: str, values: dict[str, float]):
 
 
 def fill_template(template: dict, column: str | None, cells: dict, quote_sources: list[dict],
-                  drafted_by: str) -> tuple[dict | None, str | None]:
+                  drafted_by: str, chart: str) -> tuple[dict | None, str | None]:
     """(the rule for this district column, None), or (None, why it can't be filled). With column None the
-    template must have no slots, and the rule is a general one."""
+    template must have no slots, and the rule is a general one. chart: the file the cells are from (the place's
+    zoning chart, its jurisdiction.yaml law.zoning_chart)."""
     values, cell_sources = {}, []
     for slot in template["slots"]:
         key = (slot["page"], slot["section"], slot["row"].strip(), column)
@@ -156,7 +156,7 @@ def fill_template(template: dict, column: str | None, cells: dict, quote_sources
         if why:
             return None, f"{slot['row']!r}: {why}"
         values[slot["name"]] = n
-        source = {"file": CHART_FILE, "page": slot["page"],
+        source = {"file": chart, "page": slot["page"],
                   "cell": {"section": slot["section"], "row": slot["row"].strip(), "column": column}}
         if source not in cell_sources:
             cell_sources.append(source)

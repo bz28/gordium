@@ -121,13 +121,13 @@ def main(argv=None) -> int:
                 first_ok = bool(ok)
             if ok:
                 result["reason"] = "" if result["rules"] else answer["no_rule_reason"].strip()
-                chosen = drafter.keep(result, unit, i.cells, i.columns, context)
+                chosen = drafter.keep(result, unit, i.cells, i.columns, context, chart=i.chart)
                 break
             notes.append(f"attempt {rec['attempt']}: " + "; ".join(result["problems"])[:600])
             if result["rules"]:
                 last = result
         if chosen is None and last is not None:
-            chosen = drafter.keep(last, unit, i.cells, i.columns, context, last_attempt=True)
+            chosen = drafter.keep(last, unit, i.cells, i.columns, context, last_attempt=True, chart=i.chart)
             outcome = "partial (last attempt with working rules kept)"
         elif chosen is None:
             chosen = {"failed": notes[-1] if notes else "no answer", "rules": {}, "unresolved": [], "rejected": [],
