@@ -4178,6 +4178,39 @@ def should_recheck(dirty_at, now, running, box_open, wait, last_at=None, auto=Tr
     return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
 
 
+# ---- edits made without touching an object (the audit of main, 2026-10-29): live mode heard only objects added,
+# deleted, replaced or re-attributed, so these left a ✓ showing as current over a model that had changed.
+def layer_edit_counts(event, old, new):
+    """Whether a layer change can change what Gordium checks. Which objects are the lot and the buildings is decided
+    by each object's layer's full path (classify), hidden and locked objects counted too, so a layer renamed or
+    moved under another parent counts (`old`, `new`: the layer's (name, parent id) before and after, None if it
+    can't be read: then it counts), and so does one deleted or brought back. Its colour, whether it is shown or
+    locked, the current layer, a new empty layer and the order of the layer list don't (Gordium itself changes
+    those on its own layers at every check: counting them would grey every result it had just shown). `event`:
+    Rhino's LayerTableEventType's name (Added, Deleted, Undeleted, Modified, Sorted, Current)."""
+    if event in ("Deleted", "Undeleted"):
+        return True
+    if event == "Modified":
+        return old is None or new is None or tuple(old) != tuple(new)
+    return event not in ("Added", "Sorted", "Current")       # any other kind Rhino adds: counted, never missed
+
+
+def block_edit_counts(event):
+    """Whether a block definition change can change what Gordium checks: a block's contents edited (BlockEdit),
+    redefined, deleted or brought back changes every building placed from it. A new definition (nothing placed from
+    it yet: placing one adds an object, heard on its own) and the order of the list don't. `event`: Rhino's
+    InstanceDefinitionTableEventType's name."""
+    return event not in ("Added", "Sorted")
+
+
+def units_edit_counts(seen, now):
+    """Whether a document properties change changed the model's units, the one property the check reads (every
+    length is taken to feet by its scale): `seen`, the units last noted for this document (None: none yet, so it
+    counts, never assumed unchanged), `now` the units after the change. Rhino says only that some property
+    changed (a render setting, a note), so the units are compared."""
+    return seen is None or seen != now
+
+
 # ---- the Check button (Ben, 2026-10-21): no check after every edit unless asked ---------------------------------
 CHANGED_SINCE = "Model changed since the last check — press Check"
 AUTO_CHECK_LABEL = "Check after every edit"
