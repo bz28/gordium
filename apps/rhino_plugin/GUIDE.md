@@ -150,7 +150,8 @@ fact stays unset, so its rule keeps waiting (never 0 or No).
 Two parts of the start box exist in the code but are switched off while the ground is assumed flat: the **Ground**
 row (**Place spot grades…**, **Pick terrain…**, **I'll regrade: set finished ground…**, and the tick **No
 regrading near the house**) and the **Advanced** section with **Design buffer**. The panel's **Set grade…** button (tell Gordium the ground level) is switched off with it. They will be described
-here when they come back.
+here when they come back. Until then a sloping lot (the lookup's ground falls 6 inches or more), or one with no
+ground looked up, gives Building height and Stories **needs review**, saying how far the ground falls.
 
 ## What "Needs review" means
 

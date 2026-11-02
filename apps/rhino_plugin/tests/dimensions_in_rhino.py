@@ -100,6 +100,9 @@ doc = None
 try:
     g = fresh_module()
     doc = TestDocs("dimensions").__enter__().open("Large Objects - Feet")
+    # a lot known level (the lookup's fall 0.0): the height is measured, so its dimension is drawn (with no ground
+    # looked up, or on 106's real 14.2 ft fall, height needs review and has no dimension: the sloped-lot fix)
+    g.STATE["box_overrides"] = dict(g.STATE.get("box_overrides") or {}, ground_fall=0.0)
     g.gordium_check()                                    # GordiumStart's flow on the sample
     g.set_labels(True)
     k = 1.0 / g._scale(doc)

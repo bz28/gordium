@@ -122,7 +122,7 @@ try:
         claim("3 a north arrow by the lot, to true north", north is not None and abs(north[1].X - x) < 1e-9 and
               abs(north[1].Y - y) < 1e-9, log["north"])
         claim("3 the envelope is its outline; its top labelled Height limit 35'-0\"",
-              o.envelope_lines is not None and o.height_limit is not None and o.height_limit[1] == "Height limit 35'-0\"",
+              o.envelope_lines is not None and o.height_limit is not None and o.height_limit[1] == "Height limit 35'-0\" (no grade plane yet: shown from the lot's level)",
               o.height_limit[1] if o.height_limit else None)
         g._actions()["labels"](True)
         texts = [t for _, t, _ in o.edge_labels]

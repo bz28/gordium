@@ -70,6 +70,8 @@ def fact_problems(facts: dict) -> list[str]:
             problems.append(f"{k} must be a number of square feet, 0 or more")
     if facts.get("stream_distance") is not None and not (_number(facts["stream_distance"]) and facts["stream_distance"] >= 0):
         problems.append("stream_distance must be a number of feet, 0 or more")       # as typed, never rounded
+    if facts.get("ground_fall") is not None and not (_number(facts["ground_fall"]) and facts["ground_fall"] >= 0):
+        problems.append("ground_fall must be a number of feet, 0 or more")      # how far the looked-up ground falls
     for k in ("occupants_most_in_one_unit", "attached_units_in_building",       # at least one, by definition
               "primary_buildings"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):

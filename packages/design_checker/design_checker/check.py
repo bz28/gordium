@@ -848,8 +848,10 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
 def _envelope_facts(site: dict, facts: dict) -> dict:
     """The facts the envelope is drawn from. Spot grades (or terrain sampled at the walls) that the measuring
     accepts give the grade plane, so the height plane is drawn from it; existing ground never sets it (it isn't
-    the grade the code measures from), so then only the buildable area is drawn."""
-    if facts.get("grade_is") == "existing":
+    the grade the code measures from), so then only the buildable area is drawn; nor does flat ground assumed on a
+    lot that may slope (measure.flat_assumption_unsafe: its height and stories need review, so no height plane)."""
+    from model_measurement.measure import flat_assumption_unsafe
+    if facts.get("grade_is") == "existing" or flat_assumption_unsafe(facts):
         return {**facts, "ground_is_flat": None}
     if facts.get("grade_points"):
         from model_measurement.measure import envelope_grade   # the measuring's own refusals, the same function
@@ -1606,6 +1608,12 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     # (the spots themselves aren't at the new building's walls: it's drawn on their plane, and the check that follows
     # judges the spots as they are)
     drawing = facts
+    from model_measurement.measure import flat_assumption_unsafe
+    unsafe_flat = flat_assumption_unsafe(facts)
+    if unsafe_flat:                     # flat ground assumed on a lot that may not be: drawn standing at the lot's
+        # level all the same (as with no grade, below), its height and stories from the zone's limits; the check
+        # that follows says they need review (measure.flat_assumption_unsafe), and so does this note
+        drawing = {k: v for k, v in facts.items() if k not in ("ground_assumed", "ground_fall")}
     if facts.get("grade_points"):       # their plane sets the drawing level, existing ground too (the check that
         # follows still says existing ground needs review); the points themselves never go on to measure the house
         # drawn (they are at the lot, not at its walls: its height would be "not measurable" and nothing drawn,
@@ -1634,6 +1642,9 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
         out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "
                             "No regrading near the house (or set the finished ground)")
     out["preview"] = _start_preview(out, measured)
+    if unsafe_flat and out.get("floors"):
+        out["notes"].append("drawn as if the ground were flat, at the lot's level: building height and stories need "
+                            "review (" + unsafe_flat.split(":")[0] + ")")
     if no_grade and out.get("floors"):
         out["notes"].append("drawn standing at the lot's level: building height and stories need review until the "
                             "grade is set")
