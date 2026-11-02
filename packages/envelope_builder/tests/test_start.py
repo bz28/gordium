@@ -22,7 +22,8 @@ INTERIOR = {"sleeping_rooms", "parking_spaces"}
 # state, never the starting building's to settle
 HOUSEHOLD = {"unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
              "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
-             "stream_near_lot", "stream_distance"}
+             "stream_near_lot", "stream_distance",
+             "garage_cars", "private_garages"}    # the garage's cars (chart p.2 note 6): the architect's to state too
 SITE_106 = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 FACTS = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b", "use": "one_family_detached",
          "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0}

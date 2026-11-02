@@ -50,6 +50,10 @@ primary_buildings:    {unit: count,  meaning: "Primary buildings on the lot, the
 stream_near_lot:      {unit: yes_no, meaning: "Some inlet wall, or the bank of an inlet channel or stream (at its average water level), is within 20 ft of the lot (§325-26)"}
 stream_distance:      {unit: ft,     meaning: "Least horizontal distance from any new structure on the lot (a house, an addition, a garage, a deck, a fence; not a patio or terrace, §325-3B STRUCTURE) to the nearest inlet wall or stream bank at its average water level (§325-26 and its illustration)"}
 south_hill_overlay:   {unit: yes_no, meaning: "The lot is in the South Hill Overlay District (§325-8E; chart p.2 note 2), as the City's zoning map shows it; stated by the architect (Gordium doesn't look up the overlay map yet)"}
+# Stated by the architect: the lot's private garages (§325-3B GARAGE, PRIVATE: an enclosed space for storing motor
+# vehicles), for the chart's car limits (p.2 notes 6 and 7). The model doesn't say what a garage holds.
+garage_cars:          {unit: count,  meaning: "Cars the lot's private garages hold, all together: every enclosed garage, attached or detached (§325-3B GARAGE, PRIVATE: an enclosed space for the storage of motor vehicles); 0 if there is none (a carport isn't enclosed)"}
+private_garages:      {unit: count,  meaning: "Private garages on the lot, an attached garage included (1 or more); read only when the cars are over the chart's limit"}
 primary_buildings_same_use: {unit: yes_no, meaning: "Every primary building on the lot holds the use entered for the lot (use), so each needs that use's lot area (§325-8B(1))"}
 # Yards to the building seen from above, eaves and cornices included: §325-18B lets those project up to 2 ft
 # into a required yard (the yards above are measured to the building, its eaves left out).

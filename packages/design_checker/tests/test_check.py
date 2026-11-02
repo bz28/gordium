@@ -25,9 +25,9 @@ def facts():
 
 
 # the rules waiting on who lives there and on a home occupation (§325-3B), and on whether a stream or inlet is near
-# the lot (§325-26): the sample's facts don't say
+# the lot (§325-26), and on the cars its private garages hold (chart p.2 note 6): the sample's facts don't say
 WAITING_ON_THE_HOUSEHOLD = ["R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family",
-                            "R-1b.stream_setback"]
+                            "R-1b.private_garage", "R-1b.stream_setback"]
 
 
 def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp_path):
@@ -38,13 +38,13 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 10
     assert errors["R-1b.yard_projections"] == "PASS"
     s = result["summary"]
-    # who lives there, a home occupation and a stream near the lot aren't in their spreadsheet: those four rules wait
-    # (never a pass)
-    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 4 need review"
+    # who lives there, a home occupation, a stream near the lot and the garage's cars aren't in their spreadsheet:
+    # those five rules wait (never a pass)
+    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 5 need review"
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
-    assert len(s["lines"]) == 5 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
-                                        in x for x in s["lines"][1:])
+    assert len(s["lines"]) == 6 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
+                                        in x or "private garages hold" in x for x in s["lines"][1:])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 
@@ -70,7 +70,7 @@ def test_needs_review_rows_say_why_in_the_measuring_words(facts):
     parking = next(r for r in result["interior"] if r["Rule id"] == "R-1b.parking_one_family")
     assert parking["Error"] == "NEEDS REVIEW" and parking["Why"] == "enter bedrooms / parking spaces"
     assert all(r["Rule id"] != "R-1b.parking_one_family" for r in result["rows"])
-    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 4 need review")
+    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 5 need review")
     assert sorted(r["Rule id"] for r in result["rows"] if r["Error"] == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
 
 
@@ -151,7 +151,7 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 4 need review"
+    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 5 need review"
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 
@@ -1970,9 +1970,11 @@ def test_rules_not_in_gordium_yet_read_not_checked_yet_in_the_panel_and_the_repo
                    report_path=report)
     grey = [i for i in r["view"]["items"] if i["group"] == "not_covered"]
     assert grey, "the rulebook has sections not in Gordium yet"
-    # the private garage's car limit and front-yard parking are listed on every result (audit of main, 2026-10-29)
+    # front-yard parking and driveways are listed on every result (audit of main, 2026-10-29); the private garage's
+    # car limit was too until its rule (R-x.private_garage) checks it: never listed as both checked and not
     names = {i["id"]: i["name"] for i in grey}
-    assert names["gap.garage_cars"].startswith("§325-8A(3), chart p.2 notes 6 and 7 Private garage size")
+    assert "gap.garage_cars" not in names and not any("garage" in n.lower() for n in names.values())
+    assert any(i["rule"] == "R-1b.private_garage" for i in r["view"]["items"])
     assert names["gap.front_yard_parking"].startswith("§325-20E Parking in front yards")
     assert names["gap.parking_areas"].startswith("§325-20D(2), §325-20F Driveways and parking areas")
     titles = {g["key"]: g["title"] for g in present.grouped(r["view"]["items"])}

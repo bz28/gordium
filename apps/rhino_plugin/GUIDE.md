@@ -142,7 +142,9 @@ in one small window: `Bedrooms`, `Off-street parking spaces`, `Dwelling units`, 
 questions, such as `Most occupants in any one dwelling unit (optional: how they are split)` and
 `Is there an accessory dwelling unit (ADU) on the lot (§325-3B, §325-28)?`, and the lot's own questions, such as
 `Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?` (the start box asks the lot's
-questions under **About this project** when the district's rules need them). Left blank (or **Not answered**), a
+questions under **About this project** when the district's rules need them). One is asked only by its row:
+`Private garages on the lot (an attached garage counts)`, once the cars the garages hold are entered and over the
+chart's limit (R-1 and R-2). Left blank (or **Not answered**), a
 fact stays unset, so its rule keeps waiting (never 0 or No).
 
 ## Not shown in this version

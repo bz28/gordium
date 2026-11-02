@@ -420,6 +420,12 @@ STATED_FACTS = {
                         "the distance from the stream"),
     "south_hill_overlay": ("Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?", "yes_no",
                            "whether the lot is in the South Hill Overlay"),
+    # the chart's private garage limit (p.2 notes 6 and 7): the cars all the lot's garages hold together, and, only once
+    # that is over the limit, how many garages (ROW_ONLY_FACTS)
+    "garage_cars": ("Cars the lot's private garages hold, all together: every enclosed garage, attached or detached (0 if "
+                    "there is none; a carport isn't enclosed)", "count", "the cars the private garages hold"),
+    "private_garages": ("Private garages on the lot (an attached garage counts)", "count",
+                        "the private garages on the lot"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
@@ -427,7 +433,8 @@ STATED_FACTS = {
 # The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
 # at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
 # accept what the check refuses (#r2 review round 2).
-MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1}
+MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1,
+           "private_garages": 1}
 # Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit
 # is 1 to occupants): asked only where some value in that range would change the row (present.could_settle).
 OPTIONAL = {"occupants_most_in_one_unit": "occupants"}
@@ -477,7 +484,13 @@ CHECKED_TOGETHER = (("unrelated_persons", "unrelated_persons_with_children"),)
 # answer is said in each row's reason instead (coordinator for Ben, 2026-10-28)
 USE_DETAILS_TITLE = "Use details (for later)"
 USE_DETAILS_WHEN = "Answer when you plan the interior"
-BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
+# Facts never asked in the start box, each with the fact that must be entered before a row asks it: the number of
+# private garages matters only when the cars they hold are over the chart's limit (a lot of three cars or fewer passes
+# whatever the count), so asking it up front would ask every architect with a garage a question that rarely matters.
+# A row waiting on the garage's car limit asks the cars first (needs_of); entered over the limit, it then asks this.
+ROW_ONLY_FACTS = {"private_garages": "garage_cars"}
+BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS
+                 and k not in ROW_ONLY_FACTS)   # what the box can ask
 
 
 def is_use_detail(item, facts=None):
@@ -550,6 +563,7 @@ ABOUT_LABELS = {
     "stream_near_lot": "Stream or inlet",
     "stream_distance": "Distance to it (ft)",
     "south_hill_overlay": "South Hill Overlay",
+    "garage_cars": "Private garage, cars",
     "abuts_r1_district": "Next to R-1 land",
     "conversion": "New or converted",
 }
@@ -568,6 +582,7 @@ ABOUT_COUNTS = {            # a count's one-click numbers (a typed number is not
     "rooms_let_for_profit": [("None", 0)] + [(str(n), n) for n in range(1, 7)],
     "attached_units_in_building": [(str(n), n) for n in range(2, 9)],
     "dwelling_units": [(str(n), n) for n in range(1, 9)],
+    "garage_cars": [("No garage", 0)] + [(str(n), n) for n in range(1, 7)],
 }
 # Several answers in one click (shown only when the district and use ask at least one of them; it fills the others
 # that are asked and leaves the rest as they were). Each is a statement the architect makes by picking it.
@@ -836,9 +851,11 @@ def answers_note(entries):
 def needs_of(names, values, settles=None):
     """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked; never the
     stories count (asked only where the measuring asks for it: stories_needed). An optional one (OPTIONAL) only where
-    `settles(key)` says entering it could change the row."""
+    `settles(key)` says entering it could change the row. A row-only fact (ROW_ONLY_FACTS) only once the fact it
+    follows is entered."""
     return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None
-            and (k not in OPTIONAL or (settles is not None and settles(k)))]
+            and (k not in OPTIONAL or (settles is not None and settles(k)))
+            and (k not in ROW_ONLY_FACTS or (values or {}).get(ROW_ONLY_FACTS[k]) is not None)]
 
 
 def _and(words):

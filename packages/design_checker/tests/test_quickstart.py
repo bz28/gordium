@@ -133,15 +133,28 @@ def test_the_starting_house_on_the_sample_lot(house):
         assert (row["proposed"], row["status"], row["note"]) == (at, present.REVIEW, "assuming flat ground")
     why, = said(r'neither can be decided: "(the ground falls .+? against your survey)"')
     assert " ".join(why.split()) in height["reason"] and " ".join(why.split()) in items["Stories"]["reason"]
-    said("Five rows need review from the start")
+    said("Six rows need review from the start")
     stream = "New structures at least 20 ft from an inlet wall or stream bank"
     said(r"\*\*" + stream + r"\*\*: the start box's stream question was left Not answered")
     assert [i["name"] for i in items.values() if i["status"] == present.REVIEW and not i.get("use_detail")] == [
-        stream, "Stories", "Building height", "Rear yard", "Eaves into front yard"]
+        stream, "Stories", "Building height", "Rear yard", "Eaves into front yard",
+        "Private garage: not more than three cars"]
     assert items[stream]["reason"].startswith("say whether any inlet wall or stream bank") and \
         set(items[stream]["needs"]) == {"stream_near_lot", "stream_distance"}       # waits on the question, nothing else
     button, = said(r"Answer it with the row's \*\*(.+?)…\*\* button")
     assert button == logic.answer_words(items[stream]["needs"])
+    # the garage's car limit (chart p.2 note 6): waits on the cars only; the number of garages is asked after
+    garage = items["Private garage: not more than three cars"]
+    said(r"\*\*Private garage: not more than three cars\*\*: the start box's garage question was left Not answered")
+    assert garage["needs"] == ["garage_cars"] and garage["reason"].startswith("enter how many cars the lot's private")
+    button, = said(r"Answer it with the row's\s+\*\*(Enter the cars.+?)…\*\* button")
+    assert button == logic.answer_words(garage["needs"])
+    for cars, status in ((3, present.COMPLIES), (4, present.REVIEW), (7, present.REVIEW)):
+        decided = _check(got["floors"], facts, garage_cars=cars)["Private garage: not more than three cars"]
+        assert decided["status"] == status, (cars, decided)
+        assert decided["needs"] == ([] if cars == 3 else ["private_garages"]), (cars, decided)  # "then asks how many"
+    assert _check(got["floors"], facts, garage_cars=4, private_garages=1)[
+        "Private garage: not more than three cars"]["status"] == present.FAILS
     said("On a lot the lookup finds level, both comply")
     level = _check(got["floors"], facts, ground_fall=0.0)
     assert all(level[n]["status"] == present.COMPLIES for n in ("Building height", "Stories"))

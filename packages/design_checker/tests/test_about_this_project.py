@@ -3,9 +3,11 @@ only the ones the chosen district's and use's rules need, each with one-click an
 rows that wait on a fact say so exactly as before (never a false pass).
 
 Expected values come from the rulebooks read by hand (R-1b.yaml lines 386-491 for the stream and South Hill rules,
-1076 for the household rule, 1262 for the home occupation): R-1b with a one-family house reads these seven facts, of
-which the start box asks the two that shape the envelope (stream, South Hill); the household and home business are use
-details (rhino_logic.DEFERRED_FACTS), answered later; the stream's distance waits on a yes."""
+1076 for the household rule, 1262 for the home occupation, the end of the file for the private garage): R-1b with a
+one-family house reads these nine facts, of which the start box asks the three that shape the exterior (stream, South
+Hill, the cars the garages hold); the household and home business are use details (rhino_logic.DEFERRED_FACTS),
+answered later; the stream's distance waits on a yes; the number of garages is asked only by the garage row, once the
+cars are over the limit."""
 
 import copy
 
@@ -16,7 +18,8 @@ from design_checker import rhino_logic as logic
 from design_checker.check import check_site
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
-R1B_ASKS = ["stream_near_lot", "south_hill_overlay"]       # up front: what shapes the envelope (Ben, 2026-10-27)
+R1B_ASKS = ["stream_near_lot", "south_hill_overlay",        # up front: what shapes the envelope (Ben, 2026-10-27)
+            "garage_cars"]
 HOUSEHOLD = ["unrelated_persons", "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
              "home_occupation"]                             # use details: deferred, answered when the interior is planned
 
@@ -33,6 +36,26 @@ def test_r1b_one_family_asks_exactly_the_facts_its_rules_read(options):
     # the household and home business are never asked up front, whatever else is answered
     every = logic.follow_up_rows(options, "R-1b", "one_family_detached", {"home_occupation": True, "stream_near_lot": True})
     assert not {r["key"] for r in every} & set(logic.DEFERRED_FACTS)
+
+
+def test_the_garage_cars_are_asked_up_front_and_the_garage_count_never(options):
+    """The garage's car limit (chart p.2 notes 6, 7) reads two facts in R-1a to R-2c: the cars all the garages hold
+    are asked in the box; the number of garages (only needed over the limit) never is, whatever is answered. The row
+    asks it instead, and only once the cars are entered (needs_of)."""
+    for zone in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c"):
+        assert "private_garages" in options["follow_ups"][zone]["one_family_detached"], zone   # the rule reads it
+        for facts in ({}, {"garage_cars": 5}, {"garage_cars": 9, "stream_near_lot": True}):
+            keys = [r["key"] for r in logic.follow_up_rows(options, zone, "one_family_detached", facts)]
+            assert "garage_cars" in keys and "private_garages" not in keys, (zone, facts)
+    for zone in ("R-3a", "R-3aa", "R-3b", "RU"):                       # no car limit there: never asked
+        assert "garage_cars" not in options["follow_ups"][zone]["one_family_detached"], zone
+    assert "private_garages" not in logic.BOX_ASKS and "garage_cars" in logic.BOX_ASKS
+    names = {"garage_cars", "private_garages"}
+    assert logic.needs_of(names, {}) == ["garage_cars"]                 # the cars first
+    assert logic.needs_of(names, {"garage_cars": 5}) == ["private_garages"]
+    assert logic.needs_of(names, {"garage_cars": 5, "private_garages": 2}) == []
+    assert logic.minimum("private_garages") == 1 and logic.minimum("garage_cars") == 0
+    assert logic.choices_for("garage_cars", "count")[0] == ("No garage", 0)
 
 
 def test_what_the_drawing_shows_is_never_asked_up_front(options):

@@ -2812,3 +2812,132 @@ rules:
     notes: "Always needs review once one is planned: whether it needs the special permit (§325-9B(1)(i)) and §325-3B's conditions on how it runs are a person's to check. Its size is R-2c.home_occupation_size. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
     drafted_by: claude
     status: draft
+
+  - id: R-2c.private_garage
+    kind: rule
+    topic: uses
+    title: "Private garage: not more than six cars per building (chart p.2 note 7)"
+    check: garage_cars <= 6
+    review_when:
+      - when: "garage_cars > 6 and (garage_cars <= 6 * private_garages or garage_cars <= 6 * primary_buildings)"
+        reason: >-
+          More than six cars in all, but not more than six for each private garage or for each primary building:
+          whether note 7's "per building" means each building holding a garage, each primary building or the whole lot
+          is an open question; check by hand or ask the zoning office.
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [48, 48]
+        quote: "(7) For not more than six cars per building."
+      # the district's own cell on line 32, marked with that note: the chart reader's cell, so the column is checked
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Private garage", column: R-2C}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 11
+        lines: [16, 17]
+        quote: "GARAGE, PRIVATE — An enclosed space for the storage of one or more motor vehicles, provided that no business, occupation or service is conducted for profit therein."
+        not_limits: {1: "one or more: what a garage holds, not a limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [17, 18]
+        quote: "(3) Column 3: Permitted Accessory Uses. Uses permitted to be accessory to the main use of the premises are listed, subject to the further regulations of Article V."
+    examples:
+      - given: {garage_cars: 0}
+        expect: pass
+        note: no private garage
+      - given: {garage_cars: 6}
+        expect: pass
+        note: six cars in all passes under every reading (the garage count isn't needed)
+      - given: {garage_cars: 7, private_garages: 1, primary_buildings: 1}
+        expect: fail
+        note: one garage of seven cars on a lot of one primary building, too many under every reading
+      - given: {garage_cars: 13, private_garages: 2, primary_buildings: 2}
+        expect: fail
+        note: more than six for each garage and for each primary building, under every reading
+      - given: {garage_cars: 7, private_garages: 2, primary_buildings: 1}
+        expect: needs_review
+        note: two garages, each could hold six or fewer; the lot's seven are too many only per lot or per primary building
+      - given: {garage_cars: 7, private_garages: 1, primary_buildings: 2}
+        expect: needs_review
+        note: one garage of seven, two primary buildings; too many only if per garage or per lot
+      - given: {}
+        expect: needs_review
+        note: the cars in the garages not said
+      - given: {garage_cars: 7, primary_buildings: 1}
+        expect: needs_review
+        note: over six in all, the garages not counted
+    open_questions:
+    - 'Chart p.2 note 7, "For not more than six cars per building", on the private garage in R-2c: is "per building" each building that holds a private garage, each primary building on the lot (with the garages serving it, attached or detached), or the whole lot?'
+    research:
+    - question: 'Chart p.2 note 7, "For not more than six cars per building", on the private garage in R-2c: is "per building" each building that holds a private garage, each primary building on the lot (with the garages serving it, attached or detached), or the whole lot?'
+      searched:
+      - 325-8A
+      - 325-3B:garage_private
+      - 325-3B:accessory_use
+      - 325-3B:accessory_building_or_structure
+      - 325-3B:accessory_dwelling_unit_attached
+      - 325-3B:accessory_dwelling_unit_detached
+      - 325-3B:building
+      - 325-3B:structure
+      - 325-3B:primary_structure
+      - 325-3B:lot_building
+      - 325-3B:parking_area
+      - 325-3B:parking_garage
+      - 325-3B:parking_space
+      - 325-20
+      - 325-20D
+      - 325-20E
+      - 325-20F
+      - 325-25
+      - 325-25A
+      - 325-25C
+      - 325-25D
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 11
+        lines: [16, 16]
+        quote: "GARAGE, PRIVATE — An enclosed space for the storage of one or more motor vehicles"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [28, 28]
+        quote: "(7) Garages within a residential building or on the premises thereof used primarily for the storage"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [34, 34]
+        quote: "Accessory structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [19, 20]
+        quote: "The off-street parking spaces listed in this column shall be provided for each building hereafter erected or altered"
+      why_open: >-
+        Note 7 limits a private garage in R-2c to "six cars per building" without saying which building: §325-3B
+        defines a private garage as "an enclosed space", which may stand alone or be "within a residential building"
+        (ACCESSORY USE (7)), and §325-8A(4) uses "for each building" for the parking each building erected needs,
+        a primary building. So "building" may be each building holding a garage, each primary building on the lot, or
+        the whole lot read as one. No City interpretation or Board of Zoning Appeals decision was found (web search,
+        2026-10-29); the City's 2010 chart (fhia.org) gives R-2c the same "cars per building" and doesn't settle it either.
+        Gordium passes six cars or fewer in all (every reading), fails more than six times both the garages and the
+        primary buildings (every reading), and asks between.
+      readings:
+      - id: each_garage_building
+        reading: six cars at most in each building that holds a private garage
+      - id: each_primary_building
+        reading: six cars at most for each primary building on the lot, its garages together
+      - id: whole_lot
+        reading: six cars at most in all the private garages on the lot together
+      report: docs/research/2026-10-29_private_garage.md §4
+    notes: >-
+      Chart p.2: a private garage is a permitted accessory use in R-2c "for not more than six cars per building" (note
+      7); §325-3B defines it as an enclosed space for storing motor vehicles, with no business in it. The architect
+      states the cars the lot's private garages hold, all together (garage_cars: every enclosed garage, attached or
+      detached; 0 for none; a carport isn't enclosed), and, only when that is over six, how many private garages there
+      are (private_garages); the primary buildings are counted as for §325-8B(1) (primary_buildings, stated or read
+      from the drawing). Blank needs review, never a pass. "Per building" is read three ways (each building holding a
+      garage, each primary building, the whole lot): Gordium passes six or fewer in all, fails more than six times
+      both the garages and the primary buildings (too many under every reading), and asks between. Not checked here:
+      the definition's "no business ... for profit" (a home occupation in a garage is checked by the home-occupation
+      rules) and where the garage stands (accessory_buildings, §325-25). Research:
+      docs/research/2026-10-29_private_garage.md.
+    drafted_by: claude
+    status: draft

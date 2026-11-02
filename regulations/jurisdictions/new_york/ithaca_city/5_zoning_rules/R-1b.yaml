@@ -1355,3 +1355,125 @@ rules:
     notes: "Always needs review once one is planned: whether it needs the special permit (§325-9B(1)(i)) and §325-3B's conditions on how it runs are a person's to check. Its size is R-1b.home_occupation_size. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
     drafted_by: claude
     status: draft
+
+  - id: R-1b.private_garage
+    kind: rule
+    topic: uses
+    title: "Private garage: not more than three cars (chart p.2 note 6)"
+    check: garage_cars <= 3
+    review_when:
+      - when: "garage_cars > 3 and garage_cars <= 3 * private_garages"
+        reason: >-
+          More than three cars in all, but spread over private garages that could each hold three or fewer: whether
+          note 6 limits each garage or all the lot's garages together is an open question; check by hand or ask the
+          zoning office.
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [47, 47]
+        quote: "(6) For not more than three cars."
+      # the district's own cell on line 32, marked with that note: the chart reader's cell, so the column is checked
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Accessory Uses, row: "Private garage", column: R-1B}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 11
+        lines: [16, 17]
+        quote: "GARAGE, PRIVATE — An enclosed space for the storage of one or more motor vehicles, provided that no business, occupation or service is conducted for profit therein."
+        not_limits: {1: "one or more: what a garage holds, not a limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [17, 18]
+        quote: "(3) Column 3: Permitted Accessory Uses. Uses permitted to be accessory to the main use of the premises are listed, subject to the further regulations of Article V."
+    examples:
+      - given: {garage_cars: 0}
+        expect: pass
+        note: no private garage
+      - given: {garage_cars: 3}
+        expect: pass
+        note: three cars in all passes under both readings
+      - given: {garage_cars: 2}
+        expect: pass
+        note: the garage count isn't needed at three or fewer
+      - given: {garage_cars: 4, private_garages: 1}
+        expect: fail
+        note: one garage of four cars
+      - given: {garage_cars: 7, private_garages: 2}
+        expect: fail
+        note: two garages can't hold seven cars with three or fewer in each, so too many under both readings
+      - given: {garage_cars: 4, private_garages: 2}
+        expect: needs_review
+        note: two garages that could each hold three or fewer; four in all is too many only per lot
+      - given: {}
+        expect: needs_review
+        note: the cars in the garages not said
+      - given: {garage_cars: 5}
+        expect: needs_review
+        note: over three in all, the garages not counted
+    open_questions:
+    - 'Chart p.2 note 6, "For not more than three cars", on the private garage: is it a limit on each private garage, or on all the private garages on the lot together?'
+    research:
+    - question: 'Chart p.2 note 6, "For not more than three cars", on the private garage: is it a limit on each private garage, or on all the private garages on the lot together?'
+      searched:
+      - 325-8A
+      - 325-3B:garage_private
+      - 325-3B:accessory_use
+      - 325-3B:accessory_building_or_structure
+      - 325-3B:accessory_dwelling_unit_attached
+      - 325-3B:accessory_dwelling_unit_detached
+      - 325-3B:building
+      - 325-3B:structure
+      - 325-3B:primary_structure
+      - 325-3B:lot_building
+      - 325-3B:parking_area
+      - 325-3B:parking_garage
+      - 325-3B:parking_space
+      - 325-20
+      - 325-20D
+      - 325-20E
+      - 325-20F
+      - 325-25
+      - 325-25A
+      - 325-25C
+      - 325-25D
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 11
+        lines: [16, 16]
+        quote: "GARAGE, PRIVATE — An enclosed space for the storage of one or more motor vehicles"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 4
+        lines: [28, 28]
+        quote: "(7) Garages within a residential building or on the premises thereof used primarily for the storage"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [34, 34]
+        quote: "Accessory structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or"
+      why_open: >-
+        The chart (p.2 line 32 and note 6) gives the limit on the private garage as an accessory use, and §325-3B
+        defines a private garage as "an enclosed space", so the words fit a limit on each garage; but nothing in
+        Chapter 325 says whether a lot may have two garages of three cars each (six in all), and no other section
+        (§325-20's parking rules, §325-25's accessory structures, the ACCESSORY USE definition's garages "within a
+        residential building or on the premises thereof") counts cars in garages. No City interpretation or Board of
+        Zoning Appeals decision on the limit was found (web search, 2026-10-29); the City's 2010 chart (posted by the
+        Fall Creek neighborhood association, fhia.org) has the same words, "Private garage for not more than 3 cars",
+        and doesn't settle it either. Gordium passes three cars or fewer in all (both readings), fails more than three
+        times the garages (some garage holds more than three: both readings), and asks between.
+      readings:
+      - id: each_garage
+        reading: three cars at most in each private garage
+      - id: whole_lot
+        reading: three cars at most in all the private garages on the lot together
+      report: docs/research/2026-10-29_private_garage.md §3
+    notes: >-
+      Chart p.2: a private garage is a permitted accessory use in R-1b "for not more than three cars" (note 6);
+      §325-3B defines it as an enclosed space for storing motor vehicles, with no business in it. The architect states
+      the cars the lot's private garages hold, all together (garage_cars: every enclosed garage, attached or detached;
+      0 for none; a carport isn't enclosed), and, only when that is over three, how many private garages there are
+      (private_garages). Blank needs review, never a pass. Gordium passes three or fewer in all, fails more than three
+      times the garages (some garage holds more than three: too many under both readings), and asks between. Not
+      checked here: the definition's "no business ... for profit" (a home occupation in a garage is checked by the
+      home-occupation rules) and where the garage stands (accessory_buildings, §325-25). Research:
+      docs/research/2026-10-29_private_garage.md.
+    drafted_by: claude
+    status: draft
