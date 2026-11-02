@@ -25,9 +25,11 @@ def facts():
 
 
 # the rules waiting on who lives there and on a home occupation (§325-3B), and on whether a stream or inlet is near
-# the lot (§325-26): the sample's facts don't say
-WAITING_ON_THE_HOUSEHOLD = ["R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family",
-                            "R-1b.stream_setback"]
+# the lot (§325-26), and on the cars its private garages hold (chart p.2 note 6): the sample's facts don't say
+WAITING_ON_THE_HOUSEHOLD = ["R-1b.adu_attached_size", "R-1b.adu_bedrooms", "R-1b.adu_detached_setbacks",
+                            "R-1b.adu_detached_size", "R-1b.adu_front_yard", "R-1b.adu_one_per_parcel",
+                            "R-1b.home_occupation", "R-1b.home_occupation_size", "R-1b.occupancy_one_family",
+                            "R-1b.private_garage", "R-1b.stream_setback"]
 
 
 def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp_path):
@@ -38,13 +40,14 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 10
     assert errors["R-1b.yard_projections"] == "PASS"
     s = result["summary"]
-    # who lives there, a home occupation and a stream near the lot aren't in their spreadsheet: those four rules wait
-    # (never a pass)
-    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 4 need review"
+    # who lives there, whether an accessory dwelling unit is planned, a home occupation, a stream near the lot and the
+    # garage's cars aren't in their spreadsheet: those eleven rules wait (never a pass; six are the ADU's, §325-28)
+    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 11 need review"
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
-    assert len(s["lines"]) == 5 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
-                                        in x for x in s["lines"][1:])
+    assert len(s["lines"]) == 12 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
+                                        in x or "private garages hold" in x or "accessory dwelling unit (ADU)" in x
+                                        for x in s["lines"][1:])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 
@@ -70,7 +73,8 @@ def test_needs_review_rows_say_why_in_the_measuring_words(facts):
     parking = next(r for r in result["interior"] if r["Rule id"] == "R-1b.parking_one_family")
     assert parking["Error"] == "NEEDS REVIEW" and parking["Why"] == "enter bedrooms / parking spaces"
     assert all(r["Rule id"] != "R-1b.parking_one_family" for r in result["rows"])
-    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 4 need review")
+    # WAITING_ON_THE_HOUSEHOLD's eleven (the six ADU rules among them, §325-28)
+    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 11 need review")
     assert sorted(r["Rule id"] for r in result["rows"] if r["Error"] == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
 
 
@@ -151,7 +155,7 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 4 need review"
+    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 11 need review"
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 
@@ -1257,11 +1261,13 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     assert "ground" in {r["key"] for r in logic.box_rows({}, flat=False)}                        # the switch
     flat = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False}, 2.0)
     assert flat == {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": 2.0, "grade_from": None,
-                    "ground_assumed": "flat"}
+                    "ground_assumed": "flat", "ground_fall": None}      # (no lookup ground: unknown)
     assert logic.ground_facts({"ground": {"kind": "spot"}}, 2.0, flat=False)["grade_from"] == "spot"
     # the check itself at the house's own base (0 here): a ground above it would put part of the house below
     # grade, which the stories rule rightly asks about (a basement or cellar, §325-3; #14's one stories definition)
-    level = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False}, 0.0)
+    # (a lookup that found the ground level, 0.0 ft of fall: a known flat lot, which alone lets flat decide them)
+    level = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False, "ground_fall": 0.0}, 0.0)
+    assert level["ground_fall"] == 0.0
     sent = {**facts, **{k: v for k, v in level.items() if v is not None}}
     assert fact_problems(sent) == []
     got = check(MODEL, sent, tmp_path / "r.xlsx")
@@ -1968,6 +1974,13 @@ def test_rules_not_in_gordium_yet_read_not_checked_yet_in_the_panel_and_the_repo
                    report_path=report)
     grey = [i for i in r["view"]["items"] if i["group"] == "not_covered"]
     assert grey, "the rulebook has sections not in Gordium yet"
+    # front-yard parking and driveways are listed on every result (audit of main, 2026-10-29); the private garage's
+    # car limit was too until its rule (R-x.private_garage) checks it: never listed as both checked and not
+    names = {i["id"]: i["name"] for i in grey}
+    assert "gap.garage_cars" not in names and not any("garage" in n.lower() for n in names.values())
+    assert any(i["rule"] == "R-1b.private_garage" for i in r["view"]["items"])
+    assert names["gap.front_yard_parking"].startswith("§325-20E Parking in front yards")
+    assert names["gap.parking_areas"].startswith("§325-20D(2), §325-20F Driveways and parking areas")
     titles = {g["key"]: g["title"] for g in present.grouped(r["view"]["items"])}
     assert titles["not_covered"] == "Not checked yet"
     for i in grey:
@@ -3453,7 +3466,7 @@ def _plugin_functions(names, **extra):
     from design_checker import rhino_logic as logic_
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     view = type("View", (), {"ActiveViewportID": "vp"})()
-    doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})()})()
+    doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})(), "RuntimeSerialNumber": 1})()
     size_of = staticmethod(lambda lines, size: (max(len(t) for t in lines) * size * 0.6 + 22,     # gordium_ui's
                                                 len(lines) * (size + 9) + 10))                   # text_box_size
     ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": size_of,
@@ -3461,7 +3474,7 @@ def _plugin_functions(names, **extra):
     ns = {"time": time_, "logic": logic_, "ui": ui_, "STATE": {},
           "Rhino": type("Rhino", (), {"RhinoDoc": type("RhinoDoc", (), {"ActiveDoc": doc})}),
           "rg": type("rg", (), {"BoundingBox": type("BoundingBox", (), {"Empty": None})}),
-          "_model_on_screen": lambda o, viewport: None}
+          "_model_on_screen": lambda o, viewport: None, "_units": lambda d: 1.0}
     ns.update(extra)
     for name in names:
         exec(src[src.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
@@ -4401,7 +4414,7 @@ def test_another_document_shows_its_own_ticks():
     synced = []
     form = type("F", (), {"Visible": True})()
     ui_ = type("UI", (), {"show": staticmethod(lambda *a, **k: None)})
-    front = object()
+    front = type("Doc", (), {"RuntimeSerialNumber": 2})()
     ns = _plugin_functions(["_new_document"], ui=ui_, _sync_ticks=synced.append, _clear=lambda o: None,
                            Rhino=type("Rhino", (), {"RhinoDoc": type("RD", (), {"ActiveDoc": front})}))
     ns["STATE"]["panel_parts"] = {"form": form}

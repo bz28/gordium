@@ -114,6 +114,13 @@ expected:
       district. This site states nothing about a stream or inlet near the lot (no stream_near_lot, no stream_distance),
       and the model can't show one, so it can't be settled: needs review until the architect says (never assumed)
     cites: "§325-26 (chapter p.67); §325-3B STRUCTURE (p.19)"
+  R-1a.private_garage:
+    status: needs_review
+    working: >-
+      Chart p.2 line 32 and note 6: a private garage in R-1a is "For not more than three cars". The design draws a detached 20 × 22 ft garage, but nothing says how many cars it holds
+      (garage_cars is not stated, and a massing model can't show it): needs review until the architect says how many
+      cars the lot's private garages hold (never assumed 0)
+    cites: "chart p.2 line 32 and note 6; §325-3B GARAGE, PRIVATE (chapter p.11)"
 then:
   move: [0, -6]
   expected:

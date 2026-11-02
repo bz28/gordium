@@ -67,7 +67,15 @@ def test_a_plain_rectangular_lot():
                          "rear_yard_eaves": 35.0,
                          # no accessory building: counted (0), nothing else to measure
                          "accessory_buildings": 0, "accessory_front_yard": None, "accessory_side_yard": None,
-                         "accessory_rear_yard": None, "accessory_distances_apply": None}
+                         "accessory_rear_yard": None, "accessory_distances_apply": None,
+                         # stated by the architect (the private garage, an accessory dwelling unit): not given here
+                         "garage_cars": None, "private_garages": None, "adu_detached": None,
+                         "adu_existing_building": None, "adus_on_parcel": None, "adu_bedrooms": None,
+                         "adu_floor_area": None, "primary_floor_area": None,
+                         # no ADU's building picked: nothing to measure
+                         "adu_footprint": None, "adu_height": None, "adu_stories": None, "adu_front_yard": None,
+                         "adu_side_yard": None, "adu_rear_yard": None,
+                         "adu_in_primary_front_yard": None}
     (ax, ay), (bx, by) = m["front_yard"]["points"]                              # the working: where it was measured
     assert ay == 0 and by == 25 and ax == bx and 10 <= ax <= 35
     assert m["sleeping_rooms"]["reason"] == m["parking_spaces"]["reason"] == "enter bedrooms / parking spaces"
@@ -947,7 +955,8 @@ def test_a_fourth_floor_block_sharing_an_id_never_lets_the_stories_comply():
                 "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
                 "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                 "primary_buildings_same_use", "south_hill_overlay",
-                "stream_near_lot", "stream_distance"}
+                "stream_near_lot", "stream_distance", "garage_cars", "private_garages", "adu_detached",
+                "adu_existing_building", "adus_on_parcel", "adu_bedrooms", "adu_floor_area", "primary_floor_area"}
     read_from_buildings = [k for k in m if k not in lot_only]
     assert read_from_buildings and all(m[k]["value"] is None and "share the id" in (m[k]["reason"] or "")
                                        for k in read_from_buildings), {k: m[k]["value"] for k in read_from_buildings}
@@ -2101,3 +2110,71 @@ def test_the_main_buildings_own_parts_are_read_against_its_grade_plane_never_the
     # #18 review round 25: under #18 the cut shows in the yards' walls reading, not in coverage (from above)
     assert _walls_reading(stepped, "rear_yard") is None and stepped["rear_yard"]["value"] == pytest.approx(35.0), \
         stepped["rear_yard"]
+
+
+# ---- flat ground assumed on a sloping lot (the sloped-lot fix, 2026-10-29) --------------------------------------
+
+DRAWN = {k: v for k, v in FACTS.items() if k != "stories"}     # the stories read from the floors drawn
+
+
+def _floors():
+    return [floor(10, 25, 35, 65, 0, 10, id="f1"), floor(10, 25, 35, 65, 10, 20, id="f2"),
+            floor(10, 25, 35, 65, 20, 30, id="f3")]
+
+
+def test_assumed_flat_ground_on_a_sloping_lot_gives_height_and_stories_needs_review():
+    """106 Ithaca Rd: the lookup's ground falls 14.2 ft, yet with flat ground assumed its 35'-0" house's height and 3
+    stories were measured (a false pass at the limit: §325-3 measures from the grade plane). Now each waits, saying
+    why, with what flat ground gives kept beside it (shown, never deciding)."""
+    from model_measurement.stops import stop
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": 14.2})
+    for name, flat in (("building_height", 30.0), ("stories", 3)):
+        assert got[name]["value"] is None and not got[name]["readings"], name
+        assert got[name]["reason"] == stop("flat_sloped", fall="14.2") and got[name]["measured_as_is"] == flat
+    assert got["building_height"]["reason"].startswith("the ground falls about 14.2 ft across the lot")
+    assert got["building_area"]["value"] is not None and got["front_yard"]["value"] is not None   # the plan stands
+
+
+def test_assumed_flat_ground_with_no_ground_looked_up_gives_needs_review():
+    """No lookup ground at all (a lot by hand, the elevation service down): nothing shows the lot is flat."""
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat"})
+    assert got["building_height"]["value"] is None and got["stories"]["value"] is None
+    assert "couldn't read this lot's ground levels in full" in got["building_height"]["reason"]
+
+
+def test_a_level_looked_up_lot_and_stated_flat_ground_are_unchanged():
+    """A fall under FLAT_FALL_FT (0.5 ft: lidar can't tell it from level), 0.0 included, and flat ground the
+    architect stated (no ground_assumed) are measured as before; 0.5 ft itself is sloped."""
+    from model_measurement.measure import FLAT_FALL_FT
+    assert FLAT_FALL_FT == 0.5
+    for facts in ({**DRAWN, "ground_assumed": "flat", "ground_fall": 0.0},
+                  {**DRAWN, "ground_assumed": "flat", "ground_fall": 0.4}, DRAWN):
+        got = measure(site(RECT, *_floors()), facts)
+        assert (got["building_height"]["value"], got["stories"]["value"]) == (30.0, 3), facts
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": 0.5})
+    assert got["building_height"]["value"] is None and got["stories"]["value"] is None
+
+
+def test_a_fall_that_is_not_a_fall_never_reads_as_level():
+    """Review round 2: measure() called directly (no fact_problems guard) with a NaN, negative or infinite fall
+    read the lot as level (only `fall >= 0.5` was unsafe). Level is now only a fall shown to be 0 <= fall < 0.5."""
+    from model_measurement.measure import flat_assumption_unsafe
+    from model_measurement.stops import stop
+    for bad in (float("nan"), -1, -0.1, float("inf"), True, "0.0", None):
+        assert flat_assumption_unsafe({"ground_assumed": "flat", "ground_fall": bad}) == stop("flat_unknown"), bad
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": float("nan")})
+    assert got["building_height"]["value"] is None and got["stories"]["value"] is None
+    assert flat_assumption_unsafe({"ground_assumed": "flat", "ground_fall": 0.49}) is None
+
+
+def test_existing_ground_keeps_its_own_reason_under_assumed_flat_ground():
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": 14.2,
+                                           "grade_is": "existing"})
+    assert "existing" in got["building_height"]["reason"] and "falls about" not in got["building_height"]["reason"]
+
+
+def test_a_ground_fall_must_be_feet():
+    from model_measurement.project import fact_problems
+    assert "ground_fall must be a number of feet, 0 or more" in fact_problems({**FACTS, "ground_fall": -1})
+    assert "ground_fall must be a number of feet, 0 or more" in fact_problems({**FACTS, "ground_fall": "14"})
+    assert not [p for p in fact_problems({**FACTS, "ground_fall": 0.0}) if "ground_fall" in p]

@@ -7,8 +7,9 @@ and the run fails at the end if any did. A fresh feet document; the box opened o
 Run it as use_questions_in_rhino.py is run (same helpers), then read <temp>/gordium_facts_up_front/out.json.
 
 1. R-1b, one-family detached: a bold "About this project" label, a "Quick answers" dropdown and exactly the questions
-   that shape the envelope (Stream or inlet, South Hill Overlay), every dropdown on "Not answered" (index 0): nothing
-   assumed. No household or home-business question is in the box (use details: deferred), and no distance field yet.
+   that shape the envelope (Stream or inlet, South Hill Overlay, Private garage, cars), every dropdown on "Not
+   answered" (index 0): nothing assumed. No household or home-business question is in the box (use details: deferred),
+   no distance field yet, and never the number of private garages (asked only by the garage row, over the limit).
 2. The box fits a laptop: the dialog is at most 900 px wide and 700 px tall (1366 x 768 less the window's chrome).
 3. One click: the stream dropdown lists "Not answered", "No stream within 20 ft", "Stream or inlet within 20 ft";
    Quick answers lists "No stream, not in South Hill".
@@ -142,18 +143,19 @@ try:
     options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
     r1b = {"zone": "R-1b", "use": "one_family_detached"}
     not_answered = g.logic.NOT_ANSWERED
-    envelope_qs = ["Stream or inlet", "South Hill Overlay"]
+    envelope_qs = ["Stream or inlet", "South Hill Overlay", "Private garage, cars"]
     later = ["Unrelated people in one home", "Owner lives in the house", "Accessory dwelling unit",
-             "Functional family unit", "Home business", "Business floor area (sq ft)", "Distance to it (ft)"]
+             "Functional family unit", "Home business", "Business floor area (sq ft)", "Distance to it (ft)",
+             g.logic.about_label("private_garages")]
     _, seen, _ = open_box(g, doc, options, r1b)
     log["1"] = seen
     corner_words = g.logic.CORNER_CHOICES[1:]                   # Corner lot?'s own choices (it starts blank too)
     answer_drops = [(d, p) for d, p in zip(seen["drops"], seen["picked"])   # About's (not Corner lot?)
                     if d and d[0] == not_answered and d[1:] != corner_words]
-    claim("1 'About this project' with Quick answers and exactly the two envelope questions, all on Not answered",
+    claim("1 'About this project' with Quick answers and exactly the three envelope questions, all on Not answered",
           seen["labels"].count("About this project") == 1 and "Quick answers" in seen["labels"]
           and all(t in seen["labels"] for t in envelope_qs) and not any(t in seen["labels"] for t in later)
-          and len(answer_drops) == 2 and all(p == not_answered for _, p in answer_drops), seen)
+          and len(answer_drops) == 3 and all(p == not_answered for _, p in answer_drops), seen)
     claim("2 the box is at most 900 x 700", 0 < seen["box"]["width"] <= LAPTOP_W and 0 < seen["box"]["height"] <= LAPTOP_H,
           seen["box"])
     stream = next((d for d in seen["drops"] if "No stream within 20 ft" in d), None)

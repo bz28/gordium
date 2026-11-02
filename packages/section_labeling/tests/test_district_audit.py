@@ -527,7 +527,7 @@ def test_special_permit_primary_uses_are_flagged_in_every_district(built):
 
 def test_parked_says_who_parked_it(built):
     head = built.render().split("## The table")[0]
-    assert "or the brief that parked it" in head and built.parked["adus"]["decided"].startswith("queue item 10")
+    assert "or the brief that parked it" in head and built.parked["parking"]["decided"].startswith("Ben's later list")
 
 
 # Provenance review round 3.

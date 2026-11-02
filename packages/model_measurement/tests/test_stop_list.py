@@ -262,7 +262,23 @@ CASES = {
     "no_home_occupation": _plain(),
     "no_primary_buildings": _plain(),
     "no_south_hill": _plain(),
+    "no_garage_cars": _plain(),
+    "no_private_garages": _plain(),
     "no_stream": _plain(),
+    "no_adu": _plain(),
+    "no_adu_kind": _plain(),
+    "no_adus_on_parcel": _plain(),
+    "no_adu_bedrooms": _plain(),
+    "no_adu_floor_area": _plain(),
+    "no_adu_building": _plain(),                                  # nothing picked
+    "no_detached_adu": _plain(accessory_dwelling_unit=False),
+    "adu_not_found": _plain(adu_building="gone"),
+    "adu_is_main": _plain(adu_building="house"),                  # the only building: the main one
+    "adu_ground": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(38, 75, 48, 90, 0, 12, id="adu")],
+                         grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [43, 74.5, 0]],   # one at the ADU
+                         main_building="house", adu_building="adu", ground_is_flat=None, grade_elevation=None),
+    "adu_stories_unclear": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(38, 70, 48, 90, 0, 22, id="adu")],
+                                  main_building="house", adu_building="adu"),     # 22 ft: room for three
     "stream_facts_disagree": _plain(stream_near_lot=False, stream_distance=5),
     "household_counts_disagree": _plain(unrelated_persons=3, unrelated_persons_with_children=1),
     "attached_counts_disagree": _plain(use="one_family_attached", dwelling_units=4, attached_units_in_building=3),
@@ -273,6 +289,8 @@ CASES = {
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
+    "flat_sloped": _plain(ground_assumed="flat", ground_fall=14.2),       # 106 Ithaca Rd's looked-up fall
+    "flat_unknown": _plain(ground_assumed="flat"),                        # no lookup ground at all
     "grade_with_others": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(40, 75, 48, 90, 0, 12, id="shed")],
                                 grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [44, 74.5, 0]],
                                 main_building="house",          # one spot grade at the shed: not at all its walls
