@@ -5076,13 +5076,14 @@ class Recorder:
     def _next(self):
         if self._n is None:             # a folder recorded into before: carry on after its last request (or its
             path = os.path.join(self.folder, "session.jsonl")      # last copied model, if that one's line was lost)
-            self._n = 0
+            n = 0
             if os.path.exists(path):
                 with open(path, encoding="utf-8") as f:
-                    self._n = sum(1 for line in f if line.strip())
+                    n = sum(1 for line in f if line.strip())
             files = os.path.join(self.folder, "files")
-            if os.path.isdir(files):
-                self._n = max([self._n] + [int(d) for d in os.listdir(files) if d.isdigit()])
+            if os.path.isdir(files):        # only the recorder's own folders (0001…; never "²" or "x")
+                n = max([n] + [int(d) for d in os.listdir(files) if re.fullmatch(r"[0-9]+", d)])
+            self._n = n                     # set only once worked out: a failure is tried again next time
         self._n += 1
         return self._n
 

@@ -18,7 +18,8 @@ drawn from the sample before 2026-10-27 have them; GordiumStart no longer prefil
 deep-run site and 200 stress designs from a fixed seed, and compares each canonical answer with
 `test_data/goldens/` (`--write` writes them again, only when an answer should change). `python -m
 design_checker.replay` runs every request of each recorded session in `test_data/sessions/` through the worker's
-`answer()` and needs the recorded answer line byte for byte. Both run in CI.
+`answer()` and needs the recorded answer (compared in the goldens' canonical form: a number's last digit
+may differ between a Mac and Linux or Windows). Both run in CI.
 
 **The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
 `rhino_logic.py` runs in Rhino's Python, which can't read YAML, so it reads `place.json` beside it: the place's name,

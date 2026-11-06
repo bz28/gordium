@@ -1,5 +1,8 @@
 """Recorded sessions with the checker, run again: every request a session sent, answered again by the worker's own
-`answer()`, must give the same answer line, byte for byte, and the same progress lines.
+`answer()`, must give the same answer and the same progress lines. The answer is compared in the goldens'
+canonical form (design_checker/goldens.py: every number to a millionth of a foot): on the computer that recorded
+it the line is the same byte for byte, but Linux and Windows can differ from a Mac in a number's last digit
+(1.6382695424973557 on one, ...3559 on the other, seen in CI on a plan's yard line), which is not a change.
 
     python -m design_checker.replay                     every session under test_data/sessions/ (CI: test_replay.py)
     python -m design_checker.replay <folder>            one session
@@ -20,7 +23,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from rule_format.rulebook import REPO, utf8_console
+from rule_format.rulebook import REPO, read_jsonl, utf8_console
 
 SESSIONS = REPO / "test_data" / "sessions"
 
@@ -30,8 +33,7 @@ def sessions(folder: Path = SESSIONS) -> list[Path]:
 
 
 def entries(session: Path) -> list[dict]:
-    text = (Path(session) / "session.jsonl").read_text(encoding="utf-8")
-    return [json.loads(line) for line in text.splitlines() if line.strip()]
+    return read_jsonl(Path(session) / "session.jsonl")
 
 
 def replayed(session: Path, entry: dict, out: Path) -> tuple[str, list[str]]:
@@ -49,13 +51,15 @@ def replayed(session: Path, entry: dict, out: Path) -> tuple[str, list[str]]:
 
 
 def _comparable(line):
-    """A crash's trace names this computer's files: compared by its last line only. Every other answer whole."""
+    """An answer line in the goldens' canonical form (numbers to a millionth of a foot, keys sorted). A crash's
+    trace names this computer's files: compared by its last line only."""
+    from design_checker.goldens import canonical_text
     if line is None:
         return None
     reply = json.loads(line)
-    if "trace" not in reply:
-        return line
-    return json.dumps(dict(reply, trace=reply["trace"].strip().splitlines()[-1]))
+    if "trace" in reply:
+        reply = dict(reply, trace=reply["trace"].strip().splitlines()[-1])
+    return canonical_text(reply)
 
 
 def differences(session: Path) -> list[str]:

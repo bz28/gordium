@@ -1,9 +1,11 @@
 """The recorded sessions (test_data/sessions/; design_checker/replay.py): every request a session sent the checker,
-answered again by the worker's answer(), gives the recorded answer line byte for byte and the same progress lines.
+answered again by the worker's answer(), gives the recorded answer (in the goldens' canonical form: a number's
+last digit may differ between a Mac and Linux or Windows) and the same progress lines.
 And the recorder itself (rhino_logic.Recorder): off unless GORDIUM_RECORD_SESSION names a folder, wired into both of
 the plugin's exchanges, saving each request, a copy of its model, its progress lines and its exact answer line,
 and never stopping a check when it can't save."""
 import json
+import math
 import queue
 import re
 import shutil
@@ -16,7 +18,7 @@ from rule_format.rulebook import REPO
 RHINO = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
 
 
-def test_every_recorded_session_gives_the_same_answers_byte_for_byte():
+def test_every_recorded_session_gives_the_same_answers():
     found = replay.sessions()
     assert [p.name for p in found] >= ["seed_without_rhino"]
     for session in found:
@@ -159,6 +161,7 @@ def test_a_failed_recording_is_told_once_and_numbering_never_reuses_a_copied_mod
     rec = logic.Recorder(str(tmp_path / "rec"))
     logic.exchange(sends, lines, {"cmd": "check", "model": str(model), "id": 2}, 5, record=rec)
     (tmp_path / "rec/files/0002").mkdir(parents=True)   # a model copied whose line was then lost
+    (tmp_path / "rec/files/\u00b2").mkdir()             # not the recorder's: a digit, but not 0-9
     rec2 = logic.Recorder(str(tmp_path / "rec"))
     logic.exchange(sends, lines, {"cmd": "check", "model": str(model), "id": 4}, 5, record=rec2)
     saved = [json.loads(x) for x in (tmp_path / "rec/session.jsonl").read_text(encoding="utf-8").splitlines()]
@@ -173,4 +176,21 @@ def test_the_plugin_says_when_it_records_and_when_the_recording_fails():
     assert 'Rhino.RhinoApp.WriteLine("Gordium: recording every check to " + RECORDER.folder)' in RHINO
     answer = RHINO[RHINO.index("def _answer("):]
     answer = answer[:answer.index("\ndef ")]
-    assert "RECORDER.take_failure()" in answer and "the session recording failed" in answer
+    assert "failure = RECORDER.take_failure() if RECORDER is not None else None\n    if failure:" in answer
+    assert "the session recording failed" in answer
+
+
+def test_a_numbers_last_digit_is_not_a_change_but_a_millionth_of_a_foot_is(tmp_path):
+    session = tmp_path / "s"
+    shutil.copytree(replay.SESSIONS / "seed_without_rhino", session)
+    lines = (session / "session.jsonl").read_text(encoding="utf-8").splitlines()
+    start = json.loads(lines[3])                      # GordiumStart on the lot
+    assert start["request"]["cmd"] == "start"
+    reply = json.loads(start["reply"])
+    height = reply["result"]["floors"][0]["top"]
+    for value, caught in ((math.nextafter(height, math.inf), False), (height + 2e-6, True)):   # the last digit
+        assert value != height
+        reply["result"]["floors"][0]["top"] = value
+        (session / "session.jsonl").write_text(json.dumps(dict(start, reply=json.dumps(reply))) + "\n",
+                                               encoding="utf-8")
+        assert bool(replay.differences(session)) is caught, nudge

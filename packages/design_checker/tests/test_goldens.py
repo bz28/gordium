@@ -93,7 +93,7 @@ def test_written_goldens_are_read_back_as_written(tmp_path):
 def test_the_compressed_goldens_are_stored_as_binary_so_no_checkout_changes_their_line_endings():
     import subprocess
     out = subprocess.run(["git", "check-attr", "binary", "--", "test_data/goldens/outputs.jsonl.xz"], cwd=REPO,
-                         capture_output=True, text=True, check=True).stdout
+                         capture_output=True, text=True, encoding="utf-8", check=True).stdout
     assert out.strip().endswith("binary: set")
 
 

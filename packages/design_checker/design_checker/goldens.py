@@ -32,7 +32,7 @@ import tempfile
 from pathlib import Path
 
 from rule_format.place import plugin_place
-from rule_format.rulebook import REPO, utf8_console
+from rule_format.rulebook import REPO, _jsonl_rows, utf8_console
 
 PLACES = 6
 STRESS_SEED = 20261105
@@ -92,9 +92,9 @@ def sha(text: str) -> str:
     return hashlib.sha256(text.encode("ascii")).hexdigest()
 
 
-def fingerprint(value) -> dict:
-    """{"sha256": the whole answer's, "parts": each top-level part's} of an answer."""
-    data = canonical(value)
+def fingerprint(text: str) -> dict:
+    """{"sha256": the whole answer's, "parts": each top-level part's} of an answer's canonical text."""
+    data = json.loads(text)
     parts = {k: sha(canonical_text(v)) for k, v in data.items()} if isinstance(data, dict) else {}
     return {"sha256": sha(canonical_text(data)), "parts": parts}
 
@@ -199,21 +199,18 @@ def write(texts: dict, folder: Path = FOLDER) -> None:
     folder.mkdir(parents=True, exist_ok=True)
     manifest = {"about": "python -m design_checker.goldens: every case's answer, canonical JSON, as sha256",
                 "places": PLACES, "stress_seed": STRESS_SEED, "stress_designs": STRESS_DESIGNS,
-                "cases": {name: fingerprint(json.loads(t)) for name, t in sorted(texts.items())}}
+                "cases": {name: fingerprint(t) for name, t in sorted(texts.items())}}
     (folder / MANIFEST).write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n", encoding="utf-8")
-    lines = "".join(json.dumps({"case": n, "answer": json.loads(t)}, sort_keys=True, ensure_ascii=True,
-                               separators=(",", ":")) + "\n" for n, t in sorted(texts.items()))
+    # one line per case, {"answer", "case"} (keys in order), the answer its canonical text as it is
+    lines = "".join('{"answer":%s,"case":%s}\n' % (t, json.dumps(n, ensure_ascii=True)) for n, t in sorted(texts.items()))
     (folder / OUTPUTS).write_bytes(lzma.compress(lines.encode("ascii"), preset=9))
 
 
 def stored(folder: Path = FOLDER) -> tuple[dict, dict]:
     """(the manifest's cases, {case name: its stored answer}) of the committed goldens."""
     manifest = json.loads((folder / MANIFEST).read_text(encoding="utf-8"))["cases"]
-    answers = {}
-    for line in lzma.decompress((folder / OUTPUTS).read_bytes()).decode("ascii").splitlines():
-        row = json.loads(line)
-        answers[row["case"]] = row["answer"]
-    return manifest, answers
+    rows = _jsonl_rows(lzma.decompress((folder / OUTPUTS).read_bytes()))     # (rulebook.read_jsonl's reader)
+    return manifest, {row["case"]: row["answer"] for row in rows}
 
 
 def differences(old, new, path: str = "", limit: int = 8) -> list[str]:
@@ -255,7 +252,7 @@ def check(texts: dict, folder: Path = FOLDER, only: str = "") -> list[str]:
         if sha(texts[name]) == manifest[name]["sha256"]:
             continue
         new = json.loads(texts[name])
-        parts = fingerprint(new)["parts"]
+        parts = fingerprint(texts[name])["parts"]
         changed = sorted(k for k in set(parts) | set(manifest[name]["parts"]) if parts.get(k) != manifest[name]["parts"].get(k))
         problems.append(f"{name}: differs (parts: {', '.join(changed) or 'the whole answer'})")
         problems += ["    " + d for d in differences(answers.get(name), new)]
