@@ -8,12 +8,13 @@ left-out objects in the extras) is refused; and a report keeps the exact descrip
 
 import copy
 import json
+from pathlib import Path
 
 import pytest
 
 from design_checker import goldens, replay, scenarios, site_json
 from design_checker.__main__ import answer
-from design_checker.check import SITE_SUFFIX, check, check_description, check_site, start, start_description
+from design_checker.check import SITE_SUFFIX, _aside, check, check_description, check_site, start, start_description
 from model_measurement.project import load_facts
 from model_measurement.read_3dm import read_site
 from model_measurement.stops import TOOL_WORDS, stop
@@ -225,6 +226,8 @@ def test_a_report_keeps_the_exact_description_it_was_worked_out_from(tmp_path):
     kept = tmp_path / ("house_zoning_report" + SITE_SUFFIX)
     assert json.loads(kept.read_text(encoding="utf-8")) == site_json.through_json(doc)
     assert not list(tmp_path.glob("*.part")) and not list(tmp_path.glob(".*.part"))
+    assert _check_site(doc, facts, report=str(report))["report_error"] is None      # over the earlier one: replaced,
+    assert sorted(p.name for p in tmp_path.iterdir()) == [kept.name, report.name]   # nothing set aside left over
     again = tmp_path / "again.xlsx"
     check(path, facts, again)                      # Rhino's check keeps its description too
     assert site_json.to_site(json.loads((tmp_path / ("again" + SITE_SUFFIX)).read_text(encoding="utf-8")))
@@ -273,7 +276,33 @@ def test_a_report_is_never_beside_another_checks_site(tmp_path, monkeypatch):
     before = report.read_bytes()
     result = check(path, facts, report)
     assert result["report_error"].startswith("the site description beside the report: Permission denied")
-    assert list(tmp_path.iterdir()) == [report] and report.read_bytes() == before   # the earlier report, untouched
+    assert sorted(tmp_path.iterdir()) == sorted([report, stale]) and report.read_bytes() == before   # the earlier report,
+    assert stale.read_text(encoding="utf-8") == '{"stale": true}'                           # and its site, untouched
+
+
+def test_a_report_that_cant_be_saved_leaves_the_earlier_report_beside_its_own_site(tmp_path, monkeypatch):
+    """Review of PR 74: the earlier site file was deleted before measuring, so a new report that couldn't be moved in
+    (on Windows, the earlier one open in Excel) left the earlier report with no site to work it out again from. Now
+    the earlier site is set aside only once the new report is saved, and put back when it can't be moved in."""
+    import os
+    path, facts = MODELS[1]
+    report = tmp_path / "house.xlsx"
+    doc = site_json.read_model(path, facts, inventory_complete=True)
+    assert check_description(site_json.through_json(doc), _facts(facts), report)["report_error"] is None
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    assert sorted(before) == ["house.site.json", "house.xlsx"]
+    real = os.replace
+
+    def locked(src, dst):                    # Windows: a file open in Excel can't be replaced
+        if Path(dst) == report:
+            raise PermissionError(13, "Permission denied")
+        return real(src, dst)
+    monkeypatch.setattr(os, "replace", locked)
+    moved = copy.deepcopy(doc)
+    moved["buildings"] = moved["buildings"][:1]
+    result = check_description(site_json.through_json(moved), _facts(facts), report)
+    assert result["report_error"].startswith("Permission denied") and result["view"]["items"]
+    assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == before   # both, as they were; nothing left over
 
 
 def test_a_site_that_cant_be_written_means_no_report_is_written(tmp_path, monkeypatch):
@@ -310,7 +339,8 @@ def test_rhino_clears_the_site_descriptions_half_written_copy_too(tmp_path):
     space = {"os": os, "logic": logic}
     exec(fn, space)
     report = tmp_path / "house.xlsx"
-    parts = [tmp_path / ".house.xlsx.part", tmp_path / (".house" + SITE_SUFFIX + ".part")]
+    parts = [tmp_path / ".house.xlsx.part", tmp_path / (".house" + SITE_SUFFIX + ".part"),
+             _aside(tmp_path / ("house" + SITE_SUFFIX))]
     for p in parts + [report]:
         p.write_text("x", encoding="utf-8")
     space["_drop_report_part"](str(report))

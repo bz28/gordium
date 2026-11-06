@@ -635,7 +635,7 @@ def _failing_distances(rule: dict, measured: dict, values: dict) -> list[dict]:
     return found
 
 
-def _report(t: dict, view: dict, report_path: Path) -> None:
+def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = None) -> None:
     """The architects'-format workbook (PR 10), saying what the panel says (spec I1, I2): each rule's Error and
     Comparison are its items' most cautious status (a rule the panel shows as needing review is never PASS here),
     and a Check tab lists every item, the summary, the draft-rulebook label and the lot and grade sources."""
@@ -710,7 +710,18 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     part = report_path.with_name("." + report_path.name + ".part")
     try:
         wb.save(part)
-        os.replace(part, report_path)
+        # the earlier report's site file (check_description's) is set aside, not deleted, until the new report is in
+        # place: a report that can't be moved in (open in Excel on Windows) leaves the earlier one beside its own site
+        aside = None
+        if site_file is not None and site_file.exists():
+            aside = _aside(site_file)
+            os.replace(site_file, aside)
+        try:
+            os.replace(part, report_path)
+        except OSError:
+            if aside is not None:
+                os.replace(aside, site_file)
+            raise
     finally:
         if part.exists():
             part.unlink()
@@ -762,15 +773,22 @@ def _host(model_path: Path) -> dict:
 SITE_SUFFIX = ".site.json"      # beside a zoning report: the exact site description it was worked out from
 
 
+def _aside(site_file: Path) -> Path:
+    """Where the earlier report's site file waits while the new report is moved in (hidden, never read back)."""
+    return site_file.with_name("." + site_file.name + ".old")
+
+
 def check_description(doc: dict, facts: dict, report_path: Path | None = None, extras: dict | None = None,
                       step=None, name: str | None = None) -> dict:
     """check() for a site description (gordium.site/1: site_json; the worker's check_site): refused whole if it
     isn't exactly v1 (site_json.SiteRefused), else measured and checked as check_site does. With a report, the
     description is kept beside it (<report name>.site.json), so any report can be traced to exactly the site it was
-    worked out from and, with the same lot facts (not in the site file), worked out again. A report is never beside another check's site: the old site file goes
-    before anything is measured and the new one is written (as a hidden part file) before the report, then moved in
-    once the report is. A site file that can't be written means no report is written (report_error says why); at
-    worst, a check stopped between the two leaves a report with no site file beside it, never a wrong one."""
+    worked out from and, with the same lot facts (not in the site file), worked out again. A report is never beside
+    another check's site: the new site file is written (as a hidden part file) before the report; the earlier one is
+    set aside only once the new report is saved, put back if that report can't be moved in, and dropped once it is;
+    then the new one is moved in. A site file that can't be written means no report is written, and the earlier
+    report keeps its site (report_error says why); at worst, a check stopped between the two leaves a report with no
+    site file beside it, never a wrong one."""
     site, facts, extras = site_json.for_measuring(site_json.to_site(doc), facts, extras)
     _refuse_bad_facts(facts)                 # a refused request leaves the earlier report and its site alone
     kept = part = site_error = None
@@ -779,16 +797,17 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
         kept = report_path.with_name(report_path.stem + SITE_SUFFIX)
         part = kept.with_name("." + kept.name + ".part")       # as the report's own half-written copy is named
         try:
-            kept.unlink(missing_ok=True)
             part.write_text(json.dumps(doc, indent=1, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
         except OSError as e:
             site_error = _NotWritten(e)
     try:                                     # a site that can't be kept: no report written (the earlier one stays)
         out = check_site(site, facts, name or doc["host"]["document"] or "model",
-                         None if site_error else report_path, extras, step=step)
-    except BaseException:                    # stopped or failed: no half-written site file left behind
-        if part is not None:
+                         None if site_error else report_path, extras, step=step,
+                         site_file=None if site_error else kept)
+    except BaseException:                    # stopped or failed: no half-written site file left behind, and an
+        if part is not None:                 # earlier site set aside belongs to a report already replaced
             _unlink(part)
+            _unlink(_aside(kept))
         raise
     if part is not None:
         if out["report_error"] is None and site_error is None:
@@ -802,6 +821,7 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
             out["report_error"] = (f"the site description beside the report: {site_error.strerror or site_error} "
                                    f"({kept}), so the new report wasn't saved ({report_path})")
         _unlink(part)
+        _unlink(_aside(kept))                # put back already if the report wasn't moved in; else its report is gone
     return out
 
 
@@ -826,9 +846,10 @@ def _unlink(path: Path) -> None:
 
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
-               extras: dict | None = None, step=None) -> dict:
+               extras: dict | None = None, step=None, site_file: Path | None = None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
-    generator builds. Exactly the same measuring, rules and presentation as a model read from a file."""
+    generator builds. Exactly the same measuring, rules and presentation as a model read from a file. `site_file`
+    (check_description's) is set aside while the report is moved in, and put back if it can't be."""
     _refuse_bad_facts(facts)
     model_path = Path(name)
     say = step or _quiet
@@ -900,7 +921,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
             say(STEPS["report"])
-            _report(t, v, report_path)
+            _report(t, v, report_path, site_file)
         except OSError as e:
             report_error = f"{e.strerror or e} ({report_path})"
     # one guard for the whole check (review round 21): geometry the measuring couldn't work out draws nothing
