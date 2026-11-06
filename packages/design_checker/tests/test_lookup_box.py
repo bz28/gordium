@@ -602,6 +602,9 @@ class FakeTable:
     def snapshot(self):
         return {i: (o["layer"], o["kind"]) for i, o in self.objects.items()}, sorted(self.layers), self.views
 
+    def apply(self, plan, session, facts, saved_ui):       # (as gordium_rhino.RhinoTable.apply: the plan carried out)
+        return logic.carry_out(plan, self, session, facts, saved_ui)
+
 
 def sample_model():
     table = FakeTable({"sample": {"layer": "Site", "kind": "lot"}})

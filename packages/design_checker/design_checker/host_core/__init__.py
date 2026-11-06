@@ -7,7 +7,7 @@ them into its own Python 3.9 (through rhino_logic.py, which offers every name he
   facts          the facts the architect states
   lookup         an address lookup's answer, saved addresses
   start_box      the start box's rows, buttons and reset
-  edits          the start box's model edits as one transaction
+  edits          the start box's model edits: one transaction, decided as edit plans
   freshness      whether the results shown are current, the undo steps' names
   report         the report's and long work's words
   panel_words    the panel's words

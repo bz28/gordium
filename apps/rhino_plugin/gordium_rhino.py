@@ -2048,7 +2048,8 @@ def _place_spots(doc, prompt, layer_path=GRADE_LAYER, changing=lambda: None):
 
 
 class RhinoTable:
-    """The model as rhino_logic.BoxSession and apply_lookup use it: a few plain calls on one document. `step`: the
+    """The model as rhino_logic.BoxSession and apply_reset use it: a few plain calls on one document, and `apply`,
+    which carries out a start box's edit plan (host_core.edits) through them. `step`: the
     undo step a start box's edits go in (its first edit begins it, unless one is held; the box's caller ends it with
     the facts saved after Draw: the whole box one step, its Cancel's rollback inside it too). None: recovery's own."""
 
@@ -2141,6 +2142,12 @@ class RhinoTable:
             if view is not None:
                 view.ActiveViewport.SetViewProjection(info, True)
         self.doc.Views.Redraw()
+
+    def apply(self, plan, session, facts, saved_ui):
+        """A start box's edit plan (logic.reset_edits, logic.lookup_edits) made in this document, step by step in
+        its order, through the box's BoxSession `session` (holds, the new objects marked as its own) and this
+        table's add_lot / add_spot: (facts, saved_ui) with each "$..." ref swapped for the id Rhino gave it."""
+        return logic.carry_out(plan, self, session, facts, saved_ui)
 
     def add_lot(self, ring, name):
         self._changing()
@@ -4056,6 +4063,10 @@ class _DryTable:
 
     def add_spot(self, p):
         return None
+
+    def apply(self, plan, session, facts, saved_ui):
+        """The plan carried out on this copy (its own add_lot and add_spot), never on the real table's."""
+        return logic.carry_out(plan, self, session, facts, saved_ui)
 
 
 class _DrySession:
