@@ -833,7 +833,7 @@ def test_units_are_converted_in_one_place_both_ways():
     """Gordium works in feet; the Rhino side converts at its helpers and nowhere else (a mm template showed why the
     edge must be one place: there the start had to be checked line by line)."""
     import re
-    rhino = host_text("rhino", "plugin", purpose="lint")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_feet_volume",
                "_facts_in_feet")
     outside = []
@@ -2311,7 +2311,7 @@ def test_the_plugin_keeps_exactly_one_checker_process(tmp_path):
     book.stop_all()                                         # stopped (Rhino closing, the checker stopped)
     assert stopped == [101, 303] and book.pids() == []
     assert logic.ServerBook(str(tmp_path / "missing" / "x.json"), me, started_at, stop).pids() == []   # no record
-    rhino = host_text("rhino", "plugin", purpose="lint")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     worker = rhino[rhino.index("def _worker("):rhino.index("def _stop_worker(")]
     assert "        SERVERS.started(p.pid)" in worker
     stop_fn = rhino[rhino.index("def _stop_worker("):rhino.index("def ask(")]
@@ -4321,8 +4321,7 @@ def test_rhino_logic_runs_without_anything_rhinos_python_lacks(monkeypatch):
     big_ccw, small_cw = [[0, 0], [10, 0], [10, 10], [0, 10]], [[0, 0], [0, 1], [1, 1], [1, 0]]   # either winding
     assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small_cw, big_ccw]}) == [
         big_ccw, small_cw]
-    from pathlib import Path
-    tree = ast.parse(Path(logic.__file__).read_text(encoding="utf-8"))
+    tree = ast.parse(host_text("rhino", "logic", purpose="lint"))
     imported = {(a.name if isinstance(n, ast.Import) else n.module).split(".")[0]
                 for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom)) and not getattr(n, "level", 0)
                 for a in (n.names if isinstance(n, ast.Import) else [n])}

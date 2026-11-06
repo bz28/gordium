@@ -71,6 +71,11 @@ def host_tree(host):
     return sorted(_host(host)["dir"].rglob("*.py"))
 
 
+def host_command_files(host):
+    """The host's command files (apps/rhino_plugin/gordium_*.py: one file per command an architect can run)."""
+    return sorted(_host(host)["dir"].glob("gordium_*.py"))
+
+
 def host_path(host, part):
     """The path of one named part ("plugin", "ui", "logic", ...), for a test that needs the file, not its text."""
     return _host(host)["parts"][part]
