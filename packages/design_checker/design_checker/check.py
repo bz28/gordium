@@ -13,6 +13,7 @@ show in red, the envelope and the plan.
 import ast
 import hashlib
 import itertools
+import json
 import math
 import os
 import pickle
@@ -25,7 +26,7 @@ from pathlib import Path
 import shapely
 import yaml
 
-from design_checker import present, reading_set
+from design_checker import present, reading_set, site_json
 from design_checker import rhino_logic as logic
 from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
@@ -730,17 +731,81 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
     Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
     building measure need review, never silently dropped. `extras` is what the command adds for the panel: what
-    it sent (scope), objects on the lot it didn't send (each makes the check need review), the grade source."""
+    it sent (scope), objects on the lot it didn't send (each makes the check need review), the grade source.
+
+    The model goes through the site description another design tool sends (site_json, docs/protocol/): read, made a
+    description (the grade from the facts, the unsent objects and the left-out ones from the request), written as
+    JSON text and read back, then checked by check_description, so Rhino's check takes the path Revit's will."""
     problems = fact_problems(facts)            # the same check as a facts file: a plain refusal, never a crash
     problems += [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     model_path = Path(model_path)
     (step or _quiet)(STEPS["read"])
-    site = read_site(model_path, facts)
-    if building_problems:
-        site["buildings"].append({"id": "Building layer", "faces": [], "problems": list(building_problems)})
-    return check_site(site, facts, model_path.name, report_path, extras, step=step)
+    doc = site_json.legacy_description(read_site(model_path, facts), facts, building_problems, extras,
+                                       _host(model_path))
+    return check_description(site_json.through_json(doc), _without(facts, ("grade_points",)), report_path,
+                             _without(extras or {}, site_json.LEFT_OUT_EXTRAS), step=step, name=model_path.name)
+
+
+def _without(d: dict, keys) -> dict:
+    return {k: v for k, v in d.items() if k not in keys}
+
+
+def _host(model_path: Path) -> dict:
+    """Which file a check read (for tracing in the description; never used in a decision)."""
+    import rhino3dm
+    return {"name": "gordium check (rhino3dm)", "version": rhino3dm.__version__, "document": Path(model_path).name,
+            "model_units": "feet (read_site converts)"}
+
+
+SITE_SUFFIX = ".site.json"      # beside a zoning report: the exact site description it was worked out from
+
+
+def check_description(doc: dict, facts: dict, report_path: Path | None = None, extras: dict | None = None,
+                      step=None, name: str | None = None) -> dict:
+    """check() for a site description (gordium.site/1: site_json; the worker's check_site): refused whole if it
+    isn't exactly v1 (site_json.SiteRefused), else measured and checked as check_site does. With a report, the
+    description is kept beside it (<report name>.site.json), so any report can be traced to exactly the site it was
+    worked out from and worked out again. A report is never beside another check's site: the old site file goes
+    before anything is measured and the new one is written (as a hidden part file) before the report, then moved in
+    once the report is; a site file that can't be written takes its report with it (report_error says why)."""
+    site, facts, extras = site_json.for_measuring(site_json.to_site(doc), facts, extras)
+    kept = part = site_error = None
+    if report_path is not None:
+        report_path = Path(report_path)
+        kept = report_path.with_name(report_path.stem + SITE_SUFFIX)
+        part = kept.with_name("." + kept.name + ".part")       # as the report's own half-written copy is named
+        try:
+            kept.unlink(missing_ok=True)
+            part.write_text(json.dumps(doc, indent=1, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+        except OSError as e:
+            site_error = e
+    try:
+        out = check_site(site, facts, name or doc["host"]["document"] or "model", report_path, extras, step=step)
+    except BaseException:                    # stopped or failed: no half-written site file left behind
+        if part is not None:
+            _unlink(part)
+        raise
+    if part is not None:
+        if out["report_error"] is None and site_error is None:
+            try:
+                os.replace(part, kept)
+            except OSError as e:
+                site_error = e
+        if site_error is not None and out["report_error"] is None:     # never a report without its site
+            _unlink(report_path)
+            out["report_error"] = (f"the site description beside the report: {site_error.strerror or site_error} "
+                                   f"({kept})")
+        _unlink(part)
+    return out
+
+
+def _unlink(path: Path) -> None:
+    try:
+        path.unlink(missing_ok=True)
+    except OSError:
+        pass
 
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
@@ -1600,9 +1665,23 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    (step or _quiet)(STEPS["lot"])
+    # through the site description, as check(): its lot only (a start leaves the buildings out)
+    doc = site_json.legacy_description({**read_site(Path(model_path), facts), "buildings": []}, facts,
+                                       host=_host(Path(model_path)))
+    return start_description(site_json.through_json(doc), _without(facts, ("grade_points",)), floor_to_floor,
+                             design_buffer, larger_side, step=step)
+
+
+def start_description(doc: dict, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0,
+                      larger_side: str | None = None, step=None) -> dict:
+    """start() for a site description (the worker's start_site): its lot and grade; its buildings left out."""
+    problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
+    if problems:
+        raise ValueError("lot facts: " + "; ".join(problems))
+    site, facts, _ = site_json.for_measuring(site_json.to_site(doc), facts)
     say = step or _quiet
-    say(STEPS["lot"])
-    site = {**read_site(Path(model_path), facts), "buildings": []}
+    site = {**site, "buildings": []}
     if site.get("problems"):
         return {"floors": [], "notes": list(site["problems"])}
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]

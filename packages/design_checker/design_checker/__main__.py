@@ -11,7 +11,10 @@ Requests (one JSON object per line): {"id": 1, "cmd": "check", "model": "<.3dm>"
 106 Ithaca Rd lot and facts GordiumStart offers). New-style commands name the protocol they speak (protocol.py,
 docs/protocol/): {"id": 6, "cmd": "hello", "protocol": "1.0"} (the protocol, the site description version and the
 fingerprints of the worker's code and rules), {"id": 7, "cmd": "read_model", "protocol": "1.0", "model": "<.3dm>",
-"facts": {...}} (the model as a site description, gordium.site/1: site_json.read_model); their answers carry
+"facts": {...}} (the model as a site description, gordium.site/1: site_json.read_model), {"id": 8, "cmd":
+"check_site", "protocol": "1.0", "site": {...}, "facts": {...}, "report": null, "extras": {...}} (check() for a site
+description: check.check_description) and {"id": 9, "cmd": "start_site", "protocol": "1.0", "site": {...}, "facts":
+{...}, "floor_to_floor": null, "design_buffer": 0, "larger_side": null} (start() for one); their answers carry
 "about" (the same fingerprints) beside "result". Answers:
 {"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. A request with "progress": true
 also gets {"id": 1, "step": "Measuring the building…"} lines before its answer, one as each stage starts (the
@@ -29,7 +32,7 @@ from model_measurement.project import fact_problems, load_facts
 from rule_format.rulebook import utf8_console
 
 from . import protocol, site_json
-from .check import check, options, sample_site, start
+from .check import check, check_description, options, sample_site, start, start_description
 
 
 def _read_model(request: dict) -> dict:
@@ -39,8 +42,20 @@ def _read_model(request: dict) -> dict:
     return {"site": site_json.read_model(Path(request["model"]), request["facts"], inventory)}
 
 
+def _check_site(request: dict, step) -> dict:
+    report = request.get("report")
+    return check_description(request["site"], request["facts"], Path(report) if report else None,
+                             request.get("extras"), step=step)
+
+
+def _start_site(request: dict, step) -> dict:
+    return start_description(request["site"], request["facts"], request.get("floor_to_floor"),
+                             request.get("design_buffer") or 0.0, request.get("larger_side"), step=step)
+
+
 # the new-style commands (protocol 1.x, docs/protocol/): each answer carries "about" (protocol.about)
-NEW = {"hello": lambda request: protocol.about(), "read_model": _read_model}
+NEW = {"hello": lambda request, step: protocol.about(), "read_model": lambda request, step: _read_model(request),
+       "check_site": _check_site, "start_site": _start_site}
 
 
 def answer(request: dict, step=None) -> dict:
@@ -61,7 +76,7 @@ def answer(request: dict, step=None) -> dict:
             result = options(request["jurisdiction"])
         elif request.get("cmd") in NEW:
             protocol.speaks(request)
-            return {"id": request.get("id"), "ok": True, "result": NEW[request["cmd"]](request),
+            return {"id": request.get("id"), "ok": True, "result": NEW[request["cmd"]](request, step),
                     "about": protocol.about()}
         else:
             raise ValueError(f"unknown command {request.get('cmd')!r}")

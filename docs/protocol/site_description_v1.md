@@ -79,7 +79,7 @@ length), flat ground not yet given, and nothing else on the lot.
 
 ## How the worker uses it
 
-The worker (`python -m design_checker serve`) answers JSON requests one per line. Two new-style commands name
+The worker (`python -m design_checker serve`) answers JSON requests one per line. The new-style commands name
 the protocol they speak, `"protocol": "1.0"` (a different major version is refused):
 
 - `hello`: the protocol, the site description version, and fingerprints of the worker's code and of each place's
@@ -87,9 +87,36 @@ the protocol they speak, `"protocol": "1.0"` (a different major version is refus
 - `read_model {model, facts, inventory_complete?}`: a `.3dm` file read as a site description, for recording test
   fixtures. It reads only the lot and Building layers, so it says `inventory_complete: false` unless the caller
   says it looked at the rest of the lot itself.
+- `check_site {site, facts, report?, extras?}`: the check of a site description, the same answer `check` gives.
+- `start_site {site, facts, floor_to_floor?, design_buffer?, larger_side?}`: the largest legal starting building
+  on the description's lot (its buildings are left out), the same answer `start` gives.
 
-The older commands (`check`, `start`, `facts`, `options`, `sample_site`) answer exactly as before. Checking a site
-description directly (`check_site`) comes in the next step of the tidy-up.
+**Rhino takes the same path.** The older `check` and `start` read the model, make it a site description (the
+grade from the facts, what Rhino couldn't send as `unsent`, the objects it left out as `left_out`), write it as
+JSON text, read it back strictly, and check that, exactly as `check_site` does. So the path a Revit add-in will
+use is the one every Rhino check already takes, and both give the same answers (tests/test_check_via_site.py).
+
+**How the checker reads a description** (`site_json.for_measuring`):
+
+- Every `unsent` object's problem goes on one faceless building, so every building measure needs review.
+- `inventory_complete: false` puts a problem on every building ("the design tool didn't say everything on the lot
+  was sent…"): no building measure complies; lot size and width, which don't depend on the buildings, still can.
+- Each `left_out` object makes the check need review (an "Objects on the lot not included" row; lot coverage and
+  the accessory building rules need review); one that touches a building, or isn't known to (`touching: null`),
+  makes the yards, height and stories need review too.
+- The grade comes only from the description. Facts that also give `grade_points`, a `grade_from` other than the
+  description's grade source, or extras that also list left-out objects are refused: one source for each thing.
+- **A problem in the tool's own words.** A tool that found a problem the measuring has no code for sends
+  `{"code": "tool_words", "args": {"words": "…"}}`. It still makes the building's measuring need review. Words the
+  measuring does have a code for are refused this way (send that code).
+
+**A report keeps its site.** When `check` or `check_site` writes a zoning report, the exact description it was
+worked out from is written beside it as `<report name>.site.json` (Ben, 2026-11-06), so any report can be traced
+and worked out again. A description that can't be written takes its report with it: never a report without its
+site.
+
+The older commands (`check`, `start`, `facts`, `options`, `sample_site`) answer exactly as before (the golden
+answers and the recorded session prove it, to the last character).
 
 ## Versions
 
