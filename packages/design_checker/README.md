@@ -25,6 +25,16 @@ answer exactly as before, with or without a protocol, and go the same way: `chec
 model, make it a description (`site_json.legacy_description`), send it through JSON text and back, and check
 that. A zoning report keeps the exact description beside it (`<report name>.site.json`).
 
+**The session commands** (protocol 1.0, `protocol.COMMANDS`; every command and field in
+[docs/protocol/worker_protocol_v1.md](../../docs/protocol/worker_protocol_v1.md)): the start box's, the panel's
+and the live check's decisions, `host_core/`'s functions served to a second design tool by a fixed table
+(`facts.*`, `box.view`, `box.pick`, `lookup.*` with edit plans, `streets.*`, `session.freshness`, `session.undo`,
+`report.message`, `panel.rows`). Each part of a command is one named host_core function; stateless (the tool sends
+its facts and box choices and gets the new ones back). Rhino still calls host_core directly. The proof that each
+answer is the in-process one: `tests/test_protocol.py` replays `test_data/sessions/headless_calls/` (host_core
+calls recorded while the tests drove the plugin's logic: `python -m design_checker.call_session --record`, through
+`host_core.worker_client.CallRecorder`) through the worker.
+
 **Golden answers and recorded sessions** (the yardstick for changes that must not change any answer):
 `python -m design_checker.goldens --check` runs `check` and `start` on every test site, scenario (and its edit),
 deep-run site and 200 stress designs from a fixed seed, and compares each canonical answer with

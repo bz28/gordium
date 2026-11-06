@@ -30,6 +30,7 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 | [how_rules_are_checked.md](how_rules_are_checked.md) | The promises Gordium makes about its rules, and the check and test behind each | Architects, shareholders, engineers | A rule check is added or changes |
 | [methods.md](methods.md) | Every technique: how it works, why, alternatives, weak spots, how it's tested | Engineers, reviewers | A technique is added or changes |
 | [protocol/site_description_v1.md](protocol/site_description_v1.md) | The site description, `gordium.site/1`: what a design tool (Rhino, later Revit) sends the checker, field by field, and why anything unknown is refused; with its [JSON Schema](protocol/site_description_v1.schema.json) | Engineers writing a design-tool add-in, reviewers | The site description or the worker's new-style commands change |
+| [protocol/worker_protocol_v1.md](protocol/worker_protocol_v1.md) | The worker protocol, `1.0`: the message format, every command a design tool can send (the session commands with their fields, generated from the table), edit plans, versions, and how the parity test proves each answer is Rhino's | Engineers writing a design-tool add-in, reviewers | A command is added or changed (a test fails until the version and changelog say so) |
 | [protocol/CHANGELOG.md](protocol/CHANGELOG.md) | Each version of the protocol and the site description | Engineers writing a design-tool add-in | The schema or the commands change (a test fails until a line is added) |
 
 ## Use: how to do a job

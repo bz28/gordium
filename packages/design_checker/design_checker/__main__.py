@@ -15,7 +15,10 @@ fingerprints of the worker's code and rules), {"id": 7, "cmd": "read_model", "pr
 "check_site", "protocol": "1.0", "site": {...}, "facts": {...}, "report": null, "extras": {...}} (check() for a site
 description: check.check_description) and {"id": 9, "cmd": "start_site", "protocol": "1.0", "site": {...}, "facts":
 {...}, "floor_to_floor": null, "design_buffer": 0, "larger_side": null} (start() for one); their answers carry
-"about" (the same fingerprints) beside "result". Answers:
+"about" (the same fingerprints) beside "result". The session commands (protocol.COMMANDS: facts.*, box.view,
+box.pick, lookup.*, streets.*, session.*, report.message, panel.rows) are host_core's functions served by a fixed
+table, e.g. {"id": 10, "cmd": "box.view", "protocol": "1.0", "state": {...}}: every field in
+docs/protocol/worker_protocol_v1.md. Answers:
 {"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. A request with "progress": true
 also gets {"id": 1, "step": "Measuring the building…"} lines before its answer, one as each stage starts (the
 plugin's progress line; the answer is always the request's last line). The process stays up, so a
@@ -56,6 +59,8 @@ def _start_site(request: dict, step) -> dict:
 # the new-style commands (protocol 1.x, docs/protocol/): each answer carries "about" (protocol.about)
 NEW = {"hello": lambda request, step: protocol.about(), "read_model": lambda request, step: _read_model(request),
        "check_site": _check_site, "start_site": _start_site}
+# ... and the session commands, host_core's functions served by a fixed table (protocol.COMMANDS: facts.*, box.*, ...)
+NEW.update({name: (lambda name: lambda request, step: protocol.run(name, request))(name) for name in protocol.COMMANDS})
 
 
 def answer(request: dict, step=None) -> dict:
