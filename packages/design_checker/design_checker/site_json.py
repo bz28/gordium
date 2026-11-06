@@ -448,6 +448,8 @@ def for_measuring(site: dict, facts: dict, extras: dict | None = None) -> tuple[
         buildings.append({"id": UNSENT_BUILDING, "faces": [], "problems": [u["problem"] for u in site["unsent"]]})
     if not site["inventory_complete"]:
         buildings = [{**b, "problems": b["problems"] + [stop("inventory_incomplete")]} for b in buildings]
+        if not buildings:                    # none sent: what wasn't could still be a building (never "0 stories")
+            buildings = [{"id": UNSENT_BUILDING, "faces": [], "problems": [stop("inventory_incomplete")]}]
     facts = dict(facts)
     if grade["source"] != "none":
         facts["grade_points"] = grade["points"]

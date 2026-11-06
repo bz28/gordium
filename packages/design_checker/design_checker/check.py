@@ -767,7 +767,7 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
     """check() for a site description (gordium.site/1: site_json; the worker's check_site): refused whole if it
     isn't exactly v1 (site_json.SiteRefused), else measured and checked as check_site does. With a report, the
     description is kept beside it (<report name>.site.json), so any report can be traced to exactly the site it was
-    worked out from and worked out again. A report is never beside another check's site: the old site file goes
+    worked out from and, with the same lot facts (not in the site file), worked out again. A report is never beside another check's site: the old site file goes
     before anything is measured and the new one is written (as a hidden part file) before the report, then moved in
     once the report is. A site file that can't be written means no report is written (report_error says why); at
     worst, a check stopped between the two leaves a report with no site file beside it, never a wrong one."""

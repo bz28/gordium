@@ -46,7 +46,7 @@ Rhino: it keeps the old code loaded until then.
    changed since the last check — press Check") until **Check** is pressed; with **Check after every edit** ticked
    (off at first, kept with the file) it checks again once the model has been still for half a second. No pop-ups.
 
-The report (`<model>_gordium_report.xlsx`) is written next to the model by `GordiumCheck`, not on every edit, with the exact site the check read beside it (`<model>_gordium_report.site.json`: the lot, buildings, ground and objects left out, as plain JSON, so the report can be traced and worked out again; [docs/protocol/](../../docs/protocol/site_description_v1.md)).
+The report (`<model>_gordium_report.xlsx`) is written next to the model by `GordiumCheck`, not on every edit, with the exact site the check read beside it (`<model>_gordium_report.site.json`: the lot, buildings, ground and objects left out, as plain JSON, so the report can be traced to exactly the site it read and, with the same lot facts, worked out again; [docs/protocol/](../../docs/protocol/site_description_v1.md)).
 
 ## How we know it works
 

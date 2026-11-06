@@ -329,3 +329,17 @@ def test_a_refused_request_leaves_the_earlier_report_and_its_site_alone(tmp_path
     with pytest.raises(ValueError, match="no zone given"):
         check_description(site_json.through_json(doc), {**_facts(facts), "zone": None}, report)
     assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == before
+
+
+def test_a_description_with_no_buildings_whose_lot_wasnt_all_looked_at_leaves_no_building_measure_complying():
+    """Review round 4 (PR 4): with no building sent, the stories were 0 and complied, though the tool said it
+    hadn't sent everything."""
+    path, facts = MODELS[0]
+    doc = site_json.read_model(path, facts, inventory_complete=False)
+    doc["buildings"] = []
+    items = {i["id"]: i for i in _check_site(doc, facts)["view"]["items"]}
+    assert items["R-1b.stories"]["status"] == "needs_review"
+    for rule in ("R-1b.height", "R-1b.lot_coverage", "R-1b.front_yard", "R-1b.rear_yard"):
+        assert items.get(rule, {"status": "needs_review"})["status"] != COMPLIES, rule
+    assert not [i for i in items.values() if i["status"] == COMPLIES and any(
+        m in i["id"] for m in ("stories", "height", "coverage", "yard", "building_area"))]
