@@ -15,6 +15,7 @@ from rule_format.rulebook import REPO
 sys.path.insert(0, str(REPO / "packages/design_checker/tests"))
 from test_every_reading import floors, prism, rect, rows, run, status  # noqa: E402
 from test_quickstart import _check, _moved, house  # noqa: E402,F401  (house: the module fixture)
+from host_source import host_text
 
 
 @pytest.mark.parametrize("which", [0, 1, 2])
@@ -658,7 +659,7 @@ def test_the_outline_cleaning_note_is_shown_in_the_panel_and_the_report(tmp_path
     (apps/rhino_plugin/gordium_ui.py show_detail) and the report's Check sheet says it once, with the lot."""
     import openpyxl
     from design_checker.check import check_site, sample_site
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     show = ui.split("def show_detail", 1)[1].split("\ndef ", 1)[0]
     # (since #53, show_detail lists the plain notes from rhino_logic.detail_parts, which keeps this one in view)
     assert 'split = logic.detail_parts(det)' in show and 'for text in split["notes"]:' in show

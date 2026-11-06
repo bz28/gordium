@@ -16,6 +16,7 @@ import pytest
 from design_checker import check
 from design_checker import rhino_logic as logic
 from rule_format.rulebook import REPO
+from host_source import host_dir
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
 LAPTOP_PX = 900                 # the box's width on a 1366 x 768 laptop, with room for Rhino around it
@@ -132,7 +133,7 @@ def ui(monkeypatch):
                       "Rhino.Geometry": _module("Rhino.Geometry"), "Rhino.UI": _module("Rhino.UI"),
                       "System": _module("System"), "rhino_logic": logic}.items():
         monkeypatch.setitem(sys.modules, name, mod)
-    monkeypatch.syspath_prepend(str(REPO / "apps/rhino_plugin"))
+    monkeypatch.syspath_prepend(str(host_dir("rhino")))
     monkeypatch.delitem(sys.modules, "gordium_ui", raising=False)
     import gordium_ui
     shown = {}

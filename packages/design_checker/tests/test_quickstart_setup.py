@@ -8,10 +8,11 @@ import tomllib
 from pathlib import Path
 
 from design_checker.rhino_logic import venv_python
+from host_source import host_dir, host_doc, host_text
 
 ROOT = Path(__file__).resolve().parents[3]
-PLUGIN = ROOT / "apps" / "rhino_plugin"
-GUIDE = (PLUGIN / "QUICKSTART.md").read_text(encoding="utf-8")
+PLUGIN = host_dir("rhino")
+GUIDE = host_doc("rhino", "QUICKSTART.md", purpose="wiring")
 PYPROJECT = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 CLONE_TO = "~/Documents/gordium"
 WIN_CLONE_TO = r"$HOME\Documents\gordium"
@@ -36,7 +37,7 @@ def _lines(text):
 
 def _installed_commands():
     """install.py's COMMANDS dict, read without running it (it imports Rhino)."""
-    tree = ast.parse((PLUGIN / "install.py").read_text(encoding="utf-8"))
+    tree = ast.parse(host_text("rhino", "install", purpose="wiring"))
     for node in tree.body:
         if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", None) == "COMMANDS":
             return ast.literal_eval(node.value)
@@ -208,7 +209,7 @@ def test_the_py_install_fallback_names_both_symptoms():
 
 
 def test_the_readme_python_range_is_pyprojects():
-    readme = (PLUGIN / "README.md").read_text(encoding="utf-8")
+    readme = host_doc("rhino", "README.md", purpose="wiring")
     versions = _supported()
     found = re.findall(r"Python (3\.\d+) to (3\.\d+)", readme)
     assert found == [(versions[0], versions[-1])], found

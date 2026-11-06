@@ -9,8 +9,9 @@ import pytest
 
 from design_checker import rhino_logic as logic
 from rule_format.rulebook import REPO
+from host_source import host_doc, host_text
 
-SRC = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+SRC = host_text("rhino", "plugin", purpose="wiring")
 
 
 def _body(name):
@@ -109,7 +110,7 @@ def test_off_plan_the_dimensions_are_drawn_in_the_model_and_not_over_the_solids(
 
 def test_the_legend_and_the_guide_say_where_the_lines_hide():
     assert "in every other view they hide behind the solids" in logic.legend_text()
-    guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
+    guide = host_doc("rhino", "QUICKSTART.md", purpose="wiring")
     assert "in Perspective and the elevations they hide behind your solids" in guide
 
 
@@ -136,7 +137,7 @@ def test_off_plan_dimensions_have_the_plans_colours_and_dashed_required_lines():
     # four raised in draw_scene)
     import ast
     from rule_format.rulebook import REPO
-    tree = ast.parse((REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8"))
+    tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
     (fn,) = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_required"]
     calls = [c for c in ast.walk(tree) if isinstance(c, ast.Call) and getattr(c.func, "id", None) == "_required"]
     assert calls and all(len(c.args) == len(fn.args.args) for c in calls)
@@ -150,7 +151,7 @@ def test_the_coloured_pieces_are_plain_depth_tested_fills_with_no_ray_casting():
     The ray-cast visibility added for it cost an orbit frame 89 ms against 33: removed."""
     import ast
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     fns = {n.name: ast.get_source_segment(src, n) for n in ast.parse(src).body if isinstance(n, ast.FunctionDef)}
     assert not {"_seen_faces", "_face_samples", "_occluders"} & set(fns)
     assert "MeshRay" not in src and "occluders" not in src

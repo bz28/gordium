@@ -22,6 +22,7 @@ from test_lookup_box import ZONES, FakeTable, looked_up  # noqa: E402
 
 from design_checker import rhino_logic as logic  # noqa: E402
 from design_checker.lookup_box import frame, writes  # noqa: E402
+from host_source import host_text
 
 SAMPLE = "106 Ithaca Rd, Ithaca, NY"
 
@@ -600,7 +601,7 @@ def test_a_loose_query_typed_back_is_saved_as_found():
 def test_after_the_guide_reset_the_found_address_keeps_the_lookups_source():
     """Round 4 (P2): on the City-guide path the box's loop carried the old box's ticks back, address_source
     ("entered by you") among them, over the address as found; it was saved as the architect's."""
-    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     keeps = eval(rhino.split("\nGUIDE_KEEPS = ", 1)[1].split("\n", 1)[0])       # noqa: S307 (the file's own tuple)
     assert "address_source" not in keeps
     assert "if k in GUIDE_KEEPS}" in rhino[rhino.index("def _box_loop("):]
@@ -622,12 +623,12 @@ def test_the_box_turns_draw_off_and_on_as_the_address_is_typed():
     """Ben (2026-10-25): the box's Draw follows the address field as it is typed (off, with its reason, for an
     address not looked up; on again when the lot's own is typed back), not only after a pick; the box opens
     knowing the lot's own address."""
-    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     typed = ui[ui.index("    def address_typed(s, e):"):ui.index('address.TextChanged += logic.guard(address_typed')]
     assert 'state["address"] = address.Text' in typed
     assert "draw.Enabled = logic.can_draw(state) and not looking" in typed and \
         "reason.Text = logic.box_reason(state)" in typed   # (draw_reason, said once: #33)
-    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert "saved_ui = logic.box_opened(_ui_state(doc), facts)" in rhino[rhino.index("def _confirm("):]
     assert '"known_addresses": logic.known_addresses(saved_ui),' in rhino[rhino.index("def _box_state("):]
 
@@ -638,7 +639,7 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     reset in one undo step, the state rebuilt from the new lot (saved by _drawn), and the box kept open on the City's
     guide; _box_loop keeps the architect's ticks when Draw stops; _apply_box is rhino_logic.box_facts; Edit site…
     closes the undo step on any way out, errors included; RhinoTable.buildings is the checker's own buildings."""
-    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     prep = rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
     steps = ("unlooked = logic.draw_blocked(state, saved_ui)",
              "if unlooked:                                          # Draw is off in the box; any other way in",
@@ -922,7 +923,7 @@ def test_the_plugin_clears_its_drawing_on_undo_and_redo_and_never_changes_the_do
     were of a model no longer there: _undo_redo clears them and asks for a re-check, attached to Rhino's own undo
     event when the plugin loads. It never changes the document (a change while Rhino undoes or redoes breaks the
     Undo/Redo chain); the Draw's record is ended only when the plugin began it."""
-    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     body = rhino[rhino.index("def _undo_redo("):].split("\n\n\n", 1)[0]
     code = "\n".join(line for line in body.split('"""')[2].splitlines())       # the code, not its docstring
     assert "logic.after_undo_redo(e.IsEndUndo, e.IsEndRedo)" in code and "_clear(o)" in code
@@ -942,7 +943,7 @@ def test_draw_the_house_again_belongs_to_the_box_that_set_it():
     a starting house over the architect's model. The flag is now this box's only: every box opens with it cleared,
     only a Draw of a new address sets it, only Edit site… (the box's caller that draws the house) reads it, and
     GordiumCheck drops it with its box."""
-    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     sets = [line.strip() for line in rhino.splitlines() if 'STATE["redraw_house"] =' in line]
     assert sets == ['STATE["redraw_house"] = redraw and mode == "check"     # (GordiumStart draws its house itself)']
     assert 'STATE["redraw_house"] =' in rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
@@ -1019,7 +1020,7 @@ def test_a_file_already_drawn_keeps_working_as_before():
 
 def test_the_plugin_opens_new_files_empty_and_gates_every_box():
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     start = src[src.index("def gordium_start():"):src.index("def _draw_starting_house(")]
     assert "sample_site" not in start and "from_sample=True" not in start
     assert "logic.no_guessed_district({}, suggested_facts(" in start    # no district guessed in an empty file
@@ -1042,7 +1043,7 @@ def test_draw_draws_nothing_on_an_empty_file_without_a_found_lookup_whatever_way
     drawn = logic.box_opened({"drawn_address": SAMPLE}, {"lot_id": "lot1", "address": SAMPLE})
     assert logic.draw_blocked(dict(state, address=SAMPLE), drawn) == ""          # a drawn file: as before
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     prep = src[src.index("def _draw_prepare("):src.index("    facts, saved_ui = _apply_box(", src.index("def _draw_prepare("))]
     assert "unlooked = logic.draw_blocked(state, saved_ui)" in prep and "return facts, saved_ui, False, state" in prep
 
@@ -1118,7 +1119,7 @@ def test_the_saved_lookup_is_marked_with_its_date_and_the_district_is_picked_aga
 
 def test_the_plugin_saves_found_lookups_and_offers_the_saved_one_only_when_offline():
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     done = src[src.index("def _lookup_done("):src.index("def _saved_lookups_path(")]
     assert "_saved_lookup, " in done and "saved_offer=offer.get(\"checked\"), saved_for=asked" in done
     saved = src[src.index("def _saved_lookup("):src.index("def _show_answer(")]
@@ -1193,7 +1194,7 @@ def test_by_hand_asks_for_the_district_tick_again():
     """Round 4: the box loop's ticks carried across picks; by hand undid the lookup's district (back to the one
     picked before), so the tick given to the lookup's district moved onto it and Draw went on."""
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     loop = src[src.index("def _box_loop("):src.index("\n\n\n", src.index("def _box_loop("))]
     reset = loop[loop.index('if (what == "pick:by_hand" and saved_ui.get("_by_hand")'):]
     assert "(not was_by_hand or (had_pending and not saved_ui.get(\"_pending\")))):" in reset.split("\n", 2)[1]
@@ -1254,7 +1255,7 @@ def test_round_11_by_hand_needs_the_architects_word_that_the_lot_is_the_citys():
     assert state["by_hand"] and state["city_by_hand"] == "2026-10-27"
     assert "Town of Ithaca" in logic.IN_CITY_QUESTION and "No: nothing changes" in logic.IN_CITY_QUESTION
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
     assert pick.index("_ask_in_city()") < pick.index("logic.choose_by_hand(facts, saved_ui, in_city)")
     assert "MessageBoxDefaultButton.No" in src[src.index("def _ask_in_city("):]
@@ -1282,7 +1283,7 @@ def test_round_12_outside_the_city_refuses_by_hand_whatever_the_address():
     for address in ("", "12 Main St", "14 Main St"):
         assert logic.draw_blocked({"address": address}, later) == logic.BY_HAND_OUTSIDE.format(query="14 Main St")
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     pick = src[src.index("def _one_pick("):src.index("def _pick_outcome(")]
     assert "in_city = None if refused else _ask_in_city()" in pick
 
@@ -1407,7 +1408,7 @@ def test_round_5_no_district_is_guessed_for_a_file_with_no_site_in_edit_site_eit
     assert logic.no_guessed_district({"address": SAMPLE}, suggested)["zone"] == "R-1a"     # a site: as before
     assert logic.no_guessed_district({}, dict(suggested, lot_id="lot1"))["zone"] == "R-1a"  # a lot drawn: as before
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     edit = src[src.index("def edit_facts("):src.index("\n\n\n", src.index("def edit_facts("))]
     assert "logic.no_guessed_district(" in edit
     assert "logic.no_guessed_district({}, suggested_facts(" in src[src.index("def gordium_start("):]
@@ -1431,7 +1432,7 @@ def test_round_6_a_stale_use_saved_button_says_why_it_did_nothing():
     rows = {r["key"]: r for r in logic.box_rows({"address": "96 Ithaca Rd", "lookup": look})}
     assert [a for a, _, _ in rows["address"]["actions"]] == ["lookup"]
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     assert 'logic.saved_refused(saved_ui.get("_lookup"), offered_for, facts.get("address"))' in src
 
 
@@ -1717,7 +1718,7 @@ def test_a_found_lookups_note_is_a_plain_line_never_the_amber_question():
     assert logic.lookup_note(saved) is None and logic.uncertain(saved) == saved["lookup"]["says"]
     offline = {"lookup": {"status": "offline", "says": logic.LOOKUP_SAYS["offline"]}, "corner_lot": False}
     assert logic.lookup_note(offline) is None and logic.uncertain(offline) == logic.LOOKUP_SAYS["offline"]
-    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert 'note = label(logic.lookup_note(state) or "", size=11)' in ui and "layout.AddRow(None, row(note))" in ui
     # laid out only when there is a note: an empty label still takes a line (the start box ran 12 px past a laptop's
     # height with every question open: the merge-3 suite's test_box_width)
@@ -1734,7 +1735,7 @@ def test_the_amber_line_takes_no_room_while_it_asks_nothing_and_the_box_grows_wh
     assert logic.grown_height(282, 254.0, 28) is None             # opened with the line: it already fits
     assert logic.grown_height(298, 255.0, 28) is None             # the line hidden again: never smaller
     assert logic.grown_height(283, 269.2, 28) == 298              # a part pixel rounds up, never clips
-    ui = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     box = ui[ui.index("def start_box("):]
     box = box[:box.index("\ndef ")]
     assert "layout.AddRow(None, amber_row)" in box and "row(amber)" in box.split("amber_row = ", 1)[1][:20]

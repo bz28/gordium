@@ -2,6 +2,7 @@
 legend that explains it. The blocks themselves (per building, a roof's ridge) are pinned in test_present.py."""
 
 from design_checker import rhino_logic as logic
+from host_source import host_text
 
 
 def test_a_block_draws_the_buildings_own_part_inside_it():
@@ -20,7 +21,7 @@ def test_a_block_reaches_the_real_solids_top_a_vault_the_checker_cannot_read_is_
     yard = {"why": "yard", "base": 1.0, "top": 36.0}
     assert logic.block_span(yard, 0.5, 42.0) == (0.5, 42.0)
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     body = src[src.index("def _offending("):src.index("def _actions(")]
     assert "logic.block_span(e," in body and "_prism(doc, e[\"outline\"], base, top)" in body
 
@@ -37,7 +38,7 @@ def test_rhinos_boolean_runs_only_under_the_guard_so_a_failed_cut_never_stops_th
     the check's drawing before its results are kept (review round 2)."""
     import re
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="lint")
     calls = [m.start() for m in re.finditer(r"CreateBooleanIntersection", src)]
     assert calls, "the cut is gone: update this pin"
     for at in calls:
@@ -77,7 +78,7 @@ def test_the_drawn_list_carries_what_each_piece_is_for_so_the_checks_read_what_i
              "status": "needs_review", "base": 0, "top": 20}
     assert logic.coloured_info(entry) == {"why": "yard", "measure": "rear_yard", "row": "Rear yard",
                                           "building": "house"}
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     assert "o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))" in src
     assert 'rest, red = logic.red_last(getattr(o, "encroach", None) or [])' in src   # draw_scene draws that list
     assert "for g, status, _ in rest + red:" in src                                   # (#53: the red over the amber)
@@ -87,7 +88,7 @@ def test_each_building_is_made_into_a_solid_once_per_check_not_once_per_block():
     """Independent review of #28, P3: every coloured block looked its building up and converted it again."""
     import ast
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     fns = {n.name: ast.get_source_segment(src, n) for n in ast.parse(src).body if isinstance(n, ast.FunctionDef)}
     assert "_drawable(" not in fns["_offending"] and "_find(" not in fns["_offending"]
     assert "if key not in out:" in fns["_solids_for"]

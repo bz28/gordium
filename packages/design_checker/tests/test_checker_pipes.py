@@ -11,6 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "design_checker"))
 import rhino_logic as logic  # noqa: E402
+from host_source import host_text
 
 SILENT = "import time; time.sleep(60)"                       # never reads stdin, never answers
 SLOW = ("import json, sys, time\n"
@@ -85,7 +86,7 @@ def test_the_plugin_never_touches_a_pipe_or_a_rhino_event_directly():
     """Every pipe goes through logic.pipes/exchange; every Rhino event through _on/_off (so it is registered for
     the next copy's sweep)."""
     import re
-    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="lint")
     assert not re.search(r"\.std(in|out)\.(write|read|readline|flush)|for line in .*stdout", src)
     assert not re.search(r"Rhino\.[\w.]+ [+-]= ", src)
     assert "logic.sweep(LEFTOVERS, STATE, _release)" in src and json.dumps("gordium_leftovers") in src
@@ -95,7 +96,7 @@ def test_clearing_the_notice_never_turns_the_document_hooks_back_on():
     """off() turns the document hooks off, then clears the notice; overlay() turns them back on when they're off,
     so clearing the notice through it left them attached after every off() (Rhino, 2026-10-21:
     no_freeze_in_rhino.py claim 5 counts the handlers)."""
-    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     for name in ("_clear_toast", "_toast_tick"):
         body = src.split("def %s(" % name, 1)[1].split("\ndef ", 1)[0]
         assert "= overlay()" not in body and 'STATE.get("overlay")' in body, name
@@ -135,7 +136,7 @@ def test_the_plugin_keeps_its_state_true_across_a_reload():
     """Review round 1 (P1, P2, P3) on the Rhino side, which CI can't run (no_freeze_in_rhino.py proves it there):
     the sweep is given STATE; live mode comes back after the module loads; the drawing is registered every time
     it is turned on; every checker restart goes through _stop_worker."""
-    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     assert "\nlogic.sweep(LEFTOVERS, STATE, _release)\nif STATE.get(\"live\"):" in src   # last: after _release
     assert src.rstrip().endswith('if STATE.get("live"):                        # live mode was on before this copy '
                                  'loaded: its hooks back on\n    live(True)\n'
@@ -176,7 +177,7 @@ def test_the_sweep_releases_every_handle_before_forgetting_it():
 
 
 def test_the_plugin_releases_each_kind_of_handle():
-    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     release = src.split("def _release(", 1)[1].split("\n\n\n", 1)[0]
     kinds = set(logic.HANDLES) - {"worker_lines"}             # a queue: nothing to release
     for key in kinds:                                         # every handle any copy keeps, this one's or not
@@ -189,7 +190,7 @@ def test_releasing_a_later_copys_panel_closes_its_form():
     """Round 3 on the freeze fix: rhino-ui and demo copies keep their panel as STATE["panel_parts"] = {"form": ...};
     updating from them must close that form, or its buttons keep calling the old copy."""
     import ast
-    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_release")
     ns = {}
     exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
@@ -212,7 +213,7 @@ def test_a_floating_panel_is_placed_once_never_on_every_check():
     window is placed the first time only."""
     import ast
     import types
-    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "panel")
     fits = []
     host = object()
@@ -286,7 +287,7 @@ def test_the_plugin_has_no_two_top_level_definitions_with_one_name():
     Edit site…'s "Corner lot?" prompt raised TypeError. No top-level name is defined twice, and every call to one of
     the plugin's own top-level functions binds to its definition (positional and keyword arguments)."""
     import ast
-    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="lint")
     tree = ast.parse(src)
     defs = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
     names = [n.name for n in defs]

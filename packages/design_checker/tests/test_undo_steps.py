@@ -9,9 +9,10 @@ from pathlib import Path
 import pytest
 
 from design_checker import rhino_logic as logic
+from host_source import host_path, host_text
 
 REPO = Path(__file__).resolve().parents[3]
-SRC = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+SRC = host_text("rhino", "plugin", purpose="wiring")
 
 # the plugin's own code, run as written (each function's source from gordium_rhino.py)
 REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_building", "pick_adu_building", "add_to_check",
@@ -309,7 +310,7 @@ def test_an_undo_step_ends_when_the_change_fails_and_never_ends_rhinos_own():
 def test_the_plugin_still_compiles():
     """Undo steps round 4: a re-indented try left gordium_rhino.py unloadable, unseen by the guard (it runs functions
     cut from the source). The whole file must compile."""
-    compile(SRC, "gordium_rhino.py", "exec")
+    compile(host_text("rhino", "plugin", purpose="lint"), host_path("rhino", "plugin").name, "exec")
 
 
 def test_a_new_addresss_reset_goes_in_the_boxs_own_step():
@@ -370,7 +371,7 @@ def test_every_panel_tick_is_read_again_after_undo():
     again from the document: by source, each set_*_tick is called by _settings_from_file; by behaviour, the massing
     tick follows its layer."""
     import re
-    ui_src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui_src = host_text("rhino", "ui", purpose="wiring")
     ticks = set(re.findall(r"\ndef set_(\w+)_tick\(parts, ", ui_src))
     settings = SRC[SRC.index("def _settings_from_file("):].split("\ndef ", 1)[0]
     sync = SRC[SRC.index("def _sync_ticks("):].split("\ndef ", 1)[0]

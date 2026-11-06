@@ -3,18 +3,18 @@ start-box row, command and command-line prompt in the code is in the guide, and 
 the code, so a screen change without a guide change fails here."""
 import re
 
-from rule_format.rulebook import REPO
+from host_source import host_dir, host_doc, host_text
 
-PLUGIN = REPO / "apps/rhino_plugin"
-GUIDE = " ".join((PLUGIN / "GUIDE.md").read_text(encoding="utf-8").split())      # (line breaks are not part of a name)
-UI = (PLUGIN / "gordium_ui.py").read_text(encoding="utf-8")
-RHINO_ALL = (PLUGIN / "gordium_rhino.py").read_text(encoding="utf-8")
+PLUGIN = host_dir("rhino")
+GUIDE = " ".join(host_doc("rhino", "GUIDE.md", purpose="wiring").split())      # (line breaks are not part of a name)
+UI = host_text("rhino", "ui", purpose="wiring")
+RHINO_ALL = host_text("rhino", "plugin", purpose="wiring")
 # change_facts / _change_facts (a command-line edit of every fact) is called from nowhere but a test script: its prompts
 # are not what an architect sees, so they are neither required nor allowed in the guide (review round 5)
 _a = RHINO_ALL.index("def change_facts(")
 _b = RHINO_ALL.index("\ndef ", RHINO_ALL.index("def _change_facts(") + 1)
 RHINO = RHINO_ALL[:_a] + RHINO_ALL[_b:]
-LOGIC = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+LOGIC = host_text("rhino", "logic", purpose="wiring")
 # the code's texts as shown: the source, and each text rhino_logic builds from its place's settings (place.json:
 # "Is this lot in the City of Ithaca?")
 from design_checker import rhino_logic as _logic  # noqa: E402
