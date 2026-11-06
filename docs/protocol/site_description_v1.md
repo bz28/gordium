@@ -52,7 +52,7 @@ checker writes the words itself. For example `{"code": "several_lot_outlines", "
 **Ids** are text the tool keeps stable (a Rhino object id, a Revit UniqueId). Results point back to them: the
 items shown in red, the main building picked.
 
-**Street lines are not in the site.** The street side is something the architect states and confirms, with its
+**Street lines are not in the site.** The street side is something the architect states, with its
 source recorded, so it stays in the lot facts (`street_line`, `street_ids`). Putting it in both places would give
 two answers to one question.
 
