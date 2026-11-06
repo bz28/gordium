@@ -42,7 +42,7 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     s = result["summary"]
     # who lives there, whether an accessory dwelling unit is planned, a home occupation, a stream near the lot and the
     # garage's cars aren't in their spreadsheet: those eleven rules wait (never a pass; six are the ADU's, §325-28)
-    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 11 need review"
+    assert s["state"] == "fail" and s["text"] == "10 rules pass · 1 fail · 11 need review"
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
     assert len(s["lines"]) == 12 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
@@ -155,7 +155,7 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 11 need review"
+    assert replies[0]["result"]["summary"]["text"] == "10 rules pass · 1 fail · 11 need review"
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 
