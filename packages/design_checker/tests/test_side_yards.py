@@ -17,6 +17,7 @@ from envelope_builder.envelope import envelope
 from envelope_builder.start import _frame, _tie_side, floor_solids
 from model_measurement.places.ithaca_city.measure import Lot, measure
 from rule_format.rulebook import REPO, rulebook_for
+from host_source import host_text
 
 ITHACA = "regulations/jurisdictions/new_york/ithaca_city"
 R2B = {"R-1b.side_yards": "side_yard_smaller >= 5 and side_yard_larger >= 10",
@@ -208,8 +209,8 @@ def test_switch_in_rhino_is_one_undo_step_and_draws_before_it_deletes():
     """The Rhino code (run in Rhino by apps/rhino_plugin/tests/side_yards_in_rhino.py): the panel's button under the
     Starting house fact, wired through the gated actions; the new house drawn inside one Undo record before the old
     one is deleted, and only when the checker gave a house with the larger yard on the side asked for."""
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert '"switch_sides": switch_side_yards' in rhino
     assert 'if logic.can_switch(s):' in ui and 'button(logic.SWITCH_LABEL, a["switch_sides"])' in ui
     body = rhino[rhino.index("def switch_side_yards"):rhino.index("def _said_sides")]
@@ -226,7 +227,7 @@ def test_switch_side_yards_with_no_document_open_says_what_to_do():
     use of the document. It says "Open a Rhino model first." and touches nothing, as every other command does (#51)."""
     from types import SimpleNamespace
     from unittest.mock import MagicMock
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     said = []
 
     def touched(*args, **kwargs):

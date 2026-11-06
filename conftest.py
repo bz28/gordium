@@ -2,6 +2,12 @@
 (`pytest`, `pytest packages/...`, any one file); the architect stress test's own conftest
 (packages/design_checker/tests/stress/conftest.py) decides what `slow` skips."""
 
+import sys
+from pathlib import Path
+
+# shared test helpers (tests/host_source.py) import as plain modules from any test file
+sys.path.insert(0, str(Path(__file__).resolve().parent / "tests"))
+
 
 def pytest_addoption(parser):
     parser.addoption("--runslow", action="store_true", default=False,

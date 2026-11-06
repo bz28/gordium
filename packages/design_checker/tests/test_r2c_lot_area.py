@@ -9,6 +9,7 @@ import pytest
 
 from design_checker import present, scenarios
 from design_checker.check import check_site
+from host_source import host_text
 
 SMALL = [[5, 12], [25, 12], [25, 22], [5, 22]]       # a 20 x 10 ft house: fits every R-2c yard on the lots below
 
@@ -151,7 +152,7 @@ def test_every_counted_facts_prompt_accepts_exactly_what_its_checks_accept():
         with pytest.raises(ValueError):
             logic.update_counts({}, {k: least - 1})
         assert k in FACT_FIELDS and fact_problems({k: least}) == [] and fact_problems({k: least - 1}), k
-    plugin = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    plugin = host_text("rhino", "plugin", purpose="wiring")
     # the row's own dialog accepts exactly the same (parse_answer with the fact's minimum): a refused entry is said in
     # the dialog, which stays open, and nothing is saved (never an exception out of the button)
     for k in counts:

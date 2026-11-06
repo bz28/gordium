@@ -7,6 +7,7 @@ import pytest
 
 from design_checker import present, scenarios
 from design_checker.check import check_site
+from host_source import host_doc, host_script
 
 PATHS = scenarios.paths()
 
@@ -243,12 +244,14 @@ def test_the_scenarios_are_never_called_an_architects_answer_key():
     readme = (folder / "README.md").read_text(encoding="utf-8")
     assert "Not yet verified by an architect" in readme and "Claude" in readme
     places = [folder / "README.md", *sorted(folder.glob("*.yaml")), REPO / "packages/design_checker/design_checker/scenarios.py",
-              REPO / "packages/design_checker/tests/test_scenarios.py", REPO / "apps/rhino_plugin/README.md",
-              REPO / "apps/rhino_plugin/tests/scenarios_in_rhino.py", REPO / "docs/README.md"]
-    for p in places:
-        text = p.read_text(encoding="utf-8").lower().split("def test_the_scenarios_are_never_called")[0]
+              REPO / "packages/design_checker/tests/test_scenarios.py", REPO / "docs/README.md"]
+    texts = {p.name: p.read_text(encoding="utf-8") for p in places}
+    texts["README.md (plugin)"] = host_doc("rhino", "README.md", purpose="wiring")
+    texts["scenarios_in_rhino.py"] = host_script("rhino", "scenarios_in_rhino.py", purpose="wiring")
+    for name, text in texts.items():
+        text = text.lower().split("def test_the_scenarios_are_never_called")[0]
         for phrase in ("architect's answer key", "architects' answer key", "the answer key"):
-            assert phrase not in text, (p.name, phrase)
+            assert phrase not in text, (name, phrase)
 
 
 LESS_CAUTIOUS = [(p, rule) for p in PATHS for rule, d in (scenarios.load(p).get("disagreements") or {}).items()

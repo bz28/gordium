@@ -14,8 +14,9 @@ import threading
 from design_checker import replay
 from design_checker import rhino_logic as logic
 from rule_format.rulebook import REPO
+from host_source import host_text
 
-RHINO = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+RHINO = host_text("rhino", "plugin", purpose="wiring")
 
 
 def test_every_recorded_session_gives_the_same_answers():

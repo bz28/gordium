@@ -12,9 +12,10 @@ from design_checker import rhino_logic as logic
 from design_checker.check import check_site, sample_site, start
 from envelope_builder.start import floor_solids
 from rule_format.rulebook import REPO
+from host_source import host_doc
 
 SAMPLE = sample_site()
-GUIDE = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
+GUIDE = host_doc("rhino", "QUICKSTART.md", purpose="wiring")
 GUIDE = GUIDE.split("## Test it yourself", 1)[1].split("\n## ", 1)[0]
 LEN = r"(\d+'-\d+\")"                        # a length as the guide writes it: 27'-0"
 

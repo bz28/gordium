@@ -332,9 +332,9 @@ def test_rhino_clears_the_site_descriptions_half_written_copy_too(tmp_path):
     """Review round 2 (PR 4): a Cancel in Rhino leaves neither the report's nor its site's part file."""
     import os
     from design_checker import rhino_logic as logic
-    from rule_format.rulebook import REPO
+    from host_source import host_text
     assert logic.SITE_SUFFIX == SITE_SUFFIX
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     fn = src[src.index("def _drop_report_part("):src.index("\ndef off(")]
     space = {"os": os, "logic": logic}
     exec(fn, space)

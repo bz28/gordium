@@ -19,12 +19,13 @@ from design_checker.lookup_box import box_payload
 from model_measurement.read_3dm import read_site
 from site_lookup.adapters.ithaca_city.lookup import lookup
 from site_lookup.adapters.ithaca_city.sources import ENDPOINTS
+from host_source import host_doc, host_script, host_text
 
 REPO = Path(__file__).parents[3]
 spec = importlib.util.spec_from_file_location("site_lookup_t", REPO / "packages/site_lookup/tests/test_lookup.py")
 T = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(T)
-RHINO = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+RHINO = host_text("rhino", "plugin", purpose="wiring")
 
 
 def looked_up():
@@ -253,7 +254,7 @@ def test_the_attribute_fingerprint_is_stable_in_rhino_and_sees_print_width_and_g
     e = _Attrs(layer_index=2)
     e.LinetypePatternScale = 2.0                                                        # its linetype scale (Rhino 8)
     assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(e, drawn_doc))
-    check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
+    check = host_script("rhino", "context_in_rhino.py", purpose="wiring")
     assert "a copy pasted in place and a footprint given a print width are the architect's" in check  # Rhino proves it
     assert "a saved and reopened file, a layer deleted before it" in check
     doc = " ".join(logic.outline_key.__doc__.split())                  # its docstring says what is fingerprinted
@@ -589,18 +590,18 @@ def test_the_tick_is_kept_per_file_like_the_labels_tick():
     assert '(STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True)' in scene
     sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_on(")]
     assert "on = _context_on(doc)" in sync
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     box = ui[ui.index("def _context_box("):ui.index("def set_context_tick(")]
     assert "box.Checked = bool(on)" in box and box.index("box.Checked") < box.index("CheckedChanged")
     assert 'if not parts.get("_setting_context"):' in box                                # set from the file: no fetch
     tick = ui[ui.index("def set_context_tick("):].split("\ndef ", 1)[0]
     assert 'parts["_setting_context"] = True' in tick and 'parts["_setting_context"] = False' in tick
-    check = (REPO / "apps/rhino_plugin/tests/context_tick_in_rhino.py").read_text(encoding="utf-8")
+    check = host_script("rhino", "context_tick_in_rhino.py", purpose="wiring")
     assert "5 the tick is kept in the file" in check and "g.logic.context_shown(g._ui_state(doc))" in check
 
 
 def test_the_quickstart_says_the_footprints_are_kept_and_editable():
-    guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
+    guide = host_doc("rhino", "QUICKSTART.md", purpose="wiring")
     assert "drawn on screen only" not in guide and "to fetch them again" not in guide     # no longer live-only
     assert "unlocked `Gordium::Context::Buildings` layer" in guide and "an outline you edit is yours" in guide
 
@@ -727,9 +728,10 @@ def test_no_reader_text_still_says_the_footprints_are_never_saved():
     """Review of the editable outlines, P3: after the switch to store raw, docstrings and comments still said the
     footprints were shown only on screen and never saved, and the fixture docstring said nothing of them was recorded."""
     texts = {p: (REPO / p).read_text(encoding="utf-8") for p in (
-        "apps/rhino_plugin/gordium_rhino.py", "packages/site_lookup/site_lookup/adapters/ithaca_city/context.py",
-        "packages/design_checker/design_checker/context_box.py", "packages/design_checker/design_checker/rhino_logic.py",
-        "packages/site_lookup/tests/test_context.py")}
+        "packages/site_lookup/site_lookup/adapters/ithaca_city/context.py",
+        "packages/design_checker/design_checker/context_box.py", "packages/site_lookup/tests/test_context.py")}
+    texts["plugin"] = host_text("rhino", "plugin", purpose="wiring")
+    texts["logic"] = host_text("rhino", "logic", purpose="wiring")
     for stale in ("only drawn on screen by the overlay, never saved", "the building footprints, never saved",
                   "nothing of them is in any fixture", "its footprints (never saved) fetched again",
                   "the footprints are never saved", "the footprints, never saved", "until Ben decides"):
@@ -808,7 +810,7 @@ def test_every_state_of_the_context_has_one_definition():
     assert not re.search(r"loaded = \(STATE", RHINO)
     assert "logic.guides_of(STATE.get(\"context_guides\"), doc.RuntimeSerialNumber)" in RHINO     # _clear_context
     assert 'get("frame") ==' not in RHINO and 'get("frame") !=' not in RHINO and "same = " not in RHINO
-    src = inspect.getsource(logic)
+    src = host_text("rhino", "logic", purpose="wiring")
     rest = src.replace(inspect.getsource(logic.is_stored), "")
     assert '"store") == "raw"' not in rest and '"store") != "raw"' not in rest and '["store"] == "raw"' not in rest
     box = inspect.getsource(cb)
@@ -881,7 +883,7 @@ def test_the_note_is_small_text_at_its_own_scale_not_the_templates():
     assert "note_shrink" not in RHINO and not hasattr(logic, "note_shrink")    # the guard that never fired: gone
     # every annotation Gordium makes (swept): this note is the only one, the labels are drawn by the overlay
     assert RHINO.count("rg.TextEntity.Create(") == 1 and "AddLinearDimension" not in RHINO and "AddLeader" not in RHINO
-    check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
+    check = host_script("rhino", "context_in_rhino.py", purpose="wiring")
     assert "ok, polyline = geom.TryGetPolyline()" in check      # curves by their own points, not a world box
     assert "the sources note is small" in check and "line_height_ft" in check
     assert "geom.DimensionScale" in check and "dimension_scale" in check and "text_height_ft" in check
@@ -901,7 +903,7 @@ def test_the_plugin_writes_the_note_as_bottom_left_model_text():
     assert "_model_length(doc, o.get(\"height_ft\")" in body and "rotation_deg" in body
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
     assert 'elif o["kind"] == "text":' in draw and "doc.Objects.AddText(_context_text(doc, o, pts[0]), attrs)" in draw
-    check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
+    check = host_script("rhino", "context_in_rhino.py", purpose="wiring")
     assert "every note lies inside the neighbourhood square" in check
 
 
@@ -929,7 +931,7 @@ def test_the_plugin_draws_the_context_after_a_box_draw_guarded_and_has_a_tick():
     sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_visible(")]
     assert "draw_context(doc, frame)" in sync
     assert '"context": show_context' in RHINO
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert 'box.CheckedChanged += logic.guard(changed, "show or hide the neighbourhood")' in ui
     assert 'actions["context"](bool(box.Checked))' in ui
     greyed = ui[ui.index('parts["greyed"] = ['):].split("\n", 1)[0]
@@ -1374,7 +1376,7 @@ def test_a_refused_delete_is_in_the_panels_one_line_and_never_beside_neighbourho
     ns["logic"] = Logic()
     ns["sync_context"](doc, {})
     assert ns["said"] == [logic.context_not_cleared(1) + " " + logic.NO_CONTEXT]
-    check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
+    check = host_script("rhino", "context_in_rhino.py", purpose="wiring")
     assert '"tick_off_locks"' in check and '"tick_on_locks"' in check                  # Rhino proves it
 
 
@@ -1486,7 +1488,7 @@ def test_the_lock_probe_on_the_fake_is_the_probe_in_rhino():
     the fake expects kept: the own lock recorded under a moment's lock of Mid survives the top's lock and unlock).
     mid_relock's first step (Sub locked before Mid) changes nothing on the fake, so it is unpinned here until the next
     Rhino run puts mid_relock in the evidence and test_the_fake_layers_do_what_rhino_did replays it."""
-    probe = (REPO / "apps/rhino_plugin/tests/lock_probe_in_rhino.py").read_text(encoding="utf-8")
+    probe = host_script("rhino", "lock_probe_in_rhino.py", purpose="wiring")
     cases = eval(probe.split("CASES = ", 1)[1].split(")", 1)[0] + ")")             # noqa: S307  (a tuple literal)
     assert set(cases) == {"is_locked", "persistent_then_is_locked", "persistent_alone", "relock", "nested_is_locked",
                           "nested_relock", "mid_relock"}

@@ -14,6 +14,7 @@ from design_checker import present
 from design_checker.check import check, short, summary
 from model_measurement.project import load_facts
 from rule_format.rulebook import REPO
+from host_source import host_doc, host_files, host_path, host_script, host_text, host_text_of
 
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 MODEL = SITE / "spreadsheet_design_model.3dm"
@@ -107,8 +108,8 @@ def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
     assert [logic.STATED_FACTS[k][1] for k in needs] == ["count", "count", "yes_no"]
     assert logic.needs_of(names, {"dwelling_units": 4, "rooms_let_for_profit": 0, "conversion": False}) == []
     # the panel asks exactly the row's own list (never a fixed pair), in its own dialog (test_row_dialog.py)
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert 'a["enter"](i["needs"])' in ui and "Enter bedrooms and parking spaces…" not in ui
     assert "logic.row_fields(needs, facts)" in rhino and "logic.row_answers_applied(facts, needs, answers)" in rhino
 
@@ -163,7 +164,7 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
 def test_the_quickstart_names_every_district_the_start_box_offers(facts):
     """The guide's opening line says which districts are checked; it must name every zone the start box offers."""
     from design_checker.check import options
-    opening = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8").split("\n\n")[2]
+    opening = host_doc("rhino", "QUICKSTART.md", purpose="wiring").split("\n\n")[2]
     assert all(zone in opening for zone in options(facts["jurisdiction"])["zones"]), opening
 
 
@@ -561,8 +562,7 @@ def test_what_off_the_building_layer_could_be_a_building_left_out():
 
 # ---- no callback may raise into Rhino: on the Mac that aborts Rhino (2026-10-20) --------------------------------
 
-PLUGIN = [REPO / "apps/rhino_plugin" / n for n in ("gordium_rhino.py", "gordium_ui.py")] + sorted(
-    (REPO / "apps/rhino_plugin/tests").glob("*_in_rhino.py"))
+PLUGIN = host_files("rhino", scripts=True)     # (lint: every host file and in-host script)
 
 
 def test_guard_catches_logs_and_says_it_once(tmp_path):
@@ -584,7 +584,7 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
     import re
     unguarded = []
     for path in PLUGIN:
-        text = path.read_text(encoding="utf-8")
+        text = host_text_of(path, purpose="lint")
         guarded_names = set(re.findall(r"^\s*(\w+) = System\.EventHandler[^\n]*\((?:g\.)?logic\.guard\(", text, re.M))
         # the plugin's own route: _handler(...) guards (checked below), _on(owner, "Event", name) attaches
         guarded_names |= set(re.findall(r"^\s*(\w+) = _handler\(", text, re.M))
@@ -593,14 +593,14 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
                 unguarded.append(f"{path.name}: _on(..., {name}) not made by _handler")
         for n, line in enumerate(text.splitlines(), 1):
             m = re.match(r"\s*[\w.\[\]\"']+\.([A-Z]\w*) \+= (.+)", line)
-            if m and line.strip() == "event += handler" and path.name == "gordium_rhino.py":
+            if m and line.strip() == "event += handler" and path == host_path("rhino", "plugin"):
                 continue                                   # inside _on: every caller's handler is checked above
             if m and not (re.match(r"(g\.)?logic\.guard\(", m.group(2)) or m.group(2).strip() in guarded_names):
                 unguarded.append(f"{path.name}:{n}: {line.strip()}")
             if "System.EventHandler" in line and "(" in line.split("System.EventHandler", 1)[1] \
                     and "logic.guard(" not in line and "_handler(System.EventHandler" not in line:
                 unguarded.append(f"{path.name}:{n}: {line.strip()}")
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="lint")
     overlay = rhino.split("class Overlay", 1)[1].split("\nclass ", 1)[0].split("\ndef ", 1)[0]
     for method in re.findall(r"    def ((?:ObjectCulling|CalculateBoundingBox|PreDrawObjects|PostDrawObjects|"
                              r"DrawForeground|DrawOverlay|DrawObject)\(self, e\):\n(?:        .*\n)+)", overlay):
@@ -613,7 +613,7 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
     # an error raised while the Mac draws a view aborted Rhino (2026-10-20, before the guard): every paint handler is
     # guarded (the panel's wrapping cells are drawn); the section diagram is still drawn once into a bitmap
     import re as _re
-    paints = [m for p in PLUGIN for m in _re.findall(r"\.Paint \+= (.*)", p.read_text(encoding="utf-8"))]
+    paints = [m for p in PLUGIN for m in _re.findall(r"\.Paint \+= (.*)", host_text_of(p, purpose="lint"))]
     assert all(m.startswith("logic.guard(") for m in paints), paints
 
 
@@ -621,7 +621,7 @@ def test_the_dash_patterns_fit_rhinos_signed_int32():
     """DrawPatternedPolyline takes an Int32: a mask with the top bit set raised "value too large to convert" every
     frame (caught by the guard), so the property line and the envelope were never dashed."""
     import re
-    text = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    text = host_text("rhino", "ui", purpose="wiring")
     code = re.search(r"^def _signed\(bits\):\n(?:    .*\n)+", text, re.M).group(0)
     code += "\n".join(re.findall(r"^(?:PHANTOM|DASHED) = .*$", text, re.M))
     found = {}
@@ -665,7 +665,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
     assert by["ground"]["tick"] == ("No regrading near the house", False)
     assert [a for a, _, _ in by["ground"]["actions"]] == ["spot", "terrain", "regrade"]
     assert logic.NOT_CHECKED_YET == "Not checked yet: overlays (historic, gorge, flood)"   # pitched roofs are measured
-    box = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8").split("def start_box(", 1)[1].split("\ndef ", 1)[0]
+    box = host_text("rhino", "ui", purpose="wiring").split("def start_box(", 1)[1].split("\ndef ", 1)[0]
     for gone in ("Existing building", "Floor to floor", "\"Roof\"", "Ground is", "Envelope only", "Massing"):
         assert gone not in box, gone                                          # removed from the box
 
@@ -721,7 +721,7 @@ def test_system_colors_come_from_eto_drawing():
     """Eto.Forms has no SystemColors: asking it raised, so the dark-panel check always said "light" (unreadable text
     on a dark panel) and a complying item's detail failed to draw. They are Eto.Drawing.SystemColors."""
     for path in PLUGIN:
-        assert "ef.SystemColors" not in path.read_text(encoding="utf-8"), path.name
+        assert "ef.SystemColors" not in host_text_of(path, purpose="wiring"), path.name
 
 
 # ---- review round 5 ----------------------------------------------------------------------------------------------
@@ -734,7 +734,7 @@ def test_a_corner_lot_is_never_guessed_the_box_asks_and_the_yards_wait(facts):
     assert logic.uncertain(unanswered) == "Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)"
     assert logic.uncertain(_box(corner_lot=True)) == logic.CORNER_HINT
     assert logic.uncertain(_box(corner_lot=False)) is None
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     suggested = rhino.split("def suggested_facts(", 1)[1].split("\ndef ", 1)[0]
     assert "logic.suggested_facts(" in suggested and "corner_lot" not in suggested   # the tested logic decides
     got = check(MODEL, {k: v for k, v in facts.items() if k != "corner_lot"})          # unanswered
@@ -777,13 +777,13 @@ def test_a_box_default_left_as_it_was_is_never_confirmed_by_you():
     assert any(x.startswith("Zoning district: ") and "confirmed by you" in x for x in lines)
     gone = dict(s, starting_house={"value": "as first drawn", "source": logic.SUGGESTED, "confirmed_by": None})
     assert next(x for x in present.source_lines(gone) if x.startswith("Starting house")).endswith("not confirmed")
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8").split("def start_box(", 1)[1]
+    ui = host_text("rhino", "ui", purpose="wiring").split("def start_box(", 1)[1]
     for key in ("address_source", "use_source", "corner_source", "zone_source"):   # a change in the box records it
         assert f'state["{key}"] = logic.ENTERED' in ui, key
 
 
 def test_finished_ground_and_existing_spot_grades_are_never_mixed():
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert 'FINISHED_LAYER = "Gordium::Grade::Finished"' in rhino
     assert "GRADE_LAYER if what == \"spot\" else FINISHED_LAYER" in rhino          # placed apart
     check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
@@ -791,7 +791,7 @@ def test_finished_ground_and_existing_spot_grades_are_never_mixed():
 
 
 def test_the_confirm_tick_survives_a_pick_and_ground_marking_can_be_undone():
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0]
     assert "dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)" in loop
     assert "ticked = logic.box_ticks(state)" in loop
@@ -817,7 +817,7 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     from design_checker import rhino_logic as logic
     assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0, flat=False)["grade_from"] == "finished_spots"
     assert logic.ground_facts(_box(ground={"kind": "spot"}), 0.0, flat=False)["grade_from"] == "spot"
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
     assert "_ui_state" not in check_facts.split("elif", 1)[0]                   # the points from the facts alone
     loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
@@ -833,7 +833,7 @@ def test_units_are_converted_in_one_place_both_ways():
     """Gordium works in feet; the Rhino side converts at its helpers and nowhere else (a mm template showed why the
     edge must be one place: there the start had to be checked line by line)."""
     import re
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_feet_volume",
                "_facts_in_feet")
     outside = []
@@ -877,7 +877,7 @@ def test_plan_labels_only_in_a_view_looking_straight_down():
     assert not is_plan_view(True, 0.0)                   # Front, Right: elevations
     assert not is_plan_view(False, -1.0)                 # a perspective, even from above
     assert not is_plan_view(True, 1.0)                   # Bottom
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert "plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)" in rhino
 
 
@@ -913,7 +913,7 @@ def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
                                "tax-map lines are 2'-0\" off")
     assert lines[1].startswith("Starting house: as first drawn, Gordium couldn't keep it clear")
     assert not any(ln.count("Starting house") > 1 for ln in lines) and NOT_PROVEN.endswith(".")
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     body = rhino[rhino.index("def gordium_start"):]
     # round 8: cleared before any way out (a start that draws nothing keeps no earlier start's margin)
     assert body.index('_set_source(doc, "starting_house", None, None)') < body.index('if not start.get("floors")') \
@@ -932,9 +932,9 @@ def test_a_design_buffer_is_read_or_draw_stays_off():
 
 def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
     """Review round 7: Edit site… showed it, but changing it there redrew nothing."""
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert 'buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None' in ui
-    guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
+    guide = host_doc("rhino", "QUICKSTART.md", purpose="wiring")
     from design_checker import rhino_logic as logic
     # (hidden while the MVP assumes flat ground: the box has no Advanced then)
     assert "Edit site… → Advanced" not in guide and (logic.FLAT_GROUND or
@@ -943,7 +943,7 @@ def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
 
 def test_frame_site_frames_the_lot_and_house_not_the_whole_file():
     """Review round 7: Zoom All Extents undid the per-view framing and took in anything far away in the file."""
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     start = rhino.index("def frame_site(doc, facts):")
     body = rhino[start:start + 1800]
     assert "_Extents" not in body and '"_-Zoom _All _Selected"' in body and "doc.Objects.Select(i)" in body
@@ -968,7 +968,7 @@ def test_the_zoning_report_button_writes_the_report_for_the_model_now_then_opens
     """Ben's test, 2026-10-20: after GordiumStart the button did nothing (it only opened a report GordiumCheck had
     written, and GordiumStart, live checks and Retry never write one). Now it checks the model as it is, writing the
     report, opens it, and says where it was saved, or why not."""
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     body = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
     assert "run_check(doc, report=True)" in body and "os.path.getmtime(path) != before" in body
     assert body.count("say(") >= 4 and "if os.path.exists(path):\n" not in body
@@ -983,7 +983,7 @@ def test_no_panel_button_does_nothing_silently():
     """Every way out of a panel action that doesn't do its job says why first (say(): the command line and the
     panel's message line). A bare return with nothing said is how the report button failed unseen."""
     import re
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     names = _panel_actions(rhino)
     assert {"open_report", "zoom_to", "hide_massing", "add_to_check", "pick_survey"} <= set(names)
     silent = []
@@ -996,7 +996,7 @@ def test_no_panel_button_does_nothing_silently():
             if ln.strip() in ("return", "return None") and not any("say(" in x for x in lines[max(0, k - 3):k]):
                 silent.append(name + ": " + lines[k - 1].strip())
     assert silent == [], silent
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert 'parts["message"] = label(' in ui and "def say(parts, text):" in ui
 
 
@@ -1008,13 +1008,13 @@ def test_pick_survey_with_enter_keeps_the_outlined_lot_and_only_no_lot_says_draw
     assert logic.survey_pick(2, "lot-b", "lot-a") == ("lot-b", None)
     assert logic.survey_pick(0, None, None)[1].startswith("No lot outline to pick")
     assert logic.survey_pick(2, None, None)[0] is None and "No lot outline" not in logic.survey_pick(2, None, None)[1]
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert 'logic.survey_pick(len(lots), picked, facts.get("lot_id"))' in rhino
 
 
 def test_the_panel_message_line_is_cleared_by_every_check():
     """Review round 10: "Report saved to …" stayed after later edits and checks."""
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
     # round 11: before anything that can fail, so a check that fails early clears it too
     assert body.index('ui.say(STATE.get("panel_parts"), "")') < body.index("facts = current_facts(doc)")
@@ -1030,7 +1030,7 @@ def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_p
     got = check(MODEL, facts, blocked / "r.xlsx")
     assert got["view"]["items"] and got["report_error"] and "r.xlsx" in got["report_error"]
     assert check(MODEL, facts, tmp_path / "ok.xlsx")["report_error"] is None
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
     body = rhino[rhino.index("def _check_apply("):rhino.index("def _check_failed(")]
     assert 'if report and result.get("report_error"):' in body and \
@@ -1057,7 +1057,7 @@ def test_no_viewport_label_is_drawn_under_the_status_box():
     taken = [box]
     top = logic.clear_spot(taken, 600, 20, 120, 20)                # a label wanted under the box
     assert top >= y + h
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     conduit = rhino[rhino.index("    taken = []"):]
     assert conduit.index("logic.status_box(") < conduit.index("ui.paint_label(")
     assert conduit.index("keep = list(taken)") < conduit.index('"keep": [tuple(t) for t in keep]')   # placed off it
@@ -1116,7 +1116,7 @@ def test_the_panel_header_has_no_code_edition_line_but_the_report_keeps_it(facts
     text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
                     for row in ws.iter_rows(values_only=True) for c in row if c)
     assert "Ch. 325" in text
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert 'head.get("code")' not in ui and "logic.panel_header(head)" in ui
 
 
@@ -1128,7 +1128,7 @@ def test_the_delta_column_is_named_delta_in_the_panel_and_the_report(facts, tmp_
     cells = [c for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
     assert logic.COLUMN_DELTA == "Delta" and "Delta" in cells and "Margin" not in cells
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert '(logic.COLUMN_DELTA, 86)' in ui and '"Margin"' not in ui
 
 
@@ -1138,7 +1138,7 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     from design_checker import rhino_logic as logic
     assert logic.labels_on({}) is False and logic.labels_on(None) is False
     assert logic.labels_on({"show_labels": True}) is True and logic.labels_on({"show_labels": False}) is False
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
     assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
     assert "if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw and "    if not boxed:\n        return" in draw
@@ -1153,7 +1153,7 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     assert "logic.labels_on(_ui_state(doc))" in check_code and "_sync_ticks(doc)" in check_code
     assert "ui.set_labels_tick(p, logic.labels_on(_ui_state(doc)))" in sync
     assert '"labels": set_labels' in rhino
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert 'box.Text = "Show on-screen labels"' in ui and "box.Checked = False" in ui.split("def _labels_box(")[1]
 
 
@@ -1172,7 +1172,7 @@ def test_with_labels_off_a_failing_yards_shortfall_still_shows():
     got = plan({"lot": {"edges": []}, "buildings": []}, {"outline": [], "holes": []}, {"items": items}, {})
     labels = [y["label"] for y in got["yards"]]
     assert "✕ Rear yard 21'-2\", needs 22'-6\"" in labels and "✓ Side yard, West 12'-0\"" in labels
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert "if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in rhino
 
 
@@ -1181,7 +1181,7 @@ def test_the_code_edition_line_is_in_the_legend_and_the_report_not_the_panel(fac
     from design_checker import rhino_logic as logic
     head = check(MODEL, facts, tmp_path / "r.xlsx")["view"]["header"]
     assert logic.legend_text(head["code"]).endswith("Checked against: " + head["code"])
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert '"legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code"))' in rhino
 
 
@@ -1198,7 +1198,7 @@ def test_the_lists_values_fit_two_lines_of_a_narrow_column():
     assert logic.cell_text("up to 2'-11 1/8\" short") == "up to 2'-11⅛\" short"    # "up to": words, not a range
     for same in ("25'-0\"", "3", "25%", "at limit", "—", ""):
         assert logic.cell_text(same) == same
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     rows = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
     assert rows.count("logic.cell_text(") == 3                    # Proposed, Required and Delta; never the name
 
@@ -1222,7 +1222,7 @@ def test_the_use_row_names_the_use_in_its_item_cell(facts, tmp_path):
         assert logic.list_cells(dict(use, proposed=unset)) == ("Use (site)", unset)
     other = next(i for i in got["view"]["items"] if i["name"] == "Lot area")
     assert logic.list_cells(other) == (logic.row_name(other), other["proposed"])
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     rows = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
     assert "logic.list_cells(i)" in rows and "logic.row_name(i)" not in rows
     detail = ui[ui.index("def show_detail("):]
@@ -1244,7 +1244,7 @@ def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
     deltas = {i["delta"] for i in got["view"]["items"] if i.get("delta")}
     assert deltas and deltas <= set(cells)                            # the report's Delta: the panel's words
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert '(i.get("delta") or "")' in ui and "delta_text" not in ui          # settle's words only (round 2)
 
 
@@ -1285,7 +1285,7 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     why, item = head.index("Why it needs review"), head.index("Item")
     row = next(r for r in sheet.iter_rows(values_only=True) if r[item] == "Stories · assuming flat ground")
     assert not row[why]
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert "logic.list_cells(i)" in ui
 
 
@@ -1336,7 +1336,7 @@ def test_the_plugin_takes_only_this_requests_answer_and_never_waits_forever():
 
 def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_checker():
     """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     ask = src[src.index("def ask("):src.index("# ---- the model", src.index("def ask("))]   # ask, its job, its answer
     assert "logic.exchange(" in ask and "_stop_worker()" in ask and "readline" not in ask and "stdin" not in ask
     assert "logic.pipes(p)" in src                  # the pipes served by threads (test_checker_pipes.py)
@@ -1412,7 +1412,7 @@ def test_an_object_reaching_into_the_lot_counts_as_on_it_and_a_neighbour_does_no
 
 def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
     """The Rhino side can't run in CI: its source must use the tested logic, not the bounding-box centre."""
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
     assert "logic.reaches_into_lot(" in body and ".Center" not in body
 
@@ -1425,7 +1425,7 @@ def test_the_panel_columns_fit_a_rhino_sized_panel_and_wrap():
     In Rhino, panel_width_in_rhino.py measures every cell's text at 380 and 540."""
     import ast
     import re
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     width = int(re.search(r"^PANEL_WIDTH = (\d+)", ui, re.M).group(1))
     columns = re.search(r"^COLUMNS = (\[.*\])", ui, re.M).group(1).replace("logic.COLUMN_DELTA", "'Delta'")
     cols = dict(ast.literal_eval(columns))
@@ -1538,7 +1538,7 @@ def test_a_solid_whose_points_dont_outline_it_counts_by_its_box():
     assert reaches_into_lot(lot, seam, ON_LOT_REACH, box=(25, 35, 35, 45))
     assert reaches_into_lot(lot, [(30, 40)], ON_LOT_REACH, box=(25, 35, 35, 45))
     assert not reaches_into_lot(lot, [(100, 40), (110, 40)], ON_LOT_REACH, box=(95, 35, 115, 45))   # off the lot
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
     assert "logic.reaches_into_lot(ring, _plan_points(g), reach, box)" in body
     assert "f.PointAt(" in src[src.index("def _plan_points("):]
@@ -1560,7 +1560,7 @@ def test_the_box_pre_filter_never_drops_an_object_that_reaches_the_lot():
             assert box_near_lot(box, lot_box, ON_LOT_REACH), pts
     assert not box_near_lot((100, 0, 120, 20), lot_box, ON_LOT_REACH)
     assert box_near_lot((73, 0, 90, 20), lot_box, ON_LOT_REACH)                  # touching: still outlined
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
     assert body.index("logic.box_near_lot(") < body.index("_plan_points(g)")
 
@@ -1590,14 +1590,13 @@ def test_the_setup_brings_the_panel_back_with_rhino():
     """A Gordium tab Rhino reopens at launch is empty until something registers the panel: GordiumPanel does only
     that (no check, no checker), install.py adds it, and the guide says, for Mac and Windows, to put it in Rhino's
     startup commands (no setting a script can change). startup_panel_in_rhino.py runs it in Rhino."""
-    app = REPO / "apps/rhino_plugin"
     import ast
-    tree = ast.parse((app / "gordium_panel.py").read_text(encoding="utf-8"))
+    tree = ast.parse(host_text("rhino", "panel", purpose="wiring"))
     calls = [ast.unparse(n) for n in tree.body[1:] if isinstance(n, ast.Expr)]        # after the docstring
     assert calls == ["sys.path.insert(0, HERE)", "gordium_rhino.register_dock()"], calls   # nothing else runs
-    install = (app / "install.py").read_text(encoding="utf-8")
+    install = host_text("rhino", "install", purpose="wiring")
     assert '"GordiumPanel": "gordium_panel.py"' in install and "Run these commands every time Rhino starts" in install
-    guide = " ".join((app / "QUICKSTART.md").read_text(encoding="utf-8").split())        # the guide wraps its lines
+    guide = " ".join(host_doc("rhino", "QUICKSTART.md", purpose="wiring").split())        # the guide wraps its lines
     assert "Rhino → Settings… → General" in guide and "Tools → Options → General" in guide
     assert guide.count("add the line `GordiumPanel`") == 2 and "Gordium: GordiumPanel -> gordium_panel.py" in guide
 
@@ -1666,7 +1665,7 @@ def test_the_module_docs_say_how_a_row_is_decided():
     under every reading complies unless its result turns on an open question."""
     from design_checker import check as checking
     assert "turns_on" in checking.__doc__ and "nothing it reads open" not in checking.__doc__
-    quick = " ".join((checking.REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8").split())
+    quick = " ".join(host_doc("rhino", "QUICKSTART.md", purpose="wiring").split())
     assert "the row simply complies" in quick and "it still needs review, because only the zoning office" not in quick
 
 
@@ -1708,8 +1707,8 @@ def test_the_architects_review_fixes_in_the_panel_and_the_plan():
     assert logic.building_name("Building", "Garage", False) == "Garage"
     assert logic.building_name("Building", "", False) == "a solid on Building"
     assert logic.shorten("short", 20) == "short"
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert '"main": pick_main_building' in rhino and 'button("Main building…", a["main"])' in ui
     assert ')), e["length"],' in rhino and '" (approx.)"' not in rhino        # the length alone, no "(approx.)"
     assert '"needs input"' not in ui
@@ -1759,7 +1758,7 @@ def test_review_round_1_of_the_architects_fixes():
                 assert all(len(t) <= int(room / 7.5) for t in texts), texts
     assert logic.link_text("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16", 40).endswith("note 16")
     # (3) every overlay field a check sets is reset by _clear
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     tree = ast_.parse(src)
     fn = {n.name: n for n in tree.body if isinstance(n, ast_.FunctionDef)}
 
@@ -1810,8 +1809,8 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
     5 with labels on, the status box is drawn once, in the active view, not in all four;
     6 the empty file's start box hides "Use my survey…" and the street's "Change…" until a lot exists."""
     from design_checker import rhino_logic as logic
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     detail = ui[ui.index("def show_detail("):]
     # 2: reason, then the buttons, then the measuring notes; the hint as text only when there's no button
     assert detail.index('for text in (det.get("line"), i.get("reason")):') < detail.index("for b in buttons:") \
@@ -1868,7 +1867,7 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     assert logic.leader_end((0, 50), (10, 40, 80, 20)) == (10, 50)    # to the box's near side
     assert logic.leader_end((50, 0), (10, 40, 80, 20)) == (50, 40)
     assert logic.leader_end((0, 0), (10, 40, 80, 20)) == (10, 40)     # its corner
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
     zoom = rhino[rhino.index("def _zoomed_in("):rhino.index("def _model_dimension(")]   # (one place, scene and screen)
     assert "    zoomed_in = _zoomed_in(o, e.Viewport)" in draw
@@ -1879,7 +1878,7 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     assert '    edges = (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []' in draw
     assert 'colors[key] = (ui.status_color("complies", dark), True)' in draw            # edges: a leader when short
     assert draw.index("zoomed_in = ") < draw.index("    if not boxed:")         # the status box isn't gated by it
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     at = ui[ui.index("def paint_label("):ui.index("def _signed(")]
     assert "edge_leader and logic.needs_leader(((xb - xa) ** 2 + (yb - ya) ** 2) ** 0.5, width)" in at
     assert "        end = logic.leader_end(at, (left, top, width, h))" in at
@@ -1907,7 +1906,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     side = [[0.0, 0.0], [0.0, 120.0]]                                 # a line not on Ithaca Rd: asked, not carried
     assert logic.street_name_after_pick("Ithaca Rd", lines, side) is None
     assert logic.street_name_after_pick(None, lines, lines[0]) is None              # no name known: nothing to keep
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     # the Rhino side clicks and asks (the name first from the line's own street, else typed); rhino_logic.pick_effect
     # sets the lines from them (PR #19: every pick's effect decided there, tested by behaviour)
     pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
@@ -1919,7 +1918,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     state_src = rhino[rhino.index("def _box_state("):rhino.index("def _ft_text(")]
     assert '"street_name": (saved_ui.get("_street_name") or saved_ui.get("street_name") or facts.get("street_name"))\n' \
         '            if facts.get("street_line") else None,' in state_src
-    source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    source = host_text("rhino", "logic", purpose="wiring")
     effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
     assert 'lines, ids = pick_street(facts.get("street_line"), facts.get("street_ids"), picks[0], name)' in effect
     assert "set_street_lines(facts, lines, ids)" in effect
@@ -1999,7 +1998,7 @@ def test_rules_not_in_gordium_yet_read_not_checked_yet_in_the_panel_and_the_repo
     assert {logic.status_words(i) for i in grey} == {"Not checked yet"}
     assert logic.status_words({"status": "not_checked", "group": "not_checked"}) == "Not checked"
     assert logic.status_words({"status": "needs_review", "group": "building"}) == "Needs review"
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert "    words = logic.status_words(i)\n" in ui
 
 
@@ -2040,7 +2039,7 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
     assert logic.street_lines_after_picks([a], [b], False) == [b]
     assert logic.street_pick_prompt(True, 1) == "Click each lot line on a street (1 picked); Enter when done"
     assert logic.street_pick_prompt(False, 0) == "Click the lot line on the street"
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
     corner = pick[pick.index('            if facts.get("corner_lot") is True:'):pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))")]
     assert "                while True:" in corner and "_get_point(logic.street_pick_prompt(True, len(picks)))" in corner
@@ -2049,7 +2048,7 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
     f, s = logic.pick_effect("street", {"lines": [b, c], "ids": [None, None], "name": None},
                              {"corner_lot": True, "street_line": [a]}, {"street_name": "A St"})
     assert f["street_line"] == [b, c] and "street_name" not in s and s["street_source"] == logic.ENTERED
-    source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    source = host_text("rhino", "logic", purpose="wiring")
     effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
     assert "street_lines_after_picks(" not in effect     # a corner lot's lines are never saved without their ids
     f, s = logic.pick_effect("street", {"picks": [b, c, b], "name": None},
@@ -2069,9 +2068,9 @@ def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the
     assert rows["zone"]["tick"][0] == "This is the lot's district"
     assert logic.uncertain({"corner_lot": None}).endswith("under Front lot line (on the street)")
     assert present.SOURCE_NAMES["street"] == "Front lot line (on the street)"
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert '"\\n" + logic.STREET_LABEL + " = the highlighted blue line · " +' in rhino
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert ('            if r.get("help"):          # what that row is, in a sentence (the front lot line\'s)\n'
             '                layout.AddRow(None, row(label(r["help"], size=11, width=560)))') in ui
 
@@ -2148,7 +2147,7 @@ def test_a_corner_lot_answered_no_never_keeps_both_streets_and_never_reads_its_w
                                                                     "rear_yard")]
     assert yards and all(i["status"] != "complies" for i in yards)
     # the box and the command line call the one helper (the box through logic.box_facts, _apply_box's pure part)
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     apply_box = rhino[rhino.index("def _apply_box("):rhino.index("def _place_spots(")]
     box_facts = inspect.getsource(logic.box_facts)
     assert "logic.box_facts(" in apply_box and "corner_answered(" in box_facts
@@ -2180,8 +2179,8 @@ def test_no_process_gordium_starts_from_rhino_opens_a_console_window_on_windows(
     launch = re.compile(r"subprocess\.(Popen|run|call|check_output|check_call)\(|Process\.Start\(|os\.system\(")
     found = []
     for path in sorted((REPO / "apps").rglob("*.py")):
-        text = path.read_text(encoding="utf-8")
-        if path.name == "gordium_ui.py":
+        text = host_text_of(path, purpose="lint")
+        if path == host_path("rhino", "ui"):
             spawn = text[text.index("def spawn("):text.index("def open_target(")]
             text = text.replace(spawn, "")
             assert len(launch.findall(spawn)) == 2                     # spawn itself: run, else Popen
@@ -2198,12 +2197,12 @@ def test_no_process_gordium_starts_from_rhino_opens_a_console_window_on_windows(
     assert logic.spawn_options("posix", None) == {}
     assert logic.open_command("nt", "C:\\\\r.xlsx") == ("startfile", "C:\\\\r.xlsx")
     assert logic.open_command("posix", "/r.xlsx") == ("run", ["open", "/r.xlsx"])
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="lint")
     spawn = ui[ui.index("def spawn("):ui.index("def open_target(")]
     assert "    kw.update(logic.spawn_options(os.name, subprocess))\n" in spawn
     opener = ui[ui.index("def open_target("):ui.index("def _open(")]
     assert '            os.startfile(what)' in opener and "logic.open_command(os.name, target)" in opener
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="lint")
     assert 'command = STATE.get("worker_command") or [_python(), "-u", "-m", "design_checker", "serve"]' in rhino
     assert "p = ui.spawn(list(command)" in rhino and "opened, why = ui.open_target(path)" in rhino
 
@@ -2312,7 +2311,7 @@ def test_the_plugin_keeps_exactly_one_checker_process(tmp_path):
     book.stop_all()                                         # stopped (Rhino closing, the checker stopped)
     assert stopped == [101, 303] and book.pids() == []
     assert logic.ServerBook(str(tmp_path / "missing" / "x.json"), me, started_at, stop).pids() == []   # no record
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     worker = rhino[rhino.index("def _worker("):rhino.index("def _stop_worker(")]
     assert "        SERVERS.started(p.pid)" in worker
     stop_fn = rhino[rhino.index("def _stop_worker("):rhino.index("def ask(")]
@@ -2383,8 +2382,8 @@ def test_street_names_go_with_their_street_lines_on_every_path_and_never_stop_th
     assert logic.set_street_lines({}, [[[0, 0], [5, 0]]], ["A St", "B St"]) == {"street_line": [[[0, 0], [5, 0]]]}
     assert logic.set_street_lines({"street_ids": ["A St"]}, None) == {}
     # every place the street lines change goes through the helper
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
+    source = host_text("rhino", "logic", purpose="wiring")
     import re
     helper = source[source.index("def set_street_lines("):source.index("def drop_stale(")]
     scaled = source[source.index("def to_feet("):source.index("def set_street_lines(")]
@@ -2604,7 +2603,7 @@ def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
     assert width(named[0])["status"] == "does_not_comply"
     assert logic.pick_street(None, None, [[1, 1], [2, 2]], None, outline=outline) == ([[[1, 1], [2, 2]]], None)
     # the plugin: every street click goes through these (the corner box, the one-street box, the command line)
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert rhino.count("logic.add_street_pick(runs, outline, ") == 2
     assert "outline=_outline(doc, lot), ask=_ask_street_more" in rhino and "logic.street_lines_after_picks(" not in rhino
     assert 'lines, ids = logic.street_lines_of(outline, runs, names, picks)' in rhino
@@ -2734,7 +2733,7 @@ def test_a_street_is_never_cut_short_unasked_by_a_curve_or_a_repeated_corner_poi
     run, said = logic.street_pick(outline, outline[0], ask=lambda q: None)
     assert run == [0, 1, 2, 3, 4, 5, 6, 7] and "not surely one street" in said, (run, said)
     assert logic.street_pick(outline, outline[0], ask=lambda q: False)[0] == [0, 1, 2, 3, 4, 5]
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     ask = rhino[rhino.index("def _ask_street_more(question):"):rhino.index("def _outline(doc, lot):")]
     assert "        prompt = logic.STREET_ANSWER_NEEDED + question" in ask and "return None" not in ask   # (round 14)
 
@@ -2776,7 +2775,7 @@ def test_a_corner_point_drawn_twice_is_never_a_street_of_its_own():
     # a click on a short real piece beside a tiny one is that piece, not the tiny one (exact match first)
     short_a, short_b = [[0, 0], [0.3, 0]], [[0.3, 0], [0.31, 0]]          # both within 0.5 ft of each other's ends
     assert logic._piece_at([short_b, short_a], short_a, 0.5) == 1 and logic._piece_at([short_b], short_a, 0.5) == 0
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     click = rhino[rhino.index("def _clicked_piece(doc, lot, point):"):rhino.index("def _outline(doc, lot):")]
     assert "return min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))" in click
     assert rhino.count("a, b = _clicked_piece(doc, lot, point)") == 3 and "min(_segments(lot.Geometry)" not in \
@@ -2863,7 +2862,7 @@ def test_a_curve_drawn_in_short_pieces_is_asked_and_the_suggestion_is_decided_in
                             1 / per_foot)
         assert "street_line" not in got, (per_foot, got["street_line"])   # read in feet: the slip is short, its
         # corner asked; read in model units a 6 mm slip was a 6-unit line, suggested alone as the street
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert '"segments_ft": [(_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]) for a, b in _segments(o.Geometry)]}' \
         in rhino
 
@@ -3083,7 +3082,7 @@ def test_a_refused_click_changes_nothing_and_a_rounded_corner_never_takes_the_si
     bend = _ring([(0, 0), (20, 0), (38, 8), (60, 12), (60, 100), (0, 100)])
     logic.pick_street(None, None, bend[0], None, outline=bend, ask=lambda q: None, said=told)
     assert told[0]["words"].endswith("a bend not answered is kept as street (answer No to leave it out)"), told
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert '            if not facts.get("corner_lot") and runs:      # (a refused click: asked again)' in rhino
     assert "if told and told[-1][\"refused\"]:          # (a point clicked: everything stays as it was)" in rhino
     # (F3) the rounded corner: 47 ft front, a 3 ft radius in 12 chords, a 97 ft side
@@ -3224,7 +3223,7 @@ def test_the_bend_question_needs_a_yes_or_a_no_because_neither_default_is_safe()
     answers = iter([("exit rhino", None)])                           # any other end of the prompt: no loop
     with pytest.raises(ns["Cancelled"]):
         ns["_ask_street_more"]("q")
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     # ... run: the plugin's own _pick_outcome with stand-ins for Rhino, Esc at the bend question on the corner path
     # (one street already answered) and on the one-street path (a name already given): nothing changed (round 16)
     import copy
@@ -3261,7 +3260,7 @@ def test_a_corner_click_is_said_as_so_far_and_esc_says_the_pick_was_not_kept():
     assert logic.so_far("Street 2: 3 lot-line pieces, not surely one street: Gordium asks one street or two before "
                         "measuring along them").endswith("(so far — Enter when done)")
     assert logic.ESC_STREET == "Esc: nothing changed — the street side is as it was; this pick wasn't kept"
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     pick = rhino[rhino.index("def _pick_outcome("):rhino.index('    if what == "lot":', rhino.index("def _pick_outcome("))]
     corner = pick[pick.index('            if facts.get("corner_lot") is True:'):
                   pick.index("            rc, point = _get_point(logic.street_pick_prompt(False, 0))")]
@@ -3370,10 +3369,10 @@ def test_every_street_line_is_saved_with_its_street_id():
     lines, ids = logic.pick_street([a_, b_], ["Elm St", None], b_, None, outline=gappy)
     assert ids == ["Elm St", "Elm St"], ids
     # the source: no street lines saved without their ids
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     calls = re.findall(r"set_street_lines\(([^)]*)\)", rhino)
     assert calls and all(c.strip().endswith(", ids") or ", None" in c for c in calls), calls
-    logic_src = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    logic_src = host_text("rhino", "logic", purpose="wiring")
     saves = re.findall(r"set_street_lines\((?!facts, lines, ids=None\))([^\n]*)", logic_src)
     # (with_suggestions: the lines with their own source's ids, never the other source's: round 3, F1; the start
     # box's picks: the street runs' own ids, #19; the lookup's address street: one street, unnamed, a corner lot
@@ -3464,7 +3463,7 @@ def _plugin_functions(names, **extra):
     """The plugin's own functions, run against stand-ins for Rhino (each from gordium_rhino.py as written)."""
     import time as time_
     from design_checker import rhino_logic as logic_
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     view = type("View", (), {"ActiveViewportID": "vp"})()
     doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})(), "RuntimeSerialNumber": 1})()
     size_of = staticmethod(lambda lines, size: (max(len(t) for t in lines) * size * 0.6 + 22,     # gordium_ui's
@@ -3504,7 +3503,7 @@ def test_no_notice_outlives_the_model_it_was_about():
     assert ns["stale"](o) is True
     ns["STATE"].update(last={"at": now})
     assert ns["stale"](o) is False
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     check = src[src.index("def run_check("):src.index("def _toast(")]
     assert check.index("_clear(o)") < check.index('if result.get("notice"):')   # cleared, then the new notice
     draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
@@ -3569,7 +3568,7 @@ def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     ns["_model_on_screen"] = lambda o, viewport: lot
     lines, x, y, w, h = ns["_notice_box"](o, viewport, [], False)
     assert (x, y) == (12, 34) and not over(x, y, w, h, lot) and lines[0].startswith("✕ Side yard, Southwest")
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     check = src[src.index("def run_check("):src.index("def _toast(")]
     assert 'ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])' in check     # the panel says it
     report = src[src.index("def open_report("):].split("\ndef ", 1)[0]
@@ -3785,11 +3784,11 @@ def test_a_moved_label_is_led_and_the_draw_record_keeps_the_rules():
     """draw_screen gathers the labels (each yard's, then each lot edge's), and draws them where logic.place_labels
     put them once the view was still (ui.paint_label: the leader when led, the shrunk text); every building (its
     outline's hull) and coloured part (its own outline) goes in as HARD, the buildings counted in the record."""
-    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "ui", purpose="wiring")
     paint = src[src.index("def paint_label("):].split("\ndef ", 1)[0]
     assert 'if got["led"] or (edge_leader and' in paint and "(size + 5) * k" in paint
     assert "logic.label_height(len(rows), size)" in paint
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
     assert '"shapes": solids' in draw and 'drawn["hard_shapes"]' in draw
     assert 'logic.hull(on) if kind == "building" else on' in draw and 'drawn["buildings"] = ' in draw
@@ -3806,7 +3805,7 @@ def test_labels_are_never_placed_in_the_drawing_loop_and_settle_when_the_view_re
     too."""
     import time as time_
     from design_checker import rhino_logic as logic_
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
     for search in ("place_labels(", "place_dim_label(", "label_box(", "label_at(", "settle_labels("):
         assert search not in draw, search                                    # never in the drawing loop
@@ -3981,7 +3980,7 @@ def test_while_the_view_moves_only_labels_that_still_keep_every_hard_rule_are_dr
     assert [i["key"] for i, _ in shown] == ["fine"]
     first = lab("first", dims[2], 320, 485, order=0)                 # placed first: it wins the overlap
     assert [i["key"] for i, _ in logic_.shown_while_moving([fine, first], view, keep, dims, [house])] == ["first"]
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     draw = rhino[rhino.index("def draw_screen("):].split("\ndef ", 1)[0]
     moving = draw.split("    if not settled:", 1)[1].split("    for item, got in shown:", 1)[0]
     assert "logic.shown_while_moving(" in moving and "logic.follow(got, item[\"line\"])" in moving
@@ -4018,7 +4017,7 @@ def test_a_plan_label_never_wraps_inside_a_number_stays_inside_the_view_and_off_
         assert logic_.axis_icon_box((657, 668))[2] == int(round(logic_.AXIS_ICON_PX * 1.5)) + 3
     finally:
         logic_.AXIS_ICON_SCALE = was
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert "logic.AXIS_ICON_SCALE = _icon_zoom()" in rhino and "RunningOnOSX" in rhino   # the Mac counts points
     got = logic_.place_dim_label(edge, "101'-1 1/2\"", 11, view)
     assert got["top"] + got["h"] <= 668 - logic_.LABEL_INSET and not got["forced"], got
@@ -4098,11 +4097,11 @@ def test_no_label_is_ever_hidden_under_another_and_failing_yards_go_first():
         own = next(i["line"] for i in items if i["key"] == key)
         assert not logic_.crosses(own, g["left"] - 3, g["top"] - 3, g["w"] + 6, g["h"] + 6), (key, g)
     # the in-Rhino distance search reads each label's place in the order where the record keeps it (8th field)
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert ('[list(q) for q in item["line"]],\n            got["led"], got["size"], got["forced"], got.get("order")])'
             in rhino)                                    # text, box, rows, line, led, size, forced, order
     fields = ["text", "box", "rows", "line", "led", "size", "forced", "order"]
-    script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
+    script = host_script("rhino", "highlight_in_rhino.py", purpose="wiring")
     assert "(text, (left, top, w, h, want), nrows, own, led, size, was_forced, order)" in script
     assert "b_[%d] < order" % fields.index("order") in script
     # nowhere keeps every rule (a tiny view): forced, but still never over a label placed before it
@@ -4118,7 +4117,7 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
     """The Rhino job at 27c8e5d: highlight claim 1b worked out the notice's place with its own taken boxes and said
     "no corner clear" while the screen drew it bottom right. draw_screen now keeps what each view drew (the notice's
     box, every label's box and the lines it must stay off) in STATE["drawn"], and the in-Rhino claims read that."""
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
     assert 'STATE.setdefault("drawn", {})[str(e.Viewport.Id)] = drawn' in draw
     assert draw.index('drawn["notice"] = ') > draw.index("notice = _notice_box(o, e.Viewport, taken, old)")
@@ -4126,7 +4125,7 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
     assert 'drawn["dims"] = dims' in draw and draw.index("keep = list(taken)") < draw.index('"keep": [tuple(t)')
     assert 'drawn["settled"] = settled or not items' in draw
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py", "redraw_timing_in_rhino.py"):
-        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        script = host_script("rhino", name, purpose="wiring")
         assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
         assert "label_box(" not in script, name
 
@@ -4137,7 +4136,7 @@ def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
     be written overwrote the panel line holding the notice. Now the record is marked complete only once every label
     and the notice are drawn, each script drops the view's record before redrawing and requires it complete, and the
     report error keeps the notice first in the line."""
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
     assert draw.index("ui.draw_text_box(d, lines, ui.status_color(\"does_not_comply\"") < \
         draw.index('drawn["complete"] = True') < draw.index("if not boxed:")
@@ -4147,7 +4146,7 @@ def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
         in check                                                         # (#32 split run_check)
     assert 'first = "✕ " + result["notice"] + " · " if result.get("notice") else ""' in check
     for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
-        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        script = host_script("rhino", name, purpose="wiring")
         assert '.pop(str(' in script and 'get("complete")' in script and "logic.notice_place(" in script, name
 
 
@@ -4158,7 +4157,7 @@ def test_the_detail_under_the_list_keeps_room_for_its_button():
     of buttons (20 px each, measured on the Mac), three gaps of 6 px between them and 6 px above and below; the list
     gives way and scrolls, down to LIST_MIN_HEIGHT (three rows and the column titles)."""
     import re
-    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "ui", purpose="wiring")
     least = int(re.search(r"^DETAIL_MIN_HEIGHT = (\d+)", src, re.M).group(1))
     assert least >= 4 * 17 + 2 * 20 + 3 * 6 + 2 * 6      # four lines of name and reason, two rows of buttons (round 1)
     panel = src[src.index("    split = ef.Splitter()"):src.index("    footer = row(")]
@@ -4171,7 +4170,7 @@ def test_the_label_claim_counts_its_own_line_too():
     checks every HARD rule through rhino_logic.label_breaks_hard on what the view drew (its notice, status box and
     arrow, its buildings' and coloured parts' outlines, its dimensions), requires at least one building recorded,
     and checks distance by its own brute-force search, not the placement's."""
-    script = (REPO / "apps/rhino_plugin/tests/highlight_in_rhino.py").read_text(encoding="utf-8")
+    script = host_script("rhino", "highlight_in_rhino.py", purpose="wiring")
     assert "g.logic.label_breaks_hard(own, box, view, hard, dims, shapes)" in script
     assert 'rec.get("hard_shapes")' in script and 'rec.get("buildings", 0) >= 1' in script
     assert "not broken and not forced" in script and "not too_far" in script
@@ -4182,7 +4181,7 @@ def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown(
     little, "Does not comply · 1" half under the column titles. A new list (first fill, other rows or groups) now
     scrolls to its first row; the same rows again (every live refresh) stay where the architect left them (review
     of f063789: a scroll to the top on every edit lost their place); a selected row is scrolled just into view."""
-    src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "ui", purpose="wiring")
     show = src[src.index("def show(parts"):src.index("def _scroll_to(")]
     assert show.index("tree.DataStore = store") < show.index("if shape != parts.get(\"shape\"):") < \
         show.index("_scroll_to(tree, 0, len(shape))") < show.index('parts["shape"] = shape') < \
@@ -4215,7 +4214,7 @@ def test_the_notice_is_drawn_in_the_real_docked_top_view():
     assert not (min(x + w, arrow[0] + arrow[2]) > max(x, arrow[0]) and min(y + h, arrow[1] + arrow[3]) > max(y, arrow[1]))
     assert logic_.NOTICE_SHARES == tuple(sorted(logic_.NOTICE_SHARES))     # the most compact box first
     for name in ("notice_in_rhino.py", "highlight_in_rhino.py"):
-        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        script = host_script("rhino", name, purpose="wiring")
         assert "Size(1000, 640)" not in script, name
 
 
@@ -4279,7 +4278,7 @@ def test_the_starting_house_floors_go_on_their_own_sublayers_and_count_as_the_bu
     for layer in (logic.massing_floor(2), logic.MASSING_ROOF):
         assert logic.classify(layer, "Brep") == "building"                  # measured, as on Gordium::Massing
         assert logic.building_name(layer, "Floor 2", True) == "the starting house"
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     floors = rhino[rhino.index("def add_floors("):rhino.index("def gordium_start(")]
     assert "a.LayerIndex = _layer(doc, logic.massing_floor(i + 1))" in floors
     assert "_layer(doc, logic.MASSING_ROOF)" in floors
@@ -4322,8 +4321,7 @@ def test_rhino_logic_runs_without_anything_rhinos_python_lacks(monkeypatch):
     big_ccw, small_cw = [[0, 0], [10, 0], [10, 10], [0, 10]], [[0, 0], [0, 1], [1, 1], [1, 0]]   # either winding
     assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small_cw, big_ccw]}) == [
         big_ccw, small_cw]
-    from pathlib import Path
-    tree = ast.parse(Path(logic.__file__).read_text(encoding="utf-8"))
+    tree = ast.parse(host_text("rhino", "logic", purpose="lint"))
     imported = {(a.name if isinstance(n, ast.Import) else n.module).split(".")[0]
                 for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom)) and not getattr(n, "level", 0)
                 for a in (n.names if isinstance(n, ast.Import) else [n])}
@@ -4341,7 +4339,7 @@ def test_on_a_tax_map_lot_the_envelope_is_drawn_on_the_cautious_outline():
     small = [[0, 0], [1, 0], [1, 1], [0, 1]]
     assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small, inner]})[0] == inner
     assert logic.envelope_outlines(None, {}) == []
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     run = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
     assert 'outlines = logic.envelope_outlines(result.get("envelope"), result.get("plan"))' in run
 def test_saved_street_lines_never_take_the_suggestions_street_ids():
@@ -4378,8 +4376,8 @@ def test_every_panel_tick_follows_the_document():
     stayed ticked. Every tick box the panel has is set by its own setter (guarded, so setting it is never a click),
     all of them in _sync_ticks, which runs at every check (failed ones too) and whenever the panel is made."""
     import re
-    ui_src = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ui_src = host_text("rhino", "ui", purpose="wiring")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     boxes = re.findall(r"\ndef _(\w+)_box\(actions[^)]*\):\n(?:(?!\ndef ).)*?ef\.CheckBox\(\)", ui_src, re.S)
     assert {"massing", "labels", "envelope"} <= set(boxes)
     sync = rhino[rhino.index("def _sync_ticks("):].split("\ndef ", 1)[0]
@@ -4433,7 +4431,7 @@ def test_red_is_drawn_last_over_amber_and_everything_else():
     assert red == [("wall", "does_not_comply"), ("porch", "does_not_comply")]
     assert rest == [("eaves", "needs_review"), ("x", "complies")]
     assert logic.red_last(None) == ([], [])
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     scene = rhino[rhino.index("def draw_scene(o, e):"):rhino.index("def _see_through(")]
     assert 'rest, red = logic.red_last(getattr(o, "encroach", None) or [])' in scene
     coloured = scene.index("for g, status, _ in rest + red:")                # every amber part, then every red one
@@ -4466,9 +4464,9 @@ def test_a_recheck_brings_the_newly_failing_row_into_view(facts):
     failing = [i for g in got["groups"] for i in g["items"]
                if {x["id"]: x["status"] for x in got["items"]}[i] == "does_not_comply"]
     assert logic.newly_failing(before, got) == (failing[0] if failing else None)
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert 'ui.show(panel(), view, select=logic.newly_failing(extras["before"], view))' in rhino
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     body = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
     assert 'if select in by_id:' in body and 'parts["selected"] = select' in body \
         and 'parts["expanded"]["group:" + g["key"]] = True' in body
@@ -4517,7 +4515,7 @@ def test_the_detail_shows_plain_words_first_and_the_working_behind_a_toggle(fact
         if d.get("calc") and " = " in d["calc"]:
             assert d["calc"] in parts["worked"] and not any("max(" in t or "min(" in t for t in parts["notes"])
     assert behind >= 3                                                       # the chart's cells really are there
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     detail = ui[ui.index("def show_detail("):ui.index("def _section(")]
     assert 'det.get("calc")' not in detail and 'det.get("scope")' not in detail     # only through detail_parts
     assert 'det.get("quotes")' not in detail and 'det.get("precision")' not in detail
@@ -4551,9 +4549,9 @@ def test_a_rows_button_and_dialog_say_how_many_questions_when_there_are_several(
     assert logic.answer_words([]) is None
     assert logic.row_buttons({"needs": four})[0] == ("Answer %d questions…" % len(four), "enter")
     assert logic.needs_reason(four).startswith("Needs ") and len(logic.needs_reason(four)) > 40   # still named
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert "ui.row_dialog(logic.answer_words(needs)," in rhino
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     dialog = ui[ui.index("def row_dialog("):ui.index("def ", ui.index("def row_dialog(") + 10)]
     assert "field.Width = logic.ANSWER_WIDTH" in dialog
     assert logic.FOLLOW_UP_HELP.startswith("Your answers. ") and logic.FOLLOW_UP_HELP.endswith(".")
