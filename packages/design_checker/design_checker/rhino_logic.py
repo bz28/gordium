@@ -5044,12 +5044,14 @@ RECORD_ENV = "GORDIUM_RECORD_SESSION"     # a folder: every request to the check
 class Recorder:
     """Saves a session's traffic with the checker, for the replay test (design_checker/tests/test_replay.py): one
     line per request in `folder`/session.jsonl, {"n", "request", "steps", "reply"}, where "reply" is the answer
-    line exactly as the checker wrote it (None if none came) and "steps" its progress lines. The model file a
+    line as the checker writes it (json.dumps of its reply: the line read back and written again gives the same
+    text; None if no answer came) and "steps" its progress lines. The model file a
     request names is copied first, byte for byte, to files/<n>/<its own name> (its own name: the checker's answer
     quotes it), and the request records that copy's path relative to the folder; a report path is recorded the
-    same way (the report itself is the checker's to write). Off unless the plugin is started with RECORD_ENV set
-    (`from_env`). Recording never stops a check: a recording that fails is noted in `failed` and the exchange goes
-    on unrecorded."""
+    same way (the report itself is the checker's to write). Every request keeps its own copy of the model, so a long
+    session takes room (one model's size per check). Off unless the plugin is started with RECORD_ENV set
+    (`from_env`). Recording never stops a check: a recording that fails is noted in `failed` (the plugin says so
+    once, on Rhino's thread: `take_failure`) and the exchange goes on unrecorded."""
 
     def __init__(self, folder, copy=None):
         self.folder = folder
@@ -5057,19 +5059,30 @@ class Recorder:
         self._copy = copy or _copy_file
         self._lock = threading.Lock()
         self._n = None
+        self._told = False
 
     @classmethod
     def from_env(cls, environ):
         folder = (environ.get(RECORD_ENV) or "").strip()
         return cls(folder) if folder else None
 
+    def take_failure(self):
+        """Why the recording failed, the first time it is asked after a failure (to say once), else None."""
+        if self.failed is None or self._told:
+            return None
+        self._told = True
+        return self.failed
+
     def _next(self):
-        if self._n is None:             # a folder recorded into before: carry on after its last request
-            path = os.path.join(self.folder, "session.jsonl")
+        if self._n is None:             # a folder recorded into before: carry on after its last request (or its
+            path = os.path.join(self.folder, "session.jsonl")      # last copied model, if that one's line was lost)
             self._n = 0
             if os.path.exists(path):
                 with open(path, encoding="utf-8") as f:
                     self._n = sum(1 for line in f if line.strip())
+            files = os.path.join(self.folder, "files")
+            if os.path.isdir(files):
+                self._n = max([self._n] + [int(d) for d in os.listdir(files) if d.isdigit()])
         self._n += 1
         return self._n
 

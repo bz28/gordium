@@ -89,7 +89,9 @@ def record_seed(folder: Path) -> int:
     from design_checker import rhino_logic as logic
     from design_checker.goldens import stress_generator
     folder = Path(folder)
-    if folder.exists():
+    if folder.exists():                       # only ever a session folder is emptied (never `.` by mistake)
+        if not {p.name for p in folder.iterdir()} <= {"session.jsonl", "files"}:
+            raise ValueError(f"{folder} isn't a recorded session (it holds other files): give a new folder")
         shutil.rmtree(folder)
     folder.mkdir(parents=True)
     gen = stress_generator()

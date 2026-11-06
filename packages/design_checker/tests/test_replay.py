@@ -131,3 +131,46 @@ def test_with_no_recorder_the_exchange_is_unchanged():
     assert logic.exchange(sends, lines, {"cmd": "options", "id": 2}, 5, on_step=steps.append)["result"] == "options"
     assert steps == ["Measuring the building…"]
     sends.put(None)
+
+
+def test_a_checker_that_gives_no_answer_is_recorded_as_none_and_replay_says_so(tmp_path):
+    sends, lines = queue.Queue(), queue.Queue()
+    lines.put(None)                                    # the checker stopped: no answer
+    rec = logic.Recorder(str(tmp_path / "s"))
+    assert logic.exchange(sends, lines, {"cmd": "facts", "facts": {}, "id": 2, "progress": True}, 5,
+                          record=rec) is None
+    lines.put(json.dumps({"id": 9, "ok": True}) + "\n")  # another request's line: out of step, raised
+    try:
+        logic.exchange(sends, lines, {"cmd": "facts", "facts": {}, "id": 4, "progress": True}, 5, record=rec)
+    except logic.CheckerOutOfStep:
+        pass
+    saved = [json.loads(x) for x in (tmp_path / "s/session.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [(e["n"], e["reply"]) for e in saved] == [(1, None), (2, None)]
+    problems = replay.differences(tmp_path / "s")
+    assert problems == ["s #1 facts: no answer was recorded (the checker stopped or timed out)",
+                        "s #2 facts: no answer was recorded (the checker stopped or timed out)"]
+
+
+def test_a_failed_recording_is_told_once_and_numbering_never_reuses_a_copied_model(tmp_path):
+    sends, lines = queue.Queue(), queue.Queue()
+    _fake_checker(sends, lines, lambda r: {"ok": True, "result": "answered"})
+    model = tmp_path / "m.3dm"
+    model.write_bytes(b"m")
+    rec = logic.Recorder(str(tmp_path / "rec"))
+    logic.exchange(sends, lines, {"cmd": "check", "model": str(model), "id": 2}, 5, record=rec)
+    (tmp_path / "rec/files/0002").mkdir(parents=True)   # a model copied whose line was then lost
+    rec2 = logic.Recorder(str(tmp_path / "rec"))
+    logic.exchange(sends, lines, {"cmd": "check", "model": str(model), "id": 4}, 5, record=rec2)
+    saved = [json.loads(x) for x in (tmp_path / "rec/session.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [e["n"] for e in saved] == [1, 3]
+    assert rec2.take_failure() is None
+    rec2.failed = "OSError: disk full"
+    assert rec2.take_failure() == "OSError: disk full" and rec2.take_failure() is None
+    sends.put(None)
+
+
+def test_the_plugin_says_when_it_records_and_when_the_recording_fails():
+    assert 'Rhino.RhinoApp.WriteLine("Gordium: recording every check to " + RECORDER.folder)' in RHINO
+    answer = RHINO[RHINO.index("def _answer("):]
+    answer = answer[:answer.index("\ndef ")]
+    assert "RECORDER.take_failure()" in answer and "the session recording failed" in answer

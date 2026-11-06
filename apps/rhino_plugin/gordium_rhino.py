@@ -206,8 +206,10 @@ def _stop_worker():
 
 # the opt-in session recorder: with GORDIUM_RECORD_SESSION set to a folder before Rhino starts, every request to the
 # checker, its answer and a copy of the model it sent are saved there (logic.Recorder; the replay test runs them
-# again). Off (None) otherwise: nothing is recorded.
+# again). Off (None) otherwise: nothing is recorded. When on, the command line says so at load.
 RECORDER = logic.Recorder.from_env(os.environ)
+if RECORDER is not None:
+    Rhino.RhinoApp.WriteLine("Gordium: recording every check to " + RECORDER.folder)
 
 
 def ask(request, cancel=False, on_tick=None):
@@ -322,6 +324,9 @@ def _ask_job(request, cancel, facts_first=None):
 
 def _answer(job):
     """A finished job's answer, read on Rhino's thread: the result, or why there is none."""
+    failure = RECORDER.take_failure() if RECORDER is not None else None
+    if failure:                              # the recording stopped working: said once, the check goes on
+        Rhino.RhinoApp.WriteLine("Gordium: ⚠ the session recording failed (" + failure + "); checks go on unrecorded")
     how, answer = job.outcome()
     if how == "cancelled":
         raise logic.WorkCancelled()

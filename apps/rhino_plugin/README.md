@@ -68,9 +68,11 @@ The report (`<model>_gordium_report.xlsx`) is written next to the model by `Gord
   the start box on show for a window capture, `screencapture -l<window id>`); `tests/check_in_rhino.py`.
 
 - **Recording a session** (for the replay test): start Rhino with `GORDIUM_RECORD_SESSION` set to a folder (Mac:
-  `GORDIUM_RECORD_SESSION=~/gordium_session open -a "Rhino 8"`). Every request to the checker, a copy of the
-  model it sent and the answer are saved there (`rhino_logic.Recorder`); copy the folder into
-  `test_data/sessions/<name>/`. Off (nothing saved) unless the variable is set.
+  `open --env GORDIUM_RECORD_SESSION=/Users/<you>/gordium_session -a "Rhino 8"`, a full path: `open` passes
+  nothing from the shell otherwise). The command line says "Gordium: recording every check to …" when it is on.
+  Every request to the checker, a copy of the model it sent (one per check: a long session takes room) and the
+  answer are saved there (`rhino_logic.Recorder`); copy the folder into `test_data/sessions/<name>/`. Off
+  (nothing saved) unless the variable is set.
 
 ## Not yet
 

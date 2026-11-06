@@ -75,7 +75,10 @@ def canonical(value, scrubs=None):
                 value = value.replace(text, word)
         return value
     if isinstance(value, dict):
-        return {str(k): canonical(v, scrubs) for k, v in value.items()}
+        out = {str(k): canonical(v, scrubs) for k, v in value.items()}
+        if len(out) != len(value):              # 1 and "1" would be one key: never merge two answers' parts
+            raise ValueError(f"two keys written the same: {sorted(map(repr, value))}")
+        return out
     if isinstance(value, (list, tuple)):
         return [canonical(v, scrubs) for v in value]
     raise TypeError(f"not JSON data: {type(value).__name__}")

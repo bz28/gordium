@@ -88,3 +88,16 @@ def test_written_goldens_are_read_back_as_written(tmp_path):
     assert list(manifest) == ["a/case", "b/case"] and answers == {n: json.loads(t) for n, t in texts.items()}
     assert goldens.check(texts, tmp_path) == []
     assert lzma.decompress((tmp_path / goldens.OUTPUTS).read_bytes()).decode("ascii").count("\n") == 2
+
+
+def test_the_compressed_goldens_are_stored_as_binary_so_no_checkout_changes_their_line_endings():
+    import subprocess
+    out = subprocess.run(["git", "check-attr", "binary", "--", "test_data/goldens/outputs.jsonl.xz"], cwd=REPO,
+                         capture_output=True, text=True, check=True).stdout
+    assert out.strip().endswith("binary: set")
+
+
+def test_two_keys_that_would_be_written_the_same_are_refused_never_merged():
+    import pytest
+    with pytest.raises(ValueError, match="two keys written the same"):
+        goldens.canonical({1: "a", "1": "b"})
