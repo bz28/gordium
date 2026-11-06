@@ -23,6 +23,7 @@ from test_lookup_box import ZONES, FakeTable, looked_up  # noqa: E402
 from design_checker import rhino_logic as logic  # noqa: E402
 from design_checker.lookup_box import frame, writes  # noqa: E402
 from host_source import host_text
+from moved_names import patch_moved
 
 SAMPLE = "106 Ithaca Rd, Ithaca, NY"
 
@@ -206,7 +207,7 @@ class Box:
 
 @pytest.fixture
 def ground_on(monkeypatch):
-    monkeypatch.setattr(logic, "FLAT_GROUND", False)
+    patch_moved(monkeypatch, logic, "FLAT_GROUND", False)
 
 
 # ---- the scenarios ---------------------------------------------------------------------------------------------

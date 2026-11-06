@@ -14,7 +14,7 @@ from design_checker import present
 from design_checker.check import check, short, summary
 from model_measurement.project import load_facts
 from rule_format.rulebook import REPO
-from host_source import host_doc, host_files, host_path, host_script, host_text, host_text_of
+from host_source import host_doc, host_files, host_path, host_script, host_text, host_text_of, logic_files, logic_text
 
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 MODEL = SITE / "spreadsheet_design_model.3dm"
@@ -1918,7 +1918,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     state_src = rhino[rhino.index("def _box_state("):rhino.index("def _ft_text(")]
     assert '"street_name": (saved_ui.get("_street_name") or saved_ui.get("street_name") or facts.get("street_name"))\n' \
         '            if facts.get("street_line") else None,' in state_src
-    source = host_text("rhino", "logic", purpose="wiring")
+    source = logic_text("rhino", purpose="wiring")
     effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
     assert 'lines, ids = pick_street(facts.get("street_line"), facts.get("street_ids"), picks[0], name)' in effect
     assert "set_street_lines(facts, lines, ids)" in effect
@@ -2048,7 +2048,7 @@ def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_t
     f, s = logic.pick_effect("street", {"lines": [b, c], "ids": [None, None], "name": None},
                              {"corner_lot": True, "street_line": [a]}, {"street_name": "A St"})
     assert f["street_line"] == [b, c] and "street_name" not in s and s["street_source"] == logic.ENTERED
-    source = host_text("rhino", "logic", purpose="wiring")
+    source = logic_text("rhino", purpose="wiring")
     effect = source[source.index("def pick_effect("):source.index("def after_ground_pick(")]
     assert "street_lines_after_picks(" not in effect     # a corner lot's lines are never saved without their ids
     f, s = logic.pick_effect("street", {"picks": [b, c, b], "name": None},
@@ -2383,7 +2383,7 @@ def test_street_names_go_with_their_street_lines_on_every_path_and_never_stop_th
     assert logic.set_street_lines({"street_ids": ["A St"]}, None) == {}
     # every place the street lines change goes through the helper
     rhino = host_text("rhino", "plugin", purpose="wiring")
-    source = host_text("rhino", "logic", purpose="wiring")
+    source = logic_text("rhino", purpose="wiring")
     import re
     helper = source[source.index("def set_street_lines("):source.index("def drop_stale(")]
     scaled = source[source.index("def to_feet("):source.index("def set_street_lines(")]
@@ -3372,7 +3372,7 @@ def test_every_street_line_is_saved_with_its_street_id():
     rhino = host_text("rhino", "plugin", purpose="wiring")
     calls = re.findall(r"set_street_lines\(([^)]*)\)", rhino)
     assert calls and all(c.strip().endswith(", ids") or ", None" in c for c in calls), calls
-    logic_src = host_text("rhino", "logic", purpose="wiring")
+    logic_src = logic_text("rhino", purpose="wiring")
     saves = re.findall(r"set_street_lines\((?!facts, lines, ids=None\))([^\n]*)", logic_src)
     # (with_suggestions: the lines with their own source's ids, never the other source's: round 3, F1; the start
     # box's picks: the street runs' own ids, #19; the lookup's address street: one street, unnamed, a corner lot
@@ -4321,12 +4321,21 @@ def test_rhino_logic_runs_without_anything_rhinos_python_lacks(monkeypatch):
     big_ccw, small_cw = [[0, 0], [10, 0], [10, 10], [0, 10]], [[0, 0], [0, 1], [1, 1], [1, 0]]   # either winding
     assert logic.envelope_outlines(env, {"lot_from_tax_map": True, "buildable_cautious": [small_cw, big_ccw]}) == [
         big_ccw, small_cw]
+    for path in logic_files("rhino"):        # rhino_logic and the host_core modules it imports
+        tree = ast.parse(host_text_of(path, purpose="lint"))
+        imported = {(a.name if isinstance(n, ast.Import) else n.module).split(".")[0]
+                    for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom)) and not getattr(n, "level", 0)
+                    for a in (n.names if isinstance(n, ast.Import) else [n])}
+        beside = {"host_core"} if path == host_path("rhino", "logic") else set()   # Rhino's import of its sibling
+        assert imported - beside <= set(sys.stdlib_module_names), (path.name, imported - set(sys.stdlib_module_names))
+    # Rhino imports rhino_logic as a plain module, where a package-relative import fails: only the branch for the
+    # package copy (`if __package__:`) has one, and its `else` imports the same modules from host_core beside it
     tree = ast.parse(host_text("rhino", "logic", purpose="lint"))
-    imported = {(a.name if isinstance(n, ast.Import) else n.module).split(".")[0]
-                for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom)) and not getattr(n, "level", 0)
-                for a in (n.names if isinstance(n, ast.Import) else [n])}
-    assert imported <= set(sys.stdlib_module_names), imported - set(sys.stdlib_module_names)
-    assert not [n for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.level]   # no package-relative import
+    relative = [n for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.level]
+    package_only = [i for i in tree.body if isinstance(i, ast.If) and ast.unparse(i.test) == "__package__"]
+    assert len(package_only) == 1 and relative and all(n in package_only[0].body for n in relative)
+    assert [ast.unparse(n).replace(".host_core", "host_core") for n in relative] == [
+        ast.unparse(n) for n in package_only[0].orelse if isinstance(n, ast.ImportFrom)]
 
 
 def test_on_a_tax_map_lot_the_envelope_is_drawn_on_the_cautious_outline():

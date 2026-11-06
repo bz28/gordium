@@ -13,7 +13,8 @@ import pytest
 from design_checker import present
 from design_checker import rhino_logic as logic
 from design_checker.lookup_box import box_payload, frame, main, writes
-from host_source import host_doc, host_script, host_text
+from host_source import host_doc, host_script, host_text, logic_text
+from moved_names import patch_moved
 
 REPO = Path(__file__).resolve().parents[3]
 TESTS = REPO / "packages/site_lookup/tests"
@@ -26,7 +27,7 @@ ZONES = ["R-1a", "R-1b", "R-2a", "R-3a"]
 def ground_from_the_lookup(monkeypatch):
     """The ground as the lookup reads it (spot grades, their doubts): off in the MVP (FLAT_GROUND), kept for when
     it comes back; these tests run with it on."""
-    monkeypatch.setattr(logic, "FLAT_GROUND", False)
+    patch_moved(monkeypatch, logic, "FLAT_GROUND", False)
 
 def _rules(zone="R-1b"):
     from rule_format.rulebook import load, rulebook_for
@@ -510,7 +511,7 @@ def test_p3_the_lookups_files_are_closed_one_time_limit_and_no_silent_failure():
     assert "up to %d s" % logic.LOOKUP_LIMIT_S in logic.LOOKING
     guide = host_doc("rhino", "QUICKSTART.md", purpose="wiring")
     assert "doesn't look up the zoning map" not in guide
-    assert "doesn't look the zoning map up yet" not in host_text("rhino", "logic", purpose="wiring")
+    assert "doesn't look the zoning map up yet" not in logic_text("rhino", purpose="wiring")
 
 
 # ---- the start box as one transaction, by behaviour (review round 2): the real session and lookup logic on a fake

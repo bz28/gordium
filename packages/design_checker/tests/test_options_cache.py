@@ -17,6 +17,7 @@ from design_checker import check
 from design_checker import rhino_logic as logic
 from rule_format import formula, rulebook
 from rule_format.rulebook import REPO, rulebook_for
+from moved_names import patch_moved
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
 
@@ -118,11 +119,11 @@ def test_a_changed_code_list_is_worked_out_again(monkeypatch):
     never answered from what was kept under the old one."""
     before = check.options(CITY)
     zone, use, fact = next((z, u, f[0]) for z in before["zones"] for u, f in before["follow_ups"][z].items() if f)
-    monkeypatch.setattr(logic, "STATED_FACTS", {k: v for k, v in logic.STATED_FACTS.items() if k != fact})
+    patch_moved(monkeypatch, logic, "STATED_FACTS", {k: v for k, v in logic.STATED_FACTS.items() if k != fact})
     after = check.options(CITY)
     assert fact not in after["follow_ups"][zone][use] and after == _fresh(REPO / CITY)
     monkeypatch.undo()
-    monkeypatch.setattr(logic, "IMPLIED_BY_USE", {**logic.IMPLIED_BY_USE, use: {fact: 1}})
+    patch_moved(monkeypatch, logic, "IMPLIED_BY_USE", {**logic.IMPLIED_BY_USE, use: {fact: 1}})
     implied = check.options(CITY)
     assert implied["implied"][zone][use] == {fact: 1} and fact not in implied["follow_ups"][zone][use]
     assert implied == _fresh(REPO / CITY)
@@ -137,7 +138,10 @@ def test_every_other_code_list_is_in_the_key(monkeypatch, module, name, swap):
     """Review round 1: only two of the five lists were pinned. Each swap changes the answer (checked), and the
     answer after it is the one worked out afresh, never the one kept under the old list."""
     before = check.options(CITY)
-    monkeypatch.setattr(module, name, swap(getattr(module, name)))
+    if module is logic:                     # a name host_core defines: swapped everywhere it is bound
+        patch_moved(monkeypatch, logic, name, swap(getattr(module, name)))
+    else:
+        monkeypatch.setattr(module, name, swap(getattr(module, name)))
     after = check.options(CITY)
     assert after != before and after == _fresh(REPO / CITY)
 

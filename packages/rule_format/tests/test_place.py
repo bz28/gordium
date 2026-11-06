@@ -5,6 +5,7 @@ import datetime as dt
 import json
 import re
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
@@ -12,7 +13,7 @@ import pytest
 from rule_format import place as registry
 from rule_format.place import UnknownPlace, place, places, plugin_place
 from rule_format.rulebook import REPO, jurisdictions
-from host_source import host_path
+from host_source import CORE_DIR, host_path
 
 FIXTURES = Path(__file__).parent / "fixtures/places"          # a made-up repo with one made-up place in it
 FAKE = FIXTURES / "regulations/jurisdictions/test_state/fake_town"
@@ -199,7 +200,7 @@ def test_the_check_above_finds_a_place_named_in_code():
     assert _code_strings('"""Docs: new_york/ithaca_city."""\nY = 1  # new_york/ithaca_city\n') == []
 
 
-def test_the_plugin_loads_with_the_fewest_address_words_the_check_accepts(tmp_path):
+def test_the_plugin_loads_with_the_fewest_address_words_the_check_accepts(tmp_path, monkeypatch):
     """The check above and the plugin agree: settings it lets through (here every list it allows to be empty is
     empty, and one place shares the mail) make a place.json rhino_logic loads and reads addresses with."""
     import importlib.util
@@ -213,12 +214,17 @@ def test_the_plugin_loads_with_the_fewest_address_words_the_check_accepts(tmp_pa
     plugin = tmp_path / "plugin"
     plugin.mkdir()
     shutil.copy(host_path("rhino", "logic"), plugin)
+    shutil.copytree(CORE_DIR, plugin / "host_core", ignore=shutil.ignore_patterns("__pycache__"))  # what it re-exports
     (plugin / "place.json").write_text(registry.plugin_file_text(root), encoding="utf-8")
+    monkeypatch.syspath_prepend(str(plugin))        # as in Rhino: host_core imported from beside rhino_logic.py
+    for name in [n for n in sys.modules if n == "host_core" or n.startswith("host_core.")]:
+        monkeypatch.delitem(sys.modules, name)      # put back after the test (rhino_logic forgets any it finds)
     spec = importlib.util.spec_from_file_location("rhino_logic_fewest", plugin / host_path("rhino", "logic").name)
     logic = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(logic)
     assert "may instead be in the Elsewhere, which" in logic.IN_CITY_QUESTION
     assert logic.CITY_SUFFIX == ", Testville, TS"
+    assert logic.HOST_CORE[0].__file__ == str(plugin / "host_core" / "place.py")    # the copy's own, not the repo's
 
 
 def test_a_law_file_named_by_no_value_is_a_plain_error_never_none(tmp_path):

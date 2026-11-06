@@ -22,9 +22,17 @@ design_checker.replay` runs every request of each recorded session in `test_data
 may differ between a Mac and Linux or Windows). Both run in CI.
 
 **The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
-`rhino_logic.py` runs in Rhino's Python, which can't read YAML, so it reads `place.json` beside it: the place's name,
-time zone and how its addresses are written, copied from its `jurisdiction.yaml` by `python -m rule_format place
---write` and checked current in CI. Never edit `place.json` by hand.
+`rhino_logic.py` runs in Rhino's Python, which can't read YAML, so `host_core/place.py` reads `place.json` beside
+`rhino_logic.py`: the place's name, time zone and how its addresses are written, copied from its `jurisdiction.yaml`
+by `python -m rule_format place --write` and checked current in CI. Never edit `place.json` by hand.
+
+**host_core/** holds the half of the plugin's logic that has nothing to do with Rhino, so a second host (a Revit
+add-in) can use it: `facts` (the facts the architect states, the use questions, the row dialog), `streets` (which
+lot edges face a street, one street or two), `lookup` (an address lookup's answer, saved addresses), `start_box`
+(the start box's rows, buttons and reset) and `place`. Like `rhino_logic.py` it is Python 3.9 and the standard
+library only, because Rhino 8 imports it into its own Python 3.9. `rhino_logic.py` still offers every one of its
+names (`logic.box_rows is host_core.start_box.box_rows`) and refuses `logic.X = ...` for them, since that would
+change a copy host_core never reads; a test swaps such a name with `tests/moved_names.py`'s `patch_moved`.
 
 What it adds for the Rhino command, never changing a result:
 - **summary:** one line for the viewport corner: "All 10 rules pass", or "9 pass · 1 fail" with what fails and

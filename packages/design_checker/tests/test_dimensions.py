@@ -12,7 +12,7 @@ from design_checker import rhino_logic as logic
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "model_measurement" / "tests"))
 from test_measure import FACTS, RECT, box, sloped_roof_box  # noqa: E402
-from host_source import host_text
+from host_source import host_text, logic_text
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
 
@@ -485,7 +485,7 @@ def test_the_plugin_places_numbers_and_tags_with_the_one_placer_only():
     assert 'key = ("tag", k, j, tag)' in screen                                  # its "min" tags: labels too
     assert "logic.LabelRun(" in src and "place_dimension" not in src and "tag_spot" not in src
     assert 'for c in (y.get("candidates") or [])[:1]]' in src     # the line at its best position only (86c01ea F5)
-    source = host_text("rhino", "logic", purpose="wiring")
+    source = logic_text("rhino", purpose="wiring")
     for gone in ("def place_dimension(", "def number_spot(", "def tag_spot(", "def number_box(", "NUMBER_SCALES"):
         assert gone not in source                                    # one placer: #29's own is gone
     assert source.count("def notice_place(") == 1 and source.count("def notice_spot(") == 1

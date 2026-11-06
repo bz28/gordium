@@ -17,6 +17,7 @@ from design_checker import check
 from design_checker import rhino_logic as logic
 from rule_format.rulebook import REPO
 from host_source import host_dir
+from moved_names import patch_moved
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
 LAPTOP_PX = 900                 # the box's width on a 1366 x 768 laptop, with room for Rhino around it
@@ -296,12 +297,12 @@ def test_long_text_in_every_other_row_still_fits(ui, monkeypatch):
             {"key": "ground", "label": "Ground", "text": long, "actions": [("ground", "Change…", True)],
              "tick": (long[:40], False)}]
     gordium_ui, _ = ui
-    monkeypatch.setattr(gordium_ui.logic, "box_rows", lambda state: rows)
+    patch_moved(monkeypatch, gordium_ui.logic, "box_rows", lambda state: rows)
     # the lines under the rows too: Draw's reason, the amber line, the note under the questions (a combined refusal)
     # (draw_reason here; box_reason after #32, which the demo's box reads instead)
     for name in [n for n in ("draw_reason", "box_reason", "uncertain") if hasattr(gordium_ui.logic, n)]:
-        monkeypatch.setattr(gordium_ui.logic, name, lambda state: long)
-    monkeypatch.setattr(gordium_ui.logic, "FOLLOW_UP_HELP", long)
+        patch_moved(monkeypatch, gordium_ui.logic, name, lambda state: long)
+    patch_moved(monkeypatch, gordium_ui.logic, "FOLLOW_UP_HELP", long)
     state = dict(_state("R-1b", "one_family_detached", _questions(LONG_QUESTIONS)), use_note=long)
     px, layout = laid_out(ui, state, check.options(CITY))
     shown = texts(layout)
