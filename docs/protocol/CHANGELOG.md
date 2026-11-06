@@ -10,5 +10,5 @@ change can't land without a version and a word here (the rules for minor and maj
 [site_description_v1.md](site_description_v1.md#versions)).
 
 - **2026-11-06 · protocol 1.0 · site description `gordium.site/1`** (schema sha256 `0aec44ae2f9e296c70565351c4a5191e7b28e3e7302c194ce8aa0322402702b7`): first version.
-  Commands `hello`, `read_model`, `check_site` and `start_site`; the five older commands answer as before (and
-  now go through the site description themselves). Problem code `tool_words` for a tool's own words.
+  Commands `hello`, `read_model`, `check_site` and `start_site`; the five older commands answer as before
+  (`check` and `start` now go through the site description themselves). Problem code `tool_words` for a tool's own words.

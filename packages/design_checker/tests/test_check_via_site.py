@@ -316,3 +316,16 @@ def test_rhino_clears_the_site_descriptions_half_written_copy_too(tmp_path):
     space["_drop_report_part"](str(report))
     assert sorted(tmp_path.iterdir()) == [report]
     space["_drop_report_part"](str(tmp_path / "gone" / "house.xlsx"))      # never raises
+
+
+def test_a_refused_request_leaves_the_earlier_report_and_its_site_alone(tmp_path):
+    """Review round 3 (PR 4): facts refused before any file is touched."""
+    path, facts = MODELS[1]
+    report = tmp_path / "house.xlsx"
+    doc = site_json.read_model(path, facts, inventory_complete=True)
+    check_description(site_json.through_json(doc), _facts(facts), report)
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    assert sorted(before) == ["house.site.json", "house.xlsx"]
+    with pytest.raises(ValueError, match="no zone given"):
+        check_description(site_json.through_json(doc), {**_facts(facts), "zone": None}, report)
+    assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == before

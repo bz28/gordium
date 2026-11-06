@@ -40,7 +40,7 @@ ignored and a design could pass that shouldn't (Gordium's rule: never a false pa
 | `buildings` | Each solid on the building layer: `{id, role: "building", layer, name?, floor?, faces: [{points: [[x, y, z], …], holes?: [[…]]}], problems: [problem…]}`. `floor` is a floor block's height as drawn (ft); left out or `null` for any other solid. A face that can't be read exactly is never approximated: it is left out and the building gets a problem (`curved_surface`, `curved_edge`, `open_solid`…). |
 | `unsent` | Objects that may be building but couldn't be sent at all (a block, a surface): `{id, layer, kind, problem}`. A tool that can't name each such object may instead send one building per kind with no faces and the problem (`read_model` does: a building with id `"a block"` and a `not_a_solid` problem, as `read_site` reads a file); either way every building's measuring needs review. |
 | `left_out` | Objects on the lot that weren't sent: `{id, layer, could_be_building, touching, ground_like, context}`. Each one makes the check need review. `touching: null` means not known, which counts as touching. |
-| `grade` | `{source, points: [[x, y, z], …]}`, source one of `spot`, `finished_spots`, `terrain` or `none`. Always present: no ground read is `{"source": "none", "points": []}`, and the measuring then says the ground is missing. |
+| `grade` | `{source, points: [[x, y, z], …]}`, source one of `spot`, `finished_spots`, `terrain` or `none`. Always present: no ground read is `{"source": "none", "points": []}`, and the measuring then uses the lot facts' flat ground (`ground_is_flat`, `grade_elevation`) if they give one, else says the ground is missing. |
 | `inventory_complete` | `true` only when the tool looked at everything on the lot, so `left_out` is the whole list. `false` makes every building's measuring need review. |
 | `problems` | Problems with the site as a whole (the file, the lot outline). |
 
@@ -104,8 +104,10 @@ use is the one every Rhino check already takes, and both give the same answers (
 - Each `left_out` object makes the check need review (an "Objects on the lot not included" row; lot coverage and
   the accessory building rules need review); one that touches a building, or isn't known to (`touching: null`),
   makes the yards, height and stories need review too.
-- The grade comes only from the description. Facts that also give `grade_points`, a `grade_from` other than the
-  description's grade source, or extras that also list left-out objects are refused: one source for each thing.
+- The grade points come only from the description. Facts that also give `grade_points`, a `grade_from` other than
+  the description's grade source, or extras that also list left-out objects are refused: one source for each
+  thing. A flat ground stated in the facts (`ground_is_flat` with `grade_elevation`) is still used when the
+  description has no grade points, as it always has been.
 - **A problem in the tool's own words.** A tool that found a problem the measuring has no code for sends
   `{"code": "tool_words", "args": {"words": "…"}}`. It still makes the building's measuring need review. Words the
   measuring does have a code for are refused this way (send that code).

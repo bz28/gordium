@@ -772,6 +772,7 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
     once the report is. A site file that can't be written means no report is written (report_error says why); at
     worst, a check stopped between the two leaves a report with no site file beside it, never a wrong one."""
     site, facts, extras = site_json.for_measuring(site_json.to_site(doc), facts, extras)
+    _refuse_bad_facts(facts)                 # a refused request leaves the earlier report and its site alone
     kept = part = site_error = None
     if report_path is not None:
         report_path = Path(report_path)
@@ -811,6 +812,12 @@ class _NotWritten(OSError):
         super().__init__(error.errno, error.strerror)
 
 
+def _refuse_bad_facts(facts: dict) -> None:
+    problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
+    if problems:
+        raise ValueError("lot facts: " + "; ".join(problems))
+
+
 def _unlink(path: Path) -> None:
     try:
         path.unlink(missing_ok=True)
@@ -822,9 +829,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                extras: dict | None = None, step=None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
     generator builds. Exactly the same measuring, rules and presentation as a model read from a file."""
-    problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
-    if problems:
-        raise ValueError("lot facts: " + "; ".join(problems))
+    _refuse_bad_facts(facts)
     model_path = Path(name)
     say = step or _quiet
     say(STEPS["measure"])
