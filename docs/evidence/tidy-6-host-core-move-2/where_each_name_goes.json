@@ -97,6 +97,7 @@
  "REQUIRED_RGB": "rhino",
  "Recorder": "worker_client",
  "SETTLING": "report",
+ "SITE_SUFFIX": "report",
  "SOLIDS": "rhino",
  "STARTF_USESHOWWINDOW": "rhino",
  "STOP_HINT": "report",

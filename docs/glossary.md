@@ -47,6 +47,8 @@ Other documents link here the first time they use a term. The legal meaning of z
 | <a id="answer-key"></a>**Answer key** | Rules or results worked out by hand (by the architects or by us before running Gordium), used to grade Gordium's output |
 | <a id="eval"></a>**Eval** | A measured test of how good an output is, e.g. how many AI-drafted rules match the answer key |
 | <a id="worker"></a>**Worker** | The Python program running in the background while Rhino is open; it measures and checks, and Rhino only draws |
+| <a id="site-description"></a>**Site description** | The plain list a design tool sends the checker: the lot outline, each building as flat faces, the ground, and what was left out (`gordium.site/1`, [docs/protocol/](protocol/site_description_v1.md)). Anything in it the checker doesn't know is refused, never ignored |
+| <a id="protocol"></a>**Protocol** | The agreed form of the messages between a design tool and the worker, with a version number; each side refuses a version it doesn't speak |
 | <a id="artifact"></a>**Artifact (online doc)** | A web page on claude.ai, such as the System Map. Private unless shared |
 
 ## Software words
