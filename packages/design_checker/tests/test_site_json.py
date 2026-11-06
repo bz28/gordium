@@ -414,3 +414,26 @@ def test_grade_points_with_no_source_named_are_spot_grades_as_the_measuring_read
     assert site_json.grade_of({"grade_from": "terrain"}) == NO_GRADE
     assert site_json.grade_of({"grade_from": "finished_spots", "grade_points": [(1, 2, 3)]}) == \
         {"source": "finished_spots", "points": [[1, 2, 3]]}
+
+
+def test_a_lot_sent_as_null_with_no_problem_still_leaves_every_lot_measure_needing_review():
+    """The contract (lot: null, "problems should then say why"): a tool that doesn't say why isn't refused, and the
+    check is the same as with Rhino's own reason, every lot measure needing review as "no lot outline" (review of PR
+    72: the measuring's fallback is what makes this safe, so it is pinned here)."""
+    from design_checker.check import check_site
+    from model_measurement.stops import stop
+    sc = scenarios.load(scenarios.paths()[0])
+    site, facts, extras = scenarios.site(sc)
+    facts = {k: v for k, v in facts.items() if k != "grade_points"}
+    doc = from_read_site({**site, "lot": None}, site_json.grade_of(scenarios.facts(sc)), HOST)
+    assert doc["lot"] is None and doc["problems"] == [] and problems_of(doc) == []       # accepted, as documented
+    said = {"code": "no_lot_outline", "args": {"layer": "Site"}}
+    got = {}
+    for why in ([], [said]):
+        view = check_site(to_site({**doc, "problems": why}), facts, extras=extras)["view"]
+        got[bool(why)] = {i.get("rule"): (i.get("status"), i.get("reason")) for i in view["items"] if i.get("rule")}
+    lot_rules = [k for k, (status, reason) in got[True].items() if reason == stop("no_lot_outline", layer="Site")]
+    assert "R-1b.front_yard" in lot_rules and "R-1b.lot_area_one_family_detached" in lot_rules
+    assert {k: s for k, (s, _) in got[False].items()} == {k: s for k, (s, _) in got[True].items()}
+    for k in lot_rules:
+        assert got[False][k] == ("needs_review", stop("no_lot"))
