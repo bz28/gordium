@@ -77,7 +77,7 @@ def test_a_new_citation_must_be_named_so_a_stale_missing_cant_stand_beside_it(tm
     page, line = next(iter(piece_keys(audit.Audit(ITHACA).pieces["325-26"])))
     book = load(ITHACA / "5_zoning_rules/R-1b.yaml")
     rule = next(r for r in book["rules"] if r["id"] == "R-1b.front_yard")
-    rule["sources"].append({"file": audit.LAW, "page": page, "lines": [line, line], "quote": "x"})
+    rule["sources"].append({"file": audit.Audit(ITHACA).law, "page": page, "lines": [line, line], "quote": "x"})
     path = tmp_path / "R-1b.yaml"
     path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True), encoding="utf-8")
     found = audit.Audit(ITHACA, books={"R-1b": path}).problems
@@ -550,7 +550,7 @@ def test_special_permit_primary_uses_are_flagged_in_every_district(built):
 
 def test_parked_says_who_parked_it(built):
     head = built.render().split("## The table")[0]
-    assert "or the brief that parked it" in head and built.parked["adus"]["decided"].startswith("queue item 10")
+    assert "or the brief that parked it" in head and built.parked["parking"]["decided"].startswith("Ben's later list")
 
 
 # Provenance review round 3.

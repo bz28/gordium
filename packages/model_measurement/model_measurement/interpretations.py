@@ -20,8 +20,6 @@ removed) stops the measurement (needs review), never a guess.
 import functools
 from rule_format.rulebook import REPO, open_question_tags, research_entries
 
-ITHACA = "regulations/jurisdictions/new_york/ithaca_city"     # the one city measured so far
-
 
 @functools.lru_cache(maxsize=8)
 def _law(jurisdiction: str) -> tuple:
@@ -33,7 +31,11 @@ def _law(jurisdiction: str) -> tuple:
 
 
 def _jurisdiction(facts: dict) -> str:
-    return facts.get("jurisdiction") or ITHACA
+    """The place whose files are read: the facts' own jurisdiction. Facts that name none are a plain error (the
+    checker refuses them first: "no jurisdiction given"), never another place's law in its stead."""
+    if not facts.get("jurisdiction"):
+        raise ValueError("no jurisdiction given: the lot facts must say which place's law is measured")
+    return facts["jurisdiction"]
 
 
 def _answers(by_id: dict, entry: str) -> list[dict]:

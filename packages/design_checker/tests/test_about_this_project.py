@@ -3,22 +3,29 @@ only the ones the chosen district's and use's rules need, each with one-click an
 rows that wait on a fact say so exactly as before (never a false pass).
 
 Expected values come from the rulebooks read by hand (R-1b.yaml lines 386-491 for the stream and South Hill rules,
-1076 for the household rule, 1262 for the home occupation): R-1b with a one-family house reads these seven facts, of
-which the start box asks the two that shape the envelope (stream, South Hill); the household and home business are use
-details (rhino_logic.DEFERRED_FACTS), answered later; the stream's distance waits on a yes."""
+1076 for the household rule, 1262 for the home occupation, the end of the file for the private garage, and the ADU
+rules): R-1b with a one-family house reads these facts, of which the start box asks the four that shape the exterior
+(whether an ADU is on the lot, Ben 2026-10-30: a detached one is a building; stream, South Hill, the cars the garages
+hold); the household and home business are use details (rhino_logic.DEFERRED_FACTS), answered later; the stream's
+distance waits on a yes; the number of garages is asked only by the garage row, once the cars are over the limit; the
+ADU's own facts only by its rows, once an ADU is said to be on the lot."""
 
 import copy
+import sys
 
 import pytest
 
 from design_checker import check, present, scenarios
 from design_checker import rhino_logic as logic
 from design_checker.check import check_site
+from rule_format.rulebook import REPO
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
-R1B_ASKS = ["stream_near_lot", "south_hill_overlay"]       # up front: what shapes the envelope (Ben, 2026-10-27)
-HOUSEHOLD = ["unrelated_persons", "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
-             "home_occupation"]                             # use details: deferred, answered when the interior is planned
+R1B_ASKS = ["accessory_dwelling_unit",                    # up front: a detached ADU is a building (Ben, 2026-10-30)
+            "stream_near_lot", "south_hill_overlay",        # up front: what shapes the envelope (Ben, 2026-10-27)
+            "garage_cars"]
+HOUSEHOLD = ["unrelated_persons", "owner_occupied", "functional_family_unit",
+             "home_occupation"]                       # use details: deferred, answered when the interior is planned
 
 
 @pytest.fixture(scope="module")
@@ -33,6 +40,51 @@ def test_r1b_one_family_asks_exactly_the_facts_its_rules_read(options):
     # the household and home business are never asked up front, whatever else is answered
     every = logic.follow_up_rows(options, "R-1b", "one_family_detached", {"home_occupation": True, "stream_near_lot": True})
     assert not {r["key"] for r in every} & set(logic.DEFERRED_FACTS)
+
+
+def test_the_garage_cars_are_asked_up_front_and_the_garage_count_never(options):
+    """The garage's car limit (chart p.2 notes 6, 7) reads two facts in R-1a to R-2c: the cars all the garages hold
+    are asked in the box; the number of garages (only needed over the limit) never is, whatever is answered. The row
+    asks it instead, and only once the cars are entered (needs_of)."""
+    for zone in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c"):
+        assert "private_garages" in options["follow_ups"][zone]["one_family_detached"], zone   # the rule reads it
+        for facts in ({}, {"garage_cars": 5}, {"garage_cars": 9, "stream_near_lot": True}):
+            keys = [r["key"] for r in logic.follow_up_rows(options, zone, "one_family_detached", facts)]
+            assert "garage_cars" in keys and "private_garages" not in keys, (zone, facts)
+    for zone in ("R-3a", "R-3aa", "R-3b", "RU"):                       # no car limit there: never asked
+        assert "garage_cars" not in options["follow_ups"][zone]["one_family_detached"], zone
+    assert "private_garages" not in logic.BOX_ASKS and "garage_cars" in logic.BOX_ASKS
+    names = {"garage_cars", "private_garages"}
+    assert logic.needs_of(names, {}) == ["garage_cars"]                 # the cars first
+    assert logic.needs_of(names, {"garage_cars": 5}) == ["private_garages"]
+    assert logic.needs_of(names, {"garage_cars": 5, "private_garages": 2}) == []
+    assert logic.minimum("private_garages") == 1 and logic.minimum("garage_cars") == 0
+    assert logic.choices_for("garage_cars", "count")[0] == ("No garage", 0)
+
+
+
+ADU_ROWS = ("adu_one_per_parcel", "adu_bedrooms", "adu_front_yard", "adu_attached_size", "adu_detached_size",
+            "adu_detached_setbacks")
+
+
+def test_the_adu_is_asked_up_front_in_every_district_and_its_own_facts_never(options):
+    """Whether an ADU is on the lot shapes the exterior (a detached one is a building), so the box asks it (Ben,
+    2026-10-30) wherever a rule reads it; its own facts (detached, bedrooms, floor areas, ...) wait for its yes, in its
+    rows. Answered No, every one of the six ADU rows is not applicable (applies_when: accessory_dwelling_unit)."""
+    assert "accessory_dwelling_unit" in logic.BOX_ASKS and "accessory_dwelling_unit" not in logic.DEFERRED_FACTS
+    after = {"accessory_dwelling_unit": True, "adu_detached": True}
+    for zone in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "RU"):
+        for facts in ({}, after):
+            keys = [r["key"] for r in logic.follow_up_rows(options, zone, "one_family_detached", facts)]
+            assert "accessory_dwelling_unit" in keys and not set(keys) & set(logic.ROW_ONLY_FACTS), (zone, keys)
+    sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
+    from test_measure import FACTS, RECT, box
+    site = {"units": "ft", "lot": RECT, "buildings": [box(10, 25, 35, 55)], "problems": []}
+    base = {**FACTS, "jurisdiction": CITY, "zone": "R-1b", "main_building": "house"}
+    ids = lambda adu: {i["id"].split(".")[1]: i["status"] for i in check_site(
+        site, {**base, "accessory_dwelling_unit": adu})["view"]["items"]}
+    assert not set(ids(False)) & set(ADU_ROWS)                                     # No: none of the six shows
+    assert {r: s for r, s in ids(None).items() if r in ADU_ROWS} == dict.fromkeys(ADU_ROWS, present.REVIEW)
 
 
 def test_what_the_drawing_shows_is_never_asked_up_front(options):

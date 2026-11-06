@@ -168,7 +168,7 @@ def test_no_two_yard_dimensions_start_at_the_same_point_each_from_the_middle_of_
 
 def test_a_skewed_wall_starts_its_dimension_at_the_middle_of_its_nearest_part():
     from design_checker.check import dim_points
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     from shapely.geometry import Polygon
     site = _plot(box(12, 27, 38, 65))
     shape = Lot(site, FACTS)
@@ -229,7 +229,7 @@ def test_a_gables_footprint_point_mid_wall_never_moves_the_dimension_off_the_wal
     """Review round 3, F1: a gable's footprint (its roof planes seen from above) keeps a point under the ridge in
     the middle of each gable wall; the dimension started at a quarter point. Straight runs are one wall now."""
     from design_checker.check import dim_points
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     from shapely.geometry import Polygon
     shape = Lot(_plot(box(12, 27, 38, 65)), FACTS)
     gable = Polygon([(12, 27), (25, 27), (38, 27), (38, 65), (25, 65), (12, 65)])
@@ -275,7 +275,7 @@ def test_a_short_yards_dimension_is_never_drawn_more_than_a_quarter_inch_longer_
     import math
     from shapely.geometry import Polygon
     from design_checker.check import BEND_SLACK_FT, DIM_NEAR_FT, dim_candidates
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     shape = Lot(_plot(box(12, 27, 38, 65)), FACTS)
     skewed = Polygon([(10, 30), (30, 26), (30, 60), (10, 60)])          # nearest the street at its right end, 26 ft
     found = dim_candidates([[30, 0], [30, 26]], "front_yard", shape, skewed, RECT["edges"], worst=True)
@@ -290,7 +290,7 @@ def test_a_curved_wall_in_many_short_pieces_starts_its_dimension_on_the_wall():
     chord, and the dimension started 1 ft in front of the wall. Runs now stay within STRAIGHT_FT of their chord."""
     from shapely.geometry import Point, Polygon
     from design_checker.check import dim_points
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     arc = [(12 + 26 * k / 100, 27 + 1 - ((26 * k / 100 - 13) / 13) ** 2) for k in range(101)]
     house = Polygon(arc + [(38, 65), (12, 65)])                          # sags back to y 28 at its middle
     end, start = dim_points([[12, 0], [12, 27]], "front_yard", Lot(_plot(box(12, 27, 38, 65)), FACTS), house,
@@ -344,7 +344,7 @@ def test_a_house_turned_against_its_lot_is_dimensioned_at_its_shortest_point_nev
     import math
     from shapely.geometry import Point, Polygon
     from design_checker.check import DIM_NEAR_FT, dim_candidates
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     t = math.radians(10)
     corner = (5.0, 20.0)
     house = Polygon([corner, (corner[0] + 40 * math.cos(t), corner[1] + 40 * math.sin(t)),
@@ -589,7 +589,7 @@ def test_every_yard_gets_its_snap_line_a_lot_depth_limit_both_ends_and_curved_li
     None)."""
     from shapely.geometry import LineString
     from design_checker.check import full_yard_lines
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     bow = [[x, -10 * (1 - ((x - 25) / 25) ** 2)] for x in range(0, 51, 5)]        # the street side bulges 10 ft
     lot = {"id": "lot", "edges": [{"points": bow}, {"points": [[50, 0], [50, 100]]}, {"points": [[50, 100], [0, 100]]},
                      {"points": [[0, 100], [0, 0]]}]}

@@ -17,8 +17,8 @@ from design_checker import context_box as cb
 from design_checker import rhino_logic as logic
 from design_checker.lookup_box import box_payload
 from model_measurement.read_3dm import read_site
-from site_lookup.lookup import lookup
-from site_lookup.sources import ENDPOINTS
+from site_lookup.adapters.ithaca_city.lookup import lookup
+from site_lookup.adapters.ithaca_city.sources import ENDPOINTS
 
 REPO = Path(__file__).parents[3]
 spec = importlib.util.spec_from_file_location("site_lookup_t", REPO / "packages/site_lookup/tests/test_lookup.py")
@@ -279,7 +279,7 @@ def test_only_the_very_outline_edited_around_this_lot_is_kept_from_a_redraw():
     assert "marked.SetUserString(logic.DRAWN_KEY, str(added.Id))" in draw
     pieces = RHINO[RHINO.index("def _edited_pieces("):RHINO.index("def _context_record(")]
     assert '"own": str(o.Id)' in pieces and "logic.DRAWN_KEY" in pieces and "logic.FRAME_KEY" in pieces
-    from site_lookup import context as site_context                      # each ring its own id
+    from site_lookup.adapters.ithaca_city import context as site_context                      # each ring its own id
     feet = lambda p: [round(p[0], 2), round(p[1], 2)]                    # noqa: E731
     two = [{"attributes": {"OBJECTID": 7}, "geometry": {"rings": [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]],
                                                                   [[20, 0], [30, 0], [30, 10], [20, 10], [20, 0]]]}}]
@@ -694,7 +694,7 @@ def test_footprints_down_in_a_reopened_file_are_never_said_or_recorded_as_kept(l
     assert record3["layers"]["buildings"]["status"] == "found" and set(record3["kept_from"]) == {"buildings"}
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
     assert "logic.keeps_live" not in draw and '"state_buildings" not in' not in draw      # the plan decides
-    from site_lookup.context import LIVE_ONLY
+    from site_lookup.adapters.ithaca_city.context import LIVE_ONLY
     assert logic.LIVE_ONLY == LIVE_ONLY                    # the mark that tells a live-only credit line apart
 
 
@@ -727,7 +727,7 @@ def test_no_reader_text_still_says_the_footprints_are_never_saved():
     """Review of the editable outlines, P3: after the switch to store raw, docstrings and comments still said the
     footprints were shown only on screen and never saved, and the fixture docstring said nothing of them was recorded."""
     texts = {p: (REPO / p).read_text(encoding="utf-8") for p in (
-        "apps/rhino_plugin/gordium_rhino.py", "packages/site_lookup/site_lookup/context.py",
+        "apps/rhino_plugin/gordium_rhino.py", "packages/site_lookup/site_lookup/adapters/ithaca_city/context.py",
         "packages/design_checker/design_checker/context_box.py", "packages/design_checker/design_checker/rhino_logic.py",
         "packages/site_lookup/tests/test_context.py")}
     for stale in ("only drawn on screen by the overlay, never saved", "the building footprints, never saved",

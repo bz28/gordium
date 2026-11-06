@@ -6,10 +6,19 @@ import contextlib
 import datetime as _dt
 import json
 import math
+import os
 import queue
 import re
 import threading
 import time
+
+# The place the plugin checks (its only place, for now), from the place registry: its settings file,
+# regulations/jurisdictions/<state>/<place>/jurisdiction.yaml, copied for Rhino's Python (which can't read YAML) into
+# place.json beside this file by `python -m rule_format place --write` (CI checks the copy is current). Every value
+# below that names the place (its name, the address tail, its own words and ZIP codes, its time zone) comes from it.
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "place.json"), encoding="utf-8") as _f:
+    PLACE = json.load(_f)
+_ADDRESSES = PLACE["addresses"]
 
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
@@ -420,6 +429,25 @@ STATED_FACTS = {
                         "the distance from the stream"),
     "south_hill_overlay": ("Is the lot in the South Hill Overlay District (§325-8E; the City's zoning map)?", "yes_no",
                            "whether the lot is in the South Hill Overlay"),
+    # the chart's private garage limit (p.2 notes 6 and 7): the cars all the lot's garages hold together, and, only once
+    # that is over the limit, how many garages (ROW_ONLY_FACTS)
+    "garage_cars": ("Cars the lot's private garages hold, all together: every enclosed garage, attached or detached (0 if "
+                    "there is none; a carport isn't enclosed)", "count", "the cars the private garages hold"),
+    "private_garages": ("Private garages on the lot (an attached garage counts)", "count",
+                        "the private garages on the lot"),
+    # an accessory dwelling unit (§325-28): what kind it is, then, only once an ADU is said to be on the lot, what its
+    # rules read (ROW_ONLY_FACTS); a detached one's building is picked in the model (adu_building), never typed
+    "adu_detached": ("Is the accessory dwelling unit detached: in its own building, not in or on the main building? "
+                     "(§325-3B)", "yes_no", "whether the ADU is detached"),
+    "adu_existing_building": ("Is the detached ADU in an accessory building that already exists (not new "
+                              "construction)? (§325-28C(7)(b))", "yes_no", "whether the ADU's building already exists"),
+    "adus_on_parcel": ("Accessory dwelling units on the parcel, any already there included (§325-28C(1))", "count",
+                       "the ADUs on the parcel"),
+    "adu_bedrooms": ("Bedrooms in the accessory dwelling unit (§325-28C(3))", "count", "the ADU's bedrooms"),
+    # floor areas as typed, never rounded (as the home occupation's)
+    "adu_floor_area": ("Floor area of the attached accessory dwelling unit (sq ft)", "area", "the ADU's floor area"),
+    "primary_floor_area": ("Floor area of the whole main building the ADU is in, the ADU included (sq ft)", "area",
+                           "the main building's floor area"),
     # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
@@ -427,7 +455,8 @@ STATED_FACTS = {
 # The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
 # at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
 # accept what the check refuses (#r2 review round 2).
-MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1}
+MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1,
+           "private_garages": 1, "adus_on_parcel": 1}
 # Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit
 # is 1 to occupants): asked only where some value in that range would change the row (present.could_settle).
 OPTIONAL = {"occupants_most_in_one_unit": "occupants"}
@@ -467,8 +496,9 @@ DRAWN_FACTS = ("primary_buildings", "primary_buildings_same_use")
 # in their own collapsed group, apart from the building's problems (is_use_detail). Ben will settle the exact questions
 # later, so this tuple is the one place that moves them: a fact added here leaves the start box and joins that group.
 DEFERRED_FACTS = ("unrelated_persons", "unrelated_persons_with_children", "occupants", "occupants_most_in_one_unit",
-                  "owner_occupied", "accessory_dwelling_unit", "functional_family_unit",
-                  "home_occupation", "home_occupation_area", "home_occupation_unit_area", "rooms_let_for_profit")
+                  "owner_occupied", "functional_family_unit",
+                  "home_occupation", "home_occupation_area", "home_occupation_unit_area", "rooms_let_for_profit",
+                  "adu_bedrooms", "adu_floor_area", "primary_floor_area")
 # Facts the measuring checks against each other (a count with the children counted can't be smaller than the count
 # without: model_measurement.project.fact_conflict_rows): kept or dropped together, so a contradiction is never hidden
 # by dropping half of it.
@@ -477,7 +507,19 @@ CHECKED_TOGETHER = (("unrelated_persons", "unrelated_persons_with_children"),)
 # answer is said in each row's reason instead (coordinator for Ben, 2026-10-28)
 USE_DETAILS_TITLE = "Use details (for later)"
 USE_DETAILS_WHEN = "Answer when you plan the interior"
-BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS)   # what the box can ask
+# Facts never asked in the start box, each with the fact that must be entered before a row asks it: the number of
+# private garages matters only when the cars they hold are over the chart's limit (a lot of three cars or fewer passes
+# whatever the count), so asking it up front would ask every architect with a garage a question that rarely matters.
+# A row waiting on the garage's car limit asks the cars first (needs_of); entered over the limit, it then asks this.
+# An accessory dwelling unit's facts likewise wait for "is there an ADU" (asked in the start box: a detached ADU is a
+# building, so it shapes the exterior, Ben 2026-10-30), and a detached one's for
+# "detached?": a lot without an ADU is never asked them (its rules are not applicable once that is answered no).
+ROW_ONLY_FACTS = {"private_garages": "garage_cars", "adu_detached": "accessory_dwelling_unit",
+                  "adus_on_parcel": "accessory_dwelling_unit", "adu_bedrooms": "accessory_dwelling_unit",
+                  "adu_existing_building": "adu_detached", "adu_floor_area": "adu_detached",
+                  "primary_floor_area": "adu_detached"}
+BOX_ASKS = tuple(k for k in STATED_FACTS if k != "stories" and k not in INTERIOR_FACTS + DRAWN_FACTS + DEFERRED_FACTS
+                 and k not in ROW_ONLY_FACTS)   # what the box can ask
 
 
 def is_use_detail(item, facts=None):
@@ -550,12 +592,15 @@ ABOUT_LABELS = {
     "stream_near_lot": "Stream or inlet",
     "stream_distance": "Distance to it (ft)",
     "south_hill_overlay": "South Hill Overlay",
+    "garage_cars": "Private garage, cars",
     "abuts_r1_district": "Next to R-1 land",
     "conversion": "New or converted",
 }
 ABOUT_WORDS = {            # (the "no" answer, the "yes" answer)
     "owner_occupied": ("Owner lives elsewhere", "Owner lives in the house"),
     "accessory_dwelling_unit": ("No ADU on the lot", "ADU on the lot"),
+    "adu_detached": ("Attached (in or on the house)", "Detached (its own building)"),
+    "adu_existing_building": ("New construction", "In an existing accessory building"),
     "functional_family_unit": ("Not relying on one", "Will show it to the City"),
     "home_occupation": ("No home business", "Home business planned"),
     "stream_near_lot": ("No stream within 20 ft", "Stream or inlet within 20 ft"),
@@ -568,13 +613,14 @@ ABOUT_COUNTS = {            # a count's one-click numbers (a typed number is not
     "rooms_let_for_profit": [("None", 0)] + [(str(n), n) for n in range(1, 7)],
     "attached_units_in_building": [(str(n), n) for n in range(2, 9)],
     "dwelling_units": [(str(n), n) for n in range(1, 9)],
+    "garage_cars": [("No garage", 0)] + [(str(n), n) for n in range(1, 7)],
 }
 # Several answers in one click (shown only when the district and use ask at least one of them; it fills the others
 # that are asked and leaves the rest as they were). Each is a statement the architect makes by picking it.
 QUICK_ANSWERS = (
     ("1 family, no roomers", {"unrelated_persons": 0, "unrelated_persons_with_children": 0, "rooms_let_for_profit": 0,
                               "functional_family_unit": False}),
-    ("Owner lives there, no ADU", {"owner_occupied": True, "accessory_dwelling_unit": False}),
+    ("Owner lives there", {"owner_occupied": True}),       # whether an ADU is on the lot: asked up front, alone
     ("No home business", {"home_occupation": False}),
     ("No stream, not in South Hill", {"stream_near_lot": False, "south_hill_overlay": False}),
 )
@@ -836,9 +882,11 @@ def answers_note(entries):
 def needs_of(names, values, settles=None):
     """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked; never the
     stories count (asked only where the measuring asks for it: stories_needed). An optional one (OPTIONAL) only where
-    `settles(key)` says entering it could change the row."""
+    `settles(key)` says entering it could change the row. A row-only fact (ROW_ONLY_FACTS) only once the fact it
+    follows is entered."""
     return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None
-            and (k not in OPTIONAL or (settles is not None and settles(k)))]
+            and (k not in OPTIONAL or (settles is not None and settles(k)))
+            and (k not in ROW_ONLY_FACTS or (values or {}).get(ROW_ONLY_FACTS[k]) is not None)]
 
 
 def _and(words):
@@ -1021,7 +1069,7 @@ def set_street_lines(facts, lines, ids=None):
 
 
 def drop_stale(facts, lot_ids, building_ids):
-    """The saved facts without a lot or main building that is no longer in the model (redrawn, joined, deleted):
+    """The saved facts without a lot, main building or ADU's building that is no longer in the model (redrawn, joined, deleted):
     the lot's street lines go with it, so the confirm dialog asks again instead of keeping an id nothing has."""
     out = dict(facts or {})
     if out.get("lot_id") and out["lot_id"] not in lot_ids:
@@ -1029,6 +1077,8 @@ def drop_stale(facts, lot_ids, building_ids):
         set_street_lines(out, None)
     if out.get("main_building") and out["main_building"] not in building_ids:
         out.pop("main_building")
+    if out.get("adu_building") and out["adu_building"] not in building_ids:      # the ADU's building, the same way
+        out.pop("adu_building")
     return out
 
 
@@ -1097,7 +1147,18 @@ def after_lot_pick(facts, picked_lot):
         out["lot_id"] = picked_lot
         set_street_lines(out, None)          # the old lot's street lines and their names go with it
         out.pop("plan_north_deg", None)      # the looked-up lot's turn belonged to it
+        out.pop("ground_fall", None)         # and so did its ground (lot_ground_dropped: the saved state's too)
     return out
+
+
+def lot_ground_dropped(saved_ui):
+    """The saved state once the architect puts another lot in place of the looked-up one (their survey, a lot they
+    drew, another outline picked): the looked-up ground fall was read on the old lot, so it no longer shows the lot
+    level (review round 3: a level reading kept after the lookup's doubtful lot was replaced let height and stories
+    pass on ground never read). Height and stories need review until the address is looked up again."""
+    saved_ui = dict(saved_ui)
+    saved_ui.pop("ground_fall", None)
+    return saved_ui
 
 
 def street_enter_keeps(facts):
@@ -3012,10 +3073,15 @@ OVERLAYS_NOT_KEPT = "Overlays may apply here (a saved lookup can't keep them): c
 
 
 def city_day(now=None):
-    """The City's own day (Ithaca: America/New_York) at `now` (UTC; default the present), as YYYY-MM-DD: the day a
-    lookup was checked and a Draw is saved, never the UTC day (after about 8 pm in Ithaca that is tomorrow). US
-    Eastern time by the federal rule (15 U.S.C. 260a: from 2 am on the second Sunday of March to 2 am on the
-    first Sunday of November, UTC-4; otherwise UTC-5), so no time-zone database is needed in Rhino's Python."""
+    """The place's own day (its time zone: PLACE, e.g. Ithaca's America/New_York) at `now` (UTC; default the present),
+    as YYYY-MM-DD: the day a lookup was checked and a Draw is saved, never the UTC day (after about 8 pm in Ithaca
+    that is tomorrow). Its standard offset, one hour more by the US federal rule when it keeps daylight time (15
+    U.S.C. 260a: from 2 am on the second Sunday of March to 2 am on the first Sunday of November; Ithaca: UTC-4,
+    otherwise UTC-5), so no time-zone database is needed in Rhino's Python."""
+    zone = PLACE["time_zone"]
+    standard = zone["standard_utc_offset_hours"]
+    if zone["daylight_saving"] not in ("us_federal", "none"):
+        raise ValueError("unknown daylight-saving rule " + repr(zone["daylight_saving"]) + " in place.json")
     now = now or _dt.datetime.now(_dt.timezone.utc)
     if now.tzinfo is None:
         now = now.replace(tzinfo=_dt.timezone.utc)
@@ -3024,8 +3090,9 @@ def city_day(now=None):
     def sunday(month, nth):              # the nth Sunday of the month in now's year
         first = _dt.datetime(now.year, month, 1)
         return first + _dt.timedelta(days=(6 - first.weekday()) % 7 + 7 * (nth - 1))
-    summer = sunday(3, 2) + _dt.timedelta(hours=7) <= now < sunday(11, 1) + _dt.timedelta(hours=6)
-    return (now - _dt.timedelta(hours=4 if summer else 5)).date().isoformat()
+    summer = (zone["daylight_saving"] == "us_federal" and         # 2 am local: standard time, then daylight time
+              sunday(3, 2) + _dt.timedelta(hours=2 - standard) <= now < sunday(11, 1) + _dt.timedelta(hours=1 - standard))
+    return (now + _dt.timedelta(hours=standard + 1 if summer else standard)).date().isoformat()
 
 
 def two_zones_ask(zones):
@@ -3213,13 +3280,13 @@ def still_shown(saved_ui):
     return STILL_SHOWN.format(address=address.split(",")[0].strip()) if address else NOTHING_CHANGED
 
 
-# ---- address type-ahead (site_lookup.suggest, in lookup_box's own short process; the box shows the list) ----------
+# ---- address type-ahead (the place's site_lookup adapter's suggest, in lookup_box's own process; the box shows the list) ----
 SUGGEST_DELAY_S = 0.3          # s after the last key before the City's address layer is asked
 SUGGEST_LIMIT_S = 4.0          # s: slower than this, it is no help: "Suggestions unavailable"
 SUGGEST_MIN_CHARS = 4
 SUGGESTIONS_UNAVAILABLE = "Suggestions unavailable: type the full address and press Look up."
 NO_MATCH = "No matching address suggested: type the full address and press Look up."
-CITY_SUFFIX = ", Ithaca, NY"
+CITY_SUFFIX = _ADDRESSES["tail"]           # the place's own: ", Ithaca, NY" (PLACE)
 
 
 BOX_TEXT_WIDTH = 560           # px: the start box's long lines wrap here (one unbroken amber line stretched the box
@@ -3472,7 +3539,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         saved_ui["ground_kind"] = "spot"
         saved_ui["ground_source"] = SUGGESTED + " · " + label("ground", "ground")
     zs = [p[2] for p in writes.get("spots") or []]
-    if FLAT_GROUND and zs:                       # said, never used: how much the ground the lookup found falls
+    # how much the ground the lookup found falls: said, and from 0.5 ft (measure.FLAT_FALL_FT) it holds height and
+    # stories at needs review; the points themselves are never used. Only from a whole reading: with points missing
+    # (the elevation service's doubt) or fewer than three, a fall can't be told (one point reads 0.0, "level": a
+    # false pass, slope review round 1), so none is kept and the ground counts as unknown
+    whole = (details.get("ground") or {}).get("status") not in ("needs_review", "ask") and len(zs) >= GROUND_POINTS
+    if FLAT_GROUND and zs and whole:
         saved_ui["ground_fall"] = round(max(zs) - min(zs), 1)
     else:
         saved_ui.pop("ground_fall", None)
@@ -3559,7 +3631,8 @@ def pick_effect(what, outcome, facts, saved_ui):
         saved_ui["street_name"] = name
         saved_ui["street_source"] = ENTERED
     elif what in ("lot", "draw_lot"):
-        facts = after_lot_pick(facts, outcome) if outcome != facts.get("lot_id") else facts
+        if outcome != facts.get("lot_id"):             # another lot: the looked-up ground was read on the old one
+            facts, saved_ui = after_lot_pick(facts, outcome), lot_ground_dropped(saved_ui)
         facts["lot_surveyed"] = what == "lot"          # Use my survey…: a survey; drawn over the guide: not
         saved_ui = settle(saved_ui, "lot")
         if what == "draw_lot":
@@ -3800,10 +3873,13 @@ def _question(state):
     return " · ".join(asks) or None
 
 
-# The MVP assumes flat ground (Ben, 2026-10-20): flat at the lot level and finished, so height and stories are
-# checked (with "assuming flat ground" on their rows and in the report). The spot-grade, terrain and regrade paths
-# stay, behind this one switch: set it to False to bring the Ground row back.
+# The MVP assumes flat ground (Ben, 2026-10-20): flat at the lot level and finished (with "assuming flat ground" on
+# the height and stories rows and in the report). Height and stories are checked on it only where the lookup found
+# the lot level (measure.flat_assumption_unsafe: a fall under 0.5 ft); a sloping lot, or one with no ground looked
+# up, gives them needs review (2026-10-29). The spot-grade, terrain and regrade paths stay, behind this one switch:
+# set it to False to bring the Ground row back.
 FLAT_GROUND = True
+GROUND_POINTS = 3          # the fewest looked-up ground points a fall is read from (the lookup reads every corner + 1)
 ASSUMED_FLAT = "assuming flat ground"
 ASSUMED_SOURCE = "assumed (flat ground, the MVP's rule)"
 
@@ -3815,7 +3891,10 @@ def ground_facts(state, lot_level, flat=None):
     only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
     if FLAT_GROUND if flat is None else flat:
         return {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": lot_level, "grade_from": None,
-                "ground_assumed": "flat", **({"ground_fall": state["ground_fall"]} if state.get("ground_fall") else {})}
+                "ground_assumed": "flat",
+                # the looked-up fall, 0 too (level, known); None (unknown) removes one saved for an earlier lookup
+                # (Draw sets every key given and drops each None: slope review round 1, a stale 0.0 passed)
+                "ground_fall": state.get("ground_fall")}
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
     finished = kind == "regrade" or bool(state.get("no_regrading"))
@@ -3874,8 +3953,9 @@ def fact_sources(state, today, confirmed):
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED, chosen("corner")),
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
+        # (whether that decides height and stories is the measuring's: measure.flat_assumption_unsafe)
         "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
-                        "lot; height is checked as if flat)" if state.get("ground_fall") else ""),
+                        "lot)" if state.get("ground_fall") is not None else " (ground levels not read in full)"),
                         ASSUMED_SOURCE, None) if FLAT_GROUND else
                    fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                         "as drawn" if kind == "flat" else ground.get("source") or
@@ -4113,6 +4193,39 @@ def should_recheck(dirty_at, now, running, box_open, wait, last_at=None, auto=Tr
     return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
 
 
+# ---- edits made without touching an object (the audit of main, 2026-10-29): live mode heard only objects added,
+# deleted, replaced or re-attributed, so these left a ✓ showing as current over a model that had changed.
+def layer_edit_counts(event, old, new):
+    """Whether a layer change can change what Gordium checks. Which objects are the lot and the buildings is decided
+    by each object's layer's full path (classify), hidden and locked objects counted too, so a layer renamed or
+    moved under another parent counts (`old`, `new`: the layer's (name, parent id) before and after, None if it
+    can't be read: then it counts), and so does one deleted or brought back. Its colour, whether it is shown or
+    locked, the current layer, a new empty layer and the order of the layer list don't (Gordium itself changes
+    those on its own layers at every check: counting them would grey every result it had just shown). `event`:
+    Rhino's LayerTableEventType's name (Added, Deleted, Undeleted, Modified, Sorted, Current)."""
+    if event in ("Deleted", "Undeleted"):
+        return True
+    if event == "Modified":
+        return old is None or new is None or tuple(old) != tuple(new)
+    return event not in ("Added", "Sorted", "Current")       # any other kind Rhino adds: counted, never missed
+
+
+def block_edit_counts(event):
+    """Whether a block definition change can change what Gordium checks: a block's contents edited (BlockEdit),
+    redefined, deleted or brought back changes every building placed from it. A new definition (nothing placed from
+    it yet: placing one adds an object, heard on its own) and the order of the list don't. `event`: Rhino's
+    InstanceDefinitionTableEventType's name."""
+    return event not in ("Added", "Sorted")
+
+
+def units_edit_counts(seen, now):
+    """Whether a document properties change changed the model's units, the one property the check reads (every
+    length is taken to feet by its scale): `seen`, the units last noted for this document (None: none yet, so it
+    counts, never assumed unchanged), `now` the units after the change. Rhino says only that some property
+    changed (a render setting, a note), so the units are compared."""
+    return seen is None or seen != now
+
+
 # ---- the Check button (Ben, 2026-10-21): no check after every edit unless asked ---------------------------------
 CHANGED_SINCE = "Model changed since the last check — press Check"
 AUTO_CHECK_LABEL = "Check after every edit"
@@ -4190,7 +4303,8 @@ def last_check_at(checked_at, document):
 # Each panel change is one Rhino undo step, named in Edit > Undo by what it did (a change written outside any undo
 # record is skipped by Ctrl+Z, which undoes the architect's own earlier edit instead: #32's review, 2026-10-26)
 UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",
-              "main": "Gordium: pick the main building", "add": "Gordium: add to check",
+              "main": "Gordium: pick the main building", "adu": "Gordium: pick the ADU's building",
+              "add": "Gordium: add to check",
               "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
               "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
               "edit_site": "Gordium: the start box", "grade": "Gordium: the start box",
@@ -4627,7 +4741,7 @@ def context_replaces(payload):
     return out | ({"gordium"} if out else set())
 
 
-LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.context's mark on a live-only layer's credit line
+LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.adapters.ithaca_city.context's mark on a live-only layer's credit line
 NOTE_WIDTH = 60                          # characters per line of the Sources note (it sits inside the square)
 NOTE_HEIGHT_FT = 2.5                     # its text height (about the scale bar label's): ~95 ft wide at 60 characters
 NOTE_LINE_FT = 1.7 * NOTE_HEIGHT_FT      # the most one displayed line may take, spacing included (the in-Rhino claim)
@@ -5090,7 +5204,7 @@ PICK_A_MATCH = "Pick one of the matches under Address, then press Look up."
 WAIT_LOOKUP = "Looking up {address}: Draw once the answer is in."
 GUIDE_PREVIEW = ("The State's tax map didn't answer; the City's outline is shown as a dashed guide only (it can't be "
                  "kept). Draw clears what Gordium drew for the old address; then Draw my lot… over the guide.")
-CITY_TAIL = {"ithaca", "ny", "new", "york", "usa"}
+CITY_TAIL = set(_ADDRESSES["own_words"]) | set(_ADDRESSES["state_words"]) | {"usa"}   # Ithaca: ithaca ny new york
 
 
 def address_words(address):
@@ -5268,8 +5382,8 @@ def start_gate(state, saved_ui):
                 outside_for=saved_ui.get("_outside_for") or [])
 
 
-BY_HAND_CITY_ONLY = ("Gordium checks City of Ithaca lots only: {address} is in another place. Correct the address "
-                     "(a City of Ithaca one), or clear it.")
+BY_HAND_CITY_ONLY = ("Gordium checks " + PLACE["name"] + " lots only: {address} is in another place. Correct the "
+                     "address (a " + PLACE["name"] + " one), or clear it.")
 
 
 def no_guessed_district(saved, suggested):
@@ -5281,13 +5395,15 @@ def no_guessed_district(saved, suggested):
     return suggested
 
 
-IN_CITY_QUESTION = ("Is this lot in the City of Ithaca?\n\nGordium checks City of Ithaca lots only. An address "
-                    "that reads \"Ithaca, NY 14850\" may instead be in the Town of Ithaca, Cayuga Heights, Lansing "
-                    "or Dryden, which have their own zoning codes. The City's tax map says which.\n\n"
-                    "Yes: enter the site by hand as a City of Ithaca lot. No: nothing changes.")
-IN_CITY_SAID = "You said this lot is in the City of Ithaca ({date})."
-BY_HAND_OUTSIDE = ("The lookup said {query} is outside the City of Ithaca, and Gordium checks City of Ithaca lots "
-                   "only: look up a City of Ithaca address, or close this box.")
+IN_CITY_QUESTION = ("Is this lot in the " + PLACE["name"] + "?\n\nGordium checks " + PLACE["name"] + " lots only. An "
+                    "address that reads \"" + _ADDRESSES["shares_mail_as"] + "\" may instead be in the "
+                    + (", ".join(_ADDRESSES["shares_mail_with"][:-1]) + " or " if _ADDRESSES["shares_mail_with"][1:]
+                       else "") + _ADDRESSES["shares_mail_with"][-1]
+                    + ", which have their own zoning codes. The City's tax map says which.\n\n"
+                    "Yes: enter the site by hand as a " + PLACE["name"] + " lot. No: nothing changes.")
+IN_CITY_SAID = "You said this lot is in the " + PLACE["name"] + " ({date})."
+BY_HAND_OUTSIDE = ("The lookup said {query} is outside the " + PLACE["name"] + ", and Gordium checks " + PLACE["name"]
+                   + " lots only: look up a " + PLACE["name"] + " address, or close this box.")
 
 
 def by_hand_refused(saved_ui):
@@ -5333,7 +5449,7 @@ SAVED_SAYS = ("The map services didn't answer. Shown: the lookup of {address} sa
               "line only: pick the district again).")
 SAVED_ON = " · saved on {date}"
 SAVED_NOT_THIS = "The saved lookup is {saved_for}'s, not {address}'s: press Look up to find {address}."
-USED_LIVE = "(used live, not stored)"                     # site_lookup.lookup.USED_LIVE: a value never stored
+USED_LIVE = "(used live, not stored)"                     # site_lookup.adapters.ithaca_city.lookup.USED_LIVE: a value never stored
 
 
 def lookup_key(address):
@@ -5437,7 +5553,7 @@ def known_addresses(saved_ui):
                         pending.get("query")) if a]
 
 
-ITHACA_PLACE = {"ithaca", "14850", "14851", "14852", "14853"}
+ITHACA_PLACE = set(_ADDRESSES["own_words"]) | set(_ADDRESSES["zip_codes"])   # the place's own name and ZIPs
 
 
 def address_place(address):
@@ -5463,14 +5579,13 @@ DIRECTIONS = {"north", "south", "east", "west", "n", "s", "e", "w"}
 STREET_ENDINGS = ((set(STREET_WORDS) | set(STREET_WORDS.values())) - DIRECTIONS    # "East Ithaca" is the Town's
                   | {"way", "park", "walk", "row", "alley", "aly", "path", "trail", "trl", "ext", "extension", "sq",
                      "square", "plaza", "loop", "run", "crossing", "pike", "tpke", "turnpike", "rte", "route"})
-STATE_WORDS = ("ny", "new", "york", "usa", "us", "tompkins", "county")
+STATE_WORDS = (*_ADDRESSES["state_words"], "usa", "us", *_ADDRESSES["county_words"])   # Ithaca's: ny … tompkins county
 UNIT_WORDS = {"apt", "apartment", "unit", "#", "ste", "suite", "fl", "floor", "rm", "room", "bldg", "building"}
 NOT_A_PLACE = {"rear", "front", "lower", "upper", "-", "&"}    # a part of a lot or house ("101 N Aurora St Rear")
 # Places around the City that share its "Ithaca" mail and ZIPs, read as a town even after a street with no known
 # ending ("1 Snyder Hill Dryden": round 11); "town" and "village" too ("Town of Ithaca"). By hand, the architect also
 # says the lot is in the City (IN_CITY_QUESTION): an address alone can't prove it.
-NEARBY_PLACES = {"town", "village", "lansing", "dryden", "danby", "enfield", "newfield", "caroline", "ulysses",
-                 "groton", "trumansburg", "freeville", "varna", "etna", "slaterville", "brooktondale", "cayuga"}
+NEARBY_PLACES = {"town", "village"} | set(_ADDRESSES["nearby_places"])     # (PLACE: Lansing, Dryden, … for Ithaca)
 
 
 def _address_tokens(text):
@@ -5479,7 +5594,9 @@ def _address_tokens(text):
     read as a town)."""
     text = str(text or "").lower().replace(".", "").replace("#", " # ")
     text = re.sub(r"\bny(\d{5})", r"ny \1", text)
-    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    text = " ".join(text.split())
+    for other in _ADDRESSES["also_written"]:                 # "city of ithaca", "ithaca city" -> "ithaca"
+        text = text.replace(other, _ADDRESSES["own_words"][0])
     words, out = text.split(), []
     i = 0
     while i < len(words):

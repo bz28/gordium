@@ -9,11 +9,14 @@ from pathlib import Path
 
 import yaml
 
-from . import geometry as g
+from rule_format.place import place
 
+from ... import geometry as g
+
+PLACE = place("new_york/ithaca_city")       # the place this lookup serves: its settings (jurisdiction.yaml)
 ENDPOINTS = yaml.safe_load((Path(__file__).parent / "endpoints.yaml").read_text(encoding="utf-8"))
 NAMES = yaml.safe_load((Path(__file__).parent / "names.yaml").read_text(encoding="utf-8"))   # exact tables, by hand
-SR = 2261                                   # NAD83 / New York Central, US survey feet
+SR = PLACE.epsg                             # 2261: NAD83 / New York Central, US survey feet
 M_TO_FT = 1 / 0.3048                        # elevations: metres to international feet
 
 _SUFFIX = {"STREET": "ST", "ROAD": "RD", "AVENUE": "AVE", "PLACE": "PL", "LANE": "LN", "DRIVE": "DR",

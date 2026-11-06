@@ -36,10 +36,12 @@ STATE = sc.sticky.setdefault("gordium_state", {})
 LEFTOVERS = sc.sticky.setdefault("gordium_leftovers", {})
 _MODULE = sys.modules.get(__name__)
 REPO = STATE.get("repo") or os.path.dirname(os.path.dirname(HERE))   # apps/rhino_plugin -> the repo
-JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
-CITY = "City of Ithaca"
 sys.path.insert(0, os.path.join(REPO, "packages", "design_checker", "design_checker"))
 import rhino_logic as logic  # noqa: E402  (plain Python, tested in CI: which objects, which facts)
+# the place the plugin checks, from the place registry (its jurisdiction.yaml, through rhino_logic's place.json):
+# the only place for now; a place picker would set these
+JURISDICTION = logic.PLACE["jurisdiction"]
+CITY = logic.PLACE["name"]
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 import gordium_ui as ui  # noqa: E402  (the panel, the start box, the drawing helpers)
@@ -1226,7 +1228,7 @@ def PANEL_ACTIONS():
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
             "massing": hide_massing, "switch_sides": switch_side_yards, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
-            "context": show_context, "check": check_now, "auto_check": set_auto_check}
+            "adu": pick_adu_building, "context": show_context, "check": check_now, "auto_check": set_auto_check}
 
 
 DOCK_ID = "7c3e9a51-2d84-4b6f-9e17-5a0c8d2f4b63"   # the Gordium panel's id: Rhino remembers where it is docked
@@ -1469,10 +1471,13 @@ def pick_survey():
     if not picked:
         say(why)
         return
-    facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
+    replaced = picked != facts.get("lot_id")
+    facts = logic.after_lot_pick(facts, picked) if replaced else facts
     facts["lot_surveyed"] = True
     with logic.undo_step(doc, logic.UNDO_WORDS["survey"]):     # one Ctrl+Z puts it all back (asked first, outside)
         saved_ui = logic.settle(_ui_state(doc), "lot")
+        if replaced:                                           # another lot: its ground was never looked up
+            saved_ui = logic.lot_ground_dropped(saved_ui)
         _save_ui_state(doc, saved_ui)
         left = logic.unsettled(saved_ui)
         if left:
@@ -1645,6 +1650,34 @@ def pick_main_building():
     if picked:
         facts["main_building"] = picked
         with logic.undo_step(doc, logic.UNDO_WORDS["main"]):
+            save_facts(doc, facts)
+            run_check(doc, report=False)
+    else:
+        run_check(doc, report=False)
+
+
+def pick_adu_building():
+    """Pick the ADU's building… (the panel): a detached accessory dwelling unit's building, the solid its own size,
+    height and setbacks are measured from (§325-28C), never the main building. Click it, or choose one; Enter keeps
+    it."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:                     # every document closed: say what to do, never crash
+        say(logic.NO_DOCUMENT)
+        return None
+    facts = current_facts(doc)
+    buildings = _buildings(doc)
+    if len(buildings) < 2:
+        say("There is only one building: the main building. Draw the ADU's building on the Building layer first.")
+        return
+    try:
+        picked = _pick(doc, "Click the ADU's building (a solid on the Building layer), or choose one; Enter keeps it",
+                       buildings, "Building")
+    except Cancelled:
+        say("Cancelled: nothing changed.")
+        return
+    if picked:
+        facts["adu_building"] = picked
+        with logic.undo_step(doc, logic.UNDO_WORDS["adu"]):
             save_facts(doc, facts)
             run_check(doc, report=False)
     else:
@@ -1937,7 +1970,7 @@ def _box_state_drawn(doc, facts, options, saved_ui, mode="check"):
             else saved_ui.get("street_name"),
             "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span, "source": ground_source},
-            "ground_fall": saved_ui.get("ground_fall"),     # the looked-up ground's fall: said, never used (MVP)
+            "ground_fall": saved_ui.get("ground_fall"),     # the looked-up fall: a slope holds height and stories at review
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
             "corner_source": saved_ui.get("corner_source") or source("corner_lot"),
             "zones_found": saved_ui.get("_zones_found") or [],
@@ -2971,6 +3004,8 @@ def _change_facts(doc, facts, options):
     if len(lots) > 1:
         picked = _pick(doc, "Click the lot outline (a closed curve on the Site layer), or choose one; Enter keeps it",
                        lots, "Lot", Rhino.DocObjects.ObjectType.Curve)
+        if picked and picked != facts.get("lot_id"):           # another lot: its ground was never looked up
+            _save_ui_state(doc, logic.lot_ground_dropped(_ui_state(doc)))
         facts = logic.after_lot_pick(facts, picked)
         _highlight(doc, facts)
     if len(buildings) > 1:
@@ -3240,6 +3275,7 @@ def _check_begin(doc, report, facts=None):
     if not STATE.get("headless"):            # the message line tells of this check's action only, whatever happens
         ui.say(STATE.get("panel_parts"), "")
     at = time.time()
+    STATE.setdefault("units_seen", {})[doc.RuntimeSerialNumber] = _units(doc)   # the units this check reads
     facts = current_facts(doc) if facts is None else facts
     if logic.missing(facts):
         raise ValueError("lot facts missing: " + ", ".join(logic.missing(facts)) + " (run GordiumCheck)")
@@ -3515,6 +3551,47 @@ def _changed(sender, e):
     STATE["dirty"] = time.time()
 
 
+def _layer_key(layer):
+    """A layer's (name, parent id) as text, None if it can't be read (logic.layer_edit_counts then counts it)."""
+    try:
+        return (str(layer.Name), str(layer.ParentLayerId)) if layer is not None else None
+    except Exception:                                    # noqa: BLE001  (a layer Rhino has let go of)
+        return None
+
+
+def _layer_changed(sender, e):
+    """A layer renamed, moved under another parent, deleted or brought back: which objects are the lot and the
+    buildings may have changed, so the results grey out (logic.layer_edit_counts; Gordium's own visibility, lock
+    and colour changes don't count)."""
+    if logic.layer_edit_counts(str(e.EventType), _layer_key(e.OldState), _layer_key(e.NewState)):
+        _changed(sender, e)
+
+
+def _block_changed(sender, e):
+    """A block's contents edited, redefined, deleted or brought back: every building placed from it changed."""
+    if logic.block_edit_counts(str(e.EventType)):
+        _changed(sender, e)
+
+
+def _units(doc):
+    """The model's units as the check reads them: the unit system's name, the one setting export sends the checker
+    (it converts in one place, _scale; this only tells one setting from another)."""
+    return str(doc.ModelUnitSystem) if doc is not None else None
+
+
+def _properties_changed(sender, e):
+    """The document's properties changed: an edit if its units did (lengths are read in feet by its scale), noted
+    for each document by its serial number (logic.units_edit_counts: a document not noted yet counts)."""
+    doc = getattr(e, "Document", None) or Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        return
+    seen = STATE.setdefault("units_seen", {})
+    now = _units(doc)
+    if logic.units_edit_counts(seen.get(doc.RuntimeSerialNumber), now):
+        seen[doc.RuntimeSerialNumber] = now
+        _changed(sender, e)
+
+
 def _new_document(sender, e):
     """Another document (new, opened, or switched to): nothing from the last one stays drawn or listed."""
     o = STATE.get("overlay")
@@ -3528,6 +3605,9 @@ def _new_document(sender, e):
         _sync_ticks(Rhino.RhinoDoc.ActiveDoc)   # its own ticks (Check after every edit too, before the header)
         ui.show(p, None, error="no check yet for this document (press Check)")
     STATE["dirty"] = None               # the last document's edits are not this one's (it is checked below)
+    front = Rhino.RhinoDoc.ActiveDoc
+    if front is not None:               # its units as they are now: only a change from them counts (a render setting
+        STATE.setdefault("units_seen", {}).setdefault(front.RuntimeSerialNumber, _units(front))   # never does)
     STATE["check_front"] = True         # check the document now in front once, if it has lot facts (not an edit:
     #                                     whatever Check after every edit says: review round 1 of the Check button)
 
@@ -3589,6 +3669,8 @@ def documents(on):
 
 
 def _unhook():
+    for name, handler in STATE.pop("live_more", None) or []:     # the layer, block and units hooks
+        _off(Rhino.RhinoDoc, name, handler)
     hooks = STATE.pop("hooks", None)
     if hooks and len(hooks) == 3:            # set by an earlier version of this script, before a reload
         hooks = (hooks[0], hooks[1], None, None, None, hooks[2])
@@ -3609,8 +3691,9 @@ def _unhook():
 
 
 def live(on):
-    """Notice each edit (objects added, deleted, moved or changed, a layer change or hiding one): the results grey
-    out until a check; the idle handler checks by itself only with Check after every edit ticked."""
+    """Notice each edit (objects added, deleted, moved or changed; a layer renamed, moved, deleted or brought back;
+    a block's contents edited; the model's units changed): the results grey out until a check; the idle handler
+    checks by itself only with Check after every edit ticked."""
     _unhook()
     STATE["live"] = on
     if not on:
@@ -3626,6 +3709,21 @@ def live(on):
     _on(Rhino.RhinoDoc, "ModifyObjectAttributes", attributes)
     _on(Rhino.RhinoApp, "Idle", idle)
     STATE["hooks"] = (objects, replaced, attributes, idle)
+    # what sorts objects into lot and building, or sizes them, without touching an object: a layer renamed or
+    # moved, a block's contents edited, the model's units (the audit of main, 2026-10-29: a ✓ stayed current)
+    more = [("LayerTableEvent", _handler(System.EventHandler[Rhino.DocObjects.Tables.LayerTableEventArgs],
+                                         _layer_changed, "notice an edit")),
+            ("InstanceDefinitionTableEvent", _handler(
+                System.EventHandler[Rhino.DocObjects.Tables.InstanceDefinitionTableEventArgs], _block_changed,
+                "notice an edit")),
+            ("DocumentPropertiesChanged", _handler(System.EventHandler[Rhino.DocumentEventArgs],
+                                                   _properties_changed, "notice an edit"))]
+    for name, handler in more:
+        _on(Rhino.RhinoDoc, name, handler)
+    STATE["live_more"] = more
+    front = Rhino.RhinoDoc.ActiveDoc
+    if front is not None:                    # the units as they are now: only a change from them counts
+        STATE.setdefault("units_seen", {}).setdefault(front.RuntimeSerialNumber, _units(front))
 
 
 def toggle_live():

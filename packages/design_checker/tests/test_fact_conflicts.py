@@ -17,7 +17,7 @@ import pytest
 
 from design_checker import present, scenarios
 from design_checker.check import check_site
-from model_measurement.measure import fact_conflicts
+from model_measurement.places.ithaca_city.measure import fact_conflicts
 from model_measurement.stops import STOPS
 from rule_format import formula
 from rule_format.rulebook import REPO, load, rulebook_for

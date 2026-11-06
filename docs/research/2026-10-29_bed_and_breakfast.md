@@ -61,4 +61,4 @@ second board.
 The text and the chart disagree, each side has support, and no City record settles it. Until the architects or the
 City answer, a bed-and-breakfast inn in R-1a, R-1b, R-2a, R-2b and R-2c gets NEEDS REVIEW, saying it may be prohibited
 or allowed only with the Planning and Development Board's special permit (before 2026-10-29 it did not comply). The
-question is §5.18 of `docs/questions_for_architects.md`.
+question is §5.23 of `docs/questions_for_architects.md`.

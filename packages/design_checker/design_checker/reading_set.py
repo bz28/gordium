@@ -13,7 +13,7 @@ lot depth of one reading with the rear yard of another isn't a real case), which
 import itertools
 import math
 
-from model_measurement.measure import TAX_MAP_SLACK
+from model_measurement.plugin_measuring import TAX_MAP_SLACK
 
 LOT_LENGTHS = set(TAX_MAP_SLACK)      # every lot-dependent length, the yards to the eaves and an accessory
 # building's distances too: the one table in measure.py (PR 18)

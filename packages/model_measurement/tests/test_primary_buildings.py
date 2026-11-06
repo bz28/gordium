@@ -7,7 +7,7 @@ readings and there is no value (never a guess)."""
 import sys
 from pathlib import Path
 
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 from model_measurement.read_3dm import read_site
 
 sys.path.insert(0, str(Path(__file__).parent))

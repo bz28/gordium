@@ -232,3 +232,95 @@ def test_a_start_box_that_ends_in_an_error_leaves_the_results_greyed():
     assert logic.changed_after_box(10.0, None, False, failed=True) == 10.0        # changed before the box: still
     assert logic.changed_after_box(None, None, False, failed=True) is None        # nothing touched: nothing to grey
     assert logic.changed_after_box(None, 20.0, False) is None                     # a Cancel, as before
+
+
+# ---- edits that touch no object (the audit of main, 2026-10-29) ---------------------------------------------------
+# Live mode heard only objects added, deleted, replaced or re-attributed: a layer renamed, a block's contents edited
+# or the model's units changed left the last results showing as current (a stale ✓). Rhino shows the greying itself:
+# apps/rhino_plugin/tests/live_more_in_rhino.py.
+
+@pytest.mark.parametrize("event, old, new, counts", [
+    ("Modified", ("Building", "p"), ("Old massing", "p"), True),     # renamed: its objects are no longer on Building
+    ("Modified", ("Site", "a"), ("Site", "b"), True),                # moved under another parent: its full path
+    ("Modified", None, ("Site", "a"), True),                         # can't be read: counted, never assumed the same
+    ("Modified", ("Site", "a"), ("Site", "a"), False),               # colour, shown or hidden, locked: nothing checked
+    ("Deleted", ("Building", "p"), None, True),
+    ("Undeleted", None, ("Building", "p"), True),
+    ("Added", None, ("Gordium", "p"), False),                        # a new empty layer (Gordium makes its own)
+    ("Sorted", None, None, False),
+    ("Current", ("Site", "a"), ("Site", "a"), False),
+    ("SomethingNew", None, None, True),                              # a kind Rhino adds later: counted
+])
+def test_a_layer_change_counts_when_it_can_move_an_object_between_lot_and_building(event, old, new, counts):
+    assert logic.layer_edit_counts(event, old, new) is counts
+
+
+@pytest.mark.parametrize("event, counts", [("Modified", True), ("Deleted", True), ("Undeleted", True),
+                                           ("Added", False), ("Sorted", False), ("SomethingNew", True)])
+def test_a_block_edit_counts_unless_nothing_placed_from_it_changed(event, counts):
+    assert logic.block_edit_counts(event) is counts
+
+
+def test_a_units_change_counts_and_another_property_change_does_not():
+    feet, inches = ("Feet", 1.0), ("Inches", 1 / 12)
+    assert logic.units_edit_counts(feet, inches) is True
+    assert logic.units_edit_counts(feet, feet) is False              # a render setting, a note: same units
+    assert logic.units_edit_counts(None, feet) is True               # never noted for this document: counted
+
+
+def test_live_mode_hears_layer_block_and_units_changes_through_those_rules():
+    """The hooks are live mode's own (the open-box watcher had them; live mode did not), each taken off again with
+    the rest."""
+    live = body(RHINO, "def live(on):", "\ndef ")
+    for event, fn in (("LayerTableEvent", "_layer_changed"), ("InstanceDefinitionTableEvent", "_block_changed"),
+                      ("DocumentPropertiesChanged", "_properties_changed")):
+        hook = live[live.index(f'("{event}", _handler('):]
+        assert hook[:hook.index("notice an edit")].count(fn) == 1, event          # its own handler, no other
+    assert 'STATE["live_more"] = more' in live
+    assert 'for name, handler in STATE.pop("live_more", None) or []:' in body(RHINO, "def _unhook():", "\ndef ")
+
+
+def _handlers(units=("Feet", 1.0)):
+    """The plugin's own handlers, run with stand-ins for Rhino: what each one does to STATE["dirty"]."""
+    import types
+    doc = types.SimpleNamespace(RuntimeSerialNumber=7, ModelUnitSystem=units[0])
+    ns = {"logic": logic, "STATE": {}, "time": types.SimpleNamespace(time=lambda: 100.0),
+          "Rhino": types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc))}
+    for name in ("_changed", "_layer_key", "_layer_changed", "_block_changed", "_units", "_properties_changed"):
+        exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
+    return ns, doc
+
+
+def test_each_handler_marks_the_model_changed_only_for_an_edit_that_counts():
+    import types
+    layer = lambda name, parent="p": types.SimpleNamespace(Name=name, ParentLayerId=parent)    # noqa: E731
+    ns, doc = _handlers()
+    ns["_layer_changed"](None, types.SimpleNamespace(EventType="Modified", OldState=layer("Site"),
+                                                     NewState=layer("Site")))
+    assert ns["STATE"].get("dirty") is None                       # a colour or visibility change
+    ns["_layer_changed"](None, types.SimpleNamespace(EventType="Modified", OldState=layer("Building"),
+                                                     NewState=layer("Old")))
+    assert ns["STATE"]["dirty"] == 100.0                          # renamed
+    ns, doc = _handlers()
+    ns["_block_changed"](None, types.SimpleNamespace(EventType="Added"))
+    assert ns["STATE"].get("dirty") is None
+    ns["_block_changed"](None, types.SimpleNamespace(EventType="Modified"))
+    assert ns["STATE"]["dirty"] == 100.0
+    ns, doc = _handlers()
+    ns["STATE"]["units_seen"] = {7: ns["_units"](doc)}
+    ns["_properties_changed"](None, types.SimpleNamespace(Document=doc))
+    assert ns["STATE"].get("dirty") is None                       # another property: same units
+    doc.ModelUnitSystem = "Inches"
+    ns["_properties_changed"](None, types.SimpleNamespace(Document=doc))
+    assert ns["STATE"]["dirty"] == 100.0                          # the units changed
+
+
+def test_each_check_notes_the_units_it_read():
+    """So a later change of units is told from any other property change (logic.units_edit_counts)."""
+    begin = body(RHINO, "def _check_begin(", "\ndef ")
+    assert 'STATE.setdefault("units_seen", {})[doc.RuntimeSerialNumber] = _units(doc)' in begin
+    assert "str(doc.ModelUnitSystem)" in body(RHINO, "def _units(doc):", "\ndef ")
+    # a document come to the front is noted too, so a render setting changed there before its first check never
+    # greys it (review round 1, finding 2)
+    assert 'STATE.setdefault("units_seen", {}).setdefault(front.RuntimeSerialNumber, _units(front))' in body(
+        RHINO, "def _new_document(", "\ndef ")

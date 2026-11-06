@@ -131,8 +131,8 @@ try:
         "Front yard": {"proposed": "27'-0 3/4\""}, "Side yard, Southwest": {"proposed": "12'-0 1/2\""},
         "Side yard, Northeast": {"proposed": "12'-0 3/8\""}, "Rear yard": {"status": "needs_review"},
         "Lot coverage": {"proposed": "21.7%", "status": "complies"}, "Lot area": {"status": "complies"},
-        "Building height": {"proposed": "35'-0\"", "status": "complies", "margin": "at limit"},   # the bonus's question doesn't matter
-        "Stories": {"status": "complies"}})
+        # 106's looked-up ground falls 14.2 ft: height and stories need review (the sloped-lot fix, 2026-10-29)
+        "Building height": {"proposed": "35'-0\"", "status": "needs_review"}, "Stories": {"status": "needs_review"}})
     tests.append({"n": 1, "test": "1 Labels (checked by mvp_checks_in_rhino.py)", "expected": {}, "got": {},
                   "match": True})
     t = rg.Transform.Translation(north * 5)
@@ -165,8 +165,7 @@ try:
     roof = rg.Transform.Scale(rg.Plane(rg.Point3d(0, 0, base["base"] * ft), rg.Vector3d.ZAxis), 1, 1,
                               (base["top"] - base["base"] + 4) / (base["top"] - base["base"]))
     xf(top_floor, roof)
-    check(doc, 5, "5 Raise the roof 4 ft", {"Building height": {"status": "does_not_comply", "proposed": "39'-0\"",
-                                                                "delta": "4'-0\" over"}})
+    check(doc, 5, "5 Raise the roof 4 ft", {"Building height": {"status": "needs_review", "proposed": "39'-0\""}})
     undo(top_floor, roof)
     t = stretch(ids, 0, None, 3, low=True)
     xf(ids, t)

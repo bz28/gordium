@@ -10,8 +10,7 @@ from pathlib import Path
 
 from rule_format.rulebook import load
 
-from .measure import fact_conflicts as measure_conflicts
-from .measure import measure
+from .places import measuring
 from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
@@ -21,7 +20,9 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
                "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                "primary_buildings", "primary_buildings_same_use", "south_hill_overlay",
-               "stream_near_lot", "stream_distance",
+               "stream_near_lot", "stream_distance", "garage_cars", "private_garages",
+               "adu_building", "adu_detached", "adu_existing_building", "adus_on_parcel", "adu_bedrooms",
+               "adu_floor_area", "primary_floor_area",
                "grade_points", "grade_from", "grade_is", "unsettled", "ground_fall", "address_street_line", "accessory_buildings", "accessory_frame",
                "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
@@ -48,13 +49,14 @@ def fact_conflict_rows(facts: dict) -> list[tuple[str, tuple]]:
     """fact_conflicts, each with the facts to correct it (the panel's "Enter …" button asks those). The measuring sets
     each of those facts aside with the same reason (measure.fact_conflicts: one list). The use is set aside too when it
     is one of the answers, but it is changed in the start box (Edit site…), not by the Enter button."""
-    return [(why, tuple(n for n in names if n != "use")) for why, names in measure_conflicts(facts)]
+    return [(why, tuple(n for n in names if n != "use"))
+            for why, names in measuring(facts.get("jurisdiction")).fact_conflicts(facts)]
 
 
 def fact_problems(facts: dict) -> list[str]:
     """What's wrong with lot facts, by field. One check for every way facts arrive (a file, the Rhino command)."""
     problems = [f"unknown lot fact {k!r}" for k in sorted(set(facts) - FACT_FIELDS)]
-    text = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "main_building"}
+    text = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "main_building", "adu_building"}
     problems += [f"{k} must be text" for k in sorted(text & set(facts))
                  if facts[k] is not None and not isinstance(facts[k], str)]
     if facts.get("plan_north_deg") is not None and not _number(facts["plan_north_deg"]):
@@ -62,21 +64,26 @@ def fact_problems(facts: dict) -> list[str]:
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
     for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "occupants",
-              "unrelated_persons", "unrelated_persons_with_children"):
+              "unrelated_persons", "unrelated_persons_with_children", "garage_cars", "adu_bedrooms"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
-    for k in ("home_occupation_area", "home_occupation_unit_area"):               # square feet, never rounded
+    for k in ("home_occupation_area", "home_occupation_unit_area",               # square feet, never rounded
+              "adu_floor_area", "primary_floor_area"):
         if facts.get(k) is not None and not (_number(facts[k]) and facts[k] >= 0):
             problems.append(f"{k} must be a number of square feet, 0 or more")
     if facts.get("stream_distance") is not None and not (_number(facts["stream_distance"]) and facts["stream_distance"] >= 0):
         problems.append("stream_distance must be a number of feet, 0 or more")       # as typed, never rounded
+    if facts.get("ground_fall") is not None and not (_number(facts["ground_fall"]) and facts["ground_fall"] >= 0):
+        problems.append("ground_fall must be a number of feet, 0 or more")      # how far the looked-up ground falls
     for k in ("occupants_most_in_one_unit", "attached_units_in_building",       # at least one, by definition
-              "primary_buildings"):
+              "primary_buildings", "private_garages",     # asked only for a garage, so at least one
+              "adus_on_parcel"):                            # asked only once an ADU is said to be on the lot
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 1):
             problems.append(f"{k} must be a whole number, 1 or more")
     for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion", "abuts_r1_district",
               "owner_occupied", "functional_family_unit", "home_occupation", "accessory_dwelling_unit",
-              "primary_buildings_same_use", "south_hill_overlay", "stream_near_lot"):
+              "primary_buildings_same_use", "south_hill_overlay", "stream_near_lot", "adu_detached",
+              "adu_existing_building"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")
@@ -155,7 +162,7 @@ def project(model_path: Path, facts: dict) -> dict:
     problems = fact_problems(facts)
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
-    measured = measure(read_site(model_path, facts), facts)
+    measured = measuring(facts.get("jurisdiction")).measure(read_site(model_path, facts), facts)   # the lot's place's
     return {"title": facts.get("title") or Path(model_path).stem, "jurisdiction": facts.get("jurisdiction"),
             "zone": facts.get("zone"),
             "measurements": {name: {"value": r["value"], "from": working(r, Path(model_path).name)}

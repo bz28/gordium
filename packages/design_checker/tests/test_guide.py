@@ -15,7 +15,10 @@ _a = RHINO_ALL.index("def change_facts(")
 _b = RHINO_ALL.index("\ndef ", RHINO_ALL.index("def _change_facts(") + 1)
 RHINO = RHINO_ALL[:_a] + RHINO_ALL[_b:]
 LOGIC = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
-CODE = UI + RHINO + LOGIC
+# the code's texts as shown: the source, and each text rhino_logic builds from its place's settings (place.json:
+# "Is this lot in the City of Ithaca?")
+from design_checker import rhino_logic as _logic  # noqa: E402
+CODE = UI + RHINO + LOGIC + "\n".join(v for v in vars(_logic).values() if isinstance(v, str))
 
 
 def _bold(text):

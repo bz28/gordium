@@ -89,8 +89,9 @@ def test_r2_eaves_never_comply_or_fail_where_the_law_does_not(zone, use, small, 
 # ---- what the panel names (#18 review rounds 4-5, with this rulebook) -------------------------------------------
 
 def _one_height(monkeypatch):
-    """The checker's measuring with the roof's height settled at its highest reading (all under 35 ft: no bonus)."""
-    from design_checker import check as C
+    """The checker's measuring (Ithaca's, the lots' own place's) with the roof's height settled at its highest
+    reading (all under 35 ft: no bonus)."""
+    from model_measurement.places.ithaca_city import measure as C
     real = C.measure
 
     def settled(site, facts):

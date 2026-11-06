@@ -7,7 +7,7 @@ the checker worker, which answers one request at a time: a lookup given up on wo
 
 prints a {"step": "Finding the address…"} line as each stage starts (the box shows the latest, live), then, last,
 one JSON line: site_lookup's result, where the lot lands in the model (`frame`), and exactly what the
-Rhino side may write into the .3dm (`writes`, by each source's store policy in site_lookup/endpoints.yaml).
+Rhino side may write into the .3dm (`writes`, by each source's store policy in site_lookup/adapters/ithaca_city/endpoints.yaml).
 No AI; the map services' own answers, worked out by plain code."""
 import datetime as dt
 import json
@@ -16,10 +16,14 @@ import re
 import sys
 from pathlib import Path
 
+from rule_format.place import plugin_place
 from rule_format.rulebook import utf8_console
+from site_lookup import adapter
 from site_lookup.http import Http
-from site_lookup.lookup import lookup, strictest
-from site_lookup.sources import ENDPOINTS
+
+PLACE_LOOKUP = adapter(plugin_place())     # the plugin's place's own lookup (its jurisdiction.yaml, the registry)
+lookup, strictest = PLACE_LOOKUP.lookup.lookup, PLACE_LOOKUP.lookup.strictest
+ENDPOINTS = PLACE_LOOKUP.sources.ENDPOINTS
 
 TIMEOUT_S, RETRIES = 8.0, 1        # each map request; the Rhino side stops the whole lookup (rhino_logic.LOOKUP_LIMIT_S)
 OWN_SOURCE = {                     # which of a fact's sources is its own (the others it was only worked out with)
@@ -190,7 +194,7 @@ def suggest_main(text: str, fixture: bool = False, pause: float = 0.0, offline: 
     """One type-ahead answer, as one JSON line for the box: {"status": "ok", "query", "suggestions"} or
     {"status": "offline" | "error", "query"} (the box then says, quietly, that suggestions are unavailable)."""
     from site_lookup.http import Offline, ServiceError
-    from site_lookup.suggest import suggest
+    suggest = PLACE_LOOKUP.suggest.suggest
     if pause:
         import time
         time.sleep(pause)

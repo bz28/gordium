@@ -17,7 +17,7 @@ import itertools
 
 from shapely.geometry import LineString, Polygon
 
-from model_measurement.measure import Lot, union
+from model_measurement.plugin_measuring import Lot, union
 from rule_format import formula
 from rule_format.rulebook import MEASURE_KINDS
 

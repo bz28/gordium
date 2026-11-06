@@ -1,8 +1,9 @@
 #! python3
 """The MVP list's visible changes, in Rhino 8, each claim asserted (the run fails loudly otherwise). Run in Rhino,
 not in CI. From a fresh document: GordiumStart on the sample, then:
-- flat ground (item 5): the start box has no Ground row; the lot facts say the ground is assumed flat; Building height
-  and Stories comply, their rows reading "… · assuming flat ground";
+- flat ground (item 5): the start box has no Ground row; the lot facts say the ground is assumed flat; on 106 Ithaca
+  Rd, whose looked-up ground falls 14.2 ft, Building height and Stories need review (the sloped-lot fix, 2026-10-29),
+  their rows reading "… · assuming flat ground";
 - labels off by default (item 1): the document's setting is off and the panel's tick unticked; a failing yard (the
   house moved 5 ft to the left, QUICKSTART test 6's failing yard) still has its shortfall label; ticking turns the labels on, saved in the document;
 - the panel (items 2, 3): no code-edition line in its header (it is in the legend's text), the column is "Delta" and
@@ -92,11 +93,10 @@ try:
         claim("5 the ground is assumed flat, finished", facts.get("ground_assumed") == "flat" and
               facts.get("grade_is") == "finished", {k: facts.get(k) for k in ("ground_assumed", "grade_is")})
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
-        claim("5 stories comply; the height is at the limit (it needs review on this lot: the open question of "
-              "which back lines are rear lines)", items["Stories"]["status"] == "complies" and
-              items["Building height"]["margin"] == "at limit" and items["Building height"]["status"] in
-              ("complies", "needs_review"),
-              {n: (items[n]["status"], items[n]["margin"]) for n in ("Building height", "Stories")})
+        claim("5 on 106's sloping lot (14.2 ft of fall) height and stories need review, saying how far it falls",
+              all(items[n]["status"] == "needs_review" and "falls about 14.2 ft" in (items[n].get("reason") or "")
+                  for n in ("Building height", "Stories")),
+              {n: (items[n]["status"], items[n].get("reason")) for n in ("Building height", "Stories")})
         rows = panel_rows(g)
         claim("5 the rows say assuming flat ground",
               any("Building height · assuming flat ground" in r[0] for r in rows) and

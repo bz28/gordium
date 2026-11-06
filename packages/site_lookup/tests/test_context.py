@@ -11,10 +11,10 @@ from pathlib import Path
 import pytest
 
 from site_lookup import geometry as g
-from site_lookup.context import HALF_SIZE_FT, LAYERS, LIVE_ONLY, context
+from site_lookup.adapters.ithaca_city.context import HALF_SIZE_FT, LAYERS, LIVE_ONLY, context
 from site_lookup.http import Offline, ServiceError
-from site_lookup.lookup import US_SURVEY_FT, lookup
-from site_lookup.sources import ENDPOINTS, Fetcher
+from site_lookup.adapters.ithaca_city.lookup import US_SURVEY_FT, lookup
+from site_lookup.adapters.ithaca_city.sources import ENDPOINTS, Fetcher
 
 HERE = Path(__file__).parent
 spec = importlib.util.spec_from_file_location("site_lookup_test_lookup", HERE / "test_lookup.py")
@@ -195,7 +195,7 @@ def test_only_footprints_from_a_reviewed_source_are_kept_and_the_rest_are_said()
     """Review of the editable outlines, P2: an exact "Microsoft" match let "NYS Geospatial Services - previously,
     Microsoft" (still ODbL) through, the message never reached the architect when every service answered, and the
     left-out footprints' dates went into the credit. Now an allow-list (endpoints.yaml reviewed_sources)."""
-    from site_lookup.context import cleared
+    from site_lookup.adapters.ithaca_city.context import cleared
     assert ENDPOINTS["state_buildings"]["reviewed_sources"] == ["NYSERDA"]
     c, _ = run(with_sources("Microsoft", "NYS Geospatial Services - previously, Microsoft", "Personal Work"))
     b = c["layers"]["buildings"]

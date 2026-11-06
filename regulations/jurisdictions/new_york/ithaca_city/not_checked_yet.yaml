@@ -18,6 +18,12 @@ not_covered:
   - id: accessory_below_grade
     section: "§325-25B, §325-25D"
     name: Accessory structures below grade or across a common lot line
-  - id: adus
-    section: "§325-28"
-    name: Accessory dwelling units
+  - id: adu_sale_and_subdivision
+    section: "§325-28C(5), §325-28C(6)"
+    name: An accessory dwelling unit may not be sold separately from the house, nor the lot subdivided to separate it
+  - id: front_yard_parking
+    section: "§325-20E"
+    name: Parking in front yards (lots over 50 ft wide, up to 25% of the front yard; narrower lots, a driveway up to 12 ft wide; cars square to the street)
+  - id: parking_areas
+    section: "§325-20D(2), §325-20F"
+    name: Driveways and parking areas (every driveway at least 8 ft wide; parking for 3 or more cars, its share of the side and rear yards)
