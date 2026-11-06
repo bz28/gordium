@@ -193,4 +193,4 @@ def test_a_numbers_last_digit_is_not_a_change_but_a_millionth_of_a_foot_is(tmp_p
         reply["result"]["floors"][0]["top"] = value
         (session / "session.jsonl").write_text(json.dumps(dict(start, reply=json.dumps(reply))) + "\n",
                                                encoding="utf-8")
-        assert bool(replay.differences(session)) is caught, nudge
+        assert bool(replay.differences(session)) is caught, value
