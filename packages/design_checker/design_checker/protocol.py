@@ -36,9 +36,13 @@ def _kept(path: Path) -> bool:
 
 def code_files() -> list[Path]:
     """Every file of every package (its code and the data it loads, such as rule_format/measures.yaml), tests and
-    caches left out: a check reaches into most of them (project_report decides each row), so all are counted."""
-    root = REPO / "packages"
-    return [f for f in root.rglob("*") if f.is_file() and _kept(f.relative_to(root))]
+    caches left out: a check reaches into most of them (project_report decides each row), so all are counted. And
+    the shared files under regulations/ outside any place's folder, which every check reads too (the rule topics,
+    document_extraction_guide/vocabulary.yaml, and who may approve, reviewers.yaml: rule_format.rulebook)."""
+    packages, regulations = REPO / "packages", REPO / "regulations"
+    shared = [f for f in regulations.rglob("*") if f.is_file() and "jurisdictions" not in f.relative_to(regulations).parts
+              and not f.name.startswith(".")]
+    return [f for f in packages.rglob("*") if f.is_file() and _kept(f.relative_to(packages))] + shared
 
 
 def place_files(folder: Path) -> list[Path]:
@@ -49,7 +53,7 @@ def place_files(folder: Path) -> list[Path]:
 
 
 def worker_fingerprint() -> str:
-    """sha256 over the checker's code and the data it loads (code_files), read now."""
+    """sha256 over the checker's code and the data it loads, shared rule files included (code_files), read now."""
     return _sha(code_files(), REPO)
 
 

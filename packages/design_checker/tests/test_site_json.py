@@ -270,6 +270,17 @@ def test_a_key_given_twice_is_refused_never_one_of_them_dropped():
     assert reply["ok"] is False and "'protocol' is given twice" in reply["error"]
 
 
+def test_the_worker_answers_every_line_even_one_it_cant_read():
+    import io
+    from design_checker.__main__ import serve
+    lines = ['{"id": 1, "x": ' + "1" * 5000 + "}", "[" * 100000 + "]" * 100000, "[1]", "{not json", '"text"']
+    out = io.StringIO()
+    serve(io.StringIO("".join(line + "\n" for line in lines)), out)
+    replies = [json.loads(r) for r in out.getvalue().splitlines()]
+    assert len(replies) == len(lines) and all(r["ok"] is False and r["id"] is None for r in replies)
+    assert replies[3]["error"].startswith("not JSON: Expecting property name")     # as before, word for word
+
+
 # ---- the schema file and the code agree -------------------------------------------------------------------------
 
 def test_the_schema_file_lists_exactly_the_fields_the_code_reads():
@@ -311,6 +322,9 @@ def test_the_fingerprints_cover_what_a_check_reads_and_follow_a_rule_edited_whil
             "packages/envelope_builder/envelope_builder/__init__.py"} <= code
     assert not any("/tests/" in f or "__pycache__" in f for f in code)
     place = {f.relative_to(PLACE.folder).as_posix() for f in protocol.place_files(PLACE.folder)}
+    assert {"regulations/reviewers.yaml", "regulations/document_extraction_guide/vocabulary.yaml"} <= code
+    from rule_format import rulebook
+    assert {rulebook.REVIEWERS_FILE, rulebook.VOCABULARY_FILE} <= set(protocol.code_files())
     assert {"jurisdiction.yaml", "not_checked_yet.yaml", "5_zoning_rules/R-1b.yaml",
             "1_source_documents/sources.yaml"} <= place
     assert not any(f.endswith(".pdf") for f in place)
@@ -359,9 +373,8 @@ def test_read_model_gives_a_valid_description_of_the_file_and_never_claims_the_l
     assert not bad["ok"] and "inventory_complete" in bad["error"]
 
 
-def test_grade_points_whose_source_isnt_named_are_refused_never_guessed():
-    with pytest.raises(SiteRefused, match="grade_from is None"):
-        site_json.grade_of({"grade_points": [[0, 0, 100.0]]})
+def test_grade_points_with_no_source_named_are_spot_grades_as_the_measuring_reads_them():
+    assert site_json.grade_of({"grade_points": [[0, 0, 100.0]]}) == {"source": "spot", "points": [[0, 0, 100.0]]}
     with pytest.raises(SiteRefused, match="grade_from is 'flat'"):
         site_json.grade_of({"grade_from": "flat", "grade_points": [[0, 0, 100.0]]})
     assert site_json.grade_of({"grade_from": "terrain"}) == NO_GRADE

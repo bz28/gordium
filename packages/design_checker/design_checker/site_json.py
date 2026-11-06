@@ -357,14 +357,17 @@ def from_read_site(site: dict, grade: dict, host: dict, inventory_complete: bool
 def grade_of(facts: dict) -> dict:
     """The site description's grade from lot facts as the Rhino command sends them: the spot grades (or terrain
     points) it read, `grade_points`, under the source the facts name, `grade_from`; no points, source "none".
-    Points whose source isn't named are refused, never guessed."""
+    Points with no source named are spot grades, as the measuring has always read them (it measures grade_points
+    whatever grade_from says, and the panel calls them spot grades; facts files may leave grade_from out:
+    model_measurement.project.fact_problems). A source the facts name that isn't one is refused."""
     points = facts.get("grade_points") or []
     if not points:
         return {"source": "none", "points": []}
-    if facts.get("grade_from") not in GRADE_SOURCES[:-1]:
-        raise SiteRefused([f"grade: {len(points)} grade points given, but grade_from is {facts.get('grade_from')!r} "
+    source = facts.get("grade_from") or "spot"
+    if source not in GRADE_SOURCES[:-1]:
+        raise SiteRefused([f"grade: {len(points)} grade points given, but grade_from is {source!r} "
                            f"(one of {', '.join(GRADE_SOURCES[:-1])})"])
-    return {"source": facts["grade_from"], "points": [list(p) for p in points]}
+    return {"source": source, "points": [list(p) for p in points]}
 
 
 def read_model(path, facts: dict, inventory_complete: bool = False) -> dict:
