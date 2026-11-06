@@ -13,6 +13,13 @@ Requests to the worker: `check` (a model and its lot facts), `start` (the larges
 the lot in a model, `envelope_builder.start`), `sample_site` (the plugin's place's sample lot, from its jurisdiction.yaml: 106 Ithaca Rd's lot and facts, as files
 drawn from the sample before 2026-10-27 have them; GordiumStart no longer prefills it: a new file starts empty), `options` (zones and uses), `facts` (what's wrong with saved lot facts).
 
+**Golden answers and recorded sessions** (the yardstick for changes that must not change any answer):
+`python -m design_checker.goldens --check` runs `check` and `start` on every test site, scenario (and its edit),
+deep-run site and 200 stress designs from a fixed seed, and compares each canonical answer with
+`test_data/goldens/` (`--write` writes them again, only when an answer should change). `python -m
+design_checker.replay` runs every request of each recorded session in `test_data/sessions/` through the worker's
+`answer()` and needs the recorded answer line byte for byte. Both run in CI.
+
 **The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
 `rhino_logic.py` runs in Rhino's Python, which can't read YAML, so it reads `place.json` beside it: the place's name,
 time zone and how its addresses are written, copied from its `jurisdiction.yaml` by `python -m rule_format place
