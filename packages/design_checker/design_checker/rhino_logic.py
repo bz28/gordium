@@ -5028,11 +5028,98 @@ def _write_lines(stream, sends, process=None):
         pass
 
 
-def exchange(sends, lines, request, limit, on_step=None):
+def exchange(sends, lines, request, limit, on_step=None, record=None):
     """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for); each progress
-    line before it goes to `on_step`."""
+    line before it goes to `on_step`. `record`: a Recorder that saves the request, its progress lines and its answer
+    (the plugin passes one only when RECORD_ENV names a folder; None, the default, records nothing)."""
+    if record is not None:
+        return record.exchange(sends, lines, request, limit, on_step)
     sends.put(json.dumps(request) + "\n")
     return answer_for(lines, request["id"], limit, on_step)
+
+
+RECORD_ENV = "GORDIUM_RECORD_SESSION"     # a folder: every request to the checker and its answer saved there
+
+
+class Recorder:
+    """Saves a session's traffic with the checker, for the replay test (design_checker/tests/test_replay.py): one
+    line per request in `folder`/session.jsonl, {"n", "request", "steps", "reply"}, where "reply" is the answer
+    line exactly as the checker wrote it (None if none came) and "steps" its progress lines. The model file a
+    request names is copied first, byte for byte, to files/<n>/<its own name> (its own name: the checker's answer
+    quotes it), and the request records that copy's path relative to the folder; a report path is recorded the
+    same way (the report itself is the checker's to write). Off unless the plugin is started with RECORD_ENV set
+    (`from_env`). Recording never stops a check: a recording that fails is noted in `failed` and the exchange goes
+    on unrecorded."""
+
+    def __init__(self, folder, copy=None):
+        self.folder = folder
+        self.failed = None
+        self._copy = copy or _copy_file
+        self._lock = threading.Lock()
+        self._n = None
+
+    @classmethod
+    def from_env(cls, environ):
+        folder = (environ.get(RECORD_ENV) or "").strip()
+        return cls(folder) if folder else None
+
+    def _next(self):
+        if self._n is None:             # a folder recorded into before: carry on after its last request
+            path = os.path.join(self.folder, "session.jsonl")
+            self._n = 0
+            if os.path.exists(path):
+                with open(path, encoding="utf-8") as f:
+                    self._n = sum(1 for line in f if line.strip())
+        self._n += 1
+        return self._n
+
+    def _begin(self, request):
+        with self._lock:
+            n = self._next()
+            saved = dict(request)
+            for key in ("model", "report"):
+                if saved.get(key):
+                    rel = "files/%04d/%s" % (n, os.path.basename(str(saved[key])))
+                    if key == "model":
+                        target = os.path.join(self.folder, *rel.split("/"))
+                        os.makedirs(os.path.dirname(target), exist_ok=True)
+                        self._copy(str(saved[key]), target)
+                    saved[key] = rel
+            return {"n": n, "request": saved}
+
+    def _end(self, entry, steps, reply):
+        line = json.dumps(dict(entry, steps=steps, reply=None if reply is None else json.dumps(reply)))
+        with self._lock:
+            os.makedirs(self.folder, exist_ok=True)
+            with open(os.path.join(self.folder, "session.jsonl"), "a", encoding="utf-8", newline="\n") as f:
+                f.write(line + "\n")
+
+    def exchange(self, sends, lines, request, limit, on_step=None):
+        try:
+            entry = self._begin(request)
+        except Exception as e:                 # noqa: BLE001  (never a check lost to its recording)
+            self.failed, entry = "%s: %s" % (type(e).__name__, e), None
+        steps = []
+
+        def step(text):
+            steps.append(text)
+            if on_step is not None:
+                on_step(text)
+        reply = None
+        try:
+            reply = exchange(sends, lines, request, limit, step)
+            return reply
+        finally:
+            if entry is not None:
+                try:
+                    self._end(entry, steps, reply)
+                except Exception as e:         # noqa: BLE001
+                    self.failed = "%s: %s" % (type(e).__name__, e)
+
+
+def _copy_file(source, target):
+    with open(source, "rb") as a, open(target, "wb") as b:
+        b.write(a.read())
 
 
 HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",

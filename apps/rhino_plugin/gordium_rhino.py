@@ -204,6 +204,12 @@ def _stop_worker():
     SERVERS.stop_all()                               # and any an earlier load left running
 
 
+# the opt-in session recorder: with GORDIUM_RECORD_SESSION set to a folder before Rhino starts, every request to the
+# checker, its answer and a copy of the model it sent are saved there (logic.Recorder; the replay test runs them
+# again). Off (None) otherwise: nothing is recorded.
+RECORDER = logic.Recorder.from_env(os.environ)
+
+
 def ask(request, cancel=False, on_tick=None):
     """Send one request to the checker and wait for its answer, never on Rhino's thread: the exchange runs as a
     logic.Job and ui.wait waits for it (a slow one shows what the checker is doing, live; Rhino keeps drawing).
@@ -303,12 +309,12 @@ def _ask_job(request, cancel, facts_first=None):
 
     def work(step):                         # only these requests' answers, within their time limits; no pipe I/O
         if first is not None:               # on Rhino's thread
-            read = logic.exchange(sends, lines, first, logic.ask_limit("facts"))
+            read = logic.exchange(sends, lines, first, logic.ask_limit("facts"), record=RECORDER)
             if read is None or not read.get("ok"):
                 return read
             if (read.get("result") or {}).get("problems"):
                 return {"id": request["id"], "ok": False, "error": UNREADABLE}
-        return logic.exchange(sends, lines, request, limit, on_step=step)
+        return logic.exchange(sends, lines, request, limit, on_step=step, record=RECORDER)
 
     return logic.Job(work, logic.FIRST_STEP.get(request.get("cmd"), "Working…"),
                      stop=_stop_worker if cancel else None)
