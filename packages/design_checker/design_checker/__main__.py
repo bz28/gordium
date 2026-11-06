@@ -8,7 +8,11 @@ Requests (one JSON object per line): {"id": 1, "cmd": "check", "model": "<.3dm>"
 "facts": {...}} (what's wrong with saved lot facts: the same check as a facts file), {"id": 4, "cmd": "start",
 "model": "<.3dm with the lot>", "facts": {...}, "larger_side": null} (the largest legal starting building, as stacked floors;
 "larger_side": "left" or "right" puts a zone's larger side yard there), {"id": 5, "cmd": "sample_site"} (the
-106 Ithaca Rd lot and facts GordiumStart offers). Answers:
+106 Ithaca Rd lot and facts GordiumStart offers). New-style commands name the protocol they speak (protocol.py,
+docs/protocol/): {"id": 6, "cmd": "hello", "protocol": "1.0"} (the protocol, the site description version and the
+fingerprints of the worker's code and rules), {"id": 7, "cmd": "read_model", "protocol": "1.0", "model": "<.3dm>",
+"facts": {...}} (the model as a site description, gordium.site/1: site_json.read_model); their answers carry
+"about" (the same fingerprints) beside "result". Answers:
 {"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. A request with "progress": true
 also gets {"id": 1, "step": "Measuring the building…"} lines before its answer, one as each stage starts (the
 plugin's progress line; the answer is always the request's last line). The process stays up, so a
@@ -24,7 +28,19 @@ from pathlib import Path
 from model_measurement.project import fact_problems, load_facts
 from rule_format.rulebook import utf8_console
 
+from . import protocol, site_json
 from .check import check, options, sample_site, start
+
+
+def _read_model(request: dict) -> dict:
+    inventory = request.get("inventory_complete", False)
+    if not isinstance(inventory, bool):
+        raise ValueError("inventory_complete should be true or false")
+    return {"site": site_json.read_model(Path(request["model"]), request["facts"], inventory)}
+
+
+# the new-style commands (protocol 1.x, docs/protocol/): each answer carries "about" (protocol.about)
+NEW = {"hello": lambda request: protocol.about(), "read_model": _read_model}
 
 
 def answer(request: dict, step=None) -> dict:
@@ -43,6 +59,10 @@ def answer(request: dict, step=None) -> dict:
             result = {"problems": fact_problems(request["facts"])}
         elif request.get("cmd") == "options":
             result = options(request["jurisdiction"])
+        elif request.get("cmd") in NEW:
+            protocol.speaks(request)
+            return {"id": request.get("id"), "ok": True, "result": NEW[request["cmd"]](request),
+                    "about": protocol.about()}
         else:
             raise ValueError(f"unknown command {request.get('cmd')!r}")
         return {"id": request.get("id"), "ok": True, "result": result}
@@ -57,8 +77,8 @@ def serve(stdin=sys.stdin, stdout=sys.stdout) -> None:
     for line in stdin:
         if line.strip():
             try:
-                request = json.loads(line)
-            except json.JSONDecodeError as e:
+                request = site_json.loads(line)        # a key given twice is refused, never one of them dropped
+            except (json.JSONDecodeError, site_json.SiteRefused) as e:
                 request, reply = {}, {"id": None, "ok": False, "error": f"not JSON: {e}"}
             else:
                 reply = answer(request, _steps(request, stdout) if request.get("progress") else None)
