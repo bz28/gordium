@@ -8,8 +8,8 @@ where none of the .venv's packages are installed."""
 
 __all__ = ['report_message', 'BUSY', 'NO_DOCUMENT', 'WorkCancelled', 'WAIT_WINDOW_S', 'CANCELLING', 'STOP_HINT',
     'STOP_HINT_CLICK', 'FIRST_STEP', 'CHECK_CANCELLED', 'CHECK_CANCELLED_NOTE', 'DRAW_CANCELLED', 'REPORT_CANCELLED',
-    'REPORT_CANCELLED_LATE', 'report_cancelled', 'SETTLING', 'CHECK_OUTDATED', 'REPORT_OUTDATED', 'NOT_IN_FRONT',
-    'outdated_report_message', 'HOUSE_OUTDATED', 'DRAW_OUTDATED', 'ModelChanged']
+    'REPORT_CANCELLED_LATE', 'report_cancelled', 'SETTLING', 'CHECK_OUTDATED', 'SITE_SUFFIX', 'REPORT_OUTDATED',
+    'NOT_IN_FRONT', 'outdated_report_message', 'HOUSE_OUTDATED', 'DRAW_OUTDATED', 'ModelChanged']
 
 
 def report_message(path, written, error=None, opened=True, open_error=None, stale=False):
