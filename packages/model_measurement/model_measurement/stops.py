@@ -2,7 +2,11 @@
 
 The measuring code gives a reason only through `stop(key, ...)`, so this table is the whole list: the README
 lists each one word for word and tests/test_stop_list.py has a case that gives each (both checked from here).
+`code_of(words)` reads a reason back into its key and blanks (the site description names problems by key:
+design_checker/site_json.py).
 """
+
+import re
 
 STOPS = {
     # the law reads more than one way and the readings disagree (each reading's question is in the README's table)
@@ -189,3 +193,40 @@ STOPS = {
 def stop(key: str, **values) -> str:
     """The reason for `key`, with its blanks filled in."""
     return STOPS[key].format(**values)
+
+
+BLANK = re.compile(r"\{([a-z_]+)\}")
+
+
+def blanks(key: str) -> list[str]:
+    """The blanks of `key`'s reason, in order ("several_lot_outlines" -> ["count", "layer"])."""
+    return BLANK.findall(STOPS[key])
+
+
+def _pattern(template: str) -> re.Pattern:
+    """A reason's words as a pattern: its fixed words exactly, each blank any text (as little as will do)."""
+    parts = BLANK.split(template)          # fixed words, blank, fixed words, blank, ...
+    return re.compile("".join(re.escape(p) if i % 2 == 0 else f"(?P<{p}>.*?)" for i, p in enumerate(parts)) + r"\Z",
+                      re.DOTALL)
+
+
+PATTERNS = {key: _pattern(template) for key, template in STOPS.items()}
+
+
+def _fixed(key: str) -> int:
+    """How many of a reason's characters are fixed words (its blanks left out)."""
+    return len(BLANK.sub("", STOPS[key]))
+
+
+def code_of(words: str) -> tuple[str, dict]:
+    """(key, blanks) of a reason given in words, the reverse of `stop`: stop(key, **blanks) gives `words` back.
+    Where two reasons could give the words, the one with more fixed words is meant ("no closed lot outline on the
+    Site layer" is no_lot_outline, though "no {layer} layer" could give it too, with a layer named "closed lot
+    outline on the Site"). Words no reason gives, or two reasons give equally, are a plain error (ValueError), never
+    a guess: the site description names every problem by its key, and a wrong key would be a different problem."""
+    found = sorted(((key, m.groupdict()) for key, rx in PATTERNS.items() for m in [rx.match(words)] if m),
+                   key=lambda kb: -_fixed(kb[0]))
+    if not found or (len(found) > 1 and _fixed(found[0][0]) == _fixed(found[1][0])):
+        raise ValueError(f"{'no' if not found else 'more than one'} measuring reason gives the words {words!r}"
+                         + (f" ({', '.join(k for k, _ in found)})" if found else ""))
+    return found[0]
