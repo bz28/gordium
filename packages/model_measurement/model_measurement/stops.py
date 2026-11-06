@@ -2,7 +2,11 @@
 
 The measuring code gives a reason only through `stop(key, ...)`, so this table is the whole list: the README
 lists each one word for word and tests/test_stop_list.py has a case that gives each (both checked from here).
+`code_of(words)` reads a reason back into its key and blanks (the site description names problems by key:
+design_checker/site_json.py).
 """
+
+import re
 
 STOPS = {
     # the law reads more than one way and the readings disagree (each reading's question is in the README's table)
@@ -172,6 +176,14 @@ STOPS = {
     "single_precision": "a building mesh's points may be single precision, too coarse this far from the origin to "
                         "measure to 0.01 ft (move it nearer the origin, or turn it into a solid)",
     "not_a_solid": "{kind} on the {layer} layer can't be measured yet (explode it or turn it into a solid)",
+    # what the design tool says itself (the site description, design_checker/site_json.py): never the measuring's
+    "inventory_incomplete": "the design tool didn't say everything on the lot was sent: anything not sent may be part "
+                            "of a building, or another building (lot coverage counts every building on the lot, "
+                            "§325-8A)",
+    # a problem a design tool found and words itself (an object it couldn't send, said in the older Rhino plugin's own
+    # words): it makes the building's measuring need review all the same. Never a reason the table has words for
+    # (site_json refuses that: the reason's own code is sent), and never read back by code_of (TOOL_WORDS)
+    "tool_words": "{words}",
     # what research settled and what is still open, read from the city's files (interpretations.py)
     "law_missing": "the city's files no longer have {what} (answered without naming the reading, or removed): the "
                    "measuring can't follow it",
@@ -189,3 +201,43 @@ STOPS = {
 def stop(key: str, **values) -> str:
     """The reason for `key`, with its blanks filled in."""
     return STOPS[key].format(**values)
+
+
+BLANK = re.compile(r"\{([a-z_]+)\}")
+
+
+def blanks(key: str) -> list[str]:
+    """The blanks of `key`'s reason, in order ("several_lot_outlines" -> ["count", "layer"])."""
+    return BLANK.findall(STOPS[key])
+
+
+def _pattern(template: str) -> re.Pattern:
+    """A reason's words as a pattern: its fixed words exactly, each blank any text (as little as will do)."""
+    parts = BLANK.split(template)          # fixed words, blank, fixed words, blank, ...
+    return re.compile("".join(re.escape(p) if i % 2 == 0 else f"(?P<{p}>.*?)" for i, p in enumerate(parts)) + r"\Z",
+                      re.DOTALL)
+
+
+TOOL_WORDS = "tool_words"     # any words at all: sent by its code, never guessed from words (code_of skips it)
+PATTERNS = {key: _pattern(template) for key, template in STOPS.items() if key != TOOL_WORDS}
+
+
+def _fixed(key: str) -> int:
+    """How many of a reason's characters are fixed words (its blanks left out)."""
+    return len(BLANK.sub("", STOPS[key]))
+
+
+def code_of(words: str) -> tuple[str, dict]:
+    """(key, blanks) of a reason given in words, the reverse of `stop`: stop(key, **blanks) gives `words` back.
+    Where two reasons could give the words, the one with more fixed words is meant ("no closed lot outline on the
+    Site layer" is no_lot_outline, though "no {layer} layer" could give it too, with a layer named "closed lot
+    outline on the Site"). Words no reason gives, or two reasons give equally, are a plain error (ValueError), never
+    a guess: the site description names every problem by its key, and a wrong key would be a different problem.
+    The design tool's own words (TOOL_WORDS) are never read back from words: any words would do, so they are only
+    ever sent by that code."""
+    found = sorted(((key, m.groupdict()) for key, rx in PATTERNS.items() for m in [rx.match(words)] if m),
+                   key=lambda kb: -_fixed(kb[0]))
+    if not found or (len(found) > 1 and _fixed(found[0][0]) == _fixed(found[1][0])):
+        raise ValueError(f"{'no' if not found else 'more than one'} measuring reason gives the words {words!r}"
+                         + (f" ({', '.join(k for k, _ in found)})" if found else ""))
+    return found[0]

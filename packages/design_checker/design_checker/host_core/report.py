@@ -8,8 +8,8 @@ where none of the .venv's packages are installed."""
 
 __all__ = ['report_message', 'BUSY', 'NO_DOCUMENT', 'WorkCancelled', 'WAIT_WINDOW_S', 'CANCELLING', 'STOP_HINT',
     'STOP_HINT_CLICK', 'FIRST_STEP', 'CHECK_CANCELLED', 'CHECK_CANCELLED_NOTE', 'DRAW_CANCELLED', 'REPORT_CANCELLED',
-    'REPORT_CANCELLED_LATE', 'report_cancelled', 'SETTLING', 'CHECK_OUTDATED', 'REPORT_OUTDATED', 'NOT_IN_FRONT',
-    'outdated_report_message', 'HOUSE_OUTDATED', 'DRAW_OUTDATED', 'ModelChanged']
+    'REPORT_CANCELLED_LATE', 'report_cancelled', 'SETTLING', 'CHECK_OUTDATED', 'SITE_SUFFIX', 'REPORT_OUTDATED',
+    'NOT_IN_FRONT', 'outdated_report_message', 'HOUSE_OUTDATED', 'DRAW_OUTDATED', 'ModelChanged']
 
 
 def report_message(path, written, error=None, opened=True, open_error=None, stale=False):
@@ -63,6 +63,7 @@ def report_cancelled(path, changed):
     return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
 SETTLING = "Finishing the check that is running…"
 CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+SITE_SUFFIX = ".site.json"   # the site description kept beside a report (design_checker.check.SITE_SUFFIX)
 REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
                    "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
                    "panel) for a report of the model now.")

@@ -7,7 +7,7 @@ import re
 import pytest
 
 from model_measurement.places.ithaca_city import measure as measure_module
-from model_measurement.stops import STOPS
+from model_measurement.stops import STOPS, TOOL_WORDS
 
 # a blank holding another reason or an open question may hold anything; any other blank is a word or a few
 _OPEN = {"question", "reason"}
@@ -18,7 +18,8 @@ def _template(text: str) -> str:
     return "".join((".+" if p[1:-1] in _OPEN else "[^;]+") if p.startswith("{") else re.escape(p) for p in parts)
 
 
-ONE = "(?:" + "|".join(_template(t) for t in STOPS.values()) + ")"
+# the design tool's own words (any words at all) are never a reason the measuring gives
+ONE = "(?:" + "|".join(_template(t) for k, t in STOPS.items() if k != TOOL_WORDS) + ")"
 FROM_TABLE = re.compile(ONE + "(?:; " + ONE + ")*")
 
 
@@ -27,14 +28,20 @@ def from_table(reason: str) -> bool:
     return FROM_TABLE.fullmatch(reason) is not None
 
 
+def pytest_configure(config):
+    config.addinivalue_line("markers", "tool_words: the test gives a building the design tool's own words (any words)")
+
+
 @pytest.fixture(autouse=True)
-def reasons_come_from_the_table(monkeypatch):
+def reasons_come_from_the_table(monkeypatch, request):
     made = measure_module._record
+    # the design tool's own words pass through as a reason whatever they say: only where a test sends them
+    tool = request.node.get_closest_marker("tool_words") is not None
 
     def checked(*args, **kwargs):
         record = made(*args, **kwargs)
         reason = record["reason"]
-        assert reason is None or from_table(reason), f"a reason not from stops.py: {reason!r}"
+        assert reason is None or from_table(reason) or tool, f"a reason not from stops.py: {reason!r}"
         return record
 
     monkeypatch.setattr(measure_module, "_record", checked)

@@ -3,7 +3,7 @@ rhino_logic.py by cutting whole top-level statements (with the comment lines abo
 original order, into their new module. Nothing inside a statement is retyped; the only edits are the two file paths
 worked out from a file's own folder (EDITS), now one folder deeper. move_check.py proves the result.
 
-    git show tidy-2-host-source:packages/design_checker/design_checker/rhino_logic.py > /tmp/base.py
+    git show tidy-4-check-via-site:packages/design_checker/design_checker/rhino_logic.py > /tmp/base.py
     python mover.py /tmp/base.py where_each_name_goes.json packages/design_checker/design_checker
 
 where_each_name_goes.json: each top-level name -> its module ("rhino" stays in rhino_logic.py). It is the plan's
