@@ -769,7 +769,8 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
     description is kept beside it (<report name>.site.json), so any report can be traced to exactly the site it was
     worked out from and worked out again. A report is never beside another check's site: the old site file goes
     before anything is measured and the new one is written (as a hidden part file) before the report, then moved in
-    once the report is; a site file that can't be written takes its report with it (report_error says why)."""
+    once the report is. A site file that can't be written means no report is written (report_error says why); at
+    worst, a check stopped between the two leaves a report with no site file beside it, never a wrong one."""
     site, facts, extras = site_json.for_measuring(site_json.to_site(doc), facts, extras)
     kept = part = site_error = None
     if report_path is not None:
@@ -780,9 +781,10 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
             kept.unlink(missing_ok=True)
             part.write_text(json.dumps(doc, indent=1, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
         except OSError as e:
-            site_error = e
-    try:
-        out = check_site(site, facts, name or doc["host"]["document"] or "model", report_path, extras, step=step)
+            site_error = _NotWritten(e)
+    try:                                     # a site that can't be kept: no report written (the earlier one stays)
+        out = check_site(site, facts, name or doc["host"]["document"] or "model",
+                         None if site_error else report_path, extras, step=step)
     except BaseException:                    # stopped or failed: no half-written site file left behind
         if part is not None:
             _unlink(part)
@@ -793,12 +795,20 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
                 os.replace(part, kept)
             except OSError as e:
                 site_error = e
-        if site_error is not None and out["report_error"] is None:     # never a report without its site
-            _unlink(report_path)
+        if site_error is not None and out["report_error"] is None:     # never a report beside the wrong site
+            if not isinstance(site_error, _NotWritten):
+                _unlink(report_path)
             out["report_error"] = (f"the site description beside the report: {site_error.strerror or site_error} "
                                    f"({kept})")
         _unlink(part)
     return out
+
+
+class _NotWritten(OSError):
+    """The site file couldn't be written before the check: the report wasn't written either."""
+
+    def __init__(self, error: OSError):
+        super().__init__(error.errno, error.strerror)
 
 
 def _unlink(path: Path) -> None:

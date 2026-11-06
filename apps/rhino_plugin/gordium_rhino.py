@@ -3801,14 +3801,16 @@ def open_report():
 
 
 def _drop_report_part(path):
-    """The half-written copy a stopped checker may leave beside the report (design_checker.check writes the report
-    beside it, then moves it in: the report itself is never half written). Never raises."""
-    part = os.path.join(os.path.dirname(path), "." + os.path.basename(path) + ".part")
-    try:
-        if os.path.exists(part):
-            os.remove(part)
-    except OSError:
-        pass
+    """The half-written copies a stopped checker may leave beside the report and its site description
+    (design_checker.check writes each beside it, then moves it in: neither is ever half written). Never raises."""
+    folder, name = os.path.dirname(path), os.path.basename(path)
+    site = os.path.splitext(name)[0] + logic.SITE_SUFFIX        # its site description's, written just before it
+    for part in (os.path.join(folder, "." + name + ".part"), os.path.join(folder, "." + site + ".part")):
+        try:
+            if os.path.exists(part):
+                os.remove(part)
+        except OSError:
+            pass
 
 
 def off():

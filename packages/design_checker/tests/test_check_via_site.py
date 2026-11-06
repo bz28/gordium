@@ -270,6 +270,49 @@ def test_a_report_is_never_beside_another_checks_site(tmp_path, monkeypatch):
             raise PermissionError(13, "Permission denied")
         return real(self, *args, **kwargs)
     monkeypatch.setattr(type(report), "write_text", refuse)
+    before = report.read_bytes()
     result = check(path, facts, report)
     assert result["report_error"].startswith("the site description beside the report: Permission denied")
+    assert list(tmp_path.iterdir()) == [report] and report.read_bytes() == before   # the earlier report, untouched
+
+
+def test_a_site_that_cant_be_written_means_no_report_is_written(tmp_path, monkeypatch):
+    """Review round 2 (PR 4): the report isn't written at all, so nothing ever stands beside the wrong site."""
+    import design_checker.check as check_module
+    path, facts = MODELS[1]
+    report = tmp_path / "house.xlsx"
+    real, asked = type(report).write_text, []
+
+    def refuse(self, *args, **kwargs):
+        if self.name.endswith(SITE_SUFFIX + ".part"):
+            raise PermissionError(13, "Permission denied")
+        return real(self, *args, **kwargs)
+    real_check_site = check_module.check_site
+
+    def spy(site, facts, name="model", report_path=None, *args, **kwargs):
+        asked.append(report_path)
+        return real_check_site(site, facts, name, report_path, *args, **kwargs)
+    monkeypatch.setattr(type(report), "write_text", refuse)
+    monkeypatch.setattr(check_module, "check_site", spy)
+    result = check(path, facts, report)
+    assert asked == [None] and result["report_error"].startswith("the site description beside the report")
     assert list(tmp_path.iterdir()) == []
+
+
+def test_rhino_clears_the_site_descriptions_half_written_copy_too(tmp_path):
+    """Review round 2 (PR 4): a Cancel in Rhino leaves neither the report's nor its site's part file."""
+    import os
+    from design_checker import rhino_logic as logic
+    from rule_format.rulebook import REPO
+    assert logic.SITE_SUFFIX == SITE_SUFFIX
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fn = src[src.index("def _drop_report_part("):src.index("\ndef off(")]
+    space = {"os": os, "logic": logic}
+    exec(fn, space)
+    report = tmp_path / "house.xlsx"
+    parts = [tmp_path / ".house.xlsx.part", tmp_path / (".house" + SITE_SUFFIX + ".part")]
+    for p in parts + [report]:
+        p.write_text("x", encoding="utf-8")
+    space["_drop_report_part"](str(report))
+    assert sorted(tmp_path.iterdir()) == [report]
+    space["_drop_report_part"](str(tmp_path / "gone" / "house.xlsx"))      # never raises
