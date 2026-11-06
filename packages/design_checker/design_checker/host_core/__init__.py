@@ -12,5 +12,5 @@ them into its own Python 3.9 (through rhino_logic.py, which offers every name he
   report         the report's and long work's words
   panel_words    the panel's words
   context        the neighbourhood around a looked-up lot
-  worker_client  the reference client of the checker (its pipes, one request and its answer, a Job, the recorder)
+  worker_client  the reference client of the checker (its pipes, one request and its answer, a Job, the recorders)
 """

@@ -1,21 +1,27 @@
 """The reference Python client of the checker (the worker): its two pipes, one request and its answer,
-a long piece of work on its own thread, the session recorder, and when to restart the checker.
+a long piece of work on its own thread, the session recorder (and its call recorder: every host_core call, for the
+protocol's parity test), and when to restart the checker.
 
 Moved here unchanged from rhino_logic.py, which still offers every name (so the Rhino plugin is
 unchanged). Python 3.9 and the standard library only: Rhino 8 imports this into its own Python 3.9,
 where none of the .venv's packages are installed."""
 
+import functools
+import inspect
 import json
+import math
 import os
 import queue
 import re
 import threading
 import time
+import types
+from .lookup import MISSING
 from .report import CANCELLING
 
 __all__ = ['venv_python', 'code_fingerprint', 'restart_checker', 'Job', 'ASK_LIMIT_S', 'ASK_LIMITS_S', 'ask_limit',
     'CheckerOutOfStep', 'pipes', '_read_lines', '_write_lines', 'exchange', 'RECORD_ENV', 'Recorder', '_copy_file',
-    'answer_for']
+    'CALLS_ENV', 'NotPlain', 'MISSING_MARK', 'plain', 'unplain', 'with_tuples', '_Asked', 'CallRecorder', 'answer_for']
 
 
 def venv_python(root, os_name):
@@ -274,6 +280,241 @@ class Recorder:
 def _copy_file(source, target):
     with open(source, "rb") as a, open(target, "wb") as b:
         b.write(a.read())
+
+
+# ---- the call recorder: every host_core call, with what went in and what came out ---------------------------------
+#
+# The worker serves host_core's functions as protocol commands (design_checker/protocol.py), and the parity test
+# (design_checker/tests/test_protocol.py) proves each command's JSON answer is the in-process answer, on calls the
+# plugin's own logic really made. CallRecorder saves those calls. Off unless asked for (CALLS_ENV, or a test run
+# with tests/record_calls.py: design_checker/call_session.py records the headless session that way).
+
+CALLS_ENV = "GORDIUM_RECORD_CALLS"        # a folder: every host_core call saved there, one line each
+
+
+class NotPlain(Exception):
+    """A value the protocol can't carry as it is (not a dict with text keys, list, tuple, text, true/false, null, or a
+    finite number), so the call it was in is not recorded."""
+
+
+MISSING_MARK = "$missing"     # lookup.MISSING (a key with no value, in a pending preview's undo list) on the wire:
+#                               {"$missing": true}, the one object with this key (any other is refused)
+
+
+def plain(value, path=(), tuples=None, sets=None):
+    """`value` as JSON would carry it, every tuple a list (its place added to `tuples`, a list of paths, when given),
+    every set of text or numbers a sorted list when `sets` (a list of paths, likewise) is given (the model's ids),
+    lookup.MISSING as {"$missing": true}, or NotPlain. Never a value quietly changed: a dict key that isn't text, NaN
+    or infinity, any other object, a dict of its own with the "$missing" key, refused."""
+    if value is MISSING:
+        return {MISSING_MARK: True}
+    if value is None or isinstance(value, (bool, str)):
+        return value
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        if math.isfinite(value):
+            return value
+        raise NotPlain("%s at %s" % (value, list(path)))
+    if type(value) in (list, tuple):
+        if type(value) is tuple and tuples is not None:
+            tuples.append(list(path))
+        return [plain(v, path + (i,), tuples, sets) for i, v in enumerate(value)]
+    if type(value) in (set, frozenset) and sets is not None:
+        if not all(isinstance(v, str) for v in value) and not all(
+                isinstance(v, (int, float)) and not isinstance(v, bool) for v in value):
+            raise NotPlain("a set of mixed or other values at %s" % (list(path),))
+        sets.append(list(path))
+        return [plain(v, path + (i,), tuples, sets) for i, v in enumerate(sorted(value))]
+    if type(value) is dict:
+        if not all(isinstance(k, str) for k in value):
+            raise NotPlain("a key that isn't text at %s" % (list(path),))
+        if MISSING_MARK in value:
+            raise NotPlain("%r is the protocol's own key (lookup.MISSING), at %s" % (MISSING_MARK, list(path)))
+        return {k: plain(v, path + (k,), tuples, sets) for k, v in value.items()}
+    raise NotPlain("a %s at %s" % (type(value).__name__, list(path)))
+
+
+def unplain(value):
+    """`value` as JSON brought it, with each {"$missing": true} lookup.MISSING again (plain, the other way)."""
+    if type(value) is dict:
+        if len(value) == 1 and value.get(MISSING_MARK) is True:      # exactly the mark ({"$missing": 1} is not)
+            return MISSING
+        return {k: unplain(v) for k, v in value.items()}
+    if type(value) is list:
+        return [unplain(v) for v in value]
+    return value
+
+
+def with_tuples(value, paths, kind=tuple):
+    """`value` (as `plain` gave it) with the lists at `paths` made tuples again (or `kind`: set), as the caller had
+    them."""
+    for path in sorted(paths, key=len, reverse=True):          # the deepest first, so a path above still finds it
+        if not path:
+            value = kind(value)
+            continue
+        holder = value
+        for key in path[:-1]:
+            holder = holder[key]
+        holder[path[-1]] = kind(holder[path[-1]])
+    return value
+
+
+class _Asked:
+    """A callable argument (a question to the architect: `ask`) seen through: each call's arguments and answer
+    noted, the answer passed on unchanged."""
+
+    def __init__(self, fn):
+        self.fn, self.calls, self.raised = fn, [], False
+
+    def __call__(self, *args):
+        try:
+            answer = self.fn(*args)
+        except BaseException:
+            self.raised = True            # (Esc at the question: a call no host can send, so not recorded)
+            raise
+        self.calls.append([list(args), answer])
+        return answer
+
+
+class CallRecorder:
+    """Saves every call of host_core's functions (`install`) to `folder`/calls-<process>.jsonl, one line each:
+    {"fn": "start_box.box_rows", "args": {name: value, ...} (as passed: defaults not filled in), "tuples": {name:
+    [paths of the tuples in it]}, "sets": {name: [paths of its sets, each recorded as a sorted list]}, "result" or "raised" ([type, words]), "mutated": {name: value after} (an argument
+    the call changed in place), "asked": {name: [[question args, answer], ...]} (a callable argument's calls)}.
+    Calls inside calls are saved too (an edit plan is decided inside apply_lookup); a call made again exactly as
+    before is saved once. Nothing is saved for a call any
+    of whose values the protocol can't carry (NotPlain: counted in `skipped`), or while anything in host_core is
+    swapped out (a test's monkeypatch: the answer is then not host_core's own; counted too). Recording never
+    changes a call: the function gets the arguments it was given (a callable one through _Asked, which passes each
+    call on and its answer back unchanged), and its answer or error goes back."""
+
+    def __init__(self, folder):
+        self.folder = folder
+        self.skipped = {}
+        self._lock = threading.Lock()
+        self._local = threading.local()
+        self._modules = ()
+        self._seen = []
+        self._lines = set()          # each different call saved once
+
+    @classmethod
+    def from_env(cls, environ):
+        folder = (environ.get(CALLS_ENV) or "").strip()
+        return cls(folder) if folder else None
+
+    def install(self, modules, also=(), only=None):
+        """Wraps every function `modules` define and list in __all__ (or only those named in `only`, as
+        "start_box.box_rows"), in place: in each of `modules` and `also` (rhino_logic, which offers the same names)
+        every name bound to it is bound to the wrapper instead."""
+        found = []
+        for module in modules:
+            if module.__name__ == __name__:      # (this module: the recorder's own helpers, the client's pipes)
+                continue
+            for name in module.__all__:
+                fn = vars(module)[name]
+                label = module.__name__.split(".")[-1] + "." + name
+                if isinstance(fn, types.FunctionType) and fn.__module__ == module.__name__ and \
+                        (only is None or label in only):
+                    found.append((label, fn))
+        for label, fn in found:
+            wrapper = self._wrap(label, fn)
+            for module in tuple(modules) + tuple(also):
+                for key, value in list(vars(module).items()):
+                    if value is fn:
+                        vars(module)[key] = wrapper          # (the module's own dict: past rhino_logic's refusal)
+        self._modules = tuple(modules)
+        self._seen = [(vars(m), dict(vars(m))) for m in self._modules]
+        return len(found)
+
+    def _untouched(self):
+        """Whether every name in host_core is bound as it was at install (no test swapped one)."""
+        return all(len(now) == len(then) and all(now.get(k, self) is v for k, v in then.items())
+                   for now, then in self._seen)
+
+    def _skip(self, reason):
+        with self._lock:
+            self.skipped[reason] = self.skipped.get(reason, 0) + 1
+
+    def _wrap(self, label, fn):
+        signature = inspect.signature(fn)
+        recorder = self
+
+        @functools.wraps(fn)
+        def recorded(*args, **kwargs):
+            local = recorder._local
+            depth = getattr(local, "depth", 0)
+            if depth == 0:
+                local.clean = recorder._untouched()
+            local.depth = depth + 1
+            try:
+                if not local.clean:
+                    recorder._skip("host_core swapped by a test")
+                    return fn(*args, **kwargs)
+                return recorder._call(label, fn, signature, args, kwargs)
+            finally:
+                local.depth = depth
+        return recorded
+
+    def _call(self, label, fn, signature, args, kwargs):
+        try:
+            bound = signature.bind(*args, **kwargs)
+        except TypeError:
+            return fn(*args, **kwargs)                   # (its own error, raised by the call itself)
+        asked = {}
+        for name, value in list(bound.arguments.items()):
+            if callable(value):
+                asked[name] = bound.arguments[name] = _Asked(value)
+        try:
+            tuples, sets, before = {}, {}, {}
+            for name, value in bound.arguments.items():
+                if name not in asked:
+                    tuples[name], sets[name] = [], []
+                    before[name] = plain(value, (), tuples[name], sets[name])
+        except NotPlain:
+            before = None
+        try:
+            result = fn(*bound.args, **bound.kwargs)
+        except BaseException as e:           # (Esc at a question: KeyboardInterrupt or the plugin's own Cancelled)
+            self._end(label, before, (tuples, sets), bound, asked, raised=[type(e).__name__, str(e)])
+            raise
+        self._end(label, before, (tuples, sets), bound, asked, result=result)
+        return result
+
+    def _end(self, label, before, kinds, bound, asked, **outcome):
+        if before is None:
+            self._skip(label + ": an argument the protocol can't carry")
+            return
+        if any(a.raised for a in asked.values()):
+            self._skip(label + ": a question it asked raised")
+            return
+        try:
+            tuples, sets = kinds
+            entry = {"fn": label, "args": before, "tuples": {k: v for k, v in tuples.items() if v}}
+            if any(sets.values()):
+                entry["sets"] = {k: v for k, v in sets.items() if v}
+            if "result" in outcome:
+                entry["result"] = plain(outcome["result"])
+            else:
+                entry["raised"] = outcome["raised"]
+            after = {k: plain(v, (), None, []) for k, v in bound.arguments.items() if k not in asked}
+            mutated = {k: v for k, v in after.items() if v != before[k]}
+            if mutated:
+                entry["mutated"] = mutated
+            if asked:
+                entry["asked"] = {k: plain(a.calls) for k, a in asked.items()}
+            line = json.dumps(entry, allow_nan=False)      # (keys in their order: host_core's words can follow it)
+        except (NotPlain, ValueError):
+            self._skip(label + ": an answer the protocol can't carry")
+            return
+        with self._lock:
+            if line in self._lines:
+                return
+            self._lines.add(line)
+            os.makedirs(self.folder, exist_ok=True)
+            with open(os.path.join(self.folder, "calls-%d.jsonl" % os.getpid()), "a", encoding="utf-8",
+                      newline="\n") as f:
+                f.write(line + "\n")
 
 
 def answer_for(lines, request_id, limit, on_step=None, clock=time.monotonic):
