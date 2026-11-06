@@ -29,7 +29,11 @@ by `python -m rule_format place --write` and checked current in CI. Never edit `
 **host_core/** holds the half of the plugin's logic that has nothing to do with Rhino, so a second host (a Revit
 add-in) can use it: `facts` (the facts the architect states, the use questions, the row dialog), `streets` (which
 lot edges face a street, one street or two), `lookup` (an address lookup's answer, saved addresses), `start_box`
-(the start box's rows, buttons and reset) and `place`. Like `rhino_logic.py` it is Python 3.9 and the standard
+(the start box's rows, buttons and reset), `place`, `freshness` (whether the results on screen are current, the
+undo steps' names, the panel's actions refused while a box is open), `report` (the report's and long work's words),
+`panel_words`, `context` (the neighbourhood around a looked-up lot), `edits` (the start box's model edits as one
+transaction) and `worker_client` (the reference Python client of the checker: its pipes, one request and its
+answer, a Job, the session recorder). Like `rhino_logic.py` it is Python 3.9 and the standard
 library only, because Rhino 8 imports it into its own Python 3.9. `rhino_logic.py` still offers every one of its
 names (`logic.box_rows is host_core.start_box.box_rows`) and refuses `logic.X = ...` for them, since that would
 change a copy host_core never reads; a test swaps such a name with `tests/moved_names.py`'s `patch_moved`.
