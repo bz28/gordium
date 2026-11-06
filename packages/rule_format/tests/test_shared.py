@@ -89,13 +89,13 @@ def test_the_checks_recognise_any_spelling():
 
 def test_every_jsonl_file_is_read_by_the_one_reader():
     found = {p.relative_to(REPO).as_posix(): n for p in CODE if (n := _jsonl_readers(p.read_text(encoding="utf-8")))}
-    # the others: the Rhino worker's requests, read one at a time from a pipe as they arrive (not a file); and the
+    # the others: the Rhino worker's requests, read one at a time from a pipe as they arrive (not a file: since the
+    # site description, PR 3, through design_checker.site_json.loads, strict about keys given twice); and the
     # address lookup's printed lines (its steps, then its answer: its output file), read by the plugin's logic WHILE
     # the lookup still writes them, so a half-written last line is skipped, which read_jsonl (it raises) can't do;
     # and rhino_logic runs inside Rhino, where rule_format (yaml, its package imports) can't be imported (those two
     # readers, lookup_step and lookup_answer, now live in host_core/lookup.py, which rhino_logic re-exports)
     assert found == {"packages/rule_format/rule_format/rulebook.py": 1,
-                     "packages/design_checker/design_checker/__main__.py": 1,
                      (CORE_DIR / "lookup.py").relative_to(REPO).as_posix(): 2}, f"use rulebook.read_jsonl: {found}"
 
 

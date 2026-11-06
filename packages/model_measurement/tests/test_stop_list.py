@@ -13,7 +13,7 @@ import rhino3dm as r
 
 from model_measurement.places.ithaca_city.measure import MAX_COMBINATIONS, MAX_UNCLEAR_EDGES, measure
 from model_measurement.read_3dm import read_site
-from model_measurement.stops import STOPS
+from model_measurement.stops import STOPS, TOOL_WORDS, stop
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))           # the lots and models the other tests build
@@ -311,6 +311,11 @@ CASES = {
     "curved_edge": _file(_cylinder),
     "single_precision": _file(_far_mesh, {"street_line": [[[200000, 300000], [200050, 300000]]]}),
     "not_a_solid": _file(_surface),
+    # given by the design tool's site description (design_checker/site_json.py: tests/test_check_via_site.py there
+    # checks a description gives them); here, that a building carrying one has its measuring wait, saying it
+    "inventory_incomplete": _plain(buildings=[dict(box(10, 25, 35, 65), problems=[stop("inventory_incomplete")])]),
+    "tool_words": _plain(buildings=[box(10, 25, 35, 65), {"id": "Building layer", "faces": [],
+                                                          "problems": [stop("tool_words", words="a block (Garage)")]}]),
     "no_roof": _plain(buildings=[_walls_only(10, 25, 35, 65)]),
     "other_height": _plain(buildings=[box(10, 25, 35, 65), _walls_only(38, 70, 48, 90, "shed")], main_building="house"),
     "too_many_roofs": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house"), *SHEDS], main_building="house"),
@@ -335,7 +340,8 @@ def test_every_stop_has_a_case():
     assert sorted(CASES) == sorted(STOPS)
 
 
-@pytest.mark.parametrize("key", sorted(STOPS))
+@pytest.mark.parametrize("key", [pytest.param(k, marks=pytest.mark.tool_words) if k == TOOL_WORDS else k
+                                 for k in sorted(STOPS)])
 def test_each_stop_is_given_by_its_case(key, tmp_path):
     said = CASES[key](tmp_path)
     assert all(w in said for w in fixed_words(STOPS[key])), (STOPS[key], said)

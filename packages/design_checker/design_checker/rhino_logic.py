@@ -2101,6 +2101,7 @@ def report_cancelled(path, changed):
     return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
 SETTLING = "Finishing the check that is running…"
 CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
+SITE_SUFFIX = ".site.json"   # the site description kept beside a report (design_checker.check.SITE_SUFFIX)
 REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
                    "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
                    "panel) for a report of the model now.")
