@@ -800,7 +800,7 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
             if not isinstance(site_error, _NotWritten):
                 _unlink(report_path)
             out["report_error"] = (f"the site description beside the report: {site_error.strerror or site_error} "
-                                   f"({kept})")
+                                   f"({kept}), so the new report wasn't saved ({report_path})")
         _unlink(part)
     return out
 
