@@ -407,6 +407,10 @@ def test_bed_and_breakfasts_in_r1_r2_are_the_use_rules_special_permit(built):
         research = next(x for x in use["research"] if "bed-and-breakfast" in x["question"])
         assert {"325-9B", "325-8A", "325-10C"} <= set(research["searched"]) and "web search 2026-10-29" in \
             research["why_open"], d
+    # the coverage decisions' own notes say the same: no reading (finding) of it exists (review round 1 of PR 65)
+    coverage = (REPO / "regulations/jurisdictions/new_york/ithaca_city/residential_coverage.yaml").read_text(
+        encoding="utf-8")
+    assert "bed_and_breakfast_by_special_permit" not in coverage and "the use rule's finding cites" not in coverage
 
 
 

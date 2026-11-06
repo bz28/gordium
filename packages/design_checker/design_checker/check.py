@@ -1686,15 +1686,18 @@ def sample_site() -> dict:
 
 
 def _use_lists(body) -> list:
-    """The use names a formula lists in `use in [...]` (the chart's own rows), in order."""
+    """The use names a formula lists in `use in [...]` (the chart's own rows) or names in `use == "..."` (one row, as
+    the bed-and-breakfast inn's review in R-1 and R-2), in order. Missing the second once left the box saying a use
+    "won't comply" while its rule said needs review (review round 1 of PR 65)."""
     import ast
     out = []
     for node in ast.walk(body):
-        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use" and \
-                any(isinstance(op, ast.In) for op in node.ops):
-            for comp in node.comparators:
-                if isinstance(comp, ast.List):
+        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use":
+            for op, comp in zip(node.ops, node.comparators):
+                if isinstance(op, ast.In) and isinstance(comp, ast.List):
                     out += [e.value for e in comp.elts if isinstance(e, ast.Constant) and isinstance(e.value, str)]
+                elif isinstance(op, ast.Eq) and isinstance(comp, ast.Constant) and isinstance(comp.value, str):
+                    out.append(comp.value)
     return out
 
 
