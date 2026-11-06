@@ -721,8 +721,8 @@ def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = Non
                 raise _SiteInTheWay(e, site_file, report_path) from e
         try:
             os.replace(part, report_path)
-        except BaseException:                # not moved in (or stopped right here): the earlier site goes back
-            if aside is not None:
+        except BaseException:                # not moved in (or stopped right here): the earlier site goes back,
+            if aside is not None and part.exists():      # unless the move did happen (its part is gone)
                 os.replace(aside, site_file)
             raise
     finally:

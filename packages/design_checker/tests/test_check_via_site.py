@@ -404,3 +404,25 @@ def test_a_locked_site_file_is_said_as_the_site_file_and_a_site_that_cant_go_bac
     monkeypatch.setattr(os, "replace", stuck)
     assert check_description(doc, _facts(facts), report)["report_error"]
     assert _aside(kept).read_bytes() == before[kept.name] and report.read_bytes() == before[report.name]
+
+
+def test_a_check_stopped_just_after_its_report_moved_in_never_puts_the_earlier_site_back(tmp_path, monkeypatch):
+    """Review round 2 (PR 74 fix): a stop landing just after the report's move had happened put the earlier site file
+    back beside the new report."""
+    import os
+    path, facts = MODELS[1]
+    report = tmp_path / "house.xlsx"
+    kept = tmp_path / ("house" + SITE_SUFFIX)
+    doc = site_json.through_json(site_json.read_model(path, facts, inventory_complete=True))
+    check_description(doc, _facts(facts), report)
+    assert kept.exists()
+    real = os.replace
+
+    def moved_then_stopped(src, dst):
+        real(src, dst)
+        if Path(dst) == report:
+            raise KeyboardInterrupt
+    monkeypatch.setattr(os, "replace", moved_then_stopped)
+    with pytest.raises(KeyboardInterrupt):
+        check_description(doc, _facts(facts), report)
+    assert report.exists() and not kept.exists() and not _aside(kept).exists()      # a report with no site, at worst
