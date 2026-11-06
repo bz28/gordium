@@ -715,10 +715,13 @@ def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = Non
         aside = None
         if site_file is not None and site_file.exists():
             aside = _aside(site_file)
-            os.replace(site_file, aside)
+            try:
+                os.replace(site_file, aside)
+            except OSError as e:             # said as the site file's trouble, not the report's
+                raise _SiteInTheWay(e, site_file, report_path) from e
         try:
             os.replace(part, report_path)
-        except OSError:
+        except BaseException:                # not moved in (or stopped right here): the earlier site goes back
             if aside is not None:
                 os.replace(aside, site_file)
             raise
@@ -773,6 +776,15 @@ def _host(model_path: Path) -> dict:
 SITE_SUFFIX = ".site.json"      # beside a zoning report: the exact site description it was worked out from
 
 
+class _SiteInTheWay(OSError):
+    """The earlier report's site file couldn't be set aside (locked, say): the new report wasn't moved in."""
+
+    def __init__(self, error: OSError, site_file: Path, report_path: Path):
+        super().__init__(error.errno, error.strerror)
+        self.words = (f"the site description beside the report: {error.strerror or error} ({site_file}), so the new "
+                      f"report wasn't saved ({report_path})")
+
+
 def _aside(site_file: Path) -> Path:
     """Where the earlier report's site file waits while the new report is moved in (hidden, never read back)."""
     return site_file.with_name("." + site_file.name + ".old")
@@ -804,9 +816,9 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
         out = check_site(site, facts, name or doc["host"]["document"] or "model",
                          None if site_error else report_path, extras, step=step,
                          site_file=None if site_error else kept)
-    except BaseException:                    # stopped or failed: no half-written site file left behind, and an
-        if part is not None:                 # earlier site set aside belongs to a report already replaced
-            _unlink(part)
+    except BaseException:                    # stopped or failed: no half-written site file left behind; an earlier
+        if part is not None:                 # site still set aside is the replaced report's (_report puts it back
+            _unlink(part)                    # when its report isn't moved in), so it goes
             _unlink(_aside(kept))
         raise
     if part is not None:
@@ -821,7 +833,8 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
             out["report_error"] = (f"the site description beside the report: {site_error.strerror or site_error} "
                                    f"({kept}), so the new report wasn't saved ({report_path})")
         _unlink(part)
-        _unlink(_aside(kept))                # put back already if the report wasn't moved in; else its report is gone
+        if out["report_error"] is None or site_error is not None:    # the report it was beside was replaced; else
+            _unlink(_aside(kept))            # it was put back, or, if that failed, is the earlier report's only copy
     return out
 
 
@@ -923,7 +936,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             say(STEPS["report"])
             _report(t, v, report_path, site_file)
         except OSError as e:
-            report_error = f"{e.strerror or e} ({report_path})"
+            report_error = e.words if isinstance(e, _SiteInTheWay) else f"{e.strerror or e} ({report_path})"
     # one guard for the whole check (review round 21): geometry the measuring couldn't work out draws nothing
     # from it (no envelope, no overlays), and a geometry failure here does the same, never a crash
     geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)

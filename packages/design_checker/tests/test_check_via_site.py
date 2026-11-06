@@ -373,3 +373,34 @@ def test_a_description_with_no_buildings_whose_lot_wasnt_all_looked_at_leaves_no
         assert items.get(rule, {"status": "needs_review"})["status"] != COMPLIES, rule
     assert not [i for i in items.values() if i["status"] == COMPLIES and any(
         m in i["id"] for m in ("stories", "height", "coverage", "yard", "building_area"))]
+
+
+def test_a_locked_site_file_is_said_as_the_site_file_and_a_site_that_cant_go_back_is_kept(tmp_path, monkeypatch):
+    """Review round 1 (PR 74 fix): the earlier site file locked was said as the report's trouble, and when putting it
+    back failed too, its set-aside copy (the earlier report's only one) was deleted."""
+    import os
+    path, facts = MODELS[1]
+    report = tmp_path / "house.xlsx"
+    kept = tmp_path / ("house" + SITE_SUFFIX)
+    doc = site_json.through_json(site_json.read_model(path, facts, inventory_complete=True))
+    check_description(doc, _facts(facts), report)
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    real = os.replace
+
+    def locked(src, dst):
+        if Path(src) == kept:
+            raise PermissionError(13, "Permission denied")
+        return real(src, dst)
+    monkeypatch.setattr(os, "replace", locked)
+    result = check_description(doc, _facts(facts), report)
+    assert result["report_error"] == (f"the site description beside the report: Permission denied ({kept}), so the "
+                                      f"new report wasn't saved ({report})")
+    assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == before
+
+    def stuck(src, dst):                     # the report can't be moved in, and the site can't go back either
+        if Path(dst) in (report, kept):
+            raise PermissionError(13, "Permission denied")
+        return real(src, dst)
+    monkeypatch.setattr(os, "replace", stuck)
+    assert check_description(doc, _facts(facts), report)["report_error"]
+    assert _aside(kept).read_bytes() == before[kept.name] and report.read_bytes() == before[report.name]
