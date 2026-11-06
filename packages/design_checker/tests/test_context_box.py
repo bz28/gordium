@@ -810,7 +810,7 @@ def test_every_state_of_the_context_has_one_definition():
     assert not re.search(r"loaded = \(STATE", RHINO)
     assert "logic.guides_of(STATE.get(\"context_guides\"), doc.RuntimeSerialNumber)" in RHINO     # _clear_context
     assert 'get("frame") ==' not in RHINO and 'get("frame") !=' not in RHINO and "same = " not in RHINO
-    src = inspect.getsource(logic)
+    src = host_text("rhino", "logic", purpose="wiring")
     rest = src.replace(inspect.getsource(logic.is_stored), "")
     assert '"store") == "raw"' not in rest and '"store") != "raw"' not in rest and '["store"] == "raw"' not in rest
     box = inspect.getsource(cb)

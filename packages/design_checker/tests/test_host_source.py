@@ -45,6 +45,10 @@ def _plugin_names_in(source):
     named += [(n.lineno, ast.unparse(n)) for n in ast.walk(tree)
               if isinstance(n, ast.Attribute) and n.attr == "__file__" and isinstance(n.value, ast.Name)
               and n.value.id in LOGIC_MODULES]
+    # ... or the whole module's source (`inspect.getsource(logic)`; one function's source, `getsource(logic.f)`, is not a file)
+    named += [(n.lineno, ast.unparse(n)) for n in ast.walk(tree)
+              if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "getsource"
+              and n.args and isinstance(n.args[0], ast.Name) and n.args[0].id in LOGIC_MODULES]
     return named
 
 
@@ -70,6 +74,8 @@ def test_the_guard_catches_a_direct_read_and_ignores_prose():
     assert _plugin_names_in('x = "_gordium_load.py"') != [] and _plugin_names_in('x = "gordium_new.py"') != []
     assert _plugin_names_in("tree = ast.parse(Path(logic.__file__).read_text())") != []
     assert _plugin_names_in("tree = ast.parse(Path(measure.__file__).read_text())") == []      # not the plugin's
+    assert _plugin_names_in("src = inspect.getsource(logic)") != []
+    assert _plugin_names_in("src = inspect.getsource(logic.is_stored)") == []           # one function, not the file
     assert _plugin_names_in('x = "gordium_site"') == []
     prose = '"""Reads apps/rhino_plugin/gordium_ui.py."""\ndef test_x():\n    """gordium_rhino.py"""\n    # gordium_ui.py\n'
     assert _plugin_names_in(prose) == []
