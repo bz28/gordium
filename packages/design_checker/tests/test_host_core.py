@@ -209,5 +209,5 @@ def test_each_module_loads_first_on_its_own(module):
     """Imported first, alone, the way Rhino's folder import would reach it: its own imports (top or end) all load."""
     out = subprocess.run([sys.executable, "-I", "-S", "-c", "import sys; sys.path.insert(0, sys.argv[1]); "
                           "import host_core.%s as m; print(len(m.__all__))" % module, str(DESIGN_CHECKER_DIR)],
-                         capture_output=True, text=True, timeout=60)
+                         capture_output=True, text=True, encoding="utf-8", timeout=60)
     assert out.returncode == 0 and int(out.stdout) > 0, out.stderr
