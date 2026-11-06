@@ -13,6 +13,7 @@ import yaml
 from design_checker import scenarios
 from design_checker.check import check_site
 from rule_format.rulebook import REPO
+from host_source import host_script
 
 DEEP = scenarios.paths(scenarios.SITES)
 LIGHT = REPO / "test_data/test_sites/new_york/ithaca_city/light_run"
@@ -89,12 +90,12 @@ def test_each_drawn_solid_knows_its_design_building_so_rhino_can_map_stated_ids(
     garage = [s for s in scenarios.solids(sc)["buildings"] if s["building"] == "garage"]
     assert len(garage) == 1 and garage[0]["name"] == "garage"
     assert {s["building"] for s in scenarios.solids(sc)["buildings"]} == {"house", "garage"}
-    draw = (REPO / "apps/rhino_plugin/tests/scenarios_in_rhino.py").read_text(encoding="utf-8")
+    draw = host_script("rhino", "scenarios_in_rhino.py", purpose="wiring")
     assert 'guids.get(b, [b])' in draw and 'facts["accessory_buildings"] = ' in draw
 
 
 def test_the_deep_run_wrapper_never_leaves_its_folder_set():
-    src = (REPO / "apps/rhino_plugin/tests/deep_run_in_rhino.py").read_text(encoding="utf-8")
+    src = host_script("rhino", "deep_run_in_rhino.py", purpose="wiring")
     assert "finally:" in src and 'os.environ.pop("GORDIUM_SCENARIO_FOLDER", None)' in src
 
 
@@ -105,7 +106,7 @@ def test_the_largest_house_names_the_chart_notes_that_may_limit_it():
 
 
 def test_the_light_run_nudge_measures_to_every_street_line():
-    src = (REPO / "apps/rhino_plugin/tests/light_run_in_rhino.py").read_text(encoding="utf-8")
+    src = host_script("rhino", "light_run_in_rhino.py", purpose="wiring")
     assert "for ln in street_lines(facts)" in src and "street_line\"][0]" not in src
 
 
@@ -121,7 +122,7 @@ def test_the_drawn_area_is_the_area_of_the_stored_corners():
         n = len(pts)
         area = abs(sum(pts[i][0] * pts[(i + 1) % n][1] - pts[(i + 1) % n][0] * pts[i][1] for i in range(n))) / 2
         assert abs(site["lot"]["drawn_area_sf"] - area) < 0.01, district
-    src = (REPO / "apps/rhino_plugin/tests/light_run_in_rhino.py").read_text(encoding="utf-8")
+    src = host_script("rhino", "light_run_in_rhino.py", purpose="wiring")
     assert 'lot["drawn_area_sf"]' in src and 'lot["area_sf"]) <= 0.5' not in src
 
 
@@ -202,7 +203,7 @@ def test_the_light_run_nudge_claims_its_distance_and_numbers():
     measured front yard after the move, and the row's proposed and required values, are claimed against
     proposed_ft / required_ft (not only the status)."""
     import ast
-    src = (REPO / "apps/rhino_plugin/tests/light_run_in_rhino.py").read_text(encoding="utf-8")
+    src = host_script("rhino", "light_run_in_rhino.py", purpose="wiring")
     fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "feet")
     ns = {}
     exec(compile(ast.Module([fn], []), "feet", "exec"), ns)
@@ -234,7 +235,7 @@ def test_the_light_run_finds_rows_by_the_id_the_plugin_keeps():
     """The plugin's STATE["last"] items keep "id" but not "rule" (gordium_rhino.py, STATE["last"]): the light run's
     row lookup must work from the id, or the nudge's row is never found."""
     import ast
-    src = (REPO / "apps/rhino_plugin/tests/light_run_in_rhino.py").read_text(encoding="utf-8")
+    src = host_script("rhino", "light_run_in_rhino.py", purpose="wiring")
     fns = [n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name in ("row_for", "rule_of")]
     ns = {}
     exec(compile(ast.Module(fns, []), "rows", "exec"), ns)

@@ -12,6 +12,7 @@ from design_checker import rhino_logic as logic
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "model_measurement" / "tests"))
 from test_measure import FACTS, RECT, box, sloped_roof_box  # noqa: E402
+from host_source import host_text
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
 
@@ -91,7 +92,7 @@ def test_dimensions_give_way_zoomed_out_and_never_lie_flat_in_an_elevation():
 
 def test_the_plugin_draws_the_dimensions_by_these_rules():
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     screen = src[src.index("def draw_screen("):src.index("def _status_rows(")]
     assert "shown = logic.dims_shown(zoomed_in, elevation)" in screen
     assert "if shown else []" in screen and screen.count("_dimension(d, e.Viewport,") == 1    # yards: plan; height: draw_scene
@@ -120,7 +121,7 @@ def test_a_yard_raised_by_the_height_bonus_draws_its_required_line_at_the_raised
 
 def test_a_yards_words_keep_off_the_faint_required_lines():
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     lines = src[src.index("    o.plan_lines = [line for line, _, _ in o.yard_dims]"):][:300]
     assert "[line for line, _ in o.yard_required]" in lines        # an obstacle every label keeps off (F3)
 
@@ -192,7 +193,7 @@ def test_a_dimension_is_drawn_on_a_halo_above_the_highlight():
     the model's colours (PostDrawObjects)."""
     import ast
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_dimension")
     body = ast.get_source_segment(src, fn)
     assert "for ink, width in ((halo, 2 + 2 * logic.HALO_PX), (color, 2)):" in body       # the halo, then the line
@@ -478,13 +479,13 @@ def test_the_numbers_are_placed_by_the_one_placer_failing_first_off_the_status_b
 
 def test_the_plugin_places_numbers_and_tags_with_the_one_placer_only():
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     screen = src[src.index("def draw_screen("):src.index("def _label_timer(")]
     assert 'items.append({"key": key, "text": number,' in screen               # a yard's number only
     assert 'key = ("tag", k, j, tag)' in screen                                  # its "min" tags: labels too
     assert "logic.LabelRun(" in src and "place_dimension" not in src and "tag_spot" not in src
     assert 'for c in (y.get("candidates") or [])[:1]]' in src     # the line at its best position only (86c01ea F5)
-    source = (REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8")
+    source = host_text("rhino", "logic", purpose="wiring")
     for gone in ("def place_dimension(", "def number_spot(", "def tag_spot(", "def number_box(", "NUMBER_SCALES"):
         assert gone not in source                                    # one placer: #29's own is gone
     assert source.count("def notice_place(") == 1 and source.count("def notice_spot(") == 1
@@ -525,7 +526,7 @@ def test_the_plugin_replaces_them_each_check_whatever_the_layers_state_and_out_o
     envelope did nothing while a start box was open, and only in the active document)."""
     import ast
     from rule_format.rulebook import REPO
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     fns = {n.name: ast.get_source_segment(src, n) for n in ast.parse(src).body if isinstance(n, ast.FunctionDef)}
     body = fns["_envelope_curves"]
     assert "doc.UndoRecordingEnabled = False " in body and "UndoRecordingIsActive" not in body          # F6

@@ -7,6 +7,7 @@ import itertools
 import pytest
 
 from rule_format.rulebook import REPO, Context, load, outcome, rulebook_for
+from host_source import host_text
 
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 DISTRICTS = ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "RU"]
@@ -197,7 +198,7 @@ def test_a_floor_area_is_kept_as_typed_never_rounded():
         logic.update_counts({}, {"home_occupation_area": -1.0})
     size = rule("R-1b", "home_occupation_size")
     assert outcome(size, {"use": "one_family_detached", "home_occupation": True, **facts}, USES) == "fail"
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     # the row's own dialog (rhino_logic.row_fields / row_answers_applied) types it, kept as typed
     assert "logic.row_fields(needs, facts)" in rhino and "logic.row_answers_applied(facts, needs, answers)" in rhino
     assert logic.row_answers_applied({}, ["home_occupation_area"], {"home_occupation_area": "500.4"}) == {

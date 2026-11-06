@@ -7,9 +7,10 @@ import json
 from design_checker import rhino_logic as logic
 from design_checker.lookup_box import main, suggest_main
 from rule_format.rulebook import REPO
+from host_source import host_script, host_text
 
-RHINO = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-UI = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+RHINO = host_text("rhino", "plugin", purpose="wiring")
+UI = host_text("rhino", "ui", purpose="wiring")
 
 
 def part(src, start_at, end_at):
@@ -229,7 +230,7 @@ def test_the_list_is_sized_from_where_its_rows_are_laid_out():
 def test_the_in_rhino_list_claim_needs_the_pixels():
     """Claim 2 of autocomplete_in_rhino.py: the table's numbers are what Gordium sizes from, so the claim also reads
     the drawn pixels; not seeing them, or an empty band painted under the text, is not a fit."""
-    src = (REPO / "apps/rhino_plugin/tests/autocomplete_in_rhino.py").read_text(encoding="utf-8")
+    src = host_script("rhino", "autocomplete_in_rhino.py", purpose="wiring")
     space = {}
     exec(part(src, "PAINTED_GAP_PT =", "def screen_bottom("), space)
     fits = space["fits"]
@@ -249,7 +250,7 @@ def test_the_in_rhino_pixel_scan_finds_the_lowest_text():
     read the pixels (review round 4)."""
     import sys
     import types
-    src = (REPO / "apps/rhino_plugin/tests/autocomplete_in_rhino.py").read_text(encoding="utf-8")
+    src = host_script("rhino", "autocomplete_in_rhino.py", purpose="wiring")
     class IntPtr(int):       # Python.NET refuses a plain int for a Mac nint argument (Rhino run of c4ad070)
         pass
 

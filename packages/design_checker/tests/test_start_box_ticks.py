@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from design_checker import rhino_logic as logic
+from host_source import host_dir
 
 REPO = Path(__file__).resolve().parents[3]
 EVENTS = {"CheckedChanged", "SelectedIndexChanged", "KeyDown", "TextChanged", "Shown", "Closed", "Elapsed", "Click",
@@ -163,7 +164,7 @@ def box(monkeypatch):
         monkeypatch.setitem(sys.modules, name, mod)
     monkeypatch.setitem(sys.modules, "rhino_logic", logic)
     monkeypatch.setattr(logic, "guard", lambda fn, where, fallback=None: fn)     # errors surface in the test
-    monkeypatch.syspath_prepend(str(REPO / "apps/rhino_plugin"))
+    monkeypatch.syspath_prepend(str(host_dir("rhino")))
     sys.modules.pop("gordium_ui", None)
     ui = importlib.import_module("gordium_ui")
     monkeypatch.setattr(ui, "_dark_panel", lambda: False)

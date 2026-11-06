@@ -7,6 +7,7 @@ import re
 import yaml
 
 from rule_format.rulebook import REPO, jurisdictions, read_jsonl
+from host_source import host_path
 
 CODE = [p for p in (REPO / "packages").rglob("*.py")   # dated eval records (evals/) are frozen as they were run
         if not {"tests", "evals"} & set(p.relative_to(REPO).parts)]
@@ -94,7 +95,7 @@ def test_every_jsonl_file_is_read_by_the_one_reader():
     # the lookup still writes them, so a half-written last line is skipped, which read_jsonl (it raises) can't do;
     # and rhino_logic runs inside Rhino, where rule_format (yaml, its package imports) can't be imported
     assert found == {"packages/rule_format/rule_format/rulebook.py": 1,
-                     "packages/design_checker/design_checker/rhino_logic.py": 2}, f"use rulebook.read_jsonl: {found}"
+                     host_path("rhino", "logic").relative_to(REPO).as_posix(): 2}, f"use rulebook.read_jsonl: {found}"
 
 
 def test_every_jurisdiction_listing_uses_the_one_helper():

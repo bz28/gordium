@@ -12,9 +12,10 @@ import pytest
 
 from design_checker import rhino_logic as logic
 from rule_format.rulebook import REPO
+from host_source import host_text
 
-RHINO = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-UI = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+RHINO = host_text("rhino", "plugin", purpose="wiring")
+UI = host_text("rhino", "ui", purpose="wiring")
 STATED = list(logic.STATED_FACTS)
 # an R-3a-like district (test_use_questions.X): a multiple dwelling's lot size reads its units, rooms let and conversion
 OPTS = {"follow_ups": {"X": {"multiple_family": ["dwelling_units", "attached_units_in_building", "conversion"],
