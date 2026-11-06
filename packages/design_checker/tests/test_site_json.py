@@ -281,6 +281,17 @@ def test_the_worker_answers_every_line_even_one_it_cant_read():
     assert replies[3]["error"].startswith("not JSON: Expecting property name")     # as before, word for word
 
 
+
+def test_the_running_worker_answers_a_line_that_isnt_utf8_and_keeps_serving():
+    import subprocess
+    import sys
+    run = subprocess.run([sys.executable, "-m", "design_checker", "serve"], input=b'\xff\xfe{"id": 1}\n{"id": 2, '
+                         b'"cmd": "nope"}\n', capture_output=True, timeout=120, cwd=REPO)
+    replies = [json.loads(r) for r in run.stdout.decode("utf-8").splitlines()]
+    assert run.returncode == 0 and [r["id"] for r in replies] == [None, 2], run.stderr[-500:]
+    assert "UnicodeDecodeError" in replies[0]["error"] and "unknown command" in replies[1]["error"]
+
+
 # ---- the schema file and the code agree -------------------------------------------------------------------------
 
 def test_the_schema_file_lists_exactly_the_fields_the_code_reads():
@@ -322,7 +333,8 @@ def test_the_fingerprints_cover_what_a_check_reads_and_follow_a_rule_edited_whil
             "packages/envelope_builder/envelope_builder/__init__.py"} <= code
     assert not any("/tests/" in f or "__pycache__" in f for f in code)
     place = {f.relative_to(PLACE.folder).as_posix() for f in protocol.place_files(PLACE.folder)}
-    assert {"regulations/reviewers.yaml", "regulations/document_extraction_guide/vocabulary.yaml"} <= code
+    assert {"regulations/reviewers.yaml", "regulations/document_extraction_guide/vocabulary.yaml",
+            "docs/research/2026-10-20_architect_questions.md"} <= code
     from rule_format import rulebook
     assert {rulebook.REVIEWERS_FILE, rulebook.VOCABULARY_FILE} <= set(protocol.code_files())
     assert {"jurisdiction.yaml", "not_checked_yet.yaml", "5_zoning_rules/R-1b.yaml",
@@ -375,8 +387,9 @@ def test_read_model_gives_a_valid_description_of_the_file_and_never_claims_the_l
 
 def test_grade_points_with_no_source_named_are_spot_grades_as_the_measuring_reads_them():
     assert site_json.grade_of({"grade_points": [[0, 0, 100.0]]}) == {"source": "spot", "points": [[0, 0, 100.0]]}
-    with pytest.raises(SiteRefused, match="grade_from is 'flat'"):
-        site_json.grade_of({"grade_from": "flat", "grade_points": [[0, 0, 100.0]]})
+    for named in ("flat", "", False, 0):
+        with pytest.raises(SiteRefused, match=f"grade_from is {named!r}"):
+            site_json.grade_of({"grade_from": named, "grade_points": [[0, 0, 100.0]]})
     assert site_json.grade_of({"grade_from": "terrain"}) == NO_GRADE
     assert site_json.grade_of({"grade_from": "finished_spots", "grade_points": [(1, 2, 3)]}) == \
         {"source": "finished_spots", "points": [[1, 2, 3]]}

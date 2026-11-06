@@ -37,11 +37,13 @@ def _kept(path: Path) -> bool:
 def code_files() -> list[Path]:
     """Every file of every package (its code and the data it loads, such as rule_format/measures.yaml), tests and
     caches left out: a check reaches into most of them (project_report decides each row), so all are counted. And
-    the shared files under regulations/ outside any place's folder, which every check reads too (the rule topics,
-    document_extraction_guide/vocabulary.yaml, and who may approve, reviewers.yaml: rule_format.rulebook)."""
+    the shared files every check reads too: under regulations/ outside any place's folder (the rule topics,
+    document_extraction_guide/vocabulary.yaml, and who may approve, reviewers.yaml: rule_format.rulebook), and the
+    research reports under docs/research/ that definitions and rules cite (each cited heading must be there)."""
     packages, regulations = REPO / "packages", REPO / "regulations"
     shared = [f for f in regulations.rglob("*") if f.is_file() and "jurisdictions" not in f.relative_to(regulations).parts
               and not f.name.startswith(".")]
+    shared += [f for f in (REPO / "docs/research").rglob("*") if f.is_file() and not f.name.startswith(".")]
     return [f for f in packages.rglob("*") if f.is_file() and _kept(f.relative_to(packages))] + shared
 
 

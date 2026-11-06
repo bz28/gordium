@@ -363,7 +363,7 @@ def grade_of(facts: dict) -> dict:
     points = facts.get("grade_points") or []
     if not points:
         return {"source": "none", "points": []}
-    source = facts.get("grade_from") or "spot"
+    source = "spot" if facts.get("grade_from") is None else facts["grade_from"]
     if source not in GRADE_SOURCES[:-1]:
         raise SiteRefused([f"grade: {len(points)} grade points given, but grade_from is {source!r} "
                            f"(one of {', '.join(GRADE_SOURCES[:-1])})"])

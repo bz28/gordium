@@ -74,9 +74,13 @@ def answer(request: dict, step=None) -> dict:
 
 
 def serve(stdin=sys.stdin, stdout=sys.stdout) -> None:
+    """One answer per request line. `stdin` gives text lines, or bytes (the worker reads its pipe as bytes, so a
+    line that isn't UTF-8 gets an answer saying so, never the end of the worker)."""
     for line in stdin:
         if line.strip():
             try:
+                if isinstance(line, bytes):
+                    line = line.decode("utf-8")        # strict: never text quietly changed (a file path)
                 request = site_json.loads(line)        # a key given twice is refused, never one of them dropped
                 if not isinstance(request, dict):
                     raise ValueError(f"a request is a JSON object, not {type(request).__name__}")
@@ -84,7 +88,7 @@ def serve(stdin=sys.stdin, stdout=sys.stdout) -> None:
                 request, reply = {}, {"id": None, "ok": False, "error": "not JSON: " + "; ".join(e.reasons)}
             except json.JSONDecodeError as e:
                 request, reply = {}, {"id": None, "ok": False, "error": f"not JSON: {e}"}
-            except (ValueError, RecursionError) as e:  # a number too long to read, nesting too deep, not an object
+            except (ValueError, RecursionError) as e:  # not UTF-8, a number too long, nesting too deep, not an object
                 request, reply = {}, {"id": None, "ok": False, "error": f"not a request: {type(e).__name__}: {e}"[:500]}
             else:
                 reply = answer(request, _steps(request, stdout) if request.get("progress") else None)
@@ -109,7 +113,7 @@ def main(argv: list[str]) -> int:
         sys.stdout.flush()
         os.dup2(2, 1)
         sys.stdout = sys.stderr
-        serve(stdout=replies)
+        serve(stdin=sys.stdin.buffer, stdout=replies)
         return 0
     if len(argv) != 2:
         print(__doc__)
