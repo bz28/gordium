@@ -3,7 +3,7 @@
 What it is: for a design described in plain terms (the lot's corners and which of its lines are street, side and
 rear; each building part's plan outline and its bottom and top heights; a pitched roof's walls, overhang, fascia
 and ridge), it works out each R-1b number and says, per rule, PASS, FAIL or UNDECIDED. It never reads Gordium's
-measuring code (packages/model_measurement/measure.py) and never sees the faces Gordium is given: it works from the
+measuring code (packages/model_measurement/model_measurement/places/ithaca_city/measure.py) and never sees the faces Gordium is given: it works from the
 design description itself, with shapely on plan outlines it builds here. The rules are copied by hand from
 R-1b.yaml (each formula below quotes the `check` it comes from; test_oracle.py runs every worked example in
 R-1b.yaml through these formulas, so a copying mistake fails).

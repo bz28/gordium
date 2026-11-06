@@ -37,7 +37,7 @@ GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies",
           ("use_details", rhino_logic.USE_DETAILS_TITLE), ("not_checked", "Not checked"), ("not_covered", NOT_YET)]
 
 from model_measurement.project import fact_conflict_rows  # noqa: E402  (lot facts that disagree: shown)
-from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
+from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
 EIGHTH = 1 / 96                           # 1/8 in, in feet
@@ -402,7 +402,7 @@ def _holds(expr: str, values: dict, row: dict):
     return True if got == {True} else False if got == {False} else None
 
 
-from model_measurement import measure as _measuring  # noqa: E402  (its open questions, by name)
+from model_measurement import plugin_measuring as _measuring  # noqa: E402  (its open questions, by name)
 
 # Every open question the measuring asks, each with a short name for the panel: by its tag ("(lot_depth)"), or by
 # its own words where it has none. A test checks that every question the measuring can ask is here.
@@ -1465,7 +1465,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             base = _evaluate(limit, dict(values, building_height=0.0))
             if isinstance(base, (int, float)):
                 required = f"{numbers[4]} {value_text(base, unit, numbers[4], False)}".strip()
-                waits = ("the height is measured from existing grade only; the bonus needs it from finished grade"
+                waits = ("the height is measured as if the ground were flat; the bonus needs it from the grade plane"
+                         if as_is and facts.get("grade_is") != "existing" and _measuring.flat_assumption_unsafe(facts)
+                         else
+                         "the height is measured from existing grade only; the bonus needs it from finished grade"
                          if as_is else "the height isn't measured yet")
                 more = f"more if the §325-16C height bonus applies; {waits}"
                 why = f"{why} ({more})" if why else f"{_bonus_waits(st, False)} ({more})"
@@ -1738,13 +1741,18 @@ from model_measurement.stops import stop as _stop  # noqa: E402
 
 PICK_MAIN_WHY = _stop("no_main_building")        # the measuring's exact words when several buildings could be it
 PICK_MAIN = "Pick the main building…"            # the row's hint, and the panel's button
+PICK_ADU_WHY = _stop("no_adu_building")          # a detached ADU's rules waiting for its building to be picked
+PICK_ADU = "Pick the ADU's building…"            # the row's hint, and the panel's button
+# every reason a detached ADU's rows give that the pick answers: none picked, the picked solid gone, or the main
+# building (or a part of it) picked
+PICK_ADU_WHYS = (PICK_ADU_WHY, _stop("adu_not_found"), _stop("adu_is_main"))
 ASSUMED_MAIN_NOTE = "assuming the starting house is the main building"      # a Gordium reading: to confirm
 ASSUMED_MAIN = "Main building: the starting house (assumed) · change it with Main building…"
 
 
 BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_height", "stories")
 # (model_measurement's own lists: a yard added there is never left out here)
-from model_measurement.measure import ACCESSORY_YARDS, EAVE_YARDS  # noqa: E402
+from model_measurement.plugin_measuring import ACCESSORY_YARDS, EAVE_YARDS  # noqa: E402
 LEFT_OUT_ACCESSORY = ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply")
 
 
@@ -1826,7 +1834,7 @@ def _cautious_for_left_out(items, left_out, touching, rules_by_id=None):
 # Every measurement worked out from the lot lines is model_measurement's own list (LOT_LINE_MEASURES: the main
 # yards, their eaves and the accessory buildings' yards): one list, so a yard added there is never left out here
 # (the merge of #18 onto main left the accessory yards out: accessory_buildings stayed "complies" on a doubtful lot).
-from model_measurement.measure import LOT_LINE_MEASURES  # noqa: E402
+from model_measurement.plugin_measuring import LOT_LINE_MEASURES  # noqa: E402
 UNSETTLED_DECIDES = {
     "lot": ("lot_area",) + LOT_LINE_MEASURES,
     "street": LOT_LINE_MEASURES,
@@ -1899,9 +1907,13 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     for i in items:                                  # waiting on the main building: the row says how to pick it
         if PICK_MAIN_WHY in (i.get("reason") or "") and not i.get("hint"):
             i["hint"] = PICK_MAIN
+        elif (any(w in (i.get("reason") or "") for w in PICK_ADU_WHYS) and not i.get("hint")
+              and facts.get("accessory_dwelling_unit") is True and facts.get("adu_detached") is True):
+            i["hint"] = PICK_ADU        # only once a detached ADU is said to be on the lot: before, its question
     if facts.get("ground_assumed") == "flat":                 # on the rows the ground decides (MVP, Ben 2026-10-20)
-        for i in items:
-            if i.get("measure") in ("building_height", "stories"):
+        for i in items:                                       # the main building's, and the detached ADU's size row
+            check_reads = re.findall(r"\w+", str((rules_by_id.get(i.get("rule")) or {}).get("check") or ""))
+            if i.get("measure") in ("building_height", "stories") or {"adu_height", "adu_stories"} & set(check_reads):
                 i["note"] = "assuming flat ground"
     for i in items:                                  # measured from an assumed main building: said on the row
         if (measured.get(i.get("measure")) or {}).get("main_assumed"):
@@ -1986,9 +1998,15 @@ def grade_label(facts: dict) -> str:
     elevation 0'-0"", or "not set"."""
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
     if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
-        if facts.get("ground_fall"):                          # a lookup found the ground: say plainly how it falls
-            return (f"assumed flat (the looked-up ground falls about {facts['ground_fall']:g} ft across the lot; "
-                    "height is checked as if flat)")
+        fall = facts.get("ground_fall")                       # a lookup found the ground: say plainly how it falls
+        why = _measuring.flat_assumption_unsafe(facts)        # and that height and stories wait on it (the measuring's)
+        if why:                                               # a fall only when it is one (not NaN, -1, or none)
+            return (f"assumed flat, but the looked-up ground falls about {fall:g} ft across the lot: height and "
+                    "stories need review" if why != _measuring.stop("flat_unknown") else
+                    f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)}), but the lot's ground "
+                    "levels weren't read in full: height and stories need review")
+        if fall:
+            return f"assumed flat (the looked-up ground falls only about {fall:g} ft across the lot)"
         return f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)})"   # the team's words
     points = facts.get("grade_points") or []
     if points:

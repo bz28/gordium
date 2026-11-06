@@ -1,12 +1,12 @@
-"""Address type-ahead (site_lookup.suggest), offline: a stand-in for the City's address layer answers from a few
+"""Address type-ahead (site_lookup.adapters.ithaca_city.suggest), offline: a stand-in for the City's address layer answers from a few
 hand-written addresses (never the City's data: endpoints.yaml `city_addresses` is used live, never stored)."""
 import re
 
 import pytest
 
 from site_lookup.http import Offline
-from site_lookup.sources import ENDPOINTS
-from site_lookup.suggest import CITY_TAIL, LIMIT, MIN_CHARS, pretty, suggest, typed_prefix, typed_prefixes, where
+from site_lookup.adapters.ithaca_city.sources import ENDPOINTS
+from site_lookup.adapters.ithaca_city.suggest import CITY_TAIL, LIMIT, MIN_CHARS, pretty, suggest, typed_prefix, typed_prefixes, where
 
 # City of Ithaca addresses, typed by hand as the City's layer writes them: the sample and its neighbour, one
 # repeated (a building with units repeats), a longer number, two downtown, a half number, and ten "200 …" on

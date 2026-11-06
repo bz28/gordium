@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 import rhino3dm as r
 
-from model_measurement.measure import MAX_COMBINATIONS, MAX_UNCLEAR_EDGES, measure
+from model_measurement.places.ithaca_city.measure import MAX_COMBINATIONS, MAX_UNCLEAR_EDGES, measure
 from model_measurement.read_3dm import read_site
 from model_measurement.stops import STOPS
 
@@ -172,7 +172,7 @@ SHEDS = [sloped_roof_box(2 + 6 * i, 70, 6 + 6 * i, 74, 20, 30, f"shed {i}") for 
 def _geos_error(tmp_path):
     """Any shapely / GEOS failure while measuring: a stop with its reason, never a crash (stress F14)."""
     import shapely
-    from model_measurement import measure as m
+    from model_measurement.places.ithaca_city import measure as m
 
     def broken(building):
         raise shapely.errors.GEOSException("TopologyException: side location conflict at 1 2")
@@ -262,7 +262,23 @@ CASES = {
     "no_home_occupation": _plain(),
     "no_primary_buildings": _plain(),
     "no_south_hill": _plain(),
+    "no_garage_cars": _plain(),
+    "no_private_garages": _plain(),
     "no_stream": _plain(),
+    "no_adu": _plain(),
+    "no_adu_kind": _plain(),
+    "no_adus_on_parcel": _plain(),
+    "no_adu_bedrooms": _plain(),
+    "no_adu_floor_area": _plain(),
+    "no_adu_building": _plain(),                                  # nothing picked
+    "no_detached_adu": _plain(accessory_dwelling_unit=False),
+    "adu_not_found": _plain(adu_building="gone"),
+    "adu_is_main": _plain(adu_building="house"),                  # the only building: the main one
+    "adu_ground": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(38, 75, 48, 90, 0, 12, id="adu")],
+                         grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [43, 74.5, 0]],   # one at the ADU
+                         main_building="house", adu_building="adu", ground_is_flat=None, grade_elevation=None),
+    "adu_stories_unclear": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(38, 70, 48, 90, 0, 22, id="adu")],
+                                  main_building="house", adu_building="adu"),     # 22 ft: room for three
     "stream_facts_disagree": _plain(stream_near_lot=False, stream_distance=5),
     "household_counts_disagree": _plain(unrelated_persons=3, unrelated_persons_with_children=1),
     "attached_counts_disagree": _plain(use="one_family_attached", dwelling_units=4, attached_units_in_building=3),
@@ -273,6 +289,8 @@ CASES = {
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
+    "flat_sloped": _plain(ground_assumed="flat", ground_fall=14.2),       # 106 Ithaca Rd's looked-up fall
+    "flat_unknown": _plain(ground_assumed="flat"),                        # no lookup ground at all
     "grade_with_others": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(40, 75, 48, 90, 0, 12, id="shed")],
                                 grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [44, 74.5, 0]],
                                 main_building="house",          # one spot grade at the shed: not at all its walls
@@ -360,7 +378,7 @@ def test_the_measuring_gives_reasons_only_from_the_table():
     """Whatever becomes a reason comes from stop(), followed through names: a reason written into the code
     would be missed by the README and the cases. (conftest.py also checks every reason the tests make.)"""
     found = []
-    for name in ("read_3dm.py", "measure.py"):
+    for name in ("read_3dm.py", "places/ithaca_city/measure.py"):
         tree = ast.parse((CODE / name).read_text(encoding="utf-8"))
         bound = {}                      # module-level names (constants, tables); a local why_... is checked itself
         for node in tree.body:

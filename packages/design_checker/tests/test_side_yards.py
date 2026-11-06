@@ -15,7 +15,7 @@ from design_checker import check, present
 from design_checker import rhino_logic as logic
 from envelope_builder.envelope import envelope
 from envelope_builder.start import _frame, _tie_side, floor_solids
-from model_measurement.measure import Lot, measure
+from model_measurement.places.ithaca_city.measure import Lot, measure
 from rule_format.rulebook import REPO, rulebook_for
 
 ITHACA = "regulations/jurisdictions/new_york/ithaca_city"

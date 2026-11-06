@@ -47,11 +47,22 @@ Everyday math notation, read by a strict parser that rejects anything else: numb
 
 Fails closed: `outcome(rule, values, allowed)` requires the city's allowed text values (e.g. `{"use": uses}`). A measurement that is missing or unusable (none, NaN, infinite, negative, wrong kind, a `use` not in the list) is unknown, and unknowns follow three-valued logic: the result is pass or fail only if it is the same for every value that measurement could take (true or unknown is true; false and unknown is false), else **needs review**. A value the formula can't evaluate (divide by zero, a non-finite result) → **needs review**, never hidden under an unknown. A measure with no description can't be type-checked, so any formula using it → **needs review** (never three-valued), as does a formula that can't be read. Every formula is type-checked when rule files are validated (`formula.type_of`): one that is wrong for every value (text vs number, a number as true/false) is refused.
 
+## Places (the registry)
+
+Each place's settings live in its own folder, `regulations/jurisdictions/<state>/<place>/jurisdiction.yaml`: its
+name, the codes that tell its land apart (SWIS), its coordinate system and time zone, which chart columns are
+districts, its law files, and which lookup and measuring code serve it. `place.py` is the one reader: code asks
+`place("new_york/ithaca_city")`, `places()` or `plugin_place()` instead of typing a place's values in. A place with no
+settings file, or one with a missing or unusable field, is a plain error (`UnknownPlace`), never another place's
+settings in its stead. The Rhino plugin's Python can't read YAML, so `python -m rule_format place --write` copies
+what it needs to `packages/design_checker/design_checker/place.json`; `python -m rule_format` checks the copy is
+current. Adding a place: [docs/adding_a_place.md](../../docs/adding_a_place.md).
+
 ## Checking rule files
 
 ```bash
-python -m rule_format       # validates every jurisdiction's sources, 4_term_definitions/ (definitions.yaml,
-                            # uses.yaml), 5_zoning_rules/ and test_data/answer_keys/
+python -m rule_format       # validates every jurisdiction's settings (jurisdiction.yaml), sources, 4_term_definitions/ (definitions.yaml,
+                            # uses.yaml), 5_zoning_rules/ and test_data/answer_keys/, and the plugin's place.json
 pytest packages/rule_format
 ```
 

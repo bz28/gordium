@@ -1,19 +1,21 @@
 """Validate every rule file in the repo, or find where a quote is.
 
     python -m rule_format          # exit code 1 if anything has problems
+    python -m rule_format place --write   # writes the plugin's copy of its place's settings (place.py)
     python -m rule_format cite new_york/ithaca_city zoning_charts_2026-04.pdf 3 "Height in feet 35 ft"
                                    # prints the lines to cite: lines: [31, 31]
 
-For each jurisdiction: its source documents (fingerprints, extracted text), its definitions and
+For each jurisdiction: its settings file (jurisdiction.yaml, read by the registry in place.py), its source documents (fingerprints, extracted text), its definitions and
 uses (4_term_definitions/), its section labels (3_section_labels/<document>.yaml, against the pieces in
 2_extracted_text/<document>.sections.jsonl), then every rule file in 5_zoning_rules/ and in its
-test_data/answer_keys/ folder.
+test_data/answer_keys/ folder. Then that the plugin's copy of its place's settings (place.json) is current.
 """
 
 import argparse
 import sys
 from pathlib import Path
 
+from . import place as places
 from .labels import load_pieces, validate_labels
 from .rulebook import (REPO, Context, finding_conflicts, jurisdictions, load, locate, not_quotable, research_entries,
                        rulebook_file_problems, rulebook_paths, term_file_problems, utf8_console)
@@ -23,6 +25,13 @@ def main() -> int:
     failed = checked = 0
     for jurisdiction in jurisdictions(REPO):
         place = jurisdiction.relative_to(REPO / "regulations/jurisdictions")
+        checked += 1
+        try:
+            places.place(jurisdiction)
+            print(f"✓ {place}/{places.SETTINGS}")
+        except places.UnknownPlace as e:
+            print(f"✗ {place}: {e}")
+            failed += 1
         try:
             ctx = Context.for_jurisdiction(jurisdiction)
         except Exception as e:  # report and keep going: one broken folder mustn't hide the rest
@@ -66,6 +75,14 @@ def main() -> int:
         for problem in conflicts:
             print(f"✗ {place}: {problem}")
         failed += bool(conflicts)
+    checked += 1
+    try:
+        current = places.PLUGIN_FILE.is_file() and places.PLUGIN_FILE.read_text(encoding="utf-8") == places.plugin_file_text()
+        why = "" if current else ": differs from a fresh build (python -m rule_format place --write)"
+    except places.UnknownPlace as e:
+        current, why = False, f": {e}"
+    print(f"{'✓' if current else '✗'} {places.PLUGIN_FILE.relative_to(places.REPO)}{why}")
+    failed += not current
     print(f"{checked} files checked, {failed} with problems")
     return 1 if failed else 0
 
@@ -106,4 +123,8 @@ def cite(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     utf8_console()
+    if sys.argv[1:] == ["place", "--write"]:
+        places.PLUGIN_FILE.write_text(places.plugin_file_text(), encoding="utf-8")
+        print(f"wrote {places.PLUGIN_FILE.relative_to(REPO)}")
+        sys.exit(0)
     sys.exit(cite(sys.argv[2:]) if sys.argv[1:2] == ["cite"] else main())

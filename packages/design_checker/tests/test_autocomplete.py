@@ -95,7 +95,7 @@ def test_the_type_ahead_prints_one_line_with_city_addresses(capsys):
 
 
 def test_the_type_ahead_offline_or_failing_says_so(monkeypatch):
-    import site_lookup.suggest as s
+    import site_lookup.adapters.ithaca_city.suggest as s
     from site_lookup.http import Offline, ServiceError
 
     def offline(*a, **k):
@@ -209,7 +209,7 @@ def test_a_lookup_that_found_no_lot_is_said_once():
 def test_a_recorded_lookup_answers_the_start_of_its_own_address():
     from design_checker.lookup_box import _fixture_http
     http, now = _fixture_http("96_ithaca_rd")
-    from site_lookup.lookup import lookup
+    from site_lookup.adapters.ithaca_city.lookup import lookup
     assert lookup("96 Ithaca Rd, Ithaca, NY", http, now)["status"] == "found"      # as Look up asks it
     assert lookup("96 Ithaca Rd, Ithaca, NY 14850", http, now)["status"] == "found"
 

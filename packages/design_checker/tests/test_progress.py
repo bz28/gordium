@@ -18,7 +18,7 @@ from design_checker.check import STEPS, check, start
 from design_checker.lookup_box import _fixture_http, main as lookup_main
 from model_measurement.project import load_facts
 from rule_format.rulebook import REPO
-from site_lookup.lookup import STEPS as LOOKUP_STEPS, lookup
+from site_lookup.adapters.ithaca_city.lookup import STEPS as LOOKUP_STEPS, lookup
 
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 MODEL = SITE / "spreadsheet_design_model.3dm"

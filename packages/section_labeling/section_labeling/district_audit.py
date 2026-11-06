@@ -45,11 +45,11 @@ from pathlib import Path
 from document_extraction.sections import piece_keys
 from rule_format import formula
 from rule_format.labels import load_pieces
+from rule_format.place import place
 from rule_format.rulebook import REPO, Context, district_name, load, locate, read_jsonl, rulebook_for, tokenize
 
 DECISIONS = "residential_coverage.yaml"
 OUTPUT = "6_coverage_report/residential_districts.md"
-LAW = "chapter_325_zoning_2026-10.pdf"
 STATUSES = ("missing", "open_question", "parked", "flag", "rulebook", "not_applicable")    # worst first
 WORDS = {"missing": "MISSING", "open_question": "open question", "parked": "parked", "flag": "flag (needs review)",
          "rulebook": "in the rulebook", "not_applicable": "not applicable"}
@@ -61,12 +61,17 @@ PRIORITIES = {"high": "a real design rule that should exist; a design can pass t
 DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", "page", "piece", "cell", "item", "link",
                    "priority", "note"}
 READINGS = ("not_applicable", "parked", "flag")      # decisions resting on a person's reading: each quotes the law
-CHART = "zoning_charts_2026-04.pdf"
+
+
+def _law(j: Path) -> str:
+    """The place's zoning code (its jurisdiction.yaml law.zoning_code: Ithaca's Chapter 325)."""
+    return place(j).law_file("zoning_code")
 
 
 def _law_rows(j: Path):
-    header, pieces = load_pieces(j / "2_extracted_text" / f"{Path(LAW).stem}.sections.jsonl")
-    labels = (load(j / "3_section_labels" / f"{Path(LAW).stem}.yaml") or {}).get("labels", {})
+    law = _law(j)
+    header, pieces = load_pieces(j / "2_extracted_text" / f"{Path(law).stem}.sections.jsonl")
+    labels = (load(j / "3_section_labels" / f"{Path(law).stem}.yaml") or {}).get("labels", {})
     return header, pieces, labels
 
 
@@ -75,24 +80,25 @@ def _formula_names(rule: dict) -> set[str]:
     return set().union(*(formula.names(t) for t in texts if t)) if any(texts) else set()
 
 
-def _source_lines(sources) -> list[tuple[int, int]]:
-    """Every (page, line) of the law the sources quote."""
-    return [(s.get("page"), n) for s in sources or [] if s.get("file") == LAW and len(s.get("lines") or []) == 2
+def _source_lines(sources, law: str) -> list[tuple[int, int]]:
+    """Every (page, line) of the law (the zoning code's file name) the sources quote."""
+    return [(s.get("page"), n) for s in sources or [] if s.get("file") == law and len(s.get("lines") or []) == 2
             for n in range(s["lines"][0], s["lines"][1] + 1)]
 
 
-def citations(rule: dict, owner: dict, definitions: dict) -> dict[str, dict]:
+def citations(rule: dict, owner: dict, definitions: dict, law: str) -> dict[str, dict]:
     """{piece id: {"how": how this rule cites it first, "lines": every (page, line) of the piece it reaches}}: a
-    source, a finding's source, or a definition (definitions.yaml) of a measure its formulas use."""
+    source, a finding's source, or a definition (definitions.yaml) of a measure its formulas use. `law`: the zoning
+    code's file name."""
     out: dict[str, dict] = {}
 
     def add(keys, how):
         for key in keys:
             if pid := owner.get(key):
                 out.setdefault(pid, {"how": how, "lines": set()})["lines"].add(key)
-    add(_source_lines(rule.get("sources")), "cited")
+    add(_source_lines(rule.get("sources"), law), "cited")
     for f in rule.get("findings") or []:
-        add(_source_lines(f.get("sources")), f"cited in finding {f.get('id', '?')}")
+        add(_source_lines(f.get("sources"), law), f"cited in finding {f.get('id', '?')}")
     used = _formula_names(rule)
     for term, (keys, measures) in definitions.items():
         if used & measures:
@@ -103,7 +109,7 @@ def citations(rule: dict, owner: dict, definitions: dict) -> dict[str, dict]:
 def _definitions(j: Path, owner: dict) -> dict[str, tuple[list, set]]:
     """{term: (the (page, line)s its sources quote, the measures it defines)} from definitions.yaml."""
     path = j / "4_term_definitions/definitions.yaml"
-    return {term: (_source_lines(e.get("sources")), set(e.get("measures") or []))
+    return {term: (_source_lines(e.get("sources"), _law(j)), set(e.get("measures") or []))
             for term, e in ((load(path) or {}) if path.exists() else {}).items()}
 
 
@@ -145,14 +151,14 @@ def model_tests(j: Path) -> dict[str, list[str]]:
 
 
 # Stated by the architect, but measured from the model when it is drawn that way: stories are counted from the floor
-# blocks drawn (model_measurement.measure._stories_whole); the typed count is the fallback, or a cross-check.
+# blocks drawn (model_measurement/places/ithaca_city/measure.py _stories_whole); the typed count is the fallback, or a cross-check.
 DRAWN_OR_STATED = {"stories"}
 
 
 def measure_sources() -> tuple[set, set]:
     """(measured from the model, stated by the architect): the names model_measurement fills in. A name in
     DRAWN_OR_STATED is in both."""
-    from model_measurement.measure import STATED, UNITS
+    from model_measurement.plugin_measuring import STATED, UNITS
     return set(UNITS) | (DRAWN_OR_STATED & set(STATED)), set(STATED) | {"district"}
 
 
@@ -163,6 +169,7 @@ class Audit:
         """`data`: the decisions (default: the jurisdiction's file); `books`: a rulebook file per district in
         place of rulebook_for's (tests change one without touching the repository)."""
         self.j = j
+        self.law, self.chart = place(j).law_file("zoning_code"), place(j).law_file("zoning_chart")   # their file names
         self.problems: list[str] = []
         self.header, self.pieces, self.labels = _law_rows(j)
         self.data = (load(j / DECISIONS) or {}) if data is None else data
@@ -180,7 +187,7 @@ class Audit:
                 self.books[d] = {}
                 continue
             self.books[d] = {r["id"]: r for r in (load(path) or {}).get("rules", [])}
-        self.cites = {d: {rid: citations(r, self.owner, self.definitions) for rid, r in rules.items()}
+        self.cites = {d: {rid: citations(r, self.owner, self.definitions, self.law) for rid, r in rules.items()}
                       for d, rules in self.books.items()}
         self.disclosed = disclosed_sections(j)
         self.rows = [pid for pid in self.pieces if self.labels.get(pid, {}).get("label") in ("rule", "flag")]
@@ -320,14 +327,14 @@ class Audit:
             # cell for a person to check.
             if not dec.get("quote"):
                 p.append(f"{where}: a {WORDS[status]} decision gives the law's own words (`quote`) and where they are")
-            elif dec.get("file", LAW) not in (LAW, CHART):
+            elif dec.get("file", self.law) not in (self.law, self.chart):
                 p.append(f"{where}: quote Chapter 325 or its chart, not {dec['file']}")
             elif len(hits := self._quote_hits(pid, dec)) != 1:
                 p.append(f"{where}: quote " + ("not found" if not hits else f"found {len(hits)} times (quote enough to "
                          "be unique, as a rule's source must be)") + f" at {self._location(pid, dec)}: {dec['quote']!r}")
-            elif dec.get("file", LAW) == LAW and (keys := hits[0]) <= self.furniture:
+            elif dec.get("file", self.law) == self.law and (keys := hits[0]) <= self.furniture:
                 p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
-            if dec.get("file") == CHART and not dec.get("cell"):
+            if dec.get("file") == self.chart and not dec.get("cell"):
                 p.append(f"{where}: a chart quote names its `cell` ({{section, row}}), so the district's own cell is shown")
             if dec.get("cell") and dec.get("quote") and (cell := self._cell_record(d, dec)) and \
                     {(dec.get("page", 2), n) for n in cell.get("row_lines") or []} != self._quote_keys(pid, dec):
@@ -353,9 +360,9 @@ class Audit:
     def _cell_record(self, d: str, dec: dict) -> dict | None:
         """The district's own chart cell for the decision's row, as the chart reader read it (None if it has none)."""
         c = dec["cell"]
-        column = next((col for (pg, sec, row, col) in self.ctx.cells.get(CHART, {})
+        column = next((col for (pg, sec, row, col) in self.ctx.cells.get(self.chart, {})
                        if district_name(col) == d), None)
-        return self.ctx.cells.get(CHART, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
+        return self.ctx.cells.get(self.chart, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
 
     def _cell(self, d: str, dec: dict):
         cell = self._cell_record(d, dec)
@@ -364,7 +371,7 @@ class Audit:
     def _quote_hits(self, pid: str, dec: dict) -> list[set]:
         """Each place the decision's quote occurs, as the (page, line)s it spans: on `page` (of `file`), else inside
         `piece` (default: this piece), across its page breaks."""
-        file = dec.get("file", LAW)
+        file = dec.get("file", self.law)
         pages = self.ctx.pages.get(file, {})
         quote = dec.get("quote") or ""
         if "page" in dec:
@@ -386,8 +393,8 @@ class Audit:
     def _location(self, pid: str, dec: dict) -> str:
         """Where the quote is, as a reader finds it: file, page and lines (or where it was looked for)."""
         keys = sorted(self._quote_keys(pid, dec)) if dec.get("quote") else []
-        file = dec.get("file", LAW)
-        name = "Ch. 325" if file == LAW else "zoning chart" if file == CHART else file
+        file = dec.get("file", self.law)
+        name = "Ch. 325" if file == self.law else "zoning chart" if file == self.chart else file
         if keys:
             pages = sorted({pg for pg, _ in keys})
             spans = "; ".join(f"p.{pg} l.{min(n for g, n in keys if g == pg)}"

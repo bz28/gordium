@@ -631,7 +631,7 @@ def test_a_geometry_error_anywhere_in_the_check_is_a_reason_never_a_crash(monkey
     flags every measurement, nothing is drawn from it (no envelope, no overlays), and every building row needs
     review saying why."""
     import shapely
-    from model_measurement import measure as m
+    from model_measurement.places.ithaca_city import measure as m
 
     def broken(building):
         raise shapely.errors.GEOSException("TopologyException: side location conflict at 1 2")
@@ -684,7 +684,7 @@ def test_no_starting_house_is_drawn_from_geometry_the_measuring_couldnt_work_out
     import rhino3dm as r
     import shapely
     from design_checker.check import sample_site, start
-    from model_measurement import measure as m
+    from model_measurement.places.ithaca_city import measure as m
     sample = sample_site()
     model = r.File3dm()
     model.Settings.ModelUnitSystem = r.UnitSystem.Feet

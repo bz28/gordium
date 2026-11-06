@@ -10,7 +10,7 @@ Found first by #15's corner street-pick fix (7a16aa6): the sample's lot width re
 import math
 
 from design_checker.check import sample_site
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 
 JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
 

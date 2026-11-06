@@ -20,15 +20,15 @@ from pathlib import Path
 
 import yaml
 
-from . import geometry as g
-from .http import Offline, ServiceError
-from .sources import ENDPOINTS, NAMES, Fetcher, district, normalize_street
+from ... import geometry as g
+from ...http import Offline, ServiceError
+from .sources import ENDPOINTS, NAMES, PLACE, Fetcher, district, normalize_street
 
 OVERLAYS = NAMES["districts"]["overlays"]      # zoning-map codes that are overlays, not districts (exact)
 
 AMENDMENTS = yaml.safe_load((Path(__file__).parent / "amendments.yaml").read_text(encoding="utf-8"))
-CITY_SWIS = "500700"                     # the City of Ithaca (the Town of Ithaca has its own code and SWIS)
-PLACES = {"503089": "Town of Ithaca", "503000": "Town of Ithaca"}   # neighbours named in the refusal
+CITY_SWIS = PLACE.swis                   # 500700, the City of Ithaca (the Town has its own code and SWIS)
+PLACES = PLACE.neighbours                # neighbours named in the refusal (the Town of Ithaca's two codes)
 # EPSG:2261 coordinates are US survey feet (1200/3937 m); Gordium's feet are international feet (0.3048 m).
 US_SURVEY_FT = (1200 / 3937) / 0.3048    # 1.000002 international feet per survey foot (0.03 sf on a 7,000 sf lot)
 FROM_TAX_MAP, SUGGESTED = "from tax map", "suggested by Gordium"     # the start box's source labels
@@ -177,12 +177,12 @@ def _lookup(address: str, f: Fetcher, today: str, result: dict, say=lambda text:
         result.update(status="not_found", message="The address isn't inside any tax parcel: draw the lot.")
         return
     # The City is told apart by its SWIS code: the State names both the City and the Town of Ithaca "ITHACA".
-    in_city = [p for p in parcels if p["swis"] == CITY_SWIS]
+    in_city = [p for p in parcels if p["swis"] in CITY_SWIS]
     if not in_city:
         swis = parcels[0]["swis"]
         where = PLACES.get(swis, f"municipality SWIS {swis}")
-        result.update(status="outside_city", message=f"This address is in the {where}, not the City of Ithaca. "
-                      "Gordium's rules cover the City of Ithaca only.")
+        result.update(status="outside_city", message=f"This address is in the {where}, not the {PLACE.name}. "
+                      f"Gordium's rules cover the {PLACE.name} only.")
         return
     if len({p["id"] for p in in_city}) > 1:
         result.update(status="multiple", message="The address sits on more than one parcel: pick the lot.",

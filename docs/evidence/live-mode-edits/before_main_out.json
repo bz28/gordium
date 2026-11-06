@@ -1,0 +1,30 @@
+{
+ "claims": {
+  "0 checked, current": {
+   "ok": true,
+   "detail": {
+    "stale": false,
+    "dirty": false,
+    "status": "Gordium \u00b7 ? 3 need review \u00b7 9 comply \u00b7 2 not checked \u00b7 3 use details to answer",
+    "last": "3 need review \u00b7 9 comply \u00b7 2 not checked \u00b7 3 use details to answer"
+   }
+  },
+  "1 the units are inches now": {
+   "ok": true,
+   "detail": "Inches"
+  },
+  "1 units changed without scaling: greyed, press Check": {
+   "ok": false,
+   "detail": {
+    "stale": false,
+    "dirty": false,
+    "status": "Gordium \u00b7 ? 3 need review \u00b7 9 comply \u00b7 2 not checked \u00b7 3 use details to answer",
+    "last": "3 need review \u00b7 9 comply \u00b7 2 not checked \u00b7 3 use details to answer"
+   }
+  }
+ },
+ "idle": {},
+ "trace": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/rh_main/apps/rhino_plugin/tests/live_more_in_rhino.py\", line 232, in tick\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/rh_main/apps/rhino_plugin/tests/live_more_in_rhino.py\", line 114, in step_b\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/rh_main/apps/rhino_plugin/tests/live_more_in_rhino.py\", line 46, in claim\nAssertionError: 1 units changed without scaling: greyed, press Check: {'stale': False, 'dirty': False, 'status': 'Gordium \u00b7 ? 3 need review \u00b7 9 comply \u00b7 2 not checked \u00b7 3 use details to answer', 'last': '3 need review \u00b7 9 comply \u00b7 2 not checked \u00b7 3 use details to answer'}\n",
+ "ok": false,
+ "done": true
+}

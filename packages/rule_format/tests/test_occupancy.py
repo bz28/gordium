@@ -131,7 +131,7 @@ def test_the_r3_and_ru_count_is_asked_on_its_own_and_a_mistyped_pair_is_set_asid
     ("the same count" pointed at a question never asked there); and a count with the children below the count
     without them is a mistyped pair: set aside with the reason, never a pass."""
     from design_checker import rhino_logic as logic
-    from model_measurement.measure import measure
+    from model_measurement.places.ithaca_city.measure import measure
     prompt = logic.STATED_FACTS["unrelated_persons_with_children"][0]
     assert "same count" not in prompt and "not related by blood, marriage or adoption" in prompt
     assert "children counted too" in prompt
@@ -151,7 +151,7 @@ def test_the_r3_and_ru_count_is_asked_on_its_own_and_a_mistyped_pair_is_set_asid
     ok = measure(site, {**facts, "unrelated_persons_with_children": 3})
     assert ok["unrelated_persons_with_children"]["value"] == 3
     # review round 3: also when the drawing's geometry can't be worked out (the facts still stand there)
-    import model_measurement.measure as measure_mod
+    import model_measurement.places.ithaca_city.measure as measure_mod
     real = measure_mod._measure
 
     def broken(*a, **k):
@@ -174,7 +174,7 @@ def test_the_r3_and_ru_count_is_asked_on_its_own_and_a_mistyped_pair_is_set_asid
 def test_every_fact_is_one_the_architect_can_state_everywhere():
     """Each new fact is a measure, read from the facts, accepted in a facts file and asked in Rhino."""
     from design_checker.rhino_logic import STATED_FACTS
-    from model_measurement.measure import ASK, STATED
+    from model_measurement.places.ithaca_city.measure import ASK, STATED
     from model_measurement.project import FACT_FIELDS, fact_problems
     from rule_format.rulebook import MEASURE_KINDS
     for k in HOUSEHOLD + HOME:

@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[3]
 SRC = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
 
 # the plugin's own code, run as written (each function's source from gordium_rhino.py)
-REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_building", "add_to_check",
+REAL = ["PANEL_ACTIONS", "_actions", "pick_survey", "enter_rooms", "pick_main_building", "pick_adu_building", "add_to_check",
         "this_is_the_ground", "not_the_ground", "hide_massing", "set_labels", "set_envelope", "zoom_to", "open_report",
         "save_facts", "_save_facts", "_save_ui_state", "_ui_state", "_set_source", "fact_sources", "_tried", "_put_back",
         "edit_facts", "set_grade", "_drawn", "_begin_undo", "_end_undo", "_undo_redo", "_settings_from_file",
@@ -163,7 +163,8 @@ def _plugin(doc, said):
 
 
 # what each panel action is given (the panel's own arguments), and whether it changes the file
-CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": ((), True), "add": ((["b2"],), True),
+CALLS = {"survey": ((), True), "enter": ((["sleeping_rooms"],), True), "main": ((), True), "adu": ((), True),
+         "add": ((["b2"],), True),
          "ground": ((["mesh"],), True), "not_ground": ((), True), "massing": ((True,), True), "labels": ((True,), True),
          "zoom": ((None,), False), "report": ((), False), "envelope": ((True,), False), "legend": ((), False),
          "retry": ((), False),

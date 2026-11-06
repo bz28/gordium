@@ -5,9 +5,9 @@ import math
 import pytest
 from shapely.geometry import LineString, MultiLineString, Polygon
 
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 
-FACTS = {"street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True,
+FACTS = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True,
          "grade_elevation": 0, "use": "one_family_detached", "stories": 2, "zone": "R-1b"}
 
 
@@ -67,7 +67,15 @@ def test_a_plain_rectangular_lot():
                          "rear_yard_eaves": 35.0,
                          # no accessory building: counted (0), nothing else to measure
                          "accessory_buildings": 0, "accessory_front_yard": None, "accessory_side_yard": None,
-                         "accessory_rear_yard": None, "accessory_distances_apply": None}
+                         "accessory_rear_yard": None, "accessory_distances_apply": None,
+                         # stated by the architect (the private garage, an accessory dwelling unit): not given here
+                         "garage_cars": None, "private_garages": None, "adu_detached": None,
+                         "adu_existing_building": None, "adus_on_parcel": None, "adu_bedrooms": None,
+                         "adu_floor_area": None, "primary_floor_area": None,
+                         # no ADU's building picked: nothing to measure
+                         "adu_footprint": None, "adu_height": None, "adu_stories": None, "adu_front_yard": None,
+                         "adu_side_yard": None, "adu_rear_yard": None,
+                         "adu_in_primary_front_yard": None}
     (ax, ay), (bx, by) = m["front_yard"]["points"]                              # the working: where it was measured
     assert ay == 0 and by == 25 and ax == bx and 10 <= ax <= 35
     assert m["sleeping_rooms"]["reason"] == m["parking_spaces"]["reason"] == "enter bedrooms / parking spaces"
@@ -595,7 +603,7 @@ def test_where_the_model_sits_up_or_down_changes_nothing():
 def test_a_thin_roof_ring_around_a_tall_part_is_open_to_the_sky():
     # a 1 ft roof ring at 30 ft around a 40 x 40 hole with a 50 ft part standing in it: every grid point of the
     # ring's bounds lies in the hole, under the tall part; only the ring itself (holes kept) is open
-    from model_measurement.measure import _open_to_the_sky
+    from model_measurement.places.ithaca_city.measure import _open_to_the_sky
     ring = {"points": [[0, 0, 30], [42, 0, 30], [42, 42, 30], [0, 42, 30]],
             "holes": [[[1, 1, 30], [41, 1, 30], [41, 41, 30], [1, 41, 30]]]}
     tall = {"points": [[1, 1, 50], [41, 1, 50], [41, 41, 50], [1, 41, 50]]}
@@ -605,7 +613,7 @@ def test_a_thin_roof_ring_around_a_tall_part_is_open_to_the_sky():
 def test_a_lower_roof_partly_under_an_overhang_is_open_to_the_sky():
     # a 20 x 40 lower roof at 10 ft whose middle is under an upper slab at 20 ft (not touching, no hole): the
     # middle point is covered, the rest of the roof isn't
-    from model_measurement.measure import _open_to_the_sky
+    from model_measurement.places.ithaca_city.measure import _open_to_the_sky
     low = {"points": [[0, 0, 10], [20, 0, 10], [20, 40, 10], [0, 40, 10]]}
     slab = {"points": [[-5, 15, 20], [25, 15, 20], [25, 25, 20], [-5, 25, 20]]}
     assert low in _open_to_the_sky([low, slab])
@@ -689,7 +697,7 @@ def test_a_gently_curved_roof_is_not_one_plane():
     # and no group's corners stray beyond 0.01 ft of the plane fitted over that group, whatever order the faces
     # come in (a plane is fitted over its whole group, so one triangle's rounding noise can't tilt it)
     import numpy as np
-    from model_measurement.measure import TOL, _planes
+    from model_measurement.places.ithaca_city.measure import TOL, _planes
     radius, faces = 2000.0, []
     xs = [i * 20 / 40 for i in range(41)]
     z = [math.sqrt(radius ** 2 - (x - 10) ** 2) - radius + 30 for x in xs]
@@ -874,7 +882,7 @@ def test_terrain_samples_under_an_attached_wing_are_ground_beneath_not_off_the_w
 
 def test_the_eave_fingerprint_doesnt_depend_on_how_the_outline_is_ordered():
     """Verification round: the same overhang, its ring started elsewhere or run the other way, is the same."""
-    from model_measurement.measure import _fingerprint
+    from model_measurement.places.ithaca_city.measure import _fingerprint
     makers = [("roof", box(0, 0, 10, 10)["faces"])]
     ring = [(0, 0), (10, 0), (10, 2), (0, 2)]
     a = _fingerprint(makers, Polygon(ring))
@@ -884,7 +892,7 @@ def test_the_eave_fingerprint_doesnt_depend_on_how_the_outline_is_ordered():
 
 def test_a_four_sided_lot_has_one_reading_and_no_words():
     """Round 8, P3: a rectangle's back line is its rear line, with nothing to say about it."""
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     m = measure(site(), FACTS)
     assert m["lot_depth"]["readings"] == [] and "as a rear lot line" not in m["lot_depth"]["how"]
     readings = Lot(site(), FACTS).readings()
@@ -947,7 +955,8 @@ def test_a_fourth_floor_block_sharing_an_id_never_lets_the_stories_comply():
                 "unrelated_persons", "unrelated_persons_with_children", "owner_occupied", "functional_family_unit",
                 "home_occupation", "home_occupation_area", "home_occupation_unit_area", "accessory_dwelling_unit",
                 "primary_buildings_same_use", "south_hill_overlay",
-                "stream_near_lot", "stream_distance"}
+                "stream_near_lot", "stream_distance", "garage_cars", "private_garages", "adu_detached",
+                "adu_existing_building", "adus_on_parcel", "adu_bedrooms", "adu_floor_area", "primary_floor_area"}
     read_from_buildings = [k for k in m if k not in lot_only]
     assert read_from_buildings and all(m[k]["value"] is None and "share the id" in (m[k]["reason"] or "")
                                        for k in read_from_buildings), {k: m[k]["value"] for k in read_from_buildings}
@@ -983,7 +992,7 @@ def test_plane_grouping_grows_about_in_step_with_the_faces():
     (about n log n). And by the clock, in the same run: 16 times the faces take under 25 times as long (in place:
     about 17; copying the list: about 31)."""
     import time
-    from model_measurement.measure import _planes
+    from model_measurement.places.ithaca_city.measure import _planes
     work = {}
     faces = _planar_roof(80)
     assert len(_planes(faces, work)) == 1
@@ -1146,7 +1155,7 @@ def test_a_plain_house_with_a_three_floor_wing_against_its_rear_wall_never_compl
 
 def test_height_and_stories_report_over_the_same_candidate_buildings():
     """One list of candidate buildings (_assemblies) is read by both: their readings start with the same words."""
-    from model_measurement.measure import _assemblies
+    from model_measurement.places.ithaca_city.measure import _assemblies
     main = box(10, 25, 35, 65, 0, 30, id="house")              # 30 ft: it could hold the 4 stories typed
     # (the wing stands apart: touching, it is one building with the house, #18's §325-18A, and one candidate)
     wing = [floor(36, 25, 46, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
@@ -1179,7 +1188,7 @@ def test_the_faces_open_to_the_sky_are_found_point_by_point():
     """The open-to-the-sky test runs all its point checks at once; it finds the same faces as checking each sample
     point against each other face's grown outline one by one (random overlapping boxes and sloped roofs)."""
     import random
-    from model_measurement.measure import TOL, _normal_z, _open_to_the_sky, _plan, _plane_z, _samples
+    from model_measurement.places.ithaca_city.measure import TOL, _normal_z, _open_to_the_sky, _plan, _plane_z, _samples
     rnd = random.Random(7)
     for _ in range(60):
         faces = []
@@ -1407,7 +1416,7 @@ def test_each_candidates_own_grade_is_checked_against_its_solids():
     to 20 ft put the ground above the building: never a count."""
     house = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"floor {i + 1}") for i in range(2)]
     wing = box(35, 30, 45, 50, 0, 10, id="wing")
-    from model_measurement.measure import _assemblies, _candidate_grades, _stacks
+    from model_measurement.places.ithaca_city.measure import _assemblies, _candidate_grades, _stacks
     stacks = _stacks(house + [wing])
     main = next(b for b in stacks if b.get("parts"))
     cands = _assemblies(main, [b for b in stacks if b is not main])
@@ -1580,7 +1589,7 @@ def test_106s_tax_map_outline_is_cleaned_within_a_quarter_foot_before_its_lines_
     line every verdict tries both ways) leaves 9 lines: the tiny lines gone, the east side one line; the 10.2 ft
     chamfer at the back west corner stays, and its two readings (a side or a rear line) are still read. The lot area
     is the outline drawn."""
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     s, facts = _sample_106_site()
     lt = Lot(s, facts)
     assert lt.outline_note == ("tax-map outline cleaned within 0.25 ft: its 15 drawn lines read as 9 lot lines "
@@ -1599,7 +1608,7 @@ def test_a_surveyed_outline_is_read_as_drawn_within_a_hundredth_of_a_foot():
     """On a survey the outline is read as drawn: only lines in line (within 0.01 ft) merge. The same 106 outline
     surveyed: every corner it drops lies within 0.01 ft of the lines left (in line with them: never a line the
     survey shows, only the joints between pieces of one line), and the corners more than 0.01 ft off stay."""
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     from shapely.geometry import Point
     s, facts = _sample_106_site()
     lt = Lot(s, {**facts, "lot_surveyed": True})
@@ -1616,7 +1625,7 @@ def test_a_surveyed_outline_is_read_as_drawn_within_a_hundredth_of_a_foot():
 
 def _drawn_only(monkeypatch):
     """Lot lines read from the outline exactly as drawn (no cleaning): the comparison for the pins below."""
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     monkeypatch.setattr(Lot, "_simplify", lambda self, tol, kind: None)
 
 
@@ -1642,7 +1651,7 @@ def test_no_yard_measured_on_a_cleaned_outline_exceeds_the_same_yard_on_the_outl
     it only drops readings the drawn pieces' noise made (the 24 ft piece in line with the east side read as a rear
     line, say). Never a kinder distance."""
     import random
-    from model_measurement.measure import Lot
+    from model_measurement.places.ithaca_city.measure import Lot
     s0, facts = _sample_106_site()
     f = {**facts, "ground_is_flat": True, "grade_elevation": 0.0, "lot_surveyed": surveyed}
     rnd = random.Random(20)
@@ -1889,7 +1898,7 @@ def test_a_slab_above_the_grade_plane_on_a_slope_is_cut_at_its_own_bottom():
 def test_a_closed_solid_a_hair_off_plumb_is_closed_and_one_missing_a_wall_is_open():
     """Round 5 (P3): a wall leaning by a few hundredths of a foot was left out of the coverage, so a closed solid
     read as open; a box missing a wall read as closed. Every face counts as drawn, seen along each axis."""
-    from model_measurement.measure import _unenclosed
+    from model_measurement.places.ithaca_city.measure import _unenclosed
     lean = box(10, 25, 35, 65, 0, 30, id="house")
     for f in lean["faces"]:
         for p in f["points"]:
@@ -2043,7 +2052,7 @@ def test_every_stories_refusal_carries_its_code():
     """#15 round 7 (2): refusals were found by matching their words, so a reworded one silently stopped being a
     refusal. Each refusal stop (a count typed: its words name {typed}) is stories_<code>, and the measuring
     returns the code with it, for every one."""
-    from model_measurement.measure import REFUSALS
+    from model_measurement.places.ithaca_city.measure import REFUSALS
     from model_measurement.stops import STOPS
     typed = sorted(k[len("stories_"):] for k, v in STOPS.items() if "{typed}" in v)
     assert typed == sorted(REFUSALS)
@@ -2062,7 +2071,7 @@ def test_a_short_shed_on_its_own_lower_ground_is_never_buried_under_the_houses_g
     plane. A 5 ft shed on ground 6 ft lower, with its own spot grades at its walls, was "buried" (-6 to -1 under 0):
     the building area, the yards, the height and the envelope all stopped, in the wrong words. It is read on its own
     ground (ground_for). A solid with no spot grade of its own below the house is still refused as buried."""
-    from model_measurement.measure import envelope_grade
+    from model_measurement.places.ithaca_city.measure import envelope_grade
     spots = [[22.5, 39.5, 0], [22.5, 60.5, 0], [9.5, 50, 0], [35.5, 50, 0],               # the house's walls
              [22.5, 19.5, -6], [14.5, 26, -6], [30.5, 26, -6]]                            # the shed's
     house, shed = box(10, 40, 35, 60, 0, 30, id="house"), box(15, 20, 30, 32, -6, -1, id="shed")
@@ -2101,3 +2110,71 @@ def test_the_main_buildings_own_parts_are_read_against_its_grade_plane_never_the
     # #18 review round 25: under #18 the cut shows in the yards' walls reading, not in coverage (from above)
     assert _walls_reading(stepped, "rear_yard") is None and stepped["rear_yard"]["value"] == pytest.approx(35.0), \
         stepped["rear_yard"]
+
+
+# ---- flat ground assumed on a sloping lot (the sloped-lot fix, 2026-10-29) --------------------------------------
+
+DRAWN = {k: v for k, v in FACTS.items() if k != "stories"}     # the stories read from the floors drawn
+
+
+def _floors():
+    return [floor(10, 25, 35, 65, 0, 10, id="f1"), floor(10, 25, 35, 65, 10, 20, id="f2"),
+            floor(10, 25, 35, 65, 20, 30, id="f3")]
+
+
+def test_assumed_flat_ground_on_a_sloping_lot_gives_height_and_stories_needs_review():
+    """106 Ithaca Rd: the lookup's ground falls 14.2 ft, yet with flat ground assumed its 35'-0" house's height and 3
+    stories were measured (a false pass at the limit: §325-3 measures from the grade plane). Now each waits, saying
+    why, with what flat ground gives kept beside it (shown, never deciding)."""
+    from model_measurement.stops import stop
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": 14.2})
+    for name, flat in (("building_height", 30.0), ("stories", 3)):
+        assert got[name]["value"] is None and not got[name]["readings"], name
+        assert got[name]["reason"] == stop("flat_sloped", fall="14.2") and got[name]["measured_as_is"] == flat
+    assert got["building_height"]["reason"].startswith("the ground falls about 14.2 ft across the lot")
+    assert got["building_area"]["value"] is not None and got["front_yard"]["value"] is not None   # the plan stands
+
+
+def test_assumed_flat_ground_with_no_ground_looked_up_gives_needs_review():
+    """No lookup ground at all (a lot by hand, the elevation service down): nothing shows the lot is flat."""
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat"})
+    assert got["building_height"]["value"] is None and got["stories"]["value"] is None
+    assert "couldn't read this lot's ground levels in full" in got["building_height"]["reason"]
+
+
+def test_a_level_looked_up_lot_and_stated_flat_ground_are_unchanged():
+    """A fall under FLAT_FALL_FT (0.5 ft: lidar can't tell it from level), 0.0 included, and flat ground the
+    architect stated (no ground_assumed) are measured as before; 0.5 ft itself is sloped."""
+    from model_measurement.places.ithaca_city.measure import FLAT_FALL_FT
+    assert FLAT_FALL_FT == 0.5
+    for facts in ({**DRAWN, "ground_assumed": "flat", "ground_fall": 0.0},
+                  {**DRAWN, "ground_assumed": "flat", "ground_fall": 0.4}, DRAWN):
+        got = measure(site(RECT, *_floors()), facts)
+        assert (got["building_height"]["value"], got["stories"]["value"]) == (30.0, 3), facts
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": 0.5})
+    assert got["building_height"]["value"] is None and got["stories"]["value"] is None
+
+
+def test_a_fall_that_is_not_a_fall_never_reads_as_level():
+    """Review round 2: measure() called directly (no fact_problems guard) with a NaN, negative or infinite fall
+    read the lot as level (only `fall >= 0.5` was unsafe). Level is now only a fall shown to be 0 <= fall < 0.5."""
+    from model_measurement.places.ithaca_city.measure import flat_assumption_unsafe
+    from model_measurement.stops import stop
+    for bad in (float("nan"), -1, -0.1, float("inf"), True, "0.0", None):
+        assert flat_assumption_unsafe({"ground_assumed": "flat", "ground_fall": bad}) == stop("flat_unknown"), bad
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": float("nan")})
+    assert got["building_height"]["value"] is None and got["stories"]["value"] is None
+    assert flat_assumption_unsafe({"ground_assumed": "flat", "ground_fall": 0.49}) is None
+
+
+def test_existing_ground_keeps_its_own_reason_under_assumed_flat_ground():
+    got = measure(site(RECT, *_floors()), {**DRAWN, "ground_assumed": "flat", "ground_fall": 14.2,
+                                           "grade_is": "existing"})
+    assert "existing" in got["building_height"]["reason"] and "falls about" not in got["building_height"]["reason"]
+
+
+def test_a_ground_fall_must_be_feet():
+    from model_measurement.project import fact_problems
+    assert "ground_fall must be a number of feet, 0 or more" in fact_problems({**FACTS, "ground_fall": -1})
+    assert "ground_fall must be a number of feet, 0 or more" in fact_problems({**FACTS, "ground_fall": "14"})
+    assert not [p for p in fact_problems({**FACTS, "ground_fall": 0.0}) if "ground_fall" in p]

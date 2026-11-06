@@ -17,8 +17,8 @@ from pathlib import Path
 
 from site_lookup import geometry as g
 from site_lookup.http import Http
-from site_lookup.lookup import CITY_SWIS, lookup
-from site_lookup.sources import ENDPOINTS, Fetcher
+from site_lookup.adapters.ithaca_city.lookup import CITY_SWIS, lookup
+from site_lookup.adapters.ithaca_city.sources import ENDPOINTS, Fetcher
 
 HERE = Path(__file__).parent
 ADDRESSES = {"106_ithaca_rd": "106 Ithaca Rd, Ithaca, NY 14850",
@@ -49,7 +49,7 @@ def capture(address: str, http) -> dict:
     f = Fetcher(rec)
     cands = [c for c in f.geocode(address) if c["type"] == "PointAddress" and c["score"] >= 90]
     if cands:
-        parcels = [p for p in f.state_parcels_at(cands[0]["point"]) if p["swis"] == CITY_SWIS]
+        parcels = [p for p in f.state_parcels_at(cands[0]["point"]) if p["swis"] in CITY_SWIS]
         if parcels:
             f.state_streets_near(max(parcels[0]["rings"], key=g.area))
     return {"address": address, "captured": dt.date.today().isoformat(), "answers": rec.saved,
@@ -62,8 +62,8 @@ CONTEXT = {"106_ithaca_rd_context": "106 Ithaca Rd, Ithaca, NY 14850"}
 def capture_context(address: str, http) -> dict:
     """The context map's storable answers: the State's parcels, streets and building footprints in the square around
     the lot (all store: raw; the footprints since Ben's decision, 2026-10-21)."""
-    from site_lookup.context import context
-    from site_lookup.lookup import US_SURVEY_FT
+    from site_lookup.adapters.ithaca_city.context import context
+    from site_lookup.adapters.ithaca_city.lookup import US_SURVEY_FT
     lot = lookup(address, http)["facts"]["lot"]["value"]
     ox, oy = lot["origin_epsg2261_us_survey_ft"]
     ring = [(ox + x / US_SURVEY_FT, oy + y / US_SURVEY_FT) for x, y in lot["outline_ft"]]

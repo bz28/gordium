@@ -273,12 +273,14 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      on every new project, after every lookup and after you pick another district (a tick is for one district),
      because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
-   - **About this project**: the facts you know at the start that shape the building's outline: a stream or inlet
+   - **About this project**: the facts you know at the start that shape the building's outline: whether an
+     accessory dwelling unit (ADU) is on the lot (a detached one is a building of its own), a stream or inlet
      near the lot (and how far), whether the lot is in the South Hill Overlay, how many homes an attached building
-     holds. Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
+     holds, how many cars the lot's private garages hold (R-1 and R-2). Each is a one-click dropdown ("No stream within 20 ft") and **starts on Not answered**: Gordium never
      assumes. Leave one unanswered and the rows that need it say "needs review", as always. Hover a question for
      its full wording. Answers are saved with the project; change them in Edit site… .
-     Who lives there (household) and a home business are asked later, when you plan the interior: they sit in the
+     Who lives there (household) and a home business are asked later, when you plan
+     the interior: they sit in the
      panel's collapsed **Use details (for later)** group (still needs review, not counted among the building's
      problems, never a pass). Each row says "Answer when you plan the interior: …" and has its **Enter…** button.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
@@ -289,9 +291,13 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      keeps the whole street, however many pieces the tax map drew it in, and stops at the corner; the command line
      says what it kept ("Ithaca Rd: 8 lot-line pieces, 75'-10" of frontage"). Where the lot line bends with no clear
      corner, Gordium asks, and needs your Yes or No (neither guess is safe).
-   - **Ground**: for now Gordium assumes the ground is **flat at the lot level and finished** (no regrading), so
-     height and stories are checked; their rows say "assuming flat ground", and so does the report. (Spot grades,
-     terrain and regrading come back in a later release.)
+   - **Ground**: for now Gordium assumes the ground is **flat at the lot level and finished** (no regrading); the
+     rows for height and stories say "assuming flat ground", and so does the report. That assumption decides them
+     only when Look up found the lot level (its ground falls less than 6 inches across the lot). Height is measured
+     from the average ground level at the walls (the grade plane, §325-3), so on a sloping lot, or with no ground
+     looked up, height and stories **need review**, saying how far the ground falls: check them against your
+     survey. (Spot grades, terrain and regrading, which let Gordium check them on a slope, come back in a later
+     release.)
    - An amber line appears when the box can't decide something itself, with what to do (for example "This lot
      faces two streets: pick the front").
 
@@ -431,7 +437,7 @@ lot the tax map allows:
 - side yard, southwest 12'-0 1/2" (needs 10'-0"); northeast, 12'-0 3/8";
 - coverage 21.7% (the limit is 25%).
 
-Three rows need review from the start, and that is Gordium being honest, not a mistake:
+Thirteen rows need review from the start, and that is Gordium being honest, not a mistake:
 - **New structures at least 20 ft from an inlet wall or stream bank**: the start box's stream question was left
   Not answered, so this row waits on it ("say whether any inlet wall or stream bank … is within 20 ft of the lot").
   Answer it with the row's **Answer 2 questions…** button and the row is decided.
@@ -443,12 +449,25 @@ Three rows need review from the start, and that is Gordium being honest, not a m
   range each can take (34'-11 7/8" to 36'-3 3/8" against 24'-1 7/8" to 32'-10 1/8"), and the reason says so once: "Complies under every
   reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the
   zoning office".
-- **Eaves into front yard** waits on the same question, and says the same.
+- **Eaves into front yard** waits on the same question, and on the height (its limit grows with the height bonus,
+  and the height waits on the ground, below).
+- **Building height** (35'-0", at the limit) and **Stories** (3, at the limit): the lookup found the ground falls
+  about 14.2 ft across this lot, and Gordium is assuming it flat, so neither can be decided: "the ground falls about
+  14.2 ft across the lot, but Gordium assumes it flat: height is measured from the average ground level at the
+  walls (the grade plane, §325-3), which Gordium can't set yet: check height and stories against your survey". The
+  header's Ground line says the same. On a lot the lookup finds level, both comply.
+- **Private garage: not more than three cars**: the start box's garage question was left Not answered, so this row
+  waits on it ("enter how many cars the lot's private garages hold, all together …"). Answer it with the row's
+  **Enter the cars the private garages hold…** button: three or fewer complies; over three, the row then asks how
+  many garages there are (whether the three cars are for each garage or the whole lot is an open question).
+- The six **accessory dwelling unit** rows (one per parcel, two bedrooms, not in the primary front yard, the attached
+  ADU's 40%, the detached ADU's size and its setbacks) and **One-family occupancy**: the start box's ADU question was
+  left Not answered, so they wait on it ("say whether an accessory dwelling unit (ADU), attached or detached, is on
+  the lot"). Answer it with an ADU row's **Enter whether an ADU is on the lot…** button: **No ADU on the lot** and
+  the six ADU rows go (they don't apply), and One-family occupancy joins **Use details (for later)**, waiting only
+  on who lives there.
 
-**Building height**: 35'-0" is at the limit and complies. The height rule's taller-house bonus reads the rear yard,
-but at 35 ft or under the bonus never comes into it, so the open question doesn't matter.
-
-Stories 3 complies, at the limit, saying "assuming flat ground". Lot area complies even at the tax map's worst case.
+Lot area complies even at the tax map's worst case.
 
 ### Simple tests
 
@@ -463,8 +482,9 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
    turns red.
 4. **Undo, then pull the rear wall 11 ft back** (Cmd+Shift+click the back face, Gumball 11). Lot coverage 29.7%
    against 25%: **does not comply**, even on the largest lot the tax map allows.
-5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply**,
-   4'-0" over (the height doesn't depend on the lot lines). Only the part above 35'-0" turns red.
+5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). On this sloping lot Building height 39'-0" still
+   **needs review** (the ground, as above). On a lot the lookup finds level it **does not comply**, 4'-0" over
+   (the height doesn't depend on the lot lines), and only the part above 35'-0" turns red.
 6. **Undo, then move the southwest wall 3 ft out** (Cmd+Shift+click the face on your left, seen from the street).
    Side yard, Southwest 9'-0 1/2": **needs review**, 0'-11 1/2" short as drawn, "+1'-0 1/2" if the tax-map lines
    are 2 ft off the other way" (it complies if the tax map's line is out the lucky way). **Move it 5 ft out
@@ -480,7 +500,8 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 9. **Move one floor on its own** (Floor 2, 3 ft to the right, seen from the street). Stories needs review: "floors misaligned".
 10. **The height bonus** (§325-16C: a taller house if every yard is larger): raise the roof 3 ft (38'-0"), move the
     house 3 ft back, and pull each side wall 3 ft in. On this lot Building height **needs review**: the bonus needs
-    the rear yard larger too, and which lines are the rear lot line is the open question above.
+    the rear yard larger too, and which lines are the rear lot line is the open question above (and the ground, as
+    above).
 11. **Delta in words, as drawn and if the tax-map lines are 2 ft off:** after test 2 the Front yard row's details
     read "+7'-0 5/8" (+5'-0 5/8" if the tax-map lines are 2 ft off)" (the list says it shorter, on two lines:
     "+7'-0 5/8"" over "worst +5'-0 5/8""); in test 6 the Southwest side yard reads "0'-11 1/2" short (+1'-0 1/2" if the tax-map lines are 2 ft
@@ -495,6 +516,18 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
     10 ft limit).
 14. **Other units:** start in a Millimeters, Meters or Inches template. The results are the same: Gordium works
     in feet and converts at Rhino's edge.
+15. **A backyard cottage (a detached ADU, §325-28):** draw a `Box` 20 × 16 × 18 ft on the Building layer behind
+    the house, at least 5 ft from the side and rear lot lines. Answer **ADU on the lot** (in **Edit site…**, or an
+    ADU row's **Enter whether an ADU is on the lot…**); the ADU's rows then ask the rest with their **Enter…**
+    buttons: detached, new construction, one on the parcel, two bedrooms. Then they ask for its building: **Pick the
+    ADU's building…** and click the box. The ADU's rows are decided: not nearer the street than the house:
+    complies. 5 ft or more from the side and rear lot lines: it is, under every reading, but on this lot it needs
+    review like the house's rear yard ("Complies under every reading, but it depends on an open question: which lot
+    lines count as side and which as rear"); in R-1, 5 ft to under 6 ft also needs review (whether §325-25C's 6 ft
+    applies too is an open question). Its size (320 sf footprint, 18 ft, at most 2 stories) **needs
+    review** here, as the house's height does: the ground falls about 14.2 ft and Gordium assumes it flat. On a lot
+    the lookup finds level it complies, and made 22 ft tall it **does not comply** (20 ft at most). Move it in front
+    of the house: **does not comply** (not in the primary front yard). The cottage still counts toward lot coverage.
 
 ### What counts as a problem
 

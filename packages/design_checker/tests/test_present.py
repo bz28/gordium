@@ -13,7 +13,7 @@ import pytest
 
 from design_checker import present
 from design_checker.check import check
-from model_measurement.measure import measure
+from model_measurement.places.ithaca_city.measure import measure
 from model_measurement.project import fact_problems, load_facts
 from rule_format.rulebook import REPO, load
 
@@ -674,7 +674,7 @@ def test_the_tax_map_worst_case_moves_every_lot_line_2_ft_the_unlucky_way():
     73 x 90 lot: lot area at worst 69 x 86 = 5,934 sf (was 71 x 88 = 6,248, 1 ft per line), a lot width or depth
     off by 4 ft (two lines), a yard by 2 ft (one line). One definition, used by measurement, checker and generator."""
     from shapely.geometry import Polygon
-    from model_measurement.measure import TAX_MAP_SLACK, tax_map_lot_area
+    from model_measurement.places.ithaca_city.measure import TAX_MAP_SLACK, tax_map_lot_area
     area = tax_map_lot_area(Polygon([(0, 0), (73, 0), (73, 90), (0, 90)]))
     assert (area["low"], area["high"]) == (69 * 86, 77 * 94) == (5934, 7238)
     assert TAX_MAP_SLACK["lot_width"] == TAX_MAP_SLACK["lot_depth"] == 4.0 and TAX_MAP_SLACK["rear_yard"] == 2.0
@@ -1072,7 +1072,7 @@ def test_every_open_question_the_measuring_asks_has_a_short_name():
     """One table: every tagged question in the measuring code, and every untagged one it keeps as a constant."""
     import re
     from pathlib import Path
-    from model_measurement import measure
+    from model_measurement.places.ithaca_city import measure
     src = Path(measure.__file__).read_text(encoding="utf-8")
     tags = set(re.findall(r"open questions? for the architects \(([a-z_]+)\)", src)) | set(re.findall(r"\((story)\)\"", src))
     assert tags and all(t in present.QUESTION_NAMES for t in tags), tags - set(present.QUESTION_NAMES)
@@ -1522,7 +1522,7 @@ def test_an_assumed_main_building_is_never_kinder_than_picking_the_starting_hous
         site_ = _plot(*house, *others, lot_=lot)
         assumed = items(check_site(site_, base)["view"])
         picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])
-        from model_measurement.measure import measure
+        from model_measurement.places.ithaca_city.measure import measure
         m_a, m_p = measure(site_, base), measure(site_, {**base, "main_building": "f0"})
         for name in ("building_height", "stories"):     # the pick's every reading is among the assumption's
             def vals(r):
@@ -1551,7 +1551,7 @@ def test_the_with_every_other_solid_height_is_read_from_its_own_grade_not_the_la
     base = {**facts, "lot_surveyed": True, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
             "grade_points": points}
     site_ = _plot(*house, low, high, lot_=lot)
-    from model_measurement.measure import measure
+    from model_measurement.places.ithaca_city.measure import measure
     def with_others(f):
         return next(r["value"] for r in measure(site_, f)["building_height"]["readings"]
                     if r["reading"].startswith("with every other solid"))
@@ -1570,7 +1570,7 @@ def test_never_kinder_than_picking_the_starting_house_with_solids_touching_it():
     picked, and the pick's every height and story reading is among Gordium's own."""
     import random
     from design_checker.check import check_site
-    from model_measurement.measure import measure
+    from model_measurement.places.ithaca_city.measure import measure
     from test_measure import floor
     lot, facts = _sample106()
     rnd = random.Random(18)
@@ -1795,7 +1795,7 @@ def test_a_degenerate_building_object_never_raises_and_never_passes(kind):
     reading's problem, goes through measure() and check_site without an exception, and with its problem, the
     building measurements wait with that reason."""
     from design_checker.check import check_site
-    from model_measurement.measure import measure
+    from model_measurement.places.ithaca_city.measure import measure
     from test_measure import floor
     lot, facts = _sample106()
     for house in (False, True):
@@ -1822,7 +1822,7 @@ def test_a_degenerate_building_object_never_raises_and_never_passes(kind):
 def test_the_ground_work_waits_for_buildings_that_can_be_measured(monkeypatch):
     """Main-building round 4 (P3): the guards keeping the grade plane and the ground check off a building the
     reading refused were unpinned. With them raising, a problem building's measurement still returns."""
-    import model_measurement.measure as M
+    import model_measurement.places.ithaca_city.measure as M
     from test_measure import floor
 
     def boom(*a, **k):
