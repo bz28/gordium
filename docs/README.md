@@ -29,6 +29,8 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 | [how_gordium_is_built.md](how_gordium_is_built.md) | The code-level map: which package does each step, and how the PRs build on each other | Engineers | A package or step is added or changes |
 | [how_rules_are_checked.md](how_rules_are_checked.md) | The promises Gordium makes about its rules, and the check and test behind each | Architects, shareholders, engineers | A rule check is added or changes |
 | [methods.md](methods.md) | Every technique: how it works, why, alternatives, weak spots, how it's tested | Engineers, reviewers | A technique is added or changes |
+| [protocol/site_description_v1.md](protocol/site_description_v1.md) | The site description, `gordium.site/1`: what a design tool (Rhino, later Revit) sends the checker, field by field, and why anything unknown is refused; with its [JSON Schema](protocol/site_description_v1.schema.json) | Engineers writing a design-tool add-in, reviewers | The site description or the worker's new-style commands change |
+| [protocol/CHANGELOG.md](protocol/CHANGELOG.md) | Each version of the protocol and the site description | Engineers writing a design-tool add-in | The schema or the commands change (a test fails until a line is added) |
 
 ## Use: how to do a job
 

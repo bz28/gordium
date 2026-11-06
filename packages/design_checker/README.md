@@ -13,6 +13,18 @@ Requests to the worker: `check` (a model and its lot facts), `start` (the larges
 the lot in a model, `envelope_builder.start`), `sample_site` (the plugin's place's sample lot, from its jurisdiction.yaml: 106 Ithaca Rd's lot and facts, as files
 drawn from the sample before 2026-10-27 have them; GordiumStart no longer prefills it: a new file starts empty), `options` (zones and uses), `facts` (what's wrong with saved lot facts).
 
+**The site description** (`site_json.py`; the contract is
+[docs/protocol/site_description_v1.md](../../docs/protocol/site_description_v1.md)): the lot and buildings as plain
+JSON, `gordium.site/1`, so another design tool (Revit) can send what Rhino sends. `validate` refuses anything not
+exactly v1, every reason listed; `to_site` and `from_site` turn a description into the site the measuring reads and
+back (each problem goes by its code in `model_measurement.stops`, read back from its words by `stops.code_of`). The
+worker's new-style commands name their protocol (`protocol.py`): `hello` (the protocol, the schema version and
+fingerprints of the code and rules), `read_model` (a .3dm as a site description), `check_site` and `start_site`
+(check and start for a description: `check.check_description`, `check.start_description`). The older commands
+answer exactly as before, with or without a protocol, and go the same way: `check()` and `start()` read the
+model, make it a description (`site_json.legacy_description`), send it through JSON text and back, and check
+that. A zoning report keeps the exact description beside it (`<report name>.site.json`).
+
 **Golden answers and recorded sessions** (the yardstick for changes that must not change any answer):
 `python -m design_checker.goldens --check` runs `check` and `start` on every test site, scenario (and its edit),
 deep-run site and 200 stress designs from a fixed seed, and compares each canonical answer with
