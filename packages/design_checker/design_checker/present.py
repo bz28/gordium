@@ -1008,6 +1008,8 @@ def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
         cell = margin_text(drawn, unit) + "\nsee why"                   # beside a ✕ (review round 3)
     elif drawn >= 0 and end >= 0 and status == REVIEW:
         cell = f"{word} {cell_end}\nif confirmed"
+    elif drawn >= 0 and status == REVIEW:    # room as drawn, short at worst: "if so" (the head's "if confirmed", short
+        cell = f"{margin_text(drawn, unit)} if so\n{word} {cell_end}"       # enough for the two-line column)
     else:
         cell = f"{margin_text(drawn, unit)}\n{word} {cell_end}"
     return f"{head} ({tail}){why}", cell

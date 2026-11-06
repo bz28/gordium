@@ -359,7 +359,7 @@ def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
         (f"3'-0\" short (still 1'-0\" short {off} the other way)", True),
         (f"+1'-0\" if confirmed (1'-0\" short {off})", True), (f"+6'-0\" (+4'-0\" {off})", True)]
     assert [words[x]["delta_cell"] for x in (7, 11, 16)] == [
-        "−3'-0\"\nbest −1'-0\"", "+1'-0\"\nworst −1'-0\"", "+6'-0\"\nworst +4'-0\""]
+        "−3'-0\"\nbest −1'-0\"", "+1'-0\" if so\nworst −1'-0\"", "+6'-0\"\nworst +4'-0\""]
     assert words[7]["margin"] == "−3'-0\"" and words[7]["status"] == present.FAILS     # as drawn, unchanged
     assert words[7]["detail"]["line"] == "7'-0\" proposed, 10'-0\" required · " + words[7]["delta"]
     survey = items(check_site(_plot(box(7, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])["Side yard, West"]
@@ -2009,7 +2009,10 @@ def test_the_delta_cell_is_never_kinder_than_the_status():
     assert present.tax_delta(present.FAILS, 0.004, (-0.1, 2), "ft") == (
         f"at limit here; see why (0'-1 1/4\" short {off})", "at limit\nsee why")
     # a row in review that may be short keeps both numbers: the shortfall is shown, nothing kinder
-    assert present.tax_delta(present.REVIEW, 2.0, (-0.02, 4), "ft")[1] == "+2'-0\"\nworst −0'-0 1/4\""
+    # ... and says its room "if so" (the head's "if confirmed"): never a bare "+" beside a review mark (the sceptic of
+    # plain-words round 5); at limit too
+    assert present.tax_delta(present.REVIEW, 2.0, (-0.02, 4), "ft")[1] == "+2'-0\" if so\nworst −0'-0 1/4\""
+    assert present.tax_delta(present.REVIEW, 0.004, (-0.02, 4), "ft")[1] == "at limit if so\nworst −0'-0 1/4\""
     assert present.tax_delta(present.COMPLIES, 3.4375, (0.4375, 6), "ft")[1] == "+3'-5 1/4\"\nworst +0'-5 1/4\""
 
 
