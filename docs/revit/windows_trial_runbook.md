@@ -35,8 +35,6 @@ Do these in order. Tick each when done and write the version you got in the note
 |---|---|---|
 | [ ] | Parallels Desktop installed on the Mac; a Windows 11 ARM virtual machine created | Give the VM at least 8 cores and as much RAM as the Mac can spare (Autodesk recommends 32 GB for Revit 2027; this Mac has 16 GB, which is exactly what Q1 tests) |
 | [ ] | Windows updated; a note made of the VM's RAM, cores and disk | Fills the machine rows of the results table |
-| [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Start the trial clock only when the rest of this list is done and the models are in hand**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
-| [ ] | Revit 2026 installed as well, if Autodesk's trial allows both on the one machine (otherwise note that it did not) | The plan is one .NET 10 build for both. See the first open check in section 7 |
 | [ ] | .NET 10 SDK installed (`dotnet --list-sdks` shows 10.x) | |
 | [ ] | Git for Windows installed | |
 | [ ] | Python installed: the 64-bit Intel (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an Intel machine, so the Intel build is the one proven; it runs on Windows 11 ARM under Windows' own emulation. Whether ARM builds of the pinned packages (`rhino3dm`, `shapely`, `numpy`) exist was not checked |
@@ -46,6 +44,8 @@ Do these in order. Tick each when done and write the version you got in the note
 | [ ] | `python -m design_checker.conformance` prints `OK: every scene conforms` | Proves the Windows install reads the scenes and recordings as the Mac does |
 | [ ] | The worker answers by hand (below) | |
 | [ ] | The 3 real Revit models copied onto the VM (see Open items) | Keep copies out of the repo clone. They are the firms' files |
+| [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Last on the list, because installing it starts the 30-day clock: do it only when every row above is ticked and the models are in hand**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
+| [ ] | Revit 2026 installed as well, if Autodesk's trial allows both on the one machine (otherwise note that it did not) | The plan is one .NET 10 build for both. See the first open check in section 7 |
 
 **Worker smoke test** (from the clone, venv active). Type or pipe one request per line; each gets one answer line:
 
