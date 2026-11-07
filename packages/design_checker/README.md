@@ -35,6 +35,15 @@ answer is the in-process one: `tests/test_protocol.py` replays `test_data/sessio
 calls recorded while the tests drove the plugin's logic: `python -m design_checker.call_session --record`, through
 `host_core.worker_client.CallRecorder`) through the worker.
 
+**The host conformance suite** (`conformance.py`, `conformance_rhino.py`;
+[test_data/host_conformance/README.md](../../test_data/host_conformance/README.md)): fixed scenes (a curved wall, a
+block, a garage left out, millimetres, survey coordinates, a corner lot…) that any design tool's reading must turn
+into the expected description, every point within a millionth of a foot, with the same ids, problem codes and
+left-out objects, and exactly the hand-worked verdicts through `check_site`. A tool that sends fewer problems than
+expected fails. The Rhino reference adapter (rhino3dm) runs in CI; a tool that can't run on the Mac (Revit)
+records its descriptions once on its own machine (`recorded/<host>/`) and the same test checks them.
+`python -m design_checker.conformance` runs it.
+
 **Golden answers and recorded sessions** (the yardstick for changes that must not change any answer):
 `python -m design_checker.goldens --check` runs `check` and `start` on every test site, scenario (and its edit),
 deep-run site and 200 stress designs from a fixed seed, and compares each canonical answer with

@@ -2,7 +2,7 @@ title: Survey coordinates far from the origin
 what: >-
   The box house drawn where a survey puts it: 875,000 ft east and 885,000 ft north of the origin (New York State
   Plane, roughly where Ithaca is), with the ground flat at 820 ft. Far from the origin, a host that rounds to single
-  precision would move points by up to 1/16 in; the description must hold every point to a millionth of a foot,
+  precision would move points by up to about 3/8 in (0.03 ft); the description must hold every point to a millionth of a foot,
   and the verdicts are the box house's.
 model: {offset: [875000, 885000, 820]}
 buildings:

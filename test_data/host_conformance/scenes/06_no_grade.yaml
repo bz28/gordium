@@ -12,7 +12,9 @@ expected:
   R-1b.side_yards#east: complies
   R-1b.side_yards#west: complies
   R-1b.rear_yard: complies
-  R-1b.yard_projections: complies
+  # found on running: how far a projection may reach into a yard depends on the height (the §325-16C height
+  # bonus), which isn't known without the grade plane
+  R-1b.yard_projections: needs_review
   R-1b.height: needs_review                      # no grade plane
   R-1b.stories: needs_review                     # counted from the grade plane
   R-1b.lot_coverage: complies

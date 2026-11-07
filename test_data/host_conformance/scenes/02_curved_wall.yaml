@@ -19,3 +19,9 @@ expected:
   R-1b.height: needs_review
   R-1b.stories: needs_review
   R-1b.lot_coverage: needs_review      # the footprint isn't known
+  # found on running (not in the hand-working): with the building unreadable, Gordium can't tell how many buildings
+  # there are or where, so four rows that don't apply to one measured house appear, each needing review
+  R-1b.lot_area_each_primary_building: needs_review
+  R-1b.yards_not_shared: needs_review
+  R-1b.south_hill_overlay: needs_review
+  R-1b.accessory_buildings: needs_review

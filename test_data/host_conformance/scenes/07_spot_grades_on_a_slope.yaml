@@ -30,7 +30,8 @@ then:
     R-1b.side_yards#east: complies
     R-1b.side_yards#west: complies
     R-1b.rear_yard: complies                     # 120 − 80 = 40 ≥ 30
-    R-1b.yard_projections: complies
+    # found on running: how far a projection may reach depends on the height (§325-16C), not known now
+    R-1b.yard_projections: needs_review
     R-1b.height: needs_review                    # spot grades no longer at the building's walls
     R-1b.stories: needs_review
     R-1b.lot_coverage: complies

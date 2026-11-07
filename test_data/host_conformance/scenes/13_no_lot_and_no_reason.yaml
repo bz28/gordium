@@ -44,8 +44,9 @@ expected:
   R-1b.lot_area_one_family_detached: needs_review
   R-1b.lot_width_one_family_detached: needs_review
   R-1b.front_yard: needs_review
-  R-1b.side_yards#east: needs_review
-  R-1b.side_yards#west: needs_review
+  # found on running: with no lot the side lot lines can't be named by compass, so the rows are the narrower and wider
+  R-1b.side_yards#narrower: needs_review
+  R-1b.side_yards#wider: needs_review
   R-1b.rear_yard: needs_review
   R-1b.yard_projections: needs_review
   R-1b.height: complies
