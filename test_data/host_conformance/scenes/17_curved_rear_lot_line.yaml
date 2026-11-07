@@ -1,0 +1,24 @@
+title: A curved rear lot line
+what: >-
+  The box house on a lot whose rear (north) line is an arc bowing 4 ft out, through (30, 124). The host must send
+  that lot line as points closely along the arc (no more than 0.25 ft apart, each within a millionth of a foot of
+  the arc), marked curved, never as its straight chord. Lot area 7,200 + about 160 = 7,360 sf (the arc's segment:
+  radius 114.5 ft); the rear yard is the least distance from the house to the arc, about 42.4 ft (from the
+  house's north-west corner). Everything complies.
+lots:
+  - [[0, 0], [60, 0], [60, 120], [0, 120]]
+lot_arcs: {2: [30, 124]}
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies    # about 7,360 sf
+  R-1b.lot_width_one_family_detached: complies   # 60 ft along the straight street line
+  R-1b.front_yard: complies                      # 30 ≥ 25
+  R-1b.side_yards#east: complies
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies                       # about 42.4 ≥ 30
+  R-1b.yard_projections: complies
+  R-1b.height: complies
+  R-1b.stories: complies
+  R-1b.lot_coverage: complies                    # 1,500 ≤ 25% of about 7,360 = 1,840 sf

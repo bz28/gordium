@@ -1,0 +1,29 @@
+title: Objects left out that touch the house, sit on the neighbourhood's layer, or are a block
+what: >-
+  The box house with three solids on the lot that aren't on the Building layer. A 10 × 20 ft porch on the Default
+  layer against the house's west wall: it touches the house, so it may be part of it, and the yards, height and
+  stories can't be trusted without it. A 20 × 15 ft solid on Gordium::Context (the neighbourhood's layer) at the back
+  of the lot, apart from the house. And an 8 × 8 ft shed placed as a block on the Default layer, apart. All three
+  must be listed as left out, the porch as touching, the context solid as on the neighbourhood's layer: a host that
+  says nothing touches would let the yards pass with the porch unmeasured.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+others:
+  - {id: porch, layer: Default, outline: [[5, 40], [15, 40], [15, 60], [5, 60]], base: 0, top: 10, touching: true}
+  - {id: neighbour_solid, layer: "Gordium::Context", outline: [[20, 95], [40, 95], [40, 110], [20, 110]], base: 0,
+     top: 10, touching: false}
+  - {id: shed_block, layer: Default, outline: [[48, 90], [56, 90], [56, 98], [48, 98]], base: 0, top: 8,
+     touching: false, block: true}
+grade: {elevation: 0}
+expected:
+  scope.not_included: needs_review               # 3 objects on the lot aren't measured
+  R-1b.lot_area_one_family_detached: complies    # the lot alone
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: needs_review                  # the porch touches the house: it may be part of it
+  R-1b.side_yards#east: needs_review
+  R-1b.side_yards#west: needs_review             # the porch would leave 5 ft < 10 ft
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review
+  R-1b.stories: needs_review
+  R-1b.lot_coverage: needs_review                # 1,500 + 200 + 300 + 64 = 2,064 sf > 1,800 sf with them all
