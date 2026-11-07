@@ -421,10 +421,16 @@ def _along(points, arc: dict) -> bool:
     a lot outline may run either way), none more than ARC_STEP (and TOL) apart."""
     if points and _close(points[0], arc["end"]):
         points = points[::-1]
-    turns = [_turn(arc, p) for p in points]
+    slack = TOL / arc["radius"]                 # TOL ft along the arc, as an angle
+
+    def turn(p):                                # a hair before the start is just before it, not almost a full turn
+        t = _turn(arc, p)
+        return t - 2 * math.pi if t > 2 * math.pi - slack else t
+    turns = [turn(p) for p in points]
     end = _turn(arc, arc["end"])
     return (len(points) >= 2 and all(abs(math.dist(p, arc["center"]) - arc["radius"]) <= TOL for p in points)
-            and all(t <= end + 1e-9 for t in turns) and all(t1 >= t0 - 1e-9 for t0, t1 in zip(turns, turns[1:]))
+            and all(-slack <= t <= end + slack for t in turns)
+            and all(t1 >= t0 - slack for t0, t1 in zip(turns, turns[1:]))
             and all(math.dist(p, q) <= ARC_STEP + TOL for p, q in zip(points, points[1:])))
 
 

@@ -347,6 +347,13 @@ def test_a_curved_lot_line_must_follow_the_arc_but_needn_t_have_the_expected_poi
     back = _round_arc(arc, expected_n)
     back = back[:5] + [back[3]] + back[5:]
     assert differs(back)                                                       # goes back on itself
+    for k_end, along_by, ok in [(0, -1e-13, True), (0, -5e-7, True), (-1, 5e-7, True), (0, -2e-6, False)]:
+        moved = _round_arc(arc, expected_n)                    # an end a hair off, along the arc: within TOL is fine
+        cx, cy = arc["center"]
+        p = moved[k_end]
+        a = math.atan2(p[1] - cy, p[0] - cx) + c._sense(arc) * along_by / arc["radius"] * (1 if k_end else 1)
+        moved[k_end] = [cx + arc["radius"] * math.cos(a), cy + arc["radius"] * math.sin(a)]
+        assert (differs(moved) == []) is ok, (k_end, along_by)
     run_back = copy.deepcopy(want)                                             # the whole lot the other way
     run_back["lot"]["edges"] = [{"points": e["points"][::-1], "curved": e["curved"]}
                                 for e in reversed(run_back["lot"]["edges"])]
@@ -370,12 +377,16 @@ def test_a_recording_with_a_key_given_twice_is_refused_as_the_worker_refuses_it(
     assert found and all("can't be read" in d and "given twice" in d for d in found)
 
 
-def test_every_object_a_scene_draws_has_the_same_id_on_every_build():
-    scene = SCENES["07_spot_grades_on_a_slope"]
+@pytest.mark.parametrize("name", sorted(DRAWN))
+def test_every_object_a_scene_draws_has_the_same_id_on_every_build(name):
+    """Every placed object, blocks included (scenes 04 and 15); not a block's definition's own objects, whose ids
+    rhino3dm makes and every reader skips."""
+    scene = DRAWN[name]
     a, b = cr.build(scene), cr.build(scene)
-    assert [str(o.Attributes.Id) for o in a.Objects] == [str(o.Attributes.Id) for o in b.Objects]
+    placed = lambda m: [str(o.Attributes.Id) for o in m.Objects if not o.Attributes.IsInstanceDefinitionObject]  # noqa: E731
+    assert placed(a) == placed(b)
     assert [str(layer.Id) for layer in a.Layers] == [str(layer.Id) for layer in b.Layers]
-    assert len({str(o.Attributes.Id) for o in a.Objects}) == len(list(a.Objects))
+    assert len(set(placed(a))) == len(placed(a))
 
 
 def test_the_reference_adapter_reads_a_lot_by_its_outline_not_its_box(tmp_path):

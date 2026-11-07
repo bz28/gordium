@@ -15,7 +15,7 @@ Why a second reader is allowed at all, and the alternatives: [docs/decisions/202
 | `scenes/*.yaml` | Each scene: a small drawing written as data (the lot, each building, other objects, the ground, an edit), what it tests in plain words, and the verdict of every rule it decides, worked out by hand before Gordium ran (commits 182391ef and 2eab4b11). Rows found only on running are marked "found on running", with why. | By hand |
 | `common_verdicts.yaml` | The rows every scene gives the same status (they depend only on facts every scene states alike). A scene's check must give exactly these rows plus its own. | By hand |
 | `expected/<scene>.site.json` | The description a host must send for the scene (`.after` for the step after its edit), worked out from the scene's numbers alone, never by reading a model. | `python -m design_checker.conformance --write` |
-| `models/<scene>.3dm` | The scene drawn in Rhino's file format, every object and layer with a fixed id (so a rewrite reads the same; the files' bytes still differ on each write, as Rhino stamps them). | the same |
+| `models/<scene>.3dm` | The scene drawn in Rhino's file format, every object and layer with a fixed id (a block's definition and the object inside it excepted: rhino3dm makes their ids, and no reader uses them; so a rewrite reads the same; the files' bytes still differ on each write, as Rhino stamps them). | the same |
 | `recorded/<host>/<scene>.json` | A host's descriptions of each scene, recorded once on its own machine. `recorded/rhino3dm/` is the Rhino reference adapter's; `recorded/revit/` is empty until the Revit add-in records its own. | the host |
 
 The 17 scenes: a box house; a curved wall; an open solid; a block on the Building layer; a garage left out

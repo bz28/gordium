@@ -93,7 +93,9 @@ def _terrain(o: dict, k: float):
 
 
 def _place_block(model, name: str, solid, attrs) -> None:
-    """The solid as a block's definition (on the placed block's own layer), placed once with `attrs`."""
+    """The solid as a block's definition (on the placed block's own layer), placed once with `attrs`. rhino3dm
+    gives the definition and the object inside it new ids on every build (an id set beforehand isn't kept); no
+    reader uses them: readers skip a definition's objects, and read the placed block by its own id."""
     inside = r.ObjectAttributes()
     inside.LayerIndex = attrs.LayerIndex
     index = model.InstanceDefinitions.Add(name, "", "", "", r.Point3d(0, 0, 0), (solid,), (inside,))
@@ -103,8 +105,8 @@ def _place_block(model, name: str, solid, attrs) -> None:
 
 def build(scene: dict) -> r.File3dm:
     """The scene as drawn, before its edit: the lot outline(s) on Site, each building solid on Building (floor
-    blocks marked), the other solids on their layers, spot grades on Gordium::Grade; every object with its fixed id
-    (conformance.object_id), in the scene's units."""
+    blocks marked), the other solids on their layers, spot grades on Gordium::Grade; every object and layer with its
+    fixed id (conformance.object_id; a block's definition and what is inside it excepted), in the scene's units."""
     model = r.File3dm()
     model.Settings.ModelUnitSystem = getattr(r.UnitSystem, _units(scene))
     k = c.FEET[_units(scene)]
