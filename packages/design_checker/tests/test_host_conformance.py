@@ -351,7 +351,7 @@ def test_a_curved_lot_line_must_follow_the_arc_but_needn_t_have_the_expected_poi
         moved = _round_arc(arc, expected_n)                    # an end a hair off, along the arc: within TOL is fine
         cx, cy = arc["center"]
         p = moved[k_end]
-        a = math.atan2(p[1] - cy, p[0] - cx) + c._sense(arc) * along_by / arc["radius"] * (1 if k_end else 1)
+        a = math.atan2(p[1] - cy, p[0] - cx) + c._sense(arc) * along_by / arc["radius"]
         moved[k_end] = [cx + arc["radius"] * math.cos(a), cy + arc["radius"] * math.sin(a)]
         assert (differs(moved) == []) is ok, (k_end, along_by)
     run_back = copy.deepcopy(want)                                             # the whole lot the other way
