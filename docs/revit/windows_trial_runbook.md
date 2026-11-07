@@ -4,7 +4,7 @@
 **For:** Ben, and whoever (a person or Claude) runs the trial on the Windows machine.\
 **Kept current by:** whoever runs the trial fills in the results tables and the open items; a PR that changes a command or a scene used here updates this page.
 
-Words you may not know ("host", "worker", "site description", "conformance") are in the [glossary](../glossary.md).
+A **host** is a design tool (Rhino, Revit) that reads an architect's model and sends Gordium a description of it; **conformance** is the fixed set of test scenes every host must pass. "Worker" and "site description" are in the [glossary](../glossary.md).
 Why Revit gets its own reader and how it is kept honest: the
 [decision of 2026-11-06](../decisions/2026-11-06_hosts_talk_to_the_worker.md). The rest of this page is the
 practical side.
@@ -84,8 +84,8 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 
 | Day | Do | Done when |
 |---|---|---|
-| 1 | Section 2 up to Revit installed. Open a sample Revit model the firm did not draw (a sample project, if one is installed) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked to the Revit rows; first Q1 numbers written down |
-| 2 | Python, clone, install, `pytest`, conformance, worker smoke test. Open each real model in Revit, timing the open. Decide Q1: go, or switch (section 6) | The three models open; Q1 has a yes or no, with numbers |
+| 1 | Section 2 in order, Revit last: Parallels, Windows, Python, the clone, `pytest`, conformance and the worker smoke test. Then install Revit and start its 30-day clock (only if the three real models are in hand). Open a sample project the firm did not draw (if one is installed) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked; first Q1 numbers written down |
+| 2 | Open each real model in Revit, timing the open. Use each for a while as an architect would. Decide Q1: go, or switch (section 6) | The three models open; Q1 has a yes or no, with numbers |
 | 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Confirm which .NET runtime Revit 2027 and 2026 load, and whether one build loads in both | The button appears in both Revit versions, or the note says which version refused the build |
 | 4 | The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `test_data/host_conformance/expected/01_box_house.site.json` as the `site` and the scene's facts (see "The scene's facts and verdicts" below) | Q2 answered. The `check_site` answer's rows are exactly the scene's expected verdicts |
 | 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Decide how a Revit element maps to a building and what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit (write the mapping into the notes: nothing in the repo fixes it yet). Decide the pick flow for the lot outline (default; `PropertyLine.GetBoundary` is 2027 only) | Scene 01 recorded and passes (section 4) |
@@ -95,7 +95,7 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 | 9 | Real models 2 and 3. For each: flat versus curved faces, `UniqueId`s before and after a small edit, units, survey coordinates | Rows for models 2 and 3 filled in |
 | 10 | Timing runs: the edit loop on all three models, five repeats each. Re-run `python -m design_checker.conformance` on the Mac with the final recordings | Section 5 complete |
 | 11 to 12 | Spare. Re-record anything that failed; chase the worst timing; test the other Revit version if only one was used | |
-| 13 | Write the go / no-go: answer Q1 to Q5 in section 1 with the numbers, list what surprised us, and what the add-in MVP plan must change | Results section signed off by Ben |
+| 13 | Write the go / no-go: answer Q1 to Q5 in section 1 with the numbers, list what surprised us, and what the add-in MVP plan must change | The section 5 tables filled in and signed off by Ben |
 | 14 | Commit the recordings and results in a PR (never push to main; Ben merges) and hand the machine back or shut the cloud VM down | PR open |
 
 ## 4. Recording the scenes from Revit
