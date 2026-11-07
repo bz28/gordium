@@ -1,0 +1,19 @@
+title: A box house
+what: >-
+  The plainest drawing: a 60 × 120 ft lot with the street along its first (south) edge, and a two-story house,
+  30 × 50 ft, drawn as two 10 ft floor blocks, 30 ft back from the street and 15 ft from each side. The ground is
+  flat at 0 (stated in the facts). Every measure can be read, and every one complies.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies    # 60 × 120 = 7,200 sf
+  R-1b.lot_width_one_family_detached: complies   # 60 ft along the street
+  R-1b.front_yard: complies                      # 30 ≥ 25
+  R-1b.side_yards#east: complies                 # 60 − 45 = 15 ≥ 10
+  R-1b.side_yards#west: complies                 # 15 ≥ 10
+  R-1b.rear_yard: complies                       # 120 − 80 = 40 ≥ 30
+  R-1b.yard_projections: complies                # nothing reaches past the walls
+  R-1b.height: complies                          # 20 − 0 = 20 ≤ 35
+  R-1b.stories: complies                         # 2 floor blocks ≤ 3
+  R-1b.lot_coverage: complies                    # 30 × 50 = 1,500 ≤ 25% of 7,200 = 1,800 sf

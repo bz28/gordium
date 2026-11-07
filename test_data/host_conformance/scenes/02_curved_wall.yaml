@@ -1,0 +1,21 @@
+title: A curved wall
+what: >-
+  The box house with its rear wall bowed out into an arc (through a point 4 ft behind the straight wall). A curved
+  wall can't be measured exactly yet, so the host must not send it as if it were flat or straight: it leaves the
+  curved wall out, and the floor and roof too (each has the curved edge), and says why (curved_surface,
+  curved_edge). Every measure of the building then needs review; the lot's own measures still comply.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10],
+     curved: {edge: 2, through: [30, 84]}}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: needs_review
+  R-1b.side_yards#east: needs_review
+  R-1b.side_yards#west: needs_review
+  R-1b.rear_yard: needs_review         # the curved wall is the one nearest the rear lot line
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review
+  R-1b.stories: needs_review
+  R-1b.lot_coverage: needs_review      # the footprint isn't known

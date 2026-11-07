@@ -1,0 +1,35 @@
+title: No buildings sent, and the host didn't look at everything
+what: >-
+  A description only: the lot, no buildings, and `inventory_complete: false` (the host didn't say everything on the
+  lot was sent). Anything not sent could be a building, so the checker must never say "0 stories" or "no coverage"
+  complies: every building measure needs review. The lot's own area and width don't depend on the buildings and
+  comply.
+site:
+  schema: gordium.site/1
+  units: ft
+  host: {name: scene, version: "", document: 14_nothing_sent_and_inventory_incomplete, model_units: Feet}
+  lot:
+    id: lot
+    edges:
+      - {points: [[0, 0], [60, 0]], curved: false}
+      - {points: [[60, 0], [60, 120]], curved: false}
+      - {points: [[60, 120], [0, 120]], curved: false}
+      - {points: [[0, 120], [0, 0]], curved: false}
+  buildings: []
+  unsent: []
+  left_out: []
+  grade: {source: none, points: []}
+  inventory_complete: false
+  problems: []
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: needs_review
+  R-1b.side_yards#east: needs_review
+  R-1b.side_yards#west: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review
+  R-1b.stories: needs_review
+  R-1b.lot_coverage: needs_review

@@ -1,0 +1,19 @@
+title: An open solid
+what: >-
+  The box house drawn as walls only, with no floor or roof faces: not a closed solid, so its volume, height and
+  footprint can't be trusted. The host sends the walls it has and says the solid is open (open_solid). Every
+  measure of the building needs review.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10], open: true}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: needs_review
+  R-1b.side_yards#east: needs_review
+  R-1b.side_yards#west: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review
+  R-1b.stories: needs_review
+  R-1b.lot_coverage: needs_review

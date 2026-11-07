@@ -1,0 +1,22 @@
+title: A block on the Building layer
+what: >-
+  The box house, and a 10 × 10 × 10 ft shed behind it placed as a block on the Building layer. A block can't be
+  measured yet (in Rhino it must be exploded). The host must say so rather than drop it: the shed would add 100 sf
+  of coverage and could be closer to the rear lot line. It is sent as an object that couldn't be sent (unsent), or,
+  as Rhino's reader does, a building with no faces and the not_a_solid problem. Every building measure needs
+  review.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+  - {id: shed, outline: [[20, 90], [30, 90], [30, 100], [20, 100]], base: 0, top: 10, block: true}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: needs_review
+  R-1b.side_yards#east: needs_review
+  R-1b.side_yards#west: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review
+  R-1b.stories: needs_review
+  R-1b.lot_coverage: needs_review

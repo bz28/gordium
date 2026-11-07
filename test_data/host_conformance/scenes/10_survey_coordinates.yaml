@@ -1,0 +1,21 @@
+title: Survey coordinates far from the origin
+what: >-
+  The box house drawn where a survey puts it: 875,000 ft east and 885,000 ft north of the origin (New York State
+  Plane, roughly where Ithaca is), with the ground flat at 820 ft. Far from the origin, a host that rounds to single
+  precision would move points by up to 1/16 in; the description must hold every point to a millionth of a foot,
+  and the verdicts are the box house's.
+model: {offset: [875000, 885000, 820]}
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: complies
+  R-1b.side_yards#east: complies
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies
+  R-1b.yard_projections: complies
+  R-1b.height: complies                          # 840 − 820 = 20 ≤ 35
+  R-1b.stories: complies
+  R-1b.lot_coverage: complies

@@ -1,0 +1,25 @@
+title: A detached garage left out (scenario 06)
+what: >-
+  Scenario 06 (test_sites/new_york/ithaca_city/scenarios/06_detached_garage_not_on_the_building_layer.yaml): the
+  1,500 sf house plus a 24 × 24 ft garage at the back of the lot, drawn on the Default layer, so it isn't measured.
+  The host must list the garage as left out: lot coverage counts it (1,500 + 576 = 2,076 sf > 1,800 sf), so
+  coverage must never say complies. It doesn't touch the house (10 ft apart), so the yards, height and stories are
+  still checked.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+others:
+  - {id: garage, layer: Default, outline: [[20, 90], [44, 90], [44, 114], [20, 114]], base: 0, top: 12,
+     touching: false}
+grade: {elevation: 0}
+expected:
+  scope.not_included: needs_review               # 1 solid on the lot isn't on the Building layer
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: complies                      # 30 ≥ 25
+  R-1b.side_yards#east: complies
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies                       # to the rearmost MAIN building: 40 ≥ 30
+  R-1b.yard_projections: complies
+  R-1b.height: complies
+  R-1b.stories: complies
+  R-1b.lot_coverage: needs_review                # 2,076 sf with the garage: never "complies"
