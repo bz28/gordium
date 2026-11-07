@@ -171,7 +171,7 @@ def test_a_preview_gives_the_same_answer_in_every_process():
               "args = unplain(json.loads(sys.stdin.read()))\n"
               "print(json.dumps(plain(preview_lookup(**args)[1]['_pending']['undo'])))\n")
     said = {subprocess.run([sys.executable, "-c", script], input=json.dumps(call["args"]), capture_output=True,
-                           text=True, check=True, env={**__import__("os").environ, "PYTHONHASHSEED": seed}).stdout
+                           text=True, encoding="utf-8", check=True, env={**__import__("os").environ, "PYTHONHASHSEED": seed}).stdout
             for seed in ("1", "2", "3", "4")}
     assert len(said) == 1, said
 
@@ -309,7 +309,7 @@ def test_the_recorder_saves_a_call_and_never_changes_it(tmp_path):
     assert recorder.install([module]) == 2
     assert module.kept((1, 2)) == (2,)
     assert module.add([1], extra=[object()]) == (1, 1)          # an object: not recorded, still answered
-    lines = [json.loads(x) for f in tmp_path.glob("calls-*.jsonl") for x in f.read_text().splitlines()]
+    lines = [json.loads(x) for f in tmp_path.glob("calls-*.jsonl") for x in f.read_text(encoding="utf-8").splitlines()]
     by = {line["fn"] for line in lines}
     assert by == {"sample.kept", "sample.add"}            # the call inside a call too
     add = next(x for x in lines if x["fn"] == "sample.add")
@@ -336,7 +336,7 @@ def test_the_recorder_keeps_key_order_and_skips_a_question_that_raised(tmp_path)
     with pytest.raises(KeyboardInterrupt):
         module.asks(esc)
     assert module.asks(lambda q: True) is True
-    text = "".join(f.read_text() for f in tmp_path.glob("calls-*.jsonl"))
+    text = "".join(f.read_text(encoding="utf-8") for f in tmp_path.glob("calls-*.jsonl"))
     lines = [json.loads(x) for x in text.splitlines()]
     assert '"details": {"zone": 1, "address": 2}' in text
     assert [x["fn"] for x in lines] == ["sample3.said", "sample3.asks"]

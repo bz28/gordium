@@ -409,6 +409,9 @@ def write_doc() -> None:
 
 if __name__ == "__main__":
     import sys
+
+    from rule_format.rulebook import utf8_console
+    utf8_console()
     if sys.argv[1:] != ["--write-doc"]:
         print("python -m design_checker.protocol --write-doc    rewrites the command reference in " + str(DOC))
         sys.exit(2)
