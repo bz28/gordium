@@ -21,9 +21,9 @@ edit. The trial ends with a go / no-go and a filled-in results table, not with a
 |---|---|---|---|
 | Q1 | Does Revit run acceptably in Parallels on this Mac (16 GB M2)? | Opening a real model and orbiting, selecting and editing is usable with Revit and the add-in both running, and the Mac is not swapping heavily | Days 1 to 2, measured in section 5 |
 | Q2 | Can a minimal C# add-in start the Python worker and get an answer back? | The add-in starts `python -m design_checker serve`, sends `hello`, then `check_site` for the box-house scene, and the answer matches what the Mac gives | Days 3 to 4 |
-| Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each model, the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 5 to 9 |
-| Q4 | How long does reading take after an edit? | Within the targets in section 6 | Days 8 to 10, measured in section 5 |
-| Q5 | Can the 15 drawn conformance scenes be recorded from Revit and pass? | `python -m design_checker.conformance` on the Mac prints `OK: every scene conforms` with `recorded/revit/` filled | Days 6 to 9, section 4 |
+| Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each model, the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 8 to 9 |
+| Q4 | How long does reading take after an edit? | Within the targets in section 6 | Day 10, measured in section 5 |
+| Q5 | Can the 15 drawn conformance scenes be recorded from Revit and pass? | `python -m design_checker.conformance` on the Mac prints `OK: every scene conforms` with `recorded/revit/` filled | Days 5 to 8, section 4 |
 
 Not in the trial: the dockable pane, the live-check screen, rooms, doors or stairs. Those come after a "go".
 
@@ -59,6 +59,17 @@ a `worker_fingerprint` and a `rulebook` entry for `new_york/ithaca_city`. An unk
 `{"id": 2, "ok": false, "error": "unknown command ..."}` and the worker stays up. This was run on the Mac when this
 page was written. End it by closing its input (Ctrl+Z then Enter on Windows).
 
+**The scene's facts and verdicts.** `check_site` needs the lot facts the architect states, and the suite compares the
+answer with hand-worked verdicts. Neither is in a committed file; both come from the scene in Python. On the Mac or
+the VM (venv active), for scene 01:
+
+```
+python -c "import json; from design_checker import conformance as c; s = c.scenes()['01_box_house']; print(json.dumps(c.facts(s))); print(json.dumps(c.expected_verdicts(s), indent=1))"
+```
+
+The first line is the `facts` to send; the rest is the verdict of every row the answer must have (`complies`,
+`needs_review`, ...). This command was run on the Mac when this page was written.
+
 Two things the add-in's author must know, both from the worker's own code (`design_checker/__main__.py`):
 
 - **Every request line must be UTF-8 without a byte-order mark.** A first line that starts with a BOM is refused
@@ -68,7 +79,7 @@ Two things the add-in's author must know, both from the worker's own code (`desi
 
 ## 3. Day by day
 
-Two weeks, ten working days. Each day ends with the results table (section 5) updated and a few lines of notes.
+Two weeks: ten working days of work (days 1 to 10), then spare days (11 to 12) and the write-up (13 to 14). Each day ends with the results table (section 5) updated and a few lines of notes.
 If a day's question is answered early, move on; if a go / no-go question is answered "no", stop and use section 6.
 
 | Day | Do | Done when |
@@ -76,8 +87,8 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 | 1 | Section 2 up to Revit installed. Open a sample Revit model the firm did not draw (a sample project, if one is installed) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked to the Revit rows; first Q1 numbers written down |
 | 2 | Python, clone, install, `pytest`, conformance, worker smoke test. Open each real model in Revit, timing the open. Decide Q1: go, or switch (section 6) | The three models open; Q1 has a yes or no, with numbers |
 | 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Confirm which .NET runtime Revit 2027 and 2026 load, and whether one build loads in both | The button appears in both Revit versions, or the note says which version refused the build |
-| 4 | The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `expected/01_box_house.site.json` as the `site` and the scene's facts | Q2 answered. The `check_site` answer matches the Mac's (compare the rows with `python -m design_checker.conformance`'s scene-01 verdicts) |
-| 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Decide how a Revit element maps to a building and what each of the Rhino layers (Building, Site, Gordium::Context, Default) becomes in Revit (write the mapping into the notes: nothing in the repo fixes it yet). Decide the pick flow for the lot outline (default; `PropertyLine.GetBoundary` is 2027 only) | Scene 01 recorded and passes (section 4) |
+| 4 | The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `test_data/host_conformance/expected/01_box_house.site.json` as the `site` and the scene's facts (see "The scene's facts and verdicts" below) | Q2 answered. The `check_site` answer's rows are exactly the scene's expected verdicts |
+| 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Decide how a Revit element maps to a building and what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit (write the mapping into the notes: nothing in the repo fixes it yet). Decide the pick flow for the lot outline (default; `PropertyLine.GetBoundary` is 2027 only) | Scene 01 recorded and passes (section 4) |
 | 6 | Reading, part 2: scenes 02 to 06 (curved wall, open solid, block, garage left out, no grade) | Each recorded and passing |
 | 7 | Scenes 07 to 12 (spot grades and the move, millimetres, two lot outlines, survey coordinates, corner lot, ids after an edit) | Each recorded and passing, or the failure explained in the notes |
 | 8 | Scenes 15 to 17 (left-out objects, terrain mesh, curved lot line). Then point the add-in at real model 1: read it, send it, look at the verdicts. Time every stage (section 5) | Real model 1 row filled in |
@@ -117,13 +128,16 @@ details that matter here:
   YAML's `then.move` gives how far; do not redraw them), then record "after the edit". A UniqueId that changes at
   the edit fails the scene.
 - **Scenes that need a Revit-specific decision** (write the decision into the notes, and into the PR):
-  - *04 and 15 (a block):* "a block" is whatever Revit cannot send as a solid (for example a family instance the
-    add-in cannot read). Either send it as `unsent`, or as a building with no faces and `not_a_solid`.
+  - *04 (a block on the Building layer):* "a block" is whatever Revit cannot send as a solid (for example a family
+    instance the add-in cannot read). Either send it as `unsent`, or as a building with no faces and `not_a_solid`.
+  - *15 (a block off the Building layer):* the shed block is on the Default layer, so it is not a building and is
+    not `unsent`: list it under `left_out` (`could_be_building` true, `touching` false), as for the porch and the
+    neighbourhood-layer solid in the same scene.
   - *08 (millimetres):* set the project's display units to millimetres. Revit stores lengths in feet whatever it
     shows, so the add-in should send the same description as scene 01; this scene checks that it does.
   - *09 (two lot outlines):* two closed outlines and no lot picked. The add-in sends no lot and the problem
     `several_lot_outlines`.
-  - *10 (survey coordinates):* the scene expects points near 875,000 ft east and 885,000 ft north. Revit has an
+  - *10 (survey coordinates):* the scene expects points near 875,000 ft east and 885,000 ft north, and 820 ft up (the scene's offset moves everything, the ground included). Revit has an
     internal origin and survey (shared) coordinates, and warns about elements far from the origin. Decide which
     the description carries (the scene expects the survey ones), and how to make the scene (acquire survey
     coordinates, or draw near the origin with a shared-coordinates offset). Record the decision. This is exactly
