@@ -26,6 +26,15 @@ public sealed class FakeWorkerTests
         Assert.Null(result.ReportError);
     }
 
+    [Theory]
+    [InlineData("complies_beside_not_covered", Verdict.Complies)]
+    [InlineData("review_with_every_row_complying", Verdict.NeedsReview)]
+    public async Task An_overall_state_the_rows_back_is_read(string mode, Verdict state)
+    {
+        using var client = await Start(mode);
+        Assert.Equal(state, (await client.CheckSiteAsync(Site, Facts)).State);
+    }
+
     // ---- hello: the versions ----
 
     [Fact]
@@ -89,6 +98,11 @@ public sealed class FakeWorkerTests
     [InlineData("missing_group")]
     [InlineData("missing_summary")]
     [InlineData("state_unknown")]
+    [InlineData("complies_beside_a_fail")]
+    [InlineData("complies_beside_a_review")]
+    [InlineData("complies_with_a_use_detail")]
+    [InlineData("complies_with_nothing_complying")]
+    [InlineData("complies_use_detail_not_bool")]
     [InlineData("report_error_not_text")]
     [InlineData("about_other_schema")]
     [InlineData("about_empty_fingerprint")]

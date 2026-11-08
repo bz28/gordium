@@ -82,7 +82,8 @@ public static class Verdicts
 /// <summary>One row of a check as the panel shows it (<c>result.view.items[]</c>).</summary>
 /// <param name="Id">The row's id, such as <c>R-1b.front_yard</c> or <c>R-1b.side_yards#east</c>.</param>
 /// <param name="Name">The row's name as the panel shows it.</param>
-/// <param name="Group">The panel group it is shown in.</param>
+/// <param name="Group">What the row is about: <c>building</c>, <c>site</c>, <c>not_checked</c> or <c>not_covered</c>
+/// (the item's own <c>group</c>; the panel's headings are worked out from the statuses, not from this).</param>
 /// <param name="Status">Its verdict.</param>
 /// <param name="Reason">Why it needs review or isn't checked, when the checker says (else null).</param>
 /// <param name="Raw">The whole item as the worker sent it (its detail, its quotes, the objects to show red).</param>
@@ -124,6 +125,33 @@ public sealed class CheckResult
     /// there is not in the dictionary; <c>GetValueOrDefault</c> gives <see cref="Verdict.NeedsReview"/> for it.</summary>
     public IReadOnlyDictionary<string, Verdict> ById() => Items.ToDictionary(i => i.Id, i => i.Status);
 
+    /// <summary>A check said to comply must be one the rows back (the worker's own rule, present.state): no row it
+    /// counts (any but the rules not in Gordium yet, <c>not_covered</c>) does not comply or needs review, no use detail
+    /// waits for an answer (<c>use_detail</c>), and at least one counted row complies. Anything else is refused,
+    /// never shown as a pass.</summary>
+    private static void CheckComplies(JsonElement items)
+    {
+        var complies = false;
+        var n = 0;
+        foreach (var e in items.EnumerateArray())
+        {
+            var where = $"result.view.items[{n++}]";
+            var detail = e.TryGetProperty("use_detail", out var d) ? d : default;
+            if (detail.ValueKind is not (JsonValueKind.Undefined or JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null))
+                throw new WorkerProtocolException($"{where}.use_detail is {StrictJson.Kind(detail)}, not true or false");
+            if (detail.ValueKind == JsonValueKind.True)
+                throw new WorkerProtocolException($"the check says it complies, but {where} is a use detail still to answer");
+            if (StrictJson.String(e, "group", where) == "not_covered")
+                continue;
+            var status = Verdicts.Parse(StrictJson.String(e, "status", where), $"{where}.status");
+            if (status is Verdict.DoesNotComply or Verdict.NeedsReview)
+                throw new WorkerProtocolException($"the check says it complies, but {where} is {Verdicts.Word(status)}");
+            complies |= status == Verdict.Complies;
+        }
+        if (!complies)
+            throw new WorkerProtocolException("the check says it complies, but none of its rows complies");
+    }
+
     internal static CheckResult Parse(WorkerAnswer answer)
     {
         var result = answer.Result;
@@ -152,6 +180,8 @@ public sealed class CheckResult
         if (items.Count == 0)
             throw new WorkerProtocolException("result.view.items is empty: a check with no rows can't be shown as a result");
         var state = Verdicts.Parse(StrictJson.String(view, "state", "result.view"), "result.view.state");
+        if (state == Verdict.Complies)
+            CheckComplies(list);
         return new CheckResult(items, StrictJson.String(view, "summary", "result.view"), state,
                                StrictJson.StringOrNull(result, "report_error", "result"), result, answer.About);
     }

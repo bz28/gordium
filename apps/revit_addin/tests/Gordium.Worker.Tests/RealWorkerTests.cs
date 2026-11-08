@@ -75,6 +75,23 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
     }
 
     [Fact]
+    public async Task A_real_check_that_complies_is_read_as_complying()
+    {
+        // the box house with every question the common rows ask answered: the worker's state is "complies", and the
+        // client's own check (the rows must back it) accepts it
+        var c = SceneCase.All.Single(x => x.Scene == "01_box_house");
+        var facts = c.Facts.DeepClone().AsObject();
+        foreach (var (k, v) in Json.Obj("""
+            {"stream_near_lot": false, "accessory_dwelling_unit": false, "garage_cars": 0, "home_occupation": false,
+             "unrelated_persons": 0, "owner_occupied": true, "rooms_let_for_profit": 0}
+            """).ToList())
+            facts[k] = v!.DeepClone();
+        var result = await Client.CheckSiteAsync(c.Site, facts);
+        Assert.Equal(Verdict.Complies, result.State);
+        Assert.Equal("complies", result.Raw.GetProperty("view").GetProperty("state").GetString());
+    }
+
+    [Fact]
     public async Task An_unknown_command_is_refused_and_the_worker_keeps_serving()
     {
         var e = await Assert.ThrowsAsync<WorkerRefusedException>(() => Client.SendAsync("no_such_command"));

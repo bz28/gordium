@@ -33,6 +33,10 @@ def check(**change):
 # the answer to the request after hello, by mode: a function of the request's id giving the line written
 SECOND = {
     "ok": lambda i: ok(i, CHECK),
+    # a check that complies beside rules not in Gordium yet (not_covered) that need review: the worker's own rule
+    "complies_beside_not_covered": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="gap.x", group="not_covered", status="not_checked"), dict(ITEM, id="gap.y", group="not_covered", status="needs_review")]}}),
+    # a check that needs review is never refused for what its rows say (the cautious direction)
+    "review_with_every_row_complying": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "state": "needs_review"}}),
     "unknown_status": lambda i: ok(i, check(status="passes")),
     "missing_status": lambda i: ok(i, check(status="-")),
     "null_status": lambda i: ok(i, check(status=None)),
@@ -43,6 +47,11 @@ SECOND = {
     "missing_name": lambda i: ok(i, check(name="-")),
     "missing_group": lambda i: ok(i, check(group="-")),
     "missing_summary": lambda i: ok(i, {**CHECK, "view": {k: v for k, v in CHECK["view"].items() if k != "summary"}}),
+    "complies_beside_a_fail": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="R-1b.stories", status="does_not_comply")]}}),
+    "complies_beside_a_review": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="R-1b.stories", status="needs_review")]}}),
+    "complies_with_a_use_detail": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="R-1b.home_occupation", group="building", status="complies", use_detail=True)]}}),
+    "complies_with_nothing_complying": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [dict(ITEM, group="not_checked", status="not_checked"), dict(ITEM, id="gap.x", group="not_covered", status="complies")]}}),
+    "complies_use_detail_not_bool": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [dict(ITEM, use_detail="yes")]}}),
     "state_unknown": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "state": "passes"}}),
     "report_error_not_text": lambda i: ok(i, {**CHECK, "report_error": 5}),
     "about_other_schema": lambda i: ok(i, CHECK, {**ABOUT, "site_schema": "gordium.site/2"}),
