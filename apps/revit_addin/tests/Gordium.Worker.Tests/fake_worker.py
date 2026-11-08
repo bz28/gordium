@@ -111,6 +111,11 @@ def main(argv):
             out.flush()
             if mode == "no_read":                      # stops reading its input: a large request fills the pipe
                 time.sleep(3600)
+            if mode == "slow":                         # slow to read the next request, then slow to answer it
+                time.sleep(1.5)
+        elif mode == "slow":
+            time.sleep(1.5)
+            out.write((ok(i, CHECK) + "\n").encode("utf-8"))
         elif mode == "record":
             out.write((ok(i, CHECK) + "\n").encode("utf-8"))
         elif mode == "die":

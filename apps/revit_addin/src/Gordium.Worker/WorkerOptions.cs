@@ -18,7 +18,8 @@ public sealed class WorkerOptions
     /// <summary>The longest to wait for the first <c>hello</c> (it includes starting Python and loading the code).</summary>
     public TimeSpan StartTimeout { get; init; } = TimeSpan.FromSeconds(60);
 
-    /// <summary>The longest to wait for one answer (the Rhino plugin's own limit: worker_client.ASK_LIMIT_S).</summary>
+    /// <summary>The longest one request may take, sending it and its answer together (the Rhino plugin's own limit:
+    /// worker_client.ASK_LIMIT_S).</summary>
     public TimeSpan RequestTimeout { get; init; } = TimeSpan.FromSeconds(60);
 
     /// <summary>The longest to wait for <c>start_site</c>, which can take longer on a deep lot (ASK_LIMITS_S["start"]).</summary>

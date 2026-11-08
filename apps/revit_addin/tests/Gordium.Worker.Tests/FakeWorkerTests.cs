@@ -209,6 +209,8 @@ public sealed class FakeWorkerTests
             }
             var bytes = File.ReadAllBytes(record);
             Assert.False(bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF, "a byte-order mark was sent");
+            // only ASCII: non-English text goes as JSON \u escapes, which no code page or encoding mix-up can change
+            Assert.All(bytes, b => Assert.True(b < 0x80, $"a byte {b:X2} that isn't ASCII was sent"));
             var text = new UTF8Encoding(false, true).GetString(bytes);
             Assert.DoesNotContain('\r', text);
             var lines = text.Split('\n');
@@ -296,6 +298,16 @@ public sealed class FakeWorkerTests
         var first = await Task.WhenAny(check, Task.Delay(TimeSpan.FromSeconds(30)));
         Assert.Same(check, first);                                                   // it ended: no hang
         await Assert.ThrowsAsync<WorkerTimeoutException>(() => check);
+        Assert.True(client.IsStopped);
+    }
+
+    [Fact]
+    public async Task One_time_limit_covers_sending_a_request_and_its_answer()
+    {
+        // the stand-in takes 1.5 s to start reading the request, then 1.5 s to answer: 3 s in all, over the 2 s limit
+        using var client = await Start("slow", TimeSpan.FromSeconds(2));
+        var big = new JsonObject { ["schema"] = new string('x', 20_000_000) };     // more than a pipe holds
+        await Assert.ThrowsAsync<WorkerTimeoutException>(() => client.CheckSiteAsync(big, Facts));
         Assert.True(client.IsStopped);
     }
 

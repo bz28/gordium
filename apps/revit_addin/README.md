@@ -33,7 +33,8 @@ foreach (var row in result.Items)
 1. **Starts the worker and says `hello`.** A worker that doesn't speak protocol 1.x, or reads a site description
    other than `gordium.site/1`, is refused (each side refuses a different major version). Every later answer's
    `about` is checked the same way.
-2. **Sends one request per line,** UTF-8 without a byte-order mark (the worker refuses one), each with the next id,
+2. **Sends one request per line,** UTF-8 without a byte-order mark (the worker refuses one) and in fact plain
+   ASCII (any other character is written as a JSON `\u` escape, so no code page can change it), each with the next id,
    `"protocol": "1.0"`, and only the fields the caller gave (an optional field left null is not sent).
 3. **Typed commands:** `HelloAsync`, `CheckSiteAsync`, `StartSiteAsync`, `ReadModelAsync`, and `SessionAsync` for
    the 19 session commands (the start box, the panel, the live check's decisions), each answer read by name with
@@ -48,8 +49,8 @@ foreach (var row in result.Items)
    given is an `AnswerMissingException`. Never a default in place of a missing value, and a `Verdict` never set
    (C#'s default, or `GetValueOrDefault` for a row that isn't there) is `NeedsReview`, never `Complies`.
 5. **Stops the worker when it can't trust the next line:** a timeout (60 s; 120 s for `start_site`, the Rhino
-   plugin's own limits; the same limit again for a request the worker doesn't take in), a cancel, an answer it
-   can't read, or the worker ending. A late answer would otherwise be
+   plugin's own limits, for sending the request and its answer together), a cancel, an answer it can't read, or
+   the worker ending. A late answer would otherwise be
    read as the next request's. After that every call throws `WorkerStoppedException`; start a new client (the
    worker keeps nothing between requests, so nothing is lost).
 6. **A refusal is not a failure of the worker.** `"ok": false` gives a `WorkerRefusedException` with the worker's
@@ -75,7 +76,8 @@ the message and no verdicts.
   a key twice, NaN, no rows, a row twice, no `about` or a wrong one on a later answer, another request's id, text
   that isn't JSON or UTF-8, a crash, a hang, a worker that stops reading, a cancel. Each is an error and stops the
   worker.
-- **What is sent:** no byte-order mark, one line per request, ids 1, 2, 3..., non-English text intact.
+- **What is sent:** no byte-order mark, only ASCII bytes, one line per request, ids 1, 2, 3..., non-English text
+  intact.
 - **The protocol copy:** the session commands and their answer names equal the protocol document's command
   reference (a Python test keeps that equal to the worker's own table).
 

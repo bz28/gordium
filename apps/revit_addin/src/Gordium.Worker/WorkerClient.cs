@@ -267,8 +267,11 @@ public sealed class WorkerClient : IDisposable
             {
                 throw new ArgumentException($"{command}: a value JSON can't carry: {e.Message}", nameof(fields), e);
             }
-            await WriteAsync(line, command, timeout, cancel).ConfigureAwait(false);
-            var text = await ReadAsync(command, timeout, cancel).ConfigureAwait(false);
+            // one time limit for the whole request: sending it, then its answer
+            var clock = Stopwatch.StartNew();
+            await WriteAsync(line, command, timeout, timeout, cancel).ConfigureAwait(false);
+            var left = timeout - clock.Elapsed;
+            var text = await ReadAsync(command, left > TimeSpan.Zero ? left : TimeSpan.Zero, timeout, cancel).ConfigureAwait(false);
             return Answer(command, id, text);
         }
         finally
@@ -277,7 +280,7 @@ public sealed class WorkerClient : IDisposable
         }
     }
 
-    private async Task WriteAsync(string line, string command, TimeSpan timeout, CancellationToken cancel)
+    private async Task WriteAsync(string line, string command, TimeSpan timeout, TimeSpan limit, CancellationToken cancel)
     {
         var bytes = Utf8.GetBytes(line + "\n");          // UTF-8, no byte-order mark: the worker refuses one
         try
@@ -287,9 +290,9 @@ public sealed class WorkerClient : IDisposable
         }
         catch (TimeoutException)
         {
-            Stop($"{command} couldn't be sent in {timeout.TotalSeconds:0} s");
+            Stop($"{command} couldn't be sent in {limit.TotalSeconds:0} s");
             throw new WorkerTimeoutException(
-                $"The Gordium checker didn't take {command} in {timeout.TotalSeconds:0} s, so it was stopped and nothing from it is shown");
+                $"The Gordium checker didn't take {command} in {limit.TotalSeconds:0} s, so it was stopped and nothing from it is shown");
         }
         catch (OperationCanceledException) when (cancel.IsCancellationRequested)
         {
@@ -308,7 +311,7 @@ public sealed class WorkerClient : IDisposable
         await stdin.FlushAsync().ConfigureAwait(false);
     }
 
-    private async Task<string> ReadAsync(string command, TimeSpan timeout, CancellationToken cancel)
+    private async Task<string> ReadAsync(string command, TimeSpan timeout, TimeSpan limit, CancellationToken cancel)
     {
         using var wait = CancellationTokenSource.CreateLinkedTokenSource(cancel);
         wait.CancelAfter(timeout);
@@ -329,9 +332,9 @@ public sealed class WorkerClient : IDisposable
         }
         catch (OperationCanceledException)
         {
-            Stop($"no answer to {command} in {timeout.TotalSeconds:0} s");
+            Stop($"no answer to {command} in {limit.TotalSeconds:0} s");
             throw new WorkerTimeoutException(
-                $"The Gordium checker gave no answer to {command} in {timeout.TotalSeconds:0} s, so it was stopped and nothing from it is shown");
+                $"The Gordium checker gave no answer to {command} in {limit.TotalSeconds:0} s, so it was stopped and nothing from it is shown");
         }
     }
 
