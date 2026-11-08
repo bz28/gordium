@@ -59,7 +59,9 @@ SECOND = {
     "about_rulebook_not_text": lambda i: ok(i, CHECK, {**ABOUT, "rulebook": {"new_york/ithaca_city": 5}}),
     "about_rulebook_empty": lambda i: ok(i, CHECK, {**ABOUT, "rulebook": {"new_york/ithaca_city": ""}}),
     "refused_error_not_text": lambda i: json.dumps({"id": i, "ok": False, "error": 5}),
-    "duplicate_key": lambda i: ok(i, CHECK)[:-1] + ', "ok": false}',
+    # "ok" twice, the last copy true: read alone (the last copy kept) it would be a good answer, so only the
+    # refusal of a key given twice catches it
+    "duplicate_key": lambda i: '{"ok": false, "error": "refused", ' + ok(i, CHECK)[1:],
     "duplicate_status": lambda i: ok(i, CHECK).replace('"status": "complies"', '"status": "needs_review", "status": "complies"'),
     "nan": lambda i: ok(i, check(limit_ft=float("nan"))),
     "empty_items": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": []}}),
