@@ -38,6 +38,18 @@ SECOND = {
     "null_status": lambda i: ok(i, check(status=None)),
     "missing_id": lambda i: ok(i, check(id="-")),
     "missing_reason": lambda i: ok(i, check(reason="-")),
+    "reason_not_text": lambda i: ok(i, check(reason=3)),
+    "empty_row_id": lambda i: ok(i, check(id="")),
+    "missing_name": lambda i: ok(i, check(name="-")),
+    "missing_group": lambda i: ok(i, check(group="-")),
+    "missing_summary": lambda i: ok(i, {**CHECK, "view": {k: v for k, v in CHECK["view"].items() if k != "summary"}}),
+    "state_unknown": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "state": "passes"}}),
+    "report_error_not_text": lambda i: ok(i, {**CHECK, "report_error": 5}),
+    "about_other_schema": lambda i: ok(i, CHECK, {**ABOUT, "site_schema": "gordium.site/2"}),
+    "about_empty_fingerprint": lambda i: ok(i, CHECK, {**ABOUT, "worker_fingerprint": ""}),
+    "about_rulebook_not_text": lambda i: ok(i, CHECK, {**ABOUT, "rulebook": {"new_york/ithaca_city": 5}}),
+    "about_rulebook_empty": lambda i: ok(i, CHECK, {**ABOUT, "rulebook": {"new_york/ithaca_city": ""}}),
+    "refused_error_not_text": lambda i: json.dumps({"id": i, "ok": False, "error": 5}),
     "duplicate_key": lambda i: ok(i, CHECK)[:-1] + ', "ok": false}',
     "duplicate_status": lambda i: ok(i, CHECK).replace('"status": "complies"', '"status": "needs_review", "status": "complies"'),
     "nan": lambda i: ok(i, check(limit_ft=float("nan"))),
@@ -96,6 +108,9 @@ def main(argv):
             if mode == "hello_hang":
                 time.sleep(3600)
             out.write((ok(i, about, about) + "\n").encode("utf-8"))
+            out.flush()
+            if mode == "no_read":                      # stops reading its input: a large request fills the pipe
+                time.sleep(3600)
         elif mode == "record":
             out.write((ok(i, CHECK) + "\n").encode("utf-8"))
         elif mode == "die":

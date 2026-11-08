@@ -55,7 +55,12 @@ public sealed class ProtocolDocTests
     [Fact]
     public void The_model_commands_are_the_documents()
     {
-        foreach (var command in Protocol.ModelCommands)
-            Assert.Contains($"`{command}`", Doc);
+        // the doc's own list: "- `hello`: ..." and "- `read_model`, `check_site`, `start_site`: ..."
+        var section = Regex.Match(Doc, @"^## `hello` and the model commands\n(.*?)^## ", RegexOptions.Multiline | RegexOptions.Singleline);
+        Assert.True(section.Success, "the doc's model commands section is missing");
+        var listed = Regex.Matches(section.Groups[1].Value, @"^- (`[a-z_]+`(?:, `[a-z_]+`)*):", RegexOptions.Multiline)
+            .SelectMany(m => Regex.Matches(m.Groups[1].Value, "`([a-z_]+)`").Select(x => x.Groups[1].Value)).ToList();
+        Assert.Equal(["hello", "read_model", "check_site", "start_site"], listed);
+        Assert.Equal(listed, Protocol.ModelCommands);
     }
 }

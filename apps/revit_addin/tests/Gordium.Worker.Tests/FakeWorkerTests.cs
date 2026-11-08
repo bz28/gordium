@@ -83,6 +83,18 @@ public sealed class FakeWorkerTests
     [InlineData("null_status")]
     [InlineData("missing_id")]
     [InlineData("missing_reason")]
+    [InlineData("reason_not_text")]
+    [InlineData("empty_row_id")]
+    [InlineData("missing_name")]
+    [InlineData("missing_group")]
+    [InlineData("missing_summary")]
+    [InlineData("state_unknown")]
+    [InlineData("report_error_not_text")]
+    [InlineData("about_other_schema")]
+    [InlineData("about_empty_fingerprint")]
+    [InlineData("about_rulebook_not_text")]
+    [InlineData("about_rulebook_empty")]
+    [InlineData("refused_error_not_text")]
     [InlineData("duplicate_key")]
     [InlineData("duplicate_status")]
     [InlineData("nan")]
@@ -106,7 +118,7 @@ public sealed class FakeWorkerTests
     public async Task An_answer_that_cant_be_trusted_is_an_error_and_stops_the_worker(string mode)
     {
         using var client = await Start(mode);
-        await Assert.ThrowsAsync<WorkerProtocolException>(() => client.CheckSiteAsync(Site, Facts));
+        await Assert.ThrowsAnyAsync<WorkerProtocolException>(() => client.CheckSiteAsync(Site, Facts));
         Assert.True(client.IsStopped);
         // and never an answer afterwards: a later line could be this request's, read as the next one's
         await Assert.ThrowsAsync<WorkerStoppedException>(() => client.CheckSiteAsync(Site, Facts));
@@ -233,7 +245,7 @@ public sealed class FakeWorkerTests
     public async Task A_requests_own_field_is_never_sent_as_a_commands(string field)
     {
         using var client = await Start("ok");
-        await Assert.ThrowsAsync<ArgumentException>(() => client.SendAsync("check_site", new JsonObject { [field] = 1 }));
+        await Assert.ThrowsAsync<ArgumentException>(() => client.SendAsync("future.command", new JsonObject { [field] = 1 }));
         await Assert.ThrowsAsync<ArgumentException>(() => client.SessionAsync("session.undo", new JsonObject { [field] = 1 }));
         Assert.False(client.IsStopped);
     }
@@ -248,6 +260,59 @@ public sealed class FakeWorkerTests
     {
         using var client = await Start("ok");
         await Assert.ThrowsAsync<ArgumentException>(() => client.SendAsync(command));
+    }
+
+    public static TheoryData<string> TypedCommands()
+    {
+        var data = new TheoryData<string>();
+        foreach (var c in Protocol.ModelCommands.Concat(Protocol.SessionCommands.Keys))
+            data.Add(c);
+        return data;
+    }
+
+    [Theory]
+    [MemberData(nameof(TypedCommands))]
+    public async Task A_command_with_a_typed_method_is_never_sent_unread(string command)
+    {
+        using var client = await Start("ok");
+        await Assert.ThrowsAsync<ArgumentException>(() => client.SendAsync(command));
+        Assert.False(client.IsStopped);
+    }
+
+    [Fact]
+    public async Task A_command_a_later_worker_adds_is_sent_with_its_envelope_checked()
+    {
+        using var client = await Start("ok");
+        var answer = await client.SendAsync("future.command", new JsonObject { ["x"] = 1 });
+        Assert.Equal("gordium.site/1", answer.About.SiteSchema);
+    }
+
+    [Fact]
+    public async Task A_worker_that_stops_reading_times_out_and_is_stopped_never_a_hang()
+    {
+        using var client = await Start("no_read", TimeSpan.FromSeconds(2));
+        var big = new JsonObject { ["schema"] = new string('x', 20_000_000) };     // far more than a pipe holds
+        var check = client.CheckSiteAsync(big, Facts);
+        var first = await Task.WhenAny(check, Task.Delay(TimeSpan.FromSeconds(30)));
+        Assert.Same(check, first);                                                   // it ended: no hang
+        await Assert.ThrowsAsync<WorkerTimeoutException>(() => check);
+        Assert.True(client.IsStopped);
+    }
+
+    [Fact]
+    public void A_verdict_never_set_is_never_a_pass()
+    {
+        Assert.Equal(Verdict.NeedsReview, default(Verdict));
+        var none = new Dictionary<string, Verdict>();
+        Assert.Equal(Verdict.NeedsReview, none.GetValueOrDefault("R-1b.height"));
+    }
+
+    [Fact]
+    public async Task A_row_the_worker_didnt_send_is_never_read_as_a_pass()
+    {
+        using var client = await Start("ok");
+        var rows = (await client.CheckSiteAsync(Site, Facts)).ById();
+        Assert.NotEqual(Verdict.Complies, rows.GetValueOrDefault("R-1b.front_yard"));
     }
 
     [Fact]

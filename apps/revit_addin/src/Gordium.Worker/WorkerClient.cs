@@ -13,9 +13,14 @@ namespace Gordium.Worker;
 /// <remarks>
 /// <para>Requests go one at a time, each with the next id. Any answer that can't be trusted to be this request's
 /// (not JSON, another id, a field missing) stops the worker, as does a timeout, a cancel or a crash: its later lines
-/// might belong to an earlier request, and an earlier check shown as this one's would be a false pass. Start a new
-/// client after a <see cref="WorkerException"/> other than <see cref="WorkerRefusedException"/> and
-/// <see cref="PartRefusedException"/>; the worker keeps nothing between requests, so nothing is lost.</para>
+/// might belong to an earlier request, and an earlier check shown as this one's would be a false pass. After that
+/// every call throws <see cref="WorkerStoppedException"/> (<see cref="IsStopped"/> says so): start a new client; the
+/// worker keeps nothing between requests, so nothing is lost. <see cref="WorkerRefusedException"/>,
+/// <see cref="PartRefusedException"/> and <see cref="AnswerMissingException"/> leave the worker serving.</para>
+/// <para>What it throws: a <see cref="WorkerException"/> for anything the worker did or didn't answer;
+/// <see cref="OperationCanceledException"/> when the caller cancels (the worker is then stopped);
+/// <see cref="ArgumentException"/> for a request it won't send (a request's own field, a value JSON can't carry,
+/// a command it doesn't know), before anything is sent.</para>
 /// <para>Requests are written as UTF-8 without a byte-order mark (the worker refuses one).</para>
 /// </remarks>
 public sealed class WorkerClient : IDisposable
@@ -210,15 +215,20 @@ public sealed class WorkerClient : IDisposable
         return Guard(() => SessionAnswer.Parse(command, answer, want));
     }
 
-    /// <summary>Any protocol-1 command, by name, with its fields (<c>id</c>, <c>cmd</c> and <c>protocol</c> are
-    /// added). The older commands (check, start, facts, options, sample_site) are not sent: their answers carry no
-    /// <c>about</c>.</summary>
+    /// <summary>A protocol-1 command this client has no typed method for (one a later 1.x worker adds), by name, with
+    /// its fields (<c>id</c>, <c>cmd</c> and <c>protocol</c> are added). Its result comes back unread: only the
+    /// answer's envelope is checked (this request's id, <c>ok</c>, <c>about</c>). A command with a typed method is
+    /// refused here, so its answer is always read strictly (a check's rows, a session command's refused parts); so
+    /// are the older commands (check, start, facts, options, sample_site), whose answers carry no <c>about</c>.</summary>
     public Task<WorkerAnswer> SendAsync(string command, JsonObject? fields = null, TimeSpan? timeout = null,
                                         CancellationToken cancel = default)
     {
         ArgumentNullException.ThrowIfNull(command);
         if (Protocol.Legacy.Contains(command))
             throw new ArgumentException($"{command} is an older command, not part of protocol 1; use check_site or start_site", nameof(command));
+        if (Protocol.ModelCommands.Contains(command) || Protocol.SessionCommands.ContainsKey(command))
+            throw new ArgumentException($"{command} has its own method (HelloAsync, ReadModelAsync, CheckSiteAsync, " +
+                                        "StartSiteAsync or SessionAsync), which reads its answer strictly", nameof(command));
         return ExchangeAsync(command, fields ?? new JsonObject(), timeout ?? _options.RequestTimeout, cancel);
     }
 
@@ -257,7 +267,7 @@ public sealed class WorkerClient : IDisposable
             {
                 throw new ArgumentException($"{command}: a value JSON can't carry: {e.Message}", nameof(fields), e);
             }
-            await WriteAsync(line, command).ConfigureAwait(false);
+            await WriteAsync(line, command, timeout, cancel).ConfigureAwait(false);
             var text = await ReadAsync(command, timeout, cancel).ConfigureAwait(false);
             return Answer(command, id, text);
         }
@@ -267,19 +277,35 @@ public sealed class WorkerClient : IDisposable
         }
     }
 
-    private async Task WriteAsync(string line, string command)
+    private async Task WriteAsync(string line, string command, TimeSpan timeout, CancellationToken cancel)
     {
         var bytes = Utf8.GetBytes(line + "\n");          // UTF-8, no byte-order mark: the worker refuses one
         try
         {
-            var stdin = _process.StandardInput.BaseStream;
-            await stdin.WriteAsync(bytes).ConfigureAwait(false);
-            await stdin.FlushAsync().ConfigureAwait(false);
+            // a worker that stops reading its input would block the write when the pipe is full: never wait forever
+            await Write(_process.StandardInput.BaseStream, bytes).WaitAsync(timeout, cancel).ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            Stop($"{command} couldn't be sent in {timeout.TotalSeconds:0} s");
+            throw new WorkerTimeoutException(
+                $"The Gordium checker didn't take {command} in {timeout.TotalSeconds:0} s, so it was stopped and nothing from it is shown");
+        }
+        catch (OperationCanceledException) when (cancel.IsCancellationRequested)
+        {
+            Stop($"{command} was cancelled");
+            throw;
         }
         catch (Exception e) when (e is IOException or ObjectDisposedException or InvalidOperationException)
         {
             throw Exited($"The Gordium checker stopped before {command} could be sent");
         }
+    }
+
+    private static async Task Write(Stream stdin, byte[] bytes)
+    {
+        await stdin.WriteAsync(bytes).ConfigureAwait(false);
+        await stdin.FlushAsync().ConfigureAwait(false);
     }
 
     private async Task<string> ReadAsync(string command, TimeSpan timeout, CancellationToken cancel)

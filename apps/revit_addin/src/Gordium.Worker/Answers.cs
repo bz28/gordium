@@ -46,13 +46,15 @@ public sealed record WorkerAbout(
 public sealed record WorkerAnswer(JsonElement Result, WorkerAbout About);
 
 /// <summary>A row's status, exactly the checker's four (design_checker/present.py: COMPLIES, FAILS, REVIEW,
-/// NOT_CHECKED). Any other word in an answer is an error, never read as one of these.</summary>
+/// NOT_CHECKED). Any other word in an answer is an error, never read as one of these. The default value (0) is
+/// <see cref="NeedsReview"/>, never <see cref="Complies"/>: a verdict never set, or looked up for a row that isn't
+/// there with <c>GetValueOrDefault</c>, is never a pass.</summary>
 public enum Verdict
 {
-    Complies,
-    DoesNotComply,
-    NeedsReview,
-    NotChecked,
+    NeedsReview = 0,
+    DoesNotComply = 1,
+    Complies = 2,
+    NotChecked = 3,
 }
 
 public static class Verdicts
@@ -118,7 +120,8 @@ public sealed class CheckResult
         About = about;
     }
 
-    /// <summary>{row id: verdict}, every row (ids are unique: checked when the answer is read).</summary>
+    /// <summary>{row id: verdict}, every row (ids are unique: checked when the answer is read). A row id that isn't
+    /// there is not in the dictionary; <c>GetValueOrDefault</c> gives <see cref="Verdict.NeedsReview"/> for it.</summary>
     public IReadOnlyDictionary<string, Verdict> ById() => Items.ToDictionary(i => i.Id, i => i.Status);
 
     internal static CheckResult Parse(WorkerAnswer answer)
