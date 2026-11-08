@@ -594,6 +594,8 @@ def summary(rows: list[dict]) -> dict:
     fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
     review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
     passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
+    if not fails and not review and not passes:     # nothing checked is never a pass (principle 4)
+        return {"state": "review", "text": "Nothing checked", "lines": []}
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
