@@ -44,7 +44,9 @@ foreach (var row in result.Items)
    `start`...) are Rhino's and are not sent.
 4. **Reads every answer strictly.** The answer must be JSON, this request's id, `ok` true or false, with its
    `result` and `about`. A check's every row must have an id, a name, a group, a reason (text or null) and one of
-   the checker's four statuses; a row given twice, a key given twice, NaN, or a check with no rows is an error.
+   the checker's four statuses; a row given twice, a key given twice, NaN, or a check with no rows is an error. A
+   check whose overall state says it complies must have its rows back that (none failing or needing review apart
+   from the rules not in Gordium yet, no use detail waiting, at least one row complying), or it is refused.
    A session command's part that refused its input gives its words as a `PartRefusedException`; an answer not
    given is an `AnswerMissingException`. Never a default in place of a missing value, and a `Verdict` never set
    (C#'s default, or `GetValueOrDefault` for a row that isn't there) is `NeedsReview`, never `Complies`.
@@ -63,7 +65,7 @@ the message and no verdicts.
 
 ## How we know it works
 
-`dotnet test apps/revit_addin` runs against the real Python worker and a stand-in one:
+`dotnet test` (run in `apps/revit_addin`) runs against the real Python worker and a stand-in one:
 
 - **Every conformance scene** (`test_data/host_conformance/`: 17 scenes, 19 steps): `check_site` with the scene's
   expected description and facts gives exactly the hand-worked verdicts, every row and no row more. The facts and

@@ -69,7 +69,7 @@ jobs:
         run: python -m design_checker.goldens --check
 
   # The Revit add-in's worker client (apps/revit_addin: C#, no Revit needed) against the real Python worker,
-  # installed exactly as the Windows job installs it. Windows is where the add-in runs; Ubuntu is a cheap second.
+  # installed with the Windows job's install step (Python 3.12, the version the trial installs). Windows is where the add-in runs; Ubuntu is a cheap second.
   revit_worker_client:
     runs-on: ${{ matrix.os }}
     strategy:
