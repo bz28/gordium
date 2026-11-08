@@ -585,7 +585,8 @@ def summary(rows: list[dict]) -> dict:
     """One line for the viewport corner: all pass; it complies under every reading (rules waiting only on how the
     law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
-    missing fact, not a reading, so it is never shown as complying."""
+    missing fact, not a reading, so it is never shown as complying. No row at all is "Nothing checked", needs review:
+    a check that decided nothing never passes."""
     # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
     # whatever its named readings say (review round 20); a row without a verdict, by its outcome
     def verdict_of(r):

@@ -48,6 +48,8 @@ def test_no_counted_item_is_never_complies():
 
 
 def test_one_complying_item_beside_not_checked_ones_still_complies():
+    # today's design, unchanged here: the not-checked rows show in their own group and the summary counts them.
+    # Whether a rule waiting on an interior fact (bedrooms) should hold the whole design at needs review is open
     items = [{"group": "building", "status": present.COMPLIES},
              {"group": "not_checked", "status": present.NOT_CHECKED}]
     assert present.state(items) == present.COMPLIES
