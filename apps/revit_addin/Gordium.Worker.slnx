@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Gordium.Worker/Gordium.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Gordium.Worker.Tests/Gordium.Worker.Tests.csproj" />
+  </Folder>
+</Solution>

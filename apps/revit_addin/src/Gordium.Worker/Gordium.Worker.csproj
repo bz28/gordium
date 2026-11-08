@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Talks to Gordium's Python worker (docs/protocol/worker_protocol_v1.md). No Revit API and no packages:
+       System.Text.Json comes with .NET. -->
+  <PropertyGroup>
+    <RootNamespace>Gordium.Worker</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- the public types and members are documented; their constructors and enum values speak for themselves -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+</Project>
