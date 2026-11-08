@@ -1,0 +1,188 @@
+using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using Xunit;
+
+namespace Gordium.Worker.Tests;
+
+/// <summary>The client against the real Python worker (<c>python -m design_checker serve</c>).</summary>
+public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorker>
+{
+    private WorkerClient Client => worker.Client;
+
+    // the status words the checker sends, mapped here on their own (not through the client's mapping)
+    private static readonly Dictionary<string, Verdict> Word = new()
+    {
+        ["complies"] = Verdict.Complies,
+        ["does_not_comply"] = Verdict.DoesNotComply,
+        ["needs_review"] = Verdict.NeedsReview,
+        ["not_checked"] = Verdict.NotChecked,
+    };
+
+    [Fact]
+    public void Hello_says_protocol_1_and_the_site_schema_with_fingerprints()
+    {
+        var about = Client.About;
+        Assert.StartsWith("1.", about.Protocol);
+        Assert.Equal("gordium.site/1", about.SiteSchema);
+        Assert.Matches("^[0-9a-f]{64}$", about.WorkerFingerprint);
+        Assert.Matches("^[0-9a-f]{64}$", about.Rulebook["new_york/ithaca_city"]);
+    }
+
+    public static TheoryData<string, string> Scenes()
+    {
+        var data = new TheoryData<string, string>();
+        foreach (var c in SceneCase.All)
+            data.Add(c.Scene, c.Step);
+        return data;
+    }
+
+    [Fact]
+    public void Every_conformance_scene_step_is_tested()
+    {
+        // 17 scenes, 2 with a step after the edit: the count the conformance README and the runbook give
+        Assert.Equal(19, SceneCase.All.Count);
+        Assert.Equal(17, SceneCase.All.Select(c => c.Scene).Distinct().Count());
+    }
+
+    [Theory]
+    [MemberData(nameof(Scenes))]
+    public async Task Check_site_gives_exactly_the_hand_worked_verdicts(string scene, string step)
+    {
+        var c = SceneCase.All.Single(x => x.Scene == scene && x.Step == step);
+        var result = await Client.CheckSiteAsync(c.Site, c.Facts);
+        var got = result.Items.ToDictionary(i => i.Id, i => i);
+        // every expected row, with its status as the worker wrote it and as the client read it
+        foreach (var (id, want) in c.Verdicts)
+        {
+            Assert.True(got.ContainsKey(id), $"{c}: no row {id} (expected {want})");
+            Assert.Equal(want, got[id].Raw.GetProperty("status").GetString());
+            Assert.Equal(Word[want], got[id].Status);
+        }
+        // and no row more
+        Assert.Empty(got.Keys.Except(c.Verdicts.Keys));
+        Assert.NotEmpty(result.Summary);
+        Assert.Equal(Client.About.WorkerFingerprint, result.About.WorkerFingerprint);
+    }
+
+    [Fact]
+    public async Task A_needs_review_scene_is_never_read_as_a_pass()
+    {
+        var c = SceneCase.All.Single(x => x.Scene == "02_curved_wall");
+        var result = await Client.CheckSiteAsync(c.Site, c.Facts);
+        Assert.Equal(Verdict.NeedsReview, result.State);
+        Assert.Contains(result.Items, i => i.Status == Verdict.NeedsReview);
+    }
+
+    [Fact]
+    public async Task An_unknown_command_is_refused_and_the_worker_keeps_serving()
+    {
+        var e = await Assert.ThrowsAsync<WorkerRefusedException>(() => Client.SendAsync("no_such_command"));
+        Assert.Equal("unknown command 'no_such_command'", e.Error);
+        Assert.False(Client.IsStopped);
+        Assert.Equal(Client.About.Protocol, (await Client.HelloAsync()).Protocol);
+    }
+
+    [Fact]
+    public async Task Bad_facts_are_refused_with_the_workers_words()
+    {
+        var c = SceneCase.All.Single(x => x.Scene == "01_box_house");
+        var facts = c.Facts.DeepClone().AsObject();
+        facts["zone"] = "R-99";
+        var e = await Assert.ThrowsAsync<WorkerRefusedException>(() => Client.CheckSiteAsync(c.Site, facts));
+        Assert.Contains("R-99", e.Error);
+        Assert.False(Client.IsStopped);
+    }
+
+    [Fact]
+    public async Task Start_site_answers_for_the_box_house_lot()
+    {
+        var c = SceneCase.All.Single(x => x.Scene == "01_box_house");
+        var answer = await Client.StartSiteAsync(c.Site, c.Facts);
+        Assert.Equal(JsonValueKind.Object, answer.Result.ValueKind);
+        Assert.Equal("gordium.site/1", answer.About.SiteSchema);
+    }
+
+    [Fact]
+    public async Task A_session_constant_is_always_given()
+    {
+        var answer = await Client.SessionAsync("session.undo", new JsonObject());
+        Assert.Equal(JsonValueKind.Object, answer.Get("words").ValueKind);
+        Assert.Throws<AnswerMissingException>(() => answer.Get("recheck"));   // its fields weren't sent
+    }
+
+    [Fact]
+    public async Task A_refused_part_is_an_error_and_the_other_parts_still_answer()
+    {
+        var answer = await Client.SessionAsync("facts.validate", Json.Obj("""{"kind": "number", "text": "abc"}"""));
+        var e = Assert.Throws<PartRefusedException>(() => answer.Get("value"));
+        Assert.Equal("value", e.Answer);
+        Assert.NotEmpty(e.Words);
+        Assert.Equal(JsonValueKind.String, answer.Get("problem").ValueKind);
+    }
+
+    [Fact]
+    public async Task Want_asks_for_one_answer()
+    {
+        var answer = await Client.SessionAsync("session.freshness",
+            Json.Obj("""{"begun_at": 5.0, "dirty_at": 3.0}"""), ["still"]);
+        Assert.Equal(JsonValueKind.True, answer.Get("still").ValueKind);
+    }
+
+    [Fact]
+    public async Task A_field_the_command_doesnt_read_is_refused()
+    {
+        var e = await Assert.ThrowsAsync<WorkerRefusedException>(() => Client.SessionAsync("session.freshness",
+            Json.Obj("""{"begun_at": 5.0, "dirty_at": 3.0, "bogus": 1}""")));
+        Assert.Contains("doesn't read bogus", e.Error);
+    }
+}
+
+/// <summary>A real worker that dies: each test starts its own.</summary>
+public sealed class RealWorkerDiesTests
+{
+    [Fact]
+    public async Task A_worker_killed_mid_session_gives_a_clear_error_never_a_hang_or_an_answer()
+    {
+        var c = SceneCase.All.Single(x => x.Scene == "01_box_house");
+        using var client = await WorkerClient.StartAsync(Env.Real());
+        Assert.NotEmpty((await client.CheckSiteAsync(c.Site, c.Facts)).Items);
+        using (var p = Process.GetProcessById(client.ProcessId))
+        {
+            p.Kill(entireProcessTree: true);
+            p.WaitForExit(10_000);
+        }
+        var clock = Stopwatch.StartNew();
+        var e = await Assert.ThrowsAsync<WorkerExitedException>(() => client.CheckSiteAsync(c.Site, c.Facts));
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(15), $"took {clock.Elapsed}");
+        Assert.Contains("stopped", e.Message);
+        Assert.True(client.IsStopped);
+        await Assert.ThrowsAsync<WorkerStoppedException>(() => client.CheckSiteAsync(c.Site, c.Facts));
+    }
+
+    [Fact]
+    public async Task A_worker_killed_while_checking_gives_an_error_or_its_one_full_answer()
+    {
+        var c = SceneCase.All.Single(x => x.Scene == "01_box_house");
+        using var client = await WorkerClient.StartAsync(Env.Real());
+        var check = client.CheckSiteAsync(c.Site, c.Facts);
+        using (var p = Process.GetProcessById(client.ProcessId))
+            p.Kill(entireProcessTree: true);
+        try
+        {
+            // the check may have finished just before the kill: then it is the whole, real answer
+            var result = await check;
+            Assert.Equal(c.Verdicts.Count, result.Items.Count);
+        }
+        catch (WorkerExitedException) { }
+        await Assert.ThrowsAnyAsync<WorkerException>(() => client.CheckSiteAsync(c.Site, c.Facts));
+    }
+
+    [Fact]
+    public async Task A_python_that_isnt_there_is_a_clear_error()
+    {
+        var options = new WorkerOptions { PythonPath = Path.Combine(Env.Repo, "no_such_python"), WorkingDirectory = Env.Repo };
+        var e = await Assert.ThrowsAsync<WorkerExitedException>(() => WorkerClient.StartAsync(options));
+        Assert.Contains("couldn't be started", e.Message);
+    }
+}
