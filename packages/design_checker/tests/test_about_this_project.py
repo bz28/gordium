@@ -233,7 +233,7 @@ def test_only_use_details_left_is_still_not_a_pass():
     items = [{"id": "a", "status": present.COMPLIES, "group": "building"},
              {"id": "b", "status": present.REVIEW, "group": "building", "use_detail": True}]
     assert present.state(items) == present.REVIEW
-    assert present.summary(items) == "1 complies · 1 use detail to answer"
+    assert present.summary(items) == "needs review · 1 complies · 1 use detail to answer"   # the state, said first
     assert present.state(items[:1]) == present.COMPLIES
 
 
