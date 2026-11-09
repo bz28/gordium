@@ -88,7 +88,7 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 | 2 | Open each real model in Revit, timing the open. Use each for a while as an architect would. Decide Q1: go, or switch (section 6) | The three models open; Q1 has a yes or no, with numbers |
 | 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Confirm which .NET runtime Revit 2027 and 2026 load, and whether one build loads in both | The button appears in both Revit versions, or the note says which version refused the build |
 | 4 | Use the worker client, `Gordium.Worker` ([apps/revit_addin](../../apps/revit_addin/README.md): already tested against the real worker on the Mac), for all of this. The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `test_data/host_conformance/expected/01_box_house.site.json` as the `site` and the scene's facts (see "The scene's facts and verdicts" below) | Q2 answered. The `check_site` answer's rows are exactly the scene's expected verdicts |
-| 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Decide how a Revit element maps to a building and what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit (write the mapping into the notes: nothing in the repo fixes it yet). Decide the pick flow for the lot outline (default; `PropertyLine.GetBoundary` is 2027 only) | Scene 01 recorded and passes (section 4) |
+| 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Start from the [reading design note](revit_reading_design.md): how a Revit element maps to a building, what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit, and the lot pick flow (default; `PropertyLine.GetBoundary` is 2027 only). Write into the notes where the trial confirms or changes it, and settle its "to check" items as they come up | Scene 01 recorded and passes (section 4) |
 | 6 | Reading, part 2: scenes 02 to 06 (curved wall, open solid, block, garage left out, no grade) | Each recorded and passing |
 | 7 | Scenes 07 to 12 (spot grades and the move, millimetres, two lot outlines, survey coordinates, corner lot, ids after an edit) | Each recorded and passing, or the failure explained in the notes |
 | 8 | Scenes 15 to 17 (left-out objects, terrain mesh, curved lot line). Then point the add-in at real model 1: read it, send it, look at the verdicts. Time every stage (section 5) | Real model 1 row filled in |
@@ -127,7 +127,8 @@ details that matter here:
 - **One `ids` map serves every step.** For scenes 07 and 12, make the edit in Revit by moving the elements (the
   YAML's `then.move` gives how far; do not redraw them), then record "after the edit". A UniqueId that changes at
   the edit fails the scene.
-- **Scenes that need a Revit-specific decision** (write the decision into the notes, and into the PR):
+- **Scenes that need a Revit-specific decision** (write the decision into the notes, and into the PR; the
+  [reading design note](revit_reading_design.md) proposes one for each, with the scene that tests it):
   - *04 (a block on the Building layer):* "a block" is whatever Revit cannot send as a solid (for example a family
     instance the add-in cannot read). Either send it as `unsent`, or as a building with no faces and `not_a_solid`.
   - *15 (a block off the Building layer):* the shed block is on the Default layer, so it is not a building and is
@@ -254,7 +255,8 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 
 - Whether the one .NET 10 build loads in both Revit 2026 and 2027.
 - Whether ARM builds of `rhino3dm`, `shapely` and `numpy` exist, if we ever want a native ARM Python.
-- Which survey coordinates the description carries (scene 10), and what each Rhino layer becomes in Revit.
+- Which survey coordinates the description carries (scene 10), and what each Rhino layer becomes in Revit: the
+  [reading design note](revit_reading_design.md) proposes both, and lists the rest of its "to check" items.
 
 **Where the facts above come from.** Checked on 2026-11-05 on Autodesk's pages and the projects' own documents:
 Autodesk lists Parallels Desktop on Apple silicon as supported for Revit 2027 and recommends 32 GB of RAM; Revit has
