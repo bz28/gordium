@@ -602,16 +602,16 @@ def summary(rows: list[dict], items: list[dict] | None = None) -> dict:
     caution = {"fail": 3, "review": 2, "complies": 1, "pass": 0}
     floor = {present.FAILS: "fail", present.REVIEW: "review"}.get(view, s["state"])
     state = max(s["state"], floor, key=caution.__getitem__)
-    said = {r.get("Rule id") for r in rows if r.get("Fails") or r.get("Error") != "PASS" or
-            r.get("Verdict") not in (None, present.COMPLIES)}
+    fails, review, _ = _sorted_rows(rows)
+    said = {r.get("Rule id") for r in fails + review}          # the rows its own lines already say
     extra = [i for i in present._building_items(items) if i["status"] != present.COMPLIES
              and not (i.get("rule") and i["rule"] in said)]
     return {"state": state, "text": present.summary(items), "lines": s["lines"] + [
         f"{short(i['name'])}: {i['reason']}" if i.get("reason") else short(i["name"]) for i in extra]}
 
 
-def _rows_summary(rows: list[dict]) -> dict:
-    """summary() from the rule rows alone."""
+def _sorted_rows(rows: list[dict]) -> tuple[list, list, list]:
+    """The rule rows as (fails, review, passes)."""
     # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
     # whatever its named readings say (review round 20); a row without a verdict, by its outcome
     def verdict_of(r):
@@ -620,6 +620,12 @@ def _rows_summary(rows: list[dict]) -> dict:
     fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
     review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
     passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
+    return fails, review, passes
+
+
+def _rows_summary(rows: list[dict]) -> dict:
+    """summary() from the rule rows alone: a line for each of its fails and review rows."""
+    fails, review, passes = _sorted_rows(rows)
     if not fails and not review and not passes:     # nothing checked is never a pass (principle 4)
         return {"state": "review", "text": "Nothing checked", "lines": []}
     if not fails and not review:

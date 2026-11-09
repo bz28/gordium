@@ -141,3 +141,13 @@ def test_a_real_doubtful_lot_never_passes_in_the_results_summary():
     assert r["view"]["state"] == present.REVIEW and r["summary"]["state"] == "review"
     without = [i for i in rows if not i["id"].startswith(present.RELEASE)]   # overlays checked one day: still review
     assert present.state(without) == present.REVIEW and summary(r["rows"], without)["state"] == "review"
+
+
+def test_a_rule_the_rows_pass_but_the_panel_holds_gets_its_own_line():
+    # review round 3: a row whose Error says NEEDS REVIEW but whose verdict complies is a pass in the rows' count
+    # (no line of its own); the panel holding it at needs review gives it its line
+    row = [{"Error": "NEEDS REVIEW", "Verdict": present.COMPLIES, "Requirement": "Front yard", "Rule id": "f", "Why": "w"}]
+    held = [{"id": "f", "rule": "f", "name": "Front yard", "group": "building", "status": present.REVIEW,
+             "reason": "the looked-up lot is doubtful"}]
+    assert summary(row, held) == {"state": "review", "text": "1 needs review",
+                                  "lines": ["Front yard: the looked-up lot is doubtful"]}
