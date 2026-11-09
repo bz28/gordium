@@ -19,10 +19,11 @@ time zone and how its addresses are written, copied from its `jurisdiction.yaml`
 --write` and checked current in CI. Never edit `place.json` by hand.
 
 What it adds for the Rhino command, never changing a result:
-- **summary:** the check's own one-line answer (the viewport corner and the panel show the view's, `present.summary`):
-  "9 pass · 1 fail · 1 not checked in this release" with what fails and by how much ("Rear yard 22 ft, needs ≥ 22.5
-  ft (0.5 ft short)"). It is never "All N rules pass" while a row still waits (a fact to answer, a rule not in this
-  release, Ben 2026-11-09), so on an Ithaca result, which always lists the overlays, it never passes.
+- **summary:** the check's own answer: its state ("pass", "complies" under every reading, "review", "fail") never
+  less cautious than the panel's, its text the panel's own line (`present.summary`, one summary everywhere), and
+  its lines what fails and by how much ("Rear yard 22 ft, needs ≥ 22.5 ft (0.5 ft short)") and what waits. A row
+  still waiting (a fact to answer, a rule not in this release) is never a pass (Ben, 2026-11-09), so an Ithaca
+  result, which always lists the overlays, never passes.
 - **Why:** for a NEEDS REVIEW row, the measuring's own reason ("enter bedrooms / parking spaces", "a building
   isn't inside the lot").
 - **red:** the objects a failing rule measured (never the lot).

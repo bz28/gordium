@@ -44,7 +44,7 @@ def test_every_decided_row_complies_but_the_parking_waits_on_the_bedrooms_needs_
     assert v["summary"] == "needs review · 14 comply · 1 to answer · 1 not checked in this release"
     assert openpyxl.load_workbook(report)["Check"]["A1"].value == "GORDIUM | " + v["summary"]   # the report says it
     s = r["summary"]                                                           # the result's own line too
-    assert s["state"] == "review" and s["text"].endswith(" pass · 1 to answer · 1 not checked in this release")
+    assert s["state"] == "review" and s["text"] == v["summary"]               # the panel's own words
     assert s["lines"][0].startswith("Parking · needs input: Needs bedrooms and parking spaces")
 
 
@@ -91,38 +91,53 @@ def test_a_failing_or_review_row_says_its_own_count_not_a_second_needs_review():
 
 WAITS = [{"id": "release.overlays", "rule": None, "name": "Overlays · not in this release", "group": "not_checked",
           "status": present.NOT_CHECKED, "reason": "check them by hand"}]
-PASSING = [{"Error": "PASS", "Requirement": "Front yard"}]
-EITHER_WAY = PASSING + [{"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Provisional": "passes under every reading"}]
+PASSING = [{"Error": "PASS", "Requirement": "Front yard", "Rule id": "R-1b.front_yard"}]
+FRONT = [{"id": "R-1b.front_yard", "rule": "R-1b.front_yard", "name": "Front yard", "group": "building",
+          "status": present.COMPLIES}]
+EITHER_WAY = PASSING + [{"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Rule id": "R-1b.rear_yard",
+                         "Provisional": "passes under every reading"}]
+REAR = [{"id": "R-1b.rear_yard", "rule": "R-1b.rear_yard", "name": "Rear yard", "group": "building",
+         "status": present.REVIEW, "reason": "passes under every reading"}]
 
 
 def test_the_results_own_summary_never_passes_with_a_row_waiting():
     assert summary(PASSING)["state"] == "pass" and summary(EITHER_WAY)["state"] == "complies"   # no view: as before
-    assert summary(PASSING, WAITS) == {"state": "review", "text": "1 pass · 1 not checked in this release",
-                                       "lines": ["Overlays · not in this release: check them by hand"]}
-    s = summary(EITHER_WAY, WAITS)                         # complies whichever way the law is read: still waits
-    assert s == {"state": "review", "text": "1 pass · 1 pass whichever way open questions go · 1 not checked in this "
-                 "release", "lines": ["Rear yard: passes under every reading",      # which open question: kept
-                                      "Overlays · not in this release: check them by hand"]}
+    assert summary(PASSING, FRONT)["state"] == "pass"                       # the panel complies too: still a pass
+    assert summary(PASSING, FRONT + WAITS) == {"state": "review", "text": "needs review · 1 complies · 1 not checked "
+                                               "in this release",
+                                               "lines": ["Overlays · not in this release: check them by hand"]}
+    s = summary(EITHER_WAY, FRONT + REAR + WAITS)          # complies whichever way the law is read: still waits
+    assert s["state"] == "review" and s["lines"] == ["Rear yard: passes under every reading",   # its own, kept
+                                                     "Overlays · not in this release: check them by hand"]
 
 
 def test_the_results_own_summary_says_what_waits_beside_a_review_or_a_failure_too():
-    survey = PASSING + [{"Error": "NEEDS REVIEW", "Requirement": "Lot coverage by buildings", "Survey": True,
-                         "Provisional": "passes with the lot as drawn (confirm the survey)", "Why": "no survey"}]
-    s = summary(survey, WAITS)
-    assert s["state"] == "review" and s["text"] == "1 pass · 1 need review · 1 not checked in this release"
-    assert s["lines"][-1] == "Overlays · not in this release: check them by hand"
-    failing = PASSING + [{"Error": "FAIL", "Requirement": "Rear yard", "Line": "Rear yard: 2 ft short"}]
-    assert summary(failing, WAITS)["text"] == "1 pass · 1 fail · 1 not checked in this release"
+    failing = PASSING + [{"Error": "FAIL", "Requirement": "Rear yard", "Rule id": "R-1b.rear_yard",
+                          "Line": "Rear yard: 2 ft short"}]
+    items = FRONT + [dict(REAR[0], status=present.FAILS)] + WAITS
+    s = summary(failing, items)
+    assert s == {"state": "fail", "text": "1 does not comply · 1 complies · 1 not checked in this release",
+                 "lines": ["Rear yard: 2 ft short", "Overlays · not in this release: check them by hand"]}
 
 
-def test_the_results_own_summary_counts_the_views_rows_that_arent_a_rules():
-    # "Objects on the lot not included" and "Lot facts disagree" are the view's rows, not a rule's: the view needs
-    # review for them, so the result's line never passes beside it
+def test_the_results_own_summary_is_never_less_cautious_than_the_panel():
+    # the panel holds a rule's row at needs review that the rule rows pass (a doubtful looked-up lot, review round 2),
+    # and a row that isn't a rule's ("Objects on the lot not included"): the result's line never passes beside them
+    doubtful = [dict(FRONT[0], status=present.REVIEW, reason="the looked-up lot is doubtful")]
+    s = summary(PASSING, doubtful)
+    assert s == {"state": "review", "text": "1 needs review", "lines": ["Front yard: the looked-up lot is doubtful"]}
     left_out = {"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",
                 "group": "building", "status": present.REVIEW, "reason": "1 object on the lot isn't measured"}
-    s = summary(PASSING, [left_out])
-    assert s == {"state": "review", "text": "1 pass · 1 more need review",
-                 "lines": ["Objects on the lot not included: 1 object on the lot isn't measured"]}
-    assert summary(PASSING, [dict(left_out, status=present.FAILS)])["state"] == "fail"
-    ruled = dict(left_out, rule="R-1b.front_yard")         # a rule's row is already among the rows: not counted twice
-    assert summary(PASSING, [ruled])["state"] == "pass"
+    s = summary(PASSING, FRONT + [left_out])
+    assert s["state"] == "review" and s["lines"] == ["Objects on the lot not included: 1 object on the lot isn't measured"]
+    assert summary(PASSING, FRONT + [dict(left_out, status=present.FAILS)])["state"] == "fail"
+    either = summary(EITHER_WAY, FRONT + REAR)              # the panel needs review: never "complies" beside it
+    assert either["state"] == "review" and either["text"] == "1 needs review · 1 complies"
+
+
+def test_a_real_doubtful_lot_never_passes_in_the_results_summary():
+    r = check_site(SITE, dict(ANSWERED, **BEDROOMS, unsettled={"lot": "the lookup's outline is doubtful"}))
+    rows = r["view"]["items"]
+    assert r["view"]["state"] == present.REVIEW and r["summary"]["state"] == "review"
+    without = [i for i in rows if not i["id"].startswith(present.RELEASE)]   # overlays checked one day: still review
+    assert present.state(without) == present.REVIEW and summary(r["rows"], without)["state"] == "review"

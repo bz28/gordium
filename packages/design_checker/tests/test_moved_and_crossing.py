@@ -230,7 +230,8 @@ def test_a_rule_failing_for_a_crossing_counts_once():
     """Round 7, P3: a crossing rule that would comply under every reading is counted as a fail only."""
     res = run(floors(15, 30, 45, 70, 2) + [prism(rect(52, 90, 64, 100), 0, 10, "shed")],
               accessory_buildings=["shed"], accessory_frame=True)
-    s = res["summary"]["text"]
+    from design_checker.check import summary
+    s = summary(res["rows"])["text"]     # the rule rows' own count (the result's line says the panel's words)
     passes = int(s.split(" pass")[0]) if " pass" in s else 0
     assert passes == sum(1 for r in res["rows"] if not r["Fails"] and r["Error"] == "PASS" or
                          not r["Fails"] and (r.get("Named") or {}).get("result") == "pass")

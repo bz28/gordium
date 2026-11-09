@@ -582,34 +582,32 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
 
 
 def summary(rows: list[dict], items: list[dict] | None = None) -> dict:
-    """The check's own one-line answer (the result's "summary"; the panel and the viewport corner show the view's,
-    present.summary): all pass; it complies under every reading (rules waiting only on how the law is read, each
-    passing whichever way it goes); or what fails and what needs review. A rule that passes only with the lot as
-    drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a missing fact, not a
-    reading, so it is never shown as complying. No row at all is "Nothing checked", needs review: a check that
-    decided nothing never passes.
+    """The check's own one-line answer (the result's "summary"): all pass; it complies under every reading (rules
+    waiting only on how the law is read, each passing whichever way it goes); or what fails and what needs review. A
+    rule that passes only with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not
+    yet surveyed is a missing fact, not a reading, so it is never shown as complying. No row at all is "Nothing
+    checked", needs review: a check that decided nothing never passes.
 
-    `items`, the view's, add what the rule rows don't hold, so this line is never a pass where the view's isn't (Ben,
-    2026-11-09): the rows still waiting (a fact to answer, the bedrooms; a rule not in this release, the overlays),
-    said by what to do next ("7 pass · 1 to answer · 1 not checked in this release"), and the view's rows that aren't
-    a rule's (objects on the lot not included, lot facts that disagree), counted with the rest."""
+    Given the view's `items`, it is never less cautious than the panel (Ben, 2026-11-09): its state is the panel's
+    (present.state) whenever that is the more cautious one, and its text is the panel's own line (present.summary, one
+    summary everywhere: D3), so a row still waiting (a fact to answer, the bedrooms; a rule not in this release, the
+    overlays), a rule's row the panel holds at needs review (a doubtful looked-up fact, a tax-map reading) and a row
+    that isn't a rule's (objects on the lot not included, lot facts that disagree) are never left out of it. Its
+    lines: the rule rows' own, then each counted row of the view that fails, needs review or waits and isn't already
+    among them."""
     s = _rows_summary(rows)
-    if not rows or not items:
+    if items is None:
         return s
-    counted = present._building_items(items)
-    waiting = [i for i in counted if i["status"] == present.NOT_CHECKED]
-    others = [i for i in counted if not i.get("rule") and i["status"] in (present.FAILS, present.REVIEW)]
-    if not waiting and not others:
-        return s
-    failing = [i for i in others if i["status"] == present.FAILS]
-    held = [i for i in others if i["status"] == present.REVIEW]
-    state = "fail" if s["state"] == "fail" or failing else "review"     # never "pass" nor "complies" from here
-    text = {"pass": s["text"].replace("All ", "").replace(" rules pass", " pass").replace(" rule pass", " pass"),
-            "complies": s["text"].removeprefix("Complies: ").replace(", ", " · ")}.get(s["state"], s["text"])
-    text = " · ".join([text] + ([f"{len(failing)} more fail"] if failing else []) +
-                      ([f"{len(held)} more need review"] if held else []) + present.waiting_parts(items))
-    return {"state": state, "text": text, "lines": s["lines"] + [
-        f"{short(i['name'])}: {i['reason']}" if i.get("reason") else short(i["name"]) for i in failing + held + waiting]}
+    view = present.state(items)
+    caution = {"fail": 3, "review": 2, "complies": 1, "pass": 0}
+    floor = {present.FAILS: "fail", present.REVIEW: "review"}.get(view, s["state"])
+    state = max(s["state"], floor, key=caution.__getitem__)
+    said = {r.get("Rule id") for r in rows if r.get("Fails") or r.get("Error") != "PASS" or
+            r.get("Verdict") not in (None, present.COMPLIES)}
+    extra = [i for i in present._building_items(items) if i["status"] != present.COMPLIES
+             and not (i.get("rule") and i["rule"] in said)]
+    return {"state": state, "text": present.summary(items), "lines": s["lines"] + [
+        f"{short(i['name'])}: {i['reason']}" if i.get("reason") else short(i["name"]) for i in extra]}
 
 
 def _rows_summary(rows: list[dict]) -> dict:
