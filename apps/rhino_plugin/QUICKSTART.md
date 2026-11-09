@@ -330,7 +330,7 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      arrow, a 100 ft scale bar and the sources. The check never measures any of it, and says so if a solid on those
      layers sits over the lot. **Show neighbourhood** in the panel turns it off and on (kept with the file);
    - with **Show on-screen labels** ticked in the panel (off at first): each yard's and lot edge's label, and the
-     status box top right ("? 2 need review · 8 comply · 2 not checked"). Off, a failing yard's shortfall still
+     status box top right (e.g. "? 2 need review · 8 comply · 1 to answer · 1 not checked in this release"). Off, a failing yard's shortfall still
      shows ("✕ Rear yard 21'-2", needs 22'-6"");
    - the **Gordium panel** (a floating window): every item, bad news first.
 5. **Make an edit.** Move, stretch or add solids as you normally would. The results grey out: the panel and the

@@ -89,14 +89,40 @@ def test_a_failing_or_review_row_says_its_own_count_not_a_second_needs_review():
     assert present.state([fails, release]) == present.FAILS
 
 
+WAITS = [{"id": "release.overlays", "rule": None, "name": "Overlays · not in this release", "group": "not_checked",
+          "status": present.NOT_CHECKED, "reason": "check them by hand"}]
+PASSING = [{"Error": "PASS", "Requirement": "Front yard"}]
+EITHER_WAY = PASSING + [{"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Provisional": "passes under every reading"}]
+
+
 def test_the_results_own_summary_never_passes_with_a_row_waiting():
-    passing = [{"Error": "PASS", "Requirement": "Front yard"}]
-    waits = [{"id": "release.overlays", "name": "Overlays · not in this release", "group": "not_checked",
-              "status": present.NOT_CHECKED, "reason": "check them by hand"}]
-    assert summary(passing)["state"] == "pass"                                 # no view: as before
-    s = summary(passing, waits)
-    assert s == {"state": "review", "text": "1 pass · 1 not checked in this release",
-                 "lines": ["Overlays · not in this release: check them by hand"]}
-    either = passing + [{"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Provisional": "passes under every reading"}]
-    assert summary(either)["state"] == "complies"
-    assert summary(either, waits)["state"] == "review"                         # complies whichever way: still waits
+    assert summary(PASSING)["state"] == "pass" and summary(EITHER_WAY)["state"] == "complies"   # no view: as before
+    assert summary(PASSING, WAITS) == {"state": "review", "text": "1 pass · 1 not checked in this release",
+                                       "lines": ["Overlays · not in this release: check them by hand"]}
+    s = summary(EITHER_WAY, WAITS)                         # complies whichever way the law is read: still waits
+    assert s == {"state": "review", "text": "1 pass · 1 pass whichever way open questions go · 1 not checked in this "
+                 "release", "lines": ["Rear yard: passes under every reading",      # which open question: kept
+                                      "Overlays · not in this release: check them by hand"]}
+
+
+def test_the_results_own_summary_says_what_waits_beside_a_review_or_a_failure_too():
+    survey = PASSING + [{"Error": "NEEDS REVIEW", "Requirement": "Lot coverage by buildings", "Survey": True,
+                         "Provisional": "passes with the lot as drawn (confirm the survey)", "Why": "no survey"}]
+    s = summary(survey, WAITS)
+    assert s["state"] == "review" and s["text"] == "1 pass · 1 need review · 1 not checked in this release"
+    assert s["lines"][-1] == "Overlays · not in this release: check them by hand"
+    failing = PASSING + [{"Error": "FAIL", "Requirement": "Rear yard", "Line": "Rear yard: 2 ft short"}]
+    assert summary(failing, WAITS)["text"] == "1 pass · 1 fail · 1 not checked in this release"
+
+
+def test_the_results_own_summary_counts_the_views_rows_that_arent_a_rules():
+    # "Objects on the lot not included" and "Lot facts disagree" are the view's rows, not a rule's: the view needs
+    # review for them, so the result's line never passes beside it
+    left_out = {"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",
+                "group": "building", "status": present.REVIEW, "reason": "1 object on the lot isn't measured"}
+    s = summary(PASSING, [left_out])
+    assert s == {"state": "review", "text": "1 pass · 1 more need review",
+                 "lines": ["Objects on the lot not included: 1 object on the lot isn't measured"]}
+    assert summary(PASSING, [dict(left_out, status=present.FAILS)])["state"] == "fail"
+    ruled = dict(left_out, rule="R-1b.front_yard")         # a rule's row is already among the rows: not counted twice
+    assert summary(PASSING, [ruled])["state"] == "pass"

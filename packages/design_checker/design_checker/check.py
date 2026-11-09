@@ -583,13 +583,37 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
 
 def summary(rows: list[dict], items: list[dict] | None = None) -> dict:
     """The check's own one-line answer (the result's "summary"; the panel and the viewport corner show the view's,
-    present.summary, in the same terms): all pass; it complies under every reading (rules waiting only on how the
-    law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
-    with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
-    missing fact, not a reading, so it is never shown as complying. No row at all is "Nothing checked", needs review:
-    a check that decided nothing never passes. `items`, the view's: a row it still waits on (a fact to answer, the
-    bedrooms; a rule not in this release, the overlays) holds a design whose rows all pass at needs review, said with
-    what waits ("7 pass · 1 to answer · 1 not checked in this release"), never "pass" (Ben, 2026-11-09)."""
+    present.summary): all pass; it complies under every reading (rules waiting only on how the law is read, each
+    passing whichever way it goes); or what fails and what needs review. A rule that passes only with the lot as
+    drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a missing fact, not a
+    reading, so it is never shown as complying. No row at all is "Nothing checked", needs review: a check that
+    decided nothing never passes.
+
+    `items`, the view's, add what the rule rows don't hold, so this line is never a pass where the view's isn't (Ben,
+    2026-11-09): the rows still waiting (a fact to answer, the bedrooms; a rule not in this release, the overlays),
+    said by what to do next ("7 pass · 1 to answer · 1 not checked in this release"), and the view's rows that aren't
+    a rule's (objects on the lot not included, lot facts that disagree), counted with the rest."""
+    s = _rows_summary(rows)
+    if not rows or not items:
+        return s
+    counted = present._building_items(items)
+    waiting = [i for i in counted if i["status"] == present.NOT_CHECKED]
+    others = [i for i in counted if not i.get("rule") and i["status"] in (present.FAILS, present.REVIEW)]
+    if not waiting and not others:
+        return s
+    failing = [i for i in others if i["status"] == present.FAILS]
+    held = [i for i in others if i["status"] == present.REVIEW]
+    state = "fail" if s["state"] == "fail" or failing else "review"     # never "pass" nor "complies" from here
+    text = {"pass": s["text"].replace("All ", "").replace(" rules pass", " pass").replace(" rule pass", " pass"),
+            "complies": s["text"].removeprefix("Complies: ").replace(", ", " · ")}.get(s["state"], s["text"])
+    text = " · ".join([text] + ([f"{len(failing)} more fail"] if failing else []) +
+                      ([f"{len(held)} more need review"] if held else []) + present.waiting_parts(items))
+    return {"state": state, "text": text, "lines": s["lines"] + [
+        f"{short(i['name'])}: {i['reason']}" if i.get("reason") else short(i["name"]) for i in failing + held + waiting]}
+
+
+def _rows_summary(rows: list[dict]) -> dict:
+    """summary() from the rule rows alone."""
     # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
     # whatever its named readings say (review round 20); a row without a verdict, by its outcome
     def verdict_of(r):
@@ -600,14 +624,6 @@ def summary(rows: list[dict], items: list[dict] | None = None) -> dict:
     passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
     if not fails and not review and not passes:     # nothing checked is never a pass (principle 4)
         return {"state": "review", "text": "Nothing checked", "lines": []}
-    waiting = [i for i in present._building_items(items or []) if i["status"] == present.NOT_CHECKED]
-    if not fails and waiting and (not review or all(r.get("Provisional") and not r.get("Survey") for r in review)):
-        # every row passes (or passes whichever way the law is read), but some wait: missing data is never a pass
-        return {"state": "review", "text": " · ".join([f"{len(passes)} pass"] + (
-                    [f"{len(review)} pass whichever way open questions go"] if review else []) +
-                    present.waiting_parts(items)),
-                "lines": [f"{short(i['name'])}: {i['reason']}" if i.get("reason") else short(i["name"])
-                          for i in waiting]}
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):

@@ -138,7 +138,7 @@ D2 [code] **Header contents.**
 D3 [code] **Summary rule.** One function produces the summary used by the panel, the viewport status and the report, with identical text everywhere.
 - It counts every row, Site rows included.
 - Bad news comes first; zero counts are dropped; ✓ is never shown.
-- Examples: "7 need review · 3 comply · 1 to answer · 1 not checked in this release" (board 2) and "1 does not comply · 2 need review · 7 comply · 1 to answer · 1 not checked in this release" (board 4).
+- Examples: "7 need review · 3 comply · 3 not checked" (board 2) and "1 does not comply · 2 need review · 7 comply · 3 not checked" (board 4), drawn before the rows not checked were split by what to do next (below); today the parking rule (waiting on the bedrooms) and the overlays row read "1 to answer · 1 not checked in this release".
 - The rows not checked are counted by what the architect does next: "N to answer" (a rule waiting on a fact the model doesn't show, such as the bedrooms: its row's "Enter …" button answers it) and "N not checked in this release" (the overlays: checked by hand for now). The use details still to answer come last ("· 2 use details to answer").
 - **The overall state waits on the facts** (Ben, 2026-11-09; principle 4). The design complies only when every counted row complies. A row not checked, or a use detail still to answer, holds it at needs review even when every decided row complies, and the line then says so first: "needs review · 15 comply · 1 to answer · 1 not checked in this release". A rule not in Gordium yet (the "Not checked yet" group) is listed but never counted, so it doesn't hold the state. Since the overlays row is on every Ithaca result, no Ithaca design shows "complies" until overlays are checked.
 
