@@ -35,11 +35,11 @@ are for the architect's reading only (proposed).
 | Curtain wall (the host wall itself) | Its panels and mullions are their own elements (row 1); the wall sends its own faces only if it has any (**to check**: whether a curtain wall's own geometry is empty, so no face is sent twice) | | **new scene A** |
 | In-place family | By its category, like the building-category row or the "any other element" row (`Family.IsInPlace` only names it in the panel) | | **new scene A** |
 | Model group | Never itself: each member element is read on its own (a group has no geometry of its own) | | **new scene E** (ids after editing a group) |
-| Any other element with a solid or a mesh of more than 4 faces (generic models, masses, site, planting, specialty equipment, furniture) on the lot | `left_out`, `could_be_building: true` | A solid on the Default layer | 05 (garage), 15 (porch, shed) |
-| A loadable family instance off the building categories | `left_out`, `could_be_building: true` | A block on another layer | 15 (`shed_block`) |
+| Any other element with a Revit `Solid` with faces (closed or not) or a mesh of more than 4 faces (generic models, masses, site, planting, specialty equipment, furniture) on the lot | `left_out`, `could_be_building: true` | A solid on the Default layer | 05 (garage), 15 (porch); the recorder draws these as Generic Models |
+| A loadable family instance off the building categories, whatever its geometry (even none at Fine detail) | `left_out`, `could_be_building: true`; with no box, `touching: null` | A block on another layer: Rhino counts every block, whatever it holds | 15 (`shed_block`); empty: **new scene H** |
 | Gordium's own neighbourhood objects (proposed: marked DirectShapes, as Rhino's `Gordium::Context`) | `left_out`, `context: true` | A solid on `Gordium::Context` | 15 (`neighbour_solid`) |
-| A linked Revit model reaching into the lot that holds any building-category element | `unsent`, kind `"a linked model"`, `not_a_solid`: every building measure needs review | A block holding Building-layer objects (`read_3dm._block_holds`) | 04 (the shed drawn as a linked model); **new scene B** |
-| A linked model with no building-category element, or a 3D CAD import (`ImportInstance`), reaching into the lot | `left_out`, `could_be_building: true` | A block on another layer | 15 |
+| A linked Revit model reaching into the lot that holds any building-category element, or has a closed workset of its own (its hidden part could hold the house; **to check** that the API says so) | `unsent`, kind `"a linked model"`, `not_a_solid`: every building measure needs review | A block holding Building-layer objects (`read_3dm._block_holds`) | 04 (the shed drawn as a linked model); **new scene B** |
+| A linked model with no building-category element, or a 3D CAD import (`ImportInstance`), reaching into the lot | `left_out`, `could_be_building: true` | A block on another layer | **New scene B** (scene 15's block is already the family instance above) |
 | A link that isn't loaded | Can't be looked inside: `inventory_complete: false` | | Verdicts only: 14 (never drawn); the mapping: **new scene B** |
 | Elements in a closed workset | Proposed: `inventory_complete: false` whenever any user workset is closed (`Workset.IsOpen`), whether or not the reader can still read them (**to check**) | | Verdicts only: 14; the mapping: **new scene B** |
 | Lines, annotations, levels, grids, reference planes, rooms, areas, views, a 2D CAD import | Not looked at (no solid: not a building) | Curves, points, text | 01 to 17 (none is sent) |
@@ -50,13 +50,14 @@ not on the lot then: elements demolished by that phase or temporary in it (and p
 status). Everything else is read as above, including elements with no phase at all. It is never built as a list of
 statuses to keep, which would quietly drop any element with a status not on the list (`ElementPhaseStatusFilter`;
 the exact `ElementOnPhaseStatus` values are **to check**). **New scene C**, which includes an element with no
-phase.
+phase. The panel and the report name the phase checked, as for design options (Ben to agree).
 
-**Design options (proposed).** The main model, plus the option being edited if there is one
-(`DesignOption.GetActiveDesignOptionId`), otherwise each option set's primary option. Other options are
-alternative designs, not objects on the lot, so they are neither sent nor left out. The panel and the report must
+**Design options (proposed).** The main model, plus one option from **every** option set: the option being edited
+if it belongs to that set (`DesignOption.GetActiveDesignOptionId`), otherwise that set's primary option, as Revit's
+own views show them. The other options are alternative designs, not objects on the lot, so they are neither sent
+nor left out. The panel and the report must
 name the options checked; recording them in the description needs a new optional `host` field (a minor version of
-`gordium.site/1`, since it can't change a verdict), not `host.document`, which is the file's name. **New scene D.** This is a
+`gordium.site/1`, since it can't change a verdict), not `host.document`, which is the file's name. **New scene D** (two option sets, one being edited). This is a
 false-pass risk if the architect thinks a different option was checked, so the panel must name it (Ben to agree).
 
 **Known consequence, not a bug.** Real Revit families are full of curved geometry (door handles, round columns,
@@ -78,8 +79,9 @@ objects wholly inside the building is **new scene F**, for Ben to decide.
 | An empty solid | A solid with no faces (Revit families often hold some) is skipped: it has nothing to send | | 01 |
 | An open solid | A solid with faces and an edge that has only one face (`Edge.GetFace(1)` null): `open_solid` with `what` the element's name (**to check** that Revit gives open shells as solids, and that `GetFace(1)` behaves so) | `open_solid` | 03 |
 | A mesh in an element's geometry | Its triangles as faces, with `open_mesh` unless the mesh is known to be closed (**to check** whether Revit can say) | `_mesh_faces`, `open_mesh` | **new scene A** |
-| Anything else in the geometry (an object type that is not a solid, mesh, curve, point or family instance), or reading the geometry fails | The element is `unsent`, `not_a_solid`, kind its category | `not_a_solid` | 04 |
-| Curves and points in an element's geometry; an element with nothing else | Skipped (as `read_3dm` skips curves and points) | | 01 |
+| Anything else in the geometry (an object type that is not a solid, mesh, curve, point or family instance), or reading the geometry fails (`get_Geometry` returns null or throws) | The element is `unsent`, `not_a_solid`, kind its category | `not_a_solid` | 04 |
+| Curves and points in an element's geometry | Skipped (as `read_3dm` skips curves and points) | | 01 |
+| A building-category element with no face to send at all (for example a family whose solids show only at Coarse detail) | Never skipped: `unsent`, `not_a_solid`, kind `"a <category> with no geometry"`, so every building measure needs review (Rhino sends an empty solid on the Building layer as a building with no faces and `open_solid`) | `read_3dm.read_site` | **new scene H** |
 
 One building per element, not per solid: Revit gives no stable id to a solid inside an element, and results must
 point back to something the architect can click (ids, below).
@@ -117,7 +119,7 @@ point back to something the architect can click (ids, below).
 
 | Case | Revit reader | Scene |
 |---|---|---|
-| The architect picked the lot (the default flow) | The picked property line, or the picked lines forming the loop, in the order they run; `lot_id` saved in the facts | 01 |
+| The architect picked the lot (the default flow) | The picked property line, or the picked lines forming the loop, in the order they run; `lot_id` saved in the facts | **New scene G** (no scene's facts carry a `lot_id` yet) |
 | Nothing picked, one property line | That one | 01 |
 | Nothing picked, two or more | `lot: null`, `several_lot_outlines` (count, layer `"Property Lines"`) | 09 |
 | Nothing picked, none | `lot: null`, `no_lot_outline` | **new scene G** |
@@ -126,8 +128,8 @@ point back to something the architect can click (ids, below).
 | An arc (or any curved piece) | Points along it at most 0.25 ft apart (at least 16), `curved: true`, never its chord (as `read_3dm._edges`) | 17 |
 
 Reading a property line's boundary: `PropertyLine.GetBoundary()` exists only in the Revit 2027 API. In Revit 2026
-the reader takes the property line's curves from its geometry (**to check** that `get_Geometry` gives them), or the
-architect picks the lines themselves.
+the reader takes the property line's curves from its geometry (**to check** that `get_Geometry` gives them, and that an arc comes back as an `Arc`, never already broken into
+straight pieces: scene 17 would catch it), or the architect picks the lines themselves.
 
 **On the lot and touching** (the same rules and numbers as Rhino's `_not_included` and `_touching` in
 `apps/rhino_plugin/gordium_rhino.py`, which use `rhino_logic.reaches_into_lot` and `box_near_lot`; the box test
@@ -138,12 +140,15 @@ and boxes and never keeps a second copy of the logic):
 | Question | Rule (unchanged from Rhino) | Revit input | Scene |
 |---|---|---|---|
 | On the lot? | Its plan footprint reaches more than 0.1 ft into the lot (`reaches_into_lot`) | As Rhino's `_plan_points`: the element's vertices, points along its edges (`Edge.Tessellate`) and a 7 × 7 grid of points over each face (`Face.Evaluate` over the face's own range: **to check**), so a dome's bulge counts; used only for this, never sent as faces; its box corners when it has no points | 05, 15 |
-| Touching? | Its 3D box within 0.1 ft of any building's box | `Element.get_BoundingBox(null)`, turned by its 8 corners as in section 3, both boxes in shared coordinates | 15 (porch), 16 |
-| Not known | No box or no points: listed as on the lot with `touching: null` (counts as touching), never skipped. This is the reference adapter's rule (`conformance_rhino._left_out`); the live Rhino command's `_touching` says not touching when an object has no box, a gap to fix there | | **new scene H** |
+| Touching? | Its 3D box within 0.1 ft of any building's box | The box around the points the reader actually read (section 2 and the row above) and `Element.get_BoundingBox(null)` together, so it is never smaller than the geometry; turned by its 8 corners as in section 3, both boxes in shared coordinates | 15 (porch), 16 |
+| Not known | No box or no points: listed as on the lot with `touching: null` (counts as touching), never skipped. This is the reference adapter's rule (`conformance_rhino._left_out`); the live Rhino command can drop an object with no box altogether (`_not_included` finds it nowhere near the lot), a gap to fix there | | **new scene H** |
 | Looks like the ground? | `looks_like_ground` unchanged: open meshes or surfaces spanning the lot only (so a Toposolid, being closed, is not labelled in the first reader; labelling it is a later choice, with no effect on verdicts) | | 16 |
 
-A faster first pass (only elements whose box meets the lot's box) must also take every element with no box:
-a box filter quietly drops those, which is how an object could go unseen.
+A faster first pass (only elements whose box meets the lot's box) must also take every element with no box: a
+box filter quietly drops those, which is how an object could go unseen. Revit's own box filter works in internal
+coordinates, so it is given the box around the lot's points in internal coordinates, grown by the reach, never the
+shared-coordinate box (on a survey model that would meet nothing and drop every left-out object; scene J has
+left-out objects for this reason).
 
 ## 5. The ground
 
@@ -158,7 +163,7 @@ a box filter quietly drops those, which is how an object could go unseen.
 
 | Revit | Does | Worker command |
 |---|---|---|
-| `Application.DocumentChanged` (after a change is committed, undone or redone) on the open document | Marks the model changed (`dirty_at`); the results grey out. Any change counts, as in Rhino | `session.freshness` `stale` |
+| `Application.DocumentChanged` (after a change is committed, undone or redone) on the open document; also a worksharing reload or sync and a link reloaded, if those don't raise it (**to check**: `DocumentReloadedLatest`, `DocumentSynchronizedWithCentral`, link reload) | Marks the model changed (`dirty_at`); the results grey out. Any change counts, as in Rhino | `session.freshness` `stale` |
 | Undo or redo (the event's `Operation`) | As Rhino's undo handling | `session.undo` `recheck`, `dirty_at` |
 | Revit idle (an `ExternalEvent` or the Idling event: the model may only be read when Revit allows) | After 0.5 s with no edit (Rhino's `IDLE_SECONDS`) and only with "Check after every edit" on: read the model, send `check_site` | `session.freshness` `recheck`, then `check_site` |
 | The answer comes back | Shown only if no edit happened since the read began | `session.freshness` `still` |
@@ -173,22 +178,23 @@ joined to it, which the event may or may not report: **to check**).
 ## 7. Proposed new scenes
 
 Each case no scene covers yet. Each is hand-worked before it runs, as scenes 15 to 17 were, and recorded by every
-host that can draw it. C, D, J and K have no Rhino equivalent, and I's terrain can't be read by the reference
+host that can draw it. C, D, J and K have no Rhino equivalent, nor do B's unloaded link and closed workset (the
+reference adapter always says it looked at everything), and I's terrain can't be read by the reference
 adapter (it reads files, and terrain sampling lives only in the live command): those need host-only scenes, a
 change to `conformance.py`.
 
 | | Scene | Tests | False-pass risk if missed |
 |---|---|---|---|
 | A | A house built from parts: four wall solids, a floor slab, a roof slab, a window and an in-place family, touching; a curtain wall; one face meshed | Many solids read and measured as one building; curtain walls; in-place families; mesh faces | Yes: the measuring has only seen massing blocks |
-| B | The house is wholly in a linked model; the host file has only the lot. Then the link unloaded, and a workset closed | `unsent` from a link; `inventory_complete: false` | Yes |
+| B | The house is wholly in a linked model; the host file has only the lot. Then a link with no building categories but a 3D shed, a CAD import, the link unloaded, a host workset closed, and a workset closed inside a loaded link | `unsent` from a link; `inventory_complete: false` | Yes |
 | C | A shed demolished in the last phase, a garage existing to remain | Phases | Yes (the garage) |
-| D | A main model with two design options, the secondary one wider | Which option is sent and named | Yes |
+| D | Two option sets: a wing (primary narrow, secondary wider) and a garage (primary only), with a wing option being edited | Which option is sent and named | Yes |
 | E | Grouped walls, the group then moved | `UniqueId`s of group members after an edit | No (ids only) |
 | F | Furniture inside the house, the same family outside it | Only if Ben adopts the "wholly inside" rule | Yes, if adopted |
-| G | No lot outline; a picked lot then deleted | `no_lot_outline`, `lot_not_found` | No (the lot then needs review) |
-| H | A left-out object with no box (an empty family instance on the lot) | `touching: null` | Yes |
+| G | Two property lines and facts with a `lot_id` picking one (also as several picked lines); no lot outline; the picked lot then deleted | The picked-lot flow, `no_lot_outline`, `lot_not_found` | No (the lot then needs review) |
+| H | An empty family instance on the lot; a building-category family with no Fine geometry | `touching: null`; `unsent` | Yes |
 | I | Spot grades and finished spots together; a Toposolid under a house of native walls, picked as the ground, higher inside the house than outside | `finished_spots`, `terrain`, probes outside the walls only | Yes (height) |
-| J | Scene 01 with the project's true north turned 30° | Boxes and points turned without shrinking | Yes (touching) |
+| J | Scene 15 on a model with survey coordinates and true north turned 30° | Boxes and points turned without shrinking; the box filter in the right coordinates | Yes (touching; left-out objects dropped) |
 | K | Scene 01, then the survey point's elevation moved 10 ft | Facts entered under other coordinates aren't used | Yes (height) |
 
 ## 8. Left for the trial
