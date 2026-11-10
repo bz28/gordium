@@ -7,6 +7,7 @@ caught, never waved through."""
 import copy
 import json
 import math
+import uuid
 
 import pytest
 
@@ -399,3 +400,127 @@ def test_the_reference_adapter_reads_a_lot_by_its_outline_not_its_box(tmp_path):
         cr.build(scene).Write(str(tmp_path / "m.3dm"), 8)
         left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
         assert bool(left) is on_lot, outline
+
+
+# ---- an object with no box: the live command keeps it, as the reference adapter does -----------------------------
+
+class _Pt:
+    def __init__(self, x, y, z=0.0):
+        self.X, self.Y, self.Z = float(x), float(y), float(z)
+
+
+class _Box:
+    """RhinoCommon's BoundingBox, as much of it as the plugin's left-out code uses."""
+
+    def __init__(self, lo, hi):
+        self.Min, self.Max = _Pt(*lo), _Pt(*hi)
+
+    @property
+    def IsValid(self):  # noqa: N802 (RhinoCommon's name)
+        return all(abs(v) < 1e300 for v in (self.Min.X, self.Min.Y, self.Min.Z, self.Max.X, self.Max.Y, self.Max.Z)) \
+            and self.Min.X <= self.Max.X and self.Min.Y <= self.Max.Y and self.Min.Z <= self.Max.Z
+
+    def Inflate(self, d):  # noqa: N802
+        self.Min, self.Max = _Pt(self.Min.X - d, self.Min.Y - d, self.Min.Z - d), _Pt(self.Max.X + d, self.Max.Y + d,
+                                                                                       self.Max.Z + d)
+
+    @staticmethod
+    def Intersection(a, b):  # noqa: N802
+        return _Box((max(a.Min.X, b.Min.X), max(a.Min.Y, b.Min.Y), max(a.Min.Z, b.Min.Z)),
+                    (min(a.Max.X, b.Max.X), min(a.Max.Y, b.Max.Y), min(a.Max.Z, b.Max.Z)))
+
+
+EMPTY_BOX = ((1, 0, 0), (-1, 0, 0))                       # RhinoCommon's BoundingBox.Empty
+UNSET = -1.23432101234321e308                             # RhinoMath.UnsetValue: BoundingBox.Unset
+UNSET_BOX = ((UNSET,) * 3, (UNSET,) * 3)
+
+
+class _Geometry:
+    def __init__(self, box):
+        self._box = box
+
+    def GetBoundingBox(self, accurate):  # noqa: N802
+        return _Box(*self._box)
+
+
+class InstanceReferenceGeometry(_Geometry):               # a placed block: the plugin goes by its type's name
+    pass
+
+
+class _Curve(_Geometry):
+    def __init__(self, ring):
+        super().__init__(((min(x for x, _ in ring), min(y for _, y in ring), 0),
+                          (max(x for x, _ in ring), max(y for _, y in ring), 0)))
+        self._ring = ring
+
+    def TryGetPolyline(self):  # noqa: N802
+        return True, [_Pt(x, y) for x, y in self._ring + self._ring[:1]]
+
+
+def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
+    """gordium_rhino's own _not_included, _touching, _ground_like and _unmeasured_outlines, run on a stub document:
+    a 60 × 120 ft lot at survey coordinates (`lot_at`), a house on it, and `blocks` ({id: box}) placed on Default."""
+    import ast
+    import types
+
+    from host_source import host_path, host_text
+
+    from design_checker import rhino_logic as logic
+    names = ("_not_included", "_plan_box", "_plan_points", "_touching", "_ground_like", "_unmeasured_outlines")
+    tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
+    fns = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
+    assert sorted(f.name for f in fns) == sorted(names)
+    x, y = lot_at
+    lot = types.SimpleNamespace(Id="lot", Geometry=_Curve([(x, y), (x + 60, y), (x + 60, y + 120), (x, y + 120)]),
+                                Attributes=types.SimpleNamespace(LayerIndex=0))
+    house = types.SimpleNamespace(Id="house", Geometry=_Geometry(((x + 15, y + 30, 0), (x + 45, y + 80, 20))),
+                                  Attributes=types.SimpleNamespace(LayerIndex=1))
+    placed = [types.SimpleNamespace(Id=i, Geometry=InstanceReferenceGeometry(box),
+                                    Attributes=types.SimpleNamespace(LayerIndex=2)) for i, box in blocks.items()]
+    every = [lot, house] + placed
+    doc = types.SimpleNamespace(Layers=[types.SimpleNamespace(FullPath=p) for p in ("Site", "Building", "Default")],
+                                Objects=types.SimpleNamespace(GetObjectList=lambda settings: list(every)))
+    rg = types.SimpleNamespace(Brep=type("Brep", (), {}), Mesh=type("Mesh", (), {}), Extrusion=type("Extrusion", (), {}),
+                               Curve=_Curve, Point3d=_Pt, BoundingBox=_Box)
+    rhino = types.SimpleNamespace(DocObjects=types.SimpleNamespace(ObjectEnumeratorSettings=types.SimpleNamespace))
+    ns = {"rg": rg, "Rhino": rhino, "logic": logic, "LAYERS": {"building": "Building"},
+          "_model_length": lambda doc, feet: feet, "_ui_state": lambda doc: {},
+          "_find": lambda doc, i: next((o for o in every if o.Id == i), None)}
+    exec(compile(ast.Module(body=fns, type_ignores=[]), host_path("rhino", "plugin").name, "exec"), ns)  # noqa: S102
+    left = ns["_not_included"](doc, lot)
+    return (left, ns["_touching"](doc, left, [house]), ns["_ground_like"](doc, left, lot),
+            ns["_unmeasured_outlines"](doc, left))
+
+
+@pytest.mark.parametrize("no_box", [EMPTY_BOX, UNSET_BOX], ids=["empty", "unset"])
+@pytest.mark.parametrize("lot_at", [(0.0, 0.0), (-30.0, -60.0), (1000.0, 2000.0)], ids=["origin", "round_origin", "survey"])
+def test_the_live_command_keeps_a_block_with_no_box_as_left_out_and_touching(no_box, lot_at):
+    """A placed block with no box to place it by (its definition empty, or a linked block whose file has moved: the
+    viewport shows nothing, but the garage it stands for is part of the design) can't be told off the lot or apart
+    from the house. The Rhino command dropped it (its box missed the lot's, or its box's corners outlined nothing),
+    so nothing said a building was left out and coverage, the yards, height and stories could stay "complies". It
+    now counts as on the lot and touching, as the reference adapter lists it (touching unknown); a normal shed
+    apart from the house and one off the lot are still told by their boxes."""
+    x, y = lot_at
+    shed = ((x + 48, y + 90, 0), (x + 56, y + 98, 8))                 # on the lot, apart from the house
+    away = ((x + 500, y, 0), (x + 510, y + 10, 8))                    # far off the lot
+    left, touching, ground, outlines = _live_left_out({"nothing": no_box, "shed": shed, "away": away}, lot_at)
+    assert left == ["nothing", "shed"]
+    assert touching == ["nothing"]
+    assert ground == []
+    assert len(outlines) == 1                                         # the shed's; the block with no box has none
+
+
+def test_the_reference_adapter_lists_a_block_with_no_box_as_left_out_and_touching_unknown(tmp_path):
+    """The other half of the same decision: a placed block whose definition isn't in the file (as a linked block's
+    is when its file has moved) is listed by the rhino3dm adapter, touching unknown, which counts as touching."""
+    import rhino3dm as r
+    scene = copy.deepcopy(SCENES["05_garage_left_out"])
+    scene["others"] = []
+    model = cr.build(scene)
+    attrs = r.ObjectAttributes()
+    attrs.LayerIndex = cr._layer(model, "Default")
+    model.Objects.AddInstanceObject(r.InstanceReference(uuid.uuid4(), r.Transform.Identity()), attrs)
+    model.Write(str(tmp_path / "m.3dm"), 8)
+    left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
+    assert [(o["layer"], o["touching"]) for o in left] == [("Default", None)]

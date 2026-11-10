@@ -1139,6 +1139,8 @@ def _unmeasured_outlines(doc, ids):
         if o is None:
             continue
         b = o.Geometry.GetBoundingBox(True)
+        if not b.IsValid:                        # no box (an empty block): nothing to outline, its review row says it
+            continue
         z = b.Max.Z
         out.append([rg.Point3d(b.Min.X, b.Min.Y, z), rg.Point3d(b.Max.X, b.Min.Y, z), rg.Point3d(b.Max.X, b.Max.Y, z),
                     rg.Point3d(b.Min.X, b.Max.Y, z), rg.Point3d(b.Min.X, b.Min.Y, z)])
@@ -1722,7 +1724,9 @@ def _not_included(doc, lot):
     polysurfaces, meshes, SubD, blocks; not the picked terrain, what the architect marked as the ground, the
     Building layer or Gordium's own layers): each one makes the check need review (C8). Nothing is ever left out
     on a guess: a topography mesh stays here (marked as looking like the ground, see _ground_like) until the
-    architect says "This is the ground"."""
+    architect says "This is the ground". One with no bounding box to place it by (a block whose definition is
+    empty or whose linked file is missing, an empty SubD) can't be told off the lot: it counts as on the lot (and,
+    in _touching, as touching), never dropped, as the reference adapter (conformance_rhino._left_out) says."""
     if lot is None:
         return []
     ring = _plan_points(lot.Geometry)
@@ -1741,6 +1745,9 @@ def _not_included(doc, lot):
             g.Faces.Count if isinstance(g, (rg.Brep, rg.Mesh)) else 0)
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or not logic.left_out_candidate(layer):        # Gordium's own layers, but for the neighbourhood's
+            continue
+        if not g.GetBoundingBox(True).IsValid:                      # nowhere to place it: on the lot, not dropped
+            out.append(str(o.Id))
             continue
         box = _plan_box(g)
         if not logic.box_near_lot(box, lot_box, reach):             # far from the lot: no outline work
@@ -1795,6 +1802,8 @@ def _ground_like(doc, ids, lot):
         if g is None:
             continue
         ob = g.GetBoundingBox(True)
+        if not ob.IsValid:                       # no box: nothing to say it spreads over the lot
+            continue
         closed = (isinstance(g, rg.Brep) and g.IsSolid) or (isinstance(g, rg.Mesh) and g.IsClosed)
         if logic.looks_like_ground(type(g).__name__, closed, (ob.Min.X, ob.Min.Y, ob.Max.X, ob.Max.Y),
                                    (box.Min.X, box.Min.Y, box.Max.X, box.Max.Y)):
@@ -1870,7 +1879,8 @@ def _extras(doc, facts):
 
 def _touching(doc, ids, buildings):
     """The left-out solids that may be part of the building: their box within 0.1 ft of a building's box. Boxes
-    say "touching" more often than the shapes do, which only ever makes the check more cautious."""
+    say "touching" more often than the shapes do, which only ever makes the check more cautious. One with no box
+    to tell (an empty block, see _not_included) may be touching, so it counts as touching."""
     gap = _model_length(doc, 0.1)
     boxes = []
     for b in buildings:
@@ -1881,7 +1891,7 @@ def _touching(doc, ids, buildings):
     for i in ids:
         o = _find(doc, i)
         bb = o.Geometry.GetBoundingBox(True) if o is not None else None
-        if bb is not None and any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes):
+        if bb is not None and (not bb.IsValid or any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes)):
             out.append(i)
     return out
 
