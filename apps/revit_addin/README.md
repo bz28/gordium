@@ -45,10 +45,11 @@ foreach (var row in result.Items)
 4. **Reads every answer strictly.** The answer must be JSON, this request's id, `ok` true or false, with its
    `result` and `about`. A check's every row must have an id, a name, a group, a reason (text or null) and one of
    the checker's four statuses; a row given twice, a key given twice, NaN, or a check with no rows is an error. A
-   check whose overall state says it complies must have its rows back that (none failing or needing review apart
-   from the rules not in Gordium yet, no use detail waiting, at least one row complying), or it is refused. That
-   last part is stricter than the worker's own overall state, which would say "complies" for a check whose rows
-   are all "not checked" (no real check is known to give one): such an answer is an error, never a pass.
+   check whose overall state says it complies must have its rows back that (every row the check counts complying: none
+   failing, needing review or not checked, whether waiting on a fact or not checked in this release; apart from the
+   rules not in Gordium yet; no use detail waiting; at least one row complying), or it is refused. This is the
+   worker's own rule (Ben, 2026-11-09); the library enforces it again so an answer from an older worker is an error,
+   never a pass.
    A session command's part that refused its input gives its words as a `PartRefusedException`; an answer not
    given is an `AnswerMissingException`. Never a default in place of a missing value, and a `Verdict` never set
    (C#'s default, or `GetValueOrDefault` for a row that isn't there) is `NeedsReview`, never `Complies`.

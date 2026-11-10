@@ -102,6 +102,8 @@ public sealed class FakeWorkerTests
     [InlineData("complies_beside_a_review")]
     [InlineData("complies_with_a_use_detail")]
     [InlineData("complies_with_nothing_complying")]
+    [InlineData("complies_beside_a_not_checked")]
+    [InlineData("complies_beside_a_release_gap")]
     [InlineData("complies_use_detail_not_bool")]
     [InlineData("report_error_not_text")]
     [InlineData("about_other_schema")]
