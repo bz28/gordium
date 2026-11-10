@@ -158,7 +158,8 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == replies[0]["result"]["view"]["summary"]
+    assert replies[0]["result"]["summary"]["text"] == replies[0]["result"]["view"]["summary"] == (
+        "1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to answer")
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 

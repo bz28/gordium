@@ -604,8 +604,10 @@ def summary(rows: list[dict], items: list[dict] | None = None) -> dict:
     state = max(s["state"], floor, key=caution.__getitem__)
     fails, review, _ = _sorted_rows(rows)
     said = {r.get("Rule id") for r in fails + review}          # the rows its own lines already say
+    # (a rule the rows hold at review but the panel says fails gets the panel's reason too: review round 4)
+    failed = {r.get("Rule id") for r in fails}
     extra = [i for i in present._building_items(items) if i["status"] != present.COMPLIES
-             and not (i.get("rule") and i["rule"] in said)]
+             and not (i.get("rule") and i["rule"] in (failed if i["status"] == present.FAILS else said))]
     return {"state": state, "text": present.summary(items), "lines": s["lines"] + [
         f"{short(i['name'])}: {i['reason']}" if i.get("reason") else short(i["name"]) for i in extra]}
 

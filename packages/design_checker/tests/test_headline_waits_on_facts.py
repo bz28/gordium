@@ -151,3 +151,12 @@ def test_a_rule_the_rows_pass_but_the_panel_holds_gets_its_own_line():
              "reason": "the looked-up lot is doubtful"}]
     assert summary(row, held) == {"state": "review", "text": "1 needs review",
                                   "lines": ["Front yard: the looked-up lot is doubtful"]}
+
+
+def test_a_rule_the_rows_hold_at_review_but_the_panel_fails_gets_the_panels_reason():
+    # review round 4: the panel's fail reason is said, not only the row's own review line
+    row = [{"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Rule id": "r", "Why": "w"}]
+    failing = [{"id": "r", "rule": "r", "name": "Rear yard", "group": "building", "status": present.FAILS,
+                "reason": "2 ft short"}]
+    assert summary(row, failing) == {"state": "fail", "text": "1 does not comply",
+                                     "lines": ["Rear yard: w", "Rear yard: 2 ft short"]}
