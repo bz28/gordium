@@ -480,8 +480,8 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
     every = [lot, house] + placed
     doc = types.SimpleNamespace(Layers=[types.SimpleNamespace(FullPath=p) for p in ("Site", "Building", "Default")],
                                 Objects=types.SimpleNamespace(GetObjectList=lambda settings: list(every)))
-    rg = types.SimpleNamespace(Brep=type("Brep", (), {}), Mesh=type("Mesh", (), {}), Extrusion=type("Extrusion", (), {}),
-                               Curve=_Curve, Point3d=_Pt, BoundingBox=_Box)
+    rg = types.SimpleNamespace(Brep=type("Brep", (), {}), Mesh=type("Mesh", (), {}),
+                               Extrusion=type("Extrusion", (), {}), Curve=_Curve, Point3d=_Pt, BoundingBox=_Box)
     rhino = types.SimpleNamespace(DocObjects=types.SimpleNamespace(ObjectEnumeratorSettings=types.SimpleNamespace))
     ns = {"rg": rg, "Rhino": rhino, "logic": logic, "LAYERS": {"building": "Building"},
           "_model_length": lambda doc, feet: feet, "_ui_state": lambda doc: {},
@@ -493,14 +493,16 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
 
 
 @pytest.mark.parametrize("no_box", [EMPTY_BOX, UNSET_BOX], ids=["empty", "unset"])
-@pytest.mark.parametrize("lot_at", [(0.0, 0.0), (-30.0, -60.0), (1000.0, 2000.0)], ids=["origin", "round_origin", "survey"])
+@pytest.mark.parametrize("lot_at", [(0.0, 0.0), (-30.0, -60.0), (1000.0, 2000.0)],
+                         ids=["origin", "round_origin", "survey"])
 def test_the_live_command_keeps_a_block_with_no_box_as_left_out_and_touching(no_box, lot_at):
     """A placed block with no box to place it by (its definition empty, or a linked block whose file has moved: the
     viewport shows nothing, but the garage it stands for is part of the design) can't be told off the lot or apart
     from the house. The Rhino command dropped it (its box missed the lot's, or its box's corners outlined nothing),
-    or, with a lot round the origin, could list it as not touching, so nothing said a building was left out and coverage, the yards, height and stories could stay "complies". It
-    now counts as on the lot and touching, as the reference adapter lists it (touching unknown); a normal shed
-    apart from the house and one off the lot are still told by their boxes."""
+    or, with a lot round the origin, could list it as not touching, so nothing said a building was left out (or
+    touching) and coverage, the yards, height and stories could stay "complies". It now counts as on the lot and
+    touching, as the reference adapter lists it (touching unknown); a normal shed apart from the house and one off
+    the lot are still told by their boxes. (_ground_like runs too: a block never looks like the ground.)"""
     x, y = lot_at
     shed = ((x + 48, y + 90, 0), (x + 56, y + 98, 8))                 # on the lot, apart from the house
     away = ((x + 500, y, 0), (x + 510, y + 10, 8))                    # far off the lot
