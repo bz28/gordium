@@ -498,7 +498,7 @@ def test_the_live_command_keeps_a_block_with_no_box_as_left_out_and_touching(no_
     """A placed block with no box to place it by (its definition empty, or a linked block whose file has moved: the
     viewport shows nothing, but the garage it stands for is part of the design) can't be told off the lot or apart
     from the house. The Rhino command dropped it (its box missed the lot's, or its box's corners outlined nothing),
-    so nothing said a building was left out and coverage, the yards, height and stories could stay "complies". It
+    or, with a lot round the origin, could list it as not touching, so nothing said a building was left out and coverage, the yards, height and stories could stay "complies". It
     now counts as on the lot and touching, as the reference adapter lists it (touching unknown); a normal shed
     apart from the house and one off the lot are still told by their boxes."""
     x, y = lot_at
