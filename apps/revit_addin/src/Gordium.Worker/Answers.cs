@@ -126,8 +126,8 @@ public sealed class CheckResult
     public IReadOnlyDictionary<string, Verdict> ById() => Items.ToDictionary(i => i.Id, i => i.Status);
 
     /// <summary>A check said to comply must be one the rows back (the worker's own rule, present.state): no row it
-    /// counts (any but the rules not in Gordium yet, <c>not_covered</c>) does not comply or needs review, no use detail
-    /// waits for an answer (<c>use_detail</c>), and at least one counted row complies. Anything else is refused,
+    /// counts (any but the rules not in Gordium yet, <c>not_covered</c>) does not comply, needs review or is not checked
+    /// (waiting on a fact, or not checked in this release: Ben, 2026-11-09), no use detail waits for an answer (<c>use_detail</c>), and at least one counted row complies. Anything else is refused,
     /// never shown as a pass.</summary>
     private static void CheckComplies(JsonElement items)
     {
@@ -144,9 +144,9 @@ public sealed class CheckResult
             if (StrictJson.String(e, "group", where) == "not_covered")
                 continue;
             var status = Verdicts.Parse(StrictJson.String(e, "status", where), $"{where}.status");
-            if (status is Verdict.DoesNotComply or Verdict.NeedsReview)
+            if (status is Verdict.DoesNotComply or Verdict.NeedsReview or Verdict.NotChecked)
                 throw new WorkerProtocolException($"the check says it complies, but {where} is {Verdicts.Word(status)}");
-            complies |= status == Verdict.Complies;
+            complies = true;   // reaching here, the row complies: every other status was refused above
         }
         if (!complies)
             throw new WorkerProtocolException("the check says it complies, but none of its rows complies");
