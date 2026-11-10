@@ -1746,10 +1746,11 @@ def _not_included(doc, lot):
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or not logic.left_out_candidate(layer):        # Gordium's own layers, but for the neighbourhood's
             continue
-        if not g.GetBoundingBox(True).IsValid:                      # nowhere to place it: on the lot, not dropped
+        b = g.GetBoundingBox(True)
+        if not b.IsValid:                                           # nowhere to place it: on the lot, not dropped
             out.append(str(o.Id))
             continue
-        box = _plan_box(g)
+        box = (b.Min.X, b.Min.Y, b.Max.X, b.Max.Y)                  # its plan box (_plan_box), worked out once
         if not logic.box_near_lot(box, lot_box, reach):             # far from the lot: no outline work
             continue
         if logic.reaches_into_lot(ring, _plan_points(g), reach, box):   # its footprint, against the lot's outline
@@ -1802,8 +1803,6 @@ def _ground_like(doc, ids, lot):
         if g is None:
             continue
         ob = g.GetBoundingBox(True)
-        if not ob.IsValid:                       # no box: nothing to say it spreads over the lot
-            continue
         closed = (isinstance(g, rg.Brep) and g.IsSolid) or (isinstance(g, rg.Mesh) and g.IsClosed)
         if logic.looks_like_ground(type(g).__name__, closed, (ob.Min.X, ob.Min.Y, ob.Max.X, ob.Max.Y),
                                    (box.Min.X, box.Min.Y, box.Max.X, box.Max.Y)):
