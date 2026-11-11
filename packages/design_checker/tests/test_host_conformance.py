@@ -449,10 +449,13 @@ class InstanceReferenceGeometry(_Geometry):               # a placed block: the 
 
 
 class _Definition:
+    walked = 0                                            # GetObjects calls, every definition: a cost counter
+
     def __init__(self, parts):
-        self._parts = parts
+        self._parts, self.Id = parts, uuid.uuid4()
 
     def GetObjects(self):  # noqa: N802
+        _Definition.walked += 1
         return tuple(self._parts)
 
 
@@ -460,9 +463,10 @@ class _InstanceObject:
     """RhinoCommon's InstanceObject (a placed block): its box is its parts' boxes joined, an invalid one left out,
     as Rhino joins them; `parts` None is a definition that isn't there."""
 
-    def __init__(self, oid, parts, layer=2):
+    def __init__(self, oid, parts, layer=2, definition=None):
         self.Id, self.Attributes = oid, types.SimpleNamespace(LayerIndex=layer)
-        self.InstanceDefinition = None if parts is None else _Definition(parts)
+        self.InstanceDefinition = definition or (None if parts is None else _Definition(parts))
+        parts = definition._parts if definition else parts
         boxes = [p.Geometry.GetBoundingBox(True) for p in parts or []]
         boxes = [b for b in boxes if b.IsValid]
         self.Geometry = InstanceReferenceGeometry(
@@ -560,9 +564,23 @@ def test_the_live_command_keeps_a_block_holding_a_part_with_no_box_as_left_out_a
     partly = _InstanceObject("partly", [_part(drawn), holding_nothing])
     missing = _InstanceObject("missing", [_part(drawn), _InstanceObject("gone", None)])   # no definition at all
     whole = _InstanceObject("whole", [_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
-    left, touching, _, _ = _live_left_out({"partly": partly, "missing": missing, "whole": whole}, (x, y))
+    left, touching, _, outlines = _live_left_out({"partly": partly, "missing": missing, "whole": whole}, (x, y))
     assert left == ["partly", "missing", "whole"]
     assert touching == ["partly", "missing"]
+    assert len(outlines) == 1                 # the whole block's; a box of its drawn part alone would mislead
+
+
+def test_the_live_command_walks_each_block_definition_once_however_often_it_is_placed():
+    """A facade block placed 20 times, holding a window block placed 100 times: each definition is walked once per
+    look (the left-out list, the touching test, the outlines), not once per placing and path (2,020 walks)."""
+    x, y = 1000.0, 2000.0
+    window = _Definition([_part(((x + 48, y + 90, 0), (x + 49, y + 91, 1)))])
+    facade = _Definition([_InstanceObject(f"w{k}", None, definition=window) for k in range(100)])
+    placed = {f"f{k}": _InstanceObject(f"f{k}", None, definition=facade) for k in range(20)}
+    _Definition.walked = 0
+    left, touching, _, outlines = _live_left_out(placed, (x, y))
+    assert len(left) == 20 and touching == [] and len(outlines) == 20
+    assert _Definition.walked == 2 * 3                  # 2 definitions, in each of the 3 looks
 
 
 def test_the_reference_adapter_gives_a_block_holding_a_part_with_no_box_no_box(tmp_path):
