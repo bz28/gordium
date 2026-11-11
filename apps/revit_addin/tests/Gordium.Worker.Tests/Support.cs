@@ -96,30 +96,26 @@ public sealed record SceneCase(string Scene, string Step, JsonNode Site, JsonNod
 }
 
 /// <summary>One real worker shared by a test class (starting Python and loading the rules takes seconds). A test whose
-/// answer the client refused has stopped it; the next test gets a new one, so one refusal is one failure, not a run
-/// of WorkerStoppedException in whichever tests happen to come after it.</summary>
+/// answer the client refused has stopped it; the next test starts a new one (<see cref="EnsureRunningAsync"/>, called
+/// once before each test), so one refusal is one failure, not a run of WorkerStoppedException in whichever tests
+/// happen to come after it. Within a test the client never changes, so "the worker keeps serving" is a real check.</summary>
 public sealed class RealWorker : IAsyncLifetime
 {
-    private WorkerClient _client = null!;
+    public WorkerClient Client { get; private set; } = null!;
 
-    public WorkerClient Client
+    public async Task EnsureRunningAsync()
     {
-        get
-        {
-            if (_client.IsStopped)
-            {
-                _client.Dispose();
-                _client = Task.Run(() => WorkerClient.StartAsync(Env.Real())).GetAwaiter().GetResult();
-            }
-            return _client;
-        }
+        if (!Client.IsStopped)
+            return;
+        Client.Dispose();
+        Client = await WorkerClient.StartAsync(Env.Real());
     }
 
-    public async Task InitializeAsync() => _client = await WorkerClient.StartAsync(Env.Real());
+    public async Task InitializeAsync() => Client = await WorkerClient.StartAsync(Env.Real());
 
     public Task DisposeAsync()
     {
-        _client.Dispose();
+        Client.Dispose();
         return Task.CompletedTask;
     }
 }
