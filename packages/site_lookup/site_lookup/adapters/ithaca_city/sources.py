@@ -185,6 +185,30 @@ class Fetcher:
                                "spatialRel": "esriSpatialRelIntersects", "returnGeometry": "false", "outFields": field})
         return sorted({str(f["attributes"].get(field)) for f in body.get("features", []) if f["attributes"].get(field)})
 
+    # ---- FEMA flood maps (public: stored) ---------------------------------------------------------------
+
+    FLOOD_FIELDS = "FLD_ZONE,ZONE_SUBTY,SFHA_TF"
+
+    def _lot_query(self, ring, rel: str, fields: str, margin_ft: float) -> dict:
+        """A question about the lot's outline (and `margin_ft` around it, the tax map's tolerance), no geometry
+        back: FEMA's zone polygons run to hundreds of thousands of points."""
+        geom = {"rings": [[list(p) for p in ring + ring[:1]]], "spatialReference": {"wkid": SR}}
+        return {"geometry": json.dumps(geom), "geometryType": "esriGeometryPolygon", "inSR": SR, "spatialRel": rel,
+                "distance": margin_ft, "units": "esriSRUnit_Foot", "returnGeometry": "false", "outFields": fields}
+
+    def flood_zones(self, ring, within: bool = False, margin_ft: float = 2.0) -> list[dict]:
+        """The FEMA flood zones touching the lot (and `margin_ft` around it), or with `within`, the zones the whole
+        of it lies inside (ArcGIS: the query geometry within the feature). Each {zone, subtype, sfha}."""
+        rel = "esriSpatialRelWithin" if within else "esriSpatialRelIntersects"
+        body = self._ask("fema_flood", self._lot_query(ring, rel, self.FLOOD_FIELDS, margin_ft))
+        return [{"zone": f["attributes"].get("FLD_ZONE"), "subtype": f["attributes"].get("ZONE_SUBTY"),
+                 "sfha": f["attributes"].get("SFHA_TF")} for f in body.get("features", [])]
+
+    def flood_study_here(self, key: str, ring, margin_ft: float = 2.0) -> bool:
+        """Whether a pending or preliminary FEMA flood map (its study area) covers any of the lot."""
+        body = self._ask(key, self._lot_query(ring, "esriSpatialRelIntersects", "OBJECTID", margin_ft))
+        return bool(body.get("features"))
+
     # ---- ground ----------------------------------------------------------------------------------------
 
     def elevations_ft(self, points) -> list[float | None]:

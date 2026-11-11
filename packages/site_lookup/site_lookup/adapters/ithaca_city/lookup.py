@@ -87,7 +87,7 @@ def uses(f: dict, *keys: str) -> dict:
 # What the lookup is doing, in the architect's words, as it goes (the start box shows the latest one live).
 STEPS = {"address": "Finding the address…", "parcel": "Finding the tax parcel…",
          "streets": "Finding which lot lines face a street…", "ground": "Reading the ground elevations…",
-         "zoning": "Reading the City zoning map…", "overlays": "Checking the historic and gorge maps…"}
+         "zoning": "Reading the City zoning map…", "overlays": "Checking the historic, gorge and flood maps…"}
 
 
 def lookup(address: str, http, now: dt.datetime | None = None, step=None) -> dict:
@@ -465,10 +465,58 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict,
             found.append("Historic property")
         if str(city_parcel.get("landmarks_review") or "").upper() == "YES":
             found.append("Landmarks Preservation Commission review")
-    facts["overlays"] = fact(found, "City of Ithaca overlay maps (live)", src["url"], today,
+    found += _flood(f, ring)
+    facts["overlays"] = fact(found, "City of Ithaca overlay maps (live) and FEMA's flood maps", src["url"], today,
                              "needs_review" if found else "suggested",
                              "Overlays aren't checked in this release: check these by hand." if found else "",
-                             key=("historic_districts", "gorge_zones", "city_parcels", "city_zoning"), lot=lot)
+                             key=("historic_districts", "gorge_zones", "city_parcels", "city_zoning", "fema_flood",
+                                  "fema_pending", "fema_preliminary"), lot=lot)
+
+
+# The one FEMA answer that is "no flood zone": Zone X (unshaded), "the areas of minimal flood hazard, which are the
+# areas outside the SFHA and higher than the elevation of the 0.2-percent-annual-chance flood" (FEMA glossary, "Flood
+# Zones", fema.gov/about/glossary/flood-zones, read 2026-11-11). Anything else keeps the overlays row: every Special
+# Flood Hazard Area (SFHA_TF "T": A, AE and its floodway, AH, AO, AR, A99, V, VE), Zone X shaded (moderate: the 0.2%
+# chance flood, or the 1% chance flood under a foot deep), Zone D ("possible but undetermined flood hazards",
+# fema.gov/glossary/zone-d), and any value not listed here (FLD_ZONE, ZONE_SUBTY, SFHA_TF, matched exactly).
+FLOOD_NONE = ("X", "AREA OF MINIMAL FLOOD HAZARD", "F")
+FLOOD_MARGIN_FT = TAX_MAP_TOLERANCE_FT     # the lot and this much around it: a tax-map line may be 2 ft off
+
+
+def _flood_name(z: dict) -> str:
+    """A FEMA zone as the architect reads it."""
+    sub = f", {str(z['subtype']).lower()}" if z.get("subtype") else ""
+    if z.get("sfha") == "T":
+        return f"Zone {z['zone']}{sub} (Special Flood Hazard Area: the 1% annual chance flood)"
+    if z.get("zone") == "X":
+        return f"Zone X{sub} (moderate flood hazard)"
+    if z.get("zone") == "D":
+        return "Zone D (possible but undetermined flood hazard)"
+    return f"Zone {z.get('zone') or 'not given'}{sub}"
+
+
+def _flood(f: Fetcher, ring) -> list[str]:
+    """FEMA's flood zones on the lot, as overlay lines ([] only when FEMA positively says none). None is said only when
+    every zone touching the lot (and 2 ft around it) is Zone X unshaded, the whole lot lies inside one such zone (no
+    unmapped part, no second zone), and no pending or preliminary new map covers it. A service that doesn't answer, a
+    lot FEMA hasn't mapped, or one that straddles two areas can't be told: the row stays (principle 4)."""
+    label = "FEMA flood zone"
+    try:
+        touching = f.flood_zones(ring, margin_ft=FLOOD_MARGIN_FT)
+        if not touching:
+            return [f"{label}: couldn't tell (FEMA's flood map shows no zone here)"]
+        named = sorted({_flood_name(z) for z in touching if (z["zone"], z["subtype"], z["sfha"]) != FLOOD_NONE})
+        if named:                                            # any part of the lot, however small, counts
+            return [f"{label}: {n}" for n in named]
+        inside = f.flood_zones(ring, within=True, margin_ft=FLOOD_MARGIN_FT)
+        if not any((z["zone"], z["subtype"], z["sfha"]) == FLOOD_NONE for z in inside):
+            return [f"{label}: couldn't tell (the lot isn't wholly inside one area FEMA maps as minimal flood hazard)"]
+        for key, kind in (("fema_pending", "pending"), ("fema_preliminary", "preliminary")):
+            if f.flood_study_here(key, ring, margin_ft=FLOOD_MARGIN_FT):
+                return [f"{label}: couldn't tell (a {kind} new FEMA flood map covers this lot)"]
+        return []
+    except (Offline, ServiceError, KeyError, TypeError, AttributeError):   # down, or an answer not as expected:
+        return [f"{label}: couldn't check (FEMA's flood map didn't answer)"]   # never the whole lookup lost
 
 
 USED_LIVE = "(used live, not stored)"

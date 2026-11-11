@@ -201,7 +201,8 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
   runs with `GORDIUM_LIVE=1`.
 - **Weakness:** the tax map is approximate (about ±2 ft); the Southside area is a padded box, not the
   districts' own outline, and an amendment stays flagged until someone checks the online map shows it
-  (`map_shows_since`); overlays are found but not checked.
+  (`map_shows_since`); overlays are found but not checked (the overlays row is left out of a result only when every
+  overlay source, FEMA's flood maps included, answered none for the lot as drawn).
 
 ## 18. The term index and "show your work" research (code, then research; PR 17)
 

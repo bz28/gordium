@@ -1605,6 +1605,38 @@ def _building_items(items: list[dict]) -> list[dict]:
     return [i for i in items if i["group"] != "not_covered" and not i.get("use_detail")]
 
 
+OUTLINE_MATCH_FT = 0.01   # the lot as drawn is the lookup's outline when every corner is within this (a hundredth of a foot)
+
+
+def overlays_cleared(lot: dict | None, facts: dict) -> str | None:
+    """The day an address lookup found no overlay on this lot (facts' overlays_none_found), or None. Only while the lot
+    in the model is still exactly the outline it was found for: the same corners in the same order (from any corner,
+    either way round), each within OUTLINE_MATCH_FT, every line straight. A lot redrawn, moved, edited or picked since,
+    a curved line, no lot, or no such fact: None, and the overlays row stays (principle 4). Plain code over the saved
+    facts and the model: a live session and the reopened file decide alike."""
+    found = (facts or {}).get("overlays_none_found")
+    edges = (lot or {}).get("edges") or []
+    if not isinstance(found, dict) or found.get("value") is not True or not edges:
+        return None
+    if any(e.get("curved") or len(e.get("points") or []) != 2 for e in edges):
+        return None
+    drawn = [tuple(e["points"][0]) for e in edges]
+    if any(math.dist(e["points"][1], edges[(i + 1) % len(edges)]["points"][0]) > OUTLINE_MATCH_FT
+           for i, e in enumerate(edges)):
+        return None                                  # not one closed ring of lines end to end
+    saved = [tuple(p) for p in found.get("lot_outline") or []]
+    if len(saved) > 1 and math.dist(saved[0], saved[-1]) <= OUTLINE_MATCH_FT:
+        saved = saved[:-1]                           # a ring written closed
+    n = len(saved)
+    if n < 3 or n != len(drawn):
+        return None
+    for ring in (drawn, drawn[::-1]):
+        for k in range(n):
+            if all(math.dist(saved[i], ring[(k + i) % n]) <= OUTLINE_MATCH_FT for i in range(n)):
+                return str(found.get("date"))
+    return None
+
+
 RELEASE = "release."      # the id prefix of a row this release doesn't check (not_checked_yet.yaml's not_in_this_release)
 TO_ANSWER = ("to answer", "to answer")                               # a row waiting on a fact the architect can enter
 NOT_IN_RELEASE = ("not checked in this release", "not checked in this release")   # one Gordium can't check yet
@@ -1881,6 +1913,8 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                                  "at_limit": None}})
     gaps = load(j / "not_checked_yet.yaml") if (j / "not_checked_yet.yaml").exists() else {}
     for g in gaps.get("not_in_this_release") or []:
+        if g.get("left_out_when") == "overlays_none_found" and extras.get("overlays_none_found"):
+            continue                 # the lookup found none on this very lot, every source answering (check_site)
         items.append({"id": "release." + g["id"], "rule": None,          # short in the list; in full below
                       "name": g["name"].split(" (")[0] + " · not in this release",
                       "group": "not_checked", "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "",
@@ -1965,7 +1999,14 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
     return {"place": " · ".join(p for p in [facts.get("address") or "", facts.get("zone") or "",
                                             use_names.get(use, use.replace("_", " "))] if p),
             "code": code, "draft": DRAFT, "lot": lot, "grade": grade, "actions": actions, "main": main,
-            "sources": source_lines(extras.get("sources") or {})}
+            "sources": source_lines(extras.get("sources") or {}) + (
+                [OVERLAYS_NONE_LINE.format(date=extras["overlays_none_found"])]
+                if extras.get("overlays_none_found") else [])}
+
+
+# Said where each site fact's source is said, when the overlays row is left out: what was asked, and when
+OVERLAYS_NONE_LINE = ("Overlays: none found · address lookup, {date} (FEMA flood maps: Zone X, minimal flood hazard; the "
+                      "City's historic, gorge and zoning maps and parcel record) · not confirmed")
 
 
 SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Front lot line (on the street)",

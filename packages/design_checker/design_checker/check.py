@@ -849,7 +849,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                   if o != lot_id})
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
-    extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
+    extras = {**(extras or {}), "side_lines": side_lines(site, facts),   # compass names when a side isn't measured
+              # the lookup's "no overlay here", only for the lot it was found on (never taken from the caller)
+              "overlays_none_found": present.overlays_cleared(site.get("lot"), facts)}
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
     report_error = None
