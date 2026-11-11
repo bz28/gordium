@@ -1724,9 +1724,10 @@ def _not_included(doc, lot):
     polysurfaces, meshes, SubD, blocks; not the picked terrain, what the architect marked as the ground, the
     Building layer or Gordium's own layers): each one makes the check need review (C8). Nothing is ever left out
     on a guess: a topography mesh stays here (marked as looking like the ground, see _ground_like) until the
-    architect says "This is the ground". One with no bounding box to place it by (a block whose definition is
-    empty or whose linked file is missing, an empty SubD) can't be told off the lot: it counts as on the lot (and,
-    in _touching, as touching), never dropped, as the reference adapter (conformance_rhino._left_out) says."""
+    architect says "This is the ground". One with no bounding box that covers all of it (_whole_box: a block whose
+    definition is empty or whose linked file is missing, at any depth; an empty SubD) can't be told off the lot: it
+    counts as on the lot (and, in _touching, as touching), never dropped, as the reference adapter
+    (conformance_rhino._left_out) says."""
     if lot is None:
         return []
     ring = _plan_points(lot.Geometry)
@@ -1746,8 +1747,8 @@ def _not_included(doc, lot):
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or not logic.left_out_candidate(layer):        # Gordium's own layers, but for the neighbourhood's
             continue
-        b = g.GetBoundingBox(True)
-        if not b.IsValid:                                           # nowhere to place it: on the lot, not dropped
+        b = _whole_box(o)
+        if b is None:                                               # nowhere to place it: on the lot, not dropped
             out.append(str(o.Id))
             continue
         box = (b.Min.X, b.Min.Y, b.Max.X, b.Max.Y)                  # its plan box (_plan_box), worked out once
@@ -1756,6 +1757,23 @@ def _not_included(doc, lot):
         if logic.reaches_into_lot(ring, _plan_points(g), reach, box):   # its footprint, against the lot's outline
             out.append(str(o.Id))
     return out
+
+
+def _whole_box(o, depth=0):
+    """An object's bounding box, or None when it has none that covers all of it: no valid box (an empty block, an
+    empty SubD), or a block whose definition, at any depth, is missing, is empty or holds an object with no box (a
+    linked block whose file has moved, placed inside another block). Rhino leaves an invalid box out when it joins
+    a block's parts, so such a block's box is its visible part's alone, and the part not drawn may stand on the lot
+    or touch the house. The reference adapter (conformance_rhino._box) gives such a block no box, and so does this."""
+    b = o.Geometry.GetBoundingBox(True)
+    if not b.IsValid:
+        return None
+    if isinstance(o, Rhino.DocObjects.InstanceObject):
+        definition = o.InstanceDefinition if depth <= 32 else None
+        parts = list(definition.GetObjects()) if definition is not None else []
+        if not parts or any(_whole_box(p, depth + 1) is None for p in parts):
+            return None
+    return b
 
 
 def _plan_box(g):
@@ -1879,7 +1897,8 @@ def _extras(doc, facts):
 def _touching(doc, ids, buildings):
     """The left-out solids that may be part of the building: their box within 0.1 ft of a building's box. Boxes
     say "touching" more often than the shapes do, which only ever makes the check more cautious. One with no box
-    to tell (an empty block, see _not_included) may be touching, so it counts as touching."""
+    that covers all of it (_whole_box: an empty block, or one holding a linked block whose file has moved) may be
+    touching, so it counts as touching."""
     gap = _model_length(doc, 0.1)
     boxes = []
     for b in buildings:
@@ -1889,8 +1908,10 @@ def _touching(doc, ids, buildings):
     out = []
     for i in ids:
         o = _find(doc, i)
-        bb = o.Geometry.GetBoundingBox(True) if o is not None else None
-        if bb is not None and (not bb.IsValid or any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes)):
+        if o is None:
+            continue
+        bb = _whole_box(o)
+        if bb is None or any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes):
             out.append(i)
     return out
 
