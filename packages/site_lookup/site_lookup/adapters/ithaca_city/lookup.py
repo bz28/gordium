@@ -361,14 +361,11 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     # every polygon under each point counts, never only the first: the map draws overlays (SHOD...) on top of the
     # base districts, and the service returns them in no set order (review of lookup-names, round 1)
     counts: dict[str, int] = {}
-    over: dict[str, int] = {}
     on_map = 0
     off_map_inside = False       # a point the map doesn't cover, well inside the lot (not edge noise)
     for p in samples:
         here = {z["zone"] for z in polys if g.inside_any(p, z["rings"])}
         base = {district(c)[0] for c in here if c not in OVERLAYS}
-        for c in here & set(OVERLAYS):
-            over[c] = over.get(c, 0) + 1
         for z in base:
             counts[z] = counts.get(z, 0) + 1
         on_map += bool(base)
@@ -535,13 +532,19 @@ FLOOD_NONE = ("X", "AREA OF MINIMAL FLOOD HAZARD", "F")
 FLOOD_MARGIN_FT = TAX_MAP_TOLERANCE_FT     # the lot and this much around it: a tax-map line may be 2 ft off
 
 
+# FEMA's shaded Zone X ("moderate flood hazard", fema.gov/about/glossary/flood-zones), as NFHL layer 28 spells it
+FLOOD_SHADED_X = ("0.2 PCT ANNUAL CHANCE FLOOD HAZARD", "1 PCT DEPTH LESS THAN 1 FOOT")
+
+
 def _flood_name(z: dict) -> str:
     """A FEMA zone as the architect reads it."""
     sub = f", {str(z['subtype']).lower()}" if z.get("subtype") else ""
     if z.get("sfha") == "T":
         return f"Zone {z['zone']}{sub} (Special Flood Hazard Area: the 1% annual chance flood)"
-    if z.get("zone") == "X":
+    if z.get("zone") == "X" and z.get("subtype") in FLOOD_SHADED_X:
         return f"Zone X{sub} (moderate flood hazard)"
+    if z.get("zone") == "X":                     # a subtype FEMA didn't give, or one Gordium doesn't know: no hazard claimed
+        return f"Zone X{sub} (outside the Special Flood Hazard Area)"
     if z.get("zone") == "D":
         return "Zone D (possible but undetermined flood hazard)"
     return f"Zone {z.get('zone') or 'not given'}{sub}"

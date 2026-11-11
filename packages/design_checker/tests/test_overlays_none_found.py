@@ -216,6 +216,17 @@ def test_a_later_lookup_decides_again_and_the_architects_own_lot_gets_none():
     assert f3["lot_id"] == "mine" and "overlays_none_found" not in f3
 
 
+def test_a_lookup_that_only_draws_a_guide_drops_the_old_finding():
+    f, sv = _apply(looked_up("106_ithaca_rd"))
+    assert "overlays_none_found" in f
+    payload = copy.deepcopy(looked_up("106_ithaca_rd"))
+    w = payload["writes"]
+    w["guide_ring"], w["lot_ring"] = w["lot_ring"], None    # only the City's outline: a guide, no lot drawn
+    table = FakeTable({"sample": {"layer": "Site", "kind": "lot"}})
+    f2, _, guide = logic.apply_lookup(table, logic.BoxSession(table), payload, f, sv, ZONES)
+    assert guide and "overlays_none_found" not in f2      # no lot of its own to vouch for: the old finding goes
+
+
 def test_a_lookup_that_found_nothing_changes_nothing():
     f, sv = _apply(looked_up("106_ithaca_rd"))
     f2, _ = _apply({"status": "offline", "query": "106 Ithaca Rd"}, f, sv)

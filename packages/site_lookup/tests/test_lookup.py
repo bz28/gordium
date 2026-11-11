@@ -876,7 +876,8 @@ def test_601_hancock_st_is_in_zone_ae_and_needs_review():
     (("X", "1 PCT DEPTH LESS THAN 1 FOOT", "F"), "Zone X, 1 pct depth less than 1 foot (moderate"),
     (("D", None, "F"), "Zone D (possible but undetermined flood hazard)"),
     (("X", "AREA OF MINIMAL FLOOD HAZARD", "T"), "Zone X, area of minimal flood hazard (Special"),   # not exactly X
-    (("X", None, "F"), "Zone X (moderate"),                                                         # no subtype
+    (("X", None, "F"), "Zone X (outside the Special Flood Hazard Area"),                                                         # no subtype
+    (("X", "A NEW KIND", "F"), "Zone X, a new kind (outside the Special Flood Hazard Area"),   # never called moderate
     (("OPEN WATER", None, "F"), "Zone OPEN WATER"),
 ])
 def test_every_zone_but_x_unshaded_is_found_and_needs_review(zone, words):
