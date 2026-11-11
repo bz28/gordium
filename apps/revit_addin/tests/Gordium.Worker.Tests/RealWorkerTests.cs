@@ -20,6 +20,19 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
     };
 
     [Fact]
+    public async Task The_shared_worker_is_started_again_once_a_test_has_stopped_it()
+    {
+        using (var p = Process.GetProcessById(Client.ProcessId))
+        {
+            p.Kill(entireProcessTree: true);
+            p.WaitForExit(10_000);
+        }
+        await Assert.ThrowsAnyAsync<WorkerException>(() => Client.HelloAsync());
+        Assert.False(Client.IsStopped);                 // a new worker, so the next test isn't failed by this one
+        Assert.Equal(Client.About.Protocol, (await Client.HelloAsync()).Protocol);
+    }
+
+    [Fact]
     public void Hello_says_protocol_1_and_the_site_schema_with_fingerprints()
     {
         var about = Client.About;

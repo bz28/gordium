@@ -50,7 +50,9 @@ SECOND = {
     "complies_beside_a_fail": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="R-1b.stories", status="does_not_comply")]}}),
     "complies_beside_a_review": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="R-1b.stories", status="needs_review")]}}),
     "complies_with_a_use_detail": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="R-1b.home_occupation", group="building", status="complies", use_detail=True)]}}),
-    "complies_with_nothing_complying": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [dict(ITEM, group="not_checked", status="not_checked"), dict(ITEM, id="gap.x", group="not_covered", status="complies")]}}),
+    # every row a rule not in Gordium yet: nothing the check counts, so nothing it counts complies (a counted
+    # not_checked row would be refused by the not_checked guard first, and this guard would go untested)
+    "complies_with_nothing_complying": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [dict(ITEM, id="gap.x", group="not_covered", status="complies"), dict(ITEM, id="gap.y", group="not_covered", status="needs_review")]}}),
     "complies_beside_a_not_checked": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="R-1b.bedrooms", status="not_checked")]}}),
     "complies_beside_a_release_gap": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [ITEM, dict(ITEM, id="release.overlay", group="not_checked", status="not_checked")]}}),
     "complies_use_detail_not_bool": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": [dict(ITEM, use_detail="yes")]}}),

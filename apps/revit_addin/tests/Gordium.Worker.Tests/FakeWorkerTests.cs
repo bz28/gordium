@@ -140,6 +140,21 @@ public sealed class FakeWorkerTests
         await Assert.ThrowsAsync<WorkerStoppedException>(() => client.CheckSiteAsync(Site, Facts));
     }
 
+    // each guard on a "complies" answer is reached by its own case, never caught by another guard first
+    [Theory]
+    [InlineData("complies_beside_a_fail", "is does_not_comply")]
+    [InlineData("complies_beside_a_review", "is needs_review")]
+    [InlineData("complies_beside_a_not_checked", "is not_checked")]
+    [InlineData("complies_beside_a_release_gap", "is not_checked")]
+    [InlineData("complies_with_a_use_detail", "is a use detail still to answer")]
+    [InlineData("complies_with_nothing_complying", "none of its rows complies")]
+    public async Task Each_complies_guard_is_what_refuses_its_case(string mode, string words)
+    {
+        using var client = await Start(mode);
+        var e = await Assert.ThrowsAsync<WorkerProtocolException>(() => client.CheckSiteAsync(Site, Facts));
+        Assert.Contains(words, e.Message);
+    }
+
     [Fact]
     public async Task A_refusal_gives_the_workers_words_and_the_worker_keeps_serving()
     {

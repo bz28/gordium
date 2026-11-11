@@ -48,8 +48,9 @@ foreach (var row in result.Items)
    check whose overall state says it complies must have its rows back that (every row the check counts complying: none
    failing, needing review or not checked, whether waiting on a fact or not checked in this release; apart from the
    rules not in Gordium yet; no use detail waiting; at least one row complying), or it is refused. This is the
-   worker's own rule (Ben, 2026-11-09); the library enforces it again so an answer from an older worker is an error,
-   never a pass.
+   worker's rule from Ben's decision of 2026-11-09 (`present.state`, PR #82, which merges before this library);
+   the library enforces it again, so an answer from a worker without it (one saying "complies" beside a row not
+   checked) is an error, never a pass.
    A session command's part that refused its input gives its words as a `PartRefusedException`; an answer not
    given is an `AnswerMissingException`. Never a default in place of a missing value, and a `Verdict` never set
    (C#'s default, or `GetValueOrDefault` for a row that isn't there) is `NeedsReview`, never `Complies`.
