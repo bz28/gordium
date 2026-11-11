@@ -138,6 +138,7 @@ def test_a_lookup_that_found_none_on_its_lot_records_it_for_that_lot():
     ("a doubtful lot", lambda: _doubtful()),
     ("a saved lookup", lambda: logic.as_saved(logic.storable_lookup(dict(looked_up("106_ithaca_rd"),
                                                                          checked="2026-10-20")))),
+    ("marked saved", lambda: dict(looked_up("106_ithaca_rd"), saved_on="2026-10-20")),   # even with its list whole
 ])
 def test_a_lookup_with_any_doubt_records_nothing(why, payload):
     f, _ = _apply(payload())
