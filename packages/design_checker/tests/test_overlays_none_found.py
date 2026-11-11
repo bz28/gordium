@@ -30,9 +30,10 @@ from test_lookup_box import ZONES, FakeTable, T, looked_up  # noqa: E402
 from test_measure import box, lot  # noqa: E402
 
 CORNERS = [(0, 0), (60, 0), (60, 110), (0, 110)]          # SITE's lot
-NONE_FOUND = {"value": True, "lot_outline": [list(p) for p in CORNERS], "source": logic.OVERLAYS_NONE_SOURCE,
-              "date": "2026-11-11"}
-EVERY = dict(ANSWERED, **BEDROOMS)                        # every question answered: only the overlays row waits
+NONE_FOUND = {"value": True, "lot_outline": [list(p) for p in CORNERS], "address": "106 Ithaca Road, Ithaca, NY, 14850",
+              "source": logic.OVERLAYS_NONE_SOURCE, "date": "2026-11-11"}
+# every question answered: only the overlays row waits
+EVERY = dict(ANSWERED, **BEDROOMS, address="106 Ithaca Rd, Ithaca, NY 14850")
 
 
 def release_rows(v):
@@ -79,6 +80,18 @@ def test_a_lot_that_isnt_the_outline_it_was_found_for_keeps_the_row(outline):
 def test_the_same_outline_written_another_way_is_the_same_lot(outline):
     found = dict(NONE_FOUND, lot_outline=[list(p) for p in outline])
     assert present.overlays_cleared(SITE["lot"], dict(EVERY, overlays_none_found=found)) == "2026-11-11"
+
+
+@pytest.mark.parametrize("change", [{"address": "109 Ithaca Rd, Ithaca, NY 14850"}, {"address": None},
+                                    {"south_hill_overlay": True}])
+def test_another_address_or_the_architect_saying_south_hill_keeps_the_row(change):
+    """The finding is the lookup's for its address: a lot of the same shape under another address (or none) is not
+    it; and once the architect says the lot is in the South Hill Overlay, their word outranks the lookup's."""
+    facts = {k: v for k, v in dict(EVERY, overlays_none_found=NONE_FOUND, **change).items() if v is not None}
+    v = check_site(SITE, facts)["view"]
+    assert release_rows(v) == ["release.overlays"] and v["state"] == present.REVIEW
+    assert present.overlays_cleared(SITE["lot"], dict(EVERY, overlays_none_found=NONE_FOUND,
+                                                     south_hill_overlay=False)) == "2026-11-11"
 
 
 def test_a_curved_lot_line_or_no_lot_keeps_the_row():
@@ -157,6 +170,7 @@ def test_a_lookup_that_found_none_on_its_lot_records_it_for_that_lot():
     f, _ = _apply(payload)
     found = f["overlays_none_found"]
     assert found["value"] is True and found["lot_outline"] == payload["writes"]["lot_ring"]
+    assert found["address"] == logic.found_address(payload)
     assert found["date"] == "2026-10-20" and fact_problems({**f, "jurisdiction": "x", "zone": "R-1b"}) == []
 
 

@@ -43,8 +43,8 @@ settings, or no adapter folder, is a plain error. Everything below describes the
 **The overlays fact's one positive answer.** The overlays fact is `suggested` with an empty list only when every
 overlay source answered and every one said none, on a lot nothing is doubtful about. The start box turns exactly that
 (from a live lookup that draws its lot, never a saved one) into the lot fact `overlays_none_found`, with the lot
-outline it was found for; the check then leaves the "Overlays · not in this release" row out while the lot is still
-that outline (`design_checker.present.overlays_cleared`). The City's layers have no freshness date: their live answer
+outline and the address it was found for; the check then leaves the "Overlays · not in this release" row out while the
+lot is still that outline, at that address, and the architect hasn't said the lot is in the South Hill Overlay (`design_checker.present.overlays_cleared`). The City's layers have no freshness date: their live answer
 on the lookup's day is taken as the City's current map (as the zoning suggestion is), and the finding keeps that day.
 
 **Incomplete evidence is never "suggested".** A second address match that couldn't be placed on a parcel,

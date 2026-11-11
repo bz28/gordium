@@ -4501,9 +4501,10 @@ def overlays_none_found(answer, lot_ring):
     if not isinstance(got.get("value"), list) or got["value"] or not lot_ring or len(lot_ring) < 3:
         return None
     date = answer.get("checked") or got.get("date")
-    if not date:
+    address = found_address(answer)
+    if not date or not address:
         return None
-    return {"value": True, "lot_outline": [[float(p[0]), float(p[1])] for p in lot_ring],
+    return {"value": True, "lot_outline": [[float(p[0]), float(p[1])] for p in lot_ring], "address": address,
             "source": OVERLAYS_NONE_SOURCE, "date": str(date)}
 
 

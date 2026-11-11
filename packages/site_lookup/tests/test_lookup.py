@@ -635,7 +635,8 @@ def test_a_lookup_that_stops_half_way_keeps_nothing_from_the_city_outline():
     derived) and a malformed zoning answer stops the lookup after the ground. The ground's points are offsets
     of the City outline's corners: they count the City's source from the moment they exist, so they're not kept."""
     fx = load("106_ithaca_rd")
-    fake = Failing(fx, ["state_parcels"], zones=[{"geometry": {"rings": [[[0, 0], [1, 0], [1, 1], [0, 0]]]}}])
+    # (a polygon whose rings aren't a list: one with no attributes is now a "couldn't check" answer, not a stop)
+    fake = Failing(fx, ["state_parcels"], zones=[{"attributes": {"ZONE": "R-1b"}, "geometry": {"rings": 5}}])
     r = lookup(fx["address"], fake, NOW)
     assert r["status"] == "error"
     assert "city_parcels" in r["snapshot"]["details"]["ground"]["source_keys"]
@@ -1067,3 +1068,16 @@ def test_a_code_the_map_draws_on_the_lot_that_gordium_doesnt_know_is_never_no_ov
     # a neighbouring district's edge a foot over the lot line is edge noise, not a code on the lot
     edge = Fake(fx).square("B-2a", x1 - 1, y0 - 10, x1 + 50, y1 + 10)
     assert _overlays(zones=[Fake(fx).square(STAND_IN_ZONE), edge])["value"] == []
+
+
+@pytest.mark.parametrize("answer", [{"features": [{"attributes": {"ZONE": "SHOD"}}]},
+                                    {"features": [], "exceededTransferLimit": True}])
+def test_an_incomplete_zoning_answer_is_never_no_overlay(answer):
+    """A polygon without its outline, or an answer cut short: the map can't vouch for none."""
+    class Cut(Fake):
+        def post(self, url, params):
+            if key_of(url) == "city_zoning" and url != ENDPOINTS["city_zoning"]["layer"]:
+                return answer, b"{}"
+            return super().post(url, params)
+    o = _overlays(Cut)
+    assert o["status"] == "needs_review" and any("couldn't check" in v for v in o["value"]), o["value"]

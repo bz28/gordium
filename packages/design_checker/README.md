@@ -24,7 +24,8 @@ What it adds for the Rhino command, never changing a result:
   its lines what fails and by how much ("Rear yard 22 ft, needs ≥ 22.5 ft (0.5 ft short)") and what waits. A row
   still waiting (a fact to answer, a rule not in this release) is never a pass (Ben, 2026-11-09). An Ithaca result
   lists the overlays row (so never passes) unless the address lookup positively found no overlay on this very lot:
-  the lot fact `overlays_none_found`, honoured only while the lot is still the outline it was found for
+  the lot fact `overlays_none_found`, honoured only while the lot is still the outline (and the address) it was found
+  for, and not once the architect says the lot is in the South Hill Overlay
   (`present.overlays_cleared`; Ben, 2026-11-11, option A).
 - **Why:** for a NEEDS REVIEW row, the measuring's own reason ("enter bedrooms / parking spaces", "a building
   isn't inside the lot").

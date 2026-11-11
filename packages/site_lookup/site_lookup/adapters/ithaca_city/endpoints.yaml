@@ -107,6 +107,8 @@ fema_flood:
 fema_pending:
   name: FEMA pending flood maps (where new maps are adopted but not yet effective)
   owner: U.S. Federal Emergency Management Agency
+  # layer 0 is "Pending Data Availability" (the service's own layer list, read 2026-11-11): the areas a pending map
+  # covers. Asked only whether any of it touches the lot.
   url: https://hazards.fema.gov/arcgis/rest/services/PrelimPending/Pending_NFHL/MapServer/0/query
   terms: U.S. federal government data (public domain)
   store: raw
@@ -114,6 +116,7 @@ fema_pending:
 fema_preliminary:
   name: FEMA preliminary flood maps (where new maps are proposed)
   owner: U.S. Federal Emergency Management Agency
+  # layer 0 is "Preliminary Data Availability" (the service's own layer list, read 2026-11-11)
   url: https://hazards.fema.gov/arcgis/rest/services/PrelimPending/Prelim_NFHL/MapServer/0/query
   terms: U.S. federal government data (public domain)
   store: raw

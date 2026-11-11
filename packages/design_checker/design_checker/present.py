@@ -1609,7 +1609,8 @@ OUTLINE_MATCH_FT = 0.01   # the lot as drawn is the lookup's outline when every 
 
 
 def overlays_cleared(lot: dict | None, facts: dict) -> str | None:
-    """The day an address lookup found no overlay on this lot (facts' overlays_none_found), or None. Only while the lot
+    """The day an address lookup found no overlay on this lot (facts' overlays_none_found), or None. Only for the address
+    it was found at, never once the architect says the lot is in the South Hill Overlay, and only while the lot
     in the model is still exactly the outline it was found for: the same corners in the same order (from any corner,
     either way round), each within OUTLINE_MATCH_FT, every line straight. A lot redrawn, moved, edited or picked since,
     a curved line, no lot, or no such fact: None, and the overlays row stays (principle 4). Plain code over the saved
@@ -1618,6 +1619,11 @@ def overlays_cleared(lot: dict | None, facts: dict) -> str | None:
     edges = (lot or {}).get("edges") or []
     if not isinstance(found, dict) or found.get("value") is not True or not edges:
         return None
+    if facts.get("south_hill_overlay") is True:      # the architect says the lot is in one: theirs outranks the lookup
+        return None
+    if not (facts.get("address") and found.get("address")
+            and rhino_logic.same_site_address(str(facts["address"]), str(found["address"]))):
+        return None                                  # another address (or none) on a lot of the same shape
     if any(e.get("curved") or len(e.get("points") or []) != 2 for e in edges):
         return None
     drawn = [tuple(e["points"][0]) for e in edges]

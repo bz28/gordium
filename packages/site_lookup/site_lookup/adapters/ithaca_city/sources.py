@@ -183,8 +183,11 @@ class Fetcher:
     def zoning_near(self, ring, pad: float = 0.0) -> list[dict]:
         """The zoning map's polygons meeting the lot's box, `pad` feet around it (an overlay that close counts)."""
         body = self._ask("city_zoning", {**self._envelope(ring, pad), "outFields": "ZONE"})
+        feats = _features(body)
+        if body.get("exceededTransferLimit") or not all((f.get("geometry") or {}).get("rings") for f in feats):
+            raise ServiceError("the zoning map's answer is incomplete (more polygons, or one without its outline)")
         return [{"zone": f["attributes"].get("ZONE"), "rings": [g.open_ring(r) for r in f["geometry"]["rings"]]}
-                for f in body.get("features", []) if f.get("geometry")]
+                for f in feats]
 
     def zoning_last_edited(self) -> dt.date | None:
         body = self._ask("city_zoning", {}, url=ENDPOINTS["city_zoning"]["layer"])
