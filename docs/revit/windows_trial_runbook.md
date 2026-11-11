@@ -84,7 +84,7 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 
 | Day | Do | Done when |
 |---|---|---|
-| 1 | Section 2 in order, Revit last: Parallels, Windows, Python, the clone, `pytest`, conformance and the worker smoke test. Then install Revit and start its 30-day clock (only if the three real models are in hand). Open a sample project the firm did not draw (if one is installed) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked; first Q1 numbers written down |
+| 1 | Section 2 in order, Revit last: Parallels, Windows, Python, the clone, `pytest`, conformance and the worker smoke test. Then install Revit and start its 30-day clock (only if at least the sample model below is on the VM; see Open items). Open Autodesk's Snowdon Towers sample (`Snowdon Towers Sample Architectural.rvt`, saved in Revit 2024; Revit upgrades it on opening) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked; first Q1 numbers written down |
 | 2 | Open each real model in Revit, timing the open. Use each for a while as an architect would. Decide Q1: go, or switch (section 6) | The three models open; Q1 has a yes or no, with numbers |
 | 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Confirm which .NET runtime Revit 2027 and 2026 load, and whether one build loads in both | The button appears in both Revit versions, or the note says which version refused the build |
 | 4 | Use the worker client, `Gordium.Worker` ([apps/revit_addin](../../apps/revit_addin/README.md): already tested against the real worker on the Mac), for all of this. The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `test_data/host_conformance/expected/01_box_house.site.json` as the `site` and the scene's facts (see "The scene's facts and verdicts" below) | Q2 answered. The `check_site` answer's rows are exactly the scene's expected verdicts |
@@ -242,9 +242,12 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 1. **The 3 real Revit models from the architects.** Not yet in hand. Ask for three, different on purpose: one
    simple (flat walls), one with curved walls or curved roof, and one with survey coordinates set. Ask which
    Revit version each was saved in, and for permission to keep copies on the trial machine only (nothing from them
-   goes into the repo). Without them Q3 cannot be answered and the trial should not start the Revit clock.
-2. **A Windows ARM machine** (Parallels on the Mac, per the plan taken on 2026-11-05) and the Autodesk account
-   that starts the 30-day Revit trial.
+   goes into the repo). Until they arrive, Autodesk's Snowdon Towers sample stands in (Ben, 2026-11-11; kept outside the
+   repo in `~/Documents/gordium_archive/revit/sample_models/`): a multi-storey mixed-use building with real walls,
+   floors, roofs and stairs, enough for Q1 and the reading half of Q3 (flat versus curved faces, `UniqueId`s, units).
+   It has no Ithaca lot, so it cannot show a real zoning check: the architects' models are still needed for that.
+2. **A Windows ARM machine** (Parallels on the Mac, per the plan taken on 2026-11-05). The Autodesk account for the
+   30-day Revit trial is in hand (Ben, 2026-11-11; its login is kept outside the repo, never in it).
 3. **The cloud Windows option**, decided up front so a switch on day 2 costs no time: which provider, and who
    pays.
 4. **Which branch the trial clones.** This page sits on the tidy-up stack's top branch (PR #78); the trial needs
