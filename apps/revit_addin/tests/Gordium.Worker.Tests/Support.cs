@@ -95,16 +95,31 @@ public sealed record SceneCase(string Scene, string Step, JsonNode Site, JsonNod
     }
 }
 
-/// <summary>One real worker shared by a test class (starting Python and loading the rules takes seconds).</summary>
+/// <summary>One real worker shared by a test class (starting Python and loading the rules takes seconds). A test whose
+/// answer the client refused has stopped it; the next test gets a new one, so one refusal is one failure, not a run
+/// of WorkerStoppedException in whichever tests happen to come after it.</summary>
 public sealed class RealWorker : IAsyncLifetime
 {
-    public WorkerClient Client { get; private set; } = null!;
+    private WorkerClient _client = null!;
 
-    public async Task InitializeAsync() => Client = await WorkerClient.StartAsync(Env.Real());
+    public WorkerClient Client
+    {
+        get
+        {
+            if (_client.IsStopped)
+            {
+                _client.Dispose();
+                _client = Task.Run(() => WorkerClient.StartAsync(Env.Real())).GetAwaiter().GetResult();
+            }
+            return _client;
+        }
+    }
+
+    public async Task InitializeAsync() => _client = await WorkerClient.StartAsync(Env.Real());
 
     public Task DisposeAsync()
     {
-        Client.Dispose();
+        _client.Dispose();
         return Task.CompletedTask;
     }
 }

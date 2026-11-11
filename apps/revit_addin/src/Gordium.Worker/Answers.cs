@@ -125,7 +125,8 @@ public sealed class CheckResult
     /// there is not in the dictionary; <c>GetValueOrDefault</c> gives <see cref="Verdict.NeedsReview"/> for it.</summary>
     public IReadOnlyDictionary<string, Verdict> ById() => Items.ToDictionary(i => i.Id, i => i.Status);
 
-    /// <summary>A check said to comply must be one the rows back (the worker's own rule, present.state): no row it
+    /// <summary>A check said to comply must be one the rows back (the worker's rule, present.state, from Ben's
+    /// decision of 2026-11-09; a worker from before it is refused, never read as a pass): no row it
     /// counts (any but the rules not in Gordium yet, <c>not_covered</c>) does not comply, needs review or is not checked
     /// (waiting on a fact, or not checked in this release: Ben, 2026-11-09), no use detail waits for an answer (<c>use_detail</c>), and at least one counted row complies. Anything else is refused,
     /// never shown as a pass.</summary>
