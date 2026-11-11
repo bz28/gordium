@@ -1133,13 +1133,13 @@ def _north(doc, facts):
 
 def _unmeasured_outlines(doc, ids):
     """The plan outline (box) of each object on the lot the check doesn't measure, drawn dashed and light."""
-    out = []
+    out, wholes = [], {}
     for i in ids or []:
         o = _find(doc, i)
         if o is None:
             continue
-        b = o.Geometry.GetBoundingBox(True)
-        if not b.IsValid:                        # no box (an empty block): nothing to outline, its review row says it
+        b = _whole_box(o, wholes)
+        if b is None:      # no box that covers all of it (_whole_box): nothing to outline, its review row says it
             continue
         z = b.Max.Z
         out.append([rg.Point3d(b.Min.X, b.Min.Y, z), rg.Point3d(b.Max.X, b.Min.Y, z), rg.Point3d(b.Max.X, b.Max.Y, z),
@@ -1738,6 +1738,7 @@ def _not_included(doc, lot):
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
     state = _ui_state(doc)
     known_ground = {str(state.get("terrain_id") or "")} | set(state.get("ground_ids") or [])
+    wholes = {}                                                 # each block definition walked once (_whole_box)
     for o in doc.Objects.GetObjectList(every):
         layer = doc.Layers[o.Attributes.LayerIndex].FullPath
         g = o.Geometry
@@ -1747,7 +1748,7 @@ def _not_included(doc, lot):
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or not logic.left_out_candidate(layer):        # Gordium's own layers, but for the neighbourhood's
             continue
-        b = _whole_box(o)
+        b = _whole_box(o, wholes)
         if b is None:                                               # nowhere to place it: on the lot, not dropped
             out.append(str(o.Id))
             continue
@@ -1759,19 +1760,25 @@ def _not_included(doc, lot):
     return out
 
 
-def _whole_box(o, depth=0):
+def _whole_box(o, wholes, depth=0):
     """An object's bounding box, or None when it has none that covers all of it: no valid box (an empty block, an
     empty SubD), or a block whose definition, at any depth, is missing, is empty or holds an object with no box (a
     linked block whose file has moved, placed inside another block). Rhino leaves an invalid box out when it joins
     a block's parts, so such a block's box is its visible part's alone, and the part not drawn may stand on the lot
-    or touch the house. The reference adapter (conformance_rhino._box) gives such a block no box, and so does this."""
+    or touch the house. The reference adapter (conformance_rhino._box) gives such a block no box, and so does this.
+    `wholes` ({definition id: whether it is whole}, one per check) has each definition walked once, however many
+    times it is placed."""
     b = o.Geometry.GetBoundingBox(True)
     if not b.IsValid:
         return None
     if isinstance(o, Rhino.DocObjects.InstanceObject):
         definition = o.InstanceDefinition if depth <= 32 else None
-        parts = list(definition.GetObjects()) if definition is not None else []
-        if not parts or any(_whole_box(p, depth + 1) is None for p in parts):
+        if definition is None:
+            return None
+        if definition.Id not in wholes:
+            parts = list(definition.GetObjects())
+            wholes[definition.Id] = bool(parts) and all(_whole_box(p, wholes, depth + 1) is not None for p in parts)
+        if not wholes[definition.Id]:
             return None
     return b
 
@@ -1905,12 +1912,12 @@ def _touching(doc, ids, buildings):
         bb = b.Geometry.GetBoundingBox(True)
         bb.Inflate(gap)
         boxes.append(bb)
-    out = []
+    out, wholes = [], {}
     for i in ids:
         o = _find(doc, i)
         if o is None:
             continue
-        bb = _whole_box(o)
+        bb = _whole_box(o, wholes)
         if bb is None or any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes):
             out.append(i)
     return out
