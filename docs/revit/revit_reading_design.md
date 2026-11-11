@@ -20,10 +20,10 @@ as touching the house.
 
 Rhino sorts by layer: solids on the Building layer are the building; any other solid on the lot is "left out" and
 makes the check need review. Revit has no layers, so the reader sorts by **category** and by **what the geometry
-is** (close to Rhino's `rhino_logic.could_be_building`, with two differences, both proposed: a Revit solid with
-any face counts, where Rhino needs a closed solid or more than one face, the cautious side; and a mesh counts only
-with more than 4 faces, because whether a Revit mesh is closed is **to check**, so a closed mesh of 4 faces or fewer,
-which Rhino counts, is left out of this test until that is settled).
+is** (Rhino's `rhino_logic.could_be_building`, widened on the cautious side, proposed: a Revit solid or mesh with
+any face counts, where Rhino needs a closed solid or more than one face, or a closed mesh or more than 4 faces.
+Whether a Revit mesh is closed is **to check**, and not knowing it never drops one: the Revit reader counts at least
+everything Rhino counts).
 
 **Which elements are looked at.** Every element of the open document (`FilteredElementCollector(doc)`), never a
 view's collector: an element hidden, isolated, cropped or in a hidden category still counts, as Rhino counts hidden
@@ -38,7 +38,7 @@ are for the architect's reading only (proposed).
 | Curtain wall (the host wall itself) | Proposed: its panels and mullions are their own elements (row 1); the wall sends its own faces only if it has any (**to check**: whether a curtain wall's own geometry is empty, so no face is sent twice) | | **new scene A** |
 | In-place family | Proposed: by its category, like the building-category row; off the building categories, as the family instance row below (left out whatever its geometry, never dropped for having none at Fine detail). `Family.IsInPlace` only names it in the panel | | **new scene A**; empty: **new scene H** |
 | Model group | Proposed: never itself: each member element is read on its own (a group has no geometry of its own) | | **new scene E** (ids after editing a group) |
-| Any other element with a Revit `Solid` with faces (closed or not) or a mesh of more than 4 faces (generic models, masses, site, planting, specialty equipment, furniture) on the lot | `left_out`, `could_be_building: true` | A solid on the Default layer | 05 (garage), 15 (porch); the recorder draws these as Generic Models |
+| Any other element with a Revit `Solid` or mesh with faces (closed or not) (generic models, masses, site, planting, specialty equipment, furniture) on the lot | `left_out`, `could_be_building: true` | A solid on the Default layer | 05 (garage), 15 (porch); the recorder draws these as Generic Models |
 | A family instance off the building categories, loadable or in-place, whatever its geometry (even none at Fine detail) | `left_out`, `could_be_building: true`; with no box, `touching: null` | A block on another layer: Rhino counts every block, whatever it holds | 15 (`shed_block`); empty: **new scene H** |
 | Gordium's own neighbourhood objects (proposed: marked DirectShapes, as Rhino's `Gordium::Context`) | `left_out`, `context: true` | A solid on `Gordium::Context` | 15 (`neighbour_solid`) |
 | Proposed: a linked Revit model, wherever it is placed (Rhino reports such a block wherever it is, with no lot test), that holds any building-category element at any depth of links inside links (as `_block_holds`), or has a closed workset of its own (its hidden part could hold the house; **to check** that the API says so) | `unsent`, kind `"a linked model"`, `not_a_solid`: every building measure needs review | A block holding Building-layer objects (`read_3dm._block_holds`) | 04 (the shed drawn as a linked model); **new scene B** |
