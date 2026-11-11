@@ -1081,3 +1081,16 @@ def test_an_incomplete_zoning_answer_is_never_no_overlay(answer):
             return super().post(url, params)
     o = _overlays(Cut)
     assert o["status"] == "needs_review" and any("couldn't check" in v for v in o["value"]), o["value"]
+
+
+def test_a_rezoning_the_map_may_not_show_keeps_the_overlays_doubtful(monkeypatch):
+    """An adopted ordinance not confirmed on the online map, reaching this lot: the map's "no overlay here" is the
+    same map's, so it can't vouch for none (review round 3). Outside the ordinance's area, nothing changes."""
+    x0, y0, x1, y1 = g.bounds(ring_of(load("106_ithaca_rd")))
+    monkeypatch.setattr(lookup_module, "AMENDMENTS", [{"ordinance": "T", "title": "test", "adopted": "2025-11-19",
+                                                       "area_epsg2261": [x0, y0, x1, y1], "streets": []}])
+    o = _overlays()
+    assert o["status"] == "needs_review" and any("Ord. T may have changed this lot's map" in v for v in o["value"])
+    monkeypatch.setattr(lookup_module, "AMENDMENTS", [{"ordinance": "T", "title": "test", "adopted": "2025-11-19",
+                                                       "area_epsg2261": [0, 0, 1, 1], "streets": []}])
+    assert _overlays()["value"] == []

@@ -428,6 +428,9 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
         if why:
             asks.append(f"{line} and {why}: check the current zoning map.")
             escalate(z, "needs_review", asks[-1])
+            # the same map may not show what the ordinance drew here: its overlays can't be said to be none either
+            map_overlays.append(f"Overlays on the City's zoning map: couldn't check (Ord. {a['ordinance']} may have "
+                                "changed this lot's map)")
         else:
             notes.append(line + "; this lot is outside the area it rezoned.")
     if notes:
