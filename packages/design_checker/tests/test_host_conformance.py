@@ -7,6 +7,7 @@ caught, never waved through."""
 import copy
 import json
 import math
+import types
 import uuid
 
 import pytest
@@ -447,6 +448,33 @@ class InstanceReferenceGeometry(_Geometry):               # a placed block: the 
     pass
 
 
+class _Definition:
+    def __init__(self, parts):
+        self._parts = parts
+
+    def GetObjects(self):  # noqa: N802
+        return tuple(self._parts)
+
+
+class _InstanceObject:
+    """RhinoCommon's InstanceObject (a placed block): its box is its parts' boxes joined, an invalid one left out,
+    as Rhino joins them; `parts` None is a definition that isn't there."""
+
+    def __init__(self, oid, parts, layer=2):
+        self.Id, self.Attributes = oid, types.SimpleNamespace(LayerIndex=layer)
+        self.InstanceDefinition = None if parts is None else _Definition(parts)
+        boxes = [p.Geometry.GetBoundingBox(True) for p in parts or []]
+        boxes = [b for b in boxes if b.IsValid]
+        self.Geometry = InstanceReferenceGeometry(
+            ((min(b.Min.X for b in boxes), min(b.Min.Y for b in boxes), min(b.Min.Z for b in boxes)),
+             (max(b.Max.X for b in boxes), max(b.Max.Y for b in boxes), max(b.Max.Z for b in boxes)))
+            if boxes else EMPTY_BOX)
+
+
+def _part(box):
+    return types.SimpleNamespace(Id="part", Geometry=_Geometry(box), Attributes=types.SimpleNamespace(LayerIndex=2))
+
+
 class _Curve(_Geometry):
     def __init__(self, ring):
         super().__init__(((min(x for x, _ in ring), min(y for _, y in ring), 0),
@@ -459,14 +487,16 @@ class _Curve(_Geometry):
 
 def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
     """gordium_rhino's own _not_included, _touching, _ground_like and _unmeasured_outlines, run on a stub document:
-    a 60 × 120 ft lot at survey coordinates (`lot_at`), a house on it, and `blocks` ({id: box}) placed on Default."""
+    a 60 × 120 ft lot at survey coordinates (`lot_at`), a house on it, and `blocks` ({id: box}, or a placed
+    _InstanceObject with its definition's parts) placed on Default."""
     import ast
     import types
 
     from host_source import host_path, host_text
 
     from design_checker import rhino_logic as logic
-    names = ("_not_included", "_plan_box", "_plan_points", "_touching", "_ground_like", "_unmeasured_outlines")
+    names = ("_not_included", "_whole_box", "_plan_box", "_plan_points", "_touching", "_ground_like",
+             "_unmeasured_outlines")
     tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
     fns = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
     assert sorted(f.name for f in fns) == sorted(names)
@@ -475,14 +505,16 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
                                 Attributes=types.SimpleNamespace(LayerIndex=0))
     house = types.SimpleNamespace(Id="house", Geometry=_Geometry(((x + 15, y + 30, 0), (x + 45, y + 80, 20))),
                                   Attributes=types.SimpleNamespace(LayerIndex=1))
-    placed = [types.SimpleNamespace(Id=i, Geometry=InstanceReferenceGeometry(box),
+    placed = [box if isinstance(box, _InstanceObject) else
+              types.SimpleNamespace(Id=i, Geometry=InstanceReferenceGeometry(box),
                                     Attributes=types.SimpleNamespace(LayerIndex=2)) for i, box in blocks.items()]
     every = [lot, house] + placed
     doc = types.SimpleNamespace(Layers=[types.SimpleNamespace(FullPath=p) for p in ("Site", "Building", "Default")],
                                 Objects=types.SimpleNamespace(GetObjectList=lambda settings: list(every)))
     rg = types.SimpleNamespace(Brep=type("Brep", (), {}), Mesh=type("Mesh", (), {}),
                                Extrusion=type("Extrusion", (), {}), Curve=_Curve, Point3d=_Pt, BoundingBox=_Box)
-    rhino = types.SimpleNamespace(DocObjects=types.SimpleNamespace(ObjectEnumeratorSettings=types.SimpleNamespace))
+    rhino = types.SimpleNamespace(DocObjects=types.SimpleNamespace(ObjectEnumeratorSettings=types.SimpleNamespace,
+                                                                   InstanceObject=_InstanceObject))
     ns = {"rg": rg, "Rhino": rhino, "logic": logic, "LAYERS": {"building": "Building"},
           "_model_length": lambda doc, feet: feet, "_ui_state": lambda doc: {},
           "_find": lambda doc, i: next((o for o in every if o.Id == i), None)}
@@ -498,9 +530,9 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
 def test_the_live_command_keeps_a_block_with_no_box_as_left_out_and_touching(no_box, lot_at):
     """A placed block with no box to place it by (its definition empty, or a linked block whose file has moved: the
     viewport shows nothing, but the garage it stands for is part of the design) can't be told off the lot or apart
-    from the house. The Rhino command dropped it (its box missed the lot's, or its box's corners outlined nothing),
-    or, with a lot round the origin, could list it as not touching, so nothing said a building was left out (or
-    touching) and coverage, the yards, height and stories could stay "complies". It now counts as on the lot and
+    from the house. The Rhino command dropped it (its box missed the lot's, or its box's corners outlined nothing;
+    had it been kept, its box would also have been taken as not touching), so nothing said a building was left out
+    (or touching) and coverage, the yards, height and stories could stay "complies". It now counts as on the lot and
     touching, as the reference adapter lists it (touching unknown); a normal shed apart from the house and one off
     the lot are still told by their boxes. (_ground_like runs too: a block never looks like the ground.)"""
     x, y = lot_at
@@ -511,6 +543,50 @@ def test_the_live_command_keeps_a_block_with_no_box_as_left_out_and_touching(no_
     assert touching == ["nothing"]
     assert ground == []
     assert len(outlines) == 1                                         # the shed's; the block with no box has none
+
+
+@pytest.mark.parametrize("where", ["off_the_lot", "apart_from_the_house"])
+def test_the_live_command_keeps_a_block_holding_a_part_with_no_box_as_left_out_and_touching(where):
+    """A block whose drawn part has a box but which also holds a block with none (a linked block whose file has
+    moved, placed inside it): Rhino gives the outer block its drawn part's box alone, so the command judged it by
+    that part and dropped it (drawn part off the lot) or took it as not touching (drawn part apart from the house),
+    while the part not drawn may be a porch against the house: the yards, height and stories could stay "complies".
+    It counts as on the lot and touching, as the reference adapter gives such a block no box (test below). A block
+    whose every part has a box is still told by its box."""
+    x, y = 1000.0, 2000.0
+    drawn = {"off_the_lot": ((x + 500, y, 0), (x + 510, y + 10, 8)),
+             "apart_from_the_house": ((x + 48, y + 90, 0), (x + 56, y + 98, 8))}[where]
+    holding_nothing = _InstanceObject("inner", [])                   # its file moved: an empty definition
+    partly = _InstanceObject("partly", [_part(drawn), holding_nothing])
+    missing = _InstanceObject("missing", [_part(drawn), _InstanceObject("gone", None)])   # no definition at all
+    whole = _InstanceObject("whole", [_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
+    left, touching, _, _ = _live_left_out({"partly": partly, "missing": missing, "whole": whole}, (x, y))
+    assert left == ["partly", "missing", "whole"]
+    assert touching == ["partly", "missing"]
+
+
+def test_the_reference_adapter_gives_a_block_holding_a_part_with_no_box_no_box(tmp_path):
+    """The adapter's half: a block holding a solid far off the lot and a block whose definition isn't in the file is
+    listed, touching unknown (counts as touching), as the live command now lists it."""
+    import rhino3dm as r
+    scene = copy.deepcopy(SCENES["05_garage_left_out"])
+    scene["others"] = []
+    model = cr.build(scene)
+    layer = cr._layer(model, "Default")
+    solid = cr._solid({"outline": [[5000, 5000], [5010, 5000], [5010, 5010], [5000, 5010]], "base": 0, "top": 10},
+                      1.0)                                          # far off the lot
+    inside = r.ObjectAttributes()
+    inside.LayerIndex = layer
+    index = model.InstanceDefinitions.Add("partly", "", "", "", r.Point3d(0, 0, 0),
+                                          (solid, r.InstanceReference(uuid.uuid4(), r.Transform.Identity())),
+                                          (inside, inside))
+    attrs = r.ObjectAttributes()
+    attrs.LayerIndex = layer
+    model.Objects.AddInstanceObject(
+        r.InstanceReference(model.InstanceDefinitions.FindIndex(index).Id, r.Transform.Identity()), attrs)
+    model.Write(str(tmp_path / "m.3dm"), 8)
+    left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
+    assert [(o["layer"], o["touching"]) for o in left] == [("Default", None)]
 
 
 def test_the_reference_adapter_lists_a_block_with_no_box_as_left_out_and_touching_unknown(tmp_path):
