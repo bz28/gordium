@@ -19,10 +19,10 @@ edit. The trial ends with a go / no-go and a filled-in results table, not with a
 
 | # | Question | Go if | How it is answered |
 |---|---|---|---|
-| Q1 | Does Revit run acceptably in Parallels on this Mac (16 GB M2)? | Opening a real model and orbiting, selecting and editing is usable with Revit and the add-in both running, and the Mac is not swapping heavily | Days 1 to 2, measured in section 5 |
+| Q1 | Does Revit run acceptably in Parallels on this Mac (16 GB M2)? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the Mac is not swapping heavily | Days 1 to 2, measured in section 5 |
 | Q2 | Can a minimal C# add-in start the Python worker and get an answer back? | The add-in starts `python -m design_checker serve`, sends `hello`, then `check_site` for the box-house scene, and the answer matches what the Mac gives | Days 3 to 4 |
-| Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each model, the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 8 to 9 |
-| Q4 | How long does reading take after an edit? | Within the targets in section 6 | Day 10, measured in section 5 |
+| Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each real model (Snowdon Towers alone answers the reading half only, as "provisional (Snowdon)": it has no Ithaca lot, and its survey coordinates stay "not tested"; Q3 is not a go until the architects' models are read), the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 8 to 9 |
+| Q4 | How long does reading take after an edit? | Within the targets in section 6, or the miss recorded and the MVP planned as "check on a button" (section 6: a slow read is not a stop) | Day 10, measured in section 5 |
 | Q5 | Can the 15 drawn conformance scenes be recorded from Revit and pass? | `python -m design_checker.conformance` on the Mac prints `OK: every scene conforms` with `recorded/revit/` filled | Days 5 to 8, section 4 |
 
 Not in the trial: the dockable pane, the live-check screen, rooms, doors or stairs. Those come after a "go".
@@ -43,8 +43,8 @@ Do these in order. Tick each when done and write the version you got in the note
 | [ ] | `pytest` passes | The same step CI's Windows job runs. The Windows job runs more checks after it (rule validation, the audits, the goldens: see `ci.yml`); running them all is optional here, `pytest` is the one that proves the install |
 | [ ] | `python -m design_checker.conformance` prints `OK: every scene conforms` | Proves the Windows install reads the scenes and recordings as the Mac does |
 | [ ] | The worker answers by hand (below) | |
-| [ ] | The 3 real Revit models copied onto the VM (see Open items) | Keep copies out of the repo clone. They are the firms' files |
-| [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Last on the list, because installing it starts the 30-day clock: do it only when every row above is ticked and the models are in hand**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
+| [ ] | Autodesk's Snowdon Towers sample copied onto the VM, and each of the architects' 3 models as it arrives (see Open items 1; a model arriving later is added then, without restarting anything) | Keep copies out of the repo clone. The architects' models are the firms' files |
+| [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Last on the list, because installing it starts the 30-day clock: do it only when every row above is ticked and at least the Snowdon Towers sample is on the VM**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
 | [ ] | Revit 2026 installed as well, if Autodesk's trial allows both on the one machine (otherwise note that it did not) | The plan is one .NET 10 build for both. See the first open check in section 7 |
 
 **Worker smoke test** (from the clone, venv active). Type or pipe one request per line; each gets one answer line:
@@ -84,16 +84,16 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 
 | Day | Do | Done when |
 |---|---|---|
-| 1 | Section 2 in order, Revit last: Parallels, Windows, Python, the clone, `pytest`, conformance and the worker smoke test. Then install Revit and start its 30-day clock (only if at least the sample model below is on the VM; see Open items). Open Autodesk's Snowdon Towers sample (`Snowdon Towers Sample Architectural.rvt`, saved in Revit 2024; Revit upgrades it on opening) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked; first Q1 numbers written down |
-| 2 | Open each real model in Revit, timing the open. Use each for a while as an architect would. Decide Q1: go, or switch (section 6) | The three models open; Q1 has a yes or no, with numbers |
+| 1 | Section 2 in order, Revit last: Parallels, Windows, Python, the clone, `pytest`, conformance and the worker smoke test. Then install Revit and start its 30-day clock (only once at least the Snowdon Towers sample is on the VM: Open items 1). Open Autodesk's Snowdon Towers sample (`Snowdon Towers Sample Architectural.rvt`, saved in Revit 2024; Revit upgrades it on opening) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked; first Q1 numbers written down |
+| 2 | Open Snowdon Towers and each architect model already in hand, timing the open. Use each for a while as an architect would. Decide Q1 on those: go, or switch (section 6). An architect model arriving later is timed when it arrives, and can reopen Q1 | The models in hand open; Q1 has a yes or no, with numbers, and says which models it rests on |
 | 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Confirm which .NET runtime Revit 2027 and 2026 load, and whether one build loads in both | The button appears in both Revit versions, or the note says which version refused the build |
 | 4 | Use the worker client, `Gordium.Worker` ([apps/revit_addin](../../apps/revit_addin/README.md): already tested against the real worker on the Mac), for all of this. The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `test_data/host_conformance/expected/01_box_house.site.json` as the `site` and the scene's facts (see "The scene's facts and verdicts" below) | Q2 answered. The `check_site` answer's rows are exactly the scene's expected verdicts |
-| 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Start from the [reading design note](revit_reading_design.md): how a Revit element maps to a building, what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit, and the lot pick flow (default; `PropertyLine.GetBoundary` is 2027 only). Write into the notes where the trial confirms or changes it, and settle its "to check" items as they come up | Scene 01 recorded and passes (section 4) |
+| 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Start from the [reading design note](revit_reading_design.md): how a Revit element maps to a building, what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit, and how the lot outline is found (by default the architect picks a closed outline, the picked-lot flow; reading the property line directly with `PropertyLine.GetBoundary` works only in Revit 2027). Write into the notes where the trial confirms or changes it, and settle its "to check" items as they come up | Scene 01 recorded and passes (section 4) |
 | 6 | Reading, part 2: scenes 02 to 06 (curved wall, open solid, block, garage left out, no grade) | Each recorded and passing |
 | 7 | Scenes 07 to 12 (spot grades and the move, millimetres, two lot outlines, survey coordinates, corner lot, ids after an edit) | Each recorded and passing, or the failure explained in the notes |
-| 8 | Scenes 15 to 17 (left-out objects, terrain mesh, curved lot line). Then point the add-in at real model 1: read it, send it, look at the verdicts. Time every stage (section 5) | Real model 1 row filled in |
-| 9 | Real models 2 and 3. For each: flat versus curved faces, `UniqueId`s before and after a small edit, units, survey coordinates | Rows for models 2 and 3 filled in |
-| 10 | Timing runs: the edit loop on all three models, five repeats each. Re-run `python -m design_checker.conformance` on the Mac with the final recordings | Section 5 complete |
+| 8 | Scenes 15 to 17 (left-out objects, terrain mesh, curved lot line). Then point the add-in at real model 1 (if no architect model has arrived, Snowdon Towers as "model 0", recorded as provisional): read it, send it, look at the verdicts. Time every stage (section 5) | Real model 1 (or model 0) row filled in |
+| 9 | Real models 2 and 3. For each: flat versus curved faces, `UniqueId`s before and after a small edit, units, survey coordinates. Any not yet arrived: its row says so, and Q3 stays open (the trial is not extended for it; Ben decides when it arrives) | Rows for models 2 and 3 filled in, or marked not arrived |
+| 10 | Timing runs: the edit loop on every model in hand (Snowdon Towers too), five repeats each. Re-run `python -m design_checker.conformance` on the Mac with the final recordings | Section 5 complete |
 | 11 to 12 | Spare. Re-record anything that failed; chase the worst timing; test the other Revit version if only one was used | |
 | 13 | Write the go / no-go: answer Q1 to Q5 in section 1 with the numbers, list what surprised us, and what the add-in MVP plan must change | The section 5 tables filled in and signed off by Ben |
 | 14 | Commit the recordings and results in a PR (never push to main; Ben merges) and hand the machine back or shut the cloud VM down | PR open |
@@ -173,7 +173,7 @@ Fill these in as you go; this page is where the results live. "Mac" below means 
 | Check | Value | Usable? |
 |---|---|---|
 | Revit start to ready | | |
-| Open real model 1 / 2 / 3 | | |
+| Open Snowdon Towers; real model 1 / 2 / 3 (those in hand) | | |
 | Orbit and select in model 1: smooth, laggy, or unusable | | |
 | Memory pressure on the Mac (Activity Monitor: green, yellow, red) while Revit and the worker run | | |
 | Windows free RAM with Revit open | | |
@@ -228,12 +228,12 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 
 | If | Then |
 |---|---|
-| By the end of day 2, opening a real model takes longer than 3 minutes, orbiting is unusable, or the Mac's memory pressure stays red with only Revit running | Switch to a cloud Windows machine (a Windows VM with 32 GB or more) and restart the setup list there. Keep the days already spent; do not extend the two weeks for the switch more than 2 days |
+| By the end of day 2, opening a model (Snowdon Towers or an architect's) takes longer than 3 minutes, orbiting is unusable, or the Mac's memory pressure stays red with only Revit running | Switch to a cloud Windows machine (a Windows VM with 32 GB or more) and restart the setup list there. Keep the days already spent; do not extend the two weeks for the switch more than 2 days |
 | Revit runs but the add-in plus Revit pushes the Mac into red memory pressure | Same switch. Q1 is "no" for the 16 GB Mac, whatever else the trial finds |
 | The cloud machine is also too slow | Stop. Report: the Revit plan needs a faster Windows machine before anything else is built |
 | The worker cannot be started from the add-in, or its answers differ from the Mac's for the same site and facts | Stop and find out why. A different answer is a bug in the add-in, the install, or the worker, and nothing else is built until it is understood (the same description and the same rulebook must give the same answer) |
 | The add-in cannot tell a curved face from a flat one on a real model, or cannot give stable ids | Stop reading work and write up what Revit's API gives. A reader that cannot report curved faces cannot pass the suite, so no check from it can be trusted |
-| Read plus check after an edit takes longer than 2 seconds on the three models | Not a stop. Live check after every edit is then too slow; note what dominates (read, send, or check) and plan "check on a button" first |
+| Read plus check after an edit takes longer than 2 seconds on the models in hand | Not a stop. Live check after every edit is then too slow; note what dominates (read, send, or check) and plan "check on a button" first |
 | Longer than 10 seconds on any model | Plan the MVP as "check on a button" with the cause written up |
 | One build does not load in both Revit 2026 and 2027 | Not a stop. The MVP builds one assembly per Revit version |
 
