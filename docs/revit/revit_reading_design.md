@@ -20,7 +20,10 @@ as touching the house.
 
 Rhino sorts by layer: solids on the Building layer are the building; any other solid on the lot is "left out" and
 makes the check need review. Revit has no layers, so the reader sorts by **category** and by **what the geometry
-is** (the same tests as Rhino's `rhino_logic.could_be_building`).
+is** (close to Rhino's `rhino_logic.could_be_building`, with two differences, both proposed: a Revit solid with
+any face counts, where Rhino needs a closed solid or more than one face, the cautious side; and a mesh counts only
+with more than 4 faces, because whether a Revit mesh is closed is **to check**, so a closed mesh of 4 faces or fewer,
+which Rhino counts, is left out of this test until that is settled).
 
 **Which elements are looked at.** Every element of the open document (`FilteredElementCollector(doc)`), never a
 view's collector: an element hidden, isolated, cropped or in a hidden category still counts, as Rhino counts hidden
@@ -30,13 +33,13 @@ are for the architect's reading only (proposed).
 
 | Revit element | Sent as | Rhino equivalent | Scene that tests it |
 |---|---|---|---|
-| Proposed building categories: walls, floors, roofs, columns (architectural and structural), stairs, railings, ramps, doors, windows, curtain wall panels and mullions. Left off on purpose for the first reader, so they fall to the "any other element" row (left out, and usually touching: the cautious side): structural framing and foundations, ceilings, roof fascias, gutters and soffits, wall sweeps, slab edges, casework | `buildings`: one per element, id its `UniqueId`, faces of all its solids | A solid on the Building layer | 01 (as floor blocks); native elements: **new scene A** |
+| Proposed building categories: walls, floors, roofs, columns (architectural and structural), stairs, railings, ramps, doors, windows, curtain wall panels and mullions. A component stair's runs, landings and supports, and a railing's top rail and handrails, are their own elements in their own categories: whether they are read as part of the building or through their stair or railing is **to check** (until then they fall to the "any other element" row: left out, touching, the cautious side; and a stair element with no faces of its own is unsent, row "no face to send"). Left off on purpose for the first reader, so they fall to the "any other element" row (left out, and usually touching: the cautious side): structural framing and foundations, ceilings, roof fascias, gutters and soffits, wall sweeps, slab edges, casework | `buildings`: one per element, id its `UniqueId`, faces of all its solids | A solid on the Building layer | 01 (as floor blocks); native elements: **new scene A** |
 | Gordium's own floor blocks (drawn by `start_site`; proposed: DirectShapes carrying a Gordium mark with `"<story>;<height>"`, as Rhino's `gordium:floor` user text) | `buildings`, with `floor` = the height drawn | Floor blocks on `Gordium::Massing` | Every drawn scene: each expected building is a floor block with `floor: 10`, so every scene's house (02's curved one and 03's open one too) is drawn as marked floor blocks, built from real solids (`GeometryCreationUtilities` or `BRepBuilder`, never a faceting builder that would turn 02's curve into flat faces: **to check**) |
 | Curtain wall (the host wall itself) | Proposed: its panels and mullions are their own elements (row 1); the wall sends its own faces only if it has any (**to check**: whether a curtain wall's own geometry is empty, so no face is sent twice) | | **new scene A** |
-| In-place family | Proposed: by its category, like the building-category row or the "any other element" row (`Family.IsInPlace` only names it in the panel) | | **new scene A** |
+| In-place family | Proposed: by its category, like the building-category row; off the building categories, as the family instance row below (left out whatever its geometry, never dropped for having none at Fine detail). `Family.IsInPlace` only names it in the panel | | **new scene A**; empty: **new scene H** |
 | Model group | Proposed: never itself: each member element is read on its own (a group has no geometry of its own) | | **new scene E** (ids after editing a group) |
 | Any other element with a Revit `Solid` with faces (closed or not) or a mesh of more than 4 faces (generic models, masses, site, planting, specialty equipment, furniture) on the lot | `left_out`, `could_be_building: true` | A solid on the Default layer | 05 (garage), 15 (porch); the recorder draws these as Generic Models |
-| A loadable family instance off the building categories, whatever its geometry (even none at Fine detail) | `left_out`, `could_be_building: true`; with no box, `touching: null` | A block on another layer: Rhino counts every block, whatever it holds | 15 (`shed_block`); empty: **new scene H** |
+| A family instance off the building categories, loadable or in-place, whatever its geometry (even none at Fine detail) | `left_out`, `could_be_building: true`; with no box, `touching: null` | A block on another layer: Rhino counts every block, whatever it holds | 15 (`shed_block`); empty: **new scene H** |
 | Gordium's own neighbourhood objects (proposed: marked DirectShapes, as Rhino's `Gordium::Context`) | `left_out`, `context: true` | A solid on `Gordium::Context` | 15 (`neighbour_solid`) |
 | Proposed: a linked Revit model, wherever it is placed (Rhino reports such a block wherever it is, with no lot test), that holds any building-category element at any depth of links inside links (as `_block_holds`), or has a closed workset of its own (its hidden part could hold the house; **to check** that the API says so) | `unsent`, kind `"a linked model"`, `not_a_solid`: every building measure needs review | A block holding Building-layer objects (`read_3dm._block_holds`) | 04 (the shed drawn as a linked model); **new scene B** |
 | Proposed: a linked model with no building-category element at any depth, or a 3D CAD import (`ImportInstance`), reaching into the lot | `left_out`, `could_be_building: true` | A block on another layer | **New scene B** (scene 15's block is already the family instance above) |
@@ -115,7 +118,14 @@ point back to something the architect can click (ids, below).
 
 ## 4. The lot, touching, and what counts as "on the lot"
 
-**The lot outline.** Rhino's lot is the one closed curve on the Site layer, or the one picked (`lot_id`).
+**The lot outline.** Rhino's lot is the one closed curve on the Site layer, or the one picked (`lot_id`). Only a
+closed outline is ever a lot, in Revit too: Revit lets a property line be finished open (it only warns that its
+area can't be worked out), and the site description doesn't check that a lot closes, so a reader that sent an open
+line would have the checker close it with an edge nobody drew, and the lot's area, width, coverage and yards could
+comply where Rhino says needs review. A property line, or a set of picked lines, whose ends don't meet in one loop
+(within the reader's tolerance: **to check** how the API says a property line is closed) is not a lot: picked, it
+gives `lot_not_found`; not picked, it counts neither as "one property line" nor towards "two or more", so with no
+closed one the lot is `no_lot_outline`.
 
 | Case | Revit reader | Scene |
 |---|---|---|
@@ -141,7 +151,7 @@ and boxes and never keeps a second copy of the logic):
 |---|---|---|---|
 | On the lot? | Its plan footprint reaches more than 0.1 ft into the lot (`reaches_into_lot`) | As Rhino's `_plan_points`: the element's vertices, points along its edges (`Edge.Tessellate`) and a 7 × 7 grid of points over each face (`Face.Evaluate` over the face's own range: **to check**), so a dome's bulge counts; used only for this, never sent as faces; its box corners when it has no points | 05, 15 |
 | Touching? | Its 3D box within 0.1 ft of any building's box, or of the box around all the buildings together (proposed: a floor block's box holds the whole storey in Rhino, so anything inside the house touches; a single wall's box doesn't, so without this an object hung in the middle of a room would not count) | The box around the points the reader actually read (section 2 and the row above) and `Element.get_BoundingBox(null)` together, so it is never smaller than the geometry; turned by its 8 corners as in section 3, both boxes in shared coordinates | 15 (porch), 16; inside the house: **new scene A** (a loft drawn as a Generic Model, touching no wall or slab) |
-| Not known | No box or no points: listed as on the lot with `touching: null` (counts as touching), never skipped. This is the reference adapter's rule (`conformance_rhino._left_out`); the live Rhino command can drop an object with no box altogether (`_not_included` finds it nowhere near the lot), a gap to fix there | | **new scene H** |
+| Not known | No box or no points: listed as on the lot with `touching: null` (counts as touching), never skipped. This is the reference adapter's rule (`conformance_rhino._left_out`), and the live Rhino command's (`gordium_rhino._not_included` and `_touching`, through `_whole_box`). Both also give no box to an element made of parts when any part has none: in Rhino, a block whose definition, at any depth, is missing, is empty or holds a part with no box (a linked block whose file has moved), because Rhino's own box for it would be its drawn part's alone. The Revit reader does the same for an element any of whose nested geometry (a `GeometryInstance` at any depth) gives nothing, or that holds an unloaded link (proposed) | | **new scene H** |
 | Looks like the ground? | `looks_like_ground` unchanged: open meshes or surfaces spanning the lot only (so a Toposolid, being closed, is not labelled in the first reader; labelling it is a later choice, with no effect on verdicts) | | 16 |
 
 A faster first pass (only elements whose box meets the lot's box) must also take every element with no box: a
@@ -194,8 +204,8 @@ change to `conformance.py`.
 | D | Two option sets: a wing (primary narrow, secondary wider) and a garage (primary only), with a wing option being edited | Which option is sent and named | Yes |
 | E | Grouped walls, the group then moved | `UniqueId`s of group members after an edit | No (ids only) |
 | F | Furniture inside the house, the same family outside it | Only if Ben adopts the "wholly inside" rule | Yes, if adopted |
-| G | Two property lines and facts with a `lot_id` picking one (also as several picked lines); no lot outline; the picked lot then deleted | The picked-lot flow, `no_lot_outline`, `lot_not_found` | No (the lot then needs review) |
-| H | An empty family instance on the lot; a building-category family with no Fine geometry; a wall whose family also holds an empty solid | `touching: null`; `unsent` | Yes |
+| G | Two property lines and facts with a `lot_id` picking one (also as several picked lines); no lot outline; the picked lot then deleted; an open property line, alone and picked (also picked lines that don't close) | The picked-lot flow, `no_lot_outline`, `lot_not_found` | No (the lot then needs review) |
+| H | An empty family instance on the lot (loadable, and in-place off the building categories); a building-category family with no Fine geometry; a wall whose family also holds an empty solid; a family holding a nested family with no geometry | `touching: null`; `unsent` | Yes |
 | I | Spot grades and finished spots together; a Toposolid under a house of native walls, picked as the ground, higher inside the house than outside | `finished_spots`, `terrain`, probes outside the walls only | Yes (height) |
 | J | Scene 15 on a model with survey coordinates and true north turned 30° | Boxes and points turned without shrinking; the box filter in the right coordinates | Yes (touching; left-out objects dropped) |
 | K | Scene 01, then the survey point's elevation moved 10 ft | Facts entered under other coordinates aren't used | Yes (height) |
@@ -205,7 +215,9 @@ change to `conformance.py`.
 Every "to check" above, plus: whether the curtain wall host has faces of its own; whether open shells come back as
 solids; how property lines read in 2026; the shared-coordinates transform's direction and Revit's distance limit;
 whether `DocumentChanged` reports joined neighbours; whether `ElementOnPhaseStatus` has the values section 1 needs;
-how often real models need review only because of curved family details (Q3).
+how often real models need review only because of curved family details (Q3); how a component stair's and a
+railing's parts (runs, landings, supports, top rails, handrails) are read, so a stair is part of the building and
+neither left out nor unsent (Snowdon Towers has stairs).
 
 **Words.** The problem codes stay the same for every host (the conformance suite compares them), but some of their
 sentences are Rhino's: `lot_not_found` says "the Site layer", `no_lot_outline` and `several_lot_outlines` say "on
