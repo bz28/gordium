@@ -6,9 +6,13 @@ using Xunit;
 namespace Gordium.Worker.Tests;
 
 /// <summary>The client against the real Python worker (<c>python -m design_checker serve</c>).</summary>
-public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorker>
+public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorker>, IAsyncLifetime
 {
     private WorkerClient Client => worker.Client;
+
+    public Task InitializeAsync() => worker.EnsureRunningAsync();       // a stopped worker is started again
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     // the status words the checker sends, mapped here on their own (not through the client's mapping)
     private static readonly Dictionary<string, Verdict> Word = new()
@@ -27,8 +31,12 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
             p.Kill(entireProcessTree: true);
             p.WaitForExit(10_000);
         }
-        await Assert.ThrowsAnyAsync<WorkerException>(() => Client.HelloAsync());
-        Assert.False(Client.IsStopped);                 // a new worker, so the next test isn't failed by this one
+        var stopped = Client;
+        await Assert.ThrowsAnyAsync<WorkerException>(() => stopped.HelloAsync());
+        Assert.True(stopped.IsStopped);
+        await worker.EnsureRunningAsync();              // what runs before the next test: a new worker for it
+        Assert.NotSame(stopped, Client);
+        Assert.False(Client.IsStopped);
         Assert.Equal(Client.About.Protocol, (await Client.HelloAsync()).Protocol);
     }
 
