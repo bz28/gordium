@@ -363,6 +363,7 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     counts: dict[str, int] = {}
     over: dict[str, int] = {}
     on_map = 0
+    off_map_inside = False       # a point the map doesn't cover, well inside the lot (not edge noise)
     for p in samples:
         here = {z["zone"] for z in polys if g.inside_any(p, z["rings"])}
         base = {district(c)[0] for c in here if c not in OVERLAYS}
@@ -371,13 +372,21 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
         for z in base:
             counts[z] = counts.get(z, 0) + 1
         on_map += bool(base)
+        off_map_inside |= not base and min(g.seg_distance(p, a, b) for a, b in g.edges(ring)) > MAP_EDGE_FT
     shares = {z: n / len(samples) for z, n in counts.items()} if samples else {}
     zones = sorted((z for z, s in shares.items() if s >= ZONE_SHARE_MIN), key=lambda z: -shares[z])
+    # an overlay counts wherever it touches the lot or 2 ft around it, however little (never the 2% a base district
+    # needs, nor only where a grid point falls: a thin strip of SHOD along one side is an overlay on the lot)
+    near = _shape(ring).buffer(OVERLAY_MARGIN_FT)
     map_overlays = [f"{_overlay_name(c)} on the City's zoning map"
-                    for c in sorted(over) if samples and over[c] / len(samples) >= ZONE_SHARE_MIN]
+                    for c in sorted({z["zone"] for z in polys if z["zone"] in OVERLAYS and z["rings"]
+                                     and _shape_of(z["rings"]).intersects(near)})]
     when = edited.isoformat() if edited else "unknown"
     source = f"{src['name']}, last edited {when}: a suggestion to confirm"
     covered = on_map / len(samples) if samples else 0.0
+    if off_map_inside or not on_map:   # where the map draws no district it says nothing about overlays: never "none"
+        map_overlays.append(f"Overlays on the City's zoning map: couldn't check {'this lot' if not on_map else 'all of this lot'}"
+                            " (the map doesn't cover it)")
     if not zones:
         facts["zone"] = fact(None, source, src["url"], today, "needs_review",
                              "This lot isn't on the City's zoning map: choose the district.", key="city_zoning", lot=lot)
@@ -418,6 +427,32 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     return map_overlays
 
 
+# The zoning map and the tax map are drawn separately: along a lot line they disagree by a few feet (read 2026-11-11:
+# up to 2.3 ft at 106 Ithaca Rd and 601 Hancock St), so a point the zoning map misses that close to the line is that,
+# not a lot off the map. Farther in, the map doesn't cover the lot, and its overlays can't be said to be none.
+MAP_EDGE_FT = 5.0
+OVERLAY_MARGIN_FT = TAX_MAP_TOLERANCE_FT   # an overlay this close to the tax-map lot may be on the real one
+
+
+def _shape(ring):
+    """A ring as a shapely polygon (made valid: a tax-map ring can touch itself)."""
+    from shapely.geometry import Polygon
+    from shapely.validation import make_valid
+    return make_valid(Polygon(ring))
+
+
+def _shape_of(rings):
+    """Several rings (an ArcGIS polygon: outer rings and holes) as one shape: the even-odd union of the rings, as
+    ArcGIS draws them."""
+    out = None
+    for r in rings:
+        if len(r) >= 3:
+            p = _shape(r)
+            out = p if out is None else out.symmetric_difference(p)
+    from shapely.geometry import Polygon
+    return out if out is not None else Polygon()
+
+
 def _overlay_name(code: str) -> str:
     """An overlay as the architect reads it: its name from names.yaml, then the map's code ('Adult Use Overlay
     Zone (Adult Us)')."""
@@ -450,7 +485,7 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict,
     for key, field, label in (("historic_districts", "DISTRICT", "Historic district"),
                               ("gorge_zones", "ZONE", "Gorge protection zone")):
         try:
-            found += [f"{label}: {n}" for n in f.overlays(key, field, ring)]
+            found += [f"{label}: {n}" for n in f.overlays(key, field, ring, margin_ft=OVERLAY_MARGIN_FT)]
         except (Offline, ServiceError):
             found.append(f"{label}: couldn't check")
     if not city_parcel:
@@ -461,10 +496,16 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict,
             found.append(f"Secondary zones on the parcel: {city_parcel['secondary_zones']}")
         if city_parcel.get("overlay_zones"):   # the parcel's own record of an overlay (SHOD...), beside the map's
             found.append(f"Overlay zones on the parcel: {city_parcel['overlay_zones']}")
-        if str(city_parcel.get("historic_property") or "").upper() == "YES":
-            found.append("Historic property")
-        if str(city_parcel.get("landmarks_review") or "").upper() == "YES":
-            found.append("Landmarks Preservation Commission review")
+        # the City writes YES or NO (and, read 2026-11-11, "NR" on 57 parcels and "chk" on one for the review flag, and
+        # no value on 3 for the historic one): only NO is none; any other value, or none, is said and needs review
+        for field, name in (("historic_property", "Historic property"),
+                            ("landmarks_review", "Landmarks Preservation Commission review")):
+            flag = str(city_parcel.get(field) or "").strip()
+            if flag.upper() == "YES":
+                found.append(name)
+            elif flag.upper() != "NO":
+                found.append(f"{name}: the City's parcel record says {flag!r}" if flag else
+                             f"{name}: the City's parcel record doesn't say")
     found += _flood(f, ring)
     facts["overlays"] = fact(found, "City of Ithaca overlay maps (live) and FEMA's flood maps", src["url"], today,
                              "needs_review" if found else "suggested",

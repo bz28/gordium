@@ -96,7 +96,9 @@ class Fake:
         for a in self.fx["answers"]:
             if a["source"] == "state_parcels" and a["params"].get("geometry") == want:
                 return [{"attributes": {"SWISPRINTK": f"{f['attributes']['SWIS']}-{f['attributes']['PRINT_KEY']}",
-                                        "SWIS": f["attributes"]["SWIS"]}, "geometry": f["geometry"]}
+                                        "SWIS": f["attributes"]["SWIS"],
+                                        # the City writes YES or NO (test values, not the City's for this parcel)
+                                        "HISTPROP": "NO", "ILPCREVIEW": "NO"}, "geometry": f["geometry"]}
                         for f in a["body"].get("features", [])]
         return []
 
@@ -944,3 +946,97 @@ def test_a_doubtful_lot_never_says_no_overlays():
                 c["attributes"]["Addr_type"] = "StreetAddress"
     o = both(lookup(fx["address"], Fake(fx), NOW))["overlays"]
     assert o["value"] == [] and o["status"] == "needs_review"
+
+
+# ---- review round 1: every other overlay source, now that "none" leaves the row out ----------------------------
+
+def _overlays(fake_cls=Fake, **kw):
+    fx = load("106_ithaca_rd")
+    return both(lookup(fx["address"], fake_cls(fx, **kw), NOW))["overlays"]
+
+
+def test_a_lot_the_zoning_map_doesnt_cover_is_never_no_overlay():
+    o = _overlays(zones=[])
+    assert o["status"] == "needs_review" and any("couldn't check this lot (the map doesn't cover it)" in v
+                                                 for v in o["value"])
+
+
+def test_a_lot_half_off_the_zoning_map_is_never_no_overlay():
+    x0, y0, x1, y1 = g.bounds(ring_of(load("106_ithaca_rd")))
+    half = Fake(load("106_ithaca_rd")).square("R-1b", x0 - 50, y0 - 50, (x0 + x1) / 2, y1 + 50)
+    o = _overlays(zones=[half])
+    assert o["status"] == "needs_review" and any("couldn't check all of this lot" in v for v in o["value"])
+
+
+def test_the_zoning_map_missing_only_a_sliver_along_a_lot_line_is_edge_noise():
+    """The zoning and tax maps are drawn separately and disagree by a few feet along lot lines: a district drawn
+    1 ft short of one side still covers the lot (106 Ithaca Rd's own map misses up to 2.3 ft, read 2026-11-11)."""
+    x0, y0, x1, y1 = g.bounds(ring_of(load("106_ithaca_rd")))
+    short = Fake(load("106_ithaca_rd")).square("R-1b", x0 + 1, y0 - 50, x1 + 50, y1 + 50)
+    o = _overlays(zones=[short])
+    assert o["value"] == [] and o["status"] == "suggested"
+
+
+def test_a_thin_strip_of_an_overlay_counts_however_little_of_the_lot_it_covers():
+    """SHOD drawn as a 1 ft strip along one side (under 2% of the lot, between grid points), or 1.5 ft outside it."""
+    fx = load("106_ithaca_rd")
+    x0, y0, x1, y1 = g.bounds(ring_of(fx))
+    base = Fake(fx).square(STAND_IN_ZONE)
+    for strip in ((x1 - 1, y0 - 10, x1 + 0.0, y1 + 10), (x1 + 1.5, y0 - 10, x1 + 3, y1 + 10)):
+        shod = Fake(fx).square("SHOD", *strip)
+        o = _overlays(zones=[base, shod])
+        assert o["status"] == "needs_review" and any("(SHOD) on the City's zoning map" in v for v in o["value"]), strip
+
+
+def test_a_historic_area_with_no_name_still_counts():
+    o = _overlays(historic=[None])
+    assert o["status"] == "needs_review" and "Historic district: no name given" in o["value"]
+
+
+def test_historic_and_gorge_maps_are_asked_with_the_tax_maps_tolerance():
+    class Asking(Fake):
+        def post(self, url, params):
+            if key_of(url) in ("historic_districts", "gorge_zones"):
+                assert params["distance"] == 2.0 and params["units"] == "esriSRUnit_Foot"
+            return super().post(url, params)
+    assert _overlays(Asking)["value"] == []
+
+
+class Featureless(Fake):
+    """One source answers 200 with no feature list."""
+
+    def __init__(self, fixture, odd=(), **kw):
+        super().__init__(fixture, **kw)
+        self.odd = set(odd)
+
+    def post(self, url, params):
+        if key_of(url) in self.odd:
+            return {"objectIdFieldName": "OBJECTID"}, b"{}"
+        return super().post(url, params)
+
+
+@pytest.mark.parametrize("odd, words", [
+    ("historic_districts", "Historic district: couldn't check"), ("gorge_zones", "Gorge protection zone: couldn't check"),
+    ("fema_pending", "FEMA flood zone: couldn't check"), ("fema_preliminary", "FEMA flood zone: couldn't check"),
+])
+def test_an_answer_without_a_feature_list_is_never_none(odd, words):
+    o = _overlays(Featureless, odd=[odd])
+    assert o["status"] == "needs_review" and any(v.startswith(words) for v in o["value"]), o["value"]
+
+
+@pytest.mark.parametrize("flags, words", [
+    ({"ILPCREVIEW": "NR"}, "Landmarks Preservation Commission review: the City's parcel record says 'NR'"),
+    ({"ILPCREVIEW": "chk"}, "Landmarks Preservation Commission review: the City's parcel record says 'chk'"),
+    ({"HISTPROP": None}, "Historic property: the City's parcel record doesn't say"),
+    ({"HISTPROP": "yes"}, "Historic property"),
+])
+def test_a_parcel_flag_other_than_no_is_said_and_needs_review(flags, words):
+    """The City's values (read 2026-11-11): HISTPROP YES 726, NO 4,714, none 3; ILPCREVIEW YES 667, NO 4,718, NR 57,
+    chk 1. Only NO is none."""
+    fx = load("106_ithaca_rd")
+    parcel = Fake(fx)._state_as_city({"geometry": next(a for a in fx["answers"] if a["source"] == "state_parcels")
+                                      ["params"]["geometry"]})
+    for p in parcel:
+        p["attributes"].update(flags)
+    o = _overlays(city_parcels=parcel)
+    assert o["status"] == "needs_review" and words in o["value"], o["value"]

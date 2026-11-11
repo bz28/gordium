@@ -104,6 +104,35 @@ def test_a_saved_and_reopened_project_decides_the_same():
                                                                     release_rows(again))
 
 
+def _model(tmp_path, corners, units="Inches"):
+    """A saved Rhino file with only the lot on the Site layer, in `units` (the check reads it back in feet)."""
+    import rhino3dm as r
+    k = {"Inches": 12.0, "Feet": 1.0}[units]
+    m = r.File3dm()
+    m.Settings.ModelUnitSystem = getattr(r.UnitSystem, units)
+    layer = r.Layer()
+    layer.Name = "Site"
+    m.Layers.Add(layer)
+    attrs = r.ObjectAttributes()
+    attrs.LayerIndex = 0
+    m.Objects.AddPolyline([r.Point3d(x * k, y * k, 0) for x, y in list(corners) + list(corners[:1])], attrs)
+    path = tmp_path / f"lot_{units}_{len(list(tmp_path.iterdir()))}.3dm"
+    m.Write(str(path), 8)
+    return path
+
+
+def test_a_saved_file_reopened_reads_the_lot_back_and_decides_the_same(tmp_path):
+    """The real reopen: the lot read back from a saved .3dm (drawn in inches: read in feet), the facts as the plugin
+    keeps them (JSON). The row is left out exactly as in the live session; the file's lot moved since, it is back."""
+    from design_checker.check import check
+    facts = json.loads(json.dumps(dict(EVERY, overlays_none_found=NONE_FOUND)))
+    for units in ("Inches", "Feet"):
+        v = check(_model(tmp_path, CORNERS, units), facts)["view"]
+        assert release_rows(v) == [], units
+    moved = [(0, 0), (60, 0), (60, 110), (0, 111)]
+    assert release_rows(check(_model(tmp_path, moved), facts)["view"]) == ["release.overlays"]
+
+
 @pytest.mark.parametrize("bad", [
     True, {"value": True}, dict(NONE_FOUND, value=False), dict(NONE_FOUND, lot_outline=[[0, 0], [1, 1]]),
     dict(NONE_FOUND, lot_outline=[[0, 0], [1, 0], ["a", 1]]), dict(NONE_FOUND, date=""), dict(NONE_FOUND, extra=1),
