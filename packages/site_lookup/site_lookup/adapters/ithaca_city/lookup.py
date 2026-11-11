@@ -350,7 +350,7 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     _lookup hands to _overlays after it, whatever this finds."""
     src = ENDPOINTS["city_zoning"]
     try:
-        polys = f.zoning_near(ring)
+        polys = f.zoning_near(ring, pad=OVERLAY_MARGIN_FT)
         edited = f.zoning_last_edited()
     except (Offline, ServiceError):
         facts["zone"] = fact(None, src["name"], src["url"], today, "needs_review",
@@ -384,6 +384,14 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     when = edited.isoformat() if edited else "unknown"
     source = f"{src['name']}, last edited {when}: a suggestion to confirm"
     covered = on_map / len(samples) if samples else 0.0
+    # a code the map draws inside the lot (more than the edge noise in) that is neither a district Gordium knows nor a
+    # listed overlay may be an overlay names.yaml doesn't list yet: never "none" (however little of the lot it covers)
+    inner = _shape(ring).buffer(-MAP_EDGE_FT)
+    strange = sorted({z["zone"] for z in polys if z["zone"] not in OVERLAYS and district(z["zone"])[1] == "unknown"
+                      and z["rings"] and _shape_of(z["rings"]).intersects(inner)}, key=str)
+    if strange:
+        map_overlays.append(f"Overlays on the City's zoning map: couldn't check ({', '.join(map(str, strange))} drawn on "
+                            "this lot isn't a district or overlay Gordium knows)")
     if off_map_inside or not on_map:   # where the map draws no district it says nothing about overlays: never "none"
         map_overlays.append(f"Overlays on the City's zoning map: couldn't check {'this lot' if not on_map else 'all of this lot'}"
                             " (the map doesn't cover it)")

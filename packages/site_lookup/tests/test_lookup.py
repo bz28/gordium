@@ -1040,3 +1040,30 @@ def test_a_parcel_flag_other_than_no_is_said_and_needs_review(flags, words):
         p["attributes"].update(flags)
     o = _overlays(city_parcels=parcel)
     assert o["status"] == "needs_review" and words in o["value"], o["value"]
+
+
+def test_the_zoning_map_is_asked_for_2_ft_around_the_lot():
+    class Asking(Fake):
+        def post(self, url, params):
+            if key_of(url) == "city_zoning" and url != ENDPOINTS["city_zoning"]["layer"]:
+                self.box = [float(v) for v in params["geometry"].split(",")]
+            return super().post(url, params)
+    fx = load("106_ithaca_rd")
+    fake = Asking(fx)
+    lookup(fx["address"], fake, NOW)
+    x0, y0, x1, y1 = g.bounds(ring_of(fx))
+    assert fake.box == pytest.approx([x0 - 2, y0 - 2, x1 + 2, y1 + 2])
+
+
+def test_a_code_the_map_draws_on_the_lot_that_gordium_doesnt_know_is_never_no_overlay():
+    """An overlay names.yaml doesn't list yet would read as a district: a thin strip of it inside the lot (under the
+    2% a district needs) still keeps the overlays doubtful."""
+    fx = load("106_ithaca_rd")
+    x0, y0, x1, y1 = g.bounds(ring_of(fx))
+    cx = (x0 + x1) / 2
+    new = Fake(fx).square("NEW-OVERLAY", cx, y0 - 10, cx + 1, y1 + 10)
+    o = _overlays(zones=[Fake(fx).square(STAND_IN_ZONE), new])
+    assert o["status"] == "needs_review" and any("NEW-OVERLAY drawn on this lot" in v for v in o["value"]), o["value"]
+    # a neighbouring district's edge a foot over the lot line is edge noise, not a code on the lot
+    edge = Fake(fx).square("B-2a", x1 - 1, y0 - 10, x1 + 50, y1 + 10)
+    assert _overlays(zones=[Fake(fx).square(STAND_IN_ZONE), edge])["value"] == []

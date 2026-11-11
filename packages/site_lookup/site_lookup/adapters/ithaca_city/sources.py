@@ -180,8 +180,9 @@ class Fetcher:
 
     # ---- zoning and overlays (live only) --------------------------------------------------------------
 
-    def zoning_near(self, ring) -> list[dict]:
-        body = self._ask("city_zoning", {**self._envelope(ring, 2.0), "outFields": "ZONE"})   # overlays 2 ft out count
+    def zoning_near(self, ring, pad: float = 0.0) -> list[dict]:
+        """The zoning map's polygons meeting the lot's box, `pad` feet around it (an overlay that close counts)."""
+        body = self._ask("city_zoning", {**self._envelope(ring, pad), "outFields": "ZONE"})
         return [{"zone": f["attributes"].get("ZONE"), "rings": [g.open_ring(r) for r in f["geometry"]["rings"]]}
                 for f in body.get("features", []) if f.get("geometry")]
 
