@@ -1650,8 +1650,7 @@ def overlays_cleared(lot: dict | None, facts: dict) -> str | None:
 # Map Revision takes effect about 120 days after its second local newspaper notice and is never posted as pending.
 # 90 days is well inside six months: a full revision now in effect was pending at the lookup, with three months to
 # spare for FEMA posting it. A LOMR that took effect after the lookup is missed whatever the limit; 90 days limits
-# how long such a miss can last (a LOMR has a public 90-day reconsideration period before it takes effect, so a
-# lookup this recent is no older than that notice). Not a promise: the row it clears still says "not confirmed". Older (or an age that can't be told): the row stays, and says to look the address up again.
+# how long such a miss can last. Not a promise: the site line that replaces the row still says "not confirmed". Older (or an age that can't be told): the row stays, and says to look the address up again.
 LOOKUP_FRESH_DAYS = 90
 
 
