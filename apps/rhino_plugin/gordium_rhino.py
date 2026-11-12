@@ -1890,7 +1890,32 @@ def _extras(doc, facts):
             "context_left_out": logic.context_left_out(
                 {i: doc.Layers[_find(doc, i).Attributes.LayerIndex].FullPath for i in left_out if _find(doc, i)}),
             "ground_like": _ground_like(doc, left_out, _find(doc, facts.get("lot_id") or "")),
+            "left_out_advice": _link_advice(doc, left_out),
             "sources": fact_sources(doc)}
+
+
+def _link_advice(doc, ids):
+    """For each left-out block whose linked file, at any depth, is missing, unreadable or changed since it was read
+    (host_core.left_out.linked_file_problems), what to do in Rhino (rhino_logic.linked_file_advice): "Linked file
+    'garage.3dm' has changed since it was loaded: reload it (Edit > Blocks > Block Definitions ...)". Words on the
+    review row only: the block stays left out and counts as touching until the file is put right."""
+    objects, definitions = [], {}
+    for i in ids:
+        o = _find(doc, i)
+        if o is not None:
+            objects.append(_seen(o, definitions))
+    problems = logic.linked_file_problems(objects, definitions)
+    files = {}
+    for p in problems:
+        if p["definition"] and p["definition"] not in files:
+            d = doc.InstanceDefinitions.Find(System.Guid(p["definition"]), True)
+            path = ""
+            try:
+                path = (d.SourceArchive or "") if d is not None else ""
+            except Exception:                                   # no path to read: named by the definition alone
+                path = ""
+            files[p["definition"]] = (path, d.Name if d is not None else "")
+    return logic.linked_file_advice(problems, files)
 
 
 def _touching(doc, ids, buildings):

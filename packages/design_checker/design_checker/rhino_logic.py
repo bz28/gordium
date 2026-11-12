@@ -1621,6 +1621,35 @@ def context_left_out(layers_by_id):
     return sorted(i for i, layer in (layers_by_id or {}).items() if on_layer(layer or "", CONTEXT))
 
 
+# Where to click in Rhino 8 (Mac and Windows alike) to put a linked block's file right (left_out.linked_file_words'
+# `how`). Checked 2026-11-12 against the installed Rhino 8.35 for Mac: its Edit menu's "Blocks" holds "Block
+# Definitions" (MainMenu.nib: ID_EDIT_BLOCK_BLOCKMANAGER, which runs -BlockManager), and Rhino.UI.dll's "Update all
+# linked blocks" runs "-BlockManager Update All"; and against the Rhino 8 help for Block Definitions
+# (docs.mcneel.com/rhino/8/help/en-us/commands/block.htm): "Update: Reloads the external file to see the latest
+# changes", and a definition's Properties have its Filename with "Browse: Change the path of the external file".
+LINK_HOW = {
+    "missing": "Edit ▸ Blocks ▸ Block Definitions, select it, then Properties ▸ Filename: Browse to the file",
+    "unreadable": "Edit ▸ Blocks ▸ Block Definitions, select it, then Update",
+    "changed": "Edit ▸ Blocks ▸ Block Definitions, select it, then Update; or type -BlockManager, Update, All",
+    "not_known": "Edit ▸ Blocks ▸ Block Definitions, select it, then Update",
+}
+
+
+def linked_file_advice(problems, files):
+    """{object id: the sentence telling the architect what to do} for each left-out object whose linked file isn't
+    up to date (`problems`: left_out.linked_file_problems), in Rhino's words (LINK_HOW). `files`: {definition id:
+    (its linked file's full path as Rhino has it, or "", its definition's name)}; the file is named by its own name,
+    else by the definition's. Words only: those objects stay left out and count as touching whatever this says."""
+    out = {}
+    for p in problems or []:
+        if not p.get("problem"):
+            continue
+        path, name = (files or {}).get(p["definition"]) or ("", "")
+        shown = (path.replace("\\", "/").rsplit("/", 1)[-1] if path else "") or name or "(no name)"
+        out[p["id"]] = linked_file_words(shown, p["problem"], LINK_HOW[p["problem"]], path or None)
+    return out
+
+
 def context_objects(payload):
     """What may be written into the .3dm: objects from a source whose store is raw (the payload's layers say which),
     and Gordium's own marks (frame, north arrow, scale bar, credits). Anything else is never written, whatever the

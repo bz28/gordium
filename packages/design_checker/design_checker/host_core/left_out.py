@@ -16,6 +16,10 @@ here: everything after that, so the two hosts can't drift apart on a choice that
   left_out_decisions  for each object, whether it is left out of the check (on the lot), and why
   touching_decisions  for each object, whether it may be part of the house (its box within 0.1 ft of a building's)
 
+And for the architect, never a decision: linked_file_problems (for an object left out because a linked file isn't
+up to date, which definition's file it is and what is wrong with it) and linked_file_words (the sentence saying
+so, and what to do, with the host's own menu words: host_core has none).
+
 What a host sends, in its own model units (`feet_per_unit` says how many feet one unit is):
 
   an object      {"id": "...", "box": [x0, y0, z0, x1, y1, z1] or null, "points": [[x, y], ...],
@@ -46,7 +50,8 @@ import math
 __all__ = ['_inside', 'ON_LOT_REACH', '_ring_area', '_hull', '_clip', 'box_near_lot', 'BLOCK_CONTENTS_KNOWN',
     'block_contents_known', 'reaches_into_lot', '_Depth', 'DEPTH_QUESTIONS', '_deep', '_stretches_inside',
     'TOUCH_GAP', 'MAX_BLOCK_DEPTH', 'NO_BOX', 'WHY', '_finite', '_sent_box', '_covers', 'OBJECT_KEYS', '_sent_object',
-    '_sent_definitions', '_why_no_box', '_judged', 'no_box_reasons', 'left_out_decisions', '_sent_points', 'touching_decisions']
+    '_sent_definitions', '_why_no_box', '_judged', 'no_box_reasons', 'left_out_decisions', '_sent_points', 'touching_decisions',
+    'LINK_PROBLEM', 'LINK_WORDS', 'LINK_FIX', '_culprit', 'linked_file_problems', 'linked_file_words']
 
 
 def _inside(x, y, poly):
@@ -509,3 +514,70 @@ def touching_decisions(objects, buildings, definitions=None, feet_per_unit=1.0):
         out.append({"id": o["id"], "touching": any(x0 <= k[3] and k[0] <= x1 and y0 <= k[4] and k[1] <= y1
                                                     and z0 <= k[5] and k[2] <= z1 for k in grown)})
     return out
+
+
+# ---- what to tell the architect about a linked file (words only: no decision reads these) ------------------------
+
+# What is wrong with a linked file, by its definition's status (ArchiveFileStatus by name): "missing", "unreadable",
+# "changed"; any other status that isn't BLOCK_CONTENTS_KNOWN (none, or one this list doesn't have) is "not_known".
+LINK_PROBLEM = {"LinkedFileNotFound": "missing", "LinkedFileNotReadable": "unreadable",
+                "LinkedFileIsNewer": "changed", "LinkedFileIsOlder": "changed", "LinkedFileIsDifferent": "changed"}
+LINK_WORDS = {
+    "missing": "can't be found",
+    "unreadable": "can't be read",
+    "changed": "has changed since it was loaded",
+    "not_known": "may have changed since it was loaded (the design tool can't say whether it is up to date)",
+}
+# What to do, in any design tool's words. A host adds where to click in its own menus (linked_file_words' `how`):
+# Rhino's are in rhino_logic.LINK_HOW; Revit's (Manage Links: Reload, Reload From) will be the add-in's own.
+LINK_FIX = {
+    "missing": "relink it to where the file is now",
+    "unreadable": "check that the file opens, then reload it",
+    "changed": "reload it",
+    "not_known": "reload it",
+}
+
+
+def _culprit(o, definitions, memo, seen):
+    """The id of the definition, at any depth, whose linked file makes `o` "contents_not_known" (_judged's own
+    path: the first part with no box decides), or None when that isn't why."""
+    d = o.get("definition")
+    if d is None or d not in definitions or d in seen:
+        return None
+    entry = definitions[d]
+    if not block_contents_known(entry.get("status")):
+        return d
+    for p in entry.get("parts") or []:
+        why, _ = _judged(p, definitions, memo, set())
+        if why:
+            return _culprit(p, definitions, memo, seen | {d}) if why == "contents_not_known" else None
+    return None
+
+
+def linked_file_problems(objects, definitions=None):
+    """For each object (in order): {"id", "definition", "problem"}: for one with no box because a linked file isn't
+    up to date (no_box_reasons' "contents_not_known"), the id of the definition (at any depth) whose file it is and
+    what is wrong with that file (LINK_PROBLEM's word, "not_known" for any other status); else both None. Words
+    only: the object stays left out and counts as touching whatever this says."""
+    if not isinstance(objects, list):
+        raise ValueError("objects: a list")
+    definitions, memo = _sent_definitions(definitions), {}
+    out = []
+    for o in (_sent_object(o, "objects") for o in objects):
+        d = _culprit(o, definitions, memo, set()) if _why_no_box(o, definitions, memo) == "contents_not_known" \
+            else None
+        status = None if d is None else str(definitions[d].get("status")).split(".")[-1]
+        out.append({"id": o["id"], "definition": d, "problem": None if d is None else LINK_PROBLEM.get(status, "not_known")})
+    return out
+
+
+def linked_file_words(name, problem, how=None, path=None):
+    """The sentence telling the architect about one linked file: what is wrong with it (LINK_WORDS), where it was
+    looked for when it is missing or unreadable (`path`, as the host has it), and what to do (LINK_FIX), with where
+    to click in the host's own menus (`how`, the host's words; none: the plain fix alone). For example "Linked file
+    'garage.3dm' has changed since it was loaded: reload it (...) so Gordium can measure it"."""
+    if problem not in LINK_WORDS:
+        raise ValueError("problem: one of %s" % ", ".join(sorted(LINK_WORDS)))
+    where = " at %s" % path if path and problem in ("missing", "unreadable") else ""
+    return "Linked file '%s' %s%s: %s%s so Gordium can measure it" % (
+        name, LINK_WORDS[problem], where, LINK_FIX[problem], " (%s)" % how if how else "")

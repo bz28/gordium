@@ -399,6 +399,8 @@ def read_model(path, facts: dict, inventory_complete: bool = False) -> dict:
 # all), so Rhino's check takes the path another design tool's will: check_site / start_site in the worker.
 
 LEFT_OUT_EXTRAS = ("not_included", "touching", "ground_like", "context_left_out")   # check()'s extras, before
+ADVICE = "left_out_advice"     # extras: {left-out object id: what the architect can do so it can be measured}, the
+                                # host's own words (Rhino: a linked file to reload, rhino_logic.linked_file_advice)
 UNSENT_BUILDING = "Building layer"   # the building every unsent object's problem is measured on (check()'s, before)
 
 
@@ -456,6 +458,15 @@ def for_measuring(site: dict, facts: dict, extras: dict | None = None) -> tuple[
         if grade["source"] != "spot":            # spot grades are what grade points are when no source is named
             facts["grade_from"] = grade["source"]
     left_out = site["left_out"]
+    advice = extras.get(ADVICE)
+    if advice is not None:                   # words for the architect, by left-out object: never a decision's input
+        if not isinstance(advice, dict) or not all(isinstance(k, str) and isinstance(v, str) and v.strip()
+                                                   for k, v in advice.items()):
+            raise SiteRefused([f"extras: {ADVICE} is {{object id: the words saying what to do about it}}"])
+        stray = sorted(set(advice) - {o["id"] for o in left_out})
+        if stray:
+            raise SiteRefused([f"extras: {', '.join(stray)} given advice ({ADVICE}) but not among the objects left "
+                               "out (the site description's left_out)"])
     extras.update(not_included=[o["id"] for o in left_out],
                   touching=[o["id"] for o in left_out if o["touching"] is not False],
                   ground_like=[o["id"] for o in left_out if o["ground_like"]],

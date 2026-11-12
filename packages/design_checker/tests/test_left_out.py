@@ -266,3 +266,87 @@ def test_a_1_0_request_is_still_answered():
                                   "objects": [_obj("x", None)]}) + "\n"), out)
     assert json.loads(out.getvalue())["result"]["no_box"] == [{"id": "x", "why": "no_box"}]
     assert protocol.PROTOCOL == "1.1"
+
+
+# ---- what to tell the architect about a linked file (words only) ------------------------------------------------
+
+@pytest.mark.parametrize("status, problem", [
+    ("LinkedFileNotFound", "missing"), ("LinkedFileNotReadable", "unreadable"), ("LinkedFileIsNewer", "changed"),
+    ("LinkedFileIsOlder", "changed"), ("LinkedFileIsDifferent", "changed"), (None, "not_known"),
+    ("SomeStatusRhinoAddsLater", "not_known"),
+    ("Rhino.DocObjects.InstanceDefinitionArchiveFileStatus.LinkedFileNotFound", "missing"),
+    ("LinkedFileIsUpToDate", None), ("NotALinkedInstanceDefinition", None)])
+def test_a_linked_file_problem_names_the_innermost_definition_whose_file_it_is(status, problem):
+    """A shed placed in a block placed in a block, its innermost definition linked to a file: the problem names that
+    innermost definition (the file to put right), not the outer blocks the architect placed, for each status that
+    gives no box; a block whose contents are known has none."""
+    defs = {"outer": _whole_def({"box": SHED, "definition": "middle"}),
+            "middle": _whole_def({"box": SHED, "definition": "inner"}),
+            "inner": _whole_def({"box": [52, 94, 4, 52, 94, 4]}, status=status)}
+    got = lo.linked_file_problems([_obj("shed", SHED, definition="outer"), _obj("plain", SHED)], defs)
+    assert got == [{"id": "shed", "definition": None if problem is None else "inner", "problem": problem},
+                   {"id": "plain", "definition": None, "problem": None}]
+
+
+def test_a_linked_file_problem_follows_the_part_that_decides_and_nothing_else():
+    """The first part with no box decides why a block has none (no_box_reasons): a block holding an empty block
+    before a linked one has no box because of the empty block, so no file is named; with the linked one first,
+    it is. A block past the depth limit, or a definition that isn't there, names no file either."""
+    linked = _whole_def({"box": SHED}, status="LinkedFileIsNewer")
+    defs = {"empty_first": _whole_def({"box": SHED, "definition": "empty"}, {"box": SHED, "definition": "linked"}),
+            "linked_first": _whole_def({"box": SHED, "definition": "linked"}, {"box": SHED, "definition": "empty"}),
+            "empty": _whole_def(), "linked": linked}
+    objects = [_obj("a", SHED, definition="empty_first"), _obj("b", SHED, definition="linked_first"),
+               _obj("c", SHED, definition="gone")]
+    assert [p["definition"] for p in lo.linked_file_problems(objects, defs)] == [None, "linked", None]
+    assert [r["why"] for r in lo.no_box_reasons(objects, defs)] == ["block_empty", "contents_not_known",
+                                                                    "block_not_found"]
+
+
+def test_every_object_with_a_linked_file_problem_is_left_out_and_touching_and_no_other_is_named():
+    """The words never stand in for the decision: each object linked_file_problems names is one no_box_reasons
+    gives "contents_not_known", so left out and touching (None), and every such object is named."""
+    defs = {"d": _whole_def({"box": [52, 94, 4, 52, 94, 4]}, status="LinkedFileNotFound"),
+            "ok": _whole_def({"box": SHED}), "newer": _whole_def({"box": SHED}, status="LinkedFileIsNewer")}
+    objects = [_obj("linked", SHED, definition="d"), _obj("whole", SHED, definition="ok"),
+               _obj("against", AGAINST, definition="newer"), _obj("far", FAR)]
+    named = [p["id"] for p in lo.linked_file_problems(objects, defs) if p["problem"]]
+    assert named == [r["id"] for r in lo.no_box_reasons(objects, defs) if r["why"] == "contents_not_known"]
+    assert named == ["linked", "against"]
+    assert [t["touching"] for t in lo.touching_decisions(objects, [HOUSE], defs)] == [None, False, None, False]
+    assert [d["left_out"] for d in lo.left_out_decisions(LOT, objects, defs)] == [True, True, True, False]
+
+
+def test_the_words_say_the_file_the_problem_and_the_fix_with_the_host_s_own_menu_words():
+    assert lo.linked_file_words("garage.3dm", "changed", "Edit > Blocks > Block Definitions, then Update") == (
+        "Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit > Blocks > Block Definitions, "
+        "then Update) so Gordium can measure it")
+    assert lo.linked_file_words("garage.3dm", "missing", path="/Users/me/site/garage.3dm") == (
+        "Linked file 'garage.3dm' can't be found at /Users/me/site/garage.3dm: relink it to where the file is now "
+        "so Gordium can measure it")
+    assert lo.linked_file_words("garage.3dm", "changed", path="/Users/me/site/garage.3dm").startswith(
+        "Linked file 'garage.3dm' has changed since it was loaded: reload it so")       # where only when not found
+    with pytest.raises(ValueError, match="problem: one of"):
+        lo.linked_file_words("garage.3dm", "on_lot")
+
+
+def test_host_core_has_no_host_s_menu_words():
+    """Where to click is the host's (Rhino: rhino_logic.LINK_HOW): host_core's words name no menu or command."""
+    import inspect
+    text = inspect.getsource(lo).split("# ---- what to tell the architect")[1]
+    for word in ("Block Definitions", "BlockManager", "Edit \u25b8", "Manage Links", "Reload From"):
+        assert word not in "".join(lo.LINK_WORDS.values()) + "".join(lo.LINK_FIX.values()), word
+    assert "Rhino's are in rhino_logic.LINK_HOW" in text
+
+
+@pytest.mark.parametrize("path, name, shown", [
+    ("/Users/me/site/garage.3dm", "Garage", "garage.3dm"), ("C:\\site\\garage.3dm", "Garage", "garage.3dm"),
+    ("", "Garage", "Garage"), (None, "", "(no name)")])
+def test_rhino_s_advice_names_the_file_by_its_own_name_and_says_where_to_click(path, name, shown):
+    problems = [{"id": "g", "definition": "d", "problem": "missing"}, {"id": "s", "definition": None, "problem": None}]
+    advice = logic.linked_file_advice(problems, {"d": (path or "", name)})
+    assert list(advice) == ["g"]
+    assert advice["g"].startswith("Linked file '%s' can't be found%s: relink it to where the file is now (Edit "
+                                  "\u25b8 Blocks \u25b8 Block Definitions, select it, then Properties \u25b8 Filename: "
+                                  "Browse to the file)" % (shown, " at " + path if path else ""))
+    assert set(logic.LINK_HOW) == set(lo.LINK_WORDS)

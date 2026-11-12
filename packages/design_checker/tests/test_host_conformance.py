@@ -707,6 +707,54 @@ def test_the_live_command_sends_each_block_definition_whole_however_deep_it_is_f
     assert left == ["deep"] and touching == ["deep"]
 
 
+def _live_advice(placed, files):
+    """gordium_rhino's own _link_advice (with _seen) on a stub document holding `placed` ({id: _InstanceObject}):
+    `files` ({definition: (its SourceArchive, its Name)}) is what the document's InstanceDefinitions.Find gives."""
+    import ast
+
+    from host_source import host_path, host_text
+
+    from design_checker import rhino_logic as logic
+    tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
+    fns = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in ("_link_advice", "_seen")]
+    assert sorted(f.name for f in fns) == ["_link_advice", "_seen"]
+    by_id = {}
+    for d, (archive, name) in files.items():
+        d.SourceArchive, d.Name = archive, name
+        by_id[str(d.Id)] = d
+    doc = types.SimpleNamespace(InstanceDefinitions=types.SimpleNamespace(
+        Find=lambda guid, ignore_deleted: by_id.get(guid) if ignore_deleted else None))
+    rhino = types.SimpleNamespace(DocObjects=types.SimpleNamespace(InstanceObject=_InstanceObject))
+    ns = {"Rhino": rhino, "logic": logic, "System": types.SimpleNamespace(Guid=str),
+          "_find": lambda doc, i: placed.get(i)}
+    exec(compile(ast.Module(body=fns, type_ignores=[]), host_path("rhino", "plugin").name, "exec"), ns)  # noqa: S102
+    return ns["_link_advice"](doc, list(placed))
+
+
+def test_the_live_command_says_which_linked_file_to_put_right_and_how():
+    """Ben, 2026-11-12: a linked shed whose file has moved, and a garage placed inside a block whose linked file
+    changed since it was read, stay left out and touching (tests above); the review row now names each file and
+    what to do in Rhino 8 (the file Rhino looked for, by its own name; Edit > Blocks > Block Definitions). A block
+    whose contents are known is given no advice."""
+    x, y = 1000.0, 2000.0
+    shed = _missing_file_block("shed", (x + 11, y + 76, 4))
+    garage_def = _Definition([_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))], status="LinkedFileIsNewer")
+    holder = _InstanceObject("holder", [_InstanceObject("garage", None, definition=garage_def)])
+    normal = _InstanceObject("normal", [_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
+    advice = _live_advice({"shed": shed, "holder": holder, "normal": normal},
+                          {shed.InstanceDefinition: ("/Users/me/Projects/106 Ithaca/shed.3dm", "Shed"),
+                           garage_def: ("/Users/me/Projects/106 Ithaca/garage.3dm", "Garage")})
+    assert advice == {
+        "shed": "Linked file 'shed.3dm' can't be found at /Users/me/Projects/106 Ithaca/shed.3dm: relink it to where "
+                "the file is now (Edit \u25b8 Blocks \u25b8 Block Definitions, select it, then Properties \u25b8 "
+                "Filename: Browse to the file) so Gordium can measure it",
+        "holder": "Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit \u25b8 Blocks \u25b8 "
+                  "Block Definitions, select it, then Update; or type -BlockManager, Update, All) so Gordium can "
+                  "measure it"}
+    left, touching, _, _ = _live_left_out({"shed": shed, "holder": holder, "normal": normal}, (x, y))
+    assert left == ["shed", "holder", "normal"] and touching == ["shed", "holder"]     # the answer, as before
+
+
 def test_the_reference_adapter_stops_with_the_workers_words_when_it_refuses():
     """Review round 2: a refused part (a lot with no outline) came back as a bare KeyError, its reason lost; it is
     never read as nothing left out."""
