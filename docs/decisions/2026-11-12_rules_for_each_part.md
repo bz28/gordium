@@ -28,7 +28,7 @@ The real egress rules are not written yet (step 1, bringing in the code text, wa
 
 ## How parts will arrive (later, step 4)
 
-A later site description version adds `parts: {<kind>: [{id, name, within?, measures: {...}, from: {...}}]}` per building, a flat list by kind, each part pointing at the part it sits in by id, each measure with where it came from (read from the drawing, suggested, stated by the architect: the three levels in the design doc §8). `parts` absent means interior checking is off (the architect hasn't run `GordiumInterior`): no part is checked, so the panel never warns "bedroom has no window" during massing, and the one "Interior: not checked yet" item (point 8) keeps the design from reading as complying. A kind absent once interior checking is on means "not read yet" (needs review); an empty list means "read, and there are none".
+A later site description version adds `parts: {<kind>: [{id, name, within?, measures: {...}, from: {...}}]}` per building, a flat list by kind, each part pointing at the part it sits in by id, each measure with where it came from (read from the drawing, suggested, stated by the architect: the three levels in the design doc §8). `parts` absent means interior checking is off (the architect hasn't run `GordiumInterior`): no part is checked, so the panel never warns "bedroom has no window" during massing, and the one "Interior: not checked yet" item (point 7) keeps the design from reading as complying. A kind absent once interior checking is on means "not read yet" (needs review); an empty list means "read, and there are none".
 
 ## Why
 

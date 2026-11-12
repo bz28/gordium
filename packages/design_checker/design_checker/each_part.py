@@ -60,7 +60,9 @@ def label(row: dict) -> str:
     row about no one part, the rule's part kind ("Stairs")."""
     names = [row["within"]["name"]] if row.get("within") else []
     names += [row["name"]] if row.get("name") else []
-    return " › ".join(names) or (row["part"] or "parts").replace("_", " ").capitalize() + "s"
+    if names:
+        return " › ".join(names)
+    return (row["part"].replace("_", " ").capitalize() + "s") if isinstance(row.get("part"), str) else "Parts"
 
 
 def line(row: dict, rule: dict, values: dict, allowed: dict) -> str:
@@ -69,11 +71,12 @@ def line(row: dict, rule: dict, values: dict, allowed: dict) -> str:
     if row["reason"]:
         return f"{head}: {row['reason']}"
     if row["outcome"] == "fail":
-        return f"{head}: {_first_failing(rule, {**values, **row['values']}, allowed) or rule['title']}"
+        known = {**parts.building_values(values), **row["values"]}
+        return f"{head}: {_first_failing(rule, known, allowed) or rule['title']}"
     if row["outcome"] == "needs_review":
         missing = [m for m, v in row["values"].items() if not _usable(v)]
         if missing:
-            return f"{head}: {', '.join(_words(rule, m) for m in missing)} not measured"
+            return f"{head}: {', '.join(_words(rule, m) for m in missing)} not measured (or not usable)"
         return f"{head}: {rule['title']}: needs review"
     return f"{head}: {rule['title']}" + (": complies" if row["outcome"] == "pass" else ": not applicable")
 
@@ -96,7 +99,7 @@ def _words(rule: dict, measure: str) -> str:
 def _first_failing(rule: dict, values: dict, allowed: dict) -> str | None:
     """The first comparison of the check that fails, in plain words: "net clear area 5.1 sq ft, needs ≥ 5.7 sq ft".
     Each comparison is decided by outcome() itself (part_outcome), so the words never disagree with the result."""
-    for node in ast.walk(formula.parse(rule["check"]).body):
+    for node in _all_of(formula.parse(rule["check"]).body):
         if not (isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.left, ast.Name)
                 and type(node.ops[0]) in SIGNS):
             continue
@@ -108,6 +111,14 @@ def _first_failing(rule: dict, values: dict, allowed: dict) -> str | None:
         return f"{_words(rule, name)} {_n(values.get(name))}{_unit(rule, name)}, needs {SIGNS[type(node.ops[0])]} " \
                f"{_n(need)}{_unit(rule, name)}"
     return None
+
+
+def _all_of(node) -> list:
+    """The comparisons the check needs every one of: the check itself, or the parts of an `and` (nested `and`s
+    too). A comparison inside `or`, `not` or if-else isn't on its own the reason a part fails, so it is never named."""
+    if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And):
+        return [n for v in node.values for n in _all_of(v)]
+    return [node]
 
 
 def _value(text: str, values: dict, rule: dict, allowed: dict):

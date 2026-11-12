@@ -55,7 +55,7 @@ def test_a_bedroom_with_no_window_never_passes():
 def test_a_missing_measurement_needs_review_and_says_which():
     got = checked(house(opening("w1", "br1", height=None), opening("w2", "br2")) | {"stair": []})
     review = [i["reason"] for i in got["items"] if i["status"] == present.REVIEW]
-    assert review == ["Bedroom 1 › w1: net clear height not measured"]
+    assert review == ["Bedroom 1 › w1: net clear height not measured (or not usable)"]
     assert design(got) == present.REVIEW
 
 
@@ -103,3 +103,25 @@ def test_every_row_that_counts_is_an_item():
     assert len(got["items"]) == len(counted) == 4
     assert [i["status"] for i in got["items"]] == [each_part.STATUS[r["outcome"]] for r in counted]
     assert len({i["id"] for i in got["items"]}) == 4
+
+
+def test_the_line_names_only_a_comparison_the_check_needs():
+    """Inside `or` / `not` a comparison alone isn't the reason: the line falls back to the rule's title."""
+    rule = copy.deepcopy(RISER) | {"check": "not (stair_riser_height > 7.75 or stair_tread_depth < 10)"}
+    got = each_part.check_parts([rule], {"stair": [{"id": "s1", "name": "Stair 1",
+                                                    "measures": {"stair_riser_height": 7, "stair_tread_depth": 9}}]},
+                                ZONING, ALLOWED)
+    assert [i["reason"] for i in got["items"]] == ["Stair 1: SYNTHETIC stair riser"]
+    both = copy.deepcopy(RISER) | {"check": "stair_riser_height <= 8.25 and (stair_tread_depth >= 9 and stories <= 3)"}
+    got = each_part.check_parts([both], {"stair": [{"id": "s1", "name": "Stair 1",
+                                                    "measures": {"stair_riser_height": 7, "stair_tread_depth": 8}}]},
+                                ZONING | {"stories": 2}, ALLOWED)
+    assert [i["reason"] for i in got["items"]] == ["Stair 1: tread depth 8 in, needs ≥ 9 in"]
+
+
+def test_rows_about_no_part_and_unusable_values_are_worded_plainly():
+    assert each_part.label({"part": None, "within": None, "name": None}) == "Parts"
+    assert each_part.label({"part": "stair", "within": None, "name": None}) == "Stairs"
+    got = checked(house(opening("w1", "br1", area=-3), opening("w2", "br2")) | {"stair": []})
+    assert [i["reason"] for i in got["items"] if i["status"] == present.REVIEW] == \
+        ["Bedroom 1 › w1: net clear area not measured (or not usable)"]

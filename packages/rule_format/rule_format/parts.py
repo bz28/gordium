@@ -163,6 +163,8 @@ def _read(parts, kind: str, everywhere: dict) -> tuple[list[dict] | None, list[s
             problems.append(f"{_words(kind)} #{n} has no id")
         elif everywhere.get(part["id"], 0) > 1:
             problems.append(f"two parts have the id {part['id']!r}")
+        elif "within" in part and not isinstance(part["within"], str):
+            problems.append(f"{_words(kind)} {_name(part)}: what it is within isn't an id")
         elif "measures" in part and not isinstance(part["measures"], dict):
             problems.append(f"{_words(kind)} {_name(part)}: its measures aren't a mapping")
         else:
@@ -236,6 +238,14 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     if rule_problems(rule):
         return [_row(rule if isinstance(rule.get("for_each"), str) else dict(rule, for_each=None), "needs_review",
                      reason="the rule's per-part fields aren't valid")]
+    try:
+        formula_names(rule)
+        shaped = all(isinstance(r, dict) and isinstance(r.get("when"), str) for r in rule.get("review_when", [])) \
+            and (isinstance(rule.get("check"), str) or rule.get("kind") == "flag")
+    except (FormulaError, AttributeError, TypeError):
+        shaped = False
+    if not shaped:                                       # never frozen so (validation refuses it); never a crash
+        return [_row(rule, "needs_review", reason="the rule's formulas can't be read")]
     kind, parent = rule["for_each"], rule.get("within")
     own = set(measure_kinds(kind))
     everywhere = _ids(parts)
@@ -245,6 +255,7 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     if unread:
         return [_row(rule, "needs_review", reason=f"the {' and the '.join(_plural(k) for k in unread)} aren't read yet")]
     out = [_row(rule, "needs_review", reason=p) for p in parent_problems + problems]
+    values = building_values(values)
 
     def checked(part, within=None):
         mine = {m: v for m, v in (part.get("measures") or {}).items() if m in own}
@@ -267,9 +278,7 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
         elif kind_of.get(where) in registry()[kind].get("within", []) and kind_of.get(where) != parent \
                 and everywhere.get(where) == 1:
             continue
-        elif everywhere.get(where, 0) > 1:
-            continue                     # its parent's duplicated id is already a needs-review row
-        else:
+        else:                            # nowhere, or an id two parts share: never dropped
             out.append(_row(rule, "needs_review", c,
                             reason=f"{_words(kind)} {_name(c)} isn't within any {_words(parent)} that was read"))
     for p in parents:
@@ -284,7 +293,15 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     return out
 
 
+def building_values(values: dict) -> dict:
+    """The building's values without any part measure's name: a part's measure comes from the part, never from a
+    building value that happens to share its name (a part missing it is then missing it)."""
+    every = all_measures()
+    return {k: v for k, v in (values or {}).items() if k not in every}
+
+
 def formula_names(rule: dict) -> set[str]:
+    """Every measure name in the rule's applies_when, check and review_when (FormulaError if one can't be read)."""
     return set().union(*(formula.names(t) for t in [rule.get("applies_when"), rule.get("check")]
                          + [r.get("when") for r in rule.get("review_when", [])] if isinstance(t, str)))
 

@@ -240,6 +240,11 @@ def test_no_sleeping_rooms_is_not_applicable_and_no_stairs_as_the_rule_says():
     (house(opening("w1", "br1"), {"id": "w2", "within": "br2", "measures": [5.7]}), "measures aren't a mapping"),
     ({"sleeping_room": [{"id": "br1"}, {"id": "br1"}], "emergency_escape_opening": [opening("w1", "br1")]},
      "two parts have the id 'br1'"),
+    # within an id two parts of another kind share (two stairs "x"): never dropped
+    (house(opening("w1", "br1"), opening("w2", "x", area=1)) | {"stair": [{"id": "x"}, {"id": "x"}]},
+     "w2 isn't within any sleeping room that was read"),
+    (house(opening("w1", "br1"), opening("w2", ["br2"])), "what it is within isn't an id"),
+    (house(opening("w1", "br1"), opening("w2", {"id": "br2"})), "what it is within isn't an id"),
 ])
 def test_a_malformed_part_is_never_dropped(given, words):
     got = rows(AREA, given, {}, ALLOWED)
@@ -255,6 +260,12 @@ def test_a_part_cant_change_a_building_value():
         {("Bedroom 1", "w1"): "fail"}
 
 
+def test_a_building_value_never_stands_in_for_a_part_measure():
+    got = rows(AREA, house({"id": "w1", "within": "br1"}, rooms=("br1",)),
+               {"opening_net_clear_area": 9, "opening_net_clear_height": 30, "opening_at_grade": False}, ALLOWED)
+    assert by_name(got) == {("Bedroom 1", "w1"): "needs_review"}
+
+
 def test_none_follows_the_rule_applying_to_the_building():
     rule = AREA | {"applies_when": 'use == "one_family_detached"'}
     empty = house(rooms=("br1",))
@@ -266,6 +277,13 @@ def test_none_follows_the_rule_applying_to_the_building():
 def test_an_invalid_rule_gives_a_review_row():
     got = rows(AREA | {"for_each": "balcony"}, house(), {}, ALLOWED)
     assert [r["outcome"] for r in got] == ["needs_review"]
+
+
+@pytest.mark.parametrize("change", [{"check": "stair_riser_height <="}, {"review_when": [{"when": "((", "reason": "r"}]},
+                                    {"review_when": [{"reason": "no when"}]}])
+def test_an_unreadable_rule_gives_a_review_row_never_a_crash(change):
+    for given in ({"stair": [{"id": "s1", "measures": {"stair_riser_height": 7}}]}, {"stair": []}):
+        assert [r["outcome"] for r in rows(RISER | change, given, {}, ALLOWED)] == ["needs_review"]
 
 
 def test_rule_result():
