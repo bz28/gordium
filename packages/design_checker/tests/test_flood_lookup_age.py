@@ -146,6 +146,21 @@ def test_the_worker_passes_the_hosts_day_and_still_answers_without_one(tmp_path)
     assert not bad["ok"] and "today must be the day of the check" in bad["error"]
 
 
+def test_the_command_line_says_its_own_day(tmp_path, monkeypatch, capsys):
+    """python -m design_checker <model> <facts>: the command line is a host too, and says the place's day."""
+    import yaml
+    model = _model(tmp_path, [(0, 0), (60, 0), (60, 110), (0, 110)])
+    facts = tmp_path / "facts.yaml"
+    facts.write_text(yaml.safe_dump({"lot_facts": facts_found_on("2026-11-11")}), encoding="utf-8")
+    monkeypatch.setattr(worker, "city_day", lambda *a: TODAY)
+    assert worker.main([str(model), str(facts)]) == 0
+    out = capsys.readouterr().out
+    assert "Gordium · " in out and "Overlays · not in this release" not in out
+    monkeypatch.setattr(worker, "city_day", lambda *a: "2027-02-10")   # 91 days on
+    assert worker.main([str(model), str(facts)]) == 0
+    assert "Overlays · not in this release" in capsys.readouterr().out
+
+
 def test_the_plugin_says_the_day_in_every_check_request():
     """The one check request the plugin builds (_check_begin, used by GordiumCheck and the live re-check) carries
     the place's own day; nothing else in it reads the clock for the checker."""

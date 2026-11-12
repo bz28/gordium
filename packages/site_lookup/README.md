@@ -47,9 +47,10 @@ outline and the address it was found for; the check then leaves the "Overlays ·
 lot is still that outline, at that address, and the architect hasn't said the lot is in the South Hill Overlay (`design_checker.present.overlays_cleared`). The City's layers have no freshness date: their live answer
 on the lookup's day is taken as the City's current map (as the zoning suggestion is), and the finding keeps that day.
 It counts for 90 days from that day (`design_checker.present.LOOKUP_FRESH_DAYS`, on the day the host says the check
-is): a full FEMA map revision is posted as pending six months before it takes effect, and a Letter of Map Revision is
-in its 90-day reconsideration period, in the Federal Register, before it takes effect, so 90 days bounds what a
-lookup can have missed. The result says how old it is; older, the row is back and says to look the address up again.
+is): a full FEMA map revision is posted as pending six months before it takes effect, so one now in effect was
+pending (and kept the row) at any lookup in the last 90 days. A Letter of Map Revision is never posted as pending: one
+that took effect after the lookup is missed, and 90 days limits how long such a miss can last (it is why the line
+says "not confirmed"). The result says how old it is; older, the row is back and says to look the address up again.
 
 **Incomplete evidence is never "suggested".** A second address match that couldn't be placed on a parcel,
 elevations missing at some corners, road widths unknown (a second street could be missed: the corner lot is
