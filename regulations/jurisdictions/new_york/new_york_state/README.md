@@ -31,7 +31,7 @@ Every reference in the brought-in sections was followed (found by code, `documen
 
 ## Ways into these sections from outside them
 
-Found by the same code: the whole book (all 1,079 pages, read once by the same extractor into the code cache, `gov.ny.residential.2025.full.jsonl`) searched for R318, R319, R320, R321, R325.6 and R325.7 outside the brought-in pieces, leaving out the table of contents (p.16), the list of standards (p.852) and the index (pp.1070-1076), which only list section numbers. None of these is brought in yet; each changes or extends what the brought-in sections apply to:
+Found by the same code: the whole book (all 1,079 pages, the code cache's text of every page, read by the same extractor: `document_extraction/book_text.py`) searched for R318, R319, R320, R321, R325.6 and R325.7 outside the brought-in pieces, leaving out the table of contents (p.16), the list of standards (p.852) and the index (pp.1070-1076), which only list section numbers. None of these is brought in yet; each changes or extends what the brought-in sections apply to:
 
 - R314.4 mezzanines (p.97): their means of egress follows R318.
 - R315.5 sleeping lofts (p.98): R318 "as modified by" R315.5.1 to R315.5.3, with their own stair, landing and ladder limits. A house with a sleeping loft needs these before its loft stair can be checked.

@@ -26,8 +26,8 @@ from pathlib import Path
 import yaml
 
 from rule_format.labels import load_pieces
-from rule_format.rulebook import (REPO, STATE_SETTINGS, Context, cached, jurisdictions, law_folders, load, read_jsonl,
-                                  utf8_console)
+from rule_format.rulebook import (REPO, STATE_SETTINGS, Context, cached_text, jurisdictions, kept_text, law_folders,
+                                  load, read_jsonl, utf8_console)
 
 from . import coverage, district_audit, labeler, term_index
 from .budget import Budget, BudgetExceeded
@@ -39,14 +39,14 @@ MIN_CACHEABLE = 512   # tokens; shorter fixed instructions silently don't cache 
 
 def extracted_rows(j: Path, file: str) -> list[dict]:
     """A document's extracted text: a header, then one row per line ({"page", "line", "text", ...}). A book kept
-    outside the repo is read from the code cache; where the cache doesn't have it, its lines are rebuilt from the
-    sections file's line counts, with no text (the header says "no_text"), so the coverage report can still be
-    checked: it counts lines, never reads them."""
+    outside the repo is read from the code cache, its brought-in pages only (rulebook.kept_text); where the cache
+    doesn't have it, its lines are rebuilt from the sections file's line counts, with no text (the header says
+    "no_text"), so the coverage report can still be checked: it counts lines, never reads them."""
     entry = next((d for d in load(j / "1_source_documents/sources.yaml")["documents"] if d["file"] == file), {})
     if entry.get("kept_outside_repo") is not True:
         return read_jsonl(j / "2_extracted_text" / f"{Path(file).stem}.jsonl")
-    if cached(entry, ".jsonl").exists():
-        return read_jsonl(cached(entry, ".jsonl"))
+    if cached_text(entry).exists():
+        return kept_text(entry)
     header, _ = load_pieces(j / "2_extracted_text" / f"{Path(file).stem}.sections.jsonl")
     return [{"file": file, "sha256": entry.get("sha256"), "no_text": True},
             *({"page": int(p), "line": n, "text": ""} for p, count in header["line_counts"].items()

@@ -21,7 +21,7 @@ is also read by a person from the whole printed sentence, without seeing numbers
 import datetime
 from pathlib import Path
 
-from .rulebook import STATE_SETTINGS, Context, cached, load, read_jsonl
+from .rulebook import STATE_SETTINGS, Context, kept_text, load, read_jsonl
 
 VERIFICATION = "text_verification.yaml"
 READINGS = ("agrees", "differs")
@@ -79,7 +79,7 @@ def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[s
     problems += [f"{pid}: in {VERIFICATION} but not a piece" for pid in recorded if pid not in pieces]
     text = None
     if name in ctx.pages:
-        lines = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+        lines = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
         text = lambda p: [lines[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1)]
     else:
         notes.append(f"{VERIFICATION}: the recorded numbers weren't compared with the book's text here "
@@ -114,7 +114,7 @@ def numbers_of(folder: Path, ctx: Context, name: str) -> dict[str, list[str]]:
     """Each piece's numbers as the extracted text has them (for writing text_verification.yaml; needs the cache)."""
     from document_extraction.numbers import shown, statements_of_lines
     entry = ctx.sources[name]
-    lines = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    lines = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
     rows = read_jsonl(Path(folder) / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
     return {p["id"]: [shown(s) for s in statements_of_lines([lines[(pg, n)] for pg, a, b in p["lines"]
                                                              for n in range(a, b + 1)])] for p in rows[1:]}

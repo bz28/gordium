@@ -400,3 +400,88 @@ def test_an_undefined_italic_word_beside_a_defined_one_in_one_phrase_must_be_nam
     rows = _book([_row(2, 6, "R318.1.2 Runs. A flight(s) or stair.", bold="R318.1.2 Runs.",
                        italic=["flight(s) or stair"])])
     assert icc_sections.split(rows, BROUGHT_IN)["problems"] == []
+
+
+# ---- the code cache's text: the whole book, the same for every branch (book_text.py) --------------------------------
+
+ORDINANCE = "regulations/jurisdictions/new_york/ithaca_city/1_source_documents/ordinance_no_2025-12_southside_form_districts.pdf"
+
+
+@pytest.fixture(scope="module")
+def whole_book():
+    """A PDF in the repo read as the code cache keeps a book: every page, each page's counts in the header."""
+    from document_extraction.icc import read_book
+    from rule_format.rulebook import REPO
+    return REPO / ORDINANCE, read_book(REPO / ORDINANCE)
+
+
+def test_a_branchs_pages_chosen_from_the_whole_book_are_a_fresh_extraction_of_them_byte_for_byte(whole_book):
+    from document_extraction.book_text import select
+    from document_extraction.extract import to_jsonl
+    from document_extraction.icc import extract_icc
+    pdf, book = whole_book
+    assert book[0]["pages_read"] == "all" and len(book[0]["page_counts"]) == book[0]["pages"]
+    for pages in ([1, 2, 3], [5, 30, 31, 37], [36, 4]):
+        assert to_jsonl(select(book, pages)) == to_jsonl(extract_icc(pdf, pages))   # header and counts included
+    with pytest.raises(ValueError):
+        select(book, [38])                                                         # never a page short, silently
+    with pytest.raises(ValueError):
+        select(extract_icc(pdf, [1, 2]), [1])                                      # only a whole book is chosen from
+
+
+def test_the_cached_texts_name_is_the_books_and_the_extractors_never_the_branchs(tmp_path, monkeypatch):
+    import shutil
+    from document_extraction import book_text
+    a = {"file": "code.pdf", "sha256": "x", "brought_in": {"pages": "34-56"}}
+    b = a | {"brought_in": {"pages": "34-56, 898"}}                  # another branch brings in one more page
+    assert book_text.file_name(a) == book_text.file_name(b)
+    copy = tmp_path / "code"
+    copy.mkdir()
+    for name in book_text.TEXT_CODE:
+        shutil.copy(book_text.HERE / name, copy / name)
+    monkeypatch.setattr(book_text, "HERE", copy)
+    before = book_text.file_name(a)
+    icc = (copy / "icc.py").read_bytes()
+    (copy / "icc.py").write_bytes(icc.replace(b"\n", b"\r\n"))       # a Windows checkout: the same extractor
+    assert book_text.file_name(a) == before
+    (copy / "icc.py").write_bytes(icc + b"\n# reads pages another way\n")
+    assert book_text.file_name(a) != before                          # another extractor: a text of its own
+
+
+def test_check_refuses_a_cached_book_whose_brought_in_pages_are_not_a_fresh_extraction(whole_book, tmp_path, capsys):
+    import json
+    import document_extraction.__main__ as cli
+    from document_extraction.extract import to_jsonl
+    from document_extraction.icc import extract_icc
+    pdf, book = whole_book
+    text = tmp_path / "book.text_k.jsonl"
+    text.write_text(to_jsonl(book), encoding="utf-8")
+    pages = [2, 3]
+    fresh = extract_icc(pdf, pages)
+    assert cli._same_as_cached(pdf, text, pages, fresh, check=True)
+    edited = [dict(r) for r in book]
+    next(r for r in edited if r.get("page") == 3)["text"] += " x"            # one brought-in line changed
+    text.write_text(to_jsonl(edited), encoding="utf-8")
+    assert not cli._same_as_cached(pdf, text, pages, fresh, check=True)
+    assert text.read_text(encoding="utf-8") == to_jsonl(edited)              # --check writes nothing
+    unchecked = [dict(r) for r in book]
+    next(r for r in unchecked if r.get("page") == 9)["text"] += " x"         # a page this branch doesn't bring in
+    text.write_text(to_jsonl(unchecked), encoding="utf-8")
+    assert cli._same_as_cached(pdf, text, pages, fresh, check=True)
+    text.write_text(to_jsonl(edited), encoding="utf-8")
+    assert cli._same_as_cached(pdf, text, pages, fresh, check=False)         # written again, the whole book
+    assert text.read_text(encoding="utf-8") == to_jsonl(book) and not list(tmp_path.glob("*.part*"))
+    assert json.loads(text.read_text(encoding="utf-8").splitlines()[0])["page_counts"]
+
+
+def test_a_selections_header_counts_only_its_own_pages():
+    # The repo's PDFs have no rotated text or stacked fractions; the book has both, counted page by page.
+    from document_extraction.book_text import header, select
+    counts = {1: (2, 1), 2: (5, 0), 3: (0, 7)}
+    book = [header("b.pdf", "s", 3, "e", counts, None) | {"page_counts": {str(p): list(c) for p, c in counts.items()}},
+            {"page": 1, "line": 1, "text": "a"}, {"page": 2, "line": 1, "text": "b"}, {"page": 3, "line": 1, "text": "c"}]
+    assert book[0]["rotated_chars_skipped"] == 7 and book[0]["fractions_joined"] == 8
+    head, *rows = select(book, [3, 2])
+    assert head == {"file": "b.pdf", "sha256": "s", "pages": 3, "extractor": "e", "rotated_chars_skipped": 5,
+                    "fractions_joined": 7, "pages_read": [3, 2]}
+    assert [r["text"] for r in rows] == ["c", "b"]                  # in the order the pages are named, as read
