@@ -41,7 +41,7 @@ def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
 
 def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[str]]:
     """(problems, notes) for a state law folder's text_verification.yaml. Notes say what wasn't checked here."""
-    from document_extraction.numbers import shown, statements      # the same code reads both readings
+    from document_extraction.numbers import shown, statements_of_lines      # the same code reads both readings
     from .labels import piece_fingerprint
     folder = Path(folder)
     path = folder / VERIFICATION
@@ -73,7 +73,7 @@ def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[s
     text = None
     if name in ctx.pages:
         lines = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
-        text = lambda p: " ".join(lines[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
+        text = lambda p: [lines[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1)]
     else:
         notes.append(f"{VERIFICATION}: the recorded numbers weren't compared with the book's text here "
                      f"({ctx.uncached.get(name, 'its text is not loaded')})")
@@ -97,16 +97,16 @@ def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[s
             problems.append(f"{pid}: says the readings differ, but its two lists of numbers are the same")
         if not agree and not e.get("flags"):
             problems.append(f"{pid}: the readings differ, so it needs a flag saying which is right and why")
-        if text is not None and e.get("numbers") != [shown(s) for s in statements(text(pieces[pid]))]:
+        if text is not None and e.get("numbers") != [shown(s) for s in statements_of_lines(text(pieces[pid]))]:
             problems.append(f"{pid}: the recorded numbers are not the extracted text's numbers now")
     return problems, notes
 
 
 def numbers_of(folder: Path, ctx: Context, name: str) -> dict[str, list[str]]:
     """Each piece's numbers as the extracted text has them (for writing text_verification.yaml; needs the cache)."""
-    from document_extraction.numbers import shown, statements
+    from document_extraction.numbers import shown, statements_of_lines
     entry = ctx.sources[name]
     lines = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
     rows = read_jsonl(Path(folder) / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
-    return {p["id"]: [shown(s) for s in statements(" ".join(lines[(pg, n)] for pg, a, b in p["lines"]
-                                                              for n in range(a, b + 1)))] for p in rows[1:]}
+    return {p["id"]: [shown(s) for s in statements_of_lines([lines[(pg, n)] for pg, a, b in p["lines"]
+                                                             for n in range(a, b + 1)])] for p in rows[1:]}

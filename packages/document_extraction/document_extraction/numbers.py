@@ -56,6 +56,9 @@ def statements(text: str) -> list[dict]:
         used = 1 if unit else 0
         if after_words[:1] and after_words[0] in TWO_WORD_UNITS and after_words[1:2] and after_words[1] in UNITS:
             unit, used = f"{after_words[0]} {UNITS[after_words[1]]}", 2
+        elif after_words[:1] == ["gross"] and after_words[1:2] and after_words[1] in TWO_WORD_UNITS \
+                and after_words[2:3] and after_words[2] in UNITS:
+            unit, used = f"gross {after_words[1]} {UNITS[after_words[2]]}", 3     # "200 gross square feet"
         if unit == "unit" and after_words[1:2] and after_words[1] in DIRECTIONS:
             unit, used = f"unit {after_words[1]}", 2
         rest = " ".join(after_words[used:used + 3])
@@ -66,12 +69,17 @@ def statements(text: str) -> list[dict]:
     return out
 
 
+def statements_of_lines(lines: list[str]) -> list[dict]:
+    """Each number in a piece given as its lines: a list item's own number is cut off where the book prints it, at
+    the start of a line ("2. Where ..."), never inside the text, where "not more than 2. Where" ends a sentence with
+    a number that must be read."""
+    return statements(" ".join(LIST_ITEM.sub("", line, count=1) for line in lines))
+
+
 def _plain(text: str) -> str:
-    """Text as the numbers are read from it: sealed markers out ("m[fn2]" -> "m"), list items inside a joined piece
-    cut off as at a line start, spaces made single. A hyphen before a space is kept: "one- or two-family" is two
+    """Text as the numbers are read from it: sealed markers out ("m[fn2]" -> "m"), spaces made single. A hyphen before a space is kept: "one- or two-family" is two
     numbers (joining it as a word broken at a line end would lose the "one")."""
     text = re.sub(r"\[fn[^\]]*\]", "", text)
-    text = re.sub(r"(?:^|\s)\d+(?:\.\d+)*\.(?=\s+[A-Z])", " ", text)    # "1. A nosing ..." list markers
     return re.sub(r"\s+", " ", text).strip()
 
 
