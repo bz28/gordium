@@ -250,6 +250,11 @@ def test_the_parts_instructions_name_every_part_kind_and_never_pass_for_none():
     lambda ex: ex["rows"][0].__setitem__("part", None),
     lambda ex: ex["parts"][1].__setitem__("within", ["br1"]),
     lambda ex: ex.__setitem__("parts", {"x": 1}),
+    # review round 3: a part measure's value or name, or a part's kind, that isn't text
+    lambda ex: ex["parts"][1]["measures"][0].__setitem__("value", 6),
+    lambda ex: ex["parts"][1]["measures"][0].__setitem__("value", None),
+    lambda ex: ex["parts"][1]["measures"][0].__setitem__("measure", ["opening_net_clear_area"]),
+    lambda ex: ex["parts"][1].__setitem__("kind", ["emergency_escape_opening"]),
 ])
 def test_a_malformed_example_in_an_answer_is_sent_back_never_a_crash(break_it):
     """Review round 2: a non-text name or id, or a row that isn't an object, crashed the run (AttributeError) instead

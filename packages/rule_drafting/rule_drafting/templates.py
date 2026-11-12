@@ -161,10 +161,13 @@ def _example(ex: dict, rule: dict, values: dict[str, float]) -> dict:
         kinds = [k for k in (rule.get("for_each"), rule.get("within")) if k]
         given = {k: [] for k in kinds}
         for p in _entries(ex.get("parts", []), "part"):
-            if p["kind"] not in given:
-                raise ValueError(f"an example's part {p['id']!r} is a {p['kind']!r}, not a kind this rule reads {kinds}")
+            if _text(p, "kind") not in given:
+                raise ValueError(f"an example's part {p.get('id')!r} is a {p.get('kind')!r}, not a kind this rule reads {kinds}")
             part = {"id": p["id"]} | {k: p[k] for k in ("name", "within") if _text(p, k)}
-            part["measures"] = {g["measure"]: _example_value(g["value"], values) for g in _entries(p["measures"], "measure")}
+            measures = _entries(p.get("measures", []), "measure")
+            for g in measures:
+                _text(g, "measure"), _text(g, "value")       # text, or the template is sent back (never a crash)
+            part["measures"] = {g["measure"]: _example_value(g["value"], values) for g in measures}
             given[p["kind"]].append(part)
         out["parts"] = given
         out["rows"] = [{k: r[k] for k in ("part", "within") if _text(r, k)} | {"outcome": r["outcome"]}
