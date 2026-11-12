@@ -99,7 +99,8 @@ def test_the_scenes_cover_what_the_suite_promises():
     codes = {p["code"] for d in want.values() for b in d["buildings"] for p in b["problems"]}
     codes |= {u["problem"]["code"] for d in want.values() for u in d["unsent"]}
     codes |= {p["code"] for d in want.values() for p in d["problems"]}
-    assert {"curved_surface", "curved_edge", "open_solid", "not_a_solid", "several_lot_outlines"} <= codes
+    assert {"curved_surface", "curved_edge", "open_solid", "not_a_solid", "several_lot_outlines", "no_lot_outline",
+            "lot_not_found"} <= codes
     left = [o for d in want.values() for o in d["left_out"]]
     assert any(o["touching"] is True for o in left) and any(o["touching"] is False for o in left)
     assert any(o["ground_like"] for o in left) and any(o["context"] for o in left)
@@ -743,3 +744,143 @@ def test_the_reference_adapter_places_a_block_whose_box_covers_no_ground_by_its_
     model.Write(str(tmp_path / "m.3dm"), 8)
     left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
     assert [(o["layer"], o["touching"]) for o in left] == [("Default", False)]
+
+
+# ---- the scenes from the Revit reading note (18 on: its section 7, the cases Rhino can draw) ---------------------
+
+NOTE = c.REPO / "docs" / "revit" / "revit_reading_design.md"
+FROM_THE_NOTE = sorted(n for n in SCENES if int(n.split("_")[0]) >= 18)
+
+
+def _lot_edges(ring, closed=True):
+    n = len(ring)
+    return [{"points": [ring[i], ring[(i + 1) % n]], "curved": False} for i in range(n if closed else n - 1)]
+
+
+def test_every_scene_from_the_revit_reading_note_says_which_reading_it_guards_and_the_note_names_it():
+    """Each says which row of the note (and which Rhino code) it guards, and the note's section 7 names the scene,
+    so a scene and the reading it stands for can't drift apart unseen."""
+    assert len(FROM_THE_NOTE) == 9
+    note = NOTE.read_text(encoding="utf-8").split("## 7. Proposed new scenes")[1].split("\n## ")[0]
+    for name in FROM_THE_NOTE:
+        guards = SCENES[name].get("guards") or ""
+        assert "Revit reading design note" in guards and "section" in guards and "In Rhino" in guards, name
+        assert f"scene {int(name.split('_')[0])}" in note or name.split("_")[0] in note, name
+
+
+def test_a_house_of_parts_is_sent_part_by_part_and_its_closed_mesh_without_open_mesh():
+    """Scene 18 (note scene A): every part is one building, the roof slab a closed mesh of triangles. A host that
+    drops a part, merges the curtain wall's pieces or calls the closed mesh open fails."""
+    import rhino3dm as r
+    scene = SCENES["18_house_built_from_parts"]
+    want = c.expected_site(scene)
+    assert len(want["buildings"]) == 15 and all(not b["problems"] for b in want["buildings"])
+    roof = next(b for b in want["buildings"] if b["id"] == "roof_slab")
+    assert len(roof["faces"]) == 12 and all(len(f["points"]) == 3 for f in roof["faces"])
+    mesh = next(o.Geometry for o in r.File3dm.Read(str(cr.model_path(scene))).Objects
+                if o.Attributes.Id == uuid.UUID(c.object_id(scene, "roof_slab")))
+    assert isinstance(mesh, r.Mesh) and mesh.IsClosed and len(mesh.Faces) == 12
+    doc = copy.deepcopy(want)
+    doc["buildings"] = [b for b in doc["buildings"] if b["id"] != "curtain_panel"]
+    assert "building curtain_panel: not sent" in c.differences(doc, want)
+    doc = copy.deepcopy(want)
+    next(b for b in doc["buildings"] if b["id"] == "roof_slab")["problems"] = [{"code": "open_mesh", "args": {}}]
+    assert "building roof_slab: problems not expected: open_mesh" in c.differences(doc, want)
+
+
+def test_the_house_only_inside_a_block_is_reported_never_read_as_an_empty_lot():
+    """Scene 19 (note scene B): a host that reads only what is placed on the Building layer sends nothing for the
+    house; it must say the block holds building parts, and list the block as left out."""
+    scene = SCENES["19_house_only_inside_a_block"]
+    got = cr.describe(scene)
+    assert [b["id"] for b in got["buildings"]] == ["a block"]          # read_3dm._block_holds, off the Building layer
+    assert [o["id"] for o in got["left_out"]] == [c.object_id(scene, "house_link")]
+    want = c.expected_site(scene)
+    doc = copy.deepcopy(want)
+    doc["unsent"], doc["left_out"] = [], []
+    found = c.conformance(scene, doc)
+    assert any("objects not sent as solids: FEWER problems" in d for d in found)
+    assert "left out house_link: not listed (it makes the check need review)" in found
+
+
+def test_a_group_s_parts_keep_their_ids_when_the_group_is_moved():
+    """Scene 20 (note scene E): the parts are one group in the model, and after the move each is sent under the id
+    it had; a host whose ids change at the edit fails."""
+    import rhino3dm as r
+    scene = SCENES["20_grouped_parts_moved"]
+    for model in [cr.build(scene)] + [r.File3dm.Read(str(cr.model_path(scene, step))) for step in c.steps(scene)]:
+        assert len(model.Groups) == 1
+        assert sorted(str(o.Attributes.Id) for o in model.Objects if o.Attributes.GroupCount == 1) == \
+            sorted(c.object_id(scene, s["id"]) for s in c.solids(scene))
+    rec = cr.record(scene)
+    assert c.recording_problems(cr.HOST, scene["name"], rec, SCENES) == []
+    after = rec["steps"][c.STEPS[1]]
+    next(b for b in after["buildings"] if b["id"] == c.object_id(scene, "wall_east"))["id"] = "made at the move"
+    found = c.recording_problems(cr.HOST, scene["name"], rec, SCENES)
+    assert any("building wall_east: not sent" in d for d in found)
+
+
+def test_the_picked_lot_is_the_one_sent_never_another_or_none():
+    """Scene 21 (note scene G): with two outlines and one picked, a host that ignores the pick (sends none, or the
+    neighbour's) fails."""
+    scene = SCENES["21_lot_picked_from_two"]
+    want = c.expected_site(scene)
+    assert want["lot"]["id"] == "lot" and want["problems"] == []
+    assert c.facts(scene)["lot_id"] == c.object_id(scene, "lot")
+    ignored = copy.deepcopy(want)
+    ignored["lot"], ignored["problems"] = None, [{"code": "several_lot_outlines", "args": {"count": "2", "layer": "Site"}}]
+    assert "lot: none sent, expected one" in c.conformance(scene, ignored)
+    neighbour = copy.deepcopy(want)
+    neighbour["lot"] = {"id": "lot", "edges": _lot_edges(c.lots(scene)[1])}
+    assert any(d.startswith("lot: its lot lines differ") for d in c.differences(neighbour, want))
+
+
+def test_a_picked_lot_deleted_is_not_replaced_by_the_one_outline_left():
+    """Scene 23 (note scene G): the only outline left is the neighbour's; a host that falls back to it fails."""
+    scene = SCENES["23_picked_lot_deleted"]
+    want = c.expected_site(scene)
+    assert want["lot"] is None and [p["code"] for p in want["problems"]] == ["lot_not_found"]
+    fell_back = copy.deepcopy(want)
+    fell_back["lot"], fell_back["problems"] = {"id": "lot", "edges": _lot_edges(c.lots(scene)[0])}, []
+    found = c.conformance(scene, fell_back)
+    assert "lot: sent, expected none" in found
+    assert any("site: FEWER problems than expected, missing lot_not_found" in d for d in found)
+
+
+@pytest.mark.parametrize("name, code", [("24_open_property_line", "no_lot_outline"),
+                                        ("25_open_property_line_picked", "lot_not_found")])
+def test_an_open_property_line_is_never_sent_as_a_lot(name, code):
+    """Scenes 24 and 25 (note scene G): a host that sent the open outline's three lines as the lot, saying nothing,
+    fails on the lot and on the problem it didn't send. The measuring refuses such a lot too (lot_not_a_loop: "the
+    lot outline isn't one closed loop of lot lines"), so the verdicts stay needs review: two guards, not one."""
+    scene = SCENES[name]
+    want = c.expected_site(scene)
+    assert want["lot"] is None and [p["code"] for p in want["problems"]] == [code]
+    sent = copy.deepcopy(want)
+    sent["lot"], sent["problems"] = {"id": "lot", "edges": _lot_edges(c.lots(scene)[0], closed=False)}, []
+    found = c.conformance(scene, sent)
+    assert found == ["lot: sent, expected none",
+                     f"site: FEWER problems than expected, missing {code} (a false pass risk)"]
+
+
+def test_blocks_with_nothing_to_measure_are_listed_touching_unknown_never_placed_by_their_readable_part():
+    """Scene 26 (note scene H): the shed's own solid stands 10 ft from the house, but its nested part has no box.
+    A host that placed the shed by its solid alone says it doesn't touch: the empty block still keeps the yards at
+    needs review, so only the description comparison catches that (it does); a host that did so for both blocks
+    would let the yards comply."""
+    scene = SCENES["26_blocks_with_nothing_to_measure"]
+    got = cr.describe(scene)
+    assert sorted((o["id"], o["touching"]) for o in got["left_out"]) == \
+        sorted((c.object_id(scene, i), None) for i in ("empty_block", "shed_with_empty_part"))
+    shed_only = c.expected_site(scene)
+    next(o for o in shed_only["left_out"] if o["id"] == "shed_with_empty_part")["touching"] = False
+    assert c.conformance(scene, shed_only) == ["left out shed_with_empty_part: touching False, expected None"]
+    doc = c.expected_site(scene)
+    for o in doc["left_out"]:
+        o["touching"] = False
+    found = c.conformance(scene, doc)
+    assert "left out shed_with_empty_part: touching False, expected None" in found
+    assert any(d.startswith("verdict R-1b.side_yards#west: complies, expected needs_review") for d in found)
+    dropped = c.expected_site(scene)
+    dropped["left_out"] = [o for o in dropped["left_out"] if o["id"] != "empty_block"]
+    assert "left out empty_block: not listed (it makes the check need review)" in c.differences(dropped, c.expected_site(scene))
