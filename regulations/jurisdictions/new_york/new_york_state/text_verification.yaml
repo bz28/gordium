@@ -14,7 +14,7 @@ second_reading:
     through document_extraction/numbers.py. 169 pieces, 357 numbers: all agree. No glyph was marked unclear. Step 1b
     (2026-11-12, the 102 pieces it brought in): the lines of the pieces were cropped from 216 dpi page images (one crop per run
     of lines on a page, 50 crops), and a helper that never saw the extracted text transcribed every line of them; the
-    transcript went through numbers.py: 102 pieces, 135 numbers, all agree. The first crops cut the left edge of some
+    transcript went through numbers.py: 102 pieces, 135 numbers, all agree (134 after review round 2, when numbers.py learned to read "one and one third" as one number and to keep a "not", "no" or "nor" before a comparison; the seven pieces this changed were compared again from the same transcript and agree). The first crops cut the left edge of some
     lines; they were rendered again at the full page width and those lines read again (the "42 inches" of R314.5 among them).
     After review round 1, five more pieces (BO102.1, BO102.1.2, BO103:unsafe, BO104.1, BO104.1.1) were read the same way
     by the same helper (4 crops): 0 numbers in the text, 0 in the reading; they agree.'
@@ -821,12 +821,12 @@ pieces:
     piece_sha256: 66066913dd720a65415e2a68b9ddc355427d30b97879133069eca8e2452dc622
     numbers:
     - not greater than one-third
-    - greater than one-half
+    - not be greater than one-half
     - not more than 42 inch
     - 1067 mm
     second_reading_numbers:
     - not greater than one-third
-    - greater than one-half
+    - not be greater than one-half
     - not more than 42 inch
     - 1067 mm
     second_reading: agrees
@@ -882,16 +882,16 @@ pieces:
   R315.3:
     piece_sha256: adb5cf63cd6e18ab0dd5dc62b0bd84c72a9f4ea3c81a7ce49df6a9bcf22dba7b
     numbers:
-    - less than 7 foot
+    - not be less than 7 foot
     - 2134 mm
-    - less than 3 foot
+    - not be less than 3 foot
     - 914 mm
     - less than 3 foot
     - 914 mm
     second_reading_numbers:
-    - less than 7 foot
+    - not be less than 7 foot
     - 2134 mm
-    - less than 3 foot
+    - not be less than 3 foot
     - 914 mm
     - less than 3 foot
     - 914 mm
@@ -899,9 +899,9 @@ pieces:
   R315.4:
     piece_sha256: f0539c1140384959ca31b8138d28668daac7a212e45884e495429a1521f3ffd2
     numbers:
-    - greater than two-thirds
+    - not be greater than two-thirds
     second_reading_numbers:
-    - greater than two-thirds
+    - not be greater than two-thirds
     second_reading: agrees
   R315.5:
     piece_sha256: cfec9f359d4db0b0edf4d961c1b20aff432e5ae3baacab750d997bcb9a9d3a66
@@ -925,12 +925,12 @@ pieces:
   R315.5.2.1:
     piece_sha256: 07f1358b50483fda63d0b0545db9b799f1b501b2ce50ef633c49fc2cb0551509
     numbers:
-    - less than 17 inch
+    - not be less than 17 inch
     - 432 mm
     - not less than 20 inch
     - 610 mm
     second_reading_numbers:
-    - less than 17 inch
+    - not be less than 17 inch
     - 432 mm
     - not less than 20 inch
     - 610 mm
@@ -2080,13 +2080,11 @@ pieces:
   BO103:dangerous:
     piece_sha256: 20dbd7d0221739a5cc44d53df8b6a98beb4e512eb34243c8c9688ccdd0f803c8
     numbers:
-    - more than one
-    - and one third
+    - more than one and one third
     - two thirds
     - one third
     second_reading_numbers:
-    - more than one
-    - and one third
+    - more than one and one third
     - two thirds
     - one third
     second_reading: agrees
@@ -2300,7 +2298,7 @@ pieces:
     numbers:
     - not less than 70 inch
     - 1778 mm
-    - more than 80 inch
+    - nor more than 80 inch
     - 2032 mm
     - not exceed 9 inch
     - 229 mm
@@ -2317,7 +2315,7 @@ pieces:
     second_reading_numbers:
     - not less than 70 inch
     - 1778 mm
-    - more than 80 inch
+    - nor more than 80 inch
     - 2032 mm
     - not exceed 9 inch
     - 229 mm
@@ -2347,11 +2345,11 @@ pieces:
   BO108.2:
     piece_sha256: 77cfb3ef454ff035cb11ffa8c35d3968f2a99589d46bef6eb7b8a68c37cd9f7a
     numbers:
-    - more than five
+    - no more than five
     - up to ten
     - '10'
     second_reading_numbers:
-    - more than five
+    - no more than five
     - up to ten
     - '10'
     second_reading: agrees

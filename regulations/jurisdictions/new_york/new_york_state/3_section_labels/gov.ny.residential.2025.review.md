@@ -24,13 +24,12 @@ Never checked: a rule wrongly put here could let a design pass that should fail.
 | BO103 | DEFINITIONS | not_for_checking | draft | A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one). | SECTION BO103—DEFINITIONS |
 | BO108 | BED AND BREAKFAST DWELLINGS | not_for_checking | draft | A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one). | [NY] SECTION BO108—BED AND BREAKFAST DWELLINGS |
 
-## Labeled reference but using requirement words (34)
+## Labeled reference but using requirement words (33)
 
 Only rules become formulas: check each is really only a definition or pointer, not a requirement.
 
 | Piece | Title | Label | Status | Reason | Quote | Words |
 |---|---|---|---|---|---|---|
-| R102.6 | Existing structures | reference | draft | Lets the lawful occupancy of a building existing on 2025-12-31 continue; its numbered parts send work on existing buildings to Appendix BO. No requirement of its own. | [NY] R102.6 Existing structures. The legal occupancy of any structure existing on the effective date of this code shall be permitted to continue without change, except as required by any provision of this code or by any other provision of the Uniform Code. For the | shall be permitted, shall be deemed |
 | R201.3 | Words and terms defined in other codes | reference | draft | Sends an italic word this code doesn't define to the meaning another New York code gives it. | [NY] R201.3 Words and terms defined in other codes. Where italicized words and terms are not defined in this code and are defined in the Building Code of New York State, Property Maintenance | shall have |
 | R201.4 | Words and terms not defined | reference | draft | Gives a word with no definition its ordinary meaning in context: a rule of reading, no requirement. | [NY] R201.4 Words and terms not defined. Where words and terms are not italicized or italicized but not defined through the meth- ods authorized by this section, such words and terms | shall have |
 | R202:bed_and_breakfast_dwelling | BED AND BREAKFAST DWELLING | reference | draft | Defines BED AND BREAKFAST DWELLING, printed in italics in BO107.1, BO108.1, BO108.2, BO108.3; used in italics by the definition of DWELLING UNIT. A definition sets no requirement itself. | BED AND BREAKFAST DWELLING. An owner-occupied residence resulting from a conversion of a one-family dwelling, used for providing overnight accommodations and a morning meal to not more than | more than |

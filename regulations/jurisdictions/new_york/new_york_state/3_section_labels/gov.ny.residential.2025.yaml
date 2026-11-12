@@ -14,18 +14,20 @@ labels:
       page: 24
       lines:
       - 38
-      - 39
+      - 42
       quote: '[NY] R101.2.1 Appendices. Provisions in the following appendices have been adopted and are made part of this
-        code: Appendix BA Manufactured Housing Used as Dwellings'
+        code: Appendix BA Manufactured Housing Used as Dwellings Appendix BB Tiny Houses Appendix BF Patio Covers Appendix
+        BO Existing Buildings and Structures'
     piece_sha256: 4da460ccc289638f7f37d57aa2a6f383aca7daf74c24df2e4ce54f1a60fd28bc
     notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   R102.6:
-    label: reference
+    label: flag
     topic: existing_buildings
-    reason: Lets the lawful occupancy of a building existing on 2025-12-31 continue; its numbered parts send work on existing
-      buildings to Appendix BO. No requirement of its own.
+    reason: Lets the lawful occupancy of a building existing on 2025-12-31 continue, an allowance for an existing condition
+      (whether a building existed then, lawfully, isn't in the model); its numbered parts send work on existing buildings to
+      Appendix BO. Shown as needing review where a design is work on an existing building.
     sources:
     - file: gov.ny.residential.2025.pdf
       page: 26
@@ -2151,7 +2153,11 @@ labels:
       quote: R315.5.2.1 Width. Stairways providing egress from a sleeping loft shall not be less than 17 inches (432 mm) in
         clear width at or above the handrail. The width below the handrail shall be not less than 20 inches (610 mm).
     piece_sha256: 07f1358b50483fda63d0b0545db9b799f1b501b2ce50ef633c49fc2cb0551509
-    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. The book prints "20 inches
+      (610 mm)" (p.98, line 29); 20 inches is 508 mm and 610 mm is 24 inches. The same width is printed "20 inches (508 mm)"
+      for alternating tread devices in R318.7.11.1 (p.102, line 7) and for loft stairs in Appendix BB (BB104.2.1.1, p.881).
+      Gordium''s reading: 20 inches governs, the millimetres being a misprinted conversion; a reading for the architects
+      to confirm before a rule is drafted from it. Applies only to a space shown to be a sleeping loft (R315.1, R315.2).'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   R315.5.2.2:
@@ -4348,8 +4354,8 @@ labels:
   BO106.1.2:
     label: flag
     topic: existing_buildings
-    reason: 'Repairs in a building getting an addition follow BO104 (not brought in) and alterations BO105: shown as needing
-      review.'
+    reason: 'Repairs in a building getting an addition follow BO104 (only BO104.1 and BO104.1.1 brought in) and
+      alterations BO105: shown as needing review.'
     sources:
     - file: gov.ny.residential.2025.pdf
       page: 971
