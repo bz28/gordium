@@ -272,6 +272,13 @@ def test_where_the_words_kept_are_wrong_the_recorded_comparison_differs_from_the
     assert comparisons([shown(s) for s in statements(text)]) != reader
 
 
+def test_a_not_eight_words_before_a_three_word_comparison_is_kept():
+    # review round 8: the words looked at were ten, so after "by more than" only seven were searched
+    assert [shown(s) for s in statements("shall not a b c d e f g by more than 3/8 inch")] == [
+        "not a b c d e f g by more than 3/8 inch"]
+    assert [shown(s) for s in statements("shall not a b c d e f g h by more than 3/8 inch")] == ["by more than 3/8 inch"]
+
+
 def test_a_not_in_another_clause_is_not_taken_and_a_pound_is_a_unit():
     assert [shown(s) for s in statements("is not required where the stair has more than 3 risers")] == ["more than 3 riser"]
     assert [shown(s) for s in statements("not less than 36 inches, more than 2")] == ["not less than 36 inch", "more than 2"]

@@ -82,7 +82,7 @@ def statements(text: str) -> list[dict]:
         elif unit and rest_words[:1] == ["("] and ")" in rest_words[:5]:   # "200 square feet (18.6 m²) or less"
             rest_words = rest_words[rest_words.index(")") + 1:]
         rest = " ".join(rest_words[:3])
-        out.append({"before": _negated(text[:m.start()].lower().split()[-10:], _ends_with(" ".join(before_text), BEFORE)),
+        out.append({"before": _negated(text[:m.start()].lower().split()[-(NEGATION_REACH + 4):], _ends_with(" ".join(before_text), BEFORE)),
                     "value": m[0].lower(),
                     "unit": unit,
                     "after": next((a for a in AFTER if rest.startswith(a)), "")})
