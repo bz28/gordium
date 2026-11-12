@@ -80,9 +80,18 @@ def fresh_module():
     return gordium_rhino
 
 
+REDRAWN = "Gordium::Envelope"   # the Osnap curves every check redraws with Undo recording off (osnap_in_rhino, 4)
+
+
 def objects(doc):
-    """Every object in the model: id -> its layer's full path."""
-    return {str(o.Id): doc.Layers[o.Attributes.LayerIndex].FullPath for o in doc.Objects}
+    """Every object in the model: id -> its layer's full path; not the curves on REDRAWN, which show the latest check,
+    never an undo step (as autocomplete_in_rhino's objects)."""
+    out = {}
+    for o in doc.Objects:
+        path = doc.Layers[o.Attributes.LayerIndex].FullPath
+        if path != REDRAWN and not path.startswith(REDRAWN + "::"):
+            out[str(o.Id)] = path
+    return out
 
 
 def undo_event(sender, e):
@@ -105,10 +114,15 @@ def watch_draws(g):
 
 
 def rhino(command, at):
-    """Rhino's own command, as the architect types it (Undo, Redo): whether it ran."""
+    """Rhino's own command, as the architect types it (Undo, Redo): whether it ran. Undo and Redo run in the document
+    (RhinoApp.ExecuteCommand, as Cmd+Z runs _Undo): RunScript("_Undo") does nothing while no Rhino window is on
+    screen, and RhinoDoc.Undo() drops the step it undid (side_yards_in_rhino, 2026-11-12)."""
     log["at"] = at
     log["command_at"] = time.time()
-    ran = bool(Rhino.RhinoApp.RunScript("_" + command, False))
+    if command in ("Undo", "Redo"):
+        ran = Rhino.RhinoApp.ExecuteCommand(Rhino.RhinoDoc.ActiveDoc, "_" + command) == Rhino.Commands.Result.Success
+    else:
+        ran = bool(Rhino.RhinoApp.RunScript("_" + command, False))
     log.setdefault("commands", []).append([at, command, ran])
     return ran
 
