@@ -192,6 +192,10 @@ def test_the_recorded_second_reading_covers_every_piece_and_needs_no_cache_to_be
     (lambda b: b["pieces"]["R318.7.5.1"]["second_reading_comparisons"].__setitem__(0, "at most"),
      "needs second_reading_comparisons"),
     (lambda b: b["pieces"]["R319.2.2"].pop("flags"), "R319.2.2: '24 inch' is recorded as 'none', but the printed"),
+    # review round 8 of step 1, on step 1b's pieces: R315.2's "more than one-half" is the law backwards ("shall not
+    # exceed 7 feet for more than one-half of the floor"); only its flag says so
+    (lambda b: b["pieces"]["R315.2"].pop("flags"),
+     "R315.2: 'more than one-half' is recorded as '>', but the printed sentence reads '<='"),
 ])
 def test_a_second_reading_that_doesnt_hold_is_refused(tmp_path, monkeypatch, change, problem):
     problems, _ = _copy_of_ny_state(tmp_path, monkeypatch, change)
