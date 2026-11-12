@@ -549,3 +549,5 @@ def test_a_label_with_readings_still_in_play_never_says_one_reading_decides():
         e = labels[pid]
         assert not decides.search(yaml.safe_dump(e)) and "needs review" in e.get("notes", ""), pid
     assert not decides.search(readme)
+    # review round 3: the README's lead-in still said the notes give Gordium's reading of both undefined words
+    assert "Two words are not defined, and the label's notes give Gordium's reading" not in readme
