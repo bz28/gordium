@@ -102,10 +102,16 @@ def _stands_with(number_path: list, slot_path: list) -> bool:
     return False
 
 
+def _listed(items) -> list[dict]:
+    return [i for i in items if isinstance(i, dict)] if isinstance(items, list) else []
+
+
 def slot_names(template: dict) -> set[str]:
     """Every slot the template refers to, its examples' values included."""
     examples = [g["value"] for ex in template.get("examples", []) for g in ex["given"]]
-    examples += [g["value"] for ex in template.get("examples", []) for p in ex.get("parts", []) for g in p["measures"]]
+    # a part's measure values too (a malformed one is sent back by fill_template, never a crash here)
+    examples += [v for ex in template.get("examples", []) for p in _listed(ex.get("parts"))
+                 for g in _listed(p.get("measures")) if isinstance(v := g.get("value"), str)]
     return formula_slots(template) | {n for t in examples for n in SLOT.findall(t)}
 
 
@@ -154,18 +160,33 @@ def _example(ex: dict, rule: dict, values: dict[str, float]) -> dict:
     if parts.is_part_rule(rule):
         kinds = [k for k in (rule.get("for_each"), rule.get("within")) if k]
         given = {k: [] for k in kinds}
-        for p in ex.get("parts", []):
+        for p in _entries(ex.get("parts", []), "part"):
             if p["kind"] not in given:
                 raise ValueError(f"an example's part {p['id']!r} is a {p['kind']!r}, not a kind this rule reads {kinds}")
-            part = {"id": p["id"]} | {k: p[k] for k in ("name", "within") if p.get(k, "").strip()}
-            part["measures"] = {g["measure"]: _example_value(g["value"], values) for g in p["measures"]}
+            part = {"id": p["id"]} | {k: p[k] for k in ("name", "within") if _text(p, k)}
+            part["measures"] = {g["measure"]: _example_value(g["value"], values) for g in _entries(p["measures"], "measure")}
             given[p["kind"]].append(part)
         out["parts"] = given
-        out["rows"] = [{k: r[k] for k in ("part", "within") if r.get(k, "").strip()} | {"outcome": r["outcome"]}
-                       for r in ex.get("rows", [])]
+        out["rows"] = [{k: r[k] for k in ("part", "within") if _text(r, k)} | {"outcome": r["outcome"]}
+                       for r in _entries(ex.get("rows", []), "row")]
     elif ex.get("parts") or ex.get("rows"):
         raise ValueError("an example gives parts or rows, but the rule isn't for each part (for_each is empty)")
     return out | {"expect": ex["expect"]}
+
+
+def _entries(items, what: str) -> list[dict]:
+    """A list of mappings from the answer, or ValueError (the template is sent back, never a crash)."""
+    if not (isinstance(items, list) and all(isinstance(i, dict) for i in items)):
+        raise ValueError(f"an example's {what}s must be a list of objects")
+    return items
+
+
+def _text(entry: dict, key: str) -> str:
+    """An answer's text field, stripped ("" for none), or ValueError when it isn't text."""
+    v = entry.get(key, "")
+    if not isinstance(v, str):
+        raise ValueError(f"an example's {key} {v!r} isn't text")
+    return v.strip()
 
 
 def fill_template(template: dict, column: str | None, cells: dict, quote_sources: list[dict],

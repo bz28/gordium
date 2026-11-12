@@ -242,3 +242,28 @@ def test_the_parts_instructions_name_every_part_kind_and_never_pass_for_none():
     for kind, d in parts.registry().items():
         assert f"- {kind}: " in with_parts and all(m in with_parts for m in d["measures"])
     assert 'Never "pass"' in drafter.PARTS_FORMAT
+
+
+@pytest.mark.parametrize("break_it", [
+    lambda ex: ex["parts"][0].__setitem__("name", None),
+    lambda ex: ex["rows"].__setitem__(0, "w1"),
+    lambda ex: ex["rows"][0].__setitem__("part", None),
+    lambda ex: ex["parts"][1].__setitem__("within", ["br1"]),
+    lambda ex: ex.__setitem__("parts", {"x": 1}),
+])
+def test_a_malformed_example_in_an_answer_is_sent_back_never_a_crash(break_it):
+    """Review round 2: a non-text name or id, or a row that isn't an object, crashed the run (AttributeError) instead
+    of sending the answer back."""
+    t = area_template()
+    t["examples"] = copy.deepcopy(t["examples"])
+    break_it(t["examples"][0])
+    got = check(t)
+    assert got["rules"] == {} and got["problems"], got
+
+
+def test_the_zoning_answer_shape_is_byte_for_byte_what_it_was():
+    """Pinned against origin/egress-2-rules-for-each-part's output_schema (sha256 of its sorted JSON), 2026-11-12."""
+    import hashlib
+    got = hashlib.sha256(json.dumps(drafter.output_schema(["dimensions", "uses"]), sort_keys=True).encode()).hexdigest()
+    assert got == "42a6c92904fccc65ff259ca4c737502ba76fab3f26f0051c9c88802b05cf9098"
+    assert hashlib.sha256(drafter.FORMAT.encode()).hexdigest()[:16] == "d35d0ea43228df3e"
