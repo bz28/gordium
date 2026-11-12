@@ -1,8 +1,9 @@
 #! python3
 """Depth-tested lines (Ben, 2026-10-21: "On-screen lines respect depth in perspective (hidden behind solids); visible
 in plan"), in Rhino 8, each claim asserted (the run fails loudly otherwise). Run in Rhino, not in CI: the rules are
-tested in CI (packages/design_checker/tests/test_depth.py). A fresh feet document, GordiumStart on the sample (106
-Ithaca Rd), Show on-screen labels on.
+tested in CI (packages/design_checker/tests/test_depth.py). A fresh feet document, GordiumStart on 106
+Ithaca Rd's recorded lookup, the lot stated level, the house moved 6 ft away from the street (into the rear yard's
+cautious band: a coloured piece for phase 2), Show on-screen labels on.
 1. Top (plan): the lines go on top (the plugin's _on_top called with True), the yard dimensions drawn on screen.
 2. Perspective, Shaded, the camera at the street looking at the house: no line goes on top; the yard dimensions are
    drawn in the model (draw_scene's _model_dimension), none on screen.
@@ -29,6 +30,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_depth") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -101,10 +103,27 @@ try:
     doc = TestDocs("depth").__enter__().open("Large Objects - Feet")
     # a lot known level (fall 0.0): the height is measured, so phase 2 has its dimension (with no ground looked up,
     # height needs review and has none: the sloped-lot fix)
-    g.STATE["box_overrides"] = dict(g.STATE.get("box_overrides") or {}, ground_fall=0.0)
-    g.gordium_check()                                    # GordiumStart's flow on the sample
+    # (106's recorded lookup finds its real fall, 14.2 ft, and Draw applies the lookup's answer after the box's own
+    # fields, so a ground_fall box override never reaches the facts: the lot is stated level after the start, then
+    # checked)
+    look_up_106(g, g.gordium_check)                      # GordiumStart: 106 Ithaca Rd looked up (recorded), drawn
+    g.save_facts(doc, dict(g.current_facts(doc), ground_fall=0.0))
+    g.run_check(doc, report=False)
+    # 106's starting house keeps clear of the rear yard's cautious band, so it has no coloured piece for phase 2 to
+    # hide (5, 6): the house moved 6 ft away from the street, into that band (its rear yard needs review, coloured)
+    o = g.overlay()
+    rear0 = next(line for line, text, _ in o.yard_dims if text[2:].startswith("Rear yard"))
+    front0 = next(line for line, text, _ in o.yard_dims if text[2:].startswith("Front yard"))
+    back = rear0.PointAt(0.5) - front0.PointAt(0.5)
+    back.Z = 0
+    back.Unitize()
+    for x in g._buildings(doc):
+        doc.Objects.Transform(x.Id, rg.Transform.Translation(back * (6.0 / g._scale(doc))), True)
+    g.run_check(doc, report=False)
     g.set_labels(True)
     o = g.overlay()
+    claim("the rear yard has a coloured piece (phase 2 hides it)", bool(o.encroach),
+          [(info.get("row"), st) for _, st, info in o.encroach])
     claim("the sample is drawn with its yard dimensions", len(o.yard_dims) >= 4, len(o.yard_dims))
 
     frame = o.box if o.box.IsValid else doc.Objects.BoundingBox
@@ -133,6 +152,11 @@ try:
     whole = rg.BoundingBox(box.Min, box.Max)             # the whole house and lot in frame, so the capture itself
     whole.Union(frame)                                   # shows the hiding (Rhino check of #31 at c174a2d)
     vp.ZoomBoundingBox(whole)                            # (keeps the direction, moves the camera back)
+    elevation = rg.BoundingBox(whole.Min, whole.Max)     # Front: the house and the height's dimension beside it
+    if o.height_dim:                                     # (on 106 it stands 4 ft past the house's side, outside
+        elevation.Union(o.height_dim[0].BoundingBox)     # the house's own frame)
+    elevation.Inflate(2.0 / g._scale(doc))
+    doc.Views.Find("Front", False).ActiveViewport.ZoomBoundingBox(elevation)
     eye = vp.CameraLocation                              # the rays below start where the camera now is
     corners = [vp.WorldToClient(c) for c in whole.GetCorners()]
     size = vp.Size

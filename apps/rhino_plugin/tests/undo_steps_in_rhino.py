@@ -3,7 +3,7 @@
 packages/design_checker/tests/test_undo_steps.py on a fake document). Ben, 2026-10-26: a change written outside any
 undo record is skipped by Ctrl+Z, which undoes the architect's own earlier edit instead.
 
-GordiumStart's flow on the sample (106 Ithaca Rd) in a fresh copy of the feet template, plus a second solid on the
+GordiumStart's flow on 106 Ithaca Rd's recorded lookup in a fresh copy of the feet template, plus a second solid on the
 Building layer (so there is a main building to pick) and a box on Default (something to add to the check). Then, for
 each panel action that changes the file, outside any command (as the panel's buttons run):
   a. the architect's own edit first: one curve drawn with Rhino's _Line command (its own undo record, as in Rhino);
@@ -23,10 +23,10 @@ Then, observed only (out.json "two_in_a_row", not a claim): two panel changes in
 one _Undo, which records it takes back. Last, the control: an edit and an action deliberately in one record; its
 claim passes only if one _Undo takes the edit back too (so the claims above can tell a merged step from a good one).
 Writes <temp>/gordium_undo_steps/out.json ("done": true at the end); the command line says which claims fail.
-Run through rhinocode on 2026-10-28, its _Undo took nothing back (every "undone" list empty, so the "undone", "only
-its own record" and "checked again" claims failed, while every "one step" claim passed; "nothing else" passed too,
-but proves nothing when the _Undo does nothing); why is not known yet (the script was not inside a command), so
-those claims are judged by a person's Cmd+Z for now."""
+Undo is Rhino's own _Undo command run in the document (RhinoApp.ExecuteCommand, as Cmd+Z runs it). Run through
+rhinocode on 2026-10-28 with RunScript("_Undo"), its _Undo took nothing back (every "undone" list empty): RunScript
+does nothing while no Rhino window is on screen, and RhinoDoc.Undo() drops the step it undid (side_yards_in_rhino,
+2026-11-12)."""
 import json
 import os
 import sys
@@ -92,10 +92,18 @@ def architects_edit(doc):
     return made[0] if len(made) == 1 else None
 
 
+def undo(doc):
+    """Rhino's _Undo command, run in this document (see the note above): whether it ran."""
+    return Rhino.RhinoApp.ExecuteCommand(doc, "_Undo") == Rhino.Commands.Result.Success
+
+
 def snapshot(g, doc):
-    """What a panel change can write: the three Gordium strings, every object's layer, each layer's visibility."""
+    """What a panel change can write: the three Gordium strings, every object's layer, each layer's visibility. Not
+    the Osnap curves on Gordium::Envelope (tagged ENVELOPE_KEY): every check redraws them with Undo recording off
+    (osnap_in_rhino, 4), so they show the latest check, never an undo step, and the next check replaces them."""
     strings = {k: doc.Strings.GetValue(g.SECTION, k) for k in (g.ENTRY, g.UI_ENTRY, g.SOURCES_ENTRY)}
-    objects = {str(o.Id): o.Attributes.LayerIndex for o in doc.Objects}
+    objects = {str(o.Id): o.Attributes.LayerIndex for o in doc.Objects
+               if not o.Attributes.GetUserString(g.logic.ENVELOPE_KEY)}
     layers = {layer.FullPath: bool(layer.IsVisible) for layer in doc.Layers if not layer.IsDeleted}
     return {"strings": strings, "objects": objects, "layers": layers}
 
@@ -117,7 +125,7 @@ def one(g, doc, name, args):
     claim(name + ": one step", len(ended) == 1 and before != snapshot(g, doc),
           {"records_ended": ended, "named (by eye in Edit > Undo)": g.logic.UNDO_WORDS[name]})
     undone_at = time.time()
-    Rhino.RhinoApp.RunScript("_Undo", False)
+    undo(doc)
     after = snapshot(g, doc)
     claim(name + ": only its own record undone", log["undone"] == ended[-1:], {"undone": log["undone"],
                                                                              "its record": ended})
@@ -136,7 +144,7 @@ def control(g, doc):
     g._actions()["labels"](False)
     doc.EndUndoRecord(outer)
     log["undone"] = []
-    Rhino.RhinoApp.RunScript("_Undo", False)
+    undo(doc)
     claim("control: a merged record is caught (the edit went with the action)",
           doc.Objects.FindId(mine) is None, {"undone": log["undone"], "merged record": outer})
 
@@ -169,7 +177,7 @@ def main():
         g._actions()["massing"](False)
         ended = list(log["events"])
         log["undone"] = []
-        Rhino.RhinoApp.RunScript("_Undo", False)
+        undo(doc)
         log["two_in_a_row"] = {"records": ended, "undone_by_one_undo": list(log["undone"])}
         architects_edit(doc)                                    # (a command between: the control's merge is its own)
         control(g, doc)                                         # last: its _Undo may take more than its own record
