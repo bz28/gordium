@@ -11,10 +11,11 @@ second_reading:
   'on': 2026-11-12
   how: 'Each brought-in piece was rendered from the PDF as an image (pypdfium2, 216 dpi), cropped from its heading to the
     next piece''s; the helpers read every number off the images, with the words before and after it, and both readings went
-    through document_extraction/numbers.py. 167 pieces, 356 numbers: all agree. No glyph was marked unclear.'
+    through document_extraction/numbers.py. 168 pieces, 356 numbers: all agree. No glyph was marked unclear.'
 notes:
 - R318.7.6 was read again from its image (2026-11-12) after numbers.py learned parts of a whole ('a quarter circle', 'one-half');
-  the first readings had not listed 'a quarter'. The new reading agrees.
+  the first readings had not listed 'a quarter'. The new reading agrees. R202:owner (no numbers) was brought in later the
+  same day, when the roman-type match learned 'Owner-occupied', and read from its image then.
 - 'Two counting conventions were aligned after the first comparison (neither changed a number): a table''s part in parentheses
   (''Table R401.4.1(2)'') is part of its name, and a number word joined by a hyphen counts (''one-family'', ''one- or two-family'').'
 - A raised 2 after m or ft (m², ft²) is written [fn2] in the extracted text, as in Ithaca's; it is never read as the number
@@ -393,6 +394,11 @@ pieces:
     second_reading: agrees
   R202:nosing:
     piece_sha256: c4c82f7a65d8256661702646a7d7bd3a2736ab462bd7cc3d5797ac598c1e8430
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R202:owner:
+    piece_sha256: 344ef2c7b85254970027fea3cf98ea0fc69165e0d464a9c2c770ded981aa1976
     numbers: []
     second_reading_numbers: []
     second_reading: agrees

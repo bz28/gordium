@@ -19,7 +19,7 @@ Egress (the ways out of a house: doors, stairs, landings, handrails, guards, esc
 ## How it works
 
 - **Extraction** (`document_extraction/icc.py`): ICC prints a fraction stacked (a small raised 1, a slash, a small lowered 4). Read line by line, the 4 falls onto a line of its own and the 1 looks like a footnote marker, so the extractor puts each stacked fraction back on its line ("8 1/4", with a space so it can never read as 81/4). It also records which words are italic and bold.
-- **Cutting** (`document_extraction/icc_sections.py`): a piece starts at a line that starts in bold: a section heading, a numbered part ("R318.7.5.1 Risers."), or a defined term in Section R202. A numbered part out of order is reported, never skipped.
+- **Cutting** (`document_extraction/icc_sections.py`): a piece starts at a line that starts in bold: a section heading, a numbered part ("R318.7.5.1 Risers."), or a defined term in Section R202. A numbered part out of order is reported, never skipped; so is a brought-in part that is the last before a page not read (it may run on there), which is why the pages read include the next part's heading after each brought-in section. A chapter's opening (its title and ICC's user notes) ends the part before it and is no law.
 - **Which definitions come in is decided by the law, not by hand.** R201.1 says the words printed in italics have the meanings in Chapter 2, so code reads the italics in the brought-in sections, brings in each definition they name, then the definitions those definitions use. Definitions whose term a section prints in roman type come in too (never fewer).
 
 ### Worked example

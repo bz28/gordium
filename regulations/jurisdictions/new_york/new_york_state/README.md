@@ -5,13 +5,13 @@ Law that every New York place inherits (a place lists this folder in its `jurisd
 - **The book:** the 2025 Residential Code of New York State (one- and two-family houses and townhouses up to three stories), in force since 2025-12-31.
 - **Brought in so far (egress step 1):** R318 means of egress, R319 emergency escape and rescue openings, R320 handrails, R321 guards and window fall protection, R325.6 and R325.7 (stairway lighting, which R318.7.10 requires), R201 (how definitions apply), and every Section R202 definition those use. No rules yet.
 - **Copyright:** the book is ICC's. The repo keeps only short exact quotes with their section, page and a link; the book and its text are in the code cache outside the repo (`1_source_documents/sources.yaml` says where and why). Where the cache is missing (CI), the checks that need the text are skipped and say so.
-- **`text_verification.yaml`:** every number in the brought-in pieces, read a second time from the page images by a reader who never saw the extracted text, and whether the two readings agree (all 167 pieces agree). Everything is **verified against the Public.Resource.Org copy only; check against an exact copy bought from ICC**.
+- **`text_verification.yaml`:** every number in the brought-in pieces, read a second time from the page images by a reader who never saw the extracted text, and whether the two readings agree (all 168 pieces agree). Everything is **verified against the Public.Resource.Org copy only; check against an exact copy bought from ICC**.
 
 See `regulations/README.md` for what each numbered step means. There is no `5_zoning_rules/` yet: egress rules come in a later step.
 
 ## References in the brought-in sections that are not brought in
 
-Every reference in the brought-in sections was followed (found by code: each "Section", "Table", "Appendix" and standard named). Those inside R318-R321 and R325.6 are brought in. These are not: all but one are a material, structural, plumbing, electrical-supply or outside-standard matter; Appendix BO is egress law, but for work on existing buildings, which is for a later step:
+Every reference in the brought-in sections was followed (found by code, `document_extraction/icc_references.py`: each section, table, appendix, chapter and standard a brought-in piece names; `python -m document_extraction.icc_references` lists them again where the code cache has the book). Those inside R318-R321 and R325.6 are brought in. These are not: all but one are a material, structural, plumbing, electrical-supply or outside-standard matter; Appendix BO is egress law, but for work on existing buildings, which is for a later step:
 
 - R507.2.2 (plastic composite treads, handrails and guards: materials; from R318.7.5.4, R320.7, R321.1.4)
 - R101.2 Exception 6 (which lodging houses the code covers; from R318.1.1)
@@ -25,7 +25,7 @@ Every reference in the brought-in sections was followed (found by code: each "Se
 
 ## Ways into these sections from outside them
 
-Found by code: the whole book (all 1,079 pages, from a first-pass extraction kept in the code cache) searched for R318, R319, R320, R321, R325.6 and R325.7, leaving out the table of contents (p.16), the list of standards (p.852) and the index (pp.1070-1076). None of these is brought in yet; each changes or extends what the brought-in sections apply to:
+Found by the same code: the whole book (all 1,079 pages, read once by the same extractor into the code cache, `gov.ny.residential.2025.full.jsonl`) searched for R318, R319, R320, R321, R325.6 and R325.7 outside the brought-in pieces, leaving out the table of contents (p.16), the list of standards (p.852) and the index (pp.1070-1076), which only list section numbers. None of these is brought in yet; each changes or extends what the brought-in sections apply to:
 
 - R314.4 mezzanines (p.97): their means of egress follows R318.
 - R315.5 sleeping lofts (p.98): R318 "as modified by" R315.5.1 to R315.5.3, with their own stair, landing and ladder limits. A house with a sleeping loft needs these before its loft stair can be checked.

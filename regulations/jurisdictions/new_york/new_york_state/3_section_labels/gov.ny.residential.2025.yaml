@@ -913,6 +913,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  R202:owner:
+    label: reference
+    topic: definitions
+    reason: Defines OWNER, named in roman type in R325.6 Exception 2 and the R325.7 Exception ("Owner-occupied one-family
+      dwellings"; R201.1 gives the defined meaning to italic words only; brought in so the reader sees it). A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 48
+      lines:
+      - 22
+      - 22
+      quote: OWNER. Any person, agent, firm or corporation having a legal or equitable interest in the property.
+    piece_sha256: 344ef2c7b85254970027fea3cf98ea0fc69165e0d464a9c2c770ded981aa1976
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   R202:permit:
     label: reference
     topic: definitions
