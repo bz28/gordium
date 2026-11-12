@@ -683,20 +683,28 @@ def test_the_live_command_counts_a_block_whose_status_cant_be_read_as_left_out_a
     assert left == ["shed"] and touching == ["shed"] and outlines == []
 
 
-def test_the_live_command_walks_no_deeper_than_host_core_looks():
-    """Review round 1: the command's look (_seen) walked blocks inside blocks at any depth, where host_core looks
-    32 deep and no further (no box). A chain 40 deep: no box, and only the first 33 definitions walked."""
+def test_the_live_command_judges_a_block_by_where_host_core_meets_it_however_deep_it_was_first_seen():
+    """Review round 3: the command's look (_seen) stopped walking 32 deep, so a definition first seen 33 deep (inside
+    a block host_core gives up on early: it holds an empty block first) was never sent, and the same definition
+    placed on its own, far off the lot, came back "not found": left out and touching, where the command had judged
+    it by its box. A chain 40 deep still has no box."""
     x, y = 1000.0, 2000.0
+    far = _part(((x + 500, y, 0), (x + 510, y + 10, 8)))
+    p = _Definition([_InstanceObject("c", None, definition=_Definition([far]))])
+    chain = [p]
+    for k in range(31):
+        chain.append(_Definition([_InstanceObject("q%d" % k, None, definition=chain[-1])]))
+    first = _Definition([_InstanceObject("e", None, definition=_Definition([])),
+                         _InstanceObject("q", None, definition=chain[-1])])
+    placed = {"A": _InstanceObject("A", None, definition=first), "B": _InstanceObject("B", None, definition=p)}
+    left, touching, _, _ = _live_left_out(placed, (x, y))
+    assert left == ["A"] and touching == ["A"]
     inner = _Definition([_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
-    chain = [inner]
+    deep = [inner]
     for k in range(40):
-        chain.append(_Definition([_InstanceObject("c%d" % k, None, definition=chain[-1])]))
-    top = _InstanceObject("deep", None, definition=chain[-1])
-    _Definition.walked = 0
-    left, touching, _, _ = _live_left_out({"deep": top}, (x, y))
+        deep.append(_Definition([_InstanceObject("d%d" % k, None, definition=deep[-1])]))
+    left, touching, _, _ = _live_left_out({"deep": _InstanceObject("deep", None, definition=deep[-1])}, (x, y))
     assert left == ["deep"] and touching == ["deep"]
-    from design_checker.host_core.left_out import MAX_BLOCK_DEPTH
-    assert _Definition.walked == 3 * (MAX_BLOCK_DEPTH + 1)              # in each of the 3 looks
 
 
 def test_the_reference_adapter_stops_with_the_workers_words_when_it_refuses():
