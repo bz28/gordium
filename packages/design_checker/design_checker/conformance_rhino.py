@@ -177,10 +177,19 @@ def _kind(g) -> str:
 def _box(model, g, depth=0):
     """A geometry's 3D box, ((x0, y0, x1, y1), (z0, z1)), or None when it has none to give. A placed block's is
     its definition's objects' boxes moved by its placement (rhino3dm gives a block itself no box), blocks inside
-    blocks too."""
+    blocks too. None for a block, at any depth, whose definition isn't in the file, is empty, holds a part with
+    none, or is linked to a file (any update type but Static), as gordium_rhino._whole_box gives none.
+
+    A linked block is the one place the adapter and live Rhino see different things. A saved .3dm holds a Linked
+    definition with no objects, and a LinkedAndEmbedded one with the copy last read, whether or not the file is
+    still there; live Rhino reads the file, and when it isn't found (Rhino 8.35, Mac, 2026-11-12) gives the
+    definition one text label at the centre of the last known shape (a valid box of a single point) and the status
+    LinkedFileNotFound, which the command takes as no box (rhino_logic.block_contents_known). A file can't say
+    whether the linked file is found and unchanged, so the adapter gives every linked block no box: on the lot
+    and touching, the cautious side of the command's answer, and the same as it when the file is missing."""
     if isinstance(g, r.InstanceReference):
         definition = model.InstanceDefinitions.FindId(g.ParentIdefId)
-        if definition is None or depth > 32:
+        if definition is None or depth > 32 or definition.UpdateType != r.InstanceDefinitionUpdateType.Static:
             return None
         boxes = []
         for object_id in definition.GetObjectIds():
@@ -239,7 +248,8 @@ def _plan_points(model, g):
 def _left_out(model, lot, buildings, s: float) -> list[dict]:
     """Everything else on the lot that could be a building (gordium_rhino._not_included, with _touching,
     _ground_like and rhino_logic.context_left_out): each one a left-out object. One whose place can't be told (a
-    block with nothing in it to measure) counts as on the lot and touching: never left off the list."""
+    block with nothing in it to measure, a linked block: _box) counts as on the lot and touching: never left off
+    the list."""
     if lot is None:
         return []
     names = [layer.FullPath for layer in model.Layers]
