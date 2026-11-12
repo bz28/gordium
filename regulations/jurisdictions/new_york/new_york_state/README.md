@@ -3,38 +3,68 @@
 Law that every New York place inherits (a place lists this folder in its `jurisdiction.yaml` under `inherits:`; Ithaca does). For now the link is declared and checked; nothing reads this folder's law into a place's check yet, since there are no egress rules yet. It is not a place: its settings file is `state.yaml`, not `jurisdiction.yaml`, so the place registry and the Rhino plugin never treat it as one. Why, and how: [docs/decisions/2026-11-12_building_code_text.md](../../../../docs/decisions/2026-11-12_building_code_text.md).
 
 - **The book:** the 2025 Residential Code of New York State (one- and two-family houses and townhouses up to three stories), in force since 2025-12-31.
-- **Brought in so far (egress step 1):** R318 means of egress, R319 emergency escape and rescue openings, R320 handrails, R321 guards and window fall protection, R325.6 and R325.7 (stairway lighting, which R318.7.10 requires), R201 (how definitions apply), and every Section R202 definition those use. No rules yet.
+- **Brought in so far:**
+  - *Egress step 1:* R318 means of egress, R319 emergency escape and rescue openings, R320 handrails, R321 guards and window fall protection, R325.6 and R325.7 (stairway lighting, which R318.7.10 requires), R201 (how definitions apply), and every Section R202 definition those use.
+  - *Egress step 1b (the parts the egress text points to):* R314 mezzanines, R315 sleeping lofts, R316 habitable attics (each whole: their size limits decide whether the space is a mezzanine, a loft or a story, and so which egress limits apply), R507.10 deck guards; R101.2.1 (which appendices are law) and R102.6 (work on existing buildings goes to Appendix BO); and the parts of **Appendix BO (existing buildings)** that set egress for work on existing one- and two-family houses (below). Appendix BO's own definitions (Section BO103) apply in Appendix BO only.
+  - No rules yet.
 - **Copyright:** the book is ICC's. The repo keeps only short exact quotes with their section, page and a link; the book and its text are in the code cache outside the repo (`1_source_documents/sources.yaml` says where and why). Where the cache is missing (CI), the checks that need the text are skipped and say so.
-- **`text_verification.yaml`:** every number in the brought-in pieces, read a second time from the page images by a reader who never saw the extracted text, and whether the two readings agree (all 169 pieces agree). Everything is **verified against the Public.Resource.Org copy only; check against an exact copy bought from ICC**.
+- **`text_verification.yaml`:** every number in the brought-in pieces, read a second time from the page images by a reader who never saw the extracted text, and whether the two readings agree (all 276 pieces agree). Everything is **verified against the Public.Resource.Org copy only; check against an exact copy bought from ICC**.
 
 See `regulations/README.md` for what each numbered step means. There is no `5_zoning_rules/` yet: egress rules come in a later step.
 
+## Appendix BO: adopted, and which parts are brought in
+
+**Appendix BO is law in New York, not an optional appendix.** The book says so twice: R101.2.1 ("Provisions in the following appendices have been adopted and are made part of this code: ... Appendix BO Existing Buildings and Structures", p.24, lines 38-42, brought in as a piece) and the preface ("The provisions of Appendix BO have been adopted and are part of this code", p.14, line 4). The State's rules incorporate the 2025 RCNYS whole (19 NYCRR §1220.2(b)) and amend Appendix BO in one place (§1220.2(e)(4), below), which they would not do to an appendix that was not law. R102.6.1 and R102.6.2 send additions, alterations, repairs and changes of use to it. (Appendices BE, BG to BN and CA to CG are "included for informational purposes" only, R101.2.1.)
+
+Brought in (egress for work on existing one- and two-family houses, and the parts that say when they apply): BO101 (purpose: new-construction rules apply except as the appendix modifies them), BO102.1 with BO102.1.2 (no work may make the building less compliant, and nothing in the appendix lets a feature built in conflict with the codes stay: this limits every existing-condition allowance below), BO102.6 with BO102.6.3 (replacement windows: window fall protection), BO103 (its definitions, as used), BO104.1 and BO104.1.1 (repairs: new-construction rules, and the existing level of life safety kept), BO105.1 (Level 1 and Level 2 alterations), BO105.2.2 and BO105.2.3 (replacement doors and escape windows), BO105.3 (nonconformities), BO105.8 (means of egress), BO105.10 (stairs, handrails and guards), BO105.11 (escape openings in reconfigured basements), BO105.13 (habitable attics above the second story), BO106.1 and BO106.7 (additions; the sprinkler exception that needs escape openings), BO107.1, BO107.2, BO107.2.1 and BO107.2.2 (change of occupancy: existing escape openings and stairs), BO108 (bed and breakfast conversions), BO109.1, BO109.8, BO109.8.1, BO109.8.5 and BO109.8.6 (historic buildings: egress widths, stair railings, guard openings). BO102.1, BO102.6, BO106.7, BO107.2 and BO109.8 are brought in without the parts under them that are not egress (`brought_in.alone`). Everything else in the appendix is named as not brought in: structure, energy, materials, plumbing, electrical, mechanical, ceiling heights, smoke and carbon monoxide alarms, relocation and replacement buildings, and posted notices (the bed-and-breakfast evacuation notice of BO102.10, an operating matter like R318.1.1).
+
+Every allowance for an existing condition (an existing stair's width, headroom, landings, riser and tread; existing escape openings; historic stairs and guards) is a **flag**, never a rule: whether a stair already exists, whether it was lawful when built (BO102.1.2), and the class of the work are the architect's input, and the model can't show them. So these looser limits never relax R318 for a new stair.
+
+What the appendix's text gets wrong or leaves open (each is in the labels, as a flag, so it shows as needing review):
+
+- **BO108.4 item 2** (bed and breakfast exterior stair) says "conforming to the requirements of R311.7". In this book R311 is carbon monoxide alarms and has no R311.7; R311.7 is the model code's (the IRC's) number for stairways, which this book renumbers to R318.7. Gordium's reading: R318.7 is meant (strong common practice: the appendix is ICC's model text with New York's numbers not carried through). A reading for the architects to confirm, not law.
+- **BO107.2** sends a two-family-to-one-family change's smoke and carbon monoxide alarms to "Section BO109", which is historic buildings and holds no alarm rule (BO102.4 and BO102.5 do). Not egress; noted only.
+- **BO105.8** sends every alteration's means of egress to Section 702 of the Property Maintenance Code of New York State, another code, not brought in: an alteration's egress needs review for that part.
+- **The book's own misnumbering**, cut where printed and named in `sources.yaml` (`printed_out_of_order`): Section BO109 goes from BO109.4 to BO109.8 (no BO109.5 to BO109.7; p.973, line 54), and prints a "BO112.12.1" between BO109.12 and BO109.12.1 (p.974, line 39). BO105.1 and BO104.1 also print "Section B0109" (a zero for the letter O; p.968, line 13 and p.967, line 16).
+- **New York's amendment to the appendix:** 19 NYCRR §1220.2(e)(4) changes the second definition printed "HOME OCCUPATION" in BO103.1 (p.966, line 38) to "LOAD-BEARING ELEMENT", with the same words. The cutter cuts it under the law's term (`amended_by_law`). It is not used by any brought-in part.
+- **Ceiling heights in BO105.9 and BO107.2.3** (not brought in: not egress) print "6 feet 8 inches (2134 mm)" in their exception 1; 6 feet 8 inches is 2032 mm (2134 mm is 7 feet). Noted for when those come in.
+
+New York amends the book in three other places (19 NYCRR §1220.2(e)(1)-(3)): PERMIT (a brought-in definition: the amendment gives the same words, tagged [NY]; it may also drop the "[NY] Building permit" entry printed under it; PERMIT sets no egress requirement), referenced standards (Chapter 44) and BA113.3 (manufactured homes). None changes an egress limit.
+
 ## References in the brought-in sections that are not brought in
 
-Every reference in the brought-in sections was followed (found by code, `document_extraction/icc_references.py`: each section, table, appendix, chapter and standard a brought-in piece names; `python -m document_extraction.icc_references` lists them again where the code cache has the book). Those inside R318-R321, R325.6 and R325.7 are brought in. These are not: all but one are a material, structural, plumbing, electrical-supply or outside-standard matter; Appendix BO is egress law, but for work on existing buildings, which is for a later step:
+Every reference in the brought-in sections was followed (found by code, `document_extraction/icc_references.py`: each section, table, appendix, chapter and standard a brought-in piece names; `python -m document_extraction.icc_references` lists them again where the code cache has the book). Those inside the brought-in parts are brought in. These are not, each a material, structural, plumbing, electrical-supply, fire-protection, room-size or outside-standard matter, or an appendix that is not egress:
 
 - R507.2.2 (plastic composite treads, handrails and guards: materials; from R318.7.5.4, R320.7, R321.1.4)
 - R101.2 Exception 6 (which lodging houses the code covers; from R318.1.1)
 - P2904 (sprinkler systems; from R319.1 Exception 3)
 - R405.1 and Table R401.4.1(2) (foundation drainage and soils; from R319.4.3)
-- Appendix BO (existing buildings; from R319.7): it holds egress law for alterations (BO105.8 means of egress, BO105.10 stairs, handrails and guards, BO105.11 escape openings, pp.968-973). Gordium checks new work only until it is brought in
+- Appendix BO's other parts (from R319.7, R102.6.1, R102.6.2 and its own brought-in parts: BO104's other parts, BO105.2 and the rest of BO105, BO107, BO109): not egress (above)
+- R301.5 (guard loads; from R507.10), R301.1.3 (engineered design; from BO105.1, BO106.1): structural
+- R312 and R313 (room area and ceiling height; from R316.2): not egress; R316.2 is a flag until they come in
+- R310.7 (fire alarm systems; from BO105.13, BO106.7) and the sprinkler standards NFPA 13D and NFPA 72 (also BO108.4)
+- R101.2 (which buildings the code covers; from BO101.1)
+- R311.7 (from BO108.4): no such part in this book (above)
+- Section 702 of the Property Maintenance Code of New York State (from BO105.8) and the Existing Building Code of New York State (from R102.6.1): other New York codes, named in words, so the code's search (which finds section numbers) does not list them
+- Appendices BA, BB, BE to BN and CA to CG (from R101.2.1, which only lists them)
 - E3401.2.1 (when a house has electrical power; from the exceptions of R325.6 and R325.7)
+- P2904 also from R314.3, R315.4, R316.3, BO105.13, BO106.7, BO108.4 (sprinklered houses get larger mezzanines and lofts)
 - the outside standards ICC 500 (storm shelters; R319.1) and ASTM F2090 (window opening control devices; R319.1.1, R321.2.1)
 - "accessed", printed in italics but not defined in Section R202: R201.3 sends such a word to another New York code's definition; that code is not brought in.
 - "unit" in R319.1 is printed in italics alone only because the book breaks the styling inside "dwelling *unit*" (p.102, line 35); the term is DWELLING UNIT, and its definition is brought in by the roman-type match.
+- "change of use" (BO101.1) and "change in use" (the definition of RECONFIGURATION OF SPACE), in italics but not defined: R202 defines CHANGE OF OCCUPANCY only; R201.3 sends them to another New York code.
+- "replacement" in BO101.1, in italics alone: Appendix BO defines REPLACEMENT, BUILDING (p.966), about replacement buildings (BO111, not brought in).
+- "existing building" in BO106.1.1 and "stories above grade plane" in BO107.1 are printed with their first letter in roman ("e*xisting building*", "s*tories above grade plane*", checked on the page images); the terms are EXISTING BUILDING and STORY ABOVE GRADE PLANE, both brought in.
 - "above" in the definition of STORY ABOVE GRADE PLANE is printed in italics with "grade plane" in item 1 (p.52, line 36), though the line above prints only "grade plane" in italics; the term is GRADE PLANE, brought in, and "above" keeps its ordinary meaning.
 
 ## Ways into these sections from outside them
 
-Found by the same code: the whole book (all 1,079 pages, read once by the same extractor into the code cache, `gov.ny.residential.2025.full.jsonl`) searched for R318, R319, R320, R321, R325.6 and R325.7 outside the brought-in pieces, leaving out the table of contents (p.16), the list of standards (p.852) and the index (pp.1070-1076), which only list section numbers. None of these is brought in yet; each changes or extends what the brought-in sections apply to:
+Found by the same code: the whole book (all 1,079 pages, read once by the same extractor into the code cache, `gov.ny.residential.2025.full.jsonl`) searched for every brought-in section outside the brought-in pieces, leaving out the pages that only list section numbers (found by their running head: the contents, pp.16-22; the referenced standards, pp.833-866; the index, pp.1070-1076). Step 1b brought in R314.4 mezzanines, R315.5 sleeping lofts, R316.4 habitable attics and R507.10 deck guards (each with its section), and Appendix BO's egress parts. These are still not brought in:
 
-- R314.4 mezzanines (p.97): their means of egress follows R318.
-- R315.5 sleeping lofts (p.98): R318 "as modified by" R315.5.1 to R315.5.3, with their own stair, landing and ladder limits. A house with a sleeping loft needs these before its loft stair can be checked.
-- R316.4 habitable attics (p.99): "the applicable provisions of Section R318".
+- R301.2.2.7 height limitations (p.75): a mezzanine that complies with R314 is not counted as a story (a seismic and structural limit).
 - R324.4.7 glazing beside the bottom stair landing (p.107): an exception for glass protected by a guard that meets R321.
 - R502.3.1 floor joists (p.166): attics reached by a fixed stairway per R318.7 (a structural load matter).
-- R507.10 deck guards (p.204): R321.
 - M1602.1 outdoor air openings (p.529): refers to R325.6.
-- Appendix BB tiny houses (pp.880-881): loft stairs, landings, handrails, ladders, guards and escape openings, modifying R318-R321.
+- Appendix BB tiny houses (pp.880-881): loft stairs, landings, handrails, ladders, guards and escape openings, modifying R318-R321. Left for later (Ben, 2026-11-12).
 - Appendix BF patio covers (p.898): exits per R318.
-- Appendix BO existing buildings (pp.965-973): see above.
+- Appendix BO's own other parts that point to R102.6.1 (structure: BO102.3, BO104.5, BO105.4) and to R319 (BO106.7, brought in).
