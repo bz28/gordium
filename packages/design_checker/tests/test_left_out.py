@@ -365,3 +365,18 @@ def test_rhino_gives_no_advice_for_a_block_whose_status_couldn_t_be_read_and_has
         "Linked file 'garage.3dm' may have changed since it was loaded (Gordium can't tell whether it is up to "
         "date): reload it (Edit \u25b8 Blocks \u25b8 Block Definitions, select it, then Update) so Gordium can see "
         "where it is")}
+
+
+def test_a_linked_block_with_no_box_of_its_own_still_names_its_file():
+    """Review round 3: a placed linked block whose file can't be read and holds nothing has no box of its own, so
+    its reason is "no_box" (the host gave none), and no file was named; its file is the one to put right, so it is
+    named, directly or placed inside another block. An empty block that isn't linked names none."""
+    defs = {"unreadable": _whole_def(status="LinkedFileNotReadable"),
+            "holder": _whole_def({"box": None, "definition": "unreadable"}), "empty": _whole_def()}
+    objects = [_obj("a", None, definition="unreadable"), _obj("b", SHED, definition="holder"),
+               _obj("c", None, definition="empty"), _obj("d", None)]
+    assert [r["why"] for r in lo.no_box_reasons(objects, defs)] == ["no_box", "no_box", "no_box", "no_box"]
+    assert lo.linked_file_problems(objects, defs) == [
+        {"id": "a", "definition": "unreadable", "problem": "unreadable"},
+        {"id": "b", "definition": "unreadable", "problem": "unreadable"},
+        {"id": "c", "definition": None, "problem": None}, {"id": "d", "definition": None, "problem": None}]

@@ -539,8 +539,9 @@ LINK_FIX = {
 
 
 def _culprit(o, definitions, memo, seen):
-    """The id of the definition, at any depth, whose linked file makes `o` "contents_not_known" (_judged's own
-    path: the first part with no box decides), or None when that isn't why."""
+    """The id of the definition, at any depth, whose linked file isn't known to be the design along _judged's own
+    path (the first part with no box decides), or None when there is none. A block with no box of its own (an
+    unreadable linked file holding nothing) is still looked into: its file is the one to put right."""
     d = o.get("definition")
     if d is None or d not in definitions or d in seen:
         return None
@@ -550,13 +551,14 @@ def _culprit(o, definitions, memo, seen):
     for p in entry.get("parts") or []:
         why, _ = _judged(p, definitions, memo, set())
         if why:
-            return _culprit(p, definitions, memo, seen | {d}) if why == "contents_not_known" else None
+            return _culprit(p, definitions, memo, seen | {d})
     return None
 
 
 def linked_file_problems(objects, definitions=None):
     """For each object (in order): {"id", "definition", "problem"}: for one with no box because a linked file isn't
-    up to date (no_box_reasons' "contents_not_known"), the id of the definition (at any depth) whose file it is and
+    up to date (no_box_reasons' "contents_not_known", or "no_box" for a linked block that holds nothing to box, its
+    file unreadable, say), the id of the definition (at any depth) whose file it is and
     what is wrong with that file (LINK_PROBLEM's word, "not_known" for any other status); else both None. Words
     only: the object stays left out and counts as touching whatever this says."""
     if not isinstance(objects, list):
@@ -564,8 +566,7 @@ def linked_file_problems(objects, definitions=None):
     definitions, memo = _sent_definitions(definitions), {}
     out = []
     for o in (_sent_object(o, "objects") for o in objects):
-        d = _culprit(o, definitions, memo, set()) if _why_no_box(o, definitions, memo) == "contents_not_known" \
-            else None
+        d = _culprit(o, definitions, memo, set()) if _why_no_box(o, definitions, memo) else None
         status = None if d is None else str(definitions[d].get("status")).split(".")[-1]
         out.append({"id": o["id"], "definition": d, "problem": None if d is None else LINK_PROBLEM.get(status, "not_known")})
     return out

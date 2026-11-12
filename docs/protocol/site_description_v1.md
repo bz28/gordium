@@ -114,9 +114,10 @@ use is the one every Rhino check already takes, and both give the same answers (
   tool's own words, said once each on the "Objects on the lot not included" row, for example Rhino's "Linked file
   'garage.3dm' has changed since it was loaded: reload it (Edit ▸ Blocks ▸ Block Definitions, select it, then
   Update; or type -BlockManager, Update, All) so Gordium can see where it is". Words only: the object is still left out and the answer is the same.
-  Advice for an id that isn't in `left_out`, or that isn't words, is refused. `host_core/left_out.py` gives every
-  tool the same facts and sentence (`linked_file_problems`, `linked_file_words`); where to click is the tool's own
-  (a Revit add-in's would be Manage Links ▸ Reload, or Reload From for a moved file).
+  Advice for an id that isn't in `left_out`, or that isn't words, is refused. The Rhino plugin makes them with
+  `host_core/left_out.py`'s `linked_file_problems` and `linked_file_words` (in its own Python); no worker command
+  serves those yet, so another tool words its own advice (a Revit add-in's would be Manage Links ▸ Reload, or
+  Reload From for a moved file) until one does, with the Revit reader.
 - **A problem in the tool's own words.** A tool that found a problem the measuring has no code for sends
   `{"code": "tool_words", "args": {"words": "…"}}`. It still makes the building's measuring need review. Words the
   measuring does have a code for are refused this way (send that code).
