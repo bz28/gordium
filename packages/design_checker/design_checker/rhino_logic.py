@@ -1250,7 +1250,9 @@ def reaches_into_lot(lot_ring, points, reach, box=None):
     plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
     wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
     line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
-    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction.
+    lot, the neighbour's house): not. However thin it is (a 1-inch fin wall, a mast), it is on the lot when some
+    of it stands more than `reach` inside the lot's outline (_deepest). The hull only ever makes an object bigger,
+    the cautious direction.
     `box`, the object's plan bounding box (x0, y0, x1, y1), is its footprint whenever the points don't outline
     one (fewer than 3, or all in a line, as a sphere's seam is): a solid always covers some ground, so such
     points under-describe it."""
@@ -1273,7 +1275,33 @@ def reaches_into_lot(lot_ring, points, reach, box=None):
     area = abs(_ring_area(part))
     perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
                     for i in range(len(part)))
-    return perimeter > 0 and 2 * area / perimeter > reach
+    if perimeter > 0 and 2 * area / perimeter > reach:
+        return True
+    return _deepest(part, lot) > reach          # a thin wall or mast inside the lot: deep in it, however thin
+
+
+def _deepest(part, lot, samples=16):
+    """How far the part of an object inside the lot (`part`, a ring inside the ring `lot`) gets from the lot's
+    outline: the largest distance to the outline of points along the part's edges (`samples` per edge). The
+    averaged width in reaches_into_lot measures how thick the part is, so a 1-inch fin wall standing wholly on
+    the lot (wL/(w+L), about w, under 0.1 ft) read as off it; a neighbour a hair over the line stays within the
+    hair of the line, so it stays off."""
+    def to_outline(x, y):
+        best = None
+        for i in range(len(lot)):
+            (ax, ay), (bx, by) = lot[i - 1], lot[i]
+            dx, dy = bx - ax, by - ay
+            t = ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy) if dx or dy else 0.0
+            t = min(1.0, max(0.0, t))
+            d = ((x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2) ** 0.5
+            best = d if best is None else min(best, d)
+        return best or 0.0
+    deepest = 0.0
+    for i in range(len(part)):
+        (ax, ay), (bx, by) = part[i - 1], part[i]
+        for k in range(samples):
+            deepest = max(deepest, to_outline(ax + (bx - ax) * k / samples, ay + (by - ay) * k / samples))
+    return deepest
 
 
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------

@@ -1410,6 +1410,33 @@ def test_an_object_reaching_into_the_lot_counts_as_on_it_and_a_neighbour_does_no
     assert reaches_into_lot(jogged, rect(5, 85, 20, 98), ON_LOT_REACH)
 
 
+def test_a_thin_object_standing_on_the_lot_counts_as_on_it_however_thin():
+    """reaches_into_lot's averaged width (2 x area / perimeter) measures how thick the part on the lot is, not how
+    far it reaches in: a 1-inch fin wall against the house in the side yard, a 1-inch mast or an upright panel
+    turned 5 degrees (its box has area, so no "covers no ground" rule catches it) read as off the lot, so nothing
+    said a building part was left out and the yards and height could read COMPLIES (review round 2 of PR 78,
+    confirmed by 2 sceptics). It now counts when some of it stands more than the reach inside the lot's outline;
+    a thin neighbour's fence a hair over the line, or one touching it from outside, stays off."""
+    import math
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+
+    def rect(x0, y0, x1, y1):
+        return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+    lot = rect(0, 0, 50, 100)
+    turn = math.radians(5)
+    panel = [(20 + dx * math.cos(turn) - dy * math.sin(turn), 30 + dx * math.sin(turn) + dy * math.cos(turn))
+             for dx, dy in rect(0, 0, 10, 1 / 12)]
+    on = {"a 1-inch fin wall": rect(20, 30, 20 + 1 / 12, 38), "a 1-inch mast": rect(20, 30, 20 + 1 / 12, 30 + 1 / 12),
+          "a 1-inch panel turned 5 degrees": panel, "a thin wall across the whole lot": rect(-5, 50, 55, 50.08)}
+    off = {"a thin fence a hair over the line": rect(-0.03, 10, 0.05, 90),
+           "a thin fence touching the line from outside": rect(-0.08, 10, 0, 90)}
+    for name, footprint in on.items():
+        assert reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+    for name, footprint in off.items():
+        assert not reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+
+
 def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
     """The Rhino side can't run in CI: its source must use the tested logic, not the bounding-box centre."""
     src = host_text("rhino", "plugin", purpose="wiring")
