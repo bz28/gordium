@@ -1,7 +1,8 @@
 """Every number a piece of law states, with the words that make it a limit: the comparison words directly before it
 ("not more than"), its unit after it ("inches", "square feet", "units horizontal"), and any comparison words after
 that ("or more"), also past a number and unit's conversion in brackets ("200 gross square feet (18.6 m²) or less" is
-"or less" for both numbers; never across another number, a comma or a stop). Comparison words further back ("not exceeding a total floor area of 200") are not caught. Used to check a book's
+"or less" for both numbers; never across another number, a comma or a stop). Comparison words further back ("not
+exceeding a total floor area of 200", "a minimum tread depth of 5 inches") are not caught. Used to check a book's
 extracted text against a second, independent reading of the page images (text_verification.yaml in the law's folder):
 both readings are put through this same code, so they are compared item by item, never by eye.
 
@@ -15,8 +16,13 @@ whole, so "one-half" is never the number one). A number fixed to letters is a na
 "P2904"), a standard ("F2090"), a table's part ("Table R401.4.1(2)"), a marker the extraction seals ("[fn2]", a
 raised 2: m², ft²). So is a list item's own number at the start of a line ("1.", "3.1."). A number joined to a word
 by a hyphen counts ("12-inch", "one-family"). A comparison keeps a "not", "no", "nor" or "cannot" printed up to eight
-words before it in the same clause, with the words between ("shall not be less than", "no more than", "shall not have
-a vertical rise greater than"): dropped, the limit would read the other way round. Plain code, no AI.
+words before it, with the words between ("shall not be less than", "no more than", "shall not have a vertical rise
+greater than"): dropped, the limit would read the other way round. That reach stops at a stop, a comma, another
+number and a word that often starts another clause ("and", "or", "where"), so it is a rule of thumb, not grammar: it
+can take a "not" that is another verb's ("not required for stairs having more than 3 risers") or miss one across an
+"or" joining two nouns ("not have a rise or a run greater than"). So what the recorded words mean is checked by a
+reading that never goes through this code: comparison() turns each recorded number into a symbol (">=", "<=", ...)
+and text_verification.yaml holds a person's symbol for each, read from the whole printed sentence. Plain code, no AI.
 """
 
 import re
@@ -119,6 +125,47 @@ def _negated(words: list[str], before: str) -> str:
         if w in NEGATIONS:
             return " ".join(rest[-k:] + [before])
     return before
+
+
+SYMBOL = {"less than": "<", "more than": ">", "greater than": ">", "by more than": ">", "steeper than": ">",
+          "exceeding": ">", "exceed": ">", "minimum": ">=", "at least": ">=", "maximum": "<=", "up to": "<=",
+          "within": "<=", "between": "between", "and": "and",
+          "or more": ">=", "or greater": ">=", "or less": "<=", "or fewer": "<="}
+FLIP = {"<": ">=", ">": "<=", ">=": "<", "<=": ">"}
+COMPARISONS = (">=", "<=", ">", "<", "between", "none")
+
+
+def comparison(shown_number: str, previous: str = "none") -> str:
+    """What a recorded number's words say of it, as a symbol: "not less than 36 inch" is ">=", "more than 3 riser"
+    is ">", "36 inch" is "none". A "not" flips it ("not have a vertical rise greater than 12 foot" is "<="), unless
+    it waives the limit ("not be required to be within 3/8 inch" is "none"). "and" ends a range only after
+    "between" (previous: the comparison of the number before it). Read from the recorded words alone, so a second
+    reading's comparisons (a person's, from the printed sentence) can be checked against them: two readings put
+    through this same code would share any word it drops, so they cannot check its meaning."""
+    words = shown_number.split()
+    # the recorded words before the number: the longest start of it holding no number and ending in a comparison
+    before = next((" ".join(words[:k]) for k in range(len(words), 0, -1)
+                   if not NUMBER.search(" ".join(words[:k])) and _ends_with(" ".join(words[:k]), BEFORE)), "")
+    after = next((a for a in AFTER if shown_number.endswith(" " + a)), "")
+    if not before:
+        return SYMBOL[after] if after else "none"
+    if re.match(r"(?:not|no) (?:be )?required\b", before):
+        return "none"                                   # "shall not be required to be within": no limit
+    base = _ends_with(before, BEFORE)
+    negated = before.split()[0] in NEGATIONS
+    base = base[4:] if base.startswith("not ") else base     # "not less than" is "less than", negated
+    symbol = SYMBOL[base]
+    if symbol == "and":
+        return "between" if previous == "between" else "none"
+    return FLIP.get(symbol, symbol) if negated else symbol
+
+
+def comparisons(shown_numbers: list[str]) -> list[str]:
+    """comparison() of each recorded number of a piece, in order."""
+    out = []
+    for s in shown_numbers:
+        out.append(comparison(s, out[-1] if out else "none"))
+    return out
 
 
 def key(s: dict) -> tuple:

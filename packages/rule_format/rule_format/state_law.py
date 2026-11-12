@@ -9,7 +9,13 @@ go through the same code (document_extraction/numbers.py). For each piece the fi
 extracted text has them, the second reading's numbers, and whether they agree; where they differ, a flag. Code
 checks: every piece is recorded, against the piece as cut now (its fingerprint); the two lists are compared here (so
 "agrees" is code's verdict, not a word taken on trust); a piece whose lists differ has a flag;
-and, where the code cache has the book, that the recorded numbers are exactly the extracted text's now. Plain code.
+and, where the code cache has the book, that the recorded numbers are exactly the extracted text's now.
+
+Both readings put through numbers.py check the digits, never what the words around them mean: a "not" the code drops
+is dropped from both, and they agree on the law backwards (it happened twice, 2026-11-12). So each number's comparison
+is also read by a person from the whole printed sentence, without seeing numbers.py's words (second_reading_comparisons:
+">=", "<=", ">", "<", "between" or "none"), and code checks it against what the recorded words say
+(numbers.comparison); where they differ, a flag quoting the recorded number says which is right and why. Plain code.
 """
 
 import datetime
@@ -20,7 +26,8 @@ from .rulebook import STATE_SETTINGS, Context, cached, load, read_jsonl
 VERIFICATION = "text_verification.yaml"
 READINGS = ("agrees", "differs")
 FIELDS = {"document", "copy_checked", "second_reading", "pieces", "notes"}
-PIECE_FIELDS = {"piece_sha256", "numbers", "second_reading", "second_reading_numbers", "flags"}
+PIECE_FIELDS = {"piece_sha256", "numbers", "second_reading", "second_reading_numbers", "second_reading_comparisons",
+                "flags"}
 
 
 def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
@@ -41,7 +48,7 @@ def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
 
 def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[str]]:
     """(problems, notes) for a state law folder's text_verification.yaml. Notes say what wasn't checked here."""
-    from document_extraction.numbers import shown, statements_of_lines      # the same code reads both readings
+    from document_extraction.numbers import COMPARISONS, comparisons, shown, statements_of_lines
     from .labels import piece_fingerprint
     folder = Path(folder)
     path = folder / VERIFICATION
@@ -97,6 +104,7 @@ def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[s
             problems.append(f"{pid}: says the readings differ, but its two lists of numbers are the same")
         if not agree and not e.get("flags"):
             problems.append(f"{pid}: the readings differ, so it needs a flag saying which is right and why")
+        problems += _comparison_problems(pid, e, COMPARISONS, comparisons)
         if text is not None and e.get("numbers") != [shown(s) for s in statements_of_lines(text(pieces[pid]))]:
             problems.append(f"{pid}: the recorded numbers are not the extracted text's numbers now")
     return problems, notes
@@ -110,3 +118,18 @@ def numbers_of(folder: Path, ctx: Context, name: str) -> dict[str, list[str]]:
     rows = read_jsonl(Path(folder) / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
     return {p["id"]: [shown(s) for s in statements_of_lines([lines[(pg, n)] for pg, a, b in p["lines"]
                                                              for n in range(a, b + 1)])] for p in rows[1:]}
+
+
+def _comparison_problems(pid: str, e: dict, allowed: tuple, comparisons) -> list[str]:
+    """Each number's comparison as a person read it from the printed sentence, against what its recorded words say;
+    a difference needs a flag quoting the recorded number."""
+    numbers, read = e.get("numbers"), e.get("second_reading_comparisons")
+    if not isinstance(numbers, list):
+        return [f"{pid}: needs numbers"]
+    if not (isinstance(read, list) and len(read) == len(numbers) and all(r in allowed for r in read)):
+        return [f"{pid}: needs second_reading_comparisons, one of {allowed} for each of its {len(numbers)} numbers "
+                f"(what the printed sentence says of each, read without numbers.py)"]
+    flags = " ".join(str(f) for f in e.get("flags") or [])
+    return [f"{pid}: {n!r} is recorded as {c!r}, but the printed sentence reads {r!r}; a flag quoting {n!r} must say "
+            f"which is right and why" for n, c, r in zip(numbers, comparisons(numbers), read)
+            if c != r and f"'{n}'" not in flags]

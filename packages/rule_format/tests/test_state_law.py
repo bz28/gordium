@@ -181,6 +181,17 @@ def test_the_recorded_second_reading_covers_every_piece_and_needs_no_cache_to_be
     (lambda b: b["pieces"]["R318.7.5.1"].update(second_reading_numbers=["not more than 8 inch"]),
      "says the readings agree, but its two lists of numbers differ"),
     (lambda b: b.pop("copy_checked"), "must have"),
+    # review round 8: a "not" dropped from both readings (both go through numbers.py) left them agreeing on the law
+    # backwards; the comparison read from the printed sentence does not agree
+    (lambda b: b["pieces"]["R318.7.3"].update(numbers=["greater than 12 foot", *b["pieces"]["R318.7.3"]["numbers"][1:]],
+                                              second_reading_numbers=["greater than 12 foot",
+                                                                      *b["pieces"]["R318.7.3"]["numbers"][1:]]),
+     "R318.7.3: 'greater than 12 foot' is recorded as '>', but the printed sentence reads '<='"),
+    (lambda b: b["pieces"]["R318.7.5.1"].pop("second_reading_comparisons"), "needs second_reading_comparisons"),
+    (lambda b: b["pieces"]["R318.7.5.1"]["second_reading_comparisons"].pop(), "needs second_reading_comparisons"),
+    (lambda b: b["pieces"]["R318.7.5.1"]["second_reading_comparisons"].__setitem__(0, "at most"),
+     "needs second_reading_comparisons"),
+    (lambda b: b["pieces"]["R319.2.2"].pop("flags"), "R319.2.2: '24 inch' is recorded as 'none', but the printed"),
 ])
 def test_a_second_reading_that_doesnt_hold_is_refused(tmp_path, monkeypatch, change, problem):
     problems, _ = _copy_of_ny_state(tmp_path, monkeypatch, change)

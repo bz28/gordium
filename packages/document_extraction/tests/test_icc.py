@@ -6,7 +6,7 @@ import pytest
 
 from document_extraction import icc_sections
 from document_extraction.icc import join_fractions, line_text
-from document_extraction.numbers import shown, statements
+from document_extraction.numbers import comparison, comparisons, shown, statements
 
 BODY = 9.48
 
@@ -235,6 +235,41 @@ def test_a_comparison_keeps_the_not_printed_before_it(text, expect):
     assert got == expect
     assert got != [shown(s) for s in statements(text.replace("not ", "").replace("nor ", "").replace("no ", "")
                                                  .replace("cannot ", ""))]
+
+
+@pytest.mark.parametrize("text,expect", [
+    ("shall be not less than 36 inches", [">="]), ("shall be not more than 8 1/4 inches", ["<="]),
+    ("where the stair has more than 3 risers", [">"]), ("less than 70 square feet", ["<"]),
+    ("shall not have a vertical rise greater than 12 feet", ["<="]),                     # R318.7.3, p.100
+    ("shall not project horizontally into the required headroom more than 4 3/4 inches", ["<="]),   # R318.7.2
+    ("shall not exceed the smallest winder tread by more than 3/8 inch", ["<="]),       # R318.7.5.2.1
+    ("shall not be required to be within 3/8 inch", ["none"]),                          # a limit lifted, not reversed
+    ("not to exceed 4 inches", ["<="]), ("nor more than 80 inches", ["<="]), ("cannot be less than 3 feet", [">="]),
+    ("not steeper than 1 unit", ["<="]), ("a minimum 36 inches", [">="]), ("up to ten", ["<="]),
+    ("200 square feet (18.6 m[fn2]) or less", ["<=", "<="]), ("6 or more", [">="]), ("three or fewer", ["<="]),
+    ("between 34 and 38 inches", ["between", "between"]), ("for one bedroom and one", ["none", "none"]),
+    ("more than one and one third the nominal", [">"]), ("36 inches", ["none"])])
+def test_a_recorded_number_says_which_way_its_limit_goes(text, expect):
+    # Review round 8 of step 1: what the recorded words say, as a symbol, so a person's reading of the printed
+    # sentence can check it; read from the recorded words alone, as text_verification.yaml holds them
+    assert comparisons([shown(s) for s in statements(text)]) == expect
+
+
+def test_a_dropped_not_reverses_the_recorded_comparison():
+    # the two rounds' bug: with the "not" dropped the words read the other way round, which is what is checked
+    assert comparison("greater than 12 foot") == ">" and comparison("not have a vertical rise greater than 12 foot") == "<="
+    assert comparison("less than 7 foot") == "<" and comparison("not be less than 7 foot") == ">="
+
+
+@pytest.mark.parametrize("text,reader", [
+    ("Handrails are not required for stairs having more than 3 risers", [">"]),   # another verb's "not" taken
+    ("Guards not located at the edge shall be at least 36 inches", [">="]),
+    ("shall not have a rise or a run greater than 7 inches", ["<="]),             # a "not" lost across "or"
+    ("shall not exceed 7 feet (2134 mm) for more than one-half of the floor", ["<=", "none", "<="])])   # R315.2
+def test_where_the_words_kept_are_wrong_the_recorded_comparison_differs_from_the_printed_sentence(text, reader):
+    # Review round 8 of step 1: numbers.py's reach is a rule of thumb; where it takes or drops the wrong "not", what
+    # the recorded words say differs from a person's reading of the sentence, so text_verification.yaml needs a flag
+    assert comparisons([shown(s) for s in statements(text)]) != reader
 
 
 def test_a_not_in_another_clause_is_not_taken_and_a_pound_is_a_unit():
