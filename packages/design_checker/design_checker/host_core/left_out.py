@@ -526,7 +526,7 @@ LINK_WORDS = {
     "missing": "can't be found",
     "unreadable": "can't be read",
     "changed": "has changed since it was loaded",
-    "not_known": "may have changed since it was loaded (the design tool can't say whether it is up to date)",
+    "not_known": "may have changed since it was loaded (Gordium can't tell whether it is up to date)",
 }
 # What to do, in any design tool's words. A host adds where to click in its own menus (linked_file_words' `how`):
 # Rhino's are in rhino_logic.LINK_HOW; Revit's (Manage Links: Reload, Reload From) will be the add-in's own.

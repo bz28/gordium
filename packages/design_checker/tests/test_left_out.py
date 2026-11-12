@@ -354,3 +354,14 @@ def test_rhino_s_advice_names_the_file_by_its_own_name_and_says_where_to_click(p
                                   "\u25b8 Blocks \u25b8 Block Definitions, select it, then Properties \u25b8 Filename: "
                                   "Browse to the file)" % (shown, " at " + path if path else ""))
     assert set(logic.LINK_HOW) == set(lo.LINK_WORDS)
+
+
+def test_rhino_gives_no_advice_for_a_block_whose_status_couldn_t_be_read_and_has_no_file():
+    """Review round 2: a block whose status Rhino couldn't give (None: "not_known") and which names no file may not
+    be linked at all, so it isn't called a linked file; with a file, it is told to reload it."""
+    problems = [{"id": "b", "definition": "d", "problem": "not_known"}]
+    assert logic.linked_file_advice(problems, {"d": ("", "Garage")}) == {}
+    assert logic.linked_file_advice(problems, {"d": ("/site/garage.3dm", "Garage")}) == {"b": (
+        "Linked file 'garage.3dm' may have changed since it was loaded (Gordium can't tell whether it is up to "
+        "date): reload it (Edit \u25b8 Blocks \u25b8 Block Definitions, select it, then Update) so Gordium can see "
+        "where it is")}
