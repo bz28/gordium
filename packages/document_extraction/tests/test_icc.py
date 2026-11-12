@@ -212,6 +212,25 @@ def test_a_comparison_word_after_a_conversion_in_brackets_is_kept():
 
 
 @pytest.mark.parametrize("text,expect", [
+    ("shall not be less than 7 feet", ["not be less than 7 foot"]),          # R315.3, p.56
+    ("nor more than 80 inches", ["nor more than 80 inch"]),                  # BO107.2.2, p.971
+    ("no more than five", ["no more than five"]), ("not be greater than one-half", ["not be greater than one-half"]),
+    ("shall be not less than 36 inches", ["not less than 36 inch"]), ("and not within 3 feet", ["not within 3 foot"])])
+def test_a_comparison_keeps_the_not_printed_before_it(text, expect):
+    # Review round 2 of step 1b: "shall not be less than 7 feet" was recorded "less than 7 foot", the law backwards,
+    # so a second reading that dropped the "not" would still have agreed
+    got = [shown(s) for s in statements(text)]
+    assert got == expect
+    assert got != [shown(s) for s in statements(text.replace("not ", "").replace("nor ", "").replace("no ", ""))]
+
+
+def test_a_whole_number_and_a_part_in_words_is_one_number():
+    # BO103 DANGEROUS item 3, p.966: "more than one and one third the nominal strength" is the number 1 1/3
+    assert [shown(s) for s in statements("more than one and one third the nominal")] == ["more than one and one third"]
+    assert [shown(s) for s in statements("between one and three")] == ["between one", "and three"]
+
+
+@pytest.mark.parametrize("text,expect", [
     ("not less than that of a quarter circle", ["a quarter"]), ("not less than one-half of the area", ["not less than one-half"]),
     ("two-thirds of the width", ["two-thirds"]), ("thirteen risers", ["thirteen riser"]), ("one-family", ["one"]),
     ("three-fourths of", ["three-fourths"]), ("twenty-four inches", ["twenty-four inch"]), ("4-3/8 inches", ["4-3/8 inch"]),

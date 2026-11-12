@@ -10,11 +10,13 @@ both readings are put through this same code, so they are compared item by item,
         {"before": "", "value": "209", "unit": "mm", "after": ""}]
 
 A number is digits ("36", "0.01", "5.7"), a fraction ("9/16"), a whole number and a fraction ("1 1/4"), a number
-word ("four", "twenty"), or a part of a whole ("one-half", "a quarter", "two-thirds"; read whole, so "one-half" is never
-the number one). A number fixed to letters is a name, not a quantity, and is left out: a section ("R318.7.11.1",
+word ("four", "twenty"), or a part of a whole ("one-half", "a quarter", "two-thirds", "one and one third"; read
+whole, so "one-half" is never the number one). A number fixed to letters is a name, not a quantity, and is left out: a section ("R318.7.11.1",
 "P2904"), a standard ("F2090"), a table's part ("Table R401.4.1(2)"), a marker the extraction seals ("[fn2]", a
 raised 2: m², ft²). So is a list item's own number at the start of a line ("1.", "3.1."). A number joined to a word
-by a hyphen counts ("12-inch", "one-family"). Plain code, no AI.
+by a hyphen counts ("12-inch", "one-family"). A comparison keeps a "not", "no" or "nor" printed just before it,
+also across "be" ("shall not be less than", "no more than", "nor more than"): dropped, the limit would read the other
+way round. Plain code, no AI.
 """
 
 import re
@@ -29,13 +31,14 @@ _W = "|".join(sorted(WORDS, key=len, reverse=True))
 BEFORE = ("not less than", "not more than", "not greater than", "not exceeding", "not exceed", "not steeper than",
           "greater than", "less than", "more than", "steeper than", "by more than", "exceeding", "exceed", "minimum",
           "maximum", "at least", "between", "within", "up to", "and")
+NEGATIONS = ("not", "no", "nor")                       # "shall not be less than 7 feet" is never "less than 7 feet"
 AFTER = ("or more", "or fewer", "or less", "or greater")
 UNITS = {"inch": "inch", "inches": "inch", "in": "inch", "foot": "foot", "feet": "foot", "mm": "mm", "cm": "cm",
          "m": "m", "degrees": "degree", "degree": "degree", "rad": "rad", "percent": "percent", "units": "unit",
          "unit": "unit", "square": "square", "cubic": "cubic", "gross": "gross", "footcandle": "footcandle", "footcandles": "footcandle",
          "lux": "lux", "risers": "riser", "riser": "riser", "pounds": "pound", "lb": "pound", "psf": "psf"}
 NUMBER = re.compile(r"(?<![\w.\-/\[])(?<!\w\()(?:\d+[ -]\d+/\d+|\d+/\d+|\d+(?:,\d{3})*(?:\.\d+)?|\.\d+)(?![\w/]|\.\d)"
-                    r"|(?<![\w-])(?:(?:a|" + _W + r")[- ])?(?:" + "|".join(PARTS) + r")(?![\w-])"
+                    r"|(?<![\w-])(?:(?:" + _W + r") and )?(?:(?:a|" + _W + r")[- ])?(?:" + "|".join(PARTS) + r")(?![\w-])"
                     r"|(?<![\w-])(?:(?:" + "|".join(TENS) + r")-(?:one|two|three|four|five|six|seven|eight|nine)(?!\w)"
                     r"|(?:" + _W + r")(?!\w))", re.IGNORECASE)
 TWO_WORD_UNITS = {"square", "cubic"}                  # "square feet" is one unit: never just "square"
@@ -70,7 +73,7 @@ def statements(text: str) -> list[dict]:
         elif unit and rest_words[:1] == ["("] and ")" in rest_words[:5]:   # "200 square feet (18.6 m²) or less"
             rest_words = rest_words[rest_words.index(")") + 1:]
         rest = " ".join(rest_words[:3])
-        out.append({"before": _ends_with(" ".join(before_text), BEFORE),
+        out.append({"before": _negated(before_text, _ends_with(" ".join(before_text), BEFORE)),
                     "value": m[0].lower(),
                     "unit": unit,
                     "after": next((a for a in AFTER if rest.startswith(a)), "")})
@@ -96,6 +99,18 @@ def _ends_with(words: str, phrases: tuple[str, ...]) -> str:
         if words == p or words.endswith(" " + p):
             return p
     return ""
+
+
+def _negated(words: list[str], before: str) -> str:
+    """The comparison with the "not", "no" or "nor" printed before it, also across "be": "not be less than"."""
+    if not before or before.split()[0] in NEGATIONS:
+        return before
+    rest = words[:len(words) - len(before.split())]
+    if rest[-1:] and rest[-1] in NEGATIONS:
+        return f"{rest[-1]} {before}"
+    if rest[-2:-1] and rest[-2] in NEGATIONS and rest[-1] == "be":
+        return f"{rest[-2]} be {before}"
+    return before
 
 
 def key(s: dict) -> tuple:
