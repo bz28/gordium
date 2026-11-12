@@ -193,3 +193,57 @@ def test_without_the_cache_a_kept_outside_book_is_skipped_and_said_so(monkeypatc
     ("1 unit vertical in 12 units horizontal", ["1 unit vertical", "12 unit horizontal"])])
 def test_parts_of_a_whole_and_larger_number_words_are_numbers_too(text, expect):
     assert [shown(s) for s in statements(text)] == expect          # "one-half" is never the number one
+
+
+def test_a_brought_in_part_last_before_a_page_not_read_is_a_problem_never_cut_short_silently():
+    rows = [r for r in _book() if not (r.get("page") == 2 and r.get("line") in (9, 10))]   # R319's heading on p.3
+    rows += [_row(5, 1, "R325.6 Lights. Not less than 1 footcandle.", bold="R325.6 Lights."),
+             _row(5, 2, "R325.7 Next.", bold="R325.7 Next.")]
+    problems = icc_sections.split(rows, {"pages": "1-2, 5", "sections": ["R318", "R325.6"]})["problems"]
+    assert any("R318.1.1: the last part on p.2 before a page not read" in p for p in problems), problems
+
+
+def test_a_page_with_no_law_on_it_is_no_gap():
+    rows = _book()[:8] + [_row(2, 1, "102102166"), _row(2, 2, "2025 RESIDENTIAL CODE OF NEW YORK STATE 12"),
+                          _row(2, 3, ".")]
+    rows += [_row(3, 1, "102102166"), _row(3, 2, "SECTION R318—MEANS OF EGRESS", bold="SECTION R318—MEANS OF EGRESS"),
+             _row(3, 3, "R318.1 Risers. Each flight shall have risers.", bold="R318.1 Risers.", italic=["flight"]),
+             _row(3, 4, "SECTION R319—ESCAPE", bold="SECTION R319—ESCAPE")]
+    assert icc_sections.split(rows, {"pages": "1-3", "sections": ["R318"]})["problems"] == []
+
+
+def test_a_new_chapters_title_and_user_notes_end_the_definitions_and_are_no_law():
+    rows = _book()[:7] + [
+        _row(2, 1, "102102166"), _row(2, 2, "Part III— Building Planning", bold="Part III— Building Planning"),
+        _row(2, 3, "CHAPTER"), _row(2, 4, "3", bold="3"), _row(2, 5, "ICC user notes:", bold="ICC user notes:"),
+        _row(2, 6, "About this chapter: risers and stairs."),
+        _row(2, 7, "SECTION R318—MEANS OF EGRESS", bold="SECTION R318—MEANS OF EGRESS"),
+        _row(2, 8, "R318.1 Risers. Each stair shall have risers.", bold="R318.1 Risers.", italic=["stair"]),
+        _row(2, 9, "SECTION R319—ESCAPE", bold="SECTION R319—ESCAPE")]
+    cut = icc_sections.split(rows, {"pages": "1-2", "sections": ["R318"]})
+    assert cut["problems"] == []                                   # the big "3" is no fraction left apart
+    stair = next(p for p in cut["pieces"] if p["id"] == "R202:stair")
+    assert stair["lines"] == [[1, 6, 6]]                           # the chapter opening is not in the definition
+    assert [2, 2, 6, "chapter opening on p.2"] in cut["outside"]
+
+
+def test_a_defined_word_leading_a_hyphenated_compound_is_brought_in():
+    rows = _book()
+    rows.insert(5, _row(1, 52, "[RB] OWNER. Any person with an interest.", bold="[RB] OWNER."))   # after FLIGHT
+    rows.insert(12, _row(2, 6, "Owner-occupied dwellings are exempt."))
+    cut = icc_sections.split(rows, BROUGHT_IN)
+    assert "R202:owner" in [p["id"] for p in cut["pieces"]]
+
+
+def test_references_into_and_out_of_the_brought_in_sections_are_found_by_code():
+    from document_extraction.icc_references import ways_in, ways_out
+    rows = [{"page": 9, "line": 1, "text": "R315.5 Sleeping lofts shall comply with Section R318 as modified."},
+            {"page": 9, "line": 2, "text": "R507.10 Guards shall meet R321.1."},
+            {"page": 9, "line": 3, "text": "R322.1 Flood. See Section R322.2."},
+            {"page": 16, "line": 1, "text": "R318—Means of Egress . . . 76"},          # the contents: left out
+            {"page": 100, "line": 1, "text": "R318.1 shall comply with R318.2."}]       # a brought-in piece's own
+    found = ways_in(rows, ["R318", "R321"], owned={(100, 1)}, skip={16})
+    assert [(p, n, c) for p, n, c, _ in found] == [(9, 1, "R318"), (9, 2, "R321.1")]
+    pieces = [{"id": "R319.7", "kind": "section", "lines": [[1, 1, 1]]}]
+    lines = {(1, 1): "Existing basements shall comply with Appendix BO and ICC 500, not R319.1."}
+    assert ways_out(pieces, lines, ["R319"]) == {"Appendix BO": ["R319.7"], "ICC 500": ["R319.7"]}
