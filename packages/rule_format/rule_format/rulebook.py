@@ -674,8 +674,13 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         return p  # the approval fingerprint and other checks rely on well-formed items
 
     # a rule for each part may use its part kind's measures too (parts.yaml), and no other kind's
-    kinds = ctx.kinds() | parts.measure_kinds(rule.get("for_each"))
-    foreign = parts.all_measures() - set(parts.measure_kinds(rule.get("for_each")))
+    try:                              # parts.yaml broken: said as a problem (and by python -m rule_format), never a crash
+        own = parts.measure_kinds(rule.get("for_each"))
+        foreign = parts.all_measures() - set(own)
+    except (ValueError, OSError) as e:
+        own, foreign = {}, set()
+        p.append(f"rule_format/parts.yaml can't be read, so part measures can't be told apart: {e}")
+    kinds = ctx.kinds() | own
     conditions = [rule[k] for k in ("applies_when", "check") if k in rule]
     for r in review_when or []:
         if not (isinstance(r.get("reason"), str) and r["reason"].strip()):

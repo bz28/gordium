@@ -135,3 +135,26 @@ def test_a_rule_without_an_id_or_title_never_crashes_or_shares_an_answer():
     got = each_part.check_parts([no_id, dict(good, check="stair_riser_height <= 10")], stairs, ZONING, ALLOWED)
     assert got["results"] == {"rule #1": "fail", "rule #2": "pass"}
     assert design(got) == present.FAILS
+
+
+def test_lines_name_a_missing_building_measure_and_read_a_mirrored_limit():
+    rule = copy.deepcopy(AREA) | {"check": "opening_net_clear_area >= (5 if stories > 1 else 4)"}
+    got = each_part.check_parts([rule], house(opening("w1", "br1"), rooms=("br1",)), ZONING, ALLOWED)
+    assert [i["reason"] for i in got["items"]] == ["Bedroom 1 › w1: stories not measured (or not usable)"]
+    mirrored = copy.deepcopy(AREA) | {"check": "5.7 <= opening_net_clear_area"}
+    got = each_part.check_parts([mirrored], house(opening("w1", "br1", area=5.1), rooms=("br1",)), ZONING, ALLOWED)
+    assert [i["reason"] for i in got["items"]] == ["Bedroom 1 › w1: net clear area 5.1 sq ft, needs ≥ 5.7 sq ft"]
+
+
+def test_two_rules_with_one_id_give_the_more_cautious_answer():
+    a = copy.deepcopy(AREA) | {"check": "opening_net_clear_area >= 100"}
+    b = copy.deepcopy(AREA)
+    for order in ([a, b], [b, a]):
+        got = each_part.check_parts(order, house(opening("w1", "br1"), rooms=("br1",)), ZONING, ALLOWED)
+        assert got["results"] == {AREA["id"]: "fail"}
+
+
+def test_an_applies_when_that_isnt_text_gives_a_review_row():
+    got = each_part.check_parts([copy.deepcopy(RISER) | {"applies_when": ["x"]}],
+                                {"stair": [{"id": "s1", "measures": {"stair_riser_height": 7}}]}, ZONING, ALLOWED)
+    assert [i["status"] for i in got["items"]] == [present.REVIEW]

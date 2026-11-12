@@ -113,7 +113,10 @@ def rule_problems(rule: dict) -> list[str]:
     """Problems with a rule's per-part fields (validation). A rule without them has none."""
     if not is_part_rule(rule):
         return []
-    kinds, p = registry(), []
+    try:
+        kinds, p = registry(), []
+    except (ValueError, OSError) as e:
+        return [f"rule_format/parts.yaml can't be read: {e}"]
     kind, within, none = rule.get("for_each"), rule.get("within"), rule.get("when_none")
     if "for_each" not in rule:
         return ["'within' and 'when_none' only go with 'for_each'"]
@@ -248,7 +251,8 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     try:
         formula_names(rule)
         shaped = all(isinstance(r, dict) and isinstance(r.get("when"), str) for r in rule.get("review_when", [])) \
-            and (isinstance(rule.get("check"), str) or rule.get("kind") == "flag")
+            and (isinstance(rule.get("check"), str) or rule.get("kind") == "flag") \
+            and isinstance(rule.get("applies_when", ""), str)
     except (FormulaError, AttributeError, TypeError):
         shaped = False
     if not shaped:                                       # never frozen so (validation refuses it); never a crash

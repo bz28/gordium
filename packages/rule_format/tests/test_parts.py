@@ -334,3 +334,14 @@ def test_rule_result():
     assert rule_result(o("pass", "not_applicable")) == "pass"
     assert rule_result(o("not_applicable")) == "not_applicable"
     assert rule_result([]) == "needs_review"
+
+
+def test_a_broken_parts_file_is_a_problem_never_a_crash(monkeypatch):
+    def refuse(*args, **kwargs):
+        raise ValueError("parts.yaml: part kind '::': a name is lowercase letters, digits and _")
+    monkeypatch.setattr(parts, "_REGISTRY", None)
+    monkeypatch.setattr(parts, "load_registry", refuse)
+    lot_rule = {k: v for k, v in RISER.items() if k not in parts.PART_FIELDS} | {"check": "stories <= 3"}
+    for rule in (lot_rule, RISER):
+        got = validate(book(rule), CTX)
+        assert any("parts.yaml can't be read" in p for p in got), got

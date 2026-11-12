@@ -16,6 +16,7 @@ from design_checker import present
 STATUS = {"pass": present.COMPLIES, "fail": present.FAILS, "needs_review": present.REVIEW}
 UNIT_WORDS = {"sf": "sq ft", "count": "", "yes_no": "", "text": ""}
 SIGNS = {ast.GtE: "≥", ast.Gt: ">", ast.LtE: "≤", ast.Lt: "<"}
+MIRROR = {ast.GtE: ast.LtE, ast.Gt: ast.Lt, ast.LtE: ast.GtE, ast.Lt: ast.Gt}
 INTERIOR_NOT_STARTED = "interior.not_started"
 INTERIOR_NOT_STARTED_WHY = "the interior isn't checked yet (bedrooms, escape openings, stairs, exit doors): " \
                            "start the interior to check them"
@@ -43,7 +44,8 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict) -> dict:
         for row in got:
             row["line"] = line(row, rule, values, allowed)
         out += got
-        results[_key(rule, n)] = parts.rule_result(got)
+        key = _key(rule, n)          # two rules with one id (never validated so): one answer from both, never kinder
+        results[key] = parts.rule_result(got + [{"outcome": results[key]}] if key in results else got)
     items = [_item(f"{r['rule']}#{n}", r["rule"], label(r), STATUS[r["outcome"]], r["line"], r)
              for n, r in enumerate(out, 1) if r["outcome"] in STATUS]
     return {"rows": out, "results": results, "items": items}
@@ -84,8 +86,11 @@ def line(row: dict, rule: dict, values: dict, allowed: dict) -> str:
         known = {**parts.building_values(values), **row["values"]}
         return f"{head}: {_first_failing(rule, known, allowed) or _title(rule)}"
     if row["outcome"] == "needs_review":
-        kinds = parts.measure_kinds(rule.get("for_each"))
-        missing = [m for m, v in row["values"].items() if not _usable(v, kinds.get(m))]
+        from rule_format.rulebook import _kinds
+        kinds = _kinds(allowed, parts.measure_kinds(rule.get("for_each")))
+        known = {**parts.building_values(values), **row["values"]}
+        # the part's measures and the building's the rule reads (stories, use…): each one missing or unusable
+        missing = [m for m in sorted(parts.formula_names(rule)) if not _usable(known.get(m), kinds.get(m))]
         if missing:
             return f"{head}: {', '.join(_words(rule, m) for m in missing)} not measured (or not usable)"
         return f"{head}: {_title(rule)}: needs review"
@@ -99,6 +104,8 @@ def _usable(v, kind) -> bool:
         return type(v) is bool
     if kind == "text":
         return type(v) is str
+    if isinstance(kind, (set, frozenset)):          # a text measure with its allowed values (the city's uses)
+        return type(v) is str and v in kind
     return type(v) in (int, float) and v == v and abs(v) != float("inf") and v >= 0
 
 
@@ -116,15 +123,19 @@ def _first_failing(rule: dict, values: dict, allowed: dict) -> str | None:
     """The first comparison of the check that fails, in plain words: "net clear area 5.1 sq ft, needs ≥ 5.7 sq ft".
     Each comparison is decided by outcome() itself (part_outcome), so the words never disagree with the result."""
     for node in _all_of(formula.parse(rule["check"]).body):
-        if not (isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.left, ast.Name)
-                and type(node.ops[0]) in SIGNS):
+        if not (isinstance(node, ast.Compare) and len(node.ops) == 1 and type(node.ops[0]) in SIGNS):
+            continue
+        left, op, right = node.left, type(node.ops[0]), node.comparators[0]
+        if not isinstance(left, ast.Name) and isinstance(right, ast.Name):    # "5.7 <= area": read as "area >= 5.7"
+            left, op, right = right, MIRROR[op], left
+        if not isinstance(left, ast.Name):
             continue
         if part_outcome({**rule, "check": ast.unparse(node), "review_when": []}, values, allowed) != "fail":
             continue
-        name, need = node.left.id, _value(ast.unparse(node.comparators[0]), values, rule, allowed)
+        name, need = left.id, _value(ast.unparse(right), values, rule, allowed)
         if need is None:
             continue
-        return f"{_words(rule, name)} {_n(values.get(name))}{_unit(rule, name)}, needs {SIGNS[type(node.ops[0])]} " \
+        return f"{_words(rule, name)} {_n(values.get(name))}{_unit(rule, name)}, needs {SIGNS[op]} " \
                f"{_n(need)}{_unit(rule, name)}"
     return None
 
