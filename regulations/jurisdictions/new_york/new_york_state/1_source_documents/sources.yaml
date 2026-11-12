@@ -53,6 +53,9 @@ documents:
         R319.1:
           unit: The book prints "dwelling unit" with only "unit" in italics; the term is DWELLING UNIT, brought in by
             the roman-type match (README).
+        R202:story_above_grade_plane:
+          above: The book prints item 1 as "above grade plane" in italics (p.52, line 36), where the line above prints
+            only "grade plane" in italics; the term is GRADE PLANE, brought in, and "above" keeps its ordinary meaning.
     contents: >
       The house code. Brought in so far (egress step 1): R318 means of egress (doors, landings, stairways, ramps),
       R319 emergency escape and rescue openings, R320 handrails, R321 guards and window fall protection; R325.6 and

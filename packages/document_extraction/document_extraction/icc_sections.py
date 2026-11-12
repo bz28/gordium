@@ -40,7 +40,7 @@ import hashlib
 import json
 import re
 
-SPLITTER = "document_extraction.icc_sections v6"   # bump when the cutting rules change
+SPLITTER = "document_extraction.icc_sections v7"   # bump when the cutting rules change
 STAMP = re.compile(r"^\d{9}$")                      # the number stamped at the top of every page of this copy
 FOOTER = re.compile(r"^(?:\d+ )?2025 RESIDENTIAL CODE OF NEW YORK STATE(?: \d+)?$")
 DOT = "."                                           # a lone "." printed under the footer
@@ -48,6 +48,9 @@ SECTION = re.compile(r"^(?:\[[A-Z]{2}\] )?SECTION (R\d{3})\s*[—–-]\s*(\S.*)$
 NUMBERED = re.compile(r"^(?:\[[A-Z]{2}\] )?(R\d{3}(?:\.\d+)+) (\S.*)$")
 TERM = re.compile(r"^(?:\[[A-Z]{2}\] )?([A-Z0-9](?:[^.(]|\([^)]*\))*?)\.(?: |$)")   # "(d.f.u.)" inside
 CHAPTER_OPENING = re.compile(r"^(?:Part [IVXLC]+\s*—.*|CHAPTER)$")   # a chapter's first page: its part, "CHAPTER", "3"
+# Words that join defined terms inside one italic phrase ("dwelling(s) or townhouse(s)": the "s" of a bracketed
+# plural too): never an undefined italic word themselves.
+JOINING = {"and", "or", "of", "the", "a", "an", "s", "es"}
 LOOSE_FRACTION = re.compile(r"\[fn\d+\]\s*/|/\s*$|^\d+\s*$")    # a numerator left raised, or a denominator alone
 
 
@@ -300,10 +303,12 @@ def italic_phrases(members: list[dict]) -> list[str]:
     return out
 
 
-def _uses(unit: dict, terms: dict[str, dict]) -> set[str]:
-    """The definitions (piece ids) a unit's italic words name. A defined word is used in its plural or with a
-    capital ("Stairways"); a phrase may hold several defined words ("Emergency escape and rescue openings"), so the
-    whole phrase is matched first, then its parts."""
+def _uses(unit: dict, terms: dict[str, dict]) -> tuple[set[str], set[str]]:
+    """(the definitions (piece ids) a unit's italic words name, the italic words no definition names). A defined
+    word is used in its plural or with a capital ("Stairways"); a phrase may hold several defined words ("Emergency
+    escape and rescue openings"), so the whole phrase is matched first, then its parts. A phrase no definition names
+    is undefined whole ("accessed"); in a phrase that does hold a defined word, each other word is undefined on its
+    own ("nonhabitable" in "nonhabitable attics"), but a joining word ("or" in "dwelling(s) or townhouse(s)") is not."""
     by_slug: dict[str, list[str]] = {}
     for pid, u in terms.items():
         for form in _forms(u["title"]):
@@ -311,23 +316,27 @@ def _uses(unit: dict, terms: dict[str, dict]) -> set[str]:
     out, undefined = set(), set()
     for phrase in italic_phrases(unit["members"]):
         words = re.sub(r"[^\w/’'-]+", " ", phrase.lower()).split()
-        found = [pid for ids in _defined(words, by_slug) for pid in ids]
+        matches, left = _defined(words, by_slug)
+        found = [pid for ids in matches for pid in ids]
         out |= set(found) - {unit["id"]}
         if not found and words:
             undefined.add(" ".join(words))
+        elif found:
+            undefined |= {w for w in left if w not in JOINING}
     return out, undefined
 
 
 def _roman(unit: dict, terms: dict[str, dict]) -> set[str]:
     """The definitions whose term the unit's text names anywhere (in any type, as a whole word or phrase, plural
-    too; "STAIRWAY, SPIRAL" also as "spiral stairway")."""
+    too, "stories" for STORY; "STAIRWAY, SPIRAL" also as "spiral stairway")."""
     text = " ".join(r["text"] for r in unit["members"]).lower()
     text = re.sub(r"-\s", "", text)            # a word broken across two lines ("open- ings")
     out = set()
     for pid, u in terms.items():
         for f in _forms(u["title"]):
             f = f.lower()
-            if f and re.search(r"(?<![\w-])" + re.escape(f) + r"(?:s|es)?(?!\w)", text):   # "owner-occupied" too
+            plural = re.escape(f) + r"(?:s|es)?" + (f"|{re.escape(f[:-1])}ies" if f.endswith("y") else "")
+            if f and re.search(r"(?<![\w-])(?:" + plural + r")(?!\w)", text):   # "owner-occupied", "stories" too
                 out.add(pid)
     return out
 
@@ -343,10 +352,11 @@ def _forms(title: str) -> list[str]:
     return list(dict.fromkeys(f for f in out if f))
 
 
-def _defined(words: list[str], by_slug: dict[str, list[str]]) -> list[list[str]]:
-    """Longest defined terms first, left to right, over the words of one italic phrase. Each match is every
-    definition with that term: "risers" is RISER (PLUMBING) and RISER (STAIR), both brought in (never fewer)."""
-    out, i = [], 0
+def _defined(words: list[str], by_slug: dict[str, list[str]]) -> tuple[list[list[str]], list[str]]:
+    """Longest defined terms first, left to right, over the words of one italic phrase: (the matches, the words no
+    match covers). Each match is every definition with that term: "risers" is RISER (PLUMBING) and RISER (STAIR),
+    both brought in (never fewer)."""
+    out, left, i = [], [], 0
     while i < len(words):
         for j in range(len(words), i, -1):
             pid = _lookup(words[i:j], by_slug)
@@ -355,8 +365,9 @@ def _defined(words: list[str], by_slug: dict[str, list[str]]) -> list[list[str]]
                 i = j
                 break
         else:
+            left.append(words[i])
             i += 1
-    return out
+    return out, left
 
 
 def _lookup(words: list[str], by_slug: dict[str, list[str]]) -> list[str] | None:

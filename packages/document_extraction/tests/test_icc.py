@@ -294,3 +294,24 @@ def test_an_italic_word_r202_doesnt_define_must_be_named_with_why():
 def test_numbers_of_a_pieces_lines(lines, expect):
     from document_extraction.numbers import statements_of_lines
     assert [shown(s) for s in statements_of_lines(lines)] == expect
+
+
+def test_a_defined_word_in_roman_type_is_brought_in_in_its_ies_plural_too():
+    # review round 6: "stories" (roman) never brought in STORY; only "story", "storys", "storyes" did
+    rows = _book()
+    rows.insert(5, _row(1, 53, "[RB] STORY. A level of a building.", bold="[RB] STORY."))   # after FLIGHT
+    rows.insert(12, _row(2, 6, "In houses of two stories the stair is enclosed."))
+    cut = icc_sections.split(rows, BROUGHT_IN)
+    assert "R202:story" in [p["id"] for p in cut["pieces"]]
+
+
+def test_an_undefined_italic_word_beside_a_defined_one_in_one_phrase_must_be_named_too():
+    # review round 6: in "nonhabitable flights", FLIGHT was found and "nonhabitable" was silently dropped
+    rows = _book([_row(2, 6, "R318.1.2 Attics. Stairs to nonhabitable flights.", bold="R318.1.2 Attics.",
+                       italic=["nonhabitable flights"])])
+    problems = icc_sections.split(rows, BROUGHT_IN)["problems"]
+    assert any("R318.1.2: italic 'nonhabitable' is not defined in Section R202" in p for p in problems), problems
+    # a word joining two defined terms, or the "s" of "flight(s)", is no undefined word
+    rows = _book([_row(2, 6, "R318.1.2 Runs. A flight(s) or stair.", bold="R318.1.2 Runs.",
+                       italic=["flight(s) or stair"])])
+    assert icc_sections.split(rows, BROUGHT_IN)["problems"] == []

@@ -22,6 +22,7 @@ Every reference in the brought-in sections was followed (found by code, `documen
 - the outside standards ICC 500 (storm shelters; R319.1) and ASTM F2090 (window opening control devices; R319.1.1, R321.2.1)
 - "accessed", printed in italics but not defined in Section R202: R201.3 sends such a word to another New York code's definition; that code is not brought in.
 - "unit" in R319.1 is printed in italics alone only because the book breaks the styling inside "dwelling *unit*" (p.102, line 35); the term is DWELLING UNIT, and its definition is brought in by the roman-type match.
+- "above" in the definition of STORY ABOVE GRADE PLANE is printed in italics with "grade plane" in item 1 (p.52, line 36), though the line above prints only "grade plane" in italics; the term is GRADE PLANE, brought in, and "above" keeps its ordinary meaning.
 
 ## Ways into these sections from outside them
 
