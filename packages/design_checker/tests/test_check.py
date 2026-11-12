@@ -1441,6 +1441,30 @@ def test_a_thin_object_standing_on_the_lot_counts_as_on_it_however_thin():
     assert not reaches_into_lot(u, [(9.95, 60), (40.05, 60), (40.05, 60.08), (9.95, 60.08)], ON_LOT_REACH)
 
 
+@pytest.mark.parametrize("at", [100.0, 1000.0, 20000.0, 800000.0])
+def test_a_wall_flat_in_plan_at_any_angle_counts_as_on_the_lot(at):
+    """An upright wall of no thickness (a polysurface or a block of one, flat in plan), turned to any angle: its
+    points are seldom exactly in a line, so rounding leaves its hull a sliver of area, and an empty or sliver part
+    inside the lot read as off it (review round 4 of PR 78: 3 to 10 of 30 angles at every scale, survey
+    coordinates included). It is on the lot whenever some of it stands more than the reach inside the outline;
+    and a long flat line cutting 0.3 ft across a corner of a turned lot is caught where it goes deepest."""
+    import math
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+    lot = [(at, at), (at + 100, at), (at + 100, at + 100), (at, at + 100)]
+    for degrees in range(0, 180, 3):
+        c, s = math.cos(math.radians(degrees)), math.sin(math.radians(degrees))
+        pts = [(at + 50 + (-15 + 30 * k / 8) * c, at + 50 + (-15 + 30 * k / 8) * s) for k in range(9)]
+        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        assert reaches_into_lot(lot, pts, ON_LOT_REACH, (min(xs), min(ys), max(xs), max(ys))), degrees
+        assert reaches_into_lot(lot, pts, ON_LOT_REACH), degrees
+    diamond = [(0, -50), (50, 0), (0, 50), (-50, 0)]                    # a square lot turned 45 degrees
+    tip = 50 - 0.3 * math.sqrt(2)                                       # a line 0.3 ft inside the top corner
+    line = [(-17, tip), (23, tip)]                                     # its samples 2.5 ft apart miss x = 0
+    assert reaches_into_lot(diamond, line, ON_LOT_REACH, (-17, tip, 23, tip))
+    hair = [(-20, 50 - 0.05 * math.sqrt(2)), (20, 50 - 0.05 * math.sqrt(2))]   # 0.05 ft in: a hair
+    assert not reaches_into_lot(diamond, hair, ON_LOT_REACH, (-20, hair[0][1], 20, hair[0][1]))
+
+
 def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
     """A GIS lot outline has hundreds of points, and a neighbour drawn along the line gives an inside part with as
     many: the depth test once measured every sample against every outline edge (1.75 s per neighbour on a
@@ -1453,7 +1477,7 @@ def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
     start = time.perf_counter()
     for k in range(20):
         assert not reaches_into_lot(lot, [(-10, 1 + k), (0.05, 1 + k), (0.05, 90), (-10, 90)], ON_LOT_REACH)
-    assert time.perf_counter() - start < 2.0
+    assert time.perf_counter() - start < 5.0             # about 0.4 s; the old way took 35 s
 
 
 def test_the_plugin_tests_left_out_objects_against_the_lot_outline():

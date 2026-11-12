@@ -1261,26 +1261,34 @@ def reaches_into_lot(lot_ring, points, reach, box=None):
     hull = _hull(points)
     if (len(hull) < 3 or _ring_area(hull) <= 1e-12) and box is not None:
         x0, y0, x1, y1 = box
-        hull = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
-        if len(hull) < 3 or _ring_area(hull) <= 1e-12:          # a point or a line: along its diagonal
-            line = [(x0 + (x1 - x0) * k / 64, y0 + (y1 - y0) * k / 64) for k in range(65)]
-            return _deeper_than([p for p in line if _inside(p[0], p[1], lot)], lot, reach)
-    if len(hull) < 3 or _ring_area(hull) <= 1e-12:
+        square = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+        hull = square if len(square) >= 3 and _ring_area(square) > 1e-12 else _hull([(x0, y0), (x1, y1)])
+    if len(hull) >= 3 and _ring_area(hull) > 1e-12:
+        part = _clip(lot, hull)
+        if len(part) >= 3:
+            area = abs(_ring_area(part))
+            perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
+                            for i in range(len(part)))
+            if perimeter > 0 and 2 * area / perimeter > reach:
+                return True
+    # However thin (or rounded to nothing: a flat wall's points are seldom exactly in a line): some of its outline
+    # standing more than `reach` inside the lot. Points along each side, and on each side the point nearest each
+    # lot corner within 20 reaches of it (where a side cutting across a corner of the lot goes deepest: a corner
+    # as sharp as 6 degrees); a jog's notch isn't the lot.
+    if not hull:
         return False
-    part = _clip(lot, hull)
-    if len(part) < 3:
-        return False
-    area = abs(_ring_area(part))
-    perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
-                    for i in range(len(part)))
-    if perimeter > 0 and 2 * area / perimeter > reach:
-        return True
-    if area <= 1e-9:                                             # a sliver along the line: nothing stands in
-        return False
-    corners = _hull(part)               # its outline's corners (a run of lot points along one line is one side)
-    along = [(a[0] + (b[0] - a[0]) * k / 16, a[1] + (b[1] - a[1]) * k / 16)
-             for a, b in zip(corners, corners[1:] + corners[:1]) for k in range(16)]
-    return _deeper_than([p for p in along if _inside(p[0], p[1], lot)], lot, reach)   # a jog's notch isn't the lot
+    sides = list(zip(hull, hull[1:] + hull[:1])) if len(hull) > 1 else [(hull[0], hull[0])]
+    pts = []
+    for (ax, ay), (bx, by) in sides:
+        dx, dy = bx - ax, by - ay
+        pts += [(ax + dx * k / 16, ay + dy * k / 16) for k in range(17)]
+        if dx or dy:
+            m = 20 * reach
+            for cx, cy in lot:
+                if min(ax, bx) - m <= cx <= max(ax, bx) + m and min(ay, by) - m <= cy <= max(ay, by) + m:
+                    t = min(1.0, max(0.0, ((cx - ax) * dx + (cy - ay) * dy) / (dx * dx + dy * dy)))
+                    pts.append((ax + t * dx, ay + t * dy))
+    return _deeper_than([p for p in pts if _inside(p[0], p[1], lot)], lot, reach)
 
 
 def _deeper_than(pts, lot, reach):
