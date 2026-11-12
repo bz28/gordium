@@ -26,7 +26,14 @@ What it adds for the Rhino command, never changing a result:
   lists the overlays row (so never passes) unless the address lookup positively found no overlay on this very lot:
   the lot fact `overlays_none_found`, honoured only while the lot is still the outline (and the address) it was found
   for, and not once the architect says the lot is in the South Hill Overlay
-  (`present.overlays_cleared`; Ben, 2026-11-11, option A).
+  (`present.overlays_cleared`; Ben, 2026-11-11, option A), and only while it is at most 90 days old on the day the
+  host gives (`present.overlays_lookup`, `LOOKUP_FRESH_DAYS`; Ben, 2026-11-12). The site lines say how old it is
+  ("flood map and City maps looked up 2 months ago (2026-08-14)"); older, dated after today, or no day given, the
+  row stays and says to look the address up again.
+- **today:** the day of the check, `YYYY-MM-DD` (the worker's `"today"`, `check(..., today=)`). The host says it
+  (the plugin: `rhino_logic.city_day()`, Ithaca's own day; the command line: the same); the checker never reads the
+  clock, so the same design, saved facts and day give the same answer. A request without it still checks; only the
+  lookup's age can't be told, so the overlays row stays. A value that isn't a day is refused.
 - **Why:** for a NEEDS REVIEW row, the measuring's own reason ("enter bedrooms / parking spaces", "a building
   isn't inside the lot").
 - **red:** the objects a failing rule measured (never the lot).

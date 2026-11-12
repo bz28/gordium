@@ -7,7 +7,8 @@ not_in_this_release:
     why: Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).
     # Left out of a result only when the address lookup positively found none on this very lot: the City's historic,
     # gorge and zoning-map overlays and the parcel's own record, and FEMA's flood maps all answered and all said none
-    # (lot fact overlays_none_found, honoured while the lot is still the outline it was found for). Any doubt: shown.
+    # (lot fact overlays_none_found, honoured while the lot is still the outline it was found for, and at most 90 days
+    # old on the day of the check: design_checker.present.LOOKUP_FRESH_DAYS). Any doubt: shown.
     left_out_when: overlays_none_found
 not_covered:
   - id: height_exceptions

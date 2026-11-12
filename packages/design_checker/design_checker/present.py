@@ -10,6 +10,7 @@ writes one summary used everywhere (D3).
 """
 
 import ast
+import datetime as _dt
 import hashlib
 import math
 import re
@@ -1643,6 +1644,83 @@ def overlays_cleared(lot: dict | None, facts: dict) -> str | None:
     return None
 
 
+# How long an address lookup's "no overlay on this lot" counts (overlays_lookup). FEMA's flood map changes in two
+# ways: a full map revision takes effect six months after its Letter of Final Determination, and is posted as
+# "pending" from then (the lookup asks the pending and preliminary maps, so one on its way keeps the row); a Letter of
+# Map Revision takes effect about 120 days after its second local newspaper notice and is never posted as pending.
+# 90 days is well inside both: a full revision now in effect was pending at the lookup, with three months to spare
+# for FEMA posting it, and a LOMR in effect now was already in its 90-day reconsideration period, in the Federal
+# Register, before the lookup. It is a bound on what a lookup may have missed, not a promise: the row it clears still
+# says "not confirmed". Older (or an age that can't be told): the row stays, and says to look the address up again.
+LOOKUP_FRESH_DAYS = 90
+
+
+def day_of(text) -> _dt.date | None:
+    """A YYYY-MM-DD day as a date, or None (anything else: a time, another format, not a real day)."""
+    if not (isinstance(text, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", text.strip())):
+        return None
+    try:
+        return _dt.date.fromisoformat(text.strip())
+    except ValueError:                               # 2026-02-30
+        return None
+
+
+def checked_today(today) -> str | None:
+    """The day of the check as the host gave it (YYYY-MM-DD, the place's own day: rhino_logic.city_day), or None
+    when it gave none. The checker never reads the clock itself (principle 3: the same design, saved facts and day
+    give the same answer); a day that isn't one is refused, never taken as no day."""
+    if today is None:
+        return None
+    if isinstance(today, _dt.datetime) or not (isinstance(today, _dt.date) or day_of(today)):
+        raise ValueError(f"today must be the day of the check as YYYY-MM-DD, not {today!r}")
+    return today.isoformat() if isinstance(today, _dt.date) else today.strip()
+
+
+def age_words(day: _dt.date, today: _dt.date) -> str:
+    """How long ago `day` was, as said beside it: today, yesterday, 12 days ago, 3 months ago (whole calendar
+    months), 2 years ago (from 24 months)."""
+    days = (today - day).days
+    months = (today.year - day.year) * 12 + today.month - day.month - (today.day < day.day)
+    if days == 0:
+        return "today"
+    if days == 1:
+        return "yesterday"
+    if months < 1:
+        return f"{days} days ago"
+    if months < 24:
+        return f"{months} month{'s' if months > 1 else ''} ago"
+    return f"{months // 12} years ago"
+
+
+def overlays_lookup(lot: dict | None, facts: dict, today: str | None) -> dict | None:
+    """The address lookup's "no overlay on this lot" (overlays_cleared) and how old it is on `today` (the host's
+    day, checked_today), or None when there is none for this lot. {date, age, cleared, why}: `cleared` only while
+    it is at most LOOKUP_FRESH_DAYS old on a day the host gave; otherwise the overlays row stays and `why` says so,
+    with the date (principle 4: a lookup whose age can't be told is never taken as fresh)."""
+    date = overlays_cleared(lot, facts)
+    if date is None:
+        return None
+    day, now = day_of(date), day_of(today)
+    if day is None:
+        why = (f"the address lookup found none, but its date ({date}) can't be read: look the address up again "
+               "in the start box, or check them by hand")
+        return {"date": date, "age": None, "cleared": False, "why": why}
+    if now is None:
+        why = (f"the address lookup found none on {date}, but this check wasn't given today's date, so how old "
+               "that is can't be told: check them by hand")
+        return {"date": date, "age": None, "cleared": False, "why": why}
+    if day > now:
+        why = (f"the address lookup's date ({date}) is after today ({today}), so how old it is can't be told: "
+               "look the address up again in the start box")
+        return {"date": date, "age": None, "cleared": False, "why": why}
+    age, days = age_words(day, now), (now - day).days
+    if days > LOOKUP_FRESH_DAYS:              # said in days beside the limit in days ("2 months" can be 91 days)
+        why = (f"the address lookup found none {days} days ago ({date}), but a lookup counts for {LOOKUP_FRESH_DAYS} "
+               "days only (flood maps change): look the address up again in the start box")
+        return {"date": date, "age": age, "cleared": False, "why": why}
+    return {"date": date, "age": age, "cleared": True, "why": None}
+
+
 RELEASE = "release."      # the id prefix of a row this release doesn't check (not_checked_yet.yaml's not_in_this_release)
 TO_ANSWER = ("to answer", "to answer")                               # a row waiting on a fact the architect can enter
 NOT_IN_RELEASE = ("not checked in this release", "not checked in this release")   # one Gordium can't check yet
@@ -1919,13 +1997,15 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                                  "at_limit": None}})
     gaps = load(j / "not_checked_yet.yaml") if (j / "not_checked_yet.yaml").exists() else {}
     for g in gaps.get("not_in_this_release") or []:
-        if g.get("left_out_when") == "overlays_none_found" and extras.get("overlays_none_found"):
-            continue                 # the lookup found none on this very lot, every source answering (check_site)
+        lookup = extras.get("overlays_none_found") if g.get("left_out_when") == "overlays_none_found" else None
+        if lookup and lookup["cleared"]:
+            continue                 # the lookup found none on this very lot, every source answering, lately (check_site)
         items.append({"id": "release." + g["id"], "rule": None,          # short in the list; in full below
                       "name": g["name"].split(" (")[0] + " · not in this release",
                       "group": "not_checked", "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "",
                       "required": "", "margin": "", "sign": "", "zoom": None, "measure": None, "objects": [],
-                      "points": None, "hint": None, "reason": g["name"] + ": " + g["why"],
+                      "points": None, "hint": None,
+                      "reason": g["name"] + ": " + (lookup["why"] if lookup else g["why"]),   # too old: says so
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None, "scope": "",
                                  "precision": "", "at_limit": None}})
     for g in gaps.get("not_covered") or []:
@@ -2006,13 +2086,13 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
                                             use_names.get(use, use.replace("_", " "))] if p),
             "code": code, "draft": DRAFT, "lot": lot, "grade": grade, "actions": actions, "main": main,
             "sources": source_lines(extras.get("sources") or {}) + (
-                [OVERLAYS_NONE_LINE.format(date=extras["overlays_none_found"])]
-                if extras.get("overlays_none_found") else [])}
+                [OVERLAYS_NONE_LINE.format(**extras["overlays_none_found"])]
+                if (extras.get("overlays_none_found") or {}).get("cleared") else [])}
 
 
-# Said where each site fact's source is said, when the overlays row is left out: what was asked, and when
-OVERLAYS_NONE_LINE = ("Overlays: none found · address lookup, {date} (FEMA flood maps: Zone X, minimal flood hazard; the "
-                      "City's historic, gorge and zoning maps and parcel record) · not confirmed")
+# Said where each site fact's source is said, when the overlays row is left out: what was asked, when, and how long ago
+OVERLAYS_NONE_LINE = ("Overlays: none found · flood map and City maps looked up {age} ({date}): FEMA Zone X, minimal "
+                      "flood hazard; the City's historic, gorge and zoning maps and parcel record · not confirmed")
 
 
 SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Front lot line (on the street)",
