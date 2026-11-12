@@ -125,3 +125,12 @@ def test_rows_about_no_part_and_unusable_values_are_worded_plainly():
     got = checked(house(opening("w1", "br1", area=-3), opening("w2", "br2")) | {"stair": []})
     assert [i["reason"] for i in got["items"] if i["status"] == present.REVIEW] == \
         ["Bedroom 1 › w1: net clear area not measured (or not usable)"]
+
+
+def test_a_rule_without_an_id_or_title_never_crashes_or_shares_an_answer():
+    no_id = {k: v for k, v in RISER.items() if k not in ("id", "title")}
+    good = copy.deepcopy(RISER) | {"id": None}
+    stairs = {"stair": [{"id": "s1", "measures": {"stair_riser_height": 9}}]}
+    got = each_part.check_parts([no_id, dict(good, check="stair_riser_height <= 10")], stairs, ZONING, ALLOWED)
+    assert got["results"] == {"rule #1": "fail", "rule #2": "pass"}
+    assert design(got) == present.FAILS

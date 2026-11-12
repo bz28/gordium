@@ -252,6 +252,33 @@ def test_a_malformed_part_is_never_dropped(given, words):
     assert rule_result(got) in ("needs_review", "fail")
 
 
+@pytest.mark.parametrize("bad", [dict(opening("w", "br1"), measures="x"), dict(opening("w", "br1"), id=""),
+                                 dict(opening("w", "br1"), within=None) | {"id": 5}])
+def test_a_room_whose_opening_cant_be_read_is_never_said_to_have_none(bad):
+    got = rows(AREA, house(bad, opening("w2", "br2")), {}, ALLOWED)
+    room1 = [r for r in got if r["within"] and r["within"]["id"] == "br1"]
+    assert [(r["outcome"], r["reason"]) for r in room1] in ([("needs_review", "an emergency escape opening that may be in it can't be read")],
+                                                            [])
+    assert not any(r["outcome"] == "fail" for r in got)        # br1 has an opening: unreadable, not missing
+    assert rule_result(got) == "needs_review"
+
+
+def test_an_opening_that_says_no_room_keeps_every_room_from_none():
+    got = rows(AREA, house({"id": "w9", "measures": {}}, rooms=("br1", "br2")), {}, ALLOWED)
+    assert not any(r["outcome"] == "fail" for r in got) and rule_result(got) == "needs_review"
+
+
+def test_two_openings_sharing_an_id_dont_make_their_room_fail():
+    got = rows(AREA, house(opening("w", "br1"), opening("w", "br1"), opening("w2", "br2")), {}, ALLOWED)
+    assert not any(r["outcome"] == "fail" for r in got) and rule_result(got) == "needs_review"
+
+
+def test_a_problem_shared_by_two_kinds_is_said_once():
+    got = rows(AREA, {"sleeping_room": [{"id": "x"}], "emergency_escape_opening": [opening("x", "x")]}, {}, ALLOWED)
+    reasons = [r["reason"] for r in got if r["reason"]]
+    assert reasons.count("two parts have the id 'x'") == 1
+
+
 def test_a_part_cant_change_a_building_value():
     rule = AREA | {"applies_when": 'use == "one_family_detached"'}
     sneaky = opening("w1", "br1", area=1)

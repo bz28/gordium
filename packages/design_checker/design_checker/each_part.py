@@ -36,17 +36,27 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict) -> dict:
     if given is None:
         items = [_item(INTERIOR_NOT_STARTED, None, "Interior", present.REVIEW, INTERIOR_NOT_STARTED_WHY)] \
             if rules else []
-        return {"rows": [], "results": {r["id"]: "needs_review" for r in rules}, "items": items}
+        return {"rows": [], "results": {_key(r, n): "needs_review" for n, r in enumerate(rules, 1)}, "items": items}
     out, results = [], {}
-    for rule in rules:
+    for n, rule in enumerate(rules, 1):
         got = parts.rows(rule, given, values, allowed)
         for row in got:
             row["line"] = line(row, rule, values, allowed)
         out += got
-        results[rule["id"]] = parts.rule_result(got)
+        results[_key(rule, n)] = parts.rule_result(got)
     items = [_item(f"{r['rule']}#{n}", r["rule"], label(r), STATUS[r["outcome"]], r["line"], r)
              for n, r in enumerate(out, 1) if r["outcome"] in STATUS]
     return {"rows": out, "results": results, "items": items}
+
+
+def _key(rule: dict, n: int) -> str:
+    """A rule's key among the results: its id, or (a rule without one, never validated so) its place in the list,
+    so two such rules never share one answer."""
+    return rule["id"] if isinstance(rule.get("id"), str) else f"rule #{n}"
+
+
+def _title(rule: dict) -> str:
+    return rule.get("title") if isinstance(rule.get("title"), str) else rule.get("id") or "the rule"
 
 
 def _item(item_id, rule_id, name, status, reason, row=None) -> dict:
@@ -72,13 +82,13 @@ def line(row: dict, rule: dict, values: dict, allowed: dict) -> str:
         return f"{head}: {row['reason']}"
     if row["outcome"] == "fail":
         known = {**parts.building_values(values), **row["values"]}
-        return f"{head}: {_first_failing(rule, known, allowed) or rule['title']}"
+        return f"{head}: {_first_failing(rule, known, allowed) or _title(rule)}"
     if row["outcome"] == "needs_review":
         missing = [m for m, v in row["values"].items() if not _usable(v)]
         if missing:
             return f"{head}: {', '.join(_words(rule, m) for m in missing)} not measured (or not usable)"
-        return f"{head}: {rule['title']}: needs review"
-    return f"{head}: {rule['title']}" + (": complies" if row["outcome"] == "pass" else ": not applicable")
+        return f"{head}: {_title(rule)}: needs review"
+    return f"{head}: {_title(rule)}" + (": complies" if row["outcome"] == "pass" else ": not applicable")
 
 
 def _usable(v) -> bool:

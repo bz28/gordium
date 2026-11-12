@@ -222,10 +222,19 @@ _RELATED = Col("Related sections", 30)          # by the term index: the require
 _NOTES = Col("Notes", 40, "notes", _get("notes", _text), every=False)
 _WHO = [Col("Status", 8, "status", _get("status")), Col("Drafted by", 18, "drafted_by", _get("drafted_by"))]
 
+def _for_each(e: dict) -> str:
+    """"for each emergency escape opening · within each sleeping room · if none: fail"; empty for a whole-lot rule."""
+    words = [f"{label}{e[k]}".replace("_", " ") for k, label in
+             (("for_each", "for each "), ("within", "within each "), ("when_none", "if none: ")) if e.get(k)]
+    return " · ".join(words)
+
+
 COLUMNS = {
     "rule": [Col("Zone", 9), Col("Rulebook", 18), Col("Rule id", 28, "id", _get("id")),
              Col("Title", 34, "title", _get("title")), *_WHO,
              Col("Kind", 7, "kind", _get("kind")), Col("Topic", 14, "topic", _get("topic")),
+             # a rule for each part (rule_format/parts.py): what it repeats over, and what "none" means
+             Col("For each part", 26, ("for_each", "within", "when_none"), lambda e, s, n, t: _for_each(e)),
              Col("Check (formula)", 40, "check", _get("check"), every=False),
              Col("Applies when", 26, "applies_when", _get("applies_when"), every=False),
              Col("Needs review when", 34, "review_when", _get("review_when", lambda v: _bullets(

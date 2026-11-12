@@ -150,12 +150,16 @@ def _plural(kind: str) -> str:
     return _words(kind) + "s"
 
 
-def _read(parts, kind: str, everywhere: dict) -> tuple[list[dict] | None, list[str]]:
-    """The well-formed parts of one kind, and a problem for each that isn't. None if the kind wasn't read."""
+ANYWHERE = object()      # an unreadable part that doesn't say where it is: it could be in any of them
+
+
+def _read(parts, kind: str, everywhere: dict) -> tuple[list[dict] | None, list[str], set]:
+    """The well-formed parts of one kind, a problem for each that isn't, and the ids the parts that aren't say they
+    are within (such a part is there, just unreadable: never "none"). None if the kind wasn't read."""
     given = parts.get(kind) if isinstance(parts, dict) else None
     if not isinstance(given, list):
-        return None, []
-    good, problems = [], []
+        return None, [], set()
+    good, problems, doubtful = [], [], set()
     for n, part in enumerate(given, 1):
         if not isinstance(part, dict):
             problems.append(f"{_words(kind)} #{n} isn't a part (a mapping)")
@@ -169,8 +173,11 @@ def _read(parts, kind: str, everywhere: dict) -> tuple[list[dict] | None, list[s
             problems.append(f"{_words(kind)} {_name(part)}: its measures aren't a mapping")
         else:
             good.append(part)
+            continue
+        # where the unreadable part is: the id it names, or (none it can name) any part it could be within
+        doubtful.add(part["within"] if isinstance(part, dict) and isinstance(part.get("within"), str) else ANYWHERE)
     # one problem per duplicated id, however many parts share it
-    return good, list(dict.fromkeys(problems))
+    return good, list(dict.fromkeys(problems)), doubtful
 
 
 def _ids(parts) -> dict:
@@ -249,12 +256,13 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     kind, parent = rule["for_each"], rule.get("within")
     own = set(measure_kinds(kind))
     everywhere = _ids(parts)
-    children, problems = _read(parts, kind, everywhere)
-    parents, parent_problems = _read(parts, parent, everywhere) if parent else ([], [])
+    children, problems, doubtful = _read(parts, kind, everywhere)
+    parents, parent_problems, _ = _read(parts, parent, everywhere) if parent else ([], [], set())
     unread = [k for k, got in ((kind, children), (parent, parents)) if k and got is None]
     if unread:
         return [_row(rule, "needs_review", reason=f"the {' and the '.join(_plural(k) for k in unread)} aren't read yet")]
-    out = [_row(rule, "needs_review", reason=p) for p in parent_problems + problems]
+    # each problem once, even when a part of each kind shares one id
+    out = [_row(rule, "needs_review", reason=p) for p in dict.fromkeys(parent_problems + problems)]
     values = building_values(values)
 
     def checked(part, within=None):
@@ -279,13 +287,17 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
                 and everywhere.get(where) == 1:
             continue
         else:                            # nowhere, or an id two parts share: never dropped
+            if not isinstance(where, str):
+                doubtful.add(ANYWHERE)       # it could be in any of them
             out.append(_row(rule, "needs_review", c,
                             reason=f"{_words(kind)} {_name(c)} isn't within any {_words(parent)} that was read"))
     for p in parents:
         within = _ref(p, parent)
         mine = by_parent[p["id"]]
         out += [checked(c, within) for c in mine]
-        if not mine:
+        if not mine and (p["id"] in doubtful or ANYWHERE in doubtful):          # it has one we can't read: not "none"
+            out.append(_row(rule, "needs_review", within=within, reason=f"an {_words(kind)} that may be in it can't be read"))
+        elif not mine:
             out.append(_row(rule, _none_outcome(rule, values, allowed), within=within,
                             reason=f"no {_words(kind)}"))
     if not parents and not parent_problems:
