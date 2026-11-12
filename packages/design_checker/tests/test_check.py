@@ -1489,8 +1489,10 @@ def test_a_wall_flat_in_plan_at_any_angle_counts_as_on_the_lot(at):
 def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
     """A GIS lot outline has hundreds of points, and a neighbour drawn along the line gives an inside part with as
     many: the depth test once measured every sample against every outline edge (1.75 s per neighbour on a
-    1,000-point lot, review round 3 of PR 78; a round mesh a hair over took 1 s, round 5). Only the stretches of
-    the object's sides inside the lot are measured, against the outline edges near them."""
+    1,000-point lot, review round 3 of PR 78; a round mesh a hair over took 1 s, round 5; a 500 ft wall exactly at
+    the reach ran on without end with no slack, round 7). Only the stretches of the object's sides inside the lot
+    are measured, against the outline edges near them; past DEPTH_QUESTIONS, an object counts as on the lot (the
+    cautious answer)."""
     import math
     import time
     from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
@@ -1504,7 +1506,12 @@ def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
         tank = [(57.95 + 8 * math.cos(2 * math.pi * j / 1000), 50 + k + 8 * math.sin(2 * math.pi * j / 1000))
                 for j in range(1000)]
         assert not reaches_into_lot(lot, tank, ON_LOT_REACH)
-    assert time.perf_counter() - start < 3.0             # about 0.4 s; the old ways took 35 s, then 5 s
+    long_lot = [(0, 0), (500, 0), (500, 100), (0, 100)]
+    for y in (0.1, 0.0999, 0.05):                      # a 500 ft wall along the line, at the reach or just under it
+        assert not reaches_into_lot(long_lot, [(0, y), (500, y)], ON_LOT_REACH, (0, y, 500, y)), y
+    assert time.perf_counter() - start < 3.0             # about 0.6 s; the old ways took 35 s, then 5 s
+    longer = [(0, 0), (5000, 0), (5000, 100), (0, 100)]   # 5,000 ft at 0.0999 ft in: past the depth search's budget
+    assert reaches_into_lot(longer, [(0, 0.0999), (5000, 0.0999)], ON_LOT_REACH, (0, 0.0999, 5000, 0.0999))
 
 
 def test_the_plugin_tests_left_out_objects_against_the_lot_outline():

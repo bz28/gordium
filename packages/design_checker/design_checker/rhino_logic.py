@@ -1296,8 +1296,8 @@ class _Depth:
     GIS lot outline has hundreds of points, a round tank's outline thousands)."""
 
     def __init__(self, lot, box, cap):
-        x0, y0, x1, y1 = box[0] - cap, box[1] - cap, box[2] + cap, box[3] + cap
-        self.cap = cap
+        x0, y0, x1, y1 = box[0] - 2 * cap, box[1] - 2 * cap, box[2] + 2 * cap, box[3] + 2 * cap
+        self.cap, self.box, self.asked = cap, (x0, y0, x1, y1), 0
         self.edges = [(a, b) for a, b in zip([lot[-1]] + lot[:-1], lot)
                       if min(a[0], b[0]) <= x1 and max(a[0], b[0]) >= x0 and min(a[1], b[1]) <= y1
                       and max(a[1], b[1]) >= y0]
@@ -1306,16 +1306,27 @@ class _Depth:
 
     def _build(self):
         self.grid = {}
-        for e in self.edges:                                     # each edge in the cells along it
+        x0, y0, x1, y1 = self.box
+        for e in self.edges:                                     # each edge in the cells along it, in the box
             (ax, ay), (bx, by) = e
-            n = int(((bx - ax) ** 2 + (by - ay) ** 2) ** 0.5 / (self.cell / 2)) + 1
+            lo, hi = 0.0, 1.0                                    # the part of it inside the box (Liang-Barsky)
+            for d, q0, q1 in ((bx - ax, x0 - ax, x1 - ax), (by - ay, y0 - ay, y1 - ay)):
+                if d:
+                    t0, t1 = sorted((q0 / d, q1 / d))
+                    lo, hi = max(lo, t0), min(hi, t1)
+            if lo > hi:
+                continue
+            length = (hi - lo) * ((bx - ax) ** 2 + (by - ay) ** 2) ** 0.5
+            n = int(length / (self.cell / 2)) + 1
             for k in range(n + 1):
-                key = (int((ax + (bx - ax) * k / n) // self.cell), int((ay + (by - ay) * k / n) // self.cell))
+                t = lo + (hi - lo) * k / n
+                key = (int((ax + (bx - ax) * t) // self.cell), int((ay + (by - ay) * t) // self.cell))
                 self.grid.setdefault(key, set()).add(e)
 
     def __call__(self, x, y):
         if self.grid is None:
             self._build()
+        self.asked += 1
         i, j = int(x // self.cell), int(y // self.cell)
         best = self.cap * self.cap
         for di in range(-2, 3):                                  # an edge within `cap` passes within 2 cells
@@ -1327,18 +1338,26 @@ class _Depth:
         return best ** 0.5
 
 
-def _deep(a, b, t0, t1, depth, reach, slack=0.05):
+DEPTH_QUESTIONS = 20000   # depth questions per object before the depth search gives up and says "on the lot"
+
+
+def _deep(a, b, t0, t1, depth, reach, slack=0.5):
     """Whether some point of the stretch a + t (b - a), t from t0 to t1 (inside the lot), is more than `reach` from
     the lot's outline. A point's depth changes by at most its own move along the stretch, so a piece whose ends are
     d0 and d1 deep and which is L long goes no deeper than (d0 + d1 + L) / 2: pieces that can't go deeper than
-    `reach` (and a `slack` share of it, so a wall drawn exactly at the reach ends) are dropped, the others halved,
-    until a point deeper than `reach` is found or none is left. No point more than `reach` (1 + slack) in is missed,
-    however the lot's corners and notches fall along it."""
+    `reach` (and a `slack` share of it, so a wall drawn at the reach along a long line ends) are dropped, the others
+    halved, until a point deeper than `reach` is found or none is left. No point more than `reach` (1 + slack) in,
+    0.15 ft, is missed, however the lot's corners and notches fall along it; between that and `reach`, only a spike
+    of the lot narrower than about 0.1 ft can be. After DEPTH_QUESTIONS questions for one object (a long wall
+    running just inside the line along a jagged outline), it counts as on the lot: the cautious answer, never a
+    long wait on every check."""
     (ax, ay), (bx, by) = a, b
     length = ((bx - ax) ** 2 + (by - ay) ** 2) ** 0.5
     at = lambda t: depth(ax + (bx - ax) * t, ay + (by - ay) * t)   # noqa: E731
     pieces = [(t0, t1, at(t0), at(t1))]
     while pieces:
+        if depth.asked > DEPTH_QUESTIONS:
+            return True
         s, e, ds, de = pieces.pop()
         if ds > reach or de > reach:
             return True
