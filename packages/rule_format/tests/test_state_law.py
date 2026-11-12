@@ -104,7 +104,7 @@ def _state_folder(tmp_path, quote_line="R318.7.5.1 Riser height. The riser heigh
     (j / "1_source_documents").mkdir(parents=True)
     (j / STATE_SETTINGS).write_text("name: Test State\n", encoding="utf-8")
     entry = {"file": "code.pdf", "title": "A code", "publisher": "x", "url": "https://example.org", "sha256": sha,
-             "kept_outside_repo": True, "layout": "icc"}
+             "kept_outside_repo": True, "layout": "icc", "brought_in": {"pages": "1", "sections": ["R318"]}}
     (j / "1_source_documents/sources.yaml").write_text(yaml.safe_dump({"documents": [entry]}), encoding="utf-8")
     cache = tmp_path / "cache" / sha
     cache.mkdir(parents=True)
@@ -162,19 +162,29 @@ def test_a_branch_reads_only_its_brought_in_pages_from_the_whole_cached_book(tmp
     # The cache keeps every page, the same for every branch (step 1c's page 898 came and went as branches were
     # extracted in turn); each branch reads its own brought-in pages, so a quote from a page it doesn't bring in is
     # still refused.
-    j, cache = _state_folder(tmp_path)
-    src = j / "1_source_documents/sources.yaml"
-    listed = yaml.safe_load(src.read_text(encoding="utf-8"))
-    listed["documents"][0]["brought_in"] = {"pages": "1", "sections": ["R318"]}
-    src.write_text(yaml.safe_dump(listed), encoding="utf-8")
+    j, cache = _state_folder(tmp_path)                       # brings in page 1 of a two-page book
     monkeypatch.setenv(CODE_CACHE_ENV, str(cache))
     ctx = Context.for_jurisdiction(j)
-    assert set(ctx.pages["code.pdf"]) == {1}
+    assert ctx.problems == [] and set(ctx.pages["code.pdf"]) == {1}
     assert _source_problems([SOURCE], ctx) == []
     elsewhere = {"file": "code.pdf", "page": 2, "lines": [1, 1], "quote": "Not more than 8 inches"}
     assert _source_problems([elsewhere], ctx)
     from rule_format.rulebook import kept_text
+    src = j / "1_source_documents/sources.yaml"
+    listed = yaml.safe_load(src.read_text(encoding="utf-8"))
     assert [r.get("page") for r in kept_text(listed["documents"][0])] == [None, 1]
+    # review round 1: a book kept outside the repo that names no pages it brings in was read whole (every page
+    # quotable); now it is a problem, everywhere (CI too), and its text is never read in its stead
+    for brought_in in (None, {"sections": ["R318"]}, {"pages": ""}, "34-56"):
+        entry = listed["documents"][0] | {"brought_in": brought_in}
+        if brought_in is None:
+            del entry["brought_in"]
+        src.write_text(yaml.safe_dump({"documents": [entry]}), encoding="utf-8")
+        ctx = Context.for_jurisdiction(j)
+        assert any("needs brought_in.pages" in p for p in ctx.problems) and "code.pdf" not in ctx.pages, brought_in
+        assert _source_problems([elsewhere], ctx) and _source_problems([SOURCE], ctx)       # refused, never passed
+        with pytest.raises(ValueError):
+            kept_text(entry)
 
 
 def test_every_test_reads_the_cache_code_cache_names():
