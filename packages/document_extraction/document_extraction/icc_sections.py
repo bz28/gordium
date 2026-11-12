@@ -39,13 +39,14 @@ import hashlib
 import json
 import re
 
-SPLITTER = "document_extraction.icc_sections v2"   # bump when the cutting rules change
+SPLITTER = "document_extraction.icc_sections v3"   # bump when the cutting rules change
 STAMP = re.compile(r"^\d{9}$")                      # the number stamped at the top of every page of this copy
 FOOTER = re.compile(r"^(?:\d+ )?2025 RESIDENTIAL CODE OF NEW YORK STATE(?: \d+)?$")
 DOT = "."                                           # a lone "." printed under the footer
 SECTION = re.compile(r"^(?:\[[A-Z]{2}\] )?SECTION (R\d{3})\s*[—–-]\s*(\S.*)$")
 NUMBERED = re.compile(r"^(?:\[[A-Z]{2}\] )?(R\d{3}(?:\.\d+)+) (\S.*)$")
 TERM = re.compile(r"^(?:\[[A-Z]{2}\] )?([A-Z0-9](?:[^.(]|\([^)]*\))*?)\.(?: |$)")   # "(d.f.u.)" inside
+CHAPTER_OPENING = re.compile(r"^(?:Part [IVXLC]+\s*—.*|CHAPTER)$")   # a chapter's first page: its part, "CHAPTER", "3"
 LOOSE_FRACTION = re.compile(r"\[fn\d+\]\s*/|/\s*$|^\d+\s*$")    # a numerator left raised, or a denominator alone
 
 
@@ -111,16 +112,25 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     last: tuple = ()                     # the last numbered part's number
     last_letter = ""                     # the last definition's first letter
     page_before = None
+    before_gap: list[tuple[int, int]] = []   # (the unit a gap in the pages read follows, the page before the gap)
     for r in body:
-        if r["page"] != page_before and page_before is not None and r["page"] != page_before + 1:
+        if page_before is not None and any(n not in pages for n in range(page_before + 1, r["page"])):
             # A page after a gap in the pages read: what it starts with continues a part on a page not read.
+            before_gap.append((len(units) - 1, page_before))
             section, last, last_letter = None, (), ""
             units.append({"id": f"before the first heading on p.{r['page']}", "title": "", "kind": "before",
                           "members": []})
         page_before = r["page"]
         bold = _bold_start(r)
         head = None
-        if bold and (m := SECTION.match(r["text"])):
+        opening = f"chapter opening on p.{r['page']}"
+        if CHAPTER_OPENING.match(r["text"]) and (bold or r["text"] == "CHAPTER") \
+                and not (units and units[-1]["id"] == opening):
+            # A new chapter: its title and ICC's user notes are not law, and end the section before (never part
+            # of the last definition, nor of the first section after).
+            section, last, last_letter = None, (), ""
+            head = {"id": opening, "title": "", "kind": "before"}
+        elif bold and (m := SECTION.match(r["text"])):
             section, last, last_letter = m[1], (), ""
             head = {"id": m[1], "title": m[2].strip(), "kind": "section_heading"}
         elif bold and (m := NUMBERED.match(bold)) and (section is None or m[1].split(".")[0] == section):
@@ -193,6 +203,12 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     keep |= {d for u in units if in_sections(u) for d in roman[u["id"]]}
     if any(i.startswith("R202:") for i in keep):
         keep.add("R202")                             # the heading the definitions sit under
+    # A brought-in part that is the last before a gap in the pages read, or the last of all, may run on onto a
+    # page not read (a page left out of `pages` would silently drop the law on it): never cut short silently.
+    for i, page in before_gap + [(len(units) - 1, body[-1]["page"] if body else 0)]:
+        if i >= 0 and units[i]["id"] in keep:
+            problems.append(f"{units[i]['id']}: the last part on p.{page} before a page not read; it may run on "
+                            "there (read the next page)")
     pieces, outside = [], []
     for u in units:
         if u["id"] in keep:
@@ -296,7 +312,7 @@ def _roman(unit: dict, terms: dict[str, dict]) -> set[str]:
     for pid, u in terms.items():
         for f in _forms(u["title"]):
             f = f.lower()
-            if f and re.search(r"(?<![\w-])" + re.escape(f) + r"(?:s|es)?(?![\w-])", text):
+            if f and re.search(r"(?<![\w-])" + re.escape(f) + r"(?:s|es)?(?!\w)", text):   # "owner-occupied" too
                 out.add(pid)
     return out
 
