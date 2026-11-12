@@ -14,9 +14,9 @@ word ("four", "twenty"), or a part of a whole ("one-half", "a quarter", "two-thi
 whole, so "one-half" is never the number one). A number fixed to letters is a name, not a quantity, and is left out: a section ("R318.7.11.1",
 "P2904"), a standard ("F2090"), a table's part ("Table R401.4.1(2)"), a marker the extraction seals ("[fn2]", a
 raised 2: m², ft²). So is a list item's own number at the start of a line ("1.", "3.1."). A number joined to a word
-by a hyphen counts ("12-inch", "one-family"). A comparison keeps a "not", "no", "nor" or "cannot" printed up to four
-words before it in the same clause ("shall not be less than", "no more than", "shall not project more than"): dropped, the limit would read the other
-way round. Plain code, no AI.
+by a hyphen counts ("12-inch", "one-family"). A comparison keeps a "not", "no", "nor" or "cannot" printed up to eight
+words before it in the same clause, with the words between ("shall not be less than", "no more than", "shall not have
+a vertical rise greater than"): dropped, the limit would read the other way round. Plain code, no AI.
 """
 
 import re
@@ -33,6 +33,7 @@ BEFORE = ("not less than", "not more than", "not greater than", "not exceeding",
           "maximum", "at least", "between", "within", "up to", "and")
 NEGATIONS = ("not", "no", "nor", "cannot")                       # "shall not be less than 7 feet" is never "less than 7 feet"
 CLAUSE_STARTS = ("and", "or", "where", "when", "unless", "if", "except", "that", "which", "but")
+NEGATION_REACH = 8          # R318.7.2: "not project horizontally into the required headroom more than" is 6 words
 AFTER = ("or more", "or fewer", "or less", "or greater")
 UNITS = {"inch": "inch", "inches": "inch", "in": "inch", "foot": "foot", "feet": "foot", "mm": "mm", "cm": "cm",
          "m": "m", "degrees": "degree", "degree": "degree", "rad": "rad", "percent": "percent", "units": "unit",
@@ -104,15 +105,16 @@ def _ends_with(words: str, phrases: tuple[str, ...]) -> str:
 
 
 def _negated(words: list[str], before: str) -> str:
-    """The comparison with a "not", "no", "nor" or "cannot" printed up to four words before it in the same clause, and
+    """The comparison with a "not", "no", "nor" or "cannot" printed up to eight words before it in the same clause, and
     the words between, as printed: "not be less than", "not project more than", "not to exceed". Never across a stop,
-    a comma or a word that starts another clause ("and", "or", "where", ...)."""
+    a comma, a word that starts another clause ("and", "or", "where", ...) or another number, whose "not" it is ("not
+    less than two occupants for one bedroom and one")."""
     if not before or before.split()[0] in NEGATIONS:
         return before
     rest = words[:len(words) - len(before.split())]
-    for k in range(1, min(4, len(rest)) + 1):
+    for k in range(1, min(NEGATION_REACH, len(rest)) + 1):
         w = rest[-k]
-        if w[-1:] in ",;.:)" or w in CLAUSE_STARTS:
+        if w[-1:] in ",;.:)" or w in CLAUSE_STARTS or NUMBER.search(w):
             return before
         if w in NEGATIONS:
             return " ".join(rest[-k:] + [before])

@@ -19,6 +19,12 @@ second_reading:
     After review round 1, five more pieces (BO102.1, BO102.1.2, BO103:unsafe, BO104.1, BO104.1.1) were read the same way
     by the same helper (4 crops): 0 numbers in the text, 0 in the reading; they agree. The transcripts of step 1b are kept in the code cache (second_reading/, with their crops, the tools that compared them and their sha256), outside the repo since they hold the book''s words; a test (rule_format/tests/test_state_law.py) rebuilds second_reading_numbers from them. After review rounds 2 and 3, the pieces whose numbers numbers.py now reads differently (R315.5.3.1 and BO108.4: "pound" and "kg" became units) were compared again from the same transcripts and agree.'
 notes:
+- 'Review round 7 of egress step 1 (2026-11-12): a "not" five to seven words before its comparison was still dropped
+  ("shall not have a vertical rise greater than 12 feet 7 inches" was recorded "greater than 12 foot"). numbers.py now
+  looks up to eight words back, stopping at a stop, a comma, a word that starts another clause or another number.
+  R318.7.2, R318.7.3, R318.7.5.2.1 and R318.7.5.3 changed; they were read again from their page images (pp.100-101,
+  216 dpi, 5 crops) by a helper that never saw the extracted text, and that transcript went through numbers.py: 4
+  pieces, 30 numbers, all agree. The transcript is kept in the code cache (second_reading/step_1_round_7_*).'
 - 'Review round 3 of egress step 1b (2026-11-12): numbers.py learned to keep a "not" printed up to four words before
   a comparison in the same clause ("shall not project more than 4 1/2 inches"). R318.7.5.1, R318.7.5.2, R320.3 and R320.5
   changed; their first transcripts were not kept, so they were read again from their page images (pp.100, 104, 216 dpi,
@@ -1183,23 +1189,23 @@ pieces:
     - not less than 6 foot
     - 8 inch
     - 2032 mm
-    - more than 4 3/4 inch
+    - not project horizontally into the required headroom more than 4 3/4 inch
     - 121 mm
     second_reading_numbers:
     - not less than 6 foot
     - 8 inch
     - 2032 mm
-    - more than 4 3/4 inch
+    - not project horizontally into the required headroom more than 4 3/4 inch
     - 121 mm
     second_reading: agrees
   R318.7.3:
     piece_sha256: 9d610e9ff2dcceff483b28da79709c38e6d952b0b6b5b12f131d907dc183128a
     numbers:
-    - greater than 12 foot
+    - not have a vertical rise greater than 12 foot
     - 7 inch
     - 3835 mm
     second_reading_numbers:
-    - greater than 12 foot
+    - not have a vertical rise greater than 12 foot
     - 7 inch
     - 3835 mm
     second_reading: agrees
@@ -1266,18 +1272,18 @@ pieces:
     - 254 mm
     - not less than 6 inch
     - 152 mm
-    - by more than 3/8 inch
+    - not exceed the smallest winder tread by more than 3/8 inch
     - 9.5 mm
-    - within 3/8 inch
+    - not be required to be within 3/8 inch
     - 9.5 mm
     second_reading_numbers:
     - not less than 10 inch
     - 254 mm
     - not less than 6 inch
     - 152 mm
-    - by more than 3/8 inch
+    - not exceed the smallest winder tread by more than 3/8 inch
     - 9.5 mm
-    - within 3/8 inch
+    - not be required to be within 3/8 inch
     - 9.5 mm
     second_reading: agrees
   R318.7.5.3:
@@ -1291,7 +1297,7 @@ pieces:
     - 19 mm
     - not more than 1 1/4 inch
     - 32 mm
-    - by more than 3/8 inch
+    - not exceed the smallest nosing projection by more than 3/8 inch
     - 9.5 mm
     - not less than 11 inch
     - 279 mm
@@ -1306,7 +1312,7 @@ pieces:
     - 19 mm
     - not more than 1 1/4 inch
     - 32 mm
-    - by more than 3/8 inch
+    - not exceed the smallest nosing projection by more than 3/8 inch
     - 9.5 mm
     - not less than 11 inch
     - 279 mm

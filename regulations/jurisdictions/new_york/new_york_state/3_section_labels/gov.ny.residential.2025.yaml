@@ -2619,7 +2619,10 @@ labels:
       - 42
       quote: '[NY] R318.7.5.1 Risers. The riser height shall be not more than 8 1/4 inches (209 mm).'
     piece_sha256: a3c13f44fc5ef9be9de7ce19d811782abb2020102da3bd7331f42d9c94f59653
-    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. The book''s metric
+      conversion of the riser slope is not its degrees: "30 degrees (0.51 rad)" (30 degrees is 0.52 rad), p.100. Gordium''s
+      reading: the degrees govern, the radians being a conversion printed after them; a reading for the architects to
+      confirm before a rule is drafted from this limit.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   R318.7.5.2:
@@ -3151,7 +3154,10 @@ labels:
       quote: R319.4.1 Minimum size. The horizontal area of the area well shall be not less than 9 square feet (0.9 m[fn2]),
         with a horizontal projec- tion and width
     piece_sha256: fcf8b3967abc22fd4420d1a9acc9d3c2ab7d705bc4e9173c4f6a1243dbd69849
-    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. The book''s metric
+      conversion of the area is not its square feet: "9 square feet (0.9 m²)" (9 square feet is 0.84 m²), p.103.
+      Gordium''s reading: the square feet govern, the square metres being a conversion printed after them; a reading
+      for the architects to confirm before a rule is drafted from this limit.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   R319.4.2:
