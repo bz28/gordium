@@ -156,10 +156,24 @@ def lot_ids(scene: dict) -> list[str]:
     return ["lot" if k == 0 else f"lot_{k + 1}" for k in range(len(lots(scene)))]
 
 
+def open_lots(scene: dict) -> set[int]:
+    """The outlines drawn open (`open_lots: [index]`): every line but the last, so its ends don't meet. Only a
+    closed outline is ever a lot (revit_reading_design.md, section 4)."""
+    return set(scene.get("open_lots") or [])
+
+
+def picked(scene: dict) -> str | None:
+    """The scene id of the lot the architect picked (`picked:`), saved in the facts as lot_id; it may name an
+    outline that isn't drawn (deleted after it was picked) or one drawn open."""
+    return scene.get("picked")
+
+
 def solids(scene: dict, step: str = STEPS[0]) -> list[dict]:
-    """Each building solid, in feet with the survey offset: {id, outline, base, top, floor, curved, open, block}.
-    A building with `floors` is one floor block per story (ids <id>_floor1, ...), each marked with the height it
-    was drawn, as GordiumStart marks them."""
+    """Each building solid, in feet with the survey offset: {id, outline, base, top, floor, curved, open, block,
+    mesh, in_block}. A building with `floors` is one floor block per story (ids <id>_floor1, ...), each marked with
+    the height it was drawn, as GordiumStart marks them. `mesh`: drawn as a closed mesh of triangles (mesh_faces);
+    `in_block`: drawn on the Building layer inside that block (one of `others`, with `holds_buildings`), so nothing
+    of it is placed on the Building layer itself."""
     moved = (scene.get("then") or {}).get("move", [0, 0]) if step == STEPS[1] else [0, 0]
     out = []
     for b in scene.get("buildings") or []:
@@ -171,17 +185,19 @@ def solids(scene: dict, step: str = STEPS[0]) -> list[dict]:
                         "base": z + _offset(scene)[2], "top": z + h + _offset(scene)[2],
                         "floor": h if b.get("floors") else None,
                         "curved": {"edge": b["curved"]["edge"], "through": _shift(b["curved"]["through"], scene, moved)}
-                        if b.get("curved") else None, "open": bool(b.get("open")), "block": bool(b.get("block"))})
+                        if b.get("curved") else None, "open": bool(b.get("open")), "block": bool(b.get("block")),
+                        "mesh": bool(b.get("mesh")), "in_block": b.get("in_block")})
             z += h
     return out
 
 
 def others(scene: dict) -> list[dict]:
     """The solids on the lot that aren't on the Building layer (each is left out of the check). The scene's edit
-    moves only the buildings."""
+    moves only the buildings. A block may have no outline of its own: one that holds only an empty solid
+    (`empty`), or one that holds buildings (`holds_buildings`: the solids whose `in_block` names it)."""
     return [{**o, "outline": [_shift(p, scene) for p in o["outline"]],
-             "base": o.get("base", 0) + _offset(scene)[2], "top": o["top"] + _offset(scene)[2]}
-            for o in scene.get("others") or []]
+             "base": o.get("base", 0) + _offset(scene)[2], "top": o["top"] + _offset(scene)[2]} if "outline" in o
+            else dict(o) for o in scene.get("others") or []]
 
 
 def spot_grades(scene: dict) -> list[list]:
@@ -197,6 +213,8 @@ def facts(scene: dict) -> dict:
     out = {"jurisdiction": plugin_place().jurisdiction, "zone": "R-1b", "use": "one_family_detached",
            "corner_lot": False, "street_line": [edges[i] for i in scene.get("streets", [0])] if edges else [],
            "lot_surveyed": True}
+    if picked(scene):                   # the reference model's id; another host saves its own when the lot is picked
+        out["lot_id"] = object_id(scene, picked(scene))
     grade = scene.get("grade") or {}
     if "elevation" in grade:
         out.update(ground_is_flat=True, grade_elevation=grade["elevation"] + _offset(scene)[2])
@@ -221,6 +239,13 @@ def _ring_faces(outline, z0, z1, curved=None, open_=False):
     return caps + walls
 
 
+def mesh_faces(faces: list[dict]) -> list[dict]:
+    """The faces as a mesh of triangles holds them: each face split into a fan of triangles from its first point
+    (a quad (a, b, c, d) into (a, b, c) and (a, c, d)), the way the scene's mesh is drawn."""
+    return [{"points": [f["points"][0], f["points"][k], f["points"][k + 1]]}
+            for f in faces for k in range(1, len(f["points"]) - 1)]
+
+
 def _problem(code, **args) -> dict:
     return {"code": code, "args": {k: str(v) for k, v in args.items()}}
 
@@ -231,27 +256,42 @@ def expected_site(scene: dict, step: str = STEPS[0]) -> dict:
     if not has_model(scene):
         return scene["site"]
     rings, problems = lots(scene), []
-    lot = None
-    if len(rings) == 1:
-        arcs = lot_arcs(scene)
-        lot = {"id": "lot", "edges": [{"points": arc_points(arcs[i]), "curved": True} if i in arcs else
-                                      {"points": [rings[0][i], rings[0][(i + 1) % len(rings[0])]], "curved": False}
-                                      for i in range(len(rings[0]))]}
-    elif rings:
-        problems.append(_problem("several_lot_outlines", count=len(rings), layer=SITE_LAYER))
+    closed = [k for k in range(len(rings)) if k not in open_lots(scene)]       # only a closed outline is a lot
+    chosen = None
+    if picked(scene) is not None:       # the picked one, if it is drawn and closed; never another in its place
+        chosen = next((k for k in closed if lot_ids(scene)[k] == picked(scene)), None)
+        if chosen is None:
+            problems.append(_problem("lot_not_found"))
+    elif len(closed) == 1:
+        chosen = closed[0]
+    elif closed:
+        problems.append(_problem("several_lot_outlines", count=len(closed), layer=SITE_LAYER))
     else:
         problems.append(_problem("no_lot_outline", layer=SITE_LAYER))
+    lot = None
+    if chosen is not None:
+        ring, arcs = rings[chosen], lot_arcs(scene) if chosen == 0 else {}
+        lot = {"id": lot_ids(scene)[chosen],
+               "edges": [{"points": arc_points(arcs[i]), "curved": True} if i in arcs else
+                         {"points": [ring[i], ring[(i + 1) % len(ring)]], "curved": False} for i in range(len(ring))]}
     buildings, unsent = [], []
     for s in solids(scene, step):
+        if s["in_block"]:               # inside a block: reported once, its solids not sent. The block itself is
+            name = f"{s['in_block']}'s building parts"      # also left out under its own id (ids are unique),
+            if name not in {u["id"] for u in unsent}:       # so this names it, as read_site's "a block" does
+                layer = next(o["layer"] for o in scene.get("others") or [] if o["id"] == s["in_block"])
+                unsent.append({"id": name, "layer": layer, "kind": "block",
+                               "problem": _problem("not_a_solid", kind="a block", layer=BUILDING_LAYER)})
+            continue
         if s["block"]:
             unsent.append({"id": s["id"], "layer": BUILDING_LAYER, "kind": "block",
                            "problem": _problem("not_a_solid", kind="a block", layer=BUILDING_LAYER)})
             continue
         trouble = ([_problem("curved_edge"), _problem("curved_surface")] if s["curved"] else []) + \
             ([_problem("open_solid", what=s["id"])] if s["open"] else [])
+        faces = _ring_faces(s["outline"], s["base"], s["top"], s["curved"], s["open"])
         buildings.append({"id": s["id"], "role": "building", "layer": BUILDING_LAYER, "floor": s["floor"],
-                          "faces": _ring_faces(s["outline"], s["base"], s["top"], s["curved"], s["open"]),
-                          "problems": trouble})
+                          "faces": mesh_faces(faces) if s["mesh"] else faces, "problems": trouble})
     left_out = [{"id": o["id"], "layer": o["layer"], "could_be_building": True, "touching": o["touching"],
                  "ground_like": bool(o.get("ground_like")), "context": o["layer"] == CONTEXT_LAYER or o["layer"].startswith(CONTEXT_LAYER + "::")}
                 for o in others(scene)]

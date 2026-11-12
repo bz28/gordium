@@ -6,7 +6,8 @@ what: >-
   solid of its own filling the opening), the east wall broken by a curtain wall (two mullions and a glass panel at
   the wall's outer face); a built-in drawn as its own solid inside, against the west wall (an in-place family); and
   a 1 ft roof slab (z 19 to 20) drawn as a closed mesh of triangles (one element meshed). Every part touches another,
-  so together they are one 20 ft building, and every measure complies as the box house's does. The measuring has
+  so together they are one 20 ft building, and every measure complies as the box house's does, but the
+  stories: with no floor marks the drawing allows 1 or 2, an open question. The measuring has
   only ever seen floor blocks: this is the first scene where a building is many solids, one of them a mesh.
 guards: >-
   The Revit reading design note (docs/revit/revit_reading_design.md), new scene A without its loft: section 1,
@@ -40,6 +41,10 @@ expected:
   R-1b.rear_yard: complies                       # the north wall at y 80: 40 ≥ 30
   R-1b.yard_projections: complies                # the slabs stop at the walls' outer faces: nothing reaches past
   R-1b.height: complies                          # the roof slab's top, 20 − 0 = 20 ≤ 35
-  R-1b.stories: complies                         # no floor marks: one 20 ft solid holds 1 to floor(20 / 7) = 2
-                                                 # stories (7 ft a story), every count ≤ 3
+  R-1b.stories: needs_review                     # found on running: no floor marks, so one 20 ft solid holds 1 to
+                                                 # floor(20 / 7) = 2 stories (7 ft a story). Every count is ≤ 3,
+                                                 # but a count the drawing leaves open is a question, never a
+                                                 # pass (measure._stories_whole: "between, it asks"; check.row_verdict:
+                                                 # complies only with no open question). Worked by hand as
+                                                 # complies; the rule says needs review.
   R-1b.lot_coverage: complies                    # the parts together cover 30 × 50 = 1,500 ≤ 1,800 sf

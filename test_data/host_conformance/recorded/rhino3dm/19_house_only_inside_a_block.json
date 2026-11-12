@@ -1,0 +1,115 @@
+{
+ "host": "rhino3dm",
+ "ids": {
+  "06f1ac22-77c5-5dc2-8865-13415e715aff": "lot",
+  "24bbadff-ad62-55f6-8830-2c521ba5a908": "house_link"
+ },
+ "recorded": {
+  "by": "python -m design_checker.conformance --write",
+  "tool": "rhino3dm 8.35.0"
+ },
+ "scene": "19_house_only_inside_a_block",
+ "steps": {
+  "as drawn": {
+   "buildings": [
+    {
+     "faces": [],
+     "id": "a block",
+     "layer": "Building",
+     "problems": [
+      {
+       "args": {
+        "kind": "a block",
+        "layer": "Building"
+       },
+       "code": "not_a_solid"
+      }
+     ],
+     "role": "building"
+    }
+   ],
+   "grade": {
+    "points": [],
+    "source": "none"
+   },
+   "host": {
+    "document": "19_house_only_inside_a_block.3dm",
+    "model_units": "Feet",
+    "name": "rhino3dm",
+    "version": "8.35.0"
+   },
+   "inventory_complete": true,
+   "left_out": [
+    {
+     "context": false,
+     "could_be_building": true,
+     "ground_like": false,
+     "id": "24bbadff-ad62-55f6-8830-2c521ba5a908",
+     "layer": "Default",
+     "touching": false
+    }
+   ],
+   "lot": {
+    "edges": [
+     {
+      "curved": false,
+      "points": [
+       [
+        0.0,
+        0.0
+       ],
+       [
+        60.0,
+        0.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        60.0,
+        0.0
+       ],
+       [
+        60.0,
+        120.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        60.0,
+        120.0
+       ],
+       [
+        0.0,
+        120.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        0.0,
+        120.0
+       ],
+       [
+        0.0,
+        0.0
+       ]
+      ]
+     }
+    ],
+    "id": "06f1ac22-77c5-5dc2-8865-13415e715aff"
+   },
+   "problems": [],
+   "schema": "gordium.site/1",
+   "units": "ft",
+   "unsent": []
+  }
+ }
+}

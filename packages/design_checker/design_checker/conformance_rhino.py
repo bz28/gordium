@@ -76,6 +76,22 @@ def _solid(s: dict, k: float):
                               not s.get("open")).ToBrep(True)
 
 
+def _mesh(s: dict, k: float):
+    """The solid as a closed mesh of triangles (conformance.mesh_faces of its faces), corners shared, so it is
+    closed: every edge between two triangles."""
+    mesh, at = r.Mesh(), {}
+    for f in c.mesh_faces(c._ring_faces(s["outline"], s["base"], s["top"])):
+        ids = []
+        for p in f["points"]:
+            key = tuple(p)
+            if key not in at:
+                at[key] = len(at)
+                mesh.Vertices.Add(p[0] * k, p[1] * k, p[2] * k)
+            ids.append(at[key])
+        mesh.Faces.AddFace(*ids)
+    return mesh
+
+
 def _terrain(o: dict, k: float):
     """A flat open mesh over the object's outline's box at its base height, `cells` × `cells` squares."""
     (x0, y0), (x1, y1) = [min(p[0] for p in o["outline"]), min(p[1] for p in o["outline"])], \
@@ -92,15 +108,53 @@ def _terrain(o: dict, k: float):
     return mesh
 
 
+def _definition(model, name: str, geometry, layers) -> r.InstanceReference:
+    """A block's definition holding the geometry (each on its layer index, or with its attributes), and a
+    placement of it where drawn. rhino3dm gives the definition and the objects inside it new ids on every build (an
+    id set beforehand isn't kept); no reader uses them: readers skip a definition's objects, and read the placed
+    block by its own id."""
+    attrs = []
+    for layer in layers:
+        if isinstance(layer, r.ObjectAttributes):
+            attrs.append(layer)
+        else:
+            attrs.append(r.ObjectAttributes())
+            attrs[-1].LayerIndex = layer
+    index = model.InstanceDefinitions.Add(name, "", "", "", r.Point3d(0, 0, 0), tuple(geometry), tuple(attrs))
+    return r.InstanceReference(model.InstanceDefinitions.FindIndex(index).Id, r.Transform.Identity())
+
+
 def _place_block(model, name: str, solid, attrs) -> None:
-    """The solid as a block's definition (on the placed block's own layer), placed once with `attrs`. rhino3dm
-    gives the definition and the object inside it new ids on every build (an id set beforehand isn't kept); no
-    reader uses them: readers skip a definition's objects, and read the placed block by its own id."""
-    inside = r.ObjectAttributes()
-    inside.LayerIndex = attrs.LayerIndex
-    index = model.InstanceDefinitions.Add(name, "", "", "", r.Point3d(0, 0, 0), (solid,), (inside,))
-    definition = model.InstanceDefinitions.FindIndex(index)
-    model.Objects.AddInstanceObject(r.InstanceReference(definition.Id, r.Transform.Identity()), attrs)
+    """The solid as a block's definition (on the placed block's own layer), placed once with `attrs`."""
+    model.Objects.AddInstanceObject(_definition(model, name, (solid,), (attrs.LayerIndex,)), attrs)
+
+
+def _floor_attrs(model, s: dict):
+    """A building solid's attributes on the Building layer, a floor block marked as GordiumStart marks it."""
+    attrs = r.ObjectAttributes()
+    attrs.LayerIndex = _layer(model, c.BUILDING_LAYER)
+    if s["floor"] is not None:
+        story = int(s["id"].rsplit("floor", 1)[1])
+        attrs.SetUserString(FLOOR_KEY, f"{story};{s['floor']}")
+    return attrs
+
+
+def _other_block(model, o: dict, k: float, scene: dict, attrs) -> None:
+    """One of `others` drawn as a block on its layer: its solid; or, with `empty`, only an empty solid (no faces,
+    so no box: a family instance with no geometry); with `nested_empty`, its solid and a block inside it holding
+    only an empty solid; with `holds_buildings`, the building solids whose `in_block` names it, on the Building
+    layer inside it."""
+    if o.get("holds_buildings"):
+        inside = [s for s in c.solids(scene) if s["in_block"] == o["id"]]
+        ref = _definition(model, o["id"], [_solid(s, k) for s in inside], [_floor_attrs(model, s) for s in inside])
+    elif o.get("empty"):
+        ref = _definition(model, o["id"], (r.Brep(),), (attrs.LayerIndex,))
+    elif o.get("nested_empty"):
+        nested = _definition(model, f"{o['id']}_part", (r.Brep(),), (attrs.LayerIndex,))
+        ref = _definition(model, o["id"], (_solid(o, k), nested), (attrs.LayerIndex, attrs.LayerIndex))
+    else:
+        ref = _definition(model, o["id"], (_solid(o, k),), (attrs.LayerIndex,))
+    model.Objects.AddInstanceObject(ref, attrs)
 
 
 def build(scene: dict) -> r.File3dm:
@@ -117,23 +171,33 @@ def build(scene: dict) -> r.File3dm:
         attrs = _on(model, c.SITE_LAYER, scene, local)
         if n == 0 and arcs:
             model.Objects.AddCurve(_outline(ring, 0, k, arcs), attrs)
+        elif n in c.open_lots(scene):   # every line but the last: its ends don't meet
+            model.Objects.AddPolyline(r.Polyline([r.Point3d(x * k, y * k, 0) for x, y in ring]), attrs)
         else:
             model.Objects.AddPolyline(r.Polyline([r.Point3d(x * k, y * k, 0) for x, y in ring + ring[:1]]), attrs)
+    group = None
+    if scene.get("group"):              # rhino3dm's Groups.Add gives nothing back: the new group is the last
+        model.Groups.Add(r.Group())
+        group = len(model.Groups) - 1
     for s in c.solids(scene):
-        attrs = _on(model, c.BUILDING_LAYER, scene, s["id"])
-        if s["floor"] is not None:
-            story = int(s["id"].rsplit("floor", 1)[1])
-            attrs.SetUserString(FLOOR_KEY, f"{story};{s['floor']}")
+        if s["in_block"]:               # drawn inside its block (one of `others`), below
+            continue
+        attrs = _floor_attrs(model, s)
+        attrs.Id = c.object_id(scene, s["id"])
+        if group is not None:           # one group of every building solid (a model group, in Revit)
+            attrs.AddToGroup(group)
         if s["block"]:                  # the solid as a block's definition, placed once on the Building layer
             _place_block(model, s["id"], _solid(s, k), attrs)
+        elif s["mesh"]:
+            model.Objects.AddMesh(_mesh(s, k), attrs)
         else:
             model.Objects.AddBrep(_solid(s, k), attrs)
     for o in c.others(scene):
         attrs = _on(model, o["layer"], scene, o["id"])
         if o.get("mesh"):
             model.Objects.AddMesh(_terrain(o, k), attrs)
-        elif o.get("block"):
-            _place_block(model, o["id"], _solid(o, k), attrs)
+        elif o.get("block") or o.get("holds_buildings"):
+            _other_block(model, o, k, scene, attrs)
         else:
             model.Objects.AddBrep(_solid(o, k), attrs)
     for n, p in enumerate(c.spot_grades(scene)):
@@ -163,7 +227,8 @@ def write_models(scene: dict) -> None:
 
 def ids(scene: dict) -> dict:
     """{Rhino object id: the scene's id}, for every object the scene draws."""
-    locals_ = c.lot_ids(scene) + [s["id"] for s in c.solids(scene)] + [o["id"] for o in c.others(scene)]
+    locals_ = c.lot_ids(scene) + [s["id"] for s in c.solids(scene) if not s["in_block"]] + \
+        [o["id"] for o in c.others(scene)]
     return {c.object_id(scene, local): local for local in locals_}
 
 

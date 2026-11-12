@@ -1,9 +1,10 @@
 title: An open property line
 what: >-
   The lot's outline drawn open: its first three lines (south, east, north) but not the west one, so its ends, at
-  (0, 0) and (0, 120), don't meet. Only a closed outline is ever a lot: a host that sent the open line would have
-  the checker close it with a west line nobody drew, and the lot's area, width, yards and coverage would comply. The
-  host must send no lot and say there is no lot outline (no_lot_outline). Height and stories comply.
+  (0, 0) and (0, 120), don't meet. Only a closed outline is ever a lot: the host must send no lot and say there is no
+  lot outline (no_lot_outline), never close it with a west line nobody drew. (Sent as it is, the measuring would
+  refuse it too, as "not one closed loop of lot lines": the lot's measures need review either way, but only the
+  problem the host sends says why.) Height and stories comply.
 guards: >-
   The Revit reading design note, new scene G: section 4, "Only a closed outline is ever a lot" (an open property
   line, not picked, counts as no lot outline). In Rhino: read_3dm.read_site keeps only closed curves on the Site
