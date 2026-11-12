@@ -847,3 +847,17 @@ def test_the_reference_adapter_places_a_block_whose_box_covers_no_ground_by_its_
     model.Write(str(tmp_path / "m.3dm"), 8)
     left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
     assert [(o["layer"], o["touching"]) for o in left] == [("Default", False)]
+
+
+def test_the_live_command_s_linked_file_advice_can_never_stop_a_check():
+    """The advice is words only: _extras asks for it through logic.guard (an error is logged and the row is said
+    without it), never directly, so a failure reading a definition's file can't take the check's answer with it."""
+    import ast
+
+    from host_source import host_text
+    tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
+    extras = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_extras")
+    calls = [n for n in ast.walk(extras) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "_link_advice"]
+    guarded = [n for n in ast.walk(extras) if isinstance(n, ast.Call) and getattr(n.func, "attr", None) == "guard"
+               and any(c in ast.walk(n) for c in calls)]
+    assert len(calls) == 1 and len(guarded) == 1
