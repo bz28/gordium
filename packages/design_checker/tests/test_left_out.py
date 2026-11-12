@@ -356,6 +356,17 @@ def test_rhino_s_advice_names_the_file_by_its_own_name_and_says_where_to_click(p
     assert set(logic.LINK_HOW) == set(lo.LINK_WORDS)
 
 
+@pytest.mark.parametrize("name, said", [("Two-car garage", "'garage.3dm' (block 'Two-car garage') can't"),
+                                        ("Garage", "'garage.3dm' can't"), ("garage", "'garage.3dm' can't"), ("garage.3dm", "'garage.3dm' can't"),
+                                        ("", "'garage.3dm' can't")])
+def test_rhino_s_advice_gives_the_block_s_own_name_when_it_isn_t_the_file_s(name, said):
+    """Review round 4: the Block Definitions list shows each block by its own name, so when that isn't the file's
+    (without its extension) the sentence gives it too, so the architect can find the one to select."""
+    problems = [{"id": "g", "definition": "d", "problem": "missing"}]
+    advice = logic.linked_file_advice(problems, {"d": ("/site/garage.3dm", name)})
+    assert advice["g"].startswith("Linked file " + said + " be found at /site/garage.3dm: ")
+
+
 def test_rhino_gives_no_advice_for_a_block_whose_status_couldn_t_be_read_and_has_no_file():
     """Review round 2: a block whose status Rhino couldn't give (None: "not_known") and which names no file may not
     be linked at all, so it isn't called a linked file; with a file, it is told to reload it."""

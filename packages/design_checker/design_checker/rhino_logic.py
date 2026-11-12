@@ -1639,7 +1639,8 @@ def linked_file_advice(problems, files):
     """{object id: the sentence telling the architect what to do} for each left-out object whose linked file isn't
     up to date (`problems`: left_out.linked_file_problems), in Rhino's words (LINK_HOW). `files`: {definition id:
     (its linked file's full path as Rhino has it, or "", its definition's name)}; the file is named by its own name,
-    else by the definition's. A status Rhino couldn't give ("not_known") with no file path may not be a linked block
+    else by the definition's, with the definition's name too when it differs (but for capitals: the Block
+    Definitions list shows that name). A status Rhino couldn't give ("not_known") with no file path may not be a linked block
     at all: no advice (the row says it isn't measured, as for any block). Words only: those objects stay left out
     and count as touching whatever this says."""
     out = {}
@@ -1650,7 +1651,8 @@ def linked_file_advice(problems, files):
         if p["problem"] == "not_known" and not path:
             continue
         shown = (path.replace("\\", "/").rsplit("/", 1)[-1] if path else "") or name or "(no name)"
-        out[p["id"]] = linked_file_words(shown, p["problem"], LINK_HOW[p["problem"]], path or None)
+        block = name if name and name.lower() not in (shown.lower(), shown.rsplit(".", 1)[0].lower()) else None
+        out[p["id"]] = linked_file_words(shown, p["problem"], LINK_HOW[p["problem"]], path or None, block)
     return out
 
 

@@ -15,8 +15,8 @@ by `packages/design_checker/tests/test_protocol.py` ([worker_protocol_v1.md](wor
   `objects.left_out` ([worker_protocol_v1.md](worker_protocol_v1.md#session-commands)): which objects a check
   leaves out, which may be touching the house, and which have no box that covers all of them, decided in
   `host_core/left_out.py` for every tool (the Rhino plugin calls the same functions in its own Python). A minor
-  version: nothing else changed, and a request naming `1.0` is answered as before. Also from 1.1, `check_site`
-  reads `extras.left_out_advice` ({left-out object id: the tool's words for what the architect can do, such as a
+  version: no other command changed, and a request naming `1.0` is answered as before, but for one thing:
+  `check_site` (for a request naming any version) now reads `extras.left_out_advice` ({left-out object id: the tool's words for what the architect can do, such as a
   linked file to reload}, said on the left-out row; words only, the answer is the same) and refuses it when it
   isn't that, or names an id not in the description's `left_out`
   ([site_description_v1.md](site_description_v1.md#how-the-worker-uses-it))
