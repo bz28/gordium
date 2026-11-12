@@ -599,10 +599,10 @@ def test_the_live_command_keeps_a_linked_block_whose_file_is_not_found_as_left_o
     block beside a drawn part apart from the house (the live run's second case: listed as left out, but not
     touching, so the side yards read "complies"). A normal block of the same shape is still told by its box."""
     x, y = lot_at
-    centre = (x + 11, y + 54, 4)                                       # an 8 ft shed against the house's west wall
+    centre = (x + 11, y + 76, 4)              # an 8 ft shed against the house's west wall (x + 15), at its north end
     linked = _missing_file_block("linked", centre)
-    drawn = _part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))         # on the lot, apart from the house
-    nested = _InstanceObject("nested", [drawn, _missing_file_block("inner", centre)])
+    drawn = _part(((x + 2, y + 90, 0), (x + 10, y + 98, 8)))          # on the lot, apart from the house
+    nested = _InstanceObject("nested", [drawn, _missing_file_block("inner", centre)])   # box x+2..11: 4 ft off
     normal = _InstanceObject("normal", [_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
     left, touching, _, outlines = _live_left_out({"linked": linked, "nested": nested, "normal": normal}, lot_at)
     assert left == ["linked", "nested", "normal"]
