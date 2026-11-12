@@ -2,6 +2,9 @@
 # from the page images (rule_format/state_law.py says what is checked). A misread number could pass a design that fails.
 # numbers: as the extracted text has them; second_reading_numbers: as the second reading has them; second_reading:
 # agrees or differs, which code re-checks by comparing the two lists (a piece that differs needs a flag).
+# second_reading_comparisons: what the printed sentence says of each number (>=, <=, >, <, between, none), read by a
+# person from the whole sentence without numbers.py; code checks it against the recorded words (a difference needs a
+# flag quoting the number). Both number readings go through numbers.py, so they can never check what its words mean.
 # Status of every piece: verified against the Public.Resource.Org copy only; check against an exact ICC copy.
 document: gov.ny.residential.2025.pdf
 copy_checked: 'The Public.Resource.Org copy on the Internet Archive (sha256 in sources.yaml): verified against this copy
@@ -19,6 +22,15 @@ second_reading:
     After review round 1, five more pieces (BO102.1, BO102.1.2, BO103:unsafe, BO104.1, BO104.1.1) were read the same way
     by the same helper (4 crops): 0 numbers in the text, 0 in the reading; they agree. The transcripts of step 1b are kept in the code cache (second_reading/, with their crops, the tools that compared them and their sha256), outside the repo since they hold the book''s words; a test (rule_format/tests/test_state_law.py) rebuilds second_reading_numbers from them. After review rounds 2 and 3, the pieces whose numbers numbers.py now reads differently (R315.5.3.1 and BO108.4: "pound" and "kg" became units) were compared again from the same transcripts and agree.'
 notes:
+- 'Review round 8 of egress step 1 (2026-11-12): twice a dropped "not" left the law recorded backwards while both
+  readings agreed, because both go through numbers.py: they check the digits, never what the words mean. So each
+  number''s comparison was read again from the whole printed sentence by a helper that saw only each piece''s text
+  and its numbers'' values and units, never numbers.py''s words (second_reading_comparisons), and code checks it
+  against numbers.comparison of the recorded words. Step 1''s 90 pieces with numbers, 357 numbers: 23 differ; step
+  1b''s 42 more, 134 numbers: 10 differ. Each has a flag saying which is right. One reverses a limit: R315.2 records
+  "more than one-half" where the book says the ceiling shall not exceed 7 feet for more than one-half of the floor
+  (at most one-half); the rest are limits the recorded words miss ("a minimum load of 1,000 pounds", "70 to 80
+  degrees") or right words the reader marked otherwise.'
 - 'Review round 7 of egress step 1 (2026-11-12): a "not" five to seven words before its comparison was still dropped
   ("shall not have a vertical rise greater than 12 feet 7 inches" was recorded "greater than 12 foot"). numbers.py now
   looks up to eight words back, stopping at a stop, a comma, a word that starts another clause or another number.
@@ -52,6 +64,7 @@ pieces:
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R102.6:
     piece_sha256: 511f4100082bf56dada6c7a959c4bf3f897b8bd3a4379cb17ea44d55bb2b34cf
     numbers:
@@ -61,46 +74,57 @@ pieces:
     - '31'
     - '2025'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R102.6.1:
     piece_sha256: 20ee5dd0a882856b7fabf2f2d78d121ca12d7e54fedd1cd829b94894e3d228cd
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R102.6.2:
     piece_sha256: 83bfc75ed382e1582be871bf67d0c3014f4bee15d77cd4e739197e704f6a58dd
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R201:
     piece_sha256: 3729f6c482560feb21d1facd4e44d2994869f51452483aef844e72da77719dc7
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R201.1:
     piece_sha256: 4909ee9dbaf43a904cf56f15344d8624f05a6f7331a11e47c1cda7378dbf1fcc
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R201.2:
     piece_sha256: ac4b253f5dae891d1cd5f943a3d621eec80f235e2ac819bb35a62f647714ab96
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R201.3:
     piece_sha256: 468b4fe0fe78b5610c753ed3483aea09f34a3d32cca41388bbb5e88a0a1be02a
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R201.4:
     piece_sha256: 6d1c43c8b0afb0adf3f29e40e126a0efb05e8b99996723026ac9f51502d57268
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:
     piece_sha256: f0187f468c69f97f2cac23aae77d5b0395ffba63481ada244cc802abcb2c7600
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:access_to:
     piece_sha256: b8ccdfba68c7b272441cce4fd33822d2ebfa67d78d6b522cd3081b492d04cc23
     numbers:
@@ -108,16 +132,20 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:accessory_structure:
     piece_sha256: f2cd58af036b3e0efe4c49212f856e160b577754901a0f7a79c5cf7828a0dcff
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:addition:
     piece_sha256: a304a94a1196c7af69185f12ee2d0ed3aaf053531034943895bce6f228ff5632
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:alteration:
     piece_sha256: 6fa561f3a1bce2eaabf977c30557b6deb0b13252fc3b0da3b21681d9897877a7
     numbers:
@@ -125,6 +153,8 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:alternating_tread_device:
     piece_sha256: ca1fe80f99fa2540f3e755ef61ef9ad9869107d297c358f55a6f9ec1d2a808e2
     numbers:
@@ -138,6 +168,13 @@ pieces:
     - '0.87'
     - and 1.22 rad
     second_reading: agrees
+    second_reading_comparisons:
+    - 'between'
+    - 'between'
+    - 'between'
+    - 'between'
+    flags:
+    - "'0.87' and 'and 1.22 rad': the radians in brackets repeat \"between 50 and 70 degrees\"; the range is recorded on the degrees ('between 50', 'and 70 degree'), as the code reads it. The second reading also marked the conversion 'between'."
   R202:appliance:
     piece_sha256: 9ee65b3bc27dc6af4b26ac725b83c8b622c3e9f7242c77ebcda7392941307dec
     numbers:
@@ -145,6 +182,8 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:approved:
     piece_sha256: eca35d388005aaaa921e2944c0bbb2b1bfbf26f6bc6f728c3098c9d5ae5ef479
     numbers:
@@ -152,26 +191,32 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:attic:
     piece_sha256: 6283aec0857b2cbc011d967b0c5ae5e61e8ee41a4a395587868b732601719cbf
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:attic_habitable:
     piece_sha256: 30dd5a5b3f6c755709739396b3880ebbbf595870e1648b00fac6d084e0e13fbc
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:authority_having_jurisdiction:
     piece_sha256: db6b559b4ed26b97e3400e92be56f405c5c921e680278179860424bd581190e6
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:basement:
     piece_sha256: c1148f751d83e8892edef216f7ca7fcc2b860f76d1df8a49292d5d74cd57d70e
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:bed_and_breakfast_dwelling:
     piece_sha256: 28b280daac6ea297bdafe671995e1336bc29acaed42643e4f041a4663e747054
     numbers:
@@ -183,6 +228,10 @@ pieces:
     - not more than ten
     - not more than five
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - '<='
+    - '<='
   R202:building:
     piece_sha256: 241649d5daa76ce95b65cd8ade884b4fd15aed4d58753df95a51e5897e9e858a
     numbers:
@@ -192,6 +241,9 @@ pieces:
     - one
     - two
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:building_code_of_new_york_state:
     piece_sha256: c0a5d562dbc3da1e739d882d9691d7b2d17ab93ffe1714b228a0b1c363d93986
     numbers:
@@ -201,31 +253,39 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:building_official:
     piece_sha256: 1104221e0f3f3427c47429d27a9c253912800ff7b5ab42ca41f3376951a64f61
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:carbon_monoxide_alarm:
     piece_sha256: f11c75875af60f33840ea2510d5aef955d6f66597be62defbb9da643271b1c4b
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:ceiling_height:
     piece_sha256: f064097acb5f306515023ef9f50989e877f44d3f36437e75e0e88eb8a1610ae0
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:certificate_of_occupancy:
     piece_sha256: dbb32c22f3418c67685e92e46bf6deabedd5dcb3c0f9b2976902f297fc08bb44
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:change_of_occupancy:
     piece_sha256: 38197d3b5b92b476f409425989e514ec311f3024af49035570bba5c5aa9b49e3
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:clearance:
     piece_sha256: 4dc8ce5736d5e9a3fc231682ca1dff50d26387a9d30791a3fab415f16d5ffbd1
     numbers:
@@ -233,11 +293,14 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:closet:
     piece_sha256: e5534063e796b1dfa9fc1e7e6e9b2b8e2629a1916c6251d8b0a442d8473c648d
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:code:
     piece_sha256: ee1af158f2d5a696c265d5b9c15d12136ea8ffbc983502249fa15bc9c3b22315
     numbers:
@@ -245,11 +308,14 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:construction_documents:
     piece_sha256: 0413e59e3b0e4b0609059dc6dbf267d096dc3949de1c3d040906a735be784789
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:control:
     piece_sha256: 200e8469faf27e9ed55e3f46a4e7901bd1cc5010f58f4518e5e2e9b33022448b
     numbers:
@@ -257,6 +323,8 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:court:
     piece_sha256: 36c7c15efc839559bbed559009facfc314e02fe5b8a300977541a854eb96b488
     numbers:
@@ -264,16 +332,20 @@ pieces:
     second_reading_numbers:
     - three or more
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
   R202:crawl_space:
     piece_sha256: 064f0986838bdafb22b39992fd3c41929b955139687997691e62d6346bc56b55
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:diameter:
     piece_sha256: 4b87da95cba6173de04fddebea2f46de625e5679c5fc7a8baa1be222ce197c70
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:draft:
     piece_sha256: 2fb694f77a2ac5d4024d34f8077b4ecd9de644d5c9cf0bffd799240d667013a4
     numbers:
@@ -285,6 +357,10 @@ pieces:
     - '24'
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - 'none'
   R202:draft_hood:
     piece_sha256: ca4a6f5f594913331ef0429a0e7149e14c027879800296ba145bba69b50761ed
     numbers:
@@ -292,11 +368,14 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:drain:
     piece_sha256: b04e2bd7feb02731301419ad9e33d092102f4ffa69636b459e83f757336eac1d
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:dwelling:
     piece_sha256: b2f00e17a35ec1a0f82b554163c0a3cce1f5e030c5769c8c8244a69cf45e4905
     numbers:
@@ -306,6 +385,9 @@ pieces:
     - one
     - two
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:dwelling_unit:
     piece_sha256: 1707d555b676a44e99305a9cb5c5826e91ccc424be45ba679a68742a275fe89e
     numbers:
@@ -319,11 +401,17 @@ pieces:
     - two
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - 'none'
+    - 'none'
   R202:emergency_escape_and_rescue_opening:
     piece_sha256: 1b183af86f56bf5765167889011e931eff5cb01c456f16a2f9a661a086f5b9f2
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:energy_code:
     piece_sha256: 5a2c3b2e43a80d95e74c31c06bf9bbbcf7e602583d2293e146decfece2f55833
     numbers:
@@ -331,6 +419,8 @@ pieces:
     second_reading_numbers:
     - '11'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:equipment:
     piece_sha256: 9f2c7cf2ccc0e8d48561e6d10c1e7cc8b134ab65308b15b0aa62a5f5016a7b46
     numbers:
@@ -338,11 +428,14 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:existing_building:
     piece_sha256: 2ee997c54b8cf0ac323766587ae4eeb744d848cb154554d166f0d4b46375ed17
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:existing_building_code_of_new_york_state:
     piece_sha256: aaef3a1631157c3e922fac14b65857d8e531c1323a40697a177a20486879a5f2
     numbers:
@@ -352,6 +445,9 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:exterior_wall:
     piece_sha256: 6e5f2c813014f77b6a7b77aaa172461ae4c87e4555bec3796d787588890db7d9
     numbers:
@@ -359,6 +455,8 @@ pieces:
     second_reading_numbers:
     - less than 50 percent
     second_reading: agrees
+    second_reading_comparisons:
+    - '<'
   R202:fire_code_of_new_york_state:
     piece_sha256: f99f580d675f2378cb5fbe0fd82deaa49ea706beb266474174a150ac520a3196
     numbers:
@@ -368,11 +466,15 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:fixture:
     piece_sha256: c72b1575cee9e234b183f02ad75dd707c178db53d33f7d82adb0fe158274179a
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:flight:
     piece_sha256: 18fa8109abe89ac74fb4029d1b54260f2ce45a6308f95306418cade68cfd7778
     numbers:
@@ -380,6 +482,8 @@ pieces:
     second_reading_numbers:
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:flue_collar:
     piece_sha256: c060b14c30bd17b527ff3def56a833dd239662abf875ebb681073907bea4c3b2
     numbers:
@@ -387,6 +491,8 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:flue_gases:
     piece_sha256: 9dc48a33905734ede2544b51daeec0319fd24839fe53f09f83695f635601f271
     numbers:
@@ -394,6 +500,8 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:fuel_gas:
     piece_sha256: c490314c3c24c0e860b9e1209e5bca7af274b7553ba27eab06cd339ce192a93c
     numbers:
@@ -401,6 +509,8 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:fuel_gas_code_of_new_york_state:
     piece_sha256: bedf6e26cd5d3c41f3733801485dc9402a6f74aceab1b1744cd19098b06b4140
     numbers:
@@ -410,6 +520,9 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:gas_piping:
     piece_sha256: b5a4c92e5e51f670fb05d61e78680544c79e9bd622c559ae8316ae39fdfdeda4
     numbers:
@@ -417,11 +530,14 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:grade:
     piece_sha256: 4d24b6beb034526892c23f5df7e09cf5488833c49934ac2afa738bdc64c7df27
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:grade_floor_emergency_escape_and_rescue_opening:
     piece_sha256: 8848d95c591e76eb11b4e8a6844e3ff9d9d5619a4f70e601604d3a625848471a
     numbers:
@@ -431,6 +547,9 @@ pieces:
     - not more than 44 inch
     - 1118 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
   R202:grade_plane:
     piece_sha256: f73298b8f7ce342d2d0170102c9f3608799c0fe259c0a00d587c99a1fe6d555f
     numbers:
@@ -444,11 +563,17 @@ pieces:
     - 6 foot
     - 1829 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>'
+    - 'none'
+    - 'none'
+    - 'none'
   R202:guard:
     piece_sha256: 9914b3ae0c54bd8f275fae23d3a8028955b94abca5746a0db7875eba35d21f73
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:guestroom:
     piece_sha256: b7f10dec2f58bbf901ba2a44c0cdab1a9adce736bb059014d4e9ded10456605f
     numbers:
@@ -456,26 +581,32 @@ pieces:
     second_reading_numbers:
     - one or more
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
   R202:habitable_space:
     piece_sha256: 0c2b643e5e32b0d4ba172a9dd984994efb82505c739e52180c8f7b15ba2d8a5a
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:handrail:
     piece_sha256: e1584ebef760071988ec3e52a945b187607c19c3a00dfa9dff12ae4db868f0fe
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:historic_building:
     piece_sha256: de89ae1f335a65e0a6b94bd53f4f10e83b35d81f3e1107aa7bce6a76d096371b
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:kitchen:
     piece_sha256: fb597d637022074182f3e875788fcfd636e97e1493fefe51e00bc590a020fec0
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:listed:
     piece_sha256: f6d428b73d9cca0d67192433603691663ce2711bec712c277c2dfb662611a677
     numbers:
@@ -483,6 +614,8 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:lodging_house:
     piece_sha256: be46819caf1e26eb677809e416e7d4a093d1536238dbb87d5617416283d7e012
     numbers:
@@ -492,21 +625,27 @@ pieces:
     - one
     - one or more
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - '>='
   R202:lot:
     piece_sha256: d82651fe8f14c9a008920f807f6c43dcd9f23d23f7777e0941af1116c7e8e7a2
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:lot_line:
     piece_sha256: b66f1b48b6a13e599ed8a1e3e129e398a55be1f1552e0bafcf26b63941b2ad54
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:main:
     piece_sha256: e58d34569cbc010343168a068478005f16a1fb302bc14c1253f3f8eaae020afd
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:mechanical_code_of_new_york_state:
     piece_sha256: 59f25dd23169c157fa8309bdfef2014504c8771569c5b3d735f31ec4cdf13cd2
     numbers:
@@ -516,31 +655,39 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:mezzanine:
     piece_sha256: ca077b6e8fc917d2126d2800c80696432fa4d82212a3e6eca5ea75512fc0217b
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:nosing:
     piece_sha256: c4c82f7a65d8256661702646a7d7bd3a2736ab462bd7cc3d5797ac598c1e8430
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:owner:
     piece_sha256: 344ef2c7b85254970027fea3cf98ea0fc69165e0d464a9c2c770ded981aa1976
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:permit:
     piece_sha256: 9437cca9970173f5d3f964abcbcc8acbb76f16827fbc921f24c448e1787c47dd
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:person:
     piece_sha256: ca3f9a518f36b022c6ac0dbd57ef63723a4b202140169a5ac1aef46737d814d7
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:piping:
     piece_sha256: e61dbd671cade2d978f10e11dc5ccd85c0fb82fb9d059fee462f24314d4cdbc5
     numbers:
@@ -552,6 +699,10 @@ pieces:
     - '24'
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - 'none'
   R202:piping_system:
     piece_sha256: be0e5577252066d3f999ffb6d5fd9d62ec307c9f44b0d32360d4eb325e6e35fd
     numbers:
@@ -559,16 +710,20 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:pitch:
     piece_sha256: 9f012b2c21042e19c5b347144cd9f0d71b57e5eec51e3350b4b64a85c52f0f49
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:plastic_composite:
     piece_sha256: ea927d39287bcb8315255542f866025a930f1e6d99130d24325a89cc42c2ae53
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:plumbing:
     piece_sha256: 922a706bdf27440e08ff7bcce68fd899767a484c808ac5ef1ece7890fecaee04
     numbers:
@@ -578,6 +733,9 @@ pieces:
     - '25'
     - '33'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:plumbing_code_of_new_york_state:
     piece_sha256: ac0fe76b73e3850369c74fd548f5e0056756b0616342e7d9795461575a2caf13
     numbers:
@@ -587,11 +745,15 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:plumbing_fixture:
     piece_sha256: 413568d9aad4eea913a2c1b8e2ac1cf91f13ec1e7bb1f427e809a0b5425928c9
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:property_maintenance_code_of_new_york_state:
     piece_sha256: 11a4455e0764a27029fb325479de98d78a56a47a93956088202a4769768b6c44
     numbers:
@@ -601,6 +763,9 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   R202:public_way:
     piece_sha256: 5b644c85e63f214ce9efc215371fc5cd5ddb64746dc99f78b83c23c170c08c6d
     numbers:
@@ -610,6 +775,9 @@ pieces:
     - not less than 10 foot
     - 3048 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
   R202:ramp:
     piece_sha256: b179336de087ff5c6b2cce9a4fe6f46f0ffbabe6768b646c3be9191e06b347c3
     numbers:
@@ -621,6 +789,10 @@ pieces:
     - 20 unit horizontal
     - 5 percent
     second_reading: agrees
+    second_reading_comparisons:
+    - '>'
+    - 'none'
+    - 'none'
   R202:ready_access_to:
     piece_sha256: 377589311b1dc5cb7e3d5e28b9d0f8124b053e5e97abbfcb266ef032cfd51532
     numbers:
@@ -628,11 +800,14 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:repair:
     piece_sha256: c2afbeecd8e138697db3e655bb9223162e3bc18f08bbb97befec98961a0fcf59
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:riser_plumbing:
     piece_sha256: 37493e39b1c290791e17da2e5618df3a18362062f5c6bb68a2d5d3092f4e3a62
     numbers:
@@ -640,31 +815,40 @@ pieces:
     second_reading_numbers:
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    flags:
+    - "'one': printed \"extends vertically one full story or more\": at least one story (>=); the recorded words stop at the number, and \"or more\" follows \"full story\". A definition, setting no limit itself."
   R202:riser_stair:
     piece_sha256: 621448a876dbc2dec22c869f1c47a5ebd7017ce5940bbfb1da41d9e6209766be
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:roof_assembly:
     piece_sha256: a6a5440f261fc52729caf6a7bd4d0813b2ac1e77a1dd54341bca8a2059e6e9af
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:roof_covering:
     piece_sha256: 0b664637230efcf890670c828d5f289704a80ec98dd256fc586826ed66eb23bf
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:roof_deck:
     piece_sha256: e543817c4a89fd67b227d550ff29e9842c068f9d5110f9c6d12d9148807cb29e
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:shall:
     piece_sha256: 786d5fd72cc8ecfaca64c6e0fd669504e89c757beaf54fa10c3e76bb5dd0f766
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:sleeping_loft:
     piece_sha256: 5e6347c48c7f39d07fb64b269a41e97b0d87a4171e5a0b58dc9d2ac18081a1e8
     numbers:
@@ -672,6 +856,8 @@ pieces:
     second_reading_numbers:
     - one or more
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
   R202:sleeping_unit:
     piece_sha256: fc500e5ea6da41d32e199a11b829b8bc68ae13b61a937a1829063dcc04a7b7e8
     numbers:
@@ -679,11 +865,14 @@ pieces:
     second_reading_numbers:
     - one or more
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
   R202:slope:
     piece_sha256: 555a9ac36c8a8cbfab3bca4fad7e3bf8d91ec428b80cebbdef2c773c24154bd4
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:stair:
     piece_sha256: 3b27ab60242c0518ba69944509207ca0360c75101db72256a9daa10bdac2c3d8
     numbers:
@@ -691,6 +880,8 @@ pieces:
     second_reading_numbers:
     - one or more
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
   R202:stairway:
     piece_sha256: fefffbb11b297278b1824dbef59f1c59f8edaf6043c97f74909972e350a7f683
     numbers:
@@ -700,11 +891,15 @@ pieces:
     - one or more
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
   R202:stairway_spiral:
     piece_sha256: b985f33ca2fbedf8c81f1b46ba7e69196272d5cc2881e2fb5fd0dcdb12db15af
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:storm_shelter:
     piece_sha256: fd32affde857b635ddb3941c0b9d33c913df1a4b1241082fc23bdf1c78641abd
     numbers:
@@ -712,11 +907,14 @@ pieces:
     second_reading_numbers:
     - '500'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:story:
     piece_sha256: cd81e0e43faab5a3b8fc37e8327c7cf713348137a5eb8b931b790af156ed0316
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:story_above_grade_plane:
     piece_sha256: 8bf47338d91a6f658d742fe70cc93cf1d3d29e4efa302325ee9e41ad6543c0be
     numbers:
@@ -736,11 +934,20 @@ pieces:
     - 1829 mm
     - more than 50 percent
     second_reading: agrees
+    second_reading_comparisons:
+    - '>'
+    - 'none'
+    - '>'
+    - 'none'
+    - '>'
+    - 'none'
+    - '>'
   R202:structure:
     piece_sha256: 633a73df3fcb837d947bb54958fd369536e1ef4b68235e0de8ae5ad8c7b550fd
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:townhouse:
     piece_sha256: de90782d8fc1797fb1a0867a12853286a709fa0abb9d3e05c32d20ba89f687a1
     numbers:
@@ -748,6 +955,8 @@ pieces:
     second_reading_numbers:
     - three or more
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
   R202:townhouse_unit:
     piece_sha256: 5828cbeba43269765a58c29cbdb97175852050379a5477b89efdb0d13cd6f99f
     numbers:
@@ -755,6 +964,8 @@ pieces:
     second_reading_numbers:
     - not less than two
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
   R202:underlayment:
     piece_sha256: 1f6f1155b6b706041cc53014d13f4a56290bd0f6d59b693ac5936c784840b3cc
     numbers:
@@ -768,6 +979,13 @@ pieces:
     - 12 unit horizontal or greater
     - 17 percent
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - 'none'
+    - 'none'
+    flags:
+    - "'2 unit vertical' and '12 unit horizontal or greater': printed \"a slope of 2 units vertical in 12 units horizontal (17-percent slope) or greater\": the slope (2 in 12) or greater, which the recorded words put on the 12 alone. A definition, setting no limit itself."
   R202:uniform_code:
     piece_sha256: d9afba7fc38e60149a2abff02f9171831906b3ee76d069f3f835d95dbbea8b8b
     numbers:
@@ -775,6 +993,8 @@ pieces:
     second_reading_numbers:
     - '18'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:vent:
     piece_sha256: 5e434d56b2b6ea387391fe5b55915ab45135107573707a05b1ff88df1364239d
     numbers:
@@ -782,11 +1002,14 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:venting:
     piece_sha256: a01d6978c018e3aa862db842fbf3e10bbfd1cc8625953d6d45f534272f20e146
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:venting_system:
     piece_sha256: 9a7cc3056d91bb8149d846a0317af80fee601382069ae6d238a329790af6c56d
     numbers:
@@ -794,31 +1017,38 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R202:walls:
     piece_sha256: 270bb4ed2c45e9fd87628a020c2d70db2d2bea8facc149eb201cae3643bc40e6
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:winder:
     piece_sha256: 06e8ed02e4d50453614aa9b4558f9f969866e7a1acdcd884ed38c8d6ea3080bc
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R202:yard:
     piece_sha256: 86112f4b30c9988773f7df45733aeba111b79e4bd496919deae4272ca8d53ff8
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R314:
     piece_sha256: 04507de7925b29ac062cdbd0f2711f4a839b72bd0ea94f2c7dece289c4ee2c14
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R314.1:
     piece_sha256: d87fa56be89be9399e365591e204794b83ced3ae7937ce94b263654d004df494
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R314.2:
     piece_sha256: 48c0595a4516280eee006452715206364b38e1280bd6906e61392074ee3d75d1
     numbers:
@@ -828,6 +1058,9 @@ pieces:
     - not less than 7 foot
     - 2134 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
   R314.3:
     piece_sha256: 66066913dd720a65415e2a68b9ddc355427d30b97879133069eca8e2452dc622
     numbers:
@@ -841,11 +1074,17 @@ pieces:
     - not more than 42 inch
     - 1067 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - '<='
+    - '<='
+    - 'none'
   R314.4:
     piece_sha256: 699cb15b66e603e4dd56cebef8f6837b2ce675ab8b0cea3ed4277360eec2d6c1
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R314.5:
     piece_sha256: c48500d24d4773c664d2718c536949ace2a01eb04ed6eae5f4528e0de1da4f6c
     numbers:
@@ -857,11 +1096,16 @@ pieces:
     - 1067 mm
     - not greater than 10 percent
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
+    - '<='
   R315:
     piece_sha256: a4a0fd5fcd31126829ac7e9f09b845cf92655f7810c1e0a4b3769dbf27552d1a
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R315.1:
     piece_sha256: d64beeb60549c0761ae9cabfc2d0fc88a44ff1167aad6d0851a96c8832fc87ce
     numbers:
@@ -875,6 +1119,11 @@ pieces:
     - less than 35 square foot
     - 3.3 m
     second_reading: agrees
+    second_reading_comparisons:
+    - '<'
+    - 'none'
+    - '<'
+    - 'none'
   R315.2:
     piece_sha256: ed41bd055c266e7f4d9bb5978403de32b2a0772913187a4d2771e0818c7d020a
     numbers:
@@ -890,6 +1139,14 @@ pieces:
     - 2134 mm
     - more than one-half
     second_reading: agrees
+    second_reading_comparisons:
+    - '<'
+    - 'none'
+    - '<='
+    - 'none'
+    - '<='
+    flags:
+    - "'more than one-half': printed \"The sleeping loft ceiling height shall not exceed 7 feet (2134 mm) for more than one-half of the sleeping loft floor area\": the \"not\" governs both, so the ceiling may be over 7 feet on at most one-half of the floor area (<=). The recorded words read \"more than one-half\" (>), the law backwards: numbers.py does not carry a \"not\" past another number (\"7 feet\"), which keeps it from taking another number's \"not\" elsewhere."
   R315.3:
     piece_sha256: adb5cf63cd6e18ab0dd5dc62b0bd84c72a9f4ea3c81a7ce49df6a9bcf22dba7b
     numbers:
@@ -907,6 +1164,13 @@ pieces:
     - less than 3 foot
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<'
+    - 'none'
   R315.4:
     piece_sha256: f0539c1140384959ca31b8138d28668daac7a212e45884e495429a1521f3ffd2
     numbers:
@@ -914,11 +1178,14 @@ pieces:
     second_reading_numbers:
     - not be greater than two-thirds
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
   R315.5:
     piece_sha256: cfec9f359d4db0b0edf4d961c1b20aff432e5ae3baacab750d997bcb9a9d3a66
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R315.5.1:
     piece_sha256: a78e80c6faffe963500b53b557bd2b356cdd1ee62a41b99b24ef00fad890a0e9
     numbers:
@@ -928,11 +1195,15 @@ pieces:
     - not less than 3 foot
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
   R315.5.2:
     piece_sha256: d171eedebdd328e59f777845f2b32211a55b974b3cc08f0c57ced24b40489694
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R315.5.2.1:
     piece_sha256: 07f1358b50483fda63d0b0545db9b799f1b501b2ce50ef633c49fc2cb0551509
     numbers:
@@ -946,6 +1217,11 @@ pieces:
     - not less than 20 inch
     - 610 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
   R315.5.2.2:
     piece_sha256: 897c186970612f3f5550b9ac7eec48b1fa5bdc064f90ea3af5de8ff2ddd9de97
     numbers:
@@ -973,6 +1249,18 @@ pieces:
     - 381 mm
     - three-fourths
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
   R315.5.2.3:
     piece_sha256: b6fa1b7ddd51d667fe092a435c9bd5b104be65f00c19741195a76de6d97bb712
     numbers:
@@ -982,11 +1270,15 @@ pieces:
     - not less than 24 inch
     - 610 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
   R315.5.3:
     piece_sha256: 48e3eaebd099633022d88a71530b9cbc6b9f1b0ebdc34ccfe206dd1a11845e3a
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R315.5.3.1:
     piece_sha256: e407a907034d832aff6e75d83131bff9787edb24e6f0b11fec073759cfdf980d
     numbers:
@@ -1012,6 +1304,19 @@ pieces:
     - within 3/8 inch
     - 9.5 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - 'between'
+    - 'none'
+    - 'between'
+    - 'none'
+    - 'none'
+    - 'none'
+    - '<='
+    - 'none'
+    flags:
+    - "'and 10 inch' and '14 inch': printed \"10-inch (254 mm) to 14-inch (356 mm) spacing between rungs\": a range from 10 to 14 inches (between); the recorded words do not read \"to\" as a range."
   R315.5.3.2:
     piece_sha256: 68565d86e2250b4138d317feef9982d651adeed272199cb07ef891fd97684ece
     numbers:
@@ -1021,21 +1326,29 @@ pieces:
     - '70'
     - 80 degree
     second_reading: agrees
+    second_reading_comparisons:
+    - 'between'
+    - 'between'
+    flags:
+    - "'70' and '80 degree': printed \"inclined at 70 to 80 degrees from horizontal\": a range from 70 to 80 degrees (between); the recorded words do not read \"to\" as a range."
   R316:
     piece_sha256: d0492813f9539cbdd112773488f4e40fab2d45d3db520aee781936565cfeec22
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R316.1:
     piece_sha256: 0bf4191f14d2fc2568b1049b80f8c381b56549fa15394e18157a08f70fef1428
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R316.2:
     piece_sha256: 384430d2bc047d38be23e3bc0cdd5d7ce1e693e2326fb645909cdcd29b7d317b
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R316.3:
     piece_sha256: b1fb653c2ddda50652c5ac20ba228d671090a06f598ba6667d7be24d92b01ead
     numbers:
@@ -1047,21 +1360,28 @@ pieces:
     - not greater than one-half
     - a third
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - '<='
+    - 'none'
   R316.4:
     piece_sha256: 80c2df17f22e3e31713a42cca80eb347888055a933224c0b00e6c955e64c2c22
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318:
     piece_sha256: e2a7de0524c2a9fdf5c59f4b312741c9f6de6b5cf90964552c6e29895ccecf0f
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.1:
     piece_sha256: ea6aae7e5ea9573c55a1492213be1ec45d2dbb17acebc3a0a45e2412e37222fc
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.1.1:
     piece_sha256: fb5c60ae54bc9c99a24a2edf9748cc115f5cd3ef7347dff0d17d73a7962d56a9
     numbers:
@@ -1069,6 +1389,8 @@ pieces:
     second_reading_numbers:
     - '6'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R318.2:
     piece_sha256: ca5ac31aa4939c1f2d9bedfc55c6535be6006287ce3f5257d3dd96bc22e86a6f
     numbers:
@@ -1088,6 +1410,14 @@ pieces:
     - not less than 78 inch
     - 1981 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - 'none'
+    - 'none'
+    - 'none'
+    - '>='
+    - 'none'
   R318.3:
     piece_sha256: d9acf1fe726e897c9db2a369e64ea23f1ca3d3e54f89f4ca21d408fe36d180e3
     numbers:
@@ -1111,6 +1441,16 @@ pieces:
     - less than 36 inch
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - 'none'
+    - '<'
+    - 'none'
+    - '<'
+    - 'none'
   R318.3.1:
     piece_sha256: 8f8cbcfd89b39dab2ebc617684241a740d6b299b60070f1aeef81432177119b6
     numbers:
@@ -1124,6 +1464,11 @@ pieces:
     - not more than 8 1/4 inch
     - 209 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
+    - '<='
+    - 'none'
   R318.3.2:
     piece_sha256: e0022c106d4301600cd8cc422d6d66a0e6aa902f6aa11ffa58b23887d2928419
     numbers:
@@ -1135,21 +1480,28 @@ pieces:
     - 209 mm
     - not more than two riser
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
+    - '<='
   R318.3.3:
     piece_sha256: d8a5f6c6b90cf4d5d1607435931fb887256224e7199a081b5f1bb5ff6a8ef36a
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.4:
     piece_sha256: 95660f3338a2b9ec55fbf6e5f56deecc47dc20221756cdbf22714941a3db06b3
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.5:
     piece_sha256: 76c3934caa78919820b65068a8ea7d3b1357aaad8e3dd6a1515cf73fc043e9b1
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.6:
     piece_sha256: 2fb6990cb308e0d977bd7d646b655868e93e56bdd095a03811b21315121ca6a8
     numbers:
@@ -1159,11 +1511,15 @@ pieces:
     - not less than 3 foot
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
   R318.7:
     piece_sha256: 94bbb604febda72f2e456e405992bfdb4d0f153d3e704e7934ce39cca5a98c76
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.7.1:
     piece_sha256: 4ca1a6906e695a54af0cbedd05745111d64038a8bbb38a90850f5467a52548a0
     numbers:
@@ -1183,6 +1539,16 @@ pieces:
     - and 27 inch
     - 698 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - 'none'
+    - '>='
+    - 'none'
+    flags:
+    - "'and 27 inch': printed \"shall be not less than 31 1/2 inches (787 mm) where a handrail is installed on one side and 27 inches (698 mm) where handrails are installed on both sides\": the \"not less than\" governs the 27 inches too (>=); the recorded words keep only \"and\"."
   R318.7.2:
     piece_sha256: 7acb6a579055c66d810932464385a4752a66750a60d80b502a2cf48be0c19d6b
     numbers:
@@ -1198,6 +1564,14 @@ pieces:
     - not project horizontally into the required headroom more than 4 3/4 inch
     - 121 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    flags:
+    - "'8 inch': printed \"not less than 6 feet 8 inches\": one length, recorded as '6 foot' (>=) and '8 inch'; the limit is the whole 6 feet 8 inches."
   R318.7.3:
     piece_sha256: 9d610e9ff2dcceff483b28da79709c38e6d952b0b6b5b12f131d907dc183128a
     numbers:
@@ -1209,6 +1583,12 @@ pieces:
     - 7 inch
     - 3835 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - '<='
+    - 'none'
+    flags:
+    - "'7 inch': printed \"greater than 12 feet 7 inches\": one length, recorded as '12 foot' (<=) and '7 inch'; the limit is the whole 12 feet 7 inches."
   R318.7.4:
     piece_sha256: ab8ae162d8f067a044d6cc6f26b81e5386b233da4a87d8444a7fa817bb8d6c22
     numbers:
@@ -1222,11 +1602,17 @@ pieces:
     - 12 inch
     - 305 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
   R318.7.5:
     piece_sha256: f07e5fea2752626f3d3b4d9c60246861b7a26c8777be9867c7106fe31509d781
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.7.5.1:
     piece_sha256: a3c13f44fc5ef9be9de7ce19d811782abb2020102da3bd7331f42d9c94f59653
     numbers:
@@ -1252,6 +1638,17 @@ pieces:
     - 4 inch
     - 102 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
+    - '<='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>'
+    - 'none'
+    - 'none'
+    - 'none'
   R318.7.5.2:
     piece_sha256: c2bb3238132120d4109c85bf8a1245f4bcc2719b1162d7e2a19f711e98a0981c
     numbers:
@@ -1265,6 +1662,11 @@ pieces:
     - not exceed the smallest by more than 3/8 inch
     - 9.5 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
   R318.7.5.2.1:
     piece_sha256: 1d6a140e00050bae33273e7822cd7f7994dc8b14ad13144f86a7afd507912fe9
     numbers:
@@ -1286,6 +1688,15 @@ pieces:
     - not be required to be within 3/8 inch
     - 9.5 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - 'none'
+    - 'none'
   R318.7.5.3:
     piece_sha256: 3a48b81f9452c2482c29d2c67b1603d8276b6d74b87fabd1b8e40384c6e5081e
     numbers:
@@ -1319,11 +1730,29 @@ pieces:
     - exceed 1 1/4 inch
     - 32 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    - 'none'
+    - 'none'
+    flags:
+    - "'exceed 1 1/4 inch': printed \"shall be permitted to exceed 1 1/4 inches\": the maximum is lifted there, which the recorded words read as more than (>); the second reading as no limit (none). Either way no maximum applies there."
   R318.7.5.4:
     piece_sha256: 3a19fb357b270bd162d8826e9370abdb037b296c7dbf7d24812bbdf0cb63a569
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.7.6:
     piece_sha256: 2f826ca495455f22959b81421873468b8926275b49809ee378a5260796148a25
     numbers:
@@ -1347,6 +1776,16 @@ pieces:
     - not less than 36 inch
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '<='
+    - '<='
+    - '>='
+    - 'none'
   R318.7.7:
     piece_sha256: ef602ca55c74b5fe3b52399b6e666c6f80e6dbd5df487109d47f44ae8dc94e58
     numbers:
@@ -1364,6 +1803,13 @@ pieces:
     - 20 unit horizontal
     - 5 percent
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
+    - 'none'
+    - '<='
+    - 'none'
+    - 'none'
   R318.7.8:
     piece_sha256: 29e35fa992f8415f16165fc45e6c23bd2d6a84a4820a61d1efe0c951d3e2e3f3
     numbers:
@@ -1373,21 +1819,27 @@ pieces:
     - not less than one
     - four or more
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - '>='
   R318.7.9:
     piece_sha256: e83ab8dd2085caf281ba4f99e9f60d617ccaf0eec339568d8458dedba1d58838
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.7.10:
     piece_sha256: f7debb0a0c1127d5807a3e653672d417fd223a942991585c52d70d890e9b5df2
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.7.11:
     piece_sha256: 0e35d6e1f869cc38570f62d54a2415a852fcdebc3200ce83432ca8d35e4b08aa
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.7.11.1:
     piece_sha256: 4a5a1eaf531090528507a82bdfb8653c7b1bc35fffc3d347edb971b3c7878157
     numbers:
@@ -1415,6 +1867,20 @@ pieces:
     - 6 inch
     - 1982 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - '>='
+    - 'none'
+    flags:
+    - "'6 inch': printed \"not less than 6 feet 6 inches\": one length, recorded as '6 foot' (>=) and '6 inch'; the limit is the whole 6 feet 6 inches."
   R318.7.11.2:
     piece_sha256: e1bbca03705826726491f0c96f13b1769fb39f34d48bcf362f4bb98510058f7b
     numbers:
@@ -1424,6 +1890,9 @@ pieces:
     - not more than 8 foot
     - 2438 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
   R318.7.12:
     piece_sha256: 56b46d47de03a0d789ea58fd0a065794abd7fe546c110106dd54ca5f7e8600ef
     numbers:
@@ -1437,6 +1906,13 @@ pieces:
     - 200 gross square foot or less
     - 18.6 m or less
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    flags:
+    - "'18.6 m or less': the m² in brackets repeat \"200 gross square feet ... or less\" (recorded '<='); the second reading marked the conversion 'none'. The \"or less\" is the 200 square feet's."
   R318.7.12.1:
     piece_sha256: e5e7ea0f7403199234e4c9e6602d84c1f5d983d84af9f15949cccbb136031371
     numbers:
@@ -1466,11 +1942,27 @@ pieces:
     - '0.87'
     - and 1.22 rad
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - 'between'
+    - 'between'
+    - 'between'
+    - 'between'
+    flags:
+    - "'0.87' and 'and 1.22 rad': the radians in brackets repeat \"between 50 and 70 degrees\"; the range is recorded on the degrees, as the code reads it. The second reading also marked the conversion 'between'."
   R318.7.12.2:
     piece_sha256: cee02ba46e792a35ac205a32668de99ed6a7a1656862724313bcd7c2eeeeb9f0
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.7.13:
     piece_sha256: 8a02eec1c6cb4bfb34886ce9ef89abb4159a443dfca23cc4451a7a514bc44867
     numbers:
@@ -1484,6 +1976,13 @@ pieces:
     - 200 gross square foot or less
     - 18.6 m or less
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    flags:
+    - "'18.6 m or less': the m² in brackets repeat \"200 gross square feet ... or less\" (recorded '<='); the second reading marked the conversion 'none'. The \"or less\" is the 200 square feet's."
   R318.7.13.1:
     piece_sha256: c67516d8d6f8bef2cd678b80fd9d0d42aa79ab974589739bca5d6cb3b2f8dfcc
     numbers:
@@ -1501,16 +2000,25 @@ pieces:
     - not more than 9 1/2 inch
     - 241 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
   R318.7.13.2:
     piece_sha256: 034887b824d48cbc661c8d943e9fe8e63edfa83867a7c55211bd547381aeaa2f
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.8:
     piece_sha256: c456a88806b75923bbb341d68a0332cbea6917974b428ad27a704b104cb74ba1
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R318.8.1:
     piece_sha256: 80bbe88129e30ad215180d4cd892a8d81f9e8b8f19fe6c93083daa7431bff3e1
     numbers:
@@ -1534,6 +2042,16 @@ pieces:
     - 8 unit horizontal
     - 12.5 percent
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
+    - 'none'
+    - '<='
+    - 'none'
+    - 'none'
+    - '<='
+    - 'none'
+    - 'none'
   R318.8.2:
     piece_sha256: a8907ce6609d403fef97e4c81aebfef2688d562b63e0adae0770cd1f62e31558
     numbers:
@@ -1543,6 +2061,9 @@ pieces:
     - not less than 36 inch
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
   R318.8.3:
     piece_sha256: 77661577703f82783682c3599c9f3d328e1dd5246090359519da44e353fcedff
     numbers:
@@ -1556,11 +2077,19 @@ pieces:
     - 12 unit horizontal
     - 8.33 percent
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - '>'
+    - 'none'
+    - 'none'
+    flags:
+    - "'1 unit vertical': printed \"ramps exceeding a slope of 1 unit vertical in 12 units horizontal\": a slope steeper than 1 in 12 (>); the recorded words stop at \"of\", so they hold no comparison."
   R319:
     piece_sha256: 06367977c1742c403c6476f8c1a1e0a6aec660e6cc92272df4c6d26e69d24273
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.1:
     piece_sha256: 6282d38ff225fb89cd41117c6bf34bc87e97117b0cf51e601c3361027aff7548
     numbers:
@@ -1588,6 +2117,20 @@ pieces:
     - not less than 36 inch
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - '<='
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - '>='
+    - 'none'
+    flags:
+    - "'200 square foot': printed \"not exceeding a total floor area of 200 square feet\": at most 200 square feet (<=); the recorded words stop at \"of\", so they hold no comparison."
   R319.1.1:
     piece_sha256: cdbfb6fc861e80fbc84dd791187e2336ae7c1b59bf164bc492a15f35748ed657
     numbers:
@@ -1597,11 +2140,15 @@ pieces:
     - not more than 70 inch
     - 178 cm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
   R319.2:
     piece_sha256: 87f306a8757b823e445e9c468aed6978c4be5cc0fa887b545fea7991c77f290e
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.2.1:
     piece_sha256: 7fc10512c2269bae71b5339f04ae1b4eac52f65a854fedd3bc1065df835d57de
     numbers:
@@ -1615,6 +2162,13 @@ pieces:
     - 5 square foot
     - 0.465 m
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    flags:
+    - "'5 square foot': printed \"The minimum net clear opening for grade-floor emergency escape and rescue openings shall be 5 square feet\": at least 5 square feet (>=); \"minimum\" is printed before the subject, so the recorded words hold no comparison."
   R319.2.2:
     piece_sha256: 0904d2c220b156dc8d3b8221268657b381f996f7f23669347b729c62f2b79c5e
     numbers:
@@ -1628,6 +2182,14 @@ pieces:
     - 20 inch
     - 508 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    flags:
+    - "'24 inch': printed \"The minimum net clear opening height dimension shall be 24 inches\": at least 24 inches (>=); \"minimum\" is printed before the subject, so the recorded words hold no comparison."
+    - "'20 inch': printed \"The minimum net clear opening width dimension shall be 20 inches\": at least 20 inches (>=), as the height."
   R319.2.3:
     piece_sha256: 7cd5adfb784d224c9afc0c4fd877916ae6de5b815dba5f3c9ee20bf602737411
     numbers:
@@ -1637,6 +2199,9 @@ pieces:
     - not greater than 44 inch
     - 1118 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
   R319.2.4:
     piece_sha256: 762c4a56d758665aea86ec0c573b12b42939f337aefcb4b97f22601164a22d14
     numbers:
@@ -1650,16 +2215,25 @@ pieces:
     - and 36 inch
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    flags:
+    - "'and 36 inch': printed \"a path not less than 36 inches (914 mm) in height and 36 inches (914 mm) in width\": the \"not less than\" governs the width too (>=); the recorded words keep only \"and\"."
   R319.3:
     piece_sha256: 5db89cf14a0b5f13f250921669e3c0542471a4045ca792fab71ffb81b3d7dc41
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.4:
     piece_sha256: 49ab59b9f487ae0c10edcc5881f533676332dddd2b57f30430bbe28ddf115c40
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.4.1:
     piece_sha256: fcf8b3967abc22fd4420d1a9acc9d3c2ab7d705bc4e9173c4f6a1243dbd69849
     numbers:
@@ -1677,6 +2251,13 @@ pieces:
     - not more than 6 inch
     - 152 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
   R319.4.2:
     piece_sha256: bf8997990981a7f5bfcede58d9d0e5715e9e8de0a39283762b99a08771eca810
     numbers:
@@ -1686,6 +2267,9 @@ pieces:
     - greater than 44 inch
     - 1118 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>'
+    - 'none'
   R319.4.2.1:
     piece_sha256: 5936133ea1e9069742a5f01bb36784a3ecc51ecb99088a291f9dec4e1d12ce26
     numbers:
@@ -1703,6 +2287,13 @@ pieces:
     - not more than 18 inch
     - 457 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
   R319.4.2.2:
     piece_sha256: 561beadeb49942233d5c718612de91efe223a182b4ee398b434ec0dd9d4d2fe3
     numbers:
@@ -1720,46 +2311,64 @@ pieces:
     - 18 inch
     - 457 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    flags:
+    - "'5 inch': printed \"a minimum tread depth of 5 inches\": at least 5 inches (>=); the recorded words stop at \"of\"."
+    - "'18 inch': printed \"a maximum riser height of 18 inches\": at most 18 inches (<=); the recorded words stop at \"of\"."
   R319.4.3:
     piece_sha256: be1c89947a22e6fdcf0e8bdc6af2dfe61f5a43eaa159e39911b27a5738a87a5f
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.4.4:
     piece_sha256: 686060ab75a3fbd549500c6ec8f4426306775fa0d8f77950b3a4fa9f8a45e68d
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.5:
     piece_sha256: de464ab95f3566fab0ee080eaded90ad92b00cb77023fa58bd8805e5c6432f6c
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.5.1:
     piece_sha256: 6041e0d420829b8069b00269e84214fad51547db237ad0d40da6e6c8ce85e13d
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.6:
     piece_sha256: 6a3e1e1b90d80e0d9c94dc54efa5ad118f1e197dfd8622fcde6625dac326e211
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R319.7:
     piece_sha256: bae8b7d1e35ed493780f8c00283f42995b216646d51506b5f05979f71af98cb0
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R320:
     piece_sha256: b4c36864f9b863b99a6b23101780a28e0b4f2adc32d184fb2f45c0f902a56f49
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R320.1:
     piece_sha256: 33a34e870f5d49380d8e3c74fb9c2da9b968c8a79da43a3f6b6de2ac1504293b
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R320.2:
     piece_sha256: ecdc82a81484d610ad14543530cbb8eb201f73aa2be764e948c4dac8d9c91f0e
     numbers:
@@ -1785,6 +2394,19 @@ pieces:
     - exceed 38 inch
     - 965 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - 'none'
+    - 'none'
+    flags:
+    - "'exceed 38 inch': printed \"shall be permitted to exceed 38 inches\": the maximum is lifted there, which the recorded words read as more than (>); the second reading as no limit (none). Either way no maximum applies there."
   R320.3:
     piece_sha256: ca561394426d289c443c4410343a9b2ee615794398edf8628824f4added9360f
     numbers:
@@ -1798,6 +2420,11 @@ pieces:
     - not more than 6 1/2 inch
     - 165 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
+    - '<='
+    - 'none'
   R320.4:
     piece_sha256: f1875ddc4ef7fad9b779f89c933c7e59ab3b925344c1d7723a5e1bbca075189f
     numbers:
@@ -1807,6 +2434,9 @@ pieces:
     - not less than 1 1/2 inch
     - 38 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
   R320.5:
     piece_sha256: 618169eb608eefd852b3b8bf97ba4c1dc7609bf5ba985d04d5ef72a74baeeb8d
     numbers:
@@ -1816,6 +2446,9 @@ pieces:
     - not form a gap more than 1/4 inch
     - 6.4 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - 'none'
   R320.6:
     piece_sha256: 29befa45b7bb4a6a652a59bdc15317c981229c7ee3ac29ee4c2df3cd35cbd3b9
     numbers:
@@ -1883,21 +2516,56 @@ pieces:
     - not less than 0.01 inch
     - 0.25 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    - '>'
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
   R320.7:
     piece_sha256: 46f7d9115991654246f26d979309447146f58f5920e7f6b94750e1a3a52d3a1b
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R321:
     piece_sha256: 52131c07022b953185f9b9272478361cdb3b830761333407bf9761f199e6b380
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R321.1:
     piece_sha256: 86c586699808b10876b7ddbcf9811b27af0082d75b35339296b18aa638459346
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R321.1.1:
     piece_sha256: 4441f83c4aac7d3870fb050090d8d0059facc51e413de1db2c950073acca1608
     numbers:
@@ -1911,6 +2579,11 @@ pieces:
     - within 36 inch
     - 914 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>'
+    - 'none'
+    - '<='
+    - 'none'
   R321.1.2:
     piece_sha256: 294d92543b5509ca62cf7ae0cfa0fb1ce2d75727044e44df15cc750aa471f1be
     numbers:
@@ -1932,6 +2605,15 @@ pieces:
     - not more than 38 inch
     - 965 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
   R321.1.3:
     piece_sha256: cd8ba793737595e91a05d1a105ad6edbe56c0239a10559c4ce91a4e839bbacae
     numbers:
@@ -1949,16 +2631,25 @@ pieces:
     - 4 3/8 inch
     - 111 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
   R321.1.4:
     piece_sha256: e99e4f9e4c898cc8443a13db1545b6cfc2514b88146d34cfd92e715b5282b716
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R321.2:
     piece_sha256: 62013a649d92d09a57d3b7b957ffbea8422d4b935352bfcca1867e3048420154
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R321.2.1:
     piece_sha256: 4cbcceeac5721cae32299aadd70fd0349282e49d6b16d946b67a318922e2174f
     numbers:
@@ -1978,11 +2669,20 @@ pieces:
     - 4 inch
     - 102 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '<'
+    - 'none'
+    - '>'
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
   R321.2.2:
     piece_sha256: 6dc61ee8ded05d88e4745265feeff22f1fc86a8e4c060181f227ac5a329f5461
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R325.6:
     piece_sha256: 586d7180ceedf3b0501020f7d8b6ca0dd8c497c08e314953da93963046c3e15d
     numbers:
@@ -1996,6 +2696,11 @@ pieces:
     - six or more
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '>='
+    - 'none'
   R325.7:
     piece_sha256: 0787a61bc9ad0a12e130ef4a86149d778a7214d09adebc1666add97e787f7815
     numbers:
@@ -2003,26 +2708,32 @@ pieces:
     second_reading_numbers:
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   R507.10:
     piece_sha256: f0334a16d8c59a7787ab9f3a2b340ce6dbe2d6d9bf0dd8f606131c1edd2e07f6
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R507.10.1:
     piece_sha256: 8bd8369283cb79cb7d847cb21211fbb510c9bdc9814ae3366399bb62b69a70ca
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R507.10.1.1:
     piece_sha256: 90c85ceaab034ddfa993956f50d0649d0be0175768c5a2e8305a0c092434cba7
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R507.10.1.2:
     piece_sha256: b128dd6b322409bc51ac6f7fd6ba53c374dc28fe7644609803cdf62460f5620d
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R507.10.2:
     piece_sha256: b8126a1002d4c606331d88b01b42da279acd00c4b23a7b39d826e0373366506f
     numbers:
@@ -2036,51 +2747,65 @@ pieces:
     - 102 mm
     - 102 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - 'none'
+    - 'none'
   R507.10.3:
     piece_sha256: ca215033780852f986d4ff10563c97eaf2ad96c9f2683c212e715498c458fce7
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   R507.10.4:
     piece_sha256: d3783a02b3fa69424ec25ce0cd08d7c3a1f407a19b77ecc0a752df5e89c28f41
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO101:
     piece_sha256: b1737c5d2465eb117b0cecee6673ffaf731b16422477a982afb836725cf244f0
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO101.1:
     piece_sha256: ddd8a9da5977fd04f9ccf81d2401885dc4ef4280120460eb46672f2c725c2ede
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO102.1:
     piece_sha256: 756a82b7d38068894d824f97628ab2b7243b05cc898cec053481e47f49b78935
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO102.1.2:
     piece_sha256: 395cacfcc1a87a854a0f8b1e007476def8b32568fe2f01c7357f78c3e3689acf
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO102.6:
     piece_sha256: b11d38f6835e42336f7173a78d68f6c273d3d079862db9fa0f29dcefbf2db8c1
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO102.6.3:
     piece_sha256: 6bff1e3db237a811cc5593ff7243c49c94cd9e94b5b54c16b98d9f7d45700e7e
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO103:
     piece_sha256: 4ada02a32de3e8ba54dfe61e04108cf29941b838252b8f682a86433bd8ad4c89
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO103.1:
     piece_sha256: aa67a49e3ea32ca8d7bbe89b5b9da05fc266ab3b6369f1253a530342bab6c928
     numbers:
@@ -2088,6 +2813,8 @@ pieces:
     second_reading_numbers:
     - '2'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   BO103:dangerous:
     piece_sha256: 20dbd7d0221739a5cc44d53df8b6a98beb4e512eb34243c8c9688ccdd0f803c8
     numbers:
@@ -2099,36 +2826,46 @@ pieces:
     - two thirds
     - one third
     second_reading: agrees
+    second_reading_comparisons:
+    - '>'
+    - 'none'
+    - 'none'
   BO103:reconfiguration_of_space:
     piece_sha256: 4d583c0d51f20c404a1f7aa198a458c5905d52fc067278ffaba63c53ed67b04c
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO103:relocation:
     piece_sha256: b0e113648e2390f13f1b883df0a29b782cf96cf3384ed4233275736a4d06073a
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO103:unsafe:
     piece_sha256: 5f23973529d6c6e8ccb7e8cea527a76bbed360cd238878df29a10fba6efc2ec0
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO103:work_area:
     piece_sha256: e85849e929efc22fd56259da5a32b4893a62456c671d787f2813abd54d9bf788
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO104.1:
     piece_sha256: f24423ae62b960af3ff751b1e5cae5132c7eaf69f81ec1c249ad9b7b939d4ec4
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO104.1.1:
     piece_sha256: c6c6c986f39bb0d7f3b15940941a32ec72698bb3ece01728256abb809ea25c84
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.1:
     piece_sha256: cce0eade431ba55056ca08e09c5328bb32853bcb968c77240a4f1dd0a0baa748
     numbers:
@@ -2138,6 +2875,9 @@ pieces:
     - '1'
     - '2'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   BO105.1.1:
     piece_sha256: 3074b2757159b74eac86576ffff5727526e15c51f5cad7d16baaa3b7104bc90b
     numbers:
@@ -2149,6 +2889,10 @@ pieces:
     - '1'
     - '1'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - 'none'
   BO105.1.2:
     piece_sha256: d70f52c7475e63e3d3aea4c2d08df8ecc213a89117a8d66b11899dfe47becb44
     numbers:
@@ -2160,26 +2904,34 @@ pieces:
     - '2'
     - '2'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - 'none'
   BO105.1.3:
     piece_sha256: 138b78cf99a112dd6ec1b3c408d0aa69bb317c6d0427837616dffd697564d4ee
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.2.2:
     piece_sha256: adb204b4f6f23647e064141da19ed9057f89ad9a94f23170e23995aada5c5826
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.2.3:
     piece_sha256: 87dc2cb026871593db0d82ea2dfdeffeda2326e1fda842a621dc13dd7a8116df
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.3:
     piece_sha256: e81e53f1eb138d64b69c00740805f01f80755dc7fd63ece7c07faa845f06f448
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.8:
     piece_sha256: f6ae55ee55c8ba0cad7ce40d1739bc9b95ffedbd40aa9b42c509c4ee42e065b8
     numbers:
@@ -2189,51 +2941,63 @@ pieces:
     - '702'
     - '2'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   BO105.10:
     piece_sha256: ffee62122579684f27750c7e36ade7f17cc414d34132b1416f0abc7b58a36e41
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.10.1:
     piece_sha256: a260d3864aab53629cd12ece041febe54bbaee070b8f20a2c342e0061be2f30b
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.10.2:
     piece_sha256: 1691466edb7903b8118ad26313f9c4e3b96891dd4392e563f0178c6f8312973f
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.10.3:
     piece_sha256: 23651aadf531119ebc4d57cf4e4519480906f69400ceb287a499a40d1e9c5f7c
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.10.4:
     piece_sha256: 8fc33fcb6ddbb2b04a86aa009269613b43f83ab7988006f91d98c73c52081f1a
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.10.5:
     piece_sha256: 96f3fe3a11c85139d86b53974846a6858166ecda3820a815087e09b1e8150dc9
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.10.6:
     piece_sha256: c4b99d99c919835a0193f058beedacf7efb3d106abfc27bebdfa9e77ae97007b
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.10.7:
     piece_sha256: e3d34ed57d703f92268f42afb754a1244687f5b091d8fe0188f74ef453227ea3
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.11:
     piece_sha256: a017567144df860f95771a657ab3175e80774d0d452abf4810cf495eafa1add5
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO105.13:
     piece_sha256: f46512d42b68da2e393797bf3a9d8e9d745e4c4c83e17b6e5b58a8a8bdf96dba
     numbers:
@@ -2241,21 +3005,26 @@ pieces:
     second_reading_numbers:
     - '72'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   BO106.1:
     piece_sha256: 0f01dafb6745f7ad430eb4764d813d1069e1357e9af51f225547593bbc5c8cd1
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO106.1.1:
     piece_sha256: bf26ce05fd35dab197fad1ddab36005db0dceeb95b4b91d057cff3ecadca2caa
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO106.1.2:
     piece_sha256: 26279ba6d724b442afbe071c37fe315b7ba553f8b20c71890433c2d43badf0c6
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO106.7:
     piece_sha256: 747d56ed8c0555a73a6065a79e6a69dbfd51b889148ffd0a27b5164a7e71eafe
     numbers:
@@ -2275,6 +3044,14 @@ pieces:
     - third
     - '72'
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - 'none'
+    - '>'
+    - 'none'
+    - 'none'
+    - 'none'
   BO107.1:
     piece_sha256: a8d7be685837c462ecfc6e81300977e765fa6cd42cf53142c8e2486f94860817
     numbers:
@@ -2290,6 +3067,12 @@ pieces:
     - one
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
+    - '<='
+    - 'none'
+    - 'none'
   BO107.2:
     piece_sha256: 6be3ee46b6f9fca2a8754db3ce40b698fe72c966a7b2b306ec047c30f0e3cc4d
     numbers:
@@ -2299,11 +3082,15 @@ pieces:
     - two
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
+    - 'none'
   BO107.2.1:
     piece_sha256: fa58aac38c910930977a026798a365b2c23f02fbb4f59f308f155aea02e8855c
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO107.2.2:
     piece_sha256: 26d36376bccdf4121e8b0473f307338cfd82f049d6398ca0ab1db684a6a64871
     numbers:
@@ -2341,11 +3128,32 @@ pieces:
     - not less than 30 inch
     - 762 mm
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - '>='
+    - 'none'
+    - '>='
+    - '>='
+    - 'none'
+    - '<='
+    - 'none'
+    - '>='
+    - 'none'
+    flags:
+    - "'6 foot' and '6 inch': printed \"Stairs shall have minimum headroom of 6 feet 6 inches (1981 mm)\": at least 6 feet 6 inches (>=); \"minimum\" is printed before \"headroom of\", so the recorded words hold no comparison."
+    - "'4 inch' (with the second '6 foot'): printed \"are permitted to have minimum headroom of 6 feet 4 inches (1930 mm)\": at least 6 feet 4 inches (>=), as above."
   BO108:
     piece_sha256: d687d5edc165696d39bd77ffe7c84d14e3e5ec196f6d097064569dc217b258f1
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO108.1:
     piece_sha256: be6d1ba4e3df1eaaa31c2459702321bfb80686ff19c96d6ec2b3fdda26c571af
     numbers:
@@ -2353,6 +3161,8 @@ pieces:
     second_reading_numbers:
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   BO108.2:
     piece_sha256: 77cfb3ef454ff035cb11ffa8c35d3968f2a99589d46bef6eb7b8a68c37cd9f7a
     numbers:
@@ -2364,6 +3174,10 @@ pieces:
     - up to ten
     - '10'
     second_reading: agrees
+    second_reading_comparisons:
+    - '<='
+    - '<='
+    - 'none'
   BO108.3:
     piece_sha256: 9a5883a8c83595d2c5f5fd464fbda5463f2ae5b52328924928e8734bb7fadb85
     numbers:
@@ -2371,6 +3185,8 @@ pieces:
     second_reading_numbers:
     - one
     second_reading: agrees
+    second_reading_comparisons:
+    - 'none'
   BO108.4:
     piece_sha256: 952924bc693acf034e7a42415cab9d0490712eb6792ed998a4ed2564c1a1112f
     numbers:
@@ -2384,28 +3200,40 @@ pieces:
     - 1,000 pound
     - 455 kg
     second_reading: agrees
+    second_reading_comparisons:
+    - '>='
+    - '<='
+    - '>='
+    - 'none'
+    flags:
+    - "'1,000 pound': printed \"shall be capable of sustaining a minimum load of 1,000 pounds\": at least 1,000 pounds (>=); the recorded words stop at \"of\"."
   BO109.1:
     piece_sha256: b6e4a9e721dd8d5d946f3e4ef1a3e4dc45350c44e4e5c5d290add8c4d2943bba
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO109.8:
     piece_sha256: 1e33db8ed08cfc695f507250b48b4ca88627a37937f95fef2f4422c3e686e65c
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO109.8.1:
     piece_sha256: 861a9dafca29574e57ffa32168cdd55fc1338d292a2d826e927a49897daf439e
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO109.8.5:
     piece_sha256: d8a1f8b05227256330b6253702f70782fd8b69c076c40ebc1adf6a9127d74ad3
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
   BO109.8.6:
     piece_sha256: 23252a42eeb3832d55b08dd716fd1bd4ad87d96aa500f94075fc14b58e8e1944
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+    second_reading_comparisons: []
