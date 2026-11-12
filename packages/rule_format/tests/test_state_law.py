@@ -244,3 +244,33 @@ def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
             if not inside and e["label"] not in ("rule", "flag"):
                 wrong.append((pid, target, e["label"]))
     assert seen >= 3 and wrong == []          # R319.7 (Appendix BO), R320.7 and R321.1.4 (R507.2.2)
+
+
+def test_a_metric_conversion_that_is_not_its_inches_is_named_in_the_labels_notes():
+    # review round 2 of egress step 1b: R318.7.1 prints "27 inches (698 mm)" (27 inches is 686 mm) and R315.5.2.1
+    # "20 inches (610 mm)" (24 inches); a rule drafted from the millimetres would set another limit, unnoticed
+    import json
+    import re
+    from rule_format.rulebook import cached, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached(entry, ".jsonl").exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    labels = load(NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml")["labels"]
+    n = r"(\d+ \d+/\d+|\d+/\d+|\d+(?:\.\d+)?)"
+    pair = re.compile(r"(?<![\d/.])" + n + r" (feet|inch|inches)(?: " + n + r" inch(?:es)?)? \((\d[\d,]*(?:\.\d+)?) mm\)")
+
+    def inches(x):
+        return sum(int(a) / int(b) if "/" in q else float(q) for q in x.split() for a, b in [(q.split("/") + ["1"])[:2]])
+    wrong, unnamed = [], []
+    for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
+        words = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
+        for m in pair.finditer(words):
+            value = inches(m[1]) * (12 if m[2] == "feet" else 1) + (inches(m[3]) if m[3] else 0)
+            mm = float(m[4].replace(",", ""))
+            if abs(mm - value * 25.4) > max(2.0, 0.01 * mm):        # the book rounds; 1931 for 1930.4 is no error
+                wrong.append((p["id"], m[0]))
+                if f"({m[4]} mm)" not in (labels[p["id"]].get("notes") or ""):
+                    unnamed.append((p["id"], m[0]))
+    assert wrong and unnamed == [], unnamed
+

@@ -24,6 +24,10 @@ Every reference in the brought-in sections was followed (found by code, `documen
 - "unit" in R319.1 is printed in italics alone only because the book breaks the styling inside "dwelling *unit*" (p.102, line 35); the term is DWELLING UNIT, and its definition is brought in by the roman-type match.
 - "above" in the definition of STORY ABOVE GRADE PLANE is printed in italics with "grade plane" in item 1 (p.52, line 36), though the line above prints only "grade plane" in italics; the term is GRADE PLANE, brought in, and "above" keeps its ordinary meaning.
 
+## What the book's text gets wrong
+
+- **R318.7.1's metric conversions** (p.100, line 25): "31 1/2 inches (787 mm)" and "27 inches (698 mm)"; 31 1/2 inches is 800 mm and 27 inches is 686 mm. Gordium's reading: the inches govern, the millimetres being a conversion printed after them; a reading for the architects to confirm before a rule is drafted from these widths. The label's notes say so, and a test (`rule_format/tests/test_state_law.py`, where the code cache is) finds every "inches (mm)" pair in the brought-in pieces that does not convert and requires its label's notes to name it.
+
 ## Ways into these sections from outside them
 
 Found by the same code: the whole book (all 1,079 pages, read once by the same extractor into the code cache, `gov.ny.residential.2025.full.jsonl`) searched for R318, R319, R320, R321, R325.6 and R325.7 outside the brought-in pieces, leaving out the table of contents (p.16), the list of standards (p.852) and the index (pp.1070-1076), which only list section numbers. None of these is brought in yet; each changes or extends what the brought-in sections apply to:
