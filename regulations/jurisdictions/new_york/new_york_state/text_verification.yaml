@@ -17,8 +17,13 @@ second_reading:
     transcript went through numbers.py: 102 pieces, 135 numbers, all agree (134 after review round 2, when numbers.py learned to read "one and one third" as one number and to keep a "not", "no" or "nor" before a comparison; the seven pieces this changed were compared again from the same transcript and agree). The first crops cut the left edge of some
     lines; they were rendered again at the full page width and those lines read again (the "42 inches" of R314.5 among them).
     After review round 1, five more pieces (BO102.1, BO102.1.2, BO103:unsafe, BO104.1, BO104.1.1) were read the same way
-    by the same helper (4 crops): 0 numbers in the text, 0 in the reading; they agree.'
+    by the same helper (4 crops): 0 numbers in the text, 0 in the reading; they agree. The transcripts of step 1b are kept in the code cache (second_reading/, with their crops, the tools that compared them and their sha256), outside the repo since they hold the book''s words; a test (rule_format/tests/test_state_law.py) rebuilds second_reading_numbers from them. After review rounds 2 and 3, the pieces whose numbers numbers.py now reads differently (R315.5.3.1 and BO108.4: "pound" and "kg" became units) were compared again from the same transcripts and agree.'
 notes:
+- 'Review round 3 of egress step 1b (2026-11-12): numbers.py learned to keep a "not" printed up to four words before
+  a comparison in the same clause ("shall not project more than 4 1/2 inches"). R318.7.5.1, R318.7.5.2, R320.3 and R320.5
+  changed; their first transcripts were not kept, so they were read again from their page images (pp.100, 104, 216 dpi,
+  3 crops) by a helper that never saw the extracted text, and the new transcript went through numbers.py: 4 pieces, 20
+  numbers, all agree. That transcript is kept in the code cache (second_reading/, sha256 in its README).'
 - R318.7.6 was read again from its image (2026-11-12) after numbers.py learned parts of a whole ('a quarter circle', 'one-half');
   the first readings had not listed 'a quarter'. The new reading agrees. R202:owner (no numbers) was brought in later the
   same day, when the roman-type match learned 'Owner-occupied', and read from its image then.
@@ -985,8 +990,8 @@ pieces:
     - 254 mm
     - 14 inch
     - 356 mm
-    - '300'
-    - '136'
+    - 300 pound
+    - 136 kg
     - within 3/8 inch
     - 9.5 mm
     second_reading_numbers:
@@ -996,8 +1001,8 @@ pieces:
     - 254 mm
     - 14 inch
     - 356 mm
-    - '300'
-    - '136'
+    - 300 pound
+    - 136 kg
     - within 3/8 inch
     - 9.5 mm
     second_reading: agrees
@@ -1221,7 +1226,7 @@ pieces:
     numbers:
     - not more than 8 1/4 inch
     - 209 mm
-    - by more than 3/8 inch
+    - not exceed the smallest by more than 3/8 inch
     - 9.5 mm
     - not more than 30 degree
     - 0.51 rad
@@ -1232,7 +1237,7 @@ pieces:
     second_reading_numbers:
     - not more than 8 1/4 inch
     - 209 mm
-    - by more than 3/8 inch
+    - not exceed the smallest by more than 3/8 inch
     - 9.5 mm
     - not more than 30 degree
     - 0.51 rad
@@ -1246,12 +1251,12 @@ pieces:
     numbers:
     - not less than 9 inch
     - 229 mm
-    - by more than 3/8 inch
+    - not exceed the smallest by more than 3/8 inch
     - 9.5 mm
     second_reading_numbers:
     - not less than 9 inch
     - 229 mm
-    - by more than 3/8 inch
+    - not exceed the smallest by more than 3/8 inch
     - 9.5 mm
     second_reading: agrees
   R318.7.5.2.1:
@@ -1777,12 +1782,12 @@ pieces:
   R320.3:
     piece_sha256: ca561394426d289c443c4410343a9b2ee615794398edf8628824f4added9360f
     numbers:
-    - more than 4 1/2 inch
+    - not project more than 4 1/2 inch
     - 114 mm
     - not more than 6 1/2 inch
     - 165 mm
     second_reading_numbers:
-    - more than 4 1/2 inch
+    - not project more than 4 1/2 inch
     - 114 mm
     - not more than 6 1/2 inch
     - 165 mm
@@ -1799,10 +1804,10 @@ pieces:
   R320.5:
     piece_sha256: 618169eb608eefd852b3b8bf97ba4c1dc7609bf5ba985d04d5ef72a74baeeb8d
     numbers:
-    - more than 1/4 inch
+    - not form a gap more than 1/4 inch
     - 6.4 mm
     second_reading_numbers:
-    - more than 1/4 inch
+    - not form a gap more than 1/4 inch
     - 6.4 mm
     second_reading: agrees
   R320.6:
@@ -2366,12 +2371,12 @@ pieces:
     - at least one
     - not more than 14 foot
     - 1,000 pound
-    - '455'
+    - 455 kg
     second_reading_numbers:
     - at least one
     - not more than 14 foot
     - 1,000 pound
-    - '455'
+    - 455 kg
     second_reading: agrees
   BO109.1:
     piece_sha256: b6e4a9e721dd8d5d946f3e4ef1a3e4dc45350c44e4e5c5d290add8c4d2943bba

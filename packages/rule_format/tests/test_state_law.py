@@ -286,32 +286,48 @@ def test_an_allowance_for_an_existing_condition_is_a_flag_never_a_rule():
     assert "R102.6" in dict(found)      # review round 2: "shall be permitted to continue" was missed
 
 
+def _wrong_conversions(words: str) -> list[tuple[str, str]]:
+    """Each "N inches (X mm)", "N-foot (X mm)" or "N feet M inches (X mm)" whose millimetres are not its length."""
+    import re
+    num = r"(\d+ \d+/\d+|\d+/\d+|\d+(?:\.\d+)?)"
+    pair = re.compile(r"(?<![\d/.])" + num + r"[ -](feet|foot|inch|inches)(?: " + num + r" inch(?:es)?)? "
+                      r"\((\d[\d,]*(?:\.\d+)?) mm\)")
+
+    def inches(x):                                              # "31 1/2" -> 31.5
+        return sum(int(a) / int(b) if b else float(a) for a, _, b in (q.partition("/") for q in x.split()))
+    out = []
+    for m in pair.finditer(words):
+        value = inches(m[1]) * (12 if m[2] in ("feet", "foot") else 1) + (inches(m[3]) if m[3] else 0)
+        mm = float(m[4].replace(",", ""))
+        if abs(mm - value * 25.4) > max(2.0, 0.01 * mm):        # the book rounds; 1931 for 1930.4 is no error
+            out.append((m[0], m[4]))
+    return out
+
+
+def test_a_wrong_conversion_is_found_in_each_way_the_book_prints_one():
+    assert _wrong_conversions("not less than 20 inches (610 mm) and 20 inches (508 mm)") == [("20 inches (610 mm)", "610")]
+    assert _wrong_conversions("a 10-inch (300 mm) sill") == [("10-inch (300 mm)", "300")]
+    assert _wrong_conversions("6 feet 8 inches (2134 mm), 6 feet 8 inches (2032 mm)") == [("6 feet 8 inches (2134 mm)", "2134")]
+    assert _wrong_conversions("3/8 inch (9.5 mm), 1 1/2 inches (38 mm), 31 1/2 inches (787 mm)") == [
+        ("31 1/2 inches (787 mm)", "787")]
+
+
 def test_a_metric_conversion_that_is_not_its_inches_is_named_in_the_labels_notes():
     # review round 2 of egress step 1b: R318.7.1 prints "27 inches (698 mm)" (27 inches is 686 mm) and R315.5.2.1
     # "20 inches (610 mm)" (24 inches); a rule drafted from the millimetres would set another limit, unnoticed
-    import json
-    import re
     from rule_format.rulebook import cached, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
     if not cached(entry, ".jsonl").exists():
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
     text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
     labels = load(NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml")["labels"]
-    n = r"(\d+ \d+/\d+|\d+/\d+|\d+(?:\.\d+)?)"
-    pair = re.compile(r"(?<![\d/.])" + n + r" (feet|inch|inches)(?: " + n + r" inch(?:es)?)? \((\d[\d,]*(?:\.\d+)?) mm\)")
-
-    def inches(x):
-        return sum(int(a) / int(b) if "/" in q else float(q) for q in x.split() for a, b in [(q.split("/") + ["1"])[:2]])
     wrong, unnamed = [], []
     for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
         words = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
-        for m in pair.finditer(words):
-            value = inches(m[1]) * (12 if m[2] == "feet" else 1) + (inches(m[3]) if m[3] else 0)
-            mm = float(m[4].replace(",", ""))
-            if abs(mm - value * 25.4) > max(2.0, 0.01 * mm):        # the book rounds; 1931 for 1930.4 is no error
-                wrong.append((p["id"], m[0]))
-                if f"({m[4]} mm)" not in (labels[p["id"]].get("notes") or ""):
-                    unnamed.append((p["id"], m[0]))
+        for printed, mm in _wrong_conversions(words):
+            wrong.append((p["id"], printed))
+            if f"({mm} mm)" not in (labels[p["id"]].get("notes") or ""):
+                unnamed.append((p["id"], printed))
     assert wrong and unnamed == [], unnamed
 
 
@@ -325,3 +341,87 @@ def test_no_label_reason_calls_a_brought_in_section_not_brought_in():
             for m in re.finditer(r"\b([A-Z]{1,2}\d{3}(?:\.\d+)*) \(not brought in\b", " ".join(e["reason"].split()))]
     wrong = [(pid, t) for pid, t in said if any(b == t or b.startswith(t + ".") or t.startswith(b + ".") for b in brought)]
     assert wrong == [], wrong
+
+
+def _transcript_numbers(folder: Path, name: str, pieces: dict) -> dict[str, list[str]]:
+    """Each piece's numbers as a kept second-reading transcript has them: the transcript cut at each piece's heading
+    within its crop, put through numbers.py (the same cutting as the tools beside it, `tools/compare.py`)."""
+    import json
+    import re
+    from document_extraction.numbers import shown, statements_of_lines
+    crops, cur = {}, None
+    for line in (folder / f"{name}_transcript.txt").read_text(encoding="utf-8").splitlines():
+        if m := re.match(r"=== (crop_\d+\.png)", line):
+            cur = m[1]
+            crops[cur] = []
+        elif cur and line.strip():
+            crops[cur].append(line.replace("m²", "m[fn2]").replace("ft²", "ft[fn2]").strip())
+
+    def starts(pid, ln):
+        p = pieces[pid]
+        if p["kind"] == "section_heading":
+            return ln.startswith(f"SECTION {pid}") or ln.startswith(f"[NY] SECTION {pid}")
+        if p["kind"] == "definition":
+            return bool(re.match(r"(\[[A-Z]{2}\] )?" + re.escape(p["title"].split(" ")[0]), ln))
+        return bool(re.match(r"(\[[A-Z]{2}\] )?" + re.escape(pid) + r" ", ln))
+    lines_of = {}
+    for c in json.loads((folder / f"{name}_crops.json").read_text(encoding="utf-8")):
+        lines, ids, at = crops[c["image"]], c["pieces"], []
+        for pid in ids:
+            if pieces[pid]["kind"] == "definition" and len(ids) == 1:
+                at.append(0)
+                continue
+            k = next((i for i, ln in enumerate(lines) if starts(pid, ln) and (not at or i > at[-1])), None)
+            at.append(0 if k is None and not at else k)
+            assert at[-1] is not None, (name, c["image"], pid)
+        for j, pid in enumerate(ids):
+            lines_of.setdefault(pid, []).extend(lines[at[j]: at[j + 1] if j + 1 < len(ids) else len(lines)])
+    return {pid: [shown(s) for s in statements_of_lines(ls)] for pid, ls in lines_of.items()}
+
+
+def test_the_recorded_second_reading_is_the_kept_transcripts():
+    # review round 3 of egress step 1b: second_reading_numbers could be edited by hand to agree; where a transcript is
+    # kept (in the code cache, beside the book, since it holds the book's words), the list must be rebuilt from it
+    import hashlib
+    from rule_format.rulebook import cached, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    folder = cached(entry, ".jsonl").parent / "second_reading"
+    if not folder.exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    for line in (folder / "README.md").read_text(encoding="utf-8").splitlines():   # "    <sha256>  <file>"
+        if len(parts := line.split()) == 2 and len(parts[0]) == 64:
+            assert hashlib.sha256((folder / parts[1]).read_bytes()).hexdigest() == parts[0], parts[1]
+    pieces = {p["id"]: p for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    recorded = load(NY_STATE / "text_verification.yaml")["pieces"]
+    rebuilt = {}
+    for name in ("step_1_round_3", "step_1b", "step_1b_round_1"):
+        rebuilt.update(_transcript_numbers(folder, name, pieces))
+    assert len(rebuilt) >= 110
+    assert {pid: recorded[pid]["second_reading_numbers"] for pid in rebuilt} == rebuilt
+
+
+def test_every_part_of_appendix_bo_is_brought_in_or_named_in_the_readme():
+    # review round 3 of egress step 1b: the README's list of what is not brought in left out BO102.1.1, BO106.5 and others
+    import re
+    from rule_format.rulebook import cached, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached(entry, ".jsonl").exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
+    named = set(re.findall(r"\bBO\d{3}(?:\.\d+)*", readme))
+    for a, b in re.findall(r"\b(BO\d{3}(?:\.\d+)*) (?:to|through) (BO\d{3}(?:\.\d+)*)", readme):
+        *stem, first = a.split(".")
+        if b.rsplit(".", 1)[0] == ".".join(stem):
+            named |= {".".join(stem + [str(k)]) for k in range(int(first), int(b.rsplit(".", 1)[1]) + 1)}
+    brought = {p["id"] for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    heads = {m[1] for r in read_jsonl(cached(entry, ".jsonl"))[1:]
+             if r.get("bold") and (m := re.match(r"(?:\[NY\] )?(BO1(?:0\d|1[0-3])(?:\.\d+)+) ", r["text"]))}
+
+    def wholly_out(part):                  # a part named, none of it brought in: its own parts are named with it
+        return part in named and not any(b == part or b.startswith(part + ".") for b in brought)
+
+    def covered(pid):
+        parts = pid.split(".")
+        return pid in brought or pid in named or any(wholly_out(".".join(parts[:k])) for k in range(1, len(parts)))
+    missing = sorted(h for h in heads if not covered(h) and not h.startswith("BO103."))
+    assert len(heads) > 100 and missing == [], " ".join(missing)
