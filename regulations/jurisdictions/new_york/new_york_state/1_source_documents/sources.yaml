@@ -2,7 +2,9 @@
 # `inherits: [new_york/new_york_state]`).
 # The code book is copyrighted (International Code Council), so it is NOT in this folder: kept_outside_repo: true
 # means the book and its extracted text are in the code cache on the machines that have it,
-# <cache>/<sha256>/<file> (rule_format/rulebook.py: code_cache; ~/Documents/gordium_archive/code_cache on Ben's Mac).
+# <cache>/<sha256>/<file> (rule_format/rulebook.py: code_cache; ~/Documents/gordium_archive/code_cache on Ben's Mac),
+# with the text of every page (document_extraction/book_text.py), the same for every branch; brought_in.pages
+# says which of its pages this branch reads.
 # The repo keeps only short exact quotes, each with its section, page and a link (decided 2026-11-12:
 # docs/decisions/2026-11-12_building_code_text.md).
 # sha256 is the book's fingerprint: if a single byte changes, it changes. To check: shasum -a 256 <file>
@@ -109,8 +111,8 @@ documents:
       Its section numbers are not the model code's (the International Residential Code's): cite only this book's.
       A bracketed letter before a section names the party responsible for it (page 7); [NY] is the New York State
       Department of State, e.g. risers not more than 8 1/4 inches and treads not less than 9 inches
-      ([NY] R318.7.5.1, [NY] R318.7.5.2). The code cache also holds the whole book's text
-      (gov.ny.residential.2025.full.jsonl: every page, the same extractor), read only to find which other parts of
+      ([NY] R318.7.5.1, [NY] R318.7.5.2). The code cache holds the whole book's text (every page,
+      document_extraction/book_text.py); the pages outside brought_in are read only to find which other parts of
       the book point into the brought-in sections (document_extraction/icc_references.py).
       New York's own amendments: 19 NYCRR §1220.2(e) amends the book for New York: (1) the definition of PERMIT;
       (2) referenced standards (Chapter 44); (3) BA113.3; (4) in BO103.1, the second definition printed "HOME OCCUPATION" reads "LOAD-BEARING

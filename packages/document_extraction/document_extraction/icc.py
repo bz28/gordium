@@ -18,6 +18,7 @@ from pathlib import Path
 
 import pdfplumber
 
+from . import book_text
 from .extract import POSITION, SUPERSCRIPT, _body_size, _level, footnote_marks, sha256
 
 EXTRACTOR = (f"pdfplumber {version('pdfplumber')} + pdfminer.six {version('pdfminer.six')} "
@@ -30,23 +31,37 @@ def extract_icc(pdf_path: Path, pages: list[int] | None = None) -> list[dict]:
     """The header row, then one row per line of text, page by page, top to bottom. `pages`: only these pages
     (1-based), for a book whose brought-in sections are a small part of it; None reads every page. Each page's
     cached objects are dropped once it is read, so a 1,000-page book is read in little memory."""
-    rows, rotated, fractions = [], 0, 0
+    head, rows, counts = _read(pdf_path, pages)
+    return [book_text.header(*head, counts, None if pages is None else list(pages)), *rows]
+
+
+def read_book(pdf_path: Path) -> list[dict]:
+    """Every page, as the code cache keeps it (book_text.py): extract_icc(pdf_path), with the extractor key and
+    each page's counts in the header, so the header of any selection of pages can be made again."""
+    head, rows, counts = _read(pdf_path, None)
+    return [book_text.header(*head, counts, None) | {"extractor_key": book_text.extractor_key(),
+                                                     "page_counts": {str(p): list(c) for p, c in counts.items()}},
+            *rows]
+
+
+def _read(pdf_path: Path, pages: list[int] | None) -> tuple[tuple, list[dict], dict[int, tuple[int, int]]]:
+    """(file, sha256, page count, extractor), the rows of the pages read, and each page's (rotated characters
+    skipped, fractions joined)."""
+    rows, counts = [], {}
     with pdfplumber.open(pdf_path) as pdf:
         wanted = range(1, len(pdf.pages) + 1) if pages is None else pages
         for page_number in wanted:
             page = pdf.pages[page_number - 1]
-            rotated += sum(not _level(c) for c in page.chars)
+            rotated = sum(not _level(c) for c in page.chars)
             lines, body, joined = icc_page_lines(page)
-            fractions += joined
+            counts[page_number] = (rotated, joined)
             for n, line in enumerate(lines, 1):
                 text, styles = line_text(line, body)
                 rows.append({"page": page_number, "line": n, "text": text,
                              **{k: round(line[k], 1) for k in POSITION}, **{k: v for k, v in styles.items() if v}})
             page.close()
-        header = {"file": pdf_path.name, "sha256": sha256(pdf_path), "pages": len(pdf.pages),
-                  "extractor": EXTRACTOR, "rotated_chars_skipped": rotated, "fractions_joined": fractions,
-                  "pages_read": "all" if pages is None else list(pages)}
-    return [header, *rows]
+        n_pages = len(pdf.pages)
+    return (pdf_path.name, sha256(pdf_path), n_pages, EXTRACTOR), rows, counts
 
 
 def icc_page_lines(page) -> tuple[list[dict], float, int]:
