@@ -71,5 +71,5 @@ Found by the same code: the whole book (all 1,079 pages, read once by the same e
 - R502.3.1 floor joists (p.166): attics reached by a fixed stairway per R318.7 (a structural load matter).
 - M1602.1 outdoor air openings (p.529): refers to R325.6.
 - Appendix BB tiny houses (pp.880-881): loft stairs, landings, handrails, ladders, guards and escape openings, modifying R318-R321. Left for later (Ben, 2026-11-12).
-- Appendix BF patio covers (p.898): exits per R318.
+- Appendix BF patio covers (p.898): BF103.2 says an escape opening from a bedroom into a patio structure must stay unenclosed, and an enclosed patio structure an exit opens into needs exits per R318. Not brought in: outside the scope Ben set on 2026-11-12 (lofts, attics, mezzanines, deck guards, Appendix BO); open for Ben. Until it comes in, a patio cover over an escape window or exit door is not checked against it.
 - Appendix BO's own other parts that point to R102.6.1 (structure: BO102.3, BO104.5, BO105.4) and to R319 (BO106.7, brought in).

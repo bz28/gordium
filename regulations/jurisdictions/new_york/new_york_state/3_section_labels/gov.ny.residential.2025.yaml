@@ -3747,10 +3747,11 @@ labels:
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   BO101.1:
-    label: reference
+    label: flag
     topic: existing_buildings
     reason: Says work on existing buildings (repairs, alterations, additions, changes of occupancy, relocation, replacement)
-      follows the rules for new construction except as Appendix BO modifies them, within this code's scope.
+      follows the rules for new construction except as Appendix BO modifies them, within the scope of R101.2 (only R101.2.1
+      brought in). Shown as needing review where a design is work on an existing building, as BO104.1, BO105.1 and BO106.1 are.
     sources:
     - file: gov.ny.residential.2025.pdf
       page: 964
