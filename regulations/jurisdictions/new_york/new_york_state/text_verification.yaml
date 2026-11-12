@@ -455,12 +455,12 @@ pieces:
   R202:ramp:
     piece_sha256: b179336de087ff5c6b2cce9a4fe6f46f0ffbabe6768b646c3be9191e06b347c3
     numbers:
-    - steeper than 1 unit
-    - 20 unit
+    - steeper than 1 unit vertical
+    - 20 unit horizontal
     - 5 percent
     second_reading_numbers:
-    - steeper than 1 unit
-    - 20 unit
+    - steeper than 1 unit vertical
+    - 20 unit horizontal
     - 5 percent
     second_reading: agrees
   R202:repair:
@@ -594,13 +594,13 @@ pieces:
     piece_sha256: 1f6f1155b6b706041cc53014d13f4a56290bd0f6d59b693ac5936c784840b3cc
     numbers:
     - one or more
-    - 2 unit
-    - 12 unit
+    - 2 unit vertical
+    - 12 unit horizontal
     - 17 percent
     second_reading_numbers:
     - one or more
-    - 2 unit
-    - 12 unit
+    - 2 unit vertical
+    - 12 unit horizontal
     - 17 percent
     second_reading: agrees
   R202:uniform_code:
@@ -661,20 +661,20 @@ pieces:
     numbers:
     - not less than 36 inch
     - 914 mm
-    - not exceed 1/4 unit
-    - 12 unit
+    - not exceed 1/4 unit vertical
+    - 12 unit horizontal
     - 2 percent
-    - less than 60 square
+    - less than 60 square foot
     - 5.6 m
     - less than 36 inch
     - 914 mm
     second_reading_numbers:
     - not less than 36 inch
     - 914 mm
-    - not exceed 1/4 unit
-    - 12 unit
+    - not exceed 1/4 unit vertical
+    - 12 unit horizontal
     - 2 percent
-    - less than 60 square
+    - less than 60 square foot
     - 5.6 m
     - less than 36 inch
     - 914 mm
@@ -918,18 +918,18 @@ pieces:
   R318.7.7:
     piece_sha256: ef602ca55c74b5fe3b52399b6e666c6f80e6dbd5df487109d47f44ae8dc94e58
     numbers:
-    - not steeper than 1 unit
-    - 48 unit
+    - not steeper than 1 unit vertical
+    - 48 unit horizontal
     - 2 percent
-    - not steeper than 1 unit
-    - 20 unit
+    - not steeper than 1 unit vertical
+    - 20 unit horizontal
     - 5 percent
     second_reading_numbers:
-    - not steeper than 1 unit
-    - 48 unit
+    - not steeper than 1 unit vertical
+    - 48 unit horizontal
     - 2 percent
-    - not steeper than 1 unit
-    - 20 unit
+    - not steeper than 1 unit vertical
+    - 20 unit horizontal
     - 5 percent
     second_reading: agrees
   R318.7.8:
@@ -1082,24 +1082,24 @@ pieces:
   R318.8.1:
     piece_sha256: 80bbe88129e30ad215180d4cd892a8d81f9e8b8f19fe6c93083daa7431bff3e1
     numbers:
-    - not more than 1 unit
-    - 12 unit
+    - not more than 1 unit vertical
+    - 12 unit horizontal
     - 8.3 percent
-    - not more than 1 unit
-    - 8 unit
+    - not more than 1 unit vertical
+    - 8 unit horizontal
     - 12.5 percent
-    - not more than 1 unit
-    - 8 unit
+    - not more than 1 unit vertical
+    - 8 unit horizontal
     - 12.5 percent
     second_reading_numbers:
-    - not more than 1 unit
-    - 12 unit
+    - not more than 1 unit vertical
+    - 12 unit horizontal
     - 8.3 percent
-    - not more than 1 unit
-    - 8 unit
+    - not more than 1 unit vertical
+    - 8 unit horizontal
     - 12.5 percent
-    - not more than 1 unit
-    - 8 unit
+    - not more than 1 unit vertical
+    - 8 unit horizontal
     - 12.5 percent
     second_reading: agrees
   R318.8.2:
@@ -1115,13 +1115,13 @@ pieces:
     piece_sha256: 77661577703f82783682c3599c9f3d328e1dd5246090359519da44e353fcedff
     numbers:
     - not less than one
-    - 1 unit
-    - 12 unit
+    - 1 unit vertical
+    - 12 unit horizontal
     - 8.33 percent
     second_reading_numbers:
     - not less than one
-    - 1 unit
-    - 12 unit
+    - 1 unit vertical
+    - 12 unit horizontal
     - 8.33 percent
     second_reading: agrees
   R319:
@@ -1134,7 +1134,7 @@ pieces:
     numbers:
     - not less than one
     - one or more
-    - 200 square
+    - 200 square foot
     - 18.58 m
     - '500'
     - one
@@ -1146,7 +1146,7 @@ pieces:
     second_reading_numbers:
     - not less than one
     - one or more
-    - 200 square
+    - 200 square foot
     - 18.58 m
     - '500'
     - one
@@ -1173,14 +1173,14 @@ pieces:
   R319.2.1:
     piece_sha256: 7fc10512c2269bae71b5339f04ae1b4eac52f65a854fedd3bc1065df835d57de
     numbers:
-    - not less than 5.7 square
+    - not less than 5.7 square foot
     - 0.530 m
-    - 5 square
+    - 5 square foot
     - 0.465 m
     second_reading_numbers:
-    - not less than 5.7 square
+    - not less than 5.7 square foot
     - 0.530 m
-    - 5 square
+    - 5 square foot
     - 0.465 m
     second_reading: agrees
   R319.2.2:
@@ -1231,14 +1231,14 @@ pieces:
   R319.4.1:
     piece_sha256: fcf8b3967abc22fd4420d1a9acc9d3c2ab7d705bc4e9173c4f6a1243dbd69849
     numbers:
-    - not less than 9 square
+    - not less than 9 square foot
     - 0.9 m
     - not less than 36 inch
     - 914 mm
     - not more than 6 inch
     - 152 mm
     second_reading_numbers:
-    - not less than 9 square
+    - not less than 9 square foot
     - 0.9 m
     - not less than 36 inch
     - 914 mm

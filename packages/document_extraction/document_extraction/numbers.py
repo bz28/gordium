@@ -1,5 +1,6 @@
-"""Every number a piece of law states, with the words that make it a limit: the comparison words before it ("not
-more than"), its unit after it ("inches"), and any comparison words after that ("or more"). Used to check a book's
+"""Every number a piece of law states, with the words that make it a limit: the comparison words directly before it
+("not more than"), its unit after it ("inches", "square feet", "units horizontal"), and any comparison words after
+that ("or more"). Comparison words further back ("not exceeding a total floor area of 200") are not caught. Used to check a book's
 extracted text against a second, independent reading of the page images (text_verification.yaml in the law's folder):
 both readings are put through this same code, so they are compared item by item, never by eye.
 
@@ -20,18 +21,24 @@ import re
 WORDS = ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen",
          "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "thirty", "forty", "fifty",
          "sixty", "seventy", "eighty", "ninety", "hundred", "thousand")
-PARTS = ("half", "halves", "quarter", "quarters", "third", "thirds")     # "one-half", "a quarter circle", "two-thirds"
+PARTS = ("half", "halves", "quarter", "quarters", "third", "thirds", "fourth", "fourths", "fifth", "fifths", "sixth",
+         "sixths", "eighth", "eighths")                       # "one-half", "a quarter circle", "three-fourths"
+TENS = ("twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety")
+_W = "|".join(sorted(WORDS, key=len, reverse=True))
 BEFORE = ("not less than", "not more than", "not greater than", "not exceeding", "not exceed", "not steeper than",
           "greater than", "less than", "more than", "steeper than", "by more than", "exceeding", "exceed", "minimum",
           "maximum", "at least", "between", "within", "up to", "and")
 AFTER = ("or more", "or fewer", "or less", "or greater")
 UNITS = {"inch": "inch", "inches": "inch", "in": "inch", "foot": "foot", "feet": "foot", "mm": "mm", "cm": "cm",
          "m": "m", "degrees": "degree", "degree": "degree", "rad": "rad", "percent": "percent", "units": "unit",
-         "unit": "unit", "square": "square", "gross": "gross", "footcandle": "footcandle", "footcandles": "footcandle",
+         "unit": "unit", "square": "square", "cubic": "cubic", "gross": "gross", "footcandle": "footcandle", "footcandles": "footcandle",
          "lux": "lux", "risers": "riser", "riser": "riser", "pounds": "pound", "lb": "pound", "psf": "psf"}
-NUMBER = re.compile(r"(?<![\w.\-/\[])(?<!\w\()(?:\d+ \d+/\d+|\d+/\d+|\d+(?:,\d{3})*(?:\.\d+)?|\.\d+)(?![\w/]|\.\d)"
-                    r"|(?<![\w-])(?:(?:a|one|two|three)[- ])?(?:" + "|".join(PARTS) + r")(?![\w-])"
-                    r"|(?<![\w-])(?:" + "|".join(sorted(WORDS, key=len, reverse=True)) + r")(?!\w)", re.IGNORECASE)
+NUMBER = re.compile(r"(?<![\w.\-/\[])(?<!\w\()(?:\d+[ -]\d+/\d+|\d+/\d+|\d+(?:,\d{3})*(?:\.\d+)?|\.\d+)(?![\w/]|\.\d)"
+                    r"|(?<![\w-])(?:(?:a|" + _W + r")[- ])?(?:" + "|".join(PARTS) + r")(?![\w-])"
+                    r"|(?<![\w-])(?:(?:" + "|".join(TENS) + r")-(?:one|two|three|four|five|six|seven|eight|nine)(?!\w)"
+                    r"|(?:" + _W + r")(?!\w))", re.IGNORECASE)
+TWO_WORD_UNITS = {"square", "cubic"}                  # "square feet" is one unit: never just "square"
+DIRECTIONS = ("vertical", "horizontal")               # "1 unit vertical in 12 units horizontal"
 LIST_ITEM = re.compile(r"^\s*\d+(?:\.\d+)*\.\s")
 
 
@@ -46,7 +53,12 @@ def statements(text: str) -> list[dict]:
         before_text = text[:m.start()].lower().split()[-5:]
         after_words = re.findall(r"[a-z]+|\(|\)", text[m.end():].lower())
         unit = next((UNITS[w] for w in after_words[:1] if w in UNITS), "")
-        rest = " ".join(after_words[1:4] if unit else after_words[:3])
+        used = 1 if unit else 0
+        if after_words[:1] and after_words[0] in TWO_WORD_UNITS and after_words[1:2] and after_words[1] in UNITS:
+            unit, used = f"{after_words[0]} {UNITS[after_words[1]]}", 2
+        if unit == "unit" and after_words[1:2] and after_words[1] in DIRECTIONS:
+            unit, used = f"unit {after_words[1]}", 2
+        rest = " ".join(after_words[used:used + 3])
         out.append({"before": _ends_with(" ".join(before_text), BEFORE),
                     "value": m[0].lower(),
                     "unit": unit,

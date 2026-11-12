@@ -187,6 +187,9 @@ def test_without_the_cache_a_kept_outside_book_is_skipped_and_said_so(monkeypatc
 
 @pytest.mark.parametrize("text,expect", [
     ("not less than that of a quarter circle", ["a quarter"]), ("not less than one-half of the area", ["not less than one-half"]),
-    ("two-thirds of the width", ["two-thirds"]), ("thirteen risers", ["thirteen riser"]), ("one-family", ["one"])])
+    ("two-thirds of the width", ["two-thirds"]), ("thirteen risers", ["thirteen riser"]), ("one-family", ["one"]),
+    ("three-fourths of", ["three-fourths"]), ("twenty-four inches", ["twenty-four inch"]), ("4-3/8 inches", ["4-3/8 inch"]),
+    ("not less than 5.7 square feet", ["not less than 5.7 square foot"]), ("5.7 square inches", ["5.7 square inch"]),
+    ("1 unit vertical in 12 units horizontal", ["1 unit vertical", "12 unit horizontal"])])
 def test_parts_of_a_whole_and_larger_number_words_are_numbers_too(text, expect):
     assert [shown(s) for s in statements(text)] == expect          # "one-half" is never the number one
