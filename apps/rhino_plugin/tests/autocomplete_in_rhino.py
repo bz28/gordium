@@ -2,7 +2,7 @@
 """Address type-ahead in the real start box (PR: address-autocomplete), in Rhino 8, each claim asserted. Run in
 Rhino, not in CI; the logic is tested in CI (packages/design_checker/tests/test_autocomplete.py,
 packages/site_lookup/tests/test_suggest.py). Stand-in addresses (site_lookup's tests: hand-written, never the
-City's data) and recorded lookups: no live call. A fresh feet document, GordiumStart (the sample, 106 Ithaca Rd),
+City's data) and recorded lookups: no live call. A fresh feet document, GordiumStart (106 Ithaca Rd looked up),
 then Edit site… with a script driving the box (typing is setting the address field's text, as a key does):
 1. "106" typed: no list after 1 s (fewer than 4 characters). When the list shows, the box grows by its height
    (Cancel and Check stay in it) and stays on screen.
@@ -38,6 +38,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
@@ -213,7 +214,7 @@ def main():
         docs = TestDocs("autocomplete").__enter__()
         g = fresh_module()
         doc = docs.open("Large Objects - Feet")
-        g.gordium_check()                                  # an empty file: the sample (106 Ithaca Rd) drawn
+        look_up_106(g, g.gordium_check)                                  # an empty file: 106 Ithaca Rd looked up, drawn
         g.live(False)
         g.STATE["auto_ok"] = False
         g.STATE["lookup_fixture"] = "96_ithaca_rd"

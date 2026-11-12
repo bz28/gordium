@@ -5,8 +5,8 @@ a failing one) and the run fails at the end if any did. Run in Rhino, not in CI:
 itself (Rhino's boolean intersection). The claims read the drawn list itself, overlay().encroach: each piece with
 its status and what it is for (its row, why, building: rhino_logic.coloured_info), so the rear yard's strip is never
 taken for the side yard's.
-A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, tax-map lot: lines ±2'-0"), then the starting
-house replaced by one solid of the architect's. Points are placed by their distance from the left lot line (the
+A fresh feet document, GordiumStart on 106 Ithaca Rd's recorded lookup (tax-map lot: lines ±2'-0"), then the
+starting house replaced by one solid of the architect's. Points are placed by their distance from the left lot line (the
 real lot's line is slanted) and tested inside or outside the coloured pieces:
 1. A cantilever, amber. A 20 ft house where the starting house stood (its wall 12'-0 1/2" from the left line), its
    upper half (10 to 20 ft) reaching 6 ft out toward that line. The left side yard needs review (to the wall it
@@ -39,6 +39,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_offending") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -126,8 +127,12 @@ try:
     g = fresh_module()
     doc = TestDocs("offending").__enter__().open("Large Objects - Feet")
     # a lot known level (fall 0.0): the height limit's plane is drawn (with no ground looked up it isn't: sloped-lot fix)
-    g.STATE["box_overrides"] = dict(g.STATE.get("box_overrides") or {}, ground_fall=0.0)
-    g.gordium_check()                                    # GordiumStart's flow on the sample
+    # (106's recorded lookup finds its real fall, 14.2 ft, and Draw applies the lookup's answer after the box's own
+    # fields, so a ground_fall box override never reaches the facts: the lot is stated level after the start, then
+    # checked)
+    look_up_106(g, g.gordium_check)                      # GordiumStart: 106 Ithaca Rd looked up (recorded), drawn
+    g.save_facts(doc, dict(g.current_facts(doc), ground_fall=0.0))
+    g.run_check(doc, report=False)
     k = 1.0 / g._scale(doc)                              # feet -> model units (1 in a feet file)
     box = rg.BoundingBox.Empty
     for o in g._buildings(doc):
