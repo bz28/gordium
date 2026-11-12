@@ -40,7 +40,7 @@ import hashlib
 import json
 import re
 
-SPLITTER = "document_extraction.icc_sections v5"   # bump when the cutting rules change
+SPLITTER = "document_extraction.icc_sections v6"   # bump when the cutting rules change
 STAMP = re.compile(r"^\d{9}$")                      # the number stamped at the top of every page of this copy
 FOOTER = re.compile(r"^(?:\d+ )?2025 RESIDENTIAL CODE OF NEW YORK STATE(?: \d+)?$")
 DOT = "."                                           # a lone "." printed under the footer
@@ -192,16 +192,17 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     for u in units:
         used[u["id"]], undefined[u["id"]] = _uses(u, terms)
     keep = {u["id"] for u in units if in_sections(u)}
-    todo = [d for i in keep for d in used[i]]
-    while todo:                                      # a brought-in definition's own defined words, and theirs
+    # A defined term printed in roman type in a brought-in section: R201.1 gives the defined meaning to italic words
+    # only, so it doesn't strictly apply there, but it is brought in too, so the reader sees both (never fewer).
+    roman = {u["id"]: sorted(_roman(u, terms) - used[u["id"]] - {u["id"]}) for u in units}
+    todo = [d for i in keep for d in used[i]] + [d for i in keep for d in roman[i]]
+    while todo:                                      # each brought-in definition's own defined words, and theirs
         d = todo.pop()
         if d not in keep:
             keep.add(d)
             todo += used[d]
-    # A defined term printed in roman type in a brought-in section: R201.1 gives the defined meaning to italic words
-    # only, so it doesn't strictly apply there, but it is brought in too, so the reader sees both (never fewer).
-    roman = {u["id"]: sorted(_roman(u, terms) - used[u["id"]] - {u["id"]}) for u in units}
-    keep |= {d for u in units if in_sections(u) for d in roman[u["id"]]}
+    # Every definition a kept piece uses is kept too: never a piece that names one the reader can't see.
+    problems += [f"{i}: uses {d}, which is not brought in" for i in sorted(keep) for d in used.get(i, ()) if d not in keep]
     if any(i.startswith("R202:") for i in keep):
         keep.add("R202")                             # the heading the definitions sit under
     # A brought-in part that is the last before a gap in the pages read, or the last of all, may run on onto a

@@ -110,6 +110,20 @@ def test_every_line_of_the_pages_read_is_a_piece_furniture_or_named_as_not_broug
     assert cut["pieces"][4]["uses"] == ["R202:flight"]          # by its italics (R201.1)
 
 
+def test_a_definition_brought_in_by_roman_type_brings_in_the_definitions_it_uses():
+    # review round 5: ACCESS (TO), brought in by roman type, uses READY ACCESS (TO), which was left out
+    swap = {(1, 5): _row(1, 5, "[RB] PORCH. A roofed deck.", bold="[RB] PORCH.", italic=["deck"]),
+            (2, 5): _row(2, 5, "R318.1.1 Treads. The stair tread at a porch shall be 9 inches.", bold="R318.1.1 Treads.",
+                         italic=["stair"])}
+    rows = [swap.get((r.get("page"), r.get("line")), r) for r in _book()]
+    at = next(i for i, r in enumerate(rows) if r.get("text", "").startswith("[RB] FLIGHT"))
+    rows.insert(at, _row(1, 31, "[RB] DECK. An open platform.", bold="[RB] DECK."))
+    cut = icc_sections.split(rows, BROUGHT_IN)
+    assert cut["problems"] == [], cut["problems"]
+    ids = [p["id"] for p in cut["pieces"]]
+    assert "R202:porch" in ids and "R202:deck" in ids, ids     # porch by roman type, deck by porch's italics
+
+
 def test_a_defined_term_with_periods_in_its_parentheses_is_cut_on_its_own():
     rows = _book()
     rows.insert(5, _row(1, 51, "[MP] FIXTURE UNIT, DRAINAGE (d.f.u.). A measure.",    # on p.1, after FLIGHT
@@ -183,6 +197,15 @@ def test_without_the_cache_a_kept_outside_book_is_skipped_and_said_so(monkeypatc
     doc = load(j / "1_source_documents/sources.yaml")["documents"][0]
     assert cli._kept_outside(j, doc, check=True) is True
     assert "not in the code cache here; not extracted or checked" in capsys.readouterr().out
+
+
+def test_a_comparison_word_after_a_conversion_in_brackets_is_kept():
+    # R318.7.12's exception, p.101: "or less" read as "or more" must read differently (review round 5)
+    right = [shown(s) for s in statements("areas of 200 gross square feet (18.6 m[fn2]) or less where")]
+    assert right == ["200 gross square foot or less", "18.6 m or less"]
+    assert [shown(s) for s in statements("areas of 200 gross square feet (18.6 m[fn2]) or more where")] != right
+    assert [shown(s) for s in statements("not less than 36 inches (914 mm) measured")] == ["not less than 36 inch",
+                                                                                           "914 mm"]
 
 
 @pytest.mark.parametrize("text,expect", [

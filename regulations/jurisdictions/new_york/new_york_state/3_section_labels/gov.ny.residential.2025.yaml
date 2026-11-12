@@ -1079,6 +1079,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  R202:ready_access_to:
+    label: reference
+    topic: definitions
+    reason: Defines READY ACCESS (TO), used in italics by the definition of ACCESS (TO), which is brought in. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 50
+      lines:
+      - 13
+      - 14
+      quote: READY ACCESS (TO). That which enables a device, appliance or equipment to be directly reached, without requiring
+        the removal or movement of any panel, door or similar obstruction.
+    piece_sha256: 377589311b1dc5cb7e3d5e28b9d0f8124b053e5e97abbfcb266ef032cfd51532
+    notes: Drafted by hand in a Claude Code session (2026-11-12, review round 5); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   R202:repair:
     label: reference
     topic: definitions
@@ -2417,9 +2434,10 @@ labels:
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   R319.7:
-    label: reference
+    label: flag
     topic: means_of_egress
-    reason: Sends alterations and repairs of existing basements to Appendix BO, which is not brought in (existing buildings).
+    reason: 'Requires alterations and repairs of existing basements to comply with Appendix BO, which is not brought in: work
+      on an existing basement is shown as needing review until it is (as R318.7.9 for existing stairs).'
     sources:
     - file: gov.ny.residential.2025.pdf
       page: 103

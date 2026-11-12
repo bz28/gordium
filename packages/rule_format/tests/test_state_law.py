@@ -226,3 +226,21 @@ def test_an_edited_cache_is_a_problem_even_where_no_quote_covers_the_edit(tmp_pa
                                                      encoding="utf-8")
     monkeypatch.setenv(CODE_CACHE_ENV, str(tmp_path / "cache"))
     assert any("words are not the ones its piece was cut from" in p for p in Context.for_jurisdiction(NY_STATE).problems)
+
+
+def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
+    # review round 5: R319.7 sends existing basements to Appendix BO, not brought in; as a reference nobody sees it
+    import re
+    src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
+    brought = src["brought_in"]["sections"]
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    points = re.compile(r"(?:comply with|in accordance with)(?: the (?:requirements|provisions) of)? "
+                        r"(?:Sections?|Appendix|Chapter) ([A-Z]{0,2}\d[\w.]*\w|[A-Z]{1,2}\b)")
+    seen, wrong = 0, []
+    for pid, e in labels.items():
+        for target in (m[1] for s in e["sources"] for m in points.finditer(s["quote"])):
+            inside = any(target == b or target.startswith(b + ".") for b in brought)
+            seen += not inside
+            if not inside and e["label"] not in ("rule", "flag"):
+                wrong.append((pid, target, e["label"]))
+    assert seen >= 3 and wrong == []          # R319.7 (Appendix BO), R320.7 and R321.1.4 (R507.2.2)

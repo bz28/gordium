@@ -18,7 +18,7 @@ Never checked: a rule wrongly put here could let a design pass that should fail.
 | R320 | HANDRAILS | not_for_checking | draft | A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one). | SECTION R320—HANDRAILS |
 | R321 | GUARDS AND WINDOW FALL PROTECTION | not_for_checking | draft | A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one). | SECTION R321—GUARDS AND WINDOW FALL PROTECTION |
 
-## Labeled reference but using requirement words (10)
+## Labeled reference but using requirement words (19)
 
 Only rules become formulas: check each is really only a definition or pointer, not a requirement.
 
@@ -32,8 +32,17 @@ Only rules become formulas: check each is really only a definition or pointer, n
 | R202:public_way | PUBLIC WAY | reference | draft | Defines PUBLIC WAY, printed in italics in R318.1, R319.1; used in italics by the definition of TOWNHOUSE UNIT. A definition sets no requirement itself. | PUBLIC WAY. Any street, alley or other parcel of land open to the outside air leading to a public street, that has been deeded, dedicated or | less than |
 | R202:story_above_grade_plane | STORY ABOVE GRADE PLANE | reference | draft | Defines STORY ABOVE GRADE PLANE, used in italics by the definition of BASEMENT. A definition sets no requirement itself. | STORY ABOVE GRADE PLANE. Any story having its finished floor surface entirely above grade plane, or in which the finished surface of the floor next above is either | more than |
 | R202:townhouse_unit | TOWNHOUSE UNIT | reference | draft | Defines TOWNHOUSE UNIT, printed in italics in R319.1; used in italics by the definitions of DWELLING UNIT, TOWNHOUSE. A definition sets no requirement itself. | TOWNHOUSE UNIT. A single-family dwelling unit in a townhouse that extends from foundation to roof, that has a yard or public way on not less than | less than |
+| R318.3.3 | Storm and screen doors | reference | draft | A permission (storm and screen doors may swing over exterior stairs and landings): it relaxes the landing rules, sets no requirement of its own. | R318.3.3 Storm and screen doors. Storm and screen doors shall be permitted to swing over exterior stairs and landings. | shall be permitted |
+| R318.7 | Stairways | reference | draft | Says which stairways the stair rules apply to, with its exceptions: it scopes the numbered rules below, sets no dimension itself. | R318.7 Stairways. Where required by this code or provided, stairways shall comply with this section. | shall comply |
 | R318.7.4 | Walkline | reference | draft | Says where the walkline is (12 inches from the inside of the turn): how winder treads are measured, no requirement of its own. | R318.7.4 Walkline. The walkline across winder treads and landings shall be concentric to the turn and parallel to the direction of travel entering and exiting the | shall be located |
+| R318.7.5 | Stair treads and risers | reference | draft | Says tread and riser dimensions are measured exclusive of carpets, rugs or runners: how to measure, no limit itself. | R318.7.5 Stair treads and risers. Stair treads and risers shall meet the requirements of this section. | shall meet |
+| R318.7.10 | Illumination | reference | draft | Requires stairway illumination by pointing to Sections R325.6 and R325.7, which are brought in and labeled themselves. | R318.7.10 Illumination. Stairways shall be provided with illumination in accordance with Sections R325.6 and R325.7. | shall be provided |
+| R318.7.11 | Special stairways | reference | draft | Says spiral and bulkhead enclosure stairways follow the stair rules except as R318.7.11.1 and R318.7.11.2 say: scopes them, no limit itself. | R318.7.11 Special stairways. Spiral stairways and bulkhead enclosure stairways shall comply with the requirements of Section R318.7 except as specified in Sections R318.7.11.1 and R318.7.11.2. | shall comply |
+| R318.8 | Ramps | reference | draft | Says which ramps the ramp rules apply to (with its exception): scopes the numbered rules below, no limit itself. | R318.8 Ramps. Where required by this code or provided, ramps shall comply with this section. | shall comply |
 | R319.2 | Emergency escape and rescue openings | reference | draft | Points to Sections R319.2.1 to R319.2.4 for the minimum dimensions: they are labeled one by one. | R319.2 Emergency escape and rescue openings. Emergency escape and rescue openings shall have minimum dimensions in accor- dance with Sections R319.2.1 through R319.2.4. | shall have, minimum |
+| R320.1 | General | reference | draft | Says handrails comply with Section R320: a pointer to the numbered rules below. | R320.1 General. Handrails shall comply with Section R320. | shall comply |
+| R321.1 | Guards | reference | draft | Points to Sections R321.1.1 to R321.1.4 for guards: they are labeled one by one. | R321.1 Guards. Guards shall be provided in accordance with Sections R321.1.1 through R321.1.4. | shall be provided |
+| R321.2 | Window fall protection | reference | draft | Points to Sections R321.2.1 and R321.2.2 for window fall protection: they are labeled one by one. | R321.2 Window fall protection. Window fall protection shall be provided in accordance with Sections R321.2.1 and R321.2.2. | shall be provided |
 
 ## Open questions for the architects (0)
 

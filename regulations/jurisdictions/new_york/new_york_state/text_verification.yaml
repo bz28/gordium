@@ -11,11 +11,16 @@ second_reading:
   'on': 2026-11-12
   how: 'Each brought-in piece was rendered from the PDF as an image (pypdfium2, 216 dpi), cropped from its heading to the
     next piece''s; the helpers read every number off the images, with the words before and after it, and both readings went
-    through document_extraction/numbers.py. 168 pieces, 356 numbers: all agree. No glyph was marked unclear.'
+    through document_extraction/numbers.py. 169 pieces, 357 numbers: all agree. No glyph was marked unclear.'
 notes:
 - R318.7.6 was read again from its image (2026-11-12) after numbers.py learned parts of a whole ('a quarter circle', 'one-half');
   the first readings had not listed 'a quarter'. The new reading agrees. R202:owner (no numbers) was brought in later the
   same day, when the roman-type match learned 'Owner-occupied', and read from its image then.
+- "Review round 5 (2026-11-12): numbers.py learned to look past a conversion in brackets for the comparison word after a
+  number ('200 gross square feet (18.6 m²) or less'). R318.7.12, R318.7.13 and R202:underlayment were read again from
+  their images (pages 101, 102, 54): 'or less', 'or less' and '(17-percent slope) or greater' are printed so; both
+  readings agree. R202:ready_access_to (used by ACCESS (TO); brought in the same round, when the chain of definitions
+  learned to follow those brought in by the roman-type match) was read from its image (page 50): 'Chapter 24', as the text."
 - 'Two counting conventions were aligned after the first comparison (neither changed a number): a table''s part in parentheses
   (''Table R401.4.1(2)'') is part of its name, and a number word joined by a hyphen counts (''one-family'', ''one- or two-family'').'
 - A raised 2 after m or ft (m², ft²) is written [fn2] in the extracted text, as in Ithaca's; it is never read as the number
@@ -469,6 +474,13 @@ pieces:
     - 20 unit horizontal
     - 5 percent
     second_reading: agrees
+  R202:ready_access_to:
+    piece_sha256: 377589311b1dc5cb7e3d5e28b9d0f8124b053e5e97abbfcb266ef032cfd51532
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
+    second_reading: agrees
   R202:repair:
     piece_sha256: c2afbeecd8e138697db3e655bb9223162e3bc18f08bbb97befec98961a0fcf59
     numbers: []
@@ -601,12 +613,12 @@ pieces:
     numbers:
     - one or more
     - 2 unit vertical
-    - 12 unit horizontal
+    - 12 unit horizontal or greater
     - 17 percent
     second_reading_numbers:
     - one or more
     - 2 unit vertical
-    - 12 unit horizontal
+    - 12 unit horizontal or greater
     - 17 percent
     second_reading: agrees
   R202:uniform_code:
@@ -1003,13 +1015,13 @@ pieces:
     numbers:
     - not less than 20 inch
     - 508 mm
-    - 200 gross square foot
-    - 18.6 m
+    - 200 gross square foot or less
+    - 18.6 m or less
     second_reading_numbers:
     - not less than 20 inch
     - 508 mm
-    - 200 gross square foot
-    - 18.6 m
+    - 200 gross square foot or less
+    - 18.6 m or less
     second_reading: agrees
   R318.7.12.1:
     piece_sha256: e5e7ea0f7403199234e4c9e6602d84c1f5d983d84af9f15949cccbb136031371
@@ -1050,13 +1062,13 @@ pieces:
     numbers:
     - not less than 20 inch
     - 508 mm
-    - 200 gross square foot
-    - 18.6 m
+    - 200 gross square foot or less
+    - 18.6 m or less
     second_reading_numbers:
     - not less than 20 inch
     - 508 mm
-    - 200 gross square foot
-    - 18.6 m
+    - 200 gross square foot or less
+    - 18.6 m or less
     second_reading: agrees
   R318.7.13.1:
     piece_sha256: c67516d8d6f8bef2cd678b80fd9d0d42aa79ab974589739bca5d6cb3b2f8dfcc

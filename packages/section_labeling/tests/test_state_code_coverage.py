@@ -35,3 +35,14 @@ def test_without_the_book_the_report_is_rebuilt_from_line_counts_and_matches_the
     report = coverage.report(rows, header, pieces, read_labels(NY, BOOK))
     assert "problems cutting the book:** 0 ✓" in report and "unlabeled 0" in report
     assert report == (NY / "6_coverage_report/gov.ny.residential.2025.md").read_text(encoding="utf-8")
+
+
+def test_the_model_codes_requirement_verbs_put_a_reference_on_the_review_list():
+    # review round 5: ICC books require with "shall comply", "shall be provided", "shall meet" (R319.7, R318.7.10)
+    piece = {"id": "R319.7", "title": "Alterations", "lines": [[1, 1, 3]]}
+    for text, word in (("Alterations of existing basements shall comply with Appendix BO.", "shall comply"),
+                       ("Stairways shall be provided with illumination.", "shall be provided"),
+                       ("Stair treads and risers shall meet the requirements of this section.", "shall meet"),
+                       ("Doors shall be permitted to swing over stairs.", "shall be permitted")):
+        rows = [{"file": "b.pdf"}, {"page": 1, "line": 1, "text": text}]
+        assert coverage.requirement_words(rows, piece) == [word]

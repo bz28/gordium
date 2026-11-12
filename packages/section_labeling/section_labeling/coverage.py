@@ -117,6 +117,7 @@ def cited_by(j: Path, file: str, pieces: dict[str, dict]) -> dict[str, list[str]
 # a missed requirement could let a design pass that should fail.
 REQUIREMENT_WORDS = re.compile(
     r"\b(shall not|shall be not|shall have|shall be located|shall conform|shall be in conformity|shall be deemed|"
+    r"shall comply|shall be provided|shall meet|shall be permitted|"   # the model codes' verbs (ICC books)
     r"shall be considered|must|may not|not to exceed|exceed(?:s|ed|ing)?|(?:more|less|fewer|greater) than|"
     r"at least|at most|is required|are required|prohibited|maximum|minimum|(?<!not )limited to|"
     r"no(?:\s+[\w/-]+){1,6}\s+shall)\b", re.I)    # patterns, not instances: "No structure shall", "less than 60"
