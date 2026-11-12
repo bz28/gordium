@@ -15,6 +15,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from . import parts
 from . import place as places
 from .labels import load_pieces, validate_labels
 from .rulebook import (REPO, Context, finding_conflicts, jurisdictions, load, locate, not_quotable, research_entries,
@@ -22,7 +23,13 @@ from .rulebook import (REPO, Context, finding_conflicts, jurisdictions, load, lo
 
 
 def main() -> int:
-    failed = checked = 0
+    failed = checked = 1
+    try:                                  # the part kinds per-part rules repeat over (parts.yaml)
+        parts.load_registry()
+        failed = 0
+        print(f"✓ {parts.PARTS_FILE.relative_to(REPO)}")
+    except (ValueError, OSError) as e:
+        print(f"✗ {parts.PARTS_FILE.relative_to(REPO)}: {e}")
     for jurisdiction in jurisdictions(REPO):
         place = jurisdiction.relative_to(REPO / "regulations/jurisdictions")
         checked += 1
