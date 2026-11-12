@@ -1,0 +1,43 @@
+# Rules for each part: one result per bedroom, window and stair (2026-11-12)
+
+**Purpose:** how a rule says "for each bedroom / escape window / stair", and how the checker answers it, one row per part.\
+**For:** engineers changing `rule_format` or `design_checker`; architects reading the panel.\
+**Kept current by:** the engineer who changes `rule_format/parts.yaml`, `rule_format/parts.py` or `design_checker/each_part.py`, in that PR.
+
+Egress step 2 of the [egress design doc](https://claude.ai/artifact/SzJvw7FdbsdfGMqUHxspFU) (§9, "Rules per part"). Zoning rules are about the whole lot: one rule, one answer. Building-code egress rules repeat: *every* sleeping room needs an escape opening, *every* stair has a riser limit. The architect must be told *which* one fails ("Bedroom 2: escape opening net clear area 5.1 sq ft, needs ≥ 5.7 sq ft"), not just "a window somewhere fails".
+
+The real egress rules are not written yet (step 1, bringing in the code text, waits on the copyright decision). Every rule in this PR's tests is **synthetic**, marked so, and quotes made-up text, never the code.
+
+## Decision
+
+1. **Part kinds are a fixed list engineers write**, `rule_format/parts.yaml`, like `measures.yaml`: each kind's name, meaning, the measures each part of that kind carries (with units), and for a part that sits inside another, which kinds it can sit `within`. First kinds: `sleeping_room`, `emergency_escape_opening` (within a sleeping room), `stair`, `egress_door`. A part's measure names are unique across every kind and never a building measure's name, so a formula's names can't mean two things.
+2. **A rule says what it repeats over** with three new optional fields:
+   - `for_each: <part kind>`: one result per part of that kind.
+   - `within: <part kind>` (optional): the parts are grouped by the part they sit in, so the rule is "for each escape opening *of each sleeping room*".
+   - `when_none:` what the law says when there is nothing to check: `fail`, `needs_review` or `not_applicable`. **Required** on every per-part rule, and never `pass`. With `within`, it is the answer for a sleeping room with no escape opening (each such room gets its own row, named); without, the answer when the building has none of that kind (no stairs: not applicable).
+   A rule's formulas (and its worked examples' values) may use the building's measures (`use`, `stories`, …) and its own part kind's measures, nothing else. Validation refuses an unknown part kind, a `within` the kind can't sit in, `within` or `when_none` without `for_each`, a missing or `pass` `when_none`, a part measure of another kind, and a part measure in `applies_when` when `when_none` isn't `not_applicable`: a rule that must find a part says which parts differ inside its `check` (`opening_net_clear_area >= (5.0 if opening_at_grade else 5.7)`), so it can't rule out every part of a room and leave the room with no row that fails. Worked examples give one part's values and are checked by the same per-part outcome the checker uses.
+3. **One row per part.** `rule_format/parts.py` runs each part's values (the building's plus the part's own measures; a part can't change a building value) through `outcome()`'s own evaluation (`part_outcome`, the rule's per-part fields set aside), so missing values and three-valued logic mean what they mean for zoning: a part missing a measure that could change its answer needs review; one that fails whatever that measure is (`5.1 sq ft` and the height missing, against "area ≥ 5.7 and height ≥ 24") fails. (The structural "fails whatever the missing number" proof of 2026-10-21 lives in `check.py` and is not applied to parts yet: those rows stay needs review, never pass.) `design_checker/each_part.py` (plain code, no AI) names the rows. Each row carries the rule, the part's kind, id and name, the part it sits in, the result and a line naming the part ("Bedroom 2 › Window 5: net clear area 5.1 sq ft, needs ≥ 5.7 sq ft").
+4. **Never a silent pass.** Each of these gives a row of its own, never nothing:
+   - the parts of a kind the rule needs (its `for_each` kind, and its `within` kind if it has one) were not read at all (not given, as opposed to an empty list): **needs review**, "not read yet";
+   - a part with no id, two parts with one id, a part `within` a part that isn't there, or a part that isn't a mapping: **needs review**, naming the problem;
+   - none to check: the rule's own `when_none` (and with `within`, a building with no sleeping rooms at all: **not applicable**, since nothing the rule talks about exists).
+5. **The rule's answer and the design's** follow `present.state` (PRs #81, #82): a rule does not comply if any of its rows fails, else needs review if any does, else complies if at least one row complies; a rule with only not-applicable rows is not applicable. Rows are shown as panel items (status `does_not_comply`/`needs_review`/`complies`; not applicable rows left out, as today), so the design's overall state is `present.state` over zoning and part rows together. Nothing counted is needs review, never complies (PR #81; until it merges, `each_part` never adds a complying item for a rule that checked nothing).
+6. **A per-part rule never answers as a whole-building rule.** The public `outcome()` given a rule with any per-part field says needs review, so code that doesn't know about parts (the project report, the envelope, `check.row_verdict`) can never pass one. Only `parts.part_outcome` (validation's worked examples, and the checker's rows) answers one part.
+7. **Interior not started is said, and counted.** When no parts are given at all (the interior isn't being checked), the per-part rules give one counted item, "Interior: not checked yet", needs review. The design is then never shown as complying with rules nobody checked; whether massing alone may say "complies (zoning only)" instead is for Ben when the panel shows egress (step 5).
+8. **Nothing else changes.** Rule files have no format version; the new fields are optional, so every existing rule file means exactly what it did. The approval fingerprint adds the new fields only when a rule has them, so every existing fingerprint is unchanged (pinned by a test). `7_published_rulebooks/` holds no published rulebook yet; nothing in it changes. The site description (`gordium.site/1`) is unchanged: tests give parts to the checker directly.
+
+## How parts will arrive (later, step 4)
+
+A later site description version adds `parts: {<kind>: [{id, name, within?, measures: {...}, from: {...}}]}` per building, a flat list by kind, each part pointing at the part it sits in by id, each measure with where it came from (read from the drawing, suggested, stated by the architect: the three levels in the design doc §8). `parts` absent means interior checking is off (the architect hasn't run `GordiumInterior`): no part is checked, so the panel never warns "bedroom has no window" during massing, and the one "Interior: not checked yet" item (point 8) keeps the design from reading as complying. A kind absent once interior checking is on means "not read yet" (needs review); an empty list means "read, and there are none".
+
+## Why
+
+- **The law's own words decide "none".** "Each sleeping room shall have an escape opening" makes a room with none a fail; "each stair" makes a house with no stairs not applicable. One fixed default would be wrong for one of them, so the rule must say.
+- **Designated escape openings, not every window.** The code asks for *an* escape opening per sleeping room, not that every window qualify. So a per-opening rule runs over the openings marked as the room's escape opening (a part kind of its own), and the same rule's `when_none: fail` gives a room with none its own failing row; no separate count, which a reader could get out of step with the openings it read. Checking every window would fail a good bedroom for its small second window.
+- **Same `outcome()` for everything.** Reusing the zoning evaluator keeps one meaning of missing data and one meaning of pass; parts add only the loop and the naming.
+
+## What we rejected
+
+- **Count measures on the building** (`sleeping_rooms_without_escape_opening == 0`): passes or fails but can't say which room.
+- **A per-part loop inside formulas** (`all(o.area >= 5.7 for o in openings)`): a new formula language, harder to check, and still one answer per rule.
+- **"At least one window in the room qualifies" as a quantifier** for now: needs one rule to look at all the room's windows together and say which comes closest. Possible later as `need: any`; designating the escape opening is how the code and architects already think about it.
