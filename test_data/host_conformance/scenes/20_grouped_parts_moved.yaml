@@ -1,0 +1,45 @@
+title: A house of parts in a group, the group moved
+what: >-
+  The box house's outline drawn as parts (a 1 ft floor slab, four 0.5 ft walls 18 ft high, a 1 ft roof slab), all
+  six in one group (a Rhino group; in Revit, a model group), then the whole group moved 10 ft back. Each part must be
+  sent under the same id before and after: results point back to objects by id, and a group moved is still the
+  same parts. After the move the house is 40 ft from the street and 30 ft from the rear line, exactly the least
+  allowed: still complies.
+guards: >-
+  The Revit reading design note, new scene E: section 1, "Model group" (never itself: each member read on its own)
+  and section 3, "Ids" (every element by its UniqueId, the same after an edit). In Rhino: a group's members are
+  ordinary objects, read by read_3dm.read_site under their own ids (read_3dm._id).
+group: true
+buildings:
+  - {id: floor_slab, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, top: 1}
+  - {id: wall_south, outline: [[15, 30], [45, 30], [45, 30.5], [15, 30.5]], base: 1, top: 19}
+  - {id: wall_north, outline: [[15, 79.5], [45, 79.5], [45, 80], [15, 80]], base: 1, top: 19}
+  - {id: wall_west, outline: [[15, 30.5], [15.5, 30.5], [15.5, 79.5], [15, 79.5]], base: 1, top: 19}
+  - {id: wall_east, outline: [[44.5, 30.5], [45, 30.5], [45, 79.5], [44.5, 79.5]], base: 1, top: 19}
+  - {id: roof_slab, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 19, top: 20}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: complies                      # 30 ≥ 25
+  R-1b.side_yards#east: complies                 # 15 ≥ 10
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies                       # 40 ≥ 30
+  R-1b.yard_projections: complies
+  R-1b.height: complies                          # 20 ≤ 35
+  R-1b.stories: complies                         # one 20 ft solid of parts: 1 to 2 stories, ≤ 3
+  R-1b.lot_coverage: complies                    # 1,500 ≤ 1,800 sf
+then:
+  what: The group moved 10 ft back (y 30 to 40, 80 to 90), each part moved in place, none redrawn.
+  move: [0, 10]
+  expected:
+    R-1b.lot_area_one_family_detached: complies
+    R-1b.lot_width_one_family_detached: complies
+    R-1b.front_yard: complies                    # 40 ≥ 25
+    R-1b.side_yards#east: complies
+    R-1b.side_yards#west: complies
+    R-1b.rear_yard: complies                     # 120 − 90 = 30 ≥ 30, at the limit
+    R-1b.yard_projections: complies
+    R-1b.height: complies
+    R-1b.stories: complies
+    R-1b.lot_coverage: complies

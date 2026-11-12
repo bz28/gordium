@@ -1,0 +1,28 @@
+title: The lot picked from two outlines
+what: >-
+  Scene 09's two closed outlines on the Site layer (the lot and its neighbour to the east), but the architect has
+  picked the lot (its id saved in the facts as lot_id), as the add-in's default flow does. The host must send the
+  picked outline, and no problem: with the lot known, every measure complies as the box house's does. A host that
+  ignored the pick would send no lot (several_lot_outlines) or, worse, the neighbour's.
+guards: >-
+  The Revit reading design note, new scene G's first case: section 4, "The architect picked the lot" (the picked
+  property line; lot_id saved in the facts). In Rhino: read_3dm.read_site's picked outline (the closed curve whose
+  id is lot_id).
+lots:
+  - [[0, 0], [60, 0], [60, 120], [0, 120]]
+  - [[60, 0], [120, 0], [120, 120], [60, 120]]
+picked: lot
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies    # the picked lot: 60 × 120 = 7,200 sf
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: complies                      # 30 ≥ 25
+  R-1b.side_yards#east: complies                 # 15 ≥ 10 (the picked lot's east line, x 60)
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies                       # 40 ≥ 30
+  R-1b.yard_projections: complies
+  R-1b.height: complies
+  R-1b.stories: complies
+  R-1b.lot_coverage: complies                    # 1,500 ≤ 1,800 sf

@@ -1,0 +1,45 @@
+title: A house built from parts
+what: >-
+  The box house's outline (30 × 50 ft, 30 ft back, 15 ft from each side), drawn the way a Revit model is: not as
+  Gordium's floor blocks but as its parts, each its own solid on the Building layer with no floor mark. A 1 ft floor
+  slab (z 0 to 1); four 0.5 ft walls 18 ft high (z 1 to 19), the south wall in pieces around a 4 × 4 ft window (a
+  solid of its own filling the opening), the east wall broken by a curtain wall (two mullions and a glass panel at
+  the wall's outer face); a built-in drawn as its own solid inside, against the west wall (an in-place family); and
+  a 1 ft roof slab (z 19 to 20) drawn as a closed mesh of triangles (one element meshed). Every part touches another,
+  so together they are one 20 ft building, and every measure complies as the box house's does. The measuring has
+  only ever seen floor blocks: this is the first scene where a building is many solids, one of them a mesh.
+guards: >-
+  The Revit reading design note (docs/revit/revit_reading_design.md), new scene A without its loft: section 1,
+  "Proposed building categories" (one building per element: walls, floors, roofs, windows; curtain wall panels and
+  mullions as their own elements; an in-place family read by its category, here a building one); section 2, "A mesh
+  in an element's geometry" (its triangles as faces; no open_mesh for a mesh known to be closed). In Rhino, the
+  same reading is read_3dm.read_site's building loop (every solid and mesh on the Building layer one building).
+buildings:
+  - {id: floor_slab, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, top: 1}
+  - {id: wall_south_west, outline: [[15, 30], [25, 30], [25, 30.5], [15, 30.5]], base: 1, top: 19}
+  - {id: window_sill, outline: [[25, 30], [29, 30], [29, 30.5], [25, 30.5]], base: 1, top: 4}
+  - {id: window, outline: [[25, 30], [29, 30], [29, 30.5], [25, 30.5]], base: 4, top: 8}
+  - {id: window_head, outline: [[25, 30], [29, 30], [29, 30.5], [25, 30.5]], base: 8, top: 19}
+  - {id: wall_south_east, outline: [[29, 30], [45, 30], [45, 30.5], [29, 30.5]], base: 1, top: 19}
+  - {id: wall_north, outline: [[15, 79.5], [45, 79.5], [45, 80], [15, 80]], base: 1, top: 19}
+  - {id: wall_west, outline: [[15, 30.5], [15.5, 30.5], [15.5, 79.5], [15, 79.5]], base: 1, top: 19}
+  - {id: wall_east_south, outline: [[44.5, 30.5], [45, 30.5], [45, 50], [44.5, 50]], base: 1, top: 19}
+  - {id: mullion_south, outline: [[44.5, 50], [45, 50], [45, 50.25], [44.5, 50.25]], base: 1, top: 19}
+  - {id: curtain_panel, outline: [[44.9, 50.25], [45, 50.25], [45, 59.75], [44.9, 59.75]], base: 1, top: 19}
+  - {id: mullion_north, outline: [[44.5, 59.75], [45, 59.75], [45, 60], [44.5, 60]], base: 1, top: 19}
+  - {id: wall_east_north, outline: [[44.5, 60], [45, 60], [45, 79.5], [44.5, 79.5]], base: 1, top: 19}
+  - {id: built_in, outline: [[15.5, 60], [19.5, 60], [19.5, 62], [15.5, 62]], base: 1, top: 10}
+  - {id: roof_slab, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 19, top: 20, mesh: true}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies    # 60 × 120 = 7,200 sf
+  R-1b.lot_width_one_family_detached: complies   # 60 ft along the street
+  R-1b.front_yard: complies                      # the south wall's outer face at y 30: 30 ≥ 25
+  R-1b.side_yards#east: complies                 # the east wall, mullions and panel all reach x 45: 15 ≥ 10
+  R-1b.side_yards#west: complies                 # the west wall at x 15: 15 ≥ 10
+  R-1b.rear_yard: complies                       # the north wall at y 80: 40 ≥ 30
+  R-1b.yard_projections: complies                # the slabs stop at the walls' outer faces: nothing reaches past
+  R-1b.height: complies                          # the roof slab's top, 20 − 0 = 20 ≤ 35
+  R-1b.stories: complies                         # no floor marks: one 20 ft solid holds 1 to floor(20 / 7) = 2
+                                                 # stories (7 ft a story), every count ≤ 3
+  R-1b.lot_coverage: complies                    # the parts together cover 30 × 50 = 1,500 ≤ 1,800 sf
