@@ -26,7 +26,8 @@ from pathlib import Path
 import yaml
 
 from rule_format.labels import load_pieces
-from rule_format.rulebook import REPO, Context, jurisdictions, load, read_jsonl, utf8_console
+from rule_format.rulebook import (REPO, STATE_SETTINGS, Context, cached, jurisdictions, law_folders, load, read_jsonl,
+                                  utf8_console)
 
 from . import coverage, district_audit, labeler, term_index
 from .budget import Budget, BudgetExceeded
@@ -37,8 +38,19 @@ MIN_CACHEABLE = 512   # tokens; shorter fixed instructions silently don't cache 
 
 
 def extracted_rows(j: Path, file: str) -> list[dict]:
-    """A document's extracted text: a header, then one row per line ({"page", "line", "text", ...})."""
-    return read_jsonl(j / "2_extracted_text" / f"{Path(file).stem}.jsonl")
+    """A document's extracted text: a header, then one row per line ({"page", "line", "text", ...}). A book kept
+    outside the repo is read from the code cache; where the cache doesn't have it, its lines are rebuilt from the
+    sections file's line counts, with no text (the header says "no_text"), so the coverage report can still be
+    checked: it counts lines, never reads them."""
+    entry = next((d for d in load(j / "1_source_documents/sources.yaml")["documents"] if d["file"] == file), {})
+    if entry.get("kept_outside_repo") is not True:
+        return read_jsonl(j / "2_extracted_text" / f"{Path(file).stem}.jsonl")
+    if cached(entry, ".jsonl").exists():
+        return read_jsonl(cached(entry, ".jsonl"))
+    header, _ = load_pieces(j / "2_extracted_text" / f"{Path(file).stem}.sections.jsonl")
+    return [{"file": file, "sha256": entry.get("sha256"), "no_text": True},
+            *({"page": int(p), "line": n, "text": ""} for p, count in header["line_counts"].items()
+              for n in range(1, count + 1))]
 
 
 def run_records(j: Path) -> list[dict]:
@@ -48,7 +60,7 @@ def run_records(j: Path) -> list[dict]:
 
 def documents(place: str | None = None):
     """(jurisdiction dir, document file name, sections file) for every document that has been cut into sections."""
-    for j in jurisdictions(REPO):
+    for j in law_folders(REPO):
         if place is not None and j.relative_to(PLACES).as_posix() != place:
             continue
         for path in sorted((j / "2_extracted_text").glob("*.sections.jsonl")):
@@ -90,9 +102,13 @@ def cmd_coverage(args) -> int:
         for problem in coverage.provenance_problems(labels, runs, pieces, rows, file, ctx):
             print(f"✗ provenance: {problem}")
             failed += 1
-        outputs = {j / "6_coverage_report" / f"{Path(file).stem}.md": coverage.report(rows, header, pieces, labels),
-                   j / "3_section_labels" / f"{Path(file).stem}.review.md":
-                       coverage.review_list(header, pieces, labels, coverage.cited_by(j, file, pieces), rows)}
+        outputs = {j / "6_coverage_report" / f"{Path(file).stem}.md": coverage.report(rows, header, pieces, labels)}
+        review = j / "3_section_labels" / f"{Path(file).stem}.review.md"
+        if rows[0].get("no_text"):          # the review list reads the words: skipped here, never passed
+            print(f"– {review.relative_to(REPO)}: not checked here (the book is kept outside the repo and not in "
+                  "the code cache); checked where the cache exists")
+        else:
+            outputs[review] = coverage.review_list(header, pieces, labels, coverage.cited_by(j, file, pieces), rows)
         for out, text in outputs.items():
             failed += not _write_or_check(out, text, args.check)
         if bad:
@@ -100,7 +116,9 @@ def cmd_coverage(args) -> int:
             failed += 1
     for j, docs in laws.items():                      # the term index: every piece that uses each term or synonym
         definitions = j / "4_term_definitions/definitions.yaml"
-        if definitions.exists():
+        # A state law folder's book marks its own defined words (in italics, R201.1): its sections file lists, for
+        # each piece, the definitions it uses (document_extraction/icc_sections.py), so it has no term index.
+        if definitions.exists() and not (j / STATE_SETTINGS).is_file():
             index = term_index.build(load(definitions) or {}, load(term_index.SYNONYMS_FILE) or {}, docs)
             failed += not _write_or_check(j / "4_term_definitions" / term_index.INDEX_NAME,
                                           term_index.render(index), args.check)
