@@ -1711,12 +1711,12 @@ def overlays_lookup(lot: dict | None, facts: dict, today: str | None) -> dict | 
         return {"date": date, "age": None, "cleared": False, "why": why}
     if day > now:
         why = (f"the address lookup's date ({date}) is after today ({today}), so how old it is can't be told: "
-               "look the address up again in the start box")
+               "look the address up again in the start box, or check them by hand")
         return {"date": date, "age": None, "cleared": False, "why": why}
     age, days = age_words(day, now), (now - day).days
     if days > LOOKUP_FRESH_DAYS:              # said in days beside the limit in days ("2 months" can be 91 days)
         why = (f"the address lookup found none {days} days ago ({date}), but a lookup counts for {LOOKUP_FRESH_DAYS} "
-               "days only (flood maps change): look the address up again in the start box")
+               "days only (flood maps change): look the address up again in the start box, or check them by hand")
         return {"date": date, "age": age, "cleared": False, "why": why}
     return {"date": date, "age": age, "cleared": True, "why": None}
 

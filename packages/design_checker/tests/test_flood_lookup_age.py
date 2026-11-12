@@ -65,7 +65,8 @@ def test_ninety_days_counts_and_ninety_one_days_does_not():
     assert release_rows(v) == ["release.overlays"] and v["state"] == present.REVIEW
     assert overlays_row(v)["reason"] == (
         "Overlays (historic, gorge, flood): the address lookup found none 91 days ago (2026-08-13), but a lookup "
-        "counts for 90 days only (flood maps change): look the address up again in the start box")
+        "counts for 90 days only (flood maps change): look the address up again in the start box, or check them by "
+        "hand")
     assert not any(s.startswith("Overlays: none found") for s in v["header"]["sources"])
 
 
@@ -87,7 +88,9 @@ def test_without_a_day_from_the_host_no_lookup_counts_as_recent():
 def test_a_lookup_dated_after_today_keeps_the_row():
     v = check_site(SITE, facts_found_on("2026-11-13"), today=TODAY)["view"]
     assert release_rows(v) == ["release.overlays"]
-    assert "(2026-11-13) is after today (2026-11-12)" in overlays_row(v)["reason"]
+    assert overlays_row(v)["reason"].endswith(
+        "(2026-11-13) is after today (2026-11-12), so how old it is can't be told: look the address up again in the "
+        "start box, or check them by hand")
 
 
 @pytest.mark.parametrize("date", ["Nov 11 2026", "2026-11-11T09:00", "11/11/2026", "2026-02-30", "2026-W46-3"])
@@ -118,6 +121,15 @@ def test_same_design_same_facts_same_day_same_answer_and_the_day_is_the_only_clo
     assert (a["state"], a["summary"], a["header"]["sources"]) == (b["state"], b["summary"], b["header"]["sources"])
     later = check_site(SITE, facts, today="2026-11-13")["view"]
     assert a["state"] == present.COMPLIES and later["state"] == present.REVIEW
+
+
+def test_nothing_on_the_check_path_reads_the_clock():
+    """The day comes only from the host: no clock read anywhere in the checker's own modules (a fallback to the
+    computer's date would pass every dated test above while the real date is near theirs)."""
+    import re
+    for module in ("check.py", "present.py", "reading_set.py"):
+        source = (REPO / "packages/design_checker/design_checker" / module).read_text(encoding="utf-8")
+        assert not re.search(r"\.today\(|\.now\(|\butcnow\(|time\.time\(|\bcity_day\(", source), module
 
 
 def test_the_worker_passes_the_hosts_day_and_still_answers_without_one(tmp_path):
