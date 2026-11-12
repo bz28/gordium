@@ -1347,10 +1347,11 @@ def _deep(a, b, t0, t1, depth, reach, slack=0.5):
     d0 and d1 deep and which is L long goes no deeper than (d0 + d1 + L) / 2: pieces that can't go deeper than
     `reach` (and a `slack` share of it, so a wall drawn at the reach along a long line ends) are dropped, the others
     halved, until a point deeper than `reach` is found or none is left. No point more than `reach` (1 + slack) in,
-    0.15 ft, is missed, however the lot's corners and notches fall along it; between that and `reach`, only a spike
-    of the lot narrower than about 0.1 ft can be. After DEPTH_QUESTIONS questions for one object (a long wall
-    running just inside the line along a jagged outline), it counts as on the lot: the cautious answer, never a
-    long wait on every check."""
+    0.15 ft, is missed, however the lot's corners and notches fall along it. Between that and `reach`, a stretch
+    whose middle goes deeper than its ends can be: one cutting across a square lot corner 0.21 ft from it goes
+    0.105 ft in and reads as off, and one crossing a strip of the lot 0.29 ft wide goes 0.145 ft in. After
+    DEPTH_QUESTIONS questions for one object (a long wall running just inside the line along a jagged outline), it
+    counts as on the lot: the cautious answer, never a long wait on every check."""
     (ax, ay), (bx, by) = a, b
     length = ((bx - ax) ** 2 + (by - ay) ** 2) ** 0.5
     at = lambda t: depth(ax + (bx - ax) * t, ay + (by - ay) * t)   # noqa: E731
