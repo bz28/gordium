@@ -50,20 +50,40 @@ public sealed class StrictJsonTests
     [MemberData(nameof(Distinct))]
     public void Keys_that_differ_are_read(string json) => StrictJson.Parse(json);
 
-    /// <summary>A key whose escapes aren't text (half of a surrogate pair) is refused as JSON that can't be
-    /// trusted. Stricter than .NET 10's built-in check, on purpose: that one let such a key through when it was
-    /// the object's only key, and otherwise threw an InvalidOperationException (not a JsonException, so not
-    /// read as "the answer isn't JSON").</summary>
+    /// <summary>A key or text value whose escapes aren't text (half of a surrogate pair) is refused as JSON that
+    /// can't be trusted, so no later read of it can fail. .NET 10's built-in check threw an
+    /// InvalidOperationException on such a key (not a JsonException, so not read as "the answer isn't JSON"),
+    /// and let such a value through to fail later, when read.</summary>
     [Theory]
-    [InlineData("""{"\ud800": 1}""")]
-    [InlineData("""{"\udc00": 1}""")]
-    [InlineData("""{"a\ud800": 1, "b": 2}""")]
-    [InlineData("""{"ok": true, "x": {"\ud800": 1}}""")]
-    public void A_key_whose_escapes_arent_text_is_refused(string json)
+    [InlineData("""{"\ud800": 1}""", "a key isn't valid text")]
+    [InlineData("""{"\udc00": 1}""", "a key isn't valid text")]
+    [InlineData("""{"a\ud800": 1, "b": 2}""", "a key isn't valid text")]
+    [InlineData("""{"ok": true, "x": {"\ud800": 1}}""", "a key isn't valid text")]
+    [InlineData("""{"error": "\ud800"}""", "a text value isn't valid text")]
+    [InlineData("""{"items": [{"status": "compl\udc00ies"}]}""", "a text value isn't valid text")]
+    [InlineData("""["\ud83d"]""", "a text value isn't valid text")]
+    public void An_escape_that_isnt_text_is_refused(string json, string words)
     {
         var e = Assert.ThrowsAny<JsonException>(() => StrictJson.Parse(json));
-        Assert.Contains("a key isn't valid text", e.Message);
+        Assert.Contains(words, e.Message);
     }
+
+    /// <summary>A line holding half a surrogate pair itself (not as an escape) is refused as JSON, never passed
+    /// on with the half replaced. A Fact, not a Theory: xUnit would replace the half while passing the case in.</summary>
+    [Fact]
+    public void A_line_that_isnt_whole_text_is_refused()
+    {
+        foreach (var line in new[] { "{\"\uD800\": 1}", "{\"error\": \"\uDC00\"}", "[\"a\uD83D\"]" })
+        {
+            Assert.Contains(line, c => char.IsSurrogate(c));   // the case really holds the half
+            var e = Assert.ThrowsAny<JsonException>(() => StrictJson.Parse(line));
+            Assert.Contains("the answer isn't whole text", e.Message);
+        }
+    }
+
+    [Fact]
+    public void A_good_escape_pair_is_read() =>
+        Assert.Equal("\U0001F600", StrictJson.Parse("""{"a": "\ud83d\ude00"}""").GetProperty("a").GetString());
 
     [Theory]
     [InlineData("""{"a": NaN}""")]
@@ -72,6 +92,7 @@ public sealed class StrictJsonTests
     [InlineData("""{"a": 1} {"a": 2}""")]                                   // two answers on one line
     [InlineData("""{"a": 1""")]
     [InlineData("")]
+    [InlineData("\uFEFF{\"a\": 1}")]                                       // a byte-order mark first
     public void Not_strict_json_is_refused(string json) => Assert.ThrowsAny<JsonException>(() => StrictJson.Parse(json));
 
     [Fact]
