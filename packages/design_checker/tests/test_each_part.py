@@ -158,3 +158,12 @@ def test_an_applies_when_that_isnt_text_gives_a_review_row():
     got = each_part.check_parts([copy.deepcopy(RISER) | {"applies_when": ["x"]}],
                                 {"stair": [{"id": "s1", "measures": {"stair_riser_height": 7}}]}, ZONING, ALLOWED)
     assert [i["status"] for i in got["items"]] == [present.REVIEW]
+
+
+def test_a_part_proven_to_fail_says_what_was_not_measured():
+    rule = synthetic.HEADROOM
+    got = each_part.check_parts([copy.deepcopy(rule)], {"stair": [{"id": "s1", "name": "Stair 1",
+                                                                   "measures": {"stair_headroom": 70}}]},
+                                ZONING, ALLOWED)
+    assert [(i["status"], i["reason"]) for i in got["items"]] == [
+        (present.FAILS, "Stair 1: SYNTHETIC stair headroom: does not comply whatever the riser height (not measured)")]

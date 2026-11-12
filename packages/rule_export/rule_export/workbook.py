@@ -160,8 +160,23 @@ def _findings(findings) -> str:
 
 
 def _examples(examples) -> str:
-    return _bullets(f"{', '.join(f'{k} = {v}' for k, v in (e.get('given') or {}).items())} → {e.get('expect')}"
-                    + (f" ({e['note']})" if e.get("note") else "") for e in examples or [])
+    return _bullets(f"{', '.join(f'{k} = {v}' for k, v in (e.get('given') or {}).items())}{_example_parts(e)} → "
+                    f"{e.get('expect')}" + (f" ({e['note']})" if e.get("note") else "") for e in examples or [])
+
+
+def _example_parts(e: dict) -> str:
+    """A rule for each part's example (rule_format/parts.py): its parts and the rows it expects; "" for any other."""
+    if "parts" not in e and "rows" not in e:
+        return ""
+    given = e.get("parts") if isinstance(e.get("parts"), dict) else {}
+    listed = "; ".join(f"{kind} {p.get('id')}" + (f" in {p['within']}" if p.get("within") else "")
+                       + (f" ({', '.join(f'{k} = {v}' for k, v in p['measures'].items())})"
+                          if isinstance(p.get("measures"), dict) and p["measures"] else "")
+                       for kind, ps in given.items() for p in (ps if isinstance(ps, list) else []) if isinstance(p, dict))
+    rows = "; ".join(f"{r.get('outcome')}" + (f" for {r['part']}" if r.get("part") else "")
+                     + (f" in {r['within']}" if r.get("within") else "")
+                     for r in (e.get("rows") if isinstance(e.get("rows"), list) else []) if isinstance(r, dict))
+    return f" · parts: {listed or 'none'} · rows: {rows or 'none'}"
 
 
 def _revisions(revised, label) -> str:

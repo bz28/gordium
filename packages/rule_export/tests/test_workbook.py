@@ -340,3 +340,17 @@ def test_open_questions_show_their_research_and_findings_have_a_tab(data):
     assert rows["perpendicular_lot_depth"][_at(f, "Answer")].startswith(
         "Gordium's reading (city practice) · confirm with the City zoning office")
     assert len(f["rows"]) == len(f["links"]["Link"])
+
+
+def test_a_rule_for_each_parts_examples_show_its_parts_and_rows():
+    """SYNTHETIC (rule_format/tests/test_parts.py): a per-part example is a small design, so the sheet shows the
+    parts and the rows it expects, not just its answer; a zoning example reads exactly as before."""
+    ex = {"given": {}, "parts": {"sleeping_room": [{"id": "br1"}, {"id": "br2"}],
+                                 "emergency_escape_opening": [{"id": "w1", "within": "br1",
+                                                               "measures": {"opening_net_clear_area": 6}}]},
+          "rows": [{"part": "w1", "within": "br1", "outcome": "pass"}, {"within": "br2", "outcome": "fail"}],
+          "expect": "fail"}
+    assert wbk._examples([ex]) == wbk._bullets([
+        " · parts: sleeping_room br1; sleeping_room br2; emergency_escape_opening w1 in br1 "
+        "(opening_net_clear_area = 6) · rows: pass for w1 in br1; fail in br2 → fail"])
+    assert wbk._examples([{"given": {"a": 1}, "expect": "pass"}]) == wbk._bullets(["a = 1 → pass"])
