@@ -5,7 +5,8 @@ The adapter is what the Rhino command does at a check, done on a file: the lot a
 read_site (the reader the command's exported copy goes through); the spot grades the command reads from
 Gordium::Grade (gordium_rhino.check_facts); and every other object on the lot looked at, as the command's
 _not_included, _touching and _ground_like do, with the same decisions (rhino_logic.could_be_building,
-left_out_candidate, reaches_into_lot, looks_like_ground, context_left_out). What it can't do on a file is what lives
+left_out_candidate, looks_like_ground, context_left_out; and which are on the lot and touching, asked of the
+worker's objects.left_out as any host asks it). What it can't do on a file is what lives
 only in a live document (the terrain sampled at the walls, objects the architect marked as the ground); no scene
 needs either.
 """
@@ -17,6 +18,7 @@ import rhino3dm as r
 from model_measurement.read_3dm import FLOOR_KEY, TO_FEET, _id, read_site
 
 from . import conformance as c
+from . import protocol
 from . import rhino_logic as logic
 from . import site_json
 
@@ -174,11 +176,13 @@ def _kind(g) -> str:
     return "InstanceReferenceGeometry" if isinstance(g, r.InstanceReference) else type(g).__name__
 
 
-def _box(model, g, depth=0):
-    """A geometry's 3D box, ((x0, y0, x1, y1), (z0, z1)), or None when it has none to give. A placed block's is
-    its definition's objects' boxes moved by its placement (rhino3dm gives a block itself no box), blocks inside
-    blocks too. None for a block, at any depth, whose definition isn't in the file, is empty, holds a part with
-    none, or is linked to a file (any update type but Static), as gordium_rhino._whole_box gives none.
+def _box(model, g):
+    """A geometry's 3D box, ((x0, y0, x1, y1), (z0, z1)), or None when it has none that covers all of it: what the
+    file says of it (_seen), judged by host_core.left_out.no_box_reasons, the decision every host's left-out
+    objects get (used here for the lot, the buildings and a block's plan points). A placed block's box is its
+    definition's objects' boxes moved by its placement (rhino3dm gives a block itself no box), blocks inside blocks
+    too; none for a block, at any depth, whose definition isn't in the file, is empty, holds a part with none, or
+    is linked to a file (any update type but Static).
 
     A linked block is the one place the adapter and live Rhino see different things. A saved .3dm holds a Linked
     definition with no objects, and a LinkedAndEmbedded one with the copy last read, whether or not the file is
@@ -187,25 +191,12 @@ def _box(model, g, depth=0):
     LinkedFileNotFound, which the command takes as no box (rhino_logic.block_contents_known). A file can't say
     whether the linked file is found and unchanged, so the adapter gives every linked block no box: on the lot
     and touching, the cautious side of the command's answer, and the same as it when the file is missing."""
-    if isinstance(g, r.InstanceReference):
-        definition = model.InstanceDefinitions.FindId(g.ParentIdefId)
-        if definition is None or depth > 32 or definition.UpdateType != r.InstanceDefinitionUpdateType.Static:
-            return None
-        boxes = []
-        for object_id in definition.GetObjectIds():
-            o = model.Objects.FindId(object_id)
-            box = _box(model, o.Geometry, depth + 1) if o is not None else None
-            if box is None:
-                return None
-            (x0, y0, x1, y1), (z0, z1) = box
-            b = g.Xform.TransformBoundingBox(r.BoundingBox(x0, y0, z0, x1, y1, z1))
-            boxes.append(((b.Min.X, b.Min.Y, b.Max.X, b.Max.Y), (b.Min.Z, b.Max.Z)))
-        if not boxes:
-            return None
-        return ((min(b[0][0] for b in boxes), min(b[0][1] for b in boxes), max(b[0][2] for b in boxes),
-                 max(b[0][3] for b in boxes)), (min(b[1][0] for b in boxes), max(b[1][1] for b in boxes)))
-    b = g.GetBoundingBox()
-    return ((b.Min.X, b.Min.Y, b.Max.X, b.Max.Y), (b.Min.Z, b.Max.Z)) if b.IsValid else None
+    definitions = {}
+    seen = dict(_seen(model, g, definitions), id="-")
+    if logic.no_box_reasons([seen], definitions)[0]["why"] is not None:
+        return None
+    x0, y0, z0, x1, y1, z1 = seen["box"]
+    return (x0, y0, x1, y1), (z0, z1)
 
 
 def _plan_points(model, g):
@@ -245,19 +236,54 @@ def _plan_points(model, g):
     return [(p.X, p.Y) for p in pts]
 
 
+def _seen(model, g, definitions) -> dict:
+    """What a file says of one object, as host_core.left_out reads it (gordium_rhino._seen): its box, and for a
+    placed block its definition's id (None when the file hasn't it), with what that definition holds and its status
+    put into `definitions` once. rhino3dm gives a block itself no box, so its box is its definition's parts' boxes
+    moved by its placement and joined, any part with none left out, as live Rhino joins them. A file can't say
+    whether a linked block's file is found and unchanged (_box), so every definition but a Static one gets a
+    status that isn't BLOCK_CONTENTS_KNOWN: no box, the cautious side of the command's answer (_box)."""
+    if not isinstance(g, r.InstanceReference):
+        b = g.GetBoundingBox()
+        return {"box": [b.Min.X, b.Min.Y, b.Min.Z, b.Max.X, b.Max.Y, b.Max.Z] if b.IsValid else None}
+    definition = model.InstanceDefinitions.FindId(g.ParentIdefId)
+    key = None if definition is None else str(g.ParentIdefId)
+    if key is not None and key not in definitions:
+        entry = definitions[key] = {"status": None, "parts": []}            # before its parts: once
+        static = definition.UpdateType == r.InstanceDefinitionUpdateType.Static
+        entry["status"] = "NotALinkedInstanceDefinition" if static else \
+            "unknown in a saved file (%s)" % str(definition.UpdateType).split(".")[-1]
+        for object_id in definition.GetObjectIds():
+            o = model.Objects.FindId(object_id)
+            entry["parts"].append(_seen(model, o.Geometry, definitions) if o is not None else {"box": None})
+    boxes = []
+    for part in (definitions[key]["parts"] if key is not None else []):
+        if part["box"] is not None:
+            x0, y0, z0, x1, y1, z1 = part["box"]
+            b = g.Xform.TransformBoundingBox(r.BoundingBox(x0, y0, z0, x1, y1, z1))
+            boxes.append([b.Min.X, b.Min.Y, b.Min.Z, b.Max.X, b.Max.Y, b.Max.Z])
+    box = [min(b[0] for b in boxes), min(b[1] for b in boxes), min(b[2] for b in boxes),
+           max(b[3] for b in boxes), max(b[4] for b in boxes), max(b[5] for b in boxes)] if boxes else None
+    return {"box": box, "definition": key}
+
+
 def _left_out(model, lot, buildings, s: float) -> list[dict]:
     """Everything else on the lot that could be a building (gordium_rhino._not_included, with _touching,
-    _ground_like and rhino_logic.context_left_out): each one a left-out object. One whose place can't be told (a
-    block with nothing in it to measure, a linked block: _box) counts as on the lot and touching: never left off
-    the list."""
+    _ground_like and rhino_logic.context_left_out): each one a left-out object. Which are on the lot and touching
+    is the worker's session command objects.left_out (host_core.left_out), asked as any host asks it, with what
+    the file says of each object (_seen) and of the lot and the buildings. One whose place can't be told (a block
+    with nothing in it to measure, a linked block) counts as on the lot and touching: never left off the list."""
     if lot is None:
         return []
     names = [layer.FullPath for layer in model.Layers]
-    ring = _plan_points(model, lot.Geometry)
-    reach = logic.ON_LOT_REACH / s                             # ft -> model units
-    (lot_box, _), gap = _box(model, lot.Geometry), 0.1 / s
-    boxes = [box for box in (_box(model, b.Geometry) for b in buildings) if box is not None]
-    out = []
+    (x0, y0, x1, y1), _ = _box(model, lot.Geometry)
+    boxes = []
+    for b in buildings:
+        box = _box(model, b.Geometry)
+        if box is not None:
+            (a0, b0, a1, b1), (c0, c1) = box
+            boxes.append([a0, b0, c0, a1, b1, c1])
+    kept, objects, definitions = [], [], {}
     for o in model.Objects:
         if o.Attributes.IsInstanceDefinitionObject:
             continue
@@ -268,17 +294,23 @@ def _left_out(model, lot, buildings, s: float) -> list[dict]:
         if not logic.could_be_building(_kind(g), solid, faces) or logic.on_layer(layer, c.BUILDING_LAYER) \
                 or not logic.left_out_candidate(layer):
             continue
-        box, points = _box(model, g), _plan_points(model, g)
-        if box is None or points is None:
-            touching = None                                  # not known: counts as touching
-        else:
-            (x0, y0, x1, y1), (z0, z1) = box
-            if not logic.box_near_lot(box[0], lot_box, reach) or not logic.reaches_into_lot(ring, points, reach, box[0]):
-                continue
-            touching = any(x0 <= b[2] + gap and b[0] - gap <= x1 and y0 <= b[3] + gap and b[1] - gap <= y1
-                           and z0 <= bz[1] + gap and bz[0] - gap <= z1 for b, bz in boxes)
-        out.append({"id": _id(o), "layer": layer, "could_be_building": True, "touching": touching,
-                    "ground_like": box is not None and logic.looks_like_ground(_kind(g), solid, box[0], lot_box),
+        seen = dict(_seen(model, g, definitions), id=_id(o))
+        points = _plan_points(model, g)
+        if points is not None:
+            seen["points"] = [list(p) for p in points]
+        kept.append((o, layer, g, solid, seen["box"]))
+        objects.append(seen)
+    answer = protocol.run("objects.left_out", {
+        "lot": {"ring": [list(p) for p in _plan_points(model, lot.Geometry)], "box": [x0, y0, x1, y1]},
+        "objects": objects, "definitions": definitions, "buildings": boxes, "feet_per_unit": s,
+        "want": ["left_out", "touching"]})
+    out = []
+    for (o, layer, g, solid, box), on, near in zip(kept, answer["left_out"], answer["touching"]):
+        if not on["left_out"]:
+            continue
+        out.append({"id": _id(o), "layer": layer, "could_be_building": True, "touching": near["touching"],
+                    "ground_like": near["touching"] is not None
+                    and logic.looks_like_ground(_kind(g), solid, (box[0], box[1], box[3], box[4]), (x0, y0, x1, y1)),
                     "context": bool(logic.context_left_out({_id(o): layer}))})
     return out
 

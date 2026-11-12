@@ -3,8 +3,9 @@ namespace Gordium.Worker;
 /// <summary>What this client speaks, from docs/protocol/worker_protocol_v1.md and site_description_v1.md.</summary>
 public static class Protocol
 {
-    /// <summary>The protocol version every request names (<c>"protocol": "1.0"</c>).</summary>
-    public const string Version = "1.0";
+    /// <summary>The protocol version every request names (<c>"protocol": "1.1"</c>). A 1.0 worker answers it too,
+    /// all but <c>objects.left_out</c>, which it doesn't have (an unknown command, refused).</summary>
+    public const string Version = "1.1";
 
     /// <summary>The major version this client understands; a worker reporting any other is refused.</summary>
     public const int Major = 1;
@@ -49,5 +50,6 @@ public static class Protocol
             ["session.undo"] = [["words"], ["recheck"], ["dirty_at"]],
             ["report.message"] = [["message"], ["outdated"], ["cancelled"]],
             ["panel.rows"] = [["header"], ["status"], ["name"], ["cell_name", "proposed"], ["highlight"], ["detail"], ["cell"]],
+            ["objects.left_out"] = [["left_out"], ["touching"], ["no_box"]],
         };
 }

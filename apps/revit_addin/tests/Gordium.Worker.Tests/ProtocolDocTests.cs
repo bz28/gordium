@@ -38,7 +38,7 @@ public sealed class ProtocolDocTests
     public void The_session_commands_and_their_parts_are_the_documents()
     {
         var doc = Reference();
-        Assert.Equal(19, doc.Count);
+        Assert.Equal(20, doc.Count);
         Assert.Equal(doc.Keys.Order(), Protocol.SessionCommands.Keys.Order());
         foreach (var (command, parts) in doc)
             Assert.Equal(parts.Select(p => string.Join(",", p)),

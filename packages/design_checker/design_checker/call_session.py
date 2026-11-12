@@ -32,7 +32,7 @@ TESTS = ["test_start_box_ticks.py", "test_re_lookup.py", "test_lookup_box.py", "
          "test_moved_and_crossing.py", "test_progress.py", "test_present.py", "test_adu_panel.py",
          "test_area_answers.py", "test_occupancy_display.py", "test_fact_conflicts.py", "test_autocomplete.py",
          "test_citation_links.py", "test_no_document.py", "test_primary_buildings_check.py", "test_check.py",
-         "test_r3_hand_keys.py", "test_context_box.py"]
+         "test_r3_hand_keys.py", "test_context_box.py", "test_left_out.py"]
 
 
 def served() -> dict:

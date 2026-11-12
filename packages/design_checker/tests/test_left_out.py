@@ -1,0 +1,218 @@
+"""host_core/left_out.py: which objects a check leaves out, decided once for every host (the Rhino command in its own
+Python, the reference adapter and the Revit add-in through the worker's objects.left_out).
+
+What must stay true (principle 4, never a false pass): an object with no box that covers all of it (no box given;
+a block whose definition, at any depth, is missing, empty, linked to a file not known to be the design, or holds a
+part with no box) is left out and counts as touching, never dropped; an object is told off the lot only by its
+footprint; touching is its box within 0.1 ft of a building's, edges meeting included; a far object is never
+outlined; and anything a host sends that isn't what the worker reads is refused, never guessed. The same answer
+comes back in-process and as JSON through the worker.
+"""
+import io
+import json
+
+import pytest
+
+from design_checker import protocol
+from design_checker import rhino_logic as logic
+from design_checker.__main__ import serve
+from design_checker.host_core import left_out as lo
+
+LOT = {"ring": [[0, 0], [60, 0], [60, 120], [0, 120]], "box": [0, 0, 60, 120]}
+HOUSE = [15, 30, 0, 45, 80, 20]
+
+
+def _square(x0, y0, x1, y1):
+    return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+
+
+def _obj(oid, box, **more):
+    x0, y0, _, x1, y1, _ = box if box is not None else (0, 0, 0, 0, 0, 0)
+    return dict({"id": oid, "box": box, "points": _square(x0, y0, x1, y1)}, **more)
+
+
+SHED = [48, 90, 0, 56, 98, 8]                    # on the lot, apart from the house
+AGAINST = [7, 40, 0, 15, 48, 8]                  # on the lot, against the house's west wall
+FAR = [500, 0, 0, 510, 10, 8]
+
+
+def _whole_def(*parts, status="NotALinkedInstanceDefinition"):
+    return {"status": status, "parts": list(parts)}
+
+
+# ---- no box that covers all of it --------------------------------------------------------------------------------
+
+def test_a_block_whose_linked_file_is_not_known_at_any_depth_has_no_box():
+    """A shed placed in a block placed in a block: the innermost linked file not found (or not readable, or changed
+    since it was read) is no box for every block holding it, however whole the outer ones look."""
+    defs = {"outer": _whole_def({"box": SHED, "definition": "middle"}),
+            "middle": _whole_def({"box": SHED, "definition": "inner"}),
+            "inner": _whole_def({"box": [52, 94, 4, 52, 94, 4]}, status="LinkedFileNotFound")}
+    for status, why in [("LinkedFileNotFound", "contents_not_known"), ("LinkedFileNotReadable", "contents_not_known"),
+                        ("LinkedFileIsNewer", "contents_not_known"), (None, "contents_not_known"),
+                        ("LinkedFileIsUpToDate", None), ("NotALinkedInstanceDefinition", None)]:
+        defs["inner"]["status"] = status
+        got = lo.no_box_reasons([_obj("shed", SHED, definition="outer")], defs)
+        assert got == [{"id": "shed", "why": why}], status
+
+
+@pytest.mark.parametrize("seen, defs, why", [
+    ({"box": None}, {}, "no_box"),                                          # the host gave none
+    ({"box": [10, 0, 0, 9, 5, 5]}, {}, "no_box"),                           # low corner above the high one
+    ({"box": SHED, "definition": None}, {}, "block_not_found"),             # a block with no definition
+    ({"box": SHED, "definition": "gone"}, {}, "block_not_found"),           # not among those sent
+    ({"box": SHED, "definition": "d"}, {"d": _whole_def()}, "block_empty"),
+    ({"box": SHED, "definition": "d"}, {"d": _whole_def({"box": SHED}, {"box": None})}, "no_box"),   # a part
+    ({"box": SHED, "definition": "d"}, {"d": _whole_def({"box": SHED}, {"box": SHED, "definition": None})},
+     "block_not_found"),
+    ({"box": [5, 5, 5, 5, 5, 5]}, {}, None),                                # a box of one point is a box
+    ({"box": SHED, "definition": "d"}, {"d": _whole_def({"box": SHED})}, None)],
+    ids=["null", "inverted", "no_definition", "unknown_definition", "empty", "part_without_box",
+         "part_block_without_definition", "point", "whole"])
+def test_why_an_object_has_no_box(seen, defs, why):
+    assert lo.no_box_reasons([dict(seen, id="x")], defs) == [{"id": "x", "why": why}]
+
+
+def test_blocks_nested_past_the_limit_have_no_box_and_each_definition_is_walked_once():
+    defs = {f"d{k}": _whole_def({"box": SHED, "definition": f"d{k + 1}"}) for k in range(lo.MAX_BLOCK_DEPTH + 1)}
+    defs[f"d{lo.MAX_BLOCK_DEPTH + 1}"] = _whole_def({"box": SHED})
+    assert lo.no_box_reasons([_obj("deep", SHED, definition="d0")], defs)[0]["why"] == "block_not_found"
+    assert lo.no_box_reasons([_obj("ok", SHED, definition="d1")], defs)[0]["why"] is None   # 32 deep: looked into
+    walked = []
+
+    class Counting(dict):
+        def __getitem__(self, k):
+            walked.append(k)
+            return dict.__getitem__(self, k)
+    many = Counting({"facade": _whole_def(*[{"box": SHED, "definition": "window"}] * 100), "window": _whole_def({"box": SHED})})
+    got = lo.no_box_reasons([_obj(f"f{k}", SHED, definition="facade") for k in range(20)], many)
+    assert all(g["why"] is None for g in got) and sorted(walked) == ["facade", "window"]
+
+
+# ---- left out: on the lot, or no box to tell ----------------------------------------------------------------------
+
+def test_an_object_with_no_box_is_left_out_wherever_its_points_are():
+    far_points = _square(500, 0, 510, 10)
+    objects = [dict(_obj("linked", SHED, definition="d"), points=far_points), dict(_obj("empty", None)),
+               _obj("shed", SHED), _obj("far", FAR)]
+    defs = {"d": _whole_def({"box": [500, 0, 0, 500, 0, 0]}, status="LinkedFileNotFound")}
+    got = lo.left_out_decisions(LOT, objects, defs)
+    assert [(g["id"], g["left_out"], g["why"]) for g in got] == [
+        ("linked", True, "contents_not_known"), ("empty", True, "no_box"), ("shed", True, "on_lot"),
+        ("far", False, "far_from_lot")]
+
+
+def test_an_object_is_told_off_the_lot_by_its_footprint_and_a_far_one_is_never_outlined():
+    asked = []
+
+    def points(name, pts):
+        return lambda: asked.append(name) or pts
+    sloped = {"ring": [[0, 0], [60, 0], [60, 120], [0, 60]], "box": [0, 0, 60, 120]}
+    objects = [{"id": "past_the_line", "box": [2, 100, 0, 12, 110, 8], "points": points("past", _square(2, 100, 12, 110))},
+               {"id": "inside", "box": [2, 40, 0, 12, 50, 8], "points": points("inside", _square(2, 40, 12, 50))},
+               {"id": "far", "box": FAR, "points": points("far", _square(500, 0, 510, 10))},
+               {"id": "a_hair_over", "box": [-5, 10, 0, 0.05, 20, 8], "points": points("hair", _square(-5, 10, 0.05, 20))}]
+    got = lo.left_out_decisions(sloped, objects)
+    assert [(g["left_out"], g["why"]) for g in got] == [(False, "off_lot"), (True, "on_lot"), (False, "far_from_lot"),
+                                                        (False, "off_lot")]
+    assert asked == ["past", "inside", "hair"]                          # the far one: never outlined
+
+
+def test_no_lot_leaves_nothing_out():
+    assert lo.left_out_decisions(None, [_obj("shed", SHED), _obj("x", None)]) == [
+        {"id": "shed", "left_out": False, "why": "no_lot"}, {"id": "x", "left_out": False, "why": "no_lot"}]
+
+
+def test_the_reach_and_the_gap_are_in_feet_whatever_the_model_units():
+    """In millimetres (0.00328084 ft each) the 0.1 ft reach is 30.48 mm: a fin 25 mm in is off the lot, 35 mm in on
+    it; a shed 25 mm from the house touches it, 35 mm doesn't."""
+    mm = 1 / 304.8
+    lot = {"ring": _square(0, 0, 18000, 36000), "box": [0, 0, 18000, 36000]}
+    fins = [{"id": f"in_{d}", "box": [-1000, 5000, 0, d, 5010, 2000], "points": _square(-1000, 5000, d, 5010)}
+            for d in (25, 35)]
+    assert [g["left_out"] for g in lo.left_out_decisions(lot, fins, feet_per_unit=mm)] == [False, True]
+    house = [4500, 9000, 0, 13500, 24000, 6000]
+    sheds = [{"id": f"gap_{d}", "box": [13500 + d, 9000, 0, 16000, 11000, 2400]} for d in (25, 35)]
+    assert [g["touching"] for g in lo.touching_decisions(sheds, [house], feet_per_unit=mm)] == [True, False]
+
+
+# ---- touching ----------------------------------------------------------------------------------------------------
+
+def test_touching_is_a_box_within_a_tenth_of_a_foot_edges_meeting_included():
+    objects = [_obj("against", AGAINST), _obj("gap_0.1", [7, 40, 0, 14.9, 48, 8]), _obj("gap_0.11", [7, 40, 0, 14.89, 48, 8]),
+               _obj("above", [20, 40, 20.1, 30, 50, 25]), _obj("higher", [20, 40, 20.2, 30, 50, 25]),
+               _obj("apart", SHED), _obj("no_box", None), _obj("empty_block", SHED, definition="d")]
+    got = lo.touching_decisions(objects, [HOUSE, None], {"d": _whole_def()})
+    assert [g["touching"] for g in got] == [True, True, False, True, False, False, None, None]
+
+
+def test_with_no_building_box_nothing_with_a_box_touches():
+    got = lo.touching_decisions([_obj("shed", SHED), _obj("x", None)], [None])
+    assert [g["touching"] for g in got] == [False, None]
+
+
+# ---- what a host sends is read exactly, or refused ---------------------------------------------------------------
+
+@pytest.mark.parametrize("fn, kwargs", [
+    (lo.no_box_reasons, {"objects": [{"id": "x", "box": SHED, "layer": "Default"}]}),          # a field not read
+    (lo.no_box_reasons, {"objects": [{"id": "x", "box": [0, 0, 0, 1, 1]}]}),                  # 5 numbers
+    (lo.no_box_reasons, {"objects": [{"id": "x", "box": [0, 0, 0, 1, 1, True]}]}),            # a yes, not a number
+    (lo.no_box_reasons, {"objects": [{"id": "x", "box": [0, 0, 0, 1, 1, float("nan")]}]}),
+    (lo.no_box_reasons, {"objects": [{"box": SHED}]}),                                         # no id
+    (lo.no_box_reasons, {"objects": [_obj("x", SHED, definition="d")], "definitions": {"d": {"status": 1}}}),
+    (lo.no_box_reasons, {"objects": [_obj("x", SHED, definition="d")],
+                         "definitions": {"d": {"status": None, "parts": [], "linked": True}}}),
+    (lo.left_out_decisions, {"lot": LOT, "objects": [{"id": "x", "box": SHED}]}),              # near: points needed
+    (lo.left_out_decisions, {"lot": LOT, "objects": [{"id": "x", "box": SHED, "points": [[1, 2, 3]]}]}),
+    (lo.left_out_decisions, {"lot": {"ring": LOT["ring"]}, "objects": []}),
+    (lo.left_out_decisions, {"lot": LOT, "objects": [], "feet_per_unit": 0}),
+    (lo.touching_decisions, {"objects": [], "buildings": [[0, 0, 0, 1, 1]]})],
+    ids=["unread_field", "short_box", "bool", "nan", "no_id", "status_number", "definition_field",
+         "near_without_points", "points_3d", "lot_without_box", "zero_units", "short_building_box"])
+def test_anything_not_read_exactly_is_refused(fn, kwargs):
+    with pytest.raises(ValueError):
+        fn(**kwargs)
+
+
+# ---- one copy: Rhino's names, and the worker's command -----------------------------------------------------------
+
+def test_rhino_logic_offers_the_moved_geometry_as_the_same_objects():
+    for name in ("reaches_into_lot", "box_near_lot", "block_contents_known", "ON_LOT_REACH", "BLOCK_CONTENTS_KNOWN",
+                 "left_out_decisions", "touching_decisions", "no_box_reasons"):
+        assert getattr(logic, name) is getattr(lo, name), name
+    assert logic._inside is lo._inside and logic._ring_area is lo._ring_area
+
+
+def _served(fields):
+    out = io.StringIO()
+    serve(io.StringIO(json.dumps({"id": 1, "cmd": "objects.left_out", "protocol": "1.1", **fields}) + "\n"), out)
+    return json.loads(out.getvalue())
+
+
+def test_the_worker_answers_what_the_functions_answer():
+    defs = {"d": _whole_def({"box": [52, 94, 4, 52, 94, 4]}, status="LinkedFileNotFound")}
+    objects = [_obj("linked", SHED, definition="d"), _obj("shed", SHED), _obj("against", AGAINST), _obj("far", FAR)]
+    fields = {"lot": LOT, "objects": objects, "definitions": defs, "buildings": [HOUSE], "feet_per_unit": 1.0}
+    reply = _served(fields)
+    assert "error" not in reply, reply
+    assert reply["result"] == {"left_out": lo.left_out_decisions(LOT, objects, defs, 1.0),
+                               "touching": lo.touching_decisions(objects, [HOUSE], defs, 1.0),
+                               "no_box": lo.no_box_reasons(objects, defs)}
+    assert [g["left_out"] for g in reply["result"]["left_out"]] == [True, True, True, False]
+    assert [g["touching"] for g in reply["result"]["touching"]] == [None, False, True, False]
+    assert reply["result"]["no_box"][0]["why"] == "contents_not_known"
+
+
+def test_the_worker_refuses_an_object_field_it_doesnt_read():
+    reply = _served({"objects": [{"id": "x", "box": SHED, "category": "Walls"}]})
+    assert reply["result"] == {"refused": {"no_box": "objects: an object has no field category (it has: id, box, "
+                                                     "points, definition)"}}, reply
+
+
+def test_a_1_0_request_is_still_answered():
+    """Protocol 1.1 adds a command: a host that names 1.0 is still answered (a minor version)."""
+    out = io.StringIO()
+    serve(io.StringIO(json.dumps({"id": 1, "cmd": "objects.left_out", "protocol": "1.0",
+                                  "objects": [_obj("x", None)]}) + "\n"), out)
+    assert json.loads(out.getvalue())["result"]["no_box"] == [{"id": "x", "why": "no_box"}]
+    assert protocol.PROTOCOL == "1.1"

@@ -1,6 +1,6 @@
 """host_core/: the host-neutral half of rhino_logic.py (facts, streets, lookup, the start box, the place; since
 tidy-up PR 6 also freshness, the report's and the panel's words, the neighbourhood, the box's edits, the worker
-client), moved there unchanged so a second host (a Revit add-in) can call it.
+client; then which objects a check leaves out), moved there so a second host (a Revit add-in) can call it.
 
 What must stay true: rhino_logic still offers every moved name as the very same object; a moved name can't be
 rebound on rhino_logic (that would patch a dead copy); host_core runs in Rhino 8's own Python (3.9, standard
@@ -17,14 +17,15 @@ from pathlib import Path
 import pytest
 
 from design_checker import rhino_logic as logic
-from design_checker.host_core import (context, edits, facts, freshness, lookup, panel_words, place, report, start_box,
-                                     streets, worker_client)
+from design_checker.host_core import (context, edits, facts, freshness, left_out, lookup, panel_words, place, report,
+                                     start_box, streets, worker_client)
 from host_source import CORE_DIR, core_files, host_path, host_text, host_text_of
 from moved_names import patch_moved
 
 HOST_CORE_DIR = CORE_DIR
 DESIGN_CHECKER_DIR = HOST_CORE_DIR.parent
-MODULES = (place, streets, facts, lookup, start_box, freshness, report, panel_words, context, edits, worker_client)
+MODULES = (place, streets, facts, lookup, start_box, freshness, report, panel_words, context, edits, worker_client,
+           left_out)
 FILES = core_files()
 assert Path(facts.__file__).parent == CORE_DIR
 

@@ -41,10 +41,10 @@ foreach (var row in result.Items)
    `about` is checked the same way.
 2. **Sends one request per line,** UTF-8 without a byte-order mark (the worker refuses one) and in fact plain
    ASCII (any other character is written as a JSON `\u` escape, so no code page can change it), each with the next id,
-   `"protocol": "1.0"`, and only the fields the caller gave (an optional field left null is not sent).
+   `"protocol": "1.1"` (a 1.0 worker answers it too, all but `objects.left_out`), and only the fields the caller gave (an optional field left null is not sent).
 3. **Typed commands:** `HelloAsync`, `CheckSiteAsync`, `StartSiteAsync`, `ReadModelAsync`, and `SessionAsync` for
-   the 19 session commands (the start box, the panel, the live check's decisions), each answer read by name with
-   `Get`. `StartSiteAsync` and `ReadModelAsync` give their result as JSON (a building's floors, a site
+   the 20 session commands (the start box, the panel, the live check's decisions, which objects are left out), each
+   answer read by name with `Get`; `LeftOutAsync` is `objects.left_out` with its fields typed. `StartSiteAsync` and `ReadModelAsync` give their result as JSON (a building's floors, a site
    description: no verdicts). `SendAsync` is only for a command a later 1.x worker adds: it refuses every command
    above, so a check's or a session command's answer is always read strictly. The older commands (`check`,
    `start`...) are Rhino's and are not sent.

@@ -168,6 +168,37 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
     }
 
     [Fact]
+    public async Task Left_out_objects_are_decided_by_the_worker_a_missing_linked_file_counts_as_touching()
+    {
+        // a 60 x 120 ft lot, the house at x 15..45, y 30..80; a linked shed whose file isn't found (Rhino gives it one
+        // label: a point box), a shed on the lot apart from the house, one against its west wall, one far away
+        var lot = Json.Obj("""{"ring": [[0, 0], [60, 0], [60, 120], [0, 120]], "box": [0, 0, 60, 120]}""");
+        var objects = JsonNode.Parse("""
+            [{"id": "linked", "box": [52, 94, 4, 52, 94, 4], "points": [[52, 94]], "definition": "shed"},
+             {"id": "apart", "box": [48, 90, 0, 56, 98, 8], "points": [[48, 90], [56, 90], [56, 98], [48, 98]]},
+             {"id": "against", "box": [7, 40, 0, 15, 48, 8], "points": [[7, 40], [15, 40], [15, 48], [7, 48]]},
+             {"id": "far", "box": [500, 0, 0, 510, 10, 8], "points": [[500, 0], [510, 0], [510, 10], [500, 10]]}]
+            """)!.AsArray();
+        var definitions = Json.Obj("""{"shed": {"status": "LinkedFileNotFound", "parts": [{"box": [52, 94, 4, 52, 94, 4]}]}}""");
+        var answer = await Client.LeftOutAsync(lot, objects, new JsonArray(new JsonArray(15, 30, 0, 45, 80, 20)), definitions);
+        Assert.Equal([true, true, true, false], answer.Get("left_out").EnumerateArray().Select(o => o.GetProperty("left_out").GetBoolean()));
+        Assert.Equal(["contents_not_known", "on_lot", "on_lot", "far_from_lot"],
+                     answer.Get("left_out").EnumerateArray().Select(o => o.GetProperty("why").GetString()));
+        Assert.Equal([JsonValueKind.Null, JsonValueKind.False, JsonValueKind.True, JsonValueKind.False],
+                     answer.Get("touching").EnumerateArray().Select(o => o.GetProperty("touching").ValueKind));
+        Assert.Equal("contents_not_known", answer.Get("no_box")[0].GetProperty("why").GetString());
+    }
+
+    [Fact]
+    public async Task A_left_out_object_with_a_field_the_worker_doesnt_read_is_refused_never_guessed()
+    {
+        var objects = JsonNode.Parse("""[{"id": "x", "box": [0, 0, 0, 1, 1, 1], "points": [[0, 0]], "category": "Walls"}]""")!.AsArray();
+        var answer = await Client.LeftOutAsync(null, objects, []);
+        var e = Assert.Throws<PartRefusedException>(() => answer.Get("left_out"));
+        Assert.Contains("no field category", e.Words);
+    }
+
+    [Fact]
     public async Task A_field_the_command_doesnt_read_is_refused()
     {
         var e = await Assert.ThrowsAsync<WorkerRefusedException>(() => Client.SessionAsync("session.freshness",

@@ -422,6 +422,8 @@ class _Box:
             and self.Min.X <= self.Max.X and self.Min.Y <= self.Max.Y and self.Min.Z <= self.Max.Z
 
     def Inflate(self, d):  # noqa: N802
+        if not self.IsValid:        # RhinoCommon, BoundingBox.Inflate: "Invalid boxes can not be inflated."
+            return                  # (developer.rhino3d.com/api/rhinocommon/rhino.geometry.boundingbox/inflate)
         self.Min, self.Max = _Pt(self.Min.X - d, self.Min.Y - d, self.Min.Z - d), _Pt(self.Max.X + d, self.Max.Y + d,
                                                                                        self.Max.Z + d)
 
@@ -518,7 +520,7 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
     from host_source import host_path, host_text
 
     from design_checker import rhino_logic as logic
-    names = ("_not_included", "_whole_box", "_plan_box", "_plan_points", "_touching", "_ground_like",
+    names = ("_not_included", "_seen", "_plan_box", "_plan_points", "_touching", "_ground_like",
              "_unmeasured_outlines")
     tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
     fns = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
@@ -539,7 +541,7 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
     rhino = types.SimpleNamespace(DocObjects=types.SimpleNamespace(ObjectEnumeratorSettings=types.SimpleNamespace,
                                                                    InstanceObject=_InstanceObject))
     ns = {"rg": rg, "Rhino": rhino, "logic": logic, "LAYERS": {"building": "Building"},
-          "_model_length": lambda doc, feet: feet, "_ui_state": lambda doc: {},
+          "_model_length": lambda doc, feet: feet, "_scale": lambda doc: 1.0, "_ui_state": lambda doc: {},
           "_find": lambda doc, i: next((o for o in every if o.Id == i), None)}
     exec(compile(ast.Module(body=fns, type_ignores=[]), host_path("rhino", "plugin").name, "exec"), ns)  # noqa: S102
     left = ns["_not_included"](doc, lot)

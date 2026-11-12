@@ -266,7 +266,7 @@ public sealed class FakeWorkerTests
             var requests = lines[..^1].Select(l => JsonNode.Parse(l)!.AsObject()).ToList();
             Assert.Equal([1L, 2L, 3L], requests.Select(r => r["id"]!.GetValue<long>()));
             Assert.Equal(["hello", "check_site", "session.undo"], requests.Select(r => r["cmd"]!.GetValue<string>()));
-            Assert.All(requests, r => Assert.Equal("1.0", r["protocol"]!.GetValue<string>()));
+            Assert.All(requests, r => Assert.Equal("1.1", r["protocol"]!.GetValue<string>()));
             Assert.Equal("Café – ½ lot", requests[1]["site"]!["name"]!.GetValue<string>());
             Assert.False(requests[1].ContainsKey("report"));      // an optional field left null is not sent
         }

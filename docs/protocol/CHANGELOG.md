@@ -11,6 +11,12 @@ change can't land without a version and a word here (the rules for minor and maj
 and the command table together (`protocol.table()`: every command, part, field and default), pinned the same way
 by `packages/design_checker/tests/test_protocol.py` ([worker_protocol_v1.md](worker_protocol_v1.md#versions)).
 
+- **2026-11-12 · protocol 1.1 · site description `gordium.site/1`** (unchanged): the session command
+  `objects.left_out` ([worker_protocol_v1.md](worker_protocol_v1.md#session-commands)): which objects a check
+  leaves out, which may be touching the house, and which have no box that covers all of them, decided in
+  `host_core/left_out.py` for every tool (the Rhino plugin calls the same functions in its own Python). A minor
+  version: nothing else changed, and a request naming `1.0` is answered as before
+  (command table sha256 `77acae03c601945bd7834d572afaeb40e8b4251ab37862b3570f74175c40ddc5`).
 - **2026-11-06 · protocol 1.0 · site description `gordium.site/1`** (schema sha256 `0aec44ae2f9e296c70565351c4a5191e7b28e3e7302c194ce8aa0322402702b7`): first version.
   Commands `hello`, `read_model`, `check_site` and `start_site`; the five older commands answer as before
   (`check` and `start` now go through the site description themselves). Problem code `tool_words` for a tool's own words.

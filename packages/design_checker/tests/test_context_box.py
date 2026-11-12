@@ -3,6 +3,7 @@ written into the .3dm (a .3dm written exactly as the plugin writes it, with rhin
 checker never measures any of it."""
 
 import importlib.util
+import inspect
 import json
 import math
 import re
@@ -15,6 +16,7 @@ import rhino3dm as r
 
 from design_checker import context_box as cb
 from design_checker import rhino_logic as logic
+from design_checker.host_core import left_out
 from design_checker.lookup_box import box_payload
 from model_measurement.read_3dm import read_site
 from site_lookup.adapters.ithaca_city.lookup import lookup
@@ -318,7 +320,8 @@ def test_a_solid_on_the_neighbourhood_layers_over_the_lot_makes_the_check_need_r
     assert logic.context_left_out({"a": logic.CONTEXT + "::Buildings", "b": "Default", "c": None}) == ["a"]
     body = RHINO[RHINO.index("def _not_included("):].split("\ndef ", 1)[0]
     assert "or not logic.left_out_candidate(layer):" in body and 'logic.on_layer(layer, "Gordium")' not in body
-    assert "logic.reaches_into_lot(ring, _plan_points(g), reach, box)" in body           # the lot's outline, not a centre
+    assert "points=lambda g=g: _plan_points(g)" in body and "logic.left_out_decisions(lot_seen" in body   # the
+    assert "reaches_into_lot(ring, points, reach, box)" in inspect.getsource(left_out.left_out_decisions)  # outline
     extras = RHINO[RHINO.index("def _extras("):].split("\ndef ", 1)[0]
     assert '"context_left_out": logic.context_left_out(' in extras
     assert "_note_context_solids" not in RHINO and not hasattr(logic, "context_solids_says")
