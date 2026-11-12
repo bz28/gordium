@@ -256,14 +256,15 @@ def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
         text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
         for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
             words[p["id"]] = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
+    readme = (NY_STATE / "README.md").read_text(encoding="utf-8")
     seen, wrong = 0, []
     for pid, e in labels.items():
-        if ":" in pid:                              # a definition sets no requirement; the pieces using it are checked
-            continue
         for target in (m[1] for m in points.finditer(" ".join(words[pid].split()))):
             inside = any(target == b or target.startswith(b + ".") for b in brought)
             seen += not inside
-            if not inside and e["label"] not in ("rule", "flag"):
+            # a definition sets no requirement, so it is no rule or flag; its pointer is named in the README instead,
+            # since the pieces using the term never show it (review round 8: R202:sleeping_loft -> Section R315)
+            if not inside and (e["label"] not in ("rule", "flag") if ":" not in pid else target not in readme):
                 wrong.append((pid, target, e["label"]))
     assert seen >= 3 and wrong == []          # R319.7 (Appendix BO), R320.7 and R321.1.4 (R507.2.2)
 
