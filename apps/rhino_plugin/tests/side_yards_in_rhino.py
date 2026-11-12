@@ -2,7 +2,8 @@
 """Switch side yards in Rhino 8 (UX review 2026-10-27): the Rhino side of it. Every claim is recorded (the run goes on
 past a failing one) and the run fails at the end if any did. Run in Rhino, not in CI: which side the larger yard
 goes on, and that both houses comply, are tested in CI (packages/design_checker/tests/test_side_yards.py).
-A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, R-1b: 10 ft side yards on both sides).
+A fresh feet document, GordiumStart with the recorded lookup of 106 Ithaca Rd (R-1b: 10 ft side yards on both
+sides; a new file waits for a lookup since 2026-10-27, so the script looks it up as the architect would).
 1. Each floor block GordiumStart drew carries how it was drawn (logic.START_KEY); R-1b: no larger side.
 2. Switch side yards on R-1b's house says there is nothing to switch, and changes nothing.
 3. A house recorded with its larger yard on the left, the real checker asked for the right: R-1b has no larger
@@ -10,7 +11,11 @@ A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, R-1b: 10 ft si
 4. The checker's answer stood in for (R-2b is in another PR): a house 5 ft to the west with its larger yard on the
    right. Switch replaces the house (new floors, each on its sublayer, one group, tagged "right"), the Starting
    house fact names the side, the panel offers the button under it (logic.can_switch), and it says what it did.
-5. One Undo brings the first house back and removes the new one; Redo brings the new one back.
+5. One Undo brings the first house back and removes the new one; Redo brings the new one back, and its fact. Undo
+   and Redo are Rhino's own commands run in the document (RhinoApp.ExecuteCommand, as Cmd+Z runs _Undo): called
+   from a script, RhinoDoc.Undo() opens an undo record it never ends and drops the step it undid, so no Redo is
+   left (shown with no Gordium code loaded, 2026-11-12); RunScript("_Undo") does nothing while no Rhino window is
+   on screen.
 6. A house on a locked layer, a hidden one (Hide starting house), or one the architect has moved, is never redrawn: refused, nothing changes.
 Writes <temp>/gordium_side_yards/out.json; closes its document."""
 import json
@@ -73,8 +78,8 @@ def said(g):
 
 
 def undo(doc, redo=False):
-    fn = getattr(doc, "Redo" if redo else "Undo", None)
-    return fn() if fn is not None else Rhino.RhinoApp.RunScript("_Redo" if redo else "_Undo", False)
+    """Rhino's _Undo or _Redo command, run in this document (see 5 above): whether it ran."""
+    return Rhino.RhinoApp.ExecuteCommand(doc, "_Redo" if redo else "_Undo") == Rhino.Commands.Result.Success
 
 
 doc = None
@@ -83,7 +88,13 @@ g = None
 try:
     g = fresh_module()
     doc = TestDocs("side_yards").__enter__().open("Large Objects - Feet")
-    g.gordium_check()                                    # GordiumStart's flow on the sample
+    g.STATE.update(box_picks=["lookup"], box_overrides={"address": "106 Ithaca Rd, Ithaca, NY 14850"},
+                   lookup_fixture="106_ithaca_rd")      # recorded: never a live call
+    try:
+        g.gordium_check()                                # GordiumStart's flow on 106 Ithaca Rd
+    finally:
+        for k in ("box_picks", "box_overrides", "lookup_fixture"):
+            g.STATE.pop(k, None)
     first = floors(g, doc)
     log["first"] = [(i, t["larger_side"], t["story"]) for i, t in first]
     claim("1 every floor block tagged with how it was drawn; R-1b: no larger side",
@@ -127,16 +138,18 @@ try:
           "10'-0\" on the right (east)" in note and g.logic.can_switch("Starting house: " + note)
           and "Starting house redrawn" in said(g), [note, said(g)])
     log["switch_record"] = g.STATE.get("switch_record")    # 0: run inside this script's command (its Undo step)
-    undo(doc)
+    ran = undo(doc)
     back = floors(g, doc)
     claim("5 one Undo brings the first house back and removes the new one",
-          sorted(i for i, _ in back) == sorted(ids), [i for i, _ in back])
+          ran and sorted(i for i, _ in back) == sorted(ids), [ran, [i for i, _ in back]])
     after = (g.fact_sources(doc).get("starting_house") or {}).get("value") or ""
     claim("5 after Undo the Starting house fact no longer names the switched side",
           "on the right (east)" not in after, after)
-    undo(doc, redo=True)
-    claim("5 Redo brings the new house back", sorted(i for i, _ in floors(g, doc)) == sorted(i for i, _ in second),
-          [i for i, _ in floors(g, doc)])
+    ran = undo(doc, redo=True)
+    claim("5 Redo brings the new house back", ran and sorted(i for i, _ in floors(g, doc)) == sorted(
+        i for i, _ in second), [ran, [i for i, _ in floors(g, doc)]])
+    redone = (g.fact_sources(doc).get("starting_house") or {}).get("value") or ""
+    claim("5 after Redo the Starting house fact names the switched side again", redone == note, redone)
     layer = doc.Layers[doc.Layers.FindByFullPath(g.logic.massing_floor(1), -1)]
     layer.IsLocked = True
     before = [i for i, _ in floors(g, doc)]
