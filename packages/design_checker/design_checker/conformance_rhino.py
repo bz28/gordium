@@ -304,6 +304,8 @@ def _left_out(model, lot, buildings, s: float) -> list[dict]:
         "lot": {"ring": [list(p) for p in _plan_points(model, lot.Geometry)], "box": [x0, y0, x1, y1]},
         "objects": objects, "definitions": definitions, "buildings": boxes, "feet_per_unit": s,
         "want": ["left_out", "touching"]})
+    if answer.get("refused"):                  # host_core refused what the file said: never read as nothing left out
+        raise ValueError("objects.left_out refused: " + "; ".join(f"{k}: {v}" for k, v in answer["refused"].items()))
     out = []
     for (o, layer, g, solid, box), on, near in zip(kept, answer["left_out"], answer["touching"]):
         if not on["left_out"]:

@@ -699,6 +699,17 @@ def test_the_live_command_walks_no_deeper_than_host_core_looks():
     assert _Definition.walked == 3 * (MAX_BLOCK_DEPTH + 1)              # in each of the 3 looks
 
 
+def test_the_reference_adapter_stops_with_the_workers_words_when_it_refuses():
+    """Review round 2: a refused part (a lot with no outline) came back as a bare KeyError, its reason lost; it is
+    never read as nothing left out."""
+    import rhino3dm as r
+    lot = types.SimpleNamespace(Geometry=r.Polyline([r.Point3d(0, 0, 0), r.Point3d(60, 0, 0), r.Point3d(0, 0, 0)])
+                                .ToPolylineCurve())
+    model = types.SimpleNamespace(Layers=[], Objects=[])
+    with pytest.raises(ValueError, match="objects.left_out refused: left_out: lot: its ring is an outline"):
+        cr._left_out(model, lot, [], 1.0)
+
+
 def test_the_reference_adapter_gives_a_block_holding_a_part_with_no_box_no_box(tmp_path):
     """The adapter's half: a block holding a solid far off the lot and a block whose definition isn't in the file is
     listed, touching unknown (counts as touching), as the live command now lists it."""

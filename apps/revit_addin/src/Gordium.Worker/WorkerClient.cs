@@ -222,7 +222,9 @@ public sealed class WorkerClient : IDisposable
     /// building's box are: host_core/left_out.py. Lengths in the model's units, <paramref name="feetPerUnit"/>
     /// feet each (Revit's internal units are feet: 1).</summary>
     /// <param name="lot">The lot's <c>{ring, box}</c>, or null when there is none (nothing is left out).</param>
-    /// <param name="objects">What the add-in saw of each object: <c>{id, box, points, definition?}</c>.</param>
+    /// <param name="objects">What the add-in saw of each object: <c>{id, box, points, definition?}</c>. Send
+    /// <c>definition</c> only for a family instance or linked model, never null for anything else: null means one
+    /// whose definition is missing, so no box (left out and touching).</param>
     /// <param name="buildings">The measured buildings' boxes.</param>
     /// <param name="definitions">What each placed family or linked model holds, once each, or null for none.</param>
     /// <param name="feetPerUnit">How many feet one model unit is.</param>

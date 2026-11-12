@@ -78,7 +78,7 @@ answer and sends the request again; the answers are always asked in the same ord
 **Which objects are left out** (`objects.left_out`, from 1.1). The tool picks the objects that could be a
 building and aren't measured (Rhino: by layer and geometry type; Revit: by category) and sends what it saw of each:
 its `id`, its 3D `box` (`null` when it has none), its plan `points`, and for a placed block or linked model its
-`definition`, with every definition it holds, at any depth, once in `definitions` (each with its `status`, the
+`definition` (left out entirely for anything else: `null` means a block whose definition is missing, so no box), with every definition it holds, at any depth, once in `definitions` (each with its `status`, the
 tool's word for whether what it holds is the design, and its `parts`). The worker decides the rest, the same for
 every tool: which are on the lot (`left_out`), which may be part of the house (`touching`), and which have no box
 that covers all of them (`no_box`: a linked file missing, unreadable or out of date at any depth, an empty block,

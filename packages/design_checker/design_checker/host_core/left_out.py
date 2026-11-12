@@ -19,7 +19,9 @@ here: everything after that, so the two hosts can't drift apart on a choice that
 What a host sends, in its own model units (`feet_per_unit` says how many feet one unit is):
 
   an object      {"id": "...", "box": [x0, y0, z0, x1, y1, z1] or null, "points": [[x, y], ...],
-                  "definition": "<id>" or null (a placed block only: null when its definition isn't there)}
+                  "definition": "<id>" or null}
+                 `definition` only for a placed block or linked model: leave the key out entirely for anything
+                 else, since null means a block whose definition isn't there (no box: left out and touching).
                  `box` is the host's own box for it, null when the host has none (an empty block, an empty SubD).
                  `points` (only asked of an object whose box comes near the lot): enough of it in plan to outline
                  it (vertices, points along its edges and over its faces; its box's corners when it has none). In
