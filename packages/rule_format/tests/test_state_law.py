@@ -533,3 +533,19 @@ def test_a_label_that_calls_its_reading_an_open_question_records_it_as_one():
     review = (NY_STATE / "3_section_labels/gov.ny.residential.2025.review.md").read_text(encoding="utf-8")
     listed = review.split("## Open questions for the architects")[1].split("\n## ")[0]
     assert all(f"| {pid} |" in listed for pid in said)
+
+
+def test_a_label_with_readings_still_in_play_never_says_one_reading_decides():
+    # review round 2 of egress step 1c: BF103.2 listed three readings of "unenclosed" but its notes (and the README)
+    # said a screened porch "fails, never passes" under the stricter one; with readings in play a design fails only if
+    # it fails under all of them, else needs review (docs/methods.md)
+    import re
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    open_ = [pid for pid, e in labels.items() if any(len(r.get("readings") or []) >= 2 for r in e.get("research") or [])]
+    assert "BF103.2" in open_
+    decides = re.compile(r"fails, never passes|until (?:it is )?answered,? Gordium takes|Gordium's reading until answered", re.I)
+    readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
+    for pid in open_:
+        e = labels[pid]
+        assert not decides.search(yaml.safe_dump(e)) and "needs review" in e.get("notes", ""), pid
+    assert not decides.search(readme)

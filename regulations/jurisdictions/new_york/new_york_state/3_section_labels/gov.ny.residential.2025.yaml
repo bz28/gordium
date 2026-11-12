@@ -3904,11 +3904,13 @@ labels:
     piece_sha256: 739559baf60e8599e7ec8e178bc3f3f5594461d825bbd1f537d46602a2679055
     notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. Gordium''s reading, for the architects
       to confirm before a rule is drafted (README, Appendix BF): "patio structure", not a defined term, is a patio cover,
-      since BF103.2 ties it to Section BF101. What "unenclosed" means is an open question (open_questions); until it is answered
-      Gordium takes the stricter reading (screening, plastic or glass make it enclosed), so a screened porch over a bedroom''s
-      escape window fails, never passes. Whether an opening is a sleeping room''s escape opening or an exit door, whether
-      it opens into a patio cover, and what fills the patio cover''s openings must be in the model; where any is not, the
-      result is needs review.'
+      since BF103.2 ties it to Section BF101. What "unenclosed" means is an open question (open_questions) with three readings
+      in play, and every one is measured (docs/methods.md): a design passes only if it passes under all of them, fails only
+      if it fails under all of them, and otherwise needs review. So until it is answered, a sleeping room''s escape opening
+      into a patio cover whose openings hold screening, plastic or glass needs review (never a pass); only one with nothing
+      in its openings passes. Whether an opening is a sleeping room''s escape opening or an exit door, whether it opens into
+      a patio cover, and what fills the patio cover''s openings must be in the model; where any is not, the result is needs
+      review.'
     open_questions:
     - Does insect screening, plastic or glass in a patio cover's wall openings (what BF103.1 says openings are "enclosed with")
       make the patio cover enclosed under BF103.2, so a sleeping room's escape opening may not open into it?
@@ -3940,8 +3942,7 @@ labels:
         be read by any script or automated browser).
       readings:
       - id: nothing_in_the_openings
-        reading: unenclosed only if nothing (screening, plastic or glass) fills the patio cover's wall openings (Gordium's
-          reading until answered)
+        reading: unenclosed only if nothing (screening, plastic or glass) fills the patio cover's wall openings
       - id: screening_leaves_it_open
         reading: insect screening leaves it unenclosed; plastic or glass encloses it
       - id: solid_walls_only
