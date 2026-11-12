@@ -3,7 +3,7 @@
 goes on past a failing one) and the run fails at the end if any did. Run in Rhino, not in CI: the curves are worked
 out in CI (packages/design_checker/tests/test_dimensions.py, the "feature 4" tests); what only Rhino can show is the
 real objects, the lock, the snapping, Undo and the layer's visibility.
-A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, a tax-map lot).
+A fresh feet document, GordiumStart on 106 Ithaca Rd's recorded lookup (a tax-map lot).
 1. After the check: a layer Gordium::Envelope, locked; on it the cautious buildable outline (closed, solid), the
    outline as drawn (closed, dashed linetype), and one required line per measured yard (dashed); each tagged
    Gordium's (gordium_envelope user text); the cautious outline lies 2'-0" inside the one as drawn.
@@ -28,6 +28,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_osnap") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -70,7 +71,7 @@ doc = None
 try:
     g = fresh_module()
     doc = TestDocs("osnap").__enter__().open("Large Objects - Feet")
-    g.gordium_check()                                    # GordiumStart's flow on the sample
+    look_up_106(g, g.gordium_check)                      # GordiumStart: 106 Ithaca Rd looked up (recorded)
     k = 1.0 / g._scale(doc)
     index, found = curves(g, doc)
     whats = sorted(o.Attributes.GetUserString(g.logic.ENVELOPE_KEY) for o in found)
