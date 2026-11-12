@@ -130,8 +130,12 @@ def test_worked_examples_are_checked_per_part():
     assert any("example 1: unknown measures ['stair_riser_height']" in p for p in validate(book(rule), CTX))
 
 
-def test_the_registry_is_checked():
+def test_the_registry_is_checked(tmp_path):
     assert parts.load_registry()                          # parts.yaml itself is well formed
+    bad = tmp_path / "parts.yaml"
+    bad.write_text("room: {meaning: m, measures: {stories: {unit: count, meaning: m}}}\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="also a building measure"):
+        parts.load_registry(bad)                          # refused, never half used
     good = {"room": {"meaning": "m", "measures": {"room_area": {"unit": "sf", "meaning": "m"}}}}
     assert registry_problems(good, {"stories"}) == []
     assert any("also a building measure" in p for p in registry_problems(good, {"room_area"}))
@@ -150,6 +154,10 @@ def test_outcome_never_answers_a_part_rule():
     assert part_outcome(AREA, values, ALLOWED) == "pass"
     assert outcome(AREA, values, ALLOWED) == "needs_review"       # code that doesn't know about parts never passes it
     assert outcome({k: v for k, v in AREA.items() if k != "for_each"}, values, ALLOWED) == "needs_review"
+    # even one whose formulas use only building measures (which outcome() could evaluate): no whole-building answer
+    on_building = RISER | {"check": "stories <= 3"}
+    assert part_outcome(on_building, {"stories": 2}, ALLOWED) == "pass"
+    assert outcome(on_building, {"stories": 2}, ALLOWED) == "needs_review"
 
 
 def test_fingerprints_of_rules_without_part_fields_are_unchanged():

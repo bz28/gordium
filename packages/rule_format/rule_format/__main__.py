@@ -23,13 +23,14 @@ from .rulebook import (REPO, Context, finding_conflicts, jurisdictions, load, lo
 
 
 def main() -> int:
-    failed = checked = 1
+    failed, checked = 0, 1
+    shown = parts.PARTS_FILE.relative_to(parts.PARTS_FILE.parents[3])   # the code's own repository
     try:                                  # the part kinds per-part rules repeat over (parts.yaml)
         parts.load_registry()
-        failed = 0
-        print(f"✓ {parts.PARTS_FILE.relative_to(REPO)}")
-    except (ValueError, OSError) as e:
-        print(f"✗ {parts.PARTS_FILE.relative_to(REPO)}: {e}")
+        print(f"✓ {shown}")
+    except (ValueError, OSError, AttributeError, TypeError) as e:
+        failed = 1
+        print(f"✗ {shown}: {e}")
     for jurisdiction in jurisdictions(REPO):
         place = jurisdiction.relative_to(REPO / "regulations/jurisdictions")
         checked += 1
