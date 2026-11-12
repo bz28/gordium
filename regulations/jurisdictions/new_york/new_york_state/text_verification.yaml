@@ -20,7 +20,7 @@ second_reading:
     transcript went through numbers.py: 102 pieces, 135 numbers, all agree (134 after review round 2, when numbers.py learned to read "one and one third" as one number and to keep a "not", "no" or "nor" before a comparison; the seven pieces this changed were compared again from the same transcript and agree). The first crops cut the left edge of some
     lines; they were rendered again at the full page width and those lines read again (the "42 inches" of R314.5 among them).
     After review round 1, five more pieces (BO102.1, BO102.1.2, BO103:unsafe, BO104.1, BO104.1.1) were read the same way
-    by the same helper (4 crops): 0 numbers in the text, 0 in the reading; they agree. The transcripts of step 1b are kept in the code cache (second_reading/, with their crops, the tools that compared them and their sha256), outside the repo since they hold the book''s words; a test (rule_format/tests/test_state_law.py) rebuilds second_reading_numbers from them. After review rounds 2 and 3, the pieces whose numbers numbers.py now reads differently (R315.5.3.1 and BO108.4: "pound" and "kg" became units) were compared again from the same transcripts and agree.'
+    by the same helper (4 crops): 0 numbers in the text, 0 in the reading; they agree. The transcripts of step 1b are kept in the code cache (second_reading/, with their crops, the tools that compared them and their sha256), outside the repo since they hold the book''s words; a test (rule_format/tests/test_state_law.py) rebuilds second_reading_numbers from them. After review rounds 2 and 3, the pieces whose numbers numbers.py now reads differently (R315.5.3.1 and BO108.4: "pound" and "kg" became units) were compared again from the same transcripts and agree. Step 1c (2026-11-12, the 10 pieces it brought in: Appendix BF''s BF101 to BF103 and R202''s VENTILATION): the lines of the pieces were cropped from 216 dpi page images at the full page width (4 crops, pp.55 and 898), and a helper that never saw the extracted text transcribed every line of them, marking no glyph unclear; the transcript went through numbers.py: 10 pieces, 7 numbers (all in BF103.1), all agree. A second helper that saw only BF103.1''s printed text and its numbers'' values and units marked each number''s comparison from the whole sentence (65 percent at least, 0.125 inch at most, the rest none); all seven are what the recorded words say. The transcript, crops and tools are kept in the code cache (second_reading/step_1c_*).'
 notes:
 - 'Review round 8 of egress step 1 (2026-11-12): twice a dropped "not" left the law recorded backwards while both
   readings agreed, because both go through numbers.py: they check the digits, never what the words mean. So each
@@ -1007,6 +1007,12 @@ pieces:
     second_reading: agrees
     second_reading_comparisons:
     - 'none'
+  R202:ventilation:
+    piece_sha256: 5f458e049ed18fcdb27bba1b21fa82c78f50faabd992f07251c362b5f90e6a83
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
   R202:venting:
     piece_sha256: a01d6978c018e3aa862db842fbf3e10bbfd1cc8625953d6d45f534272f20e146
     numbers: []
@@ -2763,6 +2769,81 @@ pieces:
     second_reading_comparisons: []
   R507.10.4:
     piece_sha256: d3783a02b3fa69424ec25ce0cd08d7c3a1f407a19b77ecc0a752df5e89c28f41
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
+  BF101:
+    piece_sha256: 8f66d9ea0254856e1f2d9e437e43cb474a3119a0ffc969e9a40ffd20ab2d6cac
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
+  BF101.1:
+    piece_sha256: d3169de8d3e9231c0fa92c5ea960b7af4a4668e68a1720f2fb7cc1567d941b8d
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
+  BF101.2:
+    piece_sha256: bf1b64a394ec1c269d5a94aa375271681720a4facf6b6f4bc690935e3e5d94a4
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
+  BF102:
+    piece_sha256: 026ac8a5dda92d4377573d468a66d7562e9438473132439f5f3bd21b9d9453df
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
+  BF102.1:
+    piece_sha256: a59ff46abe21a6f40a8c87ae697bf445e50301cfe00b4bb2274f96d61432fba7
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
+  BF102:patio_cover:
+    piece_sha256: 28df6e939064fb0882ef2405e98eb657bef5983c7523364a9d2c2b1865a7bada
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
+  BF103:
+    piece_sha256: 6ed79671092c59ec11160884df7b631f2a2756d081c50eceb05740be0e44b69d
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+    second_reading_comparisons: []
+  BF103.1:
+    piece_sha256: e498b5f6223069540f7650e11a6af50b0f38a646eecbc1aac3d685d8833e1ed2
+    numbers:
+    - and one
+    - not less than 65 percent
+    - 6 foot
+    - 8 inch
+    - 2032 mm
+    - not more than 0.125 inch
+    - 3.2 mm
+    second_reading_numbers:
+    - and one
+    - not less than 65 percent
+    - 6 foot
+    - 8 inch
+    - 2032 mm
+    - not more than 0.125 inch
+    - 3.2 mm
+    second_reading: agrees
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - <=
+    - none
+  BF103.2:
+    piece_sha256: 739559baf60e8599e7ec8e178bc3f3f5594461d825bbd1f537d46602a2679055
     numbers: []
     second_reading_numbers: []
     second_reading: agrees

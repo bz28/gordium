@@ -447,7 +447,7 @@ def test_the_recorded_second_reading_is_the_kept_transcripts():
     pieces = {p["id"]: p for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
     recorded = load(NY_STATE / "text_verification.yaml")["pieces"]
     rebuilt = {}
-    for name in ("step_1_round_3", "step_1b", "step_1b_round_1"):
+    for name in ("step_1_round_3", "step_1b", "step_1b_round_1", "step_1c"):
         rebuilt.update(_transcript_numbers(folder, name, pieces))
     assert len(rebuilt) >= 110
     assert {pid: recorded[pid]["second_reading_numbers"] for pid in rebuilt} == rebuilt
@@ -496,3 +496,27 @@ def test_a_permission_to_exceed_is_flagged_as_no_minimum():
                 if not any("second reading (none) is right" in f and "wrong" in f for f in said):
                     unclear.append((pid, n))
     assert seen >= 2 and unclear == [], unclear
+
+
+def test_every_part_of_appendix_bf_is_brought_in_or_named_in_the_readme():
+    # egress step 1c: Appendix BF comes in only for egress (BF101 to BF103); its other parts must each be named as not
+    # brought in, so a reader never takes the patio-cover height or structure limits as checked
+    import re
+    from rule_format.rulebook import cached, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached(entry, ".jsonl").exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
+    # only the README's own list of what is not brought in counts (BF101.1's "BF101 to BF106" names no part as out)
+    named = set(re.findall(r"\bBF\d{3}(?:\.\d+)*", readme.split("Not brought in, being no egress:")[1].split(" BF101.1 ")[0]))
+    brought = {p["id"] for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    heads = {m[1] for r in read_jsonl(cached(entry, ".jsonl"))[1:]
+             if r.get("bold") and (m := re.match(r"(?:\[NY\] )?(?:SECTION )?(BF1\d\d(?:\.\d+)*)\W", r["text"]))}
+
+    def covered(pid):
+        parts = pid.split(".")
+        return pid in brought or any(".".join(parts[:k]) in named and not any(
+            b.startswith(".".join(parts[:k])) for b in brought) for k in range(1, len(parts) + 1))
+    missing = sorted(h for h in heads if not covered(h))
+    assert {"BF101", "BF103.2", "BF106.4"} <= heads and missing == [], " ".join(missing)
+    assert {"BF101", "BF101.1", "BF101.2", "BF102", "BF102.1", "BF102:patio_cover", "BF103", "BF103.1", "BF103.2"} <= brought

@@ -1,4 +1,4 @@
-# How New York's 2025 Residential Code defines the words its egress sections (R314-R321, R507.10, Appendix BO) depend on:
+# How New York's 2025 Residential Code defines the words its egress sections (R314-R321, R507.10, Appendices BF, BO) depend on:
 # whole definitions, quoted exactly (file, page, lines), with no paraphrase (drafting_rules.md). R201.1: a word printed in
 # italics in the code has the meaning given here. Quotes are checked against the book's text by `python -m rule_format`
 # where the code cache exists (the book is kept outside the repo). No measurement names yet: egress rules come later.
@@ -509,5 +509,18 @@ dangerous:
       the center of gravity does not fall inside the middle one third of the base. 6. Any portion, member or appurtenance
       thereof likely to fail, or to become detached or dislodged, or to collapse and thereby injure persons.'
   notes: 'Appendix BO''s own definition (Section BO103): it applies in Appendix BO only (BO103.1; R201.1).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+patio_cover:
+  term: PATIO COVER
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 898
+    lines:
+    - 16
+    - 17
+    quote: PATIO COVER. A structure with open or glazed walls that is used for recreational, outdoor living purposes associated
+      with a dwell- ing unit.
+  notes: 'Appendix BF''s own definition (Section BF102): it applies in Appendix BF only (BF102.1; R201.1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
