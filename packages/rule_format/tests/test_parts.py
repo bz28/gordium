@@ -328,14 +328,15 @@ def test_a_part_that_fails_whatever_its_missing_number_is_fails():
     assert headroom(both, stair_headroom=70)["outcome"] == "needs_review"
     # given but unusable (NaN, below 0) isn't "not given": no proof
     assert headroom(HEADROOM, stair_headroom=70, stair_riser_height=-1)["outcome"] == "needs_review"
+    assert headroom(HEADROOM, stair_headroom=70, stair_riser_height=float("nan"))["outcome"] == "needs_review"
     # an unknown in review_when: no proof (the proof never runs over the rule's own doubt)
     doubt = HEADROOM | {"review_when": [{"when": "stair_riser_height > 9", "reason": "a tall riser"}]}
     assert headroom(doubt, stair_headroom=70)["outcome"] == "needs_review"
 
 
 def test_the_part_proof_is_the_checkers_proof():
-    """One proof: parts.fails_whatever and check.fails_whatever both take their settings from
-    rulebook.unknown_settings, so a change there changes both."""
+    """The shared proof's settings (rulebook.unknown_settings); that parts.rows and check.fails_whatever both use it
+    is pinned by design_checker/tests/test_each_part.py::test_one_proof_for_parts_and_zoning_rows."""
     from rule_format import rulebook
     assert rulebook.unknown_settings(HEADROOM, ["stair_riser_height"], parts.measure_kinds("stair")) == \
         [{"stair_riser_height": 0}]
