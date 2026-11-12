@@ -338,3 +338,21 @@ def test_a_metric_conversion_that_is_not_its_inches_is_named_in_the_labels_notes
             if f"({metric})" not in (labels[p["id"]].get("notes") or ""):
                 unnamed.append((p["id"], printed))
     assert wrong and unnamed == [], unnamed
+
+
+def test_a_permission_to_exceed_is_flagged_as_no_minimum():
+    # Review round 9 of step 1: "shall be permitted to exceed 38 inches" (R320.2, R318.7.5.3) lifts a maximum; the
+    # recorded words read it as more than (>), a minimum the law does not set. Its flag must say the recorded
+    # reading is wrong, never "either way", so no rule is drafted from the '>'
+    from document_extraction.numbers import comparisons
+    pieces = yaml.safe_load((NY_STATE / "text_verification.yaml").read_text(encoding="utf-8"))["pieces"]
+    seen, unclear = 0, []
+    for pid, e in pieces.items():
+        nums = e.get("numbers") or []
+        for n, c, r in zip(nums, comparisons(nums), e.get("second_reading_comparisons") or []):
+            if n.startswith("exceed ") and c == ">" and r == "none":
+                seen += 1
+                said = [f for f in e.get("flags") or [] if f"'{n}'" in f]
+                if not any("second reading (none) is right" in f and "wrong" in f for f in said):
+                    unclear.append((pid, n))
+    assert seen >= 2 and unclear == [], unclear
