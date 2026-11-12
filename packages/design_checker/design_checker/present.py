@@ -1710,7 +1710,8 @@ def overlays_lookup(lot: dict | None, facts: dict, today: str | None) -> dict | 
                "that is can't be told: check them by hand")
         return {"date": date, "age": None, "cleared": False, "why": why}
     if day > now:
-        why = (f"the address lookup's date ({date}) is after today ({today}), so how old it is can't be told: "
+        why = (f"the address lookup found none, but its date ({date}) is after today ({today}), so how old it is "
+               "can't be told: "
                "look the address up again in the start box, or check them by hand")
         return {"date": date, "age": None, "cleared": False, "why": why}
     age, days = age_words(day, now), (now - day).days

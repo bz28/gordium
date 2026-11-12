@@ -50,7 +50,7 @@ T = _site_lookup_tests()
 def looked_up(name, **kw):
     from site_lookup.adapters.ithaca_city.lookup import lookup
     fx = T.load(name)
-    return box_payload(lookup(fx["address"], T.Fake(fx, **kw), T.NOW))
+    return box_payload(lookup(fx["address"], T.Fake(fx, **kw), T.NOW), T.NOW)   # dated, as lookup_box.main always is
 
 
 def area(ring):

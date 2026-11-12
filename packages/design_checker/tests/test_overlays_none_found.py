@@ -193,7 +193,7 @@ def _flood_down():
     from site_lookup.adapters.ithaca_city.lookup import lookup
     from design_checker.lookup_box import box_payload
     fx = T.load("106_ithaca_rd")
-    return box_payload(lookup(fx["address"], T.Failing(fx, ["fema_flood"]), T.NOW))
+    return box_payload(lookup(fx["address"], T.Failing(fx, ["fema_flood"]), T.NOW), T.NOW)
 
 
 def _doubtful():
@@ -204,7 +204,7 @@ def _doubtful():
         if a["source"] == "geocoder":
             for c in a["body"]["candidates"]:
                 c["attributes"]["Addr_type"] = "StreetAddress"     # found only along the street: the lot may be wrong
-    return box_payload(lookup(fx["address"], T.Fake(fx), T.NOW))
+    return box_payload(lookup(fx["address"], T.Fake(fx), T.NOW), T.NOW)
 
 
 def test_a_later_lookup_decides_again_and_the_architects_own_lot_gets_none():

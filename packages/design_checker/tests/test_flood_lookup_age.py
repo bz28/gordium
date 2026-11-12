@@ -4,7 +4,7 @@
     the host says the day of the check ("today", YYYY-MM-DD: the plugin's rhino_logic.city_day); the checker never
         reads the clock (principle 3: the same design, saved facts and day give the same answer)
     a finding at most present.LOOKUP_FRESH_DAYS (90) days old on that day  ->  the row is left out, and the site lines
-        say "flood map and City maps looked up 3 months ago (2026-08-12)"
+        say "flood map and City maps looked up 2 months ago (2026-08-14)"
     older, dated after today, undated, or no day given  ->  the row stays (needs review) and says why, with the date
 
 Every expected day count and age below is worked out by hand on a calendar, never by the code under test:
@@ -88,9 +88,10 @@ def test_without_a_day_from_the_host_no_lookup_counts_as_recent():
 def test_a_lookup_dated_after_today_keeps_the_row():
     v = check_site(SITE, facts_found_on("2026-11-13"), today=TODAY)["view"]
     assert release_rows(v) == ["release.overlays"]
-    assert overlays_row(v)["reason"].endswith(
-        "(2026-11-13) is after today (2026-11-12), so how old it is can't be told: look the address up again in the "
-        "start box, or check them by hand")
+    assert overlays_row(v)["reason"] == (
+        "Overlays (historic, gorge, flood): the address lookup found none, but its date (2026-11-13) is after today "
+        "(2026-11-12), so how old it is can't be told: look the address up again in the start box, or check them by "
+        "hand")
 
 
 @pytest.mark.parametrize("date", ["Nov 11 2026", "2026-11-11T09:00", "11/11/2026", "2026-02-30", "2026-W46-3"])
@@ -152,6 +153,25 @@ def test_the_plugin_says_the_day_in_every_check_request():
     begin = source[source.index("def _check_begin("):source.index("def _check_apply(")]
     assert '"today": logic.city_day()' in begin
     assert source.count('"cmd": "check"') == 1
+
+
+def test_the_finding_is_dated_by_ithacas_day_never_the_utc_day():
+    """At 10 pm in Ithaca on 2026-10-20 (02:00 UTC on the 21st) the lookup's own facts carry the UTC day; the finding
+    takes the place's day the host will compare it with. A lookup answer without that day records no finding."""
+    from design_checker import rhino_logic as logic
+    from design_checker.lookup_box import box_payload
+    from site_lookup.adapters.ithaca_city.lookup import lookup
+    from test_lookup_box import T
+    from test_overlays_none_found import _apply
+    late = dt.datetime(2026, 10, 21, 2, 0, tzinfo=dt.timezone.utc)
+    fx = T.load("106_ithaca_rd")
+    result = lookup(fx["address"], T.Fake(fx), late)
+    assert result["facts"]["overlays"]["date"] == "2026-10-21"             # the UTC day, as site_lookup writes it
+    f, _ = _apply(box_payload(result, late))
+    assert f["overlays_none_found"]["date"] == "2026-10-20"                # Ithaca's
+    f, _ = _apply(box_payload(result))                                     # no day of the place: no finding
+    assert "overlays_none_found" not in f
+    assert logic.overlays_none_found(box_payload(result), [(0, 0), (1, 0), (1, 1)]) is None
 
 
 def _check_sheet(path):
