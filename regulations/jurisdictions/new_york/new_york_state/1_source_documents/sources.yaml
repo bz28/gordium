@@ -44,8 +44,9 @@ documents:
       # Chapter 1's adoption of the appendices and its pointer to Appendix BO (pp.24-26); Chapter 2 (R201, R202
       # definitions; p.57 is blank, p.58 starts Chapter 3); R314-R321 (mezzanines, sleeping lofts, habitable attics,
       # egress; p.97 starts with R312 and R313, not brought in); R325.6-R325.7; R507.10 deck guards (p.205 is blank,
-      # p.206 starts Chapter 6); Appendix BF patio covers (p.898: the whole appendix's text but its wind figure and tables,
-      # pp.899-900, which are not brought in); Appendix BO (pp.964-974). Each with the next part's heading, so each part's
+      # p.206 starts Chapter 6); Appendix BF patio covers (p.898: BF101 to BF103, brought in, with the heading of BF104
+      # after them; BF104 to BF106.4's opening, also on p.898, and the rest of BF106 with its wind figure and tables,
+      # pp.899-900, are not egress and not brought in); Appendix BO (pp.964-974). Each with the next part's heading, so each part's
       # end is proven.
       pages: 24-26, 34-58, 97-105, 109-110, 204-206, 898, 964-974
       sections: [R101.2.1, R102.6, R201, R314, R315, R316, R318, R319, R320, R321, R325.6, R325.7, R507.10,

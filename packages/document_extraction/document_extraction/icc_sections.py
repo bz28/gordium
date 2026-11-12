@@ -207,8 +207,10 @@ def split(rows: list[dict], brought_in: dict) -> dict:
         if head and head["kind"] != "definition":
             # A numbered part titled "Definition(s)" ("BF106.2 Definition. The following word and term shall, for the
             # purposes of this appendix, ..."): the bold terms under it are definitions, up to the next heading
-            defining_part = head["id"] if head["kind"] == "section" and head["title"] in ("Definition", "Definitions") \
-                else None
+            # (only outside a section of definitions: "BJ102.1 Definitions." under "SECTION BJ102—DEFINITIONS" leaves its
+            # terms named by the section, BJ102:term, with the section's heading brought in)
+            defining_part = head["id"] if head["kind"] == "section" and section not in definitions \
+                and head["title"] in ("Definition", "Definitions") else None
             if defining_part:
                 last_letter = ""
         if head:

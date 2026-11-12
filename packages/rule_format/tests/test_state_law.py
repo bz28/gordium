@@ -520,3 +520,16 @@ def test_every_part_of_appendix_bf_is_brought_in_or_named_in_the_readme():
     missing = sorted(h for h in heads if not covered(h))
     assert {"BF101", "BF103.2", "BF106.4"} <= heads and missing == [], " ".join(missing)
     assert {"BF101", "BF101.1", "BF101.2", "BF102", "BF102.1", "BF102:patio_cover", "BF103", "BF103.1", "BF103.2"} <= brought
+
+
+def test_a_label_that_calls_its_reading_an_open_question_records_it_as_one():
+    # review round 1 of egress step 1c: BF103.2's "unenclosed" was called an open question in its notes only, so the
+    # review list showed no open questions and nothing would block approving it
+    import re
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    said = [pid for pid, e in labels.items() if re.search(r"open question", " ".join(str(e.get(k, "")) for k in
+                                                                                     ("reason", "notes")), re.I)]
+    assert "BF103.2" in said and all(labels[pid].get("open_questions") for pid in said), said
+    review = (NY_STATE / "3_section_labels/gov.ny.residential.2025.review.md").read_text(encoding="utf-8")
+    listed = review.split("## Open questions for the architects")[1].split("\n## ")[0]
+    assert all(f"| {pid} |" in listed for pid in said)

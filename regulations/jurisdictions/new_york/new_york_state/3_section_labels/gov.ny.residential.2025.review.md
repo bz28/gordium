@@ -66,12 +66,13 @@ Only rules become formulas: check each is really only a definition or pointer, n
 | BO108.1 | General | reference | draft | Says owner-occupied one-family dwellings converted to bed and breakfasts follow BO108 and BO107. | [NY] BO108.1 General. Owner-occupied one-family dwellings converted for use as bed and breakfast dwellings shall comply with this section and Section BO107. | shall comply |
 | BO109.8 | Building elements and materials | reference | draft | Says building elements and materials of historic buildings follow BO109.8's parts; of those, BO109.8.1, BO109.8.5 and BO109.8.6 are egress and brought in. | [NY] BO109.8 Building elements and materials. Building elements and materials within historic buildings shall comply with this section. | shall comply |
 
-## Open questions for the architects (0)
+## Open questions for the architects (1)
 
 A reviewer's doubt about the label, for an architect to answer (`answers`). An answered question also unblocks approval, once approval is switched on (deferred for now).
 
 | Piece | Title | Label | Status | Reason | Quote | Questions |
 |---|---|---|---|---|---|---|
+| BF103.2 | Light, ventilation and emergency egress | rule | draft · open questions | Where a sleeping room's emergency escape and rescue opening opens into a patio cover, the patio cover must be unenclosed; where an exit from the dwelling unit opens into it, a patio cover that is not unenclosed must have its own exits meeting R318. | BF103.2 Light, ventilation and emergency egress. Exterior openings required for light and ventilation into a patio structure conforming to Section BF101 shall be unenclosed where such openings serve as emergency egress or rescue openings from sleeping rooms. Where such exterior openings serve as an exit from the dwelling unit, the patio structure, unless unenclosed, shall be provided with exits conforming to the provisions of Section R318. | Does insect screening, plastic or glass in a patio cover's wall openings (what BF103.1 says openings are "enclosed with") make the patio cover enclosed under BF103.2, so a sleeping room's escape opening may not open into it? |
 
 ## Cited by rules or definitions (41)
 

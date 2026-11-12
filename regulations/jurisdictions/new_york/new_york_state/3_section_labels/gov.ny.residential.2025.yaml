@@ -3903,15 +3903,49 @@ labels:
         unless unenclosed, shall be provided with exits conforming to the provisions of Section R318.
     piece_sha256: 739559baf60e8599e7ec8e178bc3f3f5594461d825bbd1f537d46602a2679055
     notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. Gordium''s reading, for the architects
-      to confirm before a rule is drafted (README, Appendix BF): (1) "patio structure", not a defined term, is a patio cover,
-      since BF103.2 ties it to Section BF101; (2) "unenclosed" means nothing fills the patio cover''s wall openings: insect
-      screening, plastic or glass (what BF103.1 says openings are "enclosed with") make it enclosed. The stricter reading:
-      a screened porch over a bedroom''s escape window fails, never passes. Searched 2026-11-12: the whole appendix (BF103.1
-      is its only other use of "enclosed"), R319 (an escape opening opens to a public way, yard or court), and the model code''s
-      same words (IRC Appendix AH103.2, which says R311 where this book says R318) as other places adopt it (UpCodes): no
-      official interpretation found; an open question for the architects or the City. Whether an opening is a sleeping room''s
-      escape opening or an exit door, whether it opens into a patio cover, and what fills the patio cover''s openings must
-      be in the model; where any is not, the result is needs review.'
+      to confirm before a rule is drafted (README, Appendix BF): "patio structure", not a defined term, is a patio cover,
+      since BF103.2 ties it to Section BF101. What "unenclosed" means is an open question (open_questions); until it is answered
+      Gordium takes the stricter reading (screening, plastic or glass make it enclosed), so a screened porch over a bedroom''s
+      escape window fails, never passes. Whether an opening is a sleeping room''s escape opening or an exit door, whether
+      it opens into a patio cover, and what fills the patio cover''s openings must be in the model; where any is not, the
+      result is needs review.'
+    open_questions:
+    - Does insect screening, plastic or glass in a patio cover's wall openings (what BF103.1 says openings are "enclosed with")
+      make the patio cover enclosed under BF103.2, so a sleeping room's escape opening may not open into it?
+    research:
+    - question: Does insect screening, plastic or glass in a patio cover's wall openings (what BF103.1 says openings are "enclosed
+        with") make the patio cover enclosed under BF103.2, so a sleeping room's escape opening may not open into it?
+      searched:
+      - BF101.1
+      - BF102:patio_cover
+      - BF103.1
+      - BF103.2
+      - R319.1
+      - R202:emergency_escape_and_rescue_opening
+      sources:
+      - file: gov.ny.residential.2025.pdf
+        page: 898
+        lines:
+        - 21
+        - 22
+        quote: 'Openings shall be enclosed with any of the following: 1. Insect screening.'
+      - rank: 4
+        cite: 'The model code''s same words, IRC 2021 Appendix AH103.1 and AH103.2 ("shall be unenclosed"; R311 where this
+          book says R318), as the City of Houston adopts them; read 2026-11-12 on UpCodes: no commentary or interpretation
+          of "unenclosed" shown'
+        url: https://up.codes/viewer/houston/irc-2021/chapter/AH/patio-covers
+      why_open: Appendix BF never defines "unenclosed"; BF103.1 is its only other use of "enclosed", and it calls screened,
+        plastic and glass openings enclosed, which supports the stricter reading, but BF103.2 may mean only a patio cover
+        with solid walls. No Ithaca or New York interpretation was found, and ICC's commentary is not read (its site may not
+        be read by any script or automated browser).
+      readings:
+      - id: nothing_in_the_openings
+        reading: unenclosed only if nothing (screening, plastic or glass) fills the patio cover's wall openings (Gordium's
+          reading until answered)
+      - id: screening_leaves_it_open
+        reading: insect screening leaves it unenclosed; plastic or glass encloses it
+      - id: solid_walls_only
+        reading: only solid walls enclose it; any patio cover meeting BF103.1's 65 percent open or glazed area is unenclosed
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   BO101:

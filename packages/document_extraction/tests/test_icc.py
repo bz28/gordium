@@ -563,3 +563,15 @@ def test_appendix_bfs_singular_definition_section_and_its_definition_part_cut_th
     plain = icc_sections.split(_patio([_row(3, 14, "NOT A TERM. Bold capitals.", bold="NOT A TERM.")]),
                                {"pages": "1-3", "sections": ["R318", "BF101", "BF106.1"]})
     assert plain["problems"] == [] and not any("not_a_term" in o[3] for o in plain["outside"])
+
+
+def test_a_definitions_part_inside_a_section_of_definitions_leaves_its_terms_named_by_the_section():
+    # review round 1 of egress step 1c: "BJ102.1 Definitions." printed under "SECTION BJ102—DEFINITIONS" (p.912) cut
+    # its terms as "BJ102.1:term", silently leaving the section's heading out
+    rows = _book()
+    at = next(i for i, r in enumerate(rows) if r.get("text", "").startswith("SECTION R202"))
+    rows.insert(at + 1, _row(1, 3, "R202.1 Definitions. The following words.", bold="R202.1 Definitions."))
+    cut = icc_sections.split(rows, BROUGHT_IN)
+    ids = {p["id"] for p in cut["pieces"]}
+    assert cut["problems"] == [] and {"R202", "R202:flight", "R202:stair"} <= ids and not any(
+        i.startswith("R202.1:") for i in ids)
