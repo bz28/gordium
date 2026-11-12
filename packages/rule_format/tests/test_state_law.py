@@ -229,16 +229,27 @@ def test_an_edited_cache_is_a_problem_even_where_no_quote_covers_the_edit(tmp_pa
 
 
 def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
-    # review round 5: R319.7 sends existing basements to Appendix BO, not brought in; as a reference nobody sees it
+    # review round 5: R319.7 sends existing basements to Appendix BO, not brought in; as a reference nobody sees it.
+    # Step 1b's review round 4: a pointer past the label's quote, or worded "the scoping requirements of", was missed
     import re
     src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
     brought = src["brought_in"]["sections"]
     labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
-    points = re.compile(r"(?:comply with|in accordance with)(?: the (?:requirements|provisions) of)? "
+    points = re.compile(r"(?:comply with|in accordance with|(?:scoping )?(?:requirements|provisions) of)"
+                        r"(?: the (?:requirements|provisions) of)? "
                         r"(?:Sections?|Appendix|Chapter) ([A-Z]{0,2}\d[\w.]*\w|[A-Z]{1,2}\b)")
+    from rule_format.rulebook import cached, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    words = {pid: " ".join(s["quote"] for s in e["sources"]) for pid, e in labels.items()}
+    if cached(entry, ".jsonl").exists():        # the whole piece where the book is here, not only its quote
+        text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+        for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
+            words[p["id"]] = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
     seen, wrong = 0, []
     for pid, e in labels.items():
-        for target in (m[1] for s in e["sources"] for m in points.finditer(s["quote"])):
+        if ":" in pid:                              # a definition sets no requirement; the pieces using it are checked
+            continue
+        for target in (m[1] for m in points.finditer(" ".join(words[pid].split()))):
             inside = any(target == b or target.startswith(b + ".") for b in brought)
             seen += not inside
             if not inside and e["label"] not in ("rule", "flag"):
