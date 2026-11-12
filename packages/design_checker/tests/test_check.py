@@ -1435,6 +1435,25 @@ def test_a_thin_object_standing_on_the_lot_counts_as_on_it_however_thin():
         assert reaches_into_lot(lot, footprint, ON_LOT_REACH), name
     for name, footprint in off.items():
         assert not reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+    skewed = [(0, 0), (0.12, 100), (-5, 100), (-5, 0)]     # 0 ft in at one end, 0.12 ft at the other: in
+    assert reaches_into_lot(lot, skewed, ON_LOT_REACH)
+    u = [(0, 0), (50, 0), (50, 100), (40, 100), (40, 20), (10, 20), (10, 100), (0, 100)]   # a U: its gap isn't the lot
+    assert not reaches_into_lot(u, [(9.95, 60), (40.05, 60), (40.05, 60.08), (9.95, 60.08)], ON_LOT_REACH)
+
+
+def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
+    """A GIS lot outline has hundreds of points, and a neighbour drawn along the line gives an inside part with as
+    many: the depth test once measured every sample against every outline edge (1.75 s per neighbour on a
+    1,000-point lot, review round 3 of PR 78). It measures the part's corners' sides against the edges near them."""
+    import time
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+    n = 250
+    lot = [(50 * k / n, 0) for k in range(n)] + [(50, 100 * k / n) for k in range(n)] + \
+        [(50 - 50 * k / n, 100) for k in range(n)] + [(0, 100 - 100 * k / n) for k in range(n)]
+    start = time.perf_counter()
+    for k in range(20):
+        assert not reaches_into_lot(lot, [(-10, 1 + k), (0.05, 1 + k), (0.05, 90), (-10, 90)], ON_LOT_REACH)
+    assert time.perf_counter() - start < 2.0
 
 
 def test_the_plugin_tests_left_out_objects_against_the_lot_outline():

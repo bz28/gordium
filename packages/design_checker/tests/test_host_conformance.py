@@ -629,20 +629,24 @@ def test_the_live_command_measures_a_block_only_when_its_contents_are_the_block(
 
 
 @pytest.mark.parametrize("kind", [InstanceReferenceGeometry, Extrusion], ids=["block", "extrusion"])
-def test_the_live_command_keeps_an_object_whose_box_covers_no_ground_near_the_lot_as_left_out_and_touching(kind):
-    """An object whose box is a point or a line (a block of only a label, an upright panel drawn as an extrusion)
-    has no footprint to test: reaches_into_lot reads a box that covers no ground as off the lot, so it was dropped
-    even beside the house. Near the lot, it counts as on the lot and touching; far from the lot (a cut-out tree
-    drawn in the Front view, 300 ft away), it is off the lot, as its box says."""
+def test_the_live_command_places_an_object_whose_box_covers_no_ground_by_the_line_it_lies_on(kind):
+    """An object whose box is a point or a line in plan (a block of one label, an upright panel drawn as an
+    extrusion) has no footprint: reaches_into_lot read it as off the lot, so a panel standing in the side yard
+    against the house was dropped. It is now on the lot when some of the line it lies on stands more than the reach
+    inside the lot's outline, and touching by its box as any other: the panel against the house is listed and
+    touching, the label 4 ft from the house is listed and not touching. A neighbour's fence drawn as a flat
+    extrusion on the lot line or a hair outside it, and a cut-out tree 300 ft away, stay off."""
     x, y = 1000.0, 2000.0
-    boxes = {"label": ((x + 11, y + 54, 4), (x + 11, y + 54, 4)), "panel": ((x + 11, y + 50, 0), (x + 11, y + 58, 8)),
+    boxes = {"label": ((x + 11, y + 54, 4), (x + 11, y + 54, 4)), "panel": ((x + 15, y + 50, 0), (x + 15, y + 58, 8)),
+             "fence_on_line": ((x, y + 10, 0), (x, y + 110, 6)), "fence_outside": ((x - 0.05, y + 10, 0),
+                                                                                  (x - 0.05, y + 110, 6)),
              "far": ((x + 300, y, 0), (x + 306, y, 12))}
     placed = {i: types.SimpleNamespace(Id=i, Geometry=kind(box), Attributes=types.SimpleNamespace(LayerIndex=2))
               for i, box in boxes.items()}
     if kind is InstanceReferenceGeometry:                               # placed blocks, their parts whole
         placed = {i: _InstanceObject(i, [_part(box)]) for i, box in boxes.items()}
     left, touching, _, _ = _live_left_out(placed, (x, y))
-    assert left == ["label", "panel"] and touching == ["label", "panel"]
+    assert left == ["label", "panel"] and touching == ["panel"]
 
 
 def test_the_live_command_walks_each_block_definition_once_however_often_it_is_placed():
@@ -716,10 +720,9 @@ def test_the_reference_adapter_gives_every_linked_block_no_box(update):
     assert box == (((48, 90, 56, 98), (0, 8)) if update == "Static" else None)
 
 
-def test_the_reference_adapter_lists_a_block_whose_box_covers_no_ground_as_touching_unknown(tmp_path):
-    """A block of only a point beside the house (its box covers no ground: rhino_logic.plan_box_has_area) is
-    listed, touching unknown, as the live command lists it; before, its point box read as off the lot. One far
-    from the lot is not listed."""
+def test_the_reference_adapter_places_a_block_whose_box_covers_no_ground_by_its_point(tmp_path):
+    """A block of only a point 4 ft from the house (its box covers no ground) is listed, not touching, as the live
+    command lists it; before, its point box read as off the lot. One far from the lot is not listed."""
     import rhino3dm as r
     scene = copy.deepcopy(SCENES["05_garage_left_out"])
     scene["others"] = []
@@ -739,4 +742,4 @@ def test_the_reference_adapter_lists_a_block_whose_box_covers_no_ground_as_touch
             r.InstanceReference(model.InstanceDefinitions.FindIndex(index).Id, r.Transform.Identity()), attrs)
     model.Write(str(tmp_path / "m.3dm"), 8)
     left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
-    assert [(o["layer"], o["touching"]) for o in left] == [("Default", None)]
+    assert [(o["layer"], o["touching"]) for o in left] == [("Default", False)]

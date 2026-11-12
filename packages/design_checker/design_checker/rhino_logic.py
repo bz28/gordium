@@ -1236,26 +1236,21 @@ def block_contents_known(archive_status) -> bool:
     return str(archive_status).split(".")[-1] in BLOCK_CONTENTS_KNOWN
 
 
-def plan_box_has_area(box) -> bool:
-    """Whether a plan box (x0, y0, x1, y1) covers some ground. One that doesn't (a point, a line: a linked block
-    whose file is missing, in live Rhino; an upright panel) gives no footprint: reaches_into_lot reads it as off the
-    lot, so a left-out object with such a box near the lot counts as on it, and as touching."""
-    x0, y0, x1, y1 = box
-    return x1 - x0 > 1e-9 and y1 - y0 > 1e-9
-
-
 def reaches_into_lot(lot_ring, points, reach, box=None):
     """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
     reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its
     plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
-    wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
-    line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
-    lot, the neighbour's house): not. However thin it is (a 1-inch fin wall, a mast), it is on the lot when some
-    of it stands more than `reach` inside the lot's outline (_deepest). The hull only ever makes an object bigger,
-    the cautious direction.
+    wider than `reach`, or some of it stands more than `reach` inside the lot's outline (however thin it is: a
+    1-inch fin wall, a mast, an upright panel; the averaged width measures only how thick it is). Wholly on the
+    lot, straddling a lot line or mostly past it: on the lot. Touching the line from outside, a hair over it (no
+    more than `reach` in: a wall drawn skewed counts once its deep end is more than `reach` in), or off the lot
+    but inside the lot's bounding box (a rotated or jogged lot, the neighbour's house): not. The hull only ever
+    makes an object bigger, the cautious direction.
     `box`, the object's plan bounding box (x0, y0, x1, y1), is its footprint whenever the points don't outline
     one (fewer than 3, or all in a line, as a sphere's seam is): a solid always covers some ground, so such
-    points under-describe it."""
+    points under-describe it. When the box covers no ground either (a point or a line in plan: an upright panel,
+    a block of one label), the object lies along that line, and it is on the lot when some of the line stands
+    more than `reach` inside the outline."""
     lot = [(float(x), float(y)) for x, y in lot_ring]
     if len(lot) > 1 and lot[0] == lot[-1]:
         lot = lot[:-1]
@@ -1267,6 +1262,9 @@ def reaches_into_lot(lot_ring, points, reach, box=None):
     if (len(hull) < 3 or _ring_area(hull) <= 1e-12) and box is not None:
         x0, y0, x1, y1 = box
         hull = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+        if len(hull) < 3 or _ring_area(hull) <= 1e-12:          # a point or a line: along its diagonal
+            line = [(x0 + (x1 - x0) * k / 64, y0 + (y1 - y0) * k / 64) for k in range(65)]
+            return _deeper_than([p for p in line if _inside(p[0], p[1], lot)], lot, reach)
     if len(hull) < 3 or _ring_area(hull) <= 1e-12:
         return False
     part = _clip(lot, hull)
@@ -1277,31 +1275,35 @@ def reaches_into_lot(lot_ring, points, reach, box=None):
                     for i in range(len(part)))
     if perimeter > 0 and 2 * area / perimeter > reach:
         return True
-    return _deepest(part, lot) > reach          # a thin wall or mast inside the lot: deep in it, however thin
+    if area <= 1e-9:                                             # a sliver along the line: nothing stands in
+        return False
+    corners = _hull(part)               # its outline's corners (a run of lot points along one line is one side)
+    along = [(a[0] + (b[0] - a[0]) * k / 16, a[1] + (b[1] - a[1]) * k / 16)
+             for a, b in zip(corners, corners[1:] + corners[:1]) for k in range(16)]
+    return _deeper_than([p for p in along if _inside(p[0], p[1], lot)], lot, reach)   # a jog's notch isn't the lot
 
 
-def _deepest(part, lot, samples=16):
-    """How far the part of an object inside the lot (`part`, a ring inside the ring `lot`) gets from the lot's
-    outline: the largest distance to the outline of points along the part's edges (`samples` per edge). The
-    averaged width in reaches_into_lot measures how thick the part is, so a 1-inch fin wall standing wholly on
-    the lot (wL/(w+L), about w, under 0.1 ft) read as off it; a neighbour a hair over the line stays within the
-    hair of the line, so it stays off."""
-    def to_outline(x, y):
-        best = None
-        for i in range(len(lot)):
-            (ax, ay), (bx, by) = lot[i - 1], lot[i]
+def _deeper_than(pts, lot, reach):
+    """Whether any of `pts` (points inside the lot) is more than `reach` from the lot's outline. Only outline edges
+    within `reach` of the points' box can be nearer than that, so only those are measured (a GIS lot outline has
+    hundreds of points; a neighbour along the line gives a part with as many)."""
+    if not pts:
+        return False
+    x0, y0 = min(p[0] for p in pts) - reach, min(p[1] for p in pts) - reach
+    x1, y1 = max(p[0] for p in pts) + reach, max(p[1] for p in pts) + reach
+    edges = [(a, b) for a, b in zip([lot[-1]] + lot[:-1], lot)
+             if min(a[0], b[0]) <= x1 and max(a[0], b[0]) >= x0 and min(a[1], b[1]) <= y1 and max(a[1], b[1]) >= y0]
+    for x, y in pts:
+        near = False
+        for (ax, ay), (bx, by) in edges:
             dx, dy = bx - ax, by - ay
-            t = ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy) if dx or dy else 0.0
-            t = min(1.0, max(0.0, t))
-            d = ((x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2) ** 0.5
-            best = d if best is None else min(best, d)
-        return best or 0.0
-    deepest = 0.0
-    for i in range(len(part)):
-        (ax, ay), (bx, by) = part[i - 1], part[i]
-        for k in range(samples):
-            deepest = max(deepest, to_outline(ax + (bx - ax) * k / samples, ay + (by - ay) * k / samples))
-    return deepest
+            t = min(1.0, max(0.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))) if dx or dy else 0.0
+            if (x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2 <= reach * reach:
+                near = True
+                break
+        if not near:
+            return True
+    return False
 
 
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------
