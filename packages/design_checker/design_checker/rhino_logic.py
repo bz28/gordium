@@ -1273,76 +1273,110 @@ def reaches_into_lot(lot_ring, points, reach, box=None):
                 return True
     # However thin (or rounded to nothing: a flat wall's points are seldom exactly in a line): some of its outline
     # standing more than `reach` inside the lot. Each side of its outline is cut to the stretches of it inside the
-    # lot (a jog's notch or a U's gap isn't the lot), and points are taken along each stretch and, on it, where it
-    # passes nearest each lot corner within 20 reaches (where a side cutting across a corner goes deepest: a corner
-    # as sharp as 6 degrees).
+    # lot (a jog's notch or a U's gap isn't the lot), and each stretch is searched for its deepest point (_deep).
     if not hull:
         return False
+    xs, ys = [x for x, _ in hull], [y for _, y in hull]
+    depth = _Depth(lot, (min(xs), min(ys), max(xs), max(ys)), 2 * reach)
     if len(hull) == 1:
-        return _inside(hull[0][0], hull[0][1], lot) and _deeper_than(hull, lot, reach)
-    lx0, ly0 = min(x for x, _ in lot) - reach, min(y for _, y in lot) - reach
-    lx1, ly1 = max(x for x, _ in lot) + reach, max(y for _, y in lot) + reach
-    pts, m = [], 20 * reach
-    for (ax, ay), (bx, by) in zip(hull, hull[1:] + hull[:1]):
-        if max(ax, bx) < lx0 or min(ax, bx) > lx1 or max(ay, by) < ly0 or min(ay, by) > ly1:
-            continue                                            # wholly off the lot's box
-        dx, dy = bx - ax, by - ay
-        if not (dx or dy):
+        return _inside(hull[0][0], hull[0][1], lot) and depth(*hull[0]) > reach
+    inside = _inside(hull[0][0], hull[0][1], lot)               # walked round: it changes only where a side crosses
+    for a, b in zip(hull, hull[1:] + hull[:1]):
+        if a == b:
             continue
-        for t0, t1 in _stretches_inside((ax, ay), (bx, by), lot):
-            pts += [(ax + dx * (t0 + (t1 - t0) * k / 16), ay + dy * (t0 + (t1 - t0) * k / 16)) for k in range(17)]
-            for cx, cy in lot:
-                if min(ax, bx) - m <= cx <= max(ax, bx) + m and min(ay, by) - m <= cy <= max(ay, by) + m:
-                    t = ((cx - ax) * dx + (cy - ay) * dy) / (dx * dx + dy * dy)
-                    if t0 <= t <= t1:
-                        pts.append((ax + t * dx, ay + t * dy))
-    return _deeper_than(pts, lot, reach)
+        stretches, inside = _stretches_inside(a, b, depth.edges, lot, inside)
+        if any(_deep(a, b, t0, t1, depth, reach) for t0, t1 in stretches):
+            return True
+    return False
 
 
-def _stretches_inside(a, b, lot):
-    """The stretches (t0, t1) of the segment a-b (a + t (b - a), t from 0 to 1) inside the ring `lot`: cut where it
-    crosses the lot's outline, each piece kept when its middle is inside."""
+class _Depth:
+    """How far a point inside the lot is from the lot's outline, up to `cap` (more than that reads as `cap`): only
+    the outline edges near the object's plan box (`box`, grown by `cap`), found through a grid, are measured (a
+    GIS lot outline has hundreds of points, a round tank's outline thousands)."""
+
+    def __init__(self, lot, box, cap):
+        x0, y0, x1, y1 = box[0] - cap, box[1] - cap, box[2] + cap, box[3] + cap
+        self.cap = cap
+        self.edges = [(a, b) for a, b in zip([lot[-1]] + lot[:-1], lot)
+                      if min(a[0], b[0]) <= x1 and max(a[0], b[0]) >= x0 and min(a[1], b[1]) <= y1
+                      and max(a[1], b[1]) >= y0]
+        self.cell = max(cap, (x1 - x0 + y1 - y0) / 256)
+        self.grid = None                                         # built at the first question
+
+    def _build(self):
+        self.grid = {}
+        for e in self.edges:                                     # each edge in the cells along it
+            (ax, ay), (bx, by) = e
+            n = int(((bx - ax) ** 2 + (by - ay) ** 2) ** 0.5 / (self.cell / 2)) + 1
+            for k in range(n + 1):
+                key = (int((ax + (bx - ax) * k / n) // self.cell), int((ay + (by - ay) * k / n) // self.cell))
+                self.grid.setdefault(key, set()).add(e)
+
+    def __call__(self, x, y):
+        if self.grid is None:
+            self._build()
+        i, j = int(x // self.cell), int(y // self.cell)
+        best = self.cap * self.cap
+        for di in range(-2, 3):                                  # an edge within `cap` passes within 2 cells
+            for dj in range(-2, 3):
+                for (ax, ay), (bx, by) in self.grid.get((i + di, j + dj), ()):
+                    dx, dy = bx - ax, by - ay
+                    t = min(1.0, max(0.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))) if dx or dy else 0.0
+                    best = min(best, (x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2)
+        return best ** 0.5
+
+
+def _deep(a, b, t0, t1, depth, reach, slack=0.05):
+    """Whether some point of the stretch a + t (b - a), t from t0 to t1 (inside the lot), is more than `reach` from
+    the lot's outline. A point's depth changes by at most its own move along the stretch, so a piece whose ends are
+    d0 and d1 deep and which is L long goes no deeper than (d0 + d1 + L) / 2: pieces that can't go deeper than
+    `reach` (and a `slack` share of it, so a wall drawn exactly at the reach ends) are dropped, the others halved,
+    until a point deeper than `reach` is found or none is left. No point more than `reach` (1 + slack) in is missed,
+    however the lot's corners and notches fall along it."""
+    (ax, ay), (bx, by) = a, b
+    length = ((bx - ax) ** 2 + (by - ay) ** 2) ** 0.5
+    at = lambda t: depth(ax + (bx - ax) * t, ay + (by - ay) * t)   # noqa: E731
+    pieces = [(t0, t1, at(t0), at(t1))]
+    while pieces:
+        s, e, ds, de = pieces.pop()
+        if ds > reach or de > reach:
+            return True
+        if (ds + de + (e - s) * length) / 2 <= reach * (1 + slack):
+            continue
+        m = (s + e) / 2
+        dm = at(m)
+        pieces += [(s, m, ds, dm), (m, e, dm, de)]
+    return False
+
+
+def _stretches_inside(a, b, edges, lot, a_inside):
+    """The stretches (t0, t1) of the segment a-b (a + t (b - a), t from 0 to 1) inside the ring `lot`, and whether
+    b is inside: cut where it crosses one of the lot's outline `edges` (those near it), each piece kept when its
+    middle is inside. A side crossing nothing is wholly inside or outside, as its start (`a_inside`) is."""
     (ax, ay), (bx, by) = a, b
     dx, dy = bx - ax, by - ay
-    ts = [0.0, 1.0]
-    for (cx, cy), (ex, ey) in zip([lot[-1]] + lot[:-1], lot):
+    ts, touched = [0.0, 1.0], False
+    for (cx, cy), (ex, ey) in edges:
         if max(cx, ex) < min(ax, bx) or min(cx, ex) > max(ax, bx) or max(cy, ey) < min(ay, by) \
                 or min(cy, ey) > max(ay, by):
             continue
         fx, fy = ex - cx, ey - cy
         den = dx * fy - dy * fx
-        if den == 0:
-            continue                                            # parallel: its ends, if on it, cut nothing new
+        if den == 0:                                            # parallel: on the same line, it runs along it
+            touched = touched or (cx - ax) * dy - (cy - ay) * dx == 0
+            continue
         t = ((cx - ax) * fy - (cy - ay) * fx) / den
         u = ((cx - ax) * dy - (cy - ay) * dx) / den
-        if 0.0 < t < 1.0 and -1e-9 <= u <= 1 + 1e-9:
-            ts.append(t)
+        if -1e-9 <= t <= 1 + 1e-9 and -1e-9 <= u <= 1 + 1e-9:
+            touched = True                                      # its ends on the outline count: asked, not carried
+            if 0.0 < t < 1.0:
+                ts.append(t)
+    if not touched:
+        return ([(0.0, 1.0)] if a_inside else []), a_inside
     ts.sort()
     return [(t0, t1) for t0, t1 in zip(ts, ts[1:])
-            if t1 > t0 and _inside(ax + dx * (t0 + t1) / 2, ay + dy * (t0 + t1) / 2, lot)]
-
-
-def _deeper_than(pts, lot, reach):
-    """Whether any of `pts` (points inside the lot) is more than `reach` from the lot's outline. Only outline edges
-    within `reach` of the points' box can be nearer than that, so only those are measured (a GIS lot outline has
-    hundreds of points; a neighbour along the line gives a part with as many)."""
-    if not pts:
-        return False
-    x0, y0 = min(p[0] for p in pts) - reach, min(p[1] for p in pts) - reach
-    x1, y1 = max(p[0] for p in pts) + reach, max(p[1] for p in pts) + reach
-    edges = [(a, b) for a, b in zip([lot[-1]] + lot[:-1], lot)
-             if min(a[0], b[0]) <= x1 and max(a[0], b[0]) >= x0 and min(a[1], b[1]) <= y1 and max(a[1], b[1]) >= y0]
-    for x, y in pts:
-        near = False
-        for (ax, ay), (bx, by) in edges:
-            dx, dy = bx - ax, by - ay
-            t = min(1.0, max(0.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))) if dx or dy else 0.0
-            if (x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2 <= reach * reach:
-                near = True
-                break
-        if not near:
-            return True
-    return False
+            if t1 > t0 and _inside(ax + dx * (t0 + t1) / 2, ay + dy * (t0 + t1) / 2, lot)], _inside(bx, by, lot)
 
 
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------

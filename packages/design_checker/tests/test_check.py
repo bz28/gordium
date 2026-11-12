@@ -1470,6 +1470,20 @@ def test_a_wall_flat_in_plan_at_any_angle_counts_as_on_the_lot(at):
     assert reaches_into_lot(long_lot, wall, ON_LOT_REACH, (at - 530, at + 50, at + 520, at + 50))
     assert reaches_into_lot(long_lot, wall + [(at + 520, at + 50 + 1 / 24), (at - 530, at + 50 + 1 / 24)],
                             ON_LOT_REACH)          # half an inch thick
+    notched = [(at, at), (at + 52, at), (at + 52, at - 10), (at + 55, at - 10), (at + 55, at), (at + 100, at),
+               (at + 100, at + 100), (at, at + 100)]                      # a 3 x 10 ft notch out of the south line
+    fence = [(at, at + 0.05), (at + 100, at + 0.05)]   # 0.05 ft in along the line, 1.5 ft in over the notch (round 6)
+    assert reaches_into_lot(notched, fence, ON_LOT_REACH, (at, at + 0.05, at + 100, at + 0.05))
+    assert reaches_into_lot(notched, [(at, at + 0.02), (at + 100, at + 0.02), (at + 100, at + 0.06),
+                                      (at, at + 0.06)], ON_LOT_REACH)
+    plain = [(at, at), (at + 100, at), (at + 100, at + 100), (at, at + 100)]
+    assert not reaches_into_lot(plain, fence, ON_LOT_REACH, (at, at + 0.05, at + 100, at + 0.05))   # a hair
+    for start in [(at, at + 30), (at, at)]:            # starting on the lot line, or at its corner: still on it
+        assert reaches_into_lot(plain, [start, (at + 30, at + 30.05), (at + 30, at + 30)], ON_LOT_REACH), start
+    sliver = [(37.5, 100.0), (49.25, 85.98), (49.28, 86.01)]   # from the rear line into the lot; its first corner
+    assert reaches_into_lot([(0, 0), (50, 0), (50, 100), (0, 100)], sliver, ON_LOT_REACH)   # on the line
+    assert not reaches_into_lot([(0, 0), (50, 0), (50, 100), (0, 100)],                # from the front line, out
+                                [(12.5, 0.0), (36.59, -28.16), (36.62, -28.13)], ON_LOT_REACH)
 
 
 def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
