@@ -1725,9 +1725,11 @@ def _not_included(doc, lot):
     Building layer or Gordium's own layers): each one makes the check need review (C8). Nothing is ever left out
     on a guess: a topography mesh stays here (marked as looking like the ground, see _ground_like) until the
     architect says "This is the ground". One with no bounding box that covers all of it (_whole_box: a block whose
-    definition is empty or whose linked file is missing or changed, at any depth; a block whose box is a point; an
-    empty SubD) can't be told off the lot: it counts as on the lot (and, in _touching, as touching), never dropped,
-    as the reference adapter (conformance_rhino._left_out) says."""
+    definition is empty, or whose linked file is missing, unreadable or changed, at any depth; an empty SubD) can't
+    be told off the lot: it counts as on the lot (and, in _touching, as touching), never dropped. One whose box
+    covers no ground (a point or a line: rhino_logic.plan_box_has_area; a linked block whose file is missing has a
+    point box in live Rhino, an upright panel a line) has no footprint to test: near the lot, it counts as on it
+    (and touching); far from it, it is off. As the reference adapter (conformance_rhino._left_out) says."""
     if lot is None:
         return []
     ring = _plan_points(lot.Geometry)
@@ -1755,19 +1757,18 @@ def _not_included(doc, lot):
         box = (b.Min.X, b.Min.Y, b.Max.X, b.Max.Y)                  # its plan box (_plan_box), worked out once
         if not logic.box_near_lot(box, lot_box, reach):             # far from the lot: no outline work
             continue
-        if logic.reaches_into_lot(ring, _plan_points(g), reach, box):   # its footprint, against the lot's outline
-            out.append(str(o.Id))
+        if not logic.plan_box_has_area(box) or logic.reaches_into_lot(ring, _plan_points(g), reach, box):
+            out.append(str(o.Id))                                   # no footprint to test, or it reaches in
     return out
 
 
 def _whole_box(o, wholes, depth=0):
     """An object's bounding box, or None when it has none that covers all of it: no valid box (an empty block, an
-    empty SubD); a block whose box covers no ground (a point or a line: rhino_logic.plan_box_has_area); or a block
-    whose definition, at any depth, is missing, is empty, isn't what the block is (a linked file not found, not
-    readable or changed since it was read: rhino_logic.block_contents_known) or holds an object with no box.
-    A linked block whose file has moved holds, in live Rhino 8.35 (Mac), one text label at the centre of the last
-    known shape: a valid box of a single point, which said "whole" and "off the lot" (or, placed inside another
-    block, added only a point to its box), while the shed it stands for may touch the house. Rhino leaves an
+    empty SubD); or a block whose definition, at any depth, is missing, is empty, isn't what the block is (a linked
+    file not found, not readable or changed since it was read: rhino_logic.block_contents_known) or holds an object
+    with no box. A linked block whose file has moved holds, in live Rhino 8.35 (Mac), one text label at the centre
+    of the last known shape: a valid box of a single point, which said "whole" and "off the lot" (or, placed inside
+    another block, added only a point to its box), while the shed it stands for may touch the house. Rhino leaves an
     invalid box out when it joins a block's parts, so a block holding a part with no box has its other parts' box
     alone. The reference adapter (conformance_rhino._box) gives such a block no box, and so does this. `wholes`
     ({definition id: whether it is whole}, one per check) has each definition walked once, however many times it
@@ -1777,7 +1778,7 @@ def _whole_box(o, wholes, depth=0):
         return None
     if isinstance(o, Rhino.DocObjects.InstanceObject):
         definition = o.InstanceDefinition if depth <= 32 else None
-        if definition is None or not logic.plan_box_has_area((b.Min.X, b.Min.Y, b.Max.X, b.Max.Y)):
+        if definition is None:
             return None
         if definition.Id not in wholes:
             try:
@@ -1912,8 +1913,9 @@ def _extras(doc, facts):
 def _touching(doc, ids, buildings):
     """The left-out solids that may be part of the building: their box within 0.1 ft of a building's box. Boxes
     say "touching" more often than the shapes do, which only ever makes the check more cautious. One with no box
-    that covers all of it (_whole_box: an empty block, a linked block whose file has moved, or one holding such a
-    block) may be touching, so it counts as touching."""
+    that covers all of it (_whole_box: an empty block, a linked block whose file is missing, unreadable or changed,
+    or one holding such a block), or whose box covers no ground (rhino_logic.plan_box_has_area: it has no footprint
+    to judge by), may be touching, so it counts as touching."""
     gap = _model_length(doc, 0.1)
     boxes = []
     for b in buildings:
@@ -1926,7 +1928,8 @@ def _touching(doc, ids, buildings):
         if o is None:
             continue
         bb = _whole_box(o, wholes)
-        if bb is None or any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes):
+        if bb is None or not logic.plan_box_has_area((bb.Min.X, bb.Min.Y, bb.Max.X, bb.Max.Y)) \
+                or any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes):
             out.append(i)
     return out
 

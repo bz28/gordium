@@ -1237,8 +1237,9 @@ def block_contents_known(archive_status) -> bool:
 
 
 def plan_box_has_area(box) -> bool:
-    """Whether a plan box (x0, y0, x1, y1) covers some ground. A block's box that doesn't (a point, a line) can't be
-    its footprint: reaches_into_lot would read it as off the lot, so the block counts as having no box."""
+    """Whether a plan box (x0, y0, x1, y1) covers some ground. One that doesn't (a point, a line: a linked block
+    whose file is missing, in live Rhino; an upright panel) gives no footprint: reaches_into_lot reads it as off the
+    lot, so a left-out object with such a box near the lot counts as on it, and as touching."""
     x0, y0, x1, y1 = box
     return x1 - x0 > 1e-9 and y1 - y0 > 1e-9
 

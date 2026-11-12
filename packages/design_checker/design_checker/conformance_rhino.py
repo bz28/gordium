@@ -178,8 +178,7 @@ def _box(model, g, depth=0):
     """A geometry's 3D box, ((x0, y0, x1, y1), (z0, z1)), or None when it has none to give. A placed block's is
     its definition's objects' boxes moved by its placement (rhino3dm gives a block itself no box), blocks inside
     blocks too. None for a block, at any depth, whose definition isn't in the file, is empty, holds a part with
-    none, or is linked to a file (any update type but Static), or whose box covers no ground (a point or a line:
-    rhino_logic.plan_box_has_area), as gordium_rhino._whole_box gives none.
+    none, or is linked to a file (any update type but Static), as gordium_rhino._whole_box gives none.
 
     A linked block is the one place the adapter and live Rhino see different things. A saved .3dm holds a Linked
     definition with no objects, and a LinkedAndEmbedded one with the copy last read, whether or not the file is
@@ -203,10 +202,8 @@ def _box(model, g, depth=0):
             boxes.append(((b.Min.X, b.Min.Y, b.Max.X, b.Max.Y), (b.Min.Z, b.Max.Z)))
         if not boxes:
             return None
-        plan = (min(b[0][0] for b in boxes), min(b[0][1] for b in boxes), max(b[0][2] for b in boxes),
-                max(b[0][3] for b in boxes))
-        return (plan, (min(b[1][0] for b in boxes), max(b[1][1] for b in boxes))) if logic.plan_box_has_area(plan) \
-            else None
+        return ((min(b[0][0] for b in boxes), min(b[0][1] for b in boxes), max(b[0][2] for b in boxes),
+                 max(b[0][3] for b in boxes)), (min(b[1][0] for b in boxes), max(b[1][1] for b in boxes)))
     b = g.GetBoundingBox()
     return ((b.Min.X, b.Min.Y, b.Max.X, b.Max.Y), (b.Min.Z, b.Max.Z)) if b.IsValid else None
 
@@ -252,7 +249,8 @@ def _left_out(model, lot, buildings, s: float) -> list[dict]:
     """Everything else on the lot that could be a building (gordium_rhino._not_included, with _touching,
     _ground_like and rhino_logic.context_left_out): each one a left-out object. One whose place can't be told (a
     block with nothing in it to measure, a linked block: _box) counts as on the lot and touching: never left off
-    the list."""
+    the list. One whose box covers no ground (rhino_logic.plan_box_has_area) has no footprint to test: near the
+    lot, it counts as on it, touching unknown."""
     if lot is None:
         return []
     names = [layer.FullPath for layer in model.Layers]
@@ -276,10 +274,13 @@ def _left_out(model, lot, buildings, s: float) -> list[dict]:
             touching = None                                  # not known: counts as touching
         else:
             (x0, y0, x1, y1), (z0, z1) = box
-            if not logic.box_near_lot(box[0], lot_box, reach) or not logic.reaches_into_lot(ring, points, reach, box[0]):
+            flat = not logic.plan_box_has_area(box[0])
+            if not logic.box_near_lot(box[0], lot_box, reach) or \
+                    not (flat or logic.reaches_into_lot(ring, points, reach, box[0])):
                 continue
-            touching = any(x0 <= b[2] + gap and b[0] - gap <= x1 and y0 <= b[3] + gap and b[1] - gap <= y1
-                           and z0 <= bz[1] + gap and bz[0] - gap <= z1 for b, bz in boxes)
+            touching = None if flat else any(                   # no footprint to judge by: not known
+                x0 <= b[2] + gap and b[0] - gap <= x1 and y0 <= b[3] + gap and b[1] - gap <= y1
+                and z0 <= bz[1] + gap and bz[0] - gap <= z1 for b, bz in boxes)
         out.append({"id": _id(o), "layer": layer, "could_be_building": True, "touching": touching,
                     "ground_like": box is not None and logic.looks_like_ground(_kind(g), solid, box[0], lot_box),
                     "context": bool(logic.context_left_out({_id(o): layer}))})

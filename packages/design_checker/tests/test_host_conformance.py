@@ -448,6 +448,10 @@ class InstanceReferenceGeometry(_Geometry):               # a placed block: the 
     pass
 
 
+class Extrusion(_Geometry):                               # not rg.Extrusion: told only by its type's name
+    pass
+
+
 class _Definition:
     """RhinoCommon's InstanceDefinition: its parts, and its ArchiveFileStatus (by name; a block not linked to a file
     by default)."""
@@ -507,7 +511,7 @@ class _Curve(_Geometry):
 def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
     """gordium_rhino's own _not_included, _touching, _ground_like and _unmeasured_outlines, run on a stub document:
     a 60 × 120 ft lot at survey coordinates (`lot_at`), a house on it, and `blocks` ({id: box}, or a placed
-    _InstanceObject with its definition's parts) placed on Default."""
+    _InstanceObject with its definition's parts, or any object with a Geometry) placed on Default."""
     import ast
     import types
 
@@ -524,7 +528,7 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
                                 Attributes=types.SimpleNamespace(LayerIndex=0))
     house = types.SimpleNamespace(Id="house", Geometry=_Geometry(((x + 15, y + 30, 0), (x + 45, y + 80, 20))),
                                   Attributes=types.SimpleNamespace(LayerIndex=1))
-    placed = [box if isinstance(box, _InstanceObject) else
+    placed = [box if hasattr(box, "Geometry") else
               types.SimpleNamespace(Id=i, Geometry=InstanceReferenceGeometry(box),
                                     Attributes=types.SimpleNamespace(LayerIndex=2)) for i, box in blocks.items()]
     every = [lot, house] + placed
@@ -624,14 +628,20 @@ def test_the_live_command_measures_a_block_only_when_its_contents_are_the_block(
     assert len(outlines) == (1 if known else 0)
 
 
-def test_the_live_command_gives_a_block_whose_box_covers_no_ground_no_box():
-    """A block whose box is a point or a line (a block of only a label, or of one upright panel) can't be placed by
-    its box: reaches_into_lot reads a box that covers no ground as off the lot, so it was dropped even beside the
-    house. It counts as left out and touching."""
+@pytest.mark.parametrize("kind", [InstanceReferenceGeometry, Extrusion], ids=["block", "extrusion"])
+def test_the_live_command_keeps_an_object_whose_box_covers_no_ground_near_the_lot_as_left_out_and_touching(kind):
+    """An object whose box is a point or a line (a block of only a label, an upright panel drawn as an extrusion)
+    has no footprint to test: reaches_into_lot reads a box that covers no ground as off the lot, so it was dropped
+    even beside the house. Near the lot, it counts as on the lot and touching; far from the lot (a cut-out tree
+    drawn in the Front view, 300 ft away), it is off the lot, as its box says."""
     x, y = 1000.0, 2000.0
-    label = _InstanceObject("label", [_part(((x + 11, y + 54, 4), (x + 11, y + 54, 4)))])
-    panel = _InstanceObject("panel", [_part(((x + 11, y + 50, 0), (x + 11, y + 58, 8)))])
-    left, touching, _, _ = _live_left_out({"label": label, "panel": panel}, (x, y))
+    boxes = {"label": ((x + 11, y + 54, 4), (x + 11, y + 54, 4)), "panel": ((x + 11, y + 50, 0), (x + 11, y + 58, 8)),
+             "far": ((x + 300, y, 0), (x + 306, y, 12))}
+    placed = {i: types.SimpleNamespace(Id=i, Geometry=kind(box), Attributes=types.SimpleNamespace(LayerIndex=2))
+              for i, box in boxes.items()}
+    if kind is InstanceReferenceGeometry:                               # placed blocks, their parts whole
+        placed = {i: _InstanceObject(i, [_part(box)]) for i, box in boxes.items()}
+    left, touching, _, _ = _live_left_out(placed, (x, y))
     assert left == ["label", "panel"] and touching == ["label", "panel"]
 
 
@@ -708,7 +718,8 @@ def test_the_reference_adapter_gives_every_linked_block_no_box(update):
 
 def test_the_reference_adapter_lists_a_block_whose_box_covers_no_ground_as_touching_unknown(tmp_path):
     """A block of only a point beside the house (its box covers no ground: rhino_logic.plan_box_has_area) is
-    listed, touching unknown, as the live command lists it; before, its point box read as off the lot."""
+    listed, touching unknown, as the live command lists it; before, its point box read as off the lot. One far
+    from the lot is not listed."""
     import rhino3dm as r
     scene = copy.deepcopy(SCENES["05_garage_left_out"])
     scene["others"] = []
@@ -719,12 +730,13 @@ def test_the_reference_adapter_lists_a_block_whose_box_covers_no_ground_as_touch
     (x0, y0, x1, y1), _ = cr._box(model, next(o.Geometry for o in model.Objects
                                               if cr.logic.on_layer(model.Layers[o.Attributes.LayerIndex].FullPath,
                                                                    c.BUILDING_LAYER)))
-    index = model.InstanceDefinitions.Add("label", "", "", "", r.Point3d(0, 0, 0),
-                                          (r.Point(r.Point3d(x0 - 4, (y0 + y1) / 2, 4)),), (inside,))
     attrs = r.ObjectAttributes()
     attrs.LayerIndex = layer
-    model.Objects.AddInstanceObject(
-        r.InstanceReference(model.InstanceDefinitions.FindIndex(index).Id, r.Transform.Identity()), attrs)
+    for name, at in (("label", (x0 - 4, (y0 + y1) / 2, 4)), ("far", (x0 + 5000, y0, 4))):
+        index = model.InstanceDefinitions.Add(name, "", "", "", r.Point3d(0, 0, 0), (r.Point(r.Point3d(*at)),),
+                                              (inside,))
+        model.Objects.AddInstanceObject(
+            r.InstanceReference(model.InstanceDefinitions.FindIndex(index).Id, r.Transform.Identity()), attrs)
     model.Write(str(tmp_path / "m.3dm"), 8)
     left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
     assert [(o["layer"], o["touching"]) for o in left] == [("Default", None)]
