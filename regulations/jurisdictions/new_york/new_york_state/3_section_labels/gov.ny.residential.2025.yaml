@@ -2529,7 +2529,10 @@ labels:
       quote: R318.7.1 Width. Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the
         permitted handrail height and below the
     piece_sha256: 4ca1a6906e695a54af0cbedd05745111d64038a8bbb38a90850f5467a52548a0
-    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. The book''s metric
+      conversions here are not its inches: "31 1/2 inches (787 mm)" (31 1/2 inches is 800 mm) and "27 inches (698 mm)"
+      (27 inches is 686 mm), p.100. Gordium''s reading: the inches govern, the millimetres being a conversion printed
+      after them; a reading for the architects to confirm before a rule is drafted from these limits.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   R318.7.2:

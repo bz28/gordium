@@ -275,7 +275,7 @@ def test_an_allowance_for_an_existing_condition_is_a_flag_never_a_rule():
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
     text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
     labels = load(NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml")["labels"]
-    allowance = re.compile(r"\bexisting\b.*\b(?:permitted to (?:remain|maintain)|need not|not (?:be )?required|shall be "
+    allowance = re.compile(r"\bexisting\b.*\b(?:permitted to (?:remain|maintain|continue)|need not|not (?:be )?required|shall be "
                            r"accepted|shall be allowed|be allowed|may remain|are not required)", re.I | re.S)
     found = []
     for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
@@ -283,3 +283,45 @@ def test_an_allowance_for_an_existing_condition_is_a_flag_never_a_rule():
         if p["kind"] != "definition" and allowance.search(words):
             found.append((p["id"], labels[p["id"]]["label"]))
     assert len(found) >= 6 and all(label == "flag" for _, label in found), found
+    assert "R102.6" in dict(found)      # review round 2: "shall be permitted to continue" was missed
+
+
+def test_a_metric_conversion_that_is_not_its_inches_is_named_in_the_labels_notes():
+    # review round 2 of egress step 1b: R318.7.1 prints "27 inches (698 mm)" (27 inches is 686 mm) and R315.5.2.1
+    # "20 inches (610 mm)" (24 inches); a rule drafted from the millimetres would set another limit, unnoticed
+    import json
+    import re
+    from rule_format.rulebook import cached, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached(entry, ".jsonl").exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    labels = load(NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml")["labels"]
+    n = r"(\d+ \d+/\d+|\d+/\d+|\d+(?:\.\d+)?)"
+    pair = re.compile(r"(?<![\d/.])" + n + r" (feet|inch|inches)(?: " + n + r" inch(?:es)?)? \((\d[\d,]*(?:\.\d+)?) mm\)")
+
+    def inches(x):
+        return sum(int(a) / int(b) if "/" in q else float(q) for q in x.split() for a, b in [(q.split("/") + ["1"])[:2]])
+    wrong, unnamed = [], []
+    for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
+        words = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
+        for m in pair.finditer(words):
+            value = inches(m[1]) * (12 if m[2] == "feet" else 1) + (inches(m[3]) if m[3] else 0)
+            mm = float(m[4].replace(",", ""))
+            if abs(mm - value * 25.4) > max(2.0, 0.01 * mm):        # the book rounds; 1931 for 1930.4 is no error
+                wrong.append((p["id"], m[0]))
+                if f"({m[4]} mm)" not in (labels[p["id"]].get("notes") or ""):
+                    unnamed.append((p["id"], m[0]))
+    assert wrong and unnamed == [], unnamed
+
+
+def test_no_label_reason_calls_a_brought_in_section_not_brought_in():
+    # review round 2 of egress step 1b: BO106.1.2's reason said "BO104 (not brought in)" after BO104.1 came in
+    import re
+    src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
+    brought = src["brought_in"]["sections"] + (src["brought_in"].get("alone") or [])
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    said = [(pid, m[1]) for pid, e in labels.items()
+            for m in re.finditer(r"\b([A-Z]{1,2}\d{3}(?:\.\d+)*) \(not brought in\b", " ".join(e["reason"].split()))]
+    wrong = [(pid, t) for pid, t in said if any(b == t or b.startswith(t + ".") or t.startswith(b + ".") for b in brought)]
+    assert wrong == [], wrong

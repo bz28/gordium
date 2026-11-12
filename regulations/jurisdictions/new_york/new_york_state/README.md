@@ -57,6 +57,10 @@ Every reference in the brought-in sections was followed (found by code, `documen
 - "existing building" in BO106.1.1 and "stories above grade plane" in BO107.1 are printed with their first letter in roman ("e*xisting building*", "s*tories above grade plane*", checked on the page images); the terms are EXISTING BUILDING and STORY ABOVE GRADE PLANE, both brought in.
 - "above" in the definition of STORY ABOVE GRADE PLANE is printed in italics with "grade plane" in item 1 (p.52, line 36), though the line above prints only "grade plane" in italics; the term is GRADE PLANE, brought in, and "above" keeps its ordinary meaning.
 
+## What the book's text gets wrong
+
+- **R318.7.1's metric conversions** (p.100, line 25): "31 1/2 inches (787 mm)" and "27 inches (698 mm)"; 31 1/2 inches is 800 mm and 27 inches is 686 mm. Gordium's reading: the inches govern, the millimetres being a conversion printed after them; a reading for the architects to confirm before a rule is drafted from these widths. The label's notes say so, and a test (`rule_format/tests/test_state_law.py`, where the code cache is) finds every "inches (mm)" pair in the brought-in pieces that does not convert and requires its label's notes to name it.
+
 ## Ways into these sections from outside them
 
 Found by the same code: the whole book (all 1,079 pages, read once by the same extractor into the code cache, `gov.ny.residential.2025.full.jsonl`) searched for every brought-in section outside the brought-in pieces, leaving out the pages that only list section numbers (found by their running head: the contents, pp.16-22; the referenced standards, pp.833-866; the index, pp.1070-1076). Step 1b brought in R314.4 mezzanines, R315.5 sleeping lofts, R316.4 habitable attics and R507.10 deck guards (each with its section), and Appendix BO's egress parts. These are still not brought in:
