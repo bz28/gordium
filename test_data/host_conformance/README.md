@@ -90,7 +90,8 @@ A host that can't run on the Mac (Revit) is checked from recordings:
    The scene's ids are the YAML's: `lot` (and `lot_2`…), each building's id (or `<id>_floor1`, `_floor2`… for a
    building with `floors`), each other object's id. One `ids` map serves every step, so a host whose ids change
    at the edit fails. For a scene with `picked:` (21, 23, 25), pick the lot in the host as the architect would:
-   the facts' `lot_id` (`conformance.facts`) is the reference model's Rhino id, not the host's own. For a scene
+   the facts' `lot_id` (`conformance.facts`) is the reference model's Rhino id, not the host's own. For 23,
+   whose picked lot is not among its `lots`, draw that lot too, pick it, then delete it. For a scene
    with `then:`, make the edit in the host (move the objects; don't redraw them)
    and record "after the edit" too.
 3. **Record every scene**: a host with any recording must have one for every drawn scene, so the hard ones can't

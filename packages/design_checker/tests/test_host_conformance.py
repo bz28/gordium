@@ -7,6 +7,7 @@ caught, never waved through."""
 import copy
 import json
 import math
+import re
 import types
 import uuid
 
@@ -761,11 +762,14 @@ def test_every_scene_from_the_revit_reading_note_says_which_reading_it_guards_an
     """Each says which row of the note (and which Rhino code) it guards, and the note's section 7 names the scene,
     so a scene and the reading it stands for can't drift apart unseen."""
     assert len(FROM_THE_NOTE) == 9
-    note = NOTE.read_text(encoding="utf-8").split("## 7. Proposed new scenes")[1].split("\n## ")[0]
+    section = NOTE.read_text(encoding="utf-8").split("## 7. Proposed new scenes")[1].split("\n## ")[0]
+    drawn = section.split("**Drawn so far**")[1].split("\n\n", 2)[1]       # the table of scenes drawn so far
+    named = {int(n) for row in drawn.splitlines() if row.startswith("| ")
+             for n in re.findall(r"\b(\d+) \(", row.split("|")[2])}
     for name in FROM_THE_NOTE:
         guards = SCENES[name].get("guards") or ""
         assert "Revit reading design note" in guards and "section" in guards and "In Rhino" in guards, name
-        assert f"scene {int(name.split('_')[0])}" in note or name.split("_")[0] in note, name
+    assert {int(n.split("_")[0]) for n in FROM_THE_NOTE} <= named, named
 
 
 def test_a_house_of_parts_is_sent_part_by_part_and_its_closed_mesh_without_open_mesh():
