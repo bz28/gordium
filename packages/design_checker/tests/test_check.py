@@ -1486,6 +1486,24 @@ def test_a_wall_flat_in_plan_at_any_angle_counts_as_on_the_lot(at):
                                 [(12.5, 0.0), (36.59, -28.16), (36.62, -28.13)], ON_LOT_REACH)
 
 
+def test_the_depth_search_misses_nothing_more_than_0_15_ft_in_and_says_where_it_can_miss_less():
+    """_deep's promise, as its docstring states it (review round 8 of PR 78: it said only a spike of the lot
+    narrower than 0.1 ft could be missed between 0.1 and 0.15 ft in, but a plain square corner can be): a stretch
+    whose middle goes deeper than its ends is found once it goes more than 0.15 ft in, and between 0.1 and 0.15 ft
+    it can be missed, at a lot corner as across a narrow strip of the lot."""
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+    lot = [(0, 0), (100, 0), (100, 100), (0, 100)]
+
+    def strip(half):                                   # a strip of the lot 2 x half wide, running north from it
+        return [(0, 0), (100, 0), (100, 100), (50 + half, 100), (50 + half, 200), (50 - half, 200), (50 - half, 100),
+                (0, 100)]
+    across = [(40, 150), (60, 150)]                    # a flat wall crossing the strip, its ends off the lot
+    assert reaches_into_lot(lot, [(0, 0.32), (0.32, 0), (-5, -5)], ON_LOT_REACH)          # a corner, 0.16 ft in
+    assert reaches_into_lot(strip(0.16), across, ON_LOT_REACH, (40, 150, 60, 150))      # 0.16 ft in
+    assert not reaches_into_lot(lot, [(0, 0.21), (0.21, 0), (-5, -5)], ON_LOT_REACH)    # 0.105 ft in: can be missed
+    assert not reaches_into_lot(strip(0.145), across, ON_LOT_REACH, (40, 150, 60, 150))  # 0.145 ft in: can be
+
+
 def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
     """A GIS lot outline has hundreds of points, and a neighbour drawn along the line gives an inside part with as
     many: the depth test once measured every sample against every outline edge (1.75 s per neighbour on a
