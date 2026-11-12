@@ -220,7 +220,14 @@ def test_a_comparison_word_after_a_conversion_in_brackets_is_kept():
     # review round 3: a verb between the "not" and the comparison (R320.3, R320.5, p.104)
     ("shall not project more than 4 1/2 inches", ["not project more than 4 1/2 inch"]),
     ("shall not form a gap more than 1/4 inch", ["not form a gap more than 1/4 inch"]),
-    ("cannot be less than 3 feet", ["cannot be less than 3 foot"]), ("not to exceed 4 inches", ["not to exceed 4 inch"])])
+    ("cannot be less than 3 feet", ["cannot be less than 3 foot"]), ("not to exceed 4 inches", ["not to exceed 4 inch"]),
+    # review round 7 of step 1: five to seven words between (R318.7.2, R318.7.3, R318.7.5.2.1, R318.7.5.3, pp.100-101)
+    ("shall not project horizontally into the required headroom more than 4 3/4 inches",
+     ["not project horizontally into the required headroom more than 4 3/4 inch"]),
+    ("shall not have a vertical rise greater than 12 feet", ["not have a vertical rise greater than 12 foot"]),
+    ("shall not exceed the smallest winder tread by more than 3/8 inch",
+     ["not exceed the smallest winder tread by more than 3/8 inch"]),
+    ("shall not be required to be within 3/8 inch", ["not be required to be within 3/8 inch"])])
 def test_a_comparison_keeps_the_not_printed_before_it(text, expect):
     # Review round 2 of step 1b: "shall not be less than 7 feet" was recorded "less than 7 foot", the law backwards,
     # so a second reading that dropped the "not" would still have agreed
@@ -234,6 +241,11 @@ def test_a_not_in_another_clause_is_not_taken_and_a_pound_is_a_unit():
     assert [shown(s) for s in statements("is not required where the stair has more than 3 risers")] == ["more than 3 riser"]
     assert [shown(s) for s in statements("not less than 36 inches, more than 2")] == ["not less than 36 inch", "more than 2"]
     assert [shown(s) for s in statements("a 300-pound (136 kg) load")] == ["300 pound", "136 kg"]     # R315.5.3.1
+    # a "not" before another number is that number's ("not less than two occupants for one bedroom", p.708)
+    assert [shown(s) for s in statements("not less than two occupants for one bedroom and one")] == [
+        "not less than two", "one", "and one"]
+    assert [shown(s) for s in statements("no more than five sleeping rooms for up to ten")] == ["no more than five",
+                                                                                                "up to ten"]
 
 
 def test_a_whole_number_and_a_part_in_words_is_one_number():
