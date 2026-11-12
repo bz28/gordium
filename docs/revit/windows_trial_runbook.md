@@ -35,7 +35,7 @@ Do these in order. Tick each when done and write the version you got in the note
 |---|---|---|
 | [ ] | Parallels Desktop installed on the Mac; a Windows 11 ARM virtual machine created | Give the VM at least 8 cores and as much RAM as the Mac can spare (Autodesk recommends 32 GB for Revit 2027; this Mac has 16 GB, which is exactly what Q1 tests) |
 | [ ] | Windows updated; a note made of the VM's RAM, cores and disk | Fills the machine rows of the results table |
-| [ ] | .NET 10 SDK installed (`dotnet --list-sdks` shows 10.x) | |
+| [ ] | .NET 10 SDK installed (`dotnet --list-sdks` shows 10.x), and the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and 10.x) | The worker client is built for both (see the first check the trial settles, section 7) |
 | [ ] | Git for Windows installed | |
 | [ ] | Python installed: the 64-bit Intel (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an Intel machine, so the Intel build is the one proven; it runs on Windows 11 ARM under Windows' own emulation. Whether ARM builds of the pinned packages (`rhino3dm`, `shapely`, `numpy`) exist was not checked |
 | [ ] | `git clone https://github.com/bz28/gordium.git`, then check out the branch the trial uses (see Open items) | |
@@ -45,7 +45,7 @@ Do these in order. Tick each when done and write the version you got in the note
 | [ ] | The worker answers by hand (below) | |
 | [ ] | Autodesk's Snowdon Towers sample copied onto the VM, and each of the architects' 3 models as it arrives (see Open items 1; a model arriving later is added then, without restarting anything) | Keep copies out of the repo clone. The architects' models are the firms' files |
 | [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Last on the list, because installing it starts the 30-day clock: do it only when every row above is ticked and at least the Snowdon Towers sample is on the VM**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
-| [ ] | Revit 2026 installed as well, if Autodesk's trial allows both on the one machine (otherwise note that it did not) | The plan is one .NET 10 build for both. See the first open check in section 7 |
+| [ ] | Revit 2026 installed as well, if Autodesk's trial allows both on the one machine (otherwise note that it did not) | The add-in is built twice: .NET 8 for Revit 2026, .NET 10 for Revit 2027. See the first check the trial settles, section 7 |
 
 **Worker smoke test** (from the clone, venv active). Type or pipe one request per line; each gets one answer line:
 
@@ -86,7 +86,7 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 |---|---|---|
 | 1 | Section 2 in order, Revit last: Parallels, Windows, Python, the clone, `pytest`, conformance and the worker smoke test. Then install Revit and start its 30-day clock (only once at least the Snowdon Towers sample is on the VM: Open items 1). Open Autodesk's Snowdon Towers sample (`Snowdon Towers Sample Architectural.rvt`, saved in Revit 2024; Revit upgrades it on opening) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked; first Q1 numbers written down |
 | 2 | Open Snowdon Towers and each architect model already in hand, timing the open. Use each for a while as an architect would. Decide Q1 for Revit alone on those: go, or switch (section 6); the add-in half is re-checked on day 4. An architect model arriving later is timed when it arrives, and can reopen Q1 | The models in hand open; Q1 has a yes or no, with numbers, and says which models it rests on |
-| 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Confirm which .NET runtime Revit 2027 and 2026 load, and whether one build loads in both | The button appears in both Revit versions, or the note says which version refused the build |
+| 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Build it twice, like the worker client (`net8.0` and `net10.0`). Confirm which .NET runtime Revit 2027 and 2026 load (Revit 2026's may be .NET 10 after an update: section 7), and which build each loads | The button appears in both Revit versions, the note says which build each loaded, or which version refused it |
 | 4 | Use the worker client, `Gordium.Worker` ([apps/revit_addin](../../apps/revit_addin/README.md): already tested against the real worker on the Mac), for all of this. The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `test_data/host_conformance/expected/01_box_house.site.json` as the `site` and the scene's facts (see "The scene's facts and verdicts" below) | Q2 answered. The `check_site` answer's rows are exactly the scene's expected verdicts. Q1 re-checked with Revit, the add-in and the worker all running (the second memory row in section 5) |
 | 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Decide how a Revit element maps to a building and what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit (write the mapping into the notes: nothing in the repo fixes it yet). Decide how the lot outline is found: by default the architect picks a closed outline (the picked-lot flow); reading the property line directly with `PropertyLine.GetBoundary` works only in Revit 2027 | Scene 01 recorded and passes (section 4): its own `OK  recorded/revit/01_box_house` line appears. Until all 15 drawn scenes are recorded, the run still ends `FAILED`, with a `revit: no recording for ...` line naming the scenes not yet done; that line is expected, not a failure of scene 01 |
 | 6 | Reading, part 2: scenes 02 to 06 (curved wall, open solid, block, garage left out, no grade) | Each recorded and passing (its own `OK  recorded/revit/...` line; the `no recording for` line shrinks) |
@@ -258,7 +258,12 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 
 **Checks the trial itself settles** (nothing in the repo answers them today):
 
-- Whether the one .NET 10 build loads in both Revit 2026 and 2027.
+- Which .NET runtime each installed Revit loads, and so which build: .NET 8 for Revit 2025 and 2026 and .NET 10
+  for Revit 2027 is what Autodesk's pages say today (Revit 2027 "What's new": [Migrating Revit to .NET 10](https://help.autodesk.com/cloudhelp/2027/ENU/Revit-WhatsNew/files/GUID-8D7A4715-EAF8-4BD1-BE78-061F900D0BCE.htm)),
+  so the worker client is built and tested for both. Autodesk also plans to move Revit 2025 and 2026 to .NET 10
+  ([call for preview testing](https://blog.autodesk.io/call-for-preview-testing-revit-2026-2025-migration-to-net-10/),
+  2026-04-29: a Revit 2026 preview on .NET 10, no release date), so note the Revit 2026 update installed and the
+  runtime it reports. Whether the .NET 8 build also loads in Revit 2027 is not settled by Autodesk's pages either.
 - Whether ARM builds of `rhino3dm`, `shapely` and `numpy` exist, if we ever want a native ARM Python.
 - Which survey coordinates the description carries (scene 10), and what each Rhino layer becomes in Revit.
 

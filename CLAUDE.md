@@ -49,7 +49,7 @@ Planned but not created until their code is written: `packages/ai_designer`, `pa
 - Lowercase names with underscores everywhere. Dates as YYYY-MM or YYYY-MM-DD so files sort.
 - District files named exactly as the city writes them (`R-1b.yaml`).
 - Each package has a README, its code, and its own `tests/`.
-- Python for packages. Rhino plugin language (C# vs Rhino 8 Python) is not decided yet. The Revit add-in is C# talking to the Python worker (Ben, 2026-11-05); the plan is one .NET 10 build for Revit 2026 and 2027, which the Windows trial checks (docs/revit/windows_trial_runbook.md).
+- Python for packages. Rhino plugin language (C# vs Rhino 8 Python) is not decided yet. The Revit add-in is C# talking to the Python worker (Ben, 2026-11-05); it is built for .NET 8 (Revit 2025–2026) and .NET 10 (Revit 2027), to confirm in the Windows trial (docs/revit/windows_trial_runbook.md).
 
 ## How we work
 
