@@ -42,11 +42,15 @@ documents:
       pages: 34-58, 99-105, 109-110   # Chapter 2 (R201, R202 definitions; p.57 is blank, p.58 starts Chapter 3); R318-R321; R325.6-R325.7 (and the next
                                       # part's heading after each, so each brought-in part's end is proven)
       sections: [R201, R318, R319, R320, R321, R325.6, R325.7]
-      italic_not_defined:    # italic words Section R202 doesn't define (any other is a problem when the book is cut)
-        accessed: R318.3 and R319.6 print it in italics; R202 defines ACCESS (TO), not "accessed", so R201.3 sends it to
-          another New York code's definition, not brought in (README).
-        unit: R319.1 prints "dwelling unit" with only "unit" in italics; the term is DWELLING UNIT, brought in by the
-          roman-type match (README).
+      italic_not_defined:    # by piece: italic words Section R202 doesn't define (any other, or a stale one, is a problem)
+        R318.3:
+          accessed: R202 defines ACCESS (TO), not "accessed", so R201.3 sends it to another New York code's
+            definition, not brought in (README).
+        R319.6:
+          accessed: As in R318.3.
+        R319.1:
+          unit: The book prints "dwelling unit" with only "unit" in italics; the term is DWELLING UNIT, brought in by
+            the roman-type match (README).
     contents: >
       The house code. Brought in so far (egress step 1): R318 means of egress (doors, landings, stairways, ramps),
       R319 emergency escape and rescue openings, R320 handrails, R321 guards and window fall protection; R325.6 and

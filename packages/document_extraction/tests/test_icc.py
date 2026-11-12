@@ -253,8 +253,12 @@ def test_an_italic_word_r202_doesnt_define_must_be_named_with_why():
     rows = _book([_row(2, 6, "R318.1.2 Doors. Each door shall be accessed.", bold="R318.1.2 Doors.", italic=["accessed"])])
     assert any("R318.1.2: italic 'accessed' is not defined in Section R202" in p
                for p in icc_sections.split(rows, BROUGHT_IN)["problems"])
-    named = BROUGHT_IN | {"italic_not_defined": {"accessed": "R201.3: another code's meaning"}}
+    named = BROUGHT_IN | {"italic_not_defined": {"R318.1.2": {"accessed": "R201.3: another code's meaning"}}}
     assert icc_sections.split(rows, named)["problems"] == []
+    elsewhere = BROUGHT_IN | {"italic_not_defined": {"R318.1": {"accessed": "named under another piece"}}}
+    problems = icc_sections.split(rows, elsewhere)["problems"]
+    assert any("R318.1.2: italic 'accessed'" in p for p in problems)            # a name covers its own piece only
+    assert any("names 'accessed' under R318.1, which has no such italic word" in p for p in problems)   # stale
 
 
 @pytest.mark.parametrize("lines,expect", [

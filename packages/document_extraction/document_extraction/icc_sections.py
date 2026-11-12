@@ -6,7 +6,7 @@ Plain code, no AI: the same extracted text and the same sources.yaml `brought_in
 
 What is brought in (sources.yaml `brought_in`): the pages read (`pages`), the sections (`sections`: a whole
 section "R318", or one numbered part of one "R325.6", with everything under it), the italic words Section R202
-doesn't define, each with why (`italic_not_defined`; any other is a problem), and the definitions: every
+doesn't define, by piece, each with why (`italic_not_defined`; any other is a problem), and the definitions: every
 definition in Section R202 that a brought-in section or a brought-in definition uses. The book prints a defined
 term in italics wherever it is used (R201.1: "the words and terms provided in italics shall ... have the meanings
 indicated in this chapter"), so the italics, read by code, say which definitions are used; none is picked by hand.
@@ -40,7 +40,7 @@ import hashlib
 import json
 import re
 
-SPLITTER = "document_extraction.icc_sections v4"   # bump when the cutting rules change
+SPLITTER = "document_extraction.icc_sections v5"   # bump when the cutting rules change
 STAMP = re.compile(r"^\d{9}$")                      # the number stamped at the top of every page of this copy
 FOOTER = re.compile(r"^(?:\d+ )?2025 RESIDENTIAL CODE OF NEW YORK STATE(?: \d+)?$")
 DOT = "."                                           # a lone "." printed under the footer
@@ -211,12 +211,17 @@ def split(rows: list[dict], brought_in: dict) -> dict:
             problems.append(f"{units[i]['id']}: the last part on p.{page} before a page not read; it may run on "
                             "there (read the next page)")
     # An italic word Section R202 doesn't define takes another code's meaning (R201.3), which is not brought in: each
-    # must be named in brought_in.italic_not_defined, with why, or a new one would pass unseen.
+    # must be named in brought_in.italic_not_defined under its piece, with why, or a new one would pass unseen; a name
+    # no piece needs any more is reported too, so the list never covers more than it says.
     known = brought_in.get("italic_not_defined") or {}
     for u in units:
         if u["id"] in keep:
             problems += [f"{u['id']}: italic {w!r} is not defined in Section R202; name it in brought_in."
-                         "italic_not_defined, with why" for w in sorted(undefined[u["id"]]) if w not in known]
+                         f"italic_not_defined under {u['id']}, with why" for w in sorted(undefined[u["id"]])
+                         if w not in (known.get(u["id"]) or {})]
+    problems += [f"brought_in.italic_not_defined names {w!r} under {pid}, which has no such italic word"
+                 for pid, words in known.items() for w in (words or {})
+                 if pid not in keep or w not in undefined.get(pid, ())]
     pieces, outside = [], []
     for u in units:
         if u["id"] in keep:
