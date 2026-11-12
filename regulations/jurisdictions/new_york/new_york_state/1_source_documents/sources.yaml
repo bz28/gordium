@@ -23,10 +23,12 @@ documents:
     copy: >
       Posted to the Internet Archive by Public.Resource.Org on 2026-02-02 (item gov.ny.residential.2025; the PDF is
       the item's original upload, sha1 88eb6d7f443cc250d1b7e244905397dd9935cf77, as archive.org lists it). It is not a
-      scan: it is ICC's own PDF edition, with real text in its fonts (no OCR), and a nine-digit number stamped at the
-      top of every page. Gordium reads the PDF's own text; archive.org's OCR files of it are not used. A working copy:
-      to be checked against a copy bought from ICC (ICC's digital codes site may not be read by any script or
-      automated browser: its terms forbid automated extraction and commercial use).
+      scan: it is ICC's own digital PDF edition (ISBN 978-1-967590-81-0, "PDF download", as its page 3 prints), with
+      real text in its fonts (no OCR). It carries a per-copy number, 102102166, stamped at the top of every page (all
+      1,079), so it is one specific licensed copy, posted by Public.Resource.Org. The copyright approach is unchanged:
+      short exact quotes only in the repo (terms, below). Gordium reads the PDF's own text; archive.org's OCR files of
+      it are not used. A working copy: to be checked against a copy bought from ICC (ICC's digital codes site may not
+      be read by any script or automated browser: its terms forbid automated extraction and commercial use).
     terms: >
       Copyright 2025 International Code Council. The code is law in New York (19 NYCRR Part 1220 incorporates it by
       reference). Gordium keeps only short exact quotes, with section, page and a link, in the repo; the book and its
