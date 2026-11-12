@@ -1221,6 +1221,28 @@ def box_near_lot(box, lot_box, reach):
     return x0 <= a1 + reach and a0 - reach <= x1 and y0 <= b1 + reach and b0 - reach <= y1
 
 
+# A block definition's contents are the block only when it isn't linked to a file, or its linked file was read and
+# hasn't changed since (RhinoCommon's InstanceDefinitionArchiveFileStatus, by name).
+BLOCK_CONTENTS_KNOWN = ("NotALinkedInstanceDefinition", "LinkedFileIsUpToDate")
+
+
+def block_contents_known(archive_status) -> bool:
+    """Whether what a block definition holds in the document is the block: its ArchiveFileStatus (the enum value or
+    its name) is one of BLOCK_CONTENTS_KNOWN. Every other status is not: LinkedFileNotFound (live Rhino 8.35, Mac,
+    2026-11-12: the definition then holds one text label, "Missing block file: ...", at the centre of the last
+    known shape, a valid box of a single point, so the block looks whole and nowhere near the house),
+    LinkedFileNotReadable, and LinkedFileIsNewer / IsOlder / IsDifferent (the file has changed since it was read:
+    what is drawn may not be the design). A status not in the list, or none, is not known either."""
+    return str(archive_status).split(".")[-1] in BLOCK_CONTENTS_KNOWN
+
+
+def plan_box_has_area(box) -> bool:
+    """Whether a plan box (x0, y0, x1, y1) covers some ground. A block's box that doesn't (a point, a line) can't be
+    its footprint: reaches_into_lot would read it as off the lot, so the block counts as having no box."""
+    x0, y0, x1, y1 = box
+    return x1 - x0 > 1e-9 and y1 - y0 > 1e-9
+
+
 def reaches_into_lot(lot_ring, points, reach, box=None):
     """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
     reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its

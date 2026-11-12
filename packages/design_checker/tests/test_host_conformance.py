@@ -449,10 +449,12 @@ class InstanceReferenceGeometry(_Geometry):               # a placed block: the 
 
 
 class _Definition:
+    """RhinoCommon's InstanceDefinition: its parts, and its ArchiveFileStatus (by name; a block not linked to a file
+    by default)."""
     walked = 0                                            # GetObjects calls, every definition: a cost counter
 
-    def __init__(self, parts):
-        self._parts, self.Id = parts, uuid.uuid4()
+    def __init__(self, parts, status="NotALinkedInstanceDefinition"):
+        self._parts, self.Id, self.ArchiveFileStatus = parts, uuid.uuid4(), status
 
     def GetObjects(self):  # noqa: N802
         _Definition.walked += 1
@@ -461,11 +463,12 @@ class _Definition:
 
 class _InstanceObject:
     """RhinoCommon's InstanceObject (a placed block): its box is its parts' boxes joined, an invalid one left out,
-    as Rhino joins them; `parts` None is a definition that isn't there."""
+    as Rhino joins them; `parts` None is a definition that isn't there; `status`, its definition's
+    ArchiveFileStatus."""
 
-    def __init__(self, oid, parts, layer=2, definition=None):
+    def __init__(self, oid, parts, layer=2, definition=None, status="NotALinkedInstanceDefinition"):
         self.Id, self.Attributes = oid, types.SimpleNamespace(LayerIndex=layer)
-        self.InstanceDefinition = definition or (None if parts is None else _Definition(parts))
+        self.InstanceDefinition = definition or (None if parts is None else _Definition(parts, status))
         parts = definition._parts if definition else parts
         boxes = [p.Geometry.GetBoundingBox(True) for p in parts or []]
         boxes = [b for b in boxes if b.IsValid]
@@ -477,6 +480,18 @@ class _InstanceObject:
 
 def _part(box):
     return types.SimpleNamespace(Id="part", Geometry=_Geometry(box), Attributes=types.SimpleNamespace(LayerIndex=2))
+
+
+def _missing_file_label(at):
+    """What live Rhino 8.35 (Mac) puts in a linked block's definition when its file isn't found (seen 2026-11-12):
+    one text label, "Missing block file: ...", at the centre of the last known shape: a valid box of one point."""
+    return _part((at, at))
+
+
+def _missing_file_block(oid, at):
+    """A placed linked block whose file isn't found, as live Rhino has it: its definition's status
+    LinkedFileNotFound, holding only the label (_missing_file_label), so the block's own box is that point."""
+    return _InstanceObject(oid, [_missing_file_label(at)], status="LinkedFileNotFound")
 
 
 class _Curve(_Geometry):
@@ -532,8 +547,8 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
 @pytest.mark.parametrize("lot_at", [(0.0, 0.0), (-30.0, -60.0), (1000.0, 2000.0)],
                          ids=["origin", "round_origin", "survey"])
 def test_the_live_command_keeps_a_block_with_no_box_as_left_out_and_touching(no_box, lot_at):
-    """A placed block with no box to place it by (its definition empty, or a linked block whose file has moved: the
-    viewport shows nothing, but the garage it stands for is part of the design) can't be told off the lot or apart
+    """A placed block with no box to place it by (its definition empty: the viewport shows nothing, but the garage
+    it stands for may be part of the design) can't be told off the lot or apart
     from the house. The Rhino command dropped it (its box missed the lot's, or its box's corners outlined nothing;
     had it been kept, its box would also have been taken as not touching), so nothing said a building was left out
     (or touching) and coverage, the yards, height and stories could stay "complies". It now counts as on the lot and
@@ -560,7 +575,7 @@ def test_the_live_command_keeps_a_block_holding_a_part_with_no_box_as_left_out_a
     x, y = 1000.0, 2000.0
     drawn = {"off_the_lot": ((x + 500, y, 0), (x + 510, y + 10, 8)),
              "apart_from_the_house": ((x + 48, y + 90, 0), (x + 56, y + 98, 8))}[where]
-    holding_nothing = _InstanceObject("inner", [])                   # its file moved: an empty definition
+    holding_nothing = _InstanceObject("inner", [])                   # an empty definition
     partly = _InstanceObject("partly", [_part(drawn), holding_nothing])
     missing = _InstanceObject("missing", [_part(drawn), _InstanceObject("gone", None)])   # no definition at all
     whole = _InstanceObject("whole", [_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
@@ -568,6 +583,56 @@ def test_the_live_command_keeps_a_block_holding_a_part_with_no_box_as_left_out_a
     assert left == ["partly", "missing", "whole"]
     assert touching == ["partly", "missing"]
     assert len(outlines) == 1                 # the whole block's; a box of its drawn part alone would mislead
+
+
+@pytest.mark.parametrize("lot_at", [(0.0, 0.0), (1000.0, 2000.0)], ids=["origin", "survey"])
+def test_the_live_command_keeps_a_linked_block_whose_file_is_not_found_as_left_out_and_touching(lot_at):
+    """Live Rhino 8.35 (Mac), 2026-11-12: a linked shed whose file had moved, placed against the house, was neither
+    listed as left out nor touching, and the front and side yards read "complies". Rhino gives such a definition
+    one text label at the centre of the shed's last known shape (a valid box of one point) and the status
+    LinkedFileNotFound: the command took the point box as the whole block, and a point covers no ground, so it was
+    "off the lot". It now counts as left out and touching. The same holds when the shed is placed inside another
+    block beside a drawn part apart from the house (the live run's second case: listed as left out, but not
+    touching, so the side yards read "complies"). A normal block of the same shape is still told by its box."""
+    x, y = lot_at
+    centre = (x + 11, y + 54, 4)                                       # an 8 ft shed against the house's west wall
+    linked = _missing_file_block("linked", centre)
+    drawn = _part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))         # on the lot, apart from the house
+    nested = _InstanceObject("nested", [drawn, _missing_file_block("inner", centre)])
+    normal = _InstanceObject("normal", [_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
+    left, touching, _, outlines = _live_left_out({"linked": linked, "nested": nested, "normal": normal}, lot_at)
+    assert left == ["linked", "nested", "normal"]
+    assert touching == ["linked", "nested"]
+    assert len(outlines) == 1                                         # the normal block's
+
+
+@pytest.mark.parametrize("status, known", [
+    ("NotALinkedInstanceDefinition", True), ("LinkedFileIsUpToDate", True),
+    ("LinkedFileNotFound", False), ("LinkedFileNotReadable", False), ("LinkedFileIsNewer", False),
+    ("LinkedFileIsOlder", False), ("LinkedFileIsDifferent", False), ("SomeStatusRhinoAddsLater", False),
+    ("Rhino.DocObjects.InstanceDefinitionArchiveFileStatus.LinkedFileIsUpToDate", True)])
+def test_the_live_command_measures_a_block_only_when_its_contents_are_the_block(status, known):
+    """A block's contents are the block only when it isn't linked to a file, or its linked file was read and is up
+    to date (rhino_logic.block_contents_known). Otherwise (not found, not readable, or changed since it was read)
+    what the document holds may not be the design: even a shed drawn on the lot apart from the house counts as
+    having no box, so as left out and touching (needs review), never as a part told apart by a stale box."""
+    x, y = 1000.0, 2000.0
+    shed = _InstanceObject("shed", [_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))], status=status)
+    left, touching, _, outlines = _live_left_out({"shed": shed}, (x, y))
+    assert left == ["shed"]
+    assert touching == ([] if known else ["shed"])
+    assert len(outlines) == (1 if known else 0)
+
+
+def test_the_live_command_gives_a_block_whose_box_covers_no_ground_no_box():
+    """A block whose box is a point or a line (a block of only a label, or of one upright panel) can't be placed by
+    its box: reaches_into_lot reads a box that covers no ground as off the lot, so it was dropped even beside the
+    house. It counts as left out and touching."""
+    x, y = 1000.0, 2000.0
+    label = _InstanceObject("label", [_part(((x + 11, y + 54, 4), (x + 11, y + 54, 4)))])
+    panel = _InstanceObject("panel", [_part(((x + 11, y + 50, 0), (x + 11, y + 58, 8)))])
+    left, touching, _, _ = _live_left_out({"label": label, "panel": panel}, (x, y))
+    assert left == ["label", "panel"] and touching == ["label", "panel"]
 
 
 def test_the_live_command_walks_each_block_definition_once_however_often_it_is_placed():
@@ -608,8 +673,8 @@ def test_the_reference_adapter_gives_a_block_holding_a_part_with_no_box_no_box(t
 
 
 def test_the_reference_adapter_lists_a_block_with_no_box_as_left_out_and_touching_unknown(tmp_path):
-    """The other half of the same decision: a placed block whose definition isn't in the file (as a linked block's
-    is when its file has moved) is listed by the rhino3dm adapter, touching unknown, which counts as touching."""
+    """The other half of the same decision: a placed block whose definition isn't in the file is listed by the
+    rhino3dm adapter, touching unknown, which counts as touching."""
     import rhino3dm as r
     scene = copy.deepcopy(SCENES["05_garage_left_out"])
     scene["others"] = []
@@ -617,6 +682,49 @@ def test_the_reference_adapter_lists_a_block_with_no_box_as_left_out_and_touchin
     attrs = r.ObjectAttributes()
     attrs.LayerIndex = cr._layer(model, "Default")
     model.Objects.AddInstanceObject(r.InstanceReference(uuid.uuid4(), r.Transform.Identity()), attrs)
+    model.Write(str(tmp_path / "m.3dm"), 8)
+    left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
+    assert [(o["layer"], o["touching"]) for o in left] == [("Default", None)]
+
+
+@pytest.mark.parametrize("update", ["Static", "Embedded", "LinkedAndEmbedded", "Linked"])
+def test_the_reference_adapter_gives_every_linked_block_no_box(update):
+    """A .3dm can't say whether a linked block's file is found and unchanged: it holds a Linked definition with no
+    objects, and a LinkedAndEmbedded one with the copy last read, either way. (rhino3dm can't write a linked
+    definition, so this reads a stand-in for the file's definition table; live Rhino's state when the file is
+    missing, one label and LinkedFileNotFound, lives only in a running Rhino.) The adapter gives every block not
+    Static no box, even one holding a whole shed, as the command does whenever the file isn't found and up to date:
+    the cautious side."""
+    import rhino3dm as r
+    shed = r.Brep.CreateFromBox(r.Box(r.BoundingBox(48, 90, 0, 56, 98, 8)))
+    part = types.SimpleNamespace(Geometry=shed)
+    definition = types.SimpleNamespace(UpdateType=getattr(r.InstanceDefinitionUpdateType, update),
+                                       GetObjectIds=lambda: ["shed"])
+    model = types.SimpleNamespace(InstanceDefinitions=types.SimpleNamespace(FindId=lambda i: definition),
+                                  Objects=types.SimpleNamespace(FindId=lambda i: part))
+    box = cr._box(model, r.InstanceReference(uuid.uuid4(), r.Transform.Identity()))
+    assert box == (((48, 90, 56, 98), (0, 8)) if update == "Static" else None)
+
+
+def test_the_reference_adapter_lists_a_block_whose_box_covers_no_ground_as_touching_unknown(tmp_path):
+    """A block of only a point beside the house (its box covers no ground: rhino_logic.plan_box_has_area) is
+    listed, touching unknown, as the live command lists it; before, its point box read as off the lot."""
+    import rhino3dm as r
+    scene = copy.deepcopy(SCENES["05_garage_left_out"])
+    scene["others"] = []
+    model = cr.build(scene)
+    layer = cr._layer(model, "Default")
+    inside = r.ObjectAttributes()
+    inside.LayerIndex = layer
+    (x0, y0, x1, y1), _ = cr._box(model, next(o.Geometry for o in model.Objects
+                                              if cr.logic.on_layer(model.Layers[o.Attributes.LayerIndex].FullPath,
+                                                                   c.BUILDING_LAYER)))
+    index = model.InstanceDefinitions.Add("label", "", "", "", r.Point3d(0, 0, 0),
+                                          (r.Point(r.Point3d(x0 - 4, (y0 + y1) / 2, 4)),), (inside,))
+    attrs = r.ObjectAttributes()
+    attrs.LayerIndex = layer
+    model.Objects.AddInstanceObject(
+        r.InstanceReference(model.InstanceDefinitions.FindIndex(index).Id, r.Transform.Identity()), attrs)
     model.Write(str(tmp_path / "m.3dm"), 8)
     left = cr.describe_file(tmp_path / "m.3dm", c.facts(scene))["left_out"]
     assert [(o["layer"], o["touching"]) for o in left] == [("Default", None)]
