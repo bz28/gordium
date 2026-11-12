@@ -35,6 +35,14 @@ HIDDEN = {
     "piece_sha256": "a fingerprint for code, not for reading",
     "run": "the file of recorded AI calls; for auditing, not reading",
     "layout": "tells the code how to cut a document into pieces; not for reading",
+    # A code book kept outside the repo (a state law folder's: New York's Residential Code). The workbook lists a
+    # place's own documents; a state's book is not in it until its rules are (egress step 3), which shows these.
+    "kept_outside_repo": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "copy": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "terms": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "edition": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "in_force": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "brought_in": "tells the code which pages and sections of a book to read; not for reading",
 }
 NOT_DOWNLOADED_FIELDS = {"title", "url", "why_missing"}   # sources.yaml `not_yet_downloaded` entries
 # The "City's exact words" for a cited chart cell the chart reader can't confirm (never a blank).
