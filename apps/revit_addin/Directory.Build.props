@@ -1,6 +1,9 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- Revit 2025 and 2026 load add-ins on .NET 8, Revit 2027 on .NET 10 (Autodesk's Revit 2027 "What's new":
+         "Migrating Revit to .NET 10"); Autodesk plans to move 2025/2026 to .NET 10 too, so both are built and
+         tested, and the Windows trial confirms which one the installed Revit runs -->
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>

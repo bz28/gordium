@@ -155,6 +155,18 @@ public sealed class FakeWorkerTests
         Assert.Contains(words, e.Message);
     }
 
+    // a key given twice is refused by the duplicate check itself (on .NET 8 and .NET 10), never by a later guard
+    [Theory]
+    [InlineData("duplicate_key", "\"ok\" is given twice")]
+    [InlineData("duplicate_status", "\"status\" is given twice")]
+    public async Task A_key_given_twice_is_refused_by_the_duplicate_check(string mode, string words)
+    {
+        using var client = await Start(mode);
+        var e = await Assert.ThrowsAsync<WorkerProtocolException>(() => client.CheckSiteAsync(Site, Facts));
+        Assert.Contains(words, e.Message);
+        Assert.True(client.IsStopped);
+    }
+
     [Fact]
     public async Task A_refusal_gives_the_workers_words_and_the_worker_keeps_serving()
     {
