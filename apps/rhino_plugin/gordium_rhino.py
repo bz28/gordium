@@ -1758,8 +1758,8 @@ def _seen(o, definitions):
     has none), with what that definition holds (each part seen the same way, blocks inside blocks too) and its
     ArchiveFileStatus by name (None when it can't be read) put into `definitions` once, however often it is placed.
     Only what Rhino says: whether that adds up to a box that covers all of it is host_core's decision
-    (no_box_reasons). Each definition is walked whole, however deep it is first met: host_core judges it at the
-    depth it meets it (it may meet it first higher up) and gives no box past MAX_BLOCK_DEPTH itself."""
+    (no_box_reasons). Each definition is walked whole, however deep it is first met: host_core gives a definition
+    the same answer wherever it is placed and gives no box to a block placed past MAX_BLOCK_DEPTH itself."""
     b = o.Geometry.GetBoundingBox(True)
     seen = {"id": str(o.Id), "box": [b.Min.X, b.Min.Y, b.Min.Z, b.Max.X, b.Max.Y, b.Max.Z] if b.IsValid else None}
     if isinstance(o, Rhino.DocObjects.InstanceObject):

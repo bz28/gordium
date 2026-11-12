@@ -374,7 +374,7 @@ def _sent_definitions(definitions):
     return definitions
 
 
-def _why_no_box(o, definitions, memo, depth=0):
+def _why_no_box(o, definitions, memo):
     """Why the object `o` has no box that covers all of it, or None when it has one (its own box). No box: the host
     gave none; or it is a placed block whose definition, at any depth, isn't there, holds nothing, isn't what the
     block is (block_contents_known: a linked file not found, not readable or changed since it was read) or holds a
@@ -391,7 +391,7 @@ def _why_no_box(o, definitions, memo, depth=0):
         why, levels = _judged(o, definitions, memo, set())
     except RecursionError:                   # (only a malformed request: hundreds of blocks inside blocks)
         raise ValueError("objects: blocks nested too deep to read")
-    if why is None and depth + levels > MAX_BLOCK_DEPTH + 1:
+    if why is None and levels > MAX_BLOCK_DEPTH + 1:      # itself and 32 blocks below it are looked into
         return "block_not_found"
     return why
 

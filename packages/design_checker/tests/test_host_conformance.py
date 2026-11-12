@@ -683,7 +683,7 @@ def test_the_live_command_counts_a_block_whose_status_cant_be_read_as_left_out_a
     assert left == ["shed"] and touching == ["shed"] and outlines == []
 
 
-def test_the_live_command_judges_a_block_by_where_host_core_meets_it_however_deep_it_was_first_seen():
+def test_the_live_command_sends_each_block_definition_whole_however_deep_it_is_first_seen():
     """Review round 3: the command's look (_seen) stopped walking 32 deep, so a definition first seen 33 deep (inside
     a block host_core gives up on early: it holds an empty block first) was never sent, and the same definition
     placed on its own, far off the lot, came back "not found": left out and touching, where the command had judged

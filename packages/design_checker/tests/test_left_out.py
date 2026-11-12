@@ -105,6 +105,21 @@ def test_a_block_nested_too_deep_has_no_box_whichever_object_is_sent_first():
     assert [g["touching"] for g in lo.touching_decisions([a, b], [HOUSE], defs)] == [False, None]
 
 
+def test_blocks_nested_too_deep_to_read_are_refused_never_answered():
+    """Review round 5: a chain of blocks thousands deep (only a malformed request) ran out of Python's stack; it is
+    refused with the worker's words (ValueError), never a crash read as an answer, here and through the protocol."""
+    defs = {f"d{k}": _whole_def({"box": SHED, "definition": f"d{k + 1}"}) for k in range(5000)}
+    defs["d5000"] = _whole_def({"box": SHED})
+    deep = _obj("deep", SHED, definition="d0")
+    with pytest.raises(ValueError, match="blocks nested too deep to read"):
+        lo.no_box_reasons([deep], defs)
+    with pytest.raises(ValueError, match="blocks nested too deep to read"):
+        lo.touching_decisions([deep], [HOUSE], defs)
+    reply = _served({"lot": LOT, "objects": [deep], "definitions": defs, "buildings": [HOUSE]})
+    assert reply["result"] == {"refused": {k: "objects: blocks nested too deep to read"
+                                           for k in ("left_out", "touching", "no_box")}}, reply
+
+
 def test_a_block_holding_itself_is_not_found_never_a_hang():
     defs = {"loop": _whole_def({"box": SHED, "definition": "loop"})}
     assert lo.no_box_reasons([_obj("x", SHED, definition="loop")], defs)[0]["why"] == "block_not_found"
