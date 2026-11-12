@@ -3871,7 +3871,8 @@ labels:
     reason: Lets a patio cover's walls take any shape if the longer wall and one other wall are at least 65 percent open or
       glazed below 6 feet 8 inches, and lists what may fill the openings (insect screening, approved plastic not more than
       0.125 inch thick, glass meeting R324, not brought in). What fills the openings isn't in the model; shown as needing
-      review where a design has a patio cover. It also says what makes a patio cover enclosed, which BF103.2 depends on.
+      review where a design has a patio cover. What the openings are "enclosed with" bears on what BF103.2's "unenclosed"
+      means, an open question on BF103.2.
     sources:
     - file: gov.ny.residential.2025.pdf
       page: 898

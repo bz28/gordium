@@ -548,6 +548,9 @@ def test_a_label_with_readings_still_in_play_never_says_one_reading_decides():
     for pid in open_:
         e = labels[pid]
         assert not decides.search(yaml.safe_dump(e)) and "needs review" in e.get("notes", ""), pid
+    # review round 4: BF103.1's reason (a piece the open question turns on) said it "says what makes a patio cover
+    # enclosed", the stricter reading as settled
+    assert "what makes a patio cover enclosed" not in labels["BF103.1"]["reason"]
     assert not decides.search(readme)
     # review round 3: the README's lead-in still said the notes give Gordium's reading of both undefined words
     assert "Two words are not defined, and the label's notes give Gordium's reading" not in readme
