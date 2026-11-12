@@ -29,8 +29,11 @@ notes:
   against numbers.comparison of the recorded words. Step 1''s 90 pieces with numbers, 357 numbers: 23 differ; step
   1b''s 42 more, 134 numbers: 10 differ. Each has a flag saying which is right. One reverses a limit: R315.2 records
   "more than one-half" where the book says the ceiling shall not exceed 7 feet for more than one-half of the floor
-  (at most one-half); the rest are limits the recorded words miss ("a minimum load of 1,000 pounds", "70 to 80
-  degrees") or right words the reader marked otherwise.'
+  (at most one-half). Two read a lifted maximum ("shall be permitted to exceed 38 inches", R318.7.5.3 and R320.2)
+  as more than, where the second reading (none) is right. One, R202:underlayment, puts the "or greater" of a 2 in
+  12 slope on the 12 units horizontal, in a definition, which sets no limit. The rest are limits the recorded words
+  miss ("a minimum load of 1,000 pounds", "70 to 80 degrees") or right words the reader marked otherwise (a
+  conversion or a range in brackets).'
 - 'Review round 7 of egress step 1 (2026-11-12): a "not" five to seven words before its comparison was still dropped
   ("shall not have a vertical rise greater than 12 feet 7 inches" was recorded "greater than 12 foot"). numbers.py now
   looks up to eight words back, stopping at a stop, a comma, a word that starts another clause or another number.
@@ -1746,7 +1749,7 @@ pieces:
     - 'none'
     - 'none'
     flags:
-    - "'exceed 1 1/4 inch': printed \"shall be permitted to exceed 1 1/4 inches\": the maximum is lifted there, which the recorded words read as more than (>); the second reading as no limit (none). Either way no maximum applies there."
+    - "'exceed 1 1/4 inch': printed \"shall be permitted to exceed 1 1/4 inches\": a permission: the maximum is lifted there and no other limit is set, so the second reading (none) is right. The recorded words read it as more than (>), which is wrong: it is no minimum, and no rule may be drafted from it as one."
   R318.7.5.4:
     piece_sha256: 3a19fb357b270bd162d8826e9370abdb037b296c7dbf7d24812bbdf0cb63a569
     numbers: []
@@ -2406,7 +2409,7 @@ pieces:
     - 'none'
     - 'none'
     flags:
-    - "'exceed 38 inch': printed \"shall be permitted to exceed 38 inches\": the maximum is lifted there, which the recorded words read as more than (>); the second reading as no limit (none). Either way no maximum applies there."
+    - "'exceed 38 inch': printed \"shall be permitted to exceed 38 inches\": a permission: the maximum is lifted there and no other limit is set, so the second reading (none) is right. The recorded words read it as more than (>), which is wrong: it is no minimum, and no rule may be drafted from it as one."
   R320.3:
     piece_sha256: ca561394426d289c443c4410343a9b2ee615794398edf8628824f4added9360f
     numbers:

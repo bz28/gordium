@@ -478,3 +478,21 @@ def test_every_part_of_appendix_bo_is_brought_in_or_named_in_the_readme():
         return pid in brought or pid in named or any(wholly_out(".".join(parts[:k])) for k in range(1, len(parts)))
     missing = sorted(h for h in heads if not covered(h) and not h.startswith("BO103."))
     assert len(heads) > 100 and missing == [], " ".join(missing)
+
+
+def test_a_permission_to_exceed_is_flagged_as_no_minimum():
+    # Review round 9 of step 1: "shall be permitted to exceed 38 inches" (R320.2, R318.7.5.3) lifts a maximum; the
+    # recorded words read it as more than (>), a minimum the law does not set. Its flag must say the recorded
+    # reading is wrong, never "either way", so no rule is drafted from the '>'
+    from document_extraction.numbers import comparisons
+    pieces = yaml.safe_load((NY_STATE / "text_verification.yaml").read_text(encoding="utf-8"))["pieces"]
+    seen, unclear = 0, []
+    for pid, e in pieces.items():
+        nums = e.get("numbers") or []
+        for n, c, r in zip(nums, comparisons(nums), e.get("second_reading_comparisons") or []):
+            if n.startswith("exceed ") and c == ">" and r == "none":
+                seen += 1
+                said = [f for f in e.get("flags") or [] if f"'{n}'" in f]
+                if not any("second reading (none) is right" in f and "wrong" in f for f in said):
+                    unclear.append((pid, n))
+    assert seen >= 2 and unclear == [], unclear
