@@ -201,7 +201,8 @@ def split(rows: list[dict], brought_in: dict) -> dict:
         if d not in keep:
             keep.add(d)
             todo += used[d]
-    # Every definition a kept piece uses is kept too: never a piece that names one the reader can't see.
+    # Every definition a kept piece uses is kept too: never a piece that names one the reader can't see. The loop
+    # above makes this so today; this line keeps it so if the loop is ever changed.
     problems += [f"{i}: uses {d}, which is not brought in" for i in sorted(keep) for d in used.get(i, ()) if d not in keep]
     if any(i.startswith("R202:") for i in keep):
         keep.add("R202")                             # the heading the definitions sit under

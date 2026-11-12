@@ -1,7 +1,7 @@
 """Every number a piece of law states, with the words that make it a limit: the comparison words directly before it
 ("not more than"), its unit after it ("inches", "square feet", "units horizontal"), and any comparison words after
-that ("or more"), also past a conversion in brackets ("200 gross square feet (18.6 m²) or less" is "or less"
-for both numbers). Comparison words further back ("not exceeding a total floor area of 200") are not caught. Used to check a book's
+that ("or more"), also past a number and unit's conversion in brackets ("200 gross square feet (18.6 m²) or less" is
+"or less" for both numbers; never across another number, a comma or a stop). Comparison words further back ("not exceeding a total floor area of 200") are not caught. Used to check a book's
 extracted text against a second, independent reading of the page images (text_verification.yaml in the law's folder):
 both readings are put through this same code, so they are compared item by item, never by eye.
 
@@ -62,10 +62,12 @@ def statements(text: str) -> list[dict]:
             unit, used = f"gross {after_words[1]} {UNITS[after_words[2]]}", 3     # "200 gross square feet"
         if unit == "unit" and after_words[1:2] and after_words[1] in DIRECTIONS:
             unit, used = f"unit {after_words[1]}", 2
-        rest_words = after_words[used:]
-        if rest_words[:1] == [")"]:                   # a number inside brackets: "(18.6 m²) or less"
+        # What follows, with numbers and stops kept, so a comparison word is never taken across them ("4 inches
+        # (102 mm), 6 or more": the "or more" is the 6's alone)
+        rest_words = re.findall(r"[a-z]+|\(|\)|[,;.:]|\d[\d.,/]*", text[m.end():].lower())[used:]
+        if unit and rest_words[:1] == [")"]:          # a conversion in brackets: "(18.6 m²) or less"
             rest_words = rest_words[1:]
-        elif rest_words[:1] == ["("] and ")" in rest_words:   # its conversion in brackets: "200 square feet (18.6 m²) or less"
+        elif unit and rest_words[:1] == ["("] and ")" in rest_words[:5]:   # "200 square feet (18.6 m²) or less"
             rest_words = rest_words[rest_words.index(")") + 1:]
         rest = " ".join(rest_words[:3])
         out.append({"before": _ends_with(" ".join(before_text), BEFORE),

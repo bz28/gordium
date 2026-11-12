@@ -206,6 +206,9 @@ def test_a_comparison_word_after_a_conversion_in_brackets_is_kept():
     assert [shown(s) for s in statements("areas of 200 gross square feet (18.6 m[fn2]) or more where")] != right
     assert [shown(s) for s in statements("not less than 36 inches (914 mm) measured")] == ["not less than 36 inch",
                                                                                            "914 mm"]
+    # never across another number, a comma or an unclosed bracket (review round 5, second look)
+    assert [shown(s) for s in statements("4 inches (102 mm), 6 or more")] == ["4 inch", "102 mm", "6 or more"]
+    assert [shown(s) for s in statements("10 feet (unclosed. Where the area (x) or more")] == ["10 foot"]
 
 
 @pytest.mark.parametrize("text,expect", [
