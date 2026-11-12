@@ -1003,12 +1003,12 @@ pieces:
     numbers:
     - not less than 20 inch
     - 508 mm
-    - 200 gross
+    - 200 gross square foot
     - 18.6 m
     second_reading_numbers:
     - not less than 20 inch
     - 508 mm
-    - 200 gross
+    - 200 gross square foot
     - 18.6 m
     second_reading: agrees
   R318.7.12.1:
@@ -1050,12 +1050,12 @@ pieces:
     numbers:
     - not less than 20 inch
     - 508 mm
-    - 200 gross
+    - 200 gross square foot
     - 18.6 m
     second_reading_numbers:
     - not less than 20 inch
     - 508 mm
-    - 200 gross
+    - 200 gross square foot
     - 18.6 m
     second_reading: agrees
   R318.7.13.1:
