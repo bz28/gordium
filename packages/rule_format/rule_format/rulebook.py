@@ -170,9 +170,55 @@ def _jsonl_rows(data: bytes) -> list[dict]:
     return [json.loads(line) for line in text.splitlines() if line.strip()]
 
 
+# A state's own law folder, regulations/jurisdictions/<state>/<name>/, holds law every place in that state inherits
+# (New York's Residential Code). It has the same numbered steps as a place, but its settings file is state.yaml, not
+# jurisdiction.yaml: it is no place (no boundary, no lot lookup), so the place registry and the Rhino plugin's "one
+# place" never see it. A place names the state folders it inherits in its jurisdiction.yaml `inherits:` (place.py).
+# Decided 2026-11-12: docs/decisions/2026-11-12_building_code_text.md.
+STATE_SETTINGS = "state.yaml"
+
+
 def jurisdictions(repo: Path = REPO) -> list[Path]:
-    """Every jurisdiction folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order."""
+    """Every place folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order (a state's own
+    law folder, which has a state.yaml, is not a place: state_folders)."""
+    return [p for p in _law_folders(repo) if not (p / STATE_SETTINGS).is_file()]
+
+
+def state_folders(repo: Path = REPO) -> list[Path]:
+    """Every state law folder (one with a state.yaml), regulations/jurisdictions/<state>/<name>, in a stable order."""
+    return [p for p in _law_folders(repo) if (p / STATE_SETTINGS).is_file()]
+
+
+def law_folders(repo: Path = REPO) -> list[Path]:
+    """Every folder of law: the places, then the state law folders. What checks the law's own files (sources,
+    extracted text, labels, definitions, coverage) walks."""
+    return jurisdictions(repo) + state_folders(repo)
+
+
+def _law_folders(repo: Path) -> list[Path]:
     return sorted(p for p in (Path(repo) / "regulations/jurisdictions").glob("*/*") if p.is_dir())
+
+
+# ---- law kept outside the repo ------------------------------------------------------------------------------------
+# A copyrighted code book (New York's Residential Code, published by the International Code Council) can't be
+# committed: the repo keeps only short exact quotes with their section, page and a link, and its sources.yaml entry
+# says `kept_outside_repo: true`. The book itself and its extracted text live in a cache on the machines that have
+# it, one folder per fingerprint: <cache>/<sha256>/<file> and <cache>/<sha256>/<stem>.jsonl. Where the cache is
+# missing (CI), every check that needs the text is skipped and says so; nothing is ever passed in its stead.
+CODE_CACHE_ENV = "GORDIUM_CODE_CACHE"
+DEFAULT_CODE_CACHE = Path.home() / "Documents/gordium_archive/code_cache"
+
+
+def code_cache() -> Path:
+    """The folder holding law kept outside the repo ($GORDIUM_CODE_CACHE, else ~/Documents/gordium_archive/code_cache)."""
+    import os
+    return Path(os.environ.get(CODE_CACHE_ENV) or DEFAULT_CODE_CACHE)
+
+
+def cached(entry: dict, suffix: str | None = None) -> Path:
+    """Where a kept-outside document (suffix None) or its extracted text (suffix ".jsonl") is in the cache."""
+    name = entry["file"] if suffix is None else Path(entry["file"]).stem + suffix
+    return code_cache() / str(entry.get("sha256")) / name
 
 
 @dataclass
@@ -191,6 +237,8 @@ class Context:
     districts: set[str] = field(default_factory=set)                 # district names, as the city writes them
     proposed: dict[str, dict] = field(default_factory=dict)          # measures drafts asked for, not yet in measures.yaml
     pieces: set[str] = field(default_factory=set)                    # every piece id the law is cut into (research cites them)
+    uncached: dict[str, str] = field(default_factory=dict)           # file -> why its text can't be read here (cache)
+    skipped: list[str] = field(default_factory=list)                 # checks not run here for want of the cache
 
     def kinds(self) -> dict:
         """Every usable measure's kind: "number", "text" or "boolean" (this context's measures, plus the
@@ -228,15 +276,26 @@ class Context:
             for problem in _source_entry_problems(entry):
                 ctx._problem(name, problem)
         for name, entry in listed.items():
-            pdf = j / "1_source_documents" / name
+            outside = entry.get("kept_outside_repo") is True
+            pdf = cached(entry) if outside else j / "1_source_documents" / name
+            extracted = cached(entry, ".jsonl") if outside else j / "2_extracted_text" / f"{Path(name).stem}.jsonl"
             sha = entry.get("sha256")
-            if not sha:
+            if outside and (j / "1_source_documents" / name).exists():
+                ctx._problem(name, "is kept outside the repo (kept_outside_repo), but a copy is in 1_source_documents")
+            elif outside and (j / "2_extracted_text" / extracted.name).exists():
+                ctx._problem(name, "is kept outside the repo (kept_outside_repo), but its text is in 2_extracted_text")
+            elif not sha:
                 ctx._problem(name, "no sha256 in sources.yaml")
+            elif outside and not pdf.exists():      # skipped, never passed: every quote of it is listed as not checked
+                ctx.uncached[name] = (f"kept outside the repo, and not in the code cache here ({_shown_cache(pdf)}); "
+                                      "checked where the cache exists")
             elif not pdf.exists():
                 ctx._problem(name, "listed in sources.yaml but missing")
             elif hashlib.sha256(pdf.read_bytes()).hexdigest() != sha:
                 ctx._problem(name, "fingerprint does not match sources.yaml")
-            extracted = j / "2_extracted_text" / f"{Path(name).stem}.jsonl"
+            elif outside and not extracted.exists():
+                ctx._problem(name, f"its extracted text isn't in the code cache ({_shown_cache(extracted)}): "
+                                   "run python -m document_extraction")
             # Text is only trusted for a document whose own checks all passed.
             if extracted.exists() and name not in ctx.file_problems:
                 ctx._load_extracted(name, sha, extracted)
@@ -277,6 +336,14 @@ class Context:
         self.pages[name] = pages
 
 
+def _shown_cache(path: Path) -> str:
+    """A cache path as messages show it: from the cache folder, so a message reads the same on every machine."""
+    try:
+        return "<code cache>/" + path.relative_to(code_cache()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | None:
     """A .cells.jsonl file's bytes -> (its cells, its districts: the columns `district_column` matches), or None when
     its header names another PDF version than `sha` (checked before any row is read, so a stale file is always
@@ -306,8 +373,11 @@ def _pages_of(data: bytes, sha: str) -> dict | None:
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
-                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages"}
-LAYOUTS = {"ecode360"}   # document layouts the section splitter knows (document_extraction/sections.py)
+                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages",
+                 "kept_outside_repo", "copy", "terms", "edition", "in_force", "brought_in"}
+# Document layouts the section splitters know: ecode360 (document_extraction/sections.py), icc (an ICC code book,
+# document_extraction/icc_sections.py)
+LAYOUTS = {"ecode360", "icc"}
 # A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU), is each place's own: its
 # jurisdiction.yaml districts.chart_column, through the registry (place.py: Place.district_column), the one
 # definition the chart reader, the inspector and the drafter all use.
@@ -995,6 +1065,8 @@ def _source_problems(sources: list[dict], ctx: Context, district: str | None = N
             p.append(f"source file {name!r} is not in sources.yaml")
         elif reason := not_quotable(ctx.sources[name]):
             p.append(f"source {name} {reason}")
+        elif name in ctx.uncached:          # skipped, never passed: listed so the run says what it didn't check
+            ctx.skipped.append(f"{name} p.{page} lines {lines}: quote not checked here ({ctx.uncached[name]})")
         elif name in ctx.file_problems:
             p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
         elif "cell" in s:
