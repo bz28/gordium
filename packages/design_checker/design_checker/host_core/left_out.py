@@ -575,9 +575,9 @@ def linked_file_words(name, problem, how=None, path=None):
     """The sentence telling the architect about one linked file: what is wrong with it (LINK_WORDS), where it was
     looked for when it is missing or unreadable (`path`, as the host has it), and what to do (LINK_FIX), with where
     to click in the host's own menus (`how`, the host's words; none: the plain fix alone). For example "Linked file
-    'garage.3dm' has changed since it was loaded: reload it (...) so Gordium can measure it"."""
+    'garage.3dm' has changed since it was loaded: reload it (...) so Gordium can see where it is"."""
     if problem not in LINK_WORDS:
         raise ValueError("problem: one of %s" % ", ".join(sorted(LINK_WORDS)))
     where = " at %s" % path if path and problem in ("missing", "unreadable") else ""
-    return "Linked file '%s' %s%s: %s%s so Gordium can measure it" % (
+    return "Linked file '%s' %s%s: %s%s so Gordium can see where it is" % (
         name, LINK_WORDS[problem], where, LINK_FIX[problem], " (%s)" % how if how else "")

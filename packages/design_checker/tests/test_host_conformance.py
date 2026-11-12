@@ -747,10 +747,10 @@ def test_the_live_command_says_which_linked_file_to_put_right_and_how():
     assert advice == {
         "shed": "Linked file 'shed.3dm' can't be found at /Users/me/Projects/106 Ithaca/shed.3dm: relink it to where "
                 "the file is now (Edit \u25b8 Blocks \u25b8 Block Definitions, select it, then Properties \u25b8 "
-                "Filename: Browse to the file) so Gordium can measure it",
+                "Filename: Browse to the file) so Gordium can see where it is",
         "holder": "Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit \u25b8 Blocks \u25b8 "
-                  "Block Definitions, select it, then Update; or type -BlockManager, Update, All) so Gordium can "
-                  "measure it"}
+                  "Block Definitions, select it, then Update; or type -BlockManager, Update, All) so Gordium can see "
+                  "where it is"}
     left, touching, _, _ = _live_left_out({"shed": shed, "holder": holder, "normal": normal}, (x, y))
     assert left == ["shed", "holder", "normal"] and touching == ["shed", "holder"]     # the answer, as before
 

@@ -15,7 +15,11 @@ by `packages/design_checker/tests/test_protocol.py` ([worker_protocol_v1.md](wor
   `objects.left_out` ([worker_protocol_v1.md](worker_protocol_v1.md#session-commands)): which objects a check
   leaves out, which may be touching the house, and which have no box that covers all of them, decided in
   `host_core/left_out.py` for every tool (the Rhino plugin calls the same functions in its own Python). A minor
-  version: nothing else changed, and a request naming `1.0` is answered as before
+  version: nothing else changed, and a request naming `1.0` is answered as before. Also from 1.1, `check_site`
+  reads `extras.left_out_advice` ({left-out object id: the tool's words for what the architect can do, such as a
+  linked file to reload}, said on the left-out row; words only, the answer is the same) and refuses it when it
+  isn't that, or names an id not in the description's `left_out`
+  ([site_description_v1.md](site_description_v1.md#how-the-worker-uses-it))
   (command table sha256 `77acae03c601945bd7834d572afaeb40e8b4251ab37862b3570f74175c40ddc5`).
 - **2026-11-06 · protocol 1.0 · site description `gordium.site/1`** (schema sha256 `0aec44ae2f9e296c70565351c4a5191e7b28e3e7302c194ce8aa0322402702b7`): first version.
   Commands `hello`, `read_model`, `check_site` and `start_site`; the five older commands answer as before

@@ -320,10 +320,10 @@ def test_every_object_with_a_linked_file_problem_is_left_out_and_touching_and_no
 def test_the_words_say_the_file_the_problem_and_the_fix_with_the_host_s_own_menu_words():
     assert lo.linked_file_words("garage.3dm", "changed", "Edit > Blocks > Block Definitions, then Update") == (
         "Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit > Blocks > Block Definitions, "
-        "then Update) so Gordium can measure it")
+        "then Update) so Gordium can see where it is")
     assert lo.linked_file_words("garage.3dm", "missing", path="/Users/me/site/garage.3dm") == (
         "Linked file 'garage.3dm' can't be found at /Users/me/site/garage.3dm: relink it to where the file is now "
-        "so Gordium can measure it")
+        "so Gordium can see where it is")
     assert lo.linked_file_words("garage.3dm", "changed", path="/Users/me/site/garage.3dm").startswith(
         "Linked file 'garage.3dm' has changed since it was loaded: reload it so")       # where only when not found
     with pytest.raises(ValueError, match="problem: one of"):
@@ -336,6 +336,10 @@ def test_host_core_has_no_host_s_menu_words():
     text = inspect.getsource(lo).split("# ---- what to tell the architect")[1]
     for word in ("Block Definitions", "BlockManager", "Edit \u25b8", "Manage Links", "Reload From"):
         assert word not in "".join(lo.LINK_WORDS.values()) + "".join(lo.LINK_FIX.values()), word
+    for problem in lo.LINK_WORDS:                       # nor the sentence itself, without the host's words
+        said = lo.linked_file_words("garage.3dm", problem, path="/site/garage.3dm")
+        for word in ("Block Definitions", "BlockManager", "\u25b8", "Manage Links", "Reload From", "Rhino", "Revit"):
+            assert word not in said, (problem, word)
     assert "Rhino's are in rhino_logic.LINK_HOW" in text
 
 

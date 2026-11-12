@@ -155,7 +155,7 @@ def test_a_solid_on_the_neighbourhood_layers_makes_the_check_need_review_and_say
 
 
 LINKED = ("Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit \u25b8 Blocks \u25b8 Block "
-          "Definitions, select it, then Update) so Gordium can measure it")
+          "Definitions, select it, then Update) so Gordium can see where it is")
 
 
 def test_the_left_out_row_says_what_to_do_about_a_linked_file_and_nothing_else_changes(surveyed):

@@ -392,11 +392,14 @@ usually what fixes it:
   because only the zoning office can settle it.
 - **Something on the lot isn't measured**: a solid not on the `Building` layer (a shed on Default, an imported
   garage). Lot coverage counts every building on the lot, so it needs review until you **Add to check…**.
-  A **linked block** (a block linked to another file) whose file is missing, can't be read or has changed since it was loaded
-  can't be measured at all, so it counts as on the lot and touching the house, and the row says which file and
-  what to do, for example "Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit ▸ Blocks ▸
-  Block Definitions, select it, then Update…) so Gordium can measure it", or, for a moved file, "can't be found
-  at …: relink it … (Properties ▸ Filename: Browse to the file)". Once the file is put right, check again.
+  A **linked block** (a block linked to another file) whose file is missing, can't be read or has changed since
+  it was loaded can't be placed at all, so it counts as on the lot and touching the house, and the row says which
+  file and what to do, for example "Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit ▸
+  Blocks ▸ Block Definitions, select it, then Update; or type -BlockManager, Update, All) so Gordium can see where
+  it is", or, for a moved file, "Linked file 'garage.3dm' can't be found at /Users/you/site/garage.3dm: relink it
+  to where the file is now (Edit ▸ Blocks ▸ Block Definitions, select it, then Properties ▸ Filename: Browse to
+  the file) so Gordium can see where it is". Once the file is put right, the check places the block by its own
+  shape like any other object: still on the lot, it stays in this row until you **Add to check…**.
 - **It needs a fact the model can't show** (bedrooms, parking spaces, dwelling units, rooms let for profit,
   whether it is a conversion, the number of stories): its button names them when that fits, for example **Enter bedrooms
   and parking spaces…**, or says how many, for example **Answer 3 questions…**. It opens a small window that asks only them (a number, or Not answered / No / Yes). **OK** saves just
