@@ -7,4 +7,8 @@
     <!-- the public types and members are documented; their constructors and enum values speak for themselves -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- the tests check the strict reader directly, case by case -->
+    <InternalsVisibleTo Include="Gordium.Worker.Tests" />
+  </ItemGroup>
 </Project>

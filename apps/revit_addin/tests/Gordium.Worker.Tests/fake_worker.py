@@ -67,6 +67,9 @@ SECOND = {
     # refusal of a key given twice catches it
     "duplicate_key": lambda i: '{"ok": false, "error": "refused", ' + ok(i, CHECK)[1:],
     "duplicate_status": lambda i: ok(i, CHECK).replace('"status": "complies"', '"status": "needs_review", "status": "complies"'),
+    # an escape that is half a surrogate pair: refused when read, never left to fail later at GetString
+    "error_bad_escape": lambda i: '{"id": %d, "ok": false, "error": "\\ud800"}' % i,
+    "status_bad_escape": lambda i: ok(i, CHECK).replace('"status": "complies"', '"status": "compl\\udc00ies"', 1),
     "nan": lambda i: ok(i, check(limit_ft=float("nan"))),
     "empty_items": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": []}}),
     "items_not_a_list": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "items": {"a": ITEM}}}),

@@ -11,10 +11,16 @@ into Revit: [the decision of 2026-11-06](../../docs/decisions/2026-11-06_hosts_t
 
 This folder holds the half of the add-in that doesn't need Revit: `Gordium.Worker`, a class library that starts
 the worker and speaks the protocol. It references no Revit API and no packages (only System.Text.Json, part of
-.NET), so it is built and tested on the Mac and in CI. It targets .NET 10: the plan (Ben, 2026-11-05) is one .NET 10
-build for Revit 2026 and 2027, and whether Revit 2026 loads it is one of the checks the Windows trial settles. If it
-doesn't, the library needs a second target, and its refusal of a key given twice in an answer
-(`AllowDuplicateProperties`, new in .NET 10) needs another way on the older one. The add-in itself
+.NET), so it is built and tested on the Mac and in CI. It is built twice, for .NET 8 and .NET 10, and every test
+runs on both. Revit 2027 runs on .NET 10 (Autodesk's Revit 2027 "What's new",
+[Migrating Revit to .NET 10](https://help.autodesk.com/cloudhelp/2027/ENU/Revit-WhatsNew/files/GUID-8D7A4715-EAF8-4BD1-BE78-061F900D0BCE.htm)).
+Revit 2025 and 2026 are built on .NET 8 ([Autodesk's call for preview testing](https://blog.autodesk.io/call-for-preview-testing-revit-2026-2025-migration-to-net-10/),
+2026-04-29), and a .NET 10 build can't load on .NET 8, so the Nov 5 plan of one .NET 10 build for both doesn't hold
+for Revit 2026 as it first shipped. The same post says Autodesk plans to move Revit 2025 and 2026 to .NET 10 (a
+Revit 2026 preview was tested until 2026-06-03; no release date given), so which runtime the installed Revit 2026
+uses is checked in the Windows trial. The refusal of a key given twice
+in an answer is the library's own (`StrictJson.RefuseDuplicateKeys`), one code path for both: .NET 10's built-in
+switch doesn't exist on .NET 8, and a .NET 10 test checks ours says the same as it on every case. The add-in itself
 (the ribbon button, reading the model) comes later, in the [Windows trial](../../docs/revit/windows_trial_runbook.md).
 
 ## What it does
@@ -87,17 +93,19 @@ the message and no verdicts.
 - **The protocol copy:** the session commands and their answer names equal the protocol document's command
   reference (a Python test keeps that equal to the worker's own table).
 
-The main guards (the status words, the empty and repeated rows, a key twice, the versions, `about`, the id, the
+The main guards (the status words, the empty and repeated rows, a key twice, an escape or line that isn't whole text, the versions, `about`, the id, the
 byte-order mark, a refused part, half an answer, stopping after a timeout) were each undone once to check that
-their test then fails.
+their test then fails (the strict reading on both .NET 8 and .NET 10).
 
 ## Running it
 
-Needs the .NET 10 SDK and a Python with Gordium installed (`pip install -e ".[dev]"` at the repository root).
+Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and
+10.x) and a Python with Gordium installed (`pip install -e ".[dev]"` at the repository root).
 
 ```bash
 cd apps/revit_addin          # dotnet reads global.json (the pinned SDK) from the folder it runs in
-GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test
+GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test                       # both, one after the other
+GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test --framework net8.0    # or one at a time
 ```
 
 `GORDIUM_PYTHON` defaults to `python` on the PATH. CI runs it on Windows and Ubuntu (`.github/workflows/ci.yml`,

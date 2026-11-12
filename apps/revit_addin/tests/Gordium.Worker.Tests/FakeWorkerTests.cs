@@ -114,6 +114,8 @@ public sealed class FakeWorkerTests
     [InlineData("duplicate_key")]
     [InlineData("duplicate_status")]
     [InlineData("nan")]
+    [InlineData("error_bad_escape")]
+    [InlineData("status_bad_escape")]
     [InlineData("empty_items")]
     [InlineData("items_not_a_list")]
     [InlineData("row_twice")]
@@ -153,6 +155,21 @@ public sealed class FakeWorkerTests
         using var client = await Start(mode);
         var e = await Assert.ThrowsAsync<WorkerProtocolException>(() => client.CheckSiteAsync(Site, Facts));
         Assert.Contains(words, e.Message);
+    }
+
+    // a key given twice, or an escape that isn't text, is refused by the strict reading itself (on .NET 8 and
+    // .NET 10), never by a later guard, and the worker is stopped
+    [Theory]
+    [InlineData("duplicate_key", "\"ok\" is given twice")]
+    [InlineData("duplicate_status", "\"status\" is given twice")]
+    [InlineData("error_bad_escape", "a text value isn't valid text")]
+    [InlineData("status_bad_escape", "a text value isn't valid text")]
+    public async Task Each_strict_reading_refusal_is_what_refuses_its_case(string mode, string words)
+    {
+        using var client = await Start(mode);
+        var e = await Assert.ThrowsAsync<WorkerProtocolException>(() => client.CheckSiteAsync(Site, Facts));
+        Assert.Contains(words, e.Message);
+        Assert.True(client.IsStopped);
     }
 
     [Fact]
