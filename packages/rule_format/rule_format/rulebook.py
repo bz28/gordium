@@ -302,6 +302,9 @@ class Context:
             cut = j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
             if cut.exists():
                 ctx.pieces |= {row["id"] for row in read_jsonl(cut)[1:]}
+            if outside and cut.exists() and name in ctx.pages:
+                for problem in _stale_cache_problems(extracted, cut):
+                    ctx._problem(name, problem)
             cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
             if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
                 ctx._load_cells(name, sha, cells, j)
@@ -334,6 +337,21 @@ class Context:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
         self.pages[name] = pages
+
+
+def _stale_cache_problems(extracted: Path, cut: Path) -> list[str]:
+    """A cached text that is not the one the repo's pieces were cut from (edited, or left from another extraction):
+    each piece's words must still have the fingerprint the sections file records. Only `python -m
+    document_extraction --check` re-extracts, so without this an edited cache would feed every other check."""
+    from document_extraction.icc_sections import text_fingerprint
+    lines = {(r["page"], r["line"]): r for r in read_jsonl(extracted)[1:]}
+    out = []
+    for piece in read_jsonl(cut)[1:]:
+        members = [lines.get((pg, n)) for pg, a, b in piece["lines"] for n in range(a, b + 1)]
+        if None in members or text_fingerprint(members) != piece["text_sha256"]:
+            out.append(f"{_shown_cache(extracted)}: {piece['id']}'s words are not the ones its piece was cut from; "
+                       "run python -m document_extraction")
+    return out
 
 
 def _shown_cache(path: Path) -> str:

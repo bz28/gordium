@@ -203,3 +203,26 @@ def test_with_the_cache_a_recorded_number_must_be_the_texts(tmp_path, monkeypatc
     (j / VERIFICATION).write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True), encoding="utf-8")
     assert any("R318.7.5.1: the recorded numbers are not the extracted text's" in p
                for p in verification_problems(j, Context.for_jurisdiction(j))[0])
+
+
+def test_an_edited_cache_is_a_problem_even_where_no_quote_covers_the_edit(tmp_path, monkeypatch):
+    """Only document_extraction --check re-extracts; every other check reads the cache, so the cache must still be
+    the text the pieces were cut from."""
+    import json
+    from rule_format.rulebook import cached, load
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    monkeypatch.delenv(CODE_CACHE_ENV, raising=False)
+    if not cached(entry, ".jsonl").exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    copy = tmp_path / "cache" / entry["sha256"]
+    copy.mkdir(parents=True)
+    (copy / entry["file"]).symlink_to(cached(entry))
+    rows = [json.loads(x) for x in cached(entry, ".jsonl").read_text(encoding="utf-8").splitlines()]
+    assert Context.for_jurisdiction(NY_STATE).problems == []
+    for r in rows[1:]:
+        if (r.get("page"), r.get("line")) == (100, 43):
+            r["text"] = r["text"].replace("shall not exceed", "may exceed")
+    (copy / cached(entry, ".jsonl").name).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
+                                                     encoding="utf-8")
+    monkeypatch.setenv(CODE_CACHE_ENV, str(tmp_path / "cache"))
+    assert any("words are not the ones its piece was cut from" in p for p in Context.for_jurisdiction(NY_STATE).problems)
