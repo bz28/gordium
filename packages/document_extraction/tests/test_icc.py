@@ -247,3 +247,20 @@ def test_references_into_and_out_of_the_brought_in_sections_are_found_by_code():
     pieces = [{"id": "R319.7", "kind": "section", "lines": [[1, 1, 1]]}]
     lines = {(1, 1): "Existing basements shall comply with Appendix BO and ICC 500, not R319.1."}
     assert ways_out(pieces, lines, ["R319"]) == {"Appendix BO": ["R319.7"], "ICC 500": ["R319.7"]}
+
+
+def test_an_italic_word_r202_doesnt_define_must_be_named_with_why():
+    rows = _book([_row(2, 6, "R318.1.2 Doors. Each door shall be accessed.", bold="R318.1.2 Doors.", italic=["accessed"])])
+    assert any("R318.1.2: italic 'accessed' is not defined in Section R202" in p
+               for p in icc_sections.split(rows, BROUGHT_IN)["problems"])
+    named = BROUGHT_IN | {"italic_not_defined": {"accessed": "R201.3: another code's meaning"}}
+    assert icc_sections.split(rows, named)["problems"] == []
+
+
+@pytest.mark.parametrize("lines,expect", [
+    (["The landing shall be not less than 1.5. The tread"], ["not less than 1.5"]),     # a number ending a sentence
+    (["shall be 36 inches.", "2. Where the stair is", "curved"], ["36 inch"]),           # a list item's own number
+    (["area of 200 gross square feet"], ["200 gross square foot"])])
+def test_numbers_of_a_pieces_lines(lines, expect):
+    from document_extraction.numbers import statements_of_lines
+    assert [shown(s) for s in statements_of_lines(lines)] == expect
