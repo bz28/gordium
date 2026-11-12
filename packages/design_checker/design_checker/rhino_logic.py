@@ -1272,23 +1272,54 @@ def reaches_into_lot(lot_ring, points, reach, box=None):
             if perimeter > 0 and 2 * area / perimeter > reach:
                 return True
     # However thin (or rounded to nothing: a flat wall's points are seldom exactly in a line): some of its outline
-    # standing more than `reach` inside the lot. Points along each side, and on each side the point nearest each
-    # lot corner within 20 reaches of it (where a side cutting across a corner of the lot goes deepest: a corner
-    # as sharp as 6 degrees); a jog's notch isn't the lot.
+    # standing more than `reach` inside the lot. Each side of its outline is cut to the stretches of it inside the
+    # lot (a jog's notch or a U's gap isn't the lot), and points are taken along each stretch and, on it, where it
+    # passes nearest each lot corner within 20 reaches (where a side cutting across a corner goes deepest: a corner
+    # as sharp as 6 degrees).
     if not hull:
         return False
-    sides = list(zip(hull, hull[1:] + hull[:1])) if len(hull) > 1 else [(hull[0], hull[0])]
-    pts = []
-    for (ax, ay), (bx, by) in sides:
+    if len(hull) == 1:
+        return _inside(hull[0][0], hull[0][1], lot) and _deeper_than(hull, lot, reach)
+    lx0, ly0 = min(x for x, _ in lot) - reach, min(y for _, y in lot) - reach
+    lx1, ly1 = max(x for x, _ in lot) + reach, max(y for _, y in lot) + reach
+    pts, m = [], 20 * reach
+    for (ax, ay), (bx, by) in zip(hull, hull[1:] + hull[:1]):
+        if max(ax, bx) < lx0 or min(ax, bx) > lx1 or max(ay, by) < ly0 or min(ay, by) > ly1:
+            continue                                            # wholly off the lot's box
         dx, dy = bx - ax, by - ay
-        pts += [(ax + dx * k / 16, ay + dy * k / 16) for k in range(17)]
-        if dx or dy:
-            m = 20 * reach
+        if not (dx or dy):
+            continue
+        for t0, t1 in _stretches_inside((ax, ay), (bx, by), lot):
+            pts += [(ax + dx * (t0 + (t1 - t0) * k / 16), ay + dy * (t0 + (t1 - t0) * k / 16)) for k in range(17)]
             for cx, cy in lot:
                 if min(ax, bx) - m <= cx <= max(ax, bx) + m and min(ay, by) - m <= cy <= max(ay, by) + m:
-                    t = min(1.0, max(0.0, ((cx - ax) * dx + (cy - ay) * dy) / (dx * dx + dy * dy)))
-                    pts.append((ax + t * dx, ay + t * dy))
-    return _deeper_than([p for p in pts if _inside(p[0], p[1], lot)], lot, reach)
+                    t = ((cx - ax) * dx + (cy - ay) * dy) / (dx * dx + dy * dy)
+                    if t0 <= t <= t1:
+                        pts.append((ax + t * dx, ay + t * dy))
+    return _deeper_than(pts, lot, reach)
+
+
+def _stretches_inside(a, b, lot):
+    """The stretches (t0, t1) of the segment a-b (a + t (b - a), t from 0 to 1) inside the ring `lot`: cut where it
+    crosses the lot's outline, each piece kept when its middle is inside."""
+    (ax, ay), (bx, by) = a, b
+    dx, dy = bx - ax, by - ay
+    ts = [0.0, 1.0]
+    for (cx, cy), (ex, ey) in zip([lot[-1]] + lot[:-1], lot):
+        if max(cx, ex) < min(ax, bx) or min(cx, ex) > max(ax, bx) or max(cy, ey) < min(ay, by) \
+                or min(cy, ey) > max(ay, by):
+            continue
+        fx, fy = ex - cx, ey - cy
+        den = dx * fy - dy * fx
+        if den == 0:
+            continue                                            # parallel: its ends, if on it, cut nothing new
+        t = ((cx - ax) * fy - (cy - ay) * fx) / den
+        u = ((cx - ax) * dy - (cy - ay) * dx) / den
+        if 0.0 < t < 1.0 and -1e-9 <= u <= 1 + 1e-9:
+            ts.append(t)
+    ts.sort()
+    return [(t0, t1) for t0, t1 in zip(ts, ts[1:])
+            if t1 > t0 and _inside(ax + dx * (t0 + t1) / 2, ay + dy * (t0 + t1) / 2, lot)]
 
 
 def _deeper_than(pts, lot, reach):

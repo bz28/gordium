@@ -1463,12 +1463,21 @@ def test_a_wall_flat_in_plan_at_any_angle_counts_as_on_the_lot(at):
     assert reaches_into_lot(diamond, line, ON_LOT_REACH, (-17, tip, 23, tip))
     hair = [(-20, 50 - 0.05 * math.sqrt(2)), (20, 50 - 0.05 * math.sqrt(2))]   # 0.05 ft in: a hair
     assert not reaches_into_lot(diamond, hair, ON_LOT_REACH, (-20, hair[0][1], 20, hair[0][1]))
+    deep = 50 - 2 * math.sqrt(2)                       # 200 ft long, 2 ft inside the corner (round 5 of PR 78)
+    assert reaches_into_lot(diamond, [(-103, deep), (97, deep)], ON_LOT_REACH, (-103, deep, 97, deep))
+    long_lot = [(at, at), (at + 50, at), (at + 50, at + 100), (at, at + 100)]
+    wall = [(at - 530, at + 50), (at + 520, at + 50)]  # 1,050 ft long, across the middle of a 50 ft wide lot
+    assert reaches_into_lot(long_lot, wall, ON_LOT_REACH, (at - 530, at + 50, at + 520, at + 50))
+    assert reaches_into_lot(long_lot, wall + [(at + 520, at + 50 + 1 / 24), (at - 530, at + 50 + 1 / 24)],
+                            ON_LOT_REACH)          # half an inch thick
 
 
 def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
     """A GIS lot outline has hundreds of points, and a neighbour drawn along the line gives an inside part with as
     many: the depth test once measured every sample against every outline edge (1.75 s per neighbour on a
-    1,000-point lot, review round 3 of PR 78). It measures the part's corners' sides against the edges near them."""
+    1,000-point lot, review round 3 of PR 78; a round mesh a hair over took 1 s, round 5). Only the stretches of
+    the object's sides inside the lot are measured, against the outline edges near them."""
+    import math
     import time
     from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
     n = 250
@@ -1477,7 +1486,11 @@ def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
     start = time.perf_counter()
     for k in range(20):
         assert not reaches_into_lot(lot, [(-10, 1 + k), (0.05, 1 + k), (0.05, 90), (-10, 90)], ON_LOT_REACH)
-    assert time.perf_counter() - start < 5.0             # about 0.4 s; the old way took 35 s
+    for k in range(5):                                 # a round tank or tree crown (a 1,000-vertex mesh) a hair over
+        tank = [(57.95 + 8 * math.cos(2 * math.pi * j / 1000), 50 + k + 8 * math.sin(2 * math.pi * j / 1000))
+                for j in range(1000)]
+        assert not reaches_into_lot(lot, tank, ON_LOT_REACH)
+    assert time.perf_counter() - start < 3.0             # about 0.4 s; the old ways took 35 s, then 5 s
 
 
 def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
