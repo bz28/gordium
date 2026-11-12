@@ -12,20 +12,25 @@ Why a second reader is allowed at all, and the alternatives: [docs/decisions/202
 
 | Path | What it is | Made by |
 |---|---|---|
-| `scenes/*.yaml` | Each scene: a small drawing written as data (the lot, each building, other objects, the ground, an edit), what it tests in plain words, and the verdict of every rule it decides, worked out by hand before Gordium ran (commits 182391ef and 2eab4b11). Rows found only on running are marked "found on running", with why. | By hand |
+| `scenes/*.yaml` | Each scene: a small drawing written as data (the lot, each building, other objects, the ground, an edit), what it tests in plain words, and the verdict of every rule it decides, worked out by hand before Gordium ran (commits 182391ef, 2eab4b11 and 09320095). Scenes 18 on also say which host reading they guard (`guards`: the row of the [Revit reading design note](../../docs/revit/revit_reading_design.md) and the Rhino code it stands for). Rows found only on running are marked "found on running", with why. | By hand |
 | `common_verdicts.yaml` | The rows every scene gives the same status (they depend only on facts every scene states alike). A scene's check must give exactly these rows plus its own. | By hand |
 | `expected/<scene>.site.json` | The description a host must send for the scene (`.after` for the step after its edit), worked out from the scene's numbers alone, never by reading a model. | `python -m design_checker.conformance --write` |
 | `models/<scene>.3dm` | The scene drawn in Rhino's file format, every object and layer with a fixed id (a block's definition and the object inside it excepted: rhino3dm makes their ids, and no reader uses them; so a rewrite reads the same; the files' bytes still differ on each write, as Rhino stamps them). | the same |
 | `recorded/<host>/<scene>.json` | A host's descriptions of each scene, recorded once on its own machine. `recorded/rhino3dm/` is the Rhino reference adapter's; `recorded/revit/` is empty until the Revit add-in records its own. | the host |
 
-The 17 scenes: a box house; a curved wall; an open solid; a block on the Building layer; a garage left out
+The 26 scenes: a box house; a curved wall; an open solid; a block on the Building layer; a garage left out
 (scenario 06); no grade; spot grades on a slope, then the house moves (scenario 07); a model in millimetres; two lot
 outlines; survey coordinates far from the origin; a corner lot; ids that stay the same after an edit; objects left
 out that touch the house, sit on the neighbourhood's layer or are a block; a terrain mesh left out (it looks like
 the ground); a curved rear lot line; and two descriptions no Rhino drawing gives, checked for their verdicts only:
 no lot with no reason said, and no buildings sent by a host that didn't look at everything. Scenes 15 to 17 were
 added in review (commit 2eab4b11, hand-worked before running): before them no left-out object touched the house, so a
-host that never said "touching" would have passed.
+host that never said "touching" would have passed. Scenes 18 to 26 are the cases of the Revit reading design note's
+section 7 that Rhino can draw (commit 09320095, hand-worked before running): a house built from parts (walls, slabs,
+a window, a curtain wall, a built-in, the roof a closed mesh); the house only inside a block on another layer (a
+linked model); a house of parts in a group, the group moved; the lot picked from two outlines; no lot outline; the
+picked lot deleted; an open property line, alone and picked; and blocks with nothing to measure in them. The note's
+other cases need Revit (or, for its terrain scene, a live Rhino recording) and wait for the Windows trial.
 
 ## What passing means
 
@@ -84,7 +89,9 @@ A host that can't run on the Mac (Revit) is checked from recordings:
 
    The scene's ids are the YAML's: `lot` (and `lot_2`…), each building's id (or `<id>_floor1`, `_floor2`… for a
    building with `floors`), each other object's id. One `ids` map serves every step, so a host whose ids change
-   at the edit fails. For a scene with `then:`, make the edit in the host (move the objects; don't redraw them)
+   at the edit fails. For a scene with `picked:` (21, 23, 25), pick the lot in the host as the architect would:
+   the facts' `lot_id` (`conformance.facts`) is the reference model's Rhino id, not the host's own. For a scene
+   with `then:`, make the edit in the host (move the objects; don't redraw them)
    and record "after the edit" too.
 3. **Record every scene**: a host with any recording must have one for every drawn scene, so the hard ones can't
    be left out.

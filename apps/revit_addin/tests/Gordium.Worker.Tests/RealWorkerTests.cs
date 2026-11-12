@@ -61,9 +61,9 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
     [Fact]
     public void Every_conformance_scene_step_is_tested()
     {
-        // 17 scenes, 2 with a step after the edit: the count the conformance README and the runbook give
-        Assert.Equal(19, SceneCase.All.Count);
-        Assert.Equal(17, SceneCase.All.Select(c => c.Scene).Distinct().Count());
+        // 26 scenes, 3 with a step after the edit: the count the conformance README and the runbook give
+        Assert.Equal(29, SceneCase.All.Count);
+        Assert.Equal(26, SceneCase.All.Select(c => c.Scene).Distinct().Count());
     }
 
     [Theory]

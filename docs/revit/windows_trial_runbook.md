@@ -23,7 +23,7 @@ edit. The trial ends with a go / no-go and a filled-in results table, not with a
 | Q2 | Can a minimal C# add-in start the Python worker and get an answer back? | The add-in starts `python -m design_checker serve`, sends `hello`, then `check_site` for the box-house scene, and the answer matches what the Mac gives | Days 3 to 4 |
 | Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each real model (Snowdon Towers alone answers the reading half only, as "provisional (Snowdon)": it has no Ithaca lot, and its survey coordinates stay "not tested"; Q3 is not a go until the architects' models are read), the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 8 to 9 |
 | Q4 | How long does reading take after an edit? | Within the targets in section 6, or the miss recorded and the MVP planned as "check on a button" (section 6: a slow read is not a stop) | Day 10, measured in section 5 |
-| Q5 | Can the 15 drawn conformance scenes be recorded from Revit and pass? | `python -m design_checker.conformance` on the Mac prints `OK: every scene conforms` with `recorded/revit/` filled | Days 5 to 8, section 4 |
+| Q5 | Can the 24 drawn conformance scenes be recorded from Revit and pass? | `python -m design_checker.conformance` on the Mac prints `OK: every scene conforms` with `recorded/revit/` filled | Days 5 to 8, section 4 |
 
 Not in the trial: the dockable pane, the live-check screen, rooms, doors or stairs. Those come after a "go".
 
@@ -88,10 +88,10 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 | 2 | Open Snowdon Towers and each architect model already in hand, timing the open. Use each for a while as an architect would. Decide Q1 for Revit alone on those: go, or switch (section 6); the add-in half is re-checked on day 4. An architect model arriving later is timed when it arrives, and can reopen Q1 | The models in hand open; Q1 has a yes or no, with numbers, and says which models it rests on |
 | 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Build it twice, like the worker client (`net8.0` and `net10.0`). Confirm which .NET runtime Revit 2027 and 2026 load (Revit 2026's may be .NET 10 after an update: section 7), and which build each loads | The button appears in both Revit versions, the note says which build each loaded, or which version refused it |
 | 4 | Use the worker client, `Gordium.Worker` ([apps/revit_addin](../../apps/revit_addin/README.md): already tested against the real worker on the Mac), for all of this. The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `test_data/host_conformance/expected/01_box_house.site.json` as the `site` and the scene's facts (see "The scene's facts and verdicts" below) | Q2 answered. The `check_site` answer's rows are exactly the scene's expected verdicts. Q1 re-checked with Revit, the add-in and the worker all running (the second memory row in section 5) |
-| 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Start from the [reading design note](revit_reading_design.md): how a Revit element maps to a building, what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit, and how the lot outline is found (by default the architect picks a closed outline, the picked-lot flow; reading the property line directly with `PropertyLine.GetBoundary` works only in Revit 2027). Write into the notes where the trial confirms or changes it, and settle its "to check" items as they come up | Scene 01 recorded and passes (section 4): its own `OK  recorded/revit/01_box_house` line appears. Until all 15 drawn scenes are recorded, the run still ends `FAILED`, with a `revit: no recording for ...` line naming the scenes not yet done; that line is expected, not a failure of scene 01 |
+| 5 | Reading, part 1: a hand-built scene model for scene 01 (box house). The add-in walks its solids and writes a site description: lot, building faces in feet, ids from `UniqueId`. Start from the [reading design note](revit_reading_design.md): how a Revit element maps to a building, what each of the Rhino layers the scenes use (Building, Site, Gordium::Context, Gordium::Grade, Terrain, Default) becomes in Revit, and how the lot outline is found (by default the architect picks a closed outline, the picked-lot flow; reading the property line directly with `PropertyLine.GetBoundary` works only in Revit 2027). Write into the notes where the trial confirms or changes it, and settle its "to check" items as they come up | Scene 01 recorded and passes (section 4): its own `OK  recorded/revit/01_box_house` line appears. Until all 24 drawn scenes are recorded, the run still ends `FAILED`, with a `revit: no recording for ...` line naming the scenes not yet done; that line is expected, not a failure of scene 01 |
 | 6 | Reading, part 2: scenes 02 to 06 (curved wall, open solid, block, garage left out, no grade) | Each recorded and passing (its own `OK  recorded/revit/...` line; the `no recording for` line shrinks) |
 | 7 | Scenes 07 to 12 (spot grades and the move, millimetres, two lot outlines, survey coordinates, corner lot, ids after an edit) | Each recorded and passing, or the failure explained in the notes |
-| 8 | Scenes 15 to 17 (left-out objects, terrain mesh, curved lot line). Then point the add-in at real model 1 (if no architect model has arrived, Snowdon Towers, recorded as provisional): read it, send it, look at the verdicts. Time every stage (section 5) | The Model 1 column (or the Snowdon column) of the Q3 table filled in |
+| 8 | Scenes 15 to 17 (left-out objects, terrain mesh, curved lot line), then 18 to 26 (the scenes from the [reading design note](revit_reading_design.md)'s section 7: a house of native elements, a house in a linked model, a model group moved, the picked-lot flow and open property lines, families with no geometry). Then point the add-in at real model 1 (if no architect model has arrived, Snowdon Towers, recorded as provisional): read it, send it, look at the verdicts. Time every stage (section 5) | The Model 1 column (or the Snowdon column) of the Q3 table filled in |
 | 9 | Real models 2 and 3. For each: flat versus curved faces, `UniqueId`s before and after a small edit, units, survey coordinates. Any not yet arrived: its row says so, and Q3 stays open (the trial is not extended for it; Ben decides when it arrives) | The Model 2 and 3 columns filled in, or marked not arrived |
 | 10 | Timing runs: the edit loop on every model in hand (Snowdon Towers too), five repeats each. Re-run `python -m design_checker.conformance` on the Mac with the final recordings | Section 5 complete |
 | 11 to 12 | Spare. Re-record anything that failed; chase the worst timing; test the other Revit version if only one was used | |
@@ -103,9 +103,9 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 The rules are the [conformance README](../../test_data/host_conformance/README.md)'s "How to add a host". The
 details that matter here:
 
-- **15 scenes are drawn and recorded; 2 are not.** Scenes 13 and 14 are description-only (they have `site:`
-  instead of a drawing) and are never drawn. Scenes 07 and 12 also have a step "after the edit", so the 15
-  recordings hold 17 descriptions: 15 "as drawn" and 2 "after the edit". A host with any recording must have one
+- **24 scenes are drawn and recorded; 2 are not.** Scenes 13 and 14 are description-only (they have `site:`
+  instead of a drawing) and are never drawn. Scenes 07, 12 and 20 also have a step "after the edit", so the 24
+  recordings hold 27 descriptions: 24 "as drawn" and 3 "after the edit". A host with any recording must have one
   for every drawn scene (`coverage_problems` in `conformance.py`), so the hard ones cannot be skipped.
 - **Draw each scene from its YAML** (`test_data/host_conformance/scenes/<scene>.yaml`): the lot outline, each
   building's outline, base and floors (a building with `floors` is one solid per floor), the other objects, the
@@ -124,7 +124,7 @@ details that matter here:
   The scene's ids are the YAML's: `lot` (and `lot_2`, ...), each building's id, or `<id>_floor1`, `_floor2`, ...
   for a building with `floors`, and each other object's id. The step names are exactly `as drawn` and
   `after the edit`. Write the file as UTF-8 (without a BOM, as for requests).
-- **One `ids` map serves every step.** For scenes 07 and 12, make the edit in Revit by moving the elements (the
+- **One `ids` map serves every step.** For scenes 07, 12 and 20, make the edit in Revit by moving the elements (the
   YAML's `then.move` gives how far; do not redraw them), then record "after the edit". A UniqueId that changes at
   the edit fails the scene.
 - **Scenes that need a Revit-specific decision** (write the decision into the notes, and into the PR; the
@@ -134,6 +134,15 @@ details that matter here:
   - *15 (a block off the Building layer):* the shed block is on the Default layer, so it is not a building and is
     not `unsent`: list it under `left_out` (`could_be_building` true, `touching` false), as for the porch and the
     neighbourhood-layer solid in the same scene.
+  - *18 to 26 (the reading design note's scenes):* each YAML's `guards` names the row of the
+    [reading design note](revit_reading_design.md) it tests; draw it with the elements that row names. 18: native
+    walls, floor and roof slabs, a window, a curtain wall's mullions and panel, an in-place family, and the roof
+    slab as a DirectShape of exactly the scene's triangles (a reader that can't tell the mesh is closed sends
+    `open_mesh` and fails the cautious way: record which). 19: the house in a linked model, the host file holding
+    only the lot. 20: the six parts in one model group; move the group. 21, 23 and 25: pick the lot with the add-in
+    (the facts' `lot_id` is then the picked line's `UniqueId`, not the scene's); for 23, pick it, then delete it.
+    24 and 25: a property line finished open. 26: a family instance with no geometry, and one nesting a family
+    with no geometry beside its own solid.
   - *08 (millimetres):* set the project's display units to millimetres. Revit stores lengths in feet whatever it
     shows, so the add-in should send the same description as scene 01; this scene checks that it does.
   - *09 (two lot outlines):* two closed outlines and no lot picked. The add-in sends no lot and the problem

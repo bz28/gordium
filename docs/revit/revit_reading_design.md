@@ -41,7 +41,7 @@ are for the architect's reading only (proposed).
 | Any other element with a Revit `Solid` or mesh with faces (closed or not) (generic models, masses, site, planting, specialty equipment, furniture) on the lot | `left_out`, `could_be_building: true` | A solid on the Default layer | 05 (garage), 15 (porch); the recorder draws these as Generic Models |
 | A family instance off the building categories, loadable or in-place, whatever its geometry (even none at Fine detail) | `left_out`, `could_be_building: true`; with no box, `touching: null` | A block on another layer: Rhino counts every block, whatever it holds | 15 (`shed_block`); empty: **new scene H** |
 | Gordium's own neighbourhood objects (proposed: marked DirectShapes, as Rhino's `Gordium::Context`) | `left_out`, `context: true` | A solid on `Gordium::Context` | 15 (`neighbour_solid`) |
-| Proposed: a linked Revit model, wherever it is placed (Rhino reports such a block wherever it is, with no lot test), that holds any building-category element at any depth of links inside links (as `_block_holds`), or has a closed workset of its own (its hidden part could hold the house; **to check** that the API says so) | `unsent`, kind `"a linked model"`, `not_a_solid`: every building measure needs review | A block holding Building-layer objects (`read_3dm._block_holds`) | 04 (the shed drawn as a linked model); **new scene B** |
+| Proposed: a linked Revit model, wherever it is placed (Rhino reports such a block wherever it is, with no lot test), that holds any building-category element at any depth of links inside links (as `_block_holds`), or has a closed workset of its own (its hidden part could hold the house; **to check** that the API says so) | `unsent`, kind `"a linked model"`, `not_a_solid`: every building measure needs review. Also listed in `left_out` under its `UniqueId`, `could_be_building: true`, as Rhino lists every block off the Building layer (scene 19); ids are unique, so the `unsent` entry is then named by its kind, as Rhino's reader names its `"a block"` | A block holding Building-layer objects (`read_3dm._block_holds`) | 04 (the shed drawn as a linked model); 19 (new scene B's first case) |
 | Proposed: a linked model with no building-category element at any depth, or a 3D CAD import (`ImportInstance`), reaching into the lot | `left_out`, `could_be_building: true` | A block on another layer | **New scene B** (scene 15's block is already the family instance above) |
 | A link that isn't loaded, including a link nested as an overlay (not loaded in the host: **to check**) | Can't be looked inside: `inventory_complete: false` | | Verdicts only: 14 (never drawn); the mapping: **new scene B** |
 | Elements in a closed workset | Proposed: `inventory_complete: false` whenever any user workset is closed (`Workset.IsOpen`), whether or not the reader can still read them (**to check**) | | Verdicts only: 14; the mapping: **new scene B** |
@@ -120,9 +120,10 @@ point back to something the architect can click (ids, below).
 
 **The lot outline.** Rhino's lot is the one closed curve on the Site layer, or the one picked (`lot_id`). Only a
 closed outline is ever a lot, in Revit too: Revit lets a property line be finished open (it only warns that its
-area can't be worked out), and the site description doesn't check that a lot closes, so a reader that sent an open
-line would have the checker close it with an edge nobody drew, and the lot's area, width, coverage and yards could
-comply where Rhino says needs review. A property line, or a set of picked lines, whose ends don't meet in one loop
+area can't be worked out), and the site description doesn't check that a lot closes. The measuring refuses such a
+lot itself (`lot_not_a_loop`, "the lot outline isn't one closed loop of lot lines": scenes 24 and 25 show it), so
+its measures need review either way; but only the reader can say why (it was drawn open, or the picked lot isn't
+there), and the suite compares those codes. A property line, or a set of picked lines, whose ends don't meet in one loop
 (within the reader's tolerance: **to check** how the API says a property line is closed) is not a lot: picked, it
 gives `lot_not_found`; not picked, it counts neither as "one property line" nor towards "two or more", so with no
 closed one the lot is `no_lot_outline`.
@@ -209,6 +210,23 @@ change to `conformance.py`.
 | I | Spot grades and finished spots together; a Toposolid under a house of native walls, picked as the ground, higher inside the house than outside | `finished_spots`, `terrain`, probes outside the walls only | Yes (height) |
 | J | Scene 15 on a model with survey coordinates and true north turned 30° | Boxes and points turned without shrinking; the box filter in the right coordinates | Yes (touching; left-out objects dropped) |
 | K | Scene 01, then the survey point's elevation moved 10 ft | Facts entered under other coordinates aren't used | Yes (height) |
+
+**Drawn so far** (the cases Rhino can draw, built by `conformance_rhino.build` with no Rhino open, their verdicts
+worked out by hand before they ran; each scene's `guards` names the row above it stands for):
+
+| | Scene | What waits |
+|---|---|---|
+| A | 18 (the house of parts: floor and roof slabs, walls, a window, a curtain wall's mullions and panel, a built-in, the roof a closed mesh) | The loft touching no wall or slab: it counts as touching only by the proposed "box around all the buildings" rule, which Rhino doesn't have (Rhino's reader says a loft inside a house of walls touches nothing), so it waits on Ben's decision, and then on Rhino too |
+| B | 19 (the house only inside a block placed on another layer) | The link with no building categories and the CAD import are scene 15's block in Rhino; the unloaded link, the closed workset and the workset closed inside a link have no Rhino equivalent: the Windows trial |
+| E | 20 (a house of parts in one group, the group moved) | Nothing in Rhino; Revit records it in the trial |
+| G | 21 (picked from two), 22 (none), 23 (the picked lot deleted), 24 (an open property line), 25 (it picked) | Several picked lines, and picked lines that don't close: Rhino picks one curve only; the Windows trial |
+| H | 26 (a block holding only an empty solid; a shed holding a nested block of an empty solid) | A building-category family with no Fine geometry (Rhino sends an empty Building-layer solid as `open_solid`, Revit `not_a_solid`: no shared expected answer) and a wall whose family holds an empty solid: the Windows trial |
+| C, D, I, J, K | none | Host-only (section 7's opening): the Windows trial, or for I a live Rhino recording (the reference adapter reads no terrain or finished spots) |
+| F | none | Ben's decision on the "wholly inside" rule |
+
+Found on running: a house drawn as parts with no floor marks, 20 ft tall, has stories needing review (the drawing
+allows 1 or 2, `measure._stories_whole`), where the same house as Gordium's floor blocks complies. A native Revit
+house will need its stories entered (or its floors marked) before that row can comply.
 
 ## 8. Left for the trial
 

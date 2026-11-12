@@ -77,7 +77,7 @@ the message and no verdicts.
 
 `dotnet test` (run in `apps/revit_addin`) runs against the real Python worker and a stand-in one:
 
-- **Every conformance scene** (`test_data/host_conformance/`: 17 scenes, 19 steps): `check_site` with the scene's
+- **Every conformance scene** (`test_data/host_conformance/`: 26 scenes, 29 steps): `check_site` with the scene's
   expected description and facts gives exactly the hand-worked verdicts, every row and no row more. The facts and
   verdicts come from the scene files through the conformance suite's own code (`scene_cases.py`), never retyped.
 - **`hello`, an unknown command, bad facts, session commands** (a constant, a refused part, `want`, an unknown
