@@ -1890,7 +1890,8 @@ def _extras(doc, facts):
             "context_left_out": logic.context_left_out(
                 {i: doc.Layers[_find(doc, i).Attributes.LayerIndex].FullPath for i in left_out if _find(doc, i)}),
             "ground_like": _ground_like(doc, left_out, _find(doc, facts.get("lot_id") or "")),
-            "left_out_advice": _link_advice(doc, left_out),
+            "left_out_advice": logic.guard(lambda: _link_advice(doc, left_out), "say which linked file to reload",
+                                           fallback={})(),
             "sources": fact_sources(doc)}
 
 
