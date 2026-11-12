@@ -664,6 +664,41 @@ def test_the_live_command_walks_each_block_definition_once_however_often_it_is_p
     assert _Definition.walked == 2 * 3                  # 2 definitions, in each of the 3 looks
 
 
+def test_the_live_command_counts_a_block_whose_status_cant_be_read_as_left_out_and_touching():
+    """Review round 1: reading a definition's ArchiveFileStatus may fail; the command then sends no status (None),
+    which is not known: the block, a shed on the lot apart from the house, is left out and touching, never told by
+    its box."""
+    x, y = 1000.0, 2000.0
+
+    class Unreadable(_Definition):
+        @property
+        def ArchiveFileStatus(self):  # noqa: N802
+            raise RuntimeError("no status")
+
+        @ArchiveFileStatus.setter
+        def ArchiveFileStatus(self, value):  # noqa: N802
+            pass
+    shed = _InstanceObject("shed", None, definition=Unreadable([_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))]))
+    left, touching, _, outlines = _live_left_out({"shed": shed}, (x, y))
+    assert left == ["shed"] and touching == ["shed"] and outlines == []
+
+
+def test_the_live_command_walks_no_deeper_than_host_core_looks():
+    """Review round 1: the command's look (_seen) walked blocks inside blocks at any depth, where host_core looks
+    32 deep and no further (no box). A chain 40 deep: no box, and only the first 33 definitions walked."""
+    x, y = 1000.0, 2000.0
+    inner = _Definition([_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
+    chain = [inner]
+    for k in range(40):
+        chain.append(_Definition([_InstanceObject("c%d" % k, None, definition=chain[-1])]))
+    top = _InstanceObject("deep", None, definition=chain[-1])
+    _Definition.walked = 0
+    left, touching, _, _ = _live_left_out({"deep": top}, (x, y))
+    assert left == ["deep"] and touching == ["deep"]
+    from design_checker.host_core.left_out import MAX_BLOCK_DEPTH
+    assert _Definition.walked == 3 * (MAX_BLOCK_DEPTH + 1)              # in each of the 3 looks
+
+
 def test_the_reference_adapter_gives_a_block_holding_a_part_with_no_box_no_box(tmp_path):
     """The adapter's half: a block holding a solid far off the lot and a block whose definition isn't in the file is
     listed, touching unknown (counts as touching), as the live command now lists it."""

@@ -1752,25 +1752,26 @@ def _not_included(doc, lot):
     return [d["id"] for d in logic.left_out_decisions(lot_seen, objects, definitions, _scale(doc)) if d["left_out"]]
 
 
-def _seen(o, definitions):
+def _seen(o, definitions, depth=0):
     """What the check sees of one object, as host_core.left_out reads it: its id and its box (None when Rhino has
     no valid box for it: an empty block, an empty SubD); and, for a placed block, its definition's id (None when it
     has none), with what that definition holds (each part seen the same way, blocks inside blocks too) and its
     ArchiveFileStatus by name (None when it can't be read) put into `definitions` once, however often it is placed.
     Only what Rhino says: whether that adds up to a box that covers all of it is host_core's decision
-    (no_box_reasons)."""
+    (no_box_reasons). A definition nested deeper than logic.MAX_BLOCK_DEPTH isn't walked: host_core doesn't look
+    there (it gives no box), as the command never did."""
     b = o.Geometry.GetBoundingBox(True)
     seen = {"id": str(o.Id), "box": [b.Min.X, b.Min.Y, b.Min.Z, b.Max.X, b.Max.Y, b.Max.Z] if b.IsValid else None}
     if isinstance(o, Rhino.DocObjects.InstanceObject):
         definition = o.InstanceDefinition
         seen["definition"] = None if definition is None else str(definition.Id)
-        if definition is not None and seen["definition"] not in definitions:
+        if definition is not None and seen["definition"] not in definitions and depth <= logic.MAX_BLOCK_DEPTH:
             entry = definitions[seen["definition"]] = {"status": None, "parts": []}   # before its parts: once
             try:
                 entry["status"] = str(definition.ArchiveFileStatus)
             except Exception:                                       # no status to read: None, which isn't known
                 entry["status"] = None
-            entry["parts"] = [_seen(p, definitions) for p in definition.GetObjects()]
+            entry["parts"] = [_seen(p, definitions, depth + 1) for p in definition.GetObjects()]
     return seen
 
 

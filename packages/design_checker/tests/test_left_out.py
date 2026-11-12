@@ -136,6 +136,20 @@ def test_the_reach_and_the_gap_are_in_feet_whatever_the_model_units():
     assert [g["touching"] for g in lo.touching_decisions(sheds, [house], feet_per_unit=mm)] == [True, False]
 
 
+@pytest.mark.parametrize("ring", [[], [[0, 0], [60, 0]], [[0, 0], [30, 0], [60, 0]], [[0, 0], [60, 0], [0, 0], [60, 0]]],
+                         ids=["empty", "two_points", "in_a_line", "back_and_forth"])
+def test_a_lot_with_no_outline_is_refused_never_read_as_everything_off_it(ring):
+    """Review round 1: a ring with no area made every object "off_lot", a shed in the middle too."""
+    with pytest.raises(ValueError, match="lot: its ring is an outline"):
+        lo.left_out_decisions({"ring": ring, "box": [0, 0, 60, 120]}, [_obj("shed", SHED)])
+
+
+def test_a_lot_box_sent_too_small_grows_to_hold_the_ring():
+    """Review round 1: a lot box smaller than its outline made a shed on the lot "far_from_lot", never outlined."""
+    got = lo.left_out_decisions({"ring": LOT["ring"], "box": [0, 0, 1, 1]}, [_obj("shed", SHED), _obj("far", FAR)])
+    assert [(g["left_out"], g["why"]) for g in got] == [(True, "on_lot"), (False, "far_from_lot")]
+
+
 # ---- touching ----------------------------------------------------------------------------------------------------
 
 def test_touching_is_a_box_within_a_tenth_of_a_foot_edges_meeting_included():

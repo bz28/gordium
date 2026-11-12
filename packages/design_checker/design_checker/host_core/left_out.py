@@ -29,7 +29,8 @@ What a host sends, in its own model units (`feet_per_unit` says how many feet on
                  its status: the host's word for whether what it holds is the design (Rhino's ArchiveFileStatus
                  by name; BLOCK_CONTENTS_KNOWN are the two that say it is). Each definition once, however often
                  it is placed.
-  lot            {"ring": [[x, y], ...] (its outline's points), "box": [x0, y0, x1, y1] (its plan box)} or null
+  lot            {"ring": [[x, y], ...] (its outline's points: at least 3, around some area, or it is refused),
+                  "box": [x0, y0, x1, y1] (its plan box, grown to hold the ring if it doesn't)} or null
   buildings      the measured buildings' boxes, [x0, y0, z0, x1, y1, z1] each (null: none to give, skipped)
 
 Moved here from rhino_logic.py unchanged (rhino_logic still offers every name): ON_LOT_REACH, box_near_lot,
@@ -431,6 +432,11 @@ def left_out_decisions(lot, objects, definitions=None, feet_per_unit=1.0):
     if lot_box is None:
         raise ValueError("lot: its box is 4 numbers")
     ring = _sent_points(lot["ring"], "lot")
+    if len(set(ring)) < 3 or abs(_ring_area(ring)) <= 1e-12:     # no outline to measure against: never "off"
+        raise ValueError("lot: its ring is an outline, at least 3 points around some area")
+    xs, ys = [x for x, _ in ring], [y for _, y in ring]          # the box only ever grows to hold the ring, so a
+    lot_box = (min(lot_box[0], min(xs)), min(lot_box[1], min(ys)),   # box sent too small can't skip an object
+               max(lot_box[2], max(xs)), max(lot_box[3], max(ys)))   # (Rhino's curve box already holds its ring)
     reach = ON_LOT_REACH / feet_per_unit                       # ft -> model units
     out, memo = [], {}
     for o in objects:
