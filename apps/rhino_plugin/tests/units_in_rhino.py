@@ -12,12 +12,13 @@ import runpy
 import sys
 import tempfile
 import traceback
+import types
 
 import Rhino
 import scriptcontext as sc
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from test_docs_in_rhino import TestDocs  # noqa: E402
+from test_docs_in_rhino import TestDocs, look_up_106  # noqa: E402
 import System
 
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -30,7 +31,10 @@ WANTED = ("Small Objects - Millimeters", "Large Objects - Millimeters", "Large O
 def run(name, docs):
     doc = docs.open(name)                      # a fresh copy of the template, the active document (or it raises)
     sc.sticky.setdefault("gordium_state", {})["auto_ok"] = True
-    runpy.run_path(WT + "/apps/rhino_plugin/gordium_start.py", run_name="__main__")
+    # the real command script, after typing 106 Ithaca Rd and pressing Look up (recorded): a new file waits for a
+    # lookup since 2026-10-27 (the picks go in Gordium's state, the sticky dict, before the script loads it)
+    look_up_106(types.SimpleNamespace(STATE=sc.sticky["gordium_state"]),
+                lambda: runpy.run_path(WT + "/apps/rhino_plugin/gordium_start.py", run_name="__main__"))
     g = sys.modules["gordium_rhino"]
     house = Rhino.Geometry.BoundingBox.Empty
     for o in g._buildings(doc):
