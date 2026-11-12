@@ -178,7 +178,8 @@ def test_each_number_keeps_its_limit_words_and_unit():
     got = [shown(s) for s in statements(
         "1. The riser height shall be not more than 8 1/4 inches (209 mm), not exceed the smallest by more than "
         "3/8 inch with three or fewer risers per Section R318.7.5 and Table R401.4.1(2) in one-family dwellings")]
-    assert got == ["not more than 8 1/4 inch", "209 mm", "by more than 3/8 inch", "three or fewer", "one"]
+    assert got == ["not more than 8 1/4 inch", "209 mm", "not exceed the smallest by more than 3/8 inch", "three or fewer",
+                   "one"]
 
 
 def test_a_misread_number_or_limit_word_reads_differently():
@@ -215,13 +216,24 @@ def test_a_comparison_word_after_a_conversion_in_brackets_is_kept():
     ("shall not be less than 7 feet", ["not be less than 7 foot"]),          # R315.3, p.56
     ("nor more than 80 inches", ["nor more than 80 inch"]),                  # BO107.2.2, p.971
     ("no more than five", ["no more than five"]), ("not be greater than one-half", ["not be greater than one-half"]),
-    ("shall be not less than 36 inches", ["not less than 36 inch"]), ("and not within 3 feet", ["not within 3 foot"])])
+    ("shall be not less than 36 inches", ["not less than 36 inch"]), ("and not within 3 feet", ["not within 3 foot"]),
+    # review round 3: a verb between the "not" and the comparison (R320.3, R320.5, p.104)
+    ("shall not project more than 4 1/2 inches", ["not project more than 4 1/2 inch"]),
+    ("shall not form a gap more than 1/4 inch", ["not form a gap more than 1/4 inch"]),
+    ("cannot be less than 3 feet", ["cannot be less than 3 foot"]), ("not to exceed 4 inches", ["not to exceed 4 inch"])])
 def test_a_comparison_keeps_the_not_printed_before_it(text, expect):
     # Review round 2 of step 1b: "shall not be less than 7 feet" was recorded "less than 7 foot", the law backwards,
     # so a second reading that dropped the "not" would still have agreed
     got = [shown(s) for s in statements(text)]
     assert got == expect
-    assert got != [shown(s) for s in statements(text.replace("not ", "").replace("nor ", "").replace("no ", ""))]
+    assert got != [shown(s) for s in statements(text.replace("not ", "").replace("nor ", "").replace("no ", "")
+                                                 .replace("cannot ", ""))]
+
+
+def test_a_not_in_another_clause_is_not_taken_and_a_pound_is_a_unit():
+    assert [shown(s) for s in statements("is not required where the stair has more than 3 risers")] == ["more than 3 riser"]
+    assert [shown(s) for s in statements("not less than 36 inches, more than 2")] == ["not less than 36 inch", "more than 2"]
+    assert [shown(s) for s in statements("a 300-pound (136 kg) load")] == ["300 pound", "136 kg"]     # R315.5.3.1
 
 
 def test_a_whole_number_and_a_part_in_words_is_one_number():
