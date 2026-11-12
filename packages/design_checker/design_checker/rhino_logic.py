@@ -1221,16 +1221,36 @@ def box_near_lot(box, lot_box, reach):
     return x0 <= a1 + reach and a0 - reach <= x1 and y0 <= b1 + reach and b0 - reach <= y1
 
 
+# A block definition's contents are the block only when it isn't linked to a file, or its linked file was read and
+# hasn't changed since (RhinoCommon's InstanceDefinitionArchiveFileStatus, by name).
+BLOCK_CONTENTS_KNOWN = ("NotALinkedInstanceDefinition", "LinkedFileIsUpToDate")
+
+
+def block_contents_known(archive_status) -> bool:
+    """Whether what a block definition holds in the document is the block: its ArchiveFileStatus (the enum value or
+    its name) is one of BLOCK_CONTENTS_KNOWN. Every other status is not: LinkedFileNotFound (live Rhino 8.35, Mac,
+    2026-11-12: the definition then holds one text label, "Missing block file: ...", at the centre of the last
+    known shape, a valid box of a single point, so the block looks whole and nowhere near the house),
+    LinkedFileNotReadable, and LinkedFileIsNewer / IsOlder / IsDifferent (the file has changed since it was read:
+    what is drawn may not be the design). A status not in the list, or none, is not known either."""
+    return str(archive_status).split(".")[-1] in BLOCK_CONTENTS_KNOWN
+
+
 def reaches_into_lot(lot_ring, points, reach, box=None):
     """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
     reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its
     plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
-    wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
-    line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
-    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction.
+    wider than `reach`, or some of it stands more than `reach` inside the lot's outline (however thin it is: a
+    1-inch fin wall, a mast, an upright panel; the averaged width measures only how thick it is). Wholly on the
+    lot, straddling a lot line or mostly past it: on the lot. Touching the line from outside, a hair over it (no
+    more than `reach` in: a wall drawn skewed counts once its deep end is more than `reach` in), or off the lot
+    but inside the lot's bounding box (a rotated or jogged lot, the neighbour's house): not. The hull only ever
+    makes an object bigger, the cautious direction.
     `box`, the object's plan bounding box (x0, y0, x1, y1), is its footprint whenever the points don't outline
     one (fewer than 3, or all in a line, as a sphere's seam is): a solid always covers some ground, so such
-    points under-describe it."""
+    points under-describe it. When the box covers no ground either (a point or a line in plan: an upright panel,
+    a block of one label), the object lies along that line, and it is on the lot when some of the line stands
+    more than `reach` inside the outline."""
     lot = [(float(x), float(y)) for x, y in lot_ring]
     if len(lot) > 1 and lot[0] == lot[-1]:
         lot = lot[:-1]
@@ -1241,16 +1261,141 @@ def reaches_into_lot(lot_ring, points, reach, box=None):
     hull = _hull(points)
     if (len(hull) < 3 or _ring_area(hull) <= 1e-12) and box is not None:
         x0, y0, x1, y1 = box
-        hull = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
-    if len(hull) < 3 or _ring_area(hull) <= 1e-12:
+        square = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+        hull = square if len(square) >= 3 and _ring_area(square) > 1e-12 else _hull([(x0, y0), (x1, y1)])
+    if len(hull) >= 3 and _ring_area(hull) > 1e-12:
+        part = _clip(lot, hull)
+        if len(part) >= 3:
+            area = abs(_ring_area(part))
+            perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
+                            for i in range(len(part)))
+            if perimeter > 0 and 2 * area / perimeter > reach:
+                return True
+    # However thin (or rounded to nothing: a flat wall's points are seldom exactly in a line): some of its outline
+    # standing more than `reach` inside the lot. Each side of its outline is cut to the stretches of it inside the
+    # lot (a jog's notch or a U's gap isn't the lot), and each stretch is searched for its deepest point (_deep).
+    if not hull:
         return False
-    part = _clip(lot, hull)
-    if len(part) < 3:
-        return False
-    area = abs(_ring_area(part))
-    perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
-                    for i in range(len(part)))
-    return perimeter > 0 and 2 * area / perimeter > reach
+    xs, ys = [x for x, _ in hull], [y for _, y in hull]
+    depth = _Depth(lot, (min(xs), min(ys), max(xs), max(ys)), 2 * reach)
+    if len(hull) == 1:
+        return _inside(hull[0][0], hull[0][1], lot) and depth(*hull[0]) > reach
+    inside = _inside(hull[0][0], hull[0][1], lot)               # walked round: it changes only where a side crosses
+    for a, b in zip(hull, hull[1:] + hull[:1]):
+        if a == b:
+            continue
+        stretches, inside = _stretches_inside(a, b, depth.edges, lot, inside)
+        if any(_deep(a, b, t0, t1, depth, reach) for t0, t1 in stretches):
+            return True
+    return False
+
+
+class _Depth:
+    """How far a point inside the lot is from the lot's outline, up to `cap` (more than that reads as `cap`): only
+    the outline edges near the object's plan box (`box`, grown by `cap`), found through a grid, are measured (a
+    GIS lot outline has hundreds of points, a round tank's outline thousands)."""
+
+    def __init__(self, lot, box, cap):
+        x0, y0, x1, y1 = box[0] - 2 * cap, box[1] - 2 * cap, box[2] + 2 * cap, box[3] + 2 * cap
+        self.cap, self.box, self.asked = cap, (x0, y0, x1, y1), 0
+        self.edges = [(a, b) for a, b in zip([lot[-1]] + lot[:-1], lot)
+                      if min(a[0], b[0]) <= x1 and max(a[0], b[0]) >= x0 and min(a[1], b[1]) <= y1
+                      and max(a[1], b[1]) >= y0]
+        self.cell = max(cap, (x1 - x0 + y1 - y0) / 256)
+        self.grid = None                                         # built at the first question
+
+    def _build(self):
+        self.grid = {}
+        x0, y0, x1, y1 = self.box
+        for e in self.edges:                                     # each edge in the cells along it, in the box
+            (ax, ay), (bx, by) = e
+            lo, hi = 0.0, 1.0                                    # the part of it inside the box (Liang-Barsky)
+            for d, q0, q1 in ((bx - ax, x0 - ax, x1 - ax), (by - ay, y0 - ay, y1 - ay)):
+                if d:
+                    t0, t1 = sorted((q0 / d, q1 / d))
+                    lo, hi = max(lo, t0), min(hi, t1)
+            if lo > hi:
+                continue
+            length = (hi - lo) * ((bx - ax) ** 2 + (by - ay) ** 2) ** 0.5
+            n = int(length / (self.cell / 2)) + 1
+            for k in range(n + 1):
+                t = lo + (hi - lo) * k / n
+                key = (int((ax + (bx - ax) * t) // self.cell), int((ay + (by - ay) * t) // self.cell))
+                self.grid.setdefault(key, set()).add(e)
+
+    def __call__(self, x, y):
+        if self.grid is None:
+            self._build()
+        self.asked += 1
+        i, j = int(x // self.cell), int(y // self.cell)
+        best = self.cap * self.cap
+        for di in range(-2, 3):                                  # an edge within `cap` passes within 2 cells
+            for dj in range(-2, 3):
+                for (ax, ay), (bx, by) in self.grid.get((i + di, j + dj), ()):
+                    dx, dy = bx - ax, by - ay
+                    t = min(1.0, max(0.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))) if dx or dy else 0.0
+                    best = min(best, (x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2)
+        return best ** 0.5
+
+
+DEPTH_QUESTIONS = 20000   # depth questions per object before the depth search gives up and says "on the lot"
+
+
+def _deep(a, b, t0, t1, depth, reach, slack=0.5):
+    """Whether some point of the stretch a + t (b - a), t from t0 to t1 (inside the lot), is more than `reach` from
+    the lot's outline. A point's depth changes by at most its own move along the stretch, so a piece whose ends are
+    d0 and d1 deep and which is L long goes no deeper than (d0 + d1 + L) / 2: pieces that can't go deeper than
+    `reach` (and a `slack` share of it, so a wall drawn at the reach along a long line ends) are dropped, the others
+    halved, until a point deeper than `reach` is found or none is left. No point more than `reach` (1 + slack) in,
+    0.15 ft, is missed, however the lot's corners and notches fall along it; between that and `reach`, only a spike
+    of the lot narrower than about 0.1 ft can be. After DEPTH_QUESTIONS questions for one object (a long wall
+    running just inside the line along a jagged outline), it counts as on the lot: the cautious answer, never a
+    long wait on every check."""
+    (ax, ay), (bx, by) = a, b
+    length = ((bx - ax) ** 2 + (by - ay) ** 2) ** 0.5
+    at = lambda t: depth(ax + (bx - ax) * t, ay + (by - ay) * t)   # noqa: E731
+    pieces = [(t0, t1, at(t0), at(t1))]
+    while pieces:
+        if depth.asked > DEPTH_QUESTIONS:
+            return True
+        s, e, ds, de = pieces.pop()
+        if ds > reach or de > reach:
+            return True
+        if (ds + de + (e - s) * length) / 2 <= reach * (1 + slack):
+            continue
+        m = (s + e) / 2
+        dm = at(m)
+        pieces += [(s, m, ds, dm), (m, e, dm, de)]
+    return False
+
+
+def _stretches_inside(a, b, edges, lot, a_inside):
+    """The stretches (t0, t1) of the segment a-b (a + t (b - a), t from 0 to 1) inside the ring `lot`, and whether
+    b is inside: cut where it crosses one of the lot's outline `edges` (those near it), each piece kept when its
+    middle is inside. A side crossing nothing is wholly inside or outside, as its start (`a_inside`) is."""
+    (ax, ay), (bx, by) = a, b
+    dx, dy = bx - ax, by - ay
+    ts, touched = [0.0, 1.0], False
+    for (cx, cy), (ex, ey) in edges:
+        if max(cx, ex) < min(ax, bx) or min(cx, ex) > max(ax, bx) or max(cy, ey) < min(ay, by) \
+                or min(cy, ey) > max(ay, by):
+            continue
+        fx, fy = ex - cx, ey - cy
+        den = dx * fy - dy * fx
+        if den == 0:                                            # parallel: on the same line, it runs along it
+            touched = touched or (cx - ax) * dy - (cy - ay) * dx == 0
+            continue
+        t = ((cx - ax) * fy - (cy - ay) * fx) / den
+        u = ((cx - ax) * dy - (cy - ay) * dx) / den
+        if -1e-9 <= t <= 1 + 1e-9 and -1e-9 <= u <= 1 + 1e-9:
+            touched = True                                      # its ends on the outline count: asked, not carried
+            if 0.0 < t < 1.0:
+                ts.append(t)
+    if not touched:
+        return ([(0.0, 1.0)] if a_inside else []), a_inside
+    ts.sort()
+    return [(t0, t1) for t0, t1 in zip(ts, ts[1:])
+            if t1 > t0 and _inside(ax + dx * (t0 + t1) / 2, ay + dy * (t0 + t1) / 2, lot)], _inside(bx, by, lot)
 
 
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------
