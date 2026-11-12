@@ -1,8 +1,9 @@
 <Project>
   <PropertyGroup>
-    <!-- Revit 2025 and 2026 load add-ins on .NET 8, Revit 2027 on .NET 10 (Autodesk's Revit 2027 "What's new":
-         "Migrating Revit to .NET 10"); Autodesk plans to move 2025/2026 to .NET 10 too, so both are built and
-         tested, and the Windows trial confirms which one the installed Revit runs -->
+    <!-- Revit 2027 runs add-ins on .NET 10 (Autodesk's Revit 2027 "What's new": "Migrating Revit to .NET 10");
+         Revit 2025 and 2026 are built on .NET 8, and Autodesk plans to move them to .NET 10 (Autodesk's blog,
+         "Call for Preview Testing: Revit 2026/2025 Migration to .NET 10", 2026-04-29). So both are built and
+         tested, and the Windows trial confirms which one the installed Revit runs (apps/revit_addin/README.md) -->
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

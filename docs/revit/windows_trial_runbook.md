@@ -258,12 +258,11 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 
 **Checks the trial itself settles** (nothing in the repo answers them today):
 
-- Which .NET runtime each installed Revit loads, and so which build: .NET 8 for Revit 2025 and 2026 and .NET 10
-  for Revit 2027 is what Autodesk's pages say today (Revit 2027 "What's new": [Migrating Revit to .NET 10](https://help.autodesk.com/cloudhelp/2027/ENU/Revit-WhatsNew/files/GUID-8D7A4715-EAF8-4BD1-BE78-061F900D0BCE.htm)),
-  so the worker client is built and tested for both. Autodesk also plans to move Revit 2025 and 2026 to .NET 10
-  ([call for preview testing](https://blog.autodesk.io/call-for-preview-testing-revit-2026-2025-migration-to-net-10/),
-  2026-04-29: a Revit 2026 preview on .NET 10, no release date), so note the Revit 2026 update installed and the
-  runtime it reports. Whether the .NET 8 build also loads in Revit 2027 is not settled by Autodesk's pages either.
+- Which .NET runtime each installed Revit loads, and so which build. Revit 2027 runs on .NET 10 (Revit 2027
+  "What's new": [Migrating Revit to .NET 10](https://help.autodesk.com/cloudhelp/2027/ENU/Revit-WhatsNew/files/GUID-8D7A4715-EAF8-4BD1-BE78-061F900D0BCE.htm)); Revit 2025 and 2026
+  are built on .NET 8, and Autodesk plans to move them to .NET 10 ([call for preview testing](https://blog.autodesk.io/call-for-preview-testing-revit-2026-2025-migration-to-net-10/),
+  2026-04-29: a Revit 2026 preview on .NET 10 tested until 2026-06-03, no release date). So the worker client is built
+  and tested for both; note the Revit 2026 update installed and the runtime it reports. Whether the .NET 8 build also loads in Revit 2027 is not settled by Autodesk's pages either.
 - Whether ARM builds of `rhino3dm`, `shapely` and `numpy` exist, if we ever want a native ARM Python.
 - Which survey coordinates the description carries (scene 10), and what each Rhino layer becomes in Revit.
 
