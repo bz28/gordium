@@ -315,3 +315,127 @@ def test_an_undefined_italic_word_beside_a_defined_one_in_one_phrase_must_be_nam
     rows = _book([_row(2, 6, "R318.1.2 Runs. A flight(s) or stair.", bold="R318.1.2 Runs.",
                        italic=["flight(s) or stair"])])
     assert icc_sections.split(rows, BROUGHT_IN)["problems"] == []
+
+
+# ---- appendices (egress step 1b: Appendix BO) ---------------------------------------------------------------------
+
+def _appendix(extra=()):
+    """The made-up book, then an appendix on p.3: its opening, its own definitions and two sections."""
+    rows = _book()
+    rows += [_row(3, 1, "102102166"), _row(3, 2, "APPENDIX", bold="APPENDIX"), _row(3, 3, "BO", bold="BO"),
+             _row(3, 4, "User notes:", bold="User notes:"),
+             _row(3, 5, "SECTION BO103—DEFINITIONS", bold="SECTION BO103—DEFINITIONS"),
+             _row(3, 6, "BO103.1 General. The terms used in this appendix.", bold="BO103.1 General."),
+             _row(3, 7, "[NY] HOME OCCUPATION. A use of a dwelling.", bold="[NY] HOME OCCUPATION."),
+             _row(3, 8, "[NY] PORCH. An appendix porch.", bold="[NY] PORCH."),
+             _row(3, 9, "[NY] WORK AREA. The altered part.", bold="[NY] WORK AREA."),
+             _row(3, 10, "SECTION BO105—ALTERATIONS", bold="SECTION BO105—ALTERATIONS"),
+             _row(3, 11, "BO105.1 General. In work areas each flight shall have a porch.", bold="BO105.1 General.",
+                  italic=["work areas", "flight"]),
+             _row(3, 12, "BO105.1.1 Level 1. Not egress.", bold="BO105.1.1 Level 1."),
+             *extra,
+             _row(3, 20, "BO105.2 Newly constructed. Not brought in.", bold="BO105.2 Newly constructed."),
+             _row(3, 21, "2025 RESIDENTIAL CODE OF NEW YORK STATE 13")]
+    return rows
+
+
+APPENDIX = {"pages": "1-3", "sections": ["R318"], "alone": ["BO105.1"]}
+
+
+def test_an_appendixs_own_definitions_apply_only_in_that_appendix():
+    rows = _appendix()
+    at = next(i for i, r in enumerate(rows) if r.get("text", "").startswith("R318.1.1"))
+    rows.insert(at + 1, _row(2, 6, "R318.1.2 Work. In the work area a stair is kept.", bold="R318.1.2 Work.",
+                             italic=["work area"]))
+    cut = icc_sections.split(rows, APPENDIX | {"italic_not_defined": {"R318.1.2": {"work area": "R201.3"}}})
+    assert cut["problems"] == [], cut["problems"]
+    by = {p["id"]: p for p in cut["pieces"]}
+    # BO105.1 uses the appendix's WORK AREA and Chapter 2's FLIGHT; its roman "porch" brings in both PORCH definitions
+    assert by["BO105.1"]["uses"] == ["BO103:work_area", "R202:flight"]
+    assert by["BO105.1"]["defined_terms_in_roman"] == ["BO103:porch", "R202:porch"]
+    # the appendix's definitions never apply in the code itself: no R318 piece names BO103:porch
+    assert not any(d.startswith("BO103:") for p in cut["pieces"] if p["id"].startswith("R318")
+                   for d in p["uses"] + p["defined_terms_in_roman"])
+    # the heading the appendix's definitions sit under comes in with them, and the part saying where they apply
+    assert {"BO103", "BO103.1"} <= set(by)
+    assert "BO103:home_occupation" not in by                     # used by none
+
+
+def test_a_part_brought_in_alone_leaves_the_parts_under_it_out():
+    cut = icc_sections.split(_appendix(), APPENDIX)
+    ids = [p["id"] for p in cut["pieces"]]
+    assert "BO105.1" in ids and "BO105.1.1" not in ids
+    assert any(o[3] == "BO105.1.1" for o in cut["outside"])
+    assert any("BO105.1: brought in, but no such heading" in p
+               for p in icc_sections.split(_book(), APPENDIX | {"pages": "1-2"})["problems"])
+
+
+def test_the_books_own_misnumbering_is_cut_only_where_sources_yaml_names_it():
+    skip = [_row(3, 13, "BO105.1.4 Skipped. The book has no BO105.1.2.", bold="BO105.1.4 Skipped."),
+            _row(3, 14, "BO112.1.1 Stray. Printed inside BO105.", bold="BO112.1.1 Stray."),
+            _row(3, 15, "BO105.1.5 After. Goes on.", bold="BO105.1.5 After.")]
+    problems = icc_sections.split(_appendix(skip), APPENDIX)["problems"]
+    assert any("p.3 line 13: BO105.1.4 is out of order after BO105.1.1" in p for p in problems), problems
+    assert any("p.3 line 14: BO112.1.1 is printed inside Section BO105" in p for p in problems), problems
+    named = APPENDIX | {"printed_out_of_order": {"p.3 line 13": {"printed": "BO105.1.4", "why": "the book skips BO105.1.2"},
+                                                 "p.3 line 14": {"printed": "BO112.1.1", "why": "a misprint"}}}
+    cut = icc_sections.split(_appendix(skip), named)
+    assert cut["problems"] == [], cut["problems"]
+    outside = {o[3] for o in cut["outside"]}
+    assert {"BO105.1.4", "BO112.1.1", "BO105.1.5"} <= outside          # each cut where printed, nothing merged
+    stale = APPENDIX | {"printed_out_of_order": {"p.3 line 12": {"printed": "BO105.1.1", "why": "a heading in order"}}}
+    assert any("names p.3 line 12 (printed_out_of_order)" in p for p in icc_sections.split(_appendix(), stale)["problems"])
+    # review round 1: a name whose line prints another heading than it says is a problem, never applied
+    wrong = APPENDIX | {"printed_out_of_order": {"p.3 line 13": {"printed": "BO105.1.9", "why": "stale"},
+                                                 "p.3 line 14": {"printed": "BO112.1.1", "why": "a misprint"}}}
+    problems = icc_sections.split(_appendix(skip), wrong)["problems"]
+    assert any("names p.3 line 13 as printing 'BO105.1.9', but the book prints 'BO105.1.4'" in p for p in problems)
+
+
+def test_a_term_new_yorks_rules_amend_is_cut_under_the_laws_term():
+    # 19 NYCRR 1220.2(e)(4): the book prints HOME OCCUPATION twice; the second is LOAD-BEARING ELEMENT in law
+    twice = [r if r.get("line") != 8 or r.get("page") != 3 else
+             _row(3, 8, "[NY] HOME OCCUPATION. Any column or beam.", bold="[NY] HOME OCCUPATION.") for r in _appendix()]
+    assert "BO103:home_occupation is cut twice" in icc_sections.split(twice, APPENDIX)["problems"]
+    law = {"printed": "HOME OCCUPATION", "term": "LOAD-BEARING ELEMENT", "why": "19 NYCRR"}
+    cut = icc_sections.split(twice, APPENDIX | {"amended_by_law": {"p.3 line 8": law}})
+    assert cut["problems"] == [], cut["problems"]
+    assert any(o[3] == "BO103:load_bearing_element" for o in cut["outside"])
+    # review round 1: a stale line number never renames whatever term is printed there now (here PORCH)
+    cut = icc_sections.split(_appendix(), APPENDIX | {"amended_by_law": {"p.3 line 8": law}})
+    assert any("names p.3 line 8 as printing 'HOME OCCUPATION', but the book prints 'PORCH'" in p for p in cut["problems"])
+    assert "BO103:porch" in next(p for p in cut["pieces"] if p["id"] == "BO105.1")["defined_terms_in_roman"]
+
+
+def test_a_defined_term_with_a_plural_inside_it_is_found():
+    # "changes of occupancy" is CHANGE OF OCCUPANCY, in italics and in roman type
+    rows = _book([_row(2, 6, "R318.1.2 Uses. Changes of occupancy apply.", bold="R318.1.2 Uses.",
+                       italic=["Changes of occupancy"])])
+    rows.insert(4, _row(1, 52, "[RB] CHANGE OF OCCUPANCY. A change.", bold="[RB] CHANGE OF OCCUPANCY."))   # before FLIGHT
+    cut = icc_sections.split(rows, BROUGHT_IN)
+    assert cut["problems"] == [], cut["problems"]
+    assert "R202:change_of_occupancy" in next(p for p in cut["pieces"] if p["id"] == "R318.1.2")["uses"]
+    at = next(i for i, r in enumerate(rows) if r.get("text", "").startswith("R318.1.2"))
+    rows[at] = _row(2, 6, "R318.1.2 Uses. Changes of occupancy apply.", bold="R318.1.2 Uses.")       # roman
+    cut = icc_sections.split(rows, BROUGHT_IN)
+    assert "R202:change_of_occupancy" in next(p for p in cut["pieces"] if p["id"] == "R318.1.2")["defined_terms_in_roman"]
+
+
+def test_pages_that_only_list_section_numbers_are_found_by_their_running_head():
+    from document_extraction.icc_references import lists_only, ways_out
+    rows = [{"page": 21, "line": 2, "text": "CONTENTS"}, {"page": 859, "line": 2, "text": "REFERENCED STANDARDS"},
+            {"page": 1070, "line": 2, "text": "INDEX"}, {"page": 98, "line": 2, "text": "BUILDING PLANNING"}]
+    assert lists_only(rows) == {21, 859, 1070}
+    # a part brought in alone: the parts under it are not brought in, so a pointer to one is listed
+    pieces = [{"id": "BO102.6", "kind": "section", "lines": [[1, 1, 1]]}]
+    lines = {(1, 1): "Replacement windows shall comply with BO102.6.1 and BO102.6."}
+    assert ways_out(pieces, lines, [], alone=["BO102.6"]) == {"BO102.6.1": ["BO102.6"]}
+
+
+def test_a_defined_term_with_an_ies_plural_inside_it_is_found_in_roman_type():
+    # review round 1: "stories above grade plane" (roman) never named STORY ABOVE GRADE PLANE
+    rows = _book([_row(2, 6, "R318.1.2 Height. Two stories above grade plane at most.", bold="R318.1.2 Height.")])
+    rows.insert(7, _row(1, 53, "[RB] STORY ABOVE GRADE PLANE. A story.", bold="[RB] STORY ABOVE GRADE PLANE."))  # after STAIR
+    cut = icc_sections.split(rows, BROUGHT_IN)
+    assert cut["problems"] == [], cut["problems"]
+    assert "R202:story_above_grade_plane" in next(p for p in cut["pieces"] if p["id"] == "R318.1.2")["defined_terms_in_roman"]
