@@ -524,3 +524,42 @@ def test_a_defined_term_with_an_ies_plural_inside_it_is_found_in_roman_type():
     cut = icc_sections.split(rows, BROUGHT_IN)
     assert cut["problems"] == [], cut["problems"]
     assert "R202:story_above_grade_plane" in next(p for p in cut["pieces"] if p["id"] == "R318.1.2")["defined_terms_in_roman"]
+
+
+def _patio(extra=()):
+    """The made-up book, then an appendix like BF on p.3: a section titled DEFINITION (singular), and a term printed
+    under a numbered part titled "Definition" inside another section (BF106.2)."""
+    rows = _book()
+    rows += [_row(3, 1, "102102166"), _row(3, 2, "APPENDIX", bold="APPENDIX"), _row(3, 3, "BF", bold="BF"),
+             _row(3, 4, "SECTION BF101—GENERAL", bold="SECTION BF101—GENERAL"),
+             _row(3, 5, "BF101.1 Scope. Patio covers shall conform.", bold="BF101.1 Scope.", italic=["Patio covers"]),
+             _row(3, 6, "SECTION BF102—DEFINITION", bold="SECTION BF102—DEFINITION"),
+             _row(3, 7, "BF102.1 General. The following term.", bold="BF102.1 General."),
+             _row(3, 8, "PATIO COVER. A structure with open walls.", bold="PATIO COVER."),
+             _row(3, 9, "SECTION BF106—SCREENS", bold="SECTION BF106—SCREENS"),
+             _row(3, 10, "BF106.1 General. Screen enclosures follow this section.", bold="BF106.1 General.",
+                  italic=["Screen enclosures"]),
+             _row(3, 11, "BF106.2 Definition. The following term.", bold="BF106.2 Definition."),
+             _row(3, 12, "SCREEN ENCLOSURE. A building with screen walls.", bold="SCREEN ENCLOSURE."),
+             _row(3, 13, "BF106.3 Screen enclosures. Not brought in.", bold="BF106.3 Screen enclosures."),
+             *extra,
+             _row(3, 19, "SECTION BF107—OTHER", bold="SECTION BF107—OTHER"),
+             _row(3, 20, "2025 RESIDENTIAL CODE OF NEW YORK STATE 13")]
+    return rows
+
+
+def test_appendix_bfs_singular_definition_section_and_its_definition_part_cut_their_terms():
+    # egress step 1c: Appendix BF titles its section of definitions "DEFINITION" and prints a second term under
+    # "BF106.2 Definition."; read only as "DEFINITIONS", BF101.1's italic "Patio covers" matched no definition
+    cut = icc_sections.split(_patio(), {"pages": "1-3", "sections": ["R318", "BF101", "BF106.1"]})
+    assert cut["problems"] == [], cut["problems"]
+    by = {p["id"]: p for p in cut["pieces"]}
+    assert by["BF101.1"]["uses"] == ["BF102:patio_cover"] and by["BF106.1"]["uses"] == ["BF106.2:screen_enclosure"]
+    assert by["BF102:patio_cover"]["kind"] == by["BF106.2:screen_enclosure"]["kind"] == "definition"
+    # the part saying where the term applies comes in with it, the rest of its section does not; the definition
+    # part ends at the next heading: BF106.3 is a numbered part again, never a term
+    assert {"BF102", "BF102.1", "BF106.2"} <= set(by) and any(o[3] == "BF106.3" for o in cut["outside"])
+    # a bold capitals line after a numbered part that is not "Definition(s)" is not a term
+    plain = icc_sections.split(_patio([_row(3, 14, "NOT A TERM. Bold capitals.", bold="NOT A TERM.")]),
+                               {"pages": "1-3", "sections": ["R318", "BF101", "BF106.1"]})
+    assert plain["problems"] == [] and not any("not_a_term" in o[3] for o in plain["outside"])
