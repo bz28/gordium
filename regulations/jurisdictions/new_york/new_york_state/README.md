@@ -27,6 +27,7 @@ Every reference in the brought-in sections was followed (found by code, `documen
 ## What the book's text gets wrong
 
 - **R318.7.1's metric conversions** (p.100, line 25): "31 1/2 inches (787 mm)" and "27 inches (698 mm)"; 31 1/2 inches is 800 mm and 27 inches is 686 mm. Gordium's reading: the inches govern, the millimetres being a conversion printed after them; a reading for the architects to confirm before a rule is drafted from these widths. The label's notes say so, and a test (`rule_format/tests/test_state_law.py`, where the code cache is) finds every "inches (mm)" pair in the brought-in pieces that does not convert and requires its label's notes to name it.
+- **R318.7.5.1's riser slope** (p.100, line 45): "30 degrees (0.51 rad)"; 30 degrees is 0.52 rad. **R319.4.1's area well** (p.103, line 10): "9 square feet (0.9 m²)"; 9 square feet is 0.84 m². The same reading: the US units govern; each label's notes say so, and the same test finds every "degrees (rad)", "square feet (m²)" and "inches (cm)" pair that does not convert at the precision printed.
 
 ## Ways into these sections from outside them
 

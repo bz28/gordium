@@ -275,6 +275,32 @@ def _wrong_conversions(words: str) -> list[tuple[str, str]]:
     return out
 
 
+def _wrong_other_conversions(words: str) -> list[tuple[str, str]]:
+    """Each "N degrees (X rad)", "N square feet (X m²)" or "N inches (X cm)" whose metric value, at the precision
+    printed, is not its value: "30 degrees (0.51 rad)" (0.52), "9 square feet (0.9 m²)" (0.8)."""
+    import math
+    import re
+    factor = {"degrees": math.pi / 180, "square feet": 0.09290304, "inches": 2.54}
+    pair = re.compile(r"(?<![\d/.])(\d+(?:\.\d+)?) (degrees|square feet|inches) \((\d+(?:\.\d+)?) (rad|m\[fn2\]|m²|cm)\)")
+    out = []
+    for m in pair.finditer(words):
+        if (m[2], m[4]) not in (("degrees", "rad"), ("square feet", "m[fn2]"), ("square feet", "m²"), ("inches", "cm")):
+            continue
+        places = len(m[3].partition(".")[2])
+        if abs(float(m[3]) - float(m[1]) * factor[m[2]]) > 0.5 * 10 ** -places * 1.05:   # it rounds to its last digit
+            out.append((m[0], f"{m[3]} {m[4].replace('m[fn2]', 'm²')}"))
+    return out
+
+
+def test_a_wrong_metric_value_is_found_in_degrees_areas_and_centimetres():
+    # review round 7: R318.7.5.1 "30 degrees (0.51 rad)" and R319.4.1 "9 square feet (0.9 m²)" were not looked for
+    assert _wrong_other_conversions("not more than 30 degrees (0.51 rad) and 90 degrees (1.57 rad)") == [
+        ("30 degrees (0.51 rad)", "0.51 rad")]
+    assert _wrong_other_conversions("9 square feet (0.9 m[fn2]), 5.7 square feet (0.530 m[fn2]), 35 square feet "
+                                    "(3.3 m[fn2])") == [("9 square feet (0.9 m[fn2])", "0.9 m²")]
+    assert _wrong_other_conversions("70 inches (178 cm) and 70 inches (168 cm)") == [("70 inches (168 cm)", "168 cm")]
+
+
 def test_a_wrong_conversion_is_found_in_each_way_the_book_prints_one():
     assert _wrong_conversions("not less than 20 inches (610 mm) and 20 inches (508 mm)") == [("20 inches (610 mm)", "610")]
     assert _wrong_conversions("a 10-inch (300 mm) sill") == [("10-inch (300 mm)", "300")]
@@ -295,8 +321,8 @@ def test_a_metric_conversion_that_is_not_its_inches_is_named_in_the_labels_notes
     wrong, unnamed = [], []
     for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
         words = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
-        for printed, mm in _wrong_conversions(words):
+        for printed, metric in [(a, f"{b} mm") for a, b in _wrong_conversions(words)] + _wrong_other_conversions(words):
             wrong.append((p["id"], printed))
-            if f"({mm} mm)" not in (labels[p["id"]].get("notes") or ""):
+            if f"({metric})" not in (labels[p["id"]].get("notes") or ""):
                 unnamed.append((p["id"], printed))
     assert wrong and unnamed == [], unnamed
