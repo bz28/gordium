@@ -10,6 +10,7 @@ import yaml
 
 from rule_format import place as registry
 from rule_format.place import UnknownPlace, place, places, plugin_place
+from document_extraction.book_text import file_name
 from rule_format.rulebook import (CODE_CACHE_ENV, REPO, STATE_SETTINGS, Context, _source_problems, jurisdictions,
                                   law_folders, state_folders)
 
@@ -108,10 +109,18 @@ def _state_folder(tmp_path, quote_line="R318.7.5.1 Riser height. The riser heigh
     cache = tmp_path / "cache" / sha
     cache.mkdir(parents=True)
     (cache / "code.pdf").write_bytes(pdf_bytes)
-    import json
-    rows = [{"file": "code.pdf", "sha256": sha, "pages": 1}, {"page": 1, "line": 1, "text": quote_line}]
-    (cache / "code.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    _write_book(cache / file_name(entry), sha, {1: [quote_line], 2: ["R318.7.5.2 Elsewhere. Not more than 8 inches"]})
     return j, tmp_path / "cache"
+
+
+def _write_book(path, sha, pages: dict[int, list[str]]):
+    """A made-up whole book's cached text (document_extraction/book_text.py): every page, each page's counts."""
+    import json
+    from document_extraction.book_text import header
+    counts = {p: (0, 0) for p in pages}
+    rows = [header("code.pdf", sha, len(pages), "made up", counts, None) | {"page_counts": {str(p): [0, 0] for p in pages}},
+            *({"page": p, "line": n, "text": t} for p, lines in pages.items() for n, t in enumerate(lines, 1))]
+    path.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
 
 
 SOURCE = {"file": "code.pdf", "page": 1, "lines": [1, 1], "quote": "not more than 8 1/4 inches"}
@@ -147,6 +156,34 @@ def test_a_changed_cached_book_or_a_copy_in_the_repo_is_a_problem(tmp_path, monk
     (cache / sha / "code.pdf").unlink()
     shutil.copy(__file__, j / "1_source_documents/code.pdf")
     assert "but a copy is in 1_source_documents" in " ".join(Context.for_jurisdiction(j).problems)
+
+
+def test_a_branch_reads_only_its_brought_in_pages_from_the_whole_cached_book(tmp_path, monkeypatch):
+    # The cache keeps every page, the same for every branch (step 1c's page 898 came and went as branches were
+    # extracted in turn); each branch reads its own brought-in pages, so a quote from a page it doesn't bring in is
+    # still refused.
+    j, cache = _state_folder(tmp_path)
+    src = j / "1_source_documents/sources.yaml"
+    listed = yaml.safe_load(src.read_text(encoding="utf-8"))
+    listed["documents"][0]["brought_in"] = {"pages": "1", "sections": ["R318"]}
+    src.write_text(yaml.safe_dump(listed), encoding="utf-8")
+    monkeypatch.setenv(CODE_CACHE_ENV, str(cache))
+    ctx = Context.for_jurisdiction(j)
+    assert set(ctx.pages["code.pdf"]) == {1}
+    assert _source_problems([SOURCE], ctx) == []
+    elsewhere = {"file": "code.pdf", "page": 2, "lines": [1, 1], "quote": "Not more than 8 inches"}
+    assert _source_problems([elsewhere], ctx)
+    from rule_format.rulebook import kept_text
+    assert [r.get("page") for r in kept_text(listed["documents"][0])] == [None, 1]
+
+
+def test_every_test_reads_the_cache_code_cache_names():
+    # Two tests removed $GORDIUM_CODE_CACHE and read the default cache whatever was set, so a branch run against
+    # another cache (step 1c's private copy) failed them: every check reads the cache code_cache() names.
+    removes, default = "delenv(" + "CODE_CACHE_ENV", "DEFAULT_" + "CODE_CACHE"
+    found = [f.relative_to(REPO).as_posix() for f in sorted((REPO / "packages").glob("*/tests/*.py"))
+             if removes in (t := f.read_text(encoding="utf-8")) or default in t or "gordium_" + "archive" in t]
+    assert found == []
 
 
 # ---- the second reading of the numbers (text_verification.yaml) ----------------------------------------------------
@@ -203,11 +240,10 @@ def test_a_second_reading_that_doesnt_hold_is_refused(tmp_path, monkeypatch, cha
 
 
 def test_with_the_cache_a_recorded_number_must_be_the_texts(tmp_path, monkeypatch):
-    from rule_format.rulebook import cached, load
+    from rule_format.rulebook import cached_text, load
     from rule_format.state_law import VERIFICATION, verification_problems
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
-    monkeypatch.delenv(CODE_CACHE_ENV, raising=False)
-    if not cached(entry, ".jsonl").exists():
+    if not cached_text(entry).exists():         # the cache code_cache() names ($GORDIUM_CODE_CACHE), as every check
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
     j = tmp_path / "regulations/jurisdictions/new_york/new_york_state"
     shutil.copytree(NY_STATE, j)
@@ -224,21 +260,20 @@ def test_an_edited_cache_is_a_problem_even_where_no_quote_covers_the_edit(tmp_pa
     """Only document_extraction --check re-extracts; every other check reads the cache, so the cache must still be
     the text the pieces were cut from."""
     import json
-    from rule_format.rulebook import cached, load
+    from rule_format.rulebook import cached, cached_text, load
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
-    monkeypatch.delenv(CODE_CACHE_ENV, raising=False)
-    if not cached(entry, ".jsonl").exists():
+    if not cached_text(entry).exists():         # the cache code_cache() names ($GORDIUM_CODE_CACHE), as every check
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
     copy = tmp_path / "cache" / entry["sha256"]
     copy.mkdir(parents=True)
     (copy / entry["file"]).symlink_to(cached(entry))
-    rows = [json.loads(x) for x in cached(entry, ".jsonl").read_text(encoding="utf-8").splitlines()]
+    rows = [json.loads(x) for x in cached_text(entry).read_text(encoding="utf-8").splitlines()]
     assert Context.for_jurisdiction(NY_STATE).problems == []
     for r in rows[1:]:
         if (r.get("page"), r.get("line")) == (100, 43):
             r["text"] = r["text"].replace("shall not exceed", "may exceed")
-    (copy / cached(entry, ".jsonl").name).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
-                                                     encoding="utf-8")
+    (copy / cached_text(entry).name).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
+                                                encoding="utf-8")
     monkeypatch.setenv(CODE_CACHE_ENV, str(tmp_path / "cache"))
     assert any("words are not the ones its piece was cut from" in p for p in Context.for_jurisdiction(NY_STATE).problems)
 
@@ -253,11 +288,11 @@ def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
     points = re.compile(r"(?:comply with|in accordance with|(?:scoping )?(?:requirements|provisions) of)"
                         r"(?: the (?:requirements|provisions) of)? "
                         r"(?:Sections?|Appendix|Chapter) ([A-Z]{0,2}\d[\w.]*\w|[A-Z]{1,2}\b)")
-    from rule_format.rulebook import cached, load, read_jsonl
+    from rule_format.rulebook import cached_text, kept_text, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
     words = {pid: " ".join(s["quote"] for s in e["sources"]) for pid, e in labels.items()}
-    if cached(entry, ".jsonl").exists():        # the whole piece where the book is here, not only its quote
-        text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    if cached_text(entry).exists():             # the whole piece where the book is here, not only its quote
+        text = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
         for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
             words[p["id"]] = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
     readme = (NY_STATE / "README.md").read_text(encoding="utf-8")
@@ -277,11 +312,11 @@ def test_every_term_definition_is_quoted_whole():
     # review round 1 of egress step 1b: CHANGE OF OCCUPANCY was quoted without its last words ("this code.")
     import json
     import re
-    from rule_format.rulebook import cached, load, read_jsonl
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
-    if not cached(entry, ".jsonl").exists():
+    if not cached_text(entry).exists():
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
-    text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    text = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
     pieces = {p["id"]: p for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
     by_line = {(pg, a): p for p in pieces.values() if p["kind"] == "definition" for pg, a, _ in p["lines"][:1]}
     for key, d in load(NY_STATE / "4_term_definitions/definitions.yaml").items():
@@ -296,11 +331,11 @@ def test_an_allowance_for_an_existing_condition_is_a_flag_never_a_rule():
     # review round 1 of egress step 1b: BO107.2.2 (existing stairs may keep 9-inch risers) was a rule, so a rule drafted
     # from it could relax R318 for a new stair; whether a stair exists, and was lawful when built, isn't in the model
     import re
-    from rule_format.rulebook import cached, load, read_jsonl
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
-    if not cached(entry, ".jsonl").exists():
+    if not cached_text(entry).exists():
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
-    text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    text = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
     labels = load(NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml")["labels"]
     allowance = re.compile(r"\bexisting\b.*\b(?:permitted to (?:remain|maintain|continue)|need not|not (?:be )?required|shall be "
                            r"accepted|shall be allowed|be allowed|may remain|are not required)", re.I | re.S)
@@ -368,11 +403,11 @@ def test_a_wrong_conversion_is_found_in_each_way_the_book_prints_one():
 def test_a_metric_conversion_that_is_not_its_inches_is_named_in_the_labels_notes():
     # review round 2 of egress step 1b: R318.7.1 prints "27 inches (698 mm)" (27 inches is 686 mm) and R315.5.2.1
     # "20 inches (610 mm)" (24 inches); a rule drafted from the millimetres would set another limit, unnoticed
-    from rule_format.rulebook import cached, load, read_jsonl
+    from rule_format.rulebook import cached_text, kept_text, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
-    if not cached(entry, ".jsonl").exists():
+    if not cached_text(entry).exists():
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
-    text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    text = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
     labels = load(NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml")["labels"]
     wrong, unnamed = [], []
     for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
@@ -436,9 +471,9 @@ def test_the_recorded_second_reading_is_the_kept_transcripts():
     # review round 3 of egress step 1b: second_reading_numbers could be edited by hand to agree; where a transcript is
     # kept (in the code cache, beside the book, since it holds the book's words), the list must be rebuilt from it
     import hashlib
-    from rule_format.rulebook import cached, load, read_jsonl
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
-    folder = cached(entry, ".jsonl").parent / "second_reading"
+    folder = cached(entry).parent / "second_reading"
     if not folder.exists():
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
     for line in (folder / "README.md").read_text(encoding="utf-8").splitlines():   # "    <sha256>  <file>"
@@ -456,9 +491,9 @@ def test_the_recorded_second_reading_is_the_kept_transcripts():
 def test_every_part_of_appendix_bo_is_brought_in_or_named_in_the_readme():
     # review round 3 of egress step 1b: the README's list of what is not brought in left out BO102.1.1, BO106.5 and others
     import re
-    from rule_format.rulebook import cached, load, read_jsonl
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
-    if not cached(entry, ".jsonl").exists():
+    if not cached_text(entry).exists():
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
     readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
     named = set(re.findall(r"\bBO\d{3}(?:\.\d+)*", readme))
@@ -467,7 +502,7 @@ def test_every_part_of_appendix_bo_is_brought_in_or_named_in_the_readme():
         if b.rsplit(".", 1)[0] == ".".join(stem):
             named |= {".".join(stem + [str(k)]) for k in range(int(first), int(b.rsplit(".", 1)[1]) + 1)}
     brought = {p["id"] for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
-    heads = {m[1] for r in read_jsonl(cached(entry, ".jsonl"))[1:]
+    heads = {m[1] for r in kept_text(entry)[1:]
              if r.get("bold") and (m := re.match(r"(?:\[NY\] )?(BO1(?:0\d|1[0-3])(?:\.\d+)+) ", r["text"]))}
 
     def wholly_out(part):                  # a part named, none of it brought in: its own parts are named with it

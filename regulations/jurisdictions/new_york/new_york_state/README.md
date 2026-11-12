@@ -65,7 +65,7 @@ Every reference in the brought-in sections was followed (found by code, `documen
 
 ## Ways into these sections from outside them
 
-Found by the same code: the whole book (all 1,079 pages, read once by the same extractor into the code cache, `gov.ny.residential.2025.full.jsonl`) searched for every brought-in section outside the brought-in pieces, leaving out the pages that only list section numbers (found by their running head: the contents, pp.16-22; the referenced standards, pp.833-866; the index, pp.1070-1076). Step 1b brought in R314.4 mezzanines, R315.5 sleeping lofts, R316.4 habitable attics and R507.10 deck guards (each with its section), and Appendix BO's egress parts. These are still not brought in:
+Found by the same code: the whole book (all 1,079 pages, the code cache's text of every page, read by the same extractor: `document_extraction/book_text.py`) searched for every brought-in section outside the brought-in pieces, leaving out the pages that only list section numbers (found by their running head: the contents, pp.16-22; the referenced standards, pp.833-866; the index, pp.1070-1076). Step 1b brought in R314.4 mezzanines, R315.5 sleeping lofts, R316.4 habitable attics and R507.10 deck guards (each with its section), and Appendix BO's egress parts. These are still not brought in:
 
 - R301.2.2.7 height limitations (p.75): a mezzanine that complies with R314 is not counted as a story (a seismic and structural limit).
 - R324.4.7 glazing beside the bottom stair landing (p.107): an exception for glass protected by a guard that meets R321.
