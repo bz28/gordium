@@ -41,9 +41,30 @@ documents:
       ended 2025-12-30 (DOS: https://dos.ny.gov/notice-adoption).
     layout: icc   # cut into pieces at the book's own headings (document_extraction/icc_sections.py)
     brought_in:
-      pages: 34-58, 99-105, 109-110   # Chapter 2 (R201, R202 definitions; p.57 is blank, p.58 starts Chapter 3); R318-R321; R325.6-R325.7 (and the next
-                                      # part's heading after each, so each brought-in part's end is proven)
-      sections: [R201, R318, R319, R320, R321, R325.6, R325.7]
+      # Chapter 1's adoption of the appendices and its pointer to Appendix BO (pp.24-26); Chapter 2 (R201, R202
+      # definitions; p.57 is blank, p.58 starts Chapter 3); R314-R321 (mezzanines, sleeping lofts, habitable attics,
+      # egress; p.97 starts with R312 and R313, not brought in); R325.6-R325.7; R507.10 deck guards (p.205 is blank,
+      # p.206 starts Chapter 6); Appendix BO (pp.964-974). Each with the next part's heading, so each part's end is proven.
+      pages: 24-26, 34-58, 97-105, 109-110, 204-206, 964-974
+      sections: [R101.2.1, R102.6, R201, R314, R315, R316, R318, R319, R320, R321, R325.6, R325.7, R507.10,
+                 BO101, BO102.1.2, BO102.6.3, BO104.1, BO105.1, BO105.2.2, BO105.2.3, BO105.3, BO105.8, BO105.10, BO105.11, BO105.13,
+                 BO106.1, BO107.1, BO107.2.1, BO107.2.2, BO108, BO109.1, BO109.8.1, BO109.8.5, BO109.8.6]
+      alone: [BO102.1, BO102.6, BO106.7, BO107.2, BO109.8]   # brought in without the parts under them (only some of those are egress)
+      printed_out_of_order:   # where the book's own numbering is out of order: what it prints there, cut where printed,
+                              # each with why (a line that prints anything else is a problem)
+        p.973 line 54:
+          printed: BO109.8
+          why: Appendix BO's Section BO109 goes from BO109.4 to BO109.8; the book prints no BO109.5 to BO109.7.
+        p.974 line 39:
+          printed: BO112.12.1
+          why: Printed between BO109.12 and BO109.12.1, inside Section BO109 (historic buildings); Section BO112 is
+            "Reserved" (p.975). Cut where printed; not brought in. The parts after it go on from BO109.12.
+      amended_by_law:         # where New York's rules amend the term the book prints (what it prints, and the law's term)
+        p.966 line 38:
+          printed: HOME OCCUPATION
+          term: LOAD-BEARING ELEMENT
+          why: The book prints a second "HOME OCCUPATION" here; 19 NYCRR §1220.2(e)(4) amends it to read "LOAD-BEARING
+            ELEMENT" with the same words (DOS rule text 2025-12-02, p.9; README).
       italic_not_defined:    # by piece: italic words Section R202 doesn't define (any other, or a stale one, is a problem)
         R318.3:
           accessed: R202 defines ACCESS (TO), not "accessed", so R201.3 sends it to another New York code's
@@ -56,11 +77,29 @@ documents:
         R202:story_above_grade_plane:
           above: The book prints item 1 as "above grade plane" in italics (p.52, line 36), where the line above prints
             only "grade plane" in italics; the term is GRADE PLANE, brought in, and "above" keeps its ordinary meaning.
+        BO101.1:
+          change of use: R202 defines CHANGE OF OCCUPANCY, not "change of use", so R201.3 sends it to another New York
+            code's definition, not brought in (README).
+          replacement: Appendix BO defines REPLACEMENT, BUILDING ("The reconstruction of a building on an existing
+            foundation", p.966); the word alone is not that term. Replacement buildings (BO111) are not brought in (README).
+        BO103:reconfiguration_of_space:
+          change in use: As "change of use" in BO101.1.
+        BO106.1.1:
+          xisting: The book prints "existing building" across two lines with the "e" of "exist-" in roman (p.971, line
+            14, checked on the page image); the term is EXISTING BUILDING, brought in by the roman-type match.
+        BO107.1:
+          tories: The book prints "stories above grade plane" with the "s" in roman (p.972, line 31, checked on the page
+            image); the term is STORY ABOVE GRADE PLANE, brought in.
+          above: Part of "stories above grade plane", as "tories".
     contents: >
-      The house code. Brought in so far (egress step 1): R318 means of egress (doors, landings, stairways, ramps),
+      The house code. Brought in so far. Egress step 1: R318 means of egress (doors, landings, stairways, ramps),
       R319 emergency escape and rescue openings, R320 handrails, R321 guards and window fall protection; R325.6 and
       R325.7 (stairway lighting, which R318.7.10 requires); R201 (how the definitions apply) and every R202
       definition those sections use. Not egress, so not brought in: R310 smoke alarms, R311 carbon monoxide alarms.
+      Egress step 1b, the parts the egress text points to: R314 mezzanines, R315 sleeping lofts, R316 habitable attics,
+      R507.10 deck guards; R101.2.1 (which appendices are adopted) and R102.6 (work on existing buildings goes to
+      Appendix BO); and Appendix BO's parts on egress for work on existing one- and two-family houses (README). Appendix
+      BB (tiny houses) is left for later.
     notes: >
       Its section numbers are not the model code's (the International Residential Code's): cite only this book's.
       A bracketed letter before a section names the party responsible for it (page 7); [NY] is the New York State
@@ -68,3 +107,10 @@ documents:
       ([NY] R318.7.5.1, [NY] R318.7.5.2). The code cache also holds the whole book's text
       (gov.ny.residential.2025.full.jsonl: every page, the same extractor), read only to find which other parts of
       the book point into the brought-in sections (document_extraction/icc_references.py).
+      New York's own amendments: 19 NYCRR §1220.2(e) amends the book for New York: (1) the definition of PERMIT;
+      (2) referenced standards (Chapter 44); (3) BA113.3; (4) in BO103.1, the second definition printed "HOME OCCUPATION" reads "LOAD-BEARING
+      ELEMENT". DOS rule text of 2025-12-02, pp.6-9
+      (https://dos.ny.gov/system/files/documents/2025/12/rule-text_uniform-code_amended-notice-of-adoption_12-2-25_0.pdf,
+      read 2026-11-12, sha256 dcfd684456631233d983a21f8e42f6dd1a89bf6623aa7faa20b75f24b99bc9f0). Only (4) touches a
+      brought-in part's cutting (brought_in.amended_by_law); (1) changes the words of PERMIT, a brought-in definition
+      (README).

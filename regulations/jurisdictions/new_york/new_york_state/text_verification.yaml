@@ -11,7 +11,13 @@ second_reading:
   'on': 2026-11-12
   how: 'Each brought-in piece was rendered from the PDF as an image (pypdfium2, 216 dpi), cropped from its heading to the
     next piece''s; the helpers read every number off the images, with the words before and after it, and both readings went
-    through document_extraction/numbers.py. 169 pieces, 357 numbers: all agree. No glyph was marked unclear.'
+    through document_extraction/numbers.py. 169 pieces, 357 numbers: all agree. No glyph was marked unclear. Step 1b
+    (2026-11-12, the 102 pieces it brought in): the lines of the pieces were cropped from 216 dpi page images (one crop per run
+    of lines on a page, 50 crops), and a helper that never saw the extracted text transcribed every line of them; the
+    transcript went through numbers.py: 102 pieces, 135 numbers, all agree. The first crops cut the left edge of some
+    lines; they were rendered again at the full page width and those lines read again (the "42 inches" of R314.5 among them).
+    After review round 1, five more pieces (BO102.1, BO102.1.2, BO103:unsafe, BO104.1, BO104.1.1) were read the same way
+    by the same helper (4 crops): 0 numbers in the text, 0 in the reading; they agree.'
 notes:
 - R318.7.6 was read again from its image (2026-11-12) after numbers.py learned parts of a whole ('a quarter circle', 'one-half');
   the first readings had not listed 'a quarter'. The new reading agrees. R202:owner (no numbers) was brought in later the
@@ -30,6 +36,30 @@ notes:
 - A bold lower-case entry under a definition ('Building permit' under PERMIT, 'Building, existing' under BUILDING) stays
   in that definition's piece (document_extraction/icc_sections.py).
 pieces:
+  R101.2.1:
+    piece_sha256: 4da460ccc289638f7f37d57aa2a6f383aca7daf74c24df2e4ce54f1a60fd28bc
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R102.6:
+    piece_sha256: 511f4100082bf56dada6c7a959c4bf3f897b8bd3a4379cb17ea44d55bb2b34cf
+    numbers:
+    - '31'
+    - '2025'
+    second_reading_numbers:
+    - '31'
+    - '2025'
+    second_reading: agrees
+  R102.6.1:
+    piece_sha256: 20ee5dd0a882856b7fabf2f2d78d121ca12d7e54fedd1cd829b94894e3d228cd
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R102.6.2:
+    piece_sha256: 83bfc75ed382e1582be871bf67d0c3014f4bee15d77cd4e739197e704f6a58dd
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
   R201:
     piece_sha256: 3729f6c482560feb21d1facd4e44d2994869f51452483aef844e72da77719dc7
     numbers: []
@@ -165,6 +195,16 @@ pieces:
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+  R202:carbon_monoxide_alarm:
+    piece_sha256: f11c75875af60f33840ea2510d5aef955d6f66597be62defbb9da643271b1c4b
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R202:ceiling_height:
+    piece_sha256: f064097acb5f306515023ef9f50989e877f44d3f36437e75e0e88eb8a1610ae0
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
   R202:certificate_of_occupancy:
     piece_sha256: dbb32c22f3418c67685e92e46bf6deabedd5dcb3c0f9b2976902f297fc08bb44
     numbers: []
@@ -194,6 +234,11 @@ pieces:
     second_reading_numbers:
     - '24'
     second_reading: agrees
+  R202:construction_documents:
+    piece_sha256: 0413e59e3b0e4b0609059dc6dbf267d096dc3949de1c3d040906a735be784789
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
   R202:control:
     piece_sha256: 200e8469faf27e9ed55e3f46a4e7901bd1cc5010f58f4518e5e2e9b33022448b
     numbers:
@@ -217,6 +262,24 @@ pieces:
     piece_sha256: 4b87da95cba6173de04fddebea2f46de625e5679c5fc7a8baa1be222ce197c70
     numbers: []
     second_reading_numbers: []
+    second_reading: agrees
+  R202:draft:
+    piece_sha256: 2fb694f77a2ac5d4024d34f8077b4ecd9de644d5c9cf0bffd799240d667013a4
+    numbers:
+    - '24'
+    - '24'
+    - '24'
+    second_reading_numbers:
+    - '24'
+    - '24'
+    - '24'
+    second_reading: agrees
+  R202:draft_hood:
+    piece_sha256: ca4a6f5f594913331ef0429a0e7149e14c027879800296ba145bba69b50761ed
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
     second_reading: agrees
   R202:drain:
     piece_sha256: b04e2bd7feb02731301419ad9e33d092102f4ffa69636b459e83f757336eac1d
@@ -278,6 +341,13 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+  R202:exterior_wall:
+    piece_sha256: 6e5f2c813014f77b6a7b77aaa172461ae4c87e4555bec3796d787588890db7d9
+    numbers:
+    - less than 50 percent
+    second_reading_numbers:
+    - less than 50 percent
+    second_reading: agrees
   R202:fire_code_of_new_york_state:
     piece_sha256: f99f580d675f2378cb5fbe0fd82deaa49ea706beb266474174a150ac520a3196
     numbers:
@@ -287,12 +357,31 @@ pieces:
     - '2025'
     - '2025'
     second_reading: agrees
+  R202:fixture:
+    piece_sha256: c72b1575cee9e234b183f02ad75dd707c178db53d33f7d82adb0fe158274179a
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
   R202:flight:
     piece_sha256: 18fa8109abe89ac74fb4029d1b54260f2ce45a6308f95306418cade68cfd7778
     numbers:
     - one
     second_reading_numbers:
     - one
+    second_reading: agrees
+  R202:flue_collar:
+    piece_sha256: c060b14c30bd17b527ff3def56a833dd239662abf875ebb681073907bea4c3b2
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
+    second_reading: agrees
+  R202:flue_gases:
+    piece_sha256: 9dc48a33905734ede2544b51daeec0319fd24839fe53f09f83695f635601f271
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
     second_reading: agrees
   R202:fuel_gas:
     piece_sha256: c490314c3c24c0e860b9e1209e5bca7af274b7553ba27eab06cd339ce192a93c
@@ -309,6 +398,13 @@ pieces:
     second_reading_numbers:
     - '2025'
     - '2025'
+    second_reading: agrees
+  R202:gas_piping:
+    piece_sha256: b5a4c92e5e51f670fb05d61e78680544c79e9bd622c559ae8316ae39fdfdeda4
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
     second_reading: agrees
   R202:grade:
     piece_sha256: 4d24b6beb034526892c23f5df7e09cf5488833c49934ac2afa738bdc64c7df27
@@ -359,10 +455,22 @@ pieces:
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+  R202:historic_building:
+    piece_sha256: de89ae1f335a65e0a6b94bd53f4f10e83b35d81f3e1107aa7bce6a76d096371b
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
   R202:kitchen:
     piece_sha256: fb597d637022074182f3e875788fcfd636e97e1493fefe51e00bc590a020fec0
     numbers: []
     second_reading_numbers: []
+    second_reading: agrees
+  R202:listed:
+    piece_sha256: f6d428b73d9cca0d67192433603691663ce2711bec712c277c2dfb662611a677
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
     second_reading: agrees
   R202:lodging_house:
     piece_sha256: be46819caf1e26eb677809e416e7d4a093d1536238dbb87d5617416283d7e012
@@ -380,6 +488,11 @@ pieces:
     second_reading: agrees
   R202:lot_line:
     piece_sha256: b66f1b48b6a13e599ed8a1e3e129e398a55be1f1552e0bafcf26b63941b2ad54
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R202:main:
+    piece_sha256: e58d34569cbc010343168a068478005f16a1fb302bc14c1253f3f8eaae020afd
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
@@ -417,6 +530,24 @@ pieces:
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
+  R202:piping:
+    piece_sha256: e61dbd671cade2d978f10e11dc5ccd85c0fb82fb9d059fee462f24314d4cdbc5
+    numbers:
+    - '24'
+    - '24'
+    - '24'
+    second_reading_numbers:
+    - '24'
+    - '24'
+    - '24'
+    second_reading: agrees
+  R202:piping_system:
+    piece_sha256: be0e5577252066d3f999ffb6d5fd9d62ec307c9f44b0d32360d4eb325e6e35fd
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
+    second_reading: agrees
   R202:pitch:
     piece_sha256: 9f012b2c21042e19c5b347144cd9f0d71b57e5eec51e3350b4b64a85c52f0f49
     numbers: []
@@ -444,6 +575,11 @@ pieces:
     second_reading_numbers:
     - '2025'
     - '2025'
+    second_reading: agrees
+  R202:plumbing_fixture:
+    piece_sha256: 413568d9aad4eea913a2c1b8e2ac1cf91f13ec1e7bb1f427e809a0b5425928c9
+    numbers: []
+    second_reading_numbers: []
     second_reading: agrees
   R202:property_maintenance_code_of_new_york_state:
     piece_sha256: 11a4455e0764a27029fb325479de98d78a56a47a93956088202a4769768b6c44
@@ -628,6 +764,30 @@ pieces:
     second_reading_numbers:
     - '18'
     second_reading: agrees
+  R202:vent:
+    piece_sha256: 5e434d56b2b6ea387391fe5b55915ab45135107573707a05b1ff88df1364239d
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
+    second_reading: agrees
+  R202:venting:
+    piece_sha256: a01d6978c018e3aa862db842fbf3e10bbfd1cc8625953d6d45f534272f20e146
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R202:venting_system:
+    piece_sha256: 9a7cc3056d91bb8149d846a0317af80fee601382069ae6d238a329790af6c56d
+    numbers:
+    - '24'
+    second_reading_numbers:
+    - '24'
+    second_reading: agrees
+  R202:walls:
+    piece_sha256: 270bb4ed2c45e9fd87628a020c2d70db2d2bea8facc149eb201cae3643bc40e6
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
   R202:winder:
     piece_sha256: 06e8ed02e4d50453614aa9b4558f9f969866e7a1acdcd884ed38c8d6ea3080bc
     numbers: []
@@ -635,6 +795,249 @@ pieces:
     second_reading: agrees
   R202:yard:
     piece_sha256: 86112f4b30c9988773f7df45733aeba111b79e4bd496919deae4272ca8d53ff8
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R314:
+    piece_sha256: 04507de7925b29ac062cdbd0f2711f4a839b72bd0ea94f2c7dece289c4ee2c14
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R314.1:
+    piece_sha256: d87fa56be89be9399e365591e204794b83ced3ae7937ce94b263654d004df494
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R314.2:
+    piece_sha256: 48c0595a4516280eee006452715206364b38e1280bd6906e61392074ee3d75d1
+    numbers:
+    - not less than 7 foot
+    - 2134 mm
+    second_reading_numbers:
+    - not less than 7 foot
+    - 2134 mm
+    second_reading: agrees
+  R314.3:
+    piece_sha256: 66066913dd720a65415e2a68b9ddc355427d30b97879133069eca8e2452dc622
+    numbers:
+    - not greater than one-third
+    - greater than one-half
+    - not more than 42 inch
+    - 1067 mm
+    second_reading_numbers:
+    - not greater than one-third
+    - greater than one-half
+    - not more than 42 inch
+    - 1067 mm
+    second_reading: agrees
+  R314.4:
+    piece_sha256: 699cb15b66e603e4dd56cebef8f6837b2ce675ab8b0cea3ed4277360eec2d6c1
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R314.5:
+    piece_sha256: c48500d24d4773c664d2718c536949ace2a01eb04ed6eae5f4528e0de1da4f6c
+    numbers:
+    - not more than 42 inch
+    - 1067 mm
+    - not greater than 10 percent
+    second_reading_numbers:
+    - not more than 42 inch
+    - 1067 mm
+    - not greater than 10 percent
+    second_reading: agrees
+  R315:
+    piece_sha256: a4a0fd5fcd31126829ac7e9f09b845cf92655f7810c1e0a4b3769dbf27552d1a
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R315.1:
+    piece_sha256: d64beeb60549c0761ae9cabfc2d0fc88a44ff1167aad6d0851a96c8832fc87ce
+    numbers:
+    - less than 3 foot
+    - 914 mm
+    - less than 35 square foot
+    - 3.3 m
+    second_reading_numbers:
+    - less than 3 foot
+    - 914 mm
+    - less than 35 square foot
+    - 3.3 m
+    second_reading: agrees
+  R315.2:
+    piece_sha256: ed41bd055c266e7f4d9bb5978403de32b2a0772913187a4d2771e0818c7d020a
+    numbers:
+    - less than 70 square foot
+    - 6.5 m
+    - not exceed 7 foot
+    - 2134 mm
+    - more than one-half
+    second_reading_numbers:
+    - less than 70 square foot
+    - 6.5 m
+    - not exceed 7 foot
+    - 2134 mm
+    - more than one-half
+    second_reading: agrees
+  R315.3:
+    piece_sha256: adb5cf63cd6e18ab0dd5dc62b0bd84c72a9f4ea3c81a7ce49df6a9bcf22dba7b
+    numbers:
+    - less than 7 foot
+    - 2134 mm
+    - less than 3 foot
+    - 914 mm
+    - less than 3 foot
+    - 914 mm
+    second_reading_numbers:
+    - less than 7 foot
+    - 2134 mm
+    - less than 3 foot
+    - 914 mm
+    - less than 3 foot
+    - 914 mm
+    second_reading: agrees
+  R315.4:
+    piece_sha256: f0539c1140384959ca31b8138d28668daac7a212e45884e495429a1521f3ffd2
+    numbers:
+    - greater than two-thirds
+    second_reading_numbers:
+    - greater than two-thirds
+    second_reading: agrees
+  R315.5:
+    piece_sha256: cfec9f359d4db0b0edf4d961c1b20aff432e5ae3baacab750d997bcb9a9d3a66
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R315.5.1:
+    piece_sha256: a78e80c6faffe963500b53b557bd2b356cdd1ee62a41b99b24ef00fad890a0e9
+    numbers:
+    - not less than 3 foot
+    - 914 mm
+    second_reading_numbers:
+    - not less than 3 foot
+    - 914 mm
+    second_reading: agrees
+  R315.5.2:
+    piece_sha256: d171eedebdd328e59f777845f2b32211a55b974b3cc08f0c57ced24b40489694
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R315.5.2.1:
+    piece_sha256: 07f1358b50483fda63d0b0545db9b799f1b501b2ce50ef633c49fc2cb0551509
+    numbers:
+    - less than 17 inch
+    - 432 mm
+    - not less than 20 inch
+    - 610 mm
+    second_reading_numbers:
+    - less than 17 inch
+    - 432 mm
+    - not less than 20 inch
+    - 610 mm
+    second_reading: agrees
+  R315.5.2.2:
+    piece_sha256: 897c186970612f3f5550b9ac7eec48b1fa5bdc064f90ea3af5de8ff2ddd9de97
+    numbers:
+    - not less than 7 inch
+    - 178 mm
+    - not more than 12 inch
+    - 305 mm
+    - one
+    - 20 inch
+    - 508 mm
+    - four-thirds
+    - 15 inch
+    - 381 mm
+    - three-fourths
+    second_reading_numbers:
+    - not less than 7 inch
+    - 178 mm
+    - not more than 12 inch
+    - 305 mm
+    - one
+    - 20 inch
+    - 508 mm
+    - four-thirds
+    - 15 inch
+    - 381 mm
+    - three-fourths
+    second_reading: agrees
+  R315.5.2.3:
+    piece_sha256: b6fa1b7ddd51d667fe092a435c9bd5b104be65f00c19741195a76de6d97bb712
+    numbers:
+    - not less than 24 inch
+    - 610 mm
+    second_reading_numbers:
+    - not less than 24 inch
+    - 610 mm
+    second_reading: agrees
+  R315.5.3:
+    piece_sha256: 48e3eaebd099633022d88a71530b9cbc6b9f1b0ebdc34ccfe206dd1a11845e3a
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R315.5.3.1:
+    piece_sha256: e407a907034d832aff6e75d83131bff9787edb24e6f0b11fec073759cfdf980d
+    numbers:
+    - not less than 12 inch
+    - 305 mm
+    - and 10 inch
+    - 254 mm
+    - 14 inch
+    - 356 mm
+    - '300'
+    - '136'
+    - within 3/8 inch
+    - 9.5 mm
+    second_reading_numbers:
+    - not less than 12 inch
+    - 305 mm
+    - and 10 inch
+    - 254 mm
+    - 14 inch
+    - 356 mm
+    - '300'
+    - '136'
+    - within 3/8 inch
+    - 9.5 mm
+    second_reading: agrees
+  R315.5.3.2:
+    piece_sha256: 68565d86e2250b4138d317feef9982d651adeed272199cb07ef891fd97684ece
+    numbers:
+    - '70'
+    - 80 degree
+    second_reading_numbers:
+    - '70'
+    - 80 degree
+    second_reading: agrees
+  R316:
+    piece_sha256: d0492813f9539cbdd112773488f4e40fab2d45d3db520aee781936565cfeec22
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R316.1:
+    piece_sha256: 0bf4191f14d2fc2568b1049b80f8c381b56549fa15394e18157a08f70fef1428
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R316.2:
+    piece_sha256: 384430d2bc047d38be23e3bc0cdd5d7ce1e693e2326fb645909cdcd29b7d317b
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R316.3:
+    piece_sha256: b1fb653c2ddda50652c5ac20ba228d671090a06f598ba6667d7be24d92b01ead
+    numbers:
+    - not greater than one-third
+    - not greater than one-half
+    - a third
+    second_reading_numbers:
+    - not greater than one-third
+    - not greater than one-half
+    - a third
+    second_reading: agrees
+  R316.4:
+    piece_sha256: 80c2df17f22e3e31713a42cca80eb347888055a933224c0b00e6c955e64c2c22
     numbers: []
     second_reading_numbers: []
     second_reading: agrees
@@ -1588,4 +1991,412 @@ pieces:
     - one
     second_reading_numbers:
     - one
+    second_reading: agrees
+  R507.10:
+    piece_sha256: f0334a16d8c59a7787ab9f3a2b340ce6dbe2d6d9bf0dd8f606131c1edd2e07f6
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R507.10.1:
+    piece_sha256: 8bd8369283cb79cb7d847cb21211fbb510c9bdc9814ae3366399bb62b69a70ca
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R507.10.1.1:
+    piece_sha256: 90c85ceaab034ddfa993956f50d0649d0be0175768c5a2e8305a0c092434cba7
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R507.10.1.2:
+    piece_sha256: b128dd6b322409bc51ac6f7fd6ba53c374dc28fe7644609803cdf62460f5620d
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R507.10.2:
+    piece_sha256: b8126a1002d4c606331d88b01b42da279acd00c4b23a7b39d826e0373366506f
+    numbers:
+    - 4 inch
+    - 4 inch
+    - 102 mm
+    - 102 mm
+    second_reading_numbers:
+    - 4 inch
+    - 4 inch
+    - 102 mm
+    - 102 mm
+    second_reading: agrees
+  R507.10.3:
+    piece_sha256: ca215033780852f986d4ff10563c97eaf2ad96c9f2683c212e715498c458fce7
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  R507.10.4:
+    piece_sha256: d3783a02b3fa69424ec25ce0cd08d7c3a1f407a19b77ecc0a752df5e89c28f41
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO101:
+    piece_sha256: b1737c5d2465eb117b0cecee6673ffaf731b16422477a982afb836725cf244f0
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO101.1:
+    piece_sha256: ddd8a9da5977fd04f9ccf81d2401885dc4ef4280120460eb46672f2c725c2ede
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO102.1:
+    piece_sha256: 756a82b7d38068894d824f97628ab2b7243b05cc898cec053481e47f49b78935
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO102.1.2:
+    piece_sha256: 395cacfcc1a87a854a0f8b1e007476def8b32568fe2f01c7357f78c3e3689acf
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO102.6:
+    piece_sha256: b11d38f6835e42336f7173a78d68f6c273d3d079862db9fa0f29dcefbf2db8c1
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO102.6.3:
+    piece_sha256: 6bff1e3db237a811cc5593ff7243c49c94cd9e94b5b54c16b98d9f7d45700e7e
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO103:
+    piece_sha256: 4ada02a32de3e8ba54dfe61e04108cf29941b838252b8f682a86433bd8ad4c89
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO103.1:
+    piece_sha256: aa67a49e3ea32ca8d7bbe89b5b9da05fc266ab3b6369f1253a530342bab6c928
+    numbers:
+    - '2'
+    second_reading_numbers:
+    - '2'
+    second_reading: agrees
+  BO103:dangerous:
+    piece_sha256: 20dbd7d0221739a5cc44d53df8b6a98beb4e512eb34243c8c9688ccdd0f803c8
+    numbers:
+    - more than one
+    - and one third
+    - two thirds
+    - one third
+    second_reading_numbers:
+    - more than one
+    - and one third
+    - two thirds
+    - one third
+    second_reading: agrees
+  BO103:reconfiguration_of_space:
+    piece_sha256: 4d583c0d51f20c404a1f7aa198a458c5905d52fc067278ffaba63c53ed67b04c
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO103:relocation:
+    piece_sha256: b0e113648e2390f13f1b883df0a29b782cf96cf3384ed4233275736a4d06073a
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO103:unsafe:
+    piece_sha256: 5f23973529d6c6e8ccb7e8cea527a76bbed360cd238878df29a10fba6efc2ec0
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO103:work_area:
+    piece_sha256: e85849e929efc22fd56259da5a32b4893a62456c671d787f2813abd54d9bf788
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO104.1:
+    piece_sha256: f24423ae62b960af3ff751b1e5cae5132c7eaf69f81ec1c249ad9b7b939d4ec4
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO104.1.1:
+    piece_sha256: c6c6c986f39bb0d7f3b15940941a32ec72698bb3ece01728256abb809ea25c84
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.1:
+    piece_sha256: cce0eade431ba55056ca08e09c5328bb32853bcb968c77240a4f1dd0a0baa748
+    numbers:
+    - '1'
+    - '2'
+    second_reading_numbers:
+    - '1'
+    - '2'
+    second_reading: agrees
+  BO105.1.1:
+    piece_sha256: 3074b2757159b74eac86576ffff5727526e15c51f5cad7d16baaa3b7104bc90b
+    numbers:
+    - '1'
+    - '1'
+    - '1'
+    second_reading_numbers:
+    - '1'
+    - '1'
+    - '1'
+    second_reading: agrees
+  BO105.1.2:
+    piece_sha256: d70f52c7475e63e3d3aea4c2d08df8ecc213a89117a8d66b11899dfe47becb44
+    numbers:
+    - '2'
+    - '2'
+    - '2'
+    second_reading_numbers:
+    - '2'
+    - '2'
+    - '2'
+    second_reading: agrees
+  BO105.1.3:
+    piece_sha256: 138b78cf99a112dd6ec1b3c408d0aa69bb317c6d0427837616dffd697564d4ee
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.2.2:
+    piece_sha256: adb204b4f6f23647e064141da19ed9057f89ad9a94f23170e23995aada5c5826
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.2.3:
+    piece_sha256: 87dc2cb026871593db0d82ea2dfdeffeda2326e1fda842a621dc13dd7a8116df
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.3:
+    piece_sha256: e81e53f1eb138d64b69c00740805f01f80755dc7fd63ece7c07faa845f06f448
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.8:
+    piece_sha256: f6ae55ee55c8ba0cad7ce40d1739bc9b95ffedbd40aa9b42c509c4ee42e065b8
+    numbers:
+    - '702'
+    - '2'
+    second_reading_numbers:
+    - '702'
+    - '2'
+    second_reading: agrees
+  BO105.10:
+    piece_sha256: ffee62122579684f27750c7e36ade7f17cc414d34132b1416f0abc7b58a36e41
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.10.1:
+    piece_sha256: a260d3864aab53629cd12ece041febe54bbaee070b8f20a2c342e0061be2f30b
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.10.2:
+    piece_sha256: 1691466edb7903b8118ad26313f9c4e3b96891dd4392e563f0178c6f8312973f
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.10.3:
+    piece_sha256: 23651aadf531119ebc4d57cf4e4519480906f69400ceb287a499a40d1e9c5f7c
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.10.4:
+    piece_sha256: 8fc33fcb6ddbb2b04a86aa009269613b43f83ab7988006f91d98c73c52081f1a
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.10.5:
+    piece_sha256: 96f3fe3a11c85139d86b53974846a6858166ecda3820a815087e09b1e8150dc9
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.10.6:
+    piece_sha256: c4b99d99c919835a0193f058beedacf7efb3d106abfc27bebdfa9e77ae97007b
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.10.7:
+    piece_sha256: e3d34ed57d703f92268f42afb754a1244687f5b091d8fe0188f74ef453227ea3
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.11:
+    piece_sha256: a017567144df860f95771a657ab3175e80774d0d452abf4810cf495eafa1add5
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO105.13:
+    piece_sha256: f46512d42b68da2e393797bf3a9d8e9d745e4c4c83e17b6e5b58a8a8bdf96dba
+    numbers:
+    - '72'
+    second_reading_numbers:
+    - '72'
+    second_reading: agrees
+  BO106.1:
+    piece_sha256: 0f01dafb6745f7ad430eb4764d813d1069e1357e9af51f225547593bbc5c8cd1
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO106.1.1:
+    piece_sha256: bf26ce05fd35dab197fad1ddab36005db0dceeb95b4b91d057cff3ecadca2caa
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO106.1.2:
+    piece_sha256: 26279ba6d724b442afbe071c37fe315b7ba553f8b20c71890433c2d43badf0c6
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO106.7:
+    piece_sha256: 747d56ed8c0555a73a6065a79e6a69dbfd51b889148ffd0a27b5164a7e71eafe
+    numbers:
+    - a third
+    - a third
+    - third
+    - by more than 10 percent
+    - third
+    - third
+    - '72'
+    second_reading_numbers:
+    - a third
+    - a third
+    - third
+    - by more than 10 percent
+    - third
+    - third
+    - '72'
+    second_reading: agrees
+  BO107.1:
+    piece_sha256: a8d7be685837c462ecfc6e81300977e765fa6cd42cf53142c8e2486f94860817
+    numbers:
+    - one
+    - two
+    - not more than three
+    - one
+    - one
+    second_reading_numbers:
+    - one
+    - two
+    - not more than three
+    - one
+    - one
+    second_reading: agrees
+  BO107.2:
+    piece_sha256: 6be3ee46b6f9fca2a8754db3ce40b698fe72c966a7b2b306ec047c30f0e3cc4d
+    numbers:
+    - two
+    - one
+    second_reading_numbers:
+    - two
+    - one
+    second_reading: agrees
+  BO107.2.1:
+    piece_sha256: fa58aac38c910930977a026798a365b2c23f02fbb4f59f308f155aea02e8855c
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO107.2.2:
+    piece_sha256: 26d36376bccdf4121e8b0473f307338cfd82f049d6398ca0ab1db684a6a64871
+    numbers:
+    - not less than 70 inch
+    - 1778 mm
+    - more than 80 inch
+    - 2032 mm
+    - not exceed 9 inch
+    - 229 mm
+    - 6 foot
+    - 6 inch
+    - 1981 mm
+    - 6 foot
+    - 4 inch
+    - 1930 mm
+    - not exceed 3/8 inch
+    - 9.5 mm
+    - not less than 30 inch
+    - 762 mm
+    second_reading_numbers:
+    - not less than 70 inch
+    - 1778 mm
+    - more than 80 inch
+    - 2032 mm
+    - not exceed 9 inch
+    - 229 mm
+    - 6 foot
+    - 6 inch
+    - 1981 mm
+    - 6 foot
+    - 4 inch
+    - 1930 mm
+    - not exceed 3/8 inch
+    - 9.5 mm
+    - not less than 30 inch
+    - 762 mm
+    second_reading: agrees
+  BO108:
+    piece_sha256: d687d5edc165696d39bd77ffe7c84d14e3e5ec196f6d097064569dc217b258f1
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO108.1:
+    piece_sha256: be6d1ba4e3df1eaaa31c2459702321bfb80686ff19c96d6ec2b3fdda26c571af
+    numbers:
+    - one
+    second_reading_numbers:
+    - one
+    second_reading: agrees
+  BO108.2:
+    piece_sha256: 77cfb3ef454ff035cb11ffa8c35d3968f2a99589d46bef6eb7b8a68c37cd9f7a
+    numbers:
+    - more than five
+    - up to ten
+    - '10'
+    second_reading_numbers:
+    - more than five
+    - up to ten
+    - '10'
+    second_reading: agrees
+  BO108.3:
+    piece_sha256: 9a5883a8c83595d2c5f5fd464fbda5463f2ae5b52328924928e8734bb7fadb85
+    numbers:
+    - one
+    second_reading_numbers:
+    - one
+    second_reading: agrees
+  BO108.4:
+    piece_sha256: 952924bc693acf034e7a42415cab9d0490712eb6792ed998a4ed2564c1a1112f
+    numbers:
+    - at least one
+    - not more than 14 foot
+    - 1,000 pound
+    - '455'
+    second_reading_numbers:
+    - at least one
+    - not more than 14 foot
+    - 1,000 pound
+    - '455'
+    second_reading: agrees
+  BO109.1:
+    piece_sha256: b6e4a9e721dd8d5d946f3e4ef1a3e4dc45350c44e4e5c5d290add8c4d2943bba
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO109.8:
+    piece_sha256: 1e33db8ed08cfc695f507250b48b4ca88627a37937f95fef2f4422c3e686e65c
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO109.8.1:
+    piece_sha256: 861a9dafca29574e57ffa32168cdd55fc1338d292a2d826e927a49897daf439e
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO109.8.5:
+    piece_sha256: d8a1f8b05227256330b6253702f70782fd8b69c076c40ebc1adf6a9127d74ad3
+    numbers: []
+    second_reading_numbers: []
+    second_reading: agrees
+  BO109.8.6:
+    piece_sha256: 23252a42eeb3832d55b08dd716fd1bd4ad87d96aa500f94075fc14b58e8e1944
+    numbers: []
+    second_reading_numbers: []
     second_reading: agrees

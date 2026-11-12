@@ -232,15 +232,54 @@ def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
     # review round 5: R319.7 sends existing basements to Appendix BO, not brought in; as a reference nobody sees it
     import re
     src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
-    brought = src["brought_in"]["sections"]
+    brought, alone = src["brought_in"]["sections"], src["brought_in"].get("alone") or []
     labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
     points = re.compile(r"(?:comply with|in accordance with)(?: the (?:requirements|provisions) of)? "
                         r"(?:Sections?|Appendix|Chapter) ([A-Z]{0,2}\d[\w.]*\w|[A-Z]{1,2}\b)")
     seen, wrong = 0, []
     for pid, e in labels.items():
         for target in (m[1] for s in e["sources"] for m in points.finditer(s["quote"])):
-            inside = any(target == b or target.startswith(b + ".") for b in brought)
+            inside = target in alone or any(target == b or target.startswith(b + ".") for b in brought)
             seen += not inside
             if not inside and e["label"] not in ("rule", "flag"):
                 wrong.append((pid, target, e["label"]))
     assert seen >= 3 and wrong == []          # R319.7 (Appendix BO), R320.7 and R321.1.4 (R507.2.2)
+
+
+def test_every_term_definition_is_quoted_whole():
+    # review round 1 of egress step 1b: CHANGE OF OCCUPANCY was quoted without its last words ("this code.")
+    import json
+    import re
+    from rule_format.rulebook import cached, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached(entry, ".jsonl").exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    pieces = {p["id"]: p for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    by_line = {(pg, a): p for p in pieces.values() if p["kind"] == "definition" for pg, a, _ in p["lines"][:1]}
+    for key, d in load(NY_STATE / "4_term_definitions/definitions.yaml").items():
+        first = d["sources"][0]
+        piece = by_line[(first["page"], first["lines"][0])]
+        whole = " ".join(text[(pg, n)] for pg, a, b in piece["lines"] for n in range(a, b + 1))
+        quoted = " ".join(s["quote"] for s in d["sources"])
+        assert re.sub(r"^\[[A-Z]{2}\] ", "", whole) == quoted, key
+
+
+def test_an_allowance_for_an_existing_condition_is_a_flag_never_a_rule():
+    # review round 1 of egress step 1b: BO107.2.2 (existing stairs may keep 9-inch risers) was a rule, so a rule drafted
+    # from it could relax R318 for a new stair; whether a stair exists, and was lawful when built, isn't in the model
+    import re
+    from rule_format.rulebook import cached, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached(entry, ".jsonl").exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    text = {(r["page"], r["line"]): r["text"] for r in read_jsonl(cached(entry, ".jsonl"))[1:]}
+    labels = load(NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml")["labels"]
+    allowance = re.compile(r"\bexisting\b.*\b(?:permitted to (?:remain|maintain)|need not|not (?:be )?required|shall be "
+                           r"accepted|shall be allowed|be allowed|may remain|are not required)", re.I | re.S)
+    found = []
+    for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
+        words = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
+        if p["kind"] != "definition" and allowance.search(words):
+            found.append((p["id"], labels[p["id"]]["label"]))
+    assert len(found) >= 6 and all(label == "flag" for _, label in found), found
