@@ -46,7 +46,7 @@ import math
 __all__ = ['_inside', 'ON_LOT_REACH', '_ring_area', '_hull', '_clip', 'box_near_lot', 'BLOCK_CONTENTS_KNOWN',
     'block_contents_known', 'reaches_into_lot', '_Depth', 'DEPTH_QUESTIONS', '_deep', '_stretches_inside',
     'TOUCH_GAP', 'MAX_BLOCK_DEPTH', 'NO_BOX', 'WHY', '_finite', '_sent_box', '_covers', 'OBJECT_KEYS', '_sent_object',
-    '_sent_definitions', '_why_no_box', 'no_box_reasons', 'left_out_decisions', '_sent_points', 'touching_decisions']
+    '_sent_definitions', '_why_no_box', '_judged', 'no_box_reasons', 'left_out_decisions', '_sent_points', 'touching_decisions']
 
 
 def _inside(x, y, poly):
@@ -376,31 +376,54 @@ def _sent_definitions(definitions):
 
 def _why_no_box(o, definitions, memo, depth=0):
     """Why the object `o` has no box that covers all of it, or None when it has one (its own box). No box: the host
-    gave none; or it is a placed block whose definition, at any depth, isn't there (or is nested past
-    MAX_BLOCK_DEPTH), holds nothing, isn't what the block is (block_contents_known: a linked file not found, not
-    readable or changed since it was read) or holds a part with no box. A linked block whose file has moved holds,
-    in live Rhino 8.35 (Mac), one text label at the centre of the last known shape: a valid box of a single point,
-    which said "whole" and "off the lot", while the shed it stands for may touch the house. Rhino leaves an invalid
-    box out when it joins a block's parts, so a block holding a part with no box has its other parts' box alone.
-    `memo` ({definition id: why, or None}, one per look) has each definition walked once, however many times it is
-    placed (as the Rhino command's `wholes` did before these moved here: a definition is judged at the depth it is first met)."""
-    if not _covers(o.get("box")):
-        return "no_box"
-    if "definition" not in o:
-        return None
-    d = o.get("definition") if depth <= MAX_BLOCK_DEPTH else None
-    if d is None or d not in definitions:
+    gave none; or it is a placed block whose definition, at any depth, isn't there, holds nothing, isn't what the
+    block is (block_contents_known: a linked file not found, not readable or changed since it was read) or holds a
+    part with no box; or a block placed more than MAX_BLOCK_DEPTH blocks deep, counting from this object (not looked
+    into, as Rhino's command never did). A linked block whose file has moved holds, in live Rhino 8.35 (Mac), one
+    text label at the centre of the last known shape: a valid box of a single point, which said "whole" and "off
+    the lot", while the shed it stands for may touch the house. Rhino leaves an invalid box out when it joins a
+    block's parts, so a block holding a part with no box has its other parts' box alone.
+    `memo` ({definition id: (why, how many blocks deep it goes)}, one per look) has each definition walked once,
+    however many times it is placed, and its answer is the same wherever it is placed: the depth is counted at each
+    placement (review round 4: the Rhino command's `wholes` kept the answer of the depth a definition was first met
+    at, so beyond 32 deep the answer hung on which object was sent first)."""
+    try:
+        why, levels = _judged(o, definitions, memo, set())
+    except RecursionError:                   # (only a malformed request: hundreds of blocks inside blocks)
+        raise ValueError("objects: blocks nested too deep to read")
+    if why is None and depth + levels > MAX_BLOCK_DEPTH + 1:
         return "block_not_found"
+    return why
+
+
+def _judged(o, definitions, memo, walking):
+    """(why `o` has no box, or None; how many blocks deep it goes, itself included: 0 for a plain object), whatever
+    depth it is placed at. A definition met again while it is being walked (only in a malformed request: a block
+    can't hold itself) is not found."""
+    if not _covers(o.get("box")):
+        return "no_box", 0
+    if "definition" not in o:
+        return None, 0
+    d = o.get("definition")
+    if d is None or d not in definitions or d in walking:
+        return "block_not_found", 1
     if d not in memo:
-        entry = definitions[d]
+        entry, walking = definitions[d], walking | {d}
         if not block_contents_known(entry.get("status")):
-            memo[d] = "contents_not_known"
+            memo[d] = "contents_not_known", 0
         elif not entry.get("parts"):
-            memo[d] = "block_empty"
+            memo[d] = "block_empty", 0
         else:                                    # the first part with no box decides (and stops the walk)
-            memo[d] = next((w for w in (_why_no_box(p, definitions, memo, depth + 1) for p in entry["parts"]) if w),
-                           None)
-    return memo[d]
+            why, levels = None, 0
+            for p in entry["parts"]:
+                w, k = _judged(p, definitions, memo, walking)
+                if w:
+                    why = w
+                    break
+                levels = max(levels, k)
+            memo[d] = why, levels
+    why, levels = memo[d]
+    return why, levels + 1
 
 
 def no_box_reasons(objects, definitions=None):

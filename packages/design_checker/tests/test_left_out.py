@@ -89,6 +89,27 @@ def test_blocks_nested_past_the_limit_have_no_box_and_each_definition_is_walked_
     assert all(g["why"] is None for g in got) and sorted(walked) == ["facade", "window"]
 
 
+def test_a_block_nested_too_deep_has_no_box_whichever_object_is_sent_first():
+    """Review round 4: each definition's answer was kept from the depth it was first met at, so a block placed 5
+    deep into a chain 40 long had a box when a block placed higher up the same chain was sent first, and none when
+    sent alone: the same model, two answers. Now the depth is counted at each placement."""
+    defs = {f"D{k}": _whole_def({"box": SHED, "definition": f"D{k + 1}"}) for k in range(39)}
+    defs["D39"] = _whole_def({"box": SHED})
+    a, b = _obj("A", SHED, definition="D10"), _obj("B", SHED, definition="D5")
+    for order in ([a, b], [b, a], [b]):
+        got = {g["id"]: g["why"] for g in lo.no_box_reasons(order, defs)}
+        assert got["B"] == "block_not_found", order
+        assert got.get("A") is None, order                      # 30 blocks deep: looked into, whole
+    on = {g["id"]: g["left_out"] for g in lo.left_out_decisions(LOT, [a, b], defs)}
+    assert on == {"A": True, "B": True}
+    assert [g["touching"] for g in lo.touching_decisions([a, b], [HOUSE], defs)] == [False, None]
+
+
+def test_a_block_holding_itself_is_not_found_never_a_hang():
+    defs = {"loop": _whole_def({"box": SHED, "definition": "loop"})}
+    assert lo.no_box_reasons([_obj("x", SHED, definition="loop")], defs)[0]["why"] == "block_not_found"
+
+
 # ---- left out: on the lot, or no box to tell ----------------------------------------------------------------------
 
 def test_an_object_with_no_box_is_left_out_wherever_its_points_are():
