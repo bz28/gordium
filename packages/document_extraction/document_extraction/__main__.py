@@ -93,12 +93,15 @@ def _same_as_cached(pdf: Path, text: Path, pages: list[int], fresh: list[dict], 
     included. Not checking: where it isn't, the whole book is read again and written (atomically, so a branch reading
     the cache at the same time never sees half a file)."""
     label = f"<code cache>/{text.parent.name[:12]}…/{text.name} ({len(pages)} brought-in pages of the whole book)"
+    why = "differs from a fresh extraction"
     try:
         same = to_jsonl(book_text.select(read_jsonl(text), pages)) == to_jsonl(fresh)
+    except FileNotFoundError:
+        same, why = False, "not in the code cache for this extractor version (run without --check to write it)"
     except (OSError, ValueError, KeyError):
         same = False
     if check or same:
-        print(f"{'✓' if same else '✗'} {label}{'' if same else ': differs from a fresh extraction'}")
+        print(f"{'✓' if same else '✗'} {label}{'' if same else ': ' + why}")
         return same
     print(f"reading every page of {pdf.name} into the code cache (once per book and extractor version)")
     book = read_book(pdf)

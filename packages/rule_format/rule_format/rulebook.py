@@ -237,12 +237,13 @@ def brought_in_pages(entry: dict) -> list[int] | None:
 
 def kept_text(entry: dict) -> list[dict]:
     """A kept-outside document's extracted text as this branch brings it in: its brought-in pages chosen from the
-    cached whole book, row for row what extract_icc(pdf, those pages) gives (header included); the whole book where
-    the entry names no pages."""
+    cached whole book, row for row what extract_icc(pdf, those pages) gives (header included)."""
     from document_extraction.book_text import select
     pages = brought_in_pages(entry)
+    if not pages:                               # never the whole book in its stead (_source_entry_problems)
+        raise ValueError(f"{entry['file']}: kept outside the repo with no brought_in.pages")
     return _kept(f"kept text {pages}", cached_text(entry).read_bytes(),
-                 lambda data: _jsonl_rows(data) if pages is None else select(_jsonl_rows(data), pages))
+                 lambda data: select(_jsonl_rows(data), pages))
 
 
 @dataclass
@@ -318,11 +319,13 @@ class Context:
             elif hashlib.sha256(pdf.read_bytes()).hexdigest() != sha:
                 ctx._problem(name, "fingerprint does not match sources.yaml")
             elif outside and not extracted.exists():
-                ctx._problem(name, f"its extracted text isn't in the code cache ({_shown_cache(extracted)}): "
-                                   "run python -m document_extraction")
+                ctx._problem(name, f"its extracted text isn't in the code cache for this extractor version "
+                                   f"({_shown_cache(extracted)}): run python -m document_extraction (it needs "
+                                   "pdfplumber; the version is book_text.extractor_key)")
             # Text is only trusted for a document whose own checks all passed.
             if extracted.exists() and name not in ctx.file_problems:
                 ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None)
+                # (an outside book with no brought_in.pages has a problem, so is never loaded whole)
             cut = j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
             if cut.exists():
                 ctx.pieces |= {row["id"] for row in read_jsonl(cut)[1:]}
@@ -653,6 +656,16 @@ def _source_entry_problems(entry: dict) -> list[str]:
             and len(set(chart_pages)) == len(chart_pages)
             and (type(entry.get("pages")) is not int or all(n <= entry["pages"] for n in chart_pages))):
         p.append("'chart_pages' must be a list of distinct page numbers in the document")
+    if entry.get("kept_outside_repo") is True:
+        # The code cache holds every page of the book, for every branch: without the pages this branch brings in, a
+        # quote from any page of it would be checked as law brought in.
+        try:
+            pages = brought_in_pages(entry)
+        except (TypeError, ValueError):
+            pages = None
+        if not pages:
+            p.append("kept outside the repo, so it needs brought_in.pages (the pages read, e.g. '34-56, 99'): "
+                     "only those of the cached book are read")
     return p
 
 
