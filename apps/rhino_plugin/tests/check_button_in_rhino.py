@@ -2,7 +2,8 @@
 """The Check button (Ben, 2026-10-21), in Rhino 8, each claim asserted. Run in Rhino, not in CI; the rules are
 tested in CI (packages/design_checker/tests/test_check_button.py) and the plugin's own code headless (coordination
 headless/check_button/). A fresh feet document:
-1. GordiumCheck on the empty file: the sample drawn and checked; the panel has Check first beside Edit site…, and
+1. GordiumCheck on the empty file: 106 Ithaca Rd looked up (recorded), drawn and checked; the panel has Check first
+   beside Edit site…, and
    "Check after every edit" unticked.
 2. A floor moved 3 ft (Rhino's own Transform), then Rhino really idle for 3 s: no check ran; the panel's header says
    "Model changed since the last check — press Check", its rows show no marks ("—"), and the viewport's status box
@@ -33,6 +34,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
@@ -107,7 +109,7 @@ def step_a():
     run["docs"] = TestDocs("checkbutton").__enter__()
     g = run["g"] = fresh_module()
     doc = run["doc"] = run["docs"].open("Large Objects - Feet")
-    g.gordium_check()                               # an empty file: GordiumStart, the sample drawn and checked
+    look_up_106(g, g.gordium_check)                   # an empty file: GordiumStart, 106 looked up, drawn, checked
     parts = run["parts"] = g.STATE.get("panel_parts") or {}
     buttons = [b.Text for b in parts.get("box_buttons") or []]
     auto = parts.get("auto_box")
@@ -115,8 +117,10 @@ def step_a():
           buttons[:2] == ["Check", "Edit site…"] and auto is not None and auto.Checked is False,
           {"buttons": buttons, "auto": auto.Checked if auto else None})
     runs = run["runs"] = []
-    real_run = g.run_check
+    real_run, real_live = g.run_check, g._check_live
     g.run_check = lambda *a, **k: (runs.append(1), real_run(*a, **k))[1]
+    # the automatic check runs in the background (_check_live, since f43fdc81), never through run_check
+    g._check_live = lambda *a, **k: (runs.append("live"), real_live(*a, **k))[1]
     move_top_floor(g, doc)
     edited("b")
 

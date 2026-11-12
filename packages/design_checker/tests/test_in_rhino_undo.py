@@ -1,8 +1,10 @@
-"""The in-Rhino test scripts (apps/rhino_plugin/tests/*_in_rhino.py) undo and redo with Rhino's own commands, never
-with RhinoDoc.Undo() or RhinoDoc.Redo(). Called from a script those open an undo record they never end and drop the
-step they undid, so a Redo finds nothing: side_yards_in_rhino's "Redo brings the new house back" failed that way on
-every branch while Gordium's Redo worked (2026-11-12; shown with a plain curve and no Gordium code loaded). Run in
-CI, no Rhino."""
+"""The in-Rhino test scripts (apps/rhino_plugin/tests/*_in_rhino.py) undo and redo with Rhino's own commands run in
+the document (RhinoApp.ExecuteCommand(doc, "_Undo")), never with RhinoDoc.Undo() or RhinoDoc.Redo(): called from a
+script those open an undo record they never end and drop the step they undid, so a Redo finds nothing
+(side_yards_in_rhino's "Redo brings the new house back" failed that way on every branch while Gordium's Redo worked,
+2026-11-12; shown with a plain curve and no Gordium code loaded). Nor with RhinoApp.RunScript("_Undo"), which does
+nothing while no Rhino window is on screen (undo_steps_in_rhino's "undone" claims all failed that way, 2026-10-28).
+Run in CI, no Rhino."""
 import ast
 
 from rule_format.rulebook import REPO
@@ -26,11 +28,32 @@ def _doc_undo_calls(source):
     return found
 
 
+def _run_script_undo_calls(source):
+    """Each line that calls RunScript with "_Undo" or "_Redo" written in its command."""
+    return [node.lineno for node in ast.walk(ast.parse(source))
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "RunScript"
+            and node.args and any(isinstance(c, ast.Constant) and isinstance(c.value, str) and
+                                  any(w in c.value for w in ("_Undo", "_Redo")) for c in ast.walk(node.args[0]))]
+
+
 def test_no_in_rhino_script_undoes_with_rhinodoc_undo():
     scripts = sorted(SCRIPTS.glob("*_in_rhino.py"))
     assert scripts
     bad = {p.name: lines for p in scripts if (lines := _doc_undo_calls(p.read_text(encoding="utf-8")))}
     assert not bad, bad
+
+
+def test_no_in_rhino_script_undoes_with_run_script():
+    scripts = sorted(SCRIPTS.glob("*_in_rhino*.py"))
+    bad = {p.name: lines for p in scripts if (lines := _run_script_undo_calls(p.read_text(encoding="utf-8")))}
+    assert not bad, bad
+
+
+def test_the_run_script_check_catches_it():
+    assert _run_script_undo_calls('Rhino.RhinoApp.RunScript("_Undo", False)\n') == [1]
+    assert _run_script_undo_calls('x = 1\nbool(Rhino.RhinoApp.RunScript("_Redo", False))\n') == [2]
+    assert _run_script_undo_calls('Rhino.RhinoApp.RunScript("_Line 0,0,0 1,0,0", False)\n') == []
+    assert _run_script_undo_calls('Rhino.RhinoApp.ExecuteCommand(doc, "_Undo")\n') == []
 
 
 def test_the_check_catches_both_ways_of_calling_it():
