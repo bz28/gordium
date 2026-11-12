@@ -84,16 +84,22 @@ def line(row: dict, rule: dict, values: dict, allowed: dict) -> str:
         known = {**parts.building_values(values), **row["values"]}
         return f"{head}: {_first_failing(rule, known, allowed) or _title(rule)}"
     if row["outcome"] == "needs_review":
-        missing = [m for m, v in row["values"].items() if not _usable(v)]
+        kinds = parts.measure_kinds(rule.get("for_each"))
+        missing = [m for m, v in row["values"].items() if not _usable(v, kinds.get(m))]
         if missing:
             return f"{head}: {', '.join(_words(rule, m) for m in missing)} not measured (or not usable)"
         return f"{head}: {_title(rule)}: needs review"
     return f"{head}: {_title(rule)}" + (": complies" if row["outcome"] == "pass" else ": not applicable")
 
 
-def _usable(v) -> bool:
-    """A value a formula can use (formula._measure's test, kind aside): text, yes/no, or a finite number ≥ 0."""
-    return type(v) in (str, bool) or type(v) in (int, float) and v == v and abs(v) != float("inf") and v >= 0
+def _usable(v, kind) -> bool:
+    """A value a formula can use for a measure of this kind (formula._measure's test): yes/no for "boolean", text for
+    "text", a finite number ≥ 0 (never true/false) for a number."""
+    if kind == "boolean":
+        return type(v) is bool
+    if kind == "text":
+        return type(v) is str
+    return type(v) in (int, float) and v == v and abs(v) != float("inf") and v >= 0
 
 
 def _unit(rule: dict, measure: str) -> str:

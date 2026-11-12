@@ -122,9 +122,10 @@ def test_the_line_names_only_a_comparison_the_check_needs():
 def test_rows_about_no_part_and_unusable_values_are_worded_plainly():
     assert each_part.label({"part": None, "within": None, "name": None}) == "Parts"
     assert each_part.label({"part": "stair", "within": None, "name": None}) == "Stairs"
-    got = checked(house(opening("w1", "br1", area=-3), opening("w2", "br2")) | {"stair": []})
-    assert [i["reason"] for i in got["items"] if i["status"] == present.REVIEW] == \
-        ["Bedroom 1 › w1: net clear area not measured (or not usable)"]
+    for bad in (-3, "6", True):
+        got = checked(house(opening("w1", "br1", area=bad), opening("w2", "br2")) | {"stair": []})
+        assert [i["reason"] for i in got["items"] if i["status"] == present.REVIEW] == \
+            ["Bedroom 1 › w1: net clear area not measured (or not usable)"], bad
 
 
 def test_a_rule_without_an_id_or_title_never_crashes_or_shares_an_answer():

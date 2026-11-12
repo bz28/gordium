@@ -268,6 +268,20 @@ def test_an_opening_that_says_no_room_keeps_every_room_from_none():
     assert not any(r["outcome"] == "fail" for r in got) and rule_result(got) == "needs_review"
 
 
+def test_an_opening_within_a_mistyped_room_keeps_every_room_from_none():
+    got = rows(AREA, {"sleeping_room": [{"id": "B1", "name": "Bedroom 1"}],
+                      "emergency_escape_opening": [opening("o1", "b1")]}, {}, ALLOWED)
+    assert not any(r["outcome"] == "fail" for r in got) and rule_result(got) == "needs_review"
+
+
+def test_a_proposed_measure_cant_borrow_a_part_measure_name():
+    ctx = copy.deepcopy(CTX)
+    ctx.proposed = {"stair_riser_height": {"unit": "in", "meaning": "m"}}
+    lot_rule = {k: v for k, v in RISER.items() if k not in parts.PART_FIELDS}
+    assert any("is a measure of a part" in p and "for each stair" in p for p in validate(book(lot_rule), ctx))
+    assert validate(book(RISER), ctx) == []           # the stair rule itself still may
+
+
 def test_two_openings_sharing_an_id_dont_make_their_room_fail():
     got = rows(AREA, house(opening("w", "br1"), opening("w", "br1"), opening("w2", "br2")), {}, ALLOWED)
     assert not any(r["outcome"] == "fail" for r in got) and rule_result(got) == "needs_review"

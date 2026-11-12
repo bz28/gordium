@@ -287,8 +287,7 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
                 and everywhere.get(where) == 1:
             continue
         else:                            # nowhere, or an id two parts share: never dropped
-            if not isinstance(where, str):
-                doubtful.add(ANYWHERE)       # it could be in any of them
+            doubtful.add(ANYWHERE)           # it could be any room's (a mistyped id): no room is "none"
             out.append(_row(rule, "needs_review", c,
                             reason=f"{_words(kind)} {_name(c)} isn't within any {_words(parent)} that was read"))
     for p in parents:

@@ -675,6 +675,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
 
     # a rule for each part may use its part kind's measures too (parts.yaml), and no other kind's
     kinds = ctx.kinds() | parts.measure_kinds(rule.get("for_each"))
+    foreign = parts.all_measures() - set(parts.measure_kinds(rule.get("for_each")))
     conditions = [rule[k] for k in ("applies_when", "check") if k in rule]
     for r in review_when or []:
         if not (isinstance(r.get("reason"), str) and r["reason"].strip()):
@@ -690,6 +691,9 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             elif (name := formula.bare_name(f)) and kinds.get(name) != "boolean":
                 p.append(f"{f!r} is just a measure name; only a yes/no measure can be a test on its own")
             unknown = sorted(formula.names(f) - set(kinds))
+            # a part's measure (parts.yaml) only in a rule for each part of that kind, even if a draft proposed it
+            p += [f"'{n}' in {f!r} is a measure of a part (rule_format/parts.yaml): only a rule for each "
+                  f"{_part_kind_of(n)} may use it" for n in sorted(formula.names(f) & foreign)]
             p += [f"unknown measure '{n}' in {f!r}" for n in unknown]
             p += _text_problems(f, {"use": ctx.uses, "district": ctx.districts})
             if not unknown:                 # well-typed for every value, or it is no rule (formula.type_of)
@@ -729,6 +733,10 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p += [f"uses proposed measure '{m}': an engineer must add it to measures.yaml before this can be approved"
               for m in sorted(used & set(ctx.proposed))]
     return p
+
+
+def _part_kind_of(measure: str) -> str:
+    return next((k for k, d in parts.registry().items() if measure in d["measures"]), "part").replace("_", " ")
 
 
 def _fits(kind: str, value) -> bool:
