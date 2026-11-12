@@ -1,10 +1,10 @@
 #! python3
 """Drawing-style dimensions (Ben, 2026-10-21), in Rhino 8, each claim asserted (the run fails loudly otherwise). Run
 in Rhino, not in CI: the numbers are tested in CI (packages/design_checker/tests/test_dimensions.py); what only
-Rhino can show is what the conduit draws in each view. A fresh feet document, GordiumStart on the sample (106 Ithaca
-Rd), Show on-screen labels on, then the house moved 5 ft to the left (seen from the street): the left side yard
-fails. What the screen draws is recorded by wrapping the plugin's own _dimension (each drawn dimension) while each
-view redraws.
+Rhino can show is what the conduit draws in each view. A fresh feet document, GordiumStart on 106 Ithaca
+Rd's recorded lookup, Show on-screen labels on, then the house moved 5 ft to the left (seen from the street): the
+left side yard fails. What the screen draws is recorded by wrapping the plugin's own _dimension (each drawn
+dimension) while each view redraws.
 1. Top: one dimension per measured yard, each drawn with its dashed required line (two where the limit is read two
    ways), no two starting at the same point; the left side yard's red; its required line 10'-0" from the lot line;
    each yard's dimension square to the lot-line piece it ends on (within 0.1°).
@@ -31,6 +31,7 @@ import System
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_dimensions") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -102,8 +103,12 @@ try:
     doc = TestDocs("dimensions").__enter__().open("Large Objects - Feet")
     # a lot known level (the lookup's fall 0.0): the height is measured, so its dimension is drawn (with no ground
     # looked up, or on 106's real 14.2 ft fall, height needs review and has no dimension: the sloped-lot fix)
-    g.STATE["box_overrides"] = dict(g.STATE.get("box_overrides") or {}, ground_fall=0.0)
-    g.gordium_check()                                    # GordiumStart's flow on the sample
+    # (106's recorded lookup finds its real fall, 14.2 ft, and Draw applies the lookup's answer after the box's own
+    # fields, so a ground_fall box override never reaches the facts: the lot is stated level after the start, then
+    # checked)
+    look_up_106(g, g.gordium_check)                      # GordiumStart: 106 Ithaca Rd looked up (recorded), drawn
+    g.save_facts(doc, dict(g.current_facts(doc), ground_fall=0.0))
+    g.run_check(doc, report=False)
     g.set_labels(True)
     k = 1.0 / g._scale(doc)
     for o in g._buildings(doc):
