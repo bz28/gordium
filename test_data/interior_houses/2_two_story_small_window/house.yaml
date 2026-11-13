@@ -1,0 +1,77 @@
+# A made-up two-story house (not a real house): Bedroom 3's escape window is too small; Bedroom 4 has a sloped
+# ceiling down to a 4 ft knee wall, so its floor area that counts (R312.3) isn't measured; one straight stair.
+format: gordium.interior/1
+units: in
+rooms:
+  - id: bed3
+    name: Bedroom 3
+    sleeping: true
+    floor: [[0, 0], [120, 0], [120, 120], [0, 120]]
+    floor_elevation: 120
+    ceiling_height: 96
+  - id: bed4
+    name: Bedroom 4
+    sleeping: true
+    floor: [[120, 0], [264, 0], [264, 120], [120, 120]]
+    floor_elevation: 120
+    ceilings:                    # finished ceiling undersides, x y z
+      - [[120, 0, 216], [216, 0, 216], [216, 120, 216], [120, 120, 216]]
+      - [[216, 0, 216], [264, 0, 168], [264, 120, 168], [216, 120, 216]]
+openings:
+  - id: w5
+    name: Window 5
+    room: bed3
+    escape: true
+    operation: casement
+    frame: {left: 0, right: 22, bottom: 144, top: 180}
+    hinged: {side: right, open_angle: 90, sash_width: 22, sash_thickness: 1.5}
+    ground_outside: 0
+  - id: w6
+    name: Window 6
+    room: bed4
+    escape: true
+    operation: casement
+    frame: {left: 0, right: 28, bottom: 132, top: 168}
+    hinged: {side: left, open_angle: 90, sash_width: 28, sash_thickness: 1.5}
+    ground_outside: 0
+stairs:
+  - id: s1
+    name: Main stair
+    bottom_elevation: 0
+    nosings:                     # leading edge of each tread, bottom to top, the upper floor's nosing last
+      - [[0, 0, 7.5], [0, 36, 7.5]]
+      - [[10, 0, 15], [10, 36, 15]]
+      - [[20, 0, 22.5], [20, 36, 22.5]]
+      - [[30, 0, 30], [30, 36, 30]]
+      - [[40, 0, 37.5], [40, 36, 37.5]]
+      - [[50, 0, 45], [50, 36, 45]]
+      - [[60, 0, 52.5], [60, 36, 52.5]]
+      - [[70, 0, 60], [70, 36, 60]]
+      - [[80, 0, 67.5], [80, 36, 67.5]]
+      - [[90, 0, 75], [90, 36, 75]]
+      - [[100, 0, 82.5], [100, 36, 82.5]]
+      - [[110, 0, 90], [110, 36, 90]]
+      - [[120, 0, 97.5], [120, 36, 97.5]]
+      - [[130, 0, 105], [130, 36, 105]]
+      - [[140, 0, 112.5], [140, 36, 112.5]]
+      - [[150, 0, 120], [150, 36, 120]]
+    sides:
+      left: [[-10, 36], [160, 36]]
+      right: [[-10, 0], [160, 0]]
+    handrails:
+      - {side: right, inner_edge: [[0, 3.5], [150, 3.5]]}
+    overhead:
+      - [[-20, -5, 108], [20, -5, 108], [20, 41, 108], [-20, 41, 108]]     # the upper floor's underside
+      - [[20, -5, 216], [170, -5, 216], [170, 41, 216], [20, 41, 216]]     # the stairwell's ceiling
+doors:
+  - id: d1
+    name: Front door
+    exit: true
+    operation: side_hinged
+    hinge_side: left
+    stops: {hinge: 0, latch: 33.75}
+    hinge_pin: 0
+    leaf_thickness: 1.75
+    threshold_top: 0.75
+    head_stop_bottom: 78.75
+guards: []

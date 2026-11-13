@@ -1,0 +1,65 @@
+# A made-up one-story ranch (not a real house): two bedrooms, each with a compliant escape window, one exit door.
+# Host-neutral interior description (docs/interior/interior_description_format.md).
+format: gordium.interior/1
+units: in
+rooms:
+  - id: bed1
+    name: Bedroom 1
+    sleeping: true
+    floor: [[0, 0], [144, 0], [144, 132], [0, 132]]
+    floor_elevation: 0
+    ceiling_height: 96
+  - id: bed2
+    name: Bedroom 2
+    sleeping: true
+    floor: [[144, 0], [276, 0], [276, 120], [144, 120]]
+    floor_elevation: 0
+    ceiling_height: 96
+  - id: living
+    name: Living room
+    sleeping: false
+    floor: [[0, 132], [276, 132], [276, 300], [0, 300]]
+    floor_elevation: 0
+    ceiling_height: 96
+openings:
+  - id: w1
+    name: Window 1
+    room: bed1
+    escape: true
+    operation: casement
+    frame: {left: 0, right: 26, bottom: 30, top: 66}
+    hinged: {side: left, open_angle: 90, sash_width: 26, sash_thickness: 1.5}
+    ground_outside: -8
+  - id: w2
+    name: Window 2
+    room: bed2
+    escape: true
+    operation: double_hung
+    frame: {left: 0, right: 30, bottom: 24, top: 84}
+    sashes:                      # both sashes in their fully open position: the lower one raised behind the upper
+      - {left: 0, right: 30, bottom: 52, top: 84}
+      - {left: 0, right: 30, bottom: 50, top: 82}
+    ground_outside: -8
+  - id: w3
+    name: Window 3
+    room: living
+    escape: false
+    operation: fixed
+    frame: {left: 0, right: 60, bottom: 24, top: 84}
+doors:
+  - id: d1
+    name: Front door
+    exit: true
+    operation: side_hinged
+    hinge_side: left
+    stops: {hinge: 0, latch: 34.25}
+    hinge_pin: 0.25
+    leaf_thickness: 1.75
+    threshold_top: 0.5
+    head_stop_bottom: 80.5
+  - id: d2
+    name: Back door
+    exit: false
+    operation: side_hinged
+stairs: []
+guards: []
