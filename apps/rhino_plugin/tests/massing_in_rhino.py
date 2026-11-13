@@ -2,7 +2,7 @@
 """The starting house on its own sublayers, its note and the cautious envelope (Ben, 2026-10-21), in Rhino 8. Every
 claim is recorded (the run goes on past a failing one) and the run fails at the end if any did. Run in Rhino, not
 in CI: the rules are tested in CI (packages/design_checker/tests/test_check.py, the "feature 5" tests).
-A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, a tax-map lot).
+A fresh feet document, GordiumStart on 106 Ithaca Rd's recorded lookup (a tax-map lot).
 1. Each floor block on its own sublayer Gordium::Massing::Floor 1, 2, 3 (one block each, named Floor N, the whole
    house one group); Gordium::Massing::Roof made.
 2. The check measures it as before: the building found, its stories counted (the Stories row is not "not
@@ -26,6 +26,7 @@ import scriptcontext as sc
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_docs_in_rhino import TestDocs, close  # noqa: E402
+from test_docs_in_rhino import look_up_106  # noqa: E402
 
 S = os.path.join(tempfile.gettempdir(), "gordium_massing") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -61,7 +62,7 @@ doc = None
 try:
     g = fresh_module()
     doc = TestDocs("massing").__enter__().open("Large Objects - Feet")
-    g.gordium_check()                                    # GordiumStart's flow on the sample
+    look_up_106(g, g.gordium_check)                      # GordiumStart: 106 Ithaca Rd looked up (recorded)
     k = 1.0 / g._scale(doc)
     house = list(g._buildings(doc))
     layers = sorted((doc.Layers[o.Attributes.LayerIndex].FullPath, o.Attributes.Name) for o in house)
