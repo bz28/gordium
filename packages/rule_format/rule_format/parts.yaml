@@ -11,15 +11,44 @@ sleeping_room:
   measures:
     sleeping_room_floor_area: {unit: sf, meaning: "Floor area of the room"}
 
+# Egress step 3 (2026-11-13): the spaces besides sleeping rooms that R319.1 says need an escape opening, as the
+# architect labels them.
+basement:
+  meaning: "A basement (R202 BASEMENT: a story that is not a story above grade plane), as the architect labels it"
+  measures:
+    basement_floor_area:      {unit: sf, meaning: "Floor area of the basement"}
+    basement_mechanical_only: {unit: yes_no, meaning: "The basement is used only to house mechanical equipment"}
+
+habitable_attic:
+  meaning: "A habitable attic (R202 ATTIC, HABITABLE; R316), as the architect labels it"
+  measures:
+    habitable_attic_floor_area: {unit: sf, meaning: "Floor area of the habitable attic"}
+
 emergency_escape_opening:
   meaning: "An opening (a window or door) the architect marks as a room's emergency escape and rescue opening"
-  within: [sleeping_room]
+  within: [sleeping_room, basement, habitable_attic]
   measures:
     opening_net_clear_area:   {unit: sf, meaning: "Net clear opening area with the window or door fully open"}
     opening_net_clear_height: {unit: in, meaning: "Net clear opening height with the window or door fully open"}
     opening_net_clear_width:  {unit: in, meaning: "Net clear opening width with the window or door fully open"}
     opening_sill_height:      {unit: in, meaning: "Height of the bottom of the clear opening above the floor"}
     opening_at_grade:         {unit: yes_no, meaning: "The opening's sill is at or near the ground outside it (a grade-floor opening)"}
+    opening_operable:         {unit: yes_no, meaning: "The opening can be opened (an operable window or a door, not fixed glass)"}
+    opening_opens_to_yard:    {unit: yes_no, meaning: "The opening opens directly into a public way, or to a yard or court that opens to a public way"}
+    opening_is_door:          {unit: yes_no, meaning: "The opening is a door (not a window)"}
+    opening_door_hinged_or_sliding: {unit: yes_no, meaning: "For a door: it is a side-hinged door or a sliding door"}
+    opening_under_projection: {unit: yes_no, meaning: "The opening is under a deck, porch or cantilever"}
+    opening_fully_openable:   {unit: yes_no, meaning: "The window or door opens fully (to its whole net clear opening)"}
+    opening_path_height:      {unit: in, meaning: "Least clear height of the path from the opening to a yard or court (under a deck, porch or cantilever)"}
+    opening_path_width:       {unit: in, meaning: "Least clear width of the path from the opening to a yard or court (under a deck, porch or cantilever)"}
+    opening_below_grade:      {unit: yes_no, meaning: "The bottom of the clear opening is below the adjacent ground (grade) outside it"}
+    area_well_area:           {unit: sf, meaning: "Horizontal area of the area well outside the opening"}
+    area_well_projection:     {unit: in, meaning: "Horizontal projection of the area well, measured out from the wall"}
+    area_well_width:          {unit: in, meaning: "Width of the area well, measured along the wall"}
+    area_well_depth:          {unit: in, meaning: "Vertical depth of the area well"}
+    area_well_ladder:         {unit: yes_no, meaning: "The area well has a permanently affixed ladder or steps, not obstructed by the open window or door"}
+    opening_into_patio_cover: {unit: yes_no, meaning: "The opening opens into a patio cover (Appendix BF: a roofed structure with open or glazed walls)"}
+    patio_cover_openings_open: {unit: yes_no, meaning: "Nothing fills the wall openings of the patio cover it opens into: no insect screening, plastic or glass"}
 
 stair:
   meaning: "A flight of stairs (one run of steps between landings)"
@@ -27,10 +56,49 @@ stair:
     stair_riser_height:  {unit: in, meaning: "Height of the tallest riser in the flight"}
     stair_tread_depth:   {unit: in, meaning: "Depth of the shallowest tread in the flight"}
     stair_headroom:      {unit: in, meaning: "Least clear height above the flight, measured from the tread nosings"}
-    stair_clear_width:   {unit: in, meaning: "Least clear width of the flight"}
+    stair_clear_width:   {unit: in, meaning: "Least clear width of the flight above the handrail height (and below the headroom height)"}
+    stair_clear_width_at_handrail: {unit: in, meaning: "Least clear width of the flight at and below the handrail height, treads and landings included"}
+    stair_handrail_sides: {unit: count, meaning: "Sides of the flight with a handrail (0, 1 or 2)"}
+    stair_riser_count:   {unit: count, meaning: "Risers in the flight"}
+    stair_riser_variation: {unit: in, meaning: "Greatest riser height in the flight minus the smallest"}
+    stair_tread_variation: {unit: in, meaning: "Greatest tread depth in the flight minus the smallest"}
+    stair_spiral:        {unit: yes_no, meaning: "The flight is a spiral stairway"}
+    stair_serves_sleeping_loft: {unit: yes_no, meaning: "The flight is a stairway providing egress from a sleeping loft (R315.5.2)"}
 
 egress_door:
   meaning: "A door the architect marks as the dwelling's required exit door"
   measures:
     door_clear_width:  {unit: in, meaning: "Clear width of the opening with the door open"}
     door_clear_height: {unit: in, meaning: "Clear height of the opening with the door open"}
+    door_side_hinged:  {unit: yes_no, meaning: "The door is side-hinged"}
+
+handrail:
+  meaning: "A handrail along a flight of stairs, as the architect marks it"
+  within: [stair]
+  measures:
+    handrail_height:         {unit: in, meaning: "Height of the handrail, measured vertically from the sloped plane adjoining the tread nosings (least and greatest alike: the least here)"}
+    handrail_height_max:     {unit: in, meaning: "Greatest height of the handrail along the flight, measured the same way"}
+    handrail_adjacent_to_wall: {unit: yes_no, meaning: "The handrail runs beside a wall"}
+    handrail_wall_clearance: {unit: in, meaning: "Least space between the handrail and the wall beside it"}
+    handrail_projection:     {unit: in, meaning: "How far the handrail projects into the stairway from its side"}
+
+open_side:
+  meaning: "An open side of a walking surface (a floor, stair, ramp, landing, porch, balcony or deck edge), as the architect marks it"
+  measures:
+    open_side_drop:      {unit: in, meaning: "Greatest vertical distance from the walking surface to the floor or grade below, at any point within 36 inches horizontally of the edge of the open side"}
+    open_side_on_stair:  {unit: yes_no, meaning: "The open side is the open side of a stair"}
+    guard_present:       {unit: yes_no, meaning: "A guard is installed along the open side (insect screening is not a guard)"}
+    guard_height:        {unit: in, meaning: "Least height of the guard, measured vertically above the walking surface (on a stair: from the line connecting the nosings)"}
+    guard_is_handrail:   {unit: yes_no, meaning: "The top of the guard serves as the stair's handrail"}
+    guard_height_max:    {unit: in, meaning: "Greatest height of the guard's top, measured the same way"}
+    guard_opening_sphere: {unit: in, meaning: "Diameter of the largest sphere that can pass through an opening in the guard, from the walking surface up to the required guard height (the triangle under a stair's bottom rail left out)"}
+    guard_triangle_sphere: {unit: in, meaning: "On a stair: diameter of the largest sphere that can pass through the triangle formed by a riser, a tread and the guard's bottom rail"}
+
+sleeping_loft:
+  meaning: "A space the architect marks as a sleeping loft that Section R315 applies to (R202 SLEEPING LOFT; not one of R315.1's exceptions: 3 feet deep or more, 35 square feet or more, with a permanent means of egress)"
+  measures:
+    loft_floor_area:          {unit: sf, meaning: "Floor area of the sleeping loft (sloped spaces under 3 feet of ceiling height left out, R315.3)"}
+    loft_floor_area_over_7ft: {unit: sf, meaning: "Part of the loft's floor area where the ceiling is higher than 7 feet"}
+    loft_clear_height_below:  {unit: in, meaning: "Least clear height below the loft's floor construction"}
+    loft_ceiling_height:      {unit: in, meaning: "Least ceiling height above the loft's finished floor (over its counted floor area)"}
+    loft_egress_ceiling_height: {unit: in, meaning: "Least ceiling height over the whole width of the loft's means of egress"}
