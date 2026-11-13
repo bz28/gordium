@@ -1,0 +1,36 @@
+# Every part kind a rule may repeat over ("for each sleeping room", "for each stair"), and the measures each part of
+# that kind carries. Written by engineers, like measures.yaml; a rule's `for_each` must name one of these
+# (docs/decisions/2026-11-12_rules_for_each_part.md).
+#
+# A part's measure names are unique across every kind and never a measures.yaml name, so a formula's names can't
+# mean two things. Units as in measures.yaml, plus `in` (inches: windows, doors and stairs are sized in inches).
+# `within`: the kinds a part of this kind can sit in (a rule's `within` must be one of them).
+
+sleeping_room:
+  meaning: "A room used, or intended to be used, for sleeping (a bedroom), as the architect labels it"
+  measures:
+    sleeping_room_floor_area: {unit: sf, meaning: "Floor area of the room"}
+
+emergency_escape_opening:
+  meaning: "An opening (a window or door) the architect marks as a room's emergency escape and rescue opening"
+  within: [sleeping_room]
+  measures:
+    opening_net_clear_area:   {unit: sf, meaning: "Net clear opening area with the window or door fully open"}
+    opening_net_clear_height: {unit: in, meaning: "Net clear opening height with the window or door fully open"}
+    opening_net_clear_width:  {unit: in, meaning: "Net clear opening width with the window or door fully open"}
+    opening_sill_height:      {unit: in, meaning: "Height of the bottom of the clear opening above the floor"}
+    opening_at_grade:         {unit: yes_no, meaning: "The opening's sill is at or near the ground outside it (a grade-floor opening)"}
+
+stair:
+  meaning: "A flight of stairs (one run of steps between landings)"
+  measures:
+    stair_riser_height:  {unit: in, meaning: "Height of the tallest riser in the flight"}
+    stair_tread_depth:   {unit: in, meaning: "Depth of the shallowest tread in the flight"}
+    stair_headroom:      {unit: in, meaning: "Least clear height above the flight, measured from the tread nosings"}
+    stair_clear_width:   {unit: in, meaning: "Least clear width of the flight"}
+
+egress_door:
+  meaning: "A door the architect marks as the dwelling's required exit door"
+  measures:
+    door_clear_width:  {unit: in, meaning: "Clear width of the opening with the door open"}
+    door_clear_height: {unit: in, meaning: "Clear height of the opening with the door open"}

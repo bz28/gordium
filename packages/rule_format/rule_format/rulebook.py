@@ -10,6 +10,7 @@ A missing or unusable measurement, or a value the formula can't evaluate -> need
 
 import datetime
 import hashlib
+import itertools
 import json
 import pickle
 import re
@@ -21,7 +22,7 @@ from pathlib import Path
 
 import yaml
 
-from . import formula
+from . import formula, parts
 from .formula import EvaluationError, FormulaError, MissingMeasure
 
 REPO = Path(__file__).resolve().parents[3]
@@ -36,11 +37,11 @@ STATUSES = ("draft", "approved")
 # meaning is the `check` and its `examples`. (Retellings kept dropping or adding words.)
 RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
                "notes", "open_questions", "research", "findings", "answers", "drafted_by", "status", "approved_by", "approved_on",
-               "approved_hash"}
+               "approved_hash", *parts.PART_FIELDS}
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
-               "examples": {"given", "expect", "note"}}
+               "examples": {"given", "expect", "note", *parts.EXAMPLE_FIELDS}}
 CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
 APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "findings",
                    "answers")
@@ -56,8 +57,23 @@ def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
     no list, is unrecognized. A measure that isn't in measures.yaml (one a draft proposed) is described here by
     its kind instead: "number" or "boolean". A missing or unusable measure is unknown: the result is pass or fail
     only if it is the same whatever that measure turns out to be (three-valued logic, formula.evaluate); else
-    needs review."""
-    kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
+    needs review. A rule for each part (for_each: parts.py) has no one answer for the whole building: needs review
+    here, so code that doesn't know about parts can never pass one (its rows: parts.rows)."""
+    if parts.is_part_rule(rule):
+        return "needs_review"
+    return _outcome(rule, values, allowed)
+
+
+def _kinds(allowed: dict, extra: dict | None = None) -> dict:
+    """What every measure is (formula.evaluate's kinds): measures.yaml's, then `extra` (a part's measures), then
+    `allowed` (the text values a text measure may take, or a proposed measure's kind)."""
+    return MEASURE_KINDS | (extra or {}) | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
+
+
+def _outcome(rule: dict, values: dict, allowed: dict[str, set], extra: dict | None = None) -> str:
+    """outcome() itself, for one set of values: the whole building's, or (parts.part_outcome) one part's, with
+    `extra` describing the part's own measures."""
+    kinds = _kinds(allowed, extra)
     try:
         if "applies_when" in rule and not _condition(rule["applies_when"], values, kinds):
             return "not_applicable"
@@ -68,6 +84,29 @@ def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
         return "pass" if _condition(rule["check"], values, kinds) else "fail"
     except (MissingMeasure, EvaluationError, FormulaError, ArithmeticError):
         return "needs_review"         # a formula that can't be read (never frozen so) is never a crash
+
+
+def unknown_settings(rule: dict, unknown: list[str], kinds: dict) -> list[dict] | None:
+    """The settings the "fails whatever the missing number is" proof (decided 2026-10-21) tries for these unknown
+    measures, or None when it can't be made. A rule with a check; no unknown measure in its applies_when or
+    review_when; each unknown a number the check is provably truest at when it is 0 (formula.truth_direction -1,
+    taken at 0: measures are never negative) or a yes/no fact (tried both ways); anything else, None. A rule that
+    fails under every setting fails whatever the unknowns are. Used by the checker's rows (check.fails_whatever) and
+    by each part's row (parts.rows): one proof, so it means the same for both."""
+    if rule.get("kind") != "rule" or not rule.get("check"):
+        return None
+    side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
+    for r in rule.get("review_when") or []:
+        side |= formula.names(r["when"])
+    if not unknown or any(n in side for n in unknown):
+        return None
+    numbers = [n for n in unknown if kinds.get(n) == "number"]
+    yes_no = [n for n in unknown if kinds.get(n) == "boolean"]
+    if len(numbers) + len(yes_no) != len(unknown) or any(
+            formula.truth_direction(rule["check"], n) != -1 for n in numbers):
+        return None
+    return [{**{n: 0 for n in numbers}, **dict(zip(yes_no, ways))}
+            for ways in itertools.product((False, True), repeat=len(yes_no))]
 
 
 def _condition(text: str, values: dict, kinds: dict) -> bool:
@@ -709,6 +748,8 @@ def approval_hash(entry: dict, ctx: "Context", fields: tuple[str, ...] = APPROVE
                    if isinstance(sources, list) else [])
     approved = {k: entry.get(k) for k in fields} | {
         "source_fingerprints": {f: ctx.sources.get(f, {}).get("sha256") for f in cited}}
+    # a rule's per-part fields (parts.py) only when it has them: every fingerprint made before them is unchanged
+    approved |= {k: entry[k] for k in parts.PART_FIELDS if k in entry}
     return hashlib.sha256(json.dumps(_canonical(approved)).encode()).hexdigest()
 
 
@@ -775,6 +816,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p.append(f"'title' is a one-line label of at most {TITLE_MAX} characters; the rule is its quotes and check")
     if (rule.get("kind") == "rule") != ("check" in rule):
         p.append("a 'rule' needs a 'check'; a 'flag' must not have one")
+    p += parts.rule_problems(rule)       # for_each, within, when_none (a rule for each part)
     review_when, sources, examples = (_list_of_dicts(rule, k) for k in ("review_when", "sources", "examples"))
     for key, value in (("review_when", review_when), ("sources", sources), ("examples", examples)):
         if value is None:
@@ -784,7 +826,14 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     if any("unknown field" in x for x in p):
         return p  # the approval fingerprint and other checks rely on well-formed items
 
-    kinds = ctx.kinds()
+    # a rule for each part may use its part kind's measures too (parts.yaml), and no other kind's
+    try:                              # parts.yaml broken: said as a problem (and by python -m rule_format), never a crash
+        own = parts.measure_kinds(rule.get("for_each"))
+        foreign = parts.all_measures() - set(own)
+    except (ValueError, OSError) as e:
+        own, foreign = {}, set()
+        p.append(f"rule_format/parts.yaml can't be read, so part measures can't be told apart: {e}")
+    kinds = ctx.kinds() | own
     conditions = [rule[k] for k in ("applies_when", "check") if k in rule]
     for r in review_when or []:
         if not (isinstance(r.get("reason"), str) and r["reason"].strip()):
@@ -800,6 +849,9 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             elif (name := formula.bare_name(f)) and kinds.get(name) != "boolean":
                 p.append(f"{f!r} is just a measure name; only a yes/no measure can be a test on its own")
             unknown = sorted(formula.names(f) - set(kinds))
+            # a part's measure (parts.yaml) only in a rule for each part of that kind, even if a draft proposed it
+            p += [f"'{n}' in {f!r} is a measure of a part (rule_format/parts.yaml): only a rule for each "
+                  f"{_part_kind_of(n)} may use it" for n in sorted(formula.names(f) & foreign)]
             p += [f"unknown measure '{n}' in {f!r}" for n in unknown]
             p += _text_problems(f, {"use": ctx.uses, "district": ctx.districts})
             if not unknown:                 # well-typed for every value, or it is no rule (formula.type_of)
@@ -815,12 +867,19 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     expects = {ex.get("expect") for ex in examples or [] if isinstance(ex.get("expect"), str)}
     if rule.get("kind") == "rule" and not {"pass", "fail"} <= expects:
         p.append("a 'rule' needs worked examples that pass and that fail, so its check is really exercised")
+    # a rule for each part: each example is a small design, its building's measures in `given` and its parts' in
+    # `parts`, checked by the rows the checker gives (parts.examples_problems); a whole-building rule has no parts
+    per_part = parts.is_part_rule(rule)
+    building = ctx.kinds() if per_part else kinds
     for n, ex in enumerate(examples or [], 1):
         given = ex.get("given")
-        if not isinstance(given, dict) or not all(isinstance(k, str) for k in given):
+        if not per_part and (extra := [k for k in parts.EXAMPLE_FIELDS if k in ex]):
+            p.append(f"example {n}: {extra} only go with a rule for each part (for_each)")
+        elif not isinstance(given, dict) or not all(isinstance(k, str) for k in given):
             p.append(f"example {n}: 'given' must be a mapping of measurement names to values")
-        elif unknown := sorted(given.keys() - set(kinds)):
-            p.append(f"example {n}: unknown measures {unknown}")
+        elif unknown := sorted(given.keys() - set(building)):
+            p.append(f"example {n}: unknown measures {unknown}" + (
+                " (a part's measures go in 'parts')" if per_part and set(unknown) & set(own) else ""))
         elif wrong := sorted(k for k, v in given.items() if not _fits(kinds[k], v)):
             p.append(f"example {n}: wrong kind of value for {wrong} (see measures.yaml units)")
         elif "use" in given and given["use"] not in ctx.uses:
@@ -829,8 +888,10 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append(f"example {n}: unknown district {given['district']!r}")
         elif ex.get("expect") not in OUTCOMES:
             p.append(f"example {n}: expect must be one of {OUTCOMES}")
-        elif not p and (got := outcome(rule, given, ctx.allowed())) != ex["expect"]:
+        elif not per_part and not p and (got := outcome(rule, given, ctx.allowed())) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
+    if per_part:
+        p += parts.examples_problems(rule, examples or [], ctx.allowed(), run=not p)
 
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)
     if rule.get("status") == "approved":
@@ -838,6 +899,10 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p += [f"uses proposed measure '{m}': an engineer must add it to measures.yaml before this can be approved"
               for m in sorted(used & set(ctx.proposed))]
     return p
+
+
+def _part_kind_of(measure: str) -> str:
+    return next((k for k, d in parts.registry().items() if measure in d["measures"]), "part").replace("_", " ")
 
 
 def _fits(kind: str, value) -> bool:

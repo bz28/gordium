@@ -61,6 +61,15 @@ coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can'
 - The hand-drafted `5_zoning_rules/R-1b.yaml` is never shown to the AI: it's the answer key. The drafting rules the
   AI reads use neutral examples, not R-1b's.
 
+**Rules for each part** (egress step 3a; building-code text, not yet drafted for real): with `for_parts` (the
+answer's shape and the instructions both), a template also says `for_each`, `within` and `when_none`, and each worked
+example is a small design: the building's measures, the parts, and every row expected. Code checks it exactly like a
+zoning draft (quotes, numbers), and its examples with the checker's own rows; one must show `when_none`, and parts must
+pass and fail the check (a "none" row doesn't count), or the draft is sent back. Whether a chart number decides something is judged on the rows, never on `outcome()` (which always
+says needs review for a rule for each part). A zoning run sends exactly what it always did. Tests use synthetic text
+only (`tests/test_drafting_parts.py`). Design: [the decision](../../docs/decisions/2026-11-12_rules_for_each_part.md),
+points 9 to 11.
+
 ## How the drafts are graded (`tests/test_eval.py`, once drafts exist)
 
 1. The drafted R-1b rules give the hand R-1b's outcome on every one of its worked examples.
