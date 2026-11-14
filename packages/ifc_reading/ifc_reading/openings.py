@@ -52,14 +52,25 @@ def rooms_bounded(element) -> list:
 
 
 def _flag(model, element, sets_names):
-    """The first flag the model states, as (true/false, "Set.Name", None); (None, None, None) if none; a flag that
-    is there but isn't true/false (text "TRUE", "Yes", UNKNOWN) as (None, "Set.Name", why): never read as unmarked."""
-    for s, name in sets_names:
-        value, where = model.prop(element, [s], name)
-        if isinstance(value, bool):
-            return value, where, None
-        if value is not None:
-            return None, where, f"{where} is {value!r}, not true or false"
+    """What the model states, as (true/false, "Set.Name", None); (None, None, None) if it states nothing. Every
+    statement under every name given counts (Gordium_Egress.EscapeOpening and Pset_WindowCommon.FireExit alike),
+    the element's own overriding its type's: they must agree, else (None, "Set.Name", why), as for a statement
+    that isn't true/false (text "TRUE", an enumerated value). Never the first one found."""
+    from ifc_reading.model import Unreadable
+    for holders in model.levels(element):
+        got = [(v, w) for s, name in sets_names
+               for v, w, _ in model.find_all(element, lambda n, s=s: n == s, name, holders)]
+        if not got:
+            continue
+        said = ", ".join(f"{w} {v!r}" for v, w in got)
+        if any(not isinstance(v, bool) or isinstance(v, Unreadable) for v, _ in got):
+            bad = [(v, w) for v, w in got if not isinstance(v, bool)][0]
+            return None, bad[1], f"{bad[1]} is {bad[0]!r}, not true or false" + (
+                f" ({len(got)} statements that differ: {said})" if len(got) > 1 else "")
+        if len({v for v, _ in got}) > 1:
+            return None, got[0][1], (f"the model states it differently ({len(got)} statements that differ: "
+                                     f"{said}): which is right is unclear")
+        return got[0][0], " and ".join(dict.fromkeys(w for _, w in got)), None
     return None, None, None
 
 

@@ -137,8 +137,8 @@ def test_window_operations(build, tmp_path, operation, expected):
     ({}, False, "not marked"),
     ({"Pset_WindowCommon": {"FireExit": True}}, True, "Pset_WindowCommon.FireExit is true"),
     ({"Pset_WindowCommon": {"FireExit": False}}, False, "Pset_WindowCommon.FireExit is false"),
-    ({"Gordium_Egress": {"EscapeOpening": True}, "Pset_WindowCommon": {"FireExit": False}}, True,
-     "Gordium_Egress.EscapeOpening is true"),
+    ({"Gordium_Egress": {"EscapeOpening": True}, "Pset_WindowCommon": {"FireExit": False}}, False,
+     "states it differently"),                # review round 4: two marks that disagree are not a mark
 ])
 def test_an_escape_opening_only_when_marked(build, tmp_path, psets, expected, source):
     w = read(bedroom_house(build, window={"psets": psets}).write(tmp_path / "h.ifc"))["openings"][0]
@@ -364,3 +364,36 @@ def test_the_elements_own_flag_overrides_its_types(build, tmp_path):
     got = read(b.write(tmp_path / "h.ifc"))["openings"][0]
     assert got["escape"] is True and "Gordium_Egress.EscapeOpening is true" in got["ifc"]["escape_from"]
     assert w.Name == "W1"
+
+
+@pytest.mark.parametrize("on_type", [True, False])
+def test_two_marks_must_agree(build, tmp_path, on_type):
+    """Review round 4: Gordium_Egress.EscapeOpening true (on the window's type, or the window) and the window's
+    own Pset_WindowCommon.FireExit false: settled by name order (escape true). Now the window's own mark wins
+    over its type's, and two marks at the same level must agree, else not marked, with both named."""
+    b = bedroom_house(build, window={"psets": {"Pset_WindowCommon": {"FireExit": False}} if on_type else
+                                     {"Pset_WindowCommon": {"FireExit": False}, "Gordium_Egress": {"EscapeOpening": True}}})
+    if on_type:
+        t = b.f.by_type("IfcWindowType")[0]
+        t.HasPropertySets = list(t.HasPropertySets) + [b.f.create_entity(
+            "IfcPropertySet", GlobalId=b.guid(), Name="Gordium_Egress", HasProperties=[b.f.create_entity(
+                "IfcPropertySingleValue", Name="EscapeOpening", NominalValue=b.f.create_entity("IfcBoolean", True))])]
+    door = b.door("Front", (5, 0, 0), psets={"Gordium_Egress": {"ExitDoor": True}, "Pset_DoorCommon": {"FireExit": False}})
+    d = read(b.write(tmp_path / "h.ifc"))
+    w = d["openings"][0]
+    assert w["escape"] is False
+    if on_type:                                       # the window's own FireExit false overrides its type
+        assert w["ifc"]["escape_from"] == "Pset_WindowCommon.FireExit is false"
+    else:
+        assert "states it differently" in w["ifc"]["escape_from"] and "FireExit" in w["ifc"]["escape_from"]
+    dr = one(d["doors"], "Front")
+    assert "exit" not in dr and "states it differently" in dr["not_given"]["exit"]
+    assert door.Name == "Front"
+
+
+def test_two_marks_that_agree(build, tmp_path):
+    b = bedroom_house(build, window={"psets": {"Pset_WindowCommon": {"FireExit": True},
+                                               "Gordium_Egress": {"EscapeOpening": True}}})
+    w = read(b.write(tmp_path / "h.ifc"))["openings"][0]
+    assert w["escape"] is True
+    assert w["ifc"]["escape_from"] == "Gordium_Egress.EscapeOpening and Pset_WindowCommon.FireExit is true"

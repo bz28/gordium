@@ -72,6 +72,11 @@ class Model:
                     found.append((value, f"{holder.Name}.{name}", getattr(item, "Unit", None)))
         return found
 
+    def levels(self, element):
+        """The element's own property sets, then its type's: IFC's inheritance (the element's own value wins)."""
+        t = self.type_of(element)
+        return self._own(element), list(getattr(t, "HasPropertySets", None) or [] if t is not None else [])
+
     def find(self, element, wanted, name):
         """The first of find_all: (value, "Set.Name", unit); (None, None, None) if there is none."""
         got = self.find_all(element, wanted, name)
@@ -82,10 +87,8 @@ class Model:
         The element's own statements override its type's (IFC's inheritance); stated more than once at the same
         level (two sets of the same name, say), they must agree, else the value is Unreadable (never the first
         one found, which could be the wrong one)."""
-        t = self.type_of(element)
-        levels = (self._own(element), list(getattr(t, "HasPropertySets", None) or [] if t is not None else []))
         for s in sets:
-            for holders in levels:
+            for holders in self.levels(element):
                 got = self.find_all(element, lambda n, s=s: n == s, name, holders)
                 if not got:
                     continue
