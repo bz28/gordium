@@ -305,22 +305,33 @@ areas:
     outcome: needs_review
     measured: "landings aren't measured yet"
 
-  - id: bridge_steps
-    rule: R318.7.5.1
+  - id: bridge_step_hallway
+    rule: R318.7.5.1, R318.7.1
     quote: "The riser height shall be not more than 8 1/4 inches (209 mm)"
     page: 77
     parts: [bridge steps]
-    drawings: "A-3: 'DN 7 1/2\"' from the bonus room and from the hallway onto the 'BRIDGE' (single steps)"
-    working: "each a single riser of 7 1/2 in <= 8 1/4"
+    drawings: "A-3: 'DN 7 1/2\"' from the hallway onto the 'BRIDGE', at the bridge's east edge, where it is '4'-0\"' wide"
+    working: "A single riser is a stair (R202: 'STAIR. A change in elevation, consisting of one or more risers'). Riser 7 1/2 in <= 8 1/4; width 48 in, less 1/2 in gypsum board each side = 47 >= 36 (R318.7.1)"
     outcome: complies
-    measured: "not measured (single steps aren't described as stairs)"
+    measured: "not measured (the bridge steps aren't in the description)"
+
+  - id: bridge_step_bonus_room
+    rule: R318.7.1, R318.7.5.1
+    quote: "Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height"
+    page: 77
+    parts: [bridge steps]
+    drawings: "A-3: 'DN 7 1/2\"' from the bonus room onto the 'BRIDGE'; the step's edge is drawn in the bonus room's '2'-8\"x6'-8\"' door opening, which swings into the bonus room"
+    working: "A single riser is a stair (R202), and R318.7 applies to stairways 'required by this code or provided'. Riser 7 1/2 in <= 8 1/4. Width: the step is as wide as the doorway, a 2'-8\" door, about 30 in clear (not dimensioned), < 36. R318.7.1's only exception is spiral stairs; R318.7.6 Exception 1 lets the top landing be beyond a door but says nothing of width; the NY door-step rules (R318.3.x) are for exterior doors."
+    outcome: needs_review
+    reading: "read literally it fails (about 30 in < 36): whether a one-riser step in a doorway is held to the stair width is for the architect or the building department; moving the step out onto the bridge, or a 3'-0\" door, would settle it"
+    measured: "not measured (the bridge steps aren't in the description)"
 
   - id: hallway_width
     rule: R318.6
     quote: "The width of a hallway shall be not less than 3 feet (914 mm)."
     page: 77
     parts: [hallways]
-    drawings: "A-2 main floor 'HALL' beside the stair '3'-4\"', the mudroom by the laundry '4'-0\"'; A-3 second floor 'HALLWAY' '5'-0\"', the passage east of the stair '3'-10\"'. A-1: dimensions to the nearest inch, before gypsum board"
+    drawings: "A-2 main floor 'HALL' beside the stair '3'-4\"', the mudroom by the laundry '4'-0\"'; A-3 the passage to bedroom 2's door '3'-4\"' (bath wall to the linen closet and bedroom 3 wall); A-3 second floor 'HALLWAY' '5'-0\"', the passage east of the stair '3'-10\"'. A-1: dimensions to the nearest inch, before gypsum board"
     working: "narrowest: 40 in, less 1/2 in gypsum board each side = 39 in, and at worst 38.5 in with the inch rounding: >= 36"
     outcome: complies
     measured: "not a measure yet"
@@ -386,9 +397,19 @@ areas:
     page: 76
     parts: [front]
     drawings: "A-2: the front entry door '3'-0\"x8'-0\"', drawn swinging; the rear doors are sliding ('60611 SL DR')"
-    working: "One side-hinged door leads straight outside (the front door); no sheet names it as the egress door, but it is the only one that can be"
+    working: "One side-hinged door leads straight outside (the front door); no sheet names it as the egress door, but it is the only one that can be. This area covers the door's type only; its hardware is exit_door_hardware"
     outcome: complies
     measured: "egress_door `front` (exit: true, side_hinged)"
+
+  - id: exit_door_hardware
+    rule: R318.2
+    quote: "Egress doors shall be readily openable from inside the dwelling unit without the use of a key or special knowledge or effort."
+    page: 76
+    parts: [front]
+    drawings: "no door hardware is shown or specified on any sheet"
+    working: "not given"
+    outcome: needs_review
+    measured: "not a measure"
 
   - id: exit_door_landing
     rule: R318.3
