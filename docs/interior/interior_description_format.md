@@ -1,0 +1,115 @@
+# The interior description (`gordium.interior/1`)
+
+**Purpose:** the host-neutral format a design tool sends so Gordium can measure a house's inside for egress: rooms, escape openings, stairs, guards and the exit door, as simple geometry.\
+**For:** engineers writing a reader that produces it (Rhino tags, the Revit add-in, an IFC reader) and anyone writing a test house by hand.\
+**Kept current by:** the engineer who changes `packages/model_measurement/model_measurement/interior/` in that PR.
+
+The measuring code is `model_measurement.interior` (`measure(description)`); what each measure means and which code section it serves is in [interior_measurements.md](interior_measurements.md). Five worked houses written in this format are in [test_data/interior_houses/](../../test_data/interior_houses/README.md).
+
+## Why a format of its own
+
+The zoning measurements read massing solids from a Rhino file. Egress needs the inside of the house: which room is a bedroom, which window the architect marks as its escape opening, how far that window's sash lets it open, where each stair nosing is. No host stores these the same way (a Revit window family, a Rhino block with tags, an IFC `IfcWindow` with a lining and panels), so each host's reader turns its own model into this one plain description, and the measuring code reads only this. The measuring code never looks at a host's model, and a host's reader never measures.
+
+## The rules for every value
+
+- **Units are stated, once.** `units` is one of `in`, `ft`, `mm`, `m`, and every length and coordinate in the file is in it (angles are degrees). The measures come out in inches and square feet whatever the units in.
+- **Coordinates.** Plan points are `[x, y]`; 3D points `[x, y, z]`, z up. Elevations are absolute (the same z for every part of the house) and are **finished** surfaces: the finished floor, the finished ground, the tread's walking surface without carpet (R318.7.5: "exclusive of carpets, rugs or runners").
+- **An element's own elevation.** A window, door or level guard is drawn in its own elevation: `u` along the wall (any origin, increasing to the right as seen from the room, or from the walking surface for a guard), `z` the same absolute elevation as everywhere else. A door's plan adds `n`, across the wall, positive toward the side the door swings into.
+- **Not given is not zero.** A key left out means "not known", never a default. A list left out entirely (`stairs` missing) means that kind wasn't read, and every rule about it needs review; an empty list (`stairs: []`) means the house has none.
+- **Flags are required.** Every room says `sleeping: true|false`, every opening `escape: true|false`, every door `exit: true|false`. One missing and none of that kind is read: a bedroom nobody labelled is never quietly not a bedroom.
+
+## The file
+
+```yaml
+format: gordium.interior/1
+units: in
+rooms: [...]
+openings: [...]
+stairs: [...]
+doors: [...]
+guards: [...]
+```
+
+Every part has an `id` (unique across the whole house) and may have a `name` (what the architect calls it: "Bedroom 2", "Window 5"; the id stands in otherwise).
+
+### rooms
+
+| Key | Meaning |
+|---|---|
+| `sleeping` | true for a room used or meant for sleeping, as the architect labels it (a sleeping loft too) |
+| `floor` | the finished floor's outline inside the finished walls, plan points, at least 3, not crossing itself |
+| `floor_elevation` | the finished floor's elevation |
+| `ceiling_height` | a flat ceiling's height above the finished floor; **or** |
+| `ceilings` | the finished ceiling's underside as flat pieces, each a list of 3D points, together covering the whole floor (give one or the other, never both) |
+
+### openings
+
+Every window and door that could be an escape opening (only those marked `escape: true` in a sleeping room are measured; one marked in another room is listed as not checked).
+
+| Key | Meaning |
+|---|---|
+| `room` | the id of the room it opens from |
+| `escape` | true if the architect marks it as the room's emergency escape and rescue opening |
+| `operation` | `casement`, `side_hinged_door` (hinged); `double_hung`, `single_hung`, `horizontal_slider`, `sliding_door` (sliding); `fixed`; or `awning`, `hopper`, `pivot`, `tilt_turn`, `other` (these need `stated_clear`) |
+| `frame` | the frame's clear inside opening in the opening's own elevation: `{left, right, bottom, top}` (u, u, z, z) |
+| `sashes` | a sliding window or door: each sash (rails and stiles included: glass isn't a way out) as `{left, right, bottom, top}`, **in its fully open position** |
+| `hinged` | a hinged one: `{side: left|right, open_angle, sash_width, sash_thickness, hinge_offset}`: the jamb it hinges on, the angle it opens to by its normal operation (its hardware's stop, in degrees from closed), and how far its hinge edge stands off that jamb when open (0 for a sash hinged right at the jamb; hardware that slides the sash in from the jamb makes it more) |
+| `stated_clear` | the maker's net clear opening: `{width, height, bottom, source}`, bottom an elevation. Required for the operations that need it; allowed for any (then it and the drawn one must agree within 1/16 in) |
+| `ground_outside` | the finished ground level adjacent to the opening outside: one elevation, or a list (at each end, for sloping ground) |
+| `area_well` | for an opening below the ground: `{floor_elevation, width, projection}`: the well's floor, its size along the wall and out from it |
+
+### stairs
+
+One entry per **flight** (a run of treads between landings; R318 calls it a flight). Only straight flights with rectangular treads are measured now.
+
+| Key | Meaning |
+|---|---|
+| `bottom_elevation` | the finished floor or landing at the flight's foot |
+| `nosings` | the leading edge of each tread, bottom to top, then the leading edge of the floor or landing at the top: each `[[x, y, z], [x, y, z]]`, its two ends across the stair's width |
+| `sides` | `{left, right}`, looking up the stair: the plan line of what bounds the flight above handrail height (a finished wall face, a guard's inside face), from before the first nosing to past the top one; or `open` for a side with neither (then the tread ends bound it) |
+| `handrails` | a list (empty for none) of `{side: left|right, inner_edge}`: the plan line of the handrail's edge nearest the middle of the stair, as far as it runs |
+| `overhead` | the underside of everything above the flight (ceiling, the floor above and its framing, a beam, a soffit), as flat pieces of 3D points, together covering the whole flight seen from above (an empty list is refused: nothing above can't be told from nothing sent) |
+
+### doors
+
+| Key | Meaning |
+|---|---|
+| `exit` | true for the door the architect marks as the dwelling's required exit door |
+| `operation` | `side_hinged`, `sliding`, `folding`, `pocket`, `other` |
+| `hinge_side` | `left` or `right`, in the door's own elevation |
+| `stops` | `{hinge, latch}`: the u of the face of each jamb stop |
+| `hinge_pin` | `[u, n]`: the hinge pin's centre in the door's plan |
+| `leaf_closed` | `[[u, n], [u, n]]`: two opposite corners of the leaf, closed, in the door's plan |
+| `threshold_top`, `head_stop_bottom` | the top of the threshold and the bottom of the head stop, elevations |
+
+### guards
+
+Either a guard at a level walking surface, or one along a stair (give `walking_surface` or `stair`, not both).
+
+| Key | Meaning |
+|---|---|
+| `walking_surface` | the finished walking surface the guard protects (a loft's floor, a landing) |
+| `top` | the top of the guard |
+| `extent` | `{left, right}`: the u of what the guard ends against at each end (a wall, a newel post): solid beyond |
+| `members` | every rail, baluster, post and panel in the guard's elevation, `{left, right, bottom, top}`; a member must reach the top (the top rail) |
+| `stair` | for a guard along a stair: the stair's id |
+| `top_line` | for a guard along a stair: the top of the guard as 3D points, running the flight's whole length |
+
+## What comes back
+
+```yaml
+format: gordium.interior_measured/1
+units: {length: in, area: sf}
+parts:
+  sleeping_room: [{id, name, measures: {...}, not_measured: {measure: reason}, more: {...}}]
+  emergency_escape_opening: [{id, name, within: <room id>, measures, not_measured, more}]
+  stair: [...]
+  egress_door: [...]
+  guard: [...]            # not a part kind in rule_format/parts.yaml yet
+problems: [...]           # why a kind wasn't read
+not_checked: [...]        # escape openings in rooms that aren't sleeping rooms
+```
+
+`parts` is exactly what `rule_format.parts.rows` and `design_checker.each_part.check_parts` read: a kind not read is `null`, so its rules need review. `measures` holds only the names `rule_format/parts.yaml` gives the part's kind; `more` holds measures for rules not in `parts.yaml` yet.
+
+Running one by hand: `python -m model_measurement.interior <description.yaml>`.

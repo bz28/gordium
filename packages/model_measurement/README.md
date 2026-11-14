@@ -281,6 +281,25 @@ ground level that isn't a number) are refused with a plain message before anythi
 Every measurement records its working: how it was found, the objects, the definition it follows, and for
 distances the two points it was measured between. The project file's `from` carries it, so the report shows it.
 
+## The inside of a house, for egress (`interior/`)
+
+`model_measurement.interior` measures the parts egress rules repeat over (each sleeping room, escape opening,
+stair, guard and the exit door) from a host-neutral interior description: rooms, openings with their frames and
+sashes, stair nosings, ceilings and overhead surfaces, guard members, door stops. It never reads a Rhino file:
+a host's reader (Rhino tags, the Revit add-in, IFC) writes the description, and this measures it, so the same
+code serves every host. Its output is exactly the parts `rule_format.parts` and `design_checker.each_part` read.
+
+```
+python -m model_measurement.interior <description.yaml>     # prints each part's measures (inches, sq ft)
+```
+
+- The input format: [docs/interior/interior_description_format.md](../../docs/interior/interior_description_format.md).
+- Each measure's definition, the 2025 RCNYS section it serves, and every reason one has no value (`interior/stops.py`):
+  [docs/interior/interior_measurements.md](../../docs/interior/interior_measurements.md).
+- How we know it's right: five made-up houses with every measure worked out by hand first
+  ([test_data/interior_houses/](../../test_data/interior_houses/README.md), `tests/test_interior_houses.py`); small
+  hand-worked cases and a case for each reason (`tests/test_interior_measures.py`).
+
 ## How we know it's right
 
 `tests/`:
