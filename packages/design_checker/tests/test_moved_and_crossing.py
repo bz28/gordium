@@ -232,7 +232,7 @@ def test_a_rule_failing_for_a_crossing_counts_once():
               accessory_buildings=["shed"], accessory_frame=True)
     from design_checker.check import summary
     s = summary(res["rows"])["text"]     # the rule rows' own count (the result's line says the panel's words)
-    passes = int(s.split(" pass")[0]) if " pass" in s else 0
+    passes = int(s.split(" rule")[0]) if " pass" in s else 0
     assert passes == sum(1 for r in res["rows"] if not r["Fails"] and r["Error"] == "PASS" or
                          not r["Fails"] and (r.get("Named") or {}).get("result") == "pass")
 
