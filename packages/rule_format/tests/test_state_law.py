@@ -338,7 +338,8 @@ def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
 
 def test_the_readmes_references_not_brought_in_name_every_piece_the_code_finds_pointing_to_them():
     # step 1b's review round 5: R507.10.3 also points to R507.2.2, but the README named only the step-1 pieces.
-    # Round 6: the check read only references heading a bullet with "from", so 31 of 42 went unchecked
+    # Round 6: the check read only references heading a bullet with "from", so 31 of 42 went unchecked.
+    # Round 7: a piece named anywhere in a bullet passed for every reference in it; now only its own words count
     import re
     from document_extraction.icc_references import ways_out
     from rule_format.rulebook import cached_text, kept_text, load, read_jsonl
@@ -353,15 +354,35 @@ def test_the_readmes_references_not_brought_in_name_every_piece_the_code_finds_p
     bullets = [b for b in part.splitlines() if b.startswith("- ")]
     named = lambda code, text: re.search(rf"(?<![\w.]){re.escape(code)}(?!\w|\.\d)", text)
     misprinted = {"B0109": "BO109"}            # the book's zero for the letter O (README: the book's own misnumbering)
+    spelled = lambda code: [code, misprinted.get(code)] + ([code.split()[1]] if code.startswith("Appendix ") else [])
+
+    def said_for(code, bullet):
+        """The bullet's words about this reference: from where it is named to the next reference named after its
+        "from" (so "R405.1 and Table R401.4.1(2) (...; from R319.4.3)" gives R319.4.3 to both)."""
+        if code.startswith("Appendix ") and not bullet.startswith("- Appendices ") and not named(code, bullet):
+            return []
+        others = sorted(m.start() for c in found if c != code for s in spelled(c) if s
+                        for m in re.finditer(rf"(?<![\w.]){re.escape(s)}(?!\w|\.\d)", bullet))
+        said = []
+        for s in filter(None, spelled(code)):
+            for m in re.finditer(rf"(?<![\w.]){re.escape(s)}(?!\w|\.\d)", bullet):
+                start = m.end()
+                after = bullet.find("from ", start)
+                end = next((o for o in others if o > start and after != -1 and o > after), len(bullet))
+                said.append(bullet[start:end])
+        return said
+
     unlisted, missing = [], []
     for code, by in found.items():
-        # every bullet that names this reference (and its misprint's meaning); each piece pointing to it is named there
-        mine = [b for b in bullets if named(code, b) or (code in misprinted and named(misprinted[code], b))
-                or (code.startswith("Appendix ") and b.startswith("- Appendices ") and named(code.split()[1], b))]
+        mine = [w for b in bullets for w in said_for(code, b)]
         if not mine:
             unlisted.append(code)
-        missing += [(code, p) for p in by if mine and not any(named(p, b) for b in mine)]
+        missing += [(code, p) for p in by if mine and not any(named(p, w) for w in mine)]
     assert len(found) >= 40 and unlisted == [] and missing == [], (unlisted, missing)
+    # review round 7: Chapter 2 is not all brought in, only R201 and the R202 definitions the brought-in parts use
+    used = sum(p["id"].startswith("R202:") for p in cut)
+    chapter_2 = next(b for b in bullets if b.startswith("- Chapter 2 "))
+    assert f"R201 and the {used} R202 definitions" in chapter_2, chapter_2
 
 
 def test_a_range_of_sections_named_as_brought_in_has_every_section_in_it_brought_in():
