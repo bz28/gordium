@@ -73,6 +73,8 @@ public static class SiteReader
             if (Looked(e) && OnLotNow(model, e))
                 read.Element(e);
 
+        if (read.LotInLink)
+            problems.Add(Problem("lot_block", ("layer", LotReader.LotLayer)));
         var leftOut = new JsonArray();
         if (read.Candidates.Count > 0)
         {

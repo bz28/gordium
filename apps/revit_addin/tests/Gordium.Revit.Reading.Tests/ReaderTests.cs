@@ -491,6 +491,32 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
     }
 
     [Fact]
+    public async Task A_property_line_in_a_linked_model_makes_the_lot_need_review()
+    {
+        // review round 4: the lot may be the link's, not the host's (Rhino: lot_block, a block holding Site objects)
+        var site = new RevitModel { Document = "site.rvt", LotLines = [F.PropertyLine("pl-linked", Rect(0, 0, 60, 125))] };
+        var outer = new RevitModel { Document = "outer.rvt", Elements = [FakeRevit.LinkOf("site", site)] };
+        foreach (var facts in new[] { Box.Facts, With("pl-lot") })
+        {
+            var read = await Site(House(FakeRevit.LinkOf("link", outer)), facts);
+            Assert.Equal("pl-lot", read["lot"]!["id"]!.GetValue<string>());
+            Assert.Equal(["lot_block"], Problems(read));
+        }
+        Assert.Empty(Problems(await Site(House())));
+    }
+
+    [Fact]
+    public async Task An_element_with_no_category_that_cant_be_read_is_still_a_valid_description()
+    {
+        // review round 4: an empty kind would have the whole description refused
+        var odd = new RevitElement { UniqueId = "odd", BuiltInCategory = "", Category = "", GeometryFailed = true };
+        var site = await Site(House(odd));
+        Assert.Equal("an element with no category", Assert.Single(site["unsent"]!.AsArray())!["kind"]!.GetValue<string>());
+        var result = await (await worker.RunningAsync()).CheckSiteAsync(site, Box.Facts);
+        Assert.NotEmpty(result.Items);
+    }
+
+    [Fact]
     public void Two_loops_that_share_a_corner_are_not_one_lot()
     {
         var a = F.PropertyLine("a", Rect(0, 0, 10, 10)).Curves;

@@ -82,7 +82,7 @@ objects wholly inside the building is **new scene F**, for Ben to decide.
 | An empty solid | A solid with no faces (Revit families often hold some) is skipped: it has nothing to send | | **new scene H** |
 | An open solid | A solid with faces and an edge that has only one face (`Edge.GetFace(1)` null): `open_solid` with `what` the element's name (**to check** that Revit gives open shells as solids, and that `GetFace(1)` behaves so) | `open_solid` | 03 |
 | A mesh in an element's geometry | Its triangles as faces, with `open_mesh` unless the mesh is known to be closed (**to check** whether Revit can say) | `_mesh_faces`, `open_mesh` | **new scene A** |
-| Anything else in the geometry (an object type that is not a solid, mesh, curve, point or family instance), or reading the geometry fails (`get_Geometry` throws, or returns null for a building-category element) | The element is `unsent`, `not_a_solid`, kind its category. Null for an element outside the building categories and not a family: skipped, as having nothing that could be a building (proposed in code, Ben to confirm: see "Where the decisions are written") | `not_a_solid` | 04 |
+| Anything else in the geometry (an object type that is not a solid, mesh, curve, point or family instance), or reading the geometry fails (`get_Geometry` throws, or returns null for a building-category element) | The element is `unsent`, `not_a_solid`, kind its category. Null for an element outside the building categories and not a family, a CAD import or a Toposolid (those are left out with no box): skipped, as having nothing that could be a building (proposed in code, Ben to confirm: see "Where the decisions are written") | `not_a_solid` | 04 |
 | Curves and points in an element's geometry | Skipped (as `read_3dm` skips curves and points) | | 01 |
 | A building-category element with no face to send at all (for example a family whose solids show only at Coarse detail) | Never skipped: `unsent`, `not_a_solid`, kind `"a <category> with no geometry"`, so every building measure needs review (Rhino sends an empty solid on the Building layer as a building with no faces and `open_solid`) | `read_3dm.read_site` | **new scene H** |
 
@@ -134,6 +134,7 @@ closed one the lot is `no_lot_outline`.
 | Nothing picked, two or more | `lot: null`, `several_lot_outlines` (count, layer `"Property Lines"`) | 09 |
 | Nothing picked, none | `lot: null`, `no_lot_outline` | **new scene G** |
 | The picked lot no longer there | `lot: null`, `lot_not_found` | **new scene G** |
+| A linked model holding a property line, at any depth (in code; Ben to confirm) | `lot_block` on the site, whatever lot is read (as Rhino's block holding anything on the Site layer): the lot may be the link's, not the host's | **new scene G** |
 | A straight piece | One lot line: its two ends | 01 |
 | An arc (or any curved piece) | Points along it at most 0.25 ft apart (at least 16), `curved: true`, never its chord (as `read_3dm._edges`) | 17 |
 

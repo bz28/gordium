@@ -47,6 +47,10 @@ internal sealed class Read(RevitModel model)
     /// check), or a linked model, at any depth, isn't loaded: the reader can't have looked at everything.</summary>
     public bool InventoryComplete = model.UserWorksets.All(w => w.IsOpen);
 
+    /// <summary>A linked model, at any depth, holds a property line: the lot may be in it, not in the host (as Rhino's
+    /// <c>lot_block</c>, a block holding anything on the Site layer).</summary>
+    public bool LotInLink;
+
     public void Element(RevitElement e)
     {
         switch (e)
@@ -135,10 +139,12 @@ internal sealed class Read(RevitModel model)
 
     private void Unsend(RevitElement e, string kind, Box3? box)
     {
+        if (kind.Length == 0)
+            kind = "an element with no category";             // the description never takes an empty kind
         Unsent.Add(new JsonObject
         {
             ["id"] = e.UniqueId, ["layer"] = e.Category, ["kind"] = kind,
-            ["problem"] = SiteReader.Problem("not_a_solid", ("kind", kind), ("layer", e.Category)),
+            ["problem"] = SiteReader.Problem("not_a_solid", ("kind", kind), ("layer", e.Category.Length > 0 ? e.Category : "no category")),
         });
         if (box is { } b)
             BuildingBoxes.Add(b);         // anything near it may be part of it
@@ -274,6 +280,7 @@ internal sealed class Read(RevitModel model)
         var box = Union(inside.Box.Box, RevitBox(e, ToShared));
         if (inside.Unloaded)
             InventoryComplete = false;
+        LotInLink |= inside.HoldsLot;
         if (inside.HoldsBuilding || inside.ClosedWorkset)
         {
             Unsend(e, SiteReader.LinkedModelKind, box);
@@ -288,7 +295,7 @@ internal sealed class Read(RevitModel model)
 
     private sealed class Inside
     {
-        public bool HoldsBuilding, ClosedWorkset, Unloaded, MissingPart;
+        public bool HoldsBuilding, ClosedWorkset, Unloaded, MissingPart, HoldsLot;
         public readonly BoxBuilder Box = new();
         public readonly List<(double X, double Y)> Plan = [];
     }
@@ -296,6 +303,7 @@ internal sealed class Read(RevitModel model)
     private JsonArray LookInside(RevitModel doc, Transform3 t, string key, Inside inside)
     {
         inside.ClosedWorkset |= doc.UserWorksets.Any(w => !w.IsOpen);
+        inside.HoldsLot |= doc.LotLines.Any(l => l.IsPropertyLine);
         var parts = new JsonArray();
         foreach (var el in doc.Elements.Where(SiteReader.Looked))
         {
@@ -315,6 +323,7 @@ internal sealed class Read(RevitModel model)
                 inside.ClosedWorkset |= deeper.ClosedWorkset;
                 inside.Unloaded |= deeper.Unloaded;
                 inside.MissingPart |= deeper.MissingPart;
+                inside.HoldsLot |= deeper.HoldsLot;
                 var nb = Union(deeper.Box.Box, RevitBox(el, t));
                 inside.Box.Add(nb);
                 inside.Plan.AddRange(deeper.Plan);
