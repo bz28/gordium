@@ -1,0 +1,53 @@
+# A made-up house drawn in feet (not a real house): a basement stair with one riser 1 1/2 in taller than the rest,
+# open on one side behind a guard; a bedroom with a sliding window and no ground level given outside it; the doors
+# weren't read (no `doors` at all).
+format: gordium.interior/1
+units: ft
+rooms:
+  - id: bed
+    name: Bedroom
+    sleeping: true
+    floor: [[0, 0], [10, 0], [10, 11], [0, 11]]
+    floor_elevation: 0
+    ceiling_height: 8
+openings:
+  - id: w
+    name: Window
+    room: bed
+    escape: true
+    operation: horizontal_slider
+    frame: {left: 0, right: 4, bottom: 2, top: 5}
+    sashes:                      # the fixed sash and the moving one slid behind it
+      - {left: 2, right: 4, bottom: 2, top: 5}
+      - {left: 2, right: 4, bottom: 2, top: 5}
+stairs:
+  - id: s
+    name: Basement stair
+    bottom_elevation: -8.25
+    nosings:                     # runs up along +y; the 7th riser (to -3.75) is 0.75 ft, the rest 0.625 ft
+      - [[0, 0, -7.625], [3, 0, -7.625]]
+      - [[0, 0.8125, -7.0], [3, 0.8125, -7.0]]
+      - [[0, 1.625, -6.375], [3, 1.625, -6.375]]
+      - [[0, 2.4375, -5.75], [3, 2.4375, -5.75]]
+      - [[0, 3.25, -5.125], [3, 3.25, -5.125]]
+      - [[0, 4.0625, -4.5], [3, 4.0625, -4.5]]
+      - [[0, 4.875, -3.75], [3, 4.875, -3.75]]
+      - [[0, 5.6875, -3.125], [3, 5.6875, -3.125]]
+      - [[0, 6.5, -2.5], [3, 6.5, -2.5]]
+      - [[0, 7.3125, -1.875], [3, 7.3125, -1.875]]
+      - [[0, 8.125, -1.25], [3, 8.125, -1.25]]
+      - [[0, 8.9375, -0.625], [3, 8.9375, -0.625]]
+      - [[0, 9.75, 0], [3, 9.75, 0]]
+    sides:                       # left and right looking up the stair: the wall at x = 0, the guard's inside at x = 3
+      left: [[0, -1], [0, 12]]
+      right: [[3, -1], [3, 12]]
+    handrails:
+      - {side: left, inner_edge: [[0.25, 0], [0.25, 9.75]]}
+      - {side: right, inner_edge: [[2.75, 0], [2.75, 9.75]]}
+    overhead:
+      - [[-0.5, -1, 7], [3.5, -1, 7], [3.5, 11, 7], [-0.5, 11, 7]]
+guards:
+  - id: g
+    name: Stair guard
+    stair: s
+    top_line: [[3, 0, -4.625], [3, 9.75, 3.0]]

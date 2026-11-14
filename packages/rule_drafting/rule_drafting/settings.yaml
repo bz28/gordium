@@ -8,6 +8,7 @@
 model: claude-sonnet-5-5
 effort: medium
 max_tokens: 8192          # a section's templates can run to a few thousand tokens; the rest is thinking room
+book_max_tokens: 16384    # a building code's rules for each part carry whole small designs as examples (egress step 3)
 max_attempts: 3           # the first answer plus up to 2 retries when code rejects it
 # A hard cap on total spending across all drafting runs, in US dollars, separate from labeling's. Kept in
 # ~/.config/gordium/rule_drafting_ledger.json (shared by every checkout), never taken as less than the

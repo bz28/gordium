@@ -3,7 +3,8 @@ reset_edits) now return a plan of edits, which the host's table carries out (gor
 carry_out), instead of calling the table and the box session themselves.
 
 The proof that nothing changed: BEFORE below is apply_lookup and apply_reset exactly as they were on tidy-6
-(0b2f93c5: host_core/edits.py and rhino_logic.py, copied character for character). Every start-box path (lookup,
+(0b2f93c5: host_core/edits.py and rhino_logic.py, copied character for character;
+apply_lookup with main's PR 84 lines, as tidy-6 has them since main was merged in). Every start-box path (lookup,
 re-lookup, the architect's own lot kept, not found, the City's outline only, reset with Start fresh and Keep my
 building, a pick before the reset, Draw, Cancel, Rhino closing mid-box and recover_held, the dry run of a new
 address's house) runs twice on the same fake model, once BEFORE and once now. Both runs must make the very same
@@ -37,6 +38,7 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
     facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=replaces)
     if (answer or {}).get("status") != "found":
         return facts, saved_ui, None
+    facts.pop("overlays_none_found", None)       # a found lookup decides it again, for its own lot only
     if not replaces:
         saved_ui["_lookup"]["says"] = "Your own lot is kept: the lookup filled in the address and the district only."
         return facts, saved_ui, None
@@ -58,6 +60,9 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
             #   lot width wait for the street pick, #18 reading its streets only from the ids; one street: as drawn)
         if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
             facts["plan_north_deg"] = w["frame"]["rotation_deg"]
+        none_found = overlays_none_found(answer, w["lot_ring"])
+        if none_found:
+            facts["overlays_none_found"] = none_found
         spots = [] if FLAT_GROUND else [table.add_spot(p) for p in w.get("spots") or []]   # flat: none drawn
         session.add(spots)
         saved_ui.update(replaceable_lot=lot_id, lookup_frame=w.get("frame"), lookup_spots=spots)

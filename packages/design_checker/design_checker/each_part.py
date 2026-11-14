@@ -84,6 +84,9 @@ def line(row: dict, rule: dict, values: dict, allowed: dict) -> str:
         return f"{head}: {row['reason']}"
     if row["outcome"] == "fail":
         known = {**parts.building_values(values), **row["values"]}
+        if row.get("unknown"):           # proven (parts.fails_whatever): it fails whatever the measures not given are
+            gone = " and the ".join(_words(rule, m) for m in row["unknown"])
+            return f"{head}: {_title(rule)}: does not comply whatever the {gone} (not measured)"
         return f"{head}: {_first_failing(rule, known, allowed) or _title(rule)}"
     if row["outcome"] == "needs_review":
         from rule_format.rulebook import _kinds

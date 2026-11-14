@@ -328,3 +328,14 @@ def test_rhino_logic_names_each_thing_once():
     assert [n for n, k in collections.Counter(names).items() if k > 1] == []
     assert logic.NOT_ANSWERED == "Not answered"
     assert logic._listed({"district_uses": {"R-1b": [1]}}, "R-1b") == [1] and logic._joined(["a", "b"]) == "a and b"
+
+
+def test_a_rule_for_each_part_asks_its_building_facts_never_its_parts_measures():
+    """A rule for each part (SYNTHETIC) reads its parts' measures from the interior, never from the box; the building
+    facts it reads are asked like any rule's (so its rows don't need review for a fact never asked)."""
+    from design_checker.check import _read_for
+    stair = {"id": "X.synthetic_riser", "kind": "rule", "for_each": "stair", "when_none": "not_applicable",
+             "applies_when": 'use == "multiple_family"', "check": "stair_riser_height <= 8.25 + 0 * dwelling_units"}
+    assert _read_for([stair], "multiple_family", NAMES) == {"use", "dwelling_units"}
+    assert "dwelling_units" in follow_up_facts(X[5:] + [stair], "multiple_family", NAMES)
+    assert _read_for([stair], "one_family_detached", NAMES) == set()     # not this use's rule: nothing asked
