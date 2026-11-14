@@ -15,7 +15,7 @@ import pytest
 from design_checker import conformance as c
 from design_checker import conformance_rhino as cr
 from design_checker import site_json
-from design_checker.goldens import canonical
+from design_checker.goldens import canonical_text
 
 SCENES = c.scenes()
 DRAWN = {n: s for n, s in SCENES.items() if c.has_model(s)}
@@ -23,12 +23,12 @@ STEPS = [(n, step) for n, s in SCENES.items() for step in c.steps(s)]
 
 
 def _same(committed, fresh) -> bool:
-    """Whether a committed file's data is what the code makes now, in the goldens' canonical form (goldens.canonical:
-    every word, id and verdict exact, every number to a millionth of a foot). The files were written on an Apple-chip
+    """Whether a committed file's data is what the code makes now, in the goldens' canonical text
+    (goldens.canonical_text: every word, id and verdict exact, true never 1, every number to a millionth of a foot). The files were written on an Apple-chip
     Mac; a curved line's points come from cos and sin, whose last binary digit an Intel or AMD computer's maths
     library can give otherwise (CI's Linux: 1 to 2 hundred-trillionths of a foot on 17_curved_rear_lot_line's arc,
     02_curved_wall's wall), and that is not a stale file."""
-    return canonical(committed) == canonical(fresh)
+    return canonical_text(committed) == canonical_text(fresh)
 
 
 def _host_doc(name, step=c.STEPS[0]):
@@ -69,6 +69,7 @@ def test_a_committed_file_is_current_to_a_curves_last_digit_but_not_to_a_million
     assert _same(committed, nudged(by=1.4e-14))          # CI's Linux: an arc point's last binary digit
     assert not _same(committed, nudged(by=2e-6))         # two millionths of a foot: a moved point
     assert not _same(committed, nudged(straight=True))   # a curved line sent as straight
+    assert not _same({"curved": True}, {"curved": 1})     # yes/no is not a number
 
 
 def test_no_expected_description_is_left_without_its_scene():
