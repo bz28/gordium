@@ -235,7 +235,9 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
         if not directions or op is None:
             continue
         if op in ("==", "!="):
-            out.append(f"number {shown} in '{key}' is compared with {op}: a limit of the law is never an equality")
+            out.append(f"number {shown} in '{key}' is compared with {op}: a limit of the law is never an equality "
+                       "(a measured length never equals a number or a formula exactly; where the law sets a formula, "
+                       "check it within a tolerance it states, or make the rule a flag)")
             continue
         reads = {c["comparison"] for c in fits}
         if reads == {"none"}:
@@ -284,7 +286,9 @@ def _uses(tree) -> list[tuple]:
                         names = {n.id for n in ast.walk(other) if isinstance(n, ast.Name)}
                         for number, direct in _numbers(side):
                             needed = None
-                            if sign is not None and direct and not selector:
+                            if sign in ("==", "!=") and not selector:
+                                needed = sign                # an equality, even with arithmetic: never a limit
+                            elif sign is not None and direct and not selector:
                                 needed = MIRROR.get(sign, sign) if mirrored else sign
                                 if not positive:
                                     needed = OPPOSITE.get(needed, {"==": "!=", "!=": "=="}.get(needed))

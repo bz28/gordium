@@ -166,3 +166,15 @@ def test_a_number_in_an_ifs_test_only_picks_a_limit_and_is_checked_by_value(ctx)
     assert any("isn't one of" in p for p in problems(
         ctx, "stair_clear_width_at_handrail >= (31.5 if stair_handrail_sides <= 2 else 27)", width, "stair"))
     assert any("sets no limit" in p for p in problems(ctx, "stair_handrail_sides >= 1", width, "stair"))
+
+
+def test_an_equality_is_refused_even_with_arithmetic_on_one_side(ctx):
+    # R315.5.2.2 sets a formula ("15 inches minus three-fourths of the tread depth"): a drafted
+    # `riser == 15 - 0.75 * tread` would fail every real stair (a measured length never equals it exactly)
+    formula = {"file": BOOK, "page": 98, "lines": [34, 34],
+               "quote": "2. The riser height shall be 15 inches (381 mm) minus three-fourths of the tread depth."}
+    for check in ("stair_riser_height == 15 - 0.75 * stair_tread_depth",
+                  "not (stair_riser_height != 15 - 0.75 * stair_tread_depth)"):
+        assert any("never an equality" in p for p in problems(ctx, check, formula, "stair")), check
+    # arithmetic in an ordinary comparison is still checked by value only
+    assert problems(ctx, "stair_riser_height <= 15 - 0.75 * stair_tread_depth", formula, "stair") == []
