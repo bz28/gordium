@@ -1021,6 +1021,7 @@ def test_blocks_with_nothing_to_measure_are_listed_touching_unknown_never_placed
     dropped["left_out"] = [o for o in dropped["left_out"] if o["id"] != "empty_block"]
     assert "left out empty_block: not listed (it makes the check need review)" in c.differences(dropped, c.expected_site(scene))
 
+
 def test_the_live_command_s_linked_file_advice_can_never_stop_a_check():
     """The advice is words only: _extras asks for it through logic.guard (an error is logged and the row is said
     without it), never directly, so a failure reading a definition's file can't take the check's answer with it."""
