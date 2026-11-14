@@ -5,6 +5,8 @@ Used for a stair's headroom (the surfaces overhead against the line of the nosin
 changes linearly, so its least value is at a corner of where the piece and the region overlap.
 """
 
+import math
+
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
@@ -25,6 +27,8 @@ class Surface:
             ny += (z1 - z2) * (x1 + x2)
             nz += (x1 - x2) * (y1 + y2)
         size = (nx * nx + ny * ny + nz * nz) ** 0.5
+        if not all(map(math.isfinite, (nx, ny, nz, size))):     # coordinates so large their products overflow
+            raise Stop("surface_out_of_range", what=what)
         if size == 0 or abs(nz) / size < 1e-6:
             raise Stop("surface_vertical", what=what)
         self.n = (nx / size, ny / size, nz / size)
@@ -78,4 +82,6 @@ def least_gap(surfaces: list[Surface], pieces: list[tuple], what: str, region_wo
         raise Stop("not_covered", what=what, region=region_words)
     gaps = [s.z(x, y) - ref(x, y)
             for poly, ref in pieces for s in surfaces for x, y in corners(s.plan.intersection(poly))]
+    if not all(map(math.isfinite, gaps)):                     # never let one surface drop out of the least
+        raise Stop("surface_out_of_range", what=what)
     return min(gaps)

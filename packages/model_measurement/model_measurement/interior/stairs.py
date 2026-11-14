@@ -9,6 +9,7 @@ left looking up. Definitions: docs/interior/interior_measurements.md.
 """
 
 from shapely.geometry import Polygon
+from shapely.ops import unary_union
 
 from model_measurement.interior.geometry import Surface, least_gap
 from model_measurement.interior.read import tidy
@@ -186,12 +187,20 @@ def headroom(st: dict, flight: Flight, reader) -> float:
         raise Stop("nothing_overhead")
     surfaces = [Surface(reader.points(p, 3, f"overhead surface {n}", 3), f"overhead surface {n}")
                 for n, p in enumerate(given, 1)]
-    pieces = []
+    quads = []
     for j in range(len(flight.s) - 1):
         (r1, l1), (r2, l2) = flight.ends[j], flight.ends[j + 1]
-        quad = Polygon([flight.xy(flight.s[j], r1), flight.xy(flight.s[j + 1], r2), flight.xy(flight.s[j + 1], l2),
-                        flight.xy(flight.s[j], l1)])
-        pieces.append((quad, lambda x, y: flight.nosing_z(flight.s_of(x, y))))
+        quads.append(Polygon([flight.xy(flight.s[j], r1), flight.xy(flight.s[j + 1], r2),
+                              flight.xy(flight.s[j + 1], l2), flight.xy(flight.s[j], l1)]))
+    band = unary_union(quads)
+    # cut the flight at every bend of the nosing line, so the line is straight over each piece and the least gap
+    # is at a piece's corner (the pieces of the treads alone would hide a bend inside one)
+    cuts = sorted({flight.s[0], flight.s[-1], *(s for s, _ in flight.line() if flight.s[0] < s < flight.s[-1])})
+    wide = max(abs(a) for ends in flight.ends for a in ends) + 1.0
+    pieces = []
+    for s1, s2 in zip(cuts, cuts[1:]):
+        strip = Polygon([flight.xy(s1, -wide), flight.xy(s2, -wide), flight.xy(s2, wide), flight.xy(s1, wide)])
+        pieces.append((band.intersection(strip), lambda x, y: flight.nosing_z(flight.s_of(x, y))))
     return least_gap(surfaces, pieces, "what is overhead", "flight")
 
 

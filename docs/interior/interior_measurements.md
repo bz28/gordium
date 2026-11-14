@@ -14,7 +14,7 @@ The input is the [interior description](interior_description_format.md); the cod
 2. **Where the law reads two ways, both readings are measured.** The same answer: that is the value. Different answers: no value, and the reason names the question.
 3. **Where the drawing and a stated value can disagree** (the maker's clear opening against the drawn sashes), they must agree within 1/16 in, and the less favourable one counts (the smaller width and height, the higher sill; grade-floor must come out the same at both bottoms). A maker's opening can never be bigger than its frame, and a fixed window never opens. Sizes (widths, thicknesses, offsets) can't be negative.
 4. **Drawing noise read on the cautious side.** A nosing's two ends may differ by 1/16 in: each riser and tread is read with the ends paired the worst way, and the line of the nosings through their higher ends, each at its end nearer the foot (the line rises, so that is as high as it can stand). A maker's clear opening within 1/16 in of its frame is cut back to the frame. A flat surface's points may stand 1/16 in off its plane: the plane is lowered to its lowest point.
-5. **Exact, never sampled.** Heights between flat surfaces are found at the corners of where they overlap (the gap between two flat surfaces changes in a straight line, so its least value is at a corner); widths along a flight at every point where a side, handrail or tread end bends.
+5. **Exact, never sampled.** Heights between flat surfaces are found at the corners of where they overlap, the flight cut at every bend of the line of the nosings (the gap between two flat surfaces changes in a straight line, so its least value is at a corner); widths along a flight at every point where a side, handrail or tread end bends.
 6. **Units explicit.** Every length in is converted from the description's stated `units`; every measure comes out in inches (`in`) or square feet (`sf`), as `rule_format/parts.yaml` names them. Values are rounded to a millionth (float noise only, far finer than any drawing).
 
 ## Sleeping rooms (`sleeping_room`)
@@ -117,6 +117,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `low_ceiling` | part of the room's ceiling is {height} in above the floor, under 7 ft: which part of the floor counts (R312.3) isn't measured yet |
 | `surface_vertical` | {what} is vertical: give the underside of what is overhead |
 | `surface_not_flat` | {what} isn't flat (a point is {off} in off its plane): give it as flat pieces |
+| `surface_out_of_range` | {what} has coordinates too large to measure |
 | `not_covered` | {what} doesn't cover the whole {region}: give everything above it |
 | `nothing_overhead` | nothing above the flight is given: give what is above it (a ceiling, the floor above, a beam) |
 | `room_unknown` | the room the opening is in isn't one of the rooms given |

@@ -30,6 +30,7 @@ STOPS = {
                    "counts (R312.3) isn't measured yet",
     "surface_vertical": "{what} is vertical: give the underside of what is overhead",
     "surface_not_flat": "{what} isn't flat (a point is {off} in off its plane): give it as flat pieces",
+    "surface_out_of_range": "{what} has coordinates too large to measure",
     "not_covered": "{what} doesn't cover the whole {region}: give everything above it",
     "nothing_overhead": "nothing above the flight is given: give what is above it (a ceiling, the floor above, a beam)",
     # escape openings

@@ -717,6 +717,52 @@ def test_the_nosing_line_stands_at_a_nosings_end_nearer_the_foot():
     assert m["stair_headroom"] == 66.0                               # 80 - 14 at s = 10, not 66.0218
 
 
+def test_headroom_is_read_at_every_bend_of_the_nosing_line():
+    """Review round 4: pieces cut at each nosing's middle hid the line's bend at its nearer end (82.5125, not 82.5).
+    Nosings at z 10, 20, 21 (s 0, 10, 20), the middle one's ends at s 10 and 10.0625; the overhead rises 0.5 in per
+    inch along the run from 97.5 at s = 0: the gap 87.5 - 0.5 s to s = 10 (82.5 at the bend), then rising."""
+    d = base()
+    d["stairs"][0]["bottom_elevation"] = 3
+    d["stairs"][0]["nosings"] = [[[0, 0, 10], [0, 36, 10]], [[10, 0, 20], [10.0625, 36, 20]],
+                                 [[20, 0, 21], [20, 36, 21]]]
+    d["stairs"][0]["overhead"] = [[[-5, -5, 95], [40, -5, 117.5], [40, 41, 117.5], [-5, 41, 95]]]
+    m, _, _ = stair(d)
+    assert m["stair_headroom"] == pytest.approx(82.5)
+
+
+@pytest.mark.parametrize("first", [True, False])
+def test_a_surface_too_large_to_measure_is_never_dropped(first):
+    """Review round 4: a 60 in plane reaching 1e200 in made NaN heights, and min() let the other surface win."""
+    huge = [[-5, -5, 60], [1e200, -5, 60], [1e200, 1e200, 60], [-5, 1e200, 60]]
+    normal = [[-5, -5, 200], [40, -5, 200], [40, 41, 200], [-5, 41, 200]]
+    d = base()
+    d["stairs"][0]["overhead"] = [huge, normal] if first else [normal, huge]
+    _, stopped, _ = stair(d)
+    assert "too large to measure" in stopped["stair_headroom"]
+    _, stopped, _ = room(ceilings(*([huge, normal] if first else [normal, huge])))
+    assert "too large to measure" in stopped["sleeping_room_floor_area"]
+
+
+def test_a_surface_too_large_is_refused_where_it_is_read():
+    from model_measurement.interior.geometry import Surface
+    with pytest.raises(Stop, match="too large to measure"):
+        Surface([(-5, -5, 60), (1e200, -5, 60), (1e200, 1e200, 60), (-5, 1e200, 60)], "the ceiling")
+
+
+def test_a_gap_that_isnt_a_number_never_drops_out_of_the_least():
+    from shapely.geometry import box
+    from model_measurement.interior import geometry
+
+    class Odd:                                     # a surface whose height somewhere isn't a number
+        plan = box(0, 0, 10, 10)
+
+        def z(self, x, y):
+            return float("nan") if x > 5 else 100.0
+
+    with pytest.raises(Stop, match="too large to measure"):
+        geometry.least_gap([Odd()], [(box(0, 0, 10, 10), lambda x, y: 0.0)], "the ceiling", "room")
+
+
 def test_a_stair_guard_reads_the_same_cautious_line():
     # risers 7, 9, 5 (nosings at z 7, 16, 21); the middle nosing's ends at s 10 and 10.0625; the guard's top
     # rises from 41 at s 0 to 55 at s 20: least above the line at the middle nosing's nearer end, 48 - 16
@@ -974,6 +1020,7 @@ STOP_CASES = {
     "no_ceiling": _set(("rooms", 0, "ceiling_height"), _DELETE),
     "low_ceiling": _set(("rooms", 0, "ceiling_height"), 80),
     "surface_vertical": _stair(overhead=[[[0, 0, 96], [30, 0, 96], [30, 0, 50]]]),
+    "surface_out_of_range": _stair(overhead=[[[-5, -5, 60], [1e200, -5, 60], [1e200, 1e200, 60], [-5, 1e200, 60]]]),
     "surface_not_flat": _stair(overhead=[[[-5, -5, 120], [40, -5, 120], [40, 41, 130], [-5, 41, 120]]]),
     "not_covered": _stair(overhead=[[[-5, -5, 120], [10, -5, 120], [10, 41, 120], [-5, 41, 120]]]),
     "nothing_overhead": _stair(overhead=[]),
