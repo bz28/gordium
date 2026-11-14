@@ -280,8 +280,8 @@ internal sealed class Read(RevitModel model)
     /// <summary>A linked Revit model (proposed, design note, section 1). Not loaded: it can't be looked inside, so the
     /// reader hasn't looked at everything (<c>inventory_complete: false</c>). Loaded and holding any building-category
     /// element at any depth of links inside links, or a closed workset of its own: an object that couldn't be sent
-    /// (wherever it is placed), so every building measure needs review (<see cref="UnsendLinks"/>). Either way left
-    /// out, like a family, what it holds sent as its definition. Inside a link every element counts, whatever its phase or design option: the
+    /// (wherever it is placed), so every building measure needs review (<see cref="UnsendLinks"/>). A loaded link,
+    /// either way, is left out like a family, what it holds sent as its definition. Inside a link every element counts, whatever its phase or design option: the
     /// link's own phase mapping isn't read (to check), and more is only more cautious.</summary>
     private void Link(RevitElement e)
     {
@@ -310,7 +310,8 @@ internal sealed class Read(RevitModel model)
     /// object that couldn't be sent, so every building measure needs review, wherever it is placed (design note,
     /// section 1). Ids are unique across the description and the link itself is also left out under its
     /// <c>UniqueId</c> (as Rhino lists every block off the Building layer: scene 19), so the unsent entry is named
-    /// by its kind, once for every such link (as <c>read_3dm.read_site</c>'s one "a block"). Its box is not a
+    /// by its kind: one entry however many such links there are, its layer the first one's (as
+    /// <c>read_3dm.read_site</c>'s one "a block"); each link is named by its own left-out entry. Its box is not a
     /// building's: the not_a_solid already makes every building measure need review, and the link must not touch
     /// itself (scene 19: touching false, as Rhino's).</summary>
     private void UnsendLinks(RevitElement e)
