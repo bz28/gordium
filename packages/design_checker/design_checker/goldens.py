@@ -29,8 +29,9 @@ near-identical crossing points: the shape is the same, its list of points is not
 Mac itself running an Intel build of Python: the same 34 jog-lot stress designs and nothing else.) So an answer
 whose sha256 differs is still its golden when every value other than a shape's points is identical (every
 verdict, status, word, id and number, to PLACES) and each list of plan points (x, y) traces the same line as its
-golden's, no point of either farther than GEOMETRY_TOL from the other (the Hausdorff distance). `--check` says how
-many answers matched that way. Any other difference fails as before."""
+golden's (one of SHAPE_KEYS), from the same end to the same end, no point of either farther than GEOMETRY_TOL
+from the other (shape_distance). `--check` says how many answers matched that way. Any other difference fails as
+before."""
 
 import argparse
 import hashlib
@@ -231,6 +232,11 @@ def stored(folder: Path = FOLDER) -> tuple[dict, dict]:
     return manifest, {row["case"]: row["answer"] for row in rows}
 
 
+# the answer's keys whose lists of (x, y) are shapes (lines and outlines in plan): only these may match as shapes
+SHAPE_KEYS = frozenset({"outline", "holes", "buildable", "buildable_cautious", "footprint", "points",
+                        "measured_points", "required_lines", "street_line", "lot"})
+
+
 def _plan_points(v) -> bool:
     """Whether `v` is a list of plan points: two or more [x, y], each a number (never true or false)."""
     return isinstance(v, list) and len(v) >= 2 and all(
@@ -239,29 +245,32 @@ def _plan_points(v) -> bool:
 
 
 def shape_distance(a: list, b: list) -> float:
-    """The Hausdorff distance between two lists of plan points, each read as the line through its points in
-    order: the farthest a point of either line is from the other line (its segments, not only its points), taken
-    at every point of each line and every SHAPE_STEP along it, so a stretch of one line the other skips counts."""
+    """How far apart two lists of plan points are as lines, each the line through its points in order: the farther
+    of their two ends from the other's same end, and the Hausdorff distance (the farthest a point of either line is
+    from the other line's segments), sampled at every point of each line and every SHAPE_STEP along it, so a
+    stretch of one line the other skips counts. The ends keep a line's direction: a line drawn the other way round,
+    or doubling back, is not the same line."""
     import shapely
     la, lb = shapely.LineString(a), shapely.LineString(b)
 
     def farthest(line, other):
         dense = shapely.points(shapely.get_coordinates(shapely.segmentize(line, SHAPE_STEP)))
         return float(shapely.distance(dense, other).max())
-    return max(farthest(la, lb), farthest(lb, la))
+    ends = max(math.dist(a[0], b[0]), math.dist(a[-1], b[-1]))
+    return max(ends, farthest(la, lb), farthest(lb, la))
 
 
-def same_shape(old, new) -> bool:
+def same_shape(old, new, key: str = "") -> bool:
     """Whether two canonical answers are the same but for how a shape's points fall: every value identical, except
-    that a list of plan points may have other points (even another number of them) if it traces the same line,
-    within GEOMETRY_TOL (module docstring: shapes on another kind of computer). Verdicts, statuses, words, ids and
-    every other number must be exactly as golden."""
-    if _plan_points(old) and _plan_points(new):
+    that a list of plan points under one of SHAPE_KEYS may have other points (even another number of them) if it
+    is the same line, within GEOMETRY_TOL (shape_distance; module docstring: shapes on another kind of computer).
+    Verdicts, statuses, words, ids and every other number must be exactly as golden."""
+    if key in SHAPE_KEYS and _plan_points(old) and _plan_points(new):
         return old == new or shape_distance(old, new) <= GEOMETRY_TOL
     if isinstance(old, dict) and isinstance(new, dict):
-        return old.keys() == new.keys() and all(same_shape(old[k], new[k]) for k in old)
-    if isinstance(old, list) and isinstance(new, list):
-        return len(old) == len(new) and all(same_shape(x, y) for x, y in zip(old, new))
+        return old.keys() == new.keys() and all(same_shape(old[k], new[k], k) for k in old)
+    if isinstance(old, list) and isinstance(new, list):          # (a list of shapes: each under its list's key)
+        return len(old) == len(new) and all(same_shape(x, y, key) for x, y in zip(old, new))
     return type(old) is type(new) and old == new
 
 
@@ -273,7 +282,8 @@ def differences(old, new, path: str = "", limit: int = 8) -> list[str]:
     def walk(a, b, p):
         if len(out) >= limit:
             return
-        if _plan_points(a) and _plan_points(b):     # a shape: shown only if it moved (how far), not its point list
+        if p.rsplit("/", 1)[-1].split("[")[0] in SHAPE_KEYS and _plan_points(a) and _plan_points(b):
+            # a shape: shown only if it moved (how far), not its point list
             far = 0.0 if a == b else shape_distance(a, b)
             if far > GEOMETRY_TOL:
                 out.append(f"{p}: {len(a)} points -> {len(b)}, up to {far:.3g} ft from the golden's line: "

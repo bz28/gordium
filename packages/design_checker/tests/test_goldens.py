@@ -165,3 +165,15 @@ def test_the_shape_distance_is_measured_along_the_lines_not_only_at_their_points
     # only plan points (x, y) are shapes: 3D points, and true/false, are compared exactly
     assert not goldens.same_shape([[0, 0, 1], [1, 0, 1]], [[0, 0, 1], [1, 1e-7, 1]])
     assert not goldens.same_shape([[0, True], [1, 0]], [[0, 1], [1, 0]])
+
+
+def test_a_line_drawn_the_other_way_round_or_doubling_back_or_a_list_that_is_not_a_shape_must_be_exact():
+    line = [[47.5, 90.0], [47.5, 66.6]]
+    assert goldens.same_shape({"points": line}, {"points": [[47.5, 90.0], [47.5, 70.0], [47.5, 66.6]]})
+    assert not goldens.same_shape({"points": line}, {"points": line[::-1]})                    # its ends swapped
+    assert not goldens.same_shape({"points": [[0, 0], [10, 0]]}, {"points": [[0, 0], [10, 0], [3, 0]]})   # back
+    square = [[0, 0], [10, 0], [10, 10], [0, 10]]
+    assert not goldens.same_shape({"outline": square}, {"outline": square[:1] + square[1:][::-1]})   # other way round
+    # pairs of numbers under any other key are not a shape: exact, even a point between two others
+    assert not goldens.same_shape({"ranges": [[0, 0], [10, 0]]}, {"ranges": [[0, 0], [5, 0], [10, 0]]})
+    assert goldens.same_shape({"footprint": [square]}, {"footprint": [square[:1] + [[5, 0]] + square[1:]]})
