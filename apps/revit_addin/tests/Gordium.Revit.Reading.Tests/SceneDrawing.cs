@@ -20,7 +20,10 @@ namespace Gordium.Revit.Reading.Tests;
 /// Building layer" and which is left out too (section 1; scene 19);</item>
 /// <item>a block holding the house, off the Building layer (19): a linked model holding the floor blocks;</item>
 /// <item>each other solid: a Generic Model DirectShape; a block: a Generic Models family instance (26: one holding
-/// only an empty solid, and one holding beside its solid a nested family that gives no geometry, section 7, H);
+/// only an empty solid, and one holding beside its solid a nested family that gives no geometry, section 7, H:
+/// "a nested family with no geometry"; in Revit a nested family holding only an empty solid, or only lines, is read
+/// as nothing instead, since it takes no room, and the shed keeps its own box: ReaderTests pins that, review round
+/// 5 of the reader);
 /// one on Gordium::Context: a context-marked DirectShape; the terrain mesh: an open-mesh DirectShape;</item>
 /// <item>a group (20): a model group of every part, its geometry theirs (what <c>get_Geometry</c> of a group gives),
 /// never read itself (section 1, "Model group");</item>

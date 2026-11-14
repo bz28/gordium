@@ -224,7 +224,7 @@ worked out by hand before they ran; each scene's `guards` names the row above it
 | B | 19 (the house only inside a block placed on another layer) | The link with no building categories and the CAD import are scene 15's block in Rhino; the unloaded link, the closed workset and the workset closed inside a link have no Rhino equivalent: the Windows trial |
 | E | 20 (a house of parts in one group, the group moved) | Nothing in Rhino; Revit records it in the trial |
 | G | 21 (picked from two), 22 (none), 23 (the picked lot deleted), 24 (an open property line), 25 (it picked) | Several picked lines, and picked lines that don't close: Rhino picks one curve only; the Windows trial |
-| H | 26 (a block holding only an empty solid; a shed holding a nested block of an empty solid) | A building-category family with no Fine geometry (Rhino sends an empty Building-layer solid as `open_solid`, Revit `not_a_solid`: no shared expected answer) and a wall whose family holds an empty solid: the Windows trial |
+| H | 26 (a block holding only an empty solid; a shed holding a nested block of an empty solid: in Revit, a nested family that gives no geometry, since one holding only an empty solid takes no room and is read as nothing) | A building-category family with no Fine geometry (Rhino sends an empty Building-layer solid as `open_solid`, Revit `not_a_solid`: no shared expected answer) and a wall whose family holds an empty solid: the Windows trial |
 | C, D, I, J, K | none | Host-only (section 7's opening): the Windows trial, or for I a live Rhino recording (the reference adapter reads no terrain or finished spots) |
 | F | none | Ben's decision on the "wholly inside" rule |
 

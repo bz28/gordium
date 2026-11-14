@@ -281,7 +281,8 @@ internal sealed class Read(RevitModel model)
     /// reader hasn't looked at everything (<c>inventory_complete: false</c>). Loaded and holding any building-category
     /// element at any depth of links inside links, or a closed workset of its own: an object that couldn't be sent
     /// (wherever it is placed), so every building measure needs review (<see cref="UnsendLinks"/>). A loaded link,
-    /// either way, is left out like a family, what it holds sent as its definition. Inside a link every element counts, whatever its phase or design option: the
+    /// either way, is a left-out candidate like a family (listed when objects.left_out says it is on the lot), what
+    /// it holds sent as its definition. Inside a link every element counts, whatever its phase or design option: the
     /// link's own phase mapping isn't read (to check), and more is only more cautious.</summary>
     private void Link(RevitElement e)
     {
