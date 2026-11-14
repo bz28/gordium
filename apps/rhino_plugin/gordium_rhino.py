@@ -1424,7 +1424,14 @@ def check_now():
         say(logic.NO_DOCUMENT)
         return None
     STATE["dirty"] = None
-    return run_check(doc, report=False)
+    started = time.time()
+    result = run_check(doc, report=False)
+    # the command line's last words are this check's, never an earlier button's ("Cancelled: nothing changed."
+    # stayed): its summary, or why it gave none (cancelled, failed, outdated: review round 1 of plain-words)
+    words = ((result or {}).get("view") or {}).get("summary") or logic.check_not_done(STATE.get("last"), started)
+    if words:
+        Rhino.RhinoApp.WriteLine("Gordium: " + words)
+    return result
 
 
 def set_envelope(on):
@@ -1597,7 +1604,7 @@ def enter_rooms(needs):
 
 def _save_row(doc, needs, new):
     """A row dialog's answers, saved as one Undo step: the facts and the sources of exactly the row's facts."""
-    with logic.undo_step(doc, logic.UNDO_WORDS["enter"]):   # (serial 0, inside a command: that record holds it)
+    with logic.undo_step(doc, logic.undo_enter(needs)):     # (serial 0, inside a command: that record holds it)
         _save_facts(doc, new)
         sources = logic.row_sources(fact_sources(doc), needs, new, logic.city_day())
         doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
@@ -3332,7 +3339,8 @@ def _check_apply(doc, o, begun, result):
                                                       "Error", "Rule id", "Why", "Provisional")}
                               for r in result["rows"]],
                      "items": [{k: i.get(k) for k in ("id", "name", "status", "proposed", "required", "margin",
-                                                      "delta", "approx", "colour", "note", "points", "reason",
+                                                      "delta", "delta_cell", "cells", "approx", "colour", "note",
+                                                      "points", "reason",
                                                       "group", "needs", "hint", "refused")}
                                for i in view["items"]],
                      "header": head, "interior": [r["Rule id"] for r in result.get("interior", [])],
