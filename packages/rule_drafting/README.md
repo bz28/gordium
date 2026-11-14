@@ -1,7 +1,7 @@
 # rule_drafting
 
-Drafts the zoning rules for every residential district, with one recorded AI call per unit, and checks
-every draft with code. Drafts stay marked draft: architect approval is deferred for now (decided 2026-10-19),
+Drafts the zoning rules for every residential district, and a state's building-code rules (New York's house
+egress, `--state`, below), with one recorded AI call per unit, and checks every draft with code. Drafts stay marked draft: architect approval is deferred for now (decided 2026-10-19),
 so a draft that passes every code check can be used; people read the rules through the rules spreadsheet.
 
 ## The units
@@ -102,10 +102,20 @@ python -m rule_drafting draft --limit 10 --yes      # drafts them; --only UNIT..
 python -m rule_drafting cost                        # what the recorded runs actually cost
 ```
 
-Settings are in `rule_drafting/settings.yaml` (default `claude-sonnet-5-5`, effort medium, budget $5.00).
+Settings are in `rule_drafting/settings.yaml` (default `claude-sonnet-5-5`, effort medium, budget $20.00).
 The budget is a hard cap kept in `~/.config/gordium/rule_drafting_ledger.json`, separate from labeling's,
 with the same rules: a run whose estimate exceeds what's left is refused, and no call is sent whose worst
 case could cross the cap. Drafting never runs in CI; the tests use a fake client.
+
+## A state's building code (`--state`, `rule_drafting/book.py`)
+
+`python -m rule_drafting draft --state new_york/new_york_state --all --yes` drafts New York's house egress: the
+units are the book pieces labeled rule in `book.SCOPE`; there is no chart, so no slots; every number must be one
+of the piece's second-reading numbers, used the way the law reads it (`rule_format/code_numbers.py`); rules are
+for each part (`rule_format/parts.yaml`). Related sections are the pieces labeled rule or flag that name the unit
+or a section above it (Appendix BO left out). Drafts go to `<state folder>/5_building_code_rules/drafted/`.
+`python -m rule_drafting.book_eval` grades them against the hand answer key, rule by rule
+(`evals/2026-11-13_house_egress/`). Why and how: `docs/decisions/2026-11-13_house_egress_rules.md`.
 
 ## Where things go
 
