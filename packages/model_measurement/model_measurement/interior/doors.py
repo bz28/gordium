@@ -13,6 +13,10 @@ from model_measurement.interior.stops import Stop
 
 OPERATIONS = ("side_hinged", "sliding", "folding", "pocket", "other")
 PIN_OFF = 1 / 16        # in: how far the hinge pin may stand back from the leaf's hinge corner (drawing noise)
+# in: how far a closed leaf's hinge edge may stand behind the hinge-side stop's face: the stop laps the leaf by its
+# own projection off the jamb, 1/2 to 3/4 in for a door stop
+STOP_LAP = 0.75
+STOP_LAP_WORDS = "3/4"
 
 
 def clear_width(d: dict, reader) -> float:
@@ -46,6 +50,12 @@ def clear_width(d: dict, reader) -> float:
     short = (latch - reach) if side == "left" else (reach - latch)
     if short > PIN_OFF + 1e-9:
         raise Stop("leaf_not_closing", short=tidy(short))
+    # and at its hinge side it stands no farther behind the hinge-side stop than the stop laps it (STOP_LAP): a leaf
+    # drawn running farther back (into the wall, pin and all) would turn open behind the stop and read the
+    # stop-to-stop width. A swing-clear hinge, which does that on purpose, isn't measured yet
+    behind = (hinge - edge) if side == "left" else (edge - hinge)
+    if behind > STOP_LAP + 1e-9:
+        raise Stop("leaf_behind_hinge_stop", back=tidy(behind), most=STOP_LAP_WORDS)
     back = max(0.0, far - pn) + max(0.0, edge - pu if side == "left" else pu - edge)    # both widen: together
     if back > PIN_OFF + 1e-9:
         raise Stop("pin_off_leaf", off=tidy(back))

@@ -106,7 +106,7 @@ def stair_guard(g: dict, reader, flights: dict) -> tuple[dict, dict]:
     line = along(flight, [(x, y) for x, y, _ in pts], "top line", "guard's")
     # its height along the run, from the same points in elevation: s → z
     sz = sorted((flight.s_of(x, y), z) for x, y, z in pts)
-    start, end = flight.s[0], flight.s[-1]
+    start, end = flight.span()
     if at(line, start) is None or at(line, end) is None:
         raise Stop("side_not_along", side="guard's", what="top line")
     on_side(line, flight, side_lines(st, flight, reader))
@@ -127,7 +127,7 @@ def on_side(line, flight, sides: dict) -> None:
     drawn = {side: s for side, s in sides.items() if s != "open"}
     if not drawn:
         raise Stop("guard_no_side")
-    start, end = flight.s[0], flight.s[-1]
+    start, end = flight.span()
     far = {}
     for side, side_line in drawn.items():
         cuts = {start, end, *(s for s, _ in [*line, *side_line] if start <= s <= end)}

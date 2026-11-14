@@ -6,7 +6,9 @@ changes linearly, so its least value is at a corner of where the piece and the r
 """
 
 import math
+from contextlib import contextmanager
 
+from shapely.errors import GEOSException
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
@@ -53,6 +55,16 @@ class Surface:
         return self._fit(x, y) - self.below
 
 
+@contextmanager
+def shapes(what: str):
+    """Plan shapes worked out by the geometry library: if it fails on them (edges so nearly parallel it can't tell
+    where they meet), that measure gets no value with a reason, never a crash that loses the whole house."""
+    try:
+        yield
+    except GEOSException:
+        raise Stop("shapes_failed", what=what) from None
+
+
 def corners(geom) -> list[tuple]:
     """Every corner point of a shapely result, whatever its type (an overlap can be a polygon, several, or a line
     where two only touch)."""
@@ -65,10 +77,15 @@ def corners(geom) -> list[tuple]:
     return list(geom.coords)
 
 
-def covers(surfaces: list[Surface], region: Polygon) -> bool:
-    """Whether the surfaces, seen from above, cover the whole region."""
-    left = region.difference(unary_union([s.plan for s in surfaces]))
-    return left.area <= COVER * region.area
+def covers(surfaces: list[Surface], pieces: list) -> bool:
+    """Whether the surfaces, seen from above, cover the whole region (given in pieces: each is checked on its own,
+    never unioned with its neighbours, whose shared edges can be too nearly parallel for the geometry library)."""
+    plans = unary_union([s.plan for s in surfaces])
+    left = sum(p.difference(plans).area for p in pieces)
+    whole = sum(p.area for p in pieces)
+    if not (math.isfinite(left) and math.isfinite(whole)):  # read.FAR keeps areas finite; never let inf <= inf pass
+        raise Stop("surface_out_of_range", what="the region")
+    return left <= COVER * whole
 
 
 def least_gap(surfaces: list[Surface], pieces: list[tuple], what: str, region_words: str) -> float:
@@ -77,11 +94,13 @@ def least_gap(surfaces: list[Surface], pieces: list[tuple], what: str, region_wo
     pieces: [(plan polygon, reference height function)], the region in pieces over each of which the reference is
     flat (one per tread of a flight; one for a room's floor). The surfaces must cover the whole region (else Stop:
     a gap could be open sky or something not sent); where they overlap the lowest counts."""
-    region = unary_union([p for p, _ in pieces])
-    if not covers(surfaces, region):
-        raise Stop("not_covered", what=what, region=region_words)
-    gaps = [s.z(x, y) - ref(x, y)
-            for poly, ref in pieces for s in surfaces for x, y in corners(s.plan.intersection(poly))]
+    with shapes(what):
+        if not covers(surfaces, [p for p, _ in pieces]):
+            raise Stop("not_covered", what=what, region=region_words)
+        gaps = [s.z(x, y) - ref(x, y)
+                for poly, ref in pieces for s in surfaces for x, y in corners(s.plan.intersection(poly))]
     if not all(map(math.isfinite, gaps)):                     # never let one surface drop out of the least
         raise Stop("surface_out_of_range", what=what)
+    if not gaps:                                              # nothing read over the region: never min() of none
+        raise Stop("not_covered", what=what, region=region_words)
     return min(gaps)

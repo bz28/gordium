@@ -3,7 +3,7 @@
     PYTHONPATH=packages/site_lookup python packages/site_lookup/tests/fixtures/capture.py
 
 What is saved, per address: only the answers of the sources whose terms allow storing them (endpoints.yaml
-`store: raw`): the NYS Geocoder, NYS Tax Parcels, NYS Streets and USGS 3DEP. Nothing from the City or County
+`store: raw`): the NYS Geocoder, NYS Tax Parcels, NYS Streets, USGS 3DEP and FEMA's flood maps. Nothing from the City or County
 layers (`store: none` / `derived`): the tests' stand-ins for those are synthetic (test_lookup.py).
 
 The stand-in for the City's roads is built from the NYS Streets centerlines near the lot. The lookup only asks
@@ -24,6 +24,7 @@ HERE = Path(__file__).parent
 ADDRESSES = {"106_ithaca_rd": "106 Ithaca Rd, Ithaca, NY 14850",
              "109_ithaca_rd": "109 Ithaca Rd, Ithaca, NY 14850",
              "96_ithaca_rd": "96 Ithaca Rd, Ithaca, NY 14850",
+             "601_hancock_st": "601 Hancock St, Ithaca, NY 14850",     # in FEMA's Zone AE (2026-11-11)
              "953_danby_rd_town": "953 Danby Rd, Ithaca, NY 14850",
              "not_found": "12345 Nowhere Blvd, Ithaca, NY 14850"}
 
@@ -72,16 +73,58 @@ def capture_context(address: str, http) -> dict:
     return {"address": address, "captured": dt.date.today().isoformat(), "answers": rec.saved}
 
 
-def main():
+def add_flood(name: str, http) -> dict:
+    """A fixture captured before the flood lookup, given FEMA's answers for exactly the requests the lookup makes on
+    its recorded lot: every other source answered from the fixture as recorded (the test's Fake), FEMA asked live.
+    The fixture's other answers are unchanged; `flood_captured` says when FEMA's were added."""
+    import sys
+    sys.path.insert(0, str(HERE.parent))
+    from test_lookup import Fake, NOW, key_of
+    fixture = json.loads((HERE / f"{name}.json").read_text(encoding="utf-8"))
+    fixture["answers"] = [a for a in fixture["answers"] if not a["source"].startswith("fema_")]
+    fake, live = Fake(fixture), []
+
+    class FemaLive:
+        def post(self, url, params):
+            key = key_of(url)
+            if not key.startswith("fema_"):
+                return fake.post(url, params)
+            body, raw = http.post(url, params)
+            live.append({"source": key, "params": params, "body": body})
+            return body, raw
+
+    lookup(fixture["address"], FemaLive(), NOW)
+    fixture["answers"] += live
+    fixture["flood_captured"] = dt.date.today().isoformat()
+    return fixture
+
+
+FLOOD_ONLY = ("106_ithaca_rd", "109_ithaca_rd", "96_ithaca_rd")   # captured before the flood lookup
+
+
+def main(only=None):
+    """Every fixture, or `only` these names (`capture.py 601_hancock_st`); `capture.py --flood` adds FEMA's answers
+    to the fixtures captured before the flood lookup (FLOOD_ONLY), nothing else re-asked."""
+    if only == ["--flood"]:
+        for name in FLOOD_ONLY:
+            fixture = add_flood(name, Http(timeout=60, retries=3))
+            (HERE / f"{name}.json").write_text(json.dumps(fixture, indent=1), encoding="utf-8")
+            print(name, sum(a["source"].startswith("fema_") for a in fixture["answers"]), "FEMA answers added")
+        return
     for name, address in ADDRESSES.items():
+        if only and name not in only:
+            continue
         fixture = capture(address, Http())
         (HERE / f"{name}.json").write_text(json.dumps(fixture, indent=1), encoding="utf-8")
         print(name, len(fixture["answers"]), "answers saved")
     for name, address in CONTEXT.items():
+        if only and name not in only:
+            continue
         fixture = capture_context(address, Http())
         (HERE / f"{name}.json").write_text(json.dumps(fixture, separators=(",", ":")), encoding="utf-8")
         print(name, len(fixture["answers"]), "answers saved")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(sys.argv[1:] or None)

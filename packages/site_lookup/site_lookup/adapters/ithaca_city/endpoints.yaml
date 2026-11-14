@@ -90,6 +90,37 @@ gorge_zones:
   url: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Gorge_Protection_Zones/FeatureServer/0/query
   store: none
 
+fema_flood:
+  name: FEMA National Flood Hazard Layer (flood hazard zones)
+  owner: U.S. Federal Emergency Management Agency
+  # The effective flood maps (FIRMs) as FEMA publishes them, with Letters of Map Revision folded in. Asked
+  # without geometry: which zones touch the lot and 2 ft around it (the tax map's tolerance), and whether it lies
+  # inside one zone (`within`). In Tompkins County (DFIRM 36109C, panels effective 2025-06-18, read 2026-11-11) the
+  # values are AE, AE floodway, A, X 0.2 PCT, X 1 PCT DEPTH LESS THAN 1 FOOT and X AREA OF MINIMAL FLOOD HAZARD.
+  url: https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query
+  layer: https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28
+  terms: >-
+    U.S. federal government data (public domain, no redistribution limit): storable, as the data sources decision
+    lists it (docs/decisions/2026-10-20_data_sources_and_permissions.md).
+  store: raw
+
+fema_pending:
+  name: FEMA pending flood maps (where new maps are adopted but not yet effective)
+  owner: U.S. Federal Emergency Management Agency
+  # layer 0 is "Pending Data Availability" (the service's own layer list, read 2026-11-11): the areas a pending map
+  # covers. Asked only whether any of it touches the lot.
+  url: https://hazards.fema.gov/arcgis/rest/services/PrelimPending/Pending_NFHL/MapServer/0/query
+  terms: U.S. federal government data (public domain)
+  store: raw
+
+fema_preliminary:
+  name: FEMA preliminary flood maps (where new maps are proposed)
+  owner: U.S. Federal Emergency Management Agency
+  # layer 0 is "Preliminary Data Availability" (the service's own layer list, read 2026-11-11)
+  url: https://hazards.fema.gov/arcgis/rest/services/PrelimPending/Prelim_NFHL/MapServer/0/query
+  terms: U.S. federal government data (public domain)
+  store: raw
+
 state_buildings:
   name: NYS Building Footprints
   owner: NYS ITS Geospatial Services (in the City of Ithaca from NYSERDA/CIESIN, from Tompkins County ITS GIS Division, 2014)

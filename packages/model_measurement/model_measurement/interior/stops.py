@@ -17,6 +17,8 @@ STOPS = {
     # values
     "missing": "{what} isn't given",
     "not_a_length": "{what} isn't a length (a number)",
+    "too_far": "{what} is more than 1,000,000,000 in (about 15,800 miles) from the origin: not a place in a house",
+    "not_finite": "it came out too large to be a number (from lengths far apart)",
     "negative": "{what} is {value} in: a size can't be less than zero",
     "not_a_point": "{what} isn't a list of {n} numbers",
     "not_an_outline": "{what} isn't an outline of at least 3 points that encloses an area",
@@ -31,6 +33,8 @@ STOPS = {
     "surface_vertical": "{what} is vertical: give the underside of what is overhead",
     "surface_not_flat": "{what} isn't flat (a point is {off} in off its plane): give it as flat pieces",
     "surface_out_of_range": "{what} has coordinates too large to measure",
+    "shapes_failed": "{what}: the geometry library couldn't work out the shapes (edges so nearly parallel it can't "
+                     "tell where they meet): check the drawing near there",
     "not_covered": "{what} doesn't cover the whole {region}: give everything above it",
     "nothing_overhead": "nothing above the flight is given: give what is above it (a ceiling, the floor above, a beam)",
     # escape openings
@@ -54,6 +58,7 @@ STOPS = {
     "ground_mixed": "the ground outside the opening is within 44 in of its bottom at some points and not at others",
     "readings_differ": "the readings give different answers; {question}",
     # stairs
+    "nosings_out_of_range": "the stair's nosings have coordinates too large to measure",
     "too_few_nosings": "the flight needs at least {n} nosings (each tread's leading edge, and the top one) for this",
     "nosing_not_level": "nosing {n} isn't level (its ends are {off} in apart in height)",
     "not_bottom_to_top": "the nosings don't go up from the bottom one at a time (riser {n} is {rise} in)",
@@ -61,6 +66,9 @@ STOPS = {
                "are measured at the walkline, not yet",
     "nosings_not_forward": "the nosings don't move forward up the flight (tread {n} is {depth} in deep)",
     "side_not_along": "the {side} {what} doesn't run along the flight from its first nosing to its top one",
+    "side_off_treads": "the stair's {side} side stands {off} in out beyond its treads' ends, more than a skirt or "
+                       "stringer between them ({most} in): it doesn't bound this stair (draw it where the treads end, "
+                       "or give the side as `open`)",
     "sides_cross": "the stair's sides meet or cross (clear width {width} in)",
     "treads_cross": "at the treads, a tread's end meets or crosses the other side (clear width {width} in): check "
                     "the nosings' ends and the stair's sides",
@@ -92,6 +100,9 @@ STOPS = {
     "leaf_no_thickness": "the door leaf's closed corners give it no thickness: a leaf is thicker than nothing",
     "leaf_not_closing": "the closed leaf stops {short} in short of the latch-side stop (within 1/16 in is drawing "
                         "noise): the leaf drawn doesn't close this opening",
+    "leaf_behind_hinge_stop": "the closed leaf's hinge edge stands {back} in behind the hinge-side stop, more than a "
+                              "stop laps a leaf ({most} in): the leaf drawn doesn't close this opening (a swing-clear "
+                              "hinge isn't measured yet)",
     "pin_off_leaf": "the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it "
                     "swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't "
                     "hung on that pin",
