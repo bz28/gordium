@@ -17,7 +17,7 @@ openings:
     escape: true
     operation: casement
     frame: {left: 0, right: 30, bottom: -60, top: -24}
-    hinged: {side: left, open_angle: 90, sash_width: 30, sash_thickness: 1.5}
+    hinged: {side: left, open_angle: 90, sash_width: 30, sash_thickness: 1.5, hinge_offset: 0}
     ground_outside: 0
     area_well: {floor_elevation: -66, width: 40, projection: 36}
   - id: we2
