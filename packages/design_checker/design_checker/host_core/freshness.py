@@ -6,12 +6,13 @@ Moved here unchanged from rhino_logic.py, which still offers every name (so the 
 unchanged). Python 3.9 and the standard library only: Rhino 8 imports this into its own Python 3.9,
 where none of the .venv's packages are installed."""
 
+from .facts import enter_words
 
 __all__ = ['BOX_BUSY', 'should_recheck', 'CHANGED_SINCE', 'AUTO_CHECK_LABEL', 'AUTO_CHECK_TIP', 'changed_after_box',
     'auto_check', 'NEVER_CHECKED', 'out_of_date_line', 'draw_one_hint', 'should_check_front', 'controls_enabled',
-    'zoom_state', 'last_check_at', 'UNDO_WORDS', 'undo_record_to_end', 'after_undo_redo', 'dirty_after_undo',
-    'gate_actions', 'WORKING', 'REFUSED', 'busy_actions', 'NotInFront', 'front_actions', 'recovery_message',
-    'plans_house', 'result_stale', 'checked_while_still']
+    'zoom_state', 'last_check_at', 'UNDO_WORDS', 'undo_enter', 'undo_record_to_end', 'after_undo_redo',
+    'dirty_after_undo', 'gate_actions', 'WORKING', 'REFUSED', 'busy_actions', 'NotInFront', 'front_actions',
+    'recovery_message', 'plans_house', 'result_stale', 'checked_while_still']
 
 
 BOX_BUSY = "Finish or cancel the open start box first."
@@ -106,13 +107,20 @@ def last_check_at(checked_at, document):
 
 # Each panel change is one Rhino undo step, named in Edit > Undo by what it did (a change written outside any undo
 # record is skipped by Ctrl+Z, which undoes the architect's own earlier edit instead: #32's review, 2026-10-26)
-UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",
+UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",   # (enter: undo_enter)
               "main": "Gordium: pick the main building", "adu": "Gordium: pick the ADU's building",
               "add": "Gordium: add to check",
               "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
               "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
               "edit_site": "Gordium: the start box", "grade": "Gordium: the start box",
               "context": "Gordium: show or hide the neighbourhood", "auto_check": "Gordium: check after every edit"}
+
+
+def undo_enter(needs):
+    """A row's Enter step, named in Edit > Undo by what was entered ("Gordium: enter the number of stories"), not
+    the same words for every row (the audit of main, 2026-10-29); UNDO_WORDS["enter"] with no facts named."""
+    words = enter_words(needs)
+    return "Gordium: " + words[:1].lower() + words[1:] if words else UNDO_WORDS["enter"]
 
 
 def undo_record_to_end(held, doc_serial):

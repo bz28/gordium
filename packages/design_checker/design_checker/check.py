@@ -582,11 +582,43 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     return generator.largest_legal_building(site, facts, measured, rules, verdict=verdict, **options)
 
 
-def summary(rows: list[dict]) -> dict:
-    """One line for the viewport corner: all pass; it complies under every reading (rules waiting only on how the
-    law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
-    with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
-    missing fact, not a reading, so it is never shown as complying."""
+def _rules_pass(n: int) -> str:
+    return f"{n} rule passes" if n == 1 else f"{n} rules pass"
+
+
+def summary(rows: list[dict], items: list[dict] | None = None) -> dict:
+    """The check's own one-line answer (the result's "summary"): all pass; it complies under every reading (rules
+    waiting only on how the law is read, each passing whichever way it goes); or what fails and what needs review. A
+    rule that passes only with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not
+    yet surveyed is a missing fact, not a reading, so it is never shown as complying. No row at all is "Nothing
+    checked", needs review: a check that decided nothing never passes.
+
+    Given the view's `items`, it is never less cautious than the panel (Ben, 2026-11-09): its state is the panel's
+    (present.state) whenever that is the more cautious one, and its text is the panel's own line (present.summary, one
+    summary everywhere: D3), so a row still waiting (a fact to answer, the bedrooms; a rule not in this release, the
+    overlays), a rule's row the panel holds at needs review (a doubtful looked-up fact, a tax-map reading) and a row
+    that isn't a rule's (objects on the lot not included, lot facts that disagree) are never left out of it. Its
+    lines: the rule rows' own, then each counted row of the view that fails, needs review or waits and isn't already
+    among them."""
+    s = _rows_summary(rows)
+    if items is None:
+        return s
+    view = present.state(items)
+    caution = {"fail": 3, "review": 2, "complies": 1, "pass": 0}
+    floor = {present.FAILS: "fail", present.REVIEW: "review"}.get(view, s["state"])
+    state = max(s["state"], floor, key=caution.__getitem__)
+    fails, review, _ = _sorted_rows(rows)
+    said = {r.get("Rule id") for r in fails + review}          # the rows its own lines already say
+    # (a rule the rows hold at review but the panel says fails gets the panel's reason too: review round 4)
+    failed = {r.get("Rule id") for r in fails}
+    extra = [i for i in present._building_items(items) if i["status"] != present.COMPLIES
+             and not (i.get("rule") and i["rule"] in (failed if i["status"] == present.FAILS else said))]
+    return {"state": state, "text": present.summary(items), "lines": s["lines"] + [
+        f"{short(i['name'])}: {i['reason']}" if i.get("reason") else short(i["name"]) for i in extra]}
+
+
+def _sorted_rows(rows: list[dict]) -> tuple[list, list, list]:
+    """The rule rows as (fails, review, passes)."""
     # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
     # whatever its named readings say (review round 20); a row without a verdict, by its outcome
     def verdict_of(r):
@@ -595,20 +627,30 @@ def summary(rows: list[dict]) -> dict:
     fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
     review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
     passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
+    return fails, review, passes
+
+
+def _rows_summary(rows: list[dict]) -> dict:
+    """summary() from the rule rows alone: a line for each of its fails and review rows."""
+    fails, review, passes = _sorted_rows(rows)
+    if not fails and not review and not passes:     # nothing checked is never a pass (principle 4)
+        return {"state": "review", "text": "Nothing checked", "lines": []}
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
         waiting = {}
         for r in review:
             waiting.setdefault(r["Provisional"], []).append(short(r["Requirement"]))
-        return {"state": "complies", "text": f"Complies: {len(passes)} pass, {len(review)} pass whichever way open "
-                                             "questions go",
+        return {"state": "complies", "text": f"Complies: {_rules_pass(len(passes))}, {len(review)} pass whichever "
+                                             "way open questions go",
                 "lines": [", ".join(names) + ": " + why for why, names in waiting.items()]}
     lines = [r.get("Line") or (_amount(r) if r["Error"] == "FAIL" else f"{short(r['Requirement'])}: {r['Provisional']}")
              for r in fails]
     lines += [f"{short(r['Requirement'])}: {r.get('Provisional') or (r.get('Named') or {}).get('text') or r['Why']}"
               for r in review]
-    counts = f"{len(passes)} pass" + (f" · {len(fails)} fail" if fails else "") + (
+    # counted in rules, said so: the panel counts its rows, and one rule can be two rows (the side yards: the
+    # audit of main, 2026-10-29: "8 pass" beside the panel's "9 comply")
+    counts = _rules_pass(len(passes)) + (f" · {len(fails)} fail" if fails else "") + (
         f" · {len(review)} need review" if review else "")
     return {"state": "fail" if fails else "review", "text": counts, "lines": lines}
 
@@ -849,6 +891,8 @@ def _refuse_bad_facts(facts: dict) -> None:
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    if no_rules_for(facts):                    # said plainly, never the report's temporary file and its words
+        raise ValueError(no_rules_for(facts))
 
 
 def _unlink(path: Path) -> None:
@@ -856,6 +900,20 @@ def _unlink(path: Path) -> None:
         path.unlink(missing_ok=True)
     except OSError:
         pass
+
+
+def no_rules_for(facts: dict) -> str | None:
+    """Why a district can't be checked, in plain words, when it has no rulebook (saved facts naming B-1a raised the
+    report's own "<temp path>/project.yaml: no rulebook for zone 'B-1a' in …": the audit of main, 2026-10-29);
+    None when it has one. The districts that do are listed from the rulebooks themselves."""
+    j = REPO / facts["jurisdiction"]
+    if rulebook_for(j, facts["zone"]) is not None:
+        return None
+    have = sorted({p.stem for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
+                   for p in folder.glob("*.yaml")}, key=lambda z: [int(t) if t.isdigit() else t.lower()
+                                                                  for t in re.split(r"(\d+)", z)])
+    listed = ", ".join(have[:-1]) + " and " + have[-1] if len(have) > 1 else "".join(have) or "none yet"
+    return f"Gordium doesn't have rules for district {facts['zone']} yet. It has rules for {listed}."
 
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
@@ -955,7 +1013,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     # the notice (spec G): the items that don't comply now and did at the last check the command sent ("before")
     statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
-            "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
+            "summary": summary(rows, v["items"]), "red": red, "dims": dims, "measurements": measured,
             "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": drawn,
             "report_error": report_error,
             "statuses": statuses, "notice": notice_text}
@@ -1714,6 +1772,8 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    if no_rules_for(facts):
+        raise ValueError(no_rules_for(facts))
     (step or _quiet)(STEPS["lot"])
     # through the site description, as check(): its lot only (a start leaves the buildings out)
     doc = site_json.legacy_description({**read_site(Path(model_path), facts), "buildings": []}, facts,
@@ -1728,6 +1788,8 @@ def start_description(doc: dict, facts: dict, floor_to_floor: float | None = Non
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    if no_rules_for(facts):
+        raise ValueError(no_rules_for(facts))
     site, facts, _ = site_json.for_measuring(site_json.to_site(doc), facts)
     say = step or _quiet
     site = {**site, "buildings": []}
@@ -1814,15 +1876,18 @@ def sample_site() -> dict:
 
 
 def _use_lists(body) -> list:
-    """The use names a formula lists in `use in [...]` (the chart's own rows), in order."""
+    """The use names a formula lists in `use in [...]` (the chart's own rows) or names in `use == "..."` (one row, as
+    the bed-and-breakfast inn's review in R-1 and R-2), in order. Missing the second once left the box saying a use
+    "won't comply" while its rule said needs review (review round 1 of PR 65)."""
     import ast
     out = []
     for node in ast.walk(body):
-        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use" and \
-                any(isinstance(op, ast.In) for op in node.ops):
-            for comp in node.comparators:
-                if isinstance(comp, ast.List):
+        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use":
+            for op, comp in zip(node.ops, node.comparators):
+                if isinstance(op, ast.In) and isinstance(comp, ast.List):
                     out += [e.value for e in comp.elts if isinstance(e, ast.Constant) and isinstance(e.value, str)]
+                elif isinstance(op, ast.Eq) and isinstance(comp, ast.Constant) and isinstance(comp.value, str):
+                    out.append(comp.value)
     return out
 
 

@@ -35,6 +35,14 @@ HIDDEN = {
     "piece_sha256": "a fingerprint for code, not for reading",
     "run": "the file of recorded AI calls; for auditing, not reading",
     "layout": "tells the code how to cut a document into pieces; not for reading",
+    # A code book kept outside the repo (a state law folder's: New York's Residential Code). The workbook lists a
+    # place's own documents; a state's book is not in it until its rules are (egress step 3), which shows these.
+    "kept_outside_repo": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "copy": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "terms": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "edition": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "in_force": "only a state code book kept outside the repo has it; not in a place's workbook yet",
+    "brought_in": "tells the code which pages and sections of a book to read; not for reading",
 }
 NOT_DOWNLOADED_FIELDS = {"title", "url", "why_missing"}   # sources.yaml `not_yet_downloaded` entries
 # The "City's exact words" for a cited chart cell the chart reader can't confirm (never a blank).
@@ -222,10 +230,19 @@ _RELATED = Col("Related sections", 30)          # by the term index: the require
 _NOTES = Col("Notes", 40, "notes", _get("notes", _text), every=False)
 _WHO = [Col("Status", 8, "status", _get("status")), Col("Drafted by", 18, "drafted_by", _get("drafted_by"))]
 
+def _for_each(e: dict) -> str:
+    """"for each emergency escape opening · within each sleeping room · if none: fail"; empty for a whole-lot rule."""
+    words = [f"{label}{e[k]}".replace("_", " ") for k, label in
+             (("for_each", "for each "), ("within", "within each "), ("when_none", "if none: ")) if e.get(k)]
+    return " · ".join(words)
+
+
 COLUMNS = {
     "rule": [Col("Zone", 9), Col("Rulebook", 18), Col("Rule id", 28, "id", _get("id")),
              Col("Title", 34, "title", _get("title")), *_WHO,
              Col("Kind", 7, "kind", _get("kind")), Col("Topic", 14, "topic", _get("topic")),
+             # a rule for each part (rule_format/parts.py): what it repeats over, and what "none" means
+             Col("For each part", 26, ("for_each", "within", "when_none"), lambda e, s, n, t: _for_each(e)),
              Col("Check (formula)", 40, "check", _get("check"), every=False),
              Col("Applies when", 26, "applies_when", _get("applies_when"), every=False),
              Col("Needs review when", 34, "review_when", _get("review_when", lambda v: _bullets(
