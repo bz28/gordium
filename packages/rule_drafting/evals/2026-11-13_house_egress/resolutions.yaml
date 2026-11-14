@@ -7,6 +7,12 @@
 #                        nothing applies to is reported (pass or not applicable), not from the law
 # ids: each disagreement's id (comparison.md): its cause.
 # Fixes to the key made after the comparison (each recorded in the key's notes): key_fixes.
+# Fixes to the drafts made after the comparison (review round 5): draft_fixes, one per cause, each with the rules it
+# changed (each change recorded in the rule's `revised`; the AI's own rules are in drafted/records/as_drafted/) and
+# the disagreements it settled (cases). A test runs those cases on the drafts and on the AI's own rules: the fixed
+# drafts agree with the key on every one, the AI's own rules don't (tests/test_house_egress_key.py).
+# Every draft_wrong cause is fixed, and every drafts_stricter cause left gives needs review only, never a fail the
+# law doesn't (a known difference from the law, kept; the same test holds this).
 key_fixes:
   - rule: general.r315_5_2_2_loft_stair_risers
     what: >-
@@ -53,17 +59,170 @@ key_fixes:
       what the architect answers in opening_opens_to_yard, but the measure's meaning didn't say so. The meaning now
       does, so the key's fail for an opening to nowhere is the law's.
     law: 'R319.1 exception 4: "A yard shall not be required to open directly into a public way where the yard opens to an unobstructed path from the yard to the public way. Such path shall have a width of not less than 36 inches (914 mm)."'
+draft_fixes:
+- cause: r318_2_doors_counted
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_2_egress_door_per_dwelling_unit
+  why: The drafts check "one egress door for each dwelling unit" by counting the lot's egress doors against its dwelling
+    units (a proposed building measure, egress_doors). A two-family house whose two marked doors both serve one unit would
+    pass. The key checks every marked door, fails a house with none marked, and makes a house with more than one unit need
+    review (which door serves which unit isn't in the model). Most of these rows are the drafts' count rule needing review
+    because the examples don't give egress_doors.
+  fixed: Each marked egress door is checked as the door R318.2 describes (side-hinged, 32 in wide, 78 in high); a house
+    with none marked fails; more than one dwelling unit needs review (which door serves which unit isn't in the model).
+    The count against dwelling units is gone, and with it the proposed measure egress_doors.
+  law: 'R318.2: "Not less than one egress door shall be provided for each dwelling unit."'
+  cases:
+  - R318.2/draft/general.r318_2_egress_door_clear_height#1/the building
+  - R318.2/draft/general.r318_2_egress_door_clear_height#2/the building
+  - R318.2/draft/general.r318_2_egress_door_clear_width#1/the building
+  - R318.2/draft/general.r318_2_egress_door_clear_width#2/the building
+  - R318.2/draft/general.r318_2_egress_door_side_hinged#1/the building
+  - R318.2/draft/general.r318_2_egress_door_side_hinged#2/the building
+  - R318.2/key/general.r318_2_egress_door#1/the building
+  - R318.2/key/general.r318_2_egress_door#2/the building
+  - R318.2/key/general.r318_2_egress_door#3/the building
+  - R318.2/key/general.r318_2_egress_door#4/the building
+  - R318.2/key/general.r318_2_egress_door#5/the building
+  - R318.2/key/general.r318_2_egress_door#6/the building
+- cause: r319_1_room_a_loft_opens_to
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r319_1_room_a_sleeping_loft_is_open_to
+  why: 'Both check an escape opening in the room a sleeping loft is open to (a loft_room part: a loft has no escape opening
+    of its own, R315.1 and R319.1). The key also flags each loft, so a person checks that its room was labeled; the drafts
+    don''t, so a house with a marked loft whose room isn''t labeled passes on its other rooms though R319.1''s opening for
+    the loft''s room was never checked. The loft is evidence of that room: missing data, which must give needs review.'
+  fixed: A flag added for each sleeping loft, so a person checks that the room it is open to was labeled and its opening
+    checked (a rule added whole after the AI's draft).
+  law: 'R319.1: "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have
+    not less than one operable emergency escape and rescue opening."'
+  cases:
+  - R319.1/key/general.r319_1_room_a_loft_opens_to#1/l1
+- cause: r319_4_1_ladder_review_too_wide
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r319_4_1_area_well_min_projection
+  - general.r319_4_1_area_well_min_width
+  why: 'The ladder may encroach at most 6 in into the area well''s required dimensions, so a 24 in projection fails even
+    with a ladder (30 in is the least). The drafts need review for any well with a ladder under 36 in; the key fails under
+    30 in and needs review from 30 to 36 in. Needs review where the law fails: weaker, never a pass.'
+  fixed: 'A well with a ladder fails under 30 in and needs review from 30 in up (how far the ladder reaches into it isn''t
+    measured). Found while fixing (round 5): the AI''s review also passed a well of 36 in or more with a ladder, which may
+    reach more than 6 in into it, a false pass on missing data that the full-opening flag had hidden; so this cause is now
+    marked a false-pass risk.'
+  law: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than
+    6 inches (152 mm) into the required dimensions of the area well."'
+  cases:
+  - R319.4.1/key/general.r319_4_1_area_well_size#5/w1
+- cause: r319_1_none_marked
+  verdict: draft_wrong
+  false_pass_risk: false
+  rules:
+  - general.r319_1_sleeping_room_escape_opening_operable
+  why: The drafts make a sleeping room with no marked escape opening need review; Gordium's decision (Ben, 2026-11-12, for
+    the architects to confirm) is that it fails, as the key does. Exception 3 (a sprinklered house's basement bedrooms)
+    is the case review would catch; it is the architect's to claim.
+  fixed: 'A sleeping room with no marked escape opening fails (when_none: fail).'
+  law: 'R319.1: "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have
+    not less than one operable emergency escape and rescue opening."'
+  cases:
+  - R319.1/draft/general.r319_1_sleeping_room_escape_opening_operable#3/none in r1
+  - R319.1/key/general.r319_1_sleeping_room_escape_opening#4/none in br2
+- cause: r319_4_1_full_opening_flag
+  verdict: draft_wrong
+  false_pass_risk: false
+  rules:
+  - general.r319_4_1_area_well_allows_full_opening
+  why: 'The drafts flag "the area well lets the opening fully open" on every below-grade opening, though the measure opening_fully_openable
+    exists: every such opening needs review (stricter where the key passes), and one that can''t fully open is not failed
+    (weaker where the key fails). Never a pass. (Where a drafts'' example leaves opening_fully_openable out, the comparison
+    reads it as no, as it does every left-out yes/no: book_eval.completed.)'
+  fixed: >-
+    The flag is a rule on opening_fully_openable: an opening that can't fully open fails, one that can passes. The
+    measure's meaning now says it is the opening as installed, nothing outside it (an area well wall, a deck, a porch)
+    stopping it (review round 5: read as the window's own hardware, a sash blocked by the well wall would pass).
+  law: 'R319.4.1: "The size of the area well shall allow the emergency escape and rescue opening to be fully opened."'
+  cases:
+  - R319.4.1/draft/general.r319_4_1_area_well_allows_full_opening#1/o1
+  - R319.4.1/draft/general.r319_4_1_area_well_min_area#1/o1
+  - R319.4.1/draft/general.r319_4_1_area_well_min_area#3/o1
+  - R319.4.1/draft/general.r319_4_1_area_well_min_projection#1/o1
+  - R319.4.1/draft/general.r319_4_1_area_well_min_projection#3/o1
+  - R319.4.1/draft/general.r319_4_1_area_well_min_width#1/o1
+  - R319.4.1/draft/general.r319_4_1_area_well_min_width#3/o1
+  - R319.4.1/key/general.r319_4_1_area_well_size#1/w1
+  - R319.4.1/key/general.r319_4_1_area_well_size#3/w1
+- cause: r319_4_2_not_tied_to_below_grade
+  verdict: draft_wrong
+  false_pass_risk: false
+  rules:
+  - general.r319_4_2_area_well_ladder_over_44
+  why: Area wells are for openings whose sill is below grade (R319.4); the drafts' ladder rule doesn't test opening_below_grade,
+    so an opening above grade needs review for a missing well depth, or is checked on a depth it has no well for (a pass,
+    a fail or needs review where the key says not applicable). Never a pass the law denies.
+  fixed: The ladder rule applies only to a below-grade opening (applies_when opening_below_grade and area_well_depth > 44).
+  law: 'R319.4: "An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade
+    shall be provided with an area well"; R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall
+    be equipped with an approved, permanently affixed ladder or steps."'
+  cases:
+  - R319.4.2/draft/general.r319_4_2_area_well_ladder_over_44#1/eeo1
+  - R319.4.2/draft/general.r319_4_2_area_well_ladder_over_44#2/eeo1
+  - R319.4.2/key/general.r319_4_2_area_well_ladder#4/w1
+- cause: r320_2_whole_rail_too_high
+  verdict: draft_wrong
+  false_pass_risk: false
+  rules:
+  - general.r320_2_handrail_height_34_38
+  why: 'Exception 2 lets the handrail rise above 38 in only at fittings and bendings. A rail whose lowest point is 40 in
+    is too high along its whole length: the key fails it; the drafts'' review (any rail over 38 in somewhere and 34 in at
+    least) needs review instead.'
+  fixed: The review holds only while the lowest point is within 34 to 38 in; a rail whose lowest point is above 38 in fails.
+  law: 'R320.2: "... shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)." Exception 2: "...
+    the handrail height at the fittings or bendings shall be permitted to exceed 38 inches (965 mm)."'
+  cases:
+  - R320.2/key/general.r320_2_handrail_height#3/h1
+- cause: r315_5_2_1_width_at_the_handrail
+  verdict: drafts_stricter
+  rules:
+  - general.r315_5_2_1_sleeping_loft_stair_clear_width_below_handrail
+  why: 'stair_clear_width_at_handrail is the least width "at and below" the handrail (parts.yaml, R318.7.1''s split), but
+    R315.5.2.1 puts "at" the handrail with the 17 in limit and only "below" with 20 in. A loft stair measuring 17 to 20
+    in there may be lawful (the narrow point may be at the handrail): the key needs review, the drafts fail.'
+  fixed: A loft stair 17 to 20 in at the handrail needs review instead of failing.
+  law: 'R315.5.2.1: "Stairways providing egress from a sleeping loft shall not be less than 17 inches (432 mm) in clear
+    width at or above the handrail. The width below the handrail shall be not less than 20 inches (610 mm)."'
+  cases:
+  - R315.5.2.1/draft/general.r315_5_2_1_sleeping_loft_stair_clear_width_below_handrail#2/s1
+  - R315.5.2.1/key/general.r315_5_2_1_loft_stair_width#4/s1
+- cause: r321_1_required_guards_only
+  verdict: drafts_stricter
+  rules:
+  - general.r321_1_2_guard_height_open_side_not_stair
+  - general.r321_1_2_guard_height_stair_open_side
+  - general.r321_1_2_guard_height_stair_guard_as_handrail
+  - general.r321_1_3_guard_opening_4_inch_sphere
+  - general.r321_1_3_guard_stair_triangle_6_inch_sphere
+  - general.r321_1_3_guard_stair_opening_4_3_8_sphere
+  why: 'R321.1.2 and R321.1.3 limit "required guards": those R321.1.1 requires, where the drop is more than 30 in. The drafts
+    check every guard present, so an optional guard on a 24 in drop fails or needs review. The key tests the drop. (Where
+    an example leaves the drop out, the key needs review and the drafts answer by the guard alone: those rows are missing_input_in_the_example.)'
+  fixed: The three R321.1.2 rules and three R321.1.3 flags apply only where the drop is more than 30 in (R321.1.1's required
+    guards).
+  law: 'R321.1.2: "Required guards at open-sided walking surfaces ... shall be not less than 36 inches (914 mm) in height";
+    R321.1.1: "... located more than 30 inches (762 mm) measured vertically to the floor or grade below".'
+  cases:
+  - R321.1.2/draft/general.r321_1_2_guard_height_open_side_not_stair#2/os1
+  - R321.1.2/draft/general.r321_1_2_guard_height_stair_guard_as_handrail#2/os1
+  - R321.1.2/draft/general.r321_1_2_guard_height_stair_guard_as_handrail#3/os1
+  - R321.1.2/draft/general.r321_1_2_guard_height_stair_open_side#2/os1
+  - R321.1.2/key/general.r321_1_2_guard_height#7/e1
+  - R321.1.3/key/general.r321_1_3_guard_openings#3/e1
 causes:
-  r318_2_doors_counted:
-    verdict: draft_wrong
-    false_pass_risk: true
-    why: >-
-      The drafts check "one egress door for each dwelling unit" by counting the lot's egress doors against its
-      dwelling units (a proposed building measure, egress_doors). A two-family house whose two marked doors both
-      serve one unit would pass. The key checks every marked door, fails a house with none marked, and makes a house
-      with more than one unit need review (which door serves which unit isn't in the model). Most of these rows are
-      the drafts' count rule needing review because the examples don't give egress_doors.
-    law: 'R318.2: "Not less than one egress door shall be provided for each dwelling unit."'
   r318_2_readily_openable_flag:
     verdict: drafts_stricter
     why: >-
@@ -86,34 +245,24 @@ causes:
       unenclosed structure: the law asks no more (key: not applicable). The drafts' flag ignores that measure and
       needs review. The open question (does screening make it enclosed) only arises when something fills them.
     law: 'BF103.2: "Exterior openings required for light and ventilation into a patio structure conforming to Section BF101 shall be unenclosed where such openings serve as emergency egress or rescue openings from sleeping rooms."'
-  r315_5_2_1_width_at_the_handrail:
-    verdict: drafts_stricter
-    why: >-
-      stair_clear_width_at_handrail is the least width "at and below" the handrail (parts.yaml, R318.7.1's split),
-      but R315.5.2.1 puts "at" the handrail with the 17 in limit and only "below" with 20 in. A loft stair measuring
-      17 to 20 in there may be lawful (the narrow point may be at the handrail): the key needs review, the drafts fail.
-    law: 'R315.5.2.1: "Stairways providing egress from a sleeping loft shall not be less than 17 inches (432 mm) in clear width at or above the handrail. The width below the handrail shall be not less than 20 inches (610 mm)."'
   loft_stair_may_follow_r318_7:
     verdict: drafts_stricter
     why: >-
       A sleeping loft's stair "shall be permitted to comply" with R315.5.2.1 to R315.5.2.3: a choice, so it may meet
-      either those or R318.7's ordinary limits. The key leaves loft stairs out of R318.7.1 and R318.7.5 (R315.5.2's
-      limits are looser, so meeting R318.7's meets them; under R318.7.2 a loft stair below 6 ft 8 in needs review) and makes a loft stair outside R315.5.2.2's risers but within
-      R318.7.5's need review (whether a loft stair may mix the two sets is open: key fixes). The
-      drafts apply R318.7.1's 36 in to loft stairs (fail a 20 in loft stair R315.5.2.1 allows), make loft stairs
-      need review under R318.7.2 and R318.7.5, and apply R315.5.2.2 alone (fail a 6 1/2 in riser on an ordinary
-      stair; flag the formula on every loft stair).
+      either those or R318.7's ordinary limits. The key leaves loft stairs out of R318.7.5's tread depth and riser
+      height and, under R318.7.2, makes a loft stair below 6 ft 8 in need review. The drafts make every loft stair
+      need review under R318.7.2 and R318.7.5 (and flag R315.5.2.2's formula on every loft stair): needs review
+      only, never a fail. Kept as a known difference. (Where the drafts failed a loft stair the law allows, under
+      R318.7.1's widths and R315.5.2.2's risers alone, they were fixed: draft_fixes.)
     law: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1 through R315.5.2.3."'
   missing_input_in_the_example:
     verdict: both_follow_the_law
     why: >-
       The example leaves out a measure one side's rule reads: the side whose rule needs it gives needs review, the
       other a definite answer that the law supports (a 35.5 in stair width fails R318.7.1 whatever the width at the
-      handrail; a loft stair whose shortest riser is 6 in fails R315.5.2.2 (its other way, R318.7.5, can't be
-      settled without the tread depth the example leaves out); a
-      36 in guard meets R321.1.2 whatever the drop, required or not; a 30 in door fails R318.2 whatever the number of
-      dwelling units, which the key's door rule reads and the drafts' examples don't give).
-    law: 'R318.7.1: "Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height"; R315.5.2.2: "Risers ... shall be not less than 7 inches (178 mm)".'
+      handrail; a door under 32 in wide or 78 in high, or not side-hinged, fails R318.2 whatever the number of
+      dwelling units, which the key's door rule reads and the drafts' single-feature door examples don't give).
+    law: 'R318.7.1: "Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height"; R318.2: "The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813 mm) ..."'
   r318_7_2_floor_opening_flag:
     verdict: drafts_stricter
     why: >-
@@ -129,14 +278,6 @@ causes:
       Spiral stairs need a handrail like any flight of four or more risers (R318.7.11 keeps R318.7, R318.7.11.1 says
       nothing of handrails); the drafts make them need review, the key passes one with a handrail.
     law: 'R318.7.8: "Handrails shall be provided on not less than one side of each flight of stairs with four or more risers."'
-  r319_1_none_marked:
-    verdict: draft_wrong
-    false_pass_risk: false
-    why: >-
-      The drafts make a sleeping room with no marked escape opening need review; Gordium's decision (Ben,
-      2026-11-12, for the architects to confirm) is that it fails, as the key does. Exception 3 (a sprinklered
-      house's basement bedrooms) is the case review would catch; it is the architect's to claim.
-    law: 'R319.1: "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening."'
   opening_examples_without_a_room:
     verdict: both_follow_the_law
     why: >-
@@ -145,56 +286,12 @@ causes:
       which the key's rows read as unplaced (needs review). A marked escape opening always sits in a room, where the
       two give the same answer.
     law: 'R319.1: "Emergency escape and rescue openings shall open directly into a public way, or to a yard or court that opens to a public way."'
-  r319_1_room_a_loft_opens_to:
-    verdict: draft_wrong
-    false_pass_risk: true
-    why: >-
-      Both check an escape opening in the room a sleeping loft is open to (a loft_room part: a loft has no escape
-      opening of its own, R315.1 and R319.1). The key also flags each loft, so a person checks that its room was
-      labeled; the drafts don't, so a house with a marked loft whose room isn't labeled passes on its other rooms
-      though R319.1's opening for the loft's room was never checked. The loft is evidence of that room: missing
-      data, which must give needs review.
-    law: 'R319.1: "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening."'
-  r319_4_1_full_opening_flag:
-    verdict: draft_wrong
-    false_pass_risk: false
-    why: >-
-      The drafts flag "the area well lets the opening fully open" on every below-grade opening, though the measure
-      opening_fully_openable exists: every such opening needs review (stricter where the key passes), and one that
-      can't fully open is not failed (weaker where the key fails). Never a pass. (Where a drafts' example leaves opening_fully_openable out, the comparison reads it as no, as
-      it does every left-out yes/no: book_eval.completed.)
-    law: 'R319.4.1: "The size of the area well shall allow the emergency escape and rescue opening to be fully opened."'
-  r319_4_1_ladder_review_too_wide:
-    verdict: draft_wrong
-    false_pass_risk: false
-    why: >-
-      The ladder may encroach at most 6 in into the area well's required dimensions, so a 24 in projection fails even
-      with a ladder (30 in is the least). The drafts need review for any well with a ladder under 36 in; the key fails
-      under 30 in and needs review from 30 to 36 in. Needs review where the law fails: weaker, never a pass.
-    law: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well."'
-  r319_4_2_not_tied_to_below_grade:
-    verdict: draft_wrong
-    false_pass_risk: false
-    why: >-
-      Area wells are for openings whose sill is below grade (R319.4); the drafts' ladder rule doesn't test
-      opening_below_grade, so an opening above grade needs review for a missing well depth, or is checked on a depth
-      it has no well for (a pass, a fail or needs review where the key says not applicable). Never a pass the law
-      denies.
-    law: 'R319.4: "An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade shall be provided with an area well"; R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps."'
   pass_or_not_applicable:
     verdict: both_follow_the_law
     why: >-
       A 44 in deep area well needs no ladder: the key says pass (its check holds), the drafts not applicable (their
       applies_when is "deeper than 44 in"). The same answer in law.
     law: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with ... ladder or steps."'
-  r320_2_whole_rail_too_high:
-    verdict: draft_wrong
-    false_pass_risk: false
-    why: >-
-      Exception 2 lets the handrail rise above 38 in only at fittings and bendings. A rail whose lowest point is 40 in
-      is too high along its whole length: the key fails it; the drafts' review (any rail over 38 in somewhere and 34 in
-      at least) needs review instead.
-    law: 'R320.2: "... shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)." Exception 2: "... the handrail height at the fittings or bendings shall be permitted to exceed 38 inches (965 mm)."'
   handrail_examples_without_a_stair:
     verdict: both_follow_the_law
     why: >-
@@ -203,14 +300,6 @@ causes:
       unplaced (needs review), and the key's examples give a stair with no handrail, a "none" row the drafts don't
       have. On a model where each handrail sits in its stair, both give the same answers.
     law: 'R320.2: "Handrail height ... shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)"; R320.4: "Handrails adjacent to a wall shall have a space of not less than 1 1/2 inches (38 mm) between the wall and the handrails."'
-  r321_1_required_guards_only:
-    verdict: drafts_stricter
-    why: >-
-      R321.1.2 and R321.1.3 limit "required guards": those R321.1.1 requires, where the drop is more than 30 in. The
-      drafts check every guard present, so an optional guard on a 24 in drop fails or needs review. The key tests the
-      drop. (Where an example leaves the drop out, the key needs review and the drafts answer by the guard alone:
-      those rows are missing_input_in_the_example.)
-    law: 'R321.1.2: "Required guards at open-sided walking surfaces ... shall be not less than 36 inches (914 mm) in height"; R321.1.1: "... located more than 30 inches (762 mm) measured vertically to the floor or grade below".'
 ids:
   "BF103.2/key/general.bf103_2_escape_opening_into_patio_cover#1/the building": bf103_2_every_exit_door
   "BF103.2/key/general.bf103_2_escape_opening_into_patio_cover#2/the building": bf103_2_every_exit_door
@@ -221,55 +310,21 @@ ids:
   "BF103.2/draft/general.bf103_2_escape_opening_into_patio_cover_unenclosed#2/the building": bf103_2_every_exit_door
   "BF103.2/draft/general.bf103_2_escape_opening_into_patio_cover_unenclosed#3/the building": bf103_2_every_exit_door
   "BF103.2/draft/general.bf103_2_exit_into_patio_cover_r318_exits#1/d1": bf103_2_every_exit_door
-  "R315.5.2.1/key/general.r315_5_2_1_loft_stair_width#4/s1": r315_5_2_1_width_at_the_handrail
-  "R315.5.2.1/draft/general.r315_5_2_1_sleeping_loft_stair_clear_width_below_handrail#2/s1": r315_5_2_1_width_at_the_handrail
-  "R315.5.2.2/key/general.r315_5_2_2_loft_stair_risers#3/s1": loft_stair_may_follow_r318_7
-  "R315.5.2.2/draft/general.r315_5_2_2_sleeping_loft_stair_riser_height#3/s1": missing_input_in_the_example
-  "R318.2/key/general.r318_2_egress_door#1/the building": r318_2_doors_counted
   "R318.2/key/general.r318_2_egress_door#1/d1": r318_2_readily_openable_flag
-  "R318.2/key/general.r318_2_egress_door#2/the building": r318_2_doors_counted
-  "R318.2/key/general.r318_2_egress_door#3/the building": r318_2_doors_counted
-  "R318.2/key/general.r318_2_egress_door#4/the building": r318_2_doors_counted
-  "R318.2/key/general.r318_2_egress_door#5/the building": r318_2_doors_counted
-  "R318.2/key/general.r318_2_egress_door#6/the building": r318_2_doors_counted
-  "R318.2/draft/general.r318_2_egress_door_side_hinged#1/the building": r318_2_doors_counted
-  "R318.2/draft/general.r318_2_egress_door_side_hinged#2/the building": r318_2_doors_counted
   "R318.2/draft/general.r318_2_egress_door_side_hinged#2/d1": missing_input_in_the_example
-  "R318.2/draft/general.r318_2_egress_door_clear_width#1/the building": r318_2_doors_counted
   "R318.2/draft/general.r318_2_egress_door_clear_width#1/d1": missing_input_in_the_example
-  "R318.2/draft/general.r318_2_egress_door_clear_width#2/the building": r318_2_doors_counted
   "R318.2/draft/general.r318_2_egress_door_clear_width#2/d1": missing_input_in_the_example
-  "R318.2/draft/general.r318_2_egress_door_clear_height#1/the building": r318_2_doors_counted
   "R318.2/draft/general.r318_2_egress_door_clear_height#1/d1": missing_input_in_the_example
-  "R318.2/draft/general.r318_2_egress_door_clear_height#2/the building": r318_2_doors_counted
   "R318.2/draft/general.r318_2_egress_door_clear_height#2/d1": missing_input_in_the_example
-  "R318.7.1/key/general.r318_7_1_stair_width#8/s1": loft_stair_may_follow_r318_7
   "R318.7.1/draft/general.r318_7_1_stair_clear_width_above_handrail#2/s1": missing_input_in_the_example
   "R318.7.2/key/general.r318_7_2_stair_headroom#1/s1": r318_7_2_floor_opening_flag
   "R318.7.2/key/general.r318_7_2_stair_headroom#4/s1": loft_stair_may_follow_r318_7
   "R318.7.2/draft/general.r318_7_2_stair_headroom#1/s1": r318_7_2_floor_opening_flag
   "R318.7.5.2/draft/general.r318_7_5_2_stair_tread_variation_max#3/s1": loft_stair_may_follow_r318_7
   "R318.7.8/draft/general.r318_7_8_stair_handrail_one_side#4/s1": r318_7_8_spiral_review
-  "R319.1/key/general.r319_1_sleeping_room_escape_opening#4/none in br2": r319_1_none_marked
-  "R319.1/key/general.r319_1_room_a_loft_opens_to#1/l1": r319_1_room_a_loft_opens_to
-  "R319.1/draft/general.r319_1_sleeping_room_escape_opening_operable#3/none in r1": r319_1_none_marked
   "R319.1/draft/general.r319_1_escape_opening_opens_to_public_way_or_yard#1/o1": opening_examples_without_a_room
   "R319.1/draft/general.r319_1_escape_opening_opens_to_public_way_or_yard#2/o1": opening_examples_without_a_room
-  "R319.4.1/key/general.r319_4_1_area_well_size#1/w1": r319_4_1_full_opening_flag
-  "R319.4.1/key/general.r319_4_1_area_well_size#3/w1": r319_4_1_full_opening_flag
-  "R319.4.1/key/general.r319_4_1_area_well_size#5/w1": r319_4_1_ladder_review_too_wide
-  "R319.4.1/draft/general.r319_4_1_area_well_min_area#1/o1": r319_4_1_full_opening_flag
-  "R319.4.1/draft/general.r319_4_1_area_well_min_area#3/o1": r319_4_1_full_opening_flag
-  "R319.4.1/draft/general.r319_4_1_area_well_min_projection#1/o1": r319_4_1_full_opening_flag
-  "R319.4.1/draft/general.r319_4_1_area_well_min_projection#3/o1": r319_4_1_full_opening_flag
-  "R319.4.1/draft/general.r319_4_1_area_well_min_width#1/o1": r319_4_1_full_opening_flag
-  "R319.4.1/draft/general.r319_4_1_area_well_min_width#3/o1": r319_4_1_full_opening_flag
-  "R319.4.1/draft/general.r319_4_1_area_well_allows_full_opening#1/o1": r319_4_1_full_opening_flag
   "R319.4.2/key/general.r319_4_2_area_well_ladder#1/w1": pass_or_not_applicable
-  "R319.4.2/key/general.r319_4_2_area_well_ladder#4/w1": r319_4_2_not_tied_to_below_grade
-  "R319.4.2/draft/general.r319_4_2_area_well_ladder_over_44#1/eeo1": r319_4_2_not_tied_to_below_grade
-  "R319.4.2/draft/general.r319_4_2_area_well_ladder_over_44#2/eeo1": r319_4_2_not_tied_to_below_grade
-  "R320.2/key/general.r320_2_handrail_height#3/h1": r320_2_whole_rail_too_high
   "R320.2/key/general.r320_2_handrail_height#5/none in s2": handrail_examples_without_a_stair
   "R320.2/draft/general.r320_2_handrail_height_34_38#1/the building": handrail_examples_without_a_stair
   "R320.2/draft/general.r320_2_handrail_height_34_38#1/h1": handrail_examples_without_a_stair
@@ -287,12 +342,7 @@ ids:
   "R320.4/draft/general.r320_4_handrail_wall_clearance#3/the building": handrail_examples_without_a_stair
   "R320.4/draft/general.r320_4_handrail_wall_clearance#3/h1": handrail_examples_without_a_stair
   "R320.4/draft/general.r320_4_handrail_wall_clearance#4/the building": handrail_examples_without_a_stair
-  "R321.1.2/key/general.r321_1_2_guard_height#7/e1": r321_1_required_guards_only
-  "R321.1.2/draft/general.r321_1_2_guard_height_open_side_not_stair#1/os1": missing_input_in_the_example
-  "R321.1.2/draft/general.r321_1_2_guard_height_open_side_not_stair#2/os1": r321_1_required_guards_only
-  "R321.1.2/draft/general.r321_1_2_guard_height_stair_open_side#1/os1": missing_input_in_the_example
-  "R321.1.2/draft/general.r321_1_2_guard_height_stair_open_side#2/os1": r321_1_required_guards_only
-  "R321.1.2/draft/general.r321_1_2_guard_height_stair_guard_as_handrail#1/os1": missing_input_in_the_example
-  "R321.1.2/draft/general.r321_1_2_guard_height_stair_guard_as_handrail#2/os1": r321_1_required_guards_only
-  "R321.1.2/draft/general.r321_1_2_guard_height_stair_guard_as_handrail#3/os1": r321_1_required_guards_only
-  "R321.1.3/key/general.r321_1_3_guard_openings#3/e1": r321_1_required_guards_only
+  "R318.2/draft/general.r318_2_egress_door_per_dwelling_unit#1/d1": r318_2_readily_openable_flag
+  "R319.4.2/draft/general.r319_4_2_area_well_ladder_over_44#3/eeo1": pass_or_not_applicable
+  "R320.2/draft/general.r320_2_handrail_height_34_38#4/h1": handrail_examples_without_a_stair
+  "R320.2/draft/general.r320_2_handrail_height_34_38#5/the building": handrail_examples_without_a_stair

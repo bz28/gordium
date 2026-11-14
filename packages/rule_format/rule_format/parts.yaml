@@ -43,7 +43,7 @@ emergency_escape_opening:
     opening_is_door:          {unit: yes_no, meaning: "The opening is a door (not a window)"}
     opening_door_hinged_or_sliding: {unit: yes_no, meaning: "For a door: it is a side-hinged door or a sliding door"}
     opening_under_projection: {unit: yes_no, meaning: "The opening is under a deck, porch or cantilever"}
-    opening_fully_openable:   {unit: yes_no, meaning: "The window or door opens fully (to its whole net clear opening)"}
+    opening_fully_openable:   {unit: yes_no, meaning: "The window or door, as installed, opens fully (to its whole net clear opening): nothing outside it, such as an area well wall, a deck or a porch, stops it"}
     opening_path_height:      {unit: in, meaning: "Least clear height of the path from the opening to a yard or court (under a deck, porch or cantilever)"}
     opening_path_width:       {unit: in, meaning: "Least clear width of the path from the opening to a yard or court (under a deck, porch or cantilever)"}
     opening_below_grade:      {unit: yes_no, meaning: "The bottom of the clear opening is below the adjacent ground (grade) outside it"}

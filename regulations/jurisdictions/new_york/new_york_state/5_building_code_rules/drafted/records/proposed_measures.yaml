@@ -1,9 +1,3 @@
-egress_doors:
-  meaning: Egress doors (doors the architect marks as a dwelling's required exit door) provided for the dwelling
-    units on this lot, all together
-  needed_by:
-  - general.r318_2_egress_door_per_dwelling_unit
-  unit: count
 stair_nosings_under_floor_opening:
   meaning: The nosings of treads at the side of the flight extend under the edge of a floor opening through which
     the stair passes
