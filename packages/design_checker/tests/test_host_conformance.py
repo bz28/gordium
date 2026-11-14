@@ -15,10 +15,20 @@ import pytest
 from design_checker import conformance as c
 from design_checker import conformance_rhino as cr
 from design_checker import site_json
+from design_checker.goldens import canonical
 
 SCENES = c.scenes()
 DRAWN = {n: s for n, s in SCENES.items() if c.has_model(s)}
 STEPS = [(n, step) for n, s in SCENES.items() for step in c.steps(s)]
+
+
+def _same(committed, fresh) -> bool:
+    """Whether a committed file's data is what the code makes now, in the goldens' canonical form (goldens.canonical:
+    every word, id and verdict exact, every number to a millionth of a foot). The files were written on an Apple-chip
+    Mac; a curved line's points come from cos and sin, whose last binary digit an Intel or AMD computer's maths
+    library can give otherwise (CI's Linux: 1 to 2 hundred-trillionths of a foot on 17_curved_rear_lot_line's arc,
+    02_curved_wall's wall), and that is not a stale file."""
+    return canonical(committed) == canonical(fresh)
 
 
 def _host_doc(name, step=c.STEPS[0]):
@@ -40,8 +50,25 @@ def test_every_expected_description_is_a_valid_description_and_the_committed_fil
     want = c.expected_site(scene, step)
     site_json.validate(want)
     if c.has_model(scene):
-        assert json.loads(c.expected_path(scene, step).read_text(encoding="utf-8")) == want, \
+        assert _same(json.loads(c.expected_path(scene, step).read_text(encoding="utf-8")), want), \
             "run python -m design_checker.conformance --write"
+
+
+def test_a_committed_file_is_current_to_a_curves_last_digit_but_not_to_a_millionth_or_a_word():
+    scene = SCENES["17_curved_rear_lot_line"]
+    committed = json.loads(c.expected_path(scene, c.STEPS[0]).read_text(encoding="utf-8"))
+
+    def nudged(by=None, straight=False):
+        fresh = copy.deepcopy(committed)
+        arc = next(e for e in fresh["lot"]["edges"] if e["curved"])
+        if by is not None:
+            arc["points"][5][1] += by
+        if straight:
+            arc["curved"] = False
+        return fresh
+    assert _same(committed, nudged(by=1.4e-14))          # CI's Linux: an arc point's last binary digit
+    assert not _same(committed, nudged(by=2e-6))         # two millionths of a foot: a moved point
+    assert not _same(committed, nudged(straight=True))   # a curved line sent as straight
 
 
 def test_no_expected_description_is_left_without_its_scene():
@@ -61,14 +88,14 @@ def test_each_committed_model_reads_as_a_freshly_built_one(name, tmp_path):
     facts = c.facts(scene)
     a, b = cr.describe_file(cr.model_path(scene), facts), cr.describe_file(fresh, facts)
     a["host"]["document"] = b["host"]["document"] = ""
-    assert a == b
+    assert _same(a, b)
     if scene.get("then"):
         after = tmp_path / f"{name}.after.3dm"
         cr.edited(scene, fresh).Write(str(after), 8)
         a = cr.describe_file(cr.model_path(scene, c.STEPS[1]), facts)
         b = cr.describe_file(after, facts)
         a["host"]["document"] = b["host"]["document"] = ""
-        assert a == b
+        assert _same(a, b)
 
 
 def test_every_recording_passes_and_each_host_records_every_scene():
@@ -82,7 +109,7 @@ def test_every_recording_passes_and_each_host_records_every_scene():
 @pytest.mark.parametrize("name", sorted(DRAWN))
 def test_the_reference_adapters_recordings_are_current(name):
     path = c.RECORDED / cr.HOST / f"{name}.json"
-    assert json.loads(path.read_text(encoding="utf-8")) == json.loads(json.dumps(cr.record(DRAWN[name]))), \
+    assert _same(json.loads(path.read_text(encoding="utf-8")), json.loads(json.dumps(cr.record(DRAWN[name])))), \
         "run python -m design_checker.conformance --write"
 
 
