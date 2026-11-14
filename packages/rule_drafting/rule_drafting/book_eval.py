@@ -34,6 +34,7 @@ DRAFTS = rules_folder(STATE) / "drafted/general.yaml"
 HERE = Path(__file__).resolve().parents[1] / "evals/2026-11-13_house_egress"
 REPORT, RESOLUTIONS = HERE / "comparison.md", HERE / "resolutions.yaml"
 WORST = ("fail", "needs_review", "pass", "not_applicable")
+STRICTNESS = {"fail": 3, "needs_review": 2, "pass": 1, "not_applicable": 1, "no row": 1}   # how far from a pass
 
 
 def rules_of(path: Path) -> list[dict]:
@@ -118,6 +119,7 @@ def compare(key: list[dict], drafts: list[dict], ctx) -> list[dict]:
                         if a.get(part) != b.get(part):
                             label = part[0] or (f"none in {part[1]}" if part[1] else "the building")
                             out.append({"id": f"{pid}/{whose}/{rule['id']}#{n}/{label}", "piece": pid,
+                                        "key": a.get(part, "no row"), "draft": b.get(part, "no row"),
                                         "what": f"{whose} example {n} of {rule['id']}, {label}: "
                                         f"key {a.get(part, 'no row')}, drafts {b.get(part, 'no row')}"})
     return out
