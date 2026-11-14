@@ -190,10 +190,25 @@ def test_valid_rulebooks(ctx):
     (APPROVED | {"approved_on": "last week"}, "approved_on must be a date"),
     ({"drafted_by": None}, "missing 'drafted_by'"),
     ({"colour": "red"}, "unknown field 'colour'"),
+    # a change after the AI's draft (house egress review, round 5): {field, by, date, why}, as a label's
+    ({"revised": {"field": "check"}}, "'revised' must be a list of {field, by, date, why}"),
+    ({"revised": [{"field": "check", "by": "Claude", "date": datetime.date(2026, 11, 13)}]}, "exactly field, by, date, why"),
+    ({"revised": [{"field": "colour", "by": "Claude", "date": datetime.date(2026, 11, 13), "why": "w"}]},
+     "revised field 'colour'"),
+    ({"revised": [{"field": "status", "by": "Claude", "date": datetime.date(2026, 11, 13), "why": "w"}]},
+     "revised field 'status'"),
+    ({"revised": [{"field": "check", "by": " ", "date": datetime.date(2026, 11, 13), "why": "w"}]}, "must be text"),
+    ({"revised": [{"field": "check", "by": "Claude", "date": "2026-11-13", "why": "w"}]}, "must be a date"),
 ])
 def test_invalid_rules_are_rejected(ctx, changes, problem):
     problems = validate(rulebook(**changes), ctx)
     assert any(problem in p for p in problems), problems
+
+
+def test_a_rule_records_its_changes_after_the_ais_draft(ctx):
+    revised = [{"field": "check", "by": "Claude for Ben", "date": datetime.date(2026, 11, 13), "why": "the law"},
+               {"field": "rule", "by": "Claude for Ben", "date": datetime.date(2026, 11, 13), "why": "added"}]
+    assert validate(rulebook(revised=revised), ctx) == []
 
 
 @pytest.mark.parametrize("book, problem", [

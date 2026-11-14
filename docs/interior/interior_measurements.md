@@ -15,8 +15,9 @@ The input is the [interior description](interior_description_format.md); the cod
 3. **Where the drawing and a stated value can disagree** (the maker's clear opening against the drawn sashes), they must agree within 1/16 in, and the less favourable one counts (the smaller width and height, the higher sill; grade-floor must come out the same at both bottoms). A maker's opening can never be bigger than its frame, and a fixed window never opens. Sizes (widths, thicknesses, offsets) can't be negative.
 4. **Drawing noise read on the cautious side.** A nosing's two ends may differ by 1/16 in: each riser and tread is read with the ends paired the worst way, and the line of the nosings through their higher ends, each at its end nearer the foot (the line rises, so that is as high as it can stand). A maker's clear opening within 1/16 in of its frame is cut back to the frame. A flat surface's points may stand 1/16 in off its plane: the plane is lowered to its lowest point.
 5. **Exact, never sampled.** Heights between flat surfaces are found at the corners of where they overlap, the flight cut at every bend of the line of the nosings (the gap between two flat surfaces changes in a straight line, so its least value is at a corner); widths along a flight at every point where a side, handrail or tread end bends.
-6. **A part placed against another must stand where it says.** A part that attaches to another by where it is drawn counts only where it actually is: a stair guard only along a side of its stair (its top line on that side's line, within 1/16 in, drawing noise), a handrail is a side's handrail only if it runs the whole flight between the stair's sides, a door leaf only turned about a hinge pin that hangs it (at its hinge-side corner, within 1/16 in, or beyond it, which only narrows the width), and only where it closes its own opening (reaching the latch-side stop). Drawn anywhere else, it gets no value: a guard 500 in off to the side of a stair protects none of it.
-7. **Units explicit.** Every length in is converted from the description's stated `units`; every measure comes out in inches (`in`) or square feet (`sf`), as `rule_format/parts.yaml` names them. Values are rounded to a millionth (float noise only, far finer than any drawing).
+6. **A part placed against another must stand where it says.** A part that attaches to another by where it is drawn counts only where it actually is: a stair guard only along a side of its stair (its top line on that side's line, within 1/16 in, drawing noise), a handrail is a side's handrail only if it runs the whole flight between the stair's sides, a door leaf only turned about a hinge pin that hangs it (at its hinge-side corner, within 1/16 in, or beyond it, which only narrows the width), and only where it closes its own opening (from the hinge-side stop to the latch-side stop). And what they are checked against is itself checked: a stair's drawn side bounds it only where it stands at the tread ends (no more than a skirt or stringer, 1 1/2 in, out beyond them; treads may run past it into the wall), so a side drawn away from the stair can't carry a guard or a handrail with it. The 3/4 in and 1 1/2 in are Gordium's stated readings of usual construction (a door stop's projection; a 2x stringer's thickness), to be confirmed. Drawn anywhere else, it gets no value: a guard 500 in off to the side of a stair protects none of it.
+7. **Every length within reach.** A length more than 1,000,000,000 in (about 15,800 miles) from the origin gets no value (`too_far`). Inside that, every area, sum and difference worked out from lengths stays a finite number, so no check can be passed by an overflow to infinity. As a last guard, any value that still isn't a finite number is left out (`not_finite`).
+8. **Units explicit.** Every length in is converted from the description's stated `units`; every measure comes out in inches (`in`) or square feet (`sf`), as `rule_format/parts.yaml` names them. Values are rounded to a millionth (float noise only, far finer than any drawing).
 
 ## Sleeping rooms (`sleeping_room`)
 
@@ -65,7 +66,7 @@ One part per straight flight. s runs up the flight at a right angle to the first
 | `stair_tread_depth` (in) | The shallowest tread: the distance along s between adjacent nosings | R318.7.5.2 "measured horizontally between the vertical planes of the foremost projection of adjacent treads and at a right angle to the tread’s leading edge" (p.77) |
 | `stair_tread_variation` (in, `more`) | Deepest less shallowest tread | R318.7.5.2 (p.77) |
 | `stair_headroom` (in) | The least height from the line connecting the nosings up to anything overhead, over the flight's whole width from its first nosing to its top one (each tread at its own nosing's width, back to the next riser, and out to both ends of every nosing drawn slightly askew, the top one included). The overhead pieces must cover all of it | R318.7.2 "measured vertically from the sloped line adjoining the tread nosing" (p.77) |
-| `stair_clear_width` (in) | The least distance across between the two sides above handrail height (wall faces, a guard's inside face; tread ends for an open side, each tread at its own nosing's width back to the next nosing), over the flight | R318.7.1 "not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height" (p.77) |
+| `stair_clear_width` (in) | The least distance across between the two sides above handrail height (wall faces, a guard's inside face; tread ends for an open side, each tread at its own nosing's width back to the next nosing, from its nosing's nearer end to the next one's farther end), over the flight out to the top nosing's farther end | R318.7.1 "not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height" (p.77) |
 | `stair_clear_width_at_handrail` (in, `more`) | The same, at and below handrail height: the inmost of the side, the handrail's inner edge (where it runs) and the tread ends (each tread at its own nosing's width back to the next nosing) | R318.7.1 "The clear width of stairways at and below the handrail height, including treads and landings" (p.77) |
 | `stair_handrail_sides` (count, `more`) | How many sides have a handrail (0, 1 or 2): the width allowed at the handrail turns on it. A side counts only where one handrail runs the whole flight between the stair's sides (the wall faces, or an open side's tread ends); a side whose handrails run only part of it, or lie outside the sides: no value. The description gives no handrail height, so that isn't checked here | R318.7.1 (31 1/2 in with one side, 27 in with both); R320.5 "continuous for the full length of the flight, from a point directly above the nosing of the landing at the top of the flight to a point directly above the lowest nosing of the flight" (p.81) |
 | `stair_total_rise`, `stair_risers` (`more`) | The top nosing less the foot; the number of risers | R318.7.3 "a vertical rise greater than 12 feet 7 inches" (p.77) |
@@ -87,7 +88,7 @@ Not measured yet: a stair guard's openings (R321.1.3 Exceptions 1 and 2: the 6 i
 
 | Measure | How | Serves |
 |---|---|---|
-| `door_clear_width` (in) | A side-hinged door only: the leaf, drawn closed, turned 90 degrees about its hinge pin (which must hang it: at the leaf's hinge-side corner on the face it swings toward, within 1/16 in, or beyond it; else no value). The leaf must be thicker than nothing and, closed, reach the latch-side stop (within 1/16 in), else no value; from its face toward the latch side (or the hinge-side stop, if that stands further in) to the latch-side stop | R318.2 "measured between the face of the door and the stop, with the door open 90 degrees" (p.76) |
+| `door_clear_width` (in) | A side-hinged door only: the leaf, drawn closed, turned 90 degrees about its hinge pin (which must hang it: at the leaf's hinge-side corner on the face it swings toward, within 1/16 in, or beyond it; else no value). The leaf must be thicker than nothing and, closed, span its opening: reach the latch-side stop (within 1/16 in), and stand no farther behind the hinge-side stop than a stop laps a leaf (3/4 in), else no value; from its face toward the latch side (or the hinge-side stop, if that stands further in) to the latch-side stop | R318.2 "measured between the face of the door and the stop, with the door open 90 degrees" (p.76) |
 | `door_clear_height` (in) | The bottom of the head stop less the top of the threshold | R318.2 "measured from the top of the threshold to the bottom of the stop" (p.76) |
 
 A sliding, folding or pocket door gets no clear width: R318.2's measure is defined for a side-hinged door (and requires one).
@@ -107,6 +108,8 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `flag_missing` | {what} {name}: say whether it is {question} (`{key}`: true or false) |
 | `missing` | {what} isn't given |
 | `not_a_length` | {what} isn't a length (a number) |
+| `too_far` | {what} is more than 1,000,000,000 in (about 15,800 miles) from the origin: not a place in a house |
+| `not_finite` | it came out too large to be a number (from lengths far apart) |
 | `negative` | {what} is {value} in: a size can't be less than zero |
 | `not_a_point` | {what} isn't a list of {n} numbers |
 | `not_an_outline` | {what} isn't an outline of at least 3 points that encloses an area |
@@ -119,6 +122,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `surface_vertical` | {what} is vertical: give the underside of what is overhead |
 | `surface_not_flat` | {what} isn't flat (a point is {off} in off its plane): give it as flat pieces |
 | `surface_out_of_range` | {what} has coordinates too large to measure |
+| `shapes_failed` | {what}: the geometry library couldn't work out the shapes (edges so nearly parallel it can't tell where they meet): check the drawing near there |
 | `not_covered` | {what} doesn't cover the whole {region}: give everything above it |
 | `nothing_overhead` | nothing above the flight is given: give what is above it (a ceiling, the floor above, a beam) |
 | `room_unknown` | the room the opening is in isn't one of the rooms given |
@@ -137,12 +141,14 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `no_ground` | the finished ground level outside the opening isn't given |
 | `ground_mixed` | the ground outside the opening is within 44 in of its bottom at some points and not at others |
 | `readings_differ` | the readings give different answers; {question} |
+| `nosings_out_of_range` | the stair's nosings have coordinates too large to measure |
 | `too_few_nosings` | the flight needs at least {n} nosings (each tread's leading edge, and the top one) for this |
 | `nosing_not_level` | nosing {n} isn't level (its ends are {off} in apart in height) |
 | `not_bottom_to_top` | the nosings don't go up from the bottom one at a time (riser {n} is {rise} in) |
 | `winders` | the treads aren't rectangular (nosing {n}'s ends are {off} in apart along the run): winder treads are measured at the walkline, not yet |
 | `nosings_not_forward` | the nosings don't move forward up the flight (tread {n} is {depth} in deep) |
 | `side_not_along` | the {side} {what} doesn't run along the flight from its first nosing to its top one |
+| `side_off_treads` | the stair's {side} side stands {off} in out beyond its treads' ends, more than a skirt or stringer between them ({most} in): it doesn't bound this stair (draw it where the treads end, or give the side as `open`) |
 | `sides_cross` | the stair's sides meet or cross (clear width {width} in) |
 | `treads_cross` | at the treads, a tread's end meets or crosses the other side (clear width {width} in): check the nosings' ends and the stair's sides |
 | `handrails_cross` | at handrail height, a handrail meets or crosses the other side (clear width {width} in): check each handrail's side |
@@ -160,5 +166,6 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `stops_wrong_way` | the latch-side stop isn't on the far side of the opening from the hinge side |
 | `leaf_no_thickness` | the door leaf's closed corners give it no thickness: a leaf is thicker than nothing |
 | `leaf_not_closing` | the closed leaf stops {short} in short of the latch-side stop (within 1/16 in is drawing noise): the leaf drawn doesn't close this opening |
+| `leaf_behind_hinge_stop` | the closed leaf's hinge edge stands {back} in behind the hinge-side stop, more than a stop laps a leaf ({most} in): the leaf drawn doesn't close this opening (a swing-clear hinge isn't measured yet) |
 | `pin_off_leaf` | the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't hung on that pin |
 | `not_positive` | {what} is {value} in: not more than zero |

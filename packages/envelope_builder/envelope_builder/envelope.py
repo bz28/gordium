@@ -18,7 +18,7 @@ import itertools
 from shapely.geometry import LineString, Polygon
 
 from model_measurement.plugin_measuring import Lot, union
-from rule_format import formula
+from rule_format import formula, parts
 from rule_format.rulebook import MEASURE_KINDS
 
 YARDS = {"front_yard": "front", "side_yard_smaller": "side", "side_yard_larger": "side", "rear_yard": "rear"}
@@ -158,6 +158,20 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
         out["base"] = None
         notes.append("the grade isn't set: the buildable area is drawn, the height limit isn't")
     for rule in rules:
+        if parts.is_part_rule(rule):
+            # a rule for each part (a bedroom's escape opening, a stair) is about the inside, answered per part by
+            # parts.rows, never a limit on the outside shape: skipped when it reads nothing the envelope shapes; one
+            # that does (a stair rule reading the building height) can't be read as a whole-building limit, so no
+            # envelope is drawn rather than one that might ignore it (never a box larger than a rule allows)
+            try:
+                shaping = sorted(parts.formula_names(rule) & GEOMETRIC)
+            except (formula.FormulaError, AttributeError, TypeError):
+                shaping = ["(formulas that can't be read)"]
+            if shaping:
+                notes.append(f"{rule.get('id')}: a rule for each part that reads {', '.join(shaping)}; the envelope "
+                             "can't read it as a limit on the building; no envelope drawn")
+                return out
+            continue
         if rule.get("kind") == "flag" or not rule.get("check") or not _applies(rule, measured):
             continue
         body = formula.parse(rule["check"]).body

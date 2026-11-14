@@ -1,0 +1,154 @@
+units:
+  R318.7.5.1:
+    rules:
+    - general.r318_7_5_1_stair_riser_height_max
+    - general.r318_7_5_1_stair_riser_variation_max
+    - general.r318_7_5_1_stair_riser_slope
+    - general.r318_7_5_1_stair_open_riser_sphere
+    unresolved: []
+    problems: []
+  R318.2:
+    rules:
+    - general.r318_2_egress_door_per_dwelling_unit
+    - general.r318_2_egress_door_side_hinged
+    - general.r318_2_egress_door_clear_width
+    - general.r318_2_egress_door_clear_height
+    - general.r318_2_egress_door_readily_openable
+    unresolved: []
+    problems: []
+  R318.7.1:
+    rules:
+    - general.r318_7_1_stair_clear_width_above_handrail
+    - general.r318_7_1_stair_clear_width_at_handrail
+    unresolved: []
+    problems: []
+  R318.7.2:
+    rules:
+    - general.r318_7_2_stair_headroom
+    - general.r318_7_2_stair_floor_opening_headroom
+    unresolved: []
+    problems: []
+  R318.7.5.2:
+    rules:
+    - general.r318_7_5_2_stair_tread_depth_min
+    - general.r318_7_5_2_stair_tread_variation_max
+    unresolved: []
+    problems: []
+  R318.7.8:
+    rules:
+    - general.r318_7_8_stair_handrail_one_side
+    unresolved: []
+    problems: []
+  R319.1:
+    rules:
+    - general.r319_1_sleeping_room_escape_opening_operable
+    - general.r319_1_basement_escape_opening_operable
+    - general.r319_1_habitable_attic_escape_opening_operable
+    - general.r319_1_loft_room_escape_opening_operable
+    - general.r319_1_escape_opening_opens_to_public_way_or_yard
+    unresolved: []
+    problems: []
+  R319.2.1:
+    rules:
+    - general.r319_2_1_escape_opening_min_net_clear_area
+    unresolved: []
+    problems: []
+  R319.2.2:
+    rules:
+    - general.r319_2_2_escape_opening_min_net_clear_height
+    - general.r319_2_2_escape_opening_min_net_clear_width
+    unresolved: []
+    problems: []
+  R319.2.3:
+    rules:
+    - general.r319_2_3_escape_opening_max_sill_height
+    unresolved: []
+    problems: []
+  R319.2.4:
+    rules:
+    - general.r319_2_4_under_projection_openable_path
+    unresolved: []
+    problems: []
+  R319.3:
+    rules:
+    - general.r319_3_escape_door_side_hinged_or_sliding
+    unresolved: []
+    problems: []
+  R319.4:
+    rules:
+    - general.r319_4_area_well_required
+    unresolved: []
+    problems: []
+  R319.4.1:
+    rules:
+    - general.r319_4_1_area_well_min_area
+    - general.r319_4_1_area_well_min_projection
+    - general.r319_4_1_area_well_min_width
+    - general.r319_4_1_area_well_allows_full_opening
+    unresolved: []
+    problems: []
+  R319.4.2:
+    rules:
+    - general.r319_4_2_area_well_ladder_over_44
+    unresolved: []
+    problems: []
+  BF103.2:
+    rules:
+    - general.bf103_2_escape_opening_into_patio_cover_unenclosed
+    - general.bf103_2_exit_into_patio_cover_r318_exits
+    unresolved: []
+    problems: []
+  R320.2:
+    rules:
+    - general.r320_2_handrail_height_34_38
+    unresolved: []
+    problems: []
+  R320.4:
+    rules:
+    - general.r320_4_handrail_wall_clearance
+    unresolved: []
+    problems: []
+  R321.1.1:
+    rules:
+    - general.r321_1_1_guard_required_open_side
+    unresolved: []
+    problems: []
+  R321.1.2:
+    rules:
+    - general.r321_1_2_guard_height_open_side_not_stair
+    - general.r321_1_2_guard_height_stair_open_side
+    - general.r321_1_2_guard_height_stair_guard_as_handrail
+    unresolved: []
+    problems: []
+  R321.1.3:
+    rules:
+    - general.r321_1_3_guard_opening_4_inch_sphere
+    - general.r321_1_3_guard_stair_triangle_6_inch_sphere
+    - general.r321_1_3_guard_stair_opening_4_3_8_sphere
+    unresolved: []
+    problems: []
+  R315.2:
+    rules:
+    - general.r315_2_sleeping_loft_floor_area_limit
+    - general.r315_2_sleeping_loft_ceiling_height_limit
+    unresolved: []
+    problems: []
+  R315.3:
+    rules:
+    - general.r315_3_sleeping_loft_clear_height_below
+    - general.r315_3_sleeping_loft_ceiling_height
+    unresolved: []
+    problems: []
+  R315.5.2.1:
+    rules:
+    - general.r315_5_2_1_sleeping_loft_stair_clear_width_at_or_above_handrail
+    - general.r315_5_2_1_sleeping_loft_stair_clear_width_below_handrail
+    unresolved: []
+    problems: []
+  R315.5.2.2:
+    rules:
+    - general.r315_5_2_2_sleeping_loft_stair_riser_height
+    - general.r315_5_2_2_sleeping_loft_stair_tread_riser_formula
+    unresolved: []
+    problems: []
+complete: true

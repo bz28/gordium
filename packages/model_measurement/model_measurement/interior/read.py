@@ -12,6 +12,10 @@ from model_measurement.interior.stops import Stop
 
 FORMAT = "gordium.interior/1"
 INCHES = {"in": (1, 1), "ft": (12, 1), "mm": (1, 25.4), "m": (1000, 25.4)}   # (times, divided by)
+# in: the farthest any length may be, about 15,800 miles. Every length a house can have is far inside it, and inside
+# it every sum, difference, product and area worked out from lengths stays a finite number: no measure can overflow
+# to infinity (where `inf <= inf` passes a check, or an empty overlap is read as covered)
+FAR = 1e9
 
 
 def number(value, what: str) -> float:
@@ -47,6 +51,8 @@ class Reader:
         got = number(value, what) * self.times / self.per
         if not math.isfinite(got):                           # finite as written, not once in inches
             raise Stop("not_a_length", what=what)
+        if abs(got) > FAR:
+            raise Stop("too_far", what=what)
         return got
 
     def size(self, value, what: str) -> float:
