@@ -270,6 +270,45 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
     {
         var cad = FakeRevit.Family("cad", [Block(20, 90, 30, 100)]) with { Kind = ElementKind.CadImport, Category = "shed.dwg" };
         Assert.Equal(["cad"], Ids(await Site(House(cad)), "left_out"));
+        // like a family, whatever it holds, even nothing (review round 1: an empty import was skipped as Ordinary)
+        var empty = cad with { UniqueId = "cad_empty", Geometry = null, BoundingBox = null };
+        Assert.Null(LeftOut(await Site(House(empty)), "cad_empty")["touching"]);
+    }
+
+    [Fact]
+    public async Task An_element_whose_nested_geometry_gives_nothing_is_never_dropped()
+    {
+        // review round 1: a DirectShape (or a context object, or a curtain wall) whose only geometry is a nested
+        // instance that gives nothing was skipped for having no faces; it has no box, so it counts as touching
+        var ds = new RevitElement { UniqueId = "ds", BuiltInCategory = "OST_GenericModel", Category = "Generic Models",
+                                    Geometry = [new InstanceItem(null)], BoundingBox = new RevitBox(new(20, 90, 0), new(30, 100, 10)) };
+        var context = FakeRevit.Family("ctx", []) with { Mark = GordiumMark.Context, Geometry = [new InstanceItem(null)] };
+        var site = await Site(House(ds, context));
+        Assert.Null(LeftOut(site, "ds")["touching"]);
+        Assert.Null(LeftOut(site, "ctx")["touching"]);
+        Assert.True(LeftOut(site, "ctx")["context"]!.GetValue<bool>());
+        var cw = new RevitElement { UniqueId = "cw", BuiltInCategory = "OST_Walls", Category = "Walls",
+                                    Kind = ElementKind.CurtainWallHost, Geometry = [new InstanceItem(null)] };
+        Assert.Equal(["cw"], Ids(await Site(House(cw)), "unsent"));
+    }
+
+    [Fact]
+    public async Task A_link_holding_an_element_whose_nested_geometry_gives_nothing_has_no_box()
+    {
+        var doc = new RevitModel { Document = "shed.rvt", Elements = [Thing("shed", 20, 105, 30, 115),
+            new RevitElement { UniqueId = "ds", BuiltInCategory = "OST_GenericModel", Category = "Generic Models",
+                               Geometry = [new InstanceItem(null)] }] };
+        Assert.Null(LeftOut(await Site(House(FakeRevit.LinkOf("link", doc))), "link")["touching"]);
+    }
+
+    [Fact]
+    public async Task A_toposolid_whose_geometry_cant_be_read_has_no_box()
+    {
+        // review round 1: it was placed by Revit's own box alone, which the reader never trusts on its own
+        var topo = new RevitElement { UniqueId = "topo", BuiltInCategory = "OST_Toposolid", Category = "Toposolid",
+                                      Kind = ElementKind.Toposolid, GeometryFailed = true,
+                                      BoundingBox = new RevitBox(new(100, 100, 0), new(101, 101, 1)) };
+        Assert.Null(LeftOut(await Site(House(topo)), "topo")["touching"]);
     }
 
     [Fact]

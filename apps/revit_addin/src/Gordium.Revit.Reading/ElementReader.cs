@@ -59,6 +59,9 @@ internal sealed class Read(RevitModel model)
             case { Kind: ElementKind.LinkInstance }:
                 Link(e);
                 break;
+            case { Mark: GordiumMark.Context, Kind: ElementKind.FamilyInstance or ElementKind.CadImport }:
+                Family(e, context: true);
+                break;
             case { Mark: GordiumMark.Context }:
                 Ordinary(e, context: true);
                 break;
@@ -67,7 +70,7 @@ internal sealed class Read(RevitModel model)
                 Building(e);
                 break;
             case { Kind: ElementKind.FamilyInstance or ElementKind.CadImport }:
-                Family(e);
+                Family(e, context: false);
                 break;
             case { Kind: ElementKind.Toposolid }:
                 Toposolid(e);
@@ -99,7 +102,7 @@ internal sealed class Read(RevitModel model)
         }
         if (g is null || !g.HasFaces)
         {
-            if (e.Kind == ElementKind.CurtainWallHost)
+            if (e.Kind == ElementKind.CurtainWallHost && g is not { MissingPart: true })
                 return;                  // its panels and mullions are their own elements; it has no faces of its own
             Unsend(e, $"a {e.Category} with no geometry", RevitBox(e, ToShared));
             return;
@@ -161,8 +164,8 @@ internal sealed class Read(RevitModel model)
             Unsend(e, e.Category, Union(g.Box.Box, RevitBox(e, ToShared)));
             return;
         }
-        if (!g.HasFaces)
-            return;
+        if (!g.HasFaces && !g.MissingPart)
+            return;                      // lines and points only: nothing that could be a building
         // a nested family that gave nothing: no box covers all of it, so its place can't be told (touching: null)
         var box = g.MissingPart ? null : Union(g.Box.Box, RevitBox(e, ToShared));
         Candidates.Add(Make(e, g, box, null, context, g.AnyMesh && !g.AnySolid ? "Mesh" : "Brep", g.AllClosed));
@@ -171,22 +174,23 @@ internal sealed class Read(RevitModel model)
     /// <summary>A family instance (loadable or in-place) or a 3D CAD import off the building categories: left out
     /// whatever its geometry, even none (design note, section 1); what it holds, at every depth, sent as its
     /// definition, so a nested family that gives nothing leaves it with no box (touching: null).</summary>
-    private void Family(RevitElement e)
+    private void Family(RevitElement e, bool context)
     {
         var key = e.UniqueId;
         var parts = e.GeometryFailed ? new JsonArray(new JsonObject { ["box"] = null })
                                      : Parts(e.Geometry ?? [], ToShared, key, e);
         Definitions[key] = new JsonObject { ["status"] = SiteReader.NotLinked, ["parts"] = parts };
         var g = e.GeometryFailed || e.Geometry is null ? new Gathered() : Walk(e.Geometry, ToShared, e);
-        Candidates.Add(Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), key, false, "Family", true));
+        Candidates.Add(Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), key, context, "Family", true));
     }
 
     /// <summary>A Toposolid: left out (a closed solid that could be a building until the architect says it is the
-    /// ground); never labelled as looking like the ground in the first reader.</summary>
+    /// ground); never labelled as looking like the ground in the first reader. One whose geometry can't be read has
+    /// no box (Revit's own box is never trusted alone).</summary>
     private void Toposolid(RevitElement e)
     {
         var g = e.GeometryFailed || e.Geometry is null ? new Gathered() : Walk(e.Geometry, ToShared, e);
-        var box = g.MissingPart || g.Other ? null : Union(g.Box.Box, RevitBox(e, ToShared));
+        var box = g.MissingPart || g.Other || !g.HasFaces ? null : Union(g.Box.Box, RevitBox(e, ToShared));
         Candidates.Add(Make(e, g, box, null, false, "Toposolid", true));
     }
 
@@ -313,7 +317,7 @@ internal sealed class Read(RevitModel model)
                 continue;
             }
             var g = el.Geometry is null ? new Gathered() : Walk(el.Geometry, t, el);
-            if (!g.HasFaces && !anyGeometry && !g.Other)
+            if (!g.HasFaces && !anyGeometry && !g.Other && !g.MissingPart)
                 continue;                                        // lines and points only: nothing that could be a building
             var empty = anyGeometry && !g.HasFaces;              // a family with nothing in it: its place can't be told
             var box = g.MissingPart || g.Other || empty ? null : Union(g.Box.Box, RevitBox(el, t));

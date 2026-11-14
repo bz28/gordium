@@ -1,5 +1,5 @@
 """Print each drawn conformance scene as one JSON line: its drawing in plain numbers, from the conformance suite's own
-functions (design_checker.conformance), never retyped. The C# tests (FakeScenes.cs) draw each one as fake Revit
+functions (design_checker.conformance), never retyped. The C# tests (SceneDrawing.cs) draw each one as fake Revit
 records from these numbers; what the reader must send for it is the suite's own expected description, never this.
 
     python scene_data.py

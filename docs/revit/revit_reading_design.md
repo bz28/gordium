@@ -82,7 +82,7 @@ objects wholly inside the building is **new scene F**, for Ben to decide.
 | An empty solid | A solid with no faces (Revit families often hold some) is skipped: it has nothing to send | | **new scene H** |
 | An open solid | A solid with faces and an edge that has only one face (`Edge.GetFace(1)` null): `open_solid` with `what` the element's name (**to check** that Revit gives open shells as solids, and that `GetFace(1)` behaves so) | `open_solid` | 03 |
 | A mesh in an element's geometry | Its triangles as faces, with `open_mesh` unless the mesh is known to be closed (**to check** whether Revit can say) | `_mesh_faces`, `open_mesh` | **new scene A** |
-| Anything else in the geometry (an object type that is not a solid, mesh, curve, point or family instance), or reading the geometry fails (`get_Geometry` returns null or throws) | The element is `unsent`, `not_a_solid`, kind its category | `not_a_solid` | 04 |
+| Anything else in the geometry (an object type that is not a solid, mesh, curve, point or family instance), or reading the geometry fails (`get_Geometry` throws, or returns null for a building-category element) | The element is `unsent`, `not_a_solid`, kind its category. Null for an element outside the building categories and not a family: skipped, as having nothing that could be a building (proposed in code, Ben to confirm: see "Where the decisions are written") | `not_a_solid` | 04 |
 | Curves and points in an element's geometry | Skipped (as `read_3dm` skips curves and points) | | 01 |
 | A building-category element with no face to send at all (for example a family whose solids show only at Coarse detail) | Never skipped: `unsent`, `not_a_solid`, kind `"a <category> with no geometry"`, so every building measure needs review (Rhino sends an empty solid on the Building layer as a building with no faces and `open_solid`) | `read_3dm.read_site` | **new scene H** |
 
@@ -232,7 +232,8 @@ Every decision above that a Revit model doesn't have to be open for is code in
 `apps/revit_addin/src/Gordium.Revit.Reading/` (plain C#, no Revit types), tested on the Mac against the real worker
 with each drawn conformance scene drawn as fake Revit records ([its README section](../../apps/revit_addin/README.md#the-readers-logic-gordiumrevitreading)).
 The trial writes only the layer that fills its records from the API, and confirms each "to check". Two choices the
-code makes that this note didn't spell out, for Ben to confirm: an element outside the building categories whose
+code makes, for Ben to confirm: one departs from what this note first said (section 2 had null geometry `unsent`
+for every element), one it didn't spell out. An element outside the building categories whose
 geometry Revit returns as null is skipped (nothing that could be a building; one whose reading throws is still
 `unsent`), so a survey point or a view's element doesn't make every check need review; and a building whose nested
 family gives no geometry gets a `tool_words` problem (it may be bigger than measured). Found while writing it: on a
