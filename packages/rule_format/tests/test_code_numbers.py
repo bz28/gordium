@@ -178,3 +178,37 @@ def test_an_equality_is_refused_even_with_arithmetic_on_one_side(ctx):
         assert any("never an equality" in p for p in problems(ctx, check, formula, "stair")), check
     # arithmetic in an ordinary comparison is still checked by value only
     assert problems(ctx, "stair_riser_height <= 15 - 0.75 * stair_tread_depth", formula, "stair") == []
+
+
+WIDTH = {"file": BOOK, "page": 100, "lines": [23, 26], "quote": (
+    "R318.7.1 Width. Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the "
+    "permitted handrail height and below the required headroom height.")}
+
+
+@pytest.mark.parametrize("check, source, words", [
+    # a chain holds when each comparison does: at the top it must hold, so each keeps the law's comparison
+    ("0 <= stair_clear_width < 36", WIDTH, "needs < 36 to hold"),
+    ("36 > stair_clear_width > 0", WIDTH, "needs < 36 to hold"),
+    ("36 <= stair_clear_width <= 100", WIDTH, "isn't one of"),       # 100 isn't the law's; 36 is right
+    # a number in arithmetic keeps its direction: a dropped "not" with a no-op added is still a dropped "not"
+    ("stair_riser_height > 8.25 + 0", RISERS, "needs > 8.25 to hold"),
+    ("stair_riser_height > max(8.25, stair_riser_variation)", RISERS, "needs > 8.25 to hold"),
+    ("stair_riser_height > -(-8.25)", RISERS, None),                 # read as -8.25 (no reading): refused below
+    ("8.25 - stair_riser_height < 0", RISERS, "needs > 8.25 to hold"),
+    ("stair_riser_height <= 8.25 + 0", RISERS, ""),
+    ("stair_riser_height - 0 <= 8.25", RISERS, ""),
+])
+def test_a_chain_or_arithmetic_keeps_the_laws_comparison(ctx, check, source, words):
+    got = problems(ctx, check, source, "stair")
+    if words == "":
+        assert got == [], got
+    elif words is None:
+        assert got, check
+    else:
+        assert any(words in p for p in got), got
+
+
+def test_a_degree_or_a_count_never_backs_a_length(ctx):
+    slope = {"file": BOOK, "page": 100, "lines": [44, 45],
+             "quote": "an angle not more than 30 degrees (0.51 rad) from the vertical."}
+    assert any("isn't one of" in p for p in problems(ctx, "stair_riser_height <= 30", slope, "stair"))

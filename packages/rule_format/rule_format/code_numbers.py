@@ -18,10 +18,16 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    `stair_riser_height <= 8.25` for "not more than 8 1/4 inches", never `> 8.25`, which a dropped "not" would give.
    Anywhere else (one side of an "or", an if's test, where the same number can be a trigger written either way:
    "area_well_depth <= 44 or area_well_ladder") the law's comparison or its exact opposite (> for <=, >= for <) is
-   accepted, so the edge stays where the law puts it (more than 30 is never 30 or more). A number in arithmetic
-   (20 - 4/3 * riser) is checked by value only, and so is one in an if's test, which only picks which limit applies
-   ("27 if stair_handrail_sides > 1 else 31.5": where a handrail is on one side), never passes anything itself.
-   review_when is checked by value only.
+   accepted, so the edge stays where the law puts it (more than 30 is never 30 or more). A chain (0 <= x < 36) is
+   an "and" of its comparisons. A number in arithmetic keeps its direction where it can be told (riser > 8.25 + 0
+   is a dropped "not"; x <= 15 - c reads c the other way round), and a term the law reads "none" (the 20 of
+   "20 inches minus four-thirds of the riser") is allowed there; where the direction can't be told (a divisor,
+   another function) it is checked by value only. A number in an if's test, which picks which limit applies
+   ("27 if stair_handrail_sides > 1 else 31.5": where handrails are on both sides), is checked by value only: a
+   test written the wrong way round (">= 1") gives the looser limit to the wrong stairs and passes this check; the
+   worked examples and the answer key comparison are what catch it. review_when is checked by value only.
+   A count, a degree or a percent backs only a number with no unit of its own (a count, or a coefficient such as
+   the 0.5 of "one-half of the floor area"), never a length or an area.
 3. A number the verification file flags (a flag quoting it) counts only if the flag resolves it: it gives the
    comparison the second reading has ("(>=)", "the second reading (none) is right") or says the number is part of
    one length ("one length"). Otherwise the rule is refused: such a number is for a person (make it a flag, which
@@ -215,12 +221,14 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
     except formula.FormulaError:
         return []                                             # reported with the formula
     out = []
-    for number, op, sure, measures in _uses(tree):
+    for number, op, sure, measures, in_arithmetic in _uses(tree):
         if number == 0:
             continue
         unit_classes = {UNIT_OF.get(units.get(m)) for m in measures} - {None}
+        # a count, a degree or a percent ("any") backs a number with no unit of its own (a coefficient, a count),
+        # never a length or an area
         fits = [c for c in allowed if any(_close(v, number) for u, v in c["values"].items()
-                                          if not unit_classes or u in unit_classes or u == "any")]
+                                          if u in unit_classes or (u == "any" and unit_classes <= {"count"}))]
         shown = f"{float(number):g}"
         if not fits:
             out.append(f"number {shown} in '{key}' isn't one of the second-reading numbers (text_verification.yaml) "
@@ -240,6 +248,8 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
                        "check it within a tolerance it states, or make the rule a flag)")
             continue
         reads = {c["comparison"] for c in fits}
+        if reads == {"none"} and in_arithmetic:
+            continue                                          # a term of the law's formula (20 inches minus ...)
         if reads == {"none"}:
             out.append(f"number {shown} in '{key}': the second reading says the law sets no limit with it ('none': a "
                        f"conversion, a count or a permission, {fits[0]['piece']}: {fits[0]['shown']!r}); it can't be compared with")
@@ -279,26 +289,34 @@ def _uses(tree) -> list[tuple]:
                 walk(e, positive, sure, selector)
             case ast.Compare(left=left, ops=ops, comparators=rights):
                 sides = [left, *rights]
+                # a chain (a < x < b) holds when each of its comparisons does, as an "and": under a "not", as an "or"
+                pair_sure = sure if len(ops) == 1 else sure and positive
                 for i, op in enumerate(ops):
                     sign = OPS.get(type(op))
                     a, b = sides[i], sides[i + 1]
                     for side, other, mirrored in ((b, a, False), (a, b, True)):
-                        names = {n.id for n in ast.walk(other) if isinstance(n, ast.Name)}
-                        for number, direct in _numbers(side):
+                        # the measures it is compared with: the other side's, and its own side's (8.25 - riser < 0)
+                        names = {n.id for n in ast.walk(other) if isinstance(n, ast.Name)} \
+                            | {n.id for n in ast.walk(side) if isinstance(n, ast.Name) and n.id not in ("min", "max")}
+                        for number, grows, coefficient in _numbers(side):
                             needed = None
                             if sign in ("==", "!=") and not selector:
                                 needed = sign                # an equality, even with arithmetic: never a limit
-                            elif sign is not None and direct and not selector:
+                            elif sign is not None and grows is not None and not selector:
                                 needed = MIRROR.get(sign, sign) if mirrored else sign
+                                if grows < 0:                # x <= 15 - c holds as c grows smaller: c is read c <= ...
+                                    needed = MIRROR[needed]
                                 if not positive:
                                     needed = OPPOSITE.get(needed, {"==": "!=", "!=": "=="}.get(needed))
-                            out.append((number, needed, sure and len(ops) == 1, names))
+                            # a coefficient (0.5 * floor area) has no unit of its own
+                            alone = len(_numbers(side)) == 1 and not _has_name(side) or isinstance(side, ast.IfExp)
+                            out.append((number, needed, pair_sure, set() if coefficient else names, not alone))
                 for side in sides:
                     for n in _conditions(side):              # an if's test inside a side: it picks a limit
                         walk(n, positive, False, True)
             case _:
-                for number, _ in _numbers(node):
-                    out.append((number, None, False, set()))
+                for number, _, _ in _numbers(node):
+                    out.append((number, None, False, set(), True))
                 for n in _conditions(node):
                     walk(n, positive, False, True)
 
@@ -317,26 +335,85 @@ def _conditions(node) -> list:
     return found
 
 
-def _numbers(node) -> list[tuple]:
-    """(number, direct) for every number in one side of a comparison: direct when the side is the number itself or an
-    if-else choosing between numbers; a constant divided by a constant is one number (four-thirds is 4 / 3)."""
+def _numbers(node, grows=1, coefficient=False) -> list[tuple]:
+    """(number, how the side moves as the number grows: +1, -1 or None when that can't be told, whether it multiplies a
+    measure: a coefficient) for every number in one side of a comparison. A number standing alone, or as a branch of an
+    if-else, grows +1; a number divided by a number is one number (four-thirds is 4 / 3); each number of other
+    arithmetic is its own (8.25 + 0: 8.25, which grows the side as a limit standing alone would). Through
+    + and - and through multiplying or dividing by a measure or a positive number the direction is followed (measures
+    are never negative); through anything else (a divisor, a call other than min or max) it can't be told."""
     match node:
         case ast.Constant(value=v) if type(v) in (int, float):
-            return [(Fraction(v), True)]
-        case ast.UnaryOp(op=ast.USub(), operand=ast.Constant(value=v)) if type(v) in (int, float):
-            return [(-Fraction(v), True)]
-        case ast.IfExp(body=b, orelse=e):
-            return _numbers(b) + _numbers(e)                     # the test is walked as a condition of its own
+            return [(Fraction(v), grows, coefficient)]
         case ast.BinOp(left=ast.Constant(value=a), op=ast.Div(), right=ast.Constant(value=b)) \
                 if type(a) in (int, float) and type(b) in (int, float) and b:
-            return [(Fraction(a) / Fraction(b), False)]
+            return [(Fraction(a) / Fraction(b), grows, coefficient)]        # four-thirds: one number
+        case ast.IfExp(body=b, orelse=e):
+            return _numbers(b, grows, coefficient) + _numbers(e, grows, coefficient)   # the test is walked apart
+        case ast.UnaryOp(op=ast.USub(), operand=x):
+            return _numbers(x, _flip(grows), coefficient)
+        case ast.BinOp(left=l, op=ast.Add(), right=r):
+            return _numbers(l, grows, coefficient) + _numbers(r, grows, coefficient)
+        case ast.BinOp(left=l, op=ast.Sub(), right=r):
+            return _numbers(l, grows, coefficient) + _numbers(r, _flip(grows), coefficient)
+        case ast.BinOp(left=l, op=ast.Mult(), right=r):
+            return (_numbers(l, _times(grows, r), coefficient or _has_name(r))
+                    + _numbers(r, _times(grows, l), coefficient or _has_name(l)))
+        case ast.BinOp(left=l, op=ast.Div(), right=r):
+            return _numbers(l, _times(grows, r), coefficient or _has_name(r)) + _numbers(r, None, True)
         case ast.BinOp(left=l, right=r):
-            return [(n, False) for n, _ in _numbers(l) + _numbers(r)]
-        case ast.Call(args=args):
-            return [(n, False) for a in args for n, _ in _numbers(a)]
+            return _numbers(l, None, coefficient) + _numbers(r, None, coefficient)
+        case ast.Call(func=ast.Name(id=f), args=args):
+            return [n for a in args for n in _numbers(a, grows if f in ("min", "max") else None, coefficient)]
         case ast.Compare() | ast.BoolOp() | ast.UnaryOp(op=ast.Not()):
             return []                                            # a condition inside: walked on its own
     return []
+
+
+def _fold(node) -> Fraction | None:
+    """The value of arithmetic of numbers only (no measure in it), or None."""
+    match node:
+        case ast.Constant(value=v) if type(v) in (int, float):
+            return Fraction(v)
+        case ast.UnaryOp(op=ast.USub(), operand=x):
+            v = _fold(x)
+            return None if v is None else -v
+        case ast.BinOp(left=l, op=op, right=r):
+            a, b = _fold(l), _fold(r)
+            if a is None or b is None:
+                return None
+            match op:
+                case ast.Add():
+                    return a + b
+                case ast.Sub():
+                    return a - b
+                case ast.Mult():
+                    return a * b
+                case ast.Div() if b:
+                    return a / b
+    return None
+
+
+def _flip(grows):
+    return None if grows is None else -grows
+
+
+def _times(grows, other):
+    """How a product moves with one factor: as the factor does when the other is a measure or a positive number."""
+    v = _fold(other)
+    if v is not None:
+        return grows if v > 0 else _flip(grows) if v < 0 else None
+    return grows if _has_name(other) and not _numbers_only_negative(other) else None
+
+
+def _has_name(node) -> bool:
+    return any(isinstance(n, ast.Name) for n in ast.walk(node))
+
+
+def _numbers_only_negative(node) -> bool:
+    """A factor that could be negative although it names a measure (a difference, a negation): direction unknown."""
+    return any(isinstance(n, (ast.UnaryOp, ast.BinOp)) and isinstance(getattr(n, "op", None), (ast.USub, ast.Sub))
+               for n in ast.walk(node))
 
 
 def book_values(quote: str, entry: dict) -> set[float]:
