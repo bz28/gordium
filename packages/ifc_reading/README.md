@@ -59,7 +59,9 @@ a slip is caught rather than a bedroom missed. A flag that is there but isn't tr
 in a unit of the wrong kind (an area in a length unit) is left out, with the reason. A quantity stated twice (an
 export holding both IFC4's `Qto_SpaceBaseQuantities` and IFC2x3's `BaseQuantities`) is read only if both agree,
 never the first one found. A flag stored as something other than a single value (an enumerated or list value)
-is never taken as absent: its part is left unknown, with what was found.
+is never taken as absent: its part is left unknown, with what was found. A flag stated twice on the same element
+(two `Gordium_Egress` sets, say) must agree likewise; the element's own flag overrides its type's (IFC's
+inheritance: a window type marked one way, one window of it marked the other).
 
 **Why the floor outline needs the net floor area.** The format wants the finished floor's outline, inside the
 finished walls. An IFC space can be drawn to the rough wall or the wall's centre; IFC4's `NetFloorArea` is the

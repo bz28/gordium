@@ -50,12 +50,12 @@ class Model:
         t = self.type_of(element)
         return self._own(element) + list(getattr(t, "HasPropertySets", None) or [] if t is not None else [])
 
-    def find_all(self, element, wanted, name):
+    def find_all(self, element, wanted, name, holders=None):
         """Every property or quantity called `name` in a set `wanted(set name)` accepts, the element's own first:
         [(value, "Set.Name", its own unit or None)]. The value is the bare number, text or true/false the model
         states; one stored another way (an enumerated or list value…) comes back as UNREADABLE, never skipped."""
         found = []
-        for holder in self._holders(element):
+        for holder in self._holders(element) if holders is None else holders:
             if not (holder.is_a("IfcPropertySet") or holder.is_a("IfcElementQuantity")) or not wanted(holder.Name):
                 continue
             items = holder.HasProperties if holder.is_a("IfcPropertySet") else holder.Quantities
@@ -78,11 +78,23 @@ class Model:
         return got[0] if got else (None, None, None)
 
     def prop(self, element, sets, name):
-        """The first set in `sets` (by name, in order) holding `name`, as (value, "Set.Name"); (None, None) if none."""
+        """The first set in `sets` (by name, in order) holding `name`, as (value, "Set.Name"); (None, None) if none.
+        The element's own statements override its type's (IFC's inheritance); stated more than once at the same
+        level (two sets of the same name, say), they must agree, else the value is Unreadable (never the first
+        one found, which could be the wrong one)."""
+        t = self.type_of(element)
+        levels = (self._own(element), list(getattr(t, "HasPropertySets", None) or [] if t is not None else []))
         for s in sets:
-            value, where, _ = self.find(element, lambda n, s=s: n == s, name)
-            if value is not None:
-                return value, where
+            for holders in levels:
+                got = self.find_all(element, lambda n, s=s: n == s, name, holders)
+                if not got:
+                    continue
+                values = [v for v, _, _ in got]
+                if len(got) > 1 and any(isinstance(v, Unreadable) or type(v) is not type(values[0]) or
+                                        v != values[0] for v in values):
+                    return Unreadable(f"{len(got)} statements that differ ({', '.join(map(repr, values))})",
+                                      stated=True), got[0][1]
+                return values[0], got[0][1]
         return None, None
 
     def _convert(self, value, where, unit, kind):
@@ -174,11 +186,11 @@ class Unreadable:
     """A property the model states under the wanted name but in a form not read (an enumerated or list value):
     never taken as absent, so a flag stored that way leaves its part unknown."""
 
-    def __init__(self, kind: str):
-        self.kind = kind
+    def __init__(self, kind: str, stated=False):
+        self.kind, self.stated = kind, stated
 
     def __repr__(self):
-        return f"an {self.kind} (not read)"
+        return self.kind if self.stated else f"an {self.kind} (not read)"
 
 
 def _unit_name(unit) -> str:

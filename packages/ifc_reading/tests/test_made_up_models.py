@@ -316,3 +316,51 @@ def test_a_set_of_property_sets_in_one_relation(build, tmp_path):
                     encoding="utf-8")
     got = read(path)["openings"][0]
     assert got["escape"] is True and "frame" in got
+
+
+def _two_sets(b, element, name, first, second):
+    """Two property sets of the same name on one element, each stating `name` (a real export can carry both)."""
+    for value in (first, second):
+        item = value if not isinstance(value, bool) else \
+            b.f.create_entity("IfcPropertySingleValue", Name=name, NominalValue=b.f.create_entity("IfcBoolean", value))
+        pset = b.f.create_entity("IfcPropertySet", GlobalId=b.guid(), Name="Gordium_Egress", HasProperties=[item])
+        b.f.create_entity("IfcRelDefinesByProperties", GlobalId=b.guid(), RelatedObjects=[element],
+                          RelatingPropertyDefinition=pset)
+
+
+@pytest.mark.parametrize("order", [(False, True), (True, False), (False, "enum")])
+def test_a_flag_stated_twice_must_agree(build, tmp_path, order):
+    """Review round 3: a flag stated twice, differently, was read as the first statement ("Laundry", Sleeping
+    false then true -> not a sleeping room). Now: the room is unknown, the window not marked, the door's exit
+    not given."""
+    b = bedroom_house(build, name="Laundry")
+    [space], [window] = b.f.by_type("IfcSpace"), b.f.by_type("IfcWindow")
+    door = b.door("Front", (5, 0, 0))
+
+    def stated(name, value):
+        if value != "enum":
+            return value
+        return b.f.create_entity("IfcPropertyEnumeratedValue", Name=name,
+                                 EnumerationValues=[b.f.create_entity("IfcBoolean", True)])
+
+    _two_sets(b, space, "Sleeping", *(stated("Sleeping", v) for v in order))
+    _two_sets(b, window, "EscapeOpening", *(stated("EscapeOpening", v) for v in order))
+    _two_sets(b, door, "ExitDoor", *(stated("ExitDoor", v) for v in order))
+    d = read(b.write(tmp_path / "h.ifc"))
+    room, w, dr = d["rooms"][0], one(d["openings"], "W1"), one(d["doors"], "Front")
+    assert "sleeping" not in room and "statements that differ" in room["not_given"]["sleeping"]
+    assert w["escape"] is False and "statements that differ" in w["ifc"]["escape_from"]
+    assert "exit" not in dr and "statements that differ" in dr["not_given"]["exit"]
+
+
+def test_the_elements_own_flag_overrides_its_types(build, tmp_path):
+    # IFC's inheritance: a window type marked as not escape openings, the one window of it the architect marks
+    b = bedroom_house(build, window={"psets": {"Gordium_Egress": {"EscapeOpening": True}}})
+    [w] = b.f.by_type("IfcWindow")
+    t = b.f.by_type("IfcWindowType")[0]
+    t.HasPropertySets = list(t.HasPropertySets) + [b.f.create_entity(
+        "IfcPropertySet", GlobalId=b.guid(), Name="Gordium_Egress", HasProperties=[b.f.create_entity(
+            "IfcPropertySingleValue", Name="EscapeOpening", NominalValue=b.f.create_entity("IfcBoolean", False))])]
+    got = read(b.write(tmp_path / "h.ifc"))["openings"][0]
+    assert got["escape"] is True and "Gordium_Egress.EscapeOpening is true" in got["ifc"]["escape_from"]
+    assert w.Name == "W1"
