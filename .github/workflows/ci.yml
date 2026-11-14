@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:   # every PR, including PRs stacked on other PRs
 
+# A newer push to the same PR replaces the older run, so the queue only holds
+# each branch's latest commit. Pushes to main are never cancelled.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   check:
     runs-on: ubuntu-latest

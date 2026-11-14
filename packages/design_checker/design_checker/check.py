@@ -36,9 +36,10 @@ from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
-from rule_format import formula
+from rule_format import formula, parts
 from rule_format.place import plugin_place
-from rule_format.rulebook import MEASURE_KINDS, REPO, Context, load, load_bytes, outcome, rulebook_for
+from rule_format.rulebook import (MEASURE_KINDS, REPO, Context, load, load_bytes, outcome, rulebook_for,
+                                  unknown_settings)
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
@@ -307,22 +308,13 @@ def fails_whatever(rule: dict, measured: dict, allowed: dict, facts: dict | None
     comply (principle 4)."""
     if rule.get("kind") != "rule" or not rule.get("check"):
         return None
-    side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
-    for r in rule.get("review_when") or []:
-        side |= formula.names(r["when"])
     names = reading_set.rule_names(rule)
     unknown = sorted(n for n in names if (measured.get(n) or {}).get("value") is None
                      and not (measured.get(n) or {}).get("readings"))
-    if not unknown or any(n in side for n in unknown):
-        return None
-    numbers = [n for n in unknown if MEASURE_KINDS.get(n) == "number"]
-    yes_no = [n for n in unknown if MEASURE_KINDS.get(n) == "boolean"]
-    if len(numbers) + len(yes_no) != len(unknown) or any(
-            formula.truth_direction(rule["check"], n) != -1 for n in numbers):
+    settings = unknown_settings(rule, unknown, MEASURE_KINDS)     # the proof's settings (shared with parts.rows)
+    if settings is None:
         return None
     values = {k: m["value"] for k, m in measured.items()}
-    settings = [{**{n: 0 for n in numbers}, **dict(zip(yes_no, ways))}
-                for ways in itertools.product((False, True), repeat=len(yes_no))]
     # the rest over THE reading set (each reading of what has readings; on a tax-map lot the lines' slack and the
     # lot area's low and high): it fails whatever the unknown values are only if it fails under every one of them
     every = reading_set.combos(names - set(unknown), values, measured, facts)
@@ -783,7 +775,7 @@ def _quiet(text: str) -> None:
 
 
 def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,
-          extras: dict | None = None, step=None) -> dict:
+          extras: dict | None = None, step=None, today: str | None = None) -> dict:
     """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
     Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
     building measure need review, never silently dropped. `extras` is what the command adds for the panel: what
@@ -791,7 +783,11 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
 
     The model goes through the site description another design tool sends (site_json, docs/protocol/): read, made a
     description (the grade from the facts, the unsent objects and the left-out ones from the request), written as
-    JSON text and read back, then checked by check_description, so Rhino's check takes the path Revit's will."""
+    JSON text and read back, then checked by check_description, so Rhino's check takes the path Revit's will.
+    `today` is the day of the check as YYYY-MM-DD, given by the host (the plugin: rhino_logic.city_day): how old a
+    saved lookup is (present.overlays_lookup). The checker never reads the clock; without it, no lookup counts as
+    recent, so the overlays row stays."""
+    today = present.checked_today(today)       # a day that isn't one: refused before anything is read
     problems = fact_problems(facts)            # the same check as a facts file: a plain refusal, never a crash
     problems += [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
@@ -801,7 +797,8 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     doc = site_json.legacy_description(read_site(model_path, facts), facts, building_problems, extras,
                                        _host(model_path))
     return check_description(site_json.through_json(doc), _without(facts, ("grade_points",)), report_path,
-                             _without(extras or {}, site_json.LEFT_OUT_EXTRAS), step=step, name=model_path.name)
+                             _without(extras or {}, site_json.LEFT_OUT_EXTRAS), step=step, name=model_path.name,
+                             today=today)
 
 
 def _without(d: dict, keys) -> dict:
@@ -833,7 +830,7 @@ def _aside(site_file: Path) -> Path:
 
 
 def check_description(doc: dict, facts: dict, report_path: Path | None = None, extras: dict | None = None,
-                      step=None, name: str | None = None) -> dict:
+                      step=None, name: str | None = None, today: str | None = None) -> dict:
     """check() for a site description (gordium.site/1: site_json; the worker's check_site): refused whole if it
     isn't exactly v1 (site_json.SiteRefused), else measured and checked as check_site does. With a report, the
     description is kept beside it (<report name>.site.json), so any report can be traced to exactly the site it was
@@ -842,7 +839,8 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
     set aside only once the new report is saved, put back if that report can't be moved in, and dropped once it is;
     then the new one is moved in. A site file that can't be written means no report is written, and the earlier
     report keeps its site (report_error says why); at worst, a check stopped between the two leaves a report with no
-    site file beside it, never a wrong one."""
+    site file beside it, never a wrong one. `today`: the host's day, as check() takes it."""
+    today = present.checked_today(today)     # a day that isn't one: refused before any file is touched
     site, facts, extras = site_json.for_measuring(site_json.to_site(doc), facts, extras)
     _refuse_bad_facts(facts)                 # a refused request leaves the earlier report and its site alone
     kept = part = site_error = None
@@ -857,7 +855,7 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
     try:                                     # a site that can't be kept: no report written (the earlier one stays)
         out = check_site(site, facts, name or doc["host"]["document"] or "model",
                          None if site_error else report_path, extras, step=step,
-                         site_file=None if site_error else kept)
+                         site_file=None if site_error else kept, today=today)
     except BaseException:                    # stopped or failed: no half-written site file left behind; an earlier
         if part is not None:                 # site still set aside is the replaced report's (_report puts it back
             _unlink(part)                    # when its report isn't moved in), so it goes
@@ -917,10 +915,12 @@ def no_rules_for(facts: dict) -> str | None:
 
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
-               extras: dict | None = None, step=None, site_file: Path | None = None) -> dict:
+               extras: dict | None = None, step=None, site_file: Path | None = None,
+               today: str | None = None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
     generator builds. Exactly the same measuring, rules and presentation as a model read from a file. `site_file`
     (check_description's) is set aside while the report is moved in, and put back if it can't be."""
+    today = present.checked_today(today)
     _refuse_bad_facts(facts)
     model_path = Path(name)
     say = step or _quiet
@@ -985,7 +985,10 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                   if o != lot_id})
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
-    extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
+    extras = {**(extras or {}), "side_lines": side_lines(site, facts),   # compass names when a side isn't measured
+              # the lookup's "no overlay here", only for the lot it was found on and only while recent on the
+              # host's day (never taken from the caller)
+              "overlays_none_found": present.overlays_lookup(site.get("lot"), facts, today)}
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
     report_error = None
@@ -1967,7 +1970,16 @@ def _read_for(rules: list, use: str | None, uses: dict) -> set:
                     continue                      # not this use's rule: nothing it reads is asked
             except (formula.MissingMeasure, formula.EvaluationError):
                 pass                              # depends on what isn't known yet: it may apply, so asked
-        wanted |= reading_set.rule_names(rule)
+        names = reading_set.rule_names(rule)
+        if parts.is_part_rule(rule):
+            # a rule for each part: its parts' own measures come from the parts (the interior), never asked in the
+            # box; the building facts it reads (stories, use) are asked like any rule's, so its rows aren't left
+            # needing review for a fact the architect was never asked (a fact not asked is unknown: needs review)
+            try:
+                names -= parts.all_measures()
+            except (ValueError, OSError):     # parts.yaml broken (python -m rule_format says so): every name kept
+                pass
+        wanted |= names
     return wanted
 
 

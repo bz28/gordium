@@ -24,7 +24,7 @@ from pathlib import Path
 
 from document_extraction.sections import piece_keys
 from rule_format.labels import LABEL_KINDS
-from rule_format.rulebook import TERM_SCHEMAS, load, rulebook_paths
+from rule_format.rulebook import TERM_SCHEMAS, load, rulebook_paths, rules_folder
 
 
 def line_problems(rows: list[dict], header: dict, pieces: dict[str, dict]) -> list[str]:
@@ -94,7 +94,7 @@ def cited_by(j: Path, file: str, pieces: dict[str, dict]) -> dict[str, list[str]
     (5_zoning_rules/drafted/) is listed as "drafted:<id>", so it isn't merged with a hand rule of the same id."""
     owner = {k: pid for pid, p in pieces.items() for k in piece_keys(p)}
     citing: list[tuple[str, dict]] = []
-    rulebooks = j / "5_zoning_rules"
+    rulebooks = rules_folder(j)          # 5_zoning_rules, or a state folder's 5_building_code_rules
     for path in rulebook_paths(rulebooks):     # every rulebook, hand-drafted or in drafted/
         tag = "drafted:" if "drafted" in path.relative_to(rulebooks).parts else ""
         citing += [(tag + r.get("id", "?"), s) for r in (load(path) or {}).get("rules", []) for s in r.get("sources", [])]
