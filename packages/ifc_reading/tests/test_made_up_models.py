@@ -736,3 +736,61 @@ def test_an_area_unit_that_cant_be_converted_says_so(build, tmp_path):
         b.f.create_entity("IfcContextDependentUnit", Dimensions=dims, UnitType="AREAUNIT", Name="tsubo")]
     room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
     assert "floor" not in room and "area unit 'tsubo' can't be converted" in room["not_given"]["floor"]
+
+
+def _raised_bedroom(build):
+    """The bedroom on a floor 10 ft up: its window sill 3 ft above that floor."""
+    b = build.house("foot")
+    bed = b.space("Bedroom", (0, 0, 10), (12, 10, 9), quantities=QTY)
+    b.window("W1", (0, 10, 10), (1, 0, 0), along=2, sill=3, width=3, height=4, lining=0.25, space=bed)
+    return b
+
+
+@pytest.mark.parametrize("how", ["library", "nested_unit"])
+def test_shapes_and_placements_in_one_scale(build, tmp_path, how):
+    """Review round 11: the geometry engine picked its own unit scale. With a project library holding its own
+    units, or a foot defined through another foot, it left shapes in feet-as-metres while placements were in
+    metres: the floor of a room 10 ft up read 10 m, a 3 ft sill -6 m above it."""
+    b = _raised_bedroom(build)
+    if how == "library":
+        lib_unit = b.f.create_entity("IfcSIUnit", UnitType="LENGTHUNIT", Name="METRE")
+        library = b.f.create_entity("IfcProjectLibrary", GlobalId=b.guid(), Name="lib",
+                                    UnitsInContext=b.f.create_entity("IfcUnitAssignment", [lib_unit]))
+        b.f.create_entity("IfcRelDeclares", GlobalId=b.guid(), RelatingContext=b.f.by_type("IfcProject")[0],
+                          RelatedDefinitions=[library])
+    else:
+        ctx = b.f.by_type("IfcProject")[0].UnitsInContext
+        [foot] = [u for u in ctx.Units if getattr(u, "UnitType", None) == "LENGTHUNIT"]
+        outer = b.f.create_entity("IfcConversionBasedUnit", Dimensions=foot.Dimensions, UnitType="LENGTHUNIT",
+                                  Name="foot", ConversionFactor=b.f.create_entity(
+                                      "IfcMeasureWithUnit", b.f.create_entity("IfcLengthMeasure", 1.0), foot))
+        ctx.Units = [u for u in ctx.Units if u != foot] + [outer]
+    d = read(b.write(tmp_path / "h.ifc"))
+    assert near(d["rooms"][0]["floor_elevation"], 10 * FT)
+    assert near(d["openings"][0]["ifc"]["opening_bottom_above_floor"], 3 * FT)
+
+
+@pytest.mark.parametrize("where", ["description", "zone"])
+def test_the_architects_false_settles_a_description_or_zone_word(build, tmp_path, where):
+    """Review round 11: a bedroom word in a Description or zone kept the room unknown even after the architect's
+    Gordium_Egress.Sleeping false, with the reason asking the architect for the flag already given."""
+    b = bedroom_house(build, name="Hall", flags={"Sleeping": False})
+    [space] = b.f.by_type("IfcSpace")
+    if where == "description":
+        space.Description = "next to bedroom 2"
+    else:
+        z = b.run("root.create_entity", ifc_class="IfcZone", name="Bedroom wing")
+        b.run("group.assign_group", products=[space], group=z)
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert room["sleeping"] is False and room["ifc"]["sleeping_from"] == "Gordium_Egress.Sleeping is false"
+
+
+@pytest.mark.parametrize("exact", [False, None])
+def test_informative_window_parameters_give_no_frame(build, tmp_path, exact):
+    """Review round 11: a window type whose lining and panel records are only informative (ParameterTakesPrecedence
+    false, or unset) still gave a frame from them; an informative lining thinner than the real one gives a frame
+    larger than the opening."""
+    b = bedroom_house(build)
+    b.f.by_type("IfcWindowType")[0].ParameterTakesPrecedence = exact
+    got = read(b.write(tmp_path / "h.ifc"))["openings"][0]
+    assert "frame" not in got and "operation" not in got and "only informative" in got["not_given"]["frame"]

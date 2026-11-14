@@ -101,6 +101,7 @@ class Builder:
         self.run("feature.add_filling", opening=opening, element=w)
         t = self.run("root.create_entity", ifc_class="IfcWindowType", name=f"type of {name}")
         t.PartitioningType = "SINGLE_PANEL" if len(panels) == 1 else "DOUBLE_PANEL_VERTICAL"
+        t.ParameterTakesPrecedence = True        # its lining and panel records define it exactly
         sets = [self.f.create_entity("IfcWindowLiningProperties", GlobalId=self.guid(), LiningDepth=0.25,
                                      LiningThickness=lining, MullionThickness=lining if mullion else None,
                                      FirstMullionOffset=0.5 if mullion else None)]

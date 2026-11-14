@@ -156,7 +156,19 @@ def read_window(model, window, floors: dict) -> dict:
     if len(panels) == 1 and beside:
         more.append(f"its one panel placed {beside[0]}")
     single = len(panels) == 1 and not more
-    if not single:
+    t = model.type_of(window)
+    exact = getattr(t, "ParameterTakesPrecedence", None) if t is not None else None
+    info["parameters_exact"] = exact
+    # review round 11: IFC4: unless the type says its lining and panel records "exactly define the geometry"
+    # (ParameterTakesPrecedence true), they "have only informative value" (false) or nothing can be inferred
+    # (unset); an informative lining thinner than the real one would give a frame larger than the opening
+    informative = (f"the window's type states ParameterTakesPrecedence {exact!r}, not true: its lining and panel "
+                   "records are only informative, so they don't give its opening")
+    if single and exact is not True:
+        missing["operation"] = informative
+        frame, why = _frame(model, window, m, size)
+        missing["frame"] = why if frame is None else informative
+    elif not single:
         why = (f"the window has {len(panels)} panels ({', '.join(kinds)})" if len(panels) > 1 else
                f"the window is partitioned {', '.join(more)}" if more
                else "the window's panel (IfcWindowPanelProperties) isn't given")

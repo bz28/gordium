@@ -154,6 +154,7 @@ openings:
     - SIDEHUNGLEFTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 0B1RwEzzP3CfME5NR$Vqh5
   name: EG-Fenster-7
   room: 17JZcMFrf5tOftUTidA0d3
@@ -181,6 +182,7 @@ openings:
     - SIDEHUNGRIGHTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #24189'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 25nJxEpYf8LRDJNkMUVO0m
   name: EG-Fenster-4
   room: 17JZcMFrf5tOftUTidA0d3
@@ -208,6 +210,7 @@ openings:
     - SIDEHUNGRIGHTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #24189'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 3BFcylCsX74PQAoRAe5fNv
   name: EG-Fenster-5
   room: 0Lt8gR_E9ESeGH5uY_g9e9
@@ -235,6 +238,7 @@ openings:
     - SIDEHUNGRIGHTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #24189'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 13aSY79zb8fP4HApEJ0z_e
   name: EG-Fenster-8
   room: 347jFE2yX7IhCEIALmupEH
@@ -262,6 +266,7 @@ openings:
     - SIDEHUNGRIGHTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #24189'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 2EQh_jhP1B_A_AMuSJc5E0
   name: EG-Fenster-9
   room: 0Lt8gR_E9ESeGH5uY_g9e9
@@ -289,6 +294,7 @@ openings:
     - SIDEHUNGLEFTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 1TAI4ouKX4Xx4lBDZIu5qM
   name: EG-Fenster-1
   room: 2RSCzLOBz4FAK$_wE8VckM
@@ -316,6 +322,7 @@ openings:
     - SIDEHUNGLEFTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 2Q9w7oRXP249jBobEMVqlZ
   name: EG-Fenster-2
   room: 0e_hbkIQ5DMQlIJ$2V3j_m
@@ -343,6 +350,7 @@ openings:
     - SIDEHUNGLEFTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 1DiYqhfzH9xxuJdVHwXCNa
   name: EG-Fenster-3
   room: 347jFE2yX7IhCEIALmupEH
@@ -370,12 +378,14 @@ openings:
     - SIDEHUNGLEFTHAND
     panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
+    parameters_exact: true
 - id: 1zOBw0Gej5Wf0QAJfHnOc0
   name: OG-Fenster-2
   room: 2dQFggKBb1fOc1CqZDIDlx
   escape: false
   not_given:
-    operation: the panel's operation is NOTDEFINED
+    operation: 'the window''s type states ParameterTakesPrecedence False, not true: its lining and panel records are only
+      informative, so they don''t give its opening'
     frame: 'the window isn''t rectangular (its outline fills 0.784137123 of its bounding box): its clear opening isn''t read
       yet'
     hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
@@ -395,12 +405,14 @@ openings:
     - NOTDEFINED
     panels_from: 'from its type Rundfenster 13 #67450'
     partitioning: NOTDEFINED
+    parameters_exact: false
 - id: 2ACmFFQhT1Ouf0x4YRUh9m
   name: OG-Fenster-1
   room: 2dQFggKBb1fOc1CqZDIDlx
   escape: false
   not_given:
-    operation: the panel's operation is NOTDEFINED
+    operation: 'the window''s type states ParameterTakesPrecedence False, not true: its lining and panel records are only
+      informative, so they don''t give its opening'
     frame: 'the window isn''t rectangular (its outline fills 0.784137123 of its bounding box): its clear opening isn''t read
       yet'
     hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
@@ -420,6 +432,7 @@ openings:
     - NOTDEFINED
     panels_from: 'from its type Rundfenster 13 #67450'
     partitioning: NOTDEFINED
+    parameters_exact: false
 - id: 2jTRqchjf7oB0yhQ6462T0/opening
   name: Haustuer
   room: 3$f2p7VyLB7eox67SA_zKE

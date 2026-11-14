@@ -174,7 +174,7 @@ def read_room(model, space) -> dict:
         sleeping, why = None, f"{where} is {flag!r}, not true or false: the architect says"
     else:
         sleeping, why = sleeping_from_names(texts, flag, where)
-    if sleeping is False:
+    if sleeping is False and flag is not False:   # review round 11: the architect's false settles these (not a name)
         doubt = "; ".join(unclear + [d for d in (description_doubt(model, space), zone_doubt(model, space)) if d])
         if doubt:
             sleeping, why = None, f"{why}, but {doubt}: the architect says (Gordium_Egress.Sleeping)"

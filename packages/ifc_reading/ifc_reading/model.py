@@ -208,11 +208,15 @@ class Model:
         if self._settings is None:
             self._settings = ifcopenshell.geom.settings()
             self._settings.set("use-world-coords", True)
+            # review round 11: the engine picks its own unit scale (a project library's units, or a unit defined
+            # through another, left it at 1 while placements were in metres); take the file's own numbers and
+            # scale them here, by the one scale every other length uses
+            self._settings.set("convert-back-units", True)
         try:
             shape = ifcopenshell.geom.create_shape(self._settings, element)
         except RuntimeError:
             return None
-        verts = np.array(shape.geometry.verts, dtype=float).reshape(-1, 3)   # ifcopenshell gives metres
+        verts = np.array(shape.geometry.verts, dtype=float).reshape(-1, 3) * self.metres   # file units -> metres
         faces = np.array(shape.geometry.faces, dtype=int).reshape(-1, 3)
         if not len(faces):
             return None
