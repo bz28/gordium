@@ -28,7 +28,7 @@ HEADROOM = dict(RISER, id="R-1b.synthetic_headroom", title="SYNTHETIC stair head
                           {"given": {"stair_headroom": 79}, "expect": "fail"}])
 
 
-NOT_YET = STOPS["not_measured_yet"]
+NOT_YET = {STOPS["not_measured_yet"], STOPS["in_more_not_rules"]}
 
 
 def test_there_are_five_houses():
@@ -56,7 +56,7 @@ def test_each_measure_is_the_hand_worked_one(name):
                 assert p["measures"][m] == pytest.approx(v, abs=1e-6), (pid, m)
                 assert type(p["measures"][m]) is type(v) or isinstance(v, float), (pid, m)
             # measures parts.yaml lists that this code doesn't work out yet are pinned in test_interior_measures
-            assert {m for m, why in p["not_measured"].items() if why != NOT_YET} == set(w.get("not_measured", [])), pid
+            assert {m for m, why in p["not_measured"].items() if why not in NOT_YET} == set(w.get("not_measured", [])), pid
             for m, v in (w.get("more") or {}).items():
                 assert p["more"][m] == pytest.approx(v, abs=1e-6), (pid, m)
     assert got["not_checked"] == []

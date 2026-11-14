@@ -20,6 +20,7 @@ STOPS = {
     "too_far": "{what} is more than 1,000,000,000 in (about 15,800 miles) from the origin: not a place in a house",
     "not_finite": "it came out too large to be a number (from lengths far apart)",
     "not_measured_yet": "Gordium doesn't measure this yet",
+    "in_more_not_rules": "Gordium works this out (shown with the extra values) but doesn't give it to the rules yet",
     "negative": "{what} is {value} in: a size can't be less than zero",
     "not_a_point": "{what} isn't a list of {n} numbers",
     "not_an_outline": "{what} isn't an outline of at least 3 points that encloses an area",

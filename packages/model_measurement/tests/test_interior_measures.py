@@ -1665,6 +1665,8 @@ STOP_CASES = {
     "not_a_length": _set(("doors", 0, "threshold_top"), "low"),
     "too_far": _set(("doors", 0, "threshold_top"), 1e10),
     "not_measured_yet": _with(base),
+    "in_more_not_rules": _with(base, lambda d: d["openings"][0].update(
+        area_well={"floor_elevation": 10, "width": 36, "projection": 36})),
     "not_finite": _with(base, lambda d: d["doors"][0].update(threshold_top=-1.7e308, head_stop_bottom=1.7e308)),
     "not_a_point": _set(("doors", 0, "hinge_pin"), [0]),
     "negative": _set(("openings", 0, "hinged", "sash_thickness"), -1),
@@ -1799,4 +1801,15 @@ def test_every_measure_parts_yaml_lists_is_measured_or_has_a_reason():
                 assert name in p["measures"] or name in p["not_measured"], (kind, p["id"], name)
             for name, why in p["not_measured"].items():
                 if why == STOPS["not_measured_yet"]:
-                    assert name in measure_kinds(kind) and name not in p["measures"], (kind, name)
+                    assert name in measure_kinds(kind) and name not in p["measures"] and name not in p["more"], name
+                if why == STOPS["in_more_not_rules"]:
+                    assert name in measure_kinds(kind) and name in p["more"] and name not in p["measures"], name
+
+
+def test_a_measured_area_well_is_said_to_be_measured_not_missing():
+    """The four area-well values are worked out (kept in `more`); their reason says so, not 'not measured yet'."""
+    d = base()
+    d["openings"][0]["area_well"] = {"floor_elevation": 10, "width": 36, "projection": 36}
+    p = one(d, "emergency_escape_opening")
+    for name in ("area_well_area", "area_well_depth"):
+        assert name in p["more"] and p["not_measured"][name] == STOPS["in_more_not_rules"], name

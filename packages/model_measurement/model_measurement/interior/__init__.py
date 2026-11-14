@@ -163,7 +163,9 @@ def _not_measured_yet(parts: dict) -> None:
         for part in got:
             for name in measure_kinds(kind):
                 if name not in part["measures"] and name not in part["not_measured"]:
-                    part["not_measured"][name] = Stop("not_measured_yet").reason
+                    # worked out already but kept in `more` (not yet handed to the rules), or not worked out at all
+                    part["not_measured"][name] = Stop("in_more_not_rules" if name in part["more"]
+                                                      else "not_measured_yet").reason
 
 
 def measure_file(path) -> dict:
