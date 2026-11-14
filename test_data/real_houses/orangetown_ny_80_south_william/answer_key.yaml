@@ -1,0 +1,342 @@
+# Hand-worked answer key: does this house, AS DRAWN, meet each egress rule of the 2025 Residential Code of New
+# York State (RCNYS)? Worked by hand from the code text, before and apart from any Gordium check.
+#
+# The code text: the 2025 RCNYS working copy in the code cache (the Public.Resource.Org scan, archive.org
+# `gov.ny.residential.2025`, kept outside the repository). Quotes are short and exact; `page` is the book's own page number.
+# The drawings cite the 2025 RCNYS on the title sheet (A-1), but their stair, railing and escape-window notes cite
+# the 2020 code (README.md, "The drawings disagree with themselves"). The 2025 code is applied throughout.
+#
+# outcome is one of:
+#   complies      the drawings give the values, and they meet the rule (arithmetic shown)
+#   fails         the drawings give the values, and they don't
+#   needs_review  the drawings don't give what the rule turns on. Never "complies" by guessing (Gordium principle 4).
+# reading: where a careful plan reviewer could go further with stated assumptions, what they'd likely conclude and
+# exactly what it rests on. A reading is never the outcome.
+# measured: what Gordium's measuring code (PR #95) gives for it on house.yaml (expected.yaml has every value).
+#
+# Lengths in inches unless marked; areas in square feet. Sheet references are to the drawing set named in
+# house.yaml (A-1 to A-5).
+
+code: "2025 Residential Code of New York State (working copy, code cache gov.ny.residential.2025)"
+outcomes: [complies, fails, needs_review]
+
+areas:
+  # ---------------------------------------------------------------------------------------------- bedrooms
+  - id: bedroom_floor_area
+    rule: R312.1
+    quote: "Habitable rooms shall have a floor area of not less than 70 square feet"
+    page: 73
+    parts: [master, bed2, bed3, bed4]
+    drawings: "A-3 inside dimensions: master 13'-6\" x 17'-0\"; bedroom 2 11'-0\" x 11'-8\"; bedroom 3 14'-0\" x 11'-4\"; bedroom 4 16'-4\" x 12'-4\" (main rectangle). Ceilings flat, 8'-0\" (A-4, A-5)"
+    working: |
+      master 162 x 204 / 144 = 229.5 sf; bedroom 2 132 x 140 / 144 = 128.33 sf; bedroom 3 168 x 136 / 144 = 158.67 sf;
+      bedroom 4 196 x 148 / 144 = 201.44 sf. Smallest 128.33 >= 70. The A-5 schedule's own figures (230, 128, 159,
+      202 sf) agree. No ceiling under 7 ft (R312.3 takes nothing off).
+    outcome: complies
+    measured: "sleeping_room_floor_area 229.5, 128.333333, 158.666667, 201.444444: same as worked"
+
+  - id: bedroom_least_dimension
+    rule: R312.2
+    quote: "not less than 7 feet (2134 mm) in any horizontal dimension"
+    page: 74
+    parts: [master, bed2, bed3, bed4]
+    working: "smallest inside dimension of any bedroom: 11'-0\" (bedroom 2) = 132 in >= 84 in"
+    outcome: complies
+    measured: "not a measure yet"
+
+  - id: bedroom_ceiling_height
+    rule: R313.1
+    quote: "a ceiling height of not less than 7 feet (2134 mm)"
+    page: 74
+    parts: [master, bed2, bed3, bed4]
+    working: "A-4: second floor 'SEC. FLR' to 'CLG.' 8'-0\" = 96 in >= 84 in; A-5 section: flat ceiling joists"
+    outcome: complies
+    measured: "least_ceiling_height 96.0 (in `more`) for each bedroom"
+
+  # ---------------------------------------------------------------------------------------------- escape windows
+  - id: escape_opening_designated
+    rule: R319.1
+    quote: "every sleeping room shall have not less than one operable emergency escape and rescue opening"
+    page: 79
+    parts: [master, bed2, bed3, bed4]
+    drawings: "A-5 window schedule remark 'EGRESS' on each bedroom's double-hung pair; A-4 marks them E ('INDICATES EGRESS WINDOW', A-1)"
+    working: "4 of 4 bedrooms have at least one window marked as the escape opening. Whether any of them is big enough is the next five areas."
+    outcome: complies
+    measured: "10 escape openings, each `within` its bedroom"
+
+  - id: escape_opening_area
+    rule: R319.2.1
+    quote: "a net clear opening of not less than 5.7 square feet"
+    page: 79
+    parts: [m1, m2, m3, m4, b2a, b2b, b3a, b3b, b4a, b4b]
+    drawings: |
+      Size codes only: master '(2) 3046 DH' on A-3 but '3052' in the A-5 schedule, plus '(2) C15' casements;
+      bedrooms 2 and 3 '(2) 3046 DH'; bedroom 4 '(2) 3052 DH' on A-3 but '3046' in the schedule. No frame, sash or
+      maker's clear opening dimensions; 'ANDERSEN OR EQUAL' and the schedule 'IS FOR DESIGN INTENT ONLY' (A-1).
+    working: |
+      Which minimum: 5.7 sf, not the 5 sf grade-floor exception. A grade-floor opening's bottom is "not more than 44
+      inches (1118 mm) above or below the finished ground level adjacent to the opening" (definition, p.21). Every
+      bedroom is on the second floor, at least the main floor's 9'-0" ceiling (A-4) above the main floor at 240.4 ft
+      (A-2 spot elevation): at least 249.4 ft. The highest ground given is 238.4 ft (A-4 spot elevations 237.2' to
+      238.4'). So each opening is at least (249.4 - 238.4) x 12 = 132 in above the ground: not grade-floor.
+      Not settled by the drawings: the area. The most the size code allows: a double-hung's lower sash opens at most about half
+      the unit's height, and no more than the unit's width. Reading 3046 as a 36 in by 54 in unit, the clear opening
+      is at most 36 x 27 = 972 sq in = 6.75 sf; 5.7 sf needs at least 84% of that, after the frame, the sash rails and
+      the meeting rail are taken off. For 3052 (36 x 62): at most 36 x 31 / 144 = 7.75 sf. Neither bound settles it.
+      The A-5 schedule's "natural vent provided" is 11.5 sf for two 3046 windows: 5.75 sf each, 0.05 sf over 5.7.
+      That is ventilation area (R303), with no width or height; it isn't the R319 net clear opening.
+    outcome: needs_review
+    reading: "bedrooms 2 and 3 (3046 only) are close to the line: a 3046 double-hung can come in under 5.7 sf once its frame and rails are deducted. The maker's net clear opening of the window actually ordered settles it."
+    measured: "opening_net_clear_area and opening_at_grade: no value, 'the opening's frame isn't given (and no maker's clear opening)' (grade-floor is read at the clear opening's bottom, which isn't given)"
+
+  - id: escape_opening_height
+    rule: R319.2.2
+    quote: "The minimum net clear opening height dimension shall be 24 inches"
+    page: 79
+    parts: [m1, m2, m3, m4, b2a, b2b, b3a, b3b, b4a, b4b]
+    working: |
+      Not settled. A 3046 double-hung (54 in tall) opens at most about 54 / 2 = 27 in, before the frame head, sill
+      and meeting rail are taken off: a 3 in margin over 24 for all of them. 3052: at most 31 in. C15: no height given.
+    outcome: needs_review
+    reading: "a 3046 double-hung may come in under 24 in; the maker's data settles it"
+    measured: "opening_net_clear_height: no value (frame not given)"
+
+  - id: escape_opening_width
+    rule: R319.2.2
+    quote: "The minimum net clear opening width dimension shall be 20 inches"
+    page: 79
+    parts: [m1, m2, m3, m4, b2a, b2b, b3a, b3b, b4a, b4b]
+    working: "Not settled. A 3046 or 3052 double-hung is at most 36 in wide less its two jambs: 16 in to spare for the jambs. C15: no width given (a casement's sash also stands in the opening)."
+    outcome: needs_review
+    reading: "the double-hungs very likely meet 20 in; the C15 casements can't be read at all"
+    measured: "opening_net_clear_width: no value (frame not given)"
+
+  - id: escape_opening_sill
+    rule: R319.2.3
+    quote: "the bottom of the clear opening not greater than 44 inches (1118 mm) above the floor"
+    page: 79
+    parts: [m1, m2, m3, m4, b2a, b2b, b3a, b3b, b4a, b4b]
+    drawings: "A-1: 'ALL HEADER HEIGHTS TO BE 6'-9\" ABOVE THE FINISHED FLOOR'; A-4: 6'-9\" dimensioned on the second floor. A-1 states the limit twice, differently: 44\" in one note, 42\" in the other"
+    working: |
+      Not given: the bottom of the clear opening. The unit's bottom would be the header less the unit's height:
+      3046: 81 - 54 = 27 in; 3052: 81 - 62 = 19 in. The clear opening's bottom is the unit's bottom plus its sill
+      frame, so it exceeds 44 in only if that frame were more than 17 in (3046) or 25 in (3052). C15: height unknown.
+    outcome: needs_review
+    reading: "the double-hungs comply by a wide margin, resting on the header height and nominal unit height only"
+    measured: "opening_sill_height: no value (frame not given)"
+
+  - id: window_fall_protection
+    rule: R321.2.1
+    quote: "located less than 24 inches (610 mm) above the finished floor and greater than 72 inches (1829 mm) above the finished grade"
+    page: 81
+    parts: [m1, m2, b4a, b4b]
+    working: |
+      Second-floor windows are at least 132 in above the ground (worked under escape_opening_area): more than 72. A 3052
+      unit's bottom is about 19 in above the floor (81 - 62), under 24, so unless its clear opening's bottom is at
+      least 24 in, R321.2.1 needs an opening limit or a fall prevention device, and R321.2.2 then needs it to
+      release to the full escape opening. The drawings show none. Which windows are 3052 is itself in conflict
+      (master: schedule 3052, plan 3046; bedroom 4: plan 3052, schedule 3046).
+    outcome: needs_review
+    measured: "not a measure yet"
+
+  - id: bonus_room_escape_opening
+    rule: R319.1
+    quote: "every sleeping room shall have not less than one operable emergency escape and rescue opening"
+    page: 79
+    parts: [x1, x2]
+    drawings: "A-3: 'BONUS RM.' 13'-4\" x 13'-6\" with '(2) 3052 DH'; A-4 front elevation: both marked E; not in the A-5 schedule"
+    working: |
+      Labelled a bonus room, not a bedroom, so R319.1 doesn't require an escape opening there as drawn. Its windows
+      are marked E anyway. If it is used for sleeping, its windows face the same open questions as the bedrooms'
+      3052 windows (area, height, width, sill: not given).
+    outcome: needs_review
+    reading: "not required as labelled; whether it will be a bedroom is a question for the architect"
+    measured: "not measured: listed under not_checked ('in a room that isn't a sleeping room')"
+
+  # ---------------------------------------------------------------------------------------------- the basement
+  - id: basement_escape_opening
+    rule: R319.1, R319.2.1, R319.2.2
+    quote: "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening"
+    page: 79
+    parts: [bsw1, bsw2]
+    drawings: |
+      A-2 basement plan: two 'CW14' windows in 'BOWMAN KEMP AREAWAY ... PROVIDE FALL PROTECTION', 'SEE DETAIL THIS
+      SHEET' (the detail is on A-5). A-5 window-well details: a 'BOMAN KEMP 4040 EASY-BUCK' window, 'NET WIDTH OF
+      PATH = 21 3/4\"', 'NET HEIGHT = 45 3/8\"', '44\" MAX. IF USED FOR EGRESS'.
+    working: |
+      Required: the unfinished basement isn't only mechanical space under 200 sf (Exception 1). The plan's CW14 and
+      the detail's 4040 are different windows, so which clear opening applies isn't settled. If the 4040 detail
+      governs: 21.75 x 45.375 = 986.9 sq in = 6.85 sf >= 5.7; height 45.375 >= 24; width 21.75 >= 20. Sill height:
+      the detail gives only the limit ("44\" MAX."), not the value.
+    outcome: needs_review
+    reading: "if the 4040 detail is what gets built, area, width and height comply; the sill height still isn't given"
+    measured: "not measured: listed under not_checked ('in a room that isn't a sleeping room'). The measuring code checks escape openings only in sleeping rooms; R319.1 also requires one for a basement (reported in the PR)"
+
+  - id: area_well_size
+    rule: R319.4.1
+    quote: "not less than 9 square feet (0.9 m2), with a horizontal projection and width of not less than 36 inches"
+    page: 80
+    parts: [bsw1, bsw2]
+    drawings: "A-5 'PLAN VIEW WINDOW WELL': '52\" WELL WIDTH', '36\" WELL PROJECTION' ('36\" PROJECTION REQUIRED FOR EGRESS')"
+    working: "52 x 36 = 1872 sq in = 13 sf >= 9; projection 36 >= 36; width 52 >= 36"
+    outcome: complies
+    reading: "as detailed on A-5 (the plan's areaways aren't dimensioned; the detail is the only size given)"
+    measured: "not measured (the basement isn't a sleeping room)"
+
+  - id: area_well_ladder
+    rule: R319.4.2, R319.4.2.1
+    quote: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps"
+    page: 80
+    parts: [bsw1, bsw2]
+    drawings: "A-5: 'BOMAN KEMP 4'-0 ESCAPE LADDER (WHEN EXIT HEIGHT EXCEEDS 44\")', drawn in the well; the well's depth isn't dimensioned"
+    working: "A ladder is drawn, so whether the depth exceeds 44 in doesn't matter for having one. Its rungs (inside width >= 12 in, projection >= 3 in, spacing <= 18 in, R319.4.2.1) aren't given."
+    outcome: needs_review
+    measured: "not measured"
+
+  # ---------------------------------------------------------------------------------------------- stairs
+  - id: stair_riser
+    rule: R318.7.5.1
+    quote: "The riser height shall be not more than 8 1/4 inches (209 mm)"
+    page: 77
+    parts: [main stair, basement stair]
+    drawings: "A-2 stair detail: riser '7 1/2\"' marked 'VERIFY'; A-2 'UP 16R', A-3 'DN 15R' (main stair); A-2 'DN 13R' (basement stair). No floor-to-floor height is dimensioned"
+    working: |
+      Each riser is the floor-to-floor rise divided by the risers, and no floor-to-floor rise is given. The detail's
+      7 1/2 in would comply (<= 8 1/4) but is marked VERIFY. Main stair: 15 risers to the bridge, which is 7 1/2 in
+      below the second floor (A-3 'DN 7 1/2"'), so 16 x 7 1/2 = 120 in floor to floor would fit both counts. Limit:
+      15 x 8 1/4 = 123.75 in to the bridge. Basement stair: 13 x 8 1/4 = 107.25 in is the most it can rise; the
+      basement is 8'-0" (96 in) slab to ceiling (A-4) plus the main floor's joists and subfloor, whose depth isn't
+      dimensioned (2x10 on the A-2 plan notes, 2x12 in the A-5 section).
+    outcome: needs_review
+    reading: "main stair likely complies at 7 1/2 in; the basement stair is close to the 107.25 in limit and needs the actual floor-to-floor"
+    measured: "stairs not read: stair_riser_height has no value; the kind is null (not read)"
+
+  - id: stair_tread
+    rule: R318.7.5.2
+    quote: "The tread depth shall be not less than 9 inches (229 mm)"
+    page: 77
+    parts: [main stair, basement stair]
+    drawings: "A-2 stair detail '9\" MIN' (a requirement, not a size); A-2 main floor plan '10'-0\"' along the stair; A-3 stairwell opening '9'-8\"'"
+    working: |
+      No tread depth is given. If A-2's 10'-0" is the main stair's run (its first riser to its top one), 14 treads (15
+      risers to the bridge) would be 120 / 14 = 8.57 in, under 9: it would fail. The plan is drawn at about 10 in a
+      tread, but the sheets say "DO NOT SCALE PLANS !". What the 10'-0" spans is a question for the architect.
+    outcome: needs_review
+    measured: "stairs not read"
+
+  - id: stair_headroom
+    rule: R318.7.2
+    quote: "not less than 6 feet 8 inches (2032 mm) measured vertically from the sloped line adjoining the tread nosing"
+    page: 77
+    parts: [main stair]
+    drawings: "A-2 stair detail 'MINIMUM 6'-9\" HEADROOM AS PER 2020 NYS CODE' (a requirement, stricter than 2025's 6'-8\"); A-3 stairwell opening 9'-8\" long; A-4 main floor ceiling 9'-0\""
+    working: |
+      Not given. The lower end of the main stair runs under the second-floor hallway (the stairwell opening is
+      9'-8" = 116 in long; assumed here to run back from the top nosing at the bridge, as drawn). With 15 risers of 7 1/2 in and treads T in deep, the
+      opening's edge is 14T - 116 in from the first nosing, where the nosing line is 7.5 + (14T - 116) x 7.5 / T =
+      112.5 - 870 / T in above the main floor; the hallway's underside is the main floor's 9'-0" = 108 in ceiling.
+      Headroom there = 108 - (112.5 - 870 / T) = 870 / T - 4.5. It is at least 80 in only if T <= 870 / 84.5 =
+      10.30 in. At 9 in treads: 92.2 in; at 10 in: 82.5 in; at 10 1/2 in: 78.4 in (fails).
+    outcome: needs_review
+    reading: "complies only if the treads are no deeper than about 10.3 in (with 7 1/2 in risers): a real constraint to confirm"
+    measured: "stairs not read"
+
+  - id: stair_width
+    rule: R318.7.1
+    quote: "not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height"
+    page: 77
+    parts: [main stair, basement stair]
+    drawings: "A-2 and A-3: stair '3'-4\"' between the lines drawn (a wall on one side, the railing line on the other upstairs)"
+    working: |
+      40 in between the lines drawn; which faces they are (framing, finish, the rail's middle) isn't stated. Above
+      the handrail it needs 36: 4 in to spare. At the handrail (one side) it needs 31 1/2: a handrail may project up
+      to 4 1/2 in (R320.3), so 40 - 4.5 = 35.5 before finishes.
+    outcome: needs_review
+    reading: "complies unless finishes and the rail take more than 4 in off the 3'-4\""
+    measured: "stairs not read"
+
+  - id: stair_top_landing
+    rule: R318.7.6
+    quote: "Where the stairway has a straight run, the depth in the direction of travel shall be not less than 36 inches"
+    page: 78
+    parts: [main stair]
+    drawings: "A-3: the 'BRIDGE' at the top of the main stair is '4'-0\"' deep and 3'-4\" + 3'-4\" wide"
+    working: "depth 48 >= 36; width 80 >= the flight's 40"
+    outcome: complies
+    measured: "landings aren't measured yet"
+
+  - id: stair_handrail
+    rule: R318.7.8, R320.2
+    quote: "Handrails shall be provided on not less than one side of each flight of stairs with four or more risers"
+    page: 78
+    parts: [main stair, basement stair]
+    drawings: "A-2 'STAIRS & RAILING AS PER RES. CODE'; A-2 stair detail: top rail, '3'-0\"' at the top floor, '3 1/2\" MAX.'"
+    working: "A handrail is drawn on the main stair (detail and plan). Its height above the nosings (34 to 38 in, R320.2) isn't dimensioned along the flight; the basement stair's handrail isn't shown."
+    outcome: needs_review
+    measured: "stairs not read"
+
+  # ---------------------------------------------------------------------------------------------- guards
+  - id: guard_height_level
+    rule: R321.1.1, R321.1.2
+    quote: "not less than 36 inches (914 mm) in height as measured vertically above the adjacent walking surface"
+    page: 81
+    parts: [g_hall, g_bridge_n, g_bridge_s, g_east]
+    drawings: "A-3: each labelled '36\" HIGH RAILING'; A-5 section '36\" HIGH RAILING AS PER 2020 NYS RESIDENTIAL CODE'"
+    working: |
+      Required: each is at the edge of the stairwell or an 'OPEN TO BELOW' over the main floor, at least the main
+      floor's 9'-0" ceiling below: more than 30 in (R321.1.1). Height as labelled 36 >= 36.
+    outcome: complies
+    reading: "as labelled; no rail or baluster is dimensioned in elevation"
+    measured: "guard_height: no value ('the guard's members ... isn't given'): the code needs the members drawn; the label alone isn't read"
+
+  - id: guard_height_stair
+    rule: R321.1.2 Exception 1
+    quote: "Guards on the open sides of stairs shall have a height of not less than 34 inches (864 mm) measured vertically from a line connecting the nosings"
+    page: 81
+    parts: [g_stair_w]
+    working: "The A-2 stair detail dimensions the top rail '3'-0\"' at the top floor only, not above the nosing line; the section labels it 36 in without saying where it is measured"
+    outcome: needs_review
+    measured: "guard_height: no value (its stair wasn't read)"
+
+  - id: guard_openings
+    rule: R321.1.3
+    quote: "openings from the walking surface to the required guard height that allow passage of a sphere 4 inches (102 mm) in diameter"
+    page: 81
+    parts: [g_hall, g_bridge_n, g_bridge_s, g_east, g_stair_w]
+    drawings: "A-1 stair & railing notes: openings in 'OPEN RAILINGS AND GUARDS SHALL NOT BE GREATER THAN 4\"'"
+    working: "No baluster spacing is drawn. The note's own limit is looser than the code: a 4 in gap lets a 4 in sphere through, which R321.1.3 forbids; the stair guards may have up to 4 3/8 in (Exception 2)."
+    outcome: needs_review
+    measured: "guard_opening_sphere: no value"
+
+  # ---------------------------------------------------------------------------------------------- the exit door
+  - id: exit_door_type
+    rule: R318.2
+    quote: "Not less than one egress door shall be provided for each dwelling unit. The egress door shall be side-hinged"
+    page: 76
+    parts: [front]
+    drawings: "A-2: the front entry door '3'-0\"x8'-0\"', drawn swinging; the rear doors are sliding ('6061 SL DR')"
+    working: "One side-hinged door leads straight outside (the front door); no sheet names it as the egress door, but it is the only one that can be"
+    outcome: complies
+    measured: "egress_door `front` (exit: true, side_hinged)"
+
+  - id: exit_door_clear_width
+    rule: R318.2
+    quote: "a clear width of not less than 32 inches (813 mm) where measured between the face of the door and the stop, with the door open 90 degrees"
+    page: 76
+    parts: [front]
+    working: "The leaf is 3'-0\" = 36 in; the clear width is the leaf less its thickness and the stops, none of which is given ('THERMA-TRU OR EQUAL'). It meets 32 in unless they take more than 4 in."
+    outcome: needs_review
+    reading: "complies (a 36 in leaf leaves 32 in unless thickness and stops exceed 4 in)"
+    measured: "door_clear_width: no value ('the door's hinge side isn't given')"
+
+  - id: exit_door_clear_height
+    rule: R318.2
+    quote: "The clear height of the door opening shall be not less than 78 inches (1981 mm)"
+    page: 76
+    parts: [front]
+    working: "The leaf is 8'-0\" = 96 in; the clear height (threshold to head stop) isn't given. It meets 78 in unless the threshold and head stop take more than 18 in."
+    outcome: needs_review
+    reading: "complies"
+    measured: "door_clear_height: no value ('the top of the threshold isn't given')"
+
+# Questions for the drawing's architect (the drawings can't answer them): see README.md.

@@ -105,6 +105,7 @@ openings:
     escape: true
     operation: double_hung
     cite: &master_dh
+      room: "A-3 2nd floor plan: in the master bedroom's north wall"
       escape: "A-5 window schedule, M. BEDROOM 'DOUBLE HUNG' remark 'EGRESS'; A-4 rear elevation (right pair) marked E ('INDICATES EGRESS WINDOW', A-1)"
       operation: "A-3 2nd floor plan '(2) 3046 DH'; A-5 schedule 'DOUBLE HUNG' (the size differs: the schedule says 3052)"
     absent: &no_clear_opening
@@ -125,6 +126,7 @@ openings:
     escape: true
     operation: casement
     cite: &master_cas
+      room: "A-3 2nd floor plan: in the master bedroom's west wall"
       escape: "A-4 left side elevation, both C15 casements marked E. The A-5 schedule lists '(2) CASEMENT C15' for the master bedroom with no 'EGRESS' remark: the two sheets differ"
       operation: "A-3 2nd floor plan 'C15' on the west wall (twice); A-5 schedule 'CASEMENT C15'"
     absent: &no_clear_opening_casement
@@ -145,6 +147,7 @@ openings:
     escape: true
     operation: double_hung
     cite: &bed2_dh
+      room: "A-3 2nd floor plan: in bedroom 2's north wall"
       escape: "A-5 window schedule, BEDROOM 2 'DOUBLE HUNG 3046' remark 'EGRESS'; A-4 rear elevation (left pair) marked E"
       operation: "A-3 2nd floor plan '(2) 3046 DH' on the north wall; A-5 schedule 'DOUBLE HUNG 3046'"
     absent: *no_clear_opening
@@ -161,6 +164,7 @@ openings:
     escape: true
     operation: double_hung
     cite: &bed3_dh
+      room: "A-3 2nd floor plan: in bedroom 3's east wall"
       escape: "A-5 window schedule, BEDROOM 3 'DOUBLE HUNG 3046' remark 'EGRESS'; A-4 right side elevation (upper pair) marked E"
       operation: "A-3 2nd floor plan '(2) 3046 DH' on the east wall; A-5 schedule 'DOUBLE HUNG 3046'"
     absent: *no_clear_opening
@@ -177,6 +181,7 @@ openings:
     escape: true
     operation: double_hung
     cite: &bed4_dh
+      room: "A-3 2nd floor plan: in bedroom 4's south wall"
       escape: "A-5 window schedule, BEDROOM 4 'DOUBLE HUNG' remark 'EGRESS'; A-4 front elevation (dormer pair, right) marked E"
       operation: "A-3 2nd floor plan '(2) 3052 DH' on the south wall; A-5 schedule 'DOUBLE HUNG' (the size differs: the schedule says 3046)"
     absent: *no_clear_opening
@@ -193,6 +198,7 @@ openings:
     escape: true
     operation: double_hung
     cite: &bonus_dh
+      room: "A-3 2nd floor plan: in the bonus room's south bay"
       escape: "A-4 front elevation (left, second floor pair) marked E; the bonus room is not in the A-5 schedule"
       operation: "A-3 2nd floor plan '(2) 3052 DH' in the bay on the south wall"
     absent: *no_clear_opening
@@ -209,6 +215,7 @@ openings:
     escape: true
     operation: casement
     cite: &basement_cw
+      room: "A-2 basement plan: in the foundation wall of the unfinished basement (one north, one west)"
       escape: "A-2 basement plan 'CW14' in a 'BOWMAN KEMP AREAWAY ... PROVIDE FALL PROTECTION'; A-5 'WALL SECTION THRU. WINDOW WELL' labels the window in the well 'EGRESS' and shows an escape ladder"
       operation: "A-2 basement plan 'CW14' (C: casement, the plans' own naming, as 'C15'). The A-5 window-well details instead show a 'BOMAN KEMP 4040 EASY-BUCK' window with 'NET WIDTH OF PATH = 21 3/4\"' and 'NET HEIGHT = 45 3/8\"': a different window, so its clear opening isn't used here"
     absent: &basement_absent
