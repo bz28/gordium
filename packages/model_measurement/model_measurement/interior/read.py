@@ -44,7 +44,10 @@ class Reader:
         self.times, self.per = INCHES[units]
 
     def length(self, value, what: str) -> float:
-        return number(value, what) * self.times / self.per
+        got = number(value, what) * self.times / self.per
+        if not math.isfinite(got):                           # finite as written, not once in inches
+            raise Stop("not_a_length", what=what)
+        return got
 
     def size(self, value, what: str) -> float:
         """A length that can't be less than zero (a width, a thickness, an offset)."""

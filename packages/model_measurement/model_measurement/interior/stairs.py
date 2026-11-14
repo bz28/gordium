@@ -86,12 +86,20 @@ class Flight:
     def xy(self, s, a):
         return (self.origin[0] + s * self.r[0] + a * self.a[0], self.origin[1] + s * self.r[1] + a * self.a[1])
 
+    def line(self):
+        """The line connecting the nosings, the cautious way: through each nosing's higher end, placed at its end
+        nearer the foot (so the line, which rises, stands as high as either end lets it): [(s, z)]."""
+        return [(lo, z) for (lo, _), z in zip(self.s_ends, self.z)]
+
     def nosing_z(self, s):
-        """The height of the line connecting the nosings at s (between the first nosing and the top one)."""
-        for (s1, z1), (s2, z2) in zip(zip(self.s, self.z), zip(self.s[1:], self.z[1:])):
-            if s1 - 1e-9 <= s <= s2 + 1e-9:
+        """The height of the line connecting the nosings at s; past either end of it, level with that end."""
+        pts = self.line()
+        if s <= pts[0][0]:
+            return pts[0][1]
+        for (s1, z1), (s2, z2) in zip(pts, pts[1:]):
+            if s <= s2:
                 return z1 + (s - s1) / (s2 - s1) * (z2 - z1)
-        raise ValueError(s)
+        return pts[-1][1]
 
 
 def along(flight: Flight, points, what: str, side: str):

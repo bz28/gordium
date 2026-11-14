@@ -63,10 +63,10 @@ STOPS = {
     "sides_cross": "the stair's sides meet or cross (clear width {width} in)",
     "handrail_side": "a handrail's side is {got!r}, not left or right",
     # guards
-    "guard_top_not_drawn": "no member of the guard reaches its stated top: the drawn guard is lower",
+    "guard_top_not_drawn": "the guard's members don't reach its stated top all along it (at its lowest the drawn "
+                           "guard is {least} in high): which is its height is unclear",
     "guard_kind": "say whether the guard is along a stair (`stair`) or at a level walking surface "
                   "(`walking_surface`): give one",
-    "guard_open_at_top": "the guard's members don't reach its top: an opening runs up out of it",
     "guard_opening_shape": "an opening in the guard isn't a rectangle: the largest sphere through it isn't measured "
                            "yet",
     "stair_unknown": "the stair the guard is along isn't one of the stairs given (by its id)",

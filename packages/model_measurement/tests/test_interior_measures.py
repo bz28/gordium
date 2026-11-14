@@ -635,10 +635,18 @@ def test_a_solid_panel_lets_nothing_through():
 
 
 def test_a_guard_whose_top_rail_runs_part_way():
+    """Review round 3: one member reaching the top (a post, a short rail) gave the whole guard that height."""
     d = base()
-    d["guards"][0]["members"] = [{"left": 0, "right": 5, "bottom": 134, "top": 136}]
+    d["guards"][0]["members"] = [{"left": 0, "right": 5, "bottom": 134, "top": 136},
+                                 {"left": 5, "right": 10, "bottom": 128, "top": 130}]
     m, stopped = guard(d)
-    assert m == {"guard_height": 36.0} and "don't reach its top" in stopped["guard_opening_sphere"]
+    assert m == {} and "is 30.0 in high" in stopped["guard_height"]
+    d["guards"][0]["members"] = [{"left": 0, "right": 10, "bottom": 128, "top": 130},
+                                 {"left": 200, "right": 202, "bottom": 100, "top": 136}]   # a post past its end
+    assert "is 30.0 in high" in guard(d)[1]["guard_height"]
+    d["guards"][0]["members"] = [{"left": 0, "right": 5, "bottom": 134, "top": 136},
+                                 {"left": 4, "right": 10, "bottom": 134, "top": 136}]     # two rails, overlapping
+    assert guard(d)[0] == {"guard_height": 36.0, "guard_opening_sphere": 10.0}       # one opening 10 x 34
 
 
 @pytest.mark.parametrize("members", [[{"left": 0, "right": 10, "bottom": 100, "top": 130}], []])
@@ -647,7 +655,7 @@ def test_a_guard_height_is_the_drawn_guards(members):
     d = base()
     d["guards"][0]["members"] = members
     m, stopped = guard(d)
-    assert m == {} and "drawn guard is lower" in stopped["guard_height"]
+    assert m == {} and "don't reach its stated top all along" in stopped["guard_height"]
 
 
 def test_a_sliding_sash_outside_its_frame_gives_no_value():
@@ -684,6 +692,48 @@ def test_a_surface_point_below_its_fitted_plane_counts():
     _, stopped, more = room(ceilings([[0, 0, 84.05], [60, 0, 83.97], [120, 0, 84.05], [120, 120, 84.05],
                                       [0, 120, 84.05]]))
     assert more["least_ceiling_height"] <= 83.97 and "R312.3" in stopped["sleeping_room_floor_area"]
+
+
+def test_a_makers_opening_within_the_frames_slack_is_cut_back_to_the_frame():
+    """Review round 3: a maker's opening 1/20 in wider and lower than its frame read as is (20 in, sill 44)."""
+    d = changed(("openings", 0, "operation"), "awning")
+    d["openings"][0]["frame"] = {"left": 0, "right": 19.95, "bottom": 44.05, "top": 80}
+    d["openings"][0]["stated_clear"] = {"width": 20, "height": 35.97, "bottom": 44}
+    d["openings"][0]["ground_outside"] = 0.03                        # 43.97 below the maker's bottom, 44.02 the frame's
+    m, stopped, _ = opening_measures(d)
+    assert (m["opening_net_clear_width"], m["opening_sill_height"]) == (19.95, 44.05)
+    assert m["opening_net_clear_height"] == pytest.approx(35.92)     # 44.05 .. 79.97
+    assert "for grade-floor" in stopped["opening_at_grade"]
+
+
+def test_the_nosing_line_stands_at_a_nosings_end_nearer_the_foot():
+    """Review round 3: a nosing's run position was its ends' mean, so the line (and headroom) sat 1/32 in low."""
+    # nosings at s 0, 10, 20 (z 7, 14, 21); the middle one's ends at s 10 and 10.0625; a ceiling at 80 to s 10
+    d = flight([7, 7, 7], [10, 10])
+    d["stairs"][0]["nosings"][1] = [[10, 0, 14], [10.0625, 36, 14]]
+    d["stairs"][0]["overhead"] = [[[-5, -5, 80], [10, -5, 80], [10, 41, 80], [-5, 41, 80]],
+                                  [[10, -5, 120], [40, -5, 120], [40, 41, 120], [10, 41, 120]]]
+    m, _, _ = stair(d)
+    assert m["stair_headroom"] == 66.0                               # 80 - 14 at s = 10, not 66.0218
+
+
+def test_a_stair_guard_reads_the_same_cautious_line():
+    # risers 7, 9, 5 (nosings at z 7, 16, 21); the middle nosing's ends at s 10 and 10.0625; the guard's top
+    # rises from 41 at s 0 to 55 at s 20: least above the line at the middle nosing's nearer end, 48 - 16
+    d = stair_guard([[0, 36, 41], [20, 36, 55]])
+    d["stairs"][0]["nosings"] = nosings([7, 9, 5], [10, 10])
+    d["stairs"][0]["nosings"][1] = [[10, 0, 16], [10.0625, 36, 16]]
+    d["stairs"][0]["sides"] = {"left": [[-5, 36], [30, 36]], "right": [[-5, 0], [30, 0]]}
+    m, _ = guard(d)
+    assert m["guard_height"] == pytest.approx(32.0)
+
+
+def test_a_length_infinite_only_once_in_inches_is_not_a_length():
+    """Review round 3: 1e308 ft is finite as written and infinite in inches: it came out as an infinite width."""
+    d = base()
+    d["units"] = "ft"
+    d["doors"][0]["stops"] = {"hinge": 0, "latch": 1e308}
+    assert "isn't a length" in door(d)[1]["door_clear_width"]
 
 
 def test_an_integer_too_big_for_a_float_is_not_a_length():
@@ -952,7 +1002,6 @@ STOP_CASES = {
     "sides_cross": _stair(sides={"left": [[-5, 0], [40, 0]], "right": [[-5, 36], [40, 36]]}),
     "handrail_side": _stair(handrails=[{"side": "up", "inner_edge": [[0, 4], [30, 4]]}]),
     "guard_kind": _guard(stair="s"),
-    "guard_open_at_top": _guard(members=[{"left": 0, "right": 5, "bottom": 134, "top": 136}]),
     "guard_top_not_drawn": _guard(members=[]),
     "sash_outside_frame": lambda: sliding([{"left": 0, "right": 30, "bottom": 60, "top": 90}]),
     "sash_smaller_than_frame": _set(("openings", 0, "hinged", "sash_width"), 2),

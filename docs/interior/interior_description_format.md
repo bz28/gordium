@@ -91,7 +91,7 @@ Either a guard at a level walking surface, or one along a stair (give `walking_s
 | `walking_surface` | the finished walking surface the guard protects (a loft's floor, a landing) |
 | `top` | the top of the guard |
 | `extent` | `{left, right}`: the u of what the guard ends against at each end (a wall, a newel post): solid beyond |
-| `members` | every rail, baluster, post and panel in the guard's elevation, `{left, right, bottom, top}`; some member (the top rail) must reach `top`, or the guard gets no height |
+| `members` | every rail, baluster, post and panel in the guard's elevation, `{left, right, bottom, top}`; the members (the top rail) must reach `top` all along the guard, or it gets no height |
 | `stair` | for a guard along a stair: the stair's id |
 | `top_line` | for a guard along a stair: the top of the guard as 3D points, running the flight's whole length |
 

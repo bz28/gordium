@@ -23,8 +23,9 @@ def level_guard(g: dict, reader) -> tuple[dict, dict]:
     top = reader.length(g.get("top"), "the top of the guard")
     if top - walk <= 0:
         raise Stop("not_positive", what="the guard's height", value=tidy(top - walk))
-    if not top_drawn(g, reader, top):
-        raise Stop("guard_top_not_drawn")
+    least = drawn_top(g, reader, walk, top)
+    if least < top - 1e-9:
+        raise Stop("guard_top_not_drawn", least=tidy(least - walk))
     measures["guard_height"] = tidy(top - walk)
     try:
         measures["guard_opening_sphere"] = tidy(largest_sphere(g, reader, walk, top))
@@ -33,13 +34,27 @@ def level_guard(g: dict, reader) -> tuple[dict, dict]:
     return measures, stopped
 
 
-def top_drawn(g: dict, reader, top: float) -> bool:
-    """Whether some member (the top rail) reaches the guard's stated top: its height is the drawn guard's."""
-    members = g.get("members")
+def drawn_top(g: dict, reader, walk: float, top: float) -> float:
+    """The drawn guard's top where it is lowest along its length: at each point between its ends, the highest
+    member there (no higher than the stated top). The guard's height is the stated top only if the members reach
+    it all along."""
+    extent, members = g.get("extent"), g.get("members")
+    if not isinstance(extent, dict):
+        raise Stop("missing", what="the guard's extent (`extent`: left, right)")
     if not isinstance(members, list):
         raise Stop("missing", what="the guard's members (`members`: rails, balusters, posts, panels)")
-    tops = [reader.rectangle(m, f"guard member {n}")[3] for n, m in enumerate(members, 1)]
-    return any(t >= top - 1e-9 for t in tops)
+    left = reader.length(extent.get("left"), "the guard's left end")
+    right = reader.length(extent.get("right"), "the guard's right end")
+    if right <= left:
+        raise Stop("not_positive", what="the guard's length", value=tidy(right - left))
+    rects = [reader.rectangle(m, f"guard member {n}") for n, m in enumerate(members, 1)]
+    cuts = sorted({left, right, *(u for r in rects for u in r[:2] if left < u < right)})
+    lowest = top
+    for a, b in zip(cuts, cuts[1:]):                 # the highest member over each stretch between cuts
+        mid = (a + b) / 2
+        here = [r[3] for r in rects if r[0] <= mid <= r[1]]
+        lowest = min(lowest, min(max(here), top) if here else walk)      # nothing there: no guard at all
+    return lowest
 
 
 def largest_sphere(g: dict, reader, walk: float, top: float) -> float:
@@ -66,8 +81,6 @@ def largest_sphere(g: dict, reader, walk: float, top: float) -> float:
         if piece.area <= 0:
             continue
         l, b, r, t = piece.bounds
-        if t >= top - 1e-9:
-            raise Stop("guard_open_at_top")
         if abs(piece.area - piece.envelope.area) > 1e-9 * max(1.0, piece.envelope.area):
             raise Stop("guard_opening_shape")
         best = max(best, min(r - l, t - b))
@@ -89,7 +102,8 @@ def stair_guard(g: dict, reader, flights: dict) -> tuple[dict, dict]:
     start, end = flight.s[0], flight.s[-1]
     if at(line, start) is None or at(line, end) is None:
         raise Stop("side_not_along", side="guard's", what="top line")
-    breaks = sorted({start, end, *flight.s, *(s for s, _ in sz if start <= s <= end)})
+    breaks = sorted({start, end, *flight.s, *(s for s, _ in flight.line()),
+                     *(s for s, _ in sz if start <= s <= end)})
     height = min(at(sz, s) - flight.nosing_z(s) for s in breaks)
     if height <= 0:
         raise Stop("not_positive", what="the guard's height", value=tidy(height))

@@ -104,7 +104,8 @@ def clear_opening(o: dict, reader):
         if operation == "fixed" and maker != NONE:
             raise Stop("clear_differs", which="a fixed window doesn't open, the maker's opening does")
         if has_frame and maker != NONE:
-            fits(maker, reader.rectangle(o.get("frame"), "the opening's frame"))
+            capped = fits(maker, reader.rectangle(o.get("frame"), "the opening's frame"))
+            return capped, sorted({maker[2], capped[2]})
         return maker, [] if maker == NONE else [maker[2]]
     if not has_frame:
         raise Stop("no_frame")
@@ -127,12 +128,15 @@ def clear_opening(o: dict, reader):
 
 
 def fits(maker, frame):
-    """A maker's clear opening can't be bigger than the frame it is in, or reach outside it (1/16 in to spare)."""
+    """A maker's clear opening can't be bigger than the frame it is in, or reach outside it (1/16 in to spare, for
+    drawing noise). Within that, the opening is cut back to the frame: no wider, no lower and no taller than it."""
     width, height = maker[1] - maker[0], maker[3] - maker[2]
     left, right, bottom, top = frame
     if width > right - left + AGREE or height > top - bottom + AGREE or maker[2] < bottom - AGREE \
             or maker[3] > top + AGREE:
         raise Stop("clear_outside_frame")
+    low, high = max(maker[2], bottom), min(maker[3], top)
+    return 0.0, min(width, right - left), low, high
 
 
 def grounds(o: dict, reader) -> list[float]:

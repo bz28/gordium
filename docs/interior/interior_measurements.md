@@ -13,7 +13,7 @@ The input is the [interior description](interior_description_format.md); the cod
 1. **Missing or unclear data gives no number**, never a default or a guess. The measure is left out of `measures` and its reason is in `not_measured`; a rule reading it then says **needs review** (`rule_format.parts`).
 2. **Where the law reads two ways, both readings are measured.** The same answer: that is the value. Different answers: no value, and the reason names the question.
 3. **Where the drawing and a stated value can disagree** (the maker's clear opening against the drawn sashes), they must agree within 1/16 in, and the less favourable one counts (the smaller width and height, the higher sill; grade-floor must come out the same at both bottoms). A maker's opening can never be bigger than its frame, and a fixed window never opens. Sizes (widths, thicknesses, offsets) can't be negative.
-4. **Drawing noise read on the cautious side.** A nosing's two ends may differ by 1/16 in: each riser and tread is read with the ends paired the worst way, and the line of the nosings through their higher ends. A flat surface's points may stand 1/16 in off its plane: the plane is lowered to its lowest point.
+4. **Drawing noise read on the cautious side.** A nosing's two ends may differ by 1/16 in: each riser and tread is read with the ends paired the worst way, and the line of the nosings through their higher ends, each at its end nearer the foot (the line rises, so that is as high as it can stand). A maker's clear opening within 1/16 in of its frame is cut back to the frame. A flat surface's points may stand 1/16 in off its plane: the plane is lowered to its lowest point.
 5. **Exact, never sampled.** Heights between flat surfaces are found at the corners of where they overlap (the gap between two flat surfaces changes in a straight line, so its least value is at a corner); widths along a flight at every point where a side, handrail or tread end bends.
 6. **Units explicit.** Every length in is converted from the description's stated `units`; every measure comes out in inches (`in`) or square feet (`sf`), as `rule_format/parts.yaml` names them. Values are rounded to a millionth (float noise only, far finer than any drawing).
 
@@ -77,7 +77,7 @@ Guard is not a part kind in `rule_format/parts.yaml` yet: these are measured so 
 
 | Measure | How | Serves |
 |---|---|---|
-| `guard_height` (in) | A level guard: its top less the walking surface (some member, the top rail, must reach that top: else no value). A stair guard: its top above the line connecting the nosings, least over the flight (checked at every nosing and every bend of the top line) | R321.1.2 "as measured vertically above the adjacent walking surface or the line connecting the nosings" (p.81) |
+| `guard_height` (in) | A level guard: its top less the walking surface; the members must reach that top all along the guard (at each point between its ends the highest member there), else no value. A stair guard: its top above the line connecting the nosings, least over the flight (checked at every nosing and every bend of the top line) | R321.1.2 "as measured vertically above the adjacent walking surface or the line connecting the nosings" (p.81) |
 | `guard_opening_sphere` (in) | A level guard: the diameter of the largest sphere that passes through it between the walking surface and its top: the largest circle that fits an opening between its members (an opening that is a rectangle: its smaller side). A solid guard: 0. Measured over the guard's whole height (at least the required height: the cautious side) | R321.1.3 "openings from the walking surface to the required guard height that allow passage of a sphere 4 inches (102 mm) in diameter" (p.81) |
 
 Not measured yet: a stair guard's openings (R321.1.3 Exceptions 1 and 2: the 6 in triangle at each step, the 4 3/8 in sphere): no value. Whether a guard is required (more than 30 in above the floor below, R321.1.1) is the rule's question, not a measure here.
@@ -143,9 +143,8 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `side_not_along` | the {side} {what} doesn't run along the flight from its first nosing to its top one |
 | `sides_cross` | the stair's sides meet or cross (clear width {width} in) |
 | `handrail_side` | a handrail's side is {got!r}, not left or right |
-| `guard_top_not_drawn` | no member of the guard reaches its stated top: the drawn guard is lower |
+| `guard_top_not_drawn` | the guard's members don't reach its stated top all along it (at its lowest the drawn guard is {least} in high): which is its height is unclear |
 | `guard_kind` | say whether the guard is along a stair (`stair`) or at a level walking surface (`walking_surface`): give one |
-| `guard_open_at_top` | the guard's members don't reach its top: an opening runs up out of it |
 | `guard_opening_shape` | an opening in the guard isn't a rectangle: the largest sphere through it isn't measured yet |
 | `stair_unknown` | the stair the guard is along isn't one of the stairs given (by its id) |
 | `stair_unread` | the stair the guard is along couldn't be measured: {reason} |
