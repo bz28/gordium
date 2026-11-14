@@ -29,7 +29,8 @@ CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 # An address lookup's positive "no overlay on this lot" (historic, gorge, the zoning map's overlays, the parcel's own
 # record, FEMA's flood maps: every source answered, and every one said none), with the lot outline it was found for
 # (as drawn, in feet), the address it was found at and its day. Set only by a live lookup that drew that lot; the check honours it only while the
-# lot is still exactly that outline (design_checker.present.overlays_cleared). Anything else: the overlays row stays.
+# lot is still exactly that outline (design_checker.present.overlays_cleared), and for 90 days from its date (YYYY-MM-DD)
+# on the day the host gives (present.overlays_lookup). Anything else: the overlays row stays.
 OVERLAYS_NONE_FIELDS = {"value", "lot_outline", "address", "source", "date"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).

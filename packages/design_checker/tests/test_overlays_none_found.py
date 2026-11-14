@@ -32,6 +32,7 @@ from test_measure import box, lot  # noqa: E402
 CORNERS = [(0, 0), (60, 0), (60, 110), (0, 110)]          # SITE's lot
 NONE_FOUND = {"value": True, "lot_outline": [list(p) for p in CORNERS], "address": "106 Ithaca Road, Ithaca, NY, 14850",
               "source": logic.OVERLAYS_NONE_SOURCE, "date": "2026-11-11"}
+TODAY = "2026-11-12"                                       # the day the host says the check is (the day after the lookup)
 # every question answered: only the overlays row waits
 EVERY = dict(ANSWERED, **BEDROOMS, address="106 Ithaca Rd, Ithaca, NY 14850")
 
@@ -43,16 +44,16 @@ def release_rows(v):
 # ---- the check: the row goes only for the lot it was found on ------------------------------------------------------
 
 def test_no_overlay_found_on_this_lot_leaves_the_row_out_and_the_design_complies():
-    r = check_site(SITE, dict(EVERY, overlays_none_found=NONE_FOUND))
+    r = check_site(SITE, dict(EVERY, overlays_none_found=NONE_FOUND), today=TODAY)
     v = r["view"]
     assert release_rows(v) == []
     assert v["state"] == present.COMPLIES and v["summary"] == "15 comply"
     assert r["summary"]["state"] != "review"
-    assert present.OVERLAYS_NONE_LINE.format(date="2026-11-11") in v["header"]["sources"]   # said where it came from
+    assert present.OVERLAYS_NONE_LINE.format(date="2026-11-11", age="yesterday") in v["header"]["sources"]   # said where it came from
 
 
 def test_without_the_finding_the_row_stays_and_holds_needs_review():
-    v = check_site(SITE, EVERY)["view"]
+    v = check_site(SITE, EVERY, today=TODAY)["view"]
     assert release_rows(v) == ["release.overlays"] and v["state"] == present.REVIEW
     assert not any(s.startswith("Overlays: none found") for s in v["header"]["sources"])
 
@@ -67,7 +68,7 @@ def test_without_the_finding_the_row_stays_and_holds_needs_review():
 ])
 def test_a_lot_that_isnt_the_outline_it_was_found_for_keeps_the_row(outline):
     found = dict(NONE_FOUND, lot_outline=[list(p) for p in outline])
-    v = check_site(SITE, dict(EVERY, overlays_none_found=found))["view"]
+    v = check_site(SITE, dict(EVERY, overlays_none_found=found), today=TODAY)["view"]
     assert release_rows(v) == ["release.overlays"] and v["state"] == present.REVIEW
 
 
@@ -88,7 +89,7 @@ def test_another_address_or_the_architect_saying_south_hill_keeps_the_row(change
     """The finding is the lookup's for its address: a lot of the same shape under another address (or none) is not
     it; and once the architect says the lot is in the South Hill Overlay, their word outranks the lookup's."""
     facts = {k: v for k, v in dict(EVERY, overlays_none_found=NONE_FOUND, **change).items() if v is not None}
-    v = check_site(SITE, facts)["view"]
+    v = check_site(SITE, facts, today=TODAY)["view"]
     assert release_rows(v) == ["release.overlays"] and v["state"] == present.REVIEW
     assert present.overlays_cleared(SITE["lot"], dict(EVERY, overlays_none_found=NONE_FOUND,
                                                      south_hill_overlay=False)) == "2026-11-11"
@@ -103,7 +104,7 @@ def test_a_curved_lot_line_or_no_lot_keeps_the_row():
 
 def test_the_caller_can_never_say_it_for_the_checker():
     """The Rhino command's extras never carry the finding into the check: only the facts and the model decide."""
-    v = check_site(SITE, EVERY, extras={"overlays_none_found": "2026-11-11"})["view"]
+    v = check_site(SITE, EVERY, extras={"overlays_none_found": {"date": "2026-11-11", "age": "yesterday", "cleared": True, "why": None}}, today=TODAY)["view"]
     assert release_rows(v) == ["release.overlays"]
 
 
@@ -112,7 +113,7 @@ def test_a_saved_and_reopened_project_decides_the_same():
     facts = dict(EVERY, overlays_none_found=NONE_FOUND)
     reopened = json.loads(json.dumps(facts))
     assert fact_problems(reopened) == []
-    live, again = check_site(SITE, facts)["view"], check_site(SITE, reopened)["view"]
+    live, again = check_site(SITE, facts, today=TODAY)["view"], check_site(SITE, reopened, today=TODAY)["view"]
     assert (live["state"], live["summary"], release_rows(live)) == (again["state"], again["summary"],
                                                                     release_rows(again))
 
@@ -140,10 +141,10 @@ def test_a_saved_file_reopened_reads_the_lot_back_and_decides_the_same(tmp_path)
     from design_checker.check import check
     facts = json.loads(json.dumps(dict(EVERY, overlays_none_found=NONE_FOUND)))
     for units in ("Inches", "Feet"):
-        v = check(_model(tmp_path, CORNERS, units), facts)["view"]
+        v = check(_model(tmp_path, CORNERS, units), facts, today=TODAY)["view"]
         assert release_rows(v) == [], units
     moved = [(0, 0), (60, 0), (60, 110), (0, 111)]
-    assert release_rows(check(_model(tmp_path, moved), facts)["view"]) == ["release.overlays"]
+    assert release_rows(check(_model(tmp_path, moved), facts, today=TODAY)["view"]) == ["release.overlays"]
 
 
 @pytest.mark.parametrize("bad", [
@@ -192,7 +193,7 @@ def _flood_down():
     from site_lookup.adapters.ithaca_city.lookup import lookup
     from design_checker.lookup_box import box_payload
     fx = T.load("106_ithaca_rd")
-    return box_payload(lookup(fx["address"], T.Failing(fx, ["fema_flood"]), T.NOW))
+    return box_payload(lookup(fx["address"], T.Failing(fx, ["fema_flood"]), T.NOW), T.NOW)
 
 
 def _doubtful():
@@ -203,7 +204,7 @@ def _doubtful():
         if a["source"] == "geocoder":
             for c in a["body"]["candidates"]:
                 c["attributes"]["Addr_type"] = "StreetAddress"     # found only along the street: the lot may be wrong
-    return box_payload(lookup(fx["address"], T.Fake(fx), T.NOW))
+    return box_payload(lookup(fx["address"], T.Fake(fx), T.NOW), T.NOW)
 
 
 def test_a_later_lookup_decides_again_and_the_architects_own_lot_gets_none():
@@ -244,7 +245,7 @@ def test_end_to_end_the_lookups_lot_leaves_the_row_out_and_an_edit_brings_it_bac
     cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
     site = {"units": "ft", "lot": lot(ring), "buildings": [box(cx - 10, cy - 10, cx + 10, cy + 10, 0, 20)],
             "problems": []}
-    assert release_rows(check_site(site, facts)["view"]) == []
+    assert release_rows(check_site(site, facts, today=TODAY)["view"]) == []
     moved = [ring[0]] + ring[1:-1] + [(ring[-1][0] + 1, ring[-1][1])]   # the architect drags one corner a foot
     site_edited = dict(site, lot=lot(moved))
-    assert release_rows(check_site(site_edited, facts)["view"]) == ["release.overlays"]
+    assert release_rows(check_site(site_edited, facts, today=TODAY)["view"]) == ["release.overlays"]

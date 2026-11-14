@@ -760,11 +760,15 @@ def _quiet(text: str) -> None:
 
 
 def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,
-          extras: dict | None = None, step=None) -> dict:
+          extras: dict | None = None, step=None, today: str | None = None) -> dict:
     """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
     Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
     building measure need review, never silently dropped. `extras` is what the command adds for the panel: what
-    it sent (scope), objects on the lot it didn't send (each makes the check need review), the grade source."""
+    it sent (scope), objects on the lot it didn't send (each makes the check need review), the grade source.
+    `today` is the day of the check as YYYY-MM-DD, given by the host (the plugin: rhino_logic.city_day): how old a
+    saved lookup is (present.overlays_lookup). The checker never reads the clock; without it, no lookup counts as
+    recent, so the overlays row stays."""
+    today = present.checked_today(today)       # a day that isn't one: refused before anything is read
     problems = fact_problems(facts)            # the same check as a facts file: a plain refusal, never a crash
     problems += [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
@@ -774,7 +778,7 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     site = read_site(model_path, facts)
     if building_problems:
         site["buildings"].append({"id": "Building layer", "faces": [], "problems": list(building_problems)})
-    return check_site(site, facts, model_path.name, report_path, extras, step=step)
+    return check_site(site, facts, model_path.name, report_path, extras, step=step, today=today)
 
 
 def no_rules_for(facts: dict) -> str | None:
@@ -792,9 +796,10 @@ def no_rules_for(facts: dict) -> str | None:
 
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
-               extras: dict | None = None, step=None) -> dict:
+               extras: dict | None = None, step=None, today: str | None = None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
     generator builds. Exactly the same measuring, rules and presentation as a model read from a file."""
+    today = present.checked_today(today)
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
@@ -864,8 +869,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
     extras = {**(extras or {}), "side_lines": side_lines(site, facts),   # compass names when a side isn't measured
-              # the lookup's "no overlay here", only for the lot it was found on (never taken from the caller)
-              "overlays_none_found": present.overlays_cleared(site.get("lot"), facts)}
+              # the lookup's "no overlay here", only for the lot it was found on and only while recent on the
+              # host's day (never taken from the caller)
+              "overlays_none_found": present.overlays_lookup(site.get("lot"), facts, today)}
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
     report_error = None

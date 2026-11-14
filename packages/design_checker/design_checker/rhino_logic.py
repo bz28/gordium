@@ -4518,8 +4518,8 @@ def overlays_none_found(answer, lot_ring):
         return None
     if not isinstance(got.get("value"), list) or got["value"] or not lot_ring or len(lot_ring) < 3:
         return None
-    date = answer.get("checked") or got.get("date")
-    address = found_address(answer)
+    date = answer.get("checked")   # the place's own day (lookup_box: city_day), the day the host compares it with;
+    address = found_address(answer)   # never the overlays fact's UTC day (a day ahead after about 8 pm in Ithaca)
     if not date or not address:
         return None
     return {"value": True, "lot_outline": [[float(p[0]), float(p[1])] for p in lot_ring], "address": address,

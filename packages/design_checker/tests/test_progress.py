@@ -132,7 +132,7 @@ def test_progress_lines_never_extend_the_time_limit():
 def test_serve_sends_progress_lines_only_when_asked(monkeypatch):
     import design_checker.__main__ as main_module
 
-    def fake_check(model, facts, report=None, problems=None, extras=None, step=None):
+    def fake_check(model, facts, report=None, problems=None, extras=None, step=None, today=None):
         if step is not None:            # (asked without "progress": no step function at all)
             step("Reading the model…")
             step("Measuring the building…")
