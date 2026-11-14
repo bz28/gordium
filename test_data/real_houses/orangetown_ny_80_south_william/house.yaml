@@ -237,8 +237,8 @@ openings:
     absent: *basement_absent
 
 # stairs: not given (not read). Every stair rule needs review. The drawings give: main stair 'UP 16R' (A-2) but
-# 'DN 15R' (A-3), 3'-4" wide (A-2, A-3), its stairwell opening 9'-8" long (A-3), a '10'-0"' dimension along it on
-# A-2 whose ends aren't clear; basement stair 'DN 13R' (A-2 main floor plan) but 'UP 14R' (A-2 basement plan), '3'-0"' wide; the A-2 'TYPICAL INT. STAIR DETAIL' (a typical
+# 'DN 15R' (A-3), 3'-4" wide (A-2, A-3), its stairwell opening 9'-8" long (A-3), a '10'-0"' on both A-2 plans (read
+# in answer_key.yaml as the basement stair's run, its first riser to its top one); basement stair 'DN 13R' (A-2 main floor plan) but 'UP 14R' (A-2 basement plan), '3'-0"' wide; the A-2 'TYPICAL INT. STAIR DETAIL' (a typical
 # detail, 1/2"=1'-0"): riser '7 1/2"', tread '9" MIN', nosing '1 1/8" ±', top rail '3'-0"', 'MINIMUM 6'-9" HEADROOM AS PER 2020 NYS
 # CODE'. No floor-to-floor height is dimensioned, so no riser height or nosing elevation can be placed, and no tread
 # depth is dimensioned: the nosings the format needs can't be written without inventing them.

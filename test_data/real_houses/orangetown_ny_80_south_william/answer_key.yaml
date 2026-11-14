@@ -227,15 +227,18 @@ areas:
       Each riser is the floor-to-floor rise divided by the risers, and no floor-to-floor rise is given. The detail's
       typical 7 1/2 in would comply (<= 8 1/4), but it is a typical detail, not this stair's rise divided by its
       risers. Main stair: 15 risers to the bridge, which is 7 1/2 in
-      below the second floor (A-3 'DN 7 1/2"'), so 16 x 7 1/2 = 120 in floor to floor would fit both counts. Limit:
-      15 x 8 1/4 = 123.75 in to the bridge. Basement stair: its rise is the basement's 8'-0" (96 in) slab to ceiling
+      below the second floor (A-3 'DN 7 1/2"'). Its floor to floor isn't dimensioned, but the framing gives about
+      118.5 in: A-4's main floor 9'-0" (108) to the ceiling + 1/2 in gypsum board + the second floor's 2x10 joists
+      (9 1/4, A-5 section '2"x10" JOISTS', A-2 '2"x10" JOISTS 16"OC') + a 3/4 in subfloor (as A-5 notes for the main
+      floor). So about 118.5 / 16 = 7.41 in a riser (not the detail's 7 1/2). Limit: 15 x 8 1/4 = 123.75 in to the
+      bridge. Basement stair: its rise is the basement's 8'-0" (96 in) slab to ceiling
       (A-4) plus the main floor's joists and subfloor, not dimensioned: '2x10' joists on the A-2 basement plan,
       '2x12' joists and '3/4" T&G SUBFLOOR' in the A-5 section. With the section's 2x12 (11 1/4 in actual): at least
       96 + 11.25 + 0.75 = 108 in. At 13 risers (A-2 main floor plan) that is 8.31 in a riser: over 8 1/4, it fails;
       at 14 risers (A-2 basement plan) 7.71 in: it complies. With the plan's 2x10 (9 1/4 in): at least 106 in,
       8.15 in at 13 risers.
     outcome: needs_review
-    reading: "main stair likely complies at 7 1/2 in. The basement stair fails at 13 risers with the section's 2x12 joists and complies at 14: the drawings give both counts and both joist sizes"
+    reading: "main stair likely complies at about 7.4 in. The basement stair fails at 13 risers with the section's 2x12 joists and complies at 14: the drawings give both counts and both joist sizes"
     measured: "stairs not read: stair_riser_height has no value; the kind is null (not read)"
 
   - id: stair_tread
@@ -259,21 +262,23 @@ areas:
     parts: [main stair, basement stair]
     drawings: "A-2 stair detail 'MINIMUM 6'-9\" HEADROOM AS PER 2020 NYS CODE' (a requirement, stricter than 2025's 6'-8\"); A-3 stairwell opening 9'-8\" long; A-4 main floor ceiling 9'-0\""
     working: |
-      Not given. The lower end of the main stair runs under the second-floor hallway (the stairwell opening is
-      9'-8" = 116 in long; assumed here to run back from the top nosing at the bridge, as drawn). With 15 risers of 7 1/2 in and treads T in deep, the
-      opening's edge is 14T - 116 in from the first nosing, where the nosing line is 7.5 + (14T - 116) x 7.5 / T =
-      112.5 - 870 / T in above the main floor; the hallway's underside is the main floor's 9'-0" = 108 in ceiling.
-      Headroom there = 108 - (112.5 - 870 / T) = 870 / T - 4.5. It is at least 80 in only if T <= 870 / 84.5 =
-      10.30 in. At 9 in treads: 92.2 in; at 10 in: 82.5 in; at 10 1/2 in: 78.4 in (fails).
+      Not given. Risers R (about 7.41 in, from the framing: see stair_riser; the detail's typical 7 1/2 in also
+      worked) and treads T deep. The lower end of the main stair runs under the second-floor hallway (the stairwell
+      opening is 9'-8" = 116 in long; assumed here to run back from the top nosing at the bridge, as drawn). With 15
+      risers, the opening's edge is 14T - 116 in from the first nosing, where the nosing line is
+      R + (14T - 116) x R / T = 15R - 116R / T in above the main floor; the hallway's underside is the main floor's
+      9'-0" = 108 in ceiling. Headroom there = 108 - 15R + 116R / T >= 80 only if T <= 116R / (15R - 28):
+      10.34 in at R = 7.41 (10.30 in at 7 1/2). At R = 7.41: 10 in treads give 82.8 in; 10 1/2 in, 78.7 in (fails).
       Basement stair: it runs under the main stair (both A-2 plans start both stairs on the same riser line and
       rise south; A-2 basement plan '1/2" GYP. BD. ON UNDERSIDE'; A-5 section 'STAIRS BEYOND (SEE TYPICAL STAIR DETAIL)', drawn under the main stair). It is the steeper
       (about 100 in over its 120 in run, against 0.75 in per in for the main stair), so its headroom is least at its
-      top riser, 120 in along, level with the main floor. The main stair's nosing line there is 7.5 + 120 x 7.5 / T
-      = 7.5 + 900 / T in above the main floor; its underside is lower by d, the stringer, tread and finish, not
-      given (about 15.5 in for a 2x12 stringer, a 1 in tread and 1/2 in gypsum board). Headroom = 7.5 + 900 / T - d:
-      at T = 10 in, 82 in; under 80 in if T is more than about 10.2 in.
+      top riser, 120 in along, level with the main floor. The main stair's nosing line there is R + 120R / T in
+      above the main floor; its underside is lower by d, the stringer, tread and finish, not given (about 15.5 in,
+      assumed: a 2x12 stringer, a 1 in tread and 1/2 in gypsum board). Headroom = R + 120R / T - d >= 80 only if
+      T <= 120R / (80 + d - R): 10.09 in at R = 7.41 (10.23 in at 7 1/2). At R = 7.41 and the drawn (not to
+      scale) 10 in treads: 80.8 in, under 1 in to spare.
     outcome: needs_review
-    reading: "complies only if the main stair's treads are no deeper than about 10.2 to 10.3 in (with 7 1/2 in risers), for its own headroom and the basement stair's under it: a real constraint to confirm"
+    reading: "complies only if the main stair's treads are no deeper than about 10.1 in (the basement stair under it) and 10.3 in (its own headroom), with risers of about 7.4 in and a 15.5 in deep stair underside (assumed). The treads are drawn at about 10 in: borderline, to confirm"
     measured: "stairs not read"
 
   - id: stair_width
@@ -298,7 +303,7 @@ areas:
     quote: "Where the stairway has a straight run, the depth in the direction of travel shall be not less than 36 inches"
     page: 78
     parts: [main stair]
-    drawings: "A-3: the 'BRIDGE' at the top of the main stair: '4'-0\"' dimensioned just east of it, between the lines of its north and south railings; 3'-4\" + 3'-4\" wide"
+    drawings: "A-3: the 'BRIDGE' at the top of the main stair: '4'-0\"' dimensioned just east of it, from the top riser line (the north face of the railing post) to the W.I.C. wall's north face, in line with the south railing's post; 3'-4\" + 3'-4\" wide"
     working: "the main stair's top landing only: depth 48 >= 36; width 80 >= the flight's 40"
     outcome: complies
     measured: "landings aren't measured yet"
@@ -319,7 +324,7 @@ areas:
     page: 77
     parts: [bridge steps]
     drawings: "A-3: 'DN 7 1/2\"' from the hallway onto the 'BRIDGE', at the bridge's east edge, where it is '4'-0\"' wide"
-    working: "A single riser is a stair (R202: 'STAIR. A change in elevation, consisting of one or more risers'). Riser 7 1/2 in <= 8 1/4; width 48 in, less 1/2 in gypsum board on the south wall (the north end is the stair railing's post) = 47.5 >= 36 (R318.7.1)"
+    working: "A single riser is a stair (R202: 'STAIR. A change in elevation, consisting of one or more risers'). Riser 7 1/2 in <= 8 1/4; width 48 in, less the stair railing's post at the north end (not dimensioned, drawn about 4 in) and 1/2 in gypsum board on the south wall = about 43.5 >= 36 (R318.7.1)"
     outcome: complies
     measured: "not measured (the bridge steps aren't in the description)"
 
