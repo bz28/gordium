@@ -1,0 +1,6 @@
+egress_doors:
+  meaning: Egress doors (doors the architect marks as a dwelling's required exit door) provided for the dwelling
+    units on this lot, all together
+  needed_by:
+  - general.r318_2_egress_door_per_dwelling_unit
+  unit: count
