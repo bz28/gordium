@@ -18,7 +18,19 @@ The canonicalising is done here, never in the checker: what is golden is the che
 
 The goldens (test_data/goldens/): `manifest.json`, one sha256 per case and per top-level part of its answer (which
 part changed is readable in a diff), and `outputs.jsonl.xz`, every case's full canonical answer (compressed), so
-`--check` can say exactly which values changed."""
+`--check` can say exactly which values changed.
+
+Shapes on another kind of computer (`same_shape`): the sha256 is the answer on the computer that wrote the goldens
+(an Apple-chip Mac). An Intel or AMD computer (CI's Linux and Windows), with the very same library versions (pinned
+in pyproject.toml), rounds a few sums differently in the last binary digit (other machine instructions for the
+same maths), and where two curves of an outline nearly coincide (the round corners of two yards' offsets around
+the same lot corner: the stress test's jog lot) the overlay can then keep a different few of the many
+near-identical crossing points: the shape is the same, its list of points is not. (Seen on CI's Linux, and on the
+Mac itself running an Intel build of Python: the same 34 jog-lot stress designs and nothing else.) So an answer
+whose sha256 differs is still its golden when every value other than a shape's points is identical (every
+verdict, status, word, id and number, to PLACES) and each list of plan points (x, y) traces the same line as its
+golden's, no point of either farther than GEOMETRY_TOL from the other (the Hausdorff distance). `--check` says how
+many answers matched that way. Any other difference fails as before."""
 
 import argparse
 import hashlib
@@ -35,6 +47,12 @@ from rule_format.place import plugin_place
 from rule_format.rulebook import REPO, _jsonl_rows, utf8_console
 
 PLACES = 6
+# ft: how far a shape's points may be from its golden's line on another kind of computer (`same_shape`): a
+# thousandth of the measuring's own "the same point" distance (model_measurement measure.TOL, 0.01 ft), and ten
+# times the rounding step (a millionth of a foot), so the two sides' rounding (up to 0.71 millionths each) never
+# trips it. Seen between an Apple-chip Mac and an Intel one: 0.76 millionths at most (the 34 jog-lot designs).
+GEOMETRY_TOL = 1e-5
+SHAPE_STEP = 0.1           # ft: shape_distance looks this often along each line, as well as at its points
 STRESS_SEED = 20261105
 STRESS_DESIGNS = 200
 FOLDER = REPO / "test_data" / "goldens"
@@ -213,14 +231,54 @@ def stored(folder: Path = FOLDER) -> tuple[dict, dict]:
     return manifest, {row["case"]: row["answer"] for row in rows}
 
 
+def _plan_points(v) -> bool:
+    """Whether `v` is a list of plan points: two or more [x, y], each a number (never true or false)."""
+    return isinstance(v, list) and len(v) >= 2 and all(
+        isinstance(p, list) and len(p) == 2 and all(isinstance(c, (int, float)) and not isinstance(c, bool) for c in p)
+        for p in v)
+
+
+def shape_distance(a: list, b: list) -> float:
+    """The Hausdorff distance between two lists of plan points, each read as the line through its points in
+    order: the farthest a point of either line is from the other line (its segments, not only its points), taken
+    at every point of each line and every SHAPE_STEP along it, so a stretch of one line the other skips counts."""
+    import shapely
+    la, lb = shapely.LineString(a), shapely.LineString(b)
+
+    def farthest(line, other):
+        dense = shapely.points(shapely.get_coordinates(shapely.segmentize(line, SHAPE_STEP)))
+        return float(shapely.distance(dense, other).max())
+    return max(farthest(la, lb), farthest(lb, la))
+
+
+def same_shape(old, new) -> bool:
+    """Whether two canonical answers are the same but for how a shape's points fall: every value identical, except
+    that a list of plan points may have other points (even another number of them) if it traces the same line,
+    within GEOMETRY_TOL (module docstring: shapes on another kind of computer). Verdicts, statuses, words, ids and
+    every other number must be exactly as golden."""
+    if _plan_points(old) and _plan_points(new):
+        return old == new or shape_distance(old, new) <= GEOMETRY_TOL
+    if isinstance(old, dict) and isinstance(new, dict):
+        return old.keys() == new.keys() and all(same_shape(old[k], new[k]) for k in old)
+    if isinstance(old, list) and isinstance(new, list):
+        return len(old) == len(new) and all(same_shape(x, y) for x, y in zip(old, new))
+    return type(old) is type(new) and old == new
+
+
 def differences(old, new, path: str = "", limit: int = 8) -> list[str]:
-    """Where two answers differ: up to `limit` lines "path: old -> new"."""
+    """Where two answers differ: up to `limit` lines "path: old -> new" (a shape only where it is farther than
+    GEOMETRY_TOL from its golden's line: same_shape)."""
     out = []
 
     def walk(a, b, p):
         if len(out) >= limit:
             return
-        if isinstance(a, dict) and isinstance(b, dict):
+        if _plan_points(a) and _plan_points(b):     # a shape: shown only if it moved (how far), not its point list
+            far = 0.0 if a == b else shape_distance(a, b)
+            if far > GEOMETRY_TOL:
+                out.append(f"{p}: {len(a)} points -> {len(b)}, up to {far:.3g} ft from the golden's line: "
+                           f"{_short(a)} -> {_short(b)}")
+        elif isinstance(a, dict) and isinstance(b, dict):
             for k in sorted(set(a) | set(b)):
                 if k not in a or k not in b:
                     out.append(f"{p}/{k}: {'(none)' if k not in a else _short(a[k])} -> "
@@ -241,9 +299,10 @@ def _short(v) -> str:
     return t if len(t) <= 100 else t[:97] + "..."
 
 
-def check(texts: dict, folder: Path = FOLDER, only: str = "") -> list[str]:
+def check(texts: dict, folder: Path = FOLDER, only: str = "", shaped: list | None = None) -> list[str]:
     """Why the answers don't match the goldens, or [] when every one is the same: a case missing on either side,
-    or an answer whose sha256 differs (with the parts and the values that changed)."""
+    or an answer whose sha256 differs (with the parts and the values that changed), unless it is its golden but for
+    how a shape's points fall (`same_shape`; its name is added to `shaped`, when given)."""
     manifest, answers = stored(folder)
     manifest = {n: m for n, m in manifest.items() if n.startswith(only)}
     problems = [f"{n}: no golden (a new case: --write)" for n in sorted(set(texts) - set(manifest))]
@@ -252,6 +311,10 @@ def check(texts: dict, folder: Path = FOLDER, only: str = "") -> list[str]:
         if sha(texts[name]) == manifest[name]["sha256"]:
             continue
         new = json.loads(texts[name])
+        if name in answers and same_shape(answers[name], new):
+            if shaped is not None:
+                shaped.append(name)
+            continue
         parts = fingerprint(texts[name])["parts"]
         changed = sorted(k for k in set(parts) | set(manifest[name]["parts"]) if parts.get(k) != manifest[name]["parts"].get(k))
         problems.append(f"{name}: differs (parts: {', '.join(changed) or 'the whole answer'})")
@@ -274,10 +337,16 @@ def main(argv: list[str]) -> int:
         write(texts)
         print(f"wrote {len(texts)} golden answers to {FOLDER.relative_to(REPO).as_posix()}/")
         return 0
-    problems = check(texts, only=args.only)
+    shaped = []
+    problems = check(texts, only=args.only, shaped=shaped)
     for p in problems:
         print("✗ " + p)
-    print(f"{len(texts)} cases: " + ("every answer equals its golden" if not problems else
+    if shaped:
+        print(f"{len(shaped)} answers equal their goldens but for how a shape's points fall (every other value the "
+              f"same; each shape within {GEOMETRY_TOL} ft of its golden's: another kind of computer's maths), e.g. "
+              f"{shaped[0]}")
+    same = "every answer equals its golden" + (f" ({len(shaped)} as shapes, above)" if shaped else "")
+    print(f"{len(texts)} cases: " + (same if not problems else
                                      f"{sum(1 for p in problems if not p.startswith('    '))} differ"))
     return 1 if problems else 0
 
